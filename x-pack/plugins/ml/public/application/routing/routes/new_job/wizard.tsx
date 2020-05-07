@@ -42,7 +42,7 @@ const multiMetricBreadcrumbs = [
   ...baseBreadcrumbs,
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.multiMetricLabel', {
-      defaultMessage: 'Multi metric',
+      defaultMessage: 'Multi-metric',
     }),
     href: '',
   },

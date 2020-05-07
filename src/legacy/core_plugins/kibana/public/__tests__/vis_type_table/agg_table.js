@@ -415,7 +415,7 @@ describe('Table Vis - AggTable Directive', function() {
     );
 
     $percentageColValues.each((i, value) => {
-      const percentage = `${round((counts[i] / total) * 100, 1)}%`;
+      const percentage = `${round((counts[i] / total) * 100, 3)}%`;
       expect(value).to.be(percentage);
     });
   });

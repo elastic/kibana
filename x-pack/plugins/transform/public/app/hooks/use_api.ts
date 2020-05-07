@@ -32,6 +32,11 @@ export const useApi = () => {
         body: JSON.stringify(transformConfig),
       });
     },
+    updateTransform(transformId: TransformId, transformConfig: any): Promise<any> {
+      return http.post(`${API_BASE_PATH}transforms/${transformId}/_update`, {
+        body: JSON.stringify(transformConfig),
+      });
+    },
     deleteTransforms(transformsInfo: TransformEndpointRequest[]): Promise<TransformEndpointResult> {
       return http.post(`${API_BASE_PATH}delete_transforms`, {
         body: JSON.stringify(transformsInfo),

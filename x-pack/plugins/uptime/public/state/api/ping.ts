@@ -24,14 +24,12 @@ export const fetchPingHistogram: APIFn<GetPingHistogramParams, HistogramResult> 
   monitorId,
   dateStart,
   dateEnd,
-  statusFilter,
   filters,
 }) => {
   const queryParams = {
     dateStart,
     dateEnd,
     monitorId,
-    statusFilter,
     filters,
   };
 

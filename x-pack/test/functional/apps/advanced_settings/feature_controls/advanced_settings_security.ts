@@ -69,7 +69,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows management navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Management']);
+        expect(navLinks).to.eql(['Stack Management']);
       });
 
       it(`allows settings to be changed`, async () => {
@@ -125,7 +125,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows Management navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Management']);
+        expect(navLinks).to.eql(['Stack Management']);
       });
 
       it(`does not allow settings to be changed`, async () => {
@@ -178,7 +178,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows Management navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Discover', 'Management']);
+        expect(navLinks).to.eql(['Discover', 'Stack Management']);
       });
 
       it(`does not allow navigation to advanced settings; redirects to management home`, async () => {

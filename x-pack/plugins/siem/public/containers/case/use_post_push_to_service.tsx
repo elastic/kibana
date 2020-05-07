@@ -15,6 +15,7 @@ import { errorToToaster, useStateToaster, displaySuccessToast } from '../../comp
 import { getCase, pushToService, pushCase } from './api';
 import * as i18n from './translations';
 import { Case } from './types';
+import { CaseServices } from './use_get_case_user_actions';
 
 interface PushToServiceState {
   serviceData: ServiceConnectorCaseResponse | null;
@@ -65,11 +66,18 @@ interface PushToServiceRequest {
   caseId: string;
   connectorId: string;
   connectorName: string;
+  caseServices: CaseServices;
   updateCase: (newCase: Case) => void;
 }
 
 export interface UsePostPushToService extends PushToServiceState {
-  postPushToService: ({ caseId, connectorId, updateCase }: PushToServiceRequest) => void;
+  postPushToService: ({
+    caseId,
+    caseServices,
+    connectorId,
+    connectorName,
+    updateCase,
+  }: PushToServiceRequest) => void;
 }
 
 export const usePostPushToService = (): UsePostPushToService => {
@@ -82,7 +90,13 @@ export const usePostPushToService = (): UsePostPushToService => {
   const [, dispatchToaster] = useStateToaster();
 
   const postPushToService = useCallback(
-    async ({ caseId, connectorId, connectorName, updateCase }: PushToServiceRequest) => {
+    async ({
+      caseId,
+      caseServices,
+      connectorId,
+      connectorName,
+      updateCase,
+    }: PushToServiceRequest) => {
       let cancel = false;
       const abortCtrl = new AbortController();
       try {
@@ -90,7 +104,7 @@ export const usePostPushToService = (): UsePostPushToService => {
         const casePushData = await getCase(caseId, true, abortCtrl.signal);
         const responseService = await pushToService(
           connectorId,
-          formatServiceRequestData(casePushData),
+          formatServiceRequestData(casePushData, connectorId, caseServices),
           abortCtrl.signal
         );
         const responseCase = await pushCase(
@@ -108,7 +122,10 @@ export const usePostPushToService = (): UsePostPushToService => {
           dispatch({ type: 'FETCH_SUCCESS_PUSH_SERVICE', payload: responseService });
           dispatch({ type: 'FETCH_SUCCESS_PUSH_CASE', payload: responseCase });
           updateCase(responseCase);
-          displaySuccessToast(i18n.SUCCESS_SEND_TO_EXTERNAL_SERVICE, dispatchToaster);
+          displaySuccessToast(
+            i18n.SUCCESS_SEND_TO_EXTERNAL_SERVICE(connectorName),
+            dispatchToaster
+          );
         }
       } catch (error) {
         if (!cancel) {
@@ -131,18 +148,23 @@ export const usePostPushToService = (): UsePostPushToService => {
   return { ...state, postPushToService };
 };
 
-export const formatServiceRequestData = (myCase: Case): ServiceConnectorCaseParams => {
+export const formatServiceRequestData = (
+  myCase: Case,
+  connectorId: string,
+  caseServices: CaseServices
+): ServiceConnectorCaseParams => {
   const {
     id: caseId,
     createdAt,
     createdBy,
     comments,
     description,
-    externalService,
     title,
     updatedAt,
     updatedBy,
   } = myCase;
+  const actualExternalService = caseServices[connectorId] ?? null;
+
   return {
     caseId,
     createdAt,
@@ -151,17 +173,9 @@ export const formatServiceRequestData = (myCase: Case): ServiceConnectorCasePara
       username: createdBy?.username ?? '',
     },
     comments: comments
-      .filter(c => {
-        const lastPush = c.pushedAt != null ? new Date(c.pushedAt) : null;
-        const lastUpdate = c.updatedAt != null ? new Date(c.updatedAt) : null;
-        if (
-          lastPush === null ||
-          (lastPush != null && lastUpdate != null && lastPush.getTime() < lastUpdate?.getTime())
-        ) {
-          return true;
-        }
-        return false;
-      })
+      .filter(
+        c => actualExternalService == null || actualExternalService.commentsToUpdate.includes(c.id)
+      )
       .map(c => ({
         commentId: c.id,
         comment: c.comment,
@@ -180,7 +194,7 @@ export const formatServiceRequestData = (myCase: Case): ServiceConnectorCasePara
             : null,
       })),
     description,
-    externalId: externalService?.externalId ?? null,
+    externalId: actualExternalService?.externalId ?? null,
     title,
     updatedAt,
     updatedBy:

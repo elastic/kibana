@@ -32,7 +32,7 @@ export const config = {
         ca_sha256: schema.maybe(schema.string()),
       }),
       elasticsearch: schema.object({
-        host: schema.string({ defaultValue: 'http://localhost:9200' }),
+        host: schema.maybe(schema.string()),
         ca_sha256: schema.maybe(schema.string()),
       }),
     }),

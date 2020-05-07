@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { FunctionComponent } from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { act } from 'react-dom/test-utils';
 import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
 import { ActionTypeModel, ActionParamsProps } from '../../../types';
@@ -13,13 +14,18 @@ import { SlackActionParams, SlackActionConnector } from './types';
 const ACTION_TYPE_ID = '.slack';
 let actionTypeModel: ActionTypeModel;
 
-beforeAll(() => {
+let deps: any;
+
+beforeAll(async () => {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
   registerBuiltInActionTypes({ actionTypeRegistry });
   const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
   if (getResult !== null) {
     actionTypeModel = getResult;
   }
+  deps = {
+    docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
+  };
 });
 
 describe('actionTypeRegistry.get() works', () => {
@@ -78,7 +84,7 @@ describe('slack action params validation', () => {
 });
 
 describe('SlackActionFields renders', () => {
-  test('all connector fields is rendered', () => {
+  test('all connector fields is rendered', async () => {
     expect(actionTypeModel.actionConnectorFields).not.toBeNull();
     if (!actionTypeModel.actionConnectorFields) {
       return;
@@ -96,11 +102,17 @@ describe('SlackActionFields renders', () => {
     const wrapper = mountWithIntl(
       <ConnectorFields
         action={actionConnector}
-        errors={{ webhookUrl: [] }}
+        errors={{ index: [], webhookUrl: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
+        docLinks={deps!.docLinks}
       />
     );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
     expect(wrapper.find('[data-test-subj="slackWebhookUrlInput"]').length > 0).toBeTruthy();
     expect(
       wrapper
