@@ -26,7 +26,7 @@ import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { PluginStartContract as AlertingStart } from '../../../alerting/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 
-const TriggersActionsUIHome = lazy(() => import('./home'));
+const TriggersActionsUIHome = lazy(async () => import('./home'));
 const AlertDetailsRoute = lazy(() =>
   import('./sections/alert_details/components/alert_details_route')
 );
@@ -69,12 +69,12 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
     <Switch>
       <Route
         path={`${BASE_PATH}/:section(${sectionsRegex})`}
-        component={suspendedComponentWithProps(TriggersActionsUIHome)}
+        component={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}
       />
       {canShowAlerts && (
         <Route
           path={routeToAlertDetails}
-          component={suspendedComponentWithProps(AlertDetailsRoute)}
+          component={suspendedComponentWithProps(AlertDetailsRoute, 'xl')}
         />
       )}
       <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />

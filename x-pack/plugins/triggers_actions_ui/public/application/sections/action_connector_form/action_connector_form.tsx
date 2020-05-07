@@ -13,6 +13,8 @@ import {
   EuiFieldText,
   EuiFormRow,
   EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -152,7 +154,15 @@ export const ActionConnectorForm = ({
       </EuiFormRow>
       <EuiSpacer size="m" />
       {FieldsComponent !== null ? (
-        <Suspense fallback={<EuiLoadingSpinner />}>
+        <Suspense
+          fallback={
+            <EuiFlexGroup justifyContent="center">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="m" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        >
           <FieldsComponent
             action={connector}
             errors={errors}
