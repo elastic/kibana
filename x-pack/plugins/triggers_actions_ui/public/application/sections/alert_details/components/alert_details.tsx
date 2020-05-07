@@ -29,7 +29,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { useAppDependencies } from '../../../app_context';
 import { hasSaveAlertsCapability } from '../../../lib/capabilities';
-import { Alert, AlertType, ActionType } from '../../../../types';
+import { Alert, AlertType, ActionType, AlertTypeModel } from '../../../../types';
 import {
   ComponentOpts as BulkOperationsComponentOpts,
   withBulkAlertOperations,
@@ -74,7 +74,12 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   const canSave = hasSaveAlertsCapability(capabilities);
 
   const actionTypesByTypeId = indexBy(actionTypes, 'id');
-  const alertTypeRegistryModel = alertTypeRegistry.get(alert.alertTypeId);
+  let alertTypeRegistryModel: AlertTypeModel | undefined;
+  try {
+    alertTypeRegistryModel = alertTypeRegistry.get(alert.alertTypeId);
+  } catch (e) {
+    toastNotifications.addDanger(e);
+  }
 
   const alertActions = alert.actions;
   const uniqueActions = Array.from(new Set(alertActions.map((item: any) => item.actionTypeId)));
@@ -114,7 +119,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
               <EuiFlexGroup responsive={false} gutterSize="xs">
-                {canSave && alertTypeRegistryModel.isEditable ? (
+                {canSave && alertTypeRegistryModel && alertTypeRegistryModel.isEditable ? (
                   <EuiFlexItem grow={false}>
                     <Fragment>
                       {' '}

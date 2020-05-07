@@ -7,7 +7,7 @@ import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { AlertDetails } from './alert_details';
-import { Alert, ActionType, AlertTypeRegistryContract } from '../../../../types';
+import { Alert, ActionType, ValidationResult } from '../../../../types';
 import {
   EuiTitle,
   EuiBadge,
@@ -29,15 +29,20 @@ jest.mock('../../../app_context', () => ({
       get: jest.fn(() => ({})),
     },
     actionTypeRegistry: jest.fn(),
-    alertTypeRegistry: jest.fn(() => {
-      const mocked: jest.Mocked<AlertTypeRegistryContract> = {
-        has: jest.fn(),
-        register: jest.fn(),
-        get: jest.fn(),
-        list: jest.fn(),
-      };
-      return mocked;
-    }),
+    alertTypeRegistry: {
+      has: jest.fn(),
+      register: jest.fn(),
+      get: jest.fn().mockReturnValue({
+        id: 'my-alert-type',
+        iconClass: 'test',
+        name: 'test-alert',
+        validate: (): ValidationResult => {
+          return { errors: {} };
+        },
+        isEditable: true,
+      }),
+      list: jest.fn(),
+    },
     toastNotifications: mockes.notifications.toasts,
     docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     uiSettings: mockes.uiSettings,
