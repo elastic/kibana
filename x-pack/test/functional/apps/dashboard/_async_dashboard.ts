@@ -26,8 +26,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   describe('sample data dashboard', function describeIndexTests() {
-    this.tags('smoke');
-
     before(async () => {
       await PageObjects.common.sleep(5000);
       await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
