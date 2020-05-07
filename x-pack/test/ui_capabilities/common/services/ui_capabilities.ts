@@ -68,7 +68,7 @@ export class UICapabilitiesService {
       : {};
     const response = await this.axios.post(
       `${spaceUrlPrefix}/api/core/capabilities`,
-      { applications: [...applications, 'kibana:management'] },
+      { applications: [...applications, 'kibana:stack_management'] },
       {
         headers: requestHeaders,
       }

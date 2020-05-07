@@ -21,36 +21,73 @@ import {
   SavedObjectsClientContract,
   SimpleSavedObject,
   IUiSettingsClient,
-  HttpServiceBase,
+  HttpStart,
+  CoreStart,
 } from 'src/core/public';
 
 import { createIndexPatternCache } from './_pattern_cache';
 import { IndexPattern } from './index_pattern';
 import { IndexPatternsApiClient, GetFieldsOptions } from './index_patterns_api_client';
+import {
+  createEnsureDefaultIndexPattern,
+  EnsureDefaultIndexPattern,
+} from './ensure_default_index_pattern';
+import {
+  getIndexPatternFieldListCreator,
+  CreateIndexPatternFieldList,
+  Field,
+  FieldSpec,
+} from '../fields';
+import { FieldFormatsStart } from '../../field_formats';
 
 const indexPatternCache = createIndexPatternCache();
 
-export class IndexPatterns {
+type IndexPatternCachedFieldType = 'id' | 'title';
+
+export interface IndexPatternSavedObjectAttrs {
+  title: string;
+}
+
+export class IndexPatternsService {
   private config: IUiSettingsClient;
   private savedObjectsClient: SavedObjectsClientContract;
-  private savedObjectsCache?: Array<SimpleSavedObject<Record<string, any>>> | null;
+  private savedObjectsCache?: Array<SimpleSavedObject<IndexPatternSavedObjectAttrs>> | null;
   private apiClient: IndexPatternsApiClient;
+  ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
+  createFieldList: CreateIndexPatternFieldList;
+  createField: (
+    indexPattern: IndexPattern,
+    spec: FieldSpec | Field,
+    shortDotsEnable: boolean
+  ) => Field;
 
   constructor(
-    config: IUiSettingsClient,
+    core: CoreStart,
     savedObjectsClient: SavedObjectsClientContract,
-    http: HttpServiceBase
+    http: HttpStart,
+    fieldFormats: FieldFormatsStart
   ) {
     this.apiClient = new IndexPatternsApiClient(http);
-    this.config = config;
+    this.config = core.uiSettings;
     this.savedObjectsClient = savedObjectsClient;
+    this.ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(core);
+    this.createFieldList = getIndexPatternFieldListCreator({
+      fieldFormats,
+      toastNotifications: core.notifications.toasts,
+    });
+    this.createField = (indexPattern, spec, shortDotsEnable) => {
+      return new Field(indexPattern, spec, shortDotsEnable, {
+        fieldFormats,
+        toastNotifications: core.notifications.toasts,
+      });
+    };
   }
 
   private async refreshSavedObjectsCache() {
     this.savedObjectsCache = (
-      await this.savedObjectsClient.find({
+      await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
         type: 'index-pattern',
-        fields: [],
+        fields: ['title'],
         perPage: 10000,
       })
     ).savedObjects;
@@ -76,7 +113,7 @@ export class IndexPatterns {
     return this.savedObjectsCache.map(obj => obj?.attributes?.title);
   };
 
-  getFields = async (fields: string[], refresh: boolean = false) => {
+  getFields = async (fields: IndexPatternCachedFieldType[], refresh: boolean = false) => {
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();
     }
@@ -84,8 +121,10 @@ export class IndexPatterns {
       return [];
     }
     return this.savedObjectsCache.map((obj: Record<string, any>) => {
-      const result: Record<string, any> = {};
-      fields.forEach((f: string) => (result[f] = obj[f] || obj?.attributes?.[f]));
+      const result: Partial<Record<IndexPatternCachedFieldType, string>> = {};
+      fields.forEach(
+        (f: IndexPatternCachedFieldType) => (result[f] = obj[f] || obj?.attributes?.[f])
+      );
       return result;
     });
   };
@@ -146,4 +185,4 @@ export class IndexPatterns {
   };
 }
 
-export type IndexPatternsContract = PublicMethodsOf<IndexPatterns>;
+export type IndexPatternsContract = PublicMethodsOf<IndexPatternsService>;

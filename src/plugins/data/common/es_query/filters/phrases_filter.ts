@@ -42,7 +42,11 @@ export const getPhrasesFilterField = (filter: PhrasesFilter) => {
 
 // Creates a filter where the given field matches one or more of the given values
 // params should be an array of values
-export const buildPhrasesFilter = (field: IFieldType, params: any, indexPattern: IIndexPattern) => {
+export const buildPhrasesFilter = (
+  field: IFieldType,
+  params: any[],
+  indexPattern: IIndexPattern
+) => {
   const index = indexPattern.id;
   const type = FILTERS.PHRASES;
   const key = field.name;

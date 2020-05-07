@@ -18,6 +18,7 @@
  */
 
 import { createReadStream } from 'fs';
+import { resolve } from 'path';
 
 import globby from 'globby';
 import MultiStream from 'multistream';
@@ -29,17 +30,18 @@ import { replacePlaceholder } from '../../../optimize/public_path_placeholder';
 import findSourceFiles from './find_source_files';
 import { createTestEntryTemplate } from './tests_entry_template';
 
-export default (kibana) => {
+export default kibana => {
   return new kibana.Plugin({
-    config: (Joi) => {
+    config: Joi => {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         instrument: Joi.boolean().default(false),
-        pluginId: Joi.string()
+        pluginId: Joi.string(),
       }).default();
     },
 
     uiExports: {
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       async __bundleProvider__(kbnServer) {
         const modules = new Set();
 
@@ -48,9 +50,7 @@ export default (kibana) => {
           uiApps,
           uiBundles,
           plugins,
-          uiExports: {
-            uiSettingDefaults = {}
-          }
+          uiExports: { uiSettingDefaults = {} },
         } = kbnServer;
 
         const testGlobs = [];
@@ -58,7 +58,7 @@ export default (kibana) => {
         const testingPluginIds = config.get('tests_bundle.pluginId');
 
         if (testingPluginIds) {
-          testingPluginIds.split(',').forEach((pluginId) => {
+          testingPluginIds.split(',').forEach(pluginId => {
             const plugin = plugins.find(plugin => plugin.id === pluginId);
 
             if (!plugin) {
@@ -103,11 +103,14 @@ export default (kibana) => {
           modules: [...modules],
           template: createTestEntryTemplate(uiSettingDefaults),
           extendConfig(webpackConfig) {
-            const mergedConfig = webpackMerge({
-              resolve: {
-                extensions: ['.karma_mock.js', '.karma_mock.tsx', '.karma_mock.ts']
-              }
-            }, webpackConfig);
+            const mergedConfig = webpackMerge(
+              {
+                resolve: {
+                  extensions: ['.karma_mock.js', '.karma_mock.tsx', '.karma_mock.ts'],
+                },
+              },
+              webpackConfig
+            );
 
             /**
              * [..] it removes the commons bundle creation from the webpack
@@ -122,7 +125,7 @@ export default (kibana) => {
             delete mergedConfig.optimization.splitChunks.cacheGroups.commons;
 
             return mergedConfig;
-          }
+          },
         });
 
         kbnServer.server.route({
@@ -131,7 +134,7 @@ export default (kibana) => {
           async handler(_, h) {
             const cssFiles = await globby(
               testingPluginIds
-                ? testingPluginIds.split(',').map((id) => `built_assets/css/plugins/${id}/**/*.css`)
+                ? testingPluginIds.split(',').map(id => `built_assets/css/plugins/${id}/**/*.css`)
                 : `built_assets/css/**/*.css`,
               { cwd: fromRoot('.'), absolute: true }
             );
@@ -141,8 +144,24 @@ export default (kibana) => {
               '/built_assets/css/'
             );
 
-            return h.response(stream).code(200).type('text/css');
-          }
+            return h
+              .response(stream)
+              .code(200)
+              .type('text/css');
+          },
+        });
+
+        // Sets global variables normally set by the bootstrap.js script
+        kbnServer.server.route({
+          path: '/test_bundle/karma/globals.js',
+          method: 'GET',
+          async handler(req, h) {
+            const basePath = config.get('server.basePath');
+
+            const file = `window.__kbnPublicPath__ = { 'kbn-ui-shared-deps': "${basePath}/bundles/kbn-ui-shared-deps/" };`;
+
+            return h.response(file).header('content-type', 'application/json');
+          },
         });
       },
 

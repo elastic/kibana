@@ -8,13 +8,13 @@ import expect from '@kbn/expect';
 import { xpackInfoSignature } from 'plugins/xpack_main/services/xpack_info_signature';
 
 describe('xpack_info_signature service', () => {
-  it ('updates the stored xpack info signature', () => {
+  it('updates the stored xpack info signature', () => {
     const updatedXPackInfoSignature = 'foobar';
     xpackInfoSignature.set(updatedXPackInfoSignature);
     expect(xpackInfoSignature.get()).to.be(updatedXPackInfoSignature);
   });
 
-  it ('clears the stored xpack info signature', () => {
+  it('clears the stored xpack info signature', () => {
     const updatedXPackInfoSignature = 'foobar';
     xpackInfoSignature.set(updatedXPackInfoSignature);
     expect(xpackInfoSignature.get()).not.to.be(undefined);

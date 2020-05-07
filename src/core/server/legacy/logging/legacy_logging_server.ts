@@ -20,14 +20,15 @@
 import { ServerExtType } from 'hapi';
 import Podium from 'podium';
 // @ts-ignore: implicit any for JS file
-import { Config, transformDeprecations } from '../../../../legacy/server/config';
+import { Config } from '../../../../legacy/server/config';
 // @ts-ignore: implicit any for JS file
 import { setupLogging } from '../../../../legacy/server/logging';
 import { LogLevel } from '../../logging/log_level';
 import { LogRecord } from '../../logging/log_record';
+import { LegacyVars } from '../../types';
 
 export const metadataSymbol = Symbol('log message with metadata');
-export function attachMetaData(message: string, metadata: Record<string, any> = {}) {
+export function attachMetaData(message: string, metadata: LegacyVars = {}) {
   return {
     [metadataSymbol]: {
       message,
@@ -50,7 +51,7 @@ interface PluginRegisterParams {
       options: PluginRegisterParams['options']
     ) => Promise<void>;
   };
-  options: Record<string, any>;
+  options: LegacyVars;
 }
 
 /**
@@ -84,7 +85,7 @@ export class LegacyLoggingServer {
 
   private onPostStopCallback?: () => void;
 
-  constructor(legacyLoggingConfig: Readonly<Record<string, any>>) {
+  constructor(legacyLoggingConfig: Readonly<LegacyVars>) {
     // We set `ops.interval` to max allowed number and `ops` filter to value
     // that doesn't exist to avoid logging of ops at all, if turned on it will be
     // logged by the "legacy" Kibana.
@@ -99,7 +100,7 @@ export class LegacyLoggingServer {
       ops: { interval: 2147483647 },
     };
 
-    setupLogging(this, Config.withDefaultSchema(transformDeprecations(config)));
+    setupLogging(this, Config.withDefaultSchema(config));
   }
 
   public register({ plugin: { register }, options }: PluginRegisterParams): Promise<void> {

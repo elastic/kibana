@@ -31,7 +31,7 @@ export async function clean(dir: string, expectedPaths: string[]) {
     const path = resolvePath(dir, filename);
     if (!expectedPaths.includes(path)) {
       log(`Deleting unexpected file ${path}`);
-      await del(path);
+      await del(path, { force: true });
     }
   });
 }

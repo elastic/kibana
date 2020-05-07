@@ -24,9 +24,4 @@
  * @param  {Array<T>} b
  * @return {Array<T>}
  */
-export const flatConcat = (a, b) => (
-  [].concat(
-    a === undefined ? [] : a,
-    b === undefined ? [] : b
-  )
-);
+export const flatConcat = (a, b) => [].concat(a === undefined ? [] : a, b === undefined ? [] : b);

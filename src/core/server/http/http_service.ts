@@ -17,20 +17,20 @@
  * under the License.
  */
 
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { Server } from 'hapi';
 
-import { LoggerFactory } from '../logging';
 import { CoreService } from '../../types';
-
-import { Logger } from '../logging';
+import { Logger, LoggerFactory } from '../logging';
 import { ContextSetup } from '../context';
+import { Env } from '../config';
 import { CoreContext } from '../core_context';
 import { PluginOpaqueId } from '../plugins';
+import { CspConfigType, config as cspConfig } from '../csp';
 
 import { Router } from './router';
-import { HttpConfig, HttpConfigType } from './http_config';
+import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
 
@@ -42,6 +42,7 @@ import {
 } from './types';
 
 import { RequestHandlerContext } from '../../server';
+import { registerCoreHandlers } from './lifecycle_handlers';
 
 interface SetupDeps {
   context: ContextSetup;
@@ -56,20 +57,22 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
 
   private readonly logger: LoggerFactory;
   private readonly log: Logger;
+  private readonly env: Env;
   private notReadyServer?: Server;
   private requestHandlerContext?: RequestHandlerContextContainer;
 
   constructor(private readonly coreContext: CoreContext) {
-    this.logger = coreContext.logger;
-    this.log = coreContext.logger.get('http');
-    this.config$ = coreContext.configService
-      .atPath<HttpConfigType>('server')
-      .pipe(map(rawConfig => new HttpConfig(rawConfig, coreContext.env)));
+    const { logger, configService, env } = coreContext;
 
-    this.httpServer = new HttpServer(coreContext.logger, 'Kibana');
-    this.httpsRedirectServer = new HttpsRedirectServer(
-      coreContext.logger.get('http', 'redirect', 'server')
-    );
+    this.logger = logger;
+    this.env = env;
+    this.log = logger.get('http');
+    this.config$ = combineLatest([
+      configService.atPath<HttpConfigType>(httpConfig.path),
+      configService.atPath<CspConfigType>(cspConfig.path),
+    ]).pipe(map(([http, csp]) => new HttpConfig(http, csp)));
+    this.httpServer = new HttpServer(logger, 'Kibana');
+    this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
 
   public async setup(deps: SetupDeps) {
@@ -79,7 +82,7 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
         // If the server is already running we can't make any config changes
         // to it, so we warn and don't allow the config to pass through.
         this.log.warn(
-          'Received new HTTP config after server was started. ' + 'Config will **not** be applied.'
+          'Received new HTTP config after server was started. Config will **not** be applied.'
         );
       }
     });
@@ -91,6 +94,9 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
     }
 
     const { registerRouter, ...serverContract } = await this.httpServer.setup(config);
+
+    registerCoreHandlers(serverContract, config, this.env);
+
     const contract: InternalHttpServiceSetup = {
       ...serverContract,
 
@@ -106,10 +112,6 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
         contextName: T,
         provider: RequestHandlerContextProvider<T>
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
-
-      config: {
-        defaultRoute: config.defaultRoute,
-      },
     };
 
     return contract;

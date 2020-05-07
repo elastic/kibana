@@ -25,7 +25,7 @@ const defaultRouteManager = new RouteManager();
 
 export const uiRoutes = Object.create(defaultRouteManager, {
   WAIT_FOR_URL_CHANGE_TOKEN: {
-    value: WAIT_FOR_URL_CHANGE_TOKEN
+    value: WAIT_FOR_URL_CHANGE_TOKEN,
   },
 
   enable: {
@@ -34,6 +34,6 @@ export const uiRoutes = Object.create(defaultRouteManager, {
         .get('kibana', ['ngRoute'])
         .config(defaultRouteManager.config)
         .run(defaultRouteManager.run);
-    }
-  }
+    },
+  },
 });

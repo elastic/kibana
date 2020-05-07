@@ -69,11 +69,14 @@ export class Plugin {
       this._options = options;
 
       server.logWithMetadata(['plugins', 'debug'], `Initializing plugin ${this.toString()}`, {
-        plugin: this
+        plugin: this,
       });
 
       if (this.publicDir) {
-        server.exposeStaticDir(`/plugins/${id}/{path*}`, this.publicDir);
+        server.newPlatform.__internals.http.registerStaticDir(
+          `/plugins/${id}/{path*}`,
+          this.publicDir
+        );
       }
 
       // Many of the plugins are simply adding static assets to the server and we don't need
@@ -88,7 +91,7 @@ export class Plugin {
 
     await kbnServer.server.register({
       plugin: { register, name: id, version },
-      options: config.has(configPrefix) ? config.get(configPrefix) : null
+      options: config.has(configPrefix) ? config.get(configPrefix) : null,
     });
 
     // Only change the plugin status to green if the

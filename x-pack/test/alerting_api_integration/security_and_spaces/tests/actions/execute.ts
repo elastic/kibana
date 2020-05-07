@@ -311,11 +311,8 @@ export default function({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: 'child "params" fails because ["params" is required]',
-                validation: {
-                  source: 'payload',
-                  keys: ['params'],
-                },
+                message:
+                  '[request body.params]: expected value of type [object] but got [undefined]',
               });
               break;
             default:
@@ -439,9 +436,14 @@ export default function({ getService }: FtrProviderContext) {
               indexedRecord = searchResult.hits.hits[0];
               expect(indexedRecord._source.state).to.eql({
                 callClusterSuccess: false,
+                callScopedClusterSuccess: false,
                 savedObjectsClientSuccess: false,
                 callClusterError: {
                   ...indexedRecord._source.state.callClusterError,
+                  statusCode: 403,
+                },
+                callScopedClusterError: {
+                  ...indexedRecord._source.state.callScopedClusterError,
                   statusCode: 403,
                 },
                 savedObjectsClientError: {
@@ -460,6 +462,7 @@ export default function({ getService }: FtrProviderContext) {
               indexedRecord = searchResult.hits.hits[0];
               expect(indexedRecord._source.state).to.eql({
                 callClusterSuccess: true,
+                callScopedClusterSuccess: true,
                 savedObjectsClientSuccess: false,
                 savedObjectsClientError: {
                   ...indexedRecord._source.state.savedObjectsClientError,

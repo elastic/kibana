@@ -17,7 +17,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     describe('Login Page', () => {
       before(async () => {
         await esArchiver.load('empty_kibana');
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
       });
 
       after(async () => {
@@ -25,17 +25,36 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
       });
 
-      it('meets a11y requirements', async () => {
+      it('login page meets a11y requirements', async () => {
         await PageObjects.common.navigateToApp('login');
 
         await retry.waitFor(
           'login page visible',
           async () => await testSubjects.exists('loginSubmit')
         );
+        await a11y.testAppSnapshot();
+      });
 
+      it('User can login with a11y requirements', async () => {
+        await PageObjects.security.login();
+        await a11y.testAppSnapshot();
+      });
+
+      it('Wrong credentials message meets a11y requirements', async () => {
+        await PageObjects.security.loginPage.login('wrong-user', 'wrong-password', {
+          expectSuccess: false,
+        });
+        await PageObjects.security.loginPage.getErrorMessage();
+        await a11y.testAppSnapshot();
+      });
+
+      it('Logout message acknowledges a11y requirements', async () => {
+        await PageObjects.security.login();
+        await PageObjects.security.logout();
+        await testSubjects.getVisibleText('loginInfoMessage');
         await a11y.testAppSnapshot();
       });
     });

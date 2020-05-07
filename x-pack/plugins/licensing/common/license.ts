@@ -9,7 +9,7 @@ import {
   LicenseType,
   ILicense,
   LicenseStatus,
-  LICENSE_CHECK_STATE,
+  LicenseCheck,
   LICENSE_TYPE,
   PublicLicenseJSON,
   PublicLicense,
@@ -26,13 +26,12 @@ export class License implements ILicense {
   public readonly error?: string;
   public readonly isActive: boolean;
   public readonly isAvailable: boolean;
-  public readonly isBasic: boolean;
-  public readonly isNotBasic: boolean;
 
   public readonly uid?: string;
   public readonly status?: LicenseStatus;
   public readonly expiryDateInMillis?: number;
   public readonly type?: LicenseType;
+  public readonly mode?: LicenseType;
   public readonly signature: string;
 
   /**
@@ -65,11 +64,10 @@ export class License implements ILicense {
       this.status = license.status;
       this.expiryDateInMillis = license.expiryDateInMillis;
       this.type = license.type;
+      this.mode = license.mode;
     }
 
     this.isActive = this.status === 'active';
-    this.isBasic = this.isActive && this.type === 'basic';
-    this.isNotBasic = this.isActive && this.type !== 'basic';
   }
 
   toJSON() {
@@ -87,26 +85,23 @@ export class License implements ILicense {
     }
   }
 
-  isOneOf(candidateLicenses: LicenseType | LicenseType[]) {
-    if (!this.type) {
+  hasAtLeast(minimumLicenseRequired: LicenseType) {
+    const type = this.type;
+    if (!type) {
       return false;
     }
 
-    if (!Array.isArray(candidateLicenses)) {
-      candidateLicenses = [candidateLicenses];
-    }
-
-    return candidateLicenses.includes(this.type);
-  }
-
-  check(pluginName: string, minimumLicenseRequired: LicenseType) {
     if (!(minimumLicenseRequired in LICENSE_TYPE)) {
       throw new Error(`"${minimumLicenseRequired}" is not a valid license type`);
     }
 
+    return LICENSE_TYPE[minimumLicenseRequired] <= LICENSE_TYPE[type];
+  }
+
+  check(pluginName: string, minimumLicenseRequired: LicenseType): LicenseCheck {
     if (!this.isAvailable) {
       return {
-        state: LICENSE_CHECK_STATE.Unavailable,
+        state: 'unavailable',
         message: i18n.translate('xpack.licensing.check.errorUnavailableMessage', {
           defaultMessage:
             'You cannot use {pluginName} because license information is not available at this time.',
@@ -115,31 +110,29 @@ export class License implements ILicense {
       };
     }
 
-    const type = this.type!;
-
     if (!this.isActive) {
       return {
-        state: LICENSE_CHECK_STATE.Expired,
+        state: 'expired',
         message: i18n.translate('xpack.licensing.check.errorExpiredMessage', {
           defaultMessage:
             'You cannot use {pluginName} because your {licenseType} license has expired.',
-          values: { licenseType: type, pluginName },
+          values: { licenseType: this.type!, pluginName },
         }),
       };
     }
 
-    if (LICENSE_TYPE[type] < LICENSE_TYPE[minimumLicenseRequired]) {
+    if (!this.hasAtLeast(minimumLicenseRequired)) {
       return {
-        state: LICENSE_CHECK_STATE.Invalid,
+        state: 'invalid',
         message: i18n.translate('xpack.licensing.check.errorUnsupportedMessage', {
           defaultMessage:
             'Your {licenseType} license does not support {pluginName}. Please upgrade your license.',
-          values: { licenseType: type, pluginName },
+          values: { licenseType: this.type!, pluginName },
         }),
       };
     }
 
-    return { state: LICENSE_CHECK_STATE.Valid };
+    return { state: 'valid' };
   }
 
   getFeature(name: string) {

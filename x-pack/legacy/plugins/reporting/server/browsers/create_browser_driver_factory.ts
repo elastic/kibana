@@ -4,27 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ensureBrowserDownloaded } from './download';
-import { installBrowser } from './install';
-import { LevelLogger } from '../lib/level_logger';
-import { ServerFacade, CaptureConfig } from '../../types';
-import { PLUGIN_ID, BROWSER_TYPE } from '../../common/constants';
-import { chromium } from './index';
+import { Logger } from '../../types';
+import { ReportingConfig } from '../types';
 import { HeadlessChromiumDriverFactory } from './chromium/driver_factory';
+import { ensureBrowserDownloaded } from './download';
+import { chromium } from './index';
+import { installBrowser } from './install';
 
 export async function createBrowserDriverFactory(
-  server: ServerFacade
+  config: ReportingConfig,
+  logger: Logger
 ): Promise<HeadlessChromiumDriverFactory> {
-  const config = server.config();
-  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'browser-driver']);
-
-  const dataDir: string = config.get('path.data');
-  const captureConfig: CaptureConfig = config.get('xpack.reporting.capture');
-  const browserType = captureConfig.browser.type;
+  const captureConfig = config.get('capture');
+  const browserConfig = captureConfig.browser.chromium;
   const browserAutoDownload = captureConfig.browser.autoDownload;
-  const browserConfig = captureConfig.browser[BROWSER_TYPE];
-  const networkPolicy = captureConfig.networkPolicy;
-  const reportingTimeout: number = config.get('xpack.reporting.queue.timeout');
+  const browserType = captureConfig.browser.type;
+  const dataDir = config.kbnConfig.get('path', 'data');
 
   if (browserConfig.disableSandbox) {
     logger.warning(`Enabling the Chromium sandbox provides an additional layer of protection.`);
@@ -35,13 +30,7 @@ export async function createBrowserDriverFactory(
 
   try {
     const { binaryPath } = await installBrowser(logger, chromium, dataDir);
-    return chromium.createDriverFactory(
-      binaryPath,
-      logger,
-      browserConfig,
-      reportingTimeout,
-      networkPolicy
-    );
+    return chromium.createDriverFactory(binaryPath, logger, captureConfig);
   } catch (error) {
     if (error.cause && ['EACCES', 'EEXIST'].includes(error.cause.code)) {
       logger.error(

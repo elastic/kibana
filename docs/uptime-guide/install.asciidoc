@@ -12,7 +12,7 @@ Skip managing your own {es} and {kib} instance by using our
 https://www.elastic.co/cloud/elasticsearch-service[hosted {es} Service] on
 Elastic Cloud.
 
-https://www.elastic.co/cloud/elasticsearch-service/signup[Try out the {es} Service for free],
+{ess-trial}[Try out the {es} Service for free],
 then jump straight to <<install-heartbeat>>.
 
 [float]
@@ -20,7 +20,7 @@ then jump straight to <<install-heartbeat>>.
 === Install the stack yourself
 
 If you'd rather install the stack yourself,
-first see the https://www.elastic.co/support/matrix[Elastic Support Matrix] for information about supported operating systems and product compatibility. Then, follow the steps below.
+first see the https://www.elastic.co/support/matrix[Elastic Support Matrix] for information about supported operating systems and product compatibility.
 
 * <<install-elasticsearch>>
 * <<install-kibana>>
@@ -55,6 +55,11 @@ Additional information is available in {heartbeat-ref}/heartbeat-configuration.h
 
 [role="screenshot"]
 image::images/uptime-setup.png[Installation instructions on the Uptime page in Kibana]
+
+[[setup-security]]
+=== Step 4: Setup Security
+
+Secure your installation by following the {heartbeat-ref}/securing-heartbeat.html[Secure Heartbeat] documentation.
 
 [float]
 ==== Important considerations

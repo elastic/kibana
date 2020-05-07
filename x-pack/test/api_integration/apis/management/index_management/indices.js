@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { initElasticsearchHelpers } from './lib';
 import { registerHelpers } from './indices.helpers';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
@@ -17,7 +17,7 @@ export default function ({ getService }) {
     createIndex,
     catIndex,
     indexStats,
-    cleanUp: cleanUpEsResources
+    cleanUp: cleanUpEsResources,
   } = initElasticsearchHelpers(es);
 
   const {
@@ -34,7 +34,8 @@ export default function ({ getService }) {
     clearCache,
   } = registerHelpers({ supertest });
 
-  describe('indices', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/64473
+  describe.skip('indices', () => {
     after(() => Promise.all([cleanUpEsResources()]));
 
     describe('clear cache', () => {
@@ -48,7 +49,7 @@ export default function ({ getService }) {
       });
     });
 
-    describe('close', function () {
+    describe('close', function() {
       // The Cloud backend disallows users from closing indices.
       this.tags(['skipCloud']);
 
@@ -67,7 +68,7 @@ export default function ({ getService }) {
       });
     });
 
-    describe('open', function () {
+    describe('open', function() {
       // The Cloud backend disallows users from closing indices, so there's no point testing
       // the open behavior.
       this.tags(['skipCloud']);
@@ -104,7 +105,7 @@ export default function ({ getService }) {
 
       it('should require index or indices to be provided', async () => {
         const { body } = await deleteIndex().expect(400);
-        expect(body.message).to.contain('index / indices is missing');
+        expect(body.message).to.contain('expected value of type [string]');
       });
     });
 
@@ -144,7 +145,7 @@ export default function ({ getService }) {
 
       it('should allow to define the number of segments', async () => {
         const index = await createIndex();
-        await forceMerge(index, { max_num_segments: 1 }).expect(200);
+        await forceMerge(index, { maxNumSegments: 1 }).expect(200);
       });
     });
 
@@ -177,10 +178,10 @@ export default function ({ getService }) {
       });
     });
 
-    describe('list', function () {
+    describe('list', function() {
       this.tags(['skipCloud']);
 
-      it('should list all the indices with the expected properties and data enrichers', async function () {
+      it('should list all the indices with the expected properties and data enrichers', async function() {
         const { body } = await list().expect(200);
         const expectedKeys = [
           'health',
@@ -193,20 +194,20 @@ export default function ({ getService }) {
           'size',
           'isFrozen',
           'aliases',
+          // Cloud disables CCR, so wouldn't expect follower indices.
+          'isFollowerIndex', // data enricher
           'ilm', // data enricher
           'isRollupIndex', // data enricher
-          // Cloud disables CCR, so wouldn't expect follower indices.
-          'isFollowerIndex' // data enricher
         ];
         expect(Object.keys(body[0])).to.eql(expectedKeys);
       });
     });
 
-    describe('reload', function () {
-      describe('(not on Cloud)', function () {
+    describe('reload', function() {
+      describe('(not on Cloud)', function() {
         this.tags(['skipCloud']);
 
-        it('should list all the indices with the expected properties and data enrichers', async function () {
+        it('should list all the indices with the expected properties and data enrichers', async function() {
           const { body } = await reload().expect(200);
           const expectedKeys = [
             'health',
@@ -219,10 +220,10 @@ export default function ({ getService }) {
             'size',
             'isFrozen',
             'aliases',
+            // Cloud disables CCR, so wouldn't expect follower indices.
+            'isFollowerIndex', // data enricher
             'ilm', // data enricher
             'isRollupIndex', // data enricher
-            // Cloud disables CCR, so wouldn't expect follower indices.
-            'isFollowerIndex' // data enricher
           ];
           expect(Object.keys(body[0])).to.eql(expectedKeys);
           expect(body.length > 1).to.be(true); // to contrast it with the next test

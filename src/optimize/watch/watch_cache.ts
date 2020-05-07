@@ -18,17 +18,18 @@
  */
 
 import { createHash } from 'crypto';
-import { readFile, writeFile } from 'fs';
+import { readFile, writeFile, readdir, unlink, rmdir } from 'fs';
 import { resolve } from 'path';
 import { promisify } from 'util';
-
+import path from 'path';
 import del from 'del';
-import deleteEmpty from 'delete-empty';
-import globby from 'globby';
 import normalizePosixPath from 'normalize-path';
 
 const readAsync = promisify(readFile);
 const writeAsync = promisify(writeFile);
+const readdirAsync = promisify(readdir);
+const unlinkAsync = promisify(unlink);
+const rmdirAsync = promisify(rmdir);
 
 interface Params {
   logWithMetadata: (tags: string[], message: string, metadata?: { [key: string]: any }) => void;
@@ -95,11 +96,7 @@ export class WatchCache {
     await del(this.statePath, { force: true });
 
     // delete everything in optimize/.cache directory
-    await del(await globby([normalizePosixPath(this.cachePath)], { dot: true }));
-
-    // delete some empty folder that could be left
-    // from the previous cache path reset action
-    await deleteEmpty(this.cachePath);
+    await recursiveDelete(normalizePosixPath(this.cachePath));
 
     // delete dlls
     await del(this.dllsPath);
@@ -164,6 +161,29 @@ export class WatchCache {
       return JSON.parse(await readAsync(this.statePath, 'utf8'));
     } catch (error) {
       return {};
+    }
+  }
+}
+
+/**
+ * Recursively deletes a folder. This is a workaround for a bug in `del` where
+ * very large folders (with 84K+ files) cause a stack overflow.
+ */
+async function recursiveDelete(directory: string) {
+  try {
+    const entries = await readdirAsync(directory, { withFileTypes: true });
+
+    await Promise.all(
+      entries.map(entry => {
+        const absolutePath = path.join(directory, entry.name);
+        return entry.isDirectory() ? recursiveDelete(absolutePath) : unlinkAsync(absolutePath);
+      })
+    );
+
+    return rmdirAsync(directory);
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
     }
   }
 }

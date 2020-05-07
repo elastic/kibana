@@ -26,6 +26,22 @@
   },
   "maps-telemetry": {
     "properties": {
+      "settings": {
+        "properties": {
+          "showMapVisualizationTypes": {
+            "type": "boolean"
+          }
+        }
+      },
+      "indexPatternsWithGeoFieldCount": {
+        "type": "long"
+      },
+      "indexPatternsWithGeoPointFieldCount": {
+        "type": "long"
+      },
+      "indexPatternsWithGeoShapeFieldCount": {
+        "type": "long"
+      },
       "mapsTotalCount": {
         "type": "long"
       },

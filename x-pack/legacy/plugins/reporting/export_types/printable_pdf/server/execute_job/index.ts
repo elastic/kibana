@@ -5,65 +5,59 @@
  */
 
 import * as Rx from 'rxjs';
-import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
-import {
-  ServerFacade,
-  ExecuteJobFactory,
-  ESQueueWorkerExecuteFn,
-  HeadlessChromiumDriverFactory,
-} from '../../../../types';
-import { JobDocPayloadPDF } from '../../types';
-import { PLUGIN_ID, PDF_JOB_TYPE } from '../../../../common/constants';
-import { LevelLogger } from '../../../../server/lib';
-import { generatePdfObservableFactory } from '../lib/generate_pdf';
+import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
+import { PDF_JOB_TYPE } from '../../../../common/constants';
+import { ReportingCore } from '../../../../server';
+import { ESQueueWorkerExecuteFn, ExecuteJobFactory, JobDocOutput, Logger } from '../../../../types';
 import {
   decryptJobHeaders,
-  omitBlacklistedHeaders,
   getConditionalHeaders,
-  getFullUrls,
   getCustomLogo,
+  getFullUrls,
+  omitBlacklistedHeaders,
 } from '../../../common/execute_job/';
+import { JobDocPayloadPDF } from '../../types';
+import { generatePdfObservableFactory } from '../lib/generate_pdf';
 
 type QueuedPdfExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocPayloadPDF>>;
 
-export const executeJobFactory: QueuedPdfExecutorFactory = function executeJobFactoryFn(
-  server: ServerFacade,
-  { browserDriverFactory }: { browserDriverFactory: HeadlessChromiumDriverFactory }
+export const executeJobFactory: QueuedPdfExecutorFactory = async function executeJobFactoryFn(
+  reporting: ReportingCore,
+  parentLogger: Logger
 ) {
-  const generatePdfObservable = generatePdfObservableFactory(server, browserDriverFactory);
-  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PDF_JOB_TYPE, 'execute']);
+  const config = reporting.getConfig();
+  const encryptionKey = config.get('encryptionKey');
 
-  return function executeJob(
-    jobId: string,
-    jobToExecute: JobDocPayloadPDF,
-    cancellationToken: any
-  ) {
+  const logger = parentLogger.clone([PDF_JOB_TYPE, 'execute']);
+
+  return async function executeJob(jobId: string, job: JobDocPayloadPDF, cancellationToken: any) {
+    const generatePdfObservable = await generatePdfObservableFactory(reporting);
+
     const jobLogger = logger.clone([jobId]);
+    const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
+      mergeMap(() => decryptJobHeaders({ encryptionKey, job, logger })),
+      map(decryptedHeaders => omitBlacklistedHeaders({ job, decryptedHeaders })),
+      map(filteredHeaders => getConditionalHeaders({ config, job, filteredHeaders })),
+      mergeMap(conditionalHeaders => getCustomLogo({ reporting, config, job, conditionalHeaders })),
+      mergeMap(({ logo, conditionalHeaders }) => {
+        const urls = getFullUrls({ config, job });
 
-    const process$ = Rx.of({ job: jobToExecute, server, logger }).pipe(
-      mergeMap(decryptJobHeaders),
-      map(omitBlacklistedHeaders),
-      map(getConditionalHeaders),
-      mergeMap(getCustomLogo),
-      mergeMap(getFullUrls),
-      mergeMap(
-        ({ job, conditionalHeaders, logo, urls }): Rx.Observable<Buffer> => {
-          const { browserTimezone, layout } = jobToExecute;
-          return generatePdfObservable(
-            jobLogger,
-            job.title,
-            urls,
-            browserTimezone,
-            conditionalHeaders,
-            layout,
-            logo
-          );
-        }
-      ),
-      map((buffer: Buffer) => ({
+        const { browserTimezone, layout, title } = job;
+        return generatePdfObservable(
+          jobLogger,
+          title,
+          urls,
+          browserTimezone,
+          conditionalHeaders,
+          layout,
+          logo
+        );
+      }),
+      map(({ buffer, warnings }) => ({
         content_type: 'application/pdf',
         content: buffer.toString('base64'),
         size: buffer.byteLength,
+        warnings,
       })),
       catchError(err => {
         jobLogger.error(err);
@@ -72,7 +66,6 @@ export const executeJobFactory: QueuedPdfExecutorFactory = function executeJobFa
     );
 
     const stop$ = Rx.fromEventPattern(cancellationToken.on);
-
     return process$.pipe(takeUntil(stop$)).toPromise();
   };
 };

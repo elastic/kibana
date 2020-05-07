@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import path from 'path';
 
-export default function ({ getPageObjects }) {
+export default function({ getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'common']);
 
   const IMPORT_FILE_PREVIEW_NAME = 'Import File';
@@ -28,14 +28,16 @@ export default function ({ getPageObjects }) {
     });
 
     afterEach(async () => {
-      await PageObjects.maps.cancelLayerAdd();
+      await PageObjects.maps.closeOrCancelLayer();
     });
 
     it('should add GeoJSON file to map', async () => {
       const layerLoadedInToc = await PageObjects.maps.doesLayerExist(IMPORT_FILE_PREVIEW_NAME);
       expect(layerLoadedInToc).to.be(true);
 
-      const filePickerLoadedFile = await PageObjects.maps.hasFilePickerLoadedFile(DEFAULT_LOAD_FILE_NAME);
+      const filePickerLoadedFile = await PageObjects.maps.hasFilePickerLoadedFile(
+        DEFAULT_LOAD_FILE_NAME
+      );
       expect(filePickerLoadedFile).to.be(true);
     });
 
@@ -55,7 +57,9 @@ export default function ({ getPageObjects }) {
       );
       await PageObjects.maps.waitForLayersToLoad();
       // Check second file is loaded in file picker
-      const filePickerLoadedFile = await PageObjects.maps.hasFilePickerLoadedFile(secondLoadFileName);
+      const filePickerLoadedFile = await PageObjects.maps.hasFilePickerLoadedFile(
+        secondLoadFileName
+      );
       expect(filePickerLoadedFile).to.be(true);
     });
 
@@ -67,7 +71,9 @@ export default function ({ getPageObjects }) {
       );
       await PageObjects.maps.waitForLayersToLoad();
       // Check second file is loaded in file picker
-      const filePickerLoadedFile = await PageObjects.maps.hasFilePickerLoadedFile(secondLoadFileName);
+      const filePickerLoadedFile = await PageObjects.maps.hasFilePickerLoadedFile(
+        secondLoadFileName
+      );
       expect(filePickerLoadedFile).to.be(true);
       // Check that no file is loaded in layer preview
       const layerLoadedInToc = await PageObjects.maps.doesLayerExist(IMPORT_FILE_PREVIEW_NAME);

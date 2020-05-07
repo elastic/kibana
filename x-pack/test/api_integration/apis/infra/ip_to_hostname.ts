@@ -6,7 +6,6 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { IpToHostResponse } from '../../../../legacy/plugins/infra/server/routes/ip_to_hostname';
 
 export default function ipToHostNameTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -27,8 +26,7 @@ export default function ipToHostNameTest({ getService }: FtrProviderContext) {
         .send(postBody)
         .expect(200);
 
-      const body: IpToHostResponse = response.body;
-      expect(body).to.have.property('host', 'demo-stack-mysql-01');
+      expect(response.body).to.have.property('host', 'demo-stack-mysql-01');
     });
 
     it('should return 404 for invalid ip', async () => {

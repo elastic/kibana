@@ -21,10 +21,7 @@ import moment from 'moment';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { attachMetaData } from '../../../../src/core/server/legacy/logging/legacy_logging_server';
-import {
-  createListStream,
-  createPromiseFromStreams,
-} from '../../utils';
+import { createListStream, createPromiseFromStreams } from '../../utils';
 
 import KbnLoggerJsonFormat from './log_format_json';
 
@@ -45,10 +42,7 @@ describe('KbnLoggerJsonFormat', () => {
     });
 
     it('log', async () => {
-      const result = await createPromiseFromStreams([
-        createListStream([makeEvent('log')]),
-        format
-      ]);
+      const result = await createPromiseFromStreams([createListStream([makeEvent('log')]), format]);
       const { type, message } = JSON.parse(result);
 
       expect(type).toBe('log');
@@ -68,12 +62,9 @@ describe('KbnLoggerJsonFormat', () => {
           remoteAddress: '127.0.0.1',
           userAgent: 'Test Thing',
           referer: 'elastic.co',
-        }
+        },
       };
-      const result = await createPromiseFromStreams([
-        createListStream([event]),
-        format
-      ]);
+      const result = await createPromiseFromStreams([createListStream([event]), format]);
       const { type, method, statusCode, message } = JSON.parse(result);
 
       expect(type).toBe('response');
@@ -86,13 +77,10 @@ describe('KbnLoggerJsonFormat', () => {
       const event = {
         ...makeEvent('ops'),
         os: {
-          load: [1, 1, 2]
-        }
+          load: [1, 1, 2],
+        },
       };
-      const result = await createPromiseFromStreams([
-        createListStream([event]),
-        format
-      ]);
+      const result = await createPromiseFromStreams([createListStream([event]), format]);
       const { type, message } = JSON.parse(result);
 
       expect(type).toBe('ops');
@@ -109,7 +97,7 @@ describe('KbnLoggerJsonFormat', () => {
           tags: ['tag1', 'tag2'],
         };
         const result = await createPromiseFromStreams([createListStream([event]), format]);
-        const { level, message, prop1, prop2, tags, } = JSON.parse(result);
+        const { level, message, prop1, prop2, tags } = JSON.parse(result);
 
         expect(level).toBe(undefined);
         expect(message).toBe('message for event');
@@ -128,7 +116,7 @@ describe('KbnLoggerJsonFormat', () => {
           tags: ['tag1', 'tag2'],
         };
         const result = await createPromiseFromStreams([createListStream([event]), format]);
-        const { level, message, prop1, prop2, tags, } = JSON.parse(result);
+        const { level, message, prop1, prop2, tags } = JSON.parse(result);
 
         expect(level).toBe(undefined);
         expect(message).toBe('message for event');
@@ -143,7 +131,7 @@ describe('KbnLoggerJsonFormat', () => {
           tags: ['tag1', 'tag2'],
         };
         const result = await createPromiseFromStreams([createListStream([event]), format]);
-        const { level, message, prop1, prop2, tags, } = JSON.parse(result);
+        const { level, message, prop1, prop2, tags } = JSON.parse(result);
 
         expect(level).toBe(undefined);
         expect(message).toBe('message for event');
@@ -162,7 +150,7 @@ describe('KbnLoggerJsonFormat', () => {
           tags: ['tag1', 'tag2'],
         };
         const result = await createPromiseFromStreams([createListStream([event]), format]);
-        const { level, message, prop1, prop2, tags, } = JSON.parse(result);
+        const { level, message, prop1, prop2, tags } = JSON.parse(result);
 
         expect(level).toBe('error');
         expect(message).toBe('reason');
@@ -177,13 +165,10 @@ describe('KbnLoggerJsonFormat', () => {
         const event = {
           ...makeEvent('error'),
           error: {
-            message: 'test error 0'
-          }
+            message: 'test error 0',
+          },
         };
-        const result = await createPromiseFromStreams([
-          createListStream([event]),
-          format
-        ]);
+        const result = await createPromiseFromStreams([createListStream([event]), format]);
         const { level, message, error } = JSON.parse(result);
 
         expect(level).toBe('error');
@@ -194,12 +179,9 @@ describe('KbnLoggerJsonFormat', () => {
       it('with no message', async () => {
         const event = {
           event: 'error',
-          error: {}
+          error: {},
         };
-        const result = await createPromiseFromStreams([
-          createListStream([event]),
-          format
-        ]);
+        const result = await createPromiseFromStreams([createListStream([event]), format]);
         const { level, message, error } = JSON.parse(result);
 
         expect(level).toBe('error');
@@ -211,10 +193,7 @@ describe('KbnLoggerJsonFormat', () => {
         const event = {
           error: new Error('test error 2'),
         };
-        const result = await createPromiseFromStreams([
-          createListStream([event]),
-          format
-        ]);
+        const result = await createPromiseFromStreams([createListStream([event]), format]);
         const { level, message, error } = JSON.parse(result);
 
         expect(level).toBe('error');
@@ -230,12 +209,9 @@ describe('KbnLoggerJsonFormat', () => {
       it('event error instanceof Error - fatal', async () => {
         const event = {
           error: new Error('test error 2'),
-          tags: ['fatal', 'tag2']
+          tags: ['fatal', 'tag2'],
         };
-        const result = await createPromiseFromStreams([
-          createListStream([event]),
-          format
-        ]);
+        const result = await createPromiseFromStreams([createListStream([event]), format]);
         const { tags, level, message, error } = JSON.parse(result);
 
         expect(tags).toEqual(['fatal', 'tag2']);
@@ -253,10 +229,7 @@ describe('KbnLoggerJsonFormat', () => {
         const event = {
           error: new Error(''),
         };
-        const result = await createPromiseFromStreams([
-          createListStream([event]),
-          format
-        ]);
+        const result = await createPromiseFromStreams([createListStream([event]), format]);
         const { level, message, error } = JSON.parse(result);
 
         expect(level).toBe('error');
@@ -274,13 +247,10 @@ describe('KbnLoggerJsonFormat', () => {
   describe('timezone', () => {
     it('logs in UTC', async () => {
       const format = new KbnLoggerJsonFormat({
-        timezone: 'UTC'
+        timezone: 'UTC',
       });
 
-      const result = await createPromiseFromStreams([
-        createListStream([makeEvent('log')]),
-        format
-      ]);
+      const result = await createPromiseFromStreams([createListStream([makeEvent('log')]), format]);
 
       const { '@timestamp': timestamp } = JSON.parse(result);
       expect(timestamp).toBe(moment.utc(time).format());
@@ -289,10 +259,7 @@ describe('KbnLoggerJsonFormat', () => {
     it('logs in local timezone timezone is undefined', async () => {
       const format = new KbnLoggerJsonFormat({});
 
-      const result = await createPromiseFromStreams([
-        createListStream([makeEvent('log')]),
-        format
-      ]);
+      const result = await createPromiseFromStreams([createListStream([makeEvent('log')]), format]);
 
       const { '@timestamp': timestamp } = JSON.parse(result);
       expect(timestamp).toBe(moment(time).format());

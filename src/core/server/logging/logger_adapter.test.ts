@@ -29,6 +29,7 @@ test('proxies all method calls to the internal logger.', () => {
     log: jest.fn(),
     trace: jest.fn(),
     warn: jest.fn(),
+    get: jest.fn(),
   };
 
   const adapter = new LoggerAdapter(internalLogger);
@@ -56,6 +57,10 @@ test('proxies all method calls to the internal logger.', () => {
   adapter.fatal('fatal-message');
   expect(internalLogger.fatal).toHaveBeenCalledTimes(1);
   expect(internalLogger.fatal).toHaveBeenCalledWith('fatal-message', undefined);
+
+  adapter.get('context');
+  expect(internalLogger.get).toHaveBeenCalledTimes(1);
+  expect(internalLogger.get).toHaveBeenCalledWith('context');
 });
 
 test('forwards all method calls to new internal logger if it is updated.', () => {
@@ -67,6 +72,7 @@ test('forwards all method calls to new internal logger if it is updated.', () =>
     log: jest.fn(),
     trace: jest.fn(),
     warn: jest.fn(),
+    get: jest.fn(),
   };
 
   const newInternalLogger: Logger = {
@@ -77,6 +83,7 @@ test('forwards all method calls to new internal logger if it is updated.', () =>
     log: jest.fn(),
     trace: jest.fn(),
     warn: jest.fn(),
+    get: jest.fn(),
   };
 
   const adapter = new LoggerAdapter(oldInternalLogger);

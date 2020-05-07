@@ -3,11 +3,15 @@
   "compilerOptions": {
     "types": [
       "mocha",
-      "node"
+      "node",
+      "flot"
     ]
   },
   "include": [
-    "**/*"
+    "**/*",
+    "../typings/**/*"
   ],
-  "exclude": []
+  "exclude": [
+    "../typings/jest.d.ts"
+  ]
 }

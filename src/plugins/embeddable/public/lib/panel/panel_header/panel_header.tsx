@@ -23,12 +23,14 @@ import {
   EuiIcon,
   EuiToolTip,
   EuiScreenReaderOnly,
+  EuiNotificationBadge,
 } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
-import { IAction } from 'src/plugins/ui_actions/public';
+import { Action } from 'src/plugins/ui_actions/public';
 import { PanelOptionsMenu } from './panel_options_menu';
 import { IEmbeddable } from '../../embeddables';
+import { EmbeddableContext } from '../../triggers';
 
 export interface PanelHeaderProps {
   title?: string;
@@ -36,12 +38,13 @@ export interface PanelHeaderProps {
   hidePanelTitles: boolean;
   getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor>;
   closeContextMenu: boolean;
-  badges: IAction[];
+  badges: Array<Action<EmbeddableContext>>;
+  notifications: Array<Action<EmbeddableContext>>;
   embeddable: IEmbeddable;
   headerId?: string;
 }
 
-function renderBadges(badges: IAction[], embeddable: IEmbeddable) {
+function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmbeddable) {
   return badges.map(badge => (
     <EuiBadge
       key={badge.id}
@@ -52,6 +55,22 @@ function renderBadges(badges: IAction[], embeddable: IEmbeddable) {
     >
       {badge.getDisplayName({ embeddable })}
     </EuiBadge>
+  ));
+}
+
+function renderNotifications(
+  notifications: Array<Action<EmbeddableContext>>,
+  embeddable: IEmbeddable
+) {
+  return notifications.map(notification => (
+    <EuiNotificationBadge
+      data-test-subj={`embeddablePanelNotification-${notification.id}`}
+      key={notification.id}
+      style={{ marginTop: '4px', marginRight: '4px' }}
+      onClick={() => notification.execute({ embeddable })}
+    >
+      {notification.getDisplayName({ embeddable })}
+    </EuiNotificationBadge>
   ));
 }
 
@@ -87,6 +106,7 @@ export function PanelHeader({
   getActionContextMenuPanel,
   closeContextMenu,
   badges,
+  notifications,
   embeddable,
   headerId,
 }: PanelHeaderProps) {
@@ -146,7 +166,7 @@ export function PanelHeader({
         )}
         {renderBadges(badges, embeddable)}
       </h2>
-
+      {renderNotifications(notifications, embeddable)}
       <PanelOptionsMenu
         isViewMode={isViewMode}
         getActionContextMenuPanel={getActionContextMenuPanel}

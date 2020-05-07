@@ -6,23 +6,19 @@
 
 import { notFound, notImplemented } from 'boom';
 import { get } from 'lodash';
-import { PLUGIN_ID, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
-import { cryptoFactory, LevelLogger } from '../../../../server/lib';
+import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
+import { ReportingCore } from '../../../../server';
+import { cryptoFactory } from '../../../../server/lib';
+import { CreateJobFactory, ImmediateCreateJobFn, Logger, RequestFacade } from '../../../../types';
 import {
-  CreateJobFactory,
-  ImmediateCreateJobFn,
-  ServerFacade,
-  RequestFacade,
-} from '../../../../types';
-import {
+  JobDocPayloadPanelCsv,
+  JobParamsPanelCsv,
   SavedObject,
   SavedObjectServiceError,
   SavedSearchObjectAttributesJSON,
   SearchPanel,
   TimeRangeParams,
   VisObjectAttributesJSON,
-  JobDocPayloadPanelCsv,
-  JobParamsPanelCsv,
 } from '../../types';
 import { createJobSearch } from './create_job_search';
 
@@ -34,13 +30,10 @@ interface VisData {
 
 export const createJobFactory: CreateJobFactory<ImmediateCreateJobFn<
   JobParamsPanelCsv
->> = function createJobFactoryFn(server: ServerFacade) {
-  const crypto = cryptoFactory(server);
-  const logger = LevelLogger.createForServer(server, [
-    PLUGIN_ID,
-    CSV_FROM_SAVEDOBJECT_JOB_TYPE,
-    'create-job',
-  ]);
+>> = function createJobFactoryFn(reporting: ReportingCore, parentLogger: Logger) {
+  const config = reporting.getConfig();
+  const crypto = cryptoFactory(config.get('encryptionKey'));
+  const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'create-job']);
 
   return async function createJob(
     jobParams: JobParamsPanelCsv,

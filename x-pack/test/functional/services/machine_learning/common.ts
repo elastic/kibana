@@ -72,5 +72,11 @@ export function MachineLearningCommonProvider({ getService }: FtrProviderContext
         }
       });
     },
+
+    async waitForMlLoadingIndicatorToDisappear() {
+      await retry.tryForTime(10 * 1000, async () => {
+        await testSubjects.missingOrFail('mlLoadingIndicator');
+      });
+    },
   };
 }

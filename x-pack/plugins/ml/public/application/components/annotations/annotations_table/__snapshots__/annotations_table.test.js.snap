@@ -1,0 +1,124 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
+<Fragment>
+  <EuiInMemoryTable
+    className="eui-textOverflowWrap"
+    columns={
+      Array [
+        Object {
+          "field": "annotation",
+          "name": "Annotation",
+          "scope": "row",
+          "sortable": true,
+          "width": "50%",
+        },
+        Object {
+          "dataType": "date",
+          "field": "timestamp",
+          "name": "From",
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "dataType": "date",
+          "field": "end_timestamp",
+          "name": "To",
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "dataType": "date",
+          "field": "modified_time",
+          "name": "Last modified date",
+          "render": [Function],
+          "sortable": true,
+        },
+        Object {
+          "field": "modified_username",
+          "name": "Last modified by",
+          "sortable": true,
+        },
+        Object {
+          "actions": Array [
+            Object {
+              "render": [Function],
+            },
+            Object {
+              "render": [Function],
+            },
+          ],
+          "align": "right",
+          "name": "Actions",
+          "width": "60px",
+        },
+      ]
+    }
+    compressed={true}
+    items={
+      Array [
+        Object {
+          "_id": "KCCkDWgB_ZdQ1MFDSYPi",
+          "annotation": "Major spike.",
+          "create_time": 1546417097181,
+          "create_username": "<user unknown>",
+          "end_timestamp": 1455041968976,
+          "job_id": "farequote",
+          "modified_time": 1546417097181,
+          "modified_username": "<user unknown>",
+          "timestamp": 1455026177994,
+          "type": "annotation",
+        },
+      ]
+    }
+    pagination={
+      Object {
+        "pageSizeOptions": Array [
+          5,
+          10,
+          25,
+        ],
+      }
+    }
+    responsive={true}
+    rowProps={[Function]}
+    sorting={
+      Object {
+        "sort": Object {
+          "direction": "asc",
+          "field": "timestamp",
+        },
+      }
+    }
+    tableLayout="fixed"
+  />
+</Fragment>
+`;
+
+exports[`AnnotationsTable Initialization with job config prop. 1`] = `
+<EuiFlexGroup
+  justifyContent="spaceAround"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiLoadingSpinner
+      size="l"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`AnnotationsTable Minimal initialization without props. 1`] = `
+<EuiCallOut
+  iconType="iInCircle"
+  role="alert"
+  title={
+    <FormattedMessage
+      defaultMessage="No annotations created for this job"
+      id="xpack.ml.annotationsTable.annotationsNotCreatedTitle"
+      values={Object {}}
+    />
+  }
+/>
+`;

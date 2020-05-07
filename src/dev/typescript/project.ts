@@ -52,11 +52,15 @@ export class Project {
   public directory: string;
   public name: string;
   public config: any;
+  public disableTypeCheck: boolean;
 
   private readonly include: IMinimatch[];
   private readonly exclude: IMinimatch[];
 
-  constructor(public tsConfigPath: string, name?: string) {
+  constructor(
+    public tsConfigPath: string,
+    options: { name?: string; disableTypeCheck?: boolean } = {}
+  ) {
     this.config = parseTsConfig(tsConfigPath);
 
     const { files, include, exclude = [] } = this.config as {
@@ -72,7 +76,8 @@ export class Project {
     }
 
     this.directory = dirname(this.tsConfigPath);
-    this.name = name || relative(REPO_ROOT, this.directory) || basename(this.directory);
+    this.disableTypeCheck = options.disableTypeCheck || false;
+    this.name = options.name || relative(REPO_ROOT, this.directory) || basename(this.directory);
     this.include = makeMatchers(this.directory, include);
     this.exclude = makeMatchers(this.directory, exclude);
   }

@@ -19,28 +19,31 @@
 
 import { HttpInterceptController } from './http_intercept_controller';
 import { HttpInterceptHaltError } from './http_intercept_halt_error';
-import { HttpInterceptor, IHttpResponse } from './types';
-import { HttpResponse } from './response';
+import { HttpInterceptor, HttpResponse, HttpFetchOptionsWithPath } from './types';
 
 export async function interceptRequest(
-  request: Request,
+  options: HttpFetchOptionsWithPath,
   interceptors: ReadonlySet<HttpInterceptor>,
   controller: HttpInterceptController
-): Promise<Request> {
-  let next = request;
+): Promise<HttpFetchOptionsWithPath> {
+  let current: HttpFetchOptionsWithPath;
 
   return [...interceptors].reduceRight(
     (promise, interceptor) =>
       promise.then(
-        async (current: Request) => {
-          next = current;
+        async fetchOptions => {
+          current = fetchOptions;
           checkHalt(controller);
 
           if (!interceptor.request) {
-            return current;
+            return fetchOptions;
           }
 
-          return (await interceptor.request(current, controller)) || current;
+          const overrides = await interceptor.request(current, controller);
+          return {
+            ...current,
+            ...overrides,
+          };
         },
         async error => {
           checkHalt(controller, error);
@@ -49,26 +52,33 @@ export async function interceptRequest(
             throw error;
           }
 
-          const nextRequest = await interceptor.requestError({ error, request: next }, controller);
+          const overrides = await interceptor.requestError(
+            { error, fetchOptions: current },
+            controller
+          );
 
-          if (!nextRequest) {
+          if (!overrides) {
             throw error;
           }
 
-          next = nextRequest;
-          return next;
+          current = {
+            ...current,
+            ...overrides,
+          };
+          return current;
         }
       ),
-    Promise.resolve(request)
+    Promise.resolve(options)
   );
 }
 
 export async function interceptResponse(
-  responsePromise: Promise<IHttpResponse>,
+  fetchOptions: HttpFetchOptionsWithPath,
+  responsePromise: Promise<HttpResponse>,
   interceptors: ReadonlySet<HttpInterceptor>,
   controller: HttpInterceptController
-): Promise<IHttpResponse> {
-  let current: IHttpResponse;
+): Promise<HttpResponse> {
+  let current: HttpResponse;
 
   return await [...interceptors].reduce(
     (promise, interceptor) =>
@@ -83,10 +93,10 @@ export async function interceptResponse(
 
           const interceptorOverrides = (await interceptor.response(httpResponse, controller)) || {};
 
-          return new HttpResponse({
+          return {
             ...httpResponse,
             ...interceptorOverrides,
-          });
+          };
         },
         async error => {
           const request = error.request || (current && current.request);
@@ -101,6 +111,7 @@ export async function interceptResponse(
             const next = await interceptor.responseError(
               {
                 error,
+                fetchOptions,
                 request,
                 response: error.response || (current && current.response),
                 body: error.body || (current && current.body),
@@ -114,7 +125,7 @@ export async function interceptResponse(
               throw error;
             }
 
-            return new HttpResponse({ ...next, request });
+            return { ...next, request, fetchOptions };
           } catch (err) {
             checkHalt(controller, err);
             throw err;

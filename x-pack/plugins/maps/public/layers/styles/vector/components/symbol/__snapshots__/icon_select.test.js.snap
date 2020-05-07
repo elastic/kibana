@@ -1,0 +1,75 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Should render icon select 1`] = `
+<EuiPopover
+  anchorPosition="downLeft"
+  button={
+    <EuiFormControlLayout
+      compressed={true}
+      fullWidth={true}
+      icon={
+        Object {
+          "side": "right",
+          "type": "arrowDown",
+        }
+      }
+      onKeyDown={[Function]}
+      readOnly={true}
+    >
+      <EuiFieldText
+        compressed={true}
+        fullWidth={true}
+        onClick={[Function]}
+        onKeyDown={[Function]}
+        prepend={
+          <SymbolIcon
+            className="mapIconSelectSymbol__inputButton"
+            fill="rgb(52, 55, 65)"
+            symbolId="symbol1"
+          />
+        }
+        readOnly={true}
+        value="symbol1"
+      />
+    </EuiFormControlLayout>
+  }
+  closePopover={[Function]}
+  display="block"
+  hasArrow={true}
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="s"
+>
+  <EuiFocusTrap
+    clickOutsideDisables={true}
+  >
+    <EuiSelectable
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "label": "symbol1",
+            "prepend": <SymbolIcon
+              fill="rgb(52, 55, 65)"
+              symbolId="symbol1"
+            />,
+            "value": "symbol1",
+          },
+          Object {
+            "label": "symbol2",
+            "prepend": <SymbolIcon
+              fill="rgb(52, 55, 65)"
+              symbolId="symbol2"
+            />,
+            "value": "symbol2",
+          },
+        ]
+      }
+      searchable={true}
+      singleSelection={false}
+    >
+      <Component />
+    </EuiSelectable>
+  </EuiFocusTrap>
+</EuiPopover>
+`;

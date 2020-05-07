@@ -56,7 +56,7 @@ export async function workspacePackagePaths(rootPath: string): Promise<string[]>
 }
 
 export async function copyWorkspacePackages(rootPath: string): Promise<void> {
-  const projectPaths = getProjectPaths(rootPath, {});
+  const projectPaths = getProjectPaths({ rootPath });
   const projects = await getProjects(rootPath, projectPaths);
 
   for (const project of projects.values()) {

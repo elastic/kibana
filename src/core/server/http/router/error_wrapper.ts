@@ -18,21 +18,10 @@
  */
 
 import Boom from 'boom';
-import { ObjectType, TypeOf } from '@kbn/config-schema';
-import { KibanaRequest } from './request';
-import { KibanaResponseFactory } from './response';
-import { RequestHandler } from './router';
-import { RequestHandlerContext } from '../../../server';
-import { RouteMethod } from './route';
+import { RequestHandlerWrapper } from './router';
 
-export const wrapErrors = <P extends ObjectType, Q extends ObjectType, B extends ObjectType>(
-  handler: RequestHandler<P, Q, B, RouteMethod>
-): RequestHandler<P, Q, B, RouteMethod> => {
-  return async (
-    context: RequestHandlerContext,
-    request: KibanaRequest<TypeOf<P>, TypeOf<Q>, TypeOf<B>, RouteMethod>,
-    response: KibanaResponseFactory
-  ) => {
+export const wrapErrors: RequestHandlerWrapper = handler => {
+  return async (context, request, response) => {
     try {
       return await handler(context, request, response);
     } catch (e) {

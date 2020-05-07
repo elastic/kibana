@@ -19,10 +19,7 @@ import { GraphPageProvider } from './graph_page';
 import { GrokDebuggerPageProvider } from './grok_debugger_page';
 // @ts-ignore not ts yet
 import { WatcherPageProvider } from './watcher_page';
-// @ts-ignore not ts yet
 import { ReportingPageProvider } from './reporting_page';
-// @ts-ignore not ts yet
-import { SpaceSelectorPageProvider } from './space_selector_page';
 // @ts-ignore not ts yet
 import { AccountSettingProvider } from './accountsetting_page';
 import { InfraHomePageProvider } from './infra_home_page';
@@ -33,10 +30,10 @@ import { GisPageProvider } from './gis_page';
 import { StatusPagePageProvider } from './status_page';
 // @ts-ignore not ts yet
 import { UpgradeAssistantProvider } from './upgrade_assistant';
-import { CodeHomePageProvider } from './code_page';
 // @ts-ignore not ts yet
 import { RollupPageProvider } from './rollup_page';
 import { UptimePageProvider } from './uptime_page';
+import { ApiKeysPageProvider } from './api_keys_page';
 import { LicenseManagementPageProvider } from './license_management_page';
 import { IndexManagementPageProvider } from './index_management_page';
 import { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
@@ -46,6 +43,9 @@ import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { CopySavedObjectsToSpacePageProvider } from './copy_saved_objects_to_space_page';
 import { LensPageProvider } from './lens_page';
 import { InfraMetricExplorerProvider } from './infra_metric_explorer';
+import { RoleMappingsPageProvider } from './role_mappings_page';
+import { SpaceSelectorPageProvider } from './space_selector_page';
+import { IngestPipelinesPageProvider } from './ingest_pipelines_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -67,9 +67,9 @@ export const pageObjects = {
   maps: GisPageProvider,
   statusPage: StatusPagePageProvider,
   upgradeAssistant: UpgradeAssistantProvider,
-  code: CodeHomePageProvider,
   uptime: UptimePageProvider,
   rollup: RollupPageProvider,
+  apiKeys: ApiKeysPageProvider,
   licenseManagement: LicenseManagementPageProvider,
   indexManagement: IndexManagementPageProvider,
   indexLifecycleManagement: IndexLifecycleManagementPageProvider,
@@ -78,4 +78,6 @@ export const pageObjects = {
   remoteClusters: RemoteClustersPageProvider,
   copySavedObjectsToSpace: CopySavedObjectsToSpacePageProvider,
   lens: LensPageProvider,
+  roleMappings: RoleMappingsPageProvider,
+  ingestPipelines: IngestPipelinesPageProvider,
 };

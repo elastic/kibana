@@ -17,10 +17,9 @@
  * under the License.
  */
 
-
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
@@ -32,8 +31,7 @@ export default function ({ getService, getPageObjects }) {
   };
 
   describe('discover filter editor', function describeIndexTests() {
-
-    before(async function () {
+    before(async function() {
       log.debug('load kibana index with default index pattern');
       await esArchiver.loadIfNeeded('discover');
 
@@ -45,13 +43,13 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    describe('filter editor', function () {
-      it('should add a phrases filter', async function () {
+    describe('filter editor', function() {
+      it('should add a phrases filter', async function() {
         await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
       });
 
-      it('should show the phrases if you re-open a phrases filter', async function () {
+      it('should show the phrases if you re-open a phrases filter', async function() {
         await filterBar.clickEditFilter('extension.raw', 'jpg');
         const phrases = await filterBar.getFilterEditorSelectedPhrases();
         expect(phrases.length).to.be(1);
@@ -62,10 +60,8 @@ export default function ({ getService, getPageObjects }) {
       it('should support filtering on nested fields', async () => {
         await filterBar.addFilter('nestedField.child', 'is', 'nestedValue');
         expect(await filterBar.hasFilter('nestedField.child', 'nestedValue')).to.be(true);
-        await retry.try(async function () {
-          expect(await PageObjects.discover.getHitCount()).to.be(
-            '1'
-          );
+        await retry.try(async function() {
+          expect(await PageObjects.discover.getHitCount()).to.be('1');
         });
       });
     });

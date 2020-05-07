@@ -17,17 +17,21 @@
  * under the License.
  */
 
+import { inspect } from 'util';
+
 // @ts-ignore @types are outdated and module is super simple
 import exitHook from 'exit-hook';
 
 import { pickLevelFromFlags, ToolingLog } from '../tooling_log';
 import { createFlagError, isFailError } from './fail';
 import { Flags, getFlags, getHelp } from './flags';
+import { ProcRunner, withProcRunner } from '../proc_runner';
 
 type CleanupTask = () => void;
 type RunFn = (args: {
   log: ToolingLog;
   flags: Flags;
+  procRunner: ProcRunner;
   addCleanupTask: (task: CleanupTask) => void;
 }) => Promise<void> | void;
 
@@ -36,6 +40,7 @@ export interface Options {
   description?: string;
   flags?: {
     allowUnexpected?: boolean;
+    guessTypesForUnexpectedFlags?: boolean;
     help?: string;
     alias?: { [key: string]: string | string[] };
     boolean?: string[];
@@ -46,7 +51,6 @@ export interface Options {
 
 export async function run(fn: RunFn, options: Options = {}) {
   const flags = getFlags(process.argv.slice(2), options);
-  const allowUnexpected = options.flags ? options.flags.allowUnexpected : false;
 
   if (flags.help) {
     process.stderr.write(getHelp(options));
@@ -60,7 +64,11 @@ export async function run(fn: RunFn, options: Options = {}) {
 
   process.on('unhandledRejection', error => {
     log.error('UNHANDLED PROMISE REJECTION');
-    log.error(error);
+    log.error(
+      error instanceof Error
+        ? error
+        : new Error(`non-Error type rejection value: ${inspect(error)}`)
+    );
     process.exit(1);
   });
 
@@ -97,15 +105,18 @@ export async function run(fn: RunFn, options: Options = {}) {
   const cleanupTasks: CleanupTask[] = [unhookExit];
 
   try {
-    if (!allowUnexpected && flags.unexpected.length) {
+    if (!options.flags?.allowUnexpected && flags.unexpected.length) {
       throw createFlagError(`Unknown flag(s) "${flags.unexpected.join('", "')}"`);
     }
 
     try {
-      await fn({
-        log,
-        flags,
-        addCleanupTask: (task: CleanupTask) => cleanupTasks.push(task),
+      await withProcRunner(log, async procRunner => {
+        await fn({
+          log,
+          flags,
+          procRunner,
+          addCleanupTask: (task: CleanupTask) => cleanupTasks.push(task),
+        });
       });
     } finally {
       doCleanup();

@@ -38,23 +38,13 @@ const accessibleIconButton = (props, propName, componentName) => {
 
   throw new Error(
     `${componentName} requires aria-label or aria-labelledby to be specified if it does not have children. ` +
-    `This is because we're assuming you're creating an icon-only button, which is screen-reader-inaccessible.`
+      `This is because we're assuming you're creating an icon-only button, which is screen-reader-inaccessible.`
   );
 };
 
-const BUTTON_TYPES = [
-  'basic',
-  'hollow',
-  'danger',
-  'warning',
-  'primary',
-  'secondary',
-];
+const BUTTON_TYPES = ['basic', 'hollow', 'danger', 'warning', 'primary', 'secondary'];
 
-const ICON_POSITIONS = [
-  'left',
-  'right',
-];
+const ICON_POSITIONS = ['left', 'right'];
 
 const DEFAULT_ICON_POSITION = 'left';
 
@@ -73,15 +63,13 @@ const getClassName = ({ className, buttonType, hasIcon = false }) =>
   });
 
 const ContentWithIcon = ({ children, icon, iconPosition, isLoading }) => {
-  const iconOrLoading = isLoading
-    ? <KuiButtonIcon type="loading" />
-    : icon;
+  const iconOrLoading = isLoading ? <KuiButtonIcon type="loading" /> : icon;
 
   // We need to wrap the children so that the icon's :first-child etc. pseudo-selectors get applied
   // correctly.
   const wrappedChildren = children ? <span>{children}</span> : undefined;
 
-  switch(iconPosition) {
+  switch (iconPosition) {
     case 'left':
       return (
         <span className="kuiButton__inner">
@@ -118,11 +106,7 @@ const KuiButton = ({
       })}
       {...rest}
     >
-      <ContentWithIcon
-        icon={icon}
-        iconPosition={iconPosition}
-        isLoading={isLoading}
-      >
+      <ContentWithIcon icon={icon} iconPosition={iconPosition} isLoading={isLoading}>
         {children}
       </ContentWithIcon>
     </button>
@@ -155,23 +139,18 @@ const KuiLinkButton = ({
     }
   };
 
-  const classes = classNames(getClassName({
-    className,
-    buttonType,
-    hasIcon: icon || isLoading,
-  }), { 'kuiButton-isDisabled': disabled });
+  const classes = classNames(
+    getClassName({
+      className,
+      buttonType,
+      hasIcon: icon || isLoading,
+    }),
+    { 'kuiButton-isDisabled': disabled }
+  );
 
   return (
-    <a
-      className={classes}
-      onClick={onClick}
-      {...rest}
-    >
-      <ContentWithIcon
-        icon={icon}
-        iconPosition={iconPosition}
-        isLoading={isLoading}
-      >
+    <a className={classes} onClick={onClick} {...rest}>
+      <ContentWithIcon icon={icon} iconPosition={iconPosition} isLoading={isLoading}>
         {children}
       </ContentWithIcon>
     </a>
@@ -188,12 +167,7 @@ KuiLinkButton.propTypes = {
   'aria-label': accessibleIconButton,
 };
 
-const KuiSubmitButton = ({
-  className,
-  buttonType,
-  children,
-  ...rest
-}) => {
+const KuiSubmitButton = ({ className, buttonType, children, ...rest }) => {
   // NOTE: The `input` element is a void element and can't contain children.
   return (
     <input
@@ -211,9 +185,4 @@ KuiSubmitButton.propTypes = {
   className: PropTypes.string,
 };
 
-export {
-  BUTTON_TYPES,
-  KuiButton,
-  KuiLinkButton,
-  KuiSubmitButton,
-};
+export { BUTTON_TYPES, KuiButton, KuiLinkButton, KuiSubmitButton };

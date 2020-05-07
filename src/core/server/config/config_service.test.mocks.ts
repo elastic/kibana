@@ -19,3 +19,8 @@
 
 export const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
 jest.mock('../../../../package.json', () => mockPackage);
+
+export const mockApplyDeprecations = jest.fn((config, deprecations, log) => config);
+jest.mock('./deprecation/apply_deprecations', () => ({
+  applyDeprecations: mockApplyDeprecations,
+}));

@@ -38,16 +38,16 @@ export enum AuthStatus {
 }
 
 /**
- * Get authentication state for a request. Returned by `auth` interceptor.
+ * Gets authentication state for a request. Returned by `auth` interceptor.
  * @param request {@link KibanaRequest} - an incoming request.
  * @public
  */
-export type GetAuthState = (
+export type GetAuthState = <T = unknown>(
   request: KibanaRequest | LegacyRequest
-) => { status: AuthStatus; state: unknown };
+) => { status: AuthStatus; state: T };
 
 /**
- * Return authentication status for a request.
+ * Returns authentication status for a request.
  * @param request {@link KibanaRequest} - an incoming request.
  * @public
  */
@@ -60,9 +60,9 @@ export class AuthStateStorage {
   public set = (request: KibanaRequest | LegacyRequest, state: unknown) => {
     this.storage.set(ensureRawRequest(request), state);
   };
-  public get: GetAuthState = request => {
+  public get = <T = unknown>(request: KibanaRequest | LegacyRequest) => {
     const key = ensureRawRequest(request);
-    const state = this.storage.get(key);
+    const state = this.storage.get(key) as T;
     const status: AuthStatus = this.storage.has(key)
       ? AuthStatus.authenticated
       : this.canBeAuthenticated()

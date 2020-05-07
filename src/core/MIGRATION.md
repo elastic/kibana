@@ -9,22 +9,22 @@
       - [Challenges on the server](#challenges-on-the-server)
       - [Challenges in the browser](#challenges-in-the-browser)
     - [Plan of action](#plan-of-action)
-    - [Shared application plugins](#shared-application-plugins)
   - [Server-side plan of action](#server-side-plan-of-action)
     - [De-couple from hapi.js server and request objects](#de-couple-from-hapijs-server-and-request-objects)
     - [Introduce new plugin definition shim](#introduce-new-plugin-definition-shim)
     - [Switch to new platform services](#switch-to-new-platform-services)
     - [Migrate to the new plugin system](#migrate-to-the-new-plugin-system)
   - [Browser-side plan of action](#browser-side-plan-of-action)
-    - [1. Create a plugin definition file](#1-create-a-plugin-definition-file)
-    - [2. Export all static code and types from `public/index.ts`](#2-export-all-static-code-and-types-from-publicindexts)
-    - [3. Export your runtime contract](#3-export-your-runtime-contract)
-    - [4. Move "owned" UI modules into your plugin and expose them from your public contract](#4-move-owned-ui-modules-into-your-plugin-and-expose-them-from-your-public-contract)
-    - [5. Provide plugin extension points decoupled from angular.js](#5-provide-plugin-extension-points-decoupled-from-angularjs)
-    - [6. Move all webpack alias imports into uiExport entry files](#6-move-all-webpack-alias-imports-into-uiexport-entry-files)
-    - [7. Switch to new platform services](#7-switch-to-new-platform-services)
-    - [8. Migrate to the new plugin system](#8-migrate-to-the-new-plugin-system)
-    - [Bonus: Tips for complex migration scenarios](#bonus-tips-for-complex-migration-scenarios)
+      - [1. Create a plugin definition file](#1-create-a-plugin-definition-file)
+      - [2. Export all static code and types from `public/index.ts`](#2-export-all-static-code-and-types-from-publicindexts)
+      - [3. Export your runtime contract](#3-export-your-runtime-contract)
+      - [4. Move "owned" UI modules into your plugin and expose them from your public contract](#4-move-owned-ui-modules-into-your-plugin-and-expose-them-from-your-public-contract)
+      - [5. Provide plugin extension points decoupled from angular.js](#5-provide-plugin-extension-points-decoupled-from-angularjs)
+      - [6. Move all webpack alias imports into uiExport entry files](#6-move-all-webpack-alias-imports-into-uiexport-entry-files)
+      - [7. Switch to new platform services](#7-switch-to-new-platform-services)
+      - [8. Migrate to the new plugin system](#8-migrate-to-the-new-plugin-system)
+      - [Bonus: Tips for complex migration scenarios](#bonus-tips-for-complex-migration-scenarios)
+  - [Keep Kibana fast](#keep-kibana-fast)
   - [Frequently asked questions](#frequently-asked-questions)
     - [Is migrating a plugin an all-or-nothing thing?](#is-migrating-a-plugin-an-all-or-nothing-thing)
     - [Do plugins need to be converted to TypeScript?](#do-plugins-need-to-be-converted-to-typescript)
@@ -42,9 +42,14 @@
         - [Plugins for shared application services](#plugins-for-shared-application-services)
       - [Server-side](#server-side)
         - [Core services](#core-services-1)
+        - [Plugin services](#plugin-services)
       - [UI Exports](#ui-exports)
+      - [Plugin Spec](#plugin-spec)
   - [How to](#how-to)
     - [Configure plugin](#configure-plugin)
+      - [Handle plugin configuration deprecations](#handle-plugin-configuration-deprecations)
+    - [Use scoped services](#use-scoped-services)
+      - [Declare a custom scoped service](#declare-a-custom-scoped-service)
     - [Mock new platform services in tests](#mock-new-platform-services-in-tests)
       - [Writing mocks for your plugin](#writing-mocks-for-your-plugin)
       - [Using mocks in your tests](#using-mocks-in-your-tests)
@@ -52,6 +57,8 @@
     - [Provide Legacy Platform API to the New platform plugin](#provide-legacy-platform-api-to-the-new-platform-plugin)
       - [On the server side](#on-the-server-side)
       - [On the client side](#on-the-client-side)
+    - [Updates an application navlink at runtime](#updates-an-application-navlink-at-runtime)
+    - [Logging config migration](#logging-config-migration)
 
 Make no mistake, it is going to take a lot of work to move certain plugins to the new platform. Our target is to migrate the entire repo over to the new platform throughout 7.x and to remove the legacy plugin system no later than 8.0, and this is only possible if teams start on the effort now.
 
@@ -63,7 +70,7 @@ We'll start with an overview of how plugins work in the new platform, and we'll 
 
 Plugins in the new platform are not especially novel or complicated to describe. Our intention wasn't to build some clever system that magically solved problems through abstractions and layers of obscurity, and we wanted to make sure plugins could continue to use most of the same technologies they use today, at least from a technical perspective.
 
-New platform plugins exist in the `src/plugins` and `x-pack/plugins` directories.
+New platform plugins exist in the `src/plugins` and `x-pack/plugins` directories. _See all [conventions for first-party Elastic plugins](./CONVENTIONS.md)_.
 
 ### Architecture
 
@@ -83,7 +90,7 @@ src/plugins
       plugin.ts [5]
 ```
 
-**[1] `kibana.json`** is a [static manifest](../../docs/development/core/server/kibana-plugin-server.pluginmanifest.md) file that is used to identify the plugin and to determine what kind of code the platform should execute from the plugin:
+**[1] `kibana.json`** is a [static manifest](../../docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md) file that is used to identify the plugin and to determine what kind of code the platform should execute from the plugin:
 
 ```json
 {
@@ -93,7 +100,7 @@ src/plugins
   "ui": true
 }
 ```
-More details about[manifest file format](/docs/development/core/server/kibana-plugin-server.pluginmanifest.md)
+More details about[manifest file format](/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md)
 
 Note that `package.json` files are irrelevant to and ignored by the new platform.
 
@@ -108,7 +115,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 ```
 
-**[3] `public/plugin.ts`** is the client-side plugin definition itself. Technically speaking it does not need to be a class or even a separate file from the entry point, but _all plugins at Elastic_ should be consistent in this way.
+**[3] `public/plugin.ts`** is the client-side plugin definition itself. Technically speaking it does not need to be a class or even a separate file from the entry point, but _all plugins at Elastic_ should be consistent in this way. _See all [conventions for first-party Elastic plugins](./CONVENTIONS.md)_.
 
 ```ts
 import { PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/server';
@@ -205,16 +212,16 @@ These are the contracts exposed by the core services for each lifecycle event:
 
 | lifecycle event | contract                                                                                                        |
 | --------------- | --------------------------------------------------------------------------------------------------------------- |
-| *contructor*    | [PluginInitializerContext](../../docs/development/core/server/kibana-plugin-server.plugininitializercontext.md) |
-| *setup*         | [CoreSetup](../../docs/development/core/server/kibana-plugin-server.coresetup.md)                               |
-| *start*         | [CoreStart](../../docs/development/core/server/kibana-plugin-server.corestart.md)                               |
+| *contructor*    | [PluginInitializerContext](../../docs/development/core/server/kibana-plugin-core-server.plugininitializercontext.md) |
+| *setup*         | [CoreSetup](../../docs/development/core/server/kibana-plugin-core-server.coresetup.md)                               |
+| *start*         | [CoreStart](../../docs/development/core/server/kibana-plugin-core-server.corestart.md)                               |
 | *stop*          |                                                                                                                 |
 
 ### Integrating with other plugins
 
 Plugins can expose public interfaces for other plugins to consume. Like `core`, those interfaces are bound to the lifecycle functions `setup` and/or `start`.
 
-Anything returned from `setup` or `start` will act as the interface, and while not a technical requirement, all Elastic plugins should expose types for that interface as well. 3rd party plugins wishing to allow other plugins to integrate with it are also highly encouraged to expose types for their plugin interfaces.
+Anything returned from `setup` or `start` will act as the interface, and while not a technical requirement, all first-party Elastic plugins should expose types for that interface as well. 3rd party plugins wishing to allow other plugins to integrate with it are also highly encouraged to expose types for their plugin interfaces.
 
 **foobar plugin.ts:**
 
@@ -324,43 +331,6 @@ The approach and level of effort varies significantly between server and browser
 First, decouple your plugin's business logic from the dependencies that are not exposed through the new platform, hapi.js and angular.js. Then introduce plugin definitions that more accurately reflect how plugins are defined in the new platform. Finally, replace the functionality you consume from core and other plugins with their new platform equivalents.
 
 Once those things are finished for any given plugin, it can officially be switched to the new plugin system.
-
-### Shared application plugins
-
-Some services have been already moved to the new platform.
-
-Below you can find their new locations:
-
-| Service | Old place                                    | New place in the NP                                             |
-| --------------- | ----------------------------------------- | --------------------------------------------------- |
-| *FieldFormats*         | ui/registry/field_formats      | plugins/data/public |
-
-The `FieldFormats` service has been moved to the `data` plugin in the New Platform. If your plugin has any imports from `ui/registry/field_formats`, you'll need to update your imports as follows:
-
-Use it in your New Platform plugin:
-
-```ts
-class MyPlugin {
-  setup (core, { data }) {
-    data.fieldFormats.register(myFieldFormat);
-    // ...
-  }
-  start (core, { data }) {
-    data.fieldFormats.getType(myFieldFormatId);
-    // ...
-  }
-}
-```
-
-Or, in your legacy platform plugin, consume it through the `ui/new_platform` module:
-
-```ts
-import { npSetup, npStart } from 'ui/new_platform';
-
-npSetup.plugins.data.fieldFormats.register(myFieldFormat);
-npStart.plugins.data.fieldFormats.getType(myFieldFormatId);
-// ...
-```
 
 ## Server-side plan of action
 
@@ -964,6 +934,69 @@ For a few plugins, some of these steps (such as angular removal) could be a mont
 
 One convention that is useful for this is creating a dedicated `public/np_ready` directory to house the code that is ready to migrate, and gradually move more and more code into it until the rest of your plugin is essentially empty. At that point, you'll be able to copy your `index.ts`, `plugin.ts`, and the contents of `./np_ready` over into your plugin in the new platform, leaving your legacy shim behind. This carries the added benefit of providing a way for us to introduce helpful tooling in the future, such as [custom eslint rules](https://github.com/elastic/kibana/pull/40537), which could be run against that specific directory to ensure your code is ready to migrate.
 
+## Keep Kibana fast
+**tl;dr**: Load as much code lazily as possible.
+Everyone loves snappy applications with responsive UI and hates spinners. Users deserve the best user experiences regardless of whether they run Kibana locally or in the cloud, regardless of their hardware & environment.
+There are 2 main aspects of the perceived speed of an application: loading time and responsiveness to user actions.
+New platform loads and bootstraps **all** the plugins whenever a user lands on any page. It means that adding every new application affects overall **loading performance** in the new platform, as plugin code is loaded **eagerly** to initialize the plugin and provide plugin API to dependent plugins.
+However, it's usually not necessary that the whole plugin code should be loaded and initialized at once. The plugin could keep on loading code covering API functionality on Kibana bootstrap but load UI related code lazily on-demand, when an application page or management section is mounted.
+Always prefer to require UI root components lazily when possible (such as in mount handlers). Even if their size may seem negligible, they are likely using some heavy-weight libraries that will also be removed from the initial plugin bundle, therefore, reducing its size by a significant amount.
+
+```typescript
+import { Plugin, CoreSetup, AppMountParameters } from 'src/core/public';
+export class MyPlugin implements Plugin<MyPluginSetup> {
+  setup(core: CoreSetup, plugins: SetupDeps){
+   core.application.register({
+     id: 'app',
+     title: 'My app',
+     async mount(params: AppMountParameters) {
+        const { mountApp } = await import('./app/mount_app');
+        return mountApp(await core.getStartServices(), params);
+     },
+   });
+   plugins.management.sections.getSection('another').registerApp({
+      id: 'app',
+      title: 'My app',
+      order: 1,
+      async mount(params) {
+        const { mountManagementSection } = await import('./app/mount_management_section');
+        return mountManagementSection(coreSetup, params);
+      },
+   })
+   return {
+      doSomething(){}
+   }
+ }
+}
+```
+
+#### How to understand how big the bundle size of my plugin is?
+New platform plugins are distributed as a pre-built with `@kbn/optimizer` package artifacts. It allows us to get rid of the shipping of `optimizer` in the distributable version of Kibana.
+Every NP plugin artifact contains all plugin dependencies required to run the plugin, except some stateful dependencies shared across plugin bundles via `@kbn/ui-shared-deps`.
+It means that NP plugin artifacts tend to have a bigger size than the legacy platform version.
+To understand the current size of your plugin artifact, run `@kbn/optimizer` as
+```bash
+node scripts/build_kibana_platform_plugins.js --dist --no-examples
+```
+and check the output in the `target` sub-folder of your plugin folder
+```bash
+ls -lh plugins/my_plugin/target/public/
+# output
+# an async chunk loaded on demand
+... 262K 0.plugin.js
+# eagerly loaded chunk
+... 50K  my_plugin.plugin.js
+```
+you might see at least one js bundle - `my_plugin.plugin.js`. This is the only artifact loaded by the platform during bootstrap in the browser. The rule of thumb is to keep its size as small as possible.
+Other lazily loaded parts of your plugin present in the same folder as separate chunks under `{number}.plugin.js` names.
+If you want to investigate what your plugin bundle consists of you need to run `@kbn/optimizer` with `--profile` flag to get generated [webpack stats file](https://webpack.js.org/api/stats/).
+```bash
+node scripts/build_kibana_platform_plugins.js --dist --no-examples --profile
+```
+Many OSS tools are allowing you to analyze generated stats file
+- [an official tool](http://webpack.github.io/analyse/#modules) from webpack authors
+- [webpack-visualizer](https://chrisbateman.github.io/webpack-visualizer/)
+
 ## Frequently asked questions
 
 ### Is migrating a plugin an all-or-nothing thing?
@@ -1131,6 +1164,8 @@ The benefit of this approach is that the details of where code lives and whether
 
 A plugin author that decides some set of code should diverge from having a single "common" definition can now safely change the implementation details without impacting downstream consumers.
 
+_See all [conventions for first-party Elastic plugins](./CONVENTIONS.md)_.
+
 ### When does code go into a plugin, core, or packages?
 
 This is an impossible question to answer definitively for all circumstances. For each time this question is raised, we must carefully consider to what extent we think that code is relevant to almost everyone developing in Kibana, what license the code is shipping under, which teams are most appropriate to "own" that code, is the code stateless etc.
@@ -1161,56 +1196,58 @@ import { npStart: { core } } from 'ui/new_platform';
 
 | Legacy Platform                                       | New Platform                                                                                                                                                                               | Notes                                                                                                                                          |
 | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `chrome.addBasePath`                                  | [`core.http.basePath.prepend`](/docs/development/core/public/kibana-plugin-public.httpservicebase.basepath.md)                                                                             |                                                                                                                                                |
-| `chrome.breadcrumbs.set`                              | [`core.chrome.setBreadcrumbs`](/docs/development/core/public/kibana-plugin-public.chromestart.setbreadcrumbs.md)                                                                           |                                                                                                                                                |
-| `chrome.getUiSettingsClient`                          | [`core.uiSettings`](/docs/development/core/public/kibana-plugin-public.uisettingsclient.md)                                                                                                |                                                                                                                                                |
-| `chrome.helpExtension.set`                            | [`core.chrome.setHelpExtension`](/docs/development/core/public/kibana-plugin-public.chromestart.sethelpextension.md)                                                                       |                                                                                                                                                |
-| `chrome.setVisible`                                   | [`core.chrome.setIsVisible`](/docs/development/core/public/kibana-plugin-public.chromestart.setisvisible.md)                                                                               |                                                                                                                                                |
+| `chrome.addBasePath`                                  | [`core.http.basePath.prepend`](/docs/development/core/public/kibana-plugin-core-public.httpsetup.basepath.md)                                                                             |                                                                                                                                                |
+| `chrome.navLinks.update`                              | [`core.appbase.updater`](/docs/development/core/public/kibana-plugin-core-public.appbase.updater_.md)                                                                                           | Use the `updater$` property when registering your application via `core.application.register`                                                  |
+| `chrome.breadcrumbs.set`                              | [`core.chrome.setBreadcrumbs`](/docs/development/core/public/kibana-plugin-core-public.chromestart.setbreadcrumbs.md)                                                                           |                                                                                                                                                |
+| `chrome.getUiSettingsClient`                          | [`core.uiSettings`](/docs/development/core/public/kibana-plugin-core-public.uisettingsclient.md)                                                                                                |                                                                                                                                                |
+| `chrome.helpExtension.set`                            | [`core.chrome.setHelpExtension`](/docs/development/core/public/kibana-plugin-core-public.chromestart.sethelpextension.md)                                                                       |                                                                                                                                                |
+| `chrome.setVisible`                                   | [`core.chrome.setIsVisible`](/docs/development/core/public/kibana-plugin-core-public.chromestart.setisvisible.md)                                                                               |                                                                                                                                                |
 | `chrome.setRootTemplate` / `chrome.setRootController` | --                                                                                                                                                                                         | Use application mounting via `core.application.register` (not available to legacy plugins at this time).                                       |
-| `import { recentlyAccessed } from 'ui/persisted_log'` | [`core.chrome.recentlyAccessed`](/docs/development/core/public/kibana-plugin-public.chromerecentlyaccessed.md)                                                                             |                                                                                                                                                |
-| `ui/capabilities`                                     | [`core.application.capabilities`](/docs/development/core/public/kibana-plugin-public.capabilities.md)                                                                                      |                                                                                                                                                |
-| `ui/documentation_links`                              | [`core.docLinks`](/docs/development/core/public/kibana-plugin-public.doclinksstart.md)                                                                                                     |                                                                                                                                                |
-| `ui/kfetch`                                           | [`core.http`](/docs/development/core/public/kibana-plugin-public.httpservicebase.md)                                                                                                       | API is nearly identical                                                                                                                        |
-| `ui/notify`                                           | [`core.notifications`](/docs/development/core/public/kibana-plugin-public.notificationsstart.md) and [`core.overlays`](/docs/development/core/public/kibana-plugin-public.overlaystart.md) | Toast messages are in `notifications`, banners are in `overlays`. May be combined later.                                                       |
+| `import { recentlyAccessed } from 'ui/persisted_log'` | [`core.chrome.recentlyAccessed`](/docs/development/core/public/kibana-plugin-core-public.chromerecentlyaccessed.md)                                                                             |                                                                                                                                                |
+| `ui/capabilities`                                     | [`core.application.capabilities`](/docs/development/core/public/kibana-plugin-core-public.capabilities.md)                                                                                      |                                                                                                                                                |
+| `ui/documentation_links`                              | [`core.docLinks`](/docs/development/core/public/kibana-plugin-core-public.doclinksstart.md)                                                                                                     |                                                                                                                                                |
+| `ui/kfetch`                                           | [`core.http`](/docs/development/core/public/kibana-plugin-core-public.httpservicebase.md)                                                                                                       | API is nearly identical                                                                                                                        |
+| `ui/notify`                                           | [`core.notifications`](/docs/development/core/public/kibana-plugin-core-public.notificationsstart.md) and [`core.overlays`](/docs/development/core/public/kibana-plugin-core-public.overlaystart.md) | Toast messages are in `notifications`, banners are in `overlays`. May be combined later.                                                       |
 | `ui/routes`                                           | --                                                                                                                                                                                         | There is no global routing mechanism. Each app [configures its own routing](/rfcs/text/0004_application_service_mounting.md#complete-example). |
-| `ui/saved_objects`                                    | [`core.savedObjects`](/docs/development/core/public/kibana-plugin-public.savedobjectsstart.md)                                                                                             | Client API is the same                                                                                                                         |
-| `ui/doc_title`                                        | [`core.chrome.docTitle`](/docs/development/core/public/kibana-plugin-public.chromedoctitle.md)                                                                                             |                                                                                                                                                |
-| `uiExports/injectedVars` / `chrome.getInjected`       | [Configure plugin](#configure-plugin) and [`PluginConfigDescriptor.exposeToBrowser`](/docs/development/core/server/kibana-plugin-server.pluginconfigdescriptor.exposetobrowser.md)         | Can only be used to expose configuration properties                                                                                            |
+| `ui/saved_objects`                                    | [`core.savedObjects`](/docs/development/core/public/kibana-plugin-core-public.savedobjectsstart.md)                                                                                             | Client API is the same                                                                                                                         |
+| `ui/doc_title`                                        | [`core.chrome.docTitle`](/docs/development/core/public/kibana-plugin-core-public.chromedoctitle.md)                                                                                             |                                                                                                                                                |
+| `uiExports/injectedVars` / `chrome.getInjected`       | [Configure plugin](#configure-plugin) and [`PluginConfigDescriptor.exposeToBrowser`](/docs/development/core/server/kibana-plugin-core-server.pluginconfigdescriptor.exposetobrowser.md)         | Can only be used to expose configuration properties                                                                                            |
 
-_See also: [Public's CoreStart API Docs](/docs/development/core/public/kibana-plugin-public.corestart.md)_
+_See also: [Public's CoreStart API Docs](/docs/development/core/public/kibana-plugin-core-public.corestart.md)_
 
 ##### Plugins for shared application services
 
-In client code, we have a series of plugins which house shared application services that are being built in the shape of the new platform, but for the time being, are only available in legacy. So if your plugin depends on any of the APIs below, you'll need build your plugin as a legacy plugin that shims the new platform. Once these API's have been moved to the new platform you can migrate your plugin and declare a dependency on the plugin that owns the API's you require.
+In client code, we have a series of plugins which house shared application services which are not technically part of `core`, but are often used in Kibana plugins.
 
-The contracts for these plugins are exposed for you to consume in your own plugin; we have created dedicated exports for the `setup` and `start` contracts in a file called `legacy`. By passing these contracts to your plugin's `setup` and `start` methods, you can mimic the functionality that will eventually be provided in the new platform.
+This table maps some of the most commonly used legacy items to their new platform locations.
 
 ```ts
-import { setup, start } from '../core_plugins/data/public/legacy';
-import { setup, start } from '../core_plugins/embeddables/public/legacy';
-import { setup, start } from '../core_plugins/visualizations/public/legacy';
+import { npStart: { plugins } } from 'ui/new_platform';
 ```
 
-| Legacy Platform                                   | New Platform                                                 | Notes                                                                                                                                                        |
-| ------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `import 'ui/apply_filters'`                       | N/A. Replaced by triggering an APPLY_FILTER_TRIGGER trigger.       | Directive is deprecated.                                                                                 |
-| `import 'ui/filter_bar'`                          | `import { FilterBar } from '../data/public'`                 | Directive is deprecated.                                                                                   |
-| `import 'ui/query_bar'`                           | `import { QueryStringInput } from '../data/public'`          | Directives are deprecated.                                                                                                                                             |
-| `import 'ui/search_bar'`                          | `import { SearchBar } from '../data/public'`                 | Directive is deprecated.                                                                                                                                     |
-| `import 'ui/kbn_top_nav'`                         | `import { TopNavMenu } from '../navigation/public'`          | Directive is still available in `ui/kbn_top_nav`.                                                                                                            |
-| `ui/saved_objects/components/saved_object_finder` | `import { SavedObjectFinder } from '../kibana_react/public'` |                                                                                                                                                              |
-| `core_plugins/interpreter`                        | `data.expressions`                                           | still in progress                                                                                                                                            |
-| `ui/courier`                                      | `data.search`                                                | still in progress                                                                                                                                            |
-| `ui/embeddable`                                   | `embeddables`                                                | still in progress                                                                                                                                            |
-| `ui/filter_manager`                               | `data.filter`                                                | --                                                                                                                                                           |
-| `ui/index_patterns`                               | `data.indexPatterns`                                         | still in progress                                                                                                                                            |
-| `ui/registry/feature_catalogue`                   | `home.featureCatalogue.register`                             | Must add `home` as a dependency in your kibana.json.                                                                                            |
-| `ui/registry/vis_types`                           | `visualizations.types`                                       | --                                                                                                                                                           |
-| `ui/vis`                                          | `visualizations.types`                                       | --                                                                                                                                                           |
-| `ui/share`                                        | `share`                                                      | `showShareContextMenu` is now called `toggleShareContextMenu`, `ShareContextMenuExtensionsRegistryProvider` is now called `register`                         |
-| `ui/vis/vis_factory`                              | `visualizations.types`                                       | --                                                                                                                                                           |
-| `ui/vis/vis_filters`                              | `visualizations.filters`                                     | --                                                                                                                                                           |
-| `ui/utils/parse_es_interval`                      | `import { parseEsInterval } from '../data/public'`           | `parseEsInterval`, `ParsedInterval`, `InvalidEsCalendarIntervalError`, `InvalidEsIntervalFormatError` items were moved to the `Data Plugin` as a static code |
+| Legacy Platform                                   | New Platform                                                 | Notes                                                                                                                                |
+| ------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `import 'ui/apply_filters'`                       | N/A. Replaced by triggering an APPLY_FILTER_TRIGGER trigger. | Directive is deprecated.                                                                                                             |
+| `import 'ui/filter_bar'`                          | `import { FilterBar } from '../data/public'`                 | Directive is deprecated.                                                                                                             |
+| `import 'ui/query_bar'`                           | `import { QueryStringInput } from '../data/public'`          | Directives are deprecated.                                                                                                           |
+| `import 'ui/search_bar'`                          | `import { SearchBar } from '../data/public'`                 | Directive is deprecated.                                                                                                             |
+| `import 'ui/kbn_top_nav'`                         | `import { TopNavMenu } from '../navigation/public'`          | Directive was moved to `src/plugins/kibana_legacy`.                                                                                    |
+| `ui/saved_objects/components/saved_object_finder` | `import { SavedObjectFinder } from '../saved_objects/public'` |                                                                                                                                      |
+| `core_plugins/interpreter`                        | `plugins.data.expressions`                                           |
+| `ui/courier`                                      | `plugins.data.search`                                                |
+| `ui/agg_types`                                    | `plugins.data.search.aggs`                                           | Most code is available for static import. Stateful code is part of the `search` service.
+| `ui/embeddable`                                   | `plugins.embeddables`                                                |
+| `ui/filter_manager`                               | `plugins.data.filter`                                                | --                                                                                                                                   |
+| `ui/index_patterns`                               | `plugins.data.indexPatterns`                                         |
+| `import 'ui/management'`                          | `plugins.management.sections`                                        |                                                                                                                                      |
+| `ui/registry/field_formats`                       | `plugins.data.fieldFormats`                                          |                                                                                                                                      |
+| `ui/registry/feature_catalogue`                   | `plugins.home.featureCatalogue.register`                             | Must add `home` as a dependency in your kibana.json.                                                                                 |
+| `ui/registry/vis_types`                           | `plugins.visualizations`                                       | --                                                                                                                                   |
+| `ui/vis`                                          | `plugins.visualizations`                                       | --                                                                                                                                   |
+| `ui/share`                                        | `plugins.share`                                                      | `showShareContextMenu` is now called `toggleShareContextMenu`, `ShareContextMenuExtensionsRegistryProvider` is now called `register` |
+| `ui/vis/vis_factory`                              | `plugins.visualizations`                                       | --                                                                                                                                   |
+| `ui/vis/vis_filters`                              | `plugins.visualizations.filters`                                     | --                                                                                                                                   |
+| `ui/utils/parse_es_interval`                      | `import { search: { aggs: { parseEsInterval } } } from '../data/public'`           | `parseEsInterval`, `ParsedInterval`, `InvalidEsCalendarIntervalError`, `InvalidEsIntervalFormatError` items were moved to the `Data Plugin` as a static code |
 
 #### Server-side
 
@@ -1218,16 +1255,35 @@ import { setup, start } from '../core_plugins/visualizations/public/legacy';
 
 In server code, `core` can be accessed from either `server.newPlatform` or `kbnServer.newPlatform`. There are not currently very many services available on the server-side:
 
-| Legacy Platform                                    | New Platform                                                                                                                      | Notes                                                                       |
-| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `server.config()`                                  | [`initializerContext.config.create()`](/docs/development/core/server/kibana-plugin-server.plugininitializercontext.config.md)     | Must also define schema. See _[how to configure plugin](#configure-plugin)_ |
-| `server.route`                                     | [`core.http.createRouter`](/docs/development/core/server/kibana-plugin-server.httpservicesetup.createrouter.md)                   | [Examples](./MIGRATION_EXAMPLES.md#route-registration)                      |
-| `request.getBasePath()`                            | [`core.http.basePath.get`](/docs/development/core/server/kibana-plugin-server.httpservicesetup.basepath.md)                       |                                                                             |
-| `server.plugins.elasticsearch.getCluster('data')`  | [`core.elasticsearch.dataClient$`](/docs/development/core/server/kibana-plugin-server.elasticsearchservicesetup.dataclient_.md)   | Handlers will also include a pre-configured client                          |
-| `server.plugins.elasticsearch.getCluster('admin')` | [`core.elasticsearch.adminClient$`](/docs/development/core/server/kibana-plugin-server.elasticsearchservicesetup.adminclient_.md) | Handlers will also include a pre-configured client                          |
-| `xpackMainPlugin.info.feature(pluginID).registerLicenseCheckResultsGenerator` | [`x-pack licensing plugin`](/x-pack/plugins/licensing/README.md) | |
+| Legacy Platform                                                               | New Platform                                                                                                                                                                                                                                                                                                          | Notes                                                                       |
+| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `server.config()`                                                             | [`initializerContext.config.create()`](/docs/development/core/server/kibana-plugin-core-server.plugininitializercontext.config.md)                                                                                                                                                                                    | Must also define schema. See _[how to configure plugin](#configure-plugin)_ |
+| `server.route`                                                                | [`core.http.createRouter`](/docs/development/core/server/kibana-plugin-core-server.httpservicesetup.createrouter.md)                                                                                                                                                                                                  | [Examples](./MIGRATION_EXAMPLES.md#route-registration)                      |
+| `server.renderApp()`                                                          | [`response.renderCoreApp()`](docs/development/core/server/kibana-plugin-core-server.httpresourcesservicetoolkit.rendercoreapp.md)                                                                                                                                                                                     | [Examples](./MIGRATION_EXAMPLES.md#render-html-content)                     |
+| `server.renderAppWithDefaultConfig()`                                         | [`response.renderAnonymousCoreApp()`](docs/development/core/server/kibana-plugin-core-server.httpresourcesservicetoolkit.renderanonymouscoreapp.md)                                                                                                                                                                   | [Examples](./MIGRATION_EXAMPLES.md#render-html-content)                     |
+| `request.getBasePath()`                                                       | [`core.http.basePath.get`](/docs/development/core/server/kibana-plugin-core-server.httpservicesetup.basepath.md)                                                                                                                                                                                                      |                                                                             |
+| `server.plugins.elasticsearch.getCluster('data')`                             | [`context.core.elasticsearch.dataClient`](/docs/development/core/server/kibana-plugin-core-server.iscopedclusterclient.md)                                                                                                                                                                                            |                                                                             |
+| `server.plugins.elasticsearch.getCluster('admin')`                            | [`context.core.elasticsearch.adminClient`](/docs/development/core/server/kibana-plugin-core-server.iscopedclusterclient.md)                                                                                                                                                                                           |                                                                             |
+| `server.plugins.elasticsearch.createCluster(...)`                             | [`core.elasticsearch.legacy.createClient`](/docs/development/core/server/kibana-plugin-core-server.elasticsearchservicestart.legacy.md)                                                                                                                                                                               |                                                                             |
+| `server.savedObjects.setScopedSavedObjectsClientFactory`                      | [`core.savedObjects.setClientFactoryProvider`](/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.setclientfactoryprovider.md)                                                                                                                                                          |                                                                             |
+| `server.savedObjects.addScopedSavedObjectsClientWrapperFactory`               | [`core.savedObjects.addClientWrapper`](/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.addclientwrapper.md)                                                                                                                                                                          |                                                                             |
+| `server.savedObjects.getSavedObjectsRepository`                               | [`core.savedObjects.createInternalRepository`](/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicestart.createinternalrepository.md) [`core.savedObjects.createScopedRepository`](/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicestart.createscopedrepository.md) |                                                                             |
+| `server.savedObjects.getScopedSavedObjectsClient`                             | [`core.savedObjects.getScopedClient`](/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicestart.getscopedclient.md)                                                                                                                                                                            |                                                                             |
+| `request.getSavedObjectsClient`                                               | [`context.core.savedObjects.client`](/docs/development/core/server/kibana-plugin-core-server.requesthandlercontext.core.md)                                                                                                                                                                                           |                                                                             |
+| `request.getUiSettingsService`                                                | [`context.core.uiSettings.client`](/docs/development/core/server/kibana-plugin-core-server.iuisettingsclient.md)                                                                                                                                                                                                      |                                                                             |
+| `kibana.Plugin.deprecations`                                                  | [Handle plugin configuration deprecations](#handle-plugin-config-deprecations) and [`PluginConfigDescriptor.deprecations`](docs/development/core/server/kibana-plugin-core-server.pluginconfigdescriptor.md)                                                                                                          | Deprecations from New Platform are not applied to legacy configuration      |
+| `kibana.Plugin.savedObjectSchemas`                                            | [`core.savedObjects.registerType`](docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md)                                                                                                                                                                                   | [Examples](./MIGRATION_EXAMPLES.md#saved-objects-types)                     |
+| `kibana.Plugin.mappings`                                                      | [`core.savedObjects.registerType`](docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md)                                                                                                                                                                                   | [Examples](./MIGRATION_EXAMPLES.md#saved-objects-types)                     |
+| `kibana.Plugin.migrations`                                                    | [`core.savedObjects.registerType`](docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md)                                                                                                                                                                                   | [Examples](./MIGRATION_EXAMPLES.md#saved-objects-types)                     |
+| `kibana.Plugin.savedObjectsManagement`                                        | [`core.savedObjects.registerType`](docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md)                                                                                                                                                                                   | [Examples](./MIGRATION_EXAMPLES.md#saved-objects-types)                     |
 
-_See also: [Server's CoreSetup API Docs](/docs/development/core/server/kibana-plugin-server.coresetup.md)_
+_See also: [Server's CoreSetup API Docs](/docs/development/core/server/kibana-plugin-core-server.coresetup.md)_
+
+##### Plugin services
+| Legacy Platform                                                                    | New Platform                                                                   | Notes |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ----- |
+| `server.plugins.xpack_main.registerFeature`                                        | [`plugins.features.registerFeature`](x-pack/plugins/features/server/plugin.ts) |       |
+| `server.plugins.xpack_main.feature(pluginID).registerLicenseCheckResultsGenerator` | [`x-pack licensing plugin`](/x-pack/plugins/licensing/README.md)               |       |
 
 #### UI Exports
 
@@ -1238,24 +1294,24 @@ This table shows where these uiExports have moved to in the New Platform. In mos
 | Legacy Platform              | New Platform                                                                                                              | Notes                                                                                                                                 |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `aliases`                    |                                                                                                                           |                                                                                                                                       |
-| `app`                        | [`core.application.register`](/docs/development/core/public/kibana-plugin-public.applicationsetup.register.md)            |                                                                                                                                       |
+| `app`                        | [`core.application.register`](/docs/development/core/public/kibana-plugin-core-public.applicationsetup.register.md)            |                                                                                                                                       |
 | `canvas`                     |                                                                                                                           | Should be an API on the canvas plugin.                                                                                                |
-| `chromeNavControls`          | [`core.chrome.navControls.register{Left,Right}`](/docs/development/core/public/kibana-plugin-public.chromenavcontrols.md) |                                                                                                                                       |
+| `chromeNavControls`          | [`core.chrome.navControls.register{Left,Right}`](/docs/development/core/public/kibana-plugin-core-public.chromenavcontrols.md) |                                                                                                                                       |
 | `contextMenuActions`         |                                                                                                                           | Should be an API on the devTools plugin.                                                                                              |
 | `devTools`                   |                                                                                                                           |                                                                                                                                       |
-| `docViews`                   |                                                                                                                           |                                                                                                                                       |
+| `docViews`                   | [`plugins.discover.docViews.addDocView`](./src/plugins/discover/public/doc_views)                                         | Should be an API on the discover plugin.                                                                                              |
 | `embeddableActions`          |                                                                                                                           | Should be an API on the embeddables plugin.                                                                                           |
 | `embeddableFactories`        |                                                                                                                           | Should be an API on the embeddables plugin.                                                                                           |
-| `fieldFormatEditors`         |                                                                                                                           |                                                                                                                                       |
-| `fieldFormats`               |                                                                                                                           |                                                                                                                                       |
+| `fieldFormatEditors`         |                                                                                                                          |                                                                                                                                        |
+| `fieldFormats`               | [`plugins.data.fieldFormats`](./src/plugins/data/public/field_formats)                                                                                                                                                                                            |                                                                                                                                       |
 | `hacks`                      | n/a                                                                                                                       | Just run the code in your plugin's `start` method.                                                                                    |
-| `home`                       | [`plugins.home.featureCatalogue.register`](./src/plugins/home/public/feature_catalogue)                                                    | Must add `home` as a dependency in your kibana.json.                                                                     |
+| `home`                       | [`plugins.home.featureCatalogue.register`](./src/plugins/home/public/feature_catalogue)                                   | Must add `home` as a dependency in your kibana.json.                                                                                  |
 | `indexManagement`            |                                                                                                                           | Should be an API on the indexManagement plugin.                                                                                       |
 | `injectDefaultVars`          | n/a                                                                                                                       | Plugins will only be able to "whitelist" config values for the frontend. See [#41990](https://github.com/elastic/kibana/issues/41990) |
 | `inspectorViews`             |                                                                                                                           | Should be an API on the data (?) plugin.                                                                                              |
 | `interpreter`                |                                                                                                                           | Should be an API on the interpreter plugin.                                                                                           |
 | `links`                      | n/a                                                                                                                       | Not necessary, just register your app via `core.application.register`                                                                 |
-| `managementSections`         | [`plugins.management.sections.register`](/rfcs/text/0006_management_section_service.md)                                   | API finalized, implementation in progress.                                                                                            |
+| `managementSections`         | [`plugins.management.sections.register`](/rfcs/text/0006_management_section_service.md)                                   |                                                                                                                                       |
 | `mappings`                   |                                                                                                                           | Part of SavedObjects, see [#33587](https://github.com/elastic/kibana/issues/33587)                                                    |
 | `migrations`                 |                                                                                                                           | Part of SavedObjects, see [#33587](https://github.com/elastic/kibana/issues/33587)                                                    |
 | `navbarExtensions`           | n/a                                                                                                                       | Deprecated                                                                                                                            |
@@ -1266,48 +1322,27 @@ This table shows where these uiExports have moved to in the New Platform. In mos
 | `shareContextMenuExtensions` |                                                                                                                           |                                                                                                                                       |
 | `styleSheetPaths`            |                                                                                                                           |                                                                                                                                       |
 | `taskDefinitions`            |                                                                                                                           | Should be an API on the taskManager plugin.                                                                                           |
-| `uiCapabilities`             | [`core.application.register`](/docs/development/core/public/kibana-plugin-public.applicationsetup.register.md)            |                                                                                                                                       |
-| `uiSettingDefaults`          | [`core.uiSettings.register`](/docs/development/core/server/kibana-plugin-server.uisettingsservicesetup.md) |                                                                    |
+| `uiCapabilities`             | [`core.application.register`](/docs/development/core/public/kibana-plugin-core-public.applicationsetup.register.md)            |                                                                                                                                       |
+| `uiSettingDefaults`          | [`core.uiSettings.register`](/docs/development/core/server/kibana-plugin-core-server.uisettingsservicesetup.md)                |                                                                                                                                       |
 | `validations`                |                                                                                                                           | Part of SavedObjects, see [#33587](https://github.com/elastic/kibana/issues/33587)                                                    |
 | `visEditorTypes`             |                                                                                                                           |                                                                                                                                       |
 | `visTypeEnhancers`           |                                                                                                                           |                                                                                                                                       |
-| `visTypes`                   |                                                                                                                           |                                                                                                                                       |
+| `visTypes`                   | `plugins.visualizations.types`                                                                                                                          |                                                                                                                                       |
 | `visualize`                  |                                                                                                                           |                                                                                                                                       |
 
-Examples:
-
-- **uiSettingDefaults**
-
-Before:
-
-```js
-uiExports: {
-  uiSettingDefaults: {
-    'my-plugin:my-setting': {
-      name: 'just-work',
-      value: true,
-      description: 'make it work',
-      category: ['my-category'],
-    },
-  }
-}
-```
-
-After:
-
-```ts
-// src/plugins/my-plugin/server/plugin.ts
-setup(core: CoreSetup){
-  core.uiSettings.register({
-    'my-plugin:my-setting': {
-      name: 'just-work',
-      value: true,
-      description: 'make it work',
-      category: ['my-category'],
-    },
-  })
-}
-```
+#### Plugin Spec
+| Legacy Platform               | New Platform                                                                                                |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `id`                          | [`manifest.id`](/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md)                  |
+| `require`                     | [`manifest.requiredPlugins`](/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md)     |
+| `version`                     | [`manifest.version`](/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md)             |
+| `kibanaVersion`               | [`manifest.kibanaVersion`](/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md)       |
+| `configPrefix`                | [`manifest.configPath`](/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md)          |
+| `config`                      | [export config](#configure-plugin)                                                                          |
+| `deprecations`                | [export config](#handle-plugin-configuration-deprecations)                                                  |
+| `uiExports`                   | `N/A`. Use platform & plugin public contracts                                                               |
+| `publicDir`                   | `N/A`. Platform serves static assets from `/public/assets` folder under `/plugins/{id}/assets/{path*}` URL. |
+| `preInit`, `init`, `postInit` | `N/A`. Use NP [lifecycle events](#services)                                                                 |
 
 ## How to
 
@@ -1395,6 +1430,115 @@ All plugins are considered enabled by default. If you want to disable your plugi
 export const config = {
   schema: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
 };
+```
+
+#### Handle plugin configuration deprecations
+
+If your plugin have deprecated properties, you can describe them using the  `deprecations` config descriptor field.
+
+The system is quite similar to the legacy plugin's deprecation management. The most important difference
+is that deprecations are managed on a per-plugin basis, meaning that you don't need to specify the whole
+property path, but use the relative path from your plugin's configuration root.
+
+```typescript
+// my_plugin/server/index.ts
+import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from 'kibana/server';
+
+const configSchema = schema.object({
+  newProperty: schema.string({ defaultValue: 'Some string' }),
+});
+
+type ConfigType = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<ConfigType> = {
+  schema: configSchema,
+  deprecations: ({ rename, unused }) => [
+    rename('oldProperty', 'newProperty'),
+    unused('someUnusedProperty'),
+  ]
+};
+```
+
+In some cases, accessing the whole configuration for deprecations is necessary. For these edge cases,
+`renameFromRoot` and `unusedFromRoot` are also accessible when declaring deprecations.
+
+```typescript
+// my_plugin/server/index.ts
+export const config: PluginConfigDescriptor<ConfigType> = {
+  schema: configSchema,
+  deprecations: ({ renameFromRoot, unusedFromRoot }) => [
+    renameFromRoot('oldplugin.property', 'myplugin.property'),
+    unusedFromRoot('oldplugin.deprecated'),
+  ]
+};
+```
+
+Note that deprecations registered in new platform's plugins are not applied to the legacy configuration.
+During migration, if you still need the deprecations to be effective in the legacy plugin, you need to declare them in
+both plugin definitions.
+
+### Use scoped services
+Whenever Kibana needs to get access to data saved in elasticsearch, it should perform a check whether an end-user has access to the data.
+In the legacy platform, Kibana requires to bind elasticsearch related API with an incoming request to access elasticsearch service on behalf of a user.
+```js
+  async function handler(req, res) {
+    const dataCluster = server.plugins.elasticsearch.getCluster('data');
+    const data = await dataCluster.callWithRequest(req, 'ping');
+  }
+```
+
+The new platform introduced [a handler interface](/rfcs/text/0003_handler_interface.md) on the server-side to perform that association internally. Core services, that require impersonation with an incoming request, are
+exposed via `context` argument of [the request handler interface.](/docs/development/core/server/kibana-plugin-core-server.requesthandler.md)
+The above example looks in the new platform as
+```js
+  async function handler(context, req, res) {
+    const data = await context.core.elasticsearch.adminClient.callAsInternalUser('ping')
+  }
+```
+
+The [request handler context](/docs/development/core/server/kibana-plugin-core-server.requesthandlercontext.md) exposed the next scoped **core** services:
+
+| Legacy Platform                                     | New Platform                                                                                                            |
+| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `request.getSavedObjectsClient`                     | [`context.savedObjects.client`](/docs/development/core/server/kibana-plugin-core-server.savedobjectsclient.md)          |
+| `server.plugins.elasticsearch.getCluster('admin')`  | [`context.elasticsearch.adminClient`](/docs/development/core/server/kibana-plugin-core-server.iscopedclusterclient.md)  |
+| `server.plugins.elasticsearch.getCluster('data')`   | [`context.elasticsearch.dataClient`](/docs/development/core/server/kibana-plugin-core-server.iscopedclusterclient.md)   |
+| `request.getUiSettingsService`                      | [`context.uiSettings.client`](/docs/development/core/server/kibana-plugin-core-server.iuisettingsclient.md)             |
+
+#### Declare a custom scoped service
+Plugins can extend the handler context with custom API that will be available to the plugin itself and all dependent plugins.
+For example, the plugin creates a custom elasticsearch client and want to use it via the request handler context:
+
+```ts
+import { CoreSetup, IScopedClusterClient } from 'kibana/server';
+
+export interface MyPluginContext {
+  client: IScopedClusterClient;
+}
+
+// extend RequestHandlerContext when a dependent plugin imports MyPluginContext from the file
+declare module 'src/core/server' {
+  interface RequestHandlerContext {
+    myPlugin?: MyPluginContext;
+  }
+}
+
+class Plugin {
+  setup(core: CoreSetup) {
+    const client = core.elasticsearch.createClient('myClient');
+    core.http.registerRouteHandlerContext('myPlugin', (context, req, res) => {
+      return { client: client.asScoped(req) };
+    });
+
+    router.get(
+      { path: '/api/my-plugin/', validate },
+      async (context, req, res) => {
+        const data = await context.myPlugin.client.callAsCurrentUser('endpoint');
+        ...
+      }
+    );
+  }
 ```
 
 ### Mock new platform services in tests
@@ -1534,3 +1678,34 @@ class MyPlugin {
 It's not currently possible to use a similar pattern on the client-side.
 Because Legacy platform plugins heavily rely on global angular modules, which aren't available on the new platform.
 So you can utilize the same approach for only *stateless Angular components*, as long as they are not consumed by a New Platform application. When New Platform applications are on the page, no legacy code is executed, so the `registerLegacyAPI` function would not be called.
+
+### Updates an application navlink at runtime
+
+The application API now provides a way to updates some of a registered application's properties after registration.
+
+```typescript
+// inside your plugin's setup function
+export class MyPlugin implements Plugin {
+  private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  setup({ application }) {
+    application.register({
+      id: 'my-app',
+      title: 'My App',
+      updater$: this.appUpdater,
+      async mount(params) {
+        const { renderApp } = await import('./application');
+        return renderApp(params);
+      },
+    });
+  }
+  start() {
+     // later, when the navlink needs to be updated
+     appUpdater.next(() => {
+       navLinkStatus: AppNavLinkStatus.disabled,
+       tooltip: 'Application disabled',
+     })
+  }
+```
+
+### Logging config migration
+[Read](./server/logging/README.md#logging-config-migration)

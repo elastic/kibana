@@ -17,10 +17,10 @@
  * under the License.
  */
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { esKuery } from '../../../../../../plugins/data/server';
+import { esKuery, KueryNode } from '../../../../../../plugins/data/server';
 
 import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
-import { SavedObjectsSchema } from '../../../schema';
+import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
 
 /**
  * Gets the types based on the type. Uses mappings to support
@@ -61,19 +61,31 @@ function getFieldsForTypes(types: string[], searchFields?: string[]) {
  *  Gets the clause that will filter for the type in the namespace.
  *  Some types are namespace agnostic, so they must be treated differently.
  */
-function getClauseForType(schema: SavedObjectsSchema, namespace: string | undefined, type: string) {
-  if (namespace && !schema.isNamespaceAgnostic(type)) {
+function getClauseForType(
+  registry: ISavedObjectTypeRegistry,
+  namespace: string | undefined,
+  type: string
+) {
+  if (registry.isMultiNamespace(type)) {
+    return {
+      bool: {
+        must: [{ term: { type } }, { term: { namespaces: namespace ?? 'default' } }],
+        must_not: [{ exists: { field: 'namespace' } }],
+      },
+    };
+  } else if (namespace && registry.isSingleNamespace(type)) {
     return {
       bool: {
         must: [{ term: { type } }, { term: { namespace } }],
+        must_not: [{ exists: { field: 'namespaces' } }],
       },
     };
   }
-
+  // isSingleNamespace in the default namespace, or isNamespaceAgnostic
   return {
     bool: {
       must: [{ term: { type } }],
-      must_not: [{ exists: { field: 'namespace' } }],
+      must_not: [{ exists: { field: 'namespace' } }, { exists: { field: 'namespaces' } }],
     },
   };
 }
@@ -85,14 +97,14 @@ interface HasReferenceQueryParams {
 
 interface QueryParams {
   mappings: IndexMapping;
-  schema: SavedObjectsSchema;
+  registry: ISavedObjectTypeRegistry;
   namespace?: string;
   type?: string | string[];
   search?: string;
   searchFields?: string[];
   defaultSearchOperator?: string;
   hasReference?: HasReferenceQueryParams;
-  kueryNode?: esKuery.KueryNode;
+  kueryNode?: KueryNode;
 }
 
 /**
@@ -100,7 +112,7 @@ interface QueryParams {
  */
 export function getQueryParams({
   mappings,
-  schema,
+  registry,
   namespace,
   type,
   search,
@@ -140,7 +152,7 @@ export function getQueryParams({
                 },
               ]
             : undefined,
-          should: types.map(shouldType => getClauseForType(schema, namespace, shouldType)),
+          should: types.map(shouldType => getClauseForType(registry, namespace, shouldType)),
           minimum_should_match: 1,
         },
       },

@@ -22,9 +22,7 @@ import sinon from 'sinon';
 import { render, mount } from 'enzyme';
 import { findTestSubject, requiredProps } from '../../test';
 
-import {
-  KuiPagerButtonGroup,
-} from './pager_button_group';
+import { KuiPagerButtonGroup } from './pager_button_group';
 
 let onNext;
 let onPrevious;
@@ -35,13 +33,15 @@ beforeEach(() => {
 });
 
 test('renders KuiPagerButtonGroup', () => {
-  const component = (<KuiPagerButtonGroup
-    onNext={onNext}
-    onPrevious={onPrevious}
-    hasNext={true}
-    hasPrevious={true}
-    {...requiredProps}
-  />);
+  const component = (
+    <KuiPagerButtonGroup
+      onNext={onNext}
+      onPrevious={onPrevious}
+      hasNext={true}
+      hasPrevious={true}
+      {...requiredProps}
+    />
+  );
   expect(render(component)).toMatchSnapshot();
 });
 
@@ -55,12 +55,14 @@ describe('property', () => {
   }
 
   test('onNext', () => {
-    const component = (<KuiPagerButtonGroup
-      onNext={onNext}
-      onPrevious={onPrevious}
-      hasNext={true}
-      hasPrevious={true}
-    />);
+    const component = (
+      <KuiPagerButtonGroup
+        onNext={onNext}
+        onPrevious={onPrevious}
+        hasNext={true}
+        hasPrevious={true}
+      />
+    );
     const pager = mount(component);
     findNextButton(pager).simulate('click');
     sinon.assert.calledOnce(onNext);
@@ -68,12 +70,14 @@ describe('property', () => {
   });
 
   test('onPrevious', () => {
-    const component = (<KuiPagerButtonGroup
-      onNext={onNext}
-      onPrevious={onPrevious}
-      hasNext={true}
-      hasPrevious={true}
-    />);
+    const component = (
+      <KuiPagerButtonGroup
+        onNext={onNext}
+        onPrevious={onPrevious}
+        hasNext={true}
+        hasPrevious={true}
+      />
+    );
     const pager = mount(component);
     findPreviousButton(pager).simulate('click');
     sinon.assert.calledOnce(onPrevious);
@@ -82,24 +86,28 @@ describe('property', () => {
 
   describe('hasNext', () => {
     test('is enabled when true', () => {
-      const component = (<KuiPagerButtonGroup
-        onNext={onNext}
-        onPrevious={onPrevious}
-        hasNext={true}
-        hasPrevious={true}
-      />);
+      const component = (
+        <KuiPagerButtonGroup
+          onNext={onNext}
+          onPrevious={onPrevious}
+          hasNext={true}
+          hasPrevious={true}
+        />
+      );
       const pager = mount(component);
       const isDisabled = findNextButton(pager).prop('disabled');
       expect(isDisabled).toBe(false);
     });
 
     test('is disabled when false', () => {
-      const component = (<KuiPagerButtonGroup
-        onNext={onNext}
-        onPrevious={onPrevious}
-        hasNext={false}
-        hasPrevious={true}
-      />);
+      const component = (
+        <KuiPagerButtonGroup
+          onNext={onNext}
+          onPrevious={onPrevious}
+          hasNext={false}
+          hasPrevious={true}
+        />
+      );
       const pager = mount(component);
       const isDisabled = findNextButton(pager).prop('disabled');
       expect(isDisabled).toBe(true);
@@ -108,24 +116,28 @@ describe('property', () => {
 
   describe('hasPrevious', () => {
     test('is enabled when true', () => {
-      const component = (<KuiPagerButtonGroup
-        onNext={onNext}
-        onPrevious={onPrevious}
-        hasNext={true}
-        hasPrevious={true}
-      />);
+      const component = (
+        <KuiPagerButtonGroup
+          onNext={onNext}
+          onPrevious={onPrevious}
+          hasNext={true}
+          hasPrevious={true}
+        />
+      );
       const pager = mount(component);
       const isDisabled = findPreviousButton(pager).prop('disabled');
       expect(isDisabled).toBe(false);
     });
 
     test('is disabled when false', () => {
-      const component = (<KuiPagerButtonGroup
-        onNext={onNext}
-        onPrevious={onPrevious}
-        hasNext={true}
-        hasPrevious={false}
-      />);
+      const component = (
+        <KuiPagerButtonGroup
+          onNext={onNext}
+          onPrevious={onPrevious}
+          hasNext={true}
+          hasPrevious={false}
+        />
+      );
       const pager = mount(component);
       const isDisabled = findPreviousButton(pager).prop('disabled');
       expect(isDisabled).toBe(true);

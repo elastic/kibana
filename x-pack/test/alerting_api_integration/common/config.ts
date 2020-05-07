@@ -5,16 +5,34 @@
  */
 
 import path from 'path';
+import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
-import { getAllExternalServiceSimulatorPaths } from './fixtures/plugins/actions';
+import { getAllExternalServiceSimulatorPaths } from './fixtures/plugins/actions_simulators/server/plugin';
 
 interface CreateTestConfigOptions {
   license: string;
   disabledPlugins?: string[];
   ssl?: boolean;
 }
+
+// test.not-enabled is specifically not enabled
+const enabledActionTypes = [
+  '.email',
+  '.index',
+  '.pagerduty',
+  '.server-log',
+  '.servicenow',
+  '.jira',
+  '.slack',
+  '.webhook',
+  'test.authorization',
+  'test.failing',
+  'test.index-record',
+  'test.noop',
+  'test.rate-limit',
+];
 
 // eslint-disable-next-line import/no-default-export
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
@@ -31,6 +49,11 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         protocol: ssl ? 'https' : 'http',
       },
     };
+    // Find all folders in ./plugins since we treat all them as plugin folder
+    const allFiles = fs.readdirSync(path.resolve(__dirname, 'fixtures', 'plugins'));
+    const plugins = allFiles.filter(file =>
+      fs.statSync(path.resolve(__dirname, 'fixtures', 'plugins', file)).isDirectory()
+    );
 
     return {
       testFiles: [require.resolve(`../${name}/tests/`)],
@@ -46,22 +69,70 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ssl,
         serverArgs: [
           `xpack.license.self_generated.type=${license}`,
-          `xpack.security.enabled=${!disabledPlugins.includes('security') && license === 'trial'}`,
+          `xpack.security.enabled=${!disabledPlugins.includes('security') &&
+            ['trial', 'basic'].includes(license)}`,
         ],
       },
       kbnTestServer: {
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
-          '--xpack.actions.enabled=true',
           `--xpack.actions.whitelistedHosts=${JSON.stringify([
             'localhost',
             'some.non.existent.com',
           ])}`,
-          '--xpack.alerting.enabled=true',
+          `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
+          '--xpack.eventLog.logEntries=true',
+          `--xpack.actions.preconfigured=${JSON.stringify([
+            {
+              id: 'my-slack1',
+              actionTypeId: '.slack',
+              name: 'Slack#xyz',
+              config: {
+                webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
+              },
+            },
+            {
+              id: 'custom-system-abc-connector',
+              actionTypeId: 'system-abc-action-type',
+              name: 'SystemABC',
+              config: {
+                xyzConfig1: 'value1',
+                xyzConfig2: 'value2',
+                listOfThings: ['a', 'b', 'c', 'd'],
+              },
+              secrets: {
+                xyzSecret1: 'credential1',
+                xyzSecret2: 'credential2',
+              },
+            },
+            {
+              id: 'preconfigured-es-index-action',
+              actionTypeId: '.index',
+              name: 'preconfigured_es_index_action',
+              config: {
+                index: 'functional-test-actions-index-preconfigured',
+                refresh: true,
+                executionTimeField: 'timestamp',
+              },
+            },
+            {
+              id: 'preconfigured.test.index-record',
+              actionTypeId: 'test.index-record',
+              name: 'Test:_Preconfigured_Index_Record',
+              config: {
+                unencrypted: 'ignored-but-required',
+              },
+              secrets: {
+                encrypted: 'this-is-also-ignored-and-also-required',
+              },
+            },
+          ])}`,
           ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
-          `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions')}`,
+          ...plugins.map(
+            pluginDir =>
+              `--plugin-path=${path.resolve(__dirname, 'fixtures', 'plugins', pluginDir)}`
+          ),
           `--server.xsrf.whitelist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [

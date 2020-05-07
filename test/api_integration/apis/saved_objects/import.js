@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import { join } from 'path';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -36,7 +36,7 @@ export default function ({ getService }) {
             .query({ overwrite: true })
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
-            .then((resp) => {
+            .then(resp => {
               expect(resp.body).to.eql({
                 success: true,
                 successCount: 3,
@@ -48,7 +48,7 @@ export default function ({ getService }) {
           await supertest
             .post('/api/saved_objects/_import')
             .expect(415)
-            .then((resp) => {
+            .then(resp => {
               expect(resp.body).to.eql({
                 statusCode: 415,
                 error: 'Unsupported Media Type',
@@ -62,7 +62,7 @@ export default function ({ getService }) {
             .post('/api/saved_objects/_import')
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
-            .then((resp) => {
+            .then(resp => {
               expect(resp.body).to.eql({
                 success: false,
                 successCount: 0,
@@ -73,7 +73,7 @@ export default function ({ getService }) {
                     title: 'logstash-*',
                     error: {
                       type: 'conflict',
-                    }
+                    },
                   },
                   {
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -81,7 +81,7 @@ export default function ({ getService }) {
                     title: 'Count of requests',
                     error: {
                       type: 'conflict',
-                    }
+                    },
                   },
                   {
                     id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
@@ -89,7 +89,7 @@ export default function ({ getService }) {
                     title: 'Requests',
                     error: {
                       type: 'conflict',
-                    }
+                    },
                   },
                 ],
               });
@@ -104,7 +104,7 @@ export default function ({ getService }) {
             })
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
-            .then((resp) => {
+            .then(resp => {
               expect(resp.body).to.eql({
                 success: true,
                 successCount: 3,
@@ -113,7 +113,10 @@ export default function ({ getService }) {
         });
 
         it('should return 200 when trying to import unsupported types', async () => {
-          const fileBuffer = Buffer.from('{"id":"1","type":"wigwags","attributes":{"title":"my title"},"references":[]}', 'utf8');
+          const fileBuffer = Buffer.from(
+            '{"id":"1","type":"wigwags","attributes":{"title":"my title"},"references":[]}',
+            'utf8'
+          );
           await supertest
             .post('/api/saved_objects/_import')
             .attach('file', fileBuffer, 'export.ndjson')
@@ -145,11 +148,11 @@ export default function ({ getService }) {
             .post('/api/saved_objects/_import')
             .attach('file', Buffer.from(fileChunks.join('\n'), 'utf8'), 'export.ndjson')
             .expect(400)
-            .then((resp) => {
+            .then(resp => {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: 'Can\'t import more than 10000 objects',
+                message: "Can't import more than 10000 objects",
               });
             });
         });
@@ -178,7 +181,7 @@ export default function ({ getService }) {
             .post('/api/saved_objects/_import')
             .attach('file', Buffer.from(objectsToImport.join('\n'), 'utf8'), 'export.ndjson')
             .expect(200)
-            .then((resp) => {
+            .then(resp => {
               expect(resp.body).to.eql({
                 success: false,
                 successCount: 0,

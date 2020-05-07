@@ -1,0 +1,61 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`overview filters action creators creates a fail action 1`] = `
+Object {
+  "payload": [Error: There was an error retrieving the overview filters],
+  "type": "FETCH_OVERVIEW_FILTERS_FAIL",
+}
+`;
+
+exports[`overview filters action creators creates a get action 1`] = `
+Object {
+  "payload": Object {
+    "dateRangeEnd": "now",
+    "dateRangeStart": "now-15m",
+    "locations": Array [
+      "fairbanks",
+      "tokyo",
+    ],
+    "ports": Array [
+      "80",
+    ],
+    "schemes": Array [
+      "http",
+      "tcp",
+    ],
+    "search": "",
+    "statusFilter": "down",
+    "tags": Array [
+      "api",
+      "dev",
+    ],
+  },
+  "type": "FETCH_OVERVIEW_FILTERS",
+}
+`;
+
+exports[`overview filters action creators creates a success action 1`] = `
+Object {
+  "payload": Object {
+    "locations": Array [
+      "fairbanks",
+      "tokyo",
+      "london",
+    ],
+    "ports": Array [
+      80,
+      443,
+    ],
+    "schemes": Array [
+      "http",
+      "tcp",
+    ],
+    "tags": Array [
+      "api",
+      "dev",
+      "prod",
+    ],
+  },
+  "type": "FETCH_OVERVIEW_FILTERS_SUCCESS",
+}
+`;

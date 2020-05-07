@@ -19,7 +19,9 @@
 
 export function cGroups(hierarchy) {
   if (!hierarchy) {
-    hierarchy = Math.random().toString(36).substring(7);
+    hierarchy = Math.random()
+      .toString(36)
+      .substring(7);
   }
 
   const cpuAcctDir = `/sys/fs/cgroup/cpuacct/${hierarchy}`;
@@ -35,14 +37,10 @@ export function cGroups(hierarchy) {
     '4:hugetlb:/',
     '3:perf_event:/',
     '2:cpu,cpuacct,cpuset:/' + hierarchy,
-    '1:name=systemd:/user.slice/user-1000.slice/session-2359.scope'
+    '1:name=systemd:/user.slice/user-1000.slice/session-2359.scope',
   ].join('\n');
 
-  const cpuStatContents = [
-    'nr_periods 0',
-    'nr_throttled 10',
-    'throttled_time 20'
-  ].join('\n');
+  const cpuStatContents = ['nr_periods 0', 'nr_throttled 10', 'throttled_time 20'].join('\n');
 
   return {
     hierarchy,
@@ -56,7 +54,7 @@ export function cGroups(hierarchy) {
       [`${cpuDir}/cpu.cfs_period_us`]: '100000',
       [`${cpuDir}/cpu.cfs_quota_us`]: '5000',
       [`${cpuDir}/cpu.stat`]: cpuStatContents,
-    }
+    },
   };
 }
 
@@ -74,7 +72,7 @@ export const setMockFiles = mockFiles => {
   _mockFiles = Object.create({});
   if (mockFiles) {
     const files = Object.keys(mockFiles);
-    for(const file of files) {
+    for (const file of files) {
       _mockFiles[file] = mockFiles[file];
     }
   }

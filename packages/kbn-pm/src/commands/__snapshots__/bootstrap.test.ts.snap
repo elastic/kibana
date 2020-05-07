@@ -31,6 +31,7 @@ Array [
         },
         "scripts": Object {},
         "targetLocation": "<repoRoot>/packages/kbn-pm/src/commands/target",
+        "version": "1.0.0",
       },
       "bar" => Project {
         "allDependencies": Object {},
@@ -52,6 +53,7 @@ Array [
           "kbn:bootstrap": "node ./bar.js",
         },
         "targetLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/target",
+        "version": "1.0.0",
       },
     },
     Map {
@@ -76,6 +78,7 @@ Array [
             "kbn:bootstrap": "node ./bar.js",
           },
           "targetLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/target",
+          "version": "1.0.0",
         },
       ],
       "bar" => Array [],
@@ -109,6 +112,7 @@ Array [
         "kbn:bootstrap": "node ./bar.js",
       },
       "targetLocation": "<repoRoot>/packages/kbn-pm/src/commands/packages/bar/target",
+      "version": "1.0.0",
     },
   ],
 ]

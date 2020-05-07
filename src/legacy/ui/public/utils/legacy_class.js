@@ -24,34 +24,33 @@ function describeConst(val) {
     writable: false,
     enumerable: false,
     configurable: false,
-    value: val
+    value: val,
   };
 }
 
 const props = {
-  inherits: describeConst(function (SuperClass) {
-
+  inherits: describeConst(function(SuperClass) {
     const prototype = Object.create(SuperClass.prototype, {
       constructor: describeConst(this),
-      superConstructor: describeConst(SuperClass)
+      superConstructor: describeConst(SuperClass),
     });
 
     Object.defineProperties(this, {
       prototype: describeConst(prototype),
-      Super: describeConst(SuperClass)
+      Super: describeConst(SuperClass),
     });
 
     return this;
-  })
+  }),
 };
 
 /**
-     * Add class-related behavior to a function, currently this
-     * only attaches an .inherits() method.
-     *
-     * @param  {Constructor} ClassConstructor - The function that should be extended
-     * @return {Constructor} - the constructor passed in;
-     */
+ * Add class-related behavior to a function, currently this
+ * only attaches an .inherits() method.
+ *
+ * @param  {Constructor} ClassConstructor - The function that should be extended
+ * @return {Constructor} - the constructor passed in;
+ */
 export function createLegacyClass(ClassConstructor) {
   return Object.defineProperties(ClassConstructor, props);
 }

@@ -7,23 +7,23 @@
 import expect from '@kbn/expect';
 import { API_BASE_PATH } from './constants';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const retry = getService('retry');
 
-  const esTransportPort = process.env.TEST_ES_TRANSPORT_PORT ? process.env.TEST_ES_TRANSPORT_PORT.split('-')[0] : '9300';
+  const esTransportPort = process.env.TEST_ES_TRANSPORT_PORT
+    ? process.env.TEST_ES_TRANSPORT_PORT.split('-')[0]
+    : '9300';
   const NODE_SEED = `localhost:${esTransportPort}`;
 
-  describe('Remote Clusters', function () {
+  describe('Remote Clusters', function() {
     this.tags(['skipCloud']);
 
     describe('Empty List', () => {
       it('should return an empty array when there are no remote clusters', async () => {
         const uri = `${API_BASE_PATH}`;
 
-        const { body } = await supertest
-          .get(uri)
-          .expect(200);
+        const { body } = await supertest.get(uri).expect(200);
 
         expect(body).to.eql([]);
       });
@@ -38,10 +38,9 @@ export default function ({ getService }) {
           .set('kbn-xsrf', 'xxx')
           .send({
             name: 'test_cluster',
-            seeds: [
-              NODE_SEED
-            ],
+            seeds: [NODE_SEED],
             skipUnavailable: true,
+            mode: 'sniff',
           })
           .expect(200);
 
@@ -58,16 +57,16 @@ export default function ({ getService }) {
           .set('kbn-xsrf', 'xxx')
           .send({
             name: 'test_cluster',
-            seeds: [
-              NODE_SEED
-            ]
+            seeds: [NODE_SEED],
+            skipUnavailable: false,
+            mode: 'sniff',
           })
           .expect(409);
 
         expect(body).to.eql({
           statusCode: 409,
           error: 'Conflict',
-          message: 'There is already a remote cluster with that name.'
+          message: 'There is already a remote cluster with that name.',
         });
       });
     });
@@ -81,19 +80,17 @@ export default function ({ getService }) {
           .set('kbn-xsrf', 'xxx')
           .send({
             skipUnavailable: false,
-            seeds: [
-              NODE_SEED
-            ],
+            seeds: [NODE_SEED],
+            mode: 'sniff',
           })
           .expect(200);
 
         expect(body).to.eql({
           name: 'test_cluster',
           skipUnavailable: 'false', // ES issue #35671
-          seeds: [
-            NODE_SEED
-          ],
+          seeds: [NODE_SEED],
           isConfiguredByNode: false,
+          mode: 'sniff',
         });
       });
     });
@@ -109,16 +106,15 @@ export default function ({ getService }) {
           expect(body).to.eql([
             {
               name: 'test_cluster',
-              seeds: [
-                NODE_SEED
-              ],
+              seeds: [NODE_SEED],
               isConnected: true,
               connectedNodesCount: 1,
               maxConnectionsPerCluster: 3,
               initialConnectTimeout: '30s',
               skipUnavailable: false,
               isConfiguredByNode: false,
-            }
+              mode: 'sniff',
+            },
           ]);
         });
       });
@@ -146,10 +142,9 @@ export default function ({ getService }) {
           .set('kbn-xsrf', 'xxx')
           .send({
             name: 'test_cluster1',
-            seeds: [
-              NODE_SEED
-            ],
+            seeds: [NODE_SEED],
             skipUnavailable: true,
+            mode: 'sniff',
           })
           .expect(200);
 
@@ -158,17 +153,16 @@ export default function ({ getService }) {
           .set('kbn-xsrf', 'xxx')
           .send({
             name: 'test_cluster2',
-            seeds: [
-              NODE_SEED
-            ],
+            seeds: [NODE_SEED],
             skipUnavailable: true,
+            mode: 'sniff',
           })
           .expect(200);
 
         const uri = `${API_BASE_PATH}/test_cluster1,test_cluster2`;
 
         const {
-          body: { itemsDeleted, errors }
+          body: { itemsDeleted, errors },
         } = await supertest
           .delete(uri)
           .set('kbn-xsrf', 'xxx')
@@ -193,23 +187,19 @@ export default function ({ getService }) {
 
         expect(body).to.eql({
           itemsDeleted: [],
-          errors: [{
-            name: 'test_cluster_doesnt_exist',
-            error: {
-              isBoom: true,
-              isServer: false,
-              data: null,
-              output: {
-                statusCode: 404,
-                payload: {
+          errors: [
+            {
+              name: 'test_cluster_doesnt_exist',
+              error: {
+                status: 404,
+                payload: { message: 'There is no remote cluster with that name.' },
+                options: {
                   statusCode: 404,
-                  error: 'Not Found',
-                  message: 'There is no remote cluster with that name.',
+                  body: { message: 'There is no remote cluster with that name.' },
                 },
-                headers: {},
               },
             },
-          }],
+          ],
         });
       });
     });

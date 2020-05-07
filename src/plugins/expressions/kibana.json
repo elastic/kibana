@@ -1,9 +1,9 @@
 {
   "id": "expressions",
   "version": "kibana",
-  "server": false,
+  "server": true,
   "ui": true,
   "requiredPlugins": [
-    "inspector"
+    "bfetch"
   ]
 }

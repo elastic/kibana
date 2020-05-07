@@ -12,7 +12,7 @@ import {
 } from 'url';
 import { getAbsoluteUrlFactory } from '../../../common/get_absolute_url';
 import { validateUrls } from '../../../common/validate_urls';
-import { ServerFacade, ConditionalHeaders } from '../../../types';
+import { ReportingConfig } from '../../../server/types';
 import { JobDocPayloadPNG } from '../../png/types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';
 
@@ -20,26 +20,27 @@ function isPngJob(job: JobDocPayloadPNG | JobDocPayloadPDF): job is JobDocPayloa
   return (job as JobDocPayloadPNG).relativeUrl !== undefined;
 }
 function isPdfJob(job: JobDocPayloadPNG | JobDocPayloadPDF): job is JobDocPayloadPDF {
-  return (job as JobDocPayloadPDF).objects !== undefined;
+  return (job as JobDocPayloadPDF).relativeUrls !== undefined;
 }
 
-export async function getFullUrls<JobDocPayloadType>({
+export function getFullUrls<JobDocPayloadType>({
+  config,
   job,
-  server,
-  ...mergeValues // pass-throughs
 }: {
+  config: ReportingConfig;
   job: JobDocPayloadPDF | JobDocPayloadPNG;
-  server: ServerFacade;
-  conditionalHeaders: ConditionalHeaders;
-  logo?: string;
 }) {
-  const config = server.config();
-
+  const [basePath, protocol, hostname, port] = [
+    config.kbnConfig.get('server', 'basePath'),
+    config.get('kibanaServer', 'protocol'),
+    config.get('kibanaServer', 'hostname'),
+    config.get('kibanaServer', 'port'),
+  ] as string[];
   const getAbsoluteUrl = getAbsoluteUrlFactory({
-    defaultBasePath: config.get('server.basePath'),
-    protocol: config.get('xpack.reporting.kibanaServer.protocol') || server.info.protocol,
-    hostname: config.get('xpack.reporting.kibanaServer.hostname') || config.get('server.host'),
-    port: config.get('xpack.reporting.kibanaServer.port') || config.get('server.port'),
+    defaultBasePath: basePath,
+    protocol,
+    hostname,
+    port,
   });
 
   // PDF and PNG job params put in the url differently
@@ -48,10 +49,10 @@ export async function getFullUrls<JobDocPayloadType>({
   if (isPngJob(job)) {
     relativeUrls = [job.relativeUrl];
   } else if (isPdfJob(job)) {
-    relativeUrls = job.objects.map(obj => obj.relativeUrl);
+    relativeUrls = job.relativeUrls;
   } else {
     throw new Error(
-      `No valid URL fields found in Job Params! Expected \`job.relativeUrl\` or \`job.objects[{ relativeUrl }]\``
+      `No valid URL fields found in Job Params! Expected \`job.relativeUrl: string\` or \`job.relativeUrls: string[]\``
     );
   }
 
@@ -96,5 +97,5 @@ export async function getFullUrls<JobDocPayloadType>({
     });
   });
 
-  return { job, server, urls, ...mergeValues };
+  return urls;
 }

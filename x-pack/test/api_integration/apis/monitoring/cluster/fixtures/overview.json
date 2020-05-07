@@ -69,7 +69,8 @@
         "nodeExists": null,
         "indexExists": null,
         "typeExists": false,
-        "typeExistsAtAnyTime": false
+        "typeExistsAtAnyTime": false,
+        "usingStructuredLogs": false
       },
       "types": []
     }

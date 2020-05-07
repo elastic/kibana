@@ -80,7 +80,7 @@ describe('#getProjects', () => {
   });
 
   test('includes additional projects in package.json', async () => {
-    const projectPaths = getProjectPaths(rootPath, {});
+    const projectPaths = getProjectPaths({ rootPath });
     const projects = await getProjects(rootPath, projectPaths);
 
     const expectedProjects = [
@@ -100,7 +100,7 @@ describe('#getProjects', () => {
   describe('with exclude/include filters', () => {
     let projectPaths: string[];
     beforeEach(() => {
-      projectPaths = getProjectPaths(rootPath, {});
+      projectPaths = getProjectPaths({ rootPath });
     });
 
     test('excludes projects specified in `exclude` filter', async () => {

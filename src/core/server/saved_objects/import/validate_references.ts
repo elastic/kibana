@@ -77,7 +77,7 @@ export async function getNonExistingReferenceAsKeys(
 }
 
 export async function validateReferences(
-  savedObjects: SavedObject[],
+  savedObjects: Array<SavedObject<{ title?: string }>>,
   savedObjectsClient: SavedObjectsClientContract,
   namespace?: string
 ) {

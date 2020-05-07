@@ -15,13 +15,11 @@ export default {
     `!**/__jest__/${RESERVED_DIR_JEST_INTEGRATION_TESTS}/**/*.test.{js,ts,tsx}`,
   ],
   testPathIgnorePatterns: config.testPathIgnorePatterns.filter(
-    (pattern) => !pattern.includes(RESERVED_DIR_JEST_INTEGRATION_TESTS)
+    pattern => !pattern.includes(RESERVED_DIR_JEST_INTEGRATION_TESTS)
   ),
   reporters: [
     'default',
     ['<rootDir>/../src/dev/jest/junit_reporter.js', { reportName: 'Jest Integration Tests' }],
   ],
-  setupFilesAfterEnv: [
-    '<rootDir>/../src/dev/jest/setup/after_env.integration.js'
-  ]
+  setupFilesAfterEnv: ['<rootDir>/../src/dev/jest/setup/after_env.integration.js'],
 };

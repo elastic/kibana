@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { modifyUrl } from './url';
+import { modifyUrl, isRelativeUrl } from './url';
 
 describe('modifyUrl()', () => {
   test('throws an error with invalid input', () => {
@@ -67,5 +67,19 @@ describe('modifyUrl()', () => {
         return parsed;
       })
     ).toEqual('mail:localhost');
+  });
+});
+
+describe('isRelativeUrl()', () => {
+  test('returns "true" for a relative URL', () => {
+    expect(isRelativeUrl('good')).toBe(true);
+    expect(isRelativeUrl('/good')).toBe(true);
+    expect(isRelativeUrl('/good/even/better')).toBe(true);
+  });
+  test('returns "false" for a non-relative URL', () => {
+    expect(isRelativeUrl('http://evil.com')).toBe(false);
+    expect(isRelativeUrl('//evil.com')).toBe(false);
+    expect(isRelativeUrl('///evil.com')).toBe(false);
+    expect(isRelativeUrl(' //evil.com')).toBe(false);
   });
 });

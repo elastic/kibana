@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DonutChartLegend applies valid props as expected 1`] = `
+<styled.div>
+  <DonutChartLegendRow
+    color="#bd271e"
+    content={23}
+    data-test-subj="xpack.uptime.snapshot.donutChart.down"
+    message="Down"
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <DonutChartLegendRow
+    color="#d3dae6"
+    content={45}
+    data-test-subj="xpack.uptime.snapshot.donutChart.up"
+    message="Up"
+  />
+</styled.div>
+`;

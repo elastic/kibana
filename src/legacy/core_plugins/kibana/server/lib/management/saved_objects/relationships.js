@@ -21,12 +21,7 @@ import { pick } from 'lodash';
 import { injectMetaAttributes } from './inject_meta_attributes';
 
 export async function findRelationships(type, id, options = {}) {
-  const {
-    size,
-    savedObjectsClient,
-    savedObjectTypes,
-    savedObjectsManagement,
-  } = options;
+  const { size, savedObjectsClient, savedObjectTypes, savedObjectsManagement } = options;
 
   const { references = [] } = await savedObjectsClient.get(type, id);
 
@@ -60,7 +55,7 @@ export async function findRelationships(type, id, options = {}) {
       .map(obj => ({
         ...obj,
         relationship: 'parent',
-      })),
+      }))
   );
 }
 

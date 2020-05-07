@@ -5,9 +5,7 @@
  */
 
 import { range } from 'lodash';
-import {
-  map as mapAsync,
-} from 'bluebird';
+import { map as mapAsync } from 'bluebird';
 
 export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
@@ -23,13 +21,12 @@ export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) 
   const SUBJ_OVERVIEW_ACTIONS = `${SUBJ_OVERVIEW_CLUSTER_ALERTS} > alertAction`;
   const SUBJ_OVERVIEW_VIEW_ALL = `${SUBJ_OVERVIEW_CLUSTER_ALERTS} > viewAllAlerts`;
 
-  const SUBJ_TABLE_BODY    = 'alertsTableContainer';
-  const SUBJ_TABLE_ICONS   = `${SUBJ_TABLE_BODY} > alertIcon`;
-  const SUBJ_TABLE_TEXTS   = `${SUBJ_TABLE_BODY} > alertText`;
+  const SUBJ_TABLE_BODY = 'alertsTableContainer';
+  const SUBJ_TABLE_ICONS = `${SUBJ_TABLE_BODY} > alertIcon`;
+  const SUBJ_TABLE_TEXTS = `${SUBJ_TABLE_BODY} > alertText`;
   const SUBJ_TABLE_ACTIONS = `${SUBJ_TABLE_BODY} > alertAction`;
 
-  return new class ClusterAlerts {
-
+  return new (class ClusterAlerts {
     /*
      * Helper function to return the testable panel listing content or table content
      */
@@ -45,8 +42,8 @@ export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) 
           {
             alertIcon: alertIcons[current],
             alertText: alertTexts[current],
-            alertAction: alertActions[current]
-          }
+            alertAction: alertActions[current],
+          },
         ];
       }, []);
     }
@@ -63,7 +60,7 @@ export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) 
       const listingRows = await this.getOverviewAlerts();
       const alertIcons = await retry.try(async () => {
         const elements = await find.allByCssSelector(SUBJ_OVERVIEW_ICONS);
-        return await mapAsync(elements, async (element) => {
+        return await mapAsync(elements, async element => {
           return await element.getVisibleText();
         });
       });
@@ -72,7 +69,7 @@ export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) 
         size: listingRows.length,
         alertIcons,
         textsSubj: SUBJ_OVERVIEW_TEXTS,
-        actionsSubj: SUBJ_OVERVIEW_ACTIONS
+        actionsSubj: SUBJ_OVERVIEW_ACTIONS,
       });
     }
 
@@ -106,7 +103,7 @@ export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) 
         size: tableRows.length,
         alertIcons,
         textsSubj: SUBJ_TABLE_TEXTS,
-        actionsSubj: SUBJ_TABLE_ACTIONS
+        actionsSubj: SUBJ_TABLE_ACTIONS,
       });
     }
 
@@ -114,7 +111,5 @@ export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) 
       const alerts = await this.getTableAlertsAll();
       return alerts[index];
     }
-
-  };
+  })();
 }
-

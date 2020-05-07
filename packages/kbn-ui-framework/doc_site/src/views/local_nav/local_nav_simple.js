@@ -31,9 +31,7 @@ export function SimpleLocalNav() {
     <KuiLocalNav>
       <KuiLocalNavRow>
         <KuiLocalNavRowSection>
-          <KuiLocalTitle>
-            Untitled Document
-          </KuiLocalTitle>
+          <KuiLocalTitle>Untitled Document</KuiLocalTitle>
         </KuiLocalNavRowSection>
         <KuiLocalNavRowSection>
           <div className="kuiLocalMenu">

@@ -5,9 +5,6 @@
     "skipLibCheck": true
   },
   "include": [
-    "index.ts",
-    "public/**/*.ts",
-    "public/**/*.tsx",
     "server/**/*.ts",
     "../../../../typings/**/*",
   ],

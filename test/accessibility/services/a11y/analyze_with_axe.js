@@ -29,7 +29,10 @@ export function analyzeWithAxe(context, options, callback) {
       // return a false report to trigger analyzeWithAxeWithClient
       return false;
     })
-    .then(result => callback({ result }), error => callback({ error }));
+    .then(
+      result => callback({ result }),
+      error => callback({ error })
+    );
 }
 
 export const analyzeWithAxeWithClient = `

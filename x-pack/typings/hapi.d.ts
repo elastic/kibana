@@ -6,11 +6,11 @@
 
 import 'hapi';
 
-import { XPackMainPlugin } from '../legacy/plugins/xpack_main/xpack_main';
+import { XPackMainPlugin } from '../legacy/plugins/xpack_main/server/xpack_main';
 import { SecurityPlugin } from '../legacy/plugins/security';
-import { ActionsPlugin, ActionsClient } from '../legacy/plugins/actions';
-import { TaskManager } from '../legacy/plugins/task_manager';
-import { AlertingPlugin, AlertsClient } from '../legacy/plugins/alerting';
+import { ActionsPlugin, ActionsClient } from '../plugins/actions/server';
+import { AlertingPlugin, AlertsClient } from '../plugins/alerting/server';
+import { TaskManager } from '../plugins/task_manager/server';
 
 declare module 'hapi' {
   interface Request {

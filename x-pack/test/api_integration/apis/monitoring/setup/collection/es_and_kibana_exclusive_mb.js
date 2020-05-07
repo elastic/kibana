@@ -7,8 +7,7 @@
 import expect from '@kbn/expect';
 import fixture from './fixtures/es_and_kibana_exclusive_mb';
 
-
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -16,7 +15,7 @@ export default function ({ getService }) {
     const archive = 'monitoring/setup/collection/es_and_kibana_exclusive_mb';
     const timeRange = {
       min: '2019-04-09T00:00:00.741Z',
-      max: '2019-04-09T23:59:59.741Z'
+      max: '2019-04-09T23:59:59.741Z',
     };
 
     before('load archive', () => {
@@ -33,7 +32,6 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange })
         .expect(200);
-
 
       expect(body).to.eql(fixture);
     });

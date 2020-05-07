@@ -29,7 +29,6 @@ describe('src/dev/build/tasks/node_extract_node_builds_task', () => {
     sandbox.restore();
   });
 
-
   it('copies downloadPath to extractDir/node.exe for windows platform', async () => {
     sandbox.stub(NodeDownloadInfoNS, 'getNodeDownloadInfo').returns({
       downloadPath: 'downloadPath',
@@ -40,11 +39,11 @@ describe('src/dev/build/tasks/node_extract_node_builds_task', () => {
     sandbox.stub(FsNS, 'untar');
 
     const platform = {
-      isWindows: () => true
+      isWindows: () => true,
     };
 
     const config = {
-      getNodePlatforms: () => [platform]
+      getNodePlatforms: () => [platform],
     };
 
     await ExtractNodeBuildsTask.run(config);
@@ -53,7 +52,11 @@ describe('src/dev/build/tasks/node_extract_node_builds_task', () => {
     sinon.assert.calledWithExactly(NodeDownloadInfoNS.getNodeDownloadInfo, config, platform);
 
     sinon.assert.calledOnce(ExtractNodeBuildsTask.copyWindows);
-    sinon.assert.calledWithExactly(ExtractNodeBuildsTask.copyWindows, 'downloadPath', resolve('extractDir/node.exe'));
+    sinon.assert.calledWithExactly(
+      ExtractNodeBuildsTask.copyWindows,
+      'downloadPath',
+      resolve('extractDir/node.exe')
+    );
 
     sinon.assert.notCalled(FsNS.untar);
   });
@@ -68,11 +71,11 @@ describe('src/dev/build/tasks/node_extract_node_builds_task', () => {
     sandbox.stub(FsNS, 'untar');
 
     const platform = {
-      isWindows: () => false
+      isWindows: () => false,
     };
 
     const config = {
-      getNodePlatforms: () => [platform]
+      getNodePlatforms: () => [platform],
     };
 
     await ExtractNodeBuildsTask.run(config);
@@ -84,7 +87,7 @@ describe('src/dev/build/tasks/node_extract_node_builds_task', () => {
 
     sinon.assert.calledOnce(FsNS.untar);
     sinon.assert.calledWithExactly(FsNS.untar, 'downloadPath', 'extractDir', {
-      strip: 1
+      strip: 1,
     });
   });
 });

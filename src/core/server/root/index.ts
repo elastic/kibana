@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { ConnectableObservable, Observable, Subscription } from 'rxjs';
+import { ConnectableObservable, Subscription } from 'rxjs';
 import { first, map, publishReplay, switchMap, tap } from 'rxjs/operators';
 
-import { Config, Env } from '../config';
+import { Env, RawConfigurationProvider } from '../config';
 import { Logger, LoggerFactory, LoggingConfigType, LoggingService } from '../logging';
 import { Server } from '../server';
 
@@ -35,19 +35,19 @@ export class Root {
   private loggingConfigSubscription?: Subscription;
 
   constructor(
-    config$: Observable<Config>,
+    rawConfigProvider: RawConfigurationProvider,
     env: Env,
     private readonly onShutdown?: (reason?: Error | string) => void
   ) {
     this.loggingService = new LoggingService();
     this.logger = this.loggingService.asLoggerFactory();
     this.log = this.logger.get('root');
-    this.server = new Server(config$, env, this.logger);
+    this.server = new Server(rawConfigProvider, env, this.logger);
   }
 
   public async setup() {
     try {
-      await this.server.setupConfigSchemas();
+      await this.server.setupCoreConfig();
       await this.setupLogging();
       this.log.debug('setting up root');
       return await this.server.setup();

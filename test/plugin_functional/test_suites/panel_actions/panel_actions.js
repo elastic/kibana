@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['dashboard']);
@@ -39,9 +39,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('Sample action appears in context menu in view mode', async () => {
-      await testSubjects.existOrFail(
-        'embeddablePanelAction-samplePanelAction'
-      );
+      await testSubjects.existOrFail('embeddablePanelAction-samplePanelAction');
     });
 
     it('Clicking sample action shows a flyout', async () => {

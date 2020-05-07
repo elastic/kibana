@@ -539,6 +539,24 @@ export function elasticsearchClientPlugin(Client: any, config: unknown, componen
   });
 
   /**
+   * Grants an API key in Elasticsearch for the current user.
+   *
+   * @param {string} type The type of grant, either "password" or "access_token"
+   * @param {string} username Required when using the "password" type
+   * @param {string} password Required when using the "password" type
+   * @param {string} access_token Required when using the "access_token" type
+   *
+   * @returns {{api_key: string}}
+   */
+  shield.grantAPIKey = ca({
+    method: 'POST',
+    needBody: true,
+    url: {
+      fmt: '/_security/api_key/grant',
+    },
+  });
+
+  /**
    * Invalidates an API key in Elasticsearch.
    *
    * @param {string} [id] An API key id.
@@ -572,5 +590,65 @@ export function elasticsearchClientPlugin(Client: any, config: unknown, componen
     url: {
       fmt: '/_security/delegate_pki',
     },
+  });
+
+  /**
+   * Retrieves all configured role mappings.
+   *
+   * @returns {{ [roleMappingName]: { enabled: boolean; roles: string[]; rules: Record<string, any>} }}
+   */
+  shield.getRoleMappings = ca({
+    method: 'GET',
+    urls: [
+      {
+        fmt: '/_security/role_mapping',
+      },
+      {
+        fmt: '/_security/role_mapping/<%=name%>',
+        req: {
+          name: {
+            type: 'string',
+            required: true,
+          },
+        },
+      },
+    ],
+  });
+
+  /**
+   * Saves the specified role mapping.
+   */
+  shield.saveRoleMapping = ca({
+    method: 'POST',
+    needBody: true,
+    urls: [
+      {
+        fmt: '/_security/role_mapping/<%=name%>',
+        req: {
+          name: {
+            type: 'string',
+            required: true,
+          },
+        },
+      },
+    ],
+  });
+
+  /**
+   * Deletes the specified role mapping.
+   */
+  shield.deleteRoleMapping = ca({
+    method: 'DELETE',
+    urls: [
+      {
+        fmt: '/_security/role_mapping/<%=name%>',
+        req: {
+          name: {
+            type: 'string',
+            required: true,
+          },
+        },
+      },
+    ],
   });
 }

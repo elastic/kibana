@@ -414,3 +414,51 @@ test('`startPlugins` only starts plugins that were setup', async () => {
     ]
   `);
 });
+
+describe('setup', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+  it('throws timeout error if "setup" was not completed in 30 sec.', async () => {
+    const plugin: PluginWrapper = createPlugin('timeout-setup');
+    jest.spyOn(plugin, 'setup').mockImplementation(() => new Promise(i => i));
+    pluginsSystem.addPlugin(plugin);
+    mockCreatePluginSetupContext.mockImplementation(() => ({}));
+
+    const promise = pluginsSystem.setupPlugins(setupDeps);
+    jest.runAllTimers();
+
+    await expect(promise).rejects.toMatchInlineSnapshot(
+      `[Error: Setup lifecycle of "timeout-setup" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.]`
+    );
+  });
+});
+
+describe('start', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+  it('throws timeout error if "start" was not completed in 30 sec.', async () => {
+    const plugin: PluginWrapper = createPlugin('timeout-start');
+    jest.spyOn(plugin, 'setup').mockResolvedValue({});
+    jest.spyOn(plugin, 'start').mockImplementation(() => new Promise(i => i));
+
+    pluginsSystem.addPlugin(plugin);
+    mockCreatePluginSetupContext.mockImplementation(() => ({}));
+    mockCreatePluginStartContext.mockImplementation(() => ({}));
+
+    await pluginsSystem.setupPlugins(setupDeps);
+    const promise = pluginsSystem.startPlugins(startDeps);
+    jest.runAllTimers();
+
+    await expect(promise).rejects.toMatchInlineSnapshot(
+      `[Error: Start lifecycle of "timeout-start" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.]`
+    );
+  });
+});

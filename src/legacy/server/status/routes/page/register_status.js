@@ -23,7 +23,7 @@ export function registerStatusPage(kbnServer, server, config) {
   const allowAnonymous = config.get('status.allowAnonymous');
   const wrapAuth = wrapAuthConfig(allowAnonymous);
 
-  server.decorate('toolkit', 'renderStatusPage', async function () {
+  server.decorate('toolkit', 'renderStatusPage', async function() {
     const app = server.getHiddenUiAppById('status_page');
     const h = this;
 
@@ -41,11 +41,13 @@ export function registerStatusPage(kbnServer, server, config) {
     }
   });
 
-  server.route(wrapAuth({
-    method: 'GET',
-    path: '/status',
-    handler(request, h) {
-      return h.renderStatusPage();
-    }
-  }));
+  server.route(
+    wrapAuth({
+      method: 'GET',
+      path: '/status',
+      handler(request, h) {
+        return h.renderStatusPage();
+      },
+    })
+  );
 }

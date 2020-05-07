@@ -52,7 +52,7 @@ export function ControlledTableWithEmptyPrompt() {
           actions={
             <KuiButtonGroup>
               <KuiLinkButton
-                icon={<KuiButtonIcon type="create"/>}
+                icon={<KuiButtonIcon type="create" />}
                 aria-label="Add a new dashboard"
                 data-test-subj="addNewDashPromptButton"
                 buttonType="primary"
@@ -62,13 +62,13 @@ export function ControlledTableWithEmptyPrompt() {
               </KuiLinkButton>
 
               <KuiLinkButton
-                icon={<KuiButtonIcon type="create"/>}
+                icon={<KuiButtonIcon type="create" />}
                 aria-label="Add a new visualization"
                 data-test-subj="addNewVizPromptButton"
                 buttonType="primary"
                 href="#"
               >
-              Add a new visualization
+                Add a new visualization
               </KuiLinkButton>
             </KuiButtonGroup>
           }

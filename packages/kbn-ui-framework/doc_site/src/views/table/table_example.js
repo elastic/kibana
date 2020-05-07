@@ -22,13 +22,7 @@
 import React from 'react';
 import { renderToHtml } from '../../services';
 
-import {
-  GuideDemo,
-  GuidePage,
-  GuideSection,
-  GuideSectionTypes,
-  GuideText,
-} from '../../components';
+import { GuideDemo, GuidePage, GuideSection, GuideSectionTypes, GuideText } from '../../components';
 
 import { Table } from './table';
 import tableSource from '!!raw-loader!./table'; // eslint-disable-line import/default
@@ -62,17 +56,18 @@ export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Table"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: tableSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: tableHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: tableSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: tableHtml,
+        },
+      ]}
     >
-      <GuideText>
-        Here&rsquo;s the basic Table. You can expand and collapse rows.
-      </GuideText>
+      <GuideText>Here&rsquo;s the basic Table. You can expand and collapse rows.</GuideText>
 
       <GuideDemo>
         <Table />
@@ -81,13 +76,16 @@ export default props => (
 
     <GuideSection
       title="Fluid Table"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: fluidTableSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: fluidTableHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: fluidTableSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: fluidTableHtml,
+        },
+      ]}
     >
       <GuideText>
         For when you want the content of a table&rsquo;s cells to determine its width.
@@ -100,13 +98,16 @@ export default props => (
 
     <GuideSection
       title="Table with MenuButtons"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: tableWithMenuButtonsSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: tableWithMenuButtonsHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: tableWithMenuButtonsSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: tableWithMenuButtonsHtml,
+        },
+      ]}
     >
       <GuideDemo>
         <TableWithMenuButtons />
@@ -115,13 +116,16 @@ export default props => (
 
     <GuideSection
       title="ListingTable"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: listingTableSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: listingTableHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: listingTableSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: listingTableHtml,
+        },
+      ]}
     >
       <GuideDemo>
         <ListingTable />
@@ -130,13 +134,16 @@ export default props => (
 
     <GuideSection
       title="ListingTable with loading items"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: listingTableLoadingItemsSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: listingTableLoadingItemsHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: listingTableLoadingItemsSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: listingTableLoadingItemsHtml,
+        },
+      ]}
     >
       <GuideDemo>
         <ListingTableLoadingItems />
@@ -145,13 +152,16 @@ export default props => (
 
     <GuideSection
       title="ListingTable with no items"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: listingTableWithNoItemsSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: listingTableWithNoItemsHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: listingTableWithNoItemsSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: listingTableWithNoItemsHtml,
+        },
+      ]}
     >
       <GuideDemo>
         <ListingTableWithNoItems />
@@ -160,13 +170,16 @@ export default props => (
 
     <GuideSection
       title="ListingTable with EmptyTablePrompt"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: listingTableWithEmptyPromptSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: listingTableWithEmptyPromptHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: listingTableWithEmptyPromptSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: listingTableWithEmptyPromptHtml,
+        },
+      ]}
     >
       <GuideDemo>
         <ListingTableWithEmptyPrompt />

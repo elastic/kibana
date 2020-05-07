@@ -75,6 +75,6 @@ export function createReduceStream(reducer, initial) {
       }
 
       callback();
-    }
+    },
   });
 }

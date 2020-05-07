@@ -33,8 +33,8 @@ describe('dev/build/lib/runner', () => {
   const log = new ToolingLog({
     level: 'verbose',
     writeTo: {
-      write: onLogLine
-    }
+      write: onLogLine,
+    },
   });
 
   const buildMatcher = sinon.match({
@@ -46,12 +46,8 @@ describe('dev/build/lib/runner', () => {
     getLogTag: sinon.match.func,
   });
 
-  const ossBuildMatcher = buildMatcher.and(
-    sinon.match(b => b.isOss(), 'is oss build')
-  );
-  const defaultBuildMatcher = buildMatcher.and(
-    sinon.match(b => !b.isOss(), 'is not oss build')
-  );
+  const ossBuildMatcher = buildMatcher.and(sinon.match(b => b.isOss(), 'is oss build'));
+  const defaultBuildMatcher = buildMatcher.and(sinon.match(b => !b.isOss(), 'is not oss build'));
 
   afterEach(() => sandbox.reset());
 
@@ -84,7 +80,7 @@ describe('dev/build/lib/runner', () => {
       config,
       log,
       buildOssDist: true,
-      buildDefaultDist: true
+      buildDefaultDist: true,
     });
 
     it('runs global task once, passing config and log', async () => {
@@ -107,7 +103,7 @@ describe('dev/build/lib/runner', () => {
     const run = createRunner({
       config,
       log,
-      buildDefaultDist: true
+      buildDefaultDist: true,
     });
 
     it('runs global task once, passing config and log', async () => {
@@ -156,10 +152,16 @@ describe('dev/build/lib/runner', () => {
 
     it('rejects, logs error, and marks error logged', async () => {
       try {
-        await run({ async run() { throw new Error('FOO'); } });
+        await run({
+          async run() {
+            throw new Error('FOO');
+          },
+        });
         throw new Error('expected run() to reject');
       } catch (error) {
-        expect(error).to.have.property('message').be('FOO');
+        expect(error)
+          .to.have.property('message')
+          .be('FOO');
         sinon.assert.calledWith(onLogLine, sinon.match(/FOO/));
         expect(isErrorLogged(error)).to.be(true);
       }
@@ -170,12 +172,14 @@ describe('dev/build/lib/runner', () => {
         await run({
           async run() {
             throw markErrorLogged(new Error('FOO'));
-          }
+          },
         });
 
         throw new Error('expected run() to reject');
       } catch (error) {
-        expect(error).to.have.property('message').be('FOO');
+        expect(error)
+          .to.have.property('message')
+          .be('FOO');
         sinon.assert.neverCalledWith(onLogLine, sinon.match(/FOO/));
         expect(isErrorLogged(error)).to.be(true);
       }

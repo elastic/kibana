@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Latest Active that latest active component renders normally 1`] = `
+<EuiBasicTable
+  columns={
+    Array [
+      Object {
+        "field": "range",
+        "name": "",
+      },
+      Object {
+        "dataType": "number",
+        "field": "count",
+        "name": "",
+      },
+    ]
+  }
+  items={
+    Array [
+      Object {
+        "count": 5,
+        "range": "Last 1 minute",
+      },
+      Object {
+        "count": 5,
+        "range": "Last 5 minutes",
+      },
+      Object {
+        "count": 5,
+        "range": "Last 20 minutes",
+      },
+      Object {
+        "count": 6,
+        "range": "Last 1 hour",
+      },
+      Object {
+        "count": 10,
+        "range": "Last 1 day",
+      },
+    ]
+  }
+  noItemsMessage="No items found"
+  responsive={true}
+  tableLayout="fixed"
+/>
+`;

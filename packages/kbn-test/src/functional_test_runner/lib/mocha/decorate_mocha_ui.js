@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { relative } from 'path';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { createAssignmentProxy } from './assignment_proxy';
 import { wrapFunction } from './wrap_function';
-import { wrapRunnableArgsWithErrorHandler } from './wrap_runnable_args';
+import { wrapRunnableArgs } from './wrap_runnable_args';
 
 export function decorateMochaUi(lifecycle, context) {
   // incremented at the start of each suite, decremented after
@@ -65,6 +66,10 @@ export function decorateMochaUi(lifecycle, context) {
             this._tags = [].concat(this._tags || [], tags);
           };
 
+          const relativeFilePath = relative(REPO_ROOT, this.file);
+          this.tags(relativeFilePath);
+          this.suiteTag = relativeFilePath; // The tag that uniquely targets this suite/file
+
           provider.call(this);
 
           after(async () => {
@@ -93,7 +98,7 @@ export function decorateMochaUi(lifecycle, context) {
   function wrapTestFunction(name, fn) {
     return wrapNonSuiteFunction(
       name,
-      wrapRunnableArgsWithErrorHandler(fn, async (err, test) => {
+      wrapRunnableArgs(fn, lifecycle, async (err, test) => {
         await lifecycle.testFailure.trigger(err, test);
       })
     );
@@ -111,7 +116,7 @@ export function decorateMochaUi(lifecycle, context) {
   function wrapTestHookFunction(name, fn) {
     return wrapNonSuiteFunction(
       name,
-      wrapRunnableArgsWithErrorHandler(fn, async (err, test) => {
+      wrapRunnableArgs(fn, lifecycle, async (err, test) => {
         await lifecycle.testHookFailure.trigger(err, test);
       })
     );

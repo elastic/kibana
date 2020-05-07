@@ -19,7 +19,7 @@
 
 require('./src/setup_node_env');
 
-module.exports = function (grunt) {
+module.exports = function(grunt) {
   // set the config once before calling load-grunt-config
   // and once during so that we have access to it via
   // grunt.config.get() within the config files
@@ -35,8 +35,8 @@ module.exports = function (grunt) {
     init: true,
     config: config,
     loadGruntTasks: {
-      pattern: ['grunt-*', '@*/grunt-*', 'gruntify-*', '@*/gruntify-*']
-    }
+      pattern: ['grunt-*', '@*/grunt-*', 'gruntify-*', '@*/gruntify-*'],
+    },
   });
 
   // load task definitions

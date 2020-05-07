@@ -27,7 +27,7 @@ export function KuiLocalNavRow({ className, children, isSecondary, ...rest }) {
   });
   return (
     <div className={classes} {...rest}>
-      { children }
+      {children}
     </div>
   );
 }

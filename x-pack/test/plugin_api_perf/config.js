@@ -8,7 +8,7 @@ import path from 'path';
 import fs from 'fs';
 import { services } from './services';
 
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const integrationConfig = await readConfigFile(require.resolve('../api_integration/config'));
 
   // Find all folders in ./plugins since we treat all them as plugin folder
@@ -39,7 +39,7 @@ export default async function ({ readConfigFile }) {
           '..',
           'plugin_api_integration',
           'plugins',
-          'task_manager'
+          'sample_task_plugin'
         )}`,
         ...plugins.map(
           pluginDir => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`

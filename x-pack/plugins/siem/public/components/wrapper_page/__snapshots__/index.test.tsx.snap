@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WrapperPage it renders 1`] = `
+<Memo(WrapperPageComponent)>
+  <p>
+    Test page
+  </p>
+</Memo(WrapperPageComponent)>
+`;
+
+exports[`WrapperPage restrict width custom max width when restrictWidth is number 1`] = `
+<Memo(WrapperPageComponent)
+  restrictWidth={600}
+>
+  <p>
+    Test page
+  </p>
+</Memo(WrapperPageComponent)>
+`;
+
+exports[`WrapperPage restrict width custom max width when restrictWidth is string 1`] = `
+<Memo(WrapperPageComponent)
+  restrictWidth="600px"
+>
+  <p>
+    Test page
+  </p>
+</Memo(WrapperPageComponent)>
+`;
+
+exports[`WrapperPage restrict width default max width when restrictWidth is true 1`] = `
+<Memo(WrapperPageComponent)
+  restrictWidth={true}
+>
+  <p>
+    Test page
+  </p>
+</Memo(WrapperPageComponent)>
+`;

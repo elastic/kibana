@@ -16,55 +16,54 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { take } from 'rxjs/operators';
 
-import _ from 'lodash';
 import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
 import { loggingServiceMock } from '../../../logging/logging_service.mock';
-import { SavedObjectsSchema } from '../../schema';
+import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { SavedObjectsType } from '../../types';
+
+const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
+  const registry = new SavedObjectTypeRegistry();
+  types.forEach(type =>
+    registry.registerType({
+      name: 'unknown',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: { properties: {} },
+      migrations: {},
+      ...type,
+    })
+  );
+  return registry;
+};
 
 describe('KibanaMigrator', () => {
   describe('getActiveMappings', () => {
     it('returns full index mappings w/ core properties', () => {
       const options = mockOptions();
-      options.savedObjectMappings = [
+      options.typeRegistry = createRegistry([
         {
-          pluginId: 'aaa',
-          properties: { amap: { type: 'text' } },
+          name: 'amap',
+          mappings: {
+            properties: { field: { type: 'text' } },
+          },
         },
         {
-          pluginId: 'bbb',
-          properties: { bmap: { type: 'text' } },
+          name: 'bmap',
+          indexPattern: 'other-index',
+          mappings: {
+            properties: { field: { type: 'text' } },
+          },
         },
-      ];
+      ]);
+
       const mappings = new KibanaMigrator(options).getActiveMappings();
       expect(mappings).toMatchSnapshot();
-    });
-
-    it('Fails if duplicate mappings are defined', () => {
-      const options = mockOptions();
-      options.savedObjectMappings = [
-        {
-          pluginId: 'aaa',
-          properties: { amap: { type: 'text' } },
-        },
-        {
-          pluginId: 'bbb',
-          properties: { amap: { type: 'long' } },
-        },
-      ];
-      expect(() => new KibanaMigrator(options).getActiveMappings()).toThrow(
-        /Plugin bbb is attempting to redefine mapping "amap"/
-      );
     });
   });
 
   describe('runMigrations', () => {
-    it('resolves isMigrated if migrations were skipped', async () => {
-      const skipMigrations = true;
-      const result = await new KibanaMigrator(mockOptions()).runMigrations(skipMigrations);
-      expect(result).toEqual([{ status: 'skipped' }, { status: 'skipped' }]);
-    });
-
     it('only runs migrations once if called multiple times', async () => {
       const options = mockOptions();
       const clusterStub = jest.fn<any, any>(() => ({ status: 404 }));
@@ -81,44 +80,67 @@ describe('KibanaMigrator', () => {
         .filter(callClusterPath => callClusterPath === 'cat.templates');
       expect(callClusterCommands.length).toBe(1);
     });
+
+    it('emits results on getMigratorResult$()', async () => {
+      const options = mockOptions();
+      const clusterStub = jest.fn<any, any>(() => ({ status: 404 }));
+
+      options.callCluster = clusterStub;
+      const migrator = new KibanaMigrator(options);
+      const migratorStatus = migrator
+        .getStatus$()
+        .pipe(take(3))
+        .toPromise();
+      await migrator.runMigrations();
+      const { status, result } = await migratorStatus;
+      expect(status).toEqual('completed');
+      expect(result![0]).toMatchObject({
+        destIndex: '.my-index_1',
+        elapsedMs: expect.any(Number),
+        sourceIndex: '.my-index',
+        status: 'migrated',
+      });
+      expect(result![1]).toMatchObject({
+        destIndex: 'other-index_1',
+        elapsedMs: expect.any(Number),
+        sourceIndex: 'other-index',
+        status: 'migrated',
+      });
+    });
   });
 });
 
-function mockOptions({ configValues }: { configValues?: any } = {}): KibanaMigratorOptions {
+function mockOptions(): KibanaMigratorOptions {
   const callCluster = jest.fn();
   return {
     logger: loggingServiceMock.create().get(),
     kibanaVersion: '8.2.3',
     savedObjectValidations: {},
-    savedObjectMigrations: {},
-    savedObjectMappings: [
+    typeRegistry: createRegistry([
       {
-        pluginId: 'testtype',
-        properties: {
-          testtype: {
-            properties: {
-              name: { type: 'keyword' },
-            },
+        name: 'testtype',
+        hidden: false,
+        namespaceType: 'single',
+        mappings: {
+          properties: {
+            name: { type: 'keyword' },
           },
         },
+        migrations: {},
       },
       {
-        pluginId: 'testtype2',
-        properties: {
-          testtype2: {
-            properties: {
-              name: { type: 'keyword' },
-            },
-          },
-        },
-      },
-    ],
-    savedObjectSchemas: new SavedObjectsSchema({
-      testtype2: {
-        isNamespaceAgnostic: false,
+        name: 'testtype2',
+        hidden: false,
+        namespaceType: 'single',
         indexPattern: 'other-index',
+        mappings: {
+          properties: {
+            name: { type: 'keyword' },
+          },
+        },
+        migrations: {},
       },
-    }),
+    ]),
     kibanaConfig: {
       enabled: true,
       index: '.my-index',
@@ -129,15 +151,6 @@ function mockOptions({ configValues }: { configValues?: any } = {}): KibanaMigra
       scrollDuration: '10m',
       skip: false,
     },
-    config: {
-      get: (name: string) => {
-        if (configValues && configValues[name]) {
-          return configValues[name];
-        } else {
-          throw new Error(`Unexpected config ${name}`);
-        }
-      },
-    } as KibanaMigratorOptions['config'],
     callCluster,
   };
 }

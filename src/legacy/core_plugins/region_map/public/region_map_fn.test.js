@@ -18,13 +18,13 @@
  */
 
 // eslint-disable-next-line
-import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
+import { functionWrapper } from '../../../../plugins/expressions/common/expression_functions/specs/tests/utils';
 import { createRegionMapFn } from './region_map_fn';
 
 jest.mock('ui/new_platform');
 
 describe('interpreter/functions#regionmap', () => {
-  const fn = functionWrapper(createRegionMapFn);
+  const fn = functionWrapper(createRegionMapFn());
   const context = {
     type: 'kibana_datatable',
     rows: [{ 'col-0-1': 0 }],
@@ -41,8 +41,8 @@ describe('interpreter/functions#regionmap', () => {
       enabled: false,
       options: {
         format: 'image/png',
-        transparent: true
-      }
+        transparent: true,
+      },
     },
     mapZoom: 2,
     mapCenter: [0, 0],
@@ -51,11 +51,11 @@ describe('interpreter/functions#regionmap', () => {
     metric: {
       accessor: 0,
       format: {
-        id: 'number'
+        id: 'number',
       },
       params: {},
-      aggType: 'count'
-    }
+      aggType: 'count',
+    },
   };
 
   it('returns an object with the correct structure', () => {

@@ -21,30 +21,30 @@ import _ from 'lodash';
 import url from 'url';
 
 /**
-* Converts a config and a pathname to a url
-* @param {object} config A url config
-*   example:
-*   {
-*      protocol: 'http',
-*      hostname: 'localhost',
-*      port: 9220,
-*      auth: kibanaTestUser.username + ':' + kibanaTestUser.password
-*   }
-* @param {object} app The params to append
-*   example:
-*   {
-*      pathname: 'app/kibana',
-*      hash: '/discover'
-*   }
-* @return {string}
-*/
+ * Converts a config and a pathname to a url
+ * @param {object} config A url config
+ *   example:
+ *   {
+ *      protocol: 'http',
+ *      hostname: 'localhost',
+ *      port: 9220,
+ *      auth: kibanaTestUser.username + ':' + kibanaTestUser.password
+ *   }
+ * @param {object} app The params to append
+ *   example:
+ *   {
+ *      pathname: 'app/kibana',
+ *      hash: '/discover'
+ *   }
+ * @return {string}
+ */
 
 export default function getUrl(config, app) {
   return url.format(_.assign({}, config, app));
 }
 
 getUrl.noAuth = function getUrlNoAuth(config, app) {
-  config = _.pick(config, function (val, param) {
+  config = _.pick(config, function(val, param) {
     return param !== 'auth';
   });
   return getUrl(config, app);

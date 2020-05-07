@@ -59,7 +59,6 @@ const defaultCoreSystemParams = {
       warnLegacyBrowsers: true,
     },
   } as any,
-  requireLegacyFiles: jest.fn(),
 };
 
 beforeEach(() => {
@@ -104,19 +103,22 @@ describe('constructor', () => {
     });
   });
 
-  it('passes requireLegacyFiles, useLegacyTestHarness, and a dom element to LegacyPlatformService', () => {
+  it('passes required params to LegacyPlatformService', () => {
     const requireLegacyFiles = { requireLegacyFiles: true };
-    const useLegacyTestHarness = { useLegacyTestHarness: true };
+    const requireLegacyBootstrapModule = { requireLegacyBootstrapModule: true };
+    const requireNewPlatformShimModule = { requireNewPlatformShimModule: true };
 
     createCoreSystem({
       requireLegacyFiles,
-      useLegacyTestHarness,
+      requireLegacyBootstrapModule,
+      requireNewPlatformShimModule,
     });
 
     expect(LegacyPlatformServiceConstructor).toHaveBeenCalledTimes(1);
     expect(LegacyPlatformServiceConstructor).toHaveBeenCalledWith({
       requireLegacyFiles,
-      useLegacyTestHarness,
+      requireLegacyBootstrapModule,
+      requireNewPlatformShimModule,
     });
   });
 
@@ -429,15 +431,14 @@ describe('Notifications targetDomElement', () => {
       rootDomElement,
     });
 
-    let targetDomElementParentInStart: HTMLElement | null;
+    let targetDomElementInStart: HTMLElement | null;
     MockNotificationsService.start.mockImplementation(({ targetDomElement }): any => {
-      expect(targetDomElement.parentElement).not.toBeNull();
-      targetDomElementParentInStart = targetDomElement.parentElement;
+      targetDomElementInStart = targetDomElement;
     });
 
     // Starting the core system should pass the targetDomElement as a child of the rootDomElement
     await core.setup();
     await core.start();
-    expect(targetDomElementParentInStart!).toBe(rootDomElement);
+    expect(targetDomElementInStart!.parentElement).toBe(rootDomElement);
   });
 });

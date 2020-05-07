@@ -35,9 +35,9 @@ export const getLifecycleMethods = (getService, getPageObjects) => {
     },
 
     async tearDown() {
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
       await security.user.delete('basic_monitoring_user');
       return esArchiver.unload(_archive);
-    }
+    },
   };
 };

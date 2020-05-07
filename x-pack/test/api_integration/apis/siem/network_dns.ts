@@ -5,12 +5,12 @@
  */
 
 import expect from '@kbn/expect';
-import { networkDnsQuery } from '../../../../legacy/plugins/siem/public/containers/network_dns/index.gql_query';
+import { networkDnsQuery } from '../../../../plugins/siem/public/containers/network_dns/index.gql_query';
 import {
   Direction,
   GetNetworkDnsQuery,
   NetworkDnsFields,
-} from '../../../../legacy/plugins/siem/public/graphql/types';
+} from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService }: FtrProviderContext) {
@@ -29,22 +29,23 @@ export default function({ getService }: FtrProviderContext) {
           .query<GetNetworkDnsQuery.Query>({
             query: networkDnsQuery,
             variables: {
-              sourceId: 'default',
-              timerange: {
-                interval: '12h',
-                to: TO,
-                from: FROM,
-              },
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              inspect: false,
               isPtrIncluded: false,
-              sort: { field: NetworkDnsFields.uniqueDomains, direction: Direction.asc },
               pagination: {
                 activePage: 0,
                 cursorStart: 0,
                 fakePossibleCount: 30,
                 querySize: 10,
               },
-              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-              inspect: false,
+              sort: { field: NetworkDnsFields.uniqueDomains, direction: Direction.asc },
+              sourceId: 'default',
+              stackByField: 'dns.question.registered_domain',
+              timerange: {
+                interval: '12h',
+                to: TO,
+                from: FROM,
+              },
             },
           })
           .then(resp => {
@@ -63,22 +64,24 @@ export default function({ getService }: FtrProviderContext) {
           .query<GetNetworkDnsQuery.Query>({
             query: networkDnsQuery,
             variables: {
-              sourceId: 'default',
-              timerange: {
-                interval: '12h',
-                to: TO,
-                from: FROM,
-              },
+              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+              isDnsHistogram: false,
+              inspect: false,
               isPtrIncluded: false,
-              sort: { field: NetworkDnsFields.uniqueDomains, direction: Direction.desc },
               pagination: {
                 activePage: 0,
                 cursorStart: 0,
                 fakePossibleCount: 30,
                 querySize: 10,
               },
-              defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-              inspect: false,
+              sourceId: 'default',
+              sort: { field: NetworkDnsFields.uniqueDomains, direction: Direction.desc },
+              stackByField: 'dns.question.registered_domain',
+              timerange: {
+                interval: '12h',
+                to: TO,
+                from: FROM,
+              },
             },
           })
           .then(resp => {

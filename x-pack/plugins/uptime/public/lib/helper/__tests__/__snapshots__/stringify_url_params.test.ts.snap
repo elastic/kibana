@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`stringifyUrlParams creates expected string value 1`] = `"?autorefreshInterval=50000&autorefreshIsPaused=false&dateRangeStart=now-15m&dateRangeEnd=now&filters=monitor.id%3A%20bar&search=monitor.id%3A%20foo&selectedPingStatus=down&statusFilter=up"`;
+
+exports[`stringifyUrlParams creates expected string value when ignore empty is true 1`] = `"?autorefreshInterval=50000&filters=monitor.id%3A%20bar"`;

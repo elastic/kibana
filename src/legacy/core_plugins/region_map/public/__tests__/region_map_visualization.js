@@ -21,16 +21,20 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import _ from 'lodash';
 import ChoroplethLayer from '../choropleth_layer';
-import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { Vis } from 'ui/vis';
 import { ImageComparator } from 'test_utils/image_comparator';
 import worldJson from './world.json';
-import EMS_CATALOGUE from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_manifest.json';
-import EMS_FILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_files.json';
-import EMS_TILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_tiles.json';
-import EMS_STYLE_ROAD_MAP_BRIGHT from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_bright';
-import EMS_STYLE_ROAD_MAP_DESATURATED from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_desaturated';
-import EMS_STYLE_DARK_MAP from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_dark';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import EMS_CATALOGUE from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_manifest.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import EMS_FILES from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_files.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import EMS_TILES from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_tiles.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import EMS_STYLE_ROAD_MAP_BRIGHT from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_style_bright';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import EMS_STYLE_ROAD_MAP_DESATURATED from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_style_desaturated';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import EMS_STYLE_DARK_MAP from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_style_dark';
 
 import initialPng from './initial.png';
 import toiso3Png from './toiso3.png';
@@ -39,19 +43,27 @@ import afterdatachangePng from './afterdatachange.png';
 import afterdatachangeandresizePng from './afterdatachangeandresize.png';
 import aftercolorchangePng from './aftercolorchange.png';
 import changestartupPng from './changestartup.png';
-import { setup as visualizationsSetup } from '../../../visualizations/public/np_ready/public/legacy';
 
 import { createRegionMapVisualization } from '../region_map_visualization';
 import { createRegionMapTypeDefinition } from '../region_map_type';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ExprVis } from '../../../../../plugins/visualizations/public/expressions/vis';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { BaseVisType } from '../../../../../plugins/visualizations/public/vis_types/base_vis_type';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { setInjectedVarFunc } from '../../../../../plugins/maps_legacy/public/kibana_services';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ServiceSettings } from '../../../../../plugins/maps_legacy/public/map/service_settings';
+import { getBaseMapsVis } from '../../../../../plugins/maps_legacy/public';
 
 const THRESHOLD = 0.45;
 const PIXEL_DIFF = 96;
 
-describe('RegionMapsVisualizationTests', function () {
+describe('RegionMapsVisualizationTests', function() {
   let domNode;
   let RegionMapsVisualization;
-  let indexPattern;
   let vis;
+  let regionMapVisType;
   let dependencies;
 
   let imageComparator;
@@ -86,36 +98,64 @@ describe('RegionMapsVisualizationTests', function () {
     ],
   };
 
-  let visRegComplete = false;
-
   beforeEach(ngMock.module('kibana'));
 
   let getManifestStub;
   beforeEach(
-    ngMock.inject((Private, $injector) => {
-      const serviceSettings = $injector.get('serviceSettings');
-      const uiSettings = $injector.get('config');
+    ngMock.inject(() => {
+      setInjectedVarFunc(injectedVar => {
+        switch (injectedVar) {
+          case 'mapConfig':
+            return {
+              emsFileApiUrl: '',
+              emsTileApiUrl: '',
+              emsLandingPageUrl: '',
+            };
+          case 'tilemapsConfig':
+            return {
+              deprecated: {
+                config: {
+                  options: {
+                    attribution: '123',
+                  },
+                },
+              },
+            };
+          case 'version':
+            return '123';
+          default:
+            return 'not found';
+        }
+      });
+      const serviceSettings = new ServiceSettings();
       const regionmapsConfig = {
         includeElasticMapsService: true,
         layers: [],
       };
+      const coreSetupMock = {
+        notifications: {
+          toasts: {},
+        },
+        uiSettings: {
+          get: () => {},
+        },
+        injectedMetadata: {
+          getInjectedVar: () => {},
+        },
+      };
+      const BaseMapsVisualization = getBaseMapsVis(coreSetupMock, serviceSettings);
 
       dependencies = {
         serviceSettings,
-        $injector,
         regionmapsConfig,
-        uiSettings,
+        uiSettings: coreSetupMock.uiSettings,
+        BaseMapsVisualization,
       };
 
-      if(!visRegComplete) {
-        visRegComplete = true;
-        visualizationsSetup.types.createBaseVisualization(createRegionMapTypeDefinition(dependencies));
-      }
-
+      regionMapVisType = new BaseVisType(createRegionMapTypeDefinition(dependencies));
       RegionMapsVisualization = createRegionMapVisualization(dependencies);
-      indexPattern = Private(LogstashIndexPatternStubProvider);
 
-      ChoroplethLayer.prototype._makeJsonAjaxCall = async function () {
+      ChoroplethLayer.prototype._makeJsonAjaxCall = async function() {
         //simulate network call
         return new Promise(resolve => {
           setTimeout(() => {
@@ -145,19 +185,19 @@ describe('RegionMapsVisualizationTests', function () {
     })
   );
 
-  afterEach(function () {
+  afterEach(function() {
     ChoroplethLayer.prototype._makeJsonAjaxCall = _makeJsonAjaxCallOld;
     getManifestStub.removeStub();
   });
 
-  describe('RegionMapVisualization - basics', function () {
-    beforeEach(async function () {
+  describe('RegionMapVisualization - basics', function() {
+    beforeEach(async function() {
       setupDOM('512px', '512px');
 
       imageComparator = new ImageComparator();
 
-      vis = new Vis(indexPattern, {
-        type: 'region_map',
+      vis = new ExprVis({
+        type: regionMapVisType,
       });
 
       vis.params.bucket = {
@@ -189,12 +229,12 @@ describe('RegionMapsVisualizationTests', function () {
       };
     });
 
-    afterEach(function () {
+    afterEach(function() {
       teardownDOM();
       imageComparator.destroy();
     });
 
-    it('should instantiate at zoom level 2 (may fail in dev env)', async function () {
+    it('should instantiate at zoom level 2 (may fail in dev env)', async function() {
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
       await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
@@ -208,7 +248,7 @@ describe('RegionMapsVisualizationTests', function () {
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('should update after resetting join field', async function () {
+    it('should update after resetting join field', async function() {
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
       await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
@@ -234,7 +274,7 @@ describe('RegionMapsVisualizationTests', function () {
       expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('should resize (may fail in dev env)', async function () {
+    it('should resize (may fail in dev env)', async function() {
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
       await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
@@ -271,7 +311,7 @@ describe('RegionMapsVisualizationTests', function () {
       expect(mismatchedPixelsAfterSecondResize).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('should redo data (may fail in dev env)', async function () {
+    it('should redo data (may fail in dev env)', async function() {
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
       await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
@@ -315,7 +355,7 @@ describe('RegionMapsVisualizationTests', function () {
       expect(mismatchedPixelsAfterDataChangeAndResize).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('should redo data and color ramp (may fail in dev env)', async function () {
+    it('should redo data and color ramp (may fail in dev env)', async function() {
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
       await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
@@ -341,7 +381,7 @@ describe('RegionMapsVisualizationTests', function () {
       expect(mismatchedPixelsAfterDataAndColorChange).to.be.lessThan(PIXEL_DIFF);
     });
 
-    it('should zoom and center elsewhere', async function () {
+    it('should zoom and center elsewhere', async function() {
       vis.params.mapZoom = 4;
       vis.params.mapCenter = [36, -85];
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);

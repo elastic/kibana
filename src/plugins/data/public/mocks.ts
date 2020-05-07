@@ -16,69 +16,63 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  FieldFormatRegisty,
-  Plugin,
-  FieldFormatsStart,
-  FieldFormatsSetup,
-  IndexPatternsContract,
-} from '.';
-import { searchSetupMock } from './search/mocks';
+
+import { Plugin, IndexPatternsContract } from '.';
+import { fieldFormatsServiceMock } from './field_formats/mocks';
+import { searchSetupMock, searchStartMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
 
 const autocompleteMock: any = {
-  addProvider: jest.fn(),
-  getProvider: jest.fn(),
-  clearProviders: jest.fn(),
-};
-
-const fieldFormatsMock: PublicMethodsOf<FieldFormatRegisty> = {
-  getByFieldType: jest.fn(),
-  getConfig: jest.fn(),
-  getDefaultConfig: jest.fn(),
-  getDefaultInstance: jest.fn() as any,
-  getDefaultInstanceCacheResolver: jest.fn(),
-  getDefaultInstancePlain: jest.fn(),
-  getDefaultType: jest.fn(),
-  getDefaultTypeName: jest.fn(),
-  getInstance: jest.fn() as any,
-  getType: jest.fn(),
-  getTypeNameByEsTypes: jest.fn(),
-  init: jest.fn(),
-  register: jest.fn(),
-  parseDefaultTypeMap: jest.fn(),
+  getValueSuggestions: jest.fn(),
+  getQuerySuggestions: jest.fn(),
+  hasQuerySuggestions: jest.fn(),
 };
 
 const createSetupContract = (): Setup => {
   const querySetupMock = queryServiceMock.createSetupContract();
-  const setupContract = {
+  return {
     autocomplete: autocompleteMock,
     search: searchSetupMock,
-    fieldFormats: fieldFormatsMock as FieldFormatsSetup,
+    fieldFormats: fieldFormatsServiceMock.createSetupContract(),
     query: querySetupMock,
   };
-
-  return setupContract;
 };
 
 const createStartContract = (): Start => {
   const queryStartMock = queryServiceMock.createStartContract();
-  const startContract = {
+  return {
+    actions: {
+      createFiltersFromValueClickAction: jest.fn().mockResolvedValue(['yes']),
+      createFiltersFromRangeSelectAction: jest.fn(),
+    },
     autocomplete: autocompleteMock,
-    getSuggestions: jest.fn(),
-    search: { search: jest.fn() },
-    fieldFormats: fieldFormatsMock as FieldFormatsStart,
+    search: searchStartMock,
+    fieldFormats: fieldFormatsServiceMock.createStartContract(),
     query: queryStartMock,
     ui: {
       IndexPatternSelect: jest.fn(),
+      SearchBar: jest.fn(),
     },
-    indexPatterns: {} as IndexPatternsContract,
+    indexPatterns: ({
+      createField: jest.fn(() => {}),
+      createFieldList: jest.fn(() => []),
+      ensureDefaultIndexPattern: jest.fn(),
+      make: () => ({
+        fieldsFetcher: {
+          fetchForWildcard: jest.fn(),
+        },
+      }),
+      get: jest.fn().mockReturnValue(Promise.resolve({})),
+      clearCache: jest.fn(),
+    } as unknown) as IndexPatternsContract,
   };
-  return startContract;
 };
+
+export { createSearchSourceMock } from './search/mocks';
+export { getCalculateAutoTimeExpression } from './search/aggs';
 
 export const dataPluginMock = {
   createSetupContract,

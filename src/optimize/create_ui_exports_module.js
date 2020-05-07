@@ -22,7 +22,7 @@ function normalizePath(path) {
   return path.replace(/[\\\/]+/g, '/');
 }
 
-export default function () {
+export default function() {
   if (!module.id.includes('?')) {
     throw new Error('create_ui_exports_module loaded without JSON args in module.id');
   }
@@ -35,6 +35,6 @@ export default function () {
     .join('\n        ');
 
   return {
-    code: `${comment}\n${requires}\n`
+    code: `${comment}\n${requires}\n`,
   };
 }

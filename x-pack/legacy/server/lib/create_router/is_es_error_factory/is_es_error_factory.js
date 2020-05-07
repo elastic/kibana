@@ -6,7 +6,7 @@
 
 import { memoize } from 'lodash';
 
-const esErrorsFactory = memoize((server) => {
+const esErrorsFactory = memoize(server => {
   return server.plugins.elasticsearch.getCluster('admin').errors;
 });
 

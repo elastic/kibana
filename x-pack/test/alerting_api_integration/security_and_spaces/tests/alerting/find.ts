@@ -59,18 +59,23 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 name: 'abc',
                 tags: ['foo'],
                 alertTypeId: 'test.noop',
-                interval: '1m',
+                consumer: 'bar',
+                schedule: { interval: '1m' },
                 enabled: true,
                 actions: [],
                 params: {},
                 createdBy: 'elastic',
                 scheduledTaskId: match.scheduledTaskId,
+                createdAt: match.createdAt,
+                updatedAt: match.updatedAt,
                 throttle: '1m',
                 updatedBy: 'elastic',
                 apiKeyOwner: 'elastic',
                 muteAll: false,
                 mutedInstanceIds: [],
               });
+              expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
+              expect(Date.parse(match.updatedAt)).to.be.greaterThan(0);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -138,7 +143,8 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 name: 'abc',
                 tags: ['foo'],
                 alertTypeId: 'test.noop',
-                interval: '1m',
+                consumer: 'bar',
+                schedule: { interval: '1m' },
                 enabled: false,
                 actions: [
                   {
@@ -152,10 +158,14 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 createdBy: 'elastic',
                 throttle: '1m',
                 updatedBy: 'elastic',
-                apiKeyOwner: 'elastic',
+                apiKeyOwner: null,
                 muteAll: false,
                 mutedInstanceIds: [],
+                createdAt: match.createdAt,
+                updatedAt: match.updatedAt,
               });
+              expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
+              expect(Date.parse(match.updatedAt)).to.be.greaterThan(0);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -192,7 +202,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 page: 1,
-                perPage: 20,
+                perPage: 10,
                 total: 0,
                 data: [],
               });

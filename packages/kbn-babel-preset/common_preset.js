@@ -37,20 +37,9 @@ const plugins = [
 ];
 
 module.exports = {
-  presets: [require.resolve('@babel/preset-typescript'), require.resolve('@babel/preset-react')],
-  plugins,
-  overrides: [
-    {
-      // Babel 7 don't support the namespace feature on typescript code.
-      // With namespaces only used for type declarations, we can securely
-      // strip them off for babel on x-pack infra/siem plugins
-      //
-      // See https://github.com/babel/babel/issues/8244#issuecomment-466548733
-      test: [
-        /x-pack[\/\\]legacy[\/\\]plugins[\/\\]infra[\/\\].*[\/\\]graphql/,
-        /x-pack[\/\\]legacy[\/\\]plugins[\/\\]siem[\/\\].*[\/\\]graphql/,
-      ],
-      plugins: [[require.resolve('babel-plugin-typescript-strip-namespaces')]],
-    },
+  presets: [
+    [require.resolve('@babel/preset-typescript'), { allowNamespaces: true }],
+    require.resolve('@babel/preset-react'),
   ],
+  plugins,
 };

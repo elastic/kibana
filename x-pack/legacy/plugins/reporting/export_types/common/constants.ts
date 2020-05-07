@@ -9,4 +9,4 @@ export const LayoutTypes = {
   PRINT: 'print',
 };
 
-export const WAITFOR_SELECTOR = '.application';
+export const DEFAULT_PAGELOAD_SELECTOR = '.application';

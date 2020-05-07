@@ -18,27 +18,23 @@
  */
 
 import { mapQueryString } from './map_query_string';
-import { esFilters } from '../../../../../common';
+import { buildQueryFilter, buildEmptyFilter, Filter } from '../../../../../common';
 
 describe('filter manager utilities', () => {
   describe('mapQueryString()', () => {
     test('should return the key and value for matching filters', async () => {
-      const filter = esFilters.buildQueryFilter(
-        { query_string: { query: 'foo:bar' } },
-        'index',
-        ''
-      );
-      const result = mapQueryString(filter as esFilters.Filter);
+      const filter = buildQueryFilter({ query_string: { query: 'foo:bar' } }, 'index', '');
+      const result = mapQueryString(filter as Filter);
 
       expect(result).toHaveProperty('key', 'query');
       expect(result).toHaveProperty('value', 'foo:bar');
     });
 
     test('should return undefined for none matching', async done => {
-      const filter = esFilters.buildEmptyFilter(true);
+      const filter = buildEmptyFilter(true);
 
       try {
-        mapQueryString(filter as esFilters.Filter);
+        mapQueryString(filter as Filter);
       } catch (e) {
         expect(e).toBe(filter);
         done();

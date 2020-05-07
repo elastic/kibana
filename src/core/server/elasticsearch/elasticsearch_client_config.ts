@@ -18,7 +18,6 @@
  */
 
 import { ConfigOptions } from 'elasticsearch';
-import { readFileSync } from 'fs';
 import { cloneDeep } from 'lodash';
 import { Duration } from 'moment';
 import { checkServerIdentity } from 'tls';
@@ -165,18 +164,12 @@ export function parseElasticsearchClientConfig(
       throw new Error(`Unknown ssl verificationMode: ${verificationMode}`);
   }
 
-  const readFile = (file: string) => readFileSync(file, 'utf8');
-  if (
-    config.ssl.certificateAuthorities !== undefined &&
-    config.ssl.certificateAuthorities.length > 0
-  ) {
-    esClientConfig.ssl.ca = config.ssl.certificateAuthorities.map(readFile);
-  }
+  esClientConfig.ssl.ca = config.ssl.certificateAuthorities;
 
   // Add client certificate and key if required by elasticsearch
   if (!ignoreCertAndKey && config.ssl.certificate && config.ssl.key) {
-    esClientConfig.ssl.cert = readFile(config.ssl.certificate);
-    esClientConfig.ssl.key = readFile(config.ssl.key);
+    esClientConfig.ssl.cert = config.ssl.certificate;
+    esClientConfig.ssl.key = config.ssl.key;
     esClientConfig.ssl.passphrase = config.ssl.keyPassphrase;
   }
 

@@ -18,41 +18,38 @@
  */
 
 import { snakeCase } from 'lodash';
-import { Logger } from 'kibana/server';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-// @ts-ignore
-import { Collector } from './collector';
-// @ts-ignore
+import { Logger, APICaller } from 'kibana/server';
+import { Collector, CollectorOptions } from './collector';
 import { UsageCollector } from './usage_collector';
 
 interface CollectorSetConfig {
   logger: Logger;
-  maximumWaitTimeForAllCollectorsInS: number;
-  collectors?: Collector[];
+  maximumWaitTimeForAllCollectorsInS?: number;
+  collectors?: Array<Collector<any, any>>;
 }
 
 export class CollectorSet {
   private _waitingForAllCollectorsTimestamp?: number;
-  private logger: Logger;
+  private readonly logger: Logger;
   private readonly maximumWaitTimeForAllCollectorsInS: number;
-  private collectors: Collector[] = [];
+  private collectors: Array<Collector<any, any>> = [];
   constructor({ logger, maximumWaitTimeForAllCollectorsInS, collectors = [] }: CollectorSetConfig) {
     this.logger = logger;
     this.collectors = collectors;
     this.maximumWaitTimeForAllCollectorsInS = maximumWaitTimeForAllCollectorsInS || 60;
   }
 
-  public makeStatsCollector = (options: any) => {
+  public makeStatsCollector = <T, U>(options: CollectorOptions<T, U>) => {
     return new Collector(this.logger, options);
   };
-  public makeUsageCollector = (options: any) => {
+  public makeUsageCollector = <T, U>(options: CollectorOptions<T, U>) => {
     return new UsageCollector(this.logger, options);
   };
 
   /*
    * @param collector {Collector} collector object
    */
-  public registerCollector = (collector: Collector) => {
+  public registerCollector = <T, U>(collector: Collector<T, U>) => {
     // check instanceof
     if (!(collector instanceof Collector)) {
       throw new Error('CollectorSet can only have Collector instances registered');
@@ -114,8 +111,8 @@ export class CollectorSet {
   };
 
   public bulkFetch = async (
-    callCluster: CallCluster,
-    collectors: Collector[] = this.collectors
+    callCluster: APICaller,
+    collectors: Array<Collector<any, any>> = this.collectors
   ) => {
     const responses = [];
     for (const collector of collectors) {
@@ -123,7 +120,7 @@ export class CollectorSet {
       try {
         responses.push({
           type: collector.type,
-          result: await collector.fetchInternal(callCluster),
+          result: await collector.fetch(callCluster),
         });
       } catch (err) {
         this.logger.warn(err);
@@ -137,25 +134,24 @@ export class CollectorSet {
   /*
    * @return {new CollectorSet}
    */
-  public getFilteredCollectorSet = (filter: any) => {
+  public getFilteredCollectorSet = (filter: (col: Collector) => boolean) => {
     const filtered = this.collectors.filter(filter);
     return this.makeCollectorSetFromArray(filtered);
   };
 
-  public bulkFetchUsage = async (callCluster: CallCluster) => {
-    const usageCollectors = this.getFilteredCollectorSet((c: any) => c instanceof UsageCollector);
+  public bulkFetchUsage = async (callCluster: APICaller) => {
+    const usageCollectors = this.getFilteredCollectorSet(c => c instanceof UsageCollector);
     return await this.bulkFetch(callCluster, usageCollectors.collectors);
   };
 
   // convert an array of fetched stats results into key/object
-  public toObject = (statsData: any) => {
-    if (!statsData) return {};
-    return statsData.reduce((accumulatedStats: any, { type, result }: any) => {
+  public toObject = <Result, T>(statsData: Array<{ type: string; result: T }> = []) => {
+    return statsData.reduce<Result>((accumulatedStats, { type, result }) => {
       return {
         ...accumulatedStats,
         [type]: result,
       };
-    }, {});
+    }, {} as Result);
   };
 
   // rename fields to use api conventions

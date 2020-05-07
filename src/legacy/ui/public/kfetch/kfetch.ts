@@ -32,6 +32,7 @@ export interface KFetchQuery {
 export interface KFetchOptions extends HttpRequestInit {
   pathname: string;
   query?: KFetchQuery;
+  asSystemRequest?: boolean;
 }
 
 export interface KFetchKibanaOptions {

@@ -17,15 +17,72 @@
  * under the License.
  */
 
+export {
+  calculateObjectHash,
+  defer,
+  Defer,
+  Get,
+  JsonArray,
+  JsonObject,
+  JsonValue,
+  of,
+  Set,
+  UiComponent,
+  UiComponentInstance,
+  url,
+  createGetterSetter,
+  defaultFeedbackMessage,
+} from '../common';
 export * from './core';
 export * from './errors';
-export * from './errors';
 export * from './field_mapping';
+export * from './field_wildcard';
 export * from './parse';
 export * from './render_complete';
 export * from './resize_checker';
-export * from './state_containers';
+export * from '../common/state_containers';
 export * from './storage';
-export * from './storage/hashed_item_store';
-export * from './state_management/state_hash';
-export * from './state_management/url';
+export { hashedItemStore, HashedItemStore } from './storage/hashed_item_store';
+export {
+  createStateHash,
+  persistState,
+  retrieveState,
+  isStateHash,
+} from './state_management/state_hash';
+export {
+  hashQuery,
+  hashUrl,
+  unhashUrl,
+  unhashQuery,
+  createUrlTracker,
+  createKbnUrlTracker,
+  createKbnUrlControls,
+  getStateFromKbnUrl,
+  getStatesFromKbnUrl,
+  setStateToKbnUrl,
+} from './state_management/url';
+export {
+  syncState,
+  syncStates,
+  createKbnUrlStateStorage,
+  createSessionStorageStateStorage,
+  IStateSyncConfig,
+  ISyncStateRef,
+  IKbnUrlStateStorage,
+  INullableBaseStateContainer,
+  ISessionStorageStateStorage,
+  StartSyncStateFnType,
+  StopSyncStateFnType,
+} from './state_sync';
+export { Configurable, CollectConfigProps } from './ui';
+export { removeQueryParam, redirectWhenMissing } from './history';
+export { applyDiff } from './state_management/utils/diff_object';
+export { createStartServicesGetter, StartServicesGetter } from './core/create_start_service_getter';
+
+/** dummy plugin, we just want kibanaUtils to have its own bundle */
+export function plugin() {
+  return new (class KibanaUtilsPlugin {
+    setup() {}
+    start() {}
+  })();
+}

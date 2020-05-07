@@ -18,12 +18,12 @@
  */
 
 import { duration } from 'moment';
-import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { createPluginInitializerContext } from './plugin_context';
 import { CoreContext } from '../core_context';
-import { Env, ObjectToConfigAdapter } from '../config';
+import { Env } from '../config';
 import { loggingServiceMock } from '../logging/logging_service.mock';
+import { rawConfigServiceMock } from '../config/raw_config_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { PluginManifest } from './types';
 import { Server } from '../server';
@@ -54,9 +54,9 @@ describe('Plugin Context', () => {
   beforeEach(async () => {
     coreId = Symbol('core');
     env = Env.createDefault(getEnvOptions());
-    const config$ = new BehaviorSubject(new ObjectToConfigAdapter({}));
+    const config$ = rawConfigServiceMock.create({ rawConfig: {} });
     server = new Server(config$, env, logger);
-    await server.setupConfigSchemas();
+    await server.setupCoreConfig();
     coreContext = { coreId, env, logger, configService: server.configService };
   });
 
@@ -75,7 +75,11 @@ describe('Plugin Context', () => {
       .pipe(first())
       .toPromise();
     expect(configObject).toStrictEqual({
-      kibana: { defaultAppId: 'home', index: '.kibana' },
+      kibana: {
+        index: '.kibana',
+        autocompleteTerminateAfter: duration(100000),
+        autocompleteTimeout: duration(1000),
+      },
       elasticsearch: {
         shardTimeout: duration(30, 's'),
         requestTimeout: duration(30, 's'),

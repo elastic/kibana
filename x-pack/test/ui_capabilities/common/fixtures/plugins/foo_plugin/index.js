@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function (kibana) {
+export default function(kibana) {
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     name: 'foo',
@@ -28,6 +28,8 @@ export default function (kibana) {
         catalogue: ['foo'],
         privileges: {
           all: {
+            app: ['kibana'],
+            catalogue: ['foo'],
             savedObject: {
               all: ['foo'],
               read: ['index-pattern'],
@@ -35,14 +37,16 @@ export default function (kibana) {
             ui: ['create', 'edit', 'delete', 'show'],
           },
           read: {
+            app: ['kibana'],
+            catalogue: ['foo'],
             savedObject: {
               all: [],
               read: ['foo', 'index-pattern'],
             },
             ui: ['show'],
-          }
-        }
+          },
+        },
       });
-    }
+    },
   });
 }

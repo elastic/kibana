@@ -22,13 +22,7 @@
 import React from 'react';
 import { renderToHtml } from '../../services';
 
-import {
-  GuideDemo,
-  GuidePage,
-  GuideSection,
-  GuideSectionTypes,
-  GuideText,
-} from '../../components';
+import { GuideDemo, GuidePage, GuideSection, GuideSectionTypes, GuideText } from '../../components';
 
 import { EmptyTablePrompt } from './empty_table_prompt';
 import emptyTablePromptSource from '!!raw-loader!./empty_table_prompt'; // eslint-disable-line import/default
@@ -42,40 +36,44 @@ export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Empty table prompt"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: emptyTablePromptSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: emptyTablePromptHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: emptyTablePromptSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: emptyTablePromptHtml,
+        },
+      ]}
     >
       <GuideText>
-        Use this prompt when a table has no results. It helps create space and provides a place to prompt the user
-        to follow some next actions, such as creating an item.
+        Use this prompt when a table has no results. It helps create space and provides a place to
+        prompt the user to follow some next actions, such as creating an item.
       </GuideText>
 
       <GuideDemo>
-        <EmptyTablePrompt/>
+        <EmptyTablePrompt />
       </GuideDemo>
     </GuideSection>
 
     <GuideSection
       title="Controlled table with empty table prompt"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: tableWithEmptyPromptSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: tableWithEmptyPromptHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: tableWithEmptyPromptSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: tableWithEmptyPromptHtml,
+        },
+      ]}
     >
-      <GuideText>
-        Wrap in an EmptyTablePromptPanel when using with a controlled table.
-      </GuideText>
+      <GuideText>Wrap in an EmptyTablePromptPanel when using with a controlled table.</GuideText>
 
       <GuideDemo>
-        <ControlledTableWithEmptyPrompt/>
+        <ControlledTableWithEmptyPrompt />
       </GuideDemo>
     </GuideSection>
   </GuidePage>

@@ -1,25 +1,25 @@
 [role="xpack"]
 [[canvas-present-workpad]]
-== Present your workpad
+=== Present your workpad
 
 When you are ready to present your workpad, use and enable the presentation options.
 
 [float]
 [[view-fullscreen-mode]]
-=== View your workpad in fullscreen mode
+==== View your workpad in fullscreen mode
 
-In the upper left corner, click the *Enter fullscreen mode* icon.
+Click the *Enter fullscreen mode* icon.
 
 [role="screenshot"]
 image::images/canvas-fullscreen.png[Fullscreen mode]
 
 [float]
 [[enable-autoplay]]
-=== Enable autoplay 
+==== Enable autoplay 
 
 Automatically cycle through your workpads pages in fullscreen mode.
 
-. In the upper left corner, click the *Control settings* icon.
+. Click the *Control settings* icon.
 
 . Under *Change cycling interval*, select the interval you want to use.
 +

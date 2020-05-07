@@ -7,24 +7,15 @@
 // Public UI styles
 @import 'src/legacy/ui/public/index';
 
-// Dev tools styles
-@import './dev_tools/index';
-
-// Discover styles
-@import './discover/index';
-
-// Home styles
-@import './home/index';
-
-// Visualize styles
-@import './visualize/index';
 // Has to come after visualize because of some
 // bad cascading in the Editor layout
-@import 'src/legacy/ui/public/vis/index';
+@import '../../../../plugins/maps_legacy/public/index';
+
+// Home styles
+@import '../../../../plugins/home/public/application/index';
 
 // Management styles
 @import './management/index';
 
-// Dashboard styles
-// MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS
-@import './dashboard/index';
+// Local application mount wrapper styles
+@import 'local_application_service/index';

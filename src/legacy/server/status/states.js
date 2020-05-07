@@ -24,72 +24,60 @@ export const getAll = () => [
   {
     id: 'red',
     title: i18n.translate('server.status.redTitle', {
-      defaultMessage: 'Red'
+      defaultMessage: 'Red',
     }),
     icon: 'danger',
     uiColor: 'danger',
     severity: 1000,
-    nicknames: [
-      'Danger Will Robinson! Danger!'
-    ]
+    nicknames: ['Danger Will Robinson! Danger!'],
   },
   {
     id: 'uninitialized',
     title: i18n.translate('server.status.uninitializedTitle', {
-      defaultMessage: 'Uninitialized'
+      defaultMessage: 'Uninitialized',
     }),
     icon: 'spinner',
     uiColor: 'default',
     severity: 900,
-    nicknames: [
-      'Initializing'
-    ]
+    nicknames: ['Initializing'],
   },
   {
     id: 'yellow',
     title: i18n.translate('server.status.yellowTitle', {
-      defaultMessage: 'Yellow'
+      defaultMessage: 'Yellow',
     }),
     icon: 'warning',
     uiColor: 'warning',
     severity: 800,
-    nicknames: [
-      'S.N.A.F.U',
-      'I\'ll be back',
-      'brb'
-    ]
+    nicknames: ['S.N.A.F.U', "I'll be back", 'brb'],
   },
   {
     id: 'green',
     title: i18n.translate('server.status.greenTitle', {
-      defaultMessage: 'Green'
+      defaultMessage: 'Green',
     }),
     icon: 'success',
     uiColor: 'secondary',
     severity: 0,
-    nicknames: [
-      'Looking good'
-    ]
+    nicknames: ['Looking good'],
   },
   {
     id: 'disabled',
     title: i18n.translate('server.status.disabledTitle', {
-      defaultMessage: 'Disabled'
+      defaultMessage: 'Disabled',
     }),
     severity: -1,
     icon: 'toggle-off',
     uiColor: 'default',
-    nicknames: [
-      'Am I even a thing?'
-    ]
-  }
+    nicknames: ['Am I even a thing?'],
+  },
 ];
 
 export const getAllById = () => _.indexBy(exports.getAll(), 'id');
 
 export const defaults = {
   icon: 'question',
-  severity: Infinity
+  severity: Infinity,
 };
 
 export function get(id) {

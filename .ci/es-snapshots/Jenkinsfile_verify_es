@@ -1,0 +1,73 @@
+#!/bin/groovy
+
+library 'kibana-pipeline-library'
+kibanaLibrary.load()
+
+def SNAPSHOT_VERSION = params.SNAPSHOT_VERSION
+def SNAPSHOT_ID = params.SNAPSHOT_ID
+
+if (!SNAPSHOT_VERSION) {
+  error "Parameter SNAPSHOT_VERSION must be specified"
+}
+
+if (!SNAPSHOT_ID) {
+  error "Parameter SNAPSHOT_ID must be specified"
+}
+
+currentBuild.displayName += " - ${SNAPSHOT_VERSION}"
+currentBuild.description = "ES: ${SNAPSHOT_VERSION}<br />Kibana: ${params.branch_specifier}"
+
+def SNAPSHOT_MANIFEST = "https://storage.googleapis.com/kibana-ci-es-snapshots-daily/${SNAPSHOT_VERSION}/archives/${SNAPSHOT_ID}/manifest.json"
+
+kibanaPipeline(timeoutMinutes: 150) {
+  catchErrors {
+    slackNotifications.onFailure(
+      title: ":broken_heart: *<${env.BUILD_URL}|[${SNAPSHOT_VERSION}] ES Snapshot Verification Failure>*",
+      message: ":broken_heart: [${SNAPSHOT_VERSION}] ES Snapshot Verification Failure",
+    ) {
+      retryable.enable(2)
+      withEnv(["ES_SNAPSHOT_MANIFEST=${SNAPSHOT_MANIFEST}"]) {
+        parallel([
+          'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
+          'x-pack-intake-agent': workers.intake('x-pack-intake', './test/scripts/jenkins_xpack.sh'),
+          'kibana-oss-agent': workers.functional('kibana-oss-tests', { kibanaPipeline.buildOss() }, [
+            'oss-ciGroup1': kibanaPipeline.ossCiGroupProcess(1),
+            'oss-ciGroup2': kibanaPipeline.ossCiGroupProcess(2),
+            'oss-ciGroup3': kibanaPipeline.ossCiGroupProcess(3),
+            'oss-ciGroup4': kibanaPipeline.ossCiGroupProcess(4),
+            'oss-ciGroup5': kibanaPipeline.ossCiGroupProcess(5),
+            'oss-ciGroup6': kibanaPipeline.ossCiGroupProcess(6),
+            'oss-ciGroup7': kibanaPipeline.ossCiGroupProcess(7),
+            'oss-ciGroup8': kibanaPipeline.ossCiGroupProcess(8),
+            'oss-ciGroup9': kibanaPipeline.ossCiGroupProcess(9),
+            'oss-ciGroup10': kibanaPipeline.ossCiGroupProcess(10),
+            'oss-ciGroup11': kibanaPipeline.ossCiGroupProcess(11),
+            'oss-ciGroup12': kibanaPipeline.ossCiGroupProcess(12),
+          ]),
+          'kibana-xpack-agent': workers.functional('kibana-xpack-tests', { kibanaPipeline.buildXpack() }, [
+            'xpack-ciGroup1': kibanaPipeline.xpackCiGroupProcess(1),
+            'xpack-ciGroup2': kibanaPipeline.xpackCiGroupProcess(2),
+            'xpack-ciGroup3': kibanaPipeline.xpackCiGroupProcess(3),
+            'xpack-ciGroup4': kibanaPipeline.xpackCiGroupProcess(4),
+            'xpack-ciGroup5': kibanaPipeline.xpackCiGroupProcess(5),
+            'xpack-ciGroup6': kibanaPipeline.xpackCiGroupProcess(6),
+            'xpack-ciGroup7': kibanaPipeline.xpackCiGroupProcess(7),
+            'xpack-ciGroup8': kibanaPipeline.xpackCiGroupProcess(8),
+            'xpack-ciGroup9': kibanaPipeline.xpackCiGroupProcess(9),
+            'xpack-ciGroup10': kibanaPipeline.xpackCiGroupProcess(10),
+          ]),
+        ])
+      }
+
+      promoteSnapshot(SNAPSHOT_VERSION, SNAPSHOT_ID)
+    }
+  }
+
+  kibanaPipeline.sendMail()
+}
+
+def promoteSnapshot(snapshotVersion, snapshotId) {
+  node(workers.label('s')) {
+    esSnapshots.promote(snapshotVersion, snapshotId)
+  }
+}

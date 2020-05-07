@@ -8,16 +8,14 @@ import { resolve } from 'path';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import { Legacy } from 'kibana';
 import { KibanaRequest } from '../../../../src/core/server';
-import { SpacesServiceSetup } from '../../../plugins/spaces/server/spaces_service/spaces_service';
+import { SpacesServiceSetup } from '../../../plugins/spaces/server';
 import { SpacesPluginSetup } from '../../../plugins/spaces/server';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
-import mappings from './mappings.json';
 import { wrapError } from './server/lib/errors';
-import { migrateToKibana660 } from './server/lib/migrations';
 // @ts-ignore
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
-import { initSpaceSelectorView, initEnterSpaceView } from './server/routes/views';
+import { initEnterSpaceView } from './server/routes/views';
 
 export interface LegacySpacesPlugin {
   getSpaceId: (request: Legacy.Request) => ReturnType<SpacesServiceSetup['getSpaceId']>;
@@ -34,58 +32,26 @@ export const spaces = (kibana: Record<string, any>) =>
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
 
-    uiCapabilities() {
-      return {
-        spaces: {
-          manage: true,
-        },
-        management: {
-          kibana: {
-            spaces: true,
-          },
-        },
-      };
-    },
-
     uiExports: {
-      chromeNavControls: ['plugins/spaces/views/nav_control'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      managementSections: ['plugins/spaces/views/management'],
-      apps: [
-        {
-          id: 'space_selector',
-          title: 'Spaces',
-          main: 'plugins/spaces/views/space_selector',
-          url: 'space_selector',
-          hidden: true,
-        },
-      ],
-      hacks: [],
-      mappings,
-      migrations: {
-        space: {
-          '6.6.0': migrateToKibana660,
-        },
-      },
-      savedObjectSchemas: {
-        space: {
-          isNamespaceAgnostic: true,
-          hidden: true,
-        },
-      },
-      home: ['plugins/spaces/register_feature'],
-      injectDefaultVars(server: any) {
+      managementSections: [],
+      apps: [],
+      hacks: ['plugins/spaces/legacy'],
+      home: [],
+      injectDefaultVars(server: Server) {
         return {
-          spaces: [],
-          activeSpace: null,
           serverBasePath: server.config().get('server.basePath'),
+          activeSpace: null,
         };
       },
       async replaceInjectedVars(
         vars: Record<string, any>,
         request: Legacy.Request,
-        server: Record<string, any>
+        server: Server
       ) {
+        // NOTICE: use of `activeSpace` is deprecated and will not be made available in the New Platform.
+        // Known usages:
+        // - x-pack/legacy/plugins/infra/public/utils/use_kibana_space_id.ts
         const spacesPlugin = server.newPlatform.setup.plugins.spaces as SpacesPluginSetup;
         if (!spacesPlugin) {
           throw new Error('New Platform XPack Spaces plugin is not available.');
@@ -117,27 +83,16 @@ export const spaces = (kibana: Record<string, any>) =>
         throw new Error('New Platform XPack Spaces plugin is not available.');
       }
 
-      const config = server.config();
-
       const { registerLegacyAPI, createDefaultSpace } = spacesPlugin.__legacyCompat;
 
       registerLegacyAPI({
-        legacyConfig: {
-          kibanaIndex: config.get('kibana.index'),
-        },
-        savedObjects: server.savedObjects,
-        tutorial: {
-          addScopedTutorialContextFactory: server.addScopedTutorialContextFactory,
-        },
         auditLogger: {
           create: (pluginId: string) =>
             new AuditLogger(server, pluginId, server.config(), server.plugins.xpack_main.info),
         },
-        xpackMain: server.plugins.xpack_main,
       });
 
       initEnterSpaceView(server);
-      initSpaceSelectorView(server);
 
       watchStatusAndLicenseToInitialize(server.plugins.xpack_main, this, async () => {
         await createDefaultSpace();

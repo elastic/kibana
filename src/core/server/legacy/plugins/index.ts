@@ -16,4 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 export { findLegacyPluginSpecs } from './find_legacy_plugin_specs';
+export { logLegacyThirdPartyPluginDeprecationWarning } from './log_legacy_plugins_warning';

@@ -19,13 +19,13 @@
 
 import React from 'react';
 import { ApplyFiltersPopoverContent } from './apply_filter_popover_content';
-import { IIndexPattern, esFilters } from '../..';
+import { IIndexPattern, Filter } from '../..';
 
 type CancelFnType = () => void;
-type SubmitFnType = (filters: esFilters.Filter[]) => void;
+type SubmitFnType = (filters: Filter[]) => void;
 
 export const applyFiltersPopover = (
-  filters: esFilters.Filter[],
+  filters: Filter[],
   indexPatterns: IIndexPattern[],
   onCancel: CancelFnType,
   onSubmit: SubmitFnType

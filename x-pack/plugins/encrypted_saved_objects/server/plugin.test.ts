@@ -18,6 +18,7 @@ describe('EncryptedSavedObjects Plugin', () => {
                   "registerLegacyAPI": [Function],
                 },
                 "registerType": [Function],
+                "usingEphemeralEncryptionKey": true,
               }
             `);
     });

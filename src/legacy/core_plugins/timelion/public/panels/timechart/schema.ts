@@ -17,24 +17,32 @@
  * under the License.
  */
 
-import './flot';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import '../../../../../../plugins/vis_type_timelion/public/flot';
 import _ from 'lodash';
 import $ from 'jquery';
 import moment from 'moment-timezone';
 import { timefilter } from 'ui/timefilter';
 // @ts-ignore
 import observeResize from '../../lib/observe_resize';
-// @ts-ignore
-import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../../common/lib';
+import {
+  calculateInterval,
+  DEFAULT_TIME_FORMAT,
+  // @ts-ignore
+} from '../../../../../../plugins/vis_type_timelion/common/lib';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { tickFormatters } from '../../../../../../plugins/vis_type_timelion/public/helpers/tick_formatters';
 import { TimelionVisualizationDependencies } from '../../plugin';
-import { tickFormatters } from '../../services/tick_formatters';
-import { xaxisFormatterProvider } from './xaxis_formatter';
-import { generateTicksProvider } from './tick_generator';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { xaxisFormatterProvider } from '../../../../../../plugins/vis_type_timelion/public/helpers/xaxis_formatter';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { generateTicksProvider } from '../../../../../../plugins/vis_type_timelion/public/helpers/tick_generator';
 
 const DEBOUNCE_DELAY = 50;
 
 export function timechartFn(dependencies: TimelionVisualizationDependencies) {
   const { $rootScope, $compile, uiSettings } = dependencies;
+
   return function() {
     return {
       help: 'Draw a timeseries chart',

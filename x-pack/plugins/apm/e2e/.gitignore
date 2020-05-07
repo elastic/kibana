@@ -1,0 +1,3 @@
+cypress/screenshots/*
+cypress/test-results
+tmp

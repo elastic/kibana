@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const clusterList = getService('monitoringClusterList');
   const clusterOverview = getService('monitoringClusterOverview');
   const testSubjects = getService('testSubjects');
@@ -58,7 +58,9 @@ export default function ({ getService, getPageObjects }) {
         it('clicking the basic cluster shows a toast message', async () => {
           const basicClusterLink = await clusterList.getClusterLink(UNSUPPORTED_CLUSTER_UUID);
           await basicClusterLink.click();
-          expect(await testSubjects.exists('monitoringLicenseWarning', { timeout: 2000 })).to.be(true);
+          expect(await testSubjects.exists('monitoringLicenseWarning', { timeout: 2000 })).to.be(
+            true
+          );
         });
 
         /*
@@ -87,7 +89,7 @@ export default function ({ getService, getPageObjects }) {
         await tearDown();
       });
 
-      describe('cluster row content', function () {
+      describe('cluster row content', function() {
         // TODO: https://github.com/elastic/stack-monitoring/issues/31
         this.tags(['skipCloud']);
 
@@ -99,7 +101,9 @@ export default function ({ getService, getPageObjects }) {
           expect(await clusterList.getClusterDataSize(UNSUPPORTED_CLUSTER_UUID)).to.be('-');
           expect(await clusterList.getClusterLogstashCount(UNSUPPORTED_CLUSTER_UUID)).to.be('-');
           expect(await clusterList.getClusterKibanaCount(UNSUPPORTED_CLUSTER_UUID)).to.be('-');
-          expect(await clusterList.getClusterLicense(UNSUPPORTED_CLUSTER_UUID)).to.be('Basic\nExpires 29 Aug 30');
+          expect(await clusterList.getClusterLicense(UNSUPPORTED_CLUSTER_UUID)).to.be(
+            'Basic\nExpires 29 Aug 30'
+          );
         });
 
         it('primary basic cluster shows cluster metrics', async () => {
@@ -110,21 +114,25 @@ export default function ({ getService, getPageObjects }) {
           expect(await clusterList.getClusterDataSize(SUPPORTED_CLUSTER_UUID)).to.be('1.6 MB');
           expect(await clusterList.getClusterLogstashCount(SUPPORTED_CLUSTER_UUID)).to.be('2');
           expect(await clusterList.getClusterKibanaCount(SUPPORTED_CLUSTER_UUID)).to.be('1');
-          expect(await clusterList.getClusterLicense(SUPPORTED_CLUSTER_UUID)).to.be('Basic\nExpires 29 Aug 30');
+          expect(await clusterList.getClusterLicense(SUPPORTED_CLUSTER_UUID)).to.be(
+            'Basic\nExpires 29 Aug 30'
+          );
         });
       });
 
-      describe('cluster row actions', function () {
+      describe('cluster row actions', function() {
         // TODO: https://github.com/elastic/stack-monitoring/issues/31
         this.tags(['skipCloud']);
 
         it('clicking the non-primary basic cluster shows a toast message', async () => {
           const basicClusterLink = await clusterList.getClusterLink(UNSUPPORTED_CLUSTER_UUID);
           await basicClusterLink.click();
-          expect(await testSubjects.exists('monitoringLicenseWarning', { timeout: 2000 })).to.be(true);
+          expect(await testSubjects.exists('monitoringLicenseWarning', { timeout: 2000 })).to.be(
+            true
+          );
         });
 
-        it('clicking the primary basic cluster goes to overview', async function () {
+        it('clicking the primary basic cluster goes to overview', async function() {
           const primaryBasicClusterLink = await clusterList.getClusterLink(SUPPORTED_CLUSTER_UUID);
           await primaryBasicClusterLink.click();
 
@@ -133,7 +141,6 @@ export default function ({ getService, getPageObjects }) {
 
           await PageObjects.monitoring.clickBreadcrumb('~breadcrumbClusters'); // reset for next test
         });
-
       });
     });
   });

@@ -35,13 +35,9 @@ import { generateNodeNoticeText } from './generate_node_notice_text';
 export async function generateBuildNoticeText(options = {}) {
   const { packages, nodeDir, nodeVersion, noticeFromSource } = options;
 
-  const packageNotices = await Promise.all(
-    packages.map(generatePackageNoticeText)
-  );
+  const packageNotices = await Promise.all(packages.map(generatePackageNoticeText));
 
-  return [
-    noticeFromSource,
-    ...packageNotices,
-    generateNodeNoticeText(nodeDir, nodeVersion),
-  ].join('\n---\n');
+  return [noticeFromSource, ...packageNotices, generateNodeNoticeText(nodeDir, nodeVersion)].join(
+    '\n---\n'
+  );
 }

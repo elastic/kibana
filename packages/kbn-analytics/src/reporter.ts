@@ -22,6 +22,7 @@ import { Metric, createUiStatsMetric, trackUsageAgent, UiStatsMetricType } from 
 
 import { Storage, ReportStorageManager } from './storage';
 import { Report, ReportManager } from './report';
+import { ApplicationUsage } from './metrics';
 
 export interface ReporterConfig {
   http: ReportHTTP;
@@ -35,19 +36,22 @@ export type ReportHTTP = (report: Report) => Promise<void>;
 
 export class Reporter {
   checkInterval: number;
-  private interval: any;
+  private interval?: NodeJS.Timer;
+  private lastAppId?: string;
   private http: ReportHTTP;
   private reportManager: ReportManager;
   private storageManager: ReportStorageManager;
+  private readonly applicationUsage: ApplicationUsage;
   private debug: boolean;
   private retryCount = 0;
   private readonly maxRetries = 3;
+  private started = false;
 
   constructor(config: ReporterConfig) {
     const { http, storage, debug, checkInterval = 90000, storageKey = 'analytics' } = config;
     this.http = http;
     this.checkInterval = checkInterval;
-    this.interval = null;
+    this.applicationUsage = new ApplicationUsage();
     this.storageManager = new ReportStorageManager(storageKey, storage);
     const storedReport = this.storageManager.get();
     this.reportManager = new ReportManager(storedReport);
@@ -68,10 +72,34 @@ export class Reporter {
   public start = () => {
     if (!this.interval) {
       this.interval = setTimeout(() => {
-        this.interval = null;
+        this.interval = undefined;
         this.sendReports();
       }, this.checkInterval);
     }
+
+    if (this.started) {
+      return;
+    }
+
+    if (window && document) {
+      // Before leaving the page, make sure we store the current usage
+      window.addEventListener('beforeunload', () => this.reportApplicationUsage());
+
+      // Monitoring dashboards might be open in background and we are fine with that
+      // but we don't want to report hours if the user goes to another tab and Kibana is not shown
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && this.lastAppId) {
+          this.reportApplicationUsage(this.lastAppId);
+        } else if (document.visibilityState === 'hidden') {
+          this.reportApplicationUsage();
+
+          // We also want to send the report now because intervals and timeouts be stalled when too long in the "hidden" state
+          this.sendReports();
+        }
+      });
+    }
+    this.started = true;
+    this.applicationUsage.start();
   };
 
   private log(message: any) {
@@ -101,6 +129,13 @@ export class Reporter {
     const report = trackUsageAgent(appName);
     this.saveToReport([report]);
   };
+
+  public reportApplicationUsage(appId?: string) {
+    this.log(`Reporting application changed to ${appId}`);
+    this.lastAppId = appId || this.lastAppId;
+    const appChangedReport = this.applicationUsage.appChanged(appId);
+    if (appChangedReport) this.saveToReport([appChangedReport]);
+  }
 
   public sendReports = async () => {
     if (!this.reportManager.isReportEmpty()) {

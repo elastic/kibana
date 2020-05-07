@@ -25,6 +25,7 @@ import { InternalChromeStart } from '../chrome';
 import { InternalApplicationStart } from '../application';
 import { InjectedMetadataStart } from '../injected_metadata';
 import { OverlayStart } from '../overlays';
+import { AppWrapper, AppContainer } from './app_containers';
 
 interface StartDeps {
   application: InternalApplicationStart;
@@ -65,12 +66,12 @@ export class RenderingService {
           {chromeUi}
 
           {!legacyMode && (
-            <div className="app-wrapper">
+            <AppWrapper chromeVisible$={chrome.getIsVisible$()}>
               <div className="app-wrapper-panel">
                 <div id="globalBannerList">{bannerUi}</div>
-                <div className="application">{appUi}</div>
+                <AppContainer classes$={chrome.getApplicationClasses$()}>{appUi}</AppContainer>
               </div>
-            </div>
+            </AppWrapper>
           )}
 
           {legacyMode && <div ref={legacyRef} />}

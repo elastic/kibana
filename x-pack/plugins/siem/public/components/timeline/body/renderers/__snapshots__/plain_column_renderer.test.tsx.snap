@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`plain_column_renderer rendering renders correctly against snapshot 1`] = `
+<span>
+  <Memo(FormattedFieldValueComponent)
+    contextId="plain-column-renderer-formatted-field-value-test"
+    eventId="1"
+    fieldFormat=""
+    fieldName="event.category"
+    fieldType="keyword"
+    key="plain-column-renderer-formatted-field-value-test-event.category-1-event.category-Access"
+    value="Access"
+  />
+</span>
+`;

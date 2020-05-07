@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { esFilters } from '../../../../common';
+import { Filter } from '../../../../common';
 
-export function getFiltersArray(): esFilters.Filter[] {
+export function getFiltersArray(): Filter[] {
   return [
     {
       query: { match: { extension: { query: 'jpg', type: 'phrase' } } },

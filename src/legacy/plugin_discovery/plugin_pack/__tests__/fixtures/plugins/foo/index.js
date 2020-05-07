@@ -17,7 +17,7 @@
  * under the License.
  */
 
-module.exports = function (kibana) {
+module.exports = function(kibana) {
   return new kibana.Plugin({
     id: 'foo',
   });

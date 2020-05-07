@@ -18,22 +18,17 @@
  */
 
 // Test helpers to simplify mocking logs and collecting all their outputs
-import { Logger } from './logger';
 import { ILoggingService } from './logging_service';
 import { LoggerFactory } from './logger_factory';
-
-type MockedLogger = jest.Mocked<Logger>;
+import { loggerMock, MockedLogger } from './logger.mock';
 
 const createLoggingServiceMock = () => {
-  const mockLog: MockedLogger = {
-    debug: jest.fn(),
-    error: jest.fn(),
-    fatal: jest.fn(),
-    info: jest.fn(),
-    log: jest.fn(),
-    trace: jest.fn(),
-    warn: jest.fn(),
-  };
+  const mockLog = loggerMock.create();
+
+  mockLog.get.mockImplementation((...context) => ({
+    ...mockLog,
+    context,
+  }));
 
   const mocked: jest.Mocked<ILoggingService> = {
     get: jest.fn(),
@@ -42,10 +37,10 @@ const createLoggingServiceMock = () => {
     stop: jest.fn(),
   };
   mocked.get.mockImplementation((...context) => ({
-    context,
     ...mockLog,
+    context,
   }));
-  mocked.asLoggerFactory.mockImplementation(() => createLoggingServiceMock());
+  mocked.asLoggerFactory.mockImplementation(() => mocked);
   mocked.stop.mockResolvedValue();
   return mocked;
 };
@@ -84,4 +79,5 @@ export const loggingServiceMock = {
   create: createLoggingServiceMock,
   collect: collectLoggingServiceMock,
   clear: clearLoggingServiceMock,
+  createLogger: loggerMock.create,
 };

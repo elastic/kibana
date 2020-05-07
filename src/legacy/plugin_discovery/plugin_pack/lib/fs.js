@@ -63,7 +63,7 @@ export async function isDirectory(path) {
  *  @param  {string} path
  *  @return {Promise<Array<string>>}
  */
-export const createChildDirectory$ = (path) => (
+export const createChildDirectory$ = path =>
   Rx.defer(() => {
     assertAbsolutePath(path);
     return fcb(cb => readdir(path, cb));
@@ -82,5 +82,4 @@ export const createChildDirectory$ = (path) => (
       }
     }),
     mergeAll()
-  )
-);
+  );

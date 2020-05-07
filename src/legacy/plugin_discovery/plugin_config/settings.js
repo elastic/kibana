@@ -19,7 +19,6 @@
 
 import { get } from 'lodash';
 
-import * as serverConfig from '../../server/config';
 import { getTransform } from '../../deprecation';
 
 /**
@@ -33,7 +32,7 @@ import { getTransform } from '../../deprecation';
  */
 export async function getSettings(spec, rootSettings, logDeprecation) {
   const prefix = spec.getConfigPrefix();
-  const rawSettings = get(serverConfig.transformDeprecations(rootSettings), prefix);
+  const rawSettings = get(rootSettings, prefix);
   const transform = await getTransform(spec);
   return transform(rawSettings, logDeprecation);
 }

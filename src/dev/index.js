@@ -17,11 +17,6 @@
  * under the License.
  */
 
-export {
-  createAutoJUnitReporter,
-  setupJUnitReportGeneration,
-} from '@kbn/test';
+export { createAutoJUnitReporter, setupJUnitReportGeneration } from '@kbn/test';
 
-export {
-  generateNoticeFromSource,
-} from './notice';
+export { generateNoticeFromSource } from './notice';

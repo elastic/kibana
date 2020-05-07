@@ -13,8 +13,7 @@ export function MonitoringLogstashSummaryStatusProvider({ getService }) {
   const SUBJ_SUMMARY_EVENTS_IN_TOTAL = `${SUBJ_SUMMARY} > events_in_total`;
   const SUBJ_SUMMARY_EVENTS_OUT_TOTAL = `${SUBJ_SUMMARY} > events_out_total`;
 
-  return new class LogstashSummaryStatus {
-
+  return new (class LogstashSummaryStatus {
     async getContent() {
       return {
         nodeCount: await testSubjects.getVisibleText(SUBJ_SUMMARY_NODE_COUNT),
@@ -23,6 +22,5 @@ export function MonitoringLogstashSummaryStatusProvider({ getService }) {
         eventsOutTotal: await testSubjects.getVisibleText(SUBJ_SUMMARY_EVENTS_OUT_TOTAL),
       };
     }
-
-  };
+  })();
 }

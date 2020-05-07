@@ -22,11 +22,11 @@ import { fromNode } from 'bluebird';
 import { get, once } from 'lodash';
 
 export default (kbnServer, server, config) => {
-
   server.route(
     createProxyBundlesRoute({
       host: config.get('optimize.watchHost'),
-      port: config.get('optimize.watchPort')
+      port: config.get('optimize.watchPort'),
+      buildHash: kbnServer.newPlatform.env.packageInfo.buildNum.toString(),
     })
   );
 
@@ -42,7 +42,7 @@ export default (kbnServer, server, config) => {
     if (!process.connected) return;
 
     process.send(['WORKER_BROADCAST', { optimizeReady: '?' }]);
-    process.on('message', (msg) => {
+    process.on('message', msg => {
       switch (get(msg, 'optimizeReady')) {
         case true:
           clearTimeout(timeout);
@@ -54,5 +54,4 @@ export default (kbnServer, server, config) => {
       }
     });
   });
-
 };

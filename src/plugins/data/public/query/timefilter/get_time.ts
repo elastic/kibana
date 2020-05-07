@@ -18,11 +18,8 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { TimeRange } from '../../../common';
-
-// TODO: remove this
-import { IndexPattern, Field } from '../../../../../legacy/core_plugins/data/public';
-import { esFilters } from '../../../common';
+import { IIndexPattern } from '../..';
+import { TimeRange, buildRangeFilter } from '../../../common';
 
 interface CalculateBoundsOptions {
   forceNow?: Date;
@@ -36,20 +33,29 @@ export function calculateBounds(timeRange: TimeRange, options: CalculateBoundsOp
 }
 
 export function getTime(
-  indexPattern: IndexPattern | undefined,
+  indexPattern: IIndexPattern | undefined,
   timeRange: TimeRange,
+  options?: { forceNow?: Date; fieldName?: string }
+) {
+  return createTimeRangeFilter(
+    indexPattern,
+    timeRange,
+    options?.fieldName || indexPattern?.timeFieldName,
+    options?.forceNow
+  );
+}
+
+function createTimeRangeFilter(
+  indexPattern: IIndexPattern | undefined,
+  timeRange: TimeRange,
+  fieldName?: string,
   forceNow?: Date
 ) {
   if (!indexPattern) {
-    // in CI, we sometimes seem to fail here.
     return;
   }
-
-  const timefield: Field | undefined = indexPattern.fields.find(
-    field => field.name === indexPattern.timeFieldName
-  );
-
-  if (!timefield) {
+  const field = indexPattern.fields.find(f => f.name === (fieldName || indexPattern.timeFieldName));
+  if (!field) {
     return;
   }
 
@@ -57,8 +63,8 @@ export function getTime(
   if (!bounds) {
     return;
   }
-  return esFilters.buildRangeFilter(
-    timefield,
+  return buildRangeFilter(
+    field,
     {
       ...(bounds.min && { gte: bounds.min.toISOString() }),
       ...(bounds.max && { lte: bounds.max.toISOString() }),

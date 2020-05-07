@@ -7,18 +7,18 @@
 import expect from '@kbn/expect';
 import clustersFixture from './fixtures/clusters';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('clusters', function () {
+  describe('clusters', function() {
     // TODO: https://github.com/elastic/stack-monitoring/issues/31
     this.tags(['skipCloud']);
 
     const archive = 'monitoring/standalone_cluster';
     const timeRange = {
       min: '2019-02-04T16:52:11.741Z',
-      max: '2019-02-04T17:52:11.741Z'
+      max: '2019-02-04T17:52:11.741Z',
     };
     const codePaths = ['all'];
 

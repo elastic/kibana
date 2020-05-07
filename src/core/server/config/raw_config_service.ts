@@ -22,9 +22,11 @@ import { Observable, ReplaySubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import typeDetect from 'type-detect';
 
-import { Config } from './config';
-import { ObjectToConfigAdapter } from './object_to_config_adapter';
 import { getConfigFromFiles } from './read_config';
+
+type RawConfigAdapter = (rawConfig: Record<string, any>) => Record<string, any>;
+
+export type RawConfigurationProvider = Pick<RawConfigService, 'getConfig$'>;
 
 /** @internal */
 export class RawConfigService {
@@ -35,12 +37,11 @@ export class RawConfigService {
    */
   private readonly rawConfigFromFile$: ReplaySubject<Record<string, any>> = new ReplaySubject(1);
 
-  private readonly config$: Observable<Config>;
+  private readonly config$: Observable<Record<string, any>>;
 
   constructor(
     public readonly configFiles: readonly string[],
-    configAdapter: (rawConfig: Record<string, any>) => Config = rawConfig =>
-      new ObjectToConfigAdapter(rawConfig)
+    configAdapter: RawConfigAdapter = rawConfig => rawConfig
   ) {
     this.config$ = this.rawConfigFromFile$.pipe(
       map(rawConfig => {

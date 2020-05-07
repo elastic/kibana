@@ -6,7 +6,7 @@
 import Boom from 'boom';
 import { omit } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
-import { PluginSetupContract as SecurityPluginSetupContract } from '../../../../security/server';
+import { SecurityPluginSetup } from '../../../../security/server';
 import { isReservedSpace } from '../../../common/is_reserved_space';
 import { Space } from '../../../common/model/space';
 import { SpacesAuditLogger } from '../audit_logger';
@@ -17,7 +17,7 @@ const SUPPORTED_GET_SPACE_PURPOSES: GetSpacePurpose[] = ['any', 'copySavedObject
 
 const PURPOSE_PRIVILEGE_MAP: Record<
   GetSpacePurpose,
-  (authorization: SecurityPluginSetupContract['authz']) => string
+  (authorization: SecurityPluginSetup['authz']) => string
 > = {
   any: authorization => authorization.actions.login,
   copySavedObjectsIntoSpace: authorization =>
@@ -28,7 +28,7 @@ export class SpacesClient {
   constructor(
     private readonly auditLogger: SpacesAuditLogger,
     private readonly debugLogger: (message: string) => void,
-    private readonly authorization: SecurityPluginSetupContract['authz'] | null,
+    private readonly authorization: SecurityPluginSetup['authz'] | null,
     private readonly callWithRequestSavedObjectRepository: any,
     private readonly config: ConfigType,
     private readonly internalSavedObjectRepository: any,
@@ -74,16 +74,14 @@ export class SpacesClient {
 
       const privilege = privilegeFactory(this.authorization!);
 
-      const { username, spacePrivileges } = await checkPrivileges.atSpaces(spaceIds, privilege);
+      const { username, privileges } = await checkPrivileges.atSpaces(spaceIds, privilege);
 
-      const authorized = Object.keys(spacePrivileges).filter(spaceId => {
-        return spacePrivileges[spaceId][privilege];
-      });
+      const authorized = privileges.filter(x => x.authorized).map(x => x.resource);
 
       this.debugLogger(
         `SpacesClient.getAll(), authorized for ${
           authorized.length
-        } spaces, derived from ES privilege check: ${JSON.stringify(spacePrivileges)}`
+        } spaces, derived from ES privilege check: ${JSON.stringify(privileges)}`
       );
 
       if (authorized.length === 0) {
@@ -94,7 +92,7 @@ export class SpacesClient {
         throw Boom.forbidden();
       }
 
-      this.auditLogger.spacesAuthorizationSuccess(username, 'getAll', authorized);
+      this.auditLogger.spacesAuthorizationSuccess(username, 'getAll', authorized as string[]);
       const filteredSpaces: Space[] = spaces.filter((space: any) => authorized.includes(space.id));
       this.debugLogger(
         `SpacesClient.getAll(), using RBAC. returning spaces: ${filteredSpaces
@@ -211,9 +209,9 @@ export class SpacesClient {
       throw Boom.badRequest('This Space cannot be deleted because it is reserved.');
     }
 
-    await repository.delete('space', id);
-
     await repository.deleteByNamespace(id);
+
+    await repository.delete('space', id);
   }
 
   private useRbac(): boolean {

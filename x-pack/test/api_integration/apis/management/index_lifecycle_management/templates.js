@@ -10,22 +10,17 @@ import { getTemplatePayload, getPolicyPayload } from './fixtures';
 import { registerHelpers as registerTemplatesHelpers } from './templates.helpers';
 import { registerHelpers as registerPoliciesHelpers } from './policies.helpers';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
   const { createIndexTemplate, cleanUp: cleanUpEsResources } = initElasticsearchHelpers(es);
 
-  const {
-    loadTemplates,
-    getTemplate,
-    addPolicyToTemplate,
-  } = registerTemplatesHelpers({ supertest });
+  const { loadTemplates, addPolicyToTemplate } = registerTemplatesHelpers({
+    supertest,
+  });
 
-  const {
-    createPolicy,
-    cleanUp: cleanUpPolicies,
-  } = registerPoliciesHelpers({ supertest });
+  const { createPolicy, cleanUp: cleanUpPolicies } = registerPoliciesHelpers({ supertest });
 
   describe('templates', () => {
     after(() => Promise.all([cleanUpEsResources(), cleanUpPolicies()]));
@@ -53,18 +48,6 @@ export default function ({ getService }) {
       });
     });
 
-    describe('get', () => {
-      it('should fetch a single template', async () => {
-        // Create a template with the ES client
-        const templateName = getRandomString();
-        const template = getTemplatePayload();
-        await createIndexTemplate(templateName, template);
-
-        const { body } = await getTemplate(templateName).expect(200);
-        expect(body.index_patterns).to.eql(template.index_patterns);
-      });
-    });
-
     describe('update', () => {
       it('should add a policy to a template', async () => {
         // Create policy
@@ -83,8 +66,13 @@ export default function ({ getService }) {
         await addPolicyToTemplate(templateName, policyName, rolloverAlias).expect(200);
 
         // Fetch the template and verify that the policy has been attached
-        const { body } = await getTemplate(templateName);
-        const { settings: { index: { lifecycle } } } = body;
+        const { body } = await loadTemplates();
+        const fetchedTemplate = body.find(({ name }) => templateName === name);
+        const {
+          settings: {
+            index: { lifecycle },
+          },
+        } = fetchedTemplate;
         expect(lifecycle.name).to.equal(policyName);
         expect(lifecycle.rollover_alias).to.equal(rolloverAlias);
       });

@@ -179,7 +179,10 @@ function extractValueReferencesFromIcuAst(node, keys = new Set()) {
 export function checkValuesProperty(prefixedValuesKeys, defaultMessage, messageId) {
   // Skip validation if `defaultMessage` doesn't include any ICU values and
   // `values` prop has no keys.
-  const defaultMessageValueReferences = extractValueReferencesFromMessage(defaultMessage, messageId);
+  const defaultMessageValueReferences = extractValueReferencesFromMessage(
+    defaultMessage,
+    messageId
+  );
   if (!prefixedValuesKeys.length && defaultMessageValueReferences.length === 0) {
     return;
   }

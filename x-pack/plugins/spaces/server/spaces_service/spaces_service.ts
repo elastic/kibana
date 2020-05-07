@@ -5,11 +5,10 @@
  */
 
 import { map, take } from 'rxjs/operators';
-import { Observable, Subscription, combineLatest } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { Legacy } from 'kibana';
 import { Logger, KibanaRequest, CoreSetup } from '../../../../../src/core/server';
-import { PluginSetupContract as SecurityPluginSetup } from '../../../security/server';
-import { LegacyAPI } from '../plugin';
+import { SecurityPluginSetup } from '../../../security/server';
 import { SpacesClient } from '../lib/spaces_client';
 import { ConfigType } from '../config';
 import { getSpaceIdFromPath, addSpaceIdToPath } from '../../common/lib/spaces_url_parser';
@@ -37,7 +36,7 @@ export interface SpacesServiceSetup {
 
 interface SpacesServiceDeps {
   http: CoreSetup['http'];
-  elasticsearch: CoreSetup['elasticsearch'];
+  getStartServices: CoreSetup['getStartServices'];
   authorization: SecurityPluginSetup['authz'] | null;
   config$: Observable<ConfigType>;
   getSpacesAuditLogger(): any;
@@ -46,11 +45,11 @@ interface SpacesServiceDeps {
 export class SpacesService {
   private configSubscription$?: Subscription;
 
-  constructor(private readonly log: Logger, private readonly getLegacyAPI: () => LegacyAPI) {}
+  constructor(private readonly log: Logger) {}
 
   public async setup({
     http,
-    elasticsearch,
+    getStartServices,
     authorization,
     config$,
     getSpacesAuditLogger,
@@ -69,18 +68,15 @@ export class SpacesService {
     };
 
     const getScopedClient = async (request: KibanaRequest) => {
-      return combineLatest(elasticsearch.adminClient$, config$)
+      const [coreStart] = await getStartServices();
+
+      return config$
         .pipe(
-          map(([clusterClient, config]) => {
-            const internalRepository = this.getLegacyAPI().savedObjects.getSavedObjectsRepository(
-              clusterClient.callAsInternalUser,
-              ['space']
-            );
+          map(config => {
+            const internalRepository = coreStart.savedObjects.createInternalRepository(['space']);
 
-            const callCluster = clusterClient.asScoped(request).callAsCurrentUser;
-
-            const callWithRequestRepository = this.getLegacyAPI().savedObjects.getSavedObjectsRepository(
-              callCluster,
+            const callWithRequestRepository = coreStart.savedObjects.createScopedRepository(
+              request,
               ['space']
             );
 

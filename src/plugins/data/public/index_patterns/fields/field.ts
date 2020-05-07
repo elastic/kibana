@@ -18,10 +18,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ToastsStart } from 'kibana/public';
 // @ts-ignore
 import { ObjDefine } from './obj_define';
 import { IndexPattern } from '../index_patterns';
-import { getNotifications, getFieldFormats } from '../../services';
 import {
   IFieldType,
   getKbnFieldType,
@@ -29,8 +29,14 @@ import {
   FieldFormat,
   shortenDottedString,
 } from '../../../common';
+import { FieldFormatsStart } from '../../field_formats';
 
 export type FieldSpec = Record<string, any>;
+
+interface FieldDependencies {
+  fieldFormats: FieldFormatsStart;
+  toastNotifications: ToastsStart;
+}
 
 export class Field implements IFieldType {
   name: string;
@@ -49,16 +55,16 @@ export class Field implements IFieldType {
   scripted?: boolean;
   subType?: IFieldSubType;
   displayName?: string;
+  indexPattern?: IndexPattern;
   format: any;
-  routes: Record<string, string> = {
-    edit: '/management/kibana/index_patterns/{{indexPattern.id}}/field/{{name}}',
-  };
   $$spec: FieldSpec;
+  conflictDescriptions?: Record<string, string[]>;
 
   constructor(
     indexPattern: IndexPattern,
     spec: FieldSpec | Field,
-    shortDotsEnable: boolean = false
+    shortDotsEnable: boolean,
+    { fieldFormats, toastNotifications }: FieldDependencies
   ) {
     // unwrap old instances of Field
     if (spec instanceof Field) spec = spec.$$spec;
@@ -83,9 +89,8 @@ export class Field implements IFieldType {
         values: { name: spec.name, title: indexPattern.title },
         defaultMessage: 'Field {name} in indexPattern {title} is using an unknown field type.',
       });
-      const { toasts } = getNotifications();
 
-      toasts.addDanger({
+      toastNotifications.addDanger({
         title,
         text,
       });
@@ -94,9 +99,8 @@ export class Field implements IFieldType {
     if (!type) type = getKbnFieldType('unknown');
 
     let format = spec.format;
-    if (!format || !(format instanceof FieldFormat)) {
-      const fieldFormats = getFieldFormats();
 
+    if (!FieldFormat.isInstanceOfFieldFormat(format)) {
       format =
         indexPattern.fieldFormatMap[spec.name] ||
         fieldFormats.getDefaultInstance(spec.type, spec.esTypes);
@@ -150,7 +154,3 @@ export class Field implements IFieldType {
     return obj.create();
   }
 }
-
-Field.prototype.routes = {
-  edit: '/management/kibana/index_patterns/{{indexPattern.id}}/field/{{name}}',
-};

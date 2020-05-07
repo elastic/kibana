@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 module.exports = params => {
   const result = {};
   Object.keys(params).forEach(param => {
@@ -48,6 +47,7 @@ module.exports = params => {
       case 'date':
       case 'string':
       case 'number':
+      case 'number|string':
         result[param] = defaultValue || '';
         break;
       case 'list':

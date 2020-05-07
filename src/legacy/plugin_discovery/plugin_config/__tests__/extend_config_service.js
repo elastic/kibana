@@ -36,20 +36,20 @@ describe('plugin discovery/extend config service', () => {
       name: 'test',
       version: 'kibana',
     },
-    provider: ({ Plugin }) => new Plugin({
-      configPrefix: 'foo.bar.baz',
+    provider: ({ Plugin }) =>
+      new Plugin({
+        configPrefix: 'foo.bar.baz',
 
-      config: Joi => Joi.object({
-        enabled: Joi.boolean().default(true),
-        test: Joi.string().default('bonk'),
-      }).default(),
+        config: Joi =>
+          Joi.object({
+            enabled: Joi.boolean().default(true),
+            test: Joi.string().default('bonk'),
+          }).default(),
 
-      deprecations({ rename }) {
-        return [
-          rename('oldTest', 'test'),
-        ];
-      },
-    }),
+        deprecations({ rename }) {
+          return [rename('oldTest', 'test')];
+        },
+      }),
   })
     .getPluginSpecs()
     .pop();
@@ -59,29 +59,26 @@ describe('plugin discovery/extend config service', () => {
       const rootSettings = {
         foo: {
           bar: {
-            enabled: false
-          }
-        }
+            enabled: false,
+          },
+        },
       };
       const schema = {
-        validate: () => {}
+        validate: () => {},
       };
       const configPrefix = 'foo.bar';
       const config = {
-        extendSchema: sandbox.stub()
+        extendSchema: sandbox.stub(),
       };
       const pluginSpec = {
-        getConfigPrefix: sandbox.stub()
-          .returns(configPrefix)
+        getConfigPrefix: sandbox.stub().returns(configPrefix),
       };
 
       const logDeprecation = sandbox.stub();
 
-      const getSettings = sandbox.stub(SettingsNS, 'getSettings')
-        .returns(rootSettings.foo.bar);
+      const getSettings = sandbox.stub(SettingsNS, 'getSettings').returns(rootSettings.foo.bar);
 
-      const getSchema = sandbox.stub(SchemaNS, 'getSchema')
-        .returns(schema);
+      const getSchema = sandbox.stub(SchemaNS, 'getSchema').returns(schema);
 
       await extendConfigService(pluginSpec, config, rootSettings, logDeprecation);
 
@@ -92,7 +89,12 @@ describe('plugin discovery/extend config service', () => {
       sinon.assert.calledWithExactly(getSchema, pluginSpec);
 
       sinon.assert.calledOnce(config.extendSchema);
-      sinon.assert.calledWithExactly(config.extendSchema, schema, rootSettings.foo.bar, configPrefix);
+      sinon.assert.calledWithExactly(
+        config.extendSchema,
+        schema,
+        rootSettings.foo.bar,
+        configPrefix
+      );
     });
 
     it('adds the schema for a plugin spec to its config prefix', async () => {
@@ -115,10 +117,10 @@ describe('plugin discovery/extend config service', () => {
         foo: {
           bar: {
             baz: {
-              test: 'hello world'
-            }
-          }
-        }
+              test: 'hello world',
+            },
+          },
+        },
       });
 
       expect(config.get('foo.bar.baz.test')).to.be('hello world');
@@ -132,11 +134,11 @@ describe('plugin discovery/extend config service', () => {
             bar: {
               baz: {
                 test: {
-                  'not a string': true
-                }
-              }
-            }
-          }
+                  'not a string': true,
+                },
+              },
+            },
+          },
         });
         throw new Error('Expected extendConfigService() to throw because of bad settings');
       } catch (error) {
@@ -147,15 +149,20 @@ describe('plugin discovery/extend config service', () => {
     it('calls logDeprecation() with deprecation messages', async () => {
       const config = Config.withDefaultSchema();
       const logDeprecation = sinon.stub();
-      await extendConfigService(pluginSpec, config, {
-        foo: {
-          bar: {
-            baz: {
-              oldTest: '123'
-            }
-          }
-        }
-      }, logDeprecation);
+      await extendConfigService(
+        pluginSpec,
+        config,
+        {
+          foo: {
+            bar: {
+              baz: {
+                oldTest: '123',
+              },
+            },
+          },
+        },
+        logDeprecation
+      );
       sinon.assert.calledOnce(logDeprecation);
       sinon.assert.calledWithExactly(logDeprecation, sinon.match('"oldTest" is deprecated'));
     });
@@ -166,10 +173,10 @@ describe('plugin discovery/extend config service', () => {
         foo: {
           bar: {
             baz: {
-              oldTest: '123'
-            }
-          }
-        }
+              oldTest: '123',
+            },
+          },
+        },
       });
       expect(config.get('foo.bar.baz.test')).to.be('123');
     });

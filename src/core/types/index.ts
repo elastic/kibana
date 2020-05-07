@@ -23,3 +23,6 @@
  */
 export * from './core_service';
 export * from './capabilities';
+export * from './app_category';
+export * from './ui_settings';
+export * from './saved_objects';

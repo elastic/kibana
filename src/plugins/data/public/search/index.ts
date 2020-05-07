@@ -17,11 +17,17 @@
  * under the License.
  */
 
-export { ISearchAppMountContext } from './i_search_app_mount_context';
+export * from './aggs';
+export * from './expressions';
+export * from './tabify';
 
-export { ISearchSetup } from './i_search_setup';
-
-export { ISearchContext } from './i_search_context';
+export {
+  ISearchSetup,
+  ISearchStart,
+  ISearchContext,
+  TSearchStrategyProvider,
+  ISearchStrategy,
+} from './types';
 
 export {
   ISearch,
@@ -31,12 +37,29 @@ export {
   ISearchGeneric,
 } from './i_search';
 
-export { TSearchStrategyProvider, ISearchStrategy } from './i_search_strategy';
-
 export { IEsSearchResponse, IEsSearchRequest, ES_SEARCH_STRATEGY } from '../../common/search';
 
-export { SYNC_SEARCH_STRATEGY } from './sync_search_strategy';
+export { ISyncSearchRequest, SYNC_SEARCH_STRATEGY } from './sync_search_strategy';
+export { esSearchStrategyProvider, getEsPreference } from './es_search';
 
 export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
 
-export { ISearchStart } from './search_service';
+export {
+  SearchError,
+  FetchOptions,
+  SearchRequest,
+  SearchResponse,
+  getSearchErrorType,
+} from './fetch';
+
+export {
+  ISearchSource,
+  SearchSource,
+  SearchSourceDependencies,
+  SearchSourceFields,
+  EsQuerySortValue,
+  SortDirection,
+} from './search_source';
+
+export { SearchInterceptor } from './search_interceptor';
+export { RequestTimeoutError } from './request_timeout_error';

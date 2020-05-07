@@ -10,7 +10,7 @@ Then you can drill down to view more detailed metrics or other information for t
 
 You can:
 
-* View your infrastructure metrics by hosts, Kubernetes pods or Docker containers.
+* View your infrastructure metrics by hosts, Kubernetes pods, or Docker containers.
 You can group and filter the data in various ways to help you identify the items that interest you.
 
 * View current and historic values for metrics such as CPU usage, memory usage, and network traffic for each component.
@@ -20,6 +20,8 @@ The available metrics depend on the kind of component being inspected.
 You can optionally save these views and add them to {kibana-ref}/dashboard.html[dashboards].
 
 * Seamlessly switch to view the corresponding logs, application traces or uptime information for a component.
+
+* Create alerts based on metric thresholds for one or more components.
 
 To get started, you need to <<xpack-metrics-getting-started, start collecting metrics data from your infrastructure>>. Then you can <<infra-ui, use the Metrics application to inspect and analyze your data>>.
 

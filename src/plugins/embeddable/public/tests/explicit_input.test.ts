@@ -26,20 +26,21 @@ import {
 import { FilterableEmbeddableFactory } from '../lib/test_samples/embeddables/filterable_embeddable_factory';
 import { CONTACT_CARD_EMBEDDABLE } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { SlowContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
-import { HELLO_WORLD_EMBEDDABLE_TYPE } from '../lib/test_samples/embeddables/hello_world/hello_world_embeddable';
-import { HelloWorldEmbeddableFactory } from '../lib/test_samples/embeddables/hello_world/hello_world_embeddable_factory';
+import {
+  HELLO_WORLD_EMBEDDABLE,
+  HelloWorldEmbeddableFactory,
+} from '../../../../../examples/embeddable_examples/public';
 import { FilterableContainer } from '../lib/test_samples/embeddables/filterable_container';
 import { isErrorEmbeddable } from '../lib';
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
 // eslint-disable-next-line
 import { coreMock } from '../../../../core/public/mocks';
-import { esFilters } from '../../../../plugins/data/public';
+import { esFilters, Filter } from '../../../../plugins/data/public';
 
 const { setup, doStart, coreStart, uiActions } = testPlugin(
   coreMock.createSetup(),
   coreMock.createStart()
 );
-const start = doStart();
 
 setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
 const factory = new SlowContactCardEmbeddableFactory({
@@ -47,10 +48,12 @@ const factory = new SlowContactCardEmbeddableFactory({
   execAction: uiActions.executeTriggerActions,
 });
 setup.registerEmbeddableFactory(CONTACT_CARD_EMBEDDABLE, factory);
-setup.registerEmbeddableFactory(HELLO_WORLD_EMBEDDABLE_TYPE, new HelloWorldEmbeddableFactory());
+setup.registerEmbeddableFactory(HELLO_WORLD_EMBEDDABLE, new HelloWorldEmbeddableFactory());
+
+const start = doStart();
 
 test('Explicit embeddable input mapped to undefined will default to inherited', async () => {
-  const derivedFilter: esFilters.Filter = {
+  const derivedFilter: Filter = {
     $state: { store: esFilters.FilterStateStore.APP_STATE },
     meta: { disabled: false, alias: 'name', negate: false },
     query: { match: {} },
@@ -85,6 +88,7 @@ test('Explicit embeddable input mapped to undefined with no inherited value will
       getEmbeddableFactory: start.getEmbeddableFactory,
       notifications: coreStart.notifications,
       overlays: coreStart.overlays,
+      application: coreStart.application,
       inspector: {} as any,
       SavedObjectFinder: () => null,
     }
@@ -133,6 +137,7 @@ test('Explicit input tests in async situations', (done: () => void) => {
       getEmbeddableFactory: start.getEmbeddableFactory,
       notifications: coreStart.notifications,
       overlays: coreStart.overlays,
+      application: coreStart.application,
       inspector: {} as any,
       SavedObjectFinder: () => null,
     }

@@ -1,0 +1,88 @@
+{
+  "services": [
+    {
+      "id": "road_map",
+      "name": { "en": "Road Map - Bright" },
+      "attribution": [
+        {
+          "label": { "en": "OpenStreetMap contributors" },
+          "url": { "en": "https://www.openstreetmap.org/copyright" }
+        },
+        { "label": { "en": "OpenMapTiles" }, "url": { "en": "https://openmaptiles.org" } },
+        { "label": { "en": "MapTiler" }, "url": { "en": "https://www.maptiler.com" } },
+        {
+          "label": { "en": "Elastic Maps Service" },
+          "url": { "en": "https://www.elastic.co/elastic-maps-service" }
+        }
+      ],
+      "formats": [
+        {
+          "locale": "en",
+          "format": "vector",
+          "url": "/v7.6/styles/osm-bright/style.json"
+        },
+        {
+          "locale": "en",
+          "format": "raster",
+          "url": "/v7.6/styles/osm-bright.json"
+        }
+      ]
+    },
+    {
+      "id": "road_map_desaturated",
+      "name": { "en": "Road Map" },
+      "attribution": [
+        {
+          "label": { "en": "OpenStreetMap contributors" },
+          "url": { "en": "https://www.openstreetmap.org/copyright" }
+        },
+        { "label": { "en": "OpenMapTiles" }, "url": { "en": "https://openmaptiles.org" } },
+        { "label": { "en": "MapTiler" }, "url": { "en": "https://www.maptiler.com" } },
+        {
+          "label": { "en": "Elastic Maps Service" },
+          "url": { "en": "https://www.elastic.co/elastic-maps-service" }
+        }
+      ],
+      "formats": [
+        {
+          "locale": "en",
+          "format": "vector",
+          "url": "/v7.6/styles/osm-bright-desaturated/style.json"
+        },
+        {
+          "locale": "en",
+          "format": "raster",
+          "url": "/v7.6/styles/osm-bright-desaturated.json"
+        }
+      ]
+    },
+    {
+      "id": "dark_map",
+      "name": { "en": "Dark Map" },
+      "attribution": [
+        {
+          "label": { "en": "OpenStreetMap contributors" },
+          "url": { "en": "https://www.openstreetmap.org/copyright" }
+        },
+        { "label": { "en": "OpenMapTiles" }, "url": { "en": "https://openmaptiles.org" } },
+        { "label": { "en": "MapTiler" }, "url": { "en": "https://www.maptiler.com" } },
+        {
+          "label": { "en": "Elastic Maps Service" },
+          "url": { "en": "https://www.elastic.co/elastic-maps-service" }
+        }
+      ],
+      "formats": [
+        {
+          "locale": "en",
+          "format": "vector",
+          "url": "/v7.6/styles/dark-matter/style.json"
+        },
+        {
+          "locale": "en",
+          "format": "raster",
+          "url": "/v7.6/styles/dark-matter.json"
+        }
+      ]
+    }
+  ]
+}

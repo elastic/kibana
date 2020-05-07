@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const randomness = getService('randomness');

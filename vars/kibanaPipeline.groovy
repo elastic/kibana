@@ -1,173 +1,76 @@
-def withWorkers(machineName, preWorkerClosure = {}, workerClosures = [:]) {
-  return {
-    jobRunner('tests-xl', true) {
-      withGcsArtifactUpload(machineName, {
-        try {
-          doSetup()
-          preWorkerClosure()
+def withPostBuildReporting(Closure closure) {
+  try {
+    closure()
+  } finally {
+    catchErrors {
+      runErrorReporter()
+    }
 
-          def nextWorker = 1
-          def worker = { workerClosure ->
-            def workerNumber = nextWorker
-            nextWorker++
+    catchErrors {
+      runbld.junit()
+    }
 
-            return {
-              // This delay helps smooth out CPU load caused by ES/Kibana instances starting up at the same time
-              def delay = (workerNumber-1)*20
-              sleep(delay)
-
-              workerClosure(workerNumber)
-            }
-          }
-
-          def workers = [:]
-          workerClosures.each { workerName, workerClosure ->
-            workers[workerName] = worker(workerClosure)
-          }
-
-          parallel(workers)
-        } finally {
-          catchError {
-            runErrorReporter()
-          }
-
-          catchError {
-            runbld.junit()
-          }
-
-          catchError {
-            publishJunit()
-          }
-        }
-      })
+    catchErrors {
+      publishJunit()
     }
   }
 }
 
-def getPostBuildWorker(name, closure) {
-  return { workerNumber ->
-    def kibanaPort = "61${workerNumber}1"
-    def esPort = "61${workerNumber}2"
-    def esTransportPort = "61${workerNumber}3"
+def functionalTestProcess(String name, Closure closure) {
+  return { processNumber ->
+    def kibanaPort = "61${processNumber}1"
+    def esPort = "61${processNumber}2"
+    def esTransportPort = "61${processNumber}3"
 
     withEnv([
-      "CI_WORKER_NUMBER=${workerNumber}",
+      "CI_PARALLEL_PROCESS_NUMBER=${processNumber}",
       "TEST_KIBANA_HOST=localhost",
       "TEST_KIBANA_PORT=${kibanaPort}",
       "TEST_KIBANA_URL=http://elastic:changeme@localhost:${kibanaPort}",
       "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
       "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
       "IS_PIPELINE_JOB=1",
+      "JOB=${name}",
+      "KBN_NP_PLUGINS_BUILT=true",
     ]) {
       closure()
     }
   }
 }
 
-def getOssCiGroupWorker(ciGroup) {
-  return getPostBuildWorker("ciGroup" + ciGroup, {
+def functionalTestProcess(String name, String script) {
+  return functionalTestProcess(name) {
+    retryable(name) {
+      runbld(script, "Execute ${name}")
+    }
+  }
+}
+
+def ossCiGroupProcess(ciGroup) {
+  return functionalTestProcess("ciGroup" + ciGroup) {
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=kibana-ciGroup${ciGroup}",
     ]) {
-      runbld("./test/scripts/jenkins_ci_group.sh", "Execute kibana-ciGroup${ciGroup}")
+      retryable("kibana-ciGroup${ciGroup}") {
+        runbld("./test/scripts/jenkins_ci_group.sh", "Execute kibana-ciGroup${ciGroup}")
+      }
     }
-  })
+  }
 }
 
-def getXpackCiGroupWorker(ciGroup) {
-  return getPostBuildWorker("xpack-ciGroup" + ciGroup, {
+def xpackCiGroupProcess(ciGroup) {
+  return functionalTestProcess("xpack-ciGroup" + ciGroup) {
     withEnv([
       "CI_GROUP=${ciGroup}",
       "JOB=xpack-kibana-ciGroup${ciGroup}",
     ]) {
-      runbld("./test/scripts/jenkins_xpack_ci_group.sh", "Execute xpack-kibana-ciGroup${ciGroup}")
-    }
-  })
-}
-
-def legacyJobRunner(name) {
-  return {
-    parallel([
-      "${name}": {
-        withEnv([
-          "JOB=${name}",
-        ]) {
-          jobRunner('linux && immutable', false) {
-            withGcsArtifactUpload(name, {
-              try {
-                runbld('.ci/run.sh', "Execute ${name}", true)
-              } finally {
-                catchError {
-                  runErrorReporter()
-                }
-
-                catchError {
-                  publishJunit()
-                }
-              }
-            })
-          }
-        }
-      }
-    ])
-  }
-}
-
-def jobRunner(label, useRamDisk, closure) {
-  node(label) {
-    if (useRamDisk) {
-      // Move to a temporary workspace, so that we can symlink the real workspace into /dev/shm
-      def originalWorkspace = env.WORKSPACE
-      ws('/tmp/workspace') {
-        sh(
-          script: """
-            mkdir -p /dev/shm/workspace
-            mkdir -p '${originalWorkspace}' # create all of the directories leading up to the workspace, if they don't exist
-            rm --preserve-root -rf '${originalWorkspace}' # then remove just the workspace, just in case there's stuff in it
-            ln -s /dev/shm/workspace '${originalWorkspace}'
-          """,
-          label: "Move workspace to RAM - /dev/shm/workspace"
-        )
-      }
-    }
-
-    def scmVars
-
-    // Try to clone from Github up to 8 times, waiting 15 secs between attempts
-    retry(8) {
-      try {
-        scmVars = checkout scm
-      } catch (ex) {
-        sleep 15
-        throw ex
-      }
-    }
-
-    withEnv([
-      "CI=true",
-      "HOME=${env.JENKINS_HOME}",
-      "PR_SOURCE_BRANCH=${env.ghprbSourceBranch ?: ''}",
-      "PR_TARGET_BRANCH=${env.ghprbTargetBranch ?: ''}",
-      "PR_AUTHOR=${env.ghprbPullAuthorLogin ?: ''}",
-      "TEST_BROWSER_HEADLESS=1",
-      "GIT_BRANCH=${scmVars.GIT_BRANCH}",
-    ]) {
-      withCredentials([
-        string(credentialsId: 'vault-addr', variable: 'VAULT_ADDR'),
-        string(credentialsId: 'vault-role-id', variable: 'VAULT_ROLE_ID'),
-        string(credentialsId: 'vault-secret-id', variable: 'VAULT_SECRET_ID'),
-      ]) {
-        // scm is configured to check out to the ./kibana directory
-        dir('kibana') {
-          closure()
-        }
+      retryable("xpack-kibana-ciGroup${ciGroup}") {
+        runbld("./test/scripts/jenkins_xpack_ci_group.sh", "Execute xpack-kibana-ciGroup${ciGroup}")
       }
     }
   }
 }
-
-// TODO what should happen if GCS, Junit, or email publishing fails? Unstable build? Failed build?
 
 def uploadGcsArtifact(uploadPrefix, pattern) {
   googleStorageUpload(
@@ -179,10 +82,23 @@ def uploadGcsArtifact(uploadPrefix, pattern) {
   )
 }
 
+def downloadCoverageArtifacts() {
+  def storageLocation = "gs://kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/"
+  def targetLocation = "/tmp/downloaded_coverage"
+
+  sh "mkdir -p '${targetLocation}' && gsutil -m cp -r '${storageLocation}' '${targetLocation}'"
+}
+
+def uploadCoverageArtifacts(prefix, pattern) {
+  def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/${prefix}"
+  uploadGcsArtifact(uploadPrefix, pattern)
+}
+
 def withGcsArtifactUpload(workerName, closure) {
   def uploadPrefix = "kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/${workerName}"
   def ARTIFACT_PATTERNS = [
     'target/kibana-*',
+    'target/kibana-siem/**/*.png',
     'target/junit/**/*',
     'test/**/screenshots/**/*.png',
     'test/functional/failure_debug/html/*.html',
@@ -197,13 +113,18 @@ def withGcsArtifactUpload(workerName, closure) {
     try {
       closure()
     } finally {
-      catchError {
+      catchErrors {
         ARTIFACT_PATTERNS.each { pattern ->
           uploadGcsArtifact(uploadPrefix, pattern)
         }
       }
     }
   })
+
+  if (env.CODE_COVERAGE) {
+    sh 'tar -czf kibana-coverage.tar.gz target/kibana-coverage/**/*'
+    uploadGcsArtifact("kibana-ci-artifacts/jobs/${env.JOB_NAME}/${BUILD_NUMBER}/coverage/${workerName}", 'kibana-coverage.tar.gz')
+  }
 }
 
 def publishJunit() {
@@ -225,7 +146,7 @@ def sendMail() {
 }
 
 def sendInfraMail() {
-  catchError {
+  catchErrors {
     step([
       $class: 'Mailer',
       notifyEveryUnstableBuild: true,
@@ -236,7 +157,7 @@ def sendInfraMail() {
 }
 
 def sendKibanaMail() {
-  catchError {
+  catchErrors {
     def buildStatus = buildUtils.getBuildStatus()
     if(params.NOTIFY_ON_FAILURE && buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') {
       emailext(
@@ -280,5 +201,28 @@ def runErrorReporter() {
     "Report failed tests, if necessary"
   )
 }
+
+def call(Map params = [:], Closure closure) {
+  def config = [timeoutMinutes: 135, checkPrChanges: false] + params
+
+  stage("Kibana Pipeline") {
+    timeout(time: config.timeoutMinutes, unit: 'MINUTES') {
+      timestamps {
+        ansiColor('xterm') {
+          if (config.checkPrChanges && githubPr.isPr()) {
+            print "Checking PR for changes to determine if CI needs to be run..."
+
+            if (prChanges.areChangesSkippable()) {
+              print "No changes requiring CI found in PR, skipping."
+              return
+            }
+          }
+          closure()
+        }
+      }
+    }
+  }
+}
+
 
 return this

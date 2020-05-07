@@ -19,11 +19,7 @@
 
 import React from 'react';
 
-import {
-  KuiLocalNav,
-  KuiLocalNavRow,
-  KuiLocalNavRowSection,
-} from '../../../../components';
+import { KuiLocalNav, KuiLocalNavRow, KuiLocalNavRowSection } from '../../../../components';
 
 export function LocalNavWithSearch() {
   return (
@@ -65,7 +61,9 @@ export function LocalNavWithSearch() {
             />
             <div className="kuiLocalSearchAssistedInput__assistance">
               <p className="kuiText">
-                <a className="kuiLink" href="#">API docs</a>
+                <a className="kuiLink" href="#">
+                  API docs
+                </a>
               </p>
             </div>
           </div>

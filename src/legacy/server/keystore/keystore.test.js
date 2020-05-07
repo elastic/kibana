@@ -17,16 +17,18 @@
  * under the License.
  */
 
-const mockProtectedKeystoreData = '1:4BnWfydL8NwFIQJg+VQKe0jlIs7uXtty6+++yaWPbSB'
-  + 'KIX3d9nPfQ20K1C6Xh26E/gMJAQ9jh7BxK0+W3lt/iDJBJn44wqX3pQ0189iGkNBL0ibDCc'
-  + 'tz4mRy6+hqwiLxiukpH8ELAJsff8LNNHr+gNzX/2k/GvB7nQ==';
+const mockProtectedKeystoreData =
+  '1:4BnWfydL8NwFIQJg+VQKe0jlIs7uXtty6+++yaWPbSB' +
+  'KIX3d9nPfQ20K1C6Xh26E/gMJAQ9jh7BxK0+W3lt/iDJBJn44wqX3pQ0189iGkNBL0ibDCc' +
+  'tz4mRy6+hqwiLxiukpH8ELAJsff8LNNHr+gNzX/2k/GvB7nQ==';
 
-const mockUnprotectedKeystoreData = '1:IxR0geiUTMJp8ueHDkqeUJ0I9eEw4NJPXIJi22UDy'
-  + 'fGfJSy4mHBBuGPkkAix/x/YFfIxo4tiKGdJ2oVTtU8LgKDkVoGdL+z7ylY4n3myatt6osqh'
-  + 'I4lzJ9MRy21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
+const mockUnprotectedKeystoreData =
+  '1:IxR0geiUTMJp8ueHDkqeUJ0I9eEw4NJPXIJi22UDy' +
+  'fGfJSy4mHBBuGPkkAix/x/YFfIxo4tiKGdJ2oVTtU8LgKDkVoGdL+z7ylY4n3myatt6osqh' +
+  'I4lzJ9MRy21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
 
 jest.mock('fs', () => ({
-  readFileSync: jest.fn().mockImplementation((path) => {
+  readFileSync: jest.fn().mockImplementation(path => {
     if (path.includes('data/unprotected')) {
       return JSON.stringify(mockUnprotectedKeystoreData);
     }
@@ -41,12 +43,14 @@ jest.mock('fs', () => ({
 
     throw { code: 'EACCES' };
   }),
-  existsSync: jest.fn().mockImplementation((path) => {
-    return path.includes('data/unprotected')
-      || path.includes('data/protected')
-      || path.includes('inaccessible');
+  existsSync: jest.fn().mockImplementation(path => {
+    return (
+      path.includes('data/unprotected') ||
+      path.includes('data/protected') ||
+      path.includes('inaccessible')
+    );
   }),
-  writeFileSync: jest.fn()
+  writeFileSync: jest.fn(),
 }));
 
 import sinon from 'sinon';
@@ -69,10 +73,9 @@ describe('Keystore', () => {
       try {
         const keystore = new Keystore(path);
         keystore.save();
-      } catch(e) {
+      } catch (e) {
         expect(e.code).toEqual('EACCES');
       }
-
     });
 
     it('creates keystore with version', () => {
@@ -102,14 +105,14 @@ describe('Keystore', () => {
 
     it('can load a password protected keystore', () => {
       const keystore = new Keystore('/data/protected.keystore', 'changeme');
-      expect(keystore.data).toEqual({ 'a1.b2.c3': 'foo', 'a2': 'bar' });
+      expect(keystore.data).toEqual({ 'a1.b2.c3': 'foo', a2: 'bar' });
     });
 
     it('throws unable to read keystore', () => {
       expect.assertions(1);
       try {
         new Keystore('/data/protected.keystore', 'wrongpassword');
-      } catch(e) {
+      } catch (e) {
         expect(e).toBeInstanceOf(Keystore.errors.UnableToReadKeystore);
       }
     });
@@ -157,8 +160,8 @@ describe('Keystore', () => {
 
       expect(keystore.data).toEqual({
         'a1.b2.c3': 'foo',
-        'a2': 'bar',
-        'a3': 'baz',
+        a2: 'bar',
+        a3: 'baz',
       });
     });
   });
@@ -169,7 +172,7 @@ describe('Keystore', () => {
       keystore.remove('a1.b2.c3');
 
       expect(keystore.data).toEqual({
-        'a2': 'bar',
+        a2: 'bar',
       });
     });
   });
@@ -199,9 +202,10 @@ describe('Keystore', () => {
   describe('decrypt', () => {
     const text = 'foo';
     const password = 'changeme';
-    const ciphertext = 'ctvRsD0l0u958QoPuINQX+wgspbXt2+7IJ7gNbCND2dCGZxYOCwMH9'
-    + 'MEdZZG4cevSrnhYOaxh24POFhtisSdCSlLWsKNQU8NK1zqNQ3RRP8HxayZJB7ly9uOLbDS+'
-    + 'Ew=';
+    const ciphertext =
+      'ctvRsD0l0u958QoPuINQX+wgspbXt2+7IJ7gNbCND2dCGZxYOCwMH9' +
+      'MEdZZG4cevSrnhYOaxh24POFhtisSdCSlLWsKNQU8NK1zqNQ3RRP8HxayZJB7ly9uOLbDS+' +
+      'Ew=';
 
     it('can decrypt data', () => {
       const data = Keystore.decrypt(ciphertext, password);
@@ -212,7 +216,7 @@ describe('Keystore', () => {
       expect.assertions(1);
       try {
         Keystore.decrypt(ciphertext, 'invalid');
-      } catch(e) {
+      } catch (e) {
         expect(e).toBeInstanceOf(Keystore.errors.UnableToReadKeystore);
       }
     });
@@ -221,7 +225,7 @@ describe('Keystore', () => {
       expect.assertions(1);
       try {
         Keystore.decrypt('thisisinvalid', password);
-      } catch(e) {
+      } catch (e) {
         expect(e).toBeInstanceOf(Keystore.errors.UnableToReadKeystore);
       }
     });

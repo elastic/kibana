@@ -17,7 +17,13 @@ export default function({ getService }: { getService: (service: string) => any }
         runningAverageTasksPerSecond,
         runningAverageLeadTime,
         // how often things happen in Task Manager
-        cycles: { fillPoolStarts, fillPoolCycles, fillPoolBail, fillPoolBailNoTasks },
+        cycles: {
+          fillPoolStarts,
+          fillPoolCycles,
+          claimedOnRerunCycle,
+          fillPoolBail,
+          fillPoolBailNoTasks,
+        },
         claimAvailableTasksNoTasks,
         claimAvailableTasksNoAvailableWorkers,
         numberOfTasksRanOverall,
@@ -70,9 +76,11 @@ export default function({ getService }: { getService: (service: string) => any }
           )}]---> next markAsRunning`
         );
         log.info(`Duration of Perf Test: ${bright(perfTestDuration)}`);
-        log.info(`Activity within Task Poller: ${bright(activityDuration)}`);
+        log.info(`Activity within Task Pool: ${bright(activityDuration)}`);
         log.info(`Inactivity due to Sleep: ${bright(sleepDuration)}`);
-        log.info(`Polling Cycles: ${colorizeCycles(fillPoolStarts, fillPoolCycles, fillPoolBail)}`);
+        log.info(
+          `Polling Cycles: ${colorizeCycles(fillPoolStarts, fillPoolCycles, claimedOnRerunCycle)}`
+        );
         if (fillPoolBail > 0) {
           log.info(`  ⮑ Bailed due to:`);
           if (fillPoolBailNoTasks > 0) {
@@ -127,7 +135,11 @@ function colorize(avg: number) {
   return avg < 500 ? green(`${avg}`) : avg < 1000 ? cyan(`${avg}`) : red(`${avg}`);
 }
 
-function colorizeCycles(fillPoolStarts: number, fillPoolCycles: number, fillPoolBail: number) {
+function colorizeCycles(
+  fillPoolStarts: number,
+  fillPoolCycles: number,
+  claimedOnRerunCycle: number
+) {
   const perc = (fillPoolCycles * 100) / fillPoolStarts;
   const colorFunc = perc >= 100 ? green : perc >= 50 ? cyan : red;
   return (
@@ -135,7 +147,7 @@ function colorizeCycles(fillPoolStarts: number, fillPoolCycles: number, fillPool
     bright(`${fillPoolStarts}`) +
     ` cycles, of which ` +
     colorFunc(`${fillPoolCycles}`) +
-    ` were reran before bailing`
+    ` were reran (of which ${claimedOnRerunCycle} resulted in claiming) before bailing`
   );
 }
 

@@ -12,14 +12,12 @@ import {
 import { format } from 'url';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { modifyUrl } from '../utils/url';
-import { LegacyAPI } from '../../plugin';
 import { getSpaceIdFromPath } from '../../../common';
 
 export interface OnRequestInterceptorDeps {
-  getLegacyAPI(): LegacyAPI;
   http: CoreSetup['http'];
 }
-export function initSpacesOnRequestInterceptor({ getLegacyAPI, http }: OnRequestInterceptorDeps) {
+export function initSpacesOnRequestInterceptor({ http }: OnRequestInterceptorDeps) {
   http.registerOnPreAuth(async function spacesOnPreAuthHandler(
     request: KibanaRequest,
     response: LifecycleResponseFactory,

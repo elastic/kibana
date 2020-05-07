@@ -1,0 +1,15 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "action:uuid-actionId",
+    "source": {
+      "type": "action",
+      "action": {
+        "actionTypeId": "test.not-enabled",
+        "name": "an action created before test.not-enabled was disabled",
+        "config": {}
+      }
+    }
+  }
+}

@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { cryptoFactory } from '../../../server/lib/crypto';
-import { CryptoFactory, ServerFacade, Logger } from '../../../types';
+import { Logger } from '../../../types';
 
 interface HasEncryptedHeaders {
   headers?: string;
@@ -17,22 +17,25 @@ export const decryptJobHeaders = async <
   JobParamsType,
   JobDocPayloadType extends HasEncryptedHeaders
 >({
+  encryptionKey,
   job,
-  server,
   logger,
 }: {
+  encryptionKey?: string;
   job: JobDocPayloadType;
-  server: ServerFacade;
   logger: Logger;
-}): Promise<{
-  job: JobDocPayloadType;
-  server: ServerFacade;
-  decryptedHeaders: Record<string, string>;
-}> => {
-  const crypto: CryptoFactory = cryptoFactory(server);
+}): Promise<Record<string, string>> => {
   try {
-    const decryptedHeaders: Record<string, string> = await crypto.decrypt(job.headers);
-    return { job, decryptedHeaders, server };
+    if (typeof job.headers !== 'string') {
+      throw new Error(
+        i18n.translate('xpack.reporting.exportTypes.common.missingJobHeadersErrorMessage', {
+          defaultMessage: 'Job headers are missing',
+        })
+      );
+    }
+    const crypto = cryptoFactory(encryptionKey);
+    const decryptedHeaders = (await crypto.decrypt(job.headers)) as Record<string, string>;
+    return decryptedHeaders;
   } catch (err) {
     logger.error(err);
 

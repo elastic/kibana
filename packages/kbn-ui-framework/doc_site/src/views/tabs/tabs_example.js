@@ -28,7 +28,7 @@ import {
   GuideSection,
   GuideSectionTypes,
   GuideText,
-  GuideCode
+  GuideCode,
 } from '../../components';
 
 import Tabs from './tabs';
@@ -39,13 +39,16 @@ export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Tabs"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: tabsSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: tabsHtml,
-      }]}
+      source={[
+        {
+          type: GuideSectionTypes.JS,
+          code: tabsSource,
+        },
+        {
+          type: GuideSectionTypes.HTML,
+          code: tabsHtml,
+        },
+      ]}
     >
       <GuideText>
         The <GuideCode>KuiTabs</GuideCode> component should have
@@ -56,6 +59,5 @@ export default props => (
         <Tabs />
       </GuideDemo>
     </GuideSection>
-
   </GuidePage>
 );

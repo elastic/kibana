@@ -5,43 +5,33 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { cryptoFactory, LevelLogger } from '../../../server/lib';
+import { CONTENT_TYPE_CSV, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
+import { ReportingCore } from '../../../server';
+import { cryptoFactory } from '../../../server/lib';
 import {
   ExecuteJobFactory,
   ImmediateExecuteFn,
-  JobDocOutputExecuted,
-  ServerFacade,
+  JobDocOutput,
+  Logger,
   RequestFacade,
 } from '../../../types';
-import {
-  CONTENT_TYPE_CSV,
-  CSV_FROM_SAVEDOBJECT_JOB_TYPE,
-  PLUGIN_ID,
-} from '../../../common/constants';
-import {
-  CsvResultFromSearch,
-  JobParamsPanelCsv,
-  SearchPanel,
-  JobDocPayloadPanelCsv,
-  FakeRequest,
-} from '../types';
+import { CsvResultFromSearch } from '../../csv/types';
+import { FakeRequest, JobDocPayloadPanelCsv, JobParamsPanelCsv, SearchPanel } from '../types';
 import { createGenerateCsv } from './lib';
 
 export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
   JobParamsPanelCsv
->> = function executeJobFactoryFn(server: ServerFacade) {
-  const crypto = cryptoFactory(server);
-  const logger = LevelLogger.createForServer(server, [
-    PLUGIN_ID,
-    CSV_FROM_SAVEDOBJECT_JOB_TYPE,
-    'execute-job',
-  ]);
+>> = async function executeJobFactoryFn(reporting: ReportingCore, parentLogger: Logger) {
+  const config = reporting.getConfig();
+  const crypto = cryptoFactory(config.get('encryptionKey'));
+  const logger = parentLogger.clone([CSV_FROM_SAVEDOBJECT_JOB_TYPE, 'execute-job']);
+  const generateCsv = createGenerateCsv(reporting, parentLogger);
 
   return async function executeJob(
     jobId: string | null,
     job: JobDocPayloadPanelCsv,
     realRequest?: RequestFacade
-  ): Promise<JobDocOutputExecuted> {
+  ): Promise<JobDocOutput> {
     // There will not be a jobID for "immediate" generation.
     // jobID is only for "queued" jobs
     // Use the jobID as a logging tag or "immediate"
@@ -61,14 +51,27 @@ export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
 
     let requestObject: RequestFacade | FakeRequest;
     if (isImmediate && realRequest) {
-      jobLogger.info(`Executing job from immediate API`);
+      jobLogger.info(`Executing job from Immediate API using request context`);
       requestObject = realRequest;
     } else {
       jobLogger.info(`Executing job async using encrypted headers`);
-      let decryptedHeaders;
+      let decryptedHeaders: Record<string, unknown>;
       const serializedEncryptedHeaders = job.headers;
       try {
-        decryptedHeaders = await crypto.decrypt(serializedEncryptedHeaders);
+        if (typeof serializedEncryptedHeaders !== 'string') {
+          throw new Error(
+            i18n.translate(
+              'xpack.reporting.exportTypes.csv_from_savedobject.executeJob.missingJobHeadersErrorMessage',
+              {
+                defaultMessage: 'Job headers are missing',
+              }
+            )
+          );
+        }
+        decryptedHeaders = (await crypto.decrypt(serializedEncryptedHeaders)) as Record<
+          string,
+          unknown
+        >;
       } catch (err) {
         jobLogger.error(err);
         throw new Error(
@@ -83,20 +86,15 @@ export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
         );
       }
 
-      requestObject = {
-        headers: decryptedHeaders,
-        server,
-      };
+      requestObject = { headers: decryptedHeaders };
     }
 
     let content: string;
     let maxSizeReached = false;
     let size = 0;
     try {
-      const generateCsv = createGenerateCsv(jobLogger);
       const generateResults: CsvResultFromSearch = await generateCsv(
         requestObject,
-        server,
         visType as string,
         panel,
         jobParams

@@ -17,7 +17,9 @@
  * @return {Function}: callCluster function
  */
 export function callClusterFactory(server) {
-  const { callWithRequest, callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
+  const { callWithRequest, callWithInternalUser } = server.plugins.elasticsearch.getCluster(
+    'admin'
+  );
 
   return {
     /*
@@ -38,6 +40,6 @@ export function callClusterFactory(server) {
        * internal system user
        */
       return callWithInternalUser;
-    }
+    },
   };
 }

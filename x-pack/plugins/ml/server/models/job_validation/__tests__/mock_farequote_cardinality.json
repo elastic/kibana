@@ -1,0 +1,7 @@
+{
+  "took": 0,
+  "timed_out": false,
+  "_shards": { "total": 1, "successful": 1, "skipped": 0, "failed": 0 },
+  "hits": { "total": 86274, "max_score": 0, "hits": [] },
+  "aggregations": { "airline_cardinality": { "value": 19 }, "airline_count": { "doc_count": 86274 } }
+}

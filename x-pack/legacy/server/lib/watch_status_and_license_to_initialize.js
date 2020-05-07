@@ -25,7 +25,7 @@ const propagateRedStatusAndScaleRetry = () => {
     Rx.concat(
       Rx.of({
         state: 'red',
-        message: err.message
+        message: err.message,
       }),
       Rx.timer(calculateDuration(++i)).pipe(mergeMap(() => caught))
     );
@@ -36,24 +36,27 @@ export function watchStatusAndLicenseToInitialize(xpackMainPlugin, downstreamPlu
   const xpackInfoFeature = xpackInfo.feature(downstreamPlugin.id);
 
   const upstreamStatus = xpackMainPlugin.status;
-  const currentStatus$ = Rx
-    .of({
-      state: upstreamStatus.state,
-      message: upstreamStatus.message,
-    });
-  const newStatus$ = Rx
-    .fromEvent(upstreamStatus, 'change', null, (previousState, previousMsg, state, message) => {
+  const currentStatus$ = Rx.of({
+    state: upstreamStatus.state,
+    message: upstreamStatus.message,
+  });
+  const newStatus$ = Rx.fromEvent(
+    upstreamStatus,
+    'change',
+    null,
+    (previousState, previousMsg, state, message) => {
       return {
         state,
         message,
       };
-    });
+    }
+  );
   const status$ = Rx.merge(currentStatus$, newStatus$);
 
   const currentLicense$ = Rx.of(xpackInfoFeature.getLicenseCheckResults());
-  const newLicense$ = Rx
-    .fromEventPattern(xpackInfo.onLicenseInfoChange.bind(xpackInfo))
-    .pipe(map(() => xpackInfoFeature.getLicenseCheckResults()));
+  const newLicense$ = Rx.fromEventPattern(xpackInfo.onLicenseInfoChange.bind(xpackInfo)).pipe(
+    map(() => xpackInfoFeature.getLicenseCheckResults())
+  );
   const license$ = Rx.merge(currentLicense$, newLicense$);
 
   Rx.combineLatest(status$, license$)
@@ -64,14 +67,13 @@ export function watchStatusAndLicenseToInitialize(xpackMainPlugin, downstreamPlu
           return Rx.of({ state: status.state, message: status.message });
         }
 
-        return Rx.defer(() => initialize(license))
-          .pipe(
-            map(() => ({
-              state: 'green',
-              message: 'Ready',
-            })),
-            catchError(propagateRedStatusAndScaleRetry())
-          );
+        return Rx.defer(() => initialize(license)).pipe(
+          map(() => ({
+            state: 'green',
+            message: 'Ready',
+          })),
+          catchError(propagateRedStatusAndScaleRetry())
+        );
       }),
       tap(({ state, message }) => {
         downstreamPlugin.status[state](message);

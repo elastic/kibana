@@ -104,7 +104,7 @@ function wrapQueryBarTopRowInContext(testProps: any) {
   return (
     <I18nProvider>
       <KibanaContextProvider services={services}>
-        <QueryBarTopRow.WrappedComponent {...defaultOptions} {...testProps} />
+        <QueryBarTopRow {...defaultOptions} {...testProps} />
       </KibanaContextProvider>
     </I18nProvider>
   );

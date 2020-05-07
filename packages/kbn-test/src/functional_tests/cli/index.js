@@ -18,4 +18,6 @@
  */
 
 export { runTestsCli } from './run_tests/cli';
+export { processOptions as processRunTestsCliOptions } from './run_tests/args';
 export { startServersCli } from './start_servers/cli';
+export { processOptions as processStartServersCliOptions } from './start_servers/args';

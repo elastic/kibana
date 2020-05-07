@@ -29,7 +29,7 @@ async function concatToString(streams) {
   return await createPromiseFromStreams([
     ...streams,
     createMapStream(buff => buff.toString('utf8')),
-    createConcatStream('')
+    createConcatStream(''),
   ]);
 }
 
@@ -38,7 +38,7 @@ describe('replaceStream', () => {
     const chunks = await createPromiseFromStreams([
       createListStream([Buffer.from('foo'), Buffer.from('bar')]),
       createReplaceStream('o', '0'),
-      createConcatStream([])
+      createConcatStream([]),
     ]);
 
     chunks.forEach(chunk => {
@@ -50,7 +50,7 @@ describe('replaceStream', () => {
     const chunks = await createPromiseFromStreams([
       createListStream(['foo', 'bar']),
       createReplaceStream('o', '0'),
-      createConcatStream([])
+      createConcatStream([]),
     ]);
 
     chunks.forEach(chunk => {
@@ -63,56 +63,68 @@ describe('replaceStream', () => {
   });
 
   test('replaces multiple single-char instances in a single chunk', async () => {
-    expect(await concatToString([
-      createListStream([Buffer.from('f00 bar')]),
-      createReplaceStream('0', 'o'),
-    ])).toBe('foo bar');
+    expect(
+      await concatToString([
+        createListStream([Buffer.from('f00 bar')]),
+        createReplaceStream('0', 'o'),
+      ])
+    ).toBe('foo bar');
   });
 
   test('replaces multiple single-char instances in multiple chunks', async () => {
-    expect(await concatToString([
-      createListStream([Buffer.from('f0'), Buffer.from('0 bar')]),
-      createReplaceStream('0', 'o'),
-    ])).toBe('foo bar');
+    expect(
+      await concatToString([
+        createListStream([Buffer.from('f0'), Buffer.from('0 bar')]),
+        createReplaceStream('0', 'o'),
+      ])
+    ).toBe('foo bar');
   });
 
   test('replaces single multi-char instances in single chunks', async () => {
-    expect(await concatToString([
-      createListStream([Buffer.from('f0'), Buffer.from('0 bar')]),
-      createReplaceStream('0', 'o'),
-    ])).toBe('foo bar');
+    expect(
+      await concatToString([
+        createListStream([Buffer.from('f0'), Buffer.from('0 bar')]),
+        createReplaceStream('0', 'o'),
+      ])
+    ).toBe('foo bar');
   });
 
   test('replaces multiple multi-char instances in single chunks', async () => {
-    expect(await concatToString([
-      createListStream([Buffer.from('foo ba'), Buffer.from('r b'), Buffer.from('az bar')]),
-      createReplaceStream('bar', '*'),
-    ])).toBe('foo * baz *');
+    expect(
+      await concatToString([
+        createListStream([Buffer.from('foo ba'), Buffer.from('r b'), Buffer.from('az bar')]),
+        createReplaceStream('bar', '*'),
+      ])
+    ).toBe('foo * baz *');
   });
 
   test('replaces multi-char instance that stretches multiple chunks', async () => {
-    expect(await concatToString([
-      createListStream([
-        Buffer.from('foo supe'),
-        Buffer.from('rcalifra'),
-        Buffer.from('gilistic'),
-        Buffer.from('expialid'),
-        Buffer.from('ocious bar'),
-      ]),
-      createReplaceStream('supercalifragilisticexpialidocious', '*'),
-    ])).toBe('foo * bar');
+    expect(
+      await concatToString([
+        createListStream([
+          Buffer.from('foo supe'),
+          Buffer.from('rcalifra'),
+          Buffer.from('gilistic'),
+          Buffer.from('expialid'),
+          Buffer.from('ocious bar'),
+        ]),
+        createReplaceStream('supercalifragilisticexpialidocious', '*'),
+      ])
+    ).toBe('foo * bar');
   });
 
   test('ignores missing multi-char instance', async () => {
-    expect(await concatToString([
-      createListStream([
-        Buffer.from('foo supe'),
-        Buffer.from('rcalifra'),
-        Buffer.from('gili stic'),
-        Buffer.from('expialid'),
-        Buffer.from('ocious bar'),
-      ]),
-      createReplaceStream('supercalifragilisticexpialidocious', '*'),
-    ])).toBe('foo supercalifragili sticexpialidocious bar');
+    expect(
+      await concatToString([
+        createListStream([
+          Buffer.from('foo supe'),
+          Buffer.from('rcalifra'),
+          Buffer.from('gili stic'),
+          Buffer.from('expialid'),
+          Buffer.from('ocious bar'),
+        ]),
+        createReplaceStream('supercalifragilisticexpialidocious', '*'),
+      ])
+    ).toBe('foo supercalifragili sticexpialidocious bar');
   });
 });

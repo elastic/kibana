@@ -41,6 +41,10 @@ configService.atPath.mockReturnValue(
       enabled: false,
     },
     compression: { enabled: true },
+    xsrf: {
+      disableProtection: true,
+      whitelist: [],
+    },
   } as any)
 );
 
@@ -51,13 +55,14 @@ const defaultContext: CoreContext = {
   configService,
 };
 
+export const createCoreContext = (overrides: Partial<CoreContext> = {}): CoreContext => ({
+  ...defaultContext,
+  ...overrides,
+});
+
 /**
  * Creates a concrete HttpServer with a mocked context.
  */
 export const createHttpServer = (overrides: Partial<CoreContext> = {}): HttpService => {
-  const context = {
-    ...defaultContext,
-    ...overrides,
-  };
-  return new HttpService(context);
+  return new HttpService(createCoreContext(overrides));
 };

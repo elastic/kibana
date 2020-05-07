@@ -20,10 +20,10 @@
 export { LoadingIndicator } from './loading_indicator';
 export {
   Header,
-  HeaderWrapper,
   ChromeHelpExtensionMenuLink,
   ChromeHelpExtensionMenuCustomLink,
   ChromeHelpExtensionMenuDiscussLink,
   ChromeHelpExtensionMenuDocumentationLink,
   ChromeHelpExtensionMenuGitHubLink,
+  NavType,
 } from './header';

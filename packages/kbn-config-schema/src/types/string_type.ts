@@ -45,7 +45,7 @@ export class StringType extends Type<string> {
     if (options.minLength !== undefined) {
       schema = schema.custom(value => {
         if (value.length < options.minLength!) {
-          return `value is [${value}] but it must have a minimum length of [${options.minLength}].`;
+          return `value has length [${value.length}] but it must have a minimum length of [${options.minLength}].`;
         }
       });
     }
@@ -53,7 +53,7 @@ export class StringType extends Type<string> {
     if (options.maxLength !== undefined) {
       schema = schema.custom(value => {
         if (value.length > options.maxLength!) {
-          return `value is [${value}] but it must have a maximum length of [${options.maxLength}].`;
+          return `value has length [${value.length}] but it must have a maximum length of [${options.maxLength}].`;
         }
       });
     }
@@ -66,7 +66,7 @@ export class StringType extends Type<string> {
       case 'any.required':
         return `expected value of type [string] but got [${typeDetect(value)}]`;
       case 'string.hostname':
-        return `value is [${value}] but it must be a valid hostname (see RFC 1123).`;
+        return `value must be a valid hostname (see RFC 1123).`;
     }
   }
 }

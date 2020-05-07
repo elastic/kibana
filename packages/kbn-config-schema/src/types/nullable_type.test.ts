@@ -94,13 +94,21 @@ test('returns null even if contained type has a default value', () => {
 test('validates contained type', () => {
   const type = schema.nullable(schema.string({ maxLength: 1 }));
 
-  expect(() => type.validate('foo')).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate('foo')).toThrowErrorMatchingInlineSnapshot(`
+"types that failed validation:
+- [0]: value has length [3] but it must have a maximum length of [1].
+- [1]: expected value to equal [null]"
+`);
 });
 
 test('validates basic type', () => {
   const type = schema.nullable(schema.string());
 
-  expect(() => type.validate(666)).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate(666)).toThrowErrorMatchingInlineSnapshot(`
+"types that failed validation:
+- [0]: expected value of type [string] but got [number]
+- [1]: expected value to equal [null]"
+`);
 });
 
 test('validates type in object', () => {
@@ -121,11 +129,19 @@ test('validates type errors in object', () => {
     bar: schema.nullable(schema.boolean()),
   });
 
-  expect(() => type.validate({ foo: 'ab' })).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate({ foo: 'ab' })).toThrowErrorMatchingInlineSnapshot(`
+"[foo]: types that failed validation:
+- [foo.0]: value has length [2] but it must have a maximum length of [1].
+- [foo.1]: expected value to equal [null]"
+`);
 });
 
 test('includes namespace in failure', () => {
   const type = schema.nullable(schema.string({ maxLength: 1 }));
 
-  expect(() => type.validate('foo', {}, 'foo-namespace')).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate('foo', {}, 'foo-namespace')).toThrowErrorMatchingInlineSnapshot(`
+"[foo-namespace]: types that failed validation:
+- [foo-namespace.0]: value has length [3] but it must have a maximum length of [1].
+- [foo-namespace.1]: expected value to equal [null]"
+`);
 });

@@ -28,7 +28,7 @@ test('alias', () => {
     meta: {
       ...phraseFilter.meta,
       alias: 'geo.coordinates in US',
-    }
+    },
   };
   const component = shallow(<FilterLabel filter={filter} />);
   expect(component).toMatchSnapshot();
@@ -41,7 +41,7 @@ test('negated alias', () => {
       ...phraseFilter.meta,
       alias: 'geo.coordinates in US',
       negate: true,
-    }
+    },
   };
   const component = shallow(<FilterLabel filter={filter} />);
   expect(component).toMatchSnapshot();

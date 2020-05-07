@@ -17,12 +17,8 @@
  * under the License.
  */
 
-import React, {
-  Component,
-} from 'react';
-import {
-  KuiSelect,
-} from '../../../../components';
+import React, { Component } from 'react';
+import { KuiSelect } from '../../../../components';
 
 class KuiSelectExample extends Component {
   state = {
@@ -35,20 +31,17 @@ class KuiSelectExample extends Component {
 
   handleChange = (event, key) => {
     this.setState({ [key]: event.target.value });
-  }
+  };
 
   render() {
     return (
       <div>
-        <KuiSelect
-          value={this.state.value1}
-          onChange={event => this.handleChange(event, 'value1')}
-        >
-          <option value="apple" >Apple</option>
-          <option value="bread" >Bread</option>
-          <option value="cheese" >Cheese</option>
+        <KuiSelect value={this.state.value1} onChange={event => this.handleChange(event, 'value1')}>
+          <option value="apple">Apple</option>
+          <option value="bread">Bread</option>
+          <option value="cheese">Cheese</option>
         </KuiSelect>
-        <hr className="guideBreak"/>
+        <hr className="guideBreak" />
         <KuiSelect
           value={this.state.value2}
           onChange={event => this.handleChange(event, 'value2')}
@@ -56,7 +49,7 @@ class KuiSelectExample extends Component {
         >
           <option>Disabled</option>
         </KuiSelect>
-        <hr className="guideBreak"/>
+        <hr className="guideBreak" />
         <KuiSelect
           value={this.state.value3}
           onChange={event => this.handleChange(event, 'value3')}
@@ -64,7 +57,7 @@ class KuiSelectExample extends Component {
         >
           <option>Invalid</option>
         </KuiSelect>
-        <hr className="guideBreak"/>
+        <hr className="guideBreak" />
         <KuiSelect
           value={this.state.value4}
           onChange={event => this.handleChange(event, 'value4')}
@@ -72,7 +65,7 @@ class KuiSelectExample extends Component {
         >
           <option>Small</option>
         </KuiSelect>
-        <hr className="guideBreak"/>
+        <hr className="guideBreak" />
         <KuiSelect
           value={this.state.value5}
           onChange={event => this.handleChange(event, 'value5')}

@@ -59,7 +59,7 @@ const columns = [
           ))}
       </EuiButtonEmpty>
     ),
-    dataType: 'string',
+    dataType: 'string' as const,
     sortable: ({ sort }: { sort: string }) => sort,
   },
 ];
@@ -72,7 +72,7 @@ const pagination = {
 const sorting = {
   sort: {
     field: 'title',
-    direction: 'asc',
+    direction: 'asc' as const,
   },
 };
 

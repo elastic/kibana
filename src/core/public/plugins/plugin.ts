@@ -17,9 +17,11 @@
  * under the License.
  */
 
+import { Subject } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { DiscoveredPlugin, PluginOpaqueId } from '../../server';
 import { PluginInitializerContext } from './plugin_context';
-import { loadPluginBundle } from './plugin_loader';
+import { read } from './plugin_reader';
 import { CoreStart, CoreSetup } from '..';
 
 /**
@@ -33,7 +35,7 @@ export interface Plugin<
   TPluginsSetup extends object = object,
   TPluginsStart extends object = object
 > {
-  setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
+  setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
   start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
   stop?(): void;
 }
@@ -67,8 +69,10 @@ export class PluginWrapper<
   public readonly configPath: DiscoveredPlugin['configPath'];
   public readonly requiredPlugins: DiscoveredPlugin['requiredPlugins'];
   public readonly optionalPlugins: DiscoveredPlugin['optionalPlugins'];
-  private initializer?: PluginInitializer<TSetup, TStart, TPluginsSetup, TPluginsStart>;
   private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+
+  private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
+  public readonly startDependencies = this.startDependencies$.pipe(first()).toPromise();
 
   constructor(
     public readonly discoveredPlugin: DiscoveredPlugin,
@@ -82,25 +86,13 @@ export class PluginWrapper<
   }
 
   /**
-   * Loads the plugin's bundle into the browser. Should be called in parallel with all plugins
-   * using `Promise.all`. Must be called before `setup`.
-   * @param addBasePath Function that adds the base path to a string for plugin bundle path.
-   */
-  public async load(addBasePath: (path: string) => string) {
-    this.initializer = await loadPluginBundle<TSetup, TStart, TPluginsSetup, TPluginsStart>(
-      addBasePath,
-      this.name
-    );
-  }
-
-  /**
    * Instantiates plugin and calls `setup` function exposed by the plugin initializer.
    * @param setupContext Context that consists of various core services tailored specifically
    * for the `setup` lifecycle event.
    * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `setup` function.
    */
-  public async setup(setupContext: CoreSetup, plugins: TPluginsSetup) {
+  public async setup(setupContext: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup) {
     this.instance = await this.createPluginInstance();
 
     return await this.instance.setup(setupContext, plugins);
@@ -118,7 +110,11 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
-    return await this.instance.start(startContext, plugins);
+    const startContract = await this.instance.start(startContext, plugins);
+
+    this.startDependencies$.next([startContext, plugins, startContract]);
+
+    return startContract;
   }
 
   /**
@@ -137,11 +133,14 @@ export class PluginWrapper<
   }
 
   private async createPluginInstance() {
-    if (this.initializer === undefined) {
-      throw new Error(`Plugin "${this.name}" can't be setup since its bundle isn't loaded.`);
-    }
+    const initializer = read(this.name) as PluginInitializer<
+      TSetup,
+      TStart,
+      TPluginsSetup,
+      TPluginsStart
+    >;
 
-    const instance = this.initializer(this.initializerContext);
+    const instance = initializer(this.initializerContext);
 
     if (typeof instance.setup !== 'function') {
       throw new Error(`Instance of plugin "${this.name}" does not define "setup" function.`);

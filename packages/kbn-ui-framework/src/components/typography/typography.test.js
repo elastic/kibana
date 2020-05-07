@@ -21,11 +21,7 @@ import React from 'react';
 import { render } from 'enzyme';
 import { requiredProps } from '../../test/required_props';
 
-import {
-  KuiTitle,
-  KuiText,
-  SIZES,
-} from './typography';
+import { KuiTitle, KuiText, SIZES } from './typography';
 
 describe('KuiTitle', () => {
   test('is rendered', () => {
@@ -35,8 +31,7 @@ describe('KuiTitle', () => {
       </KuiTitle>
     );
 
-    expect(component)
-      .toMatchSnapshot();
+    expect(component).toMatchSnapshot();
   });
 
   describe('renders size', () => {
@@ -48,8 +43,7 @@ describe('KuiTitle', () => {
           </KuiTitle>
         );
 
-        expect(component)
-          .toMatchSnapshot();
+        expect(component).toMatchSnapshot();
       });
     });
   });
@@ -63,7 +57,6 @@ describe('KuiText', () => {
       </KuiText>
     );
 
-    expect(component)
-      .toMatchSnapshot();
+    expect(component).toMatchSnapshot();
   });
 });

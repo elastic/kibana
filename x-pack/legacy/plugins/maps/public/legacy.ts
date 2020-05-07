@@ -7,21 +7,16 @@
 import { npSetup, npStart } from 'ui/new_platform';
 // @ts-ignore Untyped Module
 import { uiModules } from 'ui/modules';
-import { PluginInitializerContext } from 'kibana/public'; // eslint-disable-line import/order
 import { plugin } from '.';
 
-const pluginInstance = plugin({} as PluginInitializerContext);
+const pluginInstance = plugin();
 
 const setupPlugins = {
   __LEGACY: {
     uiModules,
   },
-  plugins: npSetup.plugins,
-};
-
-const startPlugins = {
-  plugins: npStart.plugins,
+  np: npSetup.plugins,
 };
 
 export const setup = pluginInstance.setup(npSetup.core, setupPlugins);
-export const start = pluginInstance.start(npStart.core, startPlugins);
+export const start = pluginInstance.start(npStart.core, npStart.plugins);

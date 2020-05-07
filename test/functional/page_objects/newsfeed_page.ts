@@ -54,7 +54,7 @@ export function NewsfeedPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getNewsfeedList() {
       const list = await testSubjects.find('NewsfeedFlyout');
-      const cells = await list.findAllByCssSelector('[data-test-subj="newsHeadAlert"]');
+      const cells = await list.findAllByTestSubject('newsHeadAlert');
 
       const objects = [];
       for (const cell of cells) {

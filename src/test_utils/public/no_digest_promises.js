@@ -37,22 +37,24 @@ Bluebird.longStackTraces();
 
 let active = false;
 
-uiModules
-  .get('kibana')
-  .config(function ($provide) {
-    $provide.decorator('Promise', function ($delegate) {
-      return active ? Bluebird : $delegate;
-    });
+uiModules.get('kibana').config(function($provide) {
+  $provide.decorator('Promise', function($delegate) {
+    return active ? Bluebird : $delegate;
   });
+});
 
-function activate() { active = true; }
-function deactivate() { active = false; }
+function activate() {
+  active = true;
+}
+function deactivate() {
+  active = false;
+}
 
 export default {
   activate: activate,
   deactivate: deactivate,
-  activateForSuite: function () {
+  activateForSuite: function() {
     before(activate);
     after(deactivate);
-  }
+  },
 };

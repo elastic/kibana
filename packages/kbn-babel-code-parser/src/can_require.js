@@ -28,7 +28,7 @@ export function canRequire(entry, cwd = require.resolve.paths(entry) || []) {
     // looking recursively as normal starting
     // from those locations.
     return require.resolve(entry, {
-      paths: [].concat(cwd)
+      paths: [].concat(cwd),
     });
   } catch (e) {
     return false;

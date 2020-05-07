@@ -21,7 +21,7 @@ import _ from 'lodash';
 
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 
 // Module-level error returned by notify.error
 let errorNotif;
@@ -40,44 +40,50 @@ function formatMetrics(data) {
         defaultMessage: 'Heap total',
       }),
       value: _.get(data.metrics, 'process.memory.heap.size_limit'),
-      type: 'byte'
-    }, {
+      type: 'byte',
+    },
+    {
       name: i18n.translate('statusPage.metricsTiles.columns.heapUsedHeader', {
         defaultMessage: 'Heap used',
       }),
       value: _.get(data.metrics, 'process.memory.heap.used_in_bytes'),
-      type: 'byte'
-    }, {
+      type: 'byte',
+    },
+    {
       name: i18n.translate('statusPage.metricsTiles.columns.loadHeader', {
         defaultMessage: 'Load',
       }),
       value: [
         _.get(data.metrics, 'os.load.1m'),
         _.get(data.metrics, 'os.load.5m'),
-        _.get(data.metrics, 'os.load.15m')
+        _.get(data.metrics, 'os.load.15m'),
       ],
-      type: 'float'
-    }, {
+      type: 'float',
+    },
+    {
       name: i18n.translate('statusPage.metricsTiles.columns.resTimeAvgHeader', {
         defaultMessage: 'Response time avg',
       }),
       value: _.get(data.metrics, 'response_times.avg_in_millis'),
-      type: 'ms'
-    }, {
+      type: 'ms',
+    },
+    {
       name: i18n.translate('statusPage.metricsTiles.columns.resTimeMaxHeader', {
         defaultMessage: 'Response time max',
       }),
       value: _.get(data.metrics, 'response_times.max_in_millis'),
-      type: 'ms'
-    }, {
+      type: 'ms',
+    },
+    {
       name: i18n.translate('statusPage.metricsTiles.columns.requestsPerSecHeader', {
         defaultMessage: 'Requests per second',
       }),
-      value: _.get(data.metrics, 'requests.total') * 1000 / _.get(data.metrics, 'collection_interval_in_millis')
-    }
+      value:
+        (_.get(data.metrics, 'requests.total') * 1000) /
+        _.get(data.metrics, 'collection_interval_in_millis'),
+    },
   ];
 }
-
 
 /**
  * Reformat the backend data to make the frontend views simpler.
@@ -89,20 +95,16 @@ function formatStatus(status) {
       id: status.state,
       title: status.title,
       message: status.message,
-      uiColor: status.uiColor
-    }
+      uiColor: status.uiColor,
+    },
   };
 }
 
-
 async function fetchData() {
-  return fetch(
-    chrome.addBasePath('/api/status'),
-    {
-      method: 'get',
-      credentials: 'same-origin'
-    }
-  );
+  return fetch(chrome.addBasePath('/api/status'), {
+    method: 'get',
+    credentials: 'same-origin',
+  });
 }
 
 /*
@@ -127,7 +129,7 @@ async function loadStatus(fetchFn = fetchData) {
       'statusPage.loadStatus.serverIsDownErrorMessage',
       {
         defaultMessage: 'Failed to request server status. Perhaps your server is down?',
-      },
+      }
     );
 
     errorNotif = toastNotifications.addDanger(serverIsDownErrorMessage);
@@ -141,7 +143,7 @@ async function loadStatus(fetchFn = fetchData) {
       {
         defaultMessage: 'Failed to request server status with status code {responseStatus}',
         values: { responseStatus: response.status },
-      },
+      }
     );
 
     errorNotif = toastNotifications.addDanger(serverStatusCodeErrorMessage);

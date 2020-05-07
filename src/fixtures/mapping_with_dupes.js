@@ -21,37 +21,37 @@ export default {
   test: {
     mappings: {
       testType: {
-        'baz': {
+        baz: {
           full_name: 'baz',
           mapping: {
             bar: {
-              type: 'long'
-            }
-          }
+              type: 'long',
+            },
+          },
         },
         'foo.bar': {
           full_name: 'foo.bar',
           mapping: {
             bar: {
-              type: 'string'
-            }
-          }
-        }
-      }
-    }
+              type: 'string',
+            },
+          },
+        },
+      },
+    },
   },
   duplicates: {
     mappings: {
       testType: {
-        'baz': {
+        baz: {
           full_name: 'baz',
           mapping: {
             bar: {
-              type: 'date'
-            }
-          }
-        }
-      }
-    }
-  }
+              type: 'date',
+            },
+          },
+        },
+      },
+    },
+  },
 };

@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
 
   describe('update collection_interval setting', () => {
@@ -16,12 +16,13 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
-      expect(body).to.eql({ // returns same response every run
+      expect(body).to.eql({
+        // returns same response every run
         acknowledged: true,
         persistent: {
-          xpack: { monitoring: { collection: { interval: '10s' } } }
+          xpack: { monitoring: { collection: { interval: '10s' } } },
         },
-        transient: {}
+        transient: {},
       });
     });
   });

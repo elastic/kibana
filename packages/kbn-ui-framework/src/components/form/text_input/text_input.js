@@ -29,34 +29,25 @@ const sizeToClassNameMap = {
 
 export const TEXTINPUT_SIZE = Object.keys(sizeToClassNameMap);
 
-export const KuiTextInput = ({
-  className,
-  onChange,
-  isInvalid,
-  isDisabled,
-  size,
-  ...rest
-}) => {
-  const classes = classNames('kuiTextInput', className, {
-    'kuiTextInput-isInvalid': isInvalid
-  }, sizeToClassNameMap[size]
+export const KuiTextInput = ({ className, onChange, isInvalid, isDisabled, size, ...rest }) => {
+  const classes = classNames(
+    'kuiTextInput',
+    className,
+    {
+      'kuiTextInput-isInvalid': isInvalid,
+    },
+    sizeToClassNameMap[size]
   );
 
   return (
-    <input
-      type="text"
-      className={classes}
-      onChange={onChange}
-      disabled={isDisabled}
-      {...rest}
-    />
+    <input type="text" className={classes} onChange={onChange} disabled={isDisabled} {...rest} />
   );
 };
 
 KuiTextInput.defaultProps = {
   isInvalid: false,
   isDisabled: false,
-  size: 'medium'
+  size: 'medium',
 };
 
 KuiTextInput.propTypes = {
@@ -64,5 +55,5 @@ KuiTextInput.propTypes = {
   onChange: PropTypes.func.isRequired,
   isInvalid: PropTypes.bool,
   isDisabled: PropTypes.bool,
-  size: PropTypes.oneOf(TEXTINPUT_SIZE)
+  size: PropTypes.oneOf(TEXTINPUT_SIZE),
 };

@@ -3,34 +3,36 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ConditionalHeaders, ServerFacade } from '../../../types';
+
+import { ReportingConfig } from '../../../server/types';
+import { ConditionalHeaders } from '../../../types';
 
 export const getConditionalHeaders = <JobDocPayloadType>({
+  config,
   job,
   filteredHeaders,
-  server,
 }: {
+  config: ReportingConfig;
   job: JobDocPayloadType;
   filteredHeaders: Record<string, string>;
-  server: ServerFacade;
 }) => {
-  const config = server.config();
+  const { kbnConfig } = config;
   const [hostname, port, basePath, protocol] = [
-    config.get('xpack.reporting.kibanaServer.hostname') || config.get('server.host'),
-    config.get('xpack.reporting.kibanaServer.port') || config.get('server.port'),
-    config.get('server.basePath'),
-    config.get('xpack.reporting.kibanaServer.protocol') || server.info.protocol,
+    config.get('kibanaServer', 'hostname'),
+    config.get('kibanaServer', 'port'),
+    kbnConfig.get('server', 'basePath'),
+    config.get('kibanaServer', 'protocol'),
   ] as [string, number, string, string];
 
   const conditionalHeaders: ConditionalHeaders = {
     headers: filteredHeaders,
     conditions: {
-      hostname: hostname.toLowerCase(),
+      hostname: hostname ? hostname.toLowerCase() : hostname,
       port,
       basePath,
       protocol,
     },
   };
 
-  return { job, conditionalHeaders, server };
+  return conditionalHeaders;
 };

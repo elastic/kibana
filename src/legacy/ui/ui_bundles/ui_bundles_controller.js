@@ -45,7 +45,7 @@ function getWebpackAliases(pluginSpecs) {
 
     return {
       ...aliases,
-      [`plugins/${spec.getId()}`]: publicDir
+      [`plugins/${spec.getId()}`]: publicDir,
     };
   }, {});
 }
@@ -62,7 +62,7 @@ function stableCloneAppExtensions(appExtensions) {
           }
           return moduleId.replace(/\\/g, '/');
         })
-        .sort((a, b) => a.localeCompare(b))
+        .sort((a, b) => a.localeCompare(b)),
     ])
   );
 }
@@ -73,6 +73,7 @@ export class UiBundlesController {
 
     this._workingDir = config.get('optimize.bundleDir');
     this._env = config.get('env.name');
+    this._validateSyntaxOfNodeModules = config.get('optimize.validateSyntaxOfNodeModules');
     this._context = {
       env: config.get('env.name'),
       sourceMaps: config.get('optimize.sourceMaps'),
@@ -84,26 +85,19 @@ export class UiBundlesController {
     this._filter = makeRe(config.get('optimize.bundleFilter') || '*', {
       noglobstar: true,
       noext: true,
-      matchBase: true
+      matchBase: true,
     });
 
     this._appExtensions = uiExports.appExtensions || {};
 
     this._webpackAliases = {
       ...getWebpackAliases(pluginSpecs),
-      ...uiExports.webpackAliases
+      ...uiExports.webpackAliases,
     };
     this._webpackPluginProviders = uiExports.webpackPluginProviders;
     this._webpackNoParseRules = uiExports.webpackNoParseRules;
     this._postLoaders = [];
     this._bundles = [];
-
-    // create a bundle for core-only with no modules
-    this.add({
-      id: 'core',
-      modules: [],
-      template: appEntryTemplate
-    });
 
     // create a bundle for each uiApp
     for (const uiApp of uiApps) {
@@ -116,26 +110,27 @@ export class UiBundlesController {
   }
 
   add(bundleSpec) {
-    const {
-      id,
-      modules,
-      template,
-      extendConfig,
-    } = bundleSpec;
+    const { id, modules, template, extendConfig } = bundleSpec;
 
     if (this._filter.test(id)) {
-      this._bundles.push(new UiBundle({
-        id,
-        modules,
-        template,
-        controller: this,
-        extendConfig,
-      }));
+      this._bundles.push(
+        new UiBundle({
+          id,
+          modules,
+          template,
+          controller: this,
+          extendConfig,
+        })
+      );
     }
   }
 
   isDevMode() {
     return this._env === 'development';
+  }
+
+  shouldValidateSyntaxOfNodeModules() {
+    return !!this._validateSyntaxOfNodeModules;
   }
 
   getWebpackPluginProviders() {
@@ -168,7 +163,7 @@ export class UiBundlesController {
 
   getContext() {
     return jsonStableStringify(this._context, {
-      space: '  '
+      space: '  ',
     });
   }
 
@@ -186,7 +181,7 @@ export class UiBundlesController {
         // since we know that `this.resolvePath()` is going to return an absolute path based on the `optimize.bundleDir`
         // and since we don't want to require that users specify a bundleDir that is within the cwd or limit the cwd
         // directory used to run Kibana in any way we use force here
-        force: true
+        force: true,
       });
     }
 
@@ -232,7 +227,7 @@ export class UiBundlesController {
 
   async areAllBundleCachesValid() {
     for (const bundle of this._bundles) {
-      if (!await bundle.isCacheValid()) {
+      if (!(await bundle.isCacheValid())) {
         return false;
       }
     }
@@ -241,15 +236,17 @@ export class UiBundlesController {
   }
 
   toWebpackEntries() {
-    return this._bundles.reduce((entries, bundle) => ({
-      ...entries,
-      [bundle.getId()]: bundle.getEntryPath(),
-    }), {});
+    return this._bundles.reduce(
+      (entries, bundle) => ({
+        ...entries,
+        [bundle.getId()]: bundle.getEntryPath(),
+      }),
+      {}
+    );
   }
 
   getIds() {
-    return this._bundles
-      .map(bundle => bundle.getId());
+    return this._bundles.map(bundle => bundle.getId());
   }
 
   getExtendedConfig(webpackConfig) {

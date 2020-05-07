@@ -15,8 +15,10 @@ export function registerLicenseChecker(server, pluginId, pluginName, minimumLice
   xpackMainPlugin.status.once('green', () => {
     // Register a function that is called whenever the xpack info changes,
     // to re-compute the license check results for this plugin
-    xpackMainPlugin.info.feature(pluginId).registerLicenseCheckResultsGenerator((xpackLicenseInfo) => {
-      return checkLicense(pluginName, minimumLicenseRequired, xpackLicenseInfo);
-    });
+    xpackMainPlugin.info
+      .feature(pluginId)
+      .registerLicenseCheckResultsGenerator(xpackLicenseInfo => {
+        return checkLicense(pluginName, minimumLicenseRequired, xpackLicenseInfo);
+      });
   });
 }

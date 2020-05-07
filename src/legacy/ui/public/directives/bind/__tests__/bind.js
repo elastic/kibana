@@ -19,18 +19,19 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-describe('$scope.$bind', function () {
-
+describe('$scope.$bind', function() {
   let $rootScope;
   let $scope;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function ($injector) {
-    $rootScope = $injector.get('$rootScope');
-    $scope = $rootScope.$new();
-  }));
+  beforeEach(
+    ngMock.inject(function($injector) {
+      $rootScope = $injector.get('$rootScope');
+      $scope = $rootScope.$new();
+    })
+  );
 
-  it('exposes $bind on all scopes', function () {
+  it('exposes $bind on all scopes', function() {
     expect($rootScope.$bind).to.be.a('function');
     expect($scope).to.have.property('$bind', $rootScope.$bind);
 
@@ -38,7 +39,7 @@ describe('$scope.$bind', function () {
     expect($isoScope).to.have.property('$bind', $rootScope.$bind);
   });
 
-  it('sets up binding from a parent scope to it\'s child', function () {
+  it("sets up binding from a parent scope to it's child", function() {
     $rootScope.val = 'foo';
     $scope.$bind('localVal', 'val');
     expect($scope.localVal).to.be('foo');
@@ -50,7 +51,7 @@ describe('$scope.$bind', function () {
     expect($scope.localVal).to.be('bar');
   });
 
-  it('sets up a binding from the child to the parent scope', function () {
+  it('sets up a binding from the child to the parent scope', function() {
     $rootScope.val = 'foo';
     $scope.$bind('localVal', 'val');
     expect($scope.localVal).to.be('foo');
@@ -62,7 +63,7 @@ describe('$scope.$bind', function () {
     expect($rootScope.val).to.be('bar');
   });
 
-  it('pulls from the scopes $parent by default', function () {
+  it('pulls from the scopes $parent by default', function() {
     const $parent = $rootScope.$new();
     const $self = $parent.$new();
 
@@ -73,7 +74,7 @@ describe('$scope.$bind', function () {
     expect($self.localVal).to.be('foo');
   });
 
-  it('accepts an alternate scope to read from', function () {
+  it('accepts an alternate scope to read from', function() {
     const $parent = $rootScope.$new();
     const $self = $parent.$new();
 

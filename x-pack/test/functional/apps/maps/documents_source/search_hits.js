@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getPageObjects, getService }) {
+export default function({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
 
@@ -19,7 +19,10 @@ export default function ({ getPageObjects, getService }) {
       await inspector.open();
       await inspector.openInspectorRequestsView();
       const requestStats = await inspector.getTableData();
-      const requestTimestamp =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Request timestamp');
+      const requestTimestamp = PageObjects.maps.getInspectorStatRowHit(
+        requestStats,
+        'Request timestamp'
+      );
       await inspector.close();
       return requestTimestamp;
     }
@@ -41,7 +44,9 @@ export default function ({ getPageObjects, getService }) {
 
     describe('query bar', () => {
       before(async () => {
-        await PageObjects.maps.setAndSubmitQuery('machine.os.raw : "win 8" OR machine.os.raw : "ios"');
+        await PageObjects.maps.setAndSubmitQuery(
+          'machine.os.raw : "win 8" OR machine.os.raw : "ios"'
+        );
       });
 
       after(async () => {

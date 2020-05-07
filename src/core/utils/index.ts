@@ -24,4 +24,8 @@ export * from './get';
 export * from './map_to_object';
 export * from './merge';
 export * from './pick';
+export * from './promise';
 export * from './url';
+export * from './unset';
+export * from './get_flattened_object';
+export * from './default_app_categories';

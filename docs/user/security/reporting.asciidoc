@@ -58,17 +58,41 @@ Go to *Management > Users*, add a new user, and assign the user the built-in
 `reporting_user` role and your new custom role, `custom_reporting_user`.
 
 [float]
+==== With a custom index
+
+If you are using Reporting with a custom index,
+the `xpack.reporting.index` setting should begin 
+with `.reporting-*`. The default {kib} system user has
+`all` privileges against the `.reporting-*` pattern of indices.
+
+[source,js]
+xpack.reporting.index: '.reporting-custom-index'
+
+If you use a different pattern for the `xpack.reporting.index` setting,
+you must create a custom role with appropriate access to the index, similar
+to the following:
+
+. Go to *Management > Roles*, and click *Create role*.
+. Name the role `custom-reporting-user`.
+. Specify the custom index and assign it the `all` index privilege.
+. Go to *Management > Users* and create a new user with
+the `kibana_system` role and the `custom-reporting-user` role.
+. Configure {kib} to use the new account:
+[source,js]
+elasticsearch.username: 'custom_kibana_system'
+
+[float]
 [[reporting-roles-user-api]]
 ==== With the user API
 This example uses the {ref}/security-api-put-user.html[user API] to create a user who has the
-`reporting_user` role and the `kibana_user` role:
+`reporting_user` role and the `kibana_admin` role:
 
 [source, sh]
 ---------------------------------------------------------------
 POST /_security/user/reporter
 {
   "password" : "x-pack-test-password",
-  "roles" : ["kibana_user", "reporting_user"],
+  "roles" : ["kibana_admin", "reporting_user"],
   "full_name" : "Reporting User"
 }
 ---------------------------------------------------------------
@@ -82,11 +106,11 @@ roles on a per user basis, or assign roles to groups of users. By default, role
 mappings are configured in
 {ref}/mapping-roles.html[`config/shield/role_mapping.yml`].
 For example, the following snippet assigns the user named Bill Murray the
-`kibana_user` and `reporting_user` roles:
+`kibana_admin` and `reporting_user` roles:
 
 [source,yaml]
 --------------------------------------------------------------------------------
-kibana_user:
+kibana_admin:
   - "cn=Bill Murray,dc=example,dc=com"
 reporting_user:
   - "cn=Bill Murray,dc=example,dc=com"
@@ -101,23 +125,33 @@ the {reporting} endpoints to authorized users. This requires that you:
 
 . Enable {security} on your {es} cluster. For more information,
 see {ref}/security-getting-started.html[Getting Started with Security].
-. Configure an SSL certificate for Kibana. For more information, see
-<<using-kibana-with-security>>.
-. Configure {watcher} to trust the Kibana server's certificate by adding it to
-the {watcher} truststore on each node:
-.. Import the {kib} server certificate into the {watcher} truststore using
-Java Keytool:
+. Configure TLS/SSL encryption for the {kib} server. For more information, see
+<<configuring-tls>>.
+. Specify the {kib} server's CA certificate chain in `elasticsearch.yml`:
 +
-[source,shell]
----------------------------------------------------------
-keytool -importcert -keystore watcher-truststore.jks -file server.crt
----------------------------------------------------------
-+
-NOTE: If the truststore doesn't already exist, it is created.
+--
+If you are using your own CA to sign the {kib} server certificate, then you need
+to specify the CA certificate chain in {es} to properly establish trust in TLS
+connections between {watcher} and {kib}. If your CA certificate chain is
+contained in a PKCS #12 trust store, specify it like so:
 
-.. Make sure the `xpack.http.ssl.truststore.path` setting in
-`elasticsearch.yml` specifies the location of the {watcher}
-truststore.
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.http.ssl.truststore.path: "/path/to/your/truststore.p12"
+xpack.http.ssl.truststore.type: "PKCS12"
+xpack.http.ssl.truststore.password: "optional decryption password"
+--------------------------------------------------------------------------------
+
+Otherwise, if your CA certificate chain is in PEM format, specify it like so:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.http.ssl.certificate_authorities: ["/path/to/your/cacert1.pem", "/path/to/your/cacert2.pem"]
+--------------------------------------------------------------------------------
+
+For more information, see {ref}/notification-settings.html#ssl-notification-settings[the {watcher} HTTP TLS/SSL Settings].
+--
+
 . Add one or more users who have the permissions
 necessary to use {kib} and {reporting}. For more information, see
 <<secure-reporting>>.

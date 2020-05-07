@@ -17,4 +17,13 @@
  * under the License.
  */
 
-export * from './hash_unhash_url';
+export { hashUrl, hashQuery, unhashUrl, unhashQuery } from './hash_unhash_url';
+export {
+  createKbnUrlControls,
+  setStateToKbnUrl,
+  getStateFromKbnUrl,
+  getStatesFromKbnUrl,
+  IKbnUrlControls,
+} from './kbn_url_storage';
+export { createKbnUrlTracker } from './kbn_url_tracker';
+export { createUrlTracker } from './url_tracker';

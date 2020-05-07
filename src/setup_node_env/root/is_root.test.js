@@ -19,14 +19,12 @@
 
 var isRoot = require('./is_root');
 
-
-describe('isRoot', function () {
-
-  test('0 is root', function () {
+describe('isRoot', function() {
+  test('0 is root', function() {
     expect(isRoot(0)).toBeTruthy();
   });
 
-  test('not 0 is not root', function () {
+  test('not 0 is not root', function() {
     expect(isRoot(5)).toBeFalsy();
   });
 });

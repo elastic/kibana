@@ -50,21 +50,24 @@ describe('FeatureCatalogueRegistry', () => {
         const service = new FeatureCatalogueRegistry();
         service.setup().register(DASHBOARD_FEATURE);
         const capabilities = { catalogue: {} } as any;
-        expect(service.start({ capabilities }).get()).toEqual([DASHBOARD_FEATURE]);
+        service.start({ capabilities });
+        expect(service.get()).toEqual([DASHBOARD_FEATURE]);
       });
 
       test('retains items with true in capabilities', () => {
         const service = new FeatureCatalogueRegistry();
         service.setup().register(DASHBOARD_FEATURE);
         const capabilities = { catalogue: { dashboard: true } } as any;
-        expect(service.start({ capabilities }).get()).toEqual([DASHBOARD_FEATURE]);
+        service.start({ capabilities });
+        expect(service.get()).toEqual([DASHBOARD_FEATURE]);
       });
 
       test('removes items with false in capabilities', () => {
         const service = new FeatureCatalogueRegistry();
         service.setup().register(DASHBOARD_FEATURE);
         const capabilities = { catalogue: { dashboard: false } } as any;
-        expect(service.start({ capabilities }).get()).toEqual([]);
+        service.start({ capabilities });
+        expect(service.get()).toEqual([]);
       });
     });
   });
@@ -77,7 +80,8 @@ describe('FeatureCatalogueRegistry', () => {
       setup.register({ id: '2', title: 'Apple' } as any);
       setup.register({ id: '3', title: 'Banana' } as any);
       const capabilities = { catalogue: {} } as any;
-      expect(service.start({ capabilities }).get()).toEqual([
+      service.start({ capabilities });
+      expect(service.get()).toEqual([
         { id: '2', title: 'Apple' },
         { id: '3', title: 'Banana' },
         { id: '1', title: 'Orange' },

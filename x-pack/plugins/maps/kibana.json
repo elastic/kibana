@@ -1,0 +1,18 @@
+{
+  "id": "maps",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "maps"],
+  "requiredPlugins": [
+    "inspector",
+    "licensing",
+    "home",
+    "data",
+    "fileUpload",
+    "uiActions",
+    "navigation",
+    "visualizations",
+    "embeddable"
+  ],
+  "ui": true
+}

@@ -6,10 +6,10 @@
 
 import { NotificationsSetup, Toast, HttpSetup, ToastInput } from 'src/core/public';
 import { BroadcastChannel } from 'broadcast-channel';
+import { SessionInfo } from '../../common/types';
 import { createToast as createIdleTimeoutToast } from './session_idle_timeout_warning';
 import { createToast as createLifespanToast } from './session_lifespan_warning';
 import { ISessionExpired } from './session_expired';
-import { SessionInfo } from '../types';
 
 /**
  * Client session timeout is decreased by this number so that Kibana server
@@ -41,7 +41,7 @@ export interface ISessionTimeout {
   extend(url: string): void;
 }
 
-export class SessionTimeout {
+export class SessionTimeout implements ISessionTimeout {
   private channel?: BroadcastChannel<SessionInfo>;
   private sessionInfo?: SessionInfo;
   private fetchTimer?: number;
@@ -104,9 +104,8 @@ export class SessionTimeout {
    */
   private fetchSessionInfoAndResetTimers = async (extend = false) => {
     const method = extend ? 'POST' : 'GET';
-    const headers = extend ? {} : { 'kbn-system-api': 'true' };
     try {
-      const result = await this.http.fetch(SESSION_ROUTE, { method, headers });
+      const result = await this.http.fetch(SESSION_ROUTE, { method, asSystemRequest: !extend });
 
       this.handleSessionInfoAndResetTimers(result);
 
@@ -128,7 +127,7 @@ export class SessionTimeout {
     this.sessionInfo = sessionInfo;
     // save the provider name in session storage, we will need it when we log out
     const key = `${this.tenant}/session_provider`;
-    sessionStorage.setItem(key, sessionInfo.provider);
+    sessionStorage.setItem(key, sessionInfo.provider.name);
 
     const { timeout, isLifespanTimeout } = this.getTimeout();
     if (timeout == null) {

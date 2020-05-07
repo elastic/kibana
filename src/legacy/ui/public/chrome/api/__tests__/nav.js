@@ -29,7 +29,7 @@ const basePath = '/someBasePath';
 
 function init(customInternals = { basePath }) {
   const chrome = {
-    addBasePath: (path) => path,
+    addBasePath: path => path,
     getBasePath: () => customInternals.basePath || '',
   };
   const internals = {
@@ -40,16 +40,15 @@ function init(customInternals = { basePath }) {
   return { chrome, internals };
 }
 
-
-describe('chrome nav apis', function () {
+describe('chrome nav apis', function() {
   let coreNavLinks;
   let fakedLinks = [];
 
-  const baseUrl = (function () {
+  const baseUrl = (function() {
     const a = document.createElement('a');
     a.setAttribute('href', '/');
     return a.href.slice(0, a.href.length - 1);
-  }());
+  })();
 
   beforeEach(() => {
     coreNavLinks = npStart.core.chrome.navLinks;
@@ -61,7 +60,7 @@ describe('chrome nav apis', function () {
       return link;
     });
     sinon.stub(coreNavLinks, 'getAll').callsFake(() => fakedLinks);
-    sinon.stub(coreNavLinks, 'get').callsFake((linkId) => fakedLinks.find(({ id }) => id === linkId));
+    sinon.stub(coreNavLinks, 'get').callsFake(linkId => fakedLinks.find(({ id }) => id === linkId));
   });
 
   afterEach(() => {
@@ -70,38 +69,42 @@ describe('chrome nav apis', function () {
     coreNavLinks.get.restore();
   });
 
-  describe('#untrackNavLinksForDeletedSavedObjects', function () {
+  describe('#untrackNavLinksForDeletedSavedObjects', function() {
     const appId = 'appId';
     const appUrl = `${baseUrl}/app/kibana#test`;
     const deletedId = 'IAMDELETED';
 
-    it('should clear last url when last url contains link to deleted saved object', function () {
+    it('should clear last url when last url contains link to deleted saved object', function() {
       const appUrlStore = new StubBrowserStorage();
-      fakedLinks = [{
-        id: appId,
-        title: 'Discover',
-        url: `${appUrl}?id=${deletedId}`,
-        baseUrl: appUrl,
-        linkToLastSubUrl: true,
-        legacy: true,
-      }];
+      fakedLinks = [
+        {
+          id: appId,
+          title: 'Discover',
+          url: `${appUrl}?id=${deletedId}`,
+          baseUrl: appUrl,
+          linkToLastSubUrl: true,
+          legacy: true,
+        },
+      ];
 
       const { chrome } = init({ appUrlStore });
       chrome.untrackNavLinksForDeletedSavedObjects([deletedId]);
       expect(coreNavLinks.update.calledWith(appId, { url: appUrl })).to.be(true);
     });
 
-    it('should not clear last url when last url does not contains link to deleted saved object', function () {
+    it('should not clear last url when last url does not contains link to deleted saved object', function() {
       const lastUrl = `${appUrl}?id=anotherSavedObjectId`;
       const appUrlStore = new StubBrowserStorage();
-      fakedLinks = [{
-        id: appId,
-        title: 'Discover',
-        url: lastUrl,
-        baseUrl: appUrl,
-        linkToLastSubUrl: true,
-        legacy: true,
-      }];
+      fakedLinks = [
+        {
+          id: appId,
+          title: 'Discover',
+          url: lastUrl,
+          baseUrl: appUrl,
+          linkToLastSubUrl: true,
+          legacy: true,
+        },
+      ];
 
       const { chrome } = init({ appUrlStore });
       chrome.untrackNavLinksForDeletedSavedObjects([deletedId]);
@@ -109,8 +112,8 @@ describe('chrome nav apis', function () {
     });
   });
 
-  describe('internals.trackPossibleSubUrl()', function () {
-    it('injects the globalState of the current url to all links for the same app', function () {
+  describe('internals.trackPossibleSubUrl()', function() {
+    it('injects the globalState of the current url to all links for the same app', function() {
       const appUrlStore = new StubBrowserStorage();
       fakedLinks = [
         {
@@ -147,22 +150,29 @@ describe('chrome nav apis', function () {
     });
   });
 
-  describe('chrome.trackSubUrlForApp()', function () {
-    it('injects a manual app url', function () {
+  describe('chrome.trackSubUrlForApp()', function() {
+    it('injects a manual app url', function() {
       const appUrlStore = new StubBrowserStorage();
-      fakedLinks = [{
-        id: 'kibana:visualize',
-        baseUrl: `${baseUrl}/app/kibana#visualize`,
-        url: `${baseUrl}/app/kibana#visualize`,
-        subUrlBase: '/app/kibana#visualize',
-        legacy: true,
-      }];
+      fakedLinks = [
+        {
+          id: 'kibana:visualize',
+          baseUrl: `${baseUrl}/app/kibana#visualize`,
+          url: `${baseUrl}/app/kibana#visualize`,
+          subUrlBase: '/app/kibana#visualize',
+          legacy: true,
+        },
+      ];
 
       const { chrome } = init({ appUrlStore });
-      const kibanaParsedUrl = absoluteToParsedUrl(`${baseUrl}/xyz/app/kibana#visualize/1234?_g=globalstate`, '/xyz');
+      const kibanaParsedUrl = absoluteToParsedUrl(
+        `${baseUrl}/xyz/app/kibana#visualize/1234?_g=globalstate`,
+        '/xyz'
+      );
       chrome.trackSubUrlForApp('kibana:visualize', kibanaParsedUrl);
       expect(
-        coreNavLinks.update.calledWith('kibana:visualize', { url: `${baseUrl}/xyz/app/kibana#visualize/1234?_g=globalstate` })
+        coreNavLinks.update.calledWith('kibana:visualize', {
+          url: `${baseUrl}/xyz/app/kibana#visualize/1234?_g=globalstate`,
+        })
       ).to.be(true);
     });
   });

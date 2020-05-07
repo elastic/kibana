@@ -27,7 +27,7 @@ describe('dev/build/lib/build', () => {
     describe('#isOss()', () => {
       it('returns true if passed oss: true', () => {
         const build = createBuild({
-          oss: true
+          oss: true,
         });
 
         expect(build.isOss()).to.be(true);
@@ -35,7 +35,7 @@ describe('dev/build/lib/build', () => {
 
       it('returns false if passed oss: false', () => {
         const build = createBuild({
-          oss: false
+          oss: false,
         });
 
         expect(build.isOss()).to.be(false);
@@ -45,14 +45,14 @@ describe('dev/build/lib/build', () => {
     describe('#getName()', () => {
       it('returns kibana when oss: false', () => {
         const build = createBuild({
-          oss: false
+          oss: false,
         });
 
         expect(build.getName()).to.be('kibana');
       });
       it('returns kibana-oss when oss: true', () => {
         const build = createBuild({
-          oss: true
+          oss: true,
         });
 
         expect(build.getName()).to.be('kibana-oss');
@@ -71,7 +71,7 @@ describe('dev/build/lib/build', () => {
       it('uses passed config to resolve a path relative to the build', () => {
         const resolveFromRepo = sinon.stub();
         const build = createBuild({
-          config: { resolveFromRepo }
+          config: { resolveFromRepo },
         });
 
         build.resolvePath('bar');
@@ -81,7 +81,7 @@ describe('dev/build/lib/build', () => {
       it('passes all arguments to config.resolveFromRepo()', () => {
         const resolveFromRepo = sinon.stub();
         const build = createBuild({
-          config: { resolveFromRepo }
+          config: { resolveFromRepo },
         });
 
         build.resolvePath('bar', 'baz', 'box');
@@ -95,7 +95,7 @@ describe('dev/build/lib/build', () => {
         const getBuildVersion = sinon.stub().returns('buildVersion');
         const build = createBuild({
           oss: true,
-          config: { resolveFromRepo, getBuildVersion }
+          config: { resolveFromRepo, getBuildVersion },
         });
 
         const getBuildName = sinon.stub().returns('platformName');
@@ -106,7 +106,14 @@ describe('dev/build/lib/build', () => {
         build.resolvePathForPlatform(platform, 'foo', 'bar');
         sinon.assert.calledWithExactly(getBuildName);
         sinon.assert.calledWithExactly(getBuildVersion);
-        sinon.assert.calledWithExactly(resolveFromRepo, 'build', 'oss', `kibana-buildVersion-platformName`, 'foo', 'bar');
+        sinon.assert.calledWithExactly(
+          resolveFromRepo,
+          'build',
+          'oss',
+          `kibana-buildVersion-platformName`,
+          'foo',
+          'bar'
+        );
       });
     });
 
@@ -115,12 +122,12 @@ describe('dev/build/lib/build', () => {
 
       const config = {
         resolveFromRepo: sandbox.stub(),
-        getBuildVersion: sandbox.stub().returns('buildVersion')
+        getBuildVersion: sandbox.stub().returns('buildVersion'),
       };
 
       const build = createBuild({
         oss: false,
-        config
+        config,
       });
 
       const platform = {
@@ -137,7 +144,11 @@ describe('dev/build/lib/build', () => {
         sinon.assert.calledWithExactly(platform.getBuildName);
         sinon.assert.calledWithExactly(platform.isWindows);
         sinon.assert.calledWithExactly(config.getBuildVersion);
-        sinon.assert.calledWithExactly(config.resolveFromRepo, 'target', `kibana-buildVersion-platformName.tar.gz`);
+        sinon.assert.calledWithExactly(
+          config.resolveFromRepo,
+          'target',
+          `kibana-buildVersion-platformName.tar.gz`
+        );
       });
 
       it('creates .zip path if platform is windows', () => {
@@ -146,7 +157,11 @@ describe('dev/build/lib/build', () => {
         sinon.assert.calledWithExactly(platform.getBuildName);
         sinon.assert.calledWithExactly(platform.isWindows);
         sinon.assert.calledWithExactly(config.getBuildVersion);
-        sinon.assert.calledWithExactly(config.resolveFromRepo, 'target', `kibana-buildVersion-platformName.zip`);
+        sinon.assert.calledWithExactly(
+          config.resolveFromRepo,
+          'target',
+          `kibana-buildVersion-platformName.zip`
+        );
       });
     });
   });

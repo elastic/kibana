@@ -18,6 +18,7 @@
  */
 
 import { pick } from '../../../utils';
+import { AppCategory } from '../../';
 
 /**
  * @public
@@ -34,9 +35,20 @@ export interface ChromeNavLink {
   readonly title: string;
 
   /**
+   * The category the app lives in
+   */
+  readonly category?: AppCategory;
+
+  /**
    * The base route used to open the root of an application.
    */
   readonly baseUrl: string;
+
+  /**
+   * The route used to open the {@link AppBase.defaultPath | default path } of an application.
+   * If unset, `baseUrl` will be used instead.
+   */
+  readonly url?: string;
 
   /**
    * An ordinal used to sort nav links relative to one another for display.
@@ -63,7 +75,7 @@ export interface ChromeNavLink {
   /** LEGACY FIELDS */
 
   /**
-   * A url base that legacy apps can set to match deep URLs to an applcation.
+   * A url base that legacy apps can set to match deep URLs to an application.
    *
    * @internalRemarks
    * This should be removed once legacy apps are gone.
@@ -71,6 +83,17 @@ export interface ChromeNavLink {
    * @deprecated
    */
   readonly subUrlBase?: string;
+
+  /**
+   * A flag that tells legacy chrome to ignore the link when
+   * tracking sub-urls
+   *
+   * @internalRemarks
+   * This should be removed once legacy apps are gone.
+   *
+   * @deprecated
+   */
+  readonly disableSubUrlTracking?: boolean;
 
   /**
    * Whether or not the subUrl feature should be enabled.
@@ -81,18 +104,6 @@ export interface ChromeNavLink {
    * @deprecated
    */
   readonly linkToLastSubUrl?: boolean;
-
-  /**
-   * A url that legacy apps can set to deep link into their applications.
-   *
-   * @internalRemarks
-   * Currently used by the "lastSubUrl" feature legacy/ui/chrome. This should
-   * be removed once the ApplicationService is implemented and mounting apps. At that
-   * time, each app can handle opening to the previous location when they are mounted.
-   *
-   * @deprecated
-   */
-  readonly url?: string;
 
   /**
    * Indicates whether or not this app is currently on the screen.

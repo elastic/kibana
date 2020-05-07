@@ -18,8 +18,11 @@
  */
 import { isPlainObject } from 'lodash';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { metadataSymbol, attachMetaData } from '../../../../src/core/server/legacy/logging/legacy_logging_server';
+import {
+  metadataSymbol,
+  attachMetaData,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../src/core/server/legacy/logging/legacy_logging_server';
 
 export const logWithMetadata = {
   isLogEvent(eventData) {
@@ -30,7 +33,7 @@ export const logWithMetadata = {
     const { message, metadata } = eventData[metadataSymbol];
     return {
       ...metadata,
-      message
+      message,
     };
   },
 

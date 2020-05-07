@@ -29,7 +29,6 @@ export const config = {
 
     /**
      * Defines an array of directories where another plugin should be loaded from.
-     * Should only be used in a development environment.
      */
     paths: schema.arrayOf(schema.string(), { defaultValue: [] }),
   }),
@@ -55,7 +54,6 @@ export class PluginsConfig {
   constructor(rawConfig: PluginsConfigType, env: Env) {
     this.initialize = rawConfig.initialize;
     this.pluginSearchPaths = env.pluginSearchPaths;
-    // Only allow custom plugin paths in dev.
-    this.additionalPluginPaths = env.mode.dev ? rawConfig.paths : [];
+    this.additionalPluginPaths = rawConfig.paths;
   }
 }

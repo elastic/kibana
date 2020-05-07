@@ -25,7 +25,9 @@ export function existingInstall(settings, logger) {
   try {
     statSync(path.join(settings.pluginDir, settings.plugins[0].name));
 
-    logger.error(`Plugin ${settings.plugins[0].name} already exists, please remove before installing a new version`);
+    logger.error(
+      `Plugin ${settings.plugins[0].name} already exists, please remove before installing a new version`
+    );
     process.exit(70);
   } catch (e) {
     if (e.code !== 'ENOENT') throw e;
@@ -34,12 +36,16 @@ export function existingInstall(settings, logger) {
 
 export function assertVersion(settings) {
   if (!settings.plugins[0].kibanaVersion) {
-    throw new Error(`Plugin package.json is missing both a version property (required) and a kibana.version property (optional).`);
+    throw new Error(
+      `Plugin package.json is missing both a version property (required) and a kibana.version property (optional).`
+    );
   }
 
   const actual = cleanVersion(settings.plugins[0].kibanaVersion);
   const expected = cleanVersion(settings.version);
   if (!versionSatisfies(actual, expected)) {
-    throw new Error(`Plugin ${settings.plugins[0].name} [${actual}] is incompatible with Kibana [${expected}]`);
+    throw new Error(
+      `Plugin ${settings.plugins[0].name} [${actual}] is incompatible with Kibana [${expected}]`
+    );
   }
 }

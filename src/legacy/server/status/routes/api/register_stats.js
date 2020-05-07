@@ -19,9 +19,9 @@
 
 import Joi from 'joi';
 import boom from 'boom';
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { wrapAuthConfig } from '../../wrap_auth_config';
-import { KIBANA_STATS_TYPE } from '../../constants';
+import { getKibanaInfoForStats } from '../../lib';
 
 const STATS_NOT_READY_MESSAGE = i18n.translate('server.stats.notReadyMessage', {
   defaultMessage: 'Stats are not ready yet. Please try again later.',
@@ -37,11 +37,11 @@ const STATS_NOT_READY_MESSAGE = i18n.translate('server.stats.notReadyMessage', {
  *   - Any other value causes a statusCode 400 response (Bad Request)
  * Including ?exclude_usage in the query string excludes the usage stats from the response. Same value semantics as ?extended
  */
-export function registerStatsApi(usageCollection, server, config) {
+export function registerStatsApi(usageCollection, server, config, kbnServer) {
   const wrapAuth = wrapAuthConfig(config.get('status.allowAnonymous'));
 
   const getClusterUuid = async callCluster => {
-    const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid', });
+    const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid' });
     return uuid;
   };
 
@@ -49,6 +49,17 @@ export function registerStatsApi(usageCollection, server, config) {
     const usage = await usageCollection.bulkFetchUsage(callCluster);
     return usageCollection.toObject(usage);
   };
+
+  let lastMetrics = null;
+  /* kibana_stats gets singled out from the collector set as it is used
+   * for health-checking Kibana and fetch does not rely on fetching data
+   * from ES */
+  server.newPlatform.setup.core.metrics.getOpsMetrics$().subscribe(metrics => {
+    lastMetrics = {
+      ...metrics,
+      timestamp: new Date().toISOString(),
+    };
+  });
 
   server.route(
     wrapAuth({
@@ -60,14 +71,15 @@ export function registerStatsApi(usageCollection, server, config) {
             extended: Joi.string().valid('', 'true', 'false'),
             legacy: Joi.string().valid('', 'true', 'false'),
             exclude_usage: Joi.string().valid('', 'true', 'false'),
-          })
+          }),
         },
         tags: ['api'],
       },
       async handler(req) {
         const isExtended = req.query.extended !== undefined && req.query.extended !== 'false';
         const isLegacy = req.query.legacy !== undefined && req.query.legacy !== 'false';
-        const shouldGetUsage = req.query.exclude_usage === undefined || req.query.exclude_usage === 'false';
+        const shouldGetUsage =
+          req.query.exclude_usage === undefined || req.query.exclude_usage === 'false';
 
         let extended;
         if (isExtended) {
@@ -81,7 +93,7 @@ export function registerStatsApi(usageCollection, server, config) {
 
           const usagePromise = shouldGetUsage ? getUsage(callCluster) : Promise.resolve({});
           try {
-            const [ usage, clusterUuid ] = await Promise.all([
+            const [usage, clusterUuid] = await Promise.all([
               usagePromise,
               getClusterUuid(callCluster),
             ]);
@@ -97,22 +109,20 @@ export function registerStatsApi(usageCollection, server, config) {
                 if (usageKey === 'kibana') {
                   accum = {
                     ...accum,
-                    ...usage[usageKey]
+                    ...usage[usageKey],
                   };
-                }
-                else if (usageKey === 'reporting') {
+                } else if (usageKey === 'reporting') {
                   accum = {
                     ...accum,
                     xpack: {
                       ...accum.xpack,
-                      reporting: usage[usageKey]
+                      reporting: usage[usageKey],
                     },
                   };
-                }
-                else {
+                } else {
                   accum = {
                     ...accum,
-                    [usageKey]: usage[usageKey]
+                    [usageKey]: usage[usageKey],
                   };
                 }
 
@@ -123,11 +133,10 @@ export function registerStatsApi(usageCollection, server, config) {
                 usage: modifiedUsage,
                 clusterUuid,
               };
-            }
-            else {
+            } else {
               extended = usageCollection.toApiFieldNames({
                 usage: modifiedUsage,
-                clusterUuid
+                clusterUuid,
               });
             }
           } catch (e) {
@@ -135,15 +144,15 @@ export function registerStatsApi(usageCollection, server, config) {
           }
         }
 
-        /* kibana_stats gets singled out from the collector set as it is used
-         * for health-checking Kibana and fetch does not rely on fetching data
-         * from ES */
-        const kibanaStatsCollector = usageCollection.getCollectorByType(KIBANA_STATS_TYPE);
-        if (!await kibanaStatsCollector.isReady()) {
+        if (!lastMetrics) {
           return boom.serverUnavailable(STATS_NOT_READY_MESSAGE);
         }
-        let kibanaStats = await kibanaStatsCollector.fetch();
-        kibanaStats = usageCollection.toApiFieldNames(kibanaStats);
+        const kibanaStats = usageCollection.toApiFieldNames({
+          ...lastMetrics,
+          kibana: getKibanaInfoForStats(server, kbnServer),
+          last_updated: new Date().toISOString(),
+          collection_interval_in_millis: config.get('ops.interval'),
+        });
 
         return {
           ...kibanaStats,

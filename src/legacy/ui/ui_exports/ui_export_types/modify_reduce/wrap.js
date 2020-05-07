@@ -41,7 +41,5 @@ export function wrap(...args) {
   const reducer = args[args.length - 1];
   const wrappers = args.slice(0, -1);
 
-  return wrappers
-    .reverse()
-    .reduce((acc, wrapper) => wrapper(acc), reducer);
+  return wrappers.reverse().reduce((acc, wrapper) => wrapper(acc), reducer);
 }

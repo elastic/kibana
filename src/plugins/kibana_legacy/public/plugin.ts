@@ -17,17 +17,53 @@
  * under the License.
  */
 
-import { App } from 'kibana/public';
+import {
+  App,
+  AppBase,
+  PluginInitializerContext,
+  AppUpdatableFields,
+  CoreStart,
+} from 'kibana/public';
+import { Observable } from 'rxjs';
+import { ConfigSchema } from '../config';
+import { getDashboardConfig } from './dashboard_config';
 
-interface ForwardDefinition {
+interface LegacyAppAliasDefinition {
   legacyAppId: string;
   newAppId: string;
   keepPrefix: boolean;
 }
 
+interface ForwardDefinition {
+  legacyAppId: string;
+  newAppId: string;
+  rewritePath: (legacyPath: string) => string;
+}
+
+export type AngularRenderedAppUpdater = (
+  app: AppBase
+) => Partial<AppUpdatableFields & { activeUrl: string }> | undefined;
+
+export interface AngularRenderedApp extends App {
+  /**
+   * Angular rendered apps are able to update the active url in the nav link (which is currently not
+   * possible for actual NP apps). When regular applications have the same functionality, this type
+   * override can be removed.
+   */
+  updater$?: Observable<AngularRenderedAppUpdater>;
+  /**
+   * If the active url is updated via the updater$ subject, the app id is assumed to be identical with
+   * the nav link id. If this is not the case, it is possible to provide another nav link id here.
+   */
+  navLinkId?: string;
+}
+
 export class KibanaLegacyPlugin {
-  private apps: App[] = [];
-  private forwards: ForwardDefinition[] = [];
+  private apps: AngularRenderedApp[] = [];
+  private legacyAppAliases: LegacyAppAliasDefinition[] = [];
+  private forwardDefinitions: ForwardDefinition[] = [];
+
+  constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup() {
     return {
@@ -48,7 +84,7 @@ export class KibanaLegacyPlugin {
        *
        * @param app The app descriptor
        */
-      registerLegacyApp: (app: App) => {
+      registerLegacyApp: (app: AngularRenderedApp) => {
         this.apps.push(app);
       },
 
@@ -65,22 +101,72 @@ export class KibanaLegacyPlugin {
        * renaming or nesting plugins. For route changes after the prefix, please
        * use the routing mechanism of your app.
        *
+       * This method just redirects URLs within the legacy `kibana` app.
+       *
        * @param legacyAppId The name of the old app to forward URLs from
        * @param newAppId The name of the new app that handles the URLs now
        * @param options Whether the prefix of the old app is kept to nest the legacy
        * path into the new path
        */
-      forwardApp: (
+      registerLegacyAppAlias: (
         legacyAppId: string,
         newAppId: string,
         options: { keepPrefix: boolean } = { keepPrefix: false }
       ) => {
-        this.forwards.push({ legacyAppId, newAppId, ...options });
+        this.legacyAppAliases.push({ legacyAppId, newAppId, ...options });
       },
+
+      /**
+       * Forwards URLs within the legacy `kibana` app to a new platform application.
+       *
+       * @param legacyAppId The name of the old app to forward URLs from
+       * @param newAppId The name of the new app that handles the URLs now
+       * @param rewritePath Function to rewrite the legacy sub path of the app to the new path in the core app
+       * path into the new path
+       *
+       * Example usage:
+       * ```
+       * kibanaLegacy.forwardApp(
+       *   'old',
+       *   'new',
+       *   path => {
+       *     const [, id] = /old/item\/(.*)$/.exec(path) || [];
+       *     if (!id) {
+       *       return '#/home';
+       *     }
+       *     return '#/items/${id}';
+       *  }
+       * );
+       * ```
+       * This will cause the following redirects:
+       *
+       * * app/kibana#/old/ -> app/new#/home
+       * * app/kibana#/old/item/123 -> app/new#/items/123
+       *
+       */
+      forwardApp: (
+        legacyAppId: string,
+        newAppId: string,
+        rewritePath: (legacyPath: string) => string
+      ) => {
+        this.forwardDefinitions.push({ legacyAppId, newAppId, rewritePath });
+      },
+
+      /**
+       * @deprecated
+       * The `defaultAppId` config key is temporarily exposed to be used in the legacy platform.
+       * As this setting is going away, no new code should depend on it.
+       */
+      config: this.initializerContext.config.get(),
+      /**
+       * @deprecated
+       * Temporarily exposing the NP env to simulate initializer contexts in the LP.
+       */
+      env: this.initializerContext.env,
     };
   }
 
-  public start() {
+  public start({ application }: CoreStart) {
     return {
       /**
        * @deprecated
@@ -91,7 +177,14 @@ export class KibanaLegacyPlugin {
        * @deprecated
        * Just exported for wiring up with legacy platform, should not be used.
        */
-      getForwards: () => this.forwards,
+      getLegacyAppAliases: () => this.legacyAppAliases,
+      /**
+       * @deprecated
+       * Just exported for wiring up with legacy platform, should not be used.
+       */
+      getForwards: () => this.forwardDefinitions,
+      config: this.initializerContext.config.get(),
+      dashboardConfig: getDashboardConfig(!application.capabilities.dashboard.showWriteControls),
     };
   }
 }

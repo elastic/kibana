@@ -176,6 +176,7 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     }
 
     public async assertJobRowFields(jobId: string, expectedRow: object) {
+      await this.refreshJobList();
       const rows = await this.parseJobTable();
       const jobRow = rows.filter(row => row.id === jobId)[0];
       expect(jobRow).to.eql(expectedRow);
@@ -186,28 +187,24 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       expectedCounts: object,
       expectedModelSizeStats: object
     ) {
-      const countDetails = await this.parseJobCounts(jobId);
-      const counts = countDetails.counts;
+      const { counts, modelSizeStats } = await this.parseJobCounts(jobId);
 
-      // fields that have changing values are only validated
-      // to be present and then removed so they don't make
-      // the object validation fail
-      expect(counts).to.have.property('last_data_time');
-      delete counts.last_data_time;
+      // Only check for expected keys / values, ignore additional properties
+      // This way the tests stay stable when new properties are added on the ES side
+      for (const [key, value] of Object.entries(expectedCounts)) {
+        expect(counts)
+          .to.have.property(key)
+          .eql(value, `Expected counts property '${key}' to exist with value '${value}'`);
+      }
 
-      expect(counts).to.eql(expectedCounts);
-
-      const modelSizeStats = countDetails.modelSizeStats;
-
-      // fields that have changing values are only validated
-      // to be present and then removed so they don't make
-      // the object validation fail
-      expect(modelSizeStats).to.have.property('log_time');
-      delete modelSizeStats.log_time;
-      expect(modelSizeStats).to.have.property('model_bytes');
-      delete modelSizeStats.model_bytes;
-
-      expect(modelSizeStats).to.eql(expectedModelSizeStats);
+      for (const [key, value] of Object.entries(expectedModelSizeStats)) {
+        expect(modelSizeStats)
+          .to.have.property(key)
+          .eql(
+            value,
+            `Expected model size stats property '${key}' to exist with value '${value}')`
+          );
+      }
     }
 
     public async clickActionsMenu(jobId: string) {
@@ -234,6 +231,16 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
     public async confirmDeleteJobModal() {
       await testSubjects.click('mlDeleteJobConfirmModal > confirmModalConfirmButton');
       await testSubjects.missingOrFail('mlDeleteJobConfirmModal', { timeout: 30 * 1000 });
+    }
+
+    public async clickOpenJobInSingleMetricViewerButton(jobId: string) {
+      await testSubjects.click(`~openJobsInSingleMetricViewer-${jobId}`);
+      await testSubjects.existOrFail('~mlPageSingleMetricViewer');
+    }
+
+    public async clickOpenJobInAnomalyExplorerButton(jobId: string) {
+      await testSubjects.click(`~openJobsInSingleAnomalyExplorer-${jobId}`);
+      await testSubjects.existOrFail('~mlPageAnomalyExplorer');
     }
   })();
 }

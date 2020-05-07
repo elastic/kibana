@@ -17,15 +17,23 @@
  * under the License.
  */
 
-import { InternalElasticsearchServiceSetup } from './elasticsearch';
-import { InternalHttpServiceSetup } from './http';
-import { InternalUiSettingsServiceSetup } from './ui_settings';
-import { ContextSetup } from './context';
-import {
-  InternalSavedObjectsServiceStart,
-  InternalSavedObjectsServiceSetup,
-} from './saved_objects';
+import { Type } from '@kbn/config-schema';
+
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
+import { ConfigDeprecationProvider } from './config';
+import { ContextSetup } from './context';
+import { InternalElasticsearchServiceSetup, ElasticsearchServiceStart } from './elasticsearch';
+import { InternalHttpServiceSetup } from './http';
+import {
+  InternalSavedObjectsServiceSetup,
+  InternalSavedObjectsServiceStart,
+} from './saved_objects';
+import { InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart } from './ui_settings';
+import { UuidServiceSetup } from './uuid';
+import { InternalMetricsServiceSetup } from './metrics';
+import { InternalRenderingServiceSetup } from './rendering';
+import { InternalHttpResourcesSetup } from './http_resources';
+import { InternalStatusServiceSetup } from './status';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -33,8 +41,13 @@ export interface InternalCoreSetup {
   context: ContextSetup;
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
-  uiSettings: InternalUiSettingsServiceSetup;
+  metrics: InternalMetricsServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
+  status: InternalStatusServiceSetup;
+  uiSettings: InternalUiSettingsServiceSetup;
+  uuid: UuidServiceSetup;
+  rendering: InternalRenderingServiceSetup;
+  httpResources: InternalHttpResourcesSetup;
 }
 
 /**
@@ -42,5 +55,22 @@ export interface InternalCoreSetup {
  */
 export interface InternalCoreStart {
   capabilities: CapabilitiesStart;
+  elasticsearch: ElasticsearchServiceStart;
   savedObjects: InternalSavedObjectsServiceStart;
+  uiSettings: InternalUiSettingsServiceStart;
+}
+
+/**
+ * @internal
+ */
+export interface ServiceConfigDescriptor<T = any> {
+  path: string;
+  /**
+   * Schema to use to validate the configuration.
+   */
+  schema: Type<T>;
+  /**
+   * Provider for the {@link ConfigDeprecation} to apply to the plugin configuration.
+   */
+  deprecations?: ConfigDeprecationProvider;
 }

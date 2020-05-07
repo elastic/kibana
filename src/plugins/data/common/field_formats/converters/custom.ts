@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { FieldFormat, IFieldFormatType } from '../field_format';
-import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import { FieldFormat } from '../field_format';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS, FieldFormatInstanceType } from '../types';
 
-export const createCustomFieldFormat = (convert: TextContextTypeConvert): IFieldFormatType =>
+export const createCustomFieldFormat = (convert: TextContextTypeConvert): FieldFormatInstanceType =>
   class CustomFieldFormat extends FieldFormat {
     static id = FIELD_FORMAT_IDS.CUSTOM;
 

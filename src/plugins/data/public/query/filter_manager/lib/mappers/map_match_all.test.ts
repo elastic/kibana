@@ -18,11 +18,11 @@
  */
 
 import { mapMatchAll } from './map_match_all';
-import { esFilters } from '../../../../../common';
+import { MatchAllFilter } from '../../../../../common';
 
 describe('filter_manager/lib', () => {
   describe('mapMatchAll()', () => {
-    let filter: esFilters.MatchAllFilter;
+    let filter: MatchAllFilter;
 
     beforeEach(() => {
       filter = {

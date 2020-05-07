@@ -16,8 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { elasticsearchServiceMock } from '../../elasticsearch/elasticsearch_service.mock';
 
 export const clusterClientMock = jest.fn();
 jest.doMock('../../elasticsearch/scoped_cluster_client', () => ({
-  ScopedClusterClient: clusterClientMock,
+  ScopedClusterClient: clusterClientMock.mockImplementation(function() {
+    return elasticsearchServiceMock.createScopedClusterClient();
+  }),
 }));
+
+jest.doMock('elasticsearch', () => {
+  const realES = jest.requireActual('elasticsearch');
+  return {
+    ...realES,
+    // eslint-disable-next-line object-shorthand
+    Client: function() {
+      return elasticsearchServiceMock.createElasticsearchClient();
+    },
+  };
+});
