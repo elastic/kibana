@@ -6,7 +6,7 @@
 import { Reducer, useReducer } from 'react';
 import { euiDragDropReorder } from '@elastic/eui';
 
-import { DeserializeResult } from './data_in';
+import { DeserializeResult } from './serialize';
 import { getValue, setValue, unsafeProcessorMove, PARENT_CHILD_NEST_ERROR } from './utils';
 import { ProcessorInternal, DraggableLocation, ProcessorSelector } from './types';
 

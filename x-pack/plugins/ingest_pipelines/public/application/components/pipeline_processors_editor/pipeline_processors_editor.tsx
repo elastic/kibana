@@ -12,16 +12,16 @@ import { Processor } from '../../../../common/types';
 import { OnFormUpdateArg } from '../../../shared_imports';
 
 import { SettingsFormFlyout, DragAndDropTree, PipelineProcessorEditorItem } from './components';
-import { deserialize } from './data_in';
-import { serialize, SerializeResult } from './data_out';
+import { deserialize } from './serialize';
+import { serialize, SerializeResult } from './deserialize';
 import { useProcessorsState } from './processors_reducer';
 import { ProcessorInternal, ProcessorSelector } from './types';
 
-interface FormState {
+interface FormValidityState {
   validate: OnFormUpdateArg<any>['validate'];
 }
 
-export interface OnUpdateHandlerArg extends FormState {
+export interface OnUpdateHandlerArg extends FormValidityState {
   getData: () => SerializeResult;
 }
 
@@ -36,31 +36,29 @@ export interface Props {
 }
 
 /**
- * The editor can be in different modes. This enables us to hold
- * a reference to data we will either use to render a form or dispatch to
- * the reducer (like the {@link ProcessorSelector} which will be used to
- * update the in-memory processors data structure.
+ * The settings form can be in different modes. This enables us to hold
+ * a reference to data dispatch to * the reducer (like the {@link ProcessorSelector}
+ * which will be used to update the in-memory processors data structure.
  */
-type Mode =
+type SettingsFormMode =
   | { id: 'creatingTopLevelProcessor' }
   | { id: 'creatingOnFailureProcessor'; arg: ProcessorSelector }
   | { id: 'editingProcessor'; arg: { processor: ProcessorInternal; selector: ProcessorSelector } }
-  | { id: 'idle' };
+  | { id: 'closed' };
 
 export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
   value: { processors: originalProcessors },
   onUpdate,
 }) => {
-  const dataInResult = useMemo(() => deserialize({ processors: originalProcessors }), [
+  const deserializedResult = useMemo(() => deserialize({ processors: originalProcessors }), [
     originalProcessors,
   ]);
 
-  const [mode, setMode] = useState<Mode>({ id: 'idle' });
+  const [settingsFormMode, setSettingsFormMode] = useState<SettingsFormMode>({ id: 'closed' });
+  const [processorsState, processorsDispatch] = useProcessorsState(deserializedResult);
+  const { processors } = processorsState;
 
-  const [state, dispatch] = useProcessorsState(dataInResult);
-  const { processors } = state;
-
-  const [formState, setFormState] = useState<FormState>({
+  const [formState, setFormState] = useState<FormValidityState>({
     validate: () => Promise.resolve(true),
   });
 
@@ -75,39 +73,39 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
     onUpdate({
       validate: async () => {
         const formValid = await formState.validate();
-        return formValid && mode.id === 'idle';
+        return formValid && settingsFormMode.id === 'closed';
       },
-      getData: () => serialize(state),
+      getData: () => serialize(processorsState),
     });
-  }, [state, onUpdate, formState, mode]);
+  }, [processorsState, onUpdate, formState, settingsFormMode]);
 
   const onSubmit = useCallback(
     processorTypeAndOptions => {
-      switch (mode.id) {
+      switch (settingsFormMode.id) {
         case 'creatingTopLevelProcessor':
-          dispatch({
+          processorsDispatch({
             type: 'addTopLevelProcessor',
             payload: { processor: processorTypeAndOptions },
           });
           break;
         case 'creatingOnFailureProcessor':
-          dispatch({
+          processorsDispatch({
             type: 'addOnFailureProcessor',
             payload: {
               onFailureProcessor: processorTypeAndOptions,
-              targetSelector: mode.arg,
+              targetSelector: settingsFormMode.arg,
             },
           });
           break;
         case 'editingProcessor':
-          dispatch({
+          processorsDispatch({
             type: 'updateProcessor',
             payload: {
               processor: {
-                ...mode.arg.processor,
+                ...settingsFormMode.arg.processor,
                 ...processorTypeAndOptions,
               },
-              selector: mode.arg.selector,
+              selector: settingsFormMode.arg.selector,
             },
           });
           break;
@@ -115,21 +113,21 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
       }
       dismissFlyout();
     },
-    [dispatch, mode]
+    [processorsDispatch, settingsFormMode]
   );
 
   const onDragEnd = useCallback(
     args => {
-      dispatch({
+      processorsDispatch({
         type: 'moveProcessor',
         payload: args,
       });
     },
-    [dispatch]
+    [processorsDispatch]
   );
 
   const dismissFlyout = () => {
-    setMode({ id: 'idle' });
+    setSettingsFormMode({ id: 'closed' });
   };
 
   return (
@@ -142,17 +140,17 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
             onClick={type => {
               switch (type) {
                 case 'edit':
-                  setMode({ id: 'editingProcessor', arg: { processor, selector } });
+                  setSettingsFormMode({ id: 'editingProcessor', arg: { processor, selector } });
                   break;
                 case 'delete':
                   // TODO: This should have a delete confirmation modal
-                  dispatch({
+                  processorsDispatch({
                     type: 'removeProcessor',
                     payload: { selector },
                   });
                   break;
                 case 'addOnFailure':
-                  setMode({ id: 'creatingOnFailureProcessor', arg: selector });
+                  setSettingsFormMode({ id: 'creatingOnFailureProcessor', arg: selector });
                   break;
               }
             }}
@@ -161,14 +159,16 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
         )}
       />
       {/* TODO: Translate */}
-      <EuiButton onClick={() => setMode({ id: 'creatingTopLevelProcessor' })}>
+      <EuiButton onClick={() => setSettingsFormMode({ id: 'creatingTopLevelProcessor' })}>
         Add a processor
       </EuiButton>
-      {mode.id !== 'idle' ? (
+      {settingsFormMode.id !== 'closed' ? (
         <SettingsFormFlyout
           onFormUpdate={onFormUpdate}
           onSubmit={onSubmit}
-          processor={mode.id === 'editingProcessor' ? mode.arg.processor : undefined}
+          processor={
+            settingsFormMode.id === 'editingProcessor' ? settingsFormMode.arg.processor : undefined
+          }
           onClose={() => {
             dismissFlyout();
             setFormState({ validate: () => Promise.resolve(true) });

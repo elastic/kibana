@@ -5,7 +5,7 @@
  */
 import { Processor } from '../../../../common/types';
 
-import { DeserializeResult } from './data_in';
+import { DeserializeResult } from './serialize';
 import { ProcessorInternal } from './types';
 
 type SerializeArgs = DeserializeResult;
