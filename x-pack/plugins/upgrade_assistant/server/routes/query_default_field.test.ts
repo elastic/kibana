@@ -82,4 +82,30 @@ describe('add query default field API', () => {
     expect(resp.status).toEqual(200);
     expect(resp.payload).toEqual({ acknowledged: true });
   });
+
+  it('fails if index already has index.query.default_field setting', async () => {
+    (routeHandlerContextMock.core.elasticsearch.adminClient
+      .callAsCurrentUser as jest.Mock).mockResolvedValueOnce({
+      'metricbeat-1': {
+        settings: { index: { query: { default_field: [] } } },
+      },
+    });
+
+    const resp = await dependencies.router.getHandler({
+      method: 'post',
+      pathPattern: '/api/upgrade_assistant/add_query_default_field/{indexName}',
+    })(
+      routeHandlerContextMock,
+      createRequestMock({
+        params: { indexName: 'metricbeat-1' },
+        body: {
+          fieldTypes: ['text', 'boolean'],
+        },
+      }),
+      kibanaResponseFactory
+    );
+
+    expect(resp.status).toEqual(400);
+    expect(resp.payload).toEqual('Index metricbeat-1 already has index.query.default_field set');
+  });
 });

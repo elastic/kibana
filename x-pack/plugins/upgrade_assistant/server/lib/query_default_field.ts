@@ -5,16 +5,13 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import Boom from 'boom';
-import { get } from 'lodash';
 
 import { MappingProperties } from './reindexing/types';
 
 /**
  * Adds the index.query.default_field setting, generated from the index's mapping.
  *
- * @param callWithRequest
- * @param request
+ * @param clusterClient
  * @param indexName
  * @param fieldTypes - Elasticsearch field types that should be used to generate the default_field from the index mapping
  * @param otherFields - Other fields that should be included in the generated default_field that do not match `fieldTypes`
@@ -25,14 +22,6 @@ export const addDefaultField = async (
   fieldTypes: ReadonlySet<string>,
   otherFields: ReadonlySet<string> = new Set()
 ) => {
-  // Verify index.query.default_field is not already set.
-  const settings = await clusterClient.callAsCurrentUser('indices.getSettings', {
-    index: indexName,
-  });
-  if (get(settings, `${indexName}.settings.index.query.default_field`)) {
-    throw Boom.badRequest(`Index ${indexName} already has index.query.default_field set`);
-  }
-
   // Get the mapping and generate the default_field based on `fieldTypes`
   const mappingResp = await clusterClient.callAsCurrentUser('indices.getMapping', {
     index: indexName,
