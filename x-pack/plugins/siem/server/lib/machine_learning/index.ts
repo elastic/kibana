@@ -6,7 +6,7 @@
 
 import { SearchResponse, SearchParams } from 'elasticsearch';
 
-import { AnomalyRecordDoc as Anomaly } from '../../../../ml/common/types/anomalies';
+import { AnomalyRecordDoc as Anomaly } from '../../../../ml/server';
 
 export { Anomaly };
 export type AnomalyResults = SearchResponse<Anomaly>;
