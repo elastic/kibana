@@ -12,6 +12,7 @@ import {
   SavedTimeline,
   TimelineResponse,
   TimelineResponseType,
+  TimelineType,
 } from '../../../common/types/timeline';
 import {
   TIMELINE_URL,
@@ -72,9 +73,19 @@ export const persistTimeline = async ({
   timeline,
   version,
 }: RequestPersistTimeline): Promise<TimelineResponse> => {
+  if (timelineId == null && timeline.timelineType === TimelineType.draft) {
+    const draftTimeline = await cleanDraftTimeline();
+    return patchTimeline({
+      timelineId: draftTimeline.data.persistTimeline.timeline.savedObjectId,
+      timeline,
+      version: draftTimeline.data.persistTimeline.timeline.version ?? '',
+    });
+  }
+
   if (timelineId == null) {
     return postTimeline({ timeline });
   }
+
   return patchTimeline({
     timelineId,
     timeline,

@@ -216,8 +216,8 @@ export const createTimelineEpic = <State>(): Epic<
           );
         } else if (action.type === getDraftTimeline.type) {
           return epicDraftTimeline(action, action$, timeline$, false);
-        } else if (action.type === createTimeline.type) {
-          return epicDraftTimeline(action, action$, timeline$, true);
+          // } else if (action.type === createTimeline.type) {
+          //   return epicDraftTimeline(action, action$, timeline$, true);
         } else if (timelineActionsType.includes(action.type)) {
           return from(
             persistTimeline({

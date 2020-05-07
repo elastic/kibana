@@ -6,15 +6,10 @@
 
 import { of, Observable, from } from 'rxjs';
 import { get } from 'lodash/fp';
-import { filter, withLatestFrom, mergeMap, takeUntil, startWith } from 'rxjs/operators';
+import { filter, withLatestFrom, mergeMap, takeUntil } from 'rxjs/operators';
 import { Epic } from 'redux-observable';
 import { Action } from 'redux';
-import {
-  addTimeline,
-  createTimeline,
-  showCallOutUnauthorizedMsg,
-  endTimelineSaving,
-} from './actions';
+import { createTimeline, showCallOutUnauthorizedMsg, endTimelineSaving } from './actions';
 import { getDraftTimeline, cleanDraftTimeline } from '../../containers/timeline/api';
 import { ActionTimeline, TimelineById } from './types';
 import { myEpicTimelineId } from './my_epic_timeline_id';
@@ -81,9 +76,6 @@ export const epicDraftTimeline = (
           if (checkAction.type === addError.type) {
             return true;
           }
-          if (checkAction.type === addTimeline.type) {
-            return true;
-          }
           if (
             checkAction.type === endTimelineSaving.type &&
             updatedTimeline[get('payload.id', checkAction)].savedObjectId != null
@@ -103,8 +95,4 @@ export const epicDraftTimeline = (
   );
 
 export const createDraftTimelineEpic = <State>(): Epic<Action, Action, State> => () =>
-  of(createTimeline({ id: 'timeline-1', columns: timelineDefaults.columns })).pipe(
-    startWith(
-      addTimeline({ id: 'timeline-1', timeline: { id: 'timeline-1', ...timelineDefaults } })
-    )
-  );
+  of(createTimeline({ id: 'timeline-1', ...timelineDefaults }));
