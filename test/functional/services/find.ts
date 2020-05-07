@@ -476,7 +476,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       value: string
     ): Promise<void> {
       log.debug(`Find.waitForAttributeToChange('${selector}', '${attribute}', '${value}')`);
-      retry.waitFor(`${attribute} to equal "${value}"`, async () => {
+      await retry.waitFor(`${attribute} to equal "${value}"`, async () => {
         const el = await this.byCssSelector(selector);
         return value === (await el.getAttribute(attribute));
       });

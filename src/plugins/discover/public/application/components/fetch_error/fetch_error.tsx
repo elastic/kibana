@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import './fetch_error.scss';
 import React, { Fragment } from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut, EuiCodeBlock, EuiSpacer } from '@elastic/eui';

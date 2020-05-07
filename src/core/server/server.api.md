@@ -1735,7 +1735,7 @@ export type SavedObjectMigrationFn<InputAttributes = unknown, MigratedAttributes
 // @public
 export interface SavedObjectMigrationMap {
     // (undocumented)
-    [version: string]: SavedObjectMigrationFn;
+    [version: string]: SavedObjectMigrationFn<any, any>;
 }
 
 // @public
