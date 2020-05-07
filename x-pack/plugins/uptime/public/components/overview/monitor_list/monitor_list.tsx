@@ -13,12 +13,9 @@ import {
   EuiLink,
   EuiPanel,
   EuiSpacer,
-  EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
 import { HistogramPoint, FetchMonitorStatesQueryArgs } from '../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../common/runtime_types';
 import { MonitorListStatusColumn } from './monitor_list_status_column';
@@ -32,8 +29,8 @@ import { MonitorListDrawer } from './monitor_list_drawer/list_drawer_container';
 import { MonitorListProps } from './monitor_list_container';
 import { MonitorList } from '../../../state/reducers/monitor_list';
 import { useUrlParams } from '../../../hooks';
-import { CERTIFICATES_ROUTE } from '../../../../common/constants';
 import { CertStatusColumn } from './cert_status_column';
+import { MonitorListHeader } from './monitor_list_header';
 
 interface Props extends MonitorListProps {
   lastRefresh: number;
@@ -190,31 +187,7 @@ export const MonitorListComponent: React.FC<Props> = ({
 
   return (
     <EuiPanel>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h5>
-              <FormattedMessage
-                id="xpack.uptime.monitorList.monitoringStatusTitle"
-                defaultMessage="Monitor status"
-              />
-            </h5>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h5>
-              <Link to={CERTIFICATES_ROUTE} data-test-subj="uptimeCertificatesLink">
-                <FormattedMessage
-                  id="xpack.uptime.monitorList.viewCertificateTitle"
-                  defaultMessage="View certificates status"
-                />
-              </Link>
-            </h5>
-          </EuiTitle>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
+      <MonitorListHeader />
       <EuiSpacer size="m" />
       <EuiBasicTable
         aria-label={labels.getDescriptionLabel(items.length)}

@@ -20,14 +20,35 @@ jest.mock('../../../common/index_controls', () => ({
 
 const ACTION_TYPE_ID = '.index';
 let actionTypeModel: ActionTypeModel;
+let deps: any;
 
-beforeAll(() => {
+beforeAll(async () => {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
   registerBuiltInActionTypes({ actionTypeRegistry });
   const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
   if (getResult !== null) {
     actionTypeModel = getResult;
   }
+  const mocks = coreMock.createSetup();
+  const [
+    {
+      application: { capabilities },
+    },
+  ] = await mocks.getStartServices();
+  deps = {
+    toastNotifications: mocks.notifications.toasts,
+    http: mocks.http,
+    capabilities: {
+      ...capabilities,
+      actions: {
+        delete: true,
+        save: true,
+        show: true,
+      },
+    },
+    actionTypeRegistry: actionTypeRegistry as any,
+    docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
+  };
 });
 
 describe('actionTypeRegistry.get() works', () => {
@@ -99,8 +120,6 @@ describe('action params validation', () => {
 
 describe('IndexActionConnectorFields renders', () => {
   test('all connector fields is rendered', async () => {
-    const mocks = coreMock.createSetup();
-
     expect(actionTypeModel.actionConnectorFields).not.toBeNull();
     if (!actionTypeModel.actionConnectorFields) {
       return;
@@ -150,7 +169,7 @@ describe('IndexActionConnectorFields renders', () => {
         errors={{ index: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        http={mocks.http}
+        http={deps!.http}
       />
     );
 

@@ -215,6 +215,12 @@ describe('update timelines', () => {
         );
       });
 
+      test('should Update existing template timeline with timelineId', async () => {
+        expect(mockPersistTimeline.mock.calls[0][1]).toEqual(
+          updateTemplateTimelineWithTimelineId.timelineId
+        );
+      });
+
       test('should Update existing template timeline with timeline version', async () => {
         expect(mockPersistTimeline.mock.calls[0][2]).toEqual(
           updateTemplateTimelineWithTimelineId.version

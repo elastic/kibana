@@ -12,7 +12,7 @@ import { Link } from 'react-router-dom';
 import { useUptimeTelemetry, UptimePage, useGetUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { PageHeader } from './page_header';
-import { DataPublicPluginSetup, IIndexPattern } from '../../../../../src/plugins/data/public';
+import { IIndexPattern } from '../../../../../src/plugins/data/public';
 import { useUpdateKueryString } from '../hooks';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { useTrackPageview } from '../../../observability/public';
@@ -20,18 +20,16 @@ import { MonitorList } from '../components/overview/monitor_list/monitor_list_co
 import { EmptyState, FilterGroup, KueryBar, ParsingErrorCallout } from '../components/overview';
 import { StatusPanel } from '../components/overview/status_panel';
 import { OVERVIEW_ROUTE } from '../../common/constants';
+import { OverviewPageProps } from '../components/overview/overview_container';
 
 const StyleLink = styled(Link)`
   animation: none !important;
 `;
 
-interface OverviewPageProps {
-  autocomplete: DataPublicPluginSetup['autocomplete'];
+interface Props extends OverviewPageProps {
   indexPattern: IIndexPattern | null;
   setEsKueryFilters: (esFilters: string) => void;
 }
-
-type Props = OverviewPageProps;
 
 const EuiFlexItemStyled = styled(EuiFlexItem)`
   && {

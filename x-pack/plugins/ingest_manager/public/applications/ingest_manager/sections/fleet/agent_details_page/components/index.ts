@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export { AgentEventsTable } from './agent_events_table';
-export { AgentDetailSection } from './details_section';
+export { AgentDetailsActionMenu } from './actions_menu';
+export { AgentDetailsContent } from './agent_details';
