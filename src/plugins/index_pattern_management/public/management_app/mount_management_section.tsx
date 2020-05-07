@@ -34,11 +34,6 @@ import {
 } from '../components';
 import { IndexPatternManagementStartDependencies, IndexPatternManagementStart } from '../plugin';
 
-const appTitle = i18n.translate('indexPatternManagement.indexPattern.sectionsHeader', {
-  defaultMessage: 'Index Patterns',
-});
-const crumb = [{ text: appTitle }];
-
 const readOnlyBadge = {
   text: i18n.translate('indexPatternManagement.indexPatterns.badge.readOnly.text', {
     defaultMessage: 'Read only',
@@ -53,8 +48,6 @@ export async function mountManagementSection(
   getStartServices: StartServicesAccessor<IndexPatternManagementStartDependencies>,
   params: ManagementAppMountParams
 ) {
-  params.setBreadcrumbs(crumb);
-
   const [
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
     { data },
@@ -88,6 +81,7 @@ export async function mountManagementSection(
                 savedObjectsClient: savedObjects.client,
                 uiSettings,
                 openConfirm: overlays.openConfirm,
+                setBreadcrumbs: params.setBreadcrumbs,
               }}
             />
           </Route>
@@ -108,6 +102,7 @@ export async function mountManagementSection(
                 fieldFormats: data.fieldFormats,
                 SearchBar: data.ui.SearchBar,
                 indexPatterns: data.indexPatterns,
+                setBreadcrumbs: params.setBreadcrumbs,
               }}
             />
           </Route>
@@ -121,6 +116,7 @@ export async function mountManagementSection(
                 docTitle: chrome.docTitle,
                 overlays,
                 savedObjectsClient: savedObjects.client,
+                setBreadcrumbs: params.setBreadcrumbs,
                 indexPatternManagement: indexPatternManagementStart as IndexPatternManagementStart,
               }}
             />
@@ -136,6 +132,7 @@ export async function mountManagementSection(
               services={{
                 savedObjectsClient: savedObjects.client,
                 uiSettings,
+                setBreadcrumbs: params.setBreadcrumbs,
                 indexPatternManagement: indexPatternManagementStart as IndexPatternManagementStart,
               }}
             />

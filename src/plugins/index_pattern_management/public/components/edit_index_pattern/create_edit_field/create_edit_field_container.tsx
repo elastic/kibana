@@ -29,6 +29,8 @@ import {
 } from 'src/core/public';
 
 import { IndexPattern, DataPublicPluginStart } from '../../../../../../plugins/data/public';
+import { ManagementAppMountParams } from '../../../../../management/public';
+import { getEditFieldBreadcrumbs, getCreateFieldBreadcrumbs } from '../../breadcrumbs';
 import { CreateEditField } from './create_edit_field';
 
 export interface CreateEditFieldContainerProps
@@ -46,6 +48,7 @@ export interface CreateEditFieldContainerProps
     toasts: NotificationsStart['toasts'];
     fieldFormats: DataPublicPluginStart['fieldFormats'];
     indexPatterns: DataPublicPluginStart['indexPatterns'];
+    setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   };
 }
 
@@ -53,7 +56,16 @@ const CreateEditFieldCont: React.FC<CreateEditFieldContainerProps> = ({ ...props
   const [indexPattern, setIndexPattern] = useState<IndexPattern>();
 
   useEffect(() => {
-    props.getIndexPattern(props.match.params.id).then((ip: IndexPattern) => setIndexPattern(ip));
+    props.getIndexPattern(props.match.params.id).then((ip: IndexPattern) => {
+      setIndexPattern(ip);
+      if (ip) {
+        props.services.setBreadcrumbs(
+          props.match.params.fieldName
+            ? getEditFieldBreadcrumbs(ip, props.match.params.fieldName)
+            : getCreateFieldBreadcrumbs(ip)
+        );
+      }
+    });
   }, [props.match.params.id, props.getIndexPattern, props]);
 
   if (indexPattern) {

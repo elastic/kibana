@@ -62,6 +62,7 @@ const services = ({
   uiSettings,
   changeUrl: jest.fn(),
   openConfirm: overlays.openConfirm,
+  setBreadcrumbs: jest.fn(),
 } as unknown) as CreateIndexPatternWizardProps['services'];
 
 const routeComponentPropsMock = {

@@ -27,7 +27,9 @@ import {
   SavedObjectsClientContract,
 } from 'src/core/public';
 import { IndexPattern } from '../../../../../plugins/data/public';
+import { ManagementAppMountParams } from '../../../../management/public';
 import { IndexPatternManagementStart } from '../..';
+import { getEditBreadcrumbs } from '../breadcrumbs';
 
 import { EditIndexPattern } from '../edit_index_pattern';
 
@@ -39,6 +41,7 @@ export interface EditIndexPatternContainerProps extends RouteComponentProps<{ id
     docTitle: ChromeDocTitle;
     overlays: OverlayStart;
     savedObjectsClient: SavedObjectsClientContract;
+    setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
     indexPatternManagement: IndexPatternManagementStart;
   };
 }
@@ -47,7 +50,10 @@ const EditIndexPatternCont: React.FC<EditIndexPatternContainerProps> = ({ ...pro
   const [indexPattern, setIndexPattern] = useState<IndexPattern>();
 
   useEffect(() => {
-    props.getIndexPattern(props.match.params.id).then((ip: IndexPattern) => setIndexPattern(ip));
+    props.getIndexPattern(props.match.params.id).then((ip: IndexPattern) => {
+      setIndexPattern(ip);
+      props.services.setBreadcrumbs(getEditBreadcrumbs(ip));
+    });
   }, [props.match.params.id, props.getIndexPattern, props]);
 
   if (indexPattern) {

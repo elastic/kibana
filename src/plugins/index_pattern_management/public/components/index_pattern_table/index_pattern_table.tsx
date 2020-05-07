@@ -34,11 +34,13 @@ import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectsClientContract, IUiSettingsClient } from '../../../../../core/public';
 import { INDEX_PATTERN_MANAGEMENT_SECTION_PATH } from '../../../../data/public';
+import { ManagementAppMountParams } from '../../../../management/public';
 import { CreateButton } from '../create_button';
 import { CreateIndexPatternPrompt } from '../create_index_pattern_prompt';
 import { IndexPatternTableItem, IndexPatternCreationOption } from '../types';
 import { IndexPatternManagementStart } from '../../plugin';
 import { getIndexPatterns } from '../utils';
+import { getListBreadcrumbs } from '../breadcrumbs';
 
 const columns = [
   {
@@ -103,6 +105,7 @@ interface Props extends RouteComponentProps {
   services: {
     savedObjectsClient: SavedObjectsClientContract;
     uiSettings: IUiSettingsClient;
+    setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
     indexPatternManagement: IndexPatternManagementStart;
   };
 }
@@ -116,6 +119,8 @@ export const IndexPatternTable = ({
   const [showFlyout, setShowFlyout] = useState(true);
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
+
+  services.setBreadcrumbs(getListBreadcrumbs());
 
   useEffect(() => {
     (async function() {

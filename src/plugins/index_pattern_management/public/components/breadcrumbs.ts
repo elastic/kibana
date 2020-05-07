@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { INDEX_PATTERN_MANAGEMENT_SECTION_PATH } from '../../../data/public';
+import { INDEX_PATTERN_MANAGEMENT_SECTION_PATH, IndexPattern } from '../../../data/public';
 
 export function getListBreadcrumbs() {
   return [
@@ -26,7 +26,7 @@ export function getListBreadcrumbs() {
       text: i18n.translate('indexPatternManagement.indexPatterns.listBreadcrumb', {
         defaultMessage: 'Index patterns',
       }),
-      href: `${INDEX_PATTERN_MANAGEMENT_SECTION_PATH}/patterns`,
+      href: `${INDEX_PATTERN_MANAGEMENT_SECTION_PATH}/`,
     },
   ];
 }
@@ -43,9 +43,7 @@ export function getCreateBreadcrumbs() {
   ];
 }
 
-export function getEditBreadcrumbs($route) {
-  const { indexPattern } = $route.current.locals;
-
+export function getEditBreadcrumbs(indexPattern: IndexPattern) {
   return [
     ...getListBreadcrumbs(),
     {
@@ -55,20 +53,18 @@ export function getEditBreadcrumbs($route) {
   ];
 }
 
-export function getEditFieldBreadcrumbs($route) {
-  const { fieldName } = $route.current.params;
-
+export function getEditFieldBreadcrumbs(indexPattern: IndexPattern, fieldName: string) {
   return [
-    ...getEditBreadcrumbs($route),
+    ...getEditBreadcrumbs(indexPattern),
     {
       text: fieldName,
     },
   ];
 }
 
-export function getCreateFieldBreadcrumbs($route) {
+export function getCreateFieldBreadcrumbs(indexPattern: IndexPattern) {
   return [
-    ...getEditBreadcrumbs($route),
+    ...getEditBreadcrumbs(indexPattern),
     {
       text: i18n.translate('indexPatternManagement.indexPatterns.createFieldBreadcrumb', {
         defaultMessage: 'Create field',

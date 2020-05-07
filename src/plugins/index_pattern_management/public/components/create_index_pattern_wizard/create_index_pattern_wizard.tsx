@@ -26,12 +26,14 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { SavedObjectsClientContract, IUiSettingsClient, OverlayStart } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { ManagementAppMountParams } from '../../../../management/public';
 import { StepIndexPattern } from './components/step_index_pattern';
 import { StepTimeField } from './components/step_time_field';
 import { Header } from './components/header';
 import { LoadingState } from './components/loading_state';
 import { EmptyState } from './components/empty_state';
 
+import { getCreateBreadcrumbs } from '../breadcrumbs';
 import { MAX_SEARCH_SIZE } from './constants';
 import { ensureMinimumTime, getIndices } from './lib';
 import { IndexPatternCreationConfig, IndexPatternManagementStart } from '../..';
@@ -45,6 +47,7 @@ export interface CreateIndexPatternWizardProps extends RouteComponentProps {
     savedObjectsClient: SavedObjectsClientContract;
     uiSettings: IUiSettingsClient;
     openConfirm: OverlayStart['openConfirm'];
+    setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   };
 }
 
@@ -66,9 +69,11 @@ export class CreateIndexPatternWizard extends Component<
   constructor(props: CreateIndexPatternWizardProps) {
     super(props);
     const {
-      services: { indexPatternCreation },
+      services: { indexPatternCreation, setBreadcrumbs },
       location,
     } = props;
+
+    setBreadcrumbs(getCreateBreadcrumbs());
 
     const type = new URLSearchParams(location.search).get('type') || undefined;
 
