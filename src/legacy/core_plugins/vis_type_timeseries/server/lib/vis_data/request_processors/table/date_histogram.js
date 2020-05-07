@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { set } from 'lodash';
+import { overwrite } from '../../helpers';
 import { dateHistogramInterval } from '../../../../../../data/server';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
@@ -40,7 +40,7 @@ export function dateHistogram(req, panel, esQueryConfig, indexPatternObject, cap
       panel.series.forEach(column => {
         const aggRoot = calculateAggRoot(doc, column);
 
-        set(doc, `${aggRoot}.timeseries.date_histogram`, {
+        overwrite(doc, `${aggRoot}.timeseries.date_histogram`, {
           field: timeField,
           min_doc_count: 0,
           time_zone: timezone,
@@ -51,7 +51,7 @@ export function dateHistogram(req, panel, esQueryConfig, indexPatternObject, cap
           ...dateHistogramInterval(intervalString),
         });
 
-        set(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
+        overwrite(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
           timeField,
           intervalString,
           bucketSize,
@@ -63,12 +63,12 @@ export function dateHistogram(req, panel, esQueryConfig, indexPatternObject, cap
       panel.series.forEach(column => {
         const aggRoot = calculateAggRoot(doc, column);
 
-        set(doc, `${aggRoot}.timeseries.auto_date_histogram`, {
+        overwrite(doc, `${aggRoot}.timeseries.auto_date_histogram`, {
           field: timeField,
           buckets: 1,
         });
 
-        set(doc, aggRoot.replace(/\.aggs$/, '.meta'), meta);
+        overwrite(doc, aggRoot.replace(/\.aggs$/, '.meta'), meta);
       });
     };
 

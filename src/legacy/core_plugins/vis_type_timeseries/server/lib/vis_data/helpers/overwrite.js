@@ -17,21 +17,15 @@
  * under the License.
  */
 
-import { overwrite } from '../../helpers';
-import { esQuery } from '../../../../../../../../plugins/data/server';
+import set from 'set-value';
 
-export function splitByFilter(req, panel, series, esQueryConfig, indexPattern) {
-  return next => doc => {
-    if (series.split_mode !== 'filter') {
-      return next(doc);
-    }
-
-    overwrite(
-      doc,
-      `aggs.${series.id}.filter`,
-      esQuery.buildEsQuery(indexPattern, [series.filter], [], esQueryConfig)
-    );
-
-    return next(doc);
-  };
+/**
+ * Set path in obj. Behaves like lodash `set`
+ * @param obj The object to mutate
+ * @param path The path of the sub-property to set
+ * @param val The value to set the sub-property to
+ */
+export function overwrite(obj, path, val) {
+  set(obj, path, undefined);
+  set(obj, path, val);
 }
