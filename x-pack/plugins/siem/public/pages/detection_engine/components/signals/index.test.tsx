@@ -7,7 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { SignalsTableComponent, PropsFromRedux } from './index';
+import { SignalsTableComponent } from './index';
 
 describe('SignalsTableComponent', () => {
   it('renders correctly', () => {
@@ -28,15 +28,13 @@ describe('SignalsTableComponent', () => {
         loadingEventIds={[]}
         selectedEventIds={{}}
         isSelectAllChecked={false}
-        clearSelected={(jest.fn() as unknown) as PropsFromRedux['clearSelected']}
-        setEventsLoading={(jest.fn() as unknown) as PropsFromRedux['setEventsLoading']}
-        clearEventsLoading={(jest.fn() as unknown) as PropsFromRedux['clearEventsLoading']}
-        setEventsDeleted={(jest.fn() as unknown) as PropsFromRedux['setEventsDeleted']}
-        clearEventsDeleted={(jest.fn() as unknown) as PropsFromRedux['clearEventsDeleted']}
-        createTimeline={(jest.fn() as unknown) as PropsFromRedux['createTimeline']}
-        updateTimelineIsLoading={
-          (jest.fn() as unknown) as PropsFromRedux['updateTimelineIsLoading']
-        }
+        clearSelected={jest.fn()}
+        setEventsLoading={jest.fn()}
+        clearEventsLoading={jest.fn()}
+        setEventsDeleted={jest.fn()}
+        clearEventsDeleted={jest.fn()}
+        updateTimelineIsLoading={jest.fn()}
+        updateTimeline={jest.fn()}
       />
     );
 
