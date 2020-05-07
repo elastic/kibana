@@ -19,7 +19,7 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
-import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
+import { getAnalysisType, DataFrameAnalyticsId, ANALYSIS_CONFIG_TYPE } from '../../../../common';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import {
   getDataFrameAnalyticsProgress,
@@ -60,6 +60,14 @@ export const getTaskStateBadge = (
   return (
     <EuiBadge className="mlTaskStateBadge" color={color}>
       {state}
+    </EuiBadge>
+  );
+};
+
+export const getJobTypeBadge = (jobType: string) => {
+  return (
+    <EuiBadge className="mlTaskStateBadge" color="hollow">
+      {jobType}
     </EuiBadge>
   );
 };
@@ -230,7 +238,7 @@ export const getColumns = (
       sortable: (item: DataFrameAnalyticsListRow) => getAnalysisType(item.config.analysis),
       truncateText: true,
       render(item: DataFrameAnalyticsListRow) {
-        return <EuiBadge color="hollow">{getAnalysisType(item.config.analysis)}</EuiBadge>;
+        return getJobTypeBadge(getAnalysisType(item.config.analysis));
       },
       width: '150px',
       'data-test-subj': 'mlAnalyticsTableColumnType',
