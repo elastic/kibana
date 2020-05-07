@@ -118,6 +118,6 @@ export async function getAlertData(
   }
 }
 
-export const AlertDetailsRouteWithApi = withActionOperations(
-  withBulkAlertOperations(AlertDetailsRoute)
-);
+const AlertDetailsRouteWithApi = withActionOperations(withBulkAlertOperations(AlertDetailsRoute));
+// eslint-disable-next-line import/no-default-export
+export { AlertDetailsRouteWithApi as default };

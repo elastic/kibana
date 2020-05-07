@@ -164,6 +164,15 @@ export const CaseComponent = React.memo<CaseProps>(
       () => connectors.find(c => c.id === caseData.connectorId)?.name ?? 'none',
       [connectors, caseData.connectorId]
     );
+
+    const currentExternalIncident = useMemo(
+      () =>
+        caseServices != null && caseServices[caseData.connectorId] != null
+          ? caseServices[caseData.connectorId]
+          : null,
+      [caseServices, caseData.connectorId]
+    );
+
     const { pushButton, pushCallouts } = usePushToService({
       caseConnectorId: caseData.connectorId,
       caseConnectorName,
@@ -254,6 +263,7 @@ export const CaseComponent = React.memo<CaseProps>(
             title={caseData.title}
           >
             <CaseStatus
+              currentExternalIncident={currentExternalIncident}
               caseData={caseData}
               disabled={!userCanCrud}
               isLoading={isLoading && updateKey === 'status'}

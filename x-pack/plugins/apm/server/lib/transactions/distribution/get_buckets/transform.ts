@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PromiseReturnType } from '../../../../../typings/common';
+import { PromiseReturnType } from '../../../../../../observability/typings/common';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { bucketFetcher } from './fetcher';
 
