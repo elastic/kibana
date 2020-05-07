@@ -108,7 +108,7 @@ describe('FieldEditor', () => {
 
   let indexPattern: IndexPattern;
 
-  const helpers: FieldEdiorProps['helpers'] = ({
+  const services: FieldEdiorProps['services'] = ({
     Field: () => {},
     getConfig: () => {},
     fieldFormatEditors: [],
@@ -120,18 +120,18 @@ describe('FieldEditor', () => {
     uiSettings: coreStartServices.uiSettings,
     SearchBar: dataStartServices.ui.SearchBar,
     indexPatterns: dataStartServices.indexPatterns,
-  } as unknown) as FieldEdiorProps['helpers'];
+  } as unknown) as FieldEdiorProps['services'];
 
   beforeEach(() => {
     indexPattern = ({
       fields: fields as IIndexPatternFieldList,
     } as unknown) as IndexPattern;
 
-    helpers.fieldFormats.getDefaultType = jest.fn(
+    services.fieldFormats.getDefaultType = jest.fn(
       () => (({} as unknown) as FieldFormatInstanceType)
     );
 
-    helpers.fieldFormats.getByFieldType = jest.fn(fieldType => {
+    services.fieldFormats.getByFieldType = jest.fn(fieldType => {
       if (fieldType === 'number') {
         return [({} as unknown) as FieldFormatInstanceType];
       } else {
@@ -145,7 +145,7 @@ describe('FieldEditor', () => {
       <FieldEditor
         indexPattern={indexPattern}
         field={(field as unknown) as IndexPatternField}
-        helpers={helpers}
+        services={services}
       />
     );
 
@@ -172,7 +172,7 @@ describe('FieldEditor', () => {
       <FieldEditor
         indexPattern={indexPattern}
         field={(testField as unknown) as IndexPatternField}
-        helpers={helpers}
+        services={services}
       />
     );
 
@@ -200,7 +200,7 @@ describe('FieldEditor', () => {
       <FieldEditor
         indexPattern={indexPattern}
         field={(testField as unknown) as IndexPatternField}
-        helpers={helpers}
+        services={services}
       />
     );
 
@@ -215,7 +215,7 @@ describe('FieldEditor', () => {
       <FieldEditor
         indexPattern={indexPattern}
         field={(testField as unknown) as IndexPatternField}
-        helpers={helpers}
+        services={services}
       />
     );
 
@@ -238,7 +238,7 @@ describe('FieldEditor', () => {
       <FieldEditor
         indexPattern={indexPattern}
         field={(testField as unknown) as IndexPatternField}
-        helpers={helpers}
+        services={services}
       />
     );
 

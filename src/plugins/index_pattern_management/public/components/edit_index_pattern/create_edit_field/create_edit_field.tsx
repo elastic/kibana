@@ -111,7 +111,7 @@ export const CreateEditField = withRouter(
               <FieldEditor
                 indexPattern={indexPattern}
                 field={field}
-                helpers={{
+                services={{
                   uiSettings: services.uiSettings,
                   http: services.http,
                   fieldFormatEditors,

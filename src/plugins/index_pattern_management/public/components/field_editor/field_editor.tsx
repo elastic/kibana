@@ -134,7 +134,7 @@ export interface FieldEditorState {
 export interface FieldEdiorProps {
   indexPattern: IndexPattern;
   field: IndexPatternField;
-  helpers: {
+  services: {
     http: HttpStart;
     fieldFormatEditors: IndexPatternManagementStart['fieldFormatEditors'];
     redirectAway: () => void;
@@ -178,7 +178,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   }
 
   async init() {
-    const { http, toasts } = this.props.helpers;
+    const { http, toasts } = this.props.services;
     const { field } = this.state;
     const { indexPattern } = this.props;
 
@@ -192,7 +192,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const fieldTypes = get(FIELD_TYPES_BY_LANG, field.lang || '', DEFAULT_FIELD_TYPES);
     field.type = fieldTypes.includes(field.type) ? field.type : fieldTypes[0];
 
-    const DefaultFieldFormat = this.props.helpers.fieldFormats.getDefaultType(
+    const DefaultFieldFormat = this.props.services.fieldFormats.getDefaultType(
       field.type as KBN_FIELD_TYPES,
       field.esTypes as ES_FIELD_TYPES[]
     );
@@ -207,7 +207,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       fieldTypeFormats: getFieldTypeFormatsList(
         field,
         DefaultFieldFormat as FieldFormatInstanceType,
-        this.props.helpers.fieldFormats
+        this.props.services.fieldFormats
       ),
       fieldFormatId: get(indexPattern, ['fieldFormatMap', field.name, 'type', 'id']),
       fieldFormatParams: field.format.params(),
@@ -221,9 +221,9 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   };
 
   onTypeChange = (type: KBN_FIELD_TYPES) => {
-    const { uiSettings } = this.props.helpers;
+    const { uiSettings } = this.props.services;
     const { field } = this.state;
-    const DefaultFieldFormat = this.props.helpers.fieldFormats.getDefaultType(
+    const DefaultFieldFormat = this.props.services.fieldFormats.getDefaultType(
       type
     ) as FieldFormatInstanceType;
 
@@ -235,7 +235,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       fieldTypeFormats: getFieldTypeFormatsList(
         field,
         DefaultFieldFormat,
-        this.props.helpers.fieldFormats
+        this.props.services.fieldFormats
       ),
       fieldFormatId: DefaultFieldFormat.id,
       fieldFormatParams: field.format.params(),
@@ -255,7 +255,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
   onFormatChange = (formatId: string, params?: any) => {
     const { field, fieldTypeFormats } = this.state;
-    const { uiSettings, fieldFormats } = this.props.helpers;
+    const { uiSettings, fieldFormats } = this.props.services;
 
     const FieldFormat = fieldFormats.getType(
       formatId || (fieldTypeFormats[0] as InitialFieldTypeFormat).defaultFieldFormat.id
@@ -369,7 +369,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
                   painlessLink: (
                     <EuiLink
                       target="_blank"
-                      href={this.props.helpers.docLinksScriptedFields.painless}
+                      href={this.props.services.docLinksScriptedFields.painless}
                     >
                       <FormattedMessage
                         id="indexPatternManagement.warningLabel.painlessLinkLabel"
@@ -477,7 +477,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
   renderFormat() {
     const { field, fieldTypeFormats, fieldFormatId, fieldFormatParams } = this.state;
-    const { fieldFormatEditors } = this.props.helpers;
+    const { fieldFormatEditors } = this.props.services;
     const defaultFormat = (fieldTypeFormats[0] as InitialFieldTypeFormat).defaultFieldFormat.title;
 
     const label = defaultFormat ? (
@@ -685,7 +685,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
   renderActions() {
     const { isCreating, field, isSaving } = this.state;
-    const { redirectAway } = this.props.helpers;
+    const { redirectAway } = this.props.services;
 
     return (
       <EuiFormRow>
@@ -750,7 +750,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         <ScriptingDisabledCallOut isVisible={!scriptingLangs.length} />
         <ScriptingWarningCallOut
           isVisible
-          docLinksScriptedFields={this.props.helpers.docLinksScriptedFields}
+          docLinksScriptedFields={this.props.services.docLinksScriptedFields}
         />
         <ScriptingHelpFlyout
           isVisible={showScriptingHelp}
@@ -760,17 +760,17 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           name={field.name}
           script={field.script}
           executeScript={executeScript}
-          http={this.props.helpers.http}
-          docLinksScriptedFields={this.props.helpers.docLinksScriptedFields}
-          uiSettings={this.props.helpers.uiSettings}
-          SearchBar={this.props.helpers.SearchBar}
+          http={this.props.services.http}
+          docLinksScriptedFields={this.props.services.docLinksScriptedFields}
+          uiSettings={this.props.services.uiSettings}
+          SearchBar={this.props.services.SearchBar}
         />
       </Fragment>
     );
   };
 
   deleteField = () => {
-    const { redirectAway } = this.props.helpers;
+    const { redirectAway } = this.props.services;
     const { indexPattern } = this.props;
     const { field } = this.state;
     const remove = indexPattern.removeScriptedField(field);
@@ -781,7 +781,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           defaultMessage: "Deleted '{fieldName}'",
           values: { fieldName: field.name },
         });
-        this.props.helpers.toasts.addSuccess(message);
+        this.props.services.toasts.addSuccess(message);
         redirectAway();
       });
     } else {
@@ -804,7 +804,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         lang: field.lang as string,
         script: field.script as string,
         indexPatternTitle: indexPattern.title,
-        http: this.props.helpers.http,
+        http: this.props.services.http,
       });
 
       if (!isValid) {
@@ -816,7 +816,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       }
     }
 
-    const { redirectAway } = this.props.helpers;
+    const { redirectAway } = this.props.services;
     const index = indexPattern.fields.findIndex((f: IFieldType) => f.name === field.name);
 
     if (index > -1) {
@@ -836,7 +836,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         defaultMessage: "Saved '{fieldName}'",
         values: { fieldName: field.name },
       });
-      this.props.helpers.toasts.addSuccess(message);
+      this.props.services.toasts.addSuccess(message);
       redirectAway();
     });
   };
