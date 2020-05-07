@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { overwrite } from '../../helpers';
 import { buildEsQuery } from '@kbn/es-query';
 export function splitByTerms(req, panel, esQueryConfig, indexPattern) {
   return next => doc => {
     panel.series
       .filter(c => c.aggregate_by && c.aggregate_function)
       .forEach(column => {
-        _.set(doc, `aggs.pivot.aggs.${column.id}.terms.field`, column.aggregate_by);
-        _.set(doc, `aggs.pivot.aggs.${column.id}.terms.size`, 100);
+        overwrite(doc, `aggs.pivot.aggs.${column.id}.terms.field`, column.aggregate_by);
+        overwrite(doc, `aggs.pivot.aggs.${column.id}.terms.size`, 100);
         if (column.filter) {
-          _.set(
+          overwrite(
             doc,
             `aggs.pivot.aggs.${column.id}.column_filter.filter`,
             buildEsQuery(indexPattern, [column.filter], [], esQueryConfig)
