@@ -34,7 +34,8 @@ export default function({ getService }) {
     clearCache,
   } = registerHelpers({ supertest });
 
-  describe('indices', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/64473
+  describe.skip('indices', () => {
     after(() => Promise.all([cleanUpEsResources()]));
 
     describe('clear cache', () => {
@@ -193,12 +194,16 @@ export default function({ getService }) {
           'size',
           'isFrozen',
           'aliases',
-          'ilm', // data enricher
-          'isRollupIndex', // data enricher
           // Cloud disables CCR, so wouldn't expect follower indices.
           'isFollowerIndex', // data enricher
+          'ilm', // data enricher
+          'isRollupIndex', // data enricher
         ];
-        expect(Object.keys(body[0])).to.eql(expectedKeys);
+        // We need to sort the keys before comparing then, because race conditions
+        // can cause enrichers to register in non-deterministic order.
+        const sortedExpectedKeys = expectedKeys.sort();
+        const sortedReceivedKeys = Object.keys(body[0]).sort();
+        expect(sortedReceivedKeys).to.eql(sortedExpectedKeys);
       });
     });
 
@@ -219,12 +224,16 @@ export default function({ getService }) {
             'size',
             'isFrozen',
             'aliases',
-            'ilm', // data enricher
-            'isRollupIndex', // data enricher
             // Cloud disables CCR, so wouldn't expect follower indices.
             'isFollowerIndex', // data enricher
+            'ilm', // data enricher
+            'isRollupIndex', // data enricher
           ];
-          expect(Object.keys(body[0])).to.eql(expectedKeys);
+          // We need to sort the keys before comparing then, because race conditions
+          // can cause enrichers to register in non-deterministic order.
+          const sortedExpectedKeys = expectedKeys.sort();
+          const sortedReceivedKeys = Object.keys(body[0]).sort();
+          expect(sortedReceivedKeys).to.eql(sortedExpectedKeys);
           expect(body.length > 1).to.be(true); // to contrast it with the next test
         });
       });

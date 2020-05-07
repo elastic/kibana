@@ -14,6 +14,7 @@ import {
   PostAgentEnrollResponse,
   PostAgentUnenrollResponse,
   GetAgentStatusResponse,
+  PutAgentReassignResponse,
 } from '../../../common/types';
 import {
   GetAgentsRequestSchema,
@@ -25,6 +26,7 @@ import {
   PostAgentEnrollRequestSchema,
   PostAgentUnenrollRequestSchema,
   GetAgentStatusRequestSchema,
+  PutAgentReassignRequestSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import * as APIKeyService from '../../services/api_keys';
@@ -293,60 +295,36 @@ export const getAgentsHandler: RequestHandler<
   }
 };
 
-export const postAgentsUnenrollHandler: RequestHandler<
+export const postAgentsUnenrollHandler: RequestHandler<TypeOf<
+  typeof PostAgentUnenrollRequestSchema.params
+>> = async (context, request, response) => {
+  const soClient = context.core.savedObjects.client;
+  try {
+    await AgentService.unenrollAgent(soClient, request.params.agentId);
+
+    const body: PostAgentUnenrollResponse = {
+      success: true,
+    };
+    return response.ok({ body });
+  } catch (e) {
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
+    });
+  }
+};
+
+export const putAgentsReassignHandler: RequestHandler<
+  TypeOf<typeof PutAgentReassignRequestSchema.params>,
   undefined,
-  undefined,
-  TypeOf<typeof PostAgentUnenrollRequestSchema.body>
+  TypeOf<typeof PutAgentReassignRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   try {
-    const kuery = (request.body as { kuery: string }).kuery;
-    let toUnenrollIds: string[] = (request.body as { ids: string[] }).ids || [];
+    await AgentService.reassignAgent(soClient, request.params.agentId, request.body.config_id);
 
-    if (kuery) {
-      let hasMore = true;
-      let page = 1;
-      while (hasMore) {
-        const { agents } = await AgentService.listAgents(soClient, {
-          page: page++,
-          perPage: 100,
-          kuery,
-          showInactive: true,
-        });
-        if (agents.length === 0) {
-          hasMore = false;
-        }
-        const agentIds = agents.filter(a => a.active).map(a => a.id);
-        toUnenrollIds = toUnenrollIds.concat(agentIds);
-      }
-    }
-    const results = (await AgentService.unenrollAgents(soClient, toUnenrollIds)).map(
-      ({
-        success,
-        id,
-        error,
-      }): {
-        success: boolean;
-        id: string;
-        action: 'unenrolled';
-        error?: {
-          message: string;
-        };
-      } => {
-        return {
-          success,
-          id,
-          action: 'unenrolled',
-          error: error && {
-            message: error.message,
-          },
-        };
-      }
-    );
-
-    const body: PostAgentUnenrollResponse = {
-      results,
-      success: results.every(result => result.success),
+    const body: PutAgentReassignResponse = {
+      success: true,
     };
     return response.ok({ body });
   } catch (e) {

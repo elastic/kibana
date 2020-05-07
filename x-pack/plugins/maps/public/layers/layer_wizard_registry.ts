@@ -6,16 +6,21 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { ReactElement } from 'react';
-import { ISource } from './sources/source';
-
-export type PreviewSourceHandler = (source: ISource | null) => void;
+import { LayerDescriptor } from '../../common/descriptor_types';
 
 export type RenderWizardArguments = {
-  onPreviewSource: PreviewSourceHandler;
-  inspectorAdapters: object;
+  previewLayer: (layerDescriptor: LayerDescriptor | null, isIndexingSource?: boolean) => void;
+  mapColors: string[];
+  // upload arguments
+  isIndexingTriggered: boolean;
+  onRemove: () => void;
+  onIndexReady: () => void;
+  importSuccessHandler: (indexResponses: unknown) => void;
+  importErrorHandler: (indexResponses: unknown) => void;
 };
 
 export type LayerWizard = {
+  checkVisibility?: () => Promise<boolean>;
   description: string;
   icon: string;
   isIndexingSource?: boolean;
@@ -26,9 +31,23 @@ export type LayerWizard = {
 const registry: LayerWizard[] = [];
 
 export function registerLayerWizard(layerWizard: LayerWizard) {
-  registry.push(layerWizard);
+  registry.push({
+    checkVisibility: async () => {
+      return true;
+    },
+    ...layerWizard,
+  });
 }
 
-export function getLayerWizards(): LayerWizard[] {
-  return [...registry];
+export async function getLayerWizards(): Promise<LayerWizard[]> {
+  const promises = registry.map(async layerWizard => {
+    return {
+      ...layerWizard,
+      // @ts-ignore
+      isVisible: await layerWizard.checkVisibility(),
+    };
+  });
+  return (await Promise.all(promises)).filter(({ isVisible }) => {
+    return isVisible;
+  });
 }

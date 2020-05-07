@@ -39,12 +39,11 @@ export const createRulesBulkRoute = (router: IRouter) => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const alertsClient = context.alerting?.getAlertsClient();
-      const actionsClient = context.actions?.getActionsClient();
       const clusterClient = context.core.elasticsearch.dataClient;
       const savedObjectsClient = context.core.savedObjects.client;
       const siemClient = context.siem?.getSiemClient();
 
-      if (!siemClient || !actionsClient || !alertsClient) {
+      if (!siemClient || !alertsClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
@@ -92,7 +91,7 @@ export const createRulesBulkRoute = (router: IRouter) => {
             try {
               validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
 
-              const finalIndex = outputIndex ?? siemClient.signalsIndex;
+              const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
               const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
               if (!indexExists) {
                 return createBulkErrorObject({
@@ -113,7 +112,6 @@ export const createRulesBulkRoute = (router: IRouter) => {
               }
               const createdRule = await createRules({
                 alertsClient,
-                actionsClient,
                 anomalyThreshold,
                 description,
                 enabled,

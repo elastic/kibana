@@ -5,8 +5,8 @@
  */
 
 import sinon from 'sinon';
-import { CustomElement } from '../../../../../legacy/plugins/canvas/types';
-import { CUSTOM_ELEMENT_TYPE } from '../../../../../legacy/plugins/canvas/common/lib/constants';
+import { CustomElement } from '../../../types';
+import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { initializeUpdateCustomElementRoute } from './update';
 import {
   IRouter,
@@ -45,7 +45,6 @@ const customElement: CustomElementPayload = {
   name: 'MyCustomElement',
   displayName: 'My Wonderful Custom Element',
   content: 'This is content',
-  tags: ['filter', 'graphic'],
   '@created': '2019-02-08T18:35:23.029Z',
   '@timestamp': '2019-02-08T18:35:23.029Z',
 };

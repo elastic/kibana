@@ -5,11 +5,19 @@
  */
 
 import { sendRequest } from './use_request';
-import { setupRouteService } from '../../services';
+import { setupRouteService, fleetSetupRouteService } from '../../services';
+import { GetFleetStatusResponse } from '../../types';
 
 export const sendSetup = () => {
   return sendRequest({
     path: setupRouteService.getSetupPath(),
     method: 'post',
+  });
+};
+
+export const sendGetFleetStatus = () => {
+  return sendRequest<GetFleetStatusResponse>({
+    path: fleetSetupRouteService.getFleetSetupPath(),
+    method: 'get',
   });
 };

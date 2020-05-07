@@ -42,15 +42,14 @@ import 'uiExports/shareContextMenuExtensions';
 import 'uiExports/interpreter';
 
 import 'ui/autoload/all';
-import './discover/legacy';
 import './management';
 import './dev_tools';
 import { showAppRedirectNotification } from '../../../../plugins/kibana_legacy/public';
-import 'leaflet';
 import { localApplicationService } from './local_application_service';
 
-npSetup.plugins.kibanaLegacy.forwardApp('doc', 'discover', { keepPrefix: true });
-npSetup.plugins.kibanaLegacy.forwardApp('context', 'discover', { keepPrefix: true });
+npSetup.plugins.kibanaLegacy.registerLegacyAppAlias('doc', 'discover', { keepPrefix: true });
+npSetup.plugins.kibanaLegacy.registerLegacyAppAlias('context', 'discover', { keepPrefix: true });
+
 localApplicationService.attachToAngular(routes);
 
 routes.enable();

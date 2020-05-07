@@ -17,7 +17,13 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  ApplicationStart,
+} from '../../../core/public';
 import { TypesService, TypesSetup, TypesStart } from './vis_types';
 import {
   setUISettings,
@@ -43,18 +49,23 @@ import {
   VisualizeEmbeddableFactory,
   createVisEmbeddableFromObject,
 } from './embeddable';
-import { ExpressionsSetup, ExpressionsStart } from '../../../plugins/expressions/public';
-import { EmbeddableSetup } from '../../../plugins/embeddable/public';
+import { ExpressionsSetup, ExpressionsStart } from '../../expressions/public';
+import { EmbeddableSetup } from '../../embeddable/public';
 import { visualization as visualizationFunction } from './expressions/visualization_function';
 import { visualization as visualizationRenderer } from './expressions/visualization_renderer';
 import { range as rangeExpressionFunction } from './expression_functions/range';
 import { visDimension as visDimensionExpressionFunction } from './expression_functions/vis_dimension';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../plugins/data/public';
-import { UsageCollectionSetup } from '../../../plugins/usage_collection/public';
+import {
+  Setup as InspectorSetup,
+  Start as InspectorStart,
+} from '../../../plugins/inspector/public';
+import { UsageCollectionSetup } from '../../usage_collection/public';
+import { createStartServicesGetter, StartServicesGetter } from '../../kibana_utils/public';
 import { createSavedVisLoader, SavedVisualizationsLoader } from './saved_visualizations';
 import { SerializedVis, Vis } from './vis';
 import { showNewVisModal } from './wizard';
-import { UiActionsStart } from '../../../plugins/ui_actions/public';
+import { UiActionsStart } from '../../ui_actions/public';
 import {
   convertFromSerializedVis,
   convertToSerializedVis,
@@ -74,20 +85,23 @@ export interface VisualizationsStart extends TypesStart {
   convertToSerializedVis: typeof convertToSerializedVis;
   convertFromSerializedVis: typeof convertFromSerializedVis;
   showNewVisModal: typeof showNewVisModal;
-  __LEGACY: { createVisEmbeddableFromObject: typeof createVisEmbeddableFromObject };
+  __LEGACY: { createVisEmbeddableFromObject: ReturnType<typeof createVisEmbeddableFromObject> };
 }
 
 export interface VisualizationsSetupDeps {
-  expressions: ExpressionsSetup;
-  embeddable: EmbeddableSetup;
-  usageCollection: UsageCollectionSetup;
   data: DataPublicPluginSetup;
+  embeddable: EmbeddableSetup;
+  expressions: ExpressionsSetup;
+  inspector: InspectorSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 export interface VisualizationsStartDeps {
   data: DataPublicPluginStart;
   expressions: ExpressionsStart;
+  inspector: InspectorStart;
   uiActions: UiActionsStart;
+  application: ApplicationStart;
 }
 
 /**
@@ -107,13 +121,16 @@ export class VisualizationsPlugin
       VisualizationsStartDeps
     > {
   private readonly types: TypesService = new TypesService();
+  private getStartServicesOrDie?: StartServicesGetter<VisualizationsStartDeps, VisualizationsStart>;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<VisualizationsStartDeps, VisualizationsStart>,
     { expressions, embeddable, usageCollection, data }: VisualizationsSetupDeps
   ): VisualizationsSetup {
+    const start = (this.getStartServicesOrDie = createStartServicesGetter(core.getStartServices));
+
     setUISettings(core.uiSettings);
     setUsageCollector(usageCollection);
 
@@ -121,8 +138,7 @@ export class VisualizationsPlugin
     expressions.registerRenderer(visualizationRenderer);
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
-
-    const embeddableFactory = new VisualizeEmbeddableFactory();
+    const embeddableFactory = new VisualizeEmbeddableFactory({ start });
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 
     return {
@@ -171,7 +187,11 @@ export class VisualizationsPlugin
       convertToSerializedVis,
       convertFromSerializedVis,
       savedVisualizationsLoader,
-      __LEGACY: { createVisEmbeddableFromObject },
+      __LEGACY: {
+        createVisEmbeddableFromObject: createVisEmbeddableFromObject({
+          start: this.getStartServicesOrDie!,
+        }),
+      },
     };
   }
 

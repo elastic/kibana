@@ -29,7 +29,7 @@ export const querySignalsRoute = (router: IRouter) => {
 
       try {
         const result = await clusterClient.callAsCurrentUser('search', {
-          index: siemClient.signalsIndex,
+          index: siemClient.getSignalsIndex(),
           body: { query, aggs, _source, track_total_hits, size },
           ignoreUnavailable: true,
         });

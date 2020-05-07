@@ -41,7 +41,7 @@ describe('buildSignal', () => {
           depth: 1,
         },
       ],
-      original_time: 'someTimeStamp',
+      original_time: '2020-04-20T21:27:45+0000',
       status: 'open',
       rule: {
         created_by: 'elastic',
@@ -101,7 +101,7 @@ describe('buildSignal', () => {
           depth: 1,
         },
       ],
-      original_time: 'someTimeStamp',
+      original_time: '2020-04-20T21:27:45+0000',
       original_event: {
         action: 'socket_opened',
         dataset: 'socket',
@@ -173,7 +173,7 @@ describe('buildSignal', () => {
           depth: 1,
         },
       ],
-      original_time: 'someTimeStamp',
+      original_time: '2020-04-20T21:27:45+0000',
       original_event: {
         action: 'socket_opened',
         dataset: 'socket',

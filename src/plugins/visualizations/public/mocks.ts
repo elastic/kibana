@@ -20,12 +20,13 @@
 import { PluginInitializerContext } from '../../../core/public';
 import { VisualizationsSetup, VisualizationsStart } from './';
 import { VisualizationsPlugin } from './plugin';
-import { coreMock } from '../../../core/public/mocks';
+import { coreMock, applicationServiceMock } from '../../../core/public/mocks';
 import { embeddablePluginMock } from '../../../plugins/embeddable/public/mocks';
 import { expressionsPluginMock } from '../../../plugins/expressions/public/mocks';
 import { dataPluginMock } from '../../../plugins/data/public/mocks';
 import { usageCollectionPluginMock } from '../../../plugins/usage_collection/public/mocks';
 import { uiActionsPluginMock } from '../../../plugins/ui_actions/public/mocks';
+import { inspectorPluginMock } from '../../../plugins/inspector/public/mocks';
 
 const createSetupContract = (): VisualizationsSetup => ({
   createBaseVisualization: jest.fn(),
@@ -53,15 +54,18 @@ const createInstance = async () => {
 
   const setup = plugin.setup(coreMock.createSetup(), {
     data: dataPluginMock.createSetupContract(),
-    expressions: expressionsPluginMock.createSetupContract(),
     embeddable: embeddablePluginMock.createSetupContract(),
+    expressions: expressionsPluginMock.createSetupContract(),
+    inspector: inspectorPluginMock.createSetupContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
   });
   const doStart = () =>
     plugin.start(coreMock.createStart(), {
       data: dataPluginMock.createStartContract(),
       expressions: expressionsPluginMock.createStartContract(),
+      inspector: inspectorPluginMock.createStartContract(),
       uiActions: uiActionsPluginMock.createStartContract(),
+      application: applicationServiceMock.createStartContract(),
     });
 
   return {
