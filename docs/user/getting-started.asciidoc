@@ -7,11 +7,10 @@
 Ready to try out {kib} and see what it can do? To quickest way to get started with {kib} is to set up on Cloud, then add a sample data set that helps you get a handle on the full range of {kib} features.
 
 [float]
-:cloud-headings: yes
-include::{asciidoc-dir}/../../shared/cloud/ess-getting-started.asciidoc[]
-:cloud-headings!:
+[[cloud-set-up]]
+== Set up on Cloud
 
-That’s it! Now that you are up and running, it’s time to get some data into {kib}. Click *Launch Kibana*.
+include::{asciidoc-dir}/../../shared/cloud/ess-getting-started.asciidoc[]
 
 [float]
 [[get-data-in]]
