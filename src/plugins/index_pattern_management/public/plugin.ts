@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import './index.scss';
+
 import { i18n } from '@kbn/i18n';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
