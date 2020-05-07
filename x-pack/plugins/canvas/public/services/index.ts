@@ -75,7 +75,7 @@ export const startServices = (
   coreStart: CoreStart,
   canvasSetupPlugins: CanvasSetupDeps,
   canvasStartPlugins: CanvasStartDeps,
-  appUpdater: any
+  appUpdater: BehaviorSubject<AppUpdater>
 ) => {
   Object.entries(services).forEach(([key, provider]) =>
     provider.start(coreSetup, coreStart, canvasSetupPlugins, canvasStartPlugins, appUpdater)

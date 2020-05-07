@@ -90,9 +90,9 @@ export const initializeCanvas = async (
   setupPlugins: CanvasSetupDeps,
   startPlugins: CanvasStartDeps,
   registries: SetupRegistries,
-  navUpdater: BehaviorSubject<AppUpdater>
+  appUpdater: BehaviorSubject<AppUpdater>
 ) => {
-  startServices(coreSetup, coreStart, setupPlugins, startPlugins, navUpdater);
+  startServices(coreSetup, coreStart, setupPlugins, startPlugins, appUpdater);
 
   // Create Store
   const canvasStore = await createStore(coreSetup, setupPlugins);
