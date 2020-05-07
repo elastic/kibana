@@ -50,7 +50,7 @@ interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
 }
 
 const filterAriaLabel = i18n.translate('kbn.management.editIndexPattern.fields.filterAria', {
-  defaultMessage: 'Filter',
+  defaultMessage: 'Filter field types',
 });
 
 const filterPlaceholder = i18n.translate(
@@ -118,6 +118,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
                 value={indexedFieldTypeFilter}
                 onChange={e => setIndexedFieldTypeFilter(e.target.value)}
                 data-test-subj="indexedFieldTypeFilterDropdown"
+                aria-label={filterAriaLabel}
               />
             </EuiFlexItem>
           )}
