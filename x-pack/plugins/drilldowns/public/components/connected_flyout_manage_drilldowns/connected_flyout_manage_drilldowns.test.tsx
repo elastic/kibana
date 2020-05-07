@@ -173,6 +173,42 @@ test('Create only mode', async () => {
   expect(await mockDynamicActionManager.state.get().events.length).toBe(1);
 });
 
+test('After switching between action factories state is restored', async () => {
+  const screen = render(
+    <FlyoutManageDrilldowns
+      placeContext={{}}
+      dynamicActionManager={mockDynamicActionManager}
+      viewMode={'create'}
+    />
+  );
+  // wait for initial render. It is async because resolving compatible action factories is async
+  await wait(() => expect(screen.getAllByText(/Create/i).length).toBeGreaterThan(0));
+  fireEvent.change(screen.getByLabelText(/name/i), {
+    target: { value: 'test' },
+  });
+  fireEvent.click(screen.getByText(/Go to URL/i));
+  fireEvent.change(screen.getByLabelText(/url/i), {
+    target: { value: 'https://elastic.co' },
+  });
+
+  // change to dashboard
+  fireEvent.click(screen.getByText(/change/i));
+  fireEvent.click(screen.getByText(/Go to Dashboard/i));
+
+  // change back to url
+  fireEvent.click(screen.getByText(/change/i));
+  fireEvent.click(screen.getByText(/Go to URL/i));
+
+  expect(screen.getByLabelText(/url/i)).toHaveValue('https://elastic.co');
+  expect(screen.getByLabelText(/name/i)).toHaveValue('test');
+
+  fireEvent.click(screen.getAllByText(/Create Drilldown/i)[1]);
+  await wait(() => expect(notifications.toasts.addSuccess).toBeCalled());
+  expect(await (mockDynamicActionManager.state.get().events[0].action.config as any).url).toBe(
+    'https://elastic.co'
+  );
+});
+
 test.todo("Error when can't fetch drilldown list");
 
 test("Error when can't save drilldown changes", async () => {
