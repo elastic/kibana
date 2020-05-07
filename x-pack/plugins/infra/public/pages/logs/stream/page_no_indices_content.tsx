@@ -21,8 +21,8 @@ export const LogsPageNoIndicesContent = () => {
   const canConfigureSource = application?.capabilities?.logs?.configureSource ? true : false;
 
   const tutorialLinkProps = useLinkProps({
-    app: 'kibana',
-    hash: '/home/tutorial_directory/logging',
+    app: 'home',
+    hash: '/tutorial_directory/logging',
   });
 
   return (
