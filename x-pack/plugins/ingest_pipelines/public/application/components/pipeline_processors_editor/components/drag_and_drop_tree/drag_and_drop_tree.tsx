@@ -99,7 +99,7 @@ export const DragAndDropTreeUI: FunctionComponent<Props> = ({
   const droppableContent = items.length ? (
     items.map(([, component]) => component)
   ) : (
-    <EuiSpacer size="l" />
+    <EuiSpacer size="xs" />
   );
 
   return (
