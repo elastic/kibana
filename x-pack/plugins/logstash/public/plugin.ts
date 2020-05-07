@@ -34,18 +34,13 @@ export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
     const logstashLicense$ = plugins.licensing.license$.pipe(
       map(license => new LogstashLicenseService(license))
     );
-    const section = plugins.management.sections.register({
-      id: 'logstash',
-      title: 'Logstash',
-      order: 30,
-      euiIconType: 'logoLogstash',
-    });
-    const managementApp = section.registerApp({
+
+    const managementApp = plugins.management.sections.getSection('ingest')!.registerApp({
       id: 'pipelines',
       title: i18n.translate('xpack.logstash.managementSection.pipelinesTitle', {
-        defaultMessage: 'Pipelines',
+        defaultMessage: 'Logstash Pipelines',
       }),
-      order: 10,
+      order: 1,
       mount: async params => {
         const [coreStart] = await core.getStartServices();
         const { renderApp } = await import('./application');

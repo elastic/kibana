@@ -12,7 +12,6 @@ export class FrameworkLib {
   public waitUntilFrameworkReady = this.adapter.waitUntilFrameworkReady.bind(this.adapter);
   public renderUIAtPath = this.adapter.renderUIAtPath.bind(this.adapter);
   public registerManagementSection = this.adapter.registerManagementSection.bind(this.adapter);
-  public registerManagementUI = this.adapter.registerManagementUI.bind(this.adapter);
 
   constructor(private readonly adapter: FrameworkAdapter) {}
 

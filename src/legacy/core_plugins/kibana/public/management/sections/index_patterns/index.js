@@ -163,10 +163,10 @@ uiModules
     };
   });
 
-management.getSection('kibana').register('index_patterns', {
+management.getSection('data').register('index_patterns', {
   display: i18n.translate('kbn.management.indexPattern.sectionsHeader', {
     defaultMessage: 'Index Patterns',
   }),
-  order: 0,
+  order: 1,
   url: '#/management/kibana/index_patterns/',
 });

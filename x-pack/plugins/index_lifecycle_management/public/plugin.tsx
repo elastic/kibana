@@ -37,10 +37,10 @@ export class IndexLifecycleManagementPlugin {
       initUiMetric(usageCollection);
       initNotification(toasts, fatalErrors);
 
-      management.sections.getSection('elasticsearch')!.registerApp({
+      management.sections.getSection('data')!.registerApp({
         id: PLUGIN.ID,
         title: PLUGIN.TITLE,
-        order: 3,
+        order: 2,
         mount: async ({ element }) => {
           const [coreStart] = await getStartServices();
           const {

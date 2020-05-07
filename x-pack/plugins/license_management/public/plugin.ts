@@ -44,10 +44,10 @@ export class LicenseManagementUIPlugin
     const { getStartServices } = coreSetup;
     const { management, telemetry, licensing } = plugins;
 
-    management.sections.getSection('elasticsearch')!.registerApp({
+    management.sections.getSection('stack')!.registerApp({
       id: PLUGIN.id,
       title: PLUGIN.title,
-      order: 99,
+      order: 0,
       mount: async ({ element, setBreadcrumbs }) => {
         const [core] = await getStartServices();
         const initialLicense = await plugins.licensing.license$.pipe(first()).toPromise();

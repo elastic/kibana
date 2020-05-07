@@ -20,6 +20,33 @@
 import { LegacyManagementSection } from './section';
 import { i18n } from '@kbn/i18n';
 
+export const sections = [
+  {
+    id: 'ingest',
+    title: 'Ingest',
+  },
+  {
+    id: 'data',
+    title: 'Data',
+  },
+  {
+    id: 'insightsAndAlerting',
+    title: 'Insights and Alerting',
+  },
+  {
+    id: 'security',
+    title: 'Security',
+  },
+  {
+    id: 'kibana',
+    title: 'Kibana',
+  },
+  {
+    id: 'stack',
+    title: 'Stack',
+  },
+];
+
 export class LegacyManagementAdapter {
   main = undefined;
   init = capabilities => {
@@ -33,29 +60,12 @@ export class LegacyManagementAdapter {
       capabilities
     );
 
-    this.main.register('data', {
-      display: i18n.translate('management.connectDataDisplayName', {
-        defaultMessage: 'Connect Data',
-      }),
-      order: 0,
-    });
-
-    this.main.register('elasticsearch', {
-      display: 'Elasticsearch',
-      order: 20,
-      icon: 'logoElasticsearch',
-    });
-
-    this.main.register('kibana', {
-      display: 'Kibana',
-      order: 30,
-      icon: 'logoKibana',
-    });
-
-    this.main.register('logstash', {
-      display: 'Logstash',
-      order: 30,
-      icon: 'logoLogstash',
+    sections.forEach(({ id, title, icon }, idx) => {
+      this.main.register(id, {
+        display: title,
+        order: idx,
+        icon,
+      });
     });
 
     return this.main;

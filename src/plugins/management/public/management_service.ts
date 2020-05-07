@@ -20,7 +20,7 @@
 import { ManagementSection } from './management_section';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
 // @ts-ignore
-import { LegacyManagementSection } from './legacy';
+import { LegacyManagementSection, sections } from './legacy';
 import { CreateSection } from './types';
 import { StartServicesAccessor, CoreStart } from '../../../core/public';
 
@@ -79,13 +79,11 @@ export class ManagementService {
       getStartServices
     );
 
-    register({ id: 'kibana', title: 'Kibana', order: 30, euiIconType: 'logoKibana' });
-    register({
-      id: 'elasticsearch',
-      title: 'Elasticsearch',
-      order: 20,
-      euiIconType: 'logoElasticsearch',
-    });
+    sections.forEach(
+      ({ id, title, icon }: { id: string; title: string; icon?: string }, idx: number) => {
+        register({ id, title, euiIconType: icon, order: idx });
+      }
+    );
 
     return {
       register,

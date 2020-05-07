@@ -24,7 +24,7 @@ export class UpgradeAssistantUIPlugin implements Plugin {
     if (!enabled) {
       return;
     }
-    const appRegistrar = management.sections.getSection('elasticsearch')!;
+    const appRegistrar = management.sections.getSection('stack')!;
     const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
 
     appRegistrar.registerApp({
@@ -33,7 +33,7 @@ export class UpgradeAssistantUIPlugin implements Plugin {
         defaultMessage: '{version} Upgrade Assistant',
         values: { version: `${NEXT_MAJOR_VERSION}.0` },
       }),
-      order: 1000,
+      order: 1,
       async mount(params) {
         const { mountManagementSection } = await import('./application/mount_management_section');
         return mountManagementSection(coreSetup, isCloudEnabled, params);

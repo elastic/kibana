@@ -48,10 +48,10 @@ export class IndexMgmtUIPlugin {
     notificationService.setup(notifications);
     this.uiMetricService.setup(usageCollection);
 
-    management.sections.getSection('elasticsearch')!.registerApp({
+    management.sections.getSection('data')!.registerApp({
       id: PLUGIN.id,
       title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
-      order: 2,
+      order: 0,
       mount: async params => {
         const { mountManagementSection } = await import('./application/mount_management_section');
         const services = {

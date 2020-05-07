@@ -5,7 +5,6 @@
  */
 
 import { Subscription } from 'rxjs';
-import { i18n } from '@kbn/i18n';
 import { StartServicesAccessor, FatalErrorsSetup } from 'src/core/public';
 import {
   ManagementApp,
@@ -39,14 +38,7 @@ export class ManagementService {
   setup({ getStartServices, management, authc, license, fatalErrors }: SetupParams) {
     this.license = license;
 
-    const securitySection = management.sections.register({
-      id: 'security',
-      title: i18n.translate('xpack.security.management.securityTitle', {
-        defaultMessage: 'Security',
-      }),
-      order: 100,
-      euiIconType: 'securityApp',
-    });
+    const securitySection = management.sections.getSection('security')!;
 
     securitySection.registerApp(usersManagementApp.create({ authc, getStartServices }));
     securitySection.registerApp(

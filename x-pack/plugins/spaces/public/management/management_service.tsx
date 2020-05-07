@@ -25,12 +25,11 @@ export class ManagementService {
   private registeredSpacesManagementApp?: ManagementApp;
 
   public setup({ getStartServices, management, spacesManager, securityLicense }: SetupDeps) {
-    const kibanaSection = management.sections.getSection('kibana');
-    if (kibanaSection) {
-      this.registeredSpacesManagementApp = kibanaSection.registerApp(
+    this.registeredSpacesManagementApp = management.sections
+      .getSection('kibana')!
+      .registerApp(
         spacesManagementApp.create({ getStartServices, spacesManager, securityLicense })
       );
-    }
   }
 
   public start({ capabilities }: StartDeps) {

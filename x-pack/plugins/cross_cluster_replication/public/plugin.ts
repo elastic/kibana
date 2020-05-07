@@ -22,7 +22,7 @@ export class CrossClusterReplicationPlugin implements Plugin {
 
   public setup(coreSetup: CoreSetup, plugins: PluginDependencies) {
     const { licensing, remoteClusters, usageCollection, management, indexManagement } = plugins;
-    const esSection = management.sections.getSection('elasticsearch');
+    const esSection = management.sections.getSection('data');
 
     const {
       http,

@@ -20,7 +20,7 @@ export class IngestPipelinesPlugin implements Plugin {
     uiMetricService.setup(usageCollection);
     apiService.setup(http, uiMetricService);
 
-    management.sections.getSection('elasticsearch')!.registerApp({
+    management.sections.getSection('ingest')!.registerApp({
       id: PLUGIN_ID,
       order: 1,
       title: i18n.translate('xpack.ingestPipelines.appTitle', {

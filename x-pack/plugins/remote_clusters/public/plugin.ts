@@ -31,13 +31,14 @@ export class RemoteClustersUIPlugin
     } = this.initializerContext.config.get<ClientConfigType>();
 
     if (isRemoteClustersUiEnabled) {
-      const esSection = management.sections.getSection('elasticsearch');
+      const esSection = management.sections.getSection('data');
 
       esSection!.registerApp({
         id: 'remote_clusters',
         title: i18n.translate('xpack.remoteClusters.appTitle', {
           defaultMessage: 'Remote Clusters',
         }),
+        order: 7,
         mount: async ({ element, setBreadcrumbs }) => {
           const [core] = await getStartServices();
           const {

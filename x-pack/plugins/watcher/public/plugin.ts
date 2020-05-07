@@ -28,7 +28,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
     { notifications, http, uiSettings, getStartServices }: CoreSetup,
     { licensing, management, data, home, charts }: Dependencies
   ) {
-    const esSection = management.sections.getSection('elasticsearch');
+    const esSection = management.sections.getSection('insightsAndAlerting');
 
     const watcherESApp = esSection!.registerApp({
       id: 'watcher',
@@ -36,6 +36,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
         'xpack.watcher.sections.watchList.managementSection.watcherDisplayName',
         { defaultMessage: 'Watcher' }
       ),
+      order: 3,
       mount: async ({ element, setBreadcrumbs }) => {
         const [core] = await getStartServices();
         const { i18n: i18nDep, docLinks, savedObjects } = core;

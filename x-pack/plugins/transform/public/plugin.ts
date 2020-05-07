@@ -22,14 +22,14 @@ export class TransformUiPlugin {
     const { management, home } = pluginsSetup;
 
     // Register management section
-    const esSection = management.sections.getSection('elasticsearch');
+    const esSection = management.sections.getSection('data');
     if (esSection !== undefined) {
       esSection.registerApp({
         id: 'transform',
         title: kbnI18n.translate('xpack.transform.appTitle', {
           defaultMessage: 'Transforms',
         }),
-        order: 4,
+        order: 5,
         mount: async params => {
           const { mountManagementSection } = await import('./app/mount_management_section');
           return mountManagementSection(coreSetup, params);

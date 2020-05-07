@@ -9,11 +9,13 @@ import { IScope } from 'angular';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { i18n } from '@kbn/i18n';
 import { UIRoutes } from 'ui/routes';
 import { isLeft } from 'fp-ts/lib/Either';
 import { npSetup } from 'ui/new_platform';
 import { SecurityPluginSetup } from '../../../../../../../plugins/security/public';
 import { BufferedKibanaServiceCall, KibanaAdapterServiceRefs, KibanaUIConfig } from '../../types';
+import { BASE_PATH } from '../../../../common/constants';
 import {
   FrameworkAdapter,
   FrameworkInfo,
@@ -148,45 +150,13 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     );
   }
 
-  public registerManagementSection(settings: {
-    id?: string;
-    name: string;
-    iconName: string;
-    order?: number;
-  }) {
-    const sectionId = settings.id || this.PLUGIN_ID;
-
-    if (!this.management.hasItem(sectionId)) {
-      this.management.register(sectionId, {
-        display: settings.name,
-        icon: settings.iconName,
-        order: settings.order || 30,
-      });
-    }
-  }
-
-  public registerManagementUI(settings: {
-    sectionId?: string;
-    name: string;
-    basePath: string;
-    visable?: boolean;
-    order?: number;
-  }) {
-    const sectionId = settings.sectionId || this.PLUGIN_ID;
-
-    if (!this.management.hasItem(sectionId)) {
-      throw new Error(
-        `registerManagementUI was called with a sectionId of ${sectionId}, and that is is not yet regestered as a section`
-      );
-    }
-
-    const section = this.management.getSection(sectionId);
-
-    section.register(sectionId, {
-      visible: settings.visable || true,
-      display: settings.name,
-      order: settings.order || 30,
-      url: `#${settings.basePath}`,
+  public registerManagementSection() {
+    this.management.getSection('ingest')!.register('beats_central_management', {
+      display: i18n.translate('xpack.beatsManagement.centralManagementSectionLabel', {
+        defaultMessage: 'Beats Central Management',
+      }),
+      order: 2,
+      url: `#${BASE_PATH}/`,
     });
   }
 

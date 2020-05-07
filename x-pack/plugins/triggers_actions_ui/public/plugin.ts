@@ -73,12 +73,12 @@ export class Plugin
 
     // Don't register routes when user doesn't have access to the application
     if (canShowActions || canShowAlerts) {
-      plugins.management.sections.getSection('kibana')!.registerApp({
+      plugins.management.sections.getSection('insightsAndAlerting')!.registerApp({
         id: 'triggersActions',
         title: i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
           defaultMessage: 'Alerts and Actions',
         }),
-        order: 7,
+        order: 0,
         mount: params => {
           boot({
             dataPlugin: plugins.data,

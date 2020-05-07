@@ -77,26 +77,23 @@ export class RollupPlugin implements Plugin {
       });
     }
 
-    const esSection = management.sections.getSection('elasticsearch');
-    if (esSection) {
-      esSection.registerApp({
-        id: 'rollup_jobs',
-        title: i18n.translate('xpack.rollupJobs.appTitle', { defaultMessage: 'Rollup Jobs' }),
-        order: 5,
-        async mount(params) {
-          params.setBreadcrumbs([
-            {
-              text: i18n.translate('xpack.rollupJobs.breadcrumbsTitle', {
-                defaultMessage: 'Rollup Jobs',
-              }),
-            },
-          ]);
-          const { renderApp } = await import('./application');
+    management.sections.getSection('data')!.registerApp({
+      id: 'rollup_jobs',
+      title: i18n.translate('xpack.rollupJobs.appTitle', { defaultMessage: 'Rollup Jobs' }),
+      order: 4,
+      async mount(params) {
+        params.setBreadcrumbs([
+          {
+            text: i18n.translate('xpack.rollupJobs.breadcrumbsTitle', {
+              defaultMessage: 'Rollup Jobs',
+            }),
+          },
+        ]);
+        const { renderApp } = await import('./application');
 
-          return renderApp(core, params);
-        },
-      });
-    }
+        return renderApp(core, params);
+      },
+    });
   }
 
   start(core: CoreStart) {

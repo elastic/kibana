@@ -117,10 +117,10 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
       category: FeatureCatalogueCategory.ADMIN,
     });
 
-    management.sections.getSection('kibana')!.registerApp({
+    management.sections.getSection('insightsAndAlerting')!.registerApp({
       id: 'reporting',
       title: this.title,
-      order: 15,
+      order: 1,
       mount: async params => {
         const [start] = await getStartServices();
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);

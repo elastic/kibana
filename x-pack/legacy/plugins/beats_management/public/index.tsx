@@ -26,7 +26,7 @@ async function startApp(libs: FrontendLibs) {
     BASE_PATH,
     <ThemeProvider theme={{ eui: euiVars }}>
       <I18nContext>
-        <HashRouter basename="/management/beats_management">
+        <HashRouter basename={BASE_PATH}>
           <UnstatedProvider inject={[new BeatsContainer(libs), new TagsContainer(libs)]}>
             <BreadcrumbProvider useGlobalBreadcrumbs={libs.framework.versionGreaterThen('6.7.0')}>
               <Subscribe to={[BeatsContainer, TagsContainer]}>
@@ -52,21 +52,7 @@ async function startApp(libs: FrontendLibs) {
   await libs.framework.waitUntilFrameworkReady();
 
   if (libs.framework.licenseIsAtLeast('standard')) {
-    libs.framework.registerManagementSection({
-      id: 'beats',
-      name: i18n.translate('xpack.beatsManagement.centralManagementSectionLabel', {
-        defaultMessage: 'Beats',
-      }),
-      iconName: 'logoBeats',
-    });
-
-    libs.framework.registerManagementUI({
-      sectionId: 'beats',
-      name: i18n.translate('xpack.beatsManagement.centralManagementLinkLabel', {
-        defaultMessage: 'Central Management',
-      }),
-      basePath: BASE_PATH,
-    });
+    libs.framework.registerManagementSection();
   }
 }
 

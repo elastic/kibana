@@ -21,19 +21,7 @@ export interface FrameworkAdapter {
     component: React.ReactElement<any>,
     toController: 'management' | 'self'
   ): void;
-  registerManagementSection(settings: {
-    id?: string;
-    name: string;
-    iconName: string;
-    order?: number;
-  }): void;
-  registerManagementUI(settings: {
-    sectionId?: string;
-    name: string;
-    basePath: string;
-    visable?: boolean;
-    order?: number;
-  }): void;
+  registerManagementSection(): void;
 }
 
 export const RuntimeFrameworkInfo = t.type({
