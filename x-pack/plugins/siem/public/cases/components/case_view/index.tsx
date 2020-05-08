@@ -160,10 +160,11 @@ export const CaseComponent = React.memo<CaseProps>(
     );
 
     const { loading: isLoadingConnectors, connectors } = useConnectors();
-    const caseConnectorName = useMemo(
-      () => connectors.find(c => c.id === caseData.connectorId)?.name ?? 'none',
-      [connectors, caseData.connectorId]
-    );
+
+    const [caseConnectorName, isValidConnector] = useMemo(() => {
+      const connector = connectors.find(c => c.id === caseData.connectorId);
+      return [connector?.name ?? 'none', !!connector];
+    }, [connectors, caseData.connectorId]);
 
     const currentExternalIncident = useMemo(
       () =>
@@ -174,7 +175,7 @@ export const CaseComponent = React.memo<CaseProps>(
     );
 
     const { pushButton, pushCallouts } = usePushToService({
-      caseConnectorId: caseData.connectorId,
+      caseConnectorId: isValidConnector ? caseData.connectorId : 'none',
       caseConnectorName,
       caseServices,
       caseId: caseData.id,
@@ -306,7 +307,7 @@ export const CaseComponent = React.memo<CaseProps>(
                           onChange={toggleStatusCase}
                         />
                       </EuiFlexItem>
-                      {hasDataToPush && (
+                      {hasDataToPush && isValidConnector && (
                         <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
                           {pushButton}
                         </EuiFlexItem>
