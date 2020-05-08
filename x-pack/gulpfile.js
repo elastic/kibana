@@ -91,7 +91,7 @@ gulp.task('build', ['clean', 'report', 'prepare'], async () => {
 
 gulp.task('test', (cb) => {
   const preTasks = ['clean-test'];
-  runSequence(preTasks, 'testserver', 'testbrowser', cb);
+  runSequence(preTasks, 'testserver', cb);
 });
 
 gulp.task('testonly', ['testserver', 'testbrowser']);
