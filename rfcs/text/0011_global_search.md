@@ -355,93 +355,35 @@ be used when it is not technically possible to register it from the server side 
 
 ### results url processing
 
-When retrieving results from providers, the GS service will always start by processing them. The most notable (and
-currently only) step is to convert the result url to an absolute one.
+When retrieving results from providers, the GS service will convert them from the provider's `GlobalSearchProviderResult`
+result type to `GlobalSeachResult`, which is the structure returned from the `GlobalSearchPluginStart.find` observable.
 
-#### absolute url conversion logic
+In current specification, the only conversion step is to transform the `result.url` property following this logic:
 
-Results returned from the GlobalSearch's `find` programmatic and HTTP APIs will all contains absolute urls for the following
-reasons:
-- It would not be usable by external consumers otherwise. 
-- Some result providers are supposed to be returning results from outside of the current `basePath`, or even from outside of the
-  Kibana instance (ie: results from another space, results from another Kibana instance in a cloud cluster)
+- if `url` is an absolute url, it will not be modified
+- if `url` is a relative path, the basePath will be prepended using `basePath.prepend`
+- if `url` is a `{ path: string; prependBasePath: boolean }` structure:
+  - if `prependBasePath` is true, the basePath will be prepended to the given `path` using `basePath.prepend`
+  - if `prependBasePath` is false, the given `path` will be returned unmodified
 
-However, as forging absolute urls can be a tedious process for the plugins, the `url` property of results returned by
-a result provider can be either an absolute url or an url path relative to the executing request's `basePath`.
+#### redirecting to a result
 
-I.E are considered valid:
-- `https://my-other-kibana-instance/some/result`
-- `/app/kibana#/dashboard/some-id`
+Parsing a relative or absolute result url to perform SPA navigation can be non trivial, and should remains the responsibility
+of the GlobalSearch plugin API.
 
-When processing the result, the logic regarding the `url` property is:
-- if the `url` is absolute, return it unchanged
-- if the `url` is a relative path (starts with `/`), it will be converted to an absolute url by prepending the Kibana
-instance's newly introduced `publicAddress`.
-
-#### server.publicAddress
-
-Given the fact that some Kibana deployments have complex architecture (proxies, rewrite rules...), there is currently
-no reliable way to know for sure what the public address used to access kibana is (at least from the server-side).
-
-A new `server.publicAddress` property will be added to the kibana configuration, allowing ops to explicitly define the public
-address to instance is accessible from. This property is only meant to be used to generate 'links' to arbitrary resources
-and will not be used to configure the http server in any way.
-
-When not explicitly defined, this property will be computed using the known `server` configuration values:
-
-```ts
-const defaultPublicAddress = removeTrailingSlash(
-  `${getServerInfo().protocol}://${httpConfig.host}:${httpConfig.port}/${httpConfig.basePath}`
-);
-
-const getPublicAddress = () => httpConfig.publicAddress ?? defaultPublicAddress;
-```
-
-A new `getAbsoluteUrl` api will also be added to the core `http` service contract:
-
-```ts
-const getAbsoluteUrl = (path: string, request: KibanaRequest) => {
-  const publicUrl = getPublicAddress();
-  const absoluteUrl = joinRemovingDuplicateAndTrailingSlash(
-    publicUrl,
-    // note: this is actually wrong. We would need the `requestScopePath` here
-    // as this currently returns `${this.serverBasePath}${requestScopePath}` and the basePath
-    // is already included in `publicAddress`
-    serverContract.basePath.get(request), 
-    path
-  );
-}
-```
-
-Search results will then be processed before being returned to convert relative urls to absolute ones:
-
-```ts
-const processResult(result: GlobalSearchResult, request: KibanaRequest) {
-  if(isUrlPath(result.url)) {
-    result.url = http.getAbsoluteUrl(result.url, request)
-  }
-}
-```
-
-#### Redirecting to a result
-
-Having absolute urls in GS results is a necessity for external consumers, and makes the API more consistent than mixing
-relative and absolute urls, however this makes it less trivial for UI consumers to redirect to a given result in a SPA
-friendly way (using `application.navigateToApp` instead of triggering a full page refresh).
-
-This is why `NavigableGlobalSearchResult.navigate` has been introduced, to let `core` handle this navigation logic.
+This is why `NavigableGlobalSearchResult.navigate` has been introduced on the client-side version of the `find` API
 
 When using `navigate` from a result instance, the following logic will be executed:
 
-If all 3 of these criteria are true for `result.url`:
-- The origin of the URL  matches the origin of the `publicUrl`
+If all these criteria are true for `result.url`:
+- (only for absolute URLs) The origin of the URL matches the origin of the browser's current location
 - The pathname of the URL starts with the current basePath (eg. /mybasepath/s/my-space)
 - The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's `appRoute` configuration)
 
 Then: match the pathname segment to the corresponding application and do the SPA navigation to that application using 
-the remaining pathname segment
+`application.navigateToApp` using the remaining pathname segment for the `path` option.
 
-Otherwise: do a full page navigation (`window.location.assign()`)
+Otherwise: do a full page navigation using `window.location.assign`
 
 ### searching from the server side
 
