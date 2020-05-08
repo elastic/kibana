@@ -77,17 +77,15 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           '--xpack.eventLog.logEntries=true',
-          `--xpack.actions.preconfigured=${JSON.stringify([
-            {
-              id: 'my-slack1',
+          `--xpack.actions.preconfigured=${JSON.stringify({
+            'my-slack1': {
               actionTypeId: '.slack',
               name: 'Slack#xyz',
               config: {
                 webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
               },
             },
-            {
-              id: 'custom-system-abc-connector',
+            'custom-system-abc-connector': {
               actionTypeId: 'system-abc-action-type',
               name: 'SystemABC',
               config: {
@@ -100,8 +98,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 xyzSecret2: 'credential2',
               },
             },
-            {
-              id: 'preconfigured-es-index-action',
+            'preconfigured-es-index-action': {
               actionTypeId: '.index',
               name: 'preconfigured_es_index_action',
               config: {
@@ -110,8 +107,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 executionTimeField: 'timestamp',
               },
             },
-            {
-              id: 'preconfigured.test.index-record',
+            'preconfigured.test.index-record': {
               actionTypeId: 'test.index-record',
               name: 'Test:_Preconfigured_Index_Record',
               config: {
@@ -121,7 +117,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 encrypted: 'this-is-also-ignored-and-also-required',
               },
             },
-          ])}`,
+          })}`,
           ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'actions_simulators')}`,
