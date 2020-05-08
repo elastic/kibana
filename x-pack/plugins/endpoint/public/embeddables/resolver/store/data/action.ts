@@ -24,7 +24,15 @@ interface ServerReturnedRelatedEventData {
   readonly payload: Map<ResolverEvent, RelatedEventDataEntry>;
 }
 
+/**
+ * Will occur when a request for related event data is unsuccessful.
+ */
+interface ServerFailedToReturnRelatedEventData {
+  readonly type: 'serverFailedToReturnRelatedEventData';
+}
+
 export type DataAction =
   | ServerReturnedResolverData
   | ServerFailedToReturnResolverData
-  | ServerReturnedRelatedEventData;
+  | ServerReturnedRelatedEventData
+  | ServerFailedToReturnRelatedEventData;

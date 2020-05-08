@@ -5,12 +5,12 @@
  */
 
 import { Dispatch, MiddlewareAPI } from 'redux';
+import { HttpHandler } from 'kibana/public';
 import { KibanaReactContextValue } from '../../../../../../../src/plugins/kibana_react/public';
 import { EndpointPluginServices } from '../../../plugin';
 import { ResolverState, ResolverAction, RelatedEventDataEntry, RelatedEventType } from '../types';
 import { ResolverEvent, ResolverNode } from '../../../../common/types';
 import * as event from '../../../../common/models/event';
-import { HttpHandler } from 'kibana/public';
 
 type MiddlewareFactory<S = ResolverState> = (
   context?: KibanaReactContextValue<EndpointPluginServices>
@@ -31,15 +31,23 @@ function flattenEvents(children: ResolverNode[], events: ResolverEvent[] = []): 
   }, events);
 }
 
-async function* getEachRelatedEventsResult(eventsToFetch: ResolverEvent[], httpGetter: HttpHandler) {
-  for (const eventToQueryForRelateds of eventsToFetch){
+type RelatedEventAPIResponse = Error | { events: ResolverEvent[] };
+async function* getEachRelatedEventsResult(
+  eventsToFetch: ResolverEvent[],
+  httpGetter: HttpHandler
+): AsyncGenerator<[ResolverEvent, RelatedEventAPIResponse], any, any> {
+  for (const eventToQueryForRelateds of eventsToFetch) {
     const id = event.entityId(eventToQueryForRelateds);
-    yield [eventToQueryForRelateds, await Promise.all([
-      httpGetter(`/api/endpoint/resolver/${id}/events`, {
-        query: {events: 100},
-      }),
-    ])
-    ]
+    const relatedEventError = new Error(`Error fetching related events for entity=${id}`);
+    let result: RelatedEventAPIResponse = relatedEventError;
+    try {
+      result = await httpGetter(`/api/endpoint/resolver/${id}/events`, {
+        query: { events: 100 },
+      });
+    } catch (e) {
+      result = relatedEventError;
+    }
+    yield [eventToQueryForRelateds, result];
   }
 }
 
@@ -96,28 +104,35 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
      * When this data is inlined with results, there won't be a need for this.
      */
     if (action.type === 'appRequestedRelatedEventData') {
-      if(typeof context !== 'undefined') { 
-        for await (const results of getEachRelatedEventsResult([action.payload], context.services.http.get)){
-            const response: Map<ResolverEvent, RelatedEventDataEntry> = new Map();
-            const baseEvent = results[0] as unknown as ResolverEvent;
-            const fetchedResults = (results[1] as unknown as {events: ResolverEvent[]}[])
-              //pack up the results into response
-            for (const relatedEventResult of fetchedResults) {
-              //help figure out how to type the Async Generator above
-              const relatedEventsFromResult = relatedEventResult.events;
-              const relatedEventEntry = relatedEventsFromResult.map(related_event => {
-                return {
-                  related_event,
-                  related_event_type: event.eventCategoryDisplayName(related_event) as RelatedEventType
-                }
-              })
-              response.set(baseEvent, {related_events: relatedEventEntry});
-            }
+      if (typeof context !== 'undefined') {
+        for await (const results of getEachRelatedEventsResult(
+          [action.payload],
+          context.services.http.get
+        )) {
+          const apiResults = results[1];
+          if (apiResults instanceof Error) {
             api.dispatch({
-              type: 'serverReturnedRelatedEventData',
-              payload: response,
+              type: 'serverFailedToReturnRelatedEventData',
             });
           }
+          const response: Map<ResolverEvent, RelatedEventDataEntry> = new Map();
+          const baseEvent = results[0];
+          const fetchedResults = (results[1] as { events: ResolverEvent[] }).events;
+          // pack up the results into response
+          const relatedEventEntry = fetchedResults.map(relatedEvent => {
+            return {
+              relatedEvent,
+              relatedEventType: event.eventCategoryDisplayName(relatedEvent) as RelatedEventType,
+            };
+          });
+
+          response.set(baseEvent, { relatedEvents: relatedEventEntry });
+
+          api.dispatch({
+            type: 'serverReturnedRelatedEventData',
+            payload: response,
+          });
+        }
       }
     }
   };

@@ -146,18 +146,14 @@ export type RelatedEventType =
   | 'Image Load'
   | 'User';
 
-  export type EventCategory = RelatedEventType |
-    ( | 'Alert' 
-      | 'Process'
-      | 'Security'
-    )
+export type EventCategory = RelatedEventType | ('Alert' | 'Process' | 'Security');
 
 /**
  * This symbol is used to tag results with Related event info
  * REMOVE: pending resolution of https://github.com/elastic/endpoint-app-team/issues/379
  * When this data is inlined with results, there won't be a need for this.
  */
-export const resultsEnrichedWithRelatedEventInfo = `resultsEnrichedWithRelatedEventInfo`
+export const resultsEnrichedWithRelatedEventInfo = `resultsEnrichedWithRelatedEventInfo`;
 /**
  * This symbol indicates that the app is waiting for related event data for the subject
  * of any particular request.
@@ -170,9 +166,9 @@ export const waitingForRelatedEventData = Symbol(
  * about a particular subject's related events
  */
 export interface RelatedEventDataEntry {
-  related_events: Array<{
-    related_event: ResolverEvent;
-    related_event_type: RelatedEventType;
+  relatedEvents: Array<{
+    relatedEvent: ResolverEvent;
+    relatedEventType: RelatedEventType;
   }>;
 }
 /**

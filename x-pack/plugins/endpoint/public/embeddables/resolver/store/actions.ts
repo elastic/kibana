@@ -50,7 +50,7 @@ interface AppRequestedResolverData {
  */
 interface AppRequestedRelatedEventData {
   readonly type: 'appRequestedRelatedEventData';
-  readonly payload: [ResolverEvent, string];
+  readonly payload: ResolverEvent;
 }
 
 /**
