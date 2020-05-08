@@ -48,6 +48,7 @@ const fetchTelemetryMetrics = async (savedObjects: SavedObjectsServiceStart) => 
       no_as_account: 0,
     },
     ui_clicked: {
+      create_first_engine_button: 0,
       header_launch_button: 0,
       engine_table_link: 0,
     },

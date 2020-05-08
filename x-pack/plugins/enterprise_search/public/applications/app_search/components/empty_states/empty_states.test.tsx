@@ -8,10 +8,16 @@ import '../../../__mocks__/shallow_usecontext.mock';
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { EuiEmptyPrompt, EuiCode, EuiLoadingContent } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton, EuiCode, EuiLoadingContent } from '@elastic/eui';
 
 jest.mock('../../utils/get_username', () => ({ getUserName: jest.fn() }));
 import { getUserName } from '../../utils/get_username';
+
+jest.mock('../../../shared/telemetry', () => ({
+  sendTelemetry: jest.fn(),
+  SendAppSearchTelemetry: jest.fn(),
+}));
+import { sendTelemetry } from '../../../shared/telemetry';
 
 import { ErrorState, NoUserState, EmptyState, LoadingState } from './';
 
@@ -50,6 +56,16 @@ describe('EmptyState', () => {
 
     expect(prompt).toHaveLength(1);
     expect(prompt.prop('title')).toEqual(<h2>There’s nothing here yet</h2>);
+  });
+
+  it('sends telemetry on create first engine click', () => {
+    const wrapper = shallow(<EmptyState />);
+    const prompt = wrapper.find(EuiEmptyPrompt).dive();
+    const button = prompt.find(EuiButton);
+
+    button.simulate('click');
+    expect(sendTelemetry).toHaveBeenCalled();
+    sendTelemetry.mockClear();
   });
 });
 

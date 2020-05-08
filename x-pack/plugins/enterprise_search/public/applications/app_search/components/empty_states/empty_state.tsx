@@ -7,6 +7,7 @@
 import React, { useContext } from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 
+import { sendTelemetry } from '../../../shared/telemetry';
 import { SetAppSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
 import { KibanaContext, IKibanaContext } from '../../../index';
 
@@ -15,7 +16,19 @@ import { EngineOverviewHeader } from '../engine_overview_header';
 import './empty_states.scss';
 
 export const EmptyState: React.FC<> = () => {
-  const { enterpriseSearchUrl } = useContext(KibanaContext) as IKibanaContext;
+  const { enterpriseSearchUrl, http } = useContext(KibanaContext) as IKibanaContext;
+
+  const buttonProps = {
+    href: `${enterpriseSearchUrl}/as/engines/new`,
+    target: '_blank',
+    onClick: () =>
+      sendTelemetry({
+        http,
+        product: 'app_search',
+        action: 'clicked',
+        metric: 'create_first_engine_button',
+      }),
+  };
 
   return (
     <EuiPage restrictWidth className="empty-state">
@@ -35,12 +48,7 @@ export const EmptyState: React.FC<> = () => {
               </p>
             }
             actions={
-              <EuiButton
-                iconType="popout"
-                fill
-                href={`${enterpriseSearchUrl}/as/engines/new`}
-                target="_blank"
-              >
+              <EuiButton iconType="popout" fill {...buttonProps}>
                 Create your first Engine
               </EuiButton>
             }
