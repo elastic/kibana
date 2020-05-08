@@ -225,7 +225,7 @@ export function InnerWorkspacePanel({
           className="lnsExpressionRenderer__component"
           padding="m"
           expression={expression!}
-          refreshSubject={plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$()}
+          reload$={plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$()}
           onEvent={(event: ExpressionRendererEvent) => {
             if (!plugins.uiActions) {
               // ui actions not available, not handling event...
