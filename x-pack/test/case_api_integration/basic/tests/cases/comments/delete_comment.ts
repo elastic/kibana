@@ -43,6 +43,28 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(comment).to.eql({});
     });
 
+    it('unhappy path - 404s when comment belongs to different case', async () => {
+      const { body: postedCase } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(postCaseReq)
+        .expect(200);
+
+      const { body: patchedCase } = await supertest
+        .post(`${CASES_URL}/${postedCase.id}/comments`)
+        .set('kbn-xsrf', 'true')
+        .send(postCommentReq);
+
+      const { body } = await supertest
+        .delete(`${CASES_URL}/fake-id/comments/${patchedCase.comments[0].id}`)
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(404);
+      expect(body.message).to.eql(
+        `This comment ${patchedCase.comments[0].id} does not exist in fake-id).`
+      );
+    });
+
     it('unhappy path - 404s when comment is not there', async () => {
       await supertest
         .delete(`${CASES_URL}/fake-id/comments/fake-id`)
