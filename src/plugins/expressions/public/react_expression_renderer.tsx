@@ -41,7 +41,7 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
   /**
    * An observable which can be used to re-run the expression without destroying the component
    */
-  refreshSubject?: Observable<unknown>;
+  reload$?: Observable<unknown>;
 }
 
 export type ReactExpressionRendererType = React.ComponentType<ReactExpressionRendererProps>;
@@ -67,7 +67,7 @@ export const ReactExpressionRenderer = ({
   renderError,
   expression,
   onEvent,
-  refreshSubject,
+  reload$,
   ...expressionLoaderOptions
 }: ReactExpressionRendererProps) => {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
@@ -141,14 +141,14 @@ export const ReactExpressionRenderer = ({
   }, [hasCustomRenderErrorHandler, onEvent]);
 
   useEffect(() => {
-    if (!refreshSubject) return;
-    const subscription = refreshSubject?.subscribe(() => {
+    if (!reload$) return;
+    const subscription = reload$?.subscribe(() => {
       if (expressionLoaderRef.current) {
         expressionLoaderRef.current.update(expression, expressionLoaderOptions);
       }
     });
-    return subscription.unsubscribe;
-  }, [refreshSubject]);
+    return () => subscription.unsubscribe();
+  }, [reload$]);
 
   // Re-fetch data automatically when the inputs change
   useShallowCompareEffect(
