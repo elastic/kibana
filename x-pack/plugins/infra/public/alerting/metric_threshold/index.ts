@@ -30,7 +30,7 @@ Reason:
 `,
       }
     ),
-    isEditable: false,
+    isEditable: true,
     consumer: 'metrics',
   };
 }

@@ -77,8 +77,18 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   let alertTypeRegistryModel: AlertTypeModel | undefined;
   try {
     alertTypeRegistryModel = alertTypeRegistry.get(alert.alertTypeId);
-  } catch (e) {
-    toastNotifications.addDanger(e);
+  } catch (errorRes) {
+    toastNotifications.addDanger(
+      i18n.translate(
+        'xpack.triggersActionsUI.sections.alertDetails.missingActionTypeErrorMessage',
+        {
+          defaultMessage: 'Object type "{id}" is not registered.',
+          values: {
+            id: alert.alertTypeId,
+          },
+        }
+      )
+    );
   }
 
   const alertActions = alert.actions;
