@@ -30,7 +30,7 @@ export interface ElementsPositionAndAttribute {
 }
 
 export interface Screenshot {
-  base64EncodedData: Buffer;
+  base64EncodedData: string;
   title: string;
   description: string;
 }
