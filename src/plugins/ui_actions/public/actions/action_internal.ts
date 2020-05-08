@@ -48,6 +48,11 @@ export class ActionInternal<A extends ActionDefinition = ActionDefinition>
     return this.definition.getDisplayName(context);
   }
 
+  public getDisplayNameTooltip(context: Context<A>): string {
+    if (!this.definition.getDisplayNameTooltip) return '';
+    return this.definition.getDisplayNameTooltip(context);
+  }
+
   public async isCompatible(context: Context<A>): Promise<boolean> {
     if (!this.definition.isCompatible) return true;
     return await this.definition.isCompatible(context);
