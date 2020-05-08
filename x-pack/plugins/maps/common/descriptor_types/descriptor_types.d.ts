@@ -28,7 +28,7 @@ export type EMSTMSSourceDescriptor = AbstractSourceDescriptor & {
 
 export type EMSFileSourceDescriptor = AbstractSourceDescriptor & {
   // id: EMS file id
-
+  id: string;
   tooltipProperties: string[];
 };
 
@@ -71,6 +71,7 @@ export type ESPewPewSourceDescriptor = AbstractESAggSourceDescriptor & {
 export type ESTermSourceDescriptor = AbstractESAggSourceDescriptor & {
   indexPatternTitle: string;
   term: string; // term field name
+  whereQuery?: Query;
 };
 
 export type KibanaRegionmapSourceDescriptor = AbstractSourceDescriptor & {

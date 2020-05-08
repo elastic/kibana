@@ -37,6 +37,7 @@ describe('connector_edit_flyout', () => {
       },
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: {} as any,
+      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
   });
 
@@ -80,6 +81,7 @@ describe('connector_edit_flyout', () => {
             reloadConnectors: () => {
               return new Promise<void>(() => {});
             },
+            docLinks: deps.docLinks,
           }}
         >
           <ConnectorEditFlyout
@@ -136,6 +138,7 @@ describe('connector_edit_flyout', () => {
             reloadConnectors: () => {
               return new Promise<void>(() => {});
             },
+            docLinks: deps.docLinks,
           }}
         >
           <ConnectorEditFlyout

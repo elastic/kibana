@@ -13,6 +13,17 @@ Server log connectors have the following configuration properties:
 Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
 
 [float]
+[[Preconfigured-server-log-configuration]]
+==== Preconfigured action type
+
+[source,text]
+--
+ my-server-log:
+   name: test
+   actionTypeId: .server-log
+--
+
+[float]
 [[server-log-action-configuration]]
 ==== Action configuration
 

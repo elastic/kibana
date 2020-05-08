@@ -8,6 +8,16 @@ import * as React from 'react';
 import { storiesOf } from '@storybook/react';
 import { DrilldownHelloBar } from '.';
 
-storiesOf('components/DrilldownHelloBar', module).add('default', () => {
-  return <DrilldownHelloBar />;
-});
+const Demo = () => {
+  const [show, setShow] = React.useState(true);
+  return show ? (
+    <DrilldownHelloBar
+      docsLink={'https://elastic.co'}
+      onHideClick={() => {
+        setShow(false);
+      }}
+    />
+  ) : null;
+};
+
+storiesOf('components/DrilldownHelloBar', module).add('default', () => <Demo />);

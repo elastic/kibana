@@ -1,0 +1,13 @@
+{
+  "id": "kbn_tp_run_pipeline",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "requiredPlugins": [
+    "data",
+    "savedObjects",
+    "kibanaUtils",
+    "expressions"
+  ],
+  "server": false,
+  "ui": true
+}
