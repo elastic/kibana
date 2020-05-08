@@ -116,7 +116,7 @@ export const IndexPatternTable = ({
   history,
   services,
 }: Props) => {
-  const [showFlyout, setShowFlyout] = useState(true);
+  const [showFlyout, setShowFlyout] = useState(false);
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
 
