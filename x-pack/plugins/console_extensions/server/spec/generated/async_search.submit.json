@@ -1,0 +1,71 @@
+{
+  "async_search.submit": {
+    "url_params": {
+      "wait_for_completion_timeout": "",
+      "keep_on_completion": "__flag__",
+      "keep_alive": "",
+      "batched_reduce_size": "",
+      "request_cache": "__flag__",
+      "analyzer": "",
+      "analyze_wildcard": "__flag__",
+      "default_operator": [
+        "AND",
+        "OR"
+      ],
+      "df": "",
+      "explain": "__flag__",
+      "stored_fields": [],
+      "docvalue_fields": [],
+      "from": "0",
+      "ignore_unavailable": "__flag__",
+      "ignore_throttled": "__flag__",
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "hidden",
+        "none",
+        "all"
+      ],
+      "lenient": "__flag__",
+      "preference": "random",
+      "q": "",
+      "routing": [],
+      "search_type": [
+        "query_then_fetch",
+        "dfs_query_then_fetch"
+      ],
+      "size": "10",
+      "sort": [],
+      "_source": [],
+      "_source_excludes": [],
+      "_source_includes": [],
+      "terminate_after": "",
+      "stats": [],
+      "suggest_field": "",
+      "suggest_mode": [
+        "missing",
+        "popular",
+        "always"
+      ],
+      "suggest_size": "",
+      "suggest_text": "",
+      "timeout": "",
+      "track_scores": "__flag__",
+      "track_total_hits": "__flag__",
+      "allow_partial_search_results": "__flag__",
+      "typed_keys": "__flag__",
+      "version": "__flag__",
+      "seq_no_primary_term": "__flag__",
+      "max_concurrent_shard_requests": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_async_search",
+      "{indices}/_async_search"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/async-search.html"
+  }
+}

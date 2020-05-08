@@ -1,0 +1,18 @@
+{
+  "put_script": {
+    "url_params": {
+      "timeout": "",
+      "master_timeout": "",
+      "context": ""
+    },
+    "methods": [
+      "PUT",
+      "POST"
+    ],
+    "patterns": [
+      "_scripts/{id}",
+      "_scripts/{id}/{context}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-scripting.html"
+  }
+}

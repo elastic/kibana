@@ -1,0 +1,11 @@
+{
+  "slm.start": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_slm/start"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/slm-api-start.html"
+  }
+}

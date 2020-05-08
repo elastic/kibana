@@ -1,0 +1,18 @@
+{
+  "security.get_api_key": {
+    "url_params": {
+      "id": "",
+      "name": "",
+      "username": "",
+      "realm_name": "",
+      "owner": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_security/api_key"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-get-api-key.html"
+  }
+}

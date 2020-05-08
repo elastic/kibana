@@ -1,0 +1,31 @@
+{
+  "cat.tasks": {
+    "url_params": {
+      "format": "",
+      "node_id": [],
+      "actions": [],
+      "detailed": "__flag__",
+      "parent_task": "",
+      "h": [],
+      "help": "__flag__",
+      "s": [],
+      "time": [
+        "d",
+        "h",
+        "m",
+        "s",
+        "ms",
+        "micros",
+        "nanos"
+      ],
+      "v": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat/tasks"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/tasks.html"
+  }
+}

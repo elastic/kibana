@@ -1,0 +1,14 @@
+{
+  "security.clear_cached_realms": {
+    "url_params": {
+      "usernames": []
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_security/realm/{realms}/_clear_cache"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-clear-cache.html"
+  }
+}
