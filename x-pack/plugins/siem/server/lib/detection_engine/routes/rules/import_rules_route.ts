@@ -208,6 +208,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       timelineTitle,
                       meta,
                       filters,
+                      rule,
                       id: undefined,
                       ruleId,
                       index,

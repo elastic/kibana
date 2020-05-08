@@ -137,6 +137,27 @@ describe('patch_rules', () => {
         status_code: 403,
       });
     });
+
+    it('rejects patching an ML rule if mlAuthz fails', async () => {
+      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
+        validateRuleType: jest
+          .fn()
+          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
+      });
+      const { type, ...payloadWithoutType } = typicalMlRulePayload();
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: payloadWithoutType,
+      });
+      const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(403);
+      expect(response.body).toEqual({
+        message: 'mocked validation message',
+        status_code: 403,
+      });
+    });
   });
 
   describe('request validation', () => {

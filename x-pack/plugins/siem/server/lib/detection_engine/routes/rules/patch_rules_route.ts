@@ -17,6 +17,7 @@ import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
+import { readRules } from '../../rules/read_rules';
 
 export const patchRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
   router.patch(
@@ -73,9 +74,16 @@ export const patchRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
           return siemResponse.error({ statusCode: 404 });
         }
 
+        const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
         if (type) {
-          const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
+          // reject an unauthorized "promotion" to ML
           throwHttpError(await mlAuthz.validateRuleType(type));
+        }
+
+        const existingRule = await readRules({ alertsClient, ruleId, id });
+        if (existingRule?.params.type) {
+          // reject an unauthorized modification of an ML rule
+          throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
         }
 
         const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
@@ -94,6 +102,7 @@ export const patchRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
           timelineTitle,
           meta,
           filters,
+          rule: existingRule,
           id,
           ruleId,
           index,
