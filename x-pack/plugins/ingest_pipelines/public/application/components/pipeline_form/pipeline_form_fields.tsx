@@ -140,7 +140,12 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
 
             <EuiSpacer />
 
-            <EuiButton size="s" onClick={onTestPipelineClick} disabled={isTestButtonDisabled}>
+            <EuiButton
+              size="s"
+              onClick={onTestPipelineClick}
+              disabled={isTestButtonDisabled}
+              data-test-subj="testPipelineButton"
+            >
               <FormattedMessage
                 id="xpack.ingestPipelines.form.testPipelineButtonLabel"
                 defaultMessage="Test pipeline"
@@ -153,8 +158,8 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
           path="processors"
           component={JsonEditorField}
           componentProps={{
-            ['data-test-subj']: 'processorsField',
             euiCodeEditorProps: {
+              ['data-test-subj']: 'processorsField',
               height: '300px',
               'aria-label': i18n.translate('xpack.ingestPipelines.form.processorsFieldAriaLabel', {
                 defaultMessage: 'Processors JSON editor',
@@ -211,8 +216,8 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
             path="on_failure"
             component={JsonEditorField}
             componentProps={{
-              ['data-test-subj']: 'onFailureEditor',
               euiCodeEditorProps: {
+                ['data-test-subj']: 'onFailureEditor',
                 height: '300px',
                 'aria-label': i18n.translate('xpack.ingestPipelines.form.onFailureFieldAriaLabel', {
                   defaultMessage: 'Failure processors JSON editor',

@@ -20,7 +20,7 @@ import { getMLJobId } from '../../../state/api/ml_anomaly';
 import * as labels from './translations';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ManageMLJobComponent } from './manage_ml_job';
-import { JobStat } from '../../../../../../plugins/ml/common/types/data_recognizer';
+import { JobStat } from '../../../../../../plugins/ml/public';
 import { useMonitorId } from '../../../hooks';
 
 export const MLIntegrationComponent = () => {
