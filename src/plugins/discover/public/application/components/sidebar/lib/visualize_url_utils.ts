@@ -53,13 +53,12 @@ export function getMapsAppUrl(
   field: IFieldType,
   indexPattern: IIndexPattern,
   appState: AppState,
-  columns: string[],
-  services: DiscoverServices
+  columns: string[]
 ) {
   const mapAppParams = new URLSearchParams();
 
   // Copy global state
-  const locationSplit = window.location.href.split('discover?');
+  const locationSplit = window.location.hash.split('?');
   if (locationSplit.length > 1) {
     const discoverParams = new URLSearchParams(locationSplit[1]);
     const globalStateUrlValue = discoverParams.get('_g');
@@ -122,7 +121,7 @@ export function getVisualizeUrl(
     (field.type === KBN_FIELD_TYPES.GEO_POINT || field.type === KBN_FIELD_TYPES.GEO_SHAPE) &&
     isMapsAppRegistered(services.visualizations)
   ) {
-    return getMapsAppUrl(field, indexPattern, state, columns, services);
+    return getMapsAppUrl(field, indexPattern, state, columns);
   }
 
   let agg;

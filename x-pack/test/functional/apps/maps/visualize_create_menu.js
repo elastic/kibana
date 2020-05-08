@@ -29,8 +29,7 @@ export default function({ getPageObjects }) {
       expect(hasLegecyViz).to.equal(false);
     });
 
-    // TODO skipped because legacy maps vis are not ready yet
-    it.skip('should take users to Maps application when Maps is clicked', async () => {
+    it('should take users to Maps application when Maps is clicked', async () => {
       await PageObjects.visualize.clickMapsApp();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.maps.waitForLayersToLoad();

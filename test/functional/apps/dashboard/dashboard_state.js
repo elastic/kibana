@@ -142,8 +142,7 @@ export default function({ getService, getPageObjects }) {
       expect(headers.length).to.be(0);
     });
 
-    // TODO skipped because legacy maps vis are not ready yet
-    it.skip('Tile map with no changes will update with visualization changes', async () => {
+    it('Tile map with no changes will update with visualization changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.dashboard.clickNewDashboard();

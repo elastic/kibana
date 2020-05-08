@@ -35,8 +35,7 @@ export default function({ getService, getPageObjects }) {
     'tileMap',
   ]);
 
-  // TODO skipped because legacy maps vis are not ready yet
-  describe.skip('tile map visualize app', function() {
+  describe('tile map visualize app', function() {
     describe('incomplete config', function describeIndexTests() {
       before(async function() {
         await browser.setWindowSize(1280, 1000);

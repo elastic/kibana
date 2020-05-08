@@ -410,8 +410,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
         { name: AREA_CHART_VIS_NAME, description: 'AreaChart' },
         { name: 'Visualization☺漢字 DataTable', description: 'DataTable' },
         { name: LINE_CHART_VIS_NAME, description: 'LineChart' },
-        // TODO skipped because legacy maps vis are not ready yet
-        // { name: 'Visualization TileMap', description: 'TileMap' },
+        { name: 'Visualization TileMap', description: 'TileMap' },
         { name: 'Visualization MetricChart', description: 'MetricChart' },
       ];
     }
@@ -468,13 +467,8 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
     public async waitForRenderComplete() {
       log.debug('waitForRenderComplete');
       const count = await this.getSharedItemsCount();
-      try {
-        // eslint-disable-next-line radix
-        await renderable.waitForRender(parseInt(count));
-      } catch (e) {
-        // TODO skipped because legacy maps vis are not ready yet
-        // shallow error for now (most likely caused by missing legacy maps vis)
-      }
+      // eslint-disable-next-line radix
+      await renderable.waitForRender(parseInt(count));
     }
 
     public async getSharedContainerData() {

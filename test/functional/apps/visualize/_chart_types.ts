@@ -39,7 +39,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         'Area',
         'Controls',
         'Coordinate Map',
-        // TODO skipped because legacy maps vis are not ready yet
         'Data Table',
         'Gauge',
         'Goal',
@@ -49,6 +48,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         'Markdown',
         'Metric',
         'Pie',
+        'Region Map',
         'TSVB',
         'Tag Cloud',
         'Timelion',

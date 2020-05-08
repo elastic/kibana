@@ -26,8 +26,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const listingTable = getService('listingTable');
 
-  // TODO skipped because legacy maps vis are not ready yet
-  describe.skip('Dashboard', () => {
+  describe('Dashboard', () => {
     const dashboardName = 'Dashboard Listing A11y';
     const clonedDashboardName = 'Dashboard Listing A11y Copy';
 

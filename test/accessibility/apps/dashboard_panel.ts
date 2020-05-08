@@ -26,8 +26,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const inspector = getService('inspector');
 
-  // TODO skipped because legacy maps vis are not ready yet
-  describe.skip('Dashboard Panel', () => {
+  describe('Dashboard Panel', () => {
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
