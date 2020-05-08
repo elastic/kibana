@@ -57,7 +57,7 @@ describe('when the camera is created', () => {
     expect(selectors.scale(store.getState())(0)).toEqual([1, 1]);
   });
 
-  describe('When panning to active current position', () => {
+  describe('When attempting to pan to current position and scale', () => {
     const duration = 1000;
     const startTime = 0;
     beforeEach(() => {

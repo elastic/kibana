@@ -282,26 +282,28 @@ export function useCamera(): {
  */
 function useAutoUpdatingClientRect(): [DOMRect | null, (node: Element | null) => void] {
   const [rect, setRect] = useState<DOMRect | null>(null);
-  const nodeRef = useRef<Element | null>(null);
+  // Using state as ref.current update does not trigger effect hook when reset
+  const [currentNode, setCurrentNode] = useState<Element | null>(null);
+
   const ref = useCallback((node: Element | null) => {
-    nodeRef.current = node;
+    setCurrentNode(node);
     if (node !== null) {
       setRect(node.getBoundingClientRect());
     }
   }, []);
   const { ResizeObserver } = useContext(SideEffectContext);
   useEffect(() => {
-    if (nodeRef.current !== null) {
+    if (currentNode !== null) {
       const resizeObserver = new ResizeObserver(entries => {
-        if (nodeRef.current !== null && nodeRef.current === entries[0].target) {
-          setRect(nodeRef.current.getBoundingClientRect());
+        if (currentNode !== null && currentNode === entries[0].target) {
+          setRect(currentNode.getBoundingClientRect());
         }
       });
-      resizeObserver.observe(nodeRef.current);
+      resizeObserver.observe(currentNode);
       return () => {
         resizeObserver.disconnect();
       };
     }
-  }, [ResizeObserver, nodeRef]);
+  }, [ResizeObserver, currentNode]);
   return [rect, ref];
 }
