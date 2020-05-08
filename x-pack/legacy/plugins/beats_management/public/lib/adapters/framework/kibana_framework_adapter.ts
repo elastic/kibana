@@ -156,6 +156,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
         defaultMessage: 'Beats Central Management',
       }),
       order: 2,
+      visible: true,
       url: `#${BASE_PATH}/`,
     });
   }
