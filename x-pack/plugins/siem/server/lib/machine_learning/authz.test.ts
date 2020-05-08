@@ -156,7 +156,6 @@ describe('mlAuthz', () => {
     it('is valid for an ML rule if ML available, license is sufficient, and an ML Admin', async () => {
       licenseMock.hasAtLeast.mockReturnValue(true);
       (hasMlAdminPermissions as jest.Mock).mockReturnValue(true);
-      licenseMock.hasAtLeast.mockReturnValue(true);
 
       const mlAuthz = buildMlAuthz({
         license: licenseMock,
