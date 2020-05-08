@@ -4,11 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Store } from 'redux';
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 import { initMonitorStatusAlertType } from './monitor_status';
 import { initTlsAlertType } from './tls';
 
-export type AlertTypeInitializer = (dependenies: { autocomplete: any }) => AlertTypeModel;
+export type AlertTypeInitializer = (dependenies: {
+  autocomplete: any;
+  store: Store<any>;
+}) => AlertTypeModel;
 
 export const alertTypeInitializers: AlertTypeInitializer[] = [
   initMonitorStatusAlertType,

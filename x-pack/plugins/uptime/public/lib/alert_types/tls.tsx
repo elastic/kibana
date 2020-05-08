@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { Provider as ReduxProvider } from 'react-redux';
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants';
 import { TlsTranslations } from './translations';
@@ -13,10 +14,14 @@ import { AlertTls } from '../../components/overview/alerts/alerts_containers/ale
 
 const { name, defaultActionMessage } = TlsTranslations;
 
-export const initTlsAlertType: AlertTypeInitializer = (): AlertTypeModel => ({
+export const initTlsAlertType: AlertTypeInitializer = ({ store }): AlertTypeModel => ({
   id: CLIENT_ALERT_TYPES.TLS,
   iconClass: 'uptimeApp',
-  alertParamsExpression: () => <AlertTls />,
+  alertParamsExpression: () => (
+    <ReduxProvider store={store}>
+      <AlertTls />
+    </ReduxProvider>
+  ),
   name,
   validate: () => ({ errors: {} }),
   defaultActionMessage,

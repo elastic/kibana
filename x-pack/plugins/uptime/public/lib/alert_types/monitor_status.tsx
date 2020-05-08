@@ -5,6 +5,7 @@
  */
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
+import { Provider as ReduxProvider } from 'react-redux';
 import React from 'react';
 import DateMath from '@elastic/datemath';
 import { isRight } from 'fp-ts/lib/Either';
@@ -59,12 +60,19 @@ const { defaultActionMessage } = MonitorStatusTranslations;
 
 export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   autocomplete,
+  store,
 }): AlertTypeModel => ({
   id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
-  name: <MonitorStatusTitle />,
+  name: (
+    <ReduxProvider store={store}>
+      <MonitorStatusTitle />
+    </ReduxProvider>
+  ),
   iconClass: 'uptimeApp',
   alertParamsExpression: (params: any) => (
-    <AlertMonitorStatus {...params} autocomplete={autocomplete} />
+    <ReduxProvider store={store}>
+      <AlertMonitorStatus {...params} autocomplete={autocomplete} />
+    </ReduxProvider>
   ),
   validate,
   defaultActionMessage,

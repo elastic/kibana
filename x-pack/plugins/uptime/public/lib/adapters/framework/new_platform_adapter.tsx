@@ -9,7 +9,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { get } from 'lodash';
 import { i18n as i18nFormatter } from '@kbn/i18n';
-import { alertTypeInitializers } from '../../alert_types';
+import { Store } from 'redux';
 import { UptimeApp, UptimeAppProps } from '../../../uptime_app';
 import { getIntegratedAppAvailability } from './capabilities_adapter';
 import {
@@ -20,11 +20,13 @@ import {
 } from '../../../../common/constants';
 import { UMFrameworkAdapter } from '../../lib';
 import { ClientPluginsStart, ClientPluginsSetup } from '../../../apps/plugin';
+import { AppState } from '../../../state';
 
 export const getKibanaFrameworkAdapter = (
   core: CoreStart,
   plugins: ClientPluginsSetup,
-  startPlugins: ClientPluginsStart
+  startPlugins: ClientPluginsStart,
+  store: Store<AppState>
 ): UMFrameworkAdapter => {
   const {
     application: { capabilities },
@@ -33,18 +35,6 @@ export const getKibanaFrameworkAdapter = (
     http: { basePath },
     i18n,
   } = core;
-
-  const {
-    data: { autocomplete },
-    triggers_actions_ui,
-  } = plugins;
-
-  alertTypeInitializers.forEach(init => {
-    const alertInitializer = init({ autocomplete });
-    if (!triggers_actions_ui.alertTypeRegistry.has(alertInitializer.id)) {
-      triggers_actions_ui.alertTypeRegistry.register(init({ autocomplete }));
-    }
-  });
 
   let breadcrumbs: ChromeBreadcrumb[] = [];
   core.chrome.getBreadcrumbs$().subscribe((nextBreadcrumbs?: ChromeBreadcrumb[]) => {
@@ -90,6 +80,7 @@ export const getKibanaFrameworkAdapter = (
     routerBasename: basePath.prepend(PLUGIN.ROUTER_BASE_NAME),
     setBadge,
     setBreadcrumbs: core.chrome.setBreadcrumbs,
+    store,
   };
 
   return {
