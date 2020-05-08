@@ -65,5 +65,12 @@ export default ({ getService }: FtrProviderContext): void => {
         .send()
         .expect(404);
     });
+    it('unhappy path - 404s when case is not there', async () => {
+      await supertest
+        .delete(`${CASES_URL}?ids=["fake-id"]`)
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(404);
+    });
   });
 };

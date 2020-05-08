@@ -42,5 +42,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(comment).to.eql(patchedCase.comments[0]);
     });
+    it('unhappy path - 404s when comment is not there', async () => {
+      await supertest
+        .get(`${CASES_URL}/fake-id/comments/fake-comment`)
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(404);
+    });
   });
 };

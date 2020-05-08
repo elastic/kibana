@@ -37,5 +37,21 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(patchedCase.comments[0].comment).to.eql(postCommentReq.comment);
       expect(patchedCase.updated_by).to.eql(defaultUser);
     });
+
+    it('unhappy path - 400s when post body is bad', async () => {
+      const { body: postedCase } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(postCaseReq)
+        .expect(200);
+
+      await supertest
+        .post(`${CASES_URL}/${postedCase.id}/comments`)
+        .set('kbn-xsrf', 'true')
+        .send({
+          bad: 'comment',
+        })
+        .expect(400);
+    });
   });
 };

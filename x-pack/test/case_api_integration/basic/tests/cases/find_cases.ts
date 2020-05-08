@@ -104,7 +104,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(body).to.eql({
         ...findCasesResp,
-        total: 2,
+        total: 1,
         cases: [
           {
             ...patchedCase,
@@ -112,7 +112,7 @@ export default ({ getService }: FtrProviderContext): void => {
             totalComment: 2,
           },
         ],
-        count_open_cases: 2,
+        count_open_cases: 1,
       });
     });
 
@@ -146,6 +146,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(body.count_open_cases).to.eql(1);
       expect(body.count_closed_cases).to.eql(1);
+    });
+    it('unhappy path - 400s when bad query supplied', async () => {
+      await supertest
+        .get(`${CASES_URL}/_find?perPage=true`)
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(400);
     });
   });
 };

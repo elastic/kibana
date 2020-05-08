@@ -55,5 +55,85 @@ export default ({ getService }: FtrProviderContext): void => {
         updated_by: defaultUser,
       });
     });
+
+    it('unhappy path - 404s when case is not there', async () => {
+      await supertest
+        .patch(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send({
+          cases: [
+            {
+              id: 'not-real',
+              version: 'version',
+              status: 'closed',
+            },
+          ],
+        })
+        .expect(404);
+    });
+
+    it('unhappy path - 406s when excess data sent', async () => {
+      const { body: postedCase } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(postCaseReq)
+        .expect(200);
+      await supertest
+        .patch(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send({
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              badKey: 'closed',
+            },
+          ],
+        })
+        .expect(406);
+    });
+
+    it('unhappy path - 400s when bad data sent', async () => {
+      const { body: postedCase } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(postCaseReq)
+        .expect(200);
+      await supertest
+        .patch(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send({
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              status: true,
+            },
+          ],
+        })
+        .expect(400);
+    });
+
+    it('unhappy path - 409s when conflict', async () => {
+      const { body: postedCase } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(postCaseReq)
+        .expect(200);
+
+      await supertest
+        .patch(`${CASES_URL}`)
+        .set('kbn-xsrf', 'true')
+        .send({
+          cases: [
+            {
+              id: postedCase.id,
+              version: 'version',
+              status: 'closed',
+            },
+          ],
+        })
+        .expect(409);
+    });
   });
 };

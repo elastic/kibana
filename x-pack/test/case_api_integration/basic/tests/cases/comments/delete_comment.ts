@@ -42,5 +42,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(comment).to.eql({});
     });
+
+    it('unhappy path - 404s when comment is not there', async () => {
+      await supertest
+        .delete(`${CASES_URL}/fake-id/comments/fake-id`)
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(404);
+    });
   });
 };

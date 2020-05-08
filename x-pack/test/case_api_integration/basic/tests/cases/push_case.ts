@@ -99,5 +99,63 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
       expect(body.comments[0].pushed_by).to.eql(defaultUser);
     });
+    it('unhappy path - 404s when case does not exist', async () => {
+      await supertest
+        .post(`${CASES_URL}/fake-id/_push`)
+        .set('kbn-xsrf', 'true')
+        .send({
+          connector_id: 'connector_id',
+          connector_name: 'connector_name',
+          external_id: 'external_id',
+          external_title: 'external_title',
+          external_url: 'external_url',
+        })
+        .expect(404);
+    });
+    it('unhappy path - 400s when bad data supplied', async () => {
+      await supertest
+        .post(`${CASES_URL}/fake-id/_push`)
+        .set('kbn-xsrf', 'true')
+        .send({
+          badKey: 'connector_id',
+        })
+        .expect(400);
+    });
+    it('unhappy path = 409s when case is closed', async () => {
+      const { body: configure } = await supertest
+        .post(CASE_CONFIGURE_URL)
+        .set('kbn-xsrf', 'true')
+        .send(getConfiguration())
+        .expect(200);
+      const { body: postedCase } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(postCaseReq)
+        .expect(200);
+      await supertest
+        .patch(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send({
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              status: 'closed',
+            },
+          ],
+        })
+        .expect(200);
+      await supertest
+        .post(`${CASES_URL}/${postedCase.id}/_push`)
+        .set('kbn-xsrf', 'true')
+        .send({
+          connector_id: configure.connector_id,
+          connector_name: configure.connector_name,
+          external_id: 'external_id',
+          external_title: 'external_title',
+          external_url: 'external_url',
+        })
+        .expect(409);
+    });
   });
 };

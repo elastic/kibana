@@ -72,5 +72,22 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(caseComments.comments).to.eql([patchedCase.comments[1]]);
     });
+
+    it('unhappy path - 400s when query is bad', async () => {
+      const { body: postedCase } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(postCaseReq)
+        .expect(200);
+      await supertest
+        .post(`${CASES_URL}/${postedCase.id}/comments`)
+        .set('kbn-xsrf', 'true')
+        .send(postCommentReq);
+      await supertest
+        .get(`${CASES_URL}/${postedCase.id}/comments/_find?perPage=true`)
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(400);
+    });
   });
 };

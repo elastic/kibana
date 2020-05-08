@@ -35,5 +35,12 @@ export default ({ getService }: FtrProviderContext): void => {
       const data = removeServerGeneratedPropertiesFromCase(postedCase);
       expect(data).to.eql(postCaseResp(postedCase.id));
     });
+    it('unhappy path - 400s when bad query supplied', async () => {
+      await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send({ ...postCaseReq, badKey: true })
+        .expect(400);
+    });
   });
 };
