@@ -140,7 +140,7 @@ export class BulkUploader {
   async _fetchAndUpload(usageCollection) {
     const collectorsReady = await usageCollection.areAllCollectorsReady();
     const hasUsageCollectors = usageCollection.some(usageCollection.isUsageCollector);
-    if (!collectorsReady) {
+    if (!collectorsReady || typeof this.kibanaStatusGetter !== 'function') {
       this._log.debug('Skipping bulk uploading because not all collectors are ready');
       if (hasUsageCollectors) {
         this._lastFetchUsageTime = null;
@@ -151,7 +151,7 @@ export class BulkUploader {
 
     const data = await usageCollection.bulkFetch(this._cluster.callAsInternalUser);
     const payload = this.toBulkUploadFormat(compact(data), usageCollection);
-    if (payload) {
+    if (payload && payload.length > 0) {
       try {
         this._log.debug(`Uploading bulk stats payload to the local cluster`);
         const result = await this._onPayload(payload);
@@ -244,7 +244,7 @@ export class BulkUploader {
    */
   toBulkUploadFormat(rawData, usageCollection) {
     if (rawData.length === 0) {
-      return;
+      return [];
     }
 
     // convert the raw data to a nested object by taking each payload through
