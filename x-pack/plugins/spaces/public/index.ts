@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import './index.scss';
+
 import { SpacesPlugin } from './plugin';
 
 export { Space } from '../common/model/space';
