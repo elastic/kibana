@@ -43,7 +43,6 @@ describe('StaticLookupFormatEditor', () => {
   it('should render normally', async () => {
     const component = shallowWithI18nProvider(
       <StaticLookupFormatEditor
-        basePath={''}
         fieldType={fieldType}
         format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
@@ -58,7 +57,6 @@ describe('StaticLookupFormatEditor', () => {
   it('should render multiple lookup entries and unknown key value', async () => {
     const component = shallowWithI18nProvider(
       <StaticLookupFormatEditor
-        basePath={''}
         fieldType={fieldType}
         format={(format as unknown) as FieldFormat}
         formatParams={{

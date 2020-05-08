@@ -69,5 +69,4 @@ const EditIndexPatternCont: React.FC<EditIndexPatternContainerProps> = ({ ...pro
   }
 };
 
-// todo rename
 export const EditIndexPatternContainer = withRouter(EditIndexPatternCont);

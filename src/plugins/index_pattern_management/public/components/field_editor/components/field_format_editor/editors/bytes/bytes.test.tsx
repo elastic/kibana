@@ -44,7 +44,6 @@ describe('BytesFormatEditor', () => {
   it('should render normally', async () => {
     const component = shallow(
       <BytesFormatEditor
-        basePath={''}
         fieldType={fieldType}
         format={(format as unknown) as FieldFormat}
         formatParams={formatParams}

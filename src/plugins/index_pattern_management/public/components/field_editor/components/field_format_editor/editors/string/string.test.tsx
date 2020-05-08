@@ -52,7 +52,6 @@ describe('StringFormatEditor', () => {
   it('should render normally', async () => {
     const component = shallow(
       <StringFormatEditor
-        basePath={''}
         fieldType={fieldType}
         format={(format as unknown) as FieldFormat}
         formatParams={formatParams}

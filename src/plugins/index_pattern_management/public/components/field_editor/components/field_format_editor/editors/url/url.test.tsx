@@ -46,10 +46,6 @@ const formatParams = {
 const onChange = jest.fn();
 const onError = jest.fn();
 
-jest.mock('ui/chrome', () => ({
-  getBasePath: () => 'http://localhost/',
-}));
-
 describe('UrlFormatEditor', () => {
   it('should have a formatId', () => {
     expect(UrlFormatEditor.formatId).toEqual('url');
@@ -58,7 +54,6 @@ describe('UrlFormatEditor', () => {
   it('should render normally', async () => {
     const component = shallow(
       <UrlFormatEditor
-        basePath={''}
         fieldType={fieldType}
         format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
@@ -73,7 +68,6 @@ describe('UrlFormatEditor', () => {
   it('should render url template help', async () => {
     const component = shallow(
       <UrlFormatEditor
-        basePath={''}
         fieldType={fieldType}
         format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
@@ -90,7 +84,6 @@ describe('UrlFormatEditor', () => {
   it('should render label template help', async () => {
     const component = shallow(
       <UrlFormatEditor
-        basePath={''}
         fieldType={fieldType}
         format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
@@ -107,7 +100,6 @@ describe('UrlFormatEditor', () => {
   it('should render width and height fields if image', async () => {
     const component = shallow(
       <UrlFormatEditor
-        basePath={''}
         fieldType={fieldType}
         format={(format as unknown) as FieldFormat}
         formatParams={{ ...formatParams, type: 'img' }}

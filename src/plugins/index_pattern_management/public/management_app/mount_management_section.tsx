@@ -59,13 +59,7 @@ export async function mountManagementSection(
     chrome.setBadge(readOnlyBadge);
   }
 
-  // todo - need new path to create index pattern
-  // todo navigate to items
   // todo path w/o slash
-  //
-  // indexPattern, indexPatterns
-
-  // data.indexPatterns.get()
 
   ReactDOM.render(
     <I18nProvider>

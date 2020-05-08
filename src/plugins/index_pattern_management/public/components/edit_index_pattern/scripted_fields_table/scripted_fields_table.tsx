@@ -143,7 +143,6 @@ export class ScriptedFieldsTable extends Component<
 
     const items = this.getFilteredItems();
 
-    // todo url
     return (
       <>
         <Header

@@ -37,8 +37,6 @@ import { LabelTemplateFlyout } from './label_template_flyout';
 
 import { UrlTemplateFlyout } from './url_template_flyout';
 
-import './icons';
-
 interface OnChangeParam {
   type: string;
   width?: string;
@@ -74,7 +72,8 @@ export class UrlFormatEditor extends DefaultFormatEditor<
   constructor(props: FormatEditorProps<UrlFormatEditorFormatParams>) {
     super(props);
 
-    this.iconPattern = `${props.basePath}/bundles/src/legacy/ui/public/field_editor/components/field_format_editor/editors/url/icons/{{value}}.png`;
+    this.iconPattern = `/plugins/indexPatternManagement/assets/icons/{{value}}.png`;
+
     this.state = {
       ...this.state,
       sampleInputsByType: {

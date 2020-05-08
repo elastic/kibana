@@ -69,7 +69,6 @@ describe('DefaultFormatEditor', () => {
   it('should render nothing', async () => {
     const component = shallow(
       <DefaultFormatEditor
-        basePath={''}
         fieldType={fieldType}
         format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
@@ -86,7 +85,6 @@ describe('DefaultFormatEditor', () => {
   it('should call prop onChange()', async () => {
     const component = shallow(
       <DefaultFormatEditor
-        basePath={''}
         fieldType={fieldType}
         format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
@@ -108,7 +106,6 @@ describe('DefaultFormatEditor', () => {
 
     shallow(
       <DefaultFormatEditor
-        basePath={''}
         fieldType={fieldType}
         format={(newFormat as unknown) as FieldFormat}
         formatParams={formatParams}

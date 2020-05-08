@@ -92,5 +92,4 @@ const CreateEditFieldCont: React.FC<CreateEditFieldContainerProps> = ({ ...props
   }
 };
 
-// todo rename
 export const CreateEditFieldContainer = withRouter(CreateEditFieldCont);

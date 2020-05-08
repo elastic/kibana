@@ -40,9 +40,6 @@ jest.mock('./lib/get_indices', () => ({
     return [{ name: 'kibana' }];
   },
 }));
-jest.mock('ui/chrome', () => ({
-  addBasePath: () => {},
-}));
 
 const { savedObjects, overlays, uiSettings } = coreMock.createStart();
 const { indexPatterns, search } = dataPluginMock.createStartContract();
