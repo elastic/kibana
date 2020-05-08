@@ -58,6 +58,7 @@ import {
   createTopNavHelper,
 } from '../../kibana_legacy/public';
 import { createDiscoverSidebarDirective } from './application/components/sidebar';
+import { createHitsCounterDirective } from '././application/components/hits_counter';
 import { DiscoverStartPlugins } from './plugin';
 import { getScopedHistory } from './kibana_services';
 
@@ -152,6 +153,7 @@ export function initializeInnerAngularModule(
     .directive('fixedScroll', FixedScrollProvider)
     .directive('renderComplete', createRenderCompleteDirective)
     .directive('discoverSidebar', createDiscoverSidebarDirective)
+    .directive('hitsCounter', createHitsCounterDirective)
     .service('debounce', ['$timeout', DebounceProviderTimeout]);
 }
 
