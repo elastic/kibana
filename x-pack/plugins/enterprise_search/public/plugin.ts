@@ -40,19 +40,20 @@ export class EnterpriseSearchPlugin implements Plugin {
     const config = this.config;
 
     core.application.register({
-      id: 'enterprise_search',
-      title: 'App Search', // TODO: This will eventually be 'Enterprise Search' once there's more than just App Search in here
-      euiIconType: AppSearchLogo, // TODO: Temporary - App Search will likely no longer need an icon once the nav structure changes.
-      category: DEFAULT_APP_CATEGORIES.management, // TODO - This is likely not final/correct
-      order: 10, // TODO - This will also likely not be needed once new nav structure changes land
+      id: 'app_search',
+      title: 'App Search',
+      // appRoute: '/app/enterprise_search/app_search', // TODO: Switch to this once https://github.com/elastic/kibana/issues/59190 is in
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
 
         const { renderApp } = await import('./applications');
+        const { AppSearch } = await import('./applications/app_search');
 
-        return renderApp(coreStart, params, config, plugins);
+        return renderApp(AppSearch, coreStart, params, config, plugins);
       },
     });
+    // TODO: Workplace Search will need to register its own plugin.
 
     plugins.home.featureCatalogue.register({
       id: 'app_search',
@@ -60,11 +61,11 @@ export class EnterpriseSearchPlugin implements Plugin {
       icon: AppSearchLogo,
       description:
         'Leverage dashboards, analytics, and APIs for advanced application search made simple.',
-      path: '/app/enterprise_search/app_search',
+      path: '/app/app_search', // TODO: Switch to '/app/enterprise_search/app_search' once https://github.com/elastic/kibana/issues/59190 is in
       category: FeatureCatalogueCategory.DATA,
       showOnHomePage: true,
     });
-    // TODO: Workplace Search will likely also register its own feature catalogue section/card.
+    // TODO: Workplace Search will need to register its own feature catalogue section/card.
   }
 
   public start(core: CoreStart) {}
