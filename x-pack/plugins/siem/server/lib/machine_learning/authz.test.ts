@@ -211,5 +211,56 @@ describe('mlAuthz', () => {
 
       expect(mockMlCapabilities).not.toHaveBeenCalled();
     });
+
+    it('validates the same cache result per request if permissions change mid-stream', async () => {
+      licenseMock.hasAtLeast.mockReturnValueOnce(false);
+      licenseMock.hasAtLeast.mockReturnValueOnce(true);
+
+      const mlAuthz = buildMlAuthz({
+        license: licenseMock,
+        ml: mlMock,
+        request,
+      });
+
+      const validationFirst = await mlAuthz.validateRuleType('machine_learning');
+      const validationSecond = await mlAuthz.validateRuleType('machine_learning');
+
+      expect(validationFirst.valid).toEqual(false);
+      expect(validationFirst.message).toEqual(
+        'Your license does not support machine learning. Please upgrade your license.'
+      );
+      expect(validationSecond.valid).toEqual(false);
+      expect(validationSecond.message).toEqual(
+        'Your license does not support machine learning. Please upgrade your license.'
+      );
+    });
+
+    it('will invalidate the cache result if the builder is called a second time after a license change', async () => {
+      licenseMock.hasAtLeast.mockReturnValueOnce(false);
+      licenseMock.hasAtLeast.mockReturnValueOnce(true);
+      (hasMlAdminPermissions as jest.Mock).mockReturnValueOnce(true);
+
+      const mlAuthzFirst = buildMlAuthz({
+        license: licenseMock,
+        ml: mlMock,
+        request,
+      });
+
+      const mlAuthzSecond = buildMlAuthz({
+        license: licenseMock,
+        ml: mlMock,
+        request,
+      });
+
+      const validationFirst = await mlAuthzFirst.validateRuleType('machine_learning');
+      const validationSecond = await mlAuthzSecond.validateRuleType('machine_learning');
+
+      expect(validationFirst.valid).toEqual(false);
+      expect(validationFirst.message).toEqual(
+        'Your license does not support machine learning. Please upgrade your license.'
+      );
+      expect(validationSecond.valid).toEqual(true);
+      expect(validationSecond.message).toBeUndefined();
+    });
   });
 });
