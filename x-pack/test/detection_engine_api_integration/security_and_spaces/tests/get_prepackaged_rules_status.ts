@@ -16,7 +16,7 @@ import { createSignalsIndex, deleteAllAlerts, deleteSignalsIndex, getSimpleRule 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('get_prepackaged_rules_status', () => {
     describe('getting prepackaged rules status', () => {
