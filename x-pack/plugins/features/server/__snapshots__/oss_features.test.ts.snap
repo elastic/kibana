@@ -58,6 +58,7 @@ Array [
       "api": Array [],
       "app": Array [
         "dashboards",
+        "kibana",
       ],
       "catalogue": Array [
         "dashboard",
@@ -93,6 +94,7 @@ Array [
     "privilege": Object {
       "app": Array [
         "dashboards",
+        "kibana",
       ],
       "catalogue": Array [
         "dashboard",
@@ -128,6 +130,7 @@ Array [
       ],
       "app": Array [
         "dev_tools",
+        "kibana",
       ],
       "catalogue": Array [
         "console",
@@ -152,6 +155,7 @@ Array [
       ],
       "app": Array [
         "dev_tools",
+        "kibana",
       ],
       "catalogue": Array [
         "console",
@@ -403,6 +407,7 @@ Array [
       "app": Array [
         "visualize",
         "lens",
+        "kibana",
       ],
       "catalogue": Array [
         "visualize",
@@ -435,6 +440,7 @@ Array [
       "app": Array [
         "visualize",
         "lens",
+        "kibana",
       ],
       "catalogue": Array [
         "visualize",
