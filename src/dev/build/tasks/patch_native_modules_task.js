@@ -30,9 +30,9 @@ const packages = [
     version: '1.10.5',
     destinationPath: 'node_modules/re2/build/Release/',
     shas: {
-      darwin: '066533b592094f91e00412499e44c338ce2466d63c9eaf0dc32be8214bde2099',
-      linux: '0322cac3c2e106129b650a8eac509f598ed283791d6116984fec4c151b24e574',
-      windows: '65b5bef7de2352f4787224c2c76a619b6683a868c8d4d71e0fdd500786fc422b',
+      darwin: '0deba2bb0e8c59f1cab1bcd3a30e30b82b1f3f49d8740a73f0e4de4ab0e44658',
+      linux: '6006ff9fd22387de349aad14fa117ddde41665d02ad28a3b47e34bdd8ba48acf',
+      windows: 'cd79658510357f3865cdceb60a80c80a642e90ae798fb31515cebed76eda8264',
     },
   },
 ];
@@ -54,7 +54,7 @@ async function patchModule(config, log, build, platform, pkg) {
     );
   }
   const platformName = platform.getName();
-  const archiveName = `${pkg.version}-${platformName}.tar.gz`;
+  const archiveName = `${pkg.version}-${platformName}-node-v${process.versions.modules}.tar.gz`;
   const downloadUrl = `${BASE_URL}/${pkg.name}/${archiveName}`;
   const downloadPath = config.resolveFromRepo(DOWNLOAD_DIRECTORY, archiveName);
   const extractedPath = build.resolvePathForPlatform(platform, pkg.destinationPath);
