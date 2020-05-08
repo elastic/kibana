@@ -38,6 +38,8 @@ export const renderApp = async (element: HTMLElement, history: ScopedHistory) =>
 
   render(<HomeApp directories={directories} />, element);
 
+  // dispatch synthetic hash change event to update hash history objects
+  // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
   const unlisten = history.listen(() => {
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   });
