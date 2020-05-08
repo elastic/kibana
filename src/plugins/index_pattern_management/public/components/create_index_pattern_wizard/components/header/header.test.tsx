@@ -29,6 +29,7 @@ describe('Header', () => {
         indexPatternName={indexPatternName}
         isIncludingSystemIndices={true}
         onChangeIncludingSystemIndices={() => {}}
+        changeTitle={() => {}}
       />
     );
 
@@ -41,6 +42,7 @@ describe('Header', () => {
         indexPatternName={indexPatternName}
         isIncludingSystemIndices={false}
         onChangeIncludingSystemIndices={() => {}}
+        changeTitle={() => {}}
       />
     );
 
@@ -55,6 +57,7 @@ describe('Header', () => {
         prompt={<div>Test prompt</div>}
         indexPatternName={indexPatternName}
         isBeta={true}
+        changeTitle={() => {}}
       />
     );
 

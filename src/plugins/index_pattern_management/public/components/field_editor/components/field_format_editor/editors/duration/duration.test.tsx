@@ -71,7 +71,6 @@ describe('DurationFormatEditor', () => {
   it('should render human readable output normally', async () => {
     const component = shallow(
       <DurationFormatEditor
-        basePath={''}
         fieldType={fieldType}
         format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
@@ -96,7 +95,6 @@ describe('DurationFormatEditor', () => {
     };
     const component = shallow(
       <DurationFormatEditor
-        basePath={''}
         fieldType={fieldType}
         format={(newFormat as unknown) as FieldFormat}
         formatParams={formatParams}

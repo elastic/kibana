@@ -63,7 +63,6 @@ export interface FormatEditorProps<P> {
   formatParams: { type?: string } & P;
   onChange: (newParams: Record<string, any>) => void;
   onError: FieldFormatEditorProps['onError'];
-  basePath: string;
 }
 
 export interface FormatEditorState {

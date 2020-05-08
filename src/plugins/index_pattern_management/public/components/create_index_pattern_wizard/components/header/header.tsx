@@ -40,6 +40,7 @@ export const Header = ({
   isIncludingSystemIndices,
   onChangeIncludingSystemIndices,
   isBeta = false,
+  changeTitle,
 }: {
   prompt?: React.ReactNode;
   indexPatternName: string;
@@ -47,64 +48,71 @@ export const Header = ({
   isIncludingSystemIndices: boolean;
   onChangeIncludingSystemIndices: () => void;
   isBeta?: boolean;
-}) => (
-  <div>
-    <EuiTitle>
-      <h1>
-        <FormattedMessage
-          id="indexPatternManagement.createIndexPatternHeader"
-          defaultMessage="Create {indexPatternName}"
-          values={{
-            indexPatternName,
-          }}
-        />
-        {isBeta ? (
-          <Fragment>
-            {' '}
-            <EuiBetaBadge
-              label={i18n.translate('indexPatternManagement.createIndexPattern.betaLabel', {
-                defaultMessage: 'Beta',
-              })}
-            />
-          </Fragment>
-        ) : null}
-      </h1>
-    </EuiTitle>
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          <p>
-            <EuiTextColor color="subdued">
-              <FormattedMessage
-                id="indexPatternManagement.createIndexPatternLabel"
-                defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
+  changeTitle: (title: string) => void;
+}) => {
+  const createIndexPatternHeader = i18n.translate(
+    'indexPatternManagement.createIndexPatternHeader',
+    {
+      defaultMessage: 'Create {indexPatternName}',
+      values: { indexPatternName },
+    }
+  );
+
+  changeTitle(createIndexPatternHeader);
+
+  return (
+    <div>
+      <EuiTitle>
+        <h1>
+          {createIndexPatternHeader}
+          {isBeta ? (
+            <Fragment>
+              {' '}
+              <EuiBetaBadge
+                label={i18n.translate('indexPatternManagement.createIndexPattern.betaLabel', {
+                  defaultMessage: 'Beta',
+                })}
               />
-            </EuiTextColor>
-          </p>
-        </EuiText>
-      </EuiFlexItem>
-      {showSystemIndices ? (
+            </Fragment>
+          ) : null}
+        </h1>
+      </EuiTitle>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiSwitch
-            label={
-              <FormattedMessage
-                id="indexPatternManagement.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
-                defaultMessage="Include system indices"
-              />
-            }
-            id="checkboxShowSystemIndices"
-            checked={isIncludingSystemIndices}
-            onChange={onChangeIncludingSystemIndices}
-          />
+          <EuiText size="s">
+            <p>
+              <EuiTextColor color="subdued">
+                <FormattedMessage
+                  id="indexPatternManagement.createIndexPatternLabel"
+                  defaultMessage="Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations."
+                />
+              </EuiTextColor>
+            </p>
+          </EuiText>
         </EuiFlexItem>
+        {showSystemIndices ? (
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              label={
+                <FormattedMessage
+                  id="indexPatternManagement.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
+                  defaultMessage="Include system indices"
+                />
+              }
+              id="checkboxShowSystemIndices"
+              checked={isIncludingSystemIndices}
+              onChange={onChangeIncludingSystemIndices}
+            />
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+      {prompt ? (
+        <Fragment>
+          <EuiSpacer size="s" />
+          {prompt}
+        </Fragment>
       ) : null}
-    </EuiFlexGroup>
-    {prompt ? (
-      <Fragment>
-        <EuiSpacer size="s" />
-        {prompt}
-      </Fragment>
-    ) : null}
-    <EuiSpacer size="m" />
-  </div>
-);
+      <EuiSpacer size="m" />
+    </div>
+  );
+};

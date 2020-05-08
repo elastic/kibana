@@ -59,13 +59,7 @@ export async function mountManagementSection(
     chrome.setBadge(readOnlyBadge);
   }
 
-  // todo - need new path to create index pattern
-  // todo navigate to items
   // todo path w/o slash
-  //
-  // indexPattern, indexPatterns
-
-  // data.indexPatterns.get()
 
   ReactDOM.render(
     <I18nProvider>
@@ -80,6 +74,7 @@ export async function mountManagementSection(
                 indexPatterns: data.indexPatterns,
                 savedObjectsClient: savedObjects.client,
                 uiSettings,
+                docTitle: chrome.docTitle,
                 openConfirm: overlays.openConfirm,
                 setBreadcrumbs: params.setBreadcrumbs,
               }}
@@ -132,6 +127,7 @@ export async function mountManagementSection(
               services={{
                 savedObjectsClient: savedObjects.client,
                 uiSettings,
+                docTitle: chrome.docTitle,
                 setBreadcrumbs: params.setBreadcrumbs,
                 indexPatternManagement: indexPatternManagementStart as IndexPatternManagementStart,
               }}

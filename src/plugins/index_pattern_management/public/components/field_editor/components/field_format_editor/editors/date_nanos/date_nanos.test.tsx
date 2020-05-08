@@ -46,7 +46,6 @@ describe('DateFormatEditor', () => {
   it('should render normally', async () => {
     const component = shallow(
       <DateNanosFormatEditor
-        basePath={''}
         fieldType={fieldType}
         format={(format as unknown) as FieldFormat}
         formatParams={formatParams}

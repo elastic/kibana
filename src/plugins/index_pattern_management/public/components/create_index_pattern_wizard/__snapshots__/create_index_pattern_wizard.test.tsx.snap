@@ -6,6 +6,7 @@ exports[`CreateIndexPatternWizard defaults to the loading state 1`] = `
 >
   <div>
     <Header
+      changeTitle={[MockFunction]}
       indexPatternName="name"
       isBeta={false}
       isIncludingSystemIndices={false}
@@ -29,6 +30,7 @@ exports[`CreateIndexPatternWizard renders index pattern step when there are indi
 >
   <div>
     <Header
+      changeTitle={[MockFunction]}
       indexPatternName="name"
       isBeta={false}
       isIncludingSystemIndices={false}
@@ -107,6 +109,7 @@ exports[`CreateIndexPatternWizard renders the empty state when there are no indi
 >
   <div>
     <Header
+      changeTitle={[MockFunction]}
       indexPatternName="name"
       isBeta={false}
       isIncludingSystemIndices={false}
@@ -132,6 +135,7 @@ exports[`CreateIndexPatternWizard renders time field step when step is set to 2 
 >
   <div>
     <Header
+      changeTitle={[MockFunction]}
       indexPatternName="name"
       isBeta={false}
       isIncludingSystemIndices={false}
@@ -179,6 +183,7 @@ exports[`CreateIndexPatternWizard renders when there are no indices but there ar
 >
   <div>
     <Header
+      changeTitle={[MockFunction]}
       indexPatternName="name"
       isBeta={false}
       isIncludingSystemIndices={false}
@@ -251,6 +256,7 @@ exports[`CreateIndexPatternWizard shows system indices even if there are no othe
 >
   <div>
     <Header
+      changeTitle={[MockFunction]}
       indexPatternName="name"
       isBeta={false}
       isIncludingSystemIndices={true}

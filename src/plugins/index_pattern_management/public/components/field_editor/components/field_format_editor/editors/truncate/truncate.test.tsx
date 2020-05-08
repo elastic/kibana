@@ -50,7 +50,6 @@ describe('TruncateFormatEditor', () => {
   it('should render normally', async () => {
     const component = shallow(
       <TruncateFormatEditor
-        basePath={''}
         fieldType={fieldType}
         format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
@@ -64,7 +63,6 @@ describe('TruncateFormatEditor', () => {
   it('should fire error, when input is invalid', async () => {
     const component = shallow(
       <TruncateFormatEditor
-        basePath={''}
         fieldType={fieldType}
         format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
@@ -91,7 +89,6 @@ describe('TruncateFormatEditor', () => {
   it('should fire change, when input changed and is valid', async () => {
     const component = shallow(
       <TruncateFormatEditor
-        basePath={''}
         fieldType={fieldType}
         format={(format as unknown) as FieldFormat}
         formatParams={formatParams}

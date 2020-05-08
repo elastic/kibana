@@ -32,9 +32,6 @@ jest.mock('./../../lib', () => ({
   extractTimeFields: require.requireActual('./../../lib').extractTimeFields,
   ensureMinimumTime: async (fields: IFieldType) => Promise.resolve(fields),
 }));
-jest.mock('ui/chrome', () => ({
-  addBasePath: () => {},
-}));
 
 const mockIndexPatternCreationType = new IndexPatternCreationConfig({
   type: 'default',

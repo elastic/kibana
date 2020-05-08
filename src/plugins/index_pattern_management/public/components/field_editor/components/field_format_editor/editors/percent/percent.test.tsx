@@ -44,7 +44,6 @@ describe('PercentFormatEditor', () => {
   it('should render normally', async () => {
     const component = shallow(
       <PercentFormatEditor
-        basePath={''}
         fieldType={fieldType}
         format={(format as unknown) as FieldFormat}
         formatParams={formatParams}

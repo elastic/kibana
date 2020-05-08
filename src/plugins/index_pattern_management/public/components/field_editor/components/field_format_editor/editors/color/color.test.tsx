@@ -42,7 +42,6 @@ describe('ColorFormatEditor', () => {
   it('should render string type normally (regex field)', async () => {
     const component = shallowWithI18nProvider(
       <ColorFormatEditor
-        basePath={''}
         fieldType={fieldType}
         format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
@@ -57,7 +56,6 @@ describe('ColorFormatEditor', () => {
   it('should render other type normally (range field)', async () => {
     const component = shallowWithI18nProvider(
       <ColorFormatEditor
-        basePath={''}
         fieldType={'number'}
         format={(format as unknown) as FieldFormat}
         formatParams={formatParams}
@@ -72,7 +70,6 @@ describe('ColorFormatEditor', () => {
   it('should render multiple colors', async () => {
     const component = shallowWithI18nProvider(
       <ColorFormatEditor
-        basePath={''}
         fieldType={fieldType}
         format={(format as unknown) as FieldFormat}
         formatParams={{ colors: [...formatParams.colors, ...formatParams.colors] }}
