@@ -179,6 +179,13 @@ export type RelatedEventDataEntryWithStats = RelatedEventDataEntry & {
   stats: Partial<Record<RelatedEventType, number>>;
 };
 
+/**
+ * The status or value of any particular event's related events w.r.t. their valence to the current view.
+ * One of:
+ * `RelatedEventDataEntryWithStats` when results have been received and processed and are ready to display
+ * `waitingForRelatedEventData` when related events have been requested but have not yet matriculated
+ * `Error` when the request for any event encounters an error during service 
+ */
 export type RelatedEventEntryWithStatsOrWaiting =
   | RelatedEventDataEntryWithStats
   | typeof waitingForRelatedEventData
