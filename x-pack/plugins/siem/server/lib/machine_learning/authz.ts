@@ -87,7 +87,7 @@ export const validateMlAuthz = async ({
   }
 
   return {
-    valid: message != null,
+    valid: message === undefined,
     message,
   };
 };
