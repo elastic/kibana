@@ -26,11 +26,15 @@ setupDeps.globalSearch.registerResultProvider({
 - using the `find` API from the client-side:
 
 ```ts
-startDeps.globalSearch.find('some term').subscribe(({ results }) => {
+startDeps.globalSearch.find('some term').subscribe(
+  ({ results }) => {
     updateResults(results);
-}, () => {}, () => {
+  },
+  () => {},
+  () => {
     showAsyncSearchIndicator(false);
-});
+  }
+);
 ```
 
 # Motivation
@@ -83,7 +87,7 @@ interface GlobalSearchProviderFindOptions {
 /**
  * Representation of a result returned by a {@link GlobalSearchResultProvider | result provider}
  */
-interface GlobalSearchResult {
+interface GlobalSearchProviderResult {
   /** an id that should be unique for an individual provider's results */
   id: string;
   /** the title/label of the result */
@@ -92,8 +96,16 @@ interface GlobalSearchResult {
   type: string;
   /** an optional EUI icon name to associate with the search result */
   icon?: string;
-  /** The url to navigate to this result. This can be either an absolute url, or a path relative to the performing request's basePath */
-  url: string;
+  /**
+   * The url associated with this result.
+   * This can be either an absolute url, a path relative to the basePath, or a structure specifying if the basePath should be prepended.
+   *
+   * @example
+   * `result.url = 'https://kibana-instance:8080/base-path/app/my-app/my-result-type/id';`
+   * `result.url = '/app/my-app/my-result-type/id';`
+   * `result.url = { path: '/base-path/app/my-app/my-result-type/id', prependBasePath: false };`
+  */
+  url: string | { path: string; prependBasePath: boolean };
   /** the score of the result, from 1 (lowest) to 100 (highest) */
   score: number;
   /** an optional record of metadata for this result */
@@ -102,6 +114,7 @@ interface GlobalSearchResult {
 ```
 
 Notes:
+
 - The `Serializable` type should be implemented and exposed from `core`. A basic implementation could be:
 
 ```ts
@@ -143,16 +156,17 @@ type GlobalSearchResultProvider = {
     term: string,
     options: GlobalSearchProviderFindOptions,
     context: GlobalSearchProviderContext
-  ): Observable<GlobalSearchResult[]>;
+  ): Observable<GlobalSearchProviderResult[]>;
 };
 ```
 
-Notes: 
+Notes:
+
 - initial implementation will only provide a static / non extensible `GlobalSearchProviderContext` context.
-It would be possible to allow plugins to register their own context providers as it's done for `RequestHandlerContext`,
-but this will not be done until the need arises.
+  It would be possible to allow plugins to register their own context providers as it's done for `RequestHandlerContext`,
+  but this will not be done until the need arises.
 - Because of the previous point, the performing `request` object is also exposed on the context to allow result providers
-to scope their custom services if needed.
+  to scope their custom services if needed.
 
 #### public
 
@@ -164,20 +178,32 @@ type GlobalSearchResultProvider = {
   id: string;
   find(
     term: string,
-    options: GlobalSearchProviderFindOptions,
-  ): Observable<GlobalSearchResult[]>;
+    options: GlobalSearchProviderFindOptions
+  ): Observable<GlobalSearchProviderResult[]>;
 };
 ```
 
-Notes: 
-- The client-side version of `GlobalSearchResultProvider` is slightly different than the 
-server one, as there is no `context` parameter on the `find` signature.
+Notes:
+
+- The client-side version of `GlobalSearchResultProvider` is slightly different than the
+  server one, as there is no `context` parameter on the `find` signature.
 
 ### Plugin API
 
 #### server API
 
 ```ts
+/**
+ * Representation of a result returned by the {@link GlobalSearchPluginStart.find | `find` API}
+ */
+type GlobalSearchResult = Omit<GlobalSearchProviderResult, 'url'> & {
+  /**
+   * The url associated with this result.
+   * This can be either an absolute url, or a relative path including the basePath
+   */
+  url: string;
+};
+
 /**
  * Options for the server-side {@link GlobalSearchServiceStart.find | find API}
  */
@@ -241,7 +267,7 @@ interface GlobalSearchFindOptions {
  */
 interface NavigableGlobalSearchResult extends GlobalSearchResult {
   /**
-   * Navigate to this result's associated url. If the result is on this kibana instance, user will be redirected to it 
+   * Navigate to this result's associated url. If the result is on this kibana instance, user will be redirected to it
    * in a SPA friendly way using `application.navigateToApp`, else, a full page refresh will be performed.
    */
   navigate: () => Promise<void>;
@@ -264,25 +290,23 @@ interface GlobalSearchPluginSetup {
 
 /** @public */
 interface GlobalSearchPluginStart {
-  find(
-    term: string,
-    options: GlobalSearchFindOptions,
-  ): Observable<GlobalSearchResponse>;
+  find(term: string, options: GlobalSearchFindOptions): Observable<GlobalSearchResponse>;
 }
 ```
 
-Notes: 
+Notes:
+
 - The public API is very similar to its server counterpart. The differences are:
-  - The `registerResultProvider` setup APIs share the same signature, however the input `GlobalSearchResultProvider` 
-  types are different on the client and server.
+  - The `registerResultProvider` setup APIs share the same signature, however the input `GlobalSearchResultProvider`
+    types are different on the client and server.
   - The `find` start API signature got a `KibanaRequest` for `server`, when this parameter is not present for `public`.
-- The `find` API returns a observable of `NavigableGlobalSearchResult` instead of plain `GlobalSearchResult`. This type 
-is here to enhance results with a `navigate` method to let `core` handle the navigation logic, which is 
-non-trivial. See the [Redirecting to a result](#redirecting-to-a-result) section for more info.
+- The `find` API returns a observable of `NavigableGlobalSearchResult` instead of plain `GlobalSearchResult`. This type
+  is here to enhance results with a `navigate` method to let the `GlobalSearch` plugin handle the navigation logic, which is
+  non-trivial. See the [Redirecting to a result](#redirecting-to-a-result) section for more info.
 
 #### http API
 
-An internal HTTP API will be exposed on `/internal/global_search/find` to allow the client-side `GlobalSearch` plugin 
+An internal HTTP API will be exposed on `/internal/global_search/find` to allow the client-side `GlobalSearch` plugin
 to fetch results from the server-side result providers.
 
 It should be very close to:
@@ -294,9 +318,11 @@ router.post(
     validate: {
       body: schema.object({
         term: schema.string(),
-        options: schema.maybe(schema.object({
-          preference: schema.maybe(schema.string()),
-        })),
+        options: schema.maybe(
+          schema.object({
+            preference: schema.maybe(schema.string()),
+          })
+        ),
       }),
     },
   },
@@ -315,25 +341,26 @@ router.post(
 );
 ```
 
-Notes: 
+Notes:
+
 - This API is only for internal use and communication between the client and the server parts of the `GS` API. When
-the need to expose an API for external consumers will appear, a new public API will be exposed for that.
+  the need to expose an API for external consumers will appear, a new public API will be exposed for that.
 - A new `globalSearch` context will be exposed on core's `RequestHandlerContext` to wrap a `find` call with current request.
-- Initial implementation will await for all results and then return them as a single response.  As it's supported by 
+- Initial implementation will await for all results and then return them as a single response. As it's supported by
   the service, it could theoretically be possible to stream the results instead, however that makes the consumption of
-  the API from the client more difficult. If this become important at some point, a new `/api/core/global_search/find/async` 
+  the API from the client more difficult. If this become important at some point, a new `/api/core/global_search/find/async`
   endpoint could be added.
-  
+
 ## Functional behavior
 
 ### summary
 
-- the `GlobalSearch` plugin setup contract exposes an API to be able to register result providers (`GlobalSearchResultProvider`). 
-  These providers can be registered from either public or server side, even if the interface for each side is not 
+- the `GlobalSearch` plugin setup contract exposes an API to be able to register result providers (`GlobalSearchResultProvider`).
+  These providers can be registered from either public or server side, even if the interface for each side is not
   exactly the same.
 - the `GlobalSearch` plugin start contract exposes an API to be able to search for objects. This API is available from both public
-  and server sides. 
-  - When using the server `find` API, only results from providers registered from the server will be returned. 
+  and server sides.
+  - When using the server `find` API, only results from providers registered from the server will be returned.
   - When using the public `find` API, results from provider registered from both server and public sides will be returned.
 - During a `find` call, the service will call all the registered result providers and collect their result observables.
   Every time a result provider emits some new results, the `globalSearch` service will:
@@ -344,12 +371,12 @@ the need to expose an API for external consumers will appear, a new public API w
 
 ### result provider registration
 
-Due to the fact that some kind of results (i.e `application`, and maybe later `management_section`) only exists on 
-the public side of Kibana and therefor are not known on the server side, the `registerResultProvider` API will be 
+Due to the fact that some kind of results (i.e `application`, and maybe later `management_section`) only exists on
+the public side of Kibana and therefor are not known on the server side, the `registerResultProvider` API will be
 available both from the public and the server counterpart of the `GlobalSearchPluginSetup` contract.
 
-However, as results from providers registered from the client-side will not be available from the server's `find` API, 
-registering result providers from the client should only be done to answer this specific use case and will be 
+However, as results from providers registered from the client-side will not be available from the server's `find` API,
+registering result providers from the client should only be done to answer this specific use case and will be
 discouraged, by providing appropriated jsdoc and documentation explaining that it should only
 be used when it is not technically possible to register it from the server side instead.
 
@@ -376,11 +403,12 @@ This is why `NavigableGlobalSearchResult.navigate` has been introduced on the cl
 When using `navigate` from a result instance, the following logic will be executed:
 
 If all these criteria are true for `result.url`:
+
 - (only for absolute URLs) The origin of the URL matches the origin of the browser's current location
 - The pathname of the URL starts with the current basePath (eg. /mybasepath/s/my-space)
 - The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's `appRoute` configuration)
 
-Then: match the pathname segment to the corresponding application and do the SPA navigation to that application using 
+Then: match the pathname segment to the corresponding application and do the SPA navigation to that application using
 `application.navigateToApp` using the remaining pathname segment for the `path` option.
 
 Otherwise: do a full page navigation using `window.location.assign`
@@ -392,11 +420,11 @@ When calling `GlobalSearchPluginStart.find` from the server-side service:
 - the service will call `find` on each server-side registered result provider and collect the resulting result observables
 
 - then, the service will merge every result observable and trigger the next step on every emission until either
-    - A predefined timeout duration is reached
-    - All result observables are completed
-   
-- on every emission of the merged observable, the results will be aggregated to the existing list and sorted following 
-the logic defined in the [results aggregation](#results-aggregation) section
+  - A predefined timeout duration is reached
+  - All result observables are completed
+  
+- on every emission of the merged observable, the results will be aggregated to the existing list and sorted following
+  the logic defined in the [results aggregation](#results-aggregation) section
 
 A very naive implementation of this behavior would be:
 
@@ -432,9 +460,9 @@ When calling `GlobalSearchPluginStart.find` from the public-side service:
 - Then, the service will merge every result observable and trigger the next step on every emission until either
   - A predefined timeout duration is reached
   - All result observables are completed
-   
-- On every emission of the merged observable, the results will be aggregated to the existing list and sorted following 
-the logic defined in the [results aggregation](#results-aggregation) section
+  
+- On every emission of the merged observable, the results will be aggregated to the existing list and sorted following
+  the logic defined in the [results aggregation](#results-aggregation) section
 
 A very naive implementation of this behavior would be:
 
@@ -460,19 +488,20 @@ search(
 }
 ```
 
-Notes: 
+Notes:
+
 - Due to the complexity of the process, the initial implementation will not be streaming results from the server,
-meaning that all results from server-side registered providers will all be fetched at the same time (via a 'classic' 
-http call to the GS endpoint). The observable-based API architecture is ready for this however, and the enhancement 
-could be added at a later time.
+  meaning that all results from server-side registered providers will all be fetched at the same time (via a 'classic'
+  http call to the GS endpoint). The observable-based API architecture is ready for this however, and the enhancement
+  could be added at a later time.
 
 ### results aggregation
 
-On every emission of an underlying provider, the service will aggregate the new results with the existing list and 
+On every emission of an underlying provider, the service will aggregate the new results with the existing list and
 sort the results following this logic before emitting them:
 
 - Results will be sorted by descending `score` value.
-- Results with the same score will then be sorted by ascending `id` value. This arbitrary sort is only performed to 
+- Results with the same score will then be sorted by ascending `id` value. This arbitrary sort is only performed to
   ensure consistent order when multiple results have the exact same score
 
 This is an equivalent of the following lodash call:
@@ -515,7 +544,7 @@ How this field is populated from each individual provider is considered an imple
 
 ### Search cancellation
 
-Consumers can cancel a `find` call at any time by providing a cancellation observable with 
+Consumers can cancel a `find` call at any time by providing a cancellation observable with
 the `GlobalSearchFindOptions.aborted$` option and then emitting from it.
 
 When this observable is provided and emitting, the GS service will complete the result observable.
@@ -536,71 +565,48 @@ while making these results not available from the server-side and HTTP APIs.
 
 We could decide to only allow providers registration from the server-side. It would reduce API exposure, while simplifying
 the service implementation. However to do that, we would need to find a solution to be able to implement a server-side
- result provider for `application` (and later `management_section`) type provider.
+result provider for `application` (and later `management_section`) type provider.
 
-I will directly exclude the option to move the `application` registration (`core.application.register`) from client 
+I will directly exclude the option to move the `application` registration (`core.application.register`) from client
 to server-side, as it's a very heavy impacting (and breaking) change to `core` APIs that would requires more reasons
 than just this RFC/API to consider.
 
 ### AST parsing
 
 One option to make the `application` results 'visible' from the server-side would be to parse the client code at build time
-using AST to find all usages to `application.register` inspect the parameters, and generates a server file 
-containing the applications. The server-side `application` result provider would then just read this file and uses it 
+using AST to find all usages to `application.register` inspect the parameters, and generates a server file
+containing the applications. The server-side `application` result provider would then just read this file and uses it
 to return application results.
 
 However
+
 - At the parsing would be done at build time, we would not be able to generate entries for any 3rd party plugins
 - As entries for every existing applications would be generated, the search provider would to be able to know which
-applications are actually enabled/accessible at runtime to filter them, which is all but easy
+  applications are actually enabled/accessible at runtime to filter them, which is all but easy
 - It will also not contains test plugin apps, making it really hard to FTR
 - AST parsing is a complex mechanism for an already unsatisfactory alternative
- 
-### Duplicated server-side `application.register` API 
- 
-One other option would be to duplicate the `application.register` API on the server side, with a subset of the 
+
+### Duplicated server-side `application.register` API
+
+One other option would be to duplicate the `application.register` API on the server side, with a subset of the
 client-side metadata.
 
 ```ts
 core.application.register({
   id: 'app_status',
   title: 'App Status',
-  euiIconType: 'snowflake'
+  euiIconType: 'snowflake',
 });
 ```
 
 This way, the applications could be searchable from the server using this server-side `applications` registry.
 
 However
+
 - It forces plugin developers to add this API call. In addition to be a very poor developer experience, it can also
   very easily be forgotten, making a given app non searchable
 - client-side only plugins would need to add a server-side part to their plugin just to register their application on
   the server side
-  
-## `GlobalSearchResult.url` could be a struct instead of a url for internal results.
-
-The initial idea for `GlobalSearchResult.url` was to have a polymorphic structure instead of just a string:
-
-```ts
-url: { absUrl: string } | { application: string; path?: string };
-```
-
-That was making it way easier to redirect to an internal result from the UI, as we could directly call
-`application.navigateToApp(application, { path })`.
-
-However, that didn't bring answer for the (future) need to be able to search for and redirect to object in 
-different spaces. We could then have changed the structure to
-
-```ts
-url: { absUrl: string } | { application: string; path?: string, space?: string };
-```
-
-But this had some caveats:
-- `space` is an xpack plugin, adding this `space` property in an oss part of the code is problematic
-- The `space` API is not callable from core or oss, meaning that we would have to 'forge' the url to this space anyway
-- this is really not generic. If another plugin was to alter the basepath in another way, we would have needed to add it another property 
-
-So even if the 'parsable absolute url' approach seems fragile, it still felt better than this alternative.
 
 # Adoption strategy
 
@@ -621,5 +627,3 @@ example plugins.
 # Unresolved questions
 
 N/A
-
-     
