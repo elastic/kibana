@@ -26,12 +26,20 @@ interface LinkProps {
   onClick?: (e: React.MouseEvent | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
 }
 
-export const useLinkProps = ({ app, pathname, hash, search }: LinkDescriptor): LinkProps => {
+interface Options {
+  hrefOnly?: boolean;
+}
+
+export const useLinkProps = (
+  { app, pathname, hash, search }: LinkDescriptor,
+  options: Options = {}
+): LinkProps => {
   validateParams({ app, pathname, hash, search });
 
   const { prompt } = useNavigationWarningPrompt();
   const prefixer = usePrefixPathWithBasepath();
   const navigateToApp = useKibana().services.application?.navigateToApp;
+  const { hrefOnly } = options;
 
   const encodedSearch = useMemo(() => {
     return search ? encodeSearch(search) : undefined;
@@ -86,7 +94,10 @@ export const useLinkProps = ({ app, pathname, hash, search }: LinkDescriptor): L
 
   return {
     href,
-    onClick,
+    // Sometimes it may not be desirable to have onClick call "navigateToApp".
+    // E.g. the management section of Kibana cannot be successfully deeplinked to via
+    // "navigateToApp". In those cases we can choose to defer to legacy behaviour.
+    onClick: hrefOnly ? undefined : onClick,
   };
 };
 

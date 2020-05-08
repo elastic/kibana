@@ -9,17 +9,19 @@ import React from 'react';
 import { XYZTMSEditor, XYZTMSSourceConfig } from './xyz_tms_editor';
 import { XYZTMSSource, sourceTitle } from './xyz_tms_source';
 import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
+import { TileLayer } from '../../tile_layer';
 
 export const tmsLayerWizardConfig: LayerWizard = {
   description: i18n.translate('xpack.maps.source.ems_xyzDescription', {
     defaultMessage: 'Tile map service configured in interface',
   }),
   icon: 'grid',
-  renderWizard: ({ onPreviewSource }: RenderWizardArguments) => {
+  renderWizard: ({ previewLayer }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: XYZTMSSourceConfig) => {
-      const sourceDescriptor = XYZTMSSource.createDescriptor(sourceConfig);
-      const source = new XYZTMSSource(sourceDescriptor);
-      onPreviewSource(source);
+      const layerDescriptor = TileLayer.createDescriptor({
+        sourceDescriptor: XYZTMSSource.createDescriptor(sourceConfig),
+      });
+      previewLayer(layerDescriptor);
     };
     return <XYZTMSEditor onSourceConfigChange={onSourceConfigChange} />;
   },

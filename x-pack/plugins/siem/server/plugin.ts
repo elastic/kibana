@@ -15,16 +15,12 @@ import {
   PluginInitializerContext,
   Logger,
 } from '../../../../src/core/server';
-import {
-  PluginStartContract as AlertingStart,
-  PluginSetupContract as AlertingSetup,
-} from '../../alerting/server';
+import { PluginSetupContract as AlertingSetup } from '../../alerting/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
-import { PluginStartContract as ActionsStart } from '../../actions/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
@@ -38,8 +34,7 @@ import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { SiemClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
-
-export { CoreSetup, CoreStart };
+import { APP_ID, APP_ICON } from '../common/constants';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -51,10 +46,8 @@ export interface SetupPlugins {
   ml?: MlSetup;
 }
 
-export interface StartPlugins {
-  actions: ActionsStart;
-  alerting: AlertingStart;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StartPlugins {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginSetup {}
@@ -62,7 +55,6 @@ export interface PluginSetup {}
 export interface PluginStart {}
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
-  readonly name = 'siem';
   private readonly logger: Logger;
   private readonly config$: Observable<ConfigType>;
   private context: PluginInitializerContext;
@@ -70,14 +62,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
-    this.logger = context.logger.get('plugins', this.name);
+    this.logger = context.logger.get('plugins', APP_ID);
     this.config$ = createConfig$(context);
     this.siemClientFactory = new SiemClientFactory();
 
     this.logger.debug('plugin initialized');
   }
 
-  public async setup(core: CoreSetup, plugins: SetupPlugins) {
+  public async setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
     this.logger.debug('plugin setup');
 
     if (hasListsFeature()) {
@@ -91,7 +83,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     initUiSettings(core.uiSettings);
 
     const router = core.http.createRouter();
-    core.http.registerRouteHandlerContext(this.name, (context, request, response) => ({
+    core.http.registerRouteHandlerContext(APP_ID, (context, request, response) => ({
       getSiemClient: () => this.siemClientFactory.create(request),
     }));
 
@@ -110,12 +102,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     );
 
     plugins.features.registerFeature({
-      id: this.name,
+      id: APP_ID,
       name: i18n.translate('xpack.siem.featureRegistry.linkSiemTitle', {
         defaultMessage: 'SIEM',
       }),
       order: 1100,
-      icon: 'securityAnalyticsApp',
+      icon: APP_ICON,
       navLinkId: 'siem',
       app: ['siem', 'kibana'],
       catalogue: ['siem'],

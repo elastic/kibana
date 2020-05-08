@@ -12,7 +12,7 @@ import {
   PluginInitializerContext,
   AppMountParameters,
 } from 'kibana/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { registerStartSingleton } from './legacy_singletons';
 import { registerFeatures } from './register_feature';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
@@ -21,7 +21,9 @@ import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/p
 import { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced/public';
 
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../plugins/triggers_actions_ui/public';
-import { getAlertType } from './components/alerting/metrics/metric_threshold_alert_type';
+import { getAlertType as getLogsAlertType } from './components/alerting/logs/log_threshold_alert_type';
+import { getInventoryMetricAlertType } from './components/alerting/inventory/metric_inventory_threshold_alert_type';
+import { createMetricThresholdAlertType } from './alerting/metric_threshold';
 
 export type ClientSetup = void;
 export type ClientStart = void;
@@ -52,7 +54,9 @@ export class Plugin
   setup(core: CoreSetup, pluginsSetup: ClientPluginsSetup) {
     registerFeatures(pluginsSetup.home);
 
-    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getAlertType());
+    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getInventoryMetricAlertType());
+    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(getLogsAlertType());
+    pluginsSetup.triggers_actions_ui.alertTypeRegistry.register(createMetricThresholdAlertType());
 
     core.application.register({
       id: 'logs',
@@ -60,7 +64,7 @@ export class Plugin
         defaultMessage: 'Logs',
       }),
       euiIconType: 'logsApp',
-      order: 8001,
+      order: 8000,
       appRoute: '/app/logs',
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
@@ -85,7 +89,7 @@ export class Plugin
         defaultMessage: 'Metrics',
       }),
       euiIconType: 'metricsApp',
-      order: 8000,
+      order: 8001,
       appRoute: '/app/metrics',
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {

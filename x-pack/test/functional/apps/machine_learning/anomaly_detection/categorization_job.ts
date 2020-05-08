@@ -64,7 +64,6 @@ export default function({ getService }: FtrProviderContext) {
       job_id: expectedJobId,
       result_type: 'model_size_stats',
       model_bytes_exceeded: '0.0 B',
-      model_bytes_memory_limit: '15.0 MB',
       total_by_field_count: '30',
       total_over_field_count: '0',
       total_partition_field_count: '2',

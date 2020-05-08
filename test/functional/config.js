@@ -25,11 +25,12 @@ export default async function({ readConfigFile }) {
 
   return {
     testFiles: [
+      require.resolve('./apps/bundles'),
       require.resolve('./apps/console'),
-      require.resolve('./apps/getting_started'),
       require.resolve('./apps/context'),
       require.resolve('./apps/dashboard'),
       require.resolve('./apps/discover'),
+      require.resolve('./apps/getting_started'),
       require.resolve('./apps/home'),
       require.resolve('./apps/management'),
       require.resolve('./apps/saved_objects_management'),

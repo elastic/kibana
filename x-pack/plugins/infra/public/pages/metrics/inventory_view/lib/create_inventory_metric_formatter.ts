@@ -5,13 +5,13 @@
  */
 
 import { get } from 'lodash';
-import { createFormatter } from '../../../../utils/formatters';
 import { InfraFormatterType } from '../../../../lib/lib';
 import {
   SnapshotMetricInput,
   SnapshotCustomMetricInputRT,
 } from '../../../../../common/http_api/snapshot_api';
 import { createFormatterForMetric } from '../../metrics_explorer/components/helpers/create_formatter_for_metric';
+import { createFormatter } from '../../../../../common/formatters';
 
 interface MetricFormatter {
   formatter: InfraFormatterType;
