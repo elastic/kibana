@@ -1,7 +1,7 @@
 /* eslint max-len:0 */
 const filter = metric => metric.type === 'filter_ratio';
 import bucketTransform from '../../helpers/bucket_transform';
-import { overwrite } from '../../helpers'
+import { overwrite } from '../../helpers';
 export default function ratios(req, panel, series) {
   return next => doc => {
     if (series.metrics.some(filter)) {

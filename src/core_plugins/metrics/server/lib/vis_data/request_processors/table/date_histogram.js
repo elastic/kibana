@@ -1,4 +1,4 @@
-import { overwrite } from '../../helpers'
+import { overwrite } from '../../helpers';
 import getBucketSize from '../../helpers/get_bucket_size';
 import getIntervalAndTimefield from '../../get_interval_and_timefield';
 import getTimerange from '../../helpers/get_timerange';

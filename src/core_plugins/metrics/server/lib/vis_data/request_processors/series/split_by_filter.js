@@ -1,4 +1,4 @@
-import { overwrite } from '../../helpers'
+import { overwrite } from '../../helpers';
 export default function splitByFilter(req, panel, series) {
   return next => doc => {
     if (series.split_mode !== 'filter') return next(doc);

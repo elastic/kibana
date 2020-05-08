@@ -1,4 +1,4 @@
-import { overwrite } from '../../helpers'
+import { overwrite } from '../../helpers';
 
 export default function splitByTerm(req, panel) {
   return next => doc => {

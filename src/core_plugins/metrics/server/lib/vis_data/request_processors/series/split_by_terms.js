@@ -1,4 +1,4 @@
-import { overwrite } from '../../helpers'
+import { overwrite } from '../../helpers';
 import basicAggs from '../../../../../common/basic_aggs';
 import getBucketsPath from '../../helpers/get_buckets_path';
 import bucketTransform from '../../helpers/bucket_transform';

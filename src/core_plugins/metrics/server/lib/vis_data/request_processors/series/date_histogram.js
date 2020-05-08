@@ -1,7 +1,7 @@
 import getBucketSize from '../../helpers/get_bucket_size';
 import offsetTime from '../../offset_time';
 import getIntervalAndTimefield from '../../get_interval_and_timefield';
-import { overwrite } from '../../helpers'
+import { overwrite } from '../../helpers';
 export default function dateHistogram(req, panel, series) {
   return next => doc => {
     const { timeField, interval } = getIntervalAndTimefield(panel, series);

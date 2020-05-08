@@ -1,4 +1,4 @@
-import { overwrite } from '../../helpers'
+import { overwrite } from '../../helpers';
 export default function splitByEverything(req, panel) {
   return next => doc => {
     panel.series.filter(c => !(c.aggregate_by && c.aggregate_function)).forEach(column => {

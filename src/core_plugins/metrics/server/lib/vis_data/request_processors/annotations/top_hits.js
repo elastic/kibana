@@ -1,4 +1,4 @@
-import { overwrite } from '../../helpers'
+import { overwrite } from '../../helpers';
 export default function topHits(req, panel, annotation) {
   return next => doc => {
     const fields = annotation.fields && annotation.fields.split(/[,\s]+/) || [];
