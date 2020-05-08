@@ -104,7 +104,7 @@ export class HomePublicPlugin
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
         );
         const { renderApp } = await import('./application');
-        return await renderApp(params.element);
+        return await renderApp(params.element, params.history);
       },
     });
     kibanaLegacy.forwardApp('home', 'home');

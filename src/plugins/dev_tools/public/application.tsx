@@ -24,7 +24,7 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { useEffect, useRef } from 'react';
 
-import { AppMountContext, AppMountDeprecated } from 'kibana/public';
+import { AppMountContext, AppMountDeprecated, ScopedHistory } from 'kibana/public';
 import { DevToolApp } from './dev_tool';
 
 interface DevToolsWrapperProps {
@@ -157,7 +157,7 @@ function setBreadcrumbs(appMountContext: AppMountContext) {
 export function renderApp(
   element: HTMLElement,
   appMountContext: AppMountContext,
-  basePath: string,
+  history: ScopedHistory,
   devTools: readonly DevToolApp[]
 ) {
   if (redirectOnMissingCapabilities(appMountContext)) {
@@ -197,7 +197,14 @@ export function renderApp(
     element
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  const unlisten = history.listen(() => {
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  });
+
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
+    unlisten();
+  };
 }
 
 function isAppMountDeprecated(mount: (...args: any[]) => any): mount is AppMountDeprecated {

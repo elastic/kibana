@@ -65,12 +65,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
         }
         const { renderApp } = await import('./application');
         params.element.classList.add('devAppWrapper');
-        return renderApp(
-          params.element,
-          appMountContext,
-          params.appBasePath,
-          this.getSortedDevTools()
-        );
+        return renderApp(params.element, appMountContext, params.history, this.getSortedDevTools());
       },
     });
     kibanaLegacy.forwardApp('dev_tools', 'dev_tools');

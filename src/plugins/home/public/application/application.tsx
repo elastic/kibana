@@ -20,13 +20,14 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
+import { ScopedHistory } from 'kibana/public';
 // @ts-ignore
 import { HomeApp } from './components/home_app';
 import { getServices } from './kibana_services';
 
 import './index.scss';
 
-export const renderApp = async (element: HTMLElement) => {
+export const renderApp = async (element: HTMLElement, history: ScopedHistory) => {
   const homeTitle = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
   const { featureCatalogue, chrome } = getServices();
 
@@ -37,7 +38,12 @@ export const renderApp = async (element: HTMLElement) => {
 
   render(<HomeApp directories={directories} />, element);
 
+  const unlisten = history.listen(() => {
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  });
+
   return () => {
     unmountComponentAtNode(element);
+    unlisten();
   };
 };
