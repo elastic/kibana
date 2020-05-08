@@ -152,7 +152,7 @@ async function validateConfigId(soClient: SavedObjectsClientContract, configId: 
     await agentConfigService.get(soClient, configId);
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {
-      throw Boom.badRequest(`Agent config ${configId} do not exists`);
+      throw Boom.badRequest(`Agent config ${configId} does not exist`);
     }
     throw e;
   }
