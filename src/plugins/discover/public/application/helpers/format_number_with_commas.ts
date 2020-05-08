@@ -17,5 +17,11 @@
  * under the License.
  */
 
-export { shortenDottedString } from './shorten_dotted_string';
-export { formatNumWithCommas } from './format_number_with_commas';
+const COMMA_SEPARATOR_RE = /(\d)(?=(\d{3})+(?!\d))/g;
+
+/**
+ * Converts a number to a string and adds commas
+ * as thousands separators
+ */
+export const formatNumWithCommas = (input: number) =>
+  String(input).replace(COMMA_SEPARATOR_RE, '$1,');
