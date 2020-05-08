@@ -10,7 +10,7 @@ import { transformError, buildSiemResponse } from '../../detection_engine/routes
 import { TIMELINE_DRAFT_URL } from '../../../../common/constants';
 import { buildFrameworkRequest } from './utils/common';
 import { SetupPlugins } from '../../../plugin';
-import { getDraftTimeline, persistTimeline, resetTimeline, getTimeline } from '../saved_object';
+import { getDraftTimeline, persistTimeline } from '../saved_object';
 import { draftTimelineDefaults } from '../default_timeline';
 
 export const getDraftTimelinesRoute = (

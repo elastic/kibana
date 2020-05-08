@@ -154,8 +154,6 @@ export const createTimelineEpic = <State>(): Epic<
             myEpicTimelineId.setTimelineId(null);
           }
           return true;
-        } else if (action.type === getDraftTimeline.type && isItAtimelineAction(timelineId)) {
-          return true;
         } else if (action.type === addTimeline.type && isItAtimelineAction(timelineId)) {
           const addNewTimeline: TimelineModel = get('payload.timeline', action);
           myEpicTimelineId.setTimelineId(addNewTimeline.savedObjectId);
