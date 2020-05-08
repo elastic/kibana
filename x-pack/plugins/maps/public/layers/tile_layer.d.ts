@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AbstractLayer, ILayerArguments } from './layer';
+import { AbstractLayer } from './layer';
 import { ITMSSource } from './sources/tms_source';
 import { LayerDescriptor } from '../../common/descriptor_types';
 
-interface ITileLayerArguments extends ILayerArguments {
+interface ITileLayerArguments {
   source: ITMSSource;
   layerDescriptor: LayerDescriptor;
 }

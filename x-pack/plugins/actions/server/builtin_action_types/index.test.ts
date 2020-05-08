@@ -27,6 +27,7 @@ export function createActionTypeRegistry(): {
     ),
     actionsConfigUtils: actionsConfigMock.create(),
     licenseState: licenseStateMock.create(),
+    preconfiguredActions: [],
   });
   registerBuiltInActionTypes({
     logger,

@@ -11,6 +11,7 @@ import {
   syncLayerOrderForSingleLayer,
   removeOrphanedSourcesAndLayers,
   addSpritesheetToMap,
+  moveLayerToTop,
 } from './utils';
 import { getGlyphUrl, isRetina } from '../../../meta';
 import { DECIMAL_DEGREES_PRECISION, ZOOM_PRECISION } from '../../../../common/constants';
@@ -23,6 +24,7 @@ import sprites2 from '@elastic/maki/dist/sprite@2.png';
 import { DrawControl } from './draw_control';
 import { TooltipControl } from './tooltip_control';
 import { clampToLatBounds, clampToLonBounds } from '../../../elasticsearch_geo_utils';
+import { getInitialView } from './get_initial_view';
 
 import { getInjectedVarFunc } from '../../../kibana_services';
 
@@ -74,7 +76,7 @@ export class MBMapContainer extends React.Component {
   }
 
   _debouncedSync = _.debounce(() => {
-    if (this._isMounted || !this.props.isMapReady) {
+    if (this._isMounted && this.props.isMapReady) {
       if (!this.state.hasSyncedLayerList) {
         this.setState(
           {
@@ -86,6 +88,7 @@ export class MBMapContainer extends React.Component {
           }
         );
       }
+      this.props.spatialFiltersLayer.syncLayerWithMB(this.state.mbMap);
       this._syncSettings();
     }
   }, 256);
@@ -110,6 +113,7 @@ export class MBMapContainer extends React.Component {
   }
 
   async _createMbMapInstance() {
+    const initialView = await getInitialView(this.props.goto, this.props.settings);
     return new Promise(resolve => {
       const mbStyle = {
         version: 8,
@@ -131,7 +135,6 @@ export class MBMapContainer extends React.Component {
         maxZoom: this.props.settings.maxZoom,
         minZoom: this.props.settings.minZoom,
       };
-      const initialView = _.get(this.props.goto, 'center');
       if (initialView) {
         options.zoom = initialView.zoom;
         options.center = {
@@ -260,9 +263,14 @@ export class MBMapContainer extends React.Component {
   };
 
   _syncMbMapWithLayerList = () => {
-    removeOrphanedSourcesAndLayers(this.state.mbMap, this.props.layerList);
+    removeOrphanedSourcesAndLayers(
+      this.state.mbMap,
+      this.props.layerList,
+      this.props.spatialFiltersLayer
+    );
     this.props.layerList.forEach(layer => layer.syncLayerWithMB(this.state.mbMap));
     syncLayerOrderForSingleLayer(this.state.mbMap, this.props.layerList);
+    moveLayerToTop(this.state.mbMap, this.props.spatialFiltersLayer);
   };
 
   _syncMbMapWithInspector = () => {

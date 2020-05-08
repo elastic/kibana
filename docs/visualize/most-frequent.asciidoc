@@ -14,20 +14,6 @@ The most frequently used visualizations include:
 [[metric-chart]]
 
 [float]
-[[frequently-used-viz-aggregation]]
-=== Supported aggregations
-
-The most frequently used visualizations support the following aggregations:
-
-* <<visualize-metric-aggregations,Metric>>
-
-* <<visualize-parent-pipeline-aggregations,Parent pipeline>>
-
-* <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
-
-* <<visualize-bucket-aggregations,Bucket>>
-
-[float]
 === Configure your visualization
 
 You configure visualizations using the default editor. Each visualization supports different configurations of the metrics and buckets.

@@ -9,17 +9,27 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiTitle,
   EuiLoadingContent,
+  EuiTitle,
+  EuiText,
   EuiSpacer,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { useHostListSelector } from '../hooks';
+import { useHostSelector } from '../hooks';
 import { urlFromQueryParams } from '../url_from_query_params';
-import { uiQueryParams, detailsData, detailsError, showView } from '../../../store/hosts/selectors';
+import {
+  uiQueryParams,
+  detailsData,
+  detailsError,
+  showView,
+  detailsLoading,
+  policyResponseConfigurations,
+  policyResponseActions,
+  policyResponseFailedOrWarningActionCount,
+} from '../../../store/hosts/selectors';
 import { HostDetails } from './host_details';
 import { PolicyResponse } from './policy_response';
 import { HostMetadata } from '../../../../../../common/types';
@@ -29,11 +39,12 @@ import { useNavigateByRouterEventHandler } from '../../hooks/use_navigate_by_rou
 export const HostDetailsFlyout = memo(() => {
   const history = useHistory();
   const { notifications } = useKibana();
-  const queryParams = useHostListSelector(uiQueryParams);
+  const queryParams = useHostSelector(uiQueryParams);
   const { selected_host: selectedHost, ...queryParamsWithoutSelectedHost } = queryParams;
-  const details = useHostListSelector(detailsData);
-  const error = useHostListSelector(detailsError);
-  const show = useHostListSelector(showView);
+  const details = useHostSelector(detailsData);
+  const loading = useHostSelector(detailsLoading);
+  const error = useHostSelector(detailsError);
+  const show = useHostSelector(showView);
 
   const handleFlyoutClose = useCallback(() => {
     history.push(urlFromQueryParams(queryParamsWithoutSelectedHost));
@@ -64,7 +75,7 @@ export const HostDetailsFlyout = memo(() => {
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 data-test-subj="hostDetailsFlyoutTitle">
-            {details === undefined ? <EuiLoadingContent lines={1} /> : details.host.hostname}
+            {loading ? <EuiLoadingContent lines={1} /> : details?.host?.hostname}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -93,7 +104,10 @@ export const HostDetailsFlyout = memo(() => {
 const PolicyResponseFlyoutPanel = memo<{
   hostMeta: HostMetadata;
 }>(({ hostMeta }) => {
-  const { show, ...queryParams } = useHostListSelector(uiQueryParams);
+  const { show, ...queryParams } = useHostSelector(uiQueryParams);
+  const responseConfig = useHostSelector(policyResponseConfigurations);
+  const responseActionStatus = useHostSelector(policyResponseActions);
+  const responseAttentionCount = useHostSelector(policyResponseFailedOrWarningActionCount);
   const detailsUri = useMemo(
     () =>
       urlFromQueryParams({
@@ -118,18 +132,28 @@ const PolicyResponseFlyoutPanel = memo<{
       <FlyoutSubHeader
         backButton={backButtonProp}
         data-test-subj="hostDetailsPolicyResponseFlyoutHeader"
-      >
-        <EuiTitle size="xxs" data-test-subj="hostDetailsPolicyResponseFlyoutTitle">
-          <h3>
+      />
+      <EuiFlyoutBody data-test-subj="hostDetailsPolicyResponseFlyoutBody">
+        <EuiText data-test-subj="hostDetailsPolicyResponseFlyoutTitle">
+          <h4>
             <FormattedMessage
               id="xpack.endpoint.host.policyResponse.title"
               defaultMessage="Policy Response"
             />
-          </h3>
-        </EuiTitle>
-      </FlyoutSubHeader>
-      <EuiFlyoutBody data-test-subj="hostDetailsPolicyResponseFlyoutBody">
-        <PolicyResponse />
+          </h4>
+        </EuiText>
+        {responseConfig !== undefined && responseActionStatus !== undefined ? (
+          <PolicyResponse
+            responseConfig={responseConfig}
+            responseActionStatus={responseActionStatus}
+            responseAttentionCount={responseAttentionCount}
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.endpoint.hostDetails.noPolicyResponse"
+            defaultMessage="No Policy Response Available"
+          />
+        )}
       </EuiFlyoutBody>
     </>
   );

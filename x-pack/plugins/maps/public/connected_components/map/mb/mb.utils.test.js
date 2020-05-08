@@ -5,6 +5,7 @@
  */
 
 import { removeOrphanedSourcesAndLayers, syncLayerOrderForSingleLayer } from './utils';
+import { SPATIAL_FILTERS_LAYER_ID } from '../../../../common/constants';
 import _ from 'lodash';
 
 class MockMbMap {
@@ -121,7 +122,8 @@ function makeMultiSourceMockLayer(layerId) {
   );
 }
 
-describe('mb/utils', () => {
+describe('removeOrphanedSourcesAndLayers', () => {
+  const spatialFilterLayer = makeMultiSourceMockLayer(SPATIAL_FILTERS_LAYER_ID);
   test('should remove foo and bar layer', async () => {
     const bazLayer = makeSingleSourceMockLayer('baz');
     const fooLayer = makeSingleSourceMockLayer('foo');
@@ -133,7 +135,7 @@ describe('mb/utils', () => {
     const currentStyle = getMockStyle(currentLayerList);
     const mockMbMap = new MockMbMap(currentStyle);
 
-    removeOrphanedSourcesAndLayers(mockMbMap, nextLayerList);
+    removeOrphanedSourcesAndLayers(mockMbMap, nextLayerList, spatialFilterLayer);
     const removedStyle = mockMbMap.getStyle();
 
     const nextStyle = getMockStyle(nextLayerList);
@@ -151,7 +153,7 @@ describe('mb/utils', () => {
     const currentStyle = getMockStyle(currentLayerList);
     const mockMbMap = new MockMbMap(currentStyle);
 
-    removeOrphanedSourcesAndLayers(mockMbMap, nextLayerList);
+    removeOrphanedSourcesAndLayers(mockMbMap, nextLayerList, spatialFilterLayer);
     const removedStyle = mockMbMap.getStyle();
 
     const nextStyle = getMockStyle(nextLayerList);
@@ -169,13 +171,23 @@ describe('mb/utils', () => {
     const currentStyle = getMockStyle(currentLayerList);
     const mockMbMap = new MockMbMap(currentStyle);
 
-    removeOrphanedSourcesAndLayers(mockMbMap, nextLayerList);
+    removeOrphanedSourcesAndLayers(mockMbMap, nextLayerList, spatialFilterLayer);
     const removedStyle = mockMbMap.getStyle();
 
     const nextStyle = getMockStyle(nextLayerList);
     expect(removedStyle).toEqual(nextStyle);
   });
 
+  test('should not remove spatial filter layer and sources when spatialFilterLayer is provided', async () => {
+    const styleWithSpatialFilters = getMockStyle([spatialFilterLayer]);
+    const mockMbMap = new MockMbMap(styleWithSpatialFilters);
+
+    removeOrphanedSourcesAndLayers(mockMbMap, [], spatialFilterLayer);
+    expect(mockMbMap.getStyle()).toEqual(styleWithSpatialFilters);
+  });
+});
+
+describe('syncLayerOrderForSingleLayer', () => {
   test('should move bar layer in front of foo layer', async () => {
     const fooLayer = makeSingleSourceMockLayer('foo');
     const barLayer = makeSingleSourceMockLayer('bar');
@@ -244,42 +256,6 @@ describe('mb/utils', () => {
 
     const currentStyle = getMockStyle(currentLayerOrder);
     const mockMbMap = new MockMbMap(currentStyle);
-    syncLayerOrderForSingleLayer(mockMbMap, nextLayerListOrder);
-    const orderedStyle = mockMbMap.getStyle();
-
-    const nextStyle = getMockStyle(nextLayerListOrder);
-    expect(orderedStyle).toEqual(nextStyle);
-  });
-
-  test('should reorder foo and bar and remove baz', async () => {
-    const bazLayer = makeSingleSourceMockLayer('baz');
-    const fooLayer = makeSingleSourceMockLayer('foo');
-    const barLayer = makeSingleSourceMockLayer('bar');
-
-    const currentLayerOrder = [bazLayer, fooLayer, barLayer];
-    const nextLayerListOrder = [barLayer, fooLayer];
-
-    const currentStyle = getMockStyle(currentLayerOrder);
-    const mockMbMap = new MockMbMap(currentStyle);
-    removeOrphanedSourcesAndLayers(mockMbMap, nextLayerListOrder);
-    syncLayerOrderForSingleLayer(mockMbMap, nextLayerListOrder);
-    const orderedStyle = mockMbMap.getStyle();
-
-    const nextStyle = getMockStyle(nextLayerListOrder);
-    expect(orderedStyle).toEqual(nextStyle);
-  });
-
-  test('should reorder foo and bar and remove baz, when having multi-source multi-layer data', async () => {
-    const bazLayer = makeMultiSourceMockLayer('baz');
-    const fooLayer = makeSingleSourceMockLayer('foo');
-    const barLayer = makeMultiSourceMockLayer('bar');
-
-    const currentLayerOrder = [bazLayer, fooLayer, barLayer];
-    const nextLayerListOrder = [barLayer, fooLayer];
-
-    const currentStyle = getMockStyle(currentLayerOrder);
-    const mockMbMap = new MockMbMap(currentStyle);
-    removeOrphanedSourcesAndLayers(mockMbMap, nextLayerListOrder);
     syncLayerOrderForSingleLayer(mockMbMap, nextLayerListOrder);
     const orderedStyle = mockMbMap.getStyle();
 

@@ -17,7 +17,13 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  ApplicationStart,
+} from '../../../core/public';
 import { TypesService, TypesSetup, TypesStart } from './vis_types';
 import {
   setUISettings,
@@ -95,6 +101,7 @@ export interface VisualizationsStartDeps {
   expressions: ExpressionsStart;
   inspector: InspectorStart;
   uiActions: UiActionsStart;
+  application: ApplicationStart;
 }
 
 /**
@@ -131,7 +138,6 @@ export class VisualizationsPlugin
     expressions.registerRenderer(visualizationRenderer);
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
-
     const embeddableFactory = new VisualizeEmbeddableFactory({ start });
     embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
 

@@ -26,6 +26,7 @@ import { ExpressionLoader } from './loader';
 import { mount } from 'enzyme';
 import { EuiProgress } from '@elastic/eui';
 import { RenderErrorHandlerFnType } from './types';
+import { ExpressionRendererEvent } from './render';
 
 jest.mock('./loader', () => {
   return {
@@ -134,5 +135,45 @@ describe('ExpressionRenderer', () => {
     instance.update();
     expect(instance.find(EuiProgress)).toHaveLength(0);
     expect(instance.find('[data-test-subj="custom-error"]')).toHaveLength(0);
+  });
+
+  it('should fire onEvent prop on every events$ observable emission in loader', () => {
+    const dataSubject = new Subject();
+    const data$ = dataSubject.asObservable().pipe(share());
+    const renderSubject = new Subject();
+    const render$ = renderSubject.asObservable().pipe(share());
+    const loadingSubject = new Subject();
+    const loading$ = loadingSubject.asObservable().pipe(share());
+    const eventsSubject = new Subject<ExpressionRendererEvent>();
+    const events$ = eventsSubject.asObservable().pipe(share());
+
+    const onEvent = jest.fn();
+    const event: ExpressionRendererEvent = {
+      name: 'foo',
+      data: {
+        bar: 'baz',
+      },
+    };
+
+    (ExpressionLoader as jest.Mock).mockImplementation(() => {
+      return {
+        render$,
+        data$,
+        loading$,
+        events$,
+        update: jest.fn(),
+      };
+    });
+
+    mount(<ReactExpressionRenderer expression="" onEvent={onEvent} />);
+
+    expect(onEvent).toHaveBeenCalledTimes(0);
+
+    act(() => {
+      eventsSubject.next(event);
+    });
+
+    expect(onEvent).toHaveBeenCalledTimes(1);
+    expect(onEvent.mock.calls[0][0]).toBe(event);
   });
 });

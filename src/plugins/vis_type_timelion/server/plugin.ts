@@ -25,7 +25,7 @@ import {
   PluginInitializerContext,
   RecursiveReadonly,
 } from '../../../../src/core/server';
-import { deepFreeze } from '../../../../src/core/utils';
+import { deepFreeze } from '../../../../src/core/server';
 import { configSchema } from '../config';
 import loadFunctions from './lib/load_functions';
 import { functionsRoute } from './routes/functions';

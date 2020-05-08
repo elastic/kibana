@@ -5,15 +5,17 @@
  */
 import { LoggerFactory } from 'kibana/server';
 import { EndpointConfigType } from './config';
-import { IndexPatternRetriever } from './index_pattern';
-import { AgentService } from '../../ingest_manager/common/types';
+import { EndpointAppContextService } from './endpoint_app_context_services';
 
 /**
  * The context for Endpoint apps.
  */
 export interface EndpointAppContext {
-  indexPatternRetriever: IndexPatternRetriever;
-  agentService: AgentService;
   logFactory: LoggerFactory;
   config(): Promise<EndpointConfigType>;
+
+  /**
+   * Object readiness is tied to plugin start method
+   */
+  service: EndpointAppContextService;
 }

@@ -398,6 +398,8 @@
           '@types/good-squeeze',
           'inert',
           '@types/inert',
+          'accept',
+          '@types/accept',
         ],
       },
       {
@@ -770,6 +772,14 @@
         ],
       },
       {
+        groupSlug: 'pretty-ms',
+        groupName: 'pretty-ms related packages',
+        packageNames: [
+          'pretty-ms',
+          '@types/pretty-ms',
+        ],
+      },
+      {
         groupSlug: 'proper-lockfile',
         groupName: 'proper-lockfile related packages',
         packageNames: [
@@ -847,11 +857,27 @@
         ],
       },
       {
+        groupSlug: 'set-value',
+        groupName: 'set-value related packages',
+        packageNames: [
+          'set-value',
+          '@types/set-value',
+        ],
+      },
+      {
         groupSlug: 'sinon',
         groupName: 'sinon related packages',
         packageNames: [
           'sinon',
           '@types/sinon',
+        ],
+      },
+      {
+        groupSlug: 'stats-lite',
+        groupName: 'stats-lite related packages',
+        packageNames: [
+          'stats-lite',
+          '@types/stats-lite',
         ],
       },
       {

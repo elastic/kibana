@@ -49,6 +49,7 @@
     "GetCategoryExamples",
     "GetPartitionFieldsValues",
 
+    "Modules",
     "DataRecognizer",
     "RecognizeIndex",
     "GetModule",
@@ -100,7 +101,7 @@
 
     "SystemRoutes",
     "HasPrivileges",
-    "MlCapabilities",
+    "MlCapabilitiesResponse",
     "MlNodeCount",
     "MlInfo",
     "MlEsSearch",

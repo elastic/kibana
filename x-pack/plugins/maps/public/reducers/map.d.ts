@@ -15,6 +15,7 @@ import {
   MapRefreshConfig,
   TooltipState,
 } from '../../common/descriptor_types';
+import { INITIAL_LOCATION } from '../../common/constants';
 import { Filter, TimeRange } from '../../../../../src/plugins/data/public';
 
 export type MapContext = {
@@ -40,8 +41,21 @@ export type MapContext = {
 };
 
 export type MapSettings = {
+  initialLocation: INITIAL_LOCATION;
+  fixedLocation: {
+    lat: number;
+    lon: number;
+    zoom: number;
+  };
+  browserLocation: {
+    zoom: number;
+  };
   maxZoom: number;
   minZoom: number;
+  showSpatialFilters: boolean;
+  spatialFiltersAlpa: number;
+  spatialFiltersFillColor: string;
+  spatialFiltersLineColor: string;
 };
 
 export type MapState = {

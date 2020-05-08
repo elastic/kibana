@@ -29,8 +29,6 @@
 
 import { isFunction, defaults, cloneDeep } from 'lodash';
 import { PersistedState } from './persisted_state';
-// @ts-ignore
-import { updateVisualizationConfig } from './legacy/vis_update';
 import { getTypes, getAggs } from './services';
 import { VisType } from './vis_types';
 import {
@@ -120,9 +118,6 @@ export class Vis {
     if (state.params || typeChanged) {
       this.params = this.getParams(state.params);
     }
-
-    // move to migration script
-    updateVisualizationConfig(state.params, this.params);
 
     if (state.data && state.data.searchSource) {
       this.data.searchSource = state.data.searchSource!;
