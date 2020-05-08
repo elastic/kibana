@@ -17,9 +17,11 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../core/public';
-import { RegionMapPlugin as Plugin } from './plugin';
+const COMMA_SEPARATOR_RE = /(\d)(?=(\d{3})+(?!\d))/g;
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new Plugin(initializerContext);
-}
+/**
+ * Converts a number to a string and adds commas
+ * as thousands separators
+ */
+export const formatNumWithCommas = (input: number) =>
+  String(input).replace(COMMA_SEPARATOR_RE, '$1,');

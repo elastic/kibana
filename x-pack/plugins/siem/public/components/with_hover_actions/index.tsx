@@ -6,7 +6,16 @@
 
 import { EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import styled from 'styled-components';
+
 import { IS_DRAGGING_CLASS_NAME } from '../drag_and_drop/helpers';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const WithHoverActionsPopover = (styled(EuiPopover as any)`
+  .euiPopover__anchor {
+    width: 100%;
+  }
+` as unknown) as typeof EuiPopover;
 
 interface Props {
   /**
@@ -59,7 +68,7 @@ export const WithHoverActions = React.memo<Props>(
 
     const popover = useMemo(() => {
       return (
-        <EuiPopover
+        <WithHoverActionsPopover
           anchorPosition={'downCenter'}
           button={content}
           closePopover={onMouseLeave}
@@ -68,7 +77,7 @@ export const WithHoverActions = React.memo<Props>(
           panelPaddingSize={!alwaysShow ? 's' : 'none'}
         >
           {isOpen ? hoverContent : null}
-        </EuiPopover>
+        </WithHoverActionsPopover>
       );
     }, [content, onMouseLeave, isOpen, alwaysShow, hoverContent]);
 

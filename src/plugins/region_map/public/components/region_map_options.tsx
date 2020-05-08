@@ -22,17 +22,9 @@ import { EuiIcon, EuiLink, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elast
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
-import {
-  FileLayerField,
-  VectorLayer,
-  IServiceSettings,
-} from '../../../../../plugins/maps_legacy/public';
-import {
-  NumberInputOption,
-  SelectOption,
-  SwitchOption,
-} from '../../../../../plugins/charts/public';
-import { RegionMapVisParams, WmsOptions } from '../../../../../plugins/maps_legacy/public';
+import { FileLayerField, VectorLayer, IServiceSettings } from '../../../maps_legacy/public';
+import { NumberInputOption, SelectOption, SwitchOption } from '../../../charts/public';
+import { RegionMapVisParams, WmsOptions } from '../../../maps_legacy/public';
 
 const mapLayerForOption = ({ layerId, name }: VectorLayer) => ({
   text: name,
