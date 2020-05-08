@@ -1,4 +1,14 @@
+/* Workaround for EuiDataGrid within a Flex Layout */
+.mlDataFrameAnalyticsClassification {
+  width: calc(100% - 0px);
+}
+
+.mlDataFrameAnalyticsClassification__confusionMatrix {
+  padding: 0 5%;
+}
+
 .mlDataFrameAnalyticsClassification__actualLabel {
+  min-width: 70px;
   padding-top: $euiSize * 4.2;
 }
 

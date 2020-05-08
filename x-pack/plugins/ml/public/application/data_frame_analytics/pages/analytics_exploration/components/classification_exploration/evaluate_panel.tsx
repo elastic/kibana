@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './_classification_exploration.scss';
+
 import React, { FC, useState, useEffect, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -44,8 +46,6 @@ import {
   MAX_COLUMNS,
   getTrailingControlColumns,
 } from './column_data';
-
-const defaultPanelWidth = 500;
 
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
@@ -103,7 +103,6 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   const [docsCount, setDocsCount] = useState<null | number>(null);
   const [error, setError] = useState<null | string>(null);
   const [dataSubsetTitle, setDataSubsetTitle] = useState<SUBSET_TITLE>(SUBSET_TITLE.ENTIRE);
-  const [panelWidth, setPanelWidth] = useState<number>(defaultPanelWidth);
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState(() =>
     columns.map(({ id }: { id: string }) => id)
@@ -166,24 +165,6 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       setDocsCount(null);
     }
   };
-
-  const resizeHandler = () => {
-    const tablePanelWidth: number =
-      document.getElementById('mlDataFrameAnalyticsTableResultsPanel')?.clientWidth ||
-      defaultPanelWidth;
-    // Keep the evaluate panel width slightly smaller than the results table
-    // to ensure results table can resize correctly. Temporary workaround DataGrid issue with flex
-    const newWidth = tablePanelWidth - 8;
-    setPanelWidth(newWidth);
-  };
-
-  useEffect(() => {
-    window.addEventListener('resize', resizeHandler);
-    resizeHandler();
-    return () => {
-      window.removeEventListener('resize', resizeHandler);
-    };
-  }, []);
 
   useEffect(() => {
     if (confusionMatrixData.length > 0) {
@@ -309,7 +290,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   return (
     <EuiPanel
       data-test-subj="mlDFAnalyticsClassificationExplorationEvaluatePanel"
-      style={{ width: `${panelWidth}px` }}
+      className="mlDataFrameAnalyticsClassification"
     >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
@@ -392,13 +373,15 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
             )}
             {/* BEGIN TABLE ELEMENTS */}
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" style={{ paddingLeft: '5%', paddingRight: '5%' }}>
-                <EuiFlexItem grow={false} style={{ minWidth: '70px' }}>
-                  <EuiText
-                    size="xs"
-                    color="subdued"
-                    className="mlDataFrameAnalyticsClassification__actualLabel"
-                  >
+              <EuiFlexGroup
+                gutterSize="s"
+                className="mlDataFrameAnalyticsClassification__confusionMatrix"
+              >
+                <EuiFlexItem
+                  grow={false}
+                  className="mlDataFrameAnalyticsClassification__actualLabel"
+                >
+                  <EuiText size="xs" color="subdued">
                     <FormattedMessage
                       id="xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixActualLabel"
                       defaultMessage="Actual label"
