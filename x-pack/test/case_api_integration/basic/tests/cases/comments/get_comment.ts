@@ -27,8 +27,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
-        .expect(200);
+        .send(postCaseReq);
 
       const { body: patchedCase } = await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
@@ -38,7 +37,8 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: comment } = await supertest
         .get(`${CASES_URL}/${postedCase.id}/comments/${patchedCase.comments[0].id}`)
         .set('kbn-xsrf', 'true')
-        .send();
+        .send()
+        .expect(200);
 
       expect(comment).to.eql(patchedCase.comments[0]);
     });

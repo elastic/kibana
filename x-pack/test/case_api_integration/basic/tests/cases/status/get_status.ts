@@ -26,7 +26,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
         .send(postCaseReq);
-      const { body: b } = await supertest
+      const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
         .send(postCaseReq);
@@ -36,8 +36,8 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({
           cases: [
             {
-              id: b.id,
-              version: b.version,
+              id: postedCase.id,
+              version: postedCase.version,
               status: 'closed',
             },
           ],

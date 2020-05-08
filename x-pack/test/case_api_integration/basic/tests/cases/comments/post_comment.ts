@@ -30,12 +30,12 @@ export default ({ getService }: FtrProviderContext): void => {
         .send(postCaseReq)
         .expect(200);
 
-      const { body: c } = await supertest
+      const { body: patchedCase } = await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
         .send(postCommentReq);
-      expect(c.comments[0].comment).to.eql(postCommentReq.comment);
-      expect(c.updated_by).to.eql(defaultUser);
+      expect(patchedCase.comments[0].comment).to.eql(postCommentReq.comment);
+      expect(patchedCase.updated_by).to.eql(defaultUser);
     });
   });
 };

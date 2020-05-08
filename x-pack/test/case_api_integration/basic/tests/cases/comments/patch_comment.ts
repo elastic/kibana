@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../../plugins/case/common/constants';
-import { postCaseReq, postCommentReq } from '../../../../common/lib/mock';
+import { defaultUser, postCaseReq, postCommentReq } from '../../../../common/lib/mock';
 import { deleteCases, deleteCasesUserActions, deleteComments } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -30,20 +30,21 @@ export default ({ getService }: FtrProviderContext): void => {
         .send(postCaseReq)
         .expect(200);
 
-      const { body: c } = await supertest
+      const { body: patchedCase } = await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
         .send(postCommentReq);
       const newComment = 'Well I decided to update my comment. So what? Deal with it.';
-      const { body: patchedCase } = await supertest
+      const { body } = await supertest
         .patch(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
         .send({
-          id: c.comments[0].id,
-          version: c.comments[0].version,
+          id: patchedCase.comments[0].id,
+          version: patchedCase.comments[0].version,
           comment: newComment,
         });
-      expect(patchedCase.comments[0].comment).to.eql(newComment);
+      expect(body.comments[0].comment).to.eql(newComment);
+      expect(body.updated_by).to.eql(defaultUser);
     });
   });
 };

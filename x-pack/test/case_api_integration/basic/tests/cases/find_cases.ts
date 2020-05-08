@@ -63,7 +63,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
         .send(postCaseReq);
-      const { body: b } = await supertest
+      const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
         .send({ ...postCaseReq, tags: ['unique'] });
@@ -76,28 +76,24 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body).to.eql({
         ...findCasesResp,
         total: 1,
-        cases: [b],
+        cases: [postedCase],
         count_open_cases: 1,
       });
     });
 
     it('correctly counts comments', async () => {
-      const { body: a } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(postCaseReq);
-      const { body: b } = await supertest
+      const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
         .send(postCaseReq);
 
       // post 2 comments
       await supertest
-        .post(`${CASES_URL}/${b.id}/comments`)
+        .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
         .send(postCommentReq);
-      const { body: c } = await supertest
-        .post(`${CASES_URL}/${b.id}/comments`)
+      const { body: patchedCase } = await supertest
+        .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
         .send(postCommentReq);
       const { body } = await supertest
@@ -110,9 +106,8 @@ export default ({ getService }: FtrProviderContext): void => {
         ...findCasesResp,
         total: 2,
         cases: [
-          a,
           {
-            ...c,
+            ...patchedCase,
             comments: [],
             totalComment: 2,
           },
@@ -126,7 +121,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
         .send(postCaseReq);
-      const { body: b } = await supertest
+      const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
         .send(postCaseReq);
@@ -136,8 +131,8 @@ export default ({ getService }: FtrProviderContext): void => {
         .send({
           cases: [
             {
-              id: b.id,
-              version: b.version,
+              id: postedCase.id,
+              version: postedCase.version,
               status: 'closed',
             },
           ],
