@@ -12,7 +12,6 @@ import {
   EuiDataGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiIconTip,
   EuiPanel,
   EuiSpacer,
@@ -394,36 +393,31 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
             {/* BEGIN TABLE ELEMENTS */}
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" style={{ paddingLeft: '5%', paddingRight: '5%' }}>
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow
+                <EuiFlexItem grow={false} style={{ minWidth: '70px' }}>
+                  <EuiText
+                    size="xs"
+                    color="subdued"
                     className="mlDataFrameAnalyticsClassification__actualLabel"
-                    helpText={i18n.translate(
-                      'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixActualLabel',
-                      {
-                        defaultMessage: 'Actual label',
-                      }
-                    )}
                   >
-                    <Fragment />
-                  </EuiFormRow>
+                    <FormattedMessage
+                      id="xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixActualLabel"
+                      defaultMessage="Actual label"
+                    />
+                  </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   {columns.length > 0 && columnsData.length > 0 && (
                     <Fragment>
                       <EuiFlexGroup direction="column" justifyContent="center" gutterSize="s">
                         <EuiFlexItem grow={false}>
-                          <EuiFormRow
-                            helpText={i18n.translate(
-                              'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixPredictedLabel',
-                              {
-                                defaultMessage: 'Predicted label',
-                              }
-                            )}
-                          >
-                            <Fragment />
-                          </EuiFormRow>
+                          <EuiText size="xs" color="subdued">
+                            <FormattedMessage
+                              id="xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixPredictedLabel"
+                              defaultMessage="Predicted label"
+                            />
+                          </EuiText>
                         </EuiFlexItem>
-                        <EuiFlexItem grow={false} style={{ width: '90%' }}>
+                        <EuiFlexItem className="mlDataFrameAnalyticsClassification__dataGridMinWidth">
                           <EuiDataGrid
                             data-test-subj="mlDFAnalyticsClassificationExplorationConfusionMatrix"
                             aria-label={i18n.translate(

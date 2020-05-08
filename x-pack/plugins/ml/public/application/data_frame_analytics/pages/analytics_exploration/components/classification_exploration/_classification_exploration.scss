@@ -1,4 +1,9 @@
-.euiFormRow.mlDataFrameAnalyticsClassification__actualLabel {
-  padding-top: $euiSize * 4;
+.mlDataFrameAnalyticsClassification__actualLabel {
+  padding-top: $euiSize * 4.2;
 }
 
+/* EuiDataGrid needs a minWidth of 480px, otherwise the columns options will disappear if you hide all columns. */
+.mlDataFrameAnalyticsClassification__dataGridMinWidth {
+  min-width: 480px;
+  width: 90%;
+}
