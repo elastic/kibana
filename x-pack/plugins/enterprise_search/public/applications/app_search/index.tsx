@@ -17,10 +17,10 @@ export const AppSearch: React.FC<> = () => {
 
   return (
     <>
-      <Route exact path="/app_search">
-        {!enterpriseSearchUrl ? <Redirect to="/app_search/setup_guide" /> : <EngineOverview />}
+      <Route exact path="/">
+        {!enterpriseSearchUrl ? <Redirect to="/setup_guide" /> : <EngineOverview />}
       </Route>
-      <Route path="/app_search/setup_guide">
+      <Route path="/setup_guide">
         <SetupGuide />
       </Route>
     </>

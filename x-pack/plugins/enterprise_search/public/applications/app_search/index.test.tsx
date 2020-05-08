@@ -16,7 +16,7 @@ import { EngineOverview } from './components/engine_overview';
 import { AppSearch } from './';
 
 describe('App Search Routes', () => {
-  describe('/app_search', () => {
+  describe('/', () => {
     it('redirects to Setup Guide when enterpriseSearchUrl is not set', () => {
       useContext.mockImplementationOnce(() => ({ enterpriseSearchUrl: '' }));
       const wrapper = shallow(<AppSearch />);
@@ -34,7 +34,7 @@ describe('App Search Routes', () => {
     });
   });
 
-  describe('/app_search/setup_guide', () => {
+  describe('/setup_guide', () => {
     it('renders', () => {
       const wrapper = shallow(<AppSearch />);
 

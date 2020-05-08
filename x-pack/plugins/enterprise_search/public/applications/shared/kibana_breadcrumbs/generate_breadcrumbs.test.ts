@@ -47,90 +47,12 @@ describe('generateBreadcrumb', () => {
 
     expect(mockHistory.push).not.toHaveBeenCalled();
   });
-});
 
-describe('appSearchBreadcrumbs', () => {
-  const breadCrumbs = [
-    {
-      text: 'Page 1',
-      path: '/page1',
-    },
-    {
-      text: 'Page 2',
-      path: '/page2',
-    },
-  ];
+  it('does not generate link behavior if path is excluded', () => {
+    const breadcrumb = generateBreadcrumb({ text: 'Unclickable breadcrumb' });
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  const subject = () => appSearchBreadcrumbs(mockHistory)(breadCrumbs);
-
-  it('Builds a chain of breadcrumbs with Enterprise Search and App Search at the root', () => {
-    expect(subject()).toEqual([
-      {
-        href: '/enterprise_search/',
-        onClick: expect.any(Function),
-        text: 'Enterprise Search',
-      },
-      {
-        href: '/enterprise_search/app_search',
-        onClick: expect.any(Function),
-        text: 'App Search',
-      },
-      {
-        href: '/enterprise_search/page1',
-        onClick: expect.any(Function),
-        text: 'Page 1',
-      },
-      {
-        href: '/enterprise_search/page2',
-        onClick: expect.any(Function),
-        text: 'Page 2',
-      },
-    ]);
-  });
-
-  it('shows just the root if breadcrumbs is empty', () => {
-    expect(appSearchBreadcrumbs(mockHistory)()).toEqual([
-      {
-        href: '/enterprise_search/',
-        onClick: expect.any(Function),
-        text: 'Enterprise Search',
-      },
-      {
-        href: '/enterprise_search/app_search',
-        onClick: expect.any(Function),
-        text: 'App Search',
-      },
-    ]);
-  });
-
-  describe('links', () => {
-    const eventMock = {
-      preventDefault: jest.fn(),
-    };
-
-    it('has a link to Enterprise Search Home page first', () => {
-      subject()[0].onClick(eventMock);
-      expect(mockHistory.push).toHaveBeenCalledWith('/');
-    });
-
-    it('has a link to App Search second', () => {
-      subject()[1].onClick(eventMock);
-      expect(mockHistory.push).toHaveBeenCalledWith('/app_search');
-    });
-
-    it('has a link to page 1 third', () => {
-      subject()[2].onClick(eventMock);
-      expect(mockHistory.push).toHaveBeenCalledWith('/page1');
-    });
-
-    it('has a link to page 2 last', () => {
-      subject()[3].onClick(eventMock);
-      expect(mockHistory.push).toHaveBeenCalledWith('/page2');
-    });
+    expect(breadcrumb.href).toBeUndefined();
+    expect(breadcrumb.onClick).toBeUndefined();
   });
 });
 
@@ -155,8 +77,6 @@ describe('enterpriseSearchBreadcrumbs', () => {
   it('Builds a chain of breadcrumbs with Enterprise Search at the root', () => {
     expect(subject()).toEqual([
       {
-        href: '/enterprise_search/',
-        onClick: expect.any(Function),
         text: 'Enterprise Search',
       },
       {
@@ -175,8 +95,6 @@ describe('enterpriseSearchBreadcrumbs', () => {
   it('shows just the root if breadcrumbs is empty', () => {
     expect(enterpriseSearchBreadcrumbs(mockHistory)()).toEqual([
       {
-        href: '/enterprise_search/',
-        onClick: expect.any(Function),
         text: 'Enterprise Search',
       },
     ]);
@@ -187,9 +105,8 @@ describe('enterpriseSearchBreadcrumbs', () => {
       preventDefault: jest.fn(),
     };
 
-    it('has a link to Enterprise Search Home page first', () => {
-      subject()[0].onClick(eventMock);
-      expect(mockHistory.push).toHaveBeenCalledWith('/');
+    it('has Enterprise Search text first', () => {
+      expect(subject()[0].onClick).toBeUndefined();
     });
 
     it('has a link to page 1 second', () => {
@@ -199,6 +116,89 @@ describe('enterpriseSearchBreadcrumbs', () => {
 
     it('has a link to page 2 last', () => {
       subject()[2].onClick(eventMock);
+      expect(mockHistory.push).toHaveBeenCalledWith('/page2');
+    });
+  });
+});
+
+describe('appSearchBreadcrumbs', () => {
+  const breadCrumbs = [
+    {
+      text: 'Page 1',
+      path: '/page1',
+    },
+    {
+      text: 'Page 2',
+      path: '/page2',
+    },
+  ];
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockHistory.createHref.mockImplementation(
+      ({ pathname }) => `/enterprise_search/app_search${pathname}`
+    );
+  });
+
+  const subject = () => appSearchBreadcrumbs(mockHistory)(breadCrumbs);
+
+  it('Builds a chain of breadcrumbs with Enterprise Search and App Search at the root', () => {
+    expect(subject()).toEqual([
+      {
+        text: 'Enterprise Search',
+      },
+      {
+        href: '/enterprise_search/app_search/',
+        onClick: expect.any(Function),
+        text: 'App Search',
+      },
+      {
+        href: '/enterprise_search/app_search/page1',
+        onClick: expect.any(Function),
+        text: 'Page 1',
+      },
+      {
+        href: '/enterprise_search/app_search/page2',
+        onClick: expect.any(Function),
+        text: 'Page 2',
+      },
+    ]);
+  });
+
+  it('shows just the root if breadcrumbs is empty', () => {
+    expect(appSearchBreadcrumbs(mockHistory)()).toEqual([
+      {
+        text: 'Enterprise Search',
+      },
+      {
+        href: '/enterprise_search/app_search/',
+        onClick: expect.any(Function),
+        text: 'App Search',
+      },
+    ]);
+  });
+
+  describe('links', () => {
+    const eventMock = {
+      preventDefault: jest.fn(),
+    };
+
+    it('has Enterprise Search text first', () => {
+      expect(subject()[0].onClick).toBeUndefined();
+    });
+
+    it('has a link to App Search second', () => {
+      subject()[1].onClick(eventMock);
+      expect(mockHistory.push).toHaveBeenCalledWith('/');
+    });
+
+    it('has a link to page 1 third', () => {
+      subject()[2].onClick(eventMock);
+      expect(mockHistory.push).toHaveBeenCalledWith('/page1');
+    });
+
+    it('has a link to page 2 last', () => {
+      subject()[3].onClick(eventMock);
       expect(mockHistory.push).toHaveBeenCalledWith('/page2');
     });
   });

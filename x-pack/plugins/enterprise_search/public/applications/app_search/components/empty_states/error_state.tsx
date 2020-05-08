@@ -44,7 +44,7 @@ export const ErrorState: ReactFC<> = () => {
               </>
             }
             actions={
-              <EuiButton iconType="help" fill to="/app_search/setup_guide">
+              <EuiButton iconType="help" fill to="/setup_guide">
                 Review the setup guide
               </EuiButton>
             }

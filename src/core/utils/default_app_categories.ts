@@ -29,20 +29,28 @@ export const DEFAULT_APP_CATEGORIES = Object.freeze({
     euiIconType: 'logoKibana',
     order: 1000,
   },
+  enterpriseSearch: {
+    id: 'enterpriseSearch',
+    label: i18n.translate('core.ui.enterpriseSearchNavList.label', {
+      defaultMessage: 'Enterprise Search',
+    }),
+    order: 2000,
+    euiIconType: 'logoEnterpriseSearch',
+  },
   observability: {
     id: 'observability',
     label: i18n.translate('core.ui.observabilityNavList.label', {
       defaultMessage: 'Observability',
     }),
     euiIconType: 'logoObservability',
-    order: 2000,
+    order: 3000,
   },
   security: {
     id: 'security',
     label: i18n.translate('core.ui.securityNavList.label', {
       defaultMessage: 'Security',
     }),
-    order: 3000,
+    order: 4000,
     euiIconType: 'logoSecurity',
   },
   management: {
