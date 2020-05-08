@@ -18,9 +18,7 @@
  */
 
 module.exports = function (grunt) {
-  grunt.registerTask('jenkins:docs', [
-    'docker:docs'
-  ]);
+  grunt.registerTask('jenkins:docs', ['docker:docs']);
 
   grunt.registerTask('jenkins:unit', [
     'run:eslint',
@@ -28,7 +26,6 @@ module.exports = function (grunt) {
     'run:checkFileCasing',
     'licenses',
     'verifyDependencyVersions',
-    'run:verifyNotice',
     'test:server',
     'test:jest',
     'test:jest_integration',
@@ -38,8 +35,5 @@ module.exports = function (grunt) {
     'verifyTranslations',
   ]);
 
-  grunt.registerTask('jenkins:selenium', [
-    'checkPlugins',
-    'run:functionalTestsRelease',
-  ]);
+  grunt.registerTask('jenkins:selenium', ['checkPlugins', 'run:functionalTestsRelease']);
 };
