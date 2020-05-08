@@ -9,7 +9,6 @@ import { Route, Router } from 'react-router-dom';
 import { Store } from 'redux';
 import { useSelector, Provider } from 'react-redux';
 import { AppMountParameters } from 'kibana/public';
-import { HeaderNavigation } from './components/header_navigation';
 import { Setup } from './setup';
 import { EndpointPluginStartDependencies } from '../../../plugin';
 import { CoreStart } from '../../../../../../../src/core/public';
@@ -32,16 +31,6 @@ const Routes: React.FunctionComponent<{ subplugins: EndpointAppSubplugins }> = R
 
     return (
       <>
-        <HeaderNavigation />
-        <Route
-          exact
-          path="/"
-          render={() => (
-            <h1 data-test-subj="welcomeTitle">
-              <FormattedMessage id="xpack.endpoint.welcomeTitle" defaultMessage="Hello World" />
-            </h1>
-          )}
-        />
         <hosts.SelectorContextProvider value={hostsState}>
           <hosts.Routes />
         </hosts.SelectorContextProvider>
