@@ -89,7 +89,7 @@ interface ResolverSubmenuOption {
   action: () => unknown;
   prefix?: number | JSX.Element;
 }
-type ResolverSubmenuOptionList = ResolverSubmenuOption[];
+type ResolverSubmenuOptionList = ResolverSubmenuOption[] | symbol;
 
 const OptionList = React.memo(
   ({
@@ -99,20 +99,23 @@ const OptionList = React.memo(
     subMenuOptions: ResolverSubmenuOptionList;
     isLoading: boolean;
   }) => {
-    const selectableOptions = subMenuOptions.map((opt: ResolverSubmenuOption): {
-      label: string;
-      prepend?: ReactNode;
-    } => {
-      return opt.prefix
-        ? {
-            label: opt.optionTitle,
-            prepend: <span>{opt.prefix}</span>,
-          }
-        : {
-            label: opt.optionTitle,
-            prepend: <span />,
-          };
-    });
+    const selectableOptions =
+      typeof subMenuOptions === 'symbol'
+        ? []
+        : subMenuOptions.map((opt: ResolverSubmenuOption): {
+            label: string;
+            prepend?: ReactNode;
+          } => {
+            return opt.prefix
+              ? {
+                  label: opt.optionTitle,
+                  prepend: <span>{opt.prefix}</span>,
+                }
+              : {
+                  label: opt.optionTitle,
+                  prepend: <span />,
+                };
+          });
     const [options, setOptions] = useState(selectableOptions);
     return useMemo(
       () => (
