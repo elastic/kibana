@@ -82,6 +82,11 @@ interface GlobalSearchProviderFindOptions {
    * this can (and should) be used to cancel any pending asynchronous task and complete the result observable.
    */
   aborted$: Observable<void>;
+  /**
+   * The total maximum number of results (including all batches / emissions) that should be returned by the provider for a given `find` request.
+   * Any result emitted exceeding this quota will be ignored by the service and not emitted to the consumer. 
+   */
+  maxResults: number;
 }
 
 /**
