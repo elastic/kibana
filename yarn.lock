@@ -13727,10 +13727,10 @@ less-loader@4.1.0:
     loader-utils "^1.1.0"
     pify "^3.0.0"
 
-less@2.7.1:
-  version "2.7.1"
-  resolved "https://registry.yarnpkg.com/less/-/less-2.7.1.tgz#6cbfea22b3b830304e9a5fb371d54fa480c9d7cf"
-  integrity sha1-bL/qIrO4MDBOml+zcdVPpIDJ188=
+"less@npm:@elastic/less@2.7.3-kibana":
+  version "2.7.3-kibana"
+  resolved "https://registry.yarnpkg.com/@elastic/less/-/less-2.7.3-kibana.tgz#3de5e0b06bb095b1cc1149043d67f8dc36272d23"
+  integrity sha512-Okm31ZKE28/m3bH0h0mNpQH0zqVWNFqRKDlsBd1AYHGdM1yBq4mzeO6IRUykB81XDGlqL0m4ThSA7mc3hy+LVg==
   optionalDependencies:
     errno "^0.1.1"
     graceful-fs "^4.1.2"
@@ -13738,6 +13738,7 @@ less@2.7.1:
     mime "^1.2.11"
     mkdirp "^0.5.0"
     promise "^7.1.1"
+    request "2.81.0"
     source-map "^0.5.3"
 
 leven@^2.1.0:
