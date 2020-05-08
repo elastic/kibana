@@ -8,7 +8,7 @@ import { SavedObjectsType } from '../../../../../../src/core/server';
 
 export const pinnedEventSavedObjectType = 'siem-ui-timeline-pinned-event';
 
-export const pinnedEventSavedObjectMappings = {
+export const pinnedEventSavedObjectMappings: SavedObjectsType['mappings'] = {
   properties: {
     timelineId: {
       type: 'keyword',

@@ -18,9 +18,9 @@ Name::      The name of the connector. The name is used to identify a  connector
 
 [source,text]
 --
- id: 'my-server-log'
- name: test
- actionTypeId: .server-log
+ my-server-log:
+   name: test
+   actionTypeId: .server-log
 --
 
 [float]

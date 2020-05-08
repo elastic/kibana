@@ -34,7 +34,7 @@
     "kibana_utils": "src/plugins/kibana_utils",
     "navigation": "src/plugins/navigation",
     "newsfeed": "src/plugins/newsfeed",
-    "regionMap": "src/legacy/core_plugins/region_map",
+    "regionMap": "src/plugins/region_map",
     "savedObjects": "src/plugins/saved_objects",
     "savedObjectsManagement": "src/plugins/saved_objects_management",
     "server": "src/legacy/server",
