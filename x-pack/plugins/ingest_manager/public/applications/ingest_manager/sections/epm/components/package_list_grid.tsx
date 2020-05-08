@@ -89,7 +89,6 @@ export function PackageListGrid({
           onChange={onQueryChange}
         />
         <EuiSpacer />
-        {}
         {gridContent}
       </EuiFlexItem>
     </EuiFlexGroup>
