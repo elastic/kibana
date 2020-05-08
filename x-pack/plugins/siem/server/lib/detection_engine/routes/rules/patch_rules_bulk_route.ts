@@ -36,10 +36,9 @@ export const patchRulesBulkRoute = (router: IRouter) => {
       const siemResponse = buildSiemResponse(response);
 
       const alertsClient = context.alerting?.getAlertsClient();
-      const actionsClient = context.actions?.getActionsClient();
       const savedObjectsClient = context.core.savedObjects.client;
 
-      if (!actionsClient || !alertsClient) {
+      if (!alertsClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
@@ -87,7 +86,6 @@ export const patchRulesBulkRoute = (router: IRouter) => {
 
             const rule = await patchRules({
               alertsClient,
-              actionsClient,
               description,
               enabled,
               falsePositives,

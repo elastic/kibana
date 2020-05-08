@@ -2,11 +2,7 @@
 
 exports[`Flyout conflicts should allow conflict resolution 1`] = `
 <EuiFlyout
-  closeButtonAriaLabel="Closes this dialog"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[MockFunction]}
-  ownFocus={false}
   size="s"
 >
   <EuiFlyoutHeader
@@ -321,11 +317,7 @@ exports[`Flyout errors should display unsupported type errors properly 1`] = `
 
 exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
 <EuiFlyout
-  closeButtonAriaLabel="Closes this dialog"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[MockFunction]}
-  ownFocus={false}
   size="s"
 >
   <EuiFlyoutHeader
@@ -586,11 +578,7 @@ Array [
 
 exports[`Flyout should render import step 1`] = `
 <EuiFlyout
-  closeButtonAriaLabel="Closes this dialog"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[MockFunction]}
-  ownFocus={false}
   size="s"
 >
   <EuiFlyoutHeader

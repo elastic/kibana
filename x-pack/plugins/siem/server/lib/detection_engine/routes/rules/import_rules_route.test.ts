@@ -60,7 +60,7 @@ describe('import_rules_route', () => {
     importRulesRoute(server.router, config);
   });
 
-  describe('status codes with actionsClient and alertClient', () => {
+  describe('status codes', () => {
     test('returns 200 when importing a single rule with a valid actionClient and alertClient', async () => {
       const response = await server.inject(request, context);
 
@@ -69,13 +69,6 @@ describe('import_rules_route', () => {
 
     test('returns 404 if alertClient is not available on the route', async () => {
       context.alerting!.getAlertsClient = jest.fn();
-      const response = await server.inject(request, context);
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
-    });
-
-    test('returns 404 if actionsClient is not available on the route', async () => {
-      context.actions!.getActionsClient = jest.fn();
       const response = await server.inject(request, context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
@@ -129,20 +122,11 @@ describe('import_rules_route', () => {
       clients.siemClient.getSignalsIndex.mockReturnValue('mockSignalsIndex');
       clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
       const response = await server.inject(request, context);
-      expect(response.status).toEqual(200);
+      expect(response.status).toEqual(400);
       expect(response.body).toEqual({
-        errors: [
-          {
-            error: {
-              message:
-                'To create a rule, the index must exist first. Index mockSignalsIndex does not exist',
-              status_code: 409,
-            },
-            rule_id: 'rule-1',
-          },
-        ],
-        success: false,
-        success_count: 0,
+        message:
+          'To create a rule, the index must exist first. Index mockSignalsIndex does not exist',
+        status_code: 400,
       });
     });
 
@@ -152,19 +136,10 @@ describe('import_rules_route', () => {
       });
 
       const response = await server.inject(request, context);
-      expect(response.status).toEqual(200);
+      expect(response.status).toEqual(500);
       expect(response.body).toEqual({
-        errors: [
-          {
-            error: {
-              message: 'Test error',
-              status_code: 400,
-            },
-            rule_id: 'rule-1',
-          },
-        ],
-        success: false,
-        success_count: 0,
+        message: 'Test error',
+        status_code: 500,
       });
     });
 

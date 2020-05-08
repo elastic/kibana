@@ -92,7 +92,15 @@ describe('monitoring plugin deprecations', function() {
       expect(log.called).to.be(true);
     });
 
-    it('does not log a warning if elasticsearch.username is set to something besides "elastic"', () => {
+    it('logs a warning if elasticsearch.username is set to "kibana"', () => {
+      const settings = { elasticsearch: { username: 'kibana' } };
+
+      const log = sinon.spy();
+      transformDeprecations(settings, fromPath, log);
+      expect(log.called).to.be(true);
+    });
+
+    it('does not log a warning if elasticsearch.username is set to something besides "elastic" or "kibana"', () => {
       const settings = { elasticsearch: { username: 'otheruser' } };
 
       const log = sinon.spy();
