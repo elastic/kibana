@@ -33,15 +33,30 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       hasError: false,
     };
   } else if (action.type === 'userRequestedRelatedEventData') {
-    const evt = action.payload;
+    const resolverEvent = action.payload;
     const statsMap = state[resultsEnrichedWithRelatedEventInfo];
     if (statsMap) {
       const currentStatsMap = new Map(statsMap);
-      currentStatsMap.set(evt, waitingForRelatedEventData);
+      /**
+       * Set the waiting indicator for this event to indicate that related event results are pending.
+       * It will be replaced by the actual results from the API when they are returned. 
+       */
+      currentStatsMap.set(resolverEvent, waitingForRelatedEventData);
       return { ...state, [resultsEnrichedWithRelatedEventInfo]: currentStatsMap };
     }
     return state;
-  } else if (action.type === 'serverReturnedRelatedEventData') {
+  } else if (action.type === 'serverFailedToReturnRelatedEventData') {
+    
+    const statsMap = state[resultsEnrichedWithRelatedEventInfo];
+    if (statsMap) {
+      const currentStatsMap = new Map(statsMap);
+      const [resolverEvent, apiError] = action.payload;
+      currentStatsMap.set(resolverEvent, apiError);
+      return { ...state, [resultsEnrichedWithRelatedEventInfo]: currentStatsMap };
+    }
+    return state;
+  } 
+  else if (action.type === 'serverReturnedRelatedEventData') {
     /**
      * REMOVE: pending resolution of https://github.com/elastic/endpoint-app-team/issues/379
      * When this data is inlined with results, there won't be a need for this.

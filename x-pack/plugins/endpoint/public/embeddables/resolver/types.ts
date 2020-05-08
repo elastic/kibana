@@ -181,7 +181,8 @@ export type RelatedEventDataEntryWithStats = RelatedEventDataEntry & {
 
 export type RelatedEventEntryWithStatsOrWaiting =
   | RelatedEventDataEntryWithStats
-  | typeof waitingForRelatedEventData;
+  | typeof waitingForRelatedEventData
+  | Error;
 
 /**
  * This represents a Map that will return either a `RelatedEventDataEntryWithStats`

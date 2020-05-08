@@ -113,6 +113,7 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
           if (apiResults instanceof Error) {
             api.dispatch({
               type: 'serverFailedToReturnRelatedEventData',
+              payload: [results[0], apiResults],
             });
           }
           const response: Map<ResolverEvent, RelatedEventDataEntry> = new Map();
