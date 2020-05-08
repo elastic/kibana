@@ -1362,6 +1362,36 @@
     tabbable "^3.0.0"
     uuid "^3.1.0"
 
+"@elastic/eui@23.2.0":
+  version "23.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-23.2.0.tgz#ffc7d3b681e0e5efb02d8a67991c2ab558c975d7"
+  integrity sha512-a2wIT4sYwDEr7EOOIWAQsaKDXn1yXNf1aLGd5ekbmBw2m8TlLLlBd8jHEh2diAaBSkZ+cU6sKlwUbbN2yRehPQ==
+  dependencies:
+    "@types/chroma-js" "^2.0.0"
+    "@types/enzyme" "^3.1.13"
+    "@types/lodash" "^4.14.116"
+    "@types/numeral" "^0.0.25"
+    "@types/react-beautiful-dnd" "^12.1.2"
+    "@types/react-input-autosize" "^2.0.2"
+    "@types/react-virtualized" "^9.18.7"
+    chroma-js "^2.0.4"
+    classnames "^2.2.5"
+    highlight.js "^9.12.0"
+    html "^1.0.0"
+    keymirror "^0.1.1"
+    lodash "^4.17.11"
+    numeral "^2.0.6"
+    prop-types "^15.6.0"
+    react-ace "^7.0.5"
+    react-beautiful-dnd "^13.0.0"
+    react-focus-lock "^1.17.7"
+    react-input-autosize "^2.2.2"
+    react-is "~16.3.0"
+    react-virtualized "^9.21.2"
+    resize-observer-polyfill "^1.5.0"
+    tabbable "^3.0.0"
+    uuid "^3.1.0"
+
 "@elastic/filesaver@1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@elastic/filesaver/-/filesaver-1.1.2.tgz#1998ffb3cd89c9da4ec12a7793bfcae10e30c77a"
@@ -23991,7 +24021,7 @@ qs@~6.4.0:
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.4.0.tgz#13e26d28ad6b0ffaa91312cd3bf708ed351e7233"
   integrity sha1-E+JtKK1rD/qpExLNO/cI7TUecjM=
 
-query-string@5.1.1, query-string@^5.0.1:
+query-string@5.1.1, query-string@^5.0.0, query-string@^5.0.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/query-string/-/query-string-5.1.1.tgz#a78c012b71c17e05f2e3fa2319dd330682efb3cb"
   integrity sha512-gjWOsm2SoGlgLEdAGt7a6slVOk9mGiXmPFMqrEhLQ68rhQuBnpfs3+EmlvqKyxnCo9/PPlF+9MtY02S1aFg+Jw==
@@ -30682,6 +30712,7 @@ use-query-params@0.6.0:
   integrity sha512-AEZm0+TTYuV3/l/IC+Iyqkvol1muXWJd2hlgY2erFESvtZNIpU4BrsTo6jnOBFd/t6rTOQuFjKSmW/+TAy8mzQ==
   dependencies:
     serialize-query-params "^0.3.0"
+
 use-resize-observer@^6.0.0:
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/use-resize-observer/-/use-resize-observer-6.0.0.tgz#8450ade735c386e8d93cdf983c26d34a9f478a54"

@@ -180,6 +180,12 @@ export class ExpressionLoader {
     if (params.variables && this.params) {
       this.params.variables = params.variables;
     }
+    if (params.customFunctions) {
+      params.customFunctions.forEach(fn => getExpressionsService().registerFunction(fn));
+    }
+    if (params.customRenderers) {
+      params.customRenderers.forEach(fn => getExpressionsService().registerRenderer(fn));
+    }
   }
 }
 
