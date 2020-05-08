@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { formatNumWithCommas } from '../../helpers';
@@ -47,21 +47,22 @@ export function HitsCounter({ hits, showResetButton, onResetQuery }: HitsCounter
         justifyContent="center"
         alignItems="center"
       >
-        <EuiFlexItem grow={false} component="span" data-test-subj="discoverQueryHits">
-          <strong>{formatNumWithCommas(hits)}</strong>
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <FormattedMessage
-            id="discover.hitsPluralTitle"
-            defaultMessage="{hits, plural, one {hit} other {hits}}"
-            values={{
-              hits,
-            }}
-          />
+          <EuiText>
+            <strong data-test-subj="discoverQueryHits">{formatNumWithCommas(hits)}</strong>{' '}
+            <FormattedMessage
+              id="discover.hitsPluralTitle"
+              defaultMessage="{hits, plural, one {hit} other {hits}}"
+              values={{
+                hits,
+              }}
+            />
+          </EuiText>
         </EuiFlexItem>
         {showResetButton && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              iconType="refresh"
               data-test-subj="resetSavedSearch"
               onClick={onResetQuery}
               size="s"

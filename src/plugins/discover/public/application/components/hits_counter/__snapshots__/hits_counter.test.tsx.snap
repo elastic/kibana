@@ -205,36 +205,34 @@ exports[`hits counter HitsCounter not renders a button when the showResetButton 
             className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow dscResultCount"
           >
             <EuiFlexItem
-              component="span"
-              data-test-subj="discoverQueryHits"
-              grow={false}
-            >
-              <span
-                className="euiFlexItem euiFlexItem--flexGrowZero"
-                data-test-subj="discoverQueryHits"
-              >
-                <strong>
-                  2
-                </strong>
-              </span>
-            </EuiFlexItem>
-            <EuiFlexItem
               grow={false}
             >
               <div
                 className="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <FormattedMessage
-                  defaultMessage="{hits, plural, one {hit} other {hits}}"
-                  id="discover.hitsPluralTitle"
-                  values={
-                    Object {
-                      "hits": 2,
-                    }
-                  }
-                >
-                  hits
-                </FormattedMessage>
+                <EuiText>
+                  <div
+                    className="euiText euiText--medium"
+                  >
+                    <strong
+                      data-test-subj="discoverQueryHits"
+                    >
+                      2
+                    </strong>
+                     
+                    <FormattedMessage
+                      defaultMessage="{hits, plural, one {hit} other {hits}}"
+                      id="discover.hitsPluralTitle"
+                      values={
+                        Object {
+                          "hits": 2,
+                        }
+                      }
+                    >
+                      hits
+                    </FormattedMessage>
+                  </div>
+                </EuiText>
               </div>
             </EuiFlexItem>
           </div>
@@ -450,36 +448,34 @@ exports[`hits counter HitsCounter renders a button by providing the showResetBut
             className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow dscResultCount"
           >
             <EuiFlexItem
-              component="span"
-              data-test-subj="discoverQueryHits"
-              grow={false}
-            >
-              <span
-                className="euiFlexItem euiFlexItem--flexGrowZero"
-                data-test-subj="discoverQueryHits"
-              >
-                <strong>
-                  2
-                </strong>
-              </span>
-            </EuiFlexItem>
-            <EuiFlexItem
               grow={false}
             >
               <div
                 className="euiFlexItem euiFlexItem--flexGrowZero"
               >
-                <FormattedMessage
-                  defaultMessage="{hits, plural, one {hit} other {hits}}"
-                  id="discover.hitsPluralTitle"
-                  values={
-                    Object {
-                      "hits": 2,
-                    }
-                  }
-                >
-                  hits
-                </FormattedMessage>
+                <EuiText>
+                  <div
+                    className="euiText euiText--medium"
+                  >
+                    <strong
+                      data-test-subj="discoverQueryHits"
+                    >
+                      2
+                    </strong>
+                     
+                    <FormattedMessage
+                      defaultMessage="{hits, plural, one {hit} other {hits}}"
+                      id="discover.hitsPluralTitle"
+                      values={
+                        Object {
+                          "hits": 2,
+                        }
+                      }
+                    >
+                      hits
+                    </FormattedMessage>
+                  </div>
+                </EuiText>
               </div>
             </EuiFlexItem>
             <EuiFlexItem
@@ -491,6 +487,7 @@ exports[`hits counter HitsCounter renders a button by providing the showResetBut
                 <EuiButtonEmpty
                   aria-label="Reset search"
                   data-test-subj="resetSavedSearch"
+                  iconType="refresh"
                   onClick={[MockFunction]}
                   size="s"
                 >
@@ -504,6 +501,19 @@ exports[`hits counter HitsCounter renders a button by providing the showResetBut
                     <span
                       className="euiButtonEmpty__content"
                     >
+                      <EuiIcon
+                        aria-hidden="true"
+                        className="euiButtonEmpty__icon"
+                        size="m"
+                        type="refresh"
+                      >
+                        <div
+                          aria-hidden="true"
+                          className="euiButtonEmpty__icon"
+                          data-euiicon-type="refresh"
+                          size="m"
+                        />
+                      </EuiIcon>
                       <span
                         className="euiButtonEmpty__text"
                       >
