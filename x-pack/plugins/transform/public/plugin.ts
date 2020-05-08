@@ -29,7 +29,7 @@ export class TransformUiPlugin {
         title: kbnI18n.translate('xpack.transform.appTitle', {
           defaultMessage: 'Transforms',
         }),
-        order: 3,
+        order: 4,
         mount: async params => {
           const { mountManagementSection } = await import('./app/mount_management_section');
           return mountManagementSection(coreSetup, params);

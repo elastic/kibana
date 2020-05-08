@@ -17,16 +17,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { CertStateThresholds } from '../../../common/runtime_types';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
+import { DynamicSettings } from '../../../common/runtime_types';
 import { SettingsFormProps } from '../../pages/settings';
+import { certificateFormTranslations } from './translations';
 
-interface ChangedValues {
-  heartbeatIndices?: string;
-  certThresholds?: Partial<CertStateThresholds>;
-}
-
-export type OnFieldChangeType = (changedValues: ChangedValues) => void;
+export type OnFieldChangeType = (changedValues: Partial<DynamicSettings>) => void;
 
 export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
   loading,
@@ -70,9 +66,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
             id="xpack.uptime.sourceConfiguration.expirationThresholdDefaultValue"
             defaultMessage="The default value is {defaultValue}"
             values={{
-              defaultValue: (
-                <EuiCode>{DYNAMIC_SETTINGS_DEFAULTS.certThresholds.expiration}</EuiCode>
-              ),
+              defaultValue: <EuiCode>{DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold}</EuiCode>,
             }}
           />
         }
@@ -87,16 +81,15 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={2}>
             <EuiFieldNumber
+              aria-label={certificateFormTranslations.expirationInputAriaLabel}
               data-test-subj={`expiration-threshold-input-${loading ? 'loading' : 'loaded'}`}
               fullWidth
               disabled={isDisabled}
               isLoading={loading}
-              value={formFields?.certThresholds?.expiration || ''}
+              value={formFields?.certExpirationThreshold ?? ''}
               onChange={e =>
                 onChange({
-                  certThresholds: {
-                    expiration: Number(e.target.value),
-                  },
+                  certExpirationThreshold: Number(e.target.value),
                 })
               }
             />
@@ -120,7 +113,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
             id="xpack.uptime.sourceConfiguration.ageThresholdDefaultValue"
             defaultMessage="The default value is {defaultValue}"
             values={{
-              defaultValue: <EuiCode>{DYNAMIC_SETTINGS_DEFAULTS.certThresholds.age}</EuiCode>,
+              defaultValue: <EuiCode>{DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold}</EuiCode>,
             }}
           />
         }
@@ -135,14 +128,15 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={2}>
             <EuiFieldNumber
+              aria-label={certificateFormTranslations.ageInputAriaLabel}
               data-test-subj={`age-threshold-input-${loading ? 'loading' : 'loaded'}`}
               fullWidth
               disabled={isDisabled}
               isLoading={loading}
-              value={formFields?.certThresholds?.age || ''}
+              value={formFields?.certAgeThreshold ?? ''}
               onChange={e =>
                 onChange({
-                  certThresholds: { age: Number(e.currentTarget.value) },
+                  certAgeThreshold: Number(e.currentTarget.value),
                 })
               }
             />
