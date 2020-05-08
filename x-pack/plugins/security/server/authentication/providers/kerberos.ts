@@ -135,7 +135,10 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
   private async authenticateWithNegotiateScheme(request: KibanaRequest) {
     this.logger.debug('Trying to authenticate request using "Negotiate" authentication scheme.');
 
-    const [, kerberosTicket] = (request.headers.authorization as string).split(/\s+/);
+    const [scheme] = (request.headers.authorization as string).split(/\s+/, 1);
+    const kerberosTicket = (request.headers.authorization as string)
+      .substr(scheme.length)
+      .trimLeft();
 
     // First attempt to exchange SPNEGO token for an access token.
     let tokens: {
