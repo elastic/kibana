@@ -4,15 +4,17 @@
 
 # Summary
 
-A Kibana API exposed on both public and server side, allowing consumers to search for various objects and
+A new Kibana plugin exposing an API on both public and server side, to allow consumers to search for various objects and
 register result providers.
+
+Note: whether this will be an oss or xpack plugin still depends on https://github.com/elastic/dev/issues/1404.
 
 # Basic example
 
 - registering a result provider:
 
 ```ts
-coreSetup.globalSearch.registerResultProvider({
+setupDeps.globalSearch.registerResultProvider({
   id: 'my_provider',
   find: (term, options, context) => {
     const resultPromise = myService.search(term, context.core.savedObjects.client);
@@ -24,7 +26,7 @@ coreSetup.globalSearch.registerResultProvider({
 - using the `find` API from the client-side:
 
 ```ts
-coreStart.globalSearch.find('some term').subscribe(({ results }) => {
+startDeps.globalSearch.find('some term').subscribe(({ results }) => {
     updateResults(results);
 }, () => {}, () => {
     showAsyncSearchIndicator(false);
@@ -205,12 +207,12 @@ type GlobalSearchResponse = {
 };
 
 /** @public */
-interface GlobalSearchServiceSetup {
+interface GlobalSearchPluginSetup {
   registerResultProvider(provider: GlobalSearchResultProvider);
 }
 
 /** @public */
-interface GlobalSearchServiceStart {
+interface GlobalSearchPluginStart {
   find(
     term: string,
     options: GlobalSearchFindOptions,
@@ -256,12 +258,12 @@ type GlobalSearchResponse = {
 };
 
 /** @public */
-interface GlobalSearchServiceSetup {
+interface GlobalSearchPluginSetup {
   registerResultProvider(provider: GlobalSearchResultProvider);
 }
 
 /** @public */
-interface GlobalSearchServiceStart {
+interface GlobalSearchPluginStart {
   find(
     term: string,
     options: GlobalSearchFindOptions,
@@ -280,7 +282,7 @@ non-trivial. See the [Redirecting to a result](#redirecting-to-a-result) section
 
 #### http API
 
-An internal HTTP API will be exposed on `/internal/core/global_search/find` to allow the client-side `GlobalSearchService` 
+An internal HTTP API will be exposed on `/internal/global_search/find` to allow the client-side `GlobalSearch` plugin 
 to fetch results from the server-side result providers.
 
 It should be very close to:
@@ -288,7 +290,7 @@ It should be very close to:
 ```ts
 router.post(
   {
-    path: '/api/core/global_search/find',
+    path: '/internal/global_search/find',
     validate: {
       body: schema.object({
         term: schema.string(),
@@ -300,7 +302,7 @@ router.post(
   },
   async (ctx, req, res) => {
     const { term, options } = req.body;
-    const results = await ctx.core.globalSearch
+    const results = await ctx.globalSearch
       .find(term, { ...options, $aborted: req.events.aborted$ })
       .pipe(last())
       .toPromise();
@@ -316,7 +318,7 @@ router.post(
 Notes: 
 - This API is only for internal use and communication between the client and the server parts of the `GS` API. When
 the need to expose an API for external consumers will appear, a new public API will be exposed for that.
-- A new `globalSearch` service will be exposed on core's `RequestHandlerContext` to wrap a `find` call with current request.
+- A new `globalSearch` context will be exposed on core's `RequestHandlerContext` to wrap a `find` call with current request.
 - Initial implementation will await for all results and then return them as a single response.  As it's supported by 
   the service, it could theoretically be possible to stream the results instead, however that makes the consumption of
   the API from the client more difficult. If this become important at some point, a new `/api/core/global_search/find/async` 
@@ -326,10 +328,10 @@ the need to expose an API for external consumers will appear, a new public API w
 
 ### summary
 
-- `coreSetup.globalService` exposes an API to be able to register result providers (`GlobalSearchResultProvider`). 
+- the `GlobalSearch` plugin setup contract exposes an API to be able to register result providers (`GlobalSearchResultProvider`). 
   These providers can be registered from either public or server side, even if the interface for each side is not 
   exactly the same.
-- `coreStart.globalService` exposes an API to be able to search for objects. This API is available from both public
+- the `GlobalSearch` plugin start contract exposes an API to be able to search for objects. This API is available from both public
   and server sides. 
   - When using the server `find` API, only results from providers registered from the server will be returned. 
   - When using the public `find` API, results from provider registered from both server and public sides will be returned.
@@ -344,7 +346,7 @@ the need to expose an API for external consumers will appear, a new public API w
 
 Due to the fact that some kind of results (i.e `application`, and maybe later `management_section`) only exists on 
 the public side of Kibana and therefor are not known on the server side, the `registerResultProvider` API will be 
-available both from the public and the server counterpart of the `GlobalSearchService`.
+available both from the public and the server counterpart of the `GlobalSearchPluginSetup` contract.
 
 However, as results from providers registered from the client-side will not be available from the server's `find` API, 
 registering result providers from the client should only be done to answer this specific use case and will be 
@@ -443,7 +445,7 @@ Otherwise: do a full page navigation (`window.location.assign()`)
 
 ### searching from the server side
 
-When calling `GlobalSearchServiceStart.find` from the server-side service:
+When calling `GlobalSearchPluginStart.find` from the server-side service:
 
 - the service will call `find` on each server-side registered result provider and collect the resulting result observables
 
@@ -479,7 +481,7 @@ search(
 
 ### searching from the client side
 
-When calling `GlobalSearchServiceStart.find` from the public-side service:
+When calling `GlobalSearchPluginStart.find` from the public-side service:
 
 - The service will call:
   - the server-side API via an http call to fetch results from the server-side result providers
@@ -657,34 +659,6 @@ But this had some caveats:
 - this is really not generic. If another plugin was to alter the basepath in another way, we would have needed to add it another property 
 
 So even if the 'parsable absolute url' approach seems fragile, it still felt better than this alternative.
-
-## The GlobalSearch service could be provided as a plugin instead of a core service
-
-The GlobalSearch API could be provided and exposed from a plugin instead of `core`.
-
-Pros:
-- Reduced `core` API exposure.
-- Could leverage other plugins APIs (such as `bfetch` and yet-to-come `KibanaURL` - if not provided by core), which would
-  not be possible from within `core`.
-- The consensus seems to be that this API is not a 'base' or 'core' API, so it probably make sense to have it in a plugin.
-- `core` is by nature only under OSS license. If some or all the features of `GS` needs to be under the ES license, it cannot be in core.
-  If only parts of `GS` should be OSS, we could imagine an OSS plugin for exposing the GS API, and xpack plugin(s) to register the licensed
-  result providers.
-
-Cons:
-- We know that our initial consumer of this API is going to be the `searchbar` header component developed by the `core-ui` team.
-  As the header is currently in `core`, and as plugin APIs are not usable from within `core`, having the GS API in 
-  a plugin would mean additional development of some kind of bridge API to allow a plugin to register to the `chrome` service
-  the component that will be providing results to the search bar. Also, as the `searchbar` would not be able to directly 
-  import / use the GS `NavigableGlobalSearchResult` type (which would be in a plugin, so not importable within core), 
-  there would be a question regarding type compatibility between the `GS` result types, and the actual result types used
-  from within core in the searchbar. Duplicating the type is always an option, even if something that would ideally be avoided.
-  One alternative to that would be to provide expose an API in the chrome service to allow registering a `MountPoint` that 
-  would be used to populate the `searchbar` placeholder in the header. That way, the searchbar implementation could live
-  in a plugin and use the GS API directly.
-- As our current SO `find` API may not be sufficient to answer the SO result provider needs, we might be adding specific
-  SO API(s) for it. If such APIs were to be added, it would be preferable to keep them internal, which
-  is not possible if the SO result provider is outside of `core`.
 
 # Adoption strategy
 
