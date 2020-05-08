@@ -6,7 +6,8 @@
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useMemo, useState } from 'react';
+import React, { FunctionComponent, useMemo, useState, MouseEvent } from 'react';
+import url from 'url';
 import { Filter } from '../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import {
@@ -27,7 +28,6 @@ import { CustomLink } from './CustomLink';
 import { CustomLinkPopover } from './CustomLink/CustomLinkPopover';
 import { getSections } from './sections';
 import { useLicense } from '../../../hooks/useLicense';
-import { px } from '../../../style/variables';
 import { convertFiltersToQuery } from '../../app/Settings/CustomizeUI/CustomLink/CustomLinkFlyout/helper';
 
 interface Props {
@@ -83,7 +83,39 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
     basePath: core.http.basePath,
     location,
     urlParams
-  });
+  }).map(sectionList =>
+    sectionList.map(section => ({
+      ...section,
+      actions: section.actions.map(action => {
+        const { href } = action;
+
+        // use navigateToApp as a temporary workaround for faster navigation between observability apps.
+        // see https://github.com/elastic/kibana/issues/65682
+
+        return {
+          ...action,
+          onClick: (event: MouseEvent) => {
+            const parsed = url.parse(href);
+
+            const appPathname = core.http.basePath.remove(
+              parsed.pathname ?? ''
+            );
+
+            const [, , app, ...rest] = appPathname.split('/');
+
+            if (app === 'uptime' || app === 'metrics' || app === 'logs') {
+              event.preventDefault();
+              core.application.navigateToApp(app, {
+                path: `${rest.join('/')}${
+                  parsed.search ? `&${parsed.search}` : ''
+                }`
+              });
+            }
+          }
+        };
+      })
+    }))
+  );
 
   const closePopover = () => {
     setIsActionPopoverOpen(false);
@@ -124,7 +156,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
           <ActionMenuButton onClick={() => setIsActionPopoverOpen(true)} />
         }
       >
-        <div style={{ maxHeight: px(600), width: px(335) }}>
+        <div>
           {isCustomLinksPopoverOpen ? (
             <CustomLinkPopover
               customLinks={customLinks.slice(3, customLinks.length)}
@@ -152,6 +184,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
                               key={action.key}
                               label={action.label}
                               href={action.href}
+                              onClick={action.onClick}
                             />
                           ))}
                         </SectionLinks>

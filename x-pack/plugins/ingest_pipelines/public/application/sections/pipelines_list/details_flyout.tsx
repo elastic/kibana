@@ -104,11 +104,12 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
     <EuiFlyout
       onClose={onClose}
       aria-labelledby="pipelineDetailsFlyoutTitle"
+      data-test-subj="pipelineDetails"
       size="m"
       maxWidth={550}
     >
       <EuiFlyoutHeader>
-        <EuiTitle id="pipelineDetailsFlyoutTitle">
+        <EuiTitle id="pipelineDetailsFlyoutTitle" data-test-subj="title">
           <h2>{pipeline.name}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -142,7 +143,7 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
           {/* Processors JSON */}
           <EuiDescriptionListTitle>
             {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.processorsTitle', {
-              defaultMessage: 'Processors JSON',
+              defaultMessage: 'Processors',
             })}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
@@ -156,7 +157,7 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
                 {i18n.translate(
                   'xpack.ingestPipelines.list.pipelineDetails.failureProcessorsTitle',
                   {
-                    defaultMessage: 'On failure processors JSON',
+                    defaultMessage: 'Failure processors',
                   }
                 )}
               </EuiDescriptionListTitle>
