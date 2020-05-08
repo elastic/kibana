@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { overwrite } from '../../helpers';
 import getBucketSize from '../../helpers/get_bucket_size';
 import getTimerange from '../../helpers/get_timerange';
 export default function dateHistogram(req, panel, annotation) {
@@ -7,7 +7,7 @@ export default function dateHistogram(req, panel, annotation) {
     const { bucketSize, intervalString } = getBucketSize(req, 'auto');
     const { from, to } = getTimerange(req);
     const { timezone:time_zone } = req.payload.timerange;
-    _.set(doc, `aggs.${annotation.id}.date_histogram`, {
+    overwrite(doc, `aggs.${annotation.id}.date_histogram`, {
       field: timeField,
       interval: intervalString,
       min_doc_count: 0,
