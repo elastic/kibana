@@ -4,21 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
-
+import { APICaller } from 'kibana/server';
 import { DataVisualizer } from '../data_visualizer';
 
 import { validateJobObject } from './validate_job_object';
+import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import { Detector } from '../../../common/types/anomaly_detection_jobs';
 
-function isValidCategorizationConfig(job, fieldName) {
+function isValidCategorizationConfig(job: CombinedJob, fieldName: string): boolean {
   return (
     typeof job.analysis_config.categorization_field_name !== 'undefined' &&
     fieldName === 'mlcategory'
   );
 }
 
-function isScriptField(job, fieldName) {
-  const scriptFields = Object.keys(_.get(job, 'datafeed_config.script_fields', {}));
+function isScriptField(job: CombinedJob, fieldName: string): boolean {
+  const scriptFields = Object.keys(job?.datafeed_config?.script_fields ?? {});
   return scriptFields.includes(fieldName);
 }
 
@@ -30,10 +31,21 @@ const PARTITION_FIELD_CARDINALITY_THRESHOLD = 1000;
 const BY_FIELD_CARDINALITY_THRESHOLD = 1000;
 const MODEL_PLOT_THRESHOLD_HIGH = 100;
 
-const validateFactory = (callWithRequest, job) => {
+type Messages = Array<{ id: string; fieldName?: string }>;
+
+type Validator = (obj: {
+  type: string;
+  isInvalid: (cardinality: number) => boolean;
+  messageId?: string;
+}) => Promise<{
+  modelPlotCardinality: number;
+  messages: Messages;
+}>;
+
+const validateFactory = (callWithRequest: APICaller, job: CombinedJob): Validator => {
   const dv = new DataVisualizer(callWithRequest);
 
-  const modelPlotConfigTerms = _.get(job, ['model_plot_config', 'terms'], '');
+  const modelPlotConfigTerms = job?.model_plot_config?.terms ?? '';
   const modelPlotConfigFieldCount =
     modelPlotConfigTerms.length > 0 ? modelPlotConfigTerms.split(',').length : 0;
 
@@ -42,8 +54,11 @@ const validateFactory = (callWithRequest, job) => {
     // if model_plot_config.terms is used, it doesn't count the real cardinality of the field
     // but adds only the count of fields used in model_plot_config.terms
     let modelPlotCardinality = 0;
-    const messages = [];
-    const fieldName = `${type}_field_name`;
+    const messages: Messages = [];
+    const fieldName = `${type}_field_name` as keyof Pick<
+      Detector,
+      'by_field_name' | 'over_field_name' | 'partition_field_name'
+    >;
 
     const detectors = job.analysis_config.detectors;
     const relevantDetectors = detectors.filter(detector => {
@@ -52,7 +67,9 @@ const validateFactory = (callWithRequest, job) => {
 
     if (relevantDetectors.length > 0) {
       try {
-        const uniqueFieldNames = _.uniq(relevantDetectors.map(f => f[fieldName]));
+        const uniqueFieldNames: string[] = [
+          ...new Set(relevantDetectors.map(f => f[fieldName])),
+        ] as string[];
 
         // use fieldCaps endpoint to get data about whether fields are aggregatable
         const fieldCaps = await callWithRequest('fieldCaps', {
@@ -60,7 +77,7 @@ const validateFactory = (callWithRequest, job) => {
           fields: uniqueFieldNames,
         });
 
-        let aggregatableFieldNames = [];
+        let aggregatableFieldNames: string[] = [];
         // parse fieldCaps to return an array of just the fields which are aggregatable
         if (typeof fieldCaps === 'object' && typeof fieldCaps.fields === 'object') {
           aggregatableFieldNames = uniqueFieldNames.filter(field => {
@@ -81,12 +98,14 @@ const validateFactory = (callWithRequest, job) => {
         );
 
         uniqueFieldNames.forEach(uniqueFieldName => {
-          const field = _.find(stats.aggregatableExistsFields, { fieldName: uniqueFieldName });
-          if (typeof field === 'object') {
+          const field = stats.aggregatableExistsFields.find(
+            fieldData => fieldData.fieldName === uniqueFieldName
+          );
+          if (field !== undefined && typeof field === 'object' && field.stats) {
             modelPlotCardinality +=
-              modelPlotConfigFieldCount > 0 ? modelPlotConfigFieldCount : field.stats.cardinality;
+              modelPlotConfigFieldCount > 0 ? modelPlotConfigFieldCount : field.stats.cardinality!;
 
-            if (isInvalid(field.stats.cardinality)) {
+            if (isInvalid(field.stats.cardinality!)) {
               messages.push({
                 id: messageId || `cardinality_${type}_field`,
                 fieldName: uniqueFieldName,
@@ -115,7 +134,7 @@ const validateFactory = (callWithRequest, job) => {
         if (relevantDetectors.length === 1) {
           messages.push({
             id: 'field_not_aggregatable',
-            fieldName: relevantDetectors[0][fieldName],
+            fieldName: relevantDetectors[0][fieldName]!,
           });
         } else {
           messages.push({ id: 'fields_not_aggregatable' });
@@ -129,7 +148,7 @@ const validateFactory = (callWithRequest, job) => {
   };
 };
 
-export async function validateCardinality(callWithRequest, job) {
+export async function validateCardinality(callWithRequest: APICaller, job: CombinedJob) {
   const messages = [];
 
   validateJobObject(job);
@@ -140,14 +159,13 @@ export async function validateCardinality(callWithRequest, job) {
     return d.by_field_name || d.over_field_name || d.partition_field_name;
   });
   if (numDetectorsWithFieldNames.length === 0) {
-    return Promise.resolve([]);
+    return [];
   }
 
   // validate({ type, isInvalid }) asynchronously returns an array of validation messages
   const validate = validateFactory(callWithRequest, job);
 
-  const modelPlotEnabled =
-    (job.model_plot_config && job.model_plot_config.enabled === true) || false;
+  const modelPlotEnabled = job.model_plot_config?.enabled ?? false;
 
   // check over fields (population analysis)
   const validateOverFieldsLow = validate({
