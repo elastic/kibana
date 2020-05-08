@@ -14,7 +14,7 @@ import { deleteCases, deleteComments, deleteCasesUserActions } from '../../../co
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
   describe('find_cases', () => {
     afterEach(async () => {
       await deleteCases(es);

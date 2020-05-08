@@ -9,12 +9,12 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { CASES_URL, CASE_TAGS_URL } from '../../../../../../plugins/case/common/constants';
 import { postCaseReq } from '../../../../common/lib/mock';
-import { deleteCases, deleteComments } from '../../../../common/lib/utils';
+import { deleteCases } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('get_tags', () => {
     afterEach(async () => {

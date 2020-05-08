@@ -7,14 +7,14 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL, CASE_STATUS_URL } from '../../../../../../plugins/case/common/constants';
+import { CASES_URL } from '../../../../../../plugins/case/common/constants';
 import { postCaseReq, postCommentReq } from '../../../../common/lib/mock';
 import { deleteCases, deleteCasesUserActions, deleteComments } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('get_all_user_actions', () => {
     afterEach(async () => {
