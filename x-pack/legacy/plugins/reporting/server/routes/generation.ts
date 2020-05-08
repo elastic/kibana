@@ -6,21 +6,22 @@
 
 import boom from 'boom';
 import { errors as elasticsearchErrors } from 'elasticsearch';
-import { Legacy } from 'kibana';
+import { IRouter, IBasePath, kibanaResponseFactory } from 'src/core/server';
+import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
 import { API_BASE_URL } from '../../common/constants';
-import { Logger, ReportingResponseToolkit, ServerFacade } from '../../types';
+import { Logger, RequestFacade } from '../../types';
 import { ReportingCore, ReportingSetupDeps } from '../types';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
-import { makeRequestFacade } from './lib/make_request_facade';
 
 const esErrors = elasticsearchErrors as Record<string, any>;
 
 export function registerJobGenerationRoutes(
   reporting: ReportingCore,
-  server: ServerFacade,
   plugins: ReportingSetupDeps,
+  router: IRouter,
+  basePath: IBasePath['get'],
   logger: Logger
 ) {
   const config = reporting.getConfig();
@@ -33,45 +34,57 @@ export function registerJobGenerationRoutes(
   async function handler(
     exportTypeId: string,
     jobParams: object,
-    legacyRequest: Legacy.Request,
-    h: ReportingResponseToolkit
+    r: RequestFacade,
+    h: typeof kibanaResponseFactory
   ) {
-    const request = makeRequestFacade(legacyRequest);
-    const user = request.pre.user;
-    const headers = request.headers;
+    const getUser = authorizedUserPreRoutingFactory(config, plugins, logger);
+    const { username } = getUser(r.getRawRequest());
+    const { headers } = r;
 
     const enqueueJob = await reporting.getEnqueueJob();
-    const job = await enqueueJob(exportTypeId, jobParams, user, headers, request);
+    const job = await enqueueJob(exportTypeId, jobParams, username, headers, r);
 
     // return the queue's job information
     const jobJson = job.toJSON();
 
-    return h
-      .response({
+    return h.ok({
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: {
         path: `${downloadBaseUrl}/${jobJson.id}`,
         job: jobJson,
-      })
-      .type('application/json');
+      },
+    });
   }
 
   function handleError(exportTypeId: string, err: Error) {
     if (err instanceof esErrors['401']) {
-      return boom.unauthorized(`Sorry, you aren't authenticated`);
+      throw boom.unauthorized(`Sorry, you aren't authenticated`);
     }
     if (err instanceof esErrors['403']) {
-      return boom.forbidden(`Sorry, you are not authorized to create ${exportTypeId} reports`);
+      throw boom.forbidden(`Sorry, you are not authorized to create ${exportTypeId} reports`);
     }
     if (err instanceof esErrors['404']) {
-      return boom.boomify(err, { statusCode: 404 });
+      throw boom.boomify(err, { statusCode: 404 });
     }
-    return err;
+    throw err;
   }
 
-  registerGenerateFromJobParams(reporting, server, plugins, handler, handleError, logger);
+  registerGenerateFromJobParams(reporting, plugins, router, basePath, handler, handleError, logger);
 
   // Register beta panel-action download-related API's
   if (config.get('csv', 'enablePanelActionDownload')) {
-    registerGenerateCsvFromSavedObject(reporting, server, plugins, handler, handleError, logger);
-    registerGenerateCsvFromSavedObjectImmediate(reporting, server, plugins, logger);
+    registerGenerateCsvFromSavedObject(
+      reporting,
+      plugins,
+      router,
+      basePath,
+      handler,
+      handleError,
+      logger
+    );
+
+    registerGenerateCsvFromSavedObjectImmediate(reporting, plugins, router, basePath, logger);
   }
 }

@@ -5,17 +5,10 @@
  */
 
 import Boom from 'boom';
-import { ResponseObject } from 'hapi';
-import { Legacy } from 'kibana';
+import { IRouter, IBasePath } from 'src/core/server';
+import { schema } from '@kbn/config-schema';
 import { API_BASE_URL } from '../../common/constants';
-import {
-  JobDocOutput,
-  JobSource,
-  ListQuery,
-  Logger,
-  ReportingResponseToolkit,
-  ServerFacade,
-} from '../../types';
+import { ListQuery, Logger } from '../../types';
 import { jobsQueryFactory } from '../lib/jobs_query';
 import { ReportingCore, ReportingSetupDeps } from '../types';
 import {
@@ -23,201 +16,209 @@ import {
   downloadJobResponseHandlerFactory,
 } from './lib/job_response_handler';
 import { makeRequestFacade } from './lib/make_request_facade';
-import {
-  getRouteConfigFactoryDeletePre,
-  getRouteConfigFactoryDownloadPre,
-  getRouteConfigFactoryManagementPre,
-} from './lib/route_config_factories';
+import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
 
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
-function isResponse(response: Boom<null> | ResponseObject): response is ResponseObject {
-  return !(response as Boom<unknown>).isBoom;
-}
-
 export function registerJobInfoRoutes(
   reporting: ReportingCore,
-  server: ServerFacade,
   plugins: ReportingSetupDeps,
+  router: IRouter,
+  basePath: IBasePath['get'],
   logger: Logger
 ) {
   const config = reporting.getConfig();
+  const getUser = authorizedUserPreRoutingFactory(config, plugins, logger);
   const { elasticsearch } = plugins;
   const jobsQuery = jobsQueryFactory(config, elasticsearch);
-  const getRouteConfig = getRouteConfigFactoryManagementPre(config, plugins, logger);
 
   // list jobs in the queue, paginated
-  server.route({
-    path: `${MAIN_ENTRY}/list`,
-    method: 'GET',
-    options: getRouteConfig(),
-    handler: (legacyRequest: Legacy.Request) => {
-      const request = makeRequestFacade(legacyRequest);
+  router.get(
+    {
+      path: `${MAIN_ENTRY}/list`,
+      validate: {},
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      const request = makeRequestFacade(context, req, basePath);
+      const { username } = getUser(request.getRawRequest());
       const { page: queryPage, size: querySize, ids: queryIds } = request.query as ListQuery;
       const page = parseInt(queryPage, 10) || 0;
       const size = Math.min(100, parseInt(querySize, 10) || 10);
       const jobIds = queryIds ? queryIds.split(',') : null;
 
-      const results = jobsQuery.list(
-        request.pre.management.jobTypes,
-        request.pre.user,
-        page,
-        size,
-        jobIds
-      );
-      return results;
-    },
-  });
+      // @todo: fill in jobtypes from license checks
+      const results = await jobsQuery.list([], username, page, size, jobIds);
+
+      return res.ok({
+        body: results,
+        headers: {
+          'content-type': 'application/json',
+        },
+      });
+    })
+  );
 
   // return the count of all jobs in the queue
-  server.route({
-    path: `${MAIN_ENTRY}/count`,
-    method: 'GET',
-    options: getRouteConfig(),
-    handler: (legacyRequest: Legacy.Request) => {
-      const request = makeRequestFacade(legacyRequest);
-      const results = jobsQuery.count(request.pre.management.jobTypes, request.pre.user);
-      return results;
+  router.get(
+    {
+      path: `${MAIN_ENTRY}/count`,
+      validate: {},
     },
-  });
+    router.handleLegacyErrors(async (context, req, res) => {
+      const request = makeRequestFacade(context, req, basePath);
+      const { username } = getUser(request.getRawRequest());
+
+      // @todo: fill in jobtypes from license checks
+      const results = await jobsQuery.count([], username);
+
+      return res.ok({
+        body: { count: results },
+        headers: {
+          'content-type': 'application/json',
+        },
+      });
+    })
+  );
 
   // return the raw output from a job
-  server.route({
-    path: `${MAIN_ENTRY}/output/{docId}`,
-    method: 'GET',
-    options: getRouteConfig(),
-    handler: (legacyRequest: Legacy.Request) => {
-      const request = makeRequestFacade(legacyRequest);
-      const { docId } = request.params;
-
-      return jobsQuery.get(request.pre.user, docId, { includeContent: true }).then(
-        (result): JobDocOutput => {
-          if (!result) {
-            throw Boom.notFound();
-          }
-          const {
-            _source: { jobtype: jobType, output: jobOutput },
-          } = result;
-
-          if (!request.pre.management.jobTypes.includes(jobType)) {
-            throw Boom.unauthorized(`Sorry, you are not authorized to download ${jobType} reports`);
-          }
-
-          return jobOutput;
-        }
-      );
+  router.get(
+    {
+      path: `${MAIN_ENTRY}/output/{docId}`,
+      validate: {
+        params: schema.object({
+          docId: schema.string({ minLength: 2 }),
+        }),
+      },
     },
-  });
+    router.handleLegacyErrors(async (context, req, res) => {
+      const request = makeRequestFacade(context, req, basePath);
+      const { username } = getUser(request.getRawRequest());
+      const { docId } = req.params;
+
+      const result = await jobsQuery.get(username, docId, { includeContent: true });
+
+      if (!result) {
+        throw Boom.notFound();
+      }
+
+      const {
+        _source: { jobtype: jobType, output: jobOutput },
+      } = result;
+
+      if (!['@todo'].includes(jobType)) {
+        throw Boom.unauthorized(`Sorry, you are not authorized to download ${jobType} reports`);
+      }
+
+      return res.ok({
+        body: jobOutput,
+        headers: {
+          'content-type': 'application/json',
+        },
+      });
+    })
+  );
 
   // return some info about the job
-  server.route({
-    path: `${MAIN_ENTRY}/info/{docId}`,
-    method: 'GET',
-    options: getRouteConfig(),
-    handler: (legacyRequest: Legacy.Request) => {
-      const request = makeRequestFacade(legacyRequest);
-      const { docId } = request.params;
+  router.get(
+    {
+      path: `${MAIN_ENTRY}/info/{docId}`,
+      validate: {
+        params: schema.object({
+          docId: schema.string({ minLength: 2 }),
+        }),
+      },
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      const request = makeRequestFacade(context, req, basePath);
+      const { username } = getUser(request.getRawRequest());
+      const { docId } = req.params;
 
-      return jobsQuery.get(request.pre.user, docId).then((result): JobSource<any>['_source'] => {
-        if (!result) {
-          throw Boom.notFound();
-        }
+      const result = await jobsQuery.get(username, docId);
 
-        const { _source: job } = result;
-        const { jobtype: jobType, payload: jobPayload } = job;
-        if (!request.pre.management.jobTypes.includes(jobType)) {
-          throw Boom.unauthorized(`Sorry, you are not authorized to view ${jobType} info`);
-        }
+      if (!result) {
+        throw Boom.notFound();
+      }
 
-        return {
+      const { _source: job } = result;
+      const { jobtype: jobType, payload: jobPayload } = job;
+
+      if (!['@todo'].includes(jobType)) {
+        throw Boom.unauthorized(`Sorry, you are not authorized to view ${jobType} info`);
+      }
+
+      return res.ok({
+        body: {
           ...job,
           payload: {
             ...jobPayload,
             headers: undefined,
           },
-        };
+        },
+        headers: {
+          'content-type': 'application/json',
+        },
       });
-    },
-  });
+    })
+  );
 
   // trigger a download of the output from a job
   const exportTypesRegistry = reporting.getExportTypesRegistry();
-  const getRouteConfigDownload = getRouteConfigFactoryDownloadPre(config, plugins, logger);
-  const downloadResponseHandler = downloadJobResponseHandlerFactory(config, elasticsearch, exportTypesRegistry); // prettier-ignore
-  server.route({
-    path: `${MAIN_ENTRY}/download/{docId}`,
-    method: 'GET',
-    options: getRouteConfigDownload(),
-    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
-      const request = makeRequestFacade(legacyRequest);
-      const { docId } = request.params;
+  const downloadResponseHandler = downloadJobResponseHandlerFactory(
+    config,
+    elasticsearch,
+    exportTypesRegistry
+  );
 
-      let response = await downloadResponseHandler(
-        request.pre.management.jobTypes,
-        request.pre.user,
-        h,
-        { docId }
-      );
-
-      if (isResponse(response)) {
-        const { statusCode } = response;
-
-        if (statusCode !== 200) {
-          if (statusCode === 500) {
-            logger.error(`Report ${docId} has failed: ${JSON.stringify(response.source)}`);
-          } else {
-            logger.debug(
-              `Report ${docId} has non-OK status: [${statusCode}] Reason: [${JSON.stringify(
-                response.source
-              )}]`
-            );
-          }
-        }
-
-        response = response.header('accept-ranges', 'none');
-      }
-
-      return response;
+  router.get(
+    {
+      path: `${MAIN_ENTRY}/download/{docId}`,
+      validate: {
+        params: schema.object({
+          docId: schema.string({ minLength: 3 }),
+        }),
+      },
     },
-  });
+    router.handleLegacyErrors(async (context, req, res) => {
+      const { username } = getUser(req);
+      const { docId } = req.params;
+
+      // @TODD: JobTypes checks
+      const response = await downloadResponseHandler([], username, { docId });
+
+      return res.ok({
+        body: response.content,
+        headers: {
+          ...response.headers,
+          'content-type': response.contentType,
+        },
+      });
+    })
+  );
 
   // allow a report to be deleted
-  const getRouteConfigDelete = getRouteConfigFactoryDeletePre(config, plugins, logger);
   const deleteResponseHandler = deleteJobResponseHandlerFactory(config, elasticsearch);
-  server.route({
-    path: `${MAIN_ENTRY}/delete/{docId}`,
-    method: 'DELETE',
-    options: getRouteConfigDelete(),
-    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
-      const request = makeRequestFacade(legacyRequest);
-      const { docId } = request.params;
-
-      let response = await deleteResponseHandler(
-        request.pre.management.jobTypes,
-        request.pre.user,
-        h,
-        { docId }
-      );
-
-      if (isResponse(response)) {
-        const { statusCode } = response;
-
-        if (statusCode !== 200) {
-          if (statusCode === 500) {
-            logger.error(`Report ${docId} has failed: ${JSON.stringify(response.source)}`);
-          } else {
-            logger.debug(
-              `Report ${docId} has non-OK status: [${statusCode}] Reason: [${JSON.stringify(
-                response.source
-              )}]`
-            );
-          }
-        }
-
-        response = response.header('accept-ranges', 'none');
-      }
-
-      return response;
+  router.delete(
+    {
+      path: `${MAIN_ENTRY}/delete/{docId}`,
+      validate: {
+        params: schema.object({
+          docId: schema.string({ minLength: 3 }),
+        }),
+      },
     },
-  });
+    router.handleLegacyErrors(async (context, req, res) => {
+      const { username } = getUser(req);
+      const { docId } = req.params;
+
+      // @TODD Jobtypes here.
+      const response = await deleteResponseHandler([], username, { docId });
+
+      return res.ok({
+        body: response,
+        headers: {
+          'content-type': 'application/json',
+        },
+      });
+    })
+  );
 }

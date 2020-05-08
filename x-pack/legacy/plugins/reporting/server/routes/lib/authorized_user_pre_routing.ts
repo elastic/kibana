@@ -5,17 +5,16 @@
  */
 
 import Boom from 'boom';
-import { Legacy } from 'kibana';
+import { KibanaRequest } from 'src/core/server';
 import { AuthenticatedUser } from '../../../../../../plugins/security/server';
 import { ReportingConfig } from '../../../server';
 import { Logger } from '../../../types';
 import { getUserFactory } from '../../lib/get_user';
 import { ReportingSetupDeps } from '../../types';
-
 const superuserRole = 'superuser';
 
 export type PreRoutingFunction = (
-  request: Legacy.Request
+  request: KibanaRequest
 ) => Promise<Boom<null> | AuthenticatedUser | null>;
 
 export const authorizedUserPreRoutingFactory = function authorizedUserPreRoutingFn(
@@ -24,30 +23,17 @@ export const authorizedUserPreRoutingFactory = function authorizedUserPreRouting
   logger: Logger
 ) {
   const getUser = getUserFactory(plugins.security, logger);
-  const { info: xpackInfo } = plugins.__LEGACY.plugins.xpack_main;
 
-  return async function authorizedUserPreRouting(request: Legacy.Request) {
-    if (!xpackInfo || !xpackInfo.isAvailable()) {
-      logger.warn('Unable to authorize user before xpack info is available.', [
-        'authorizedUserPreRouting',
-      ]);
-      return Boom.notFound();
-    }
-
-    const security = xpackInfo.feature('security');
-    if (!security.isEnabled() || !security.isAvailable()) {
-      return null;
-    }
-
-    const user = await getUser(request);
+  return function authorizedUserPreRouting(request: KibanaRequest) {
+    const user = getUser(request);
 
     if (!user) {
-      return Boom.unauthorized(`Sorry, you aren't authenticated`);
+      throw Boom.unauthorized(`Sorry, you aren't authenticated`);
     }
 
     const authorizedRoles = [superuserRole, ...(config.get('roles', 'allow') as string[])];
     if (!user.roles.find(role => authorizedRoles.includes(role))) {
-      return Boom.forbidden(`Sorry, you don't have access to Reporting`);
+      throw Boom.forbidden(`Sorry, you don't have access to Reporting`);
     }
 
     return user;

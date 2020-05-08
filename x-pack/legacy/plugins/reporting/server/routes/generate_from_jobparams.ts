@@ -5,70 +5,48 @@
  */
 
 import boom from 'boom';
-import Joi from 'joi';
-import { Legacy } from 'kibana';
 import rison from 'rison-node';
+import { IRouter, IBasePath } from 'src/core/server';
+import { schema } from '@kbn/config-schema';
 import { API_BASE_URL } from '../../common/constants';
-import { Logger, ReportingResponseToolkit, ServerFacade } from '../../types';
+import { Logger } from '../../types';
 import { ReportingCore, ReportingSetupDeps } from '../types';
 import { makeRequestFacade } from './lib/make_request_facade';
-import {
-  GetRouteConfigFactoryFn,
-  getRouteConfigFactoryReportingPre,
-  RouteConfigFactory,
-} from './lib/route_config_factories';
 import { HandlerErrorFunction, HandlerFunction } from './types';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
 export function registerGenerateFromJobParams(
   reporting: ReportingCore,
-  server: ServerFacade,
   plugins: ReportingSetupDeps,
+  router: IRouter,
+  basePath: IBasePath['get'],
   handler: HandlerFunction,
   handleError: HandlerErrorFunction,
   logger: Logger
 ) {
-  const config = reporting.getConfig();
-  const getRouteConfig = () => {
-    const getOriginalRouteConfig: GetRouteConfigFactoryFn = getRouteConfigFactoryReportingPre(
-      config,
-      plugins,
-      logger
-    );
-    const routeConfigFactory: RouteConfigFactory = getOriginalRouteConfig(
-      ({ params: { exportType } }) => exportType
-    );
-
-    return {
-      ...routeConfigFactory,
-      validate: {
-        params: Joi.object({
-          exportType: Joi.string().required(),
-        }).required(),
-        payload: Joi.object({
-          jobParams: Joi.string()
-            .optional()
-            .default(null),
-        }).allow(null), // allow optional payload
-        query: Joi.object({
-          jobParams: Joi.string().default(null),
-        }).default(),
-      },
-    };
-  };
-
   // generate report
-  server.route({
-    path: `${BASE_GENERATE}/{exportType}`,
-    method: 'POST',
-    options: getRouteConfig(),
-    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
-      const request = makeRequestFacade(legacyRequest);
+  router.post(
+    {
+      path: `${BASE_GENERATE}/{exportType}`,
+      validate: {
+        params: schema.object({
+          exportType: schema.string({ minLength: 2 }),
+        }),
+        body: schema.object({
+          jobParams: schema.string(),
+        }),
+        query: schema.object({
+          jobParams: schema.string(),
+        }),
+      },
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      const request = makeRequestFacade(context, req, basePath);
       let jobParamsRison: string | null;
 
-      if (request.payload) {
-        const { jobParams: jobParamsPayload } = request.payload as { jobParams: string };
+      if (request.body) {
+        const { jobParams: jobParamsPayload } = request.body as { jobParams: string };
         jobParamsRison = jobParamsPayload;
       } else {
         const { jobParams: queryJobParams } = request.query as { jobParams: string };
@@ -83,7 +61,7 @@ export function registerGenerateFromJobParams(
         throw boom.badRequest('A jobParams RISON string is required');
       }
 
-      const { exportType } = request.params;
+      const { exportType } = request.params as { exportType: string };
       let jobParams;
       let response;
       try {
@@ -95,22 +73,22 @@ export function registerGenerateFromJobParams(
         throw boom.badRequest(`invalid rison: ${jobParamsRison}`);
       }
       try {
-        response = await handler(exportType, jobParams, legacyRequest, h);
+        response = await handler(exportType, jobParams, request, res);
       } catch (err) {
         throw handleError(exportType, err);
       }
       return response;
-    },
-  });
+    })
+  );
 
   // Get route to generation endpoint: show error about GET method to user
-  server.route({
-    path: `${BASE_GENERATE}/{p*}`,
-    method: 'GET',
-    handler: () => {
-      const err = boom.methodNotAllowed('GET is not allowed');
-      err.output.headers.allow = 'POST';
-      return err;
+  router.get(
+    {
+      path: `${BASE_GENERATE}/{p*}`,
+      validate: false,
     },
-  });
+    router.handleLegacyErrors(() => {
+      throw boom.methodNotAllowed('GET is not allowed');
+    })
+  );
 }

@@ -4,13 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { makeRequestFacade } from './make_request_facade';
 
 describe('makeRequestFacade', () => {
   test('creates a default object', () => {
-    const legacyRequest = ({
-      getBasePath: () => 'basebase',
+    const getBasePath = () => 'basebase';
+    const context = ({
+      getSavedObjectsClient: () => {},
+    } as unknown) as RequestHandlerContext;
+    const request = ({
       params: {
         param1: 123,
       },
@@ -20,9 +23,9 @@ describe('makeRequestFacade', () => {
       headers: {
         user: 123,
       },
-    } as unknown) as Legacy.Request;
+    } as unknown) as KibanaRequest;
 
-    expect(makeRequestFacade(legacyRequest)).toMatchInlineSnapshot(`
+    expect(makeRequestFacade(context, request, getBasePath)).toMatchInlineSnapshot(`
       Object {
         "getBasePath": [Function],
         "getRawRequest": [Function],
@@ -44,7 +47,11 @@ describe('makeRequestFacade', () => {
   });
 
   test('getRawRequest', () => {
-    const legacyRequest = ({
+    const getBasePath = () => 'basebase';
+    const context = ({
+      getSavedObjectsClient: () => {},
+    } as unknown) as RequestHandlerContext;
+    const request = ({
       getBasePath: () => 'basebase',
       params: {
         param1: 123,
@@ -55,8 +62,8 @@ describe('makeRequestFacade', () => {
       headers: {
         user: 123,
       },
-    } as unknown) as Legacy.Request;
+    } as unknown) as KibanaRequest;
 
-    expect(makeRequestFacade(legacyRequest).getRawRequest()).toBe(legacyRequest);
+    expect(makeRequestFacade(context, request, getBasePath).getRawRequest()).toBe(request);
   });
 });

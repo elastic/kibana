@@ -4,28 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestQuery } from 'hapi';
-import { Legacy } from 'kibana';
-import {
-  RequestFacade,
-  ReportingRequestPayload,
-  ReportingRequestPre,
-  ReportingRequestQuery,
-} from '../../../types';
+import { KibanaRequest, IBasePath, RequestHandlerContext } from 'src/core/server';
+import { RequestFacade, ReportingRequestPayload, ReportingRequestQuery } from '../../../types';
 
-export function makeRequestFacade(request: Legacy.Request): RequestFacade {
-  // This condition is for unit tests
-  const getSavedObjectsClient = request.getSavedObjectsClient
-    ? request.getSavedObjectsClient.bind(request)
-    : request.getSavedObjectsClient;
+export function makeRequestFacade(
+  context: RequestHandlerContext,
+  request: KibanaRequest,
+  basePath: IBasePath['get']
+): RequestFacade {
   return {
-    getSavedObjectsClient,
-    headers: request.headers,
-    params: request.params,
-    payload: (request.payload as object) as ReportingRequestPayload,
-    query: ((request.query as RequestQuery) as object) as ReportingRequestQuery,
-    pre: (request.pre as Record<string, any>) as ReportingRequestPre,
-    getBasePath: request.getBasePath,
+    getSavedObjectsClient: () => context.core.savedObjects.client,
+    headers: request.headers as Record<string, string>,
+    params: request.params as Record<string, string>,
+    body: (request.body as object) as ReportingRequestPayload,
+    query: (request.query as object) as ReportingRequestQuery,
+    getBasePath: () => basePath(request),
     route: request.route,
     getRawRequest: () => request,
   };

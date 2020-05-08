@@ -4,6 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  BasePath,
+  SavedObjectsClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+  // @TODO: Move server deps to /server
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from 'src/core/server';
 import { EventEmitter } from 'events';
 import { ResponseObject } from 'hapi';
 import { Legacy } from 'kibana';
@@ -57,7 +65,7 @@ export type EnqueueJobFn = <JobParamsType>(
   exportTypeId: string,
   jobParams: JobParamsType,
   user: string,
-  headers: Record<string, string>,
+  headers: RequestFacade['headers'],
   request: RequestFacade
 ) => Promise<Job>;
 
@@ -72,15 +80,14 @@ export interface ReportingRequestPre {
 }
 
 export interface RequestFacade {
-  getBasePath: Legacy.Request['getBasePath'];
-  getSavedObjectsClient: Legacy.Request['getSavedObjectsClient'];
-  headers: Legacy.Request['headers'];
-  params: Legacy.Request['params'];
-  payload: JobParamPostPayload | GenerateExportTypePayload;
+  getBasePath: BasePath['get'];
+  getSavedObjectsClient: () => SavedObjectsClientContract;
+  headers: Record<string, string>;
+  params: KibanaRequest['params'];
+  body: JobParamPostPayload | GenerateExportTypePayload;
   query: ReportingRequestQuery;
-  route: Legacy.Request['route'];
-  pre: ReportingRequestPre;
-  getRawRequest: () => Legacy.Request;
+  route: KibanaRequest['route'];
+  getRawRequest: () => KibanaRequest;
 }
 
 export type ResponseFacade = ResponseObject & {

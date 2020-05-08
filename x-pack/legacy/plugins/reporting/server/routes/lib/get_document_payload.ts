@@ -11,10 +11,6 @@ import { CSV_JOB_TYPE } from '../../../common/constants';
 import { ExportTypeDefinition, ExportTypesRegistry, JobDocOutput, JobSource } from '../../../types';
 import { statuses } from '../../lib/esqueue/constants/statuses';
 
-interface ICustomHeaders {
-  [x: string]: any;
-}
-
 type ExportTypeType = ExportTypeDefinition<unknown, unknown, unknown, unknown>;
 
 interface ErrorFromPayload {
@@ -36,7 +32,7 @@ const getTitle = (exportType: ExportTypeType, title?: string): string =>
   `${title || DEFAULT_TITLE}.${exportType.jobContentExtension}`;
 
 const getReportingHeaders = (output: JobDocOutput, exportType: ExportTypeType) => {
-  const metaDataHeaders: ICustomHeaders = {};
+  const metaDataHeaders: Record<string, boolean> = {};
 
   if (exportType.jobType === CSV_JOB_TYPE) {
     const csvContainsFormulas = _.get(output, 'csv_contains_formulas', false);

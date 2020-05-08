@@ -13,6 +13,8 @@ import {
   SavedObjectsClient,
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
+  IRouter,
+  IBasePath,
 } from 'src/core/server';
 // @ts-ignore no module definition
 import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
@@ -67,9 +69,10 @@ export class ReportingCore {
       // to re-compute the license check results for this plugin
       xpackMainPlugin.info.feature(PLUGIN_ID).registerLicenseCheckResultsGenerator(checkLicense);
     });
+  }
 
-    // legacy routes
-    registerRoutes(this, __LEGACY, plugins, this.logger);
+  public setupRoutes(plugins: ReportingSetupDeps, router: IRouter, basePath: IBasePath['get']) {
+    registerRoutes(this, plugins, router, basePath, this.logger);
   }
 
   public pluginSetup(reportingSetupDeps: ReportingInternalSetup) {

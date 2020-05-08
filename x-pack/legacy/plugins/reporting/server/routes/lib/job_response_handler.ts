@@ -5,7 +5,6 @@
  */
 
 import Boom from 'boom';
-import { ResponseToolkit } from 'hapi';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { WHITELISTED_JOB_CONTENT_TYPES } from '../../../common/constants';
 import { ExportTypesRegistry } from '../../../types';
@@ -29,44 +28,32 @@ export function downloadJobResponseHandlerFactory(
   const jobsQuery = jobsQueryFactory(config, elasticsearch);
   const getDocumentPayload = getDocumentPayloadFactory(exportTypesRegistry);
 
-  return function jobResponseHandler(
+  return async function jobResponseHandler(
     validJobTypes: string[],
-    user: any,
-    h: ResponseToolkit,
+    username: string,
     params: JobResponseHandlerParams,
     opts: JobResponseHandlerOpts = {}
   ) {
     const { docId } = params;
-    // TODO: async/await
-    return jobsQuery.get(user, docId, { includeContent: !opts.excludeContent }).then(doc => {
-      if (!doc) return Boom.notFound();
 
-      const { jobtype: jobType } = doc._source;
-      if (!validJobTypes.includes(jobType)) {
-        return Boom.unauthorized(`Sorry, you are not authorized to download ${jobType} reports`);
-      }
+    const doc = await jobsQuery.get(username, docId, { includeContent: !opts.excludeContent });
+    if (!doc) throw Boom.notFound();
 
-      const output = getDocumentPayload(doc);
+    const { jobtype: jobType } = doc._source;
 
-      if (!WHITELISTED_JOB_CONTENT_TYPES.includes(output.contentType)) {
-        return Boom.badImplementation(
-          `Unsupported content-type of ${output.contentType} specified by job output`
-        );
-      }
+    if (!validJobTypes.includes(jobType)) {
+      throw Boom.unauthorized(`Sorry, you are not authorized to download ${jobType} reports`);
+    }
 
-      const response = h
-        .response(output.content)
-        .type(output.contentType)
-        .code(output.statusCode);
+    const output = getDocumentPayload(doc);
 
-      if (output.headers) {
-        Object.keys(output.headers).forEach(key => {
-          response.header(key, output.headers[key]);
-        });
-      }
+    if (!WHITELISTED_JOB_CONTENT_TYPES.includes(output.contentType)) {
+      throw Boom.badImplementation(
+        `Unsupported content-type of ${output.contentType} specified by job output`
+      );
+    }
 
-      return response; // Hapi
-    });
+    return output;
   };
 }
 
@@ -78,25 +65,24 @@ export function deleteJobResponseHandlerFactory(
 
   return async function deleteJobResponseHander(
     validJobTypes: string[],
-    user: any,
-    h: ResponseToolkit,
+    username: string,
     params: JobResponseHandlerParams
   ) {
     const { docId } = params;
-    const doc = await jobsQuery.get(user, docId, { includeContent: false });
-    if (!doc) return Boom.notFound();
+    const doc = await jobsQuery.get(username, docId, { includeContent: false });
+    if (!doc) throw Boom.notFound();
 
     const { jobtype: jobType } = doc._source;
     if (!validJobTypes.includes(jobType)) {
-      return Boom.unauthorized(`Sorry, you are not authorized to delete ${jobType} reports`);
+      throw Boom.unauthorized(`Sorry, you are not authorized to delete ${jobType} reports`);
     }
 
     try {
       const docIndex = doc._index;
       await jobsQuery.delete(docIndex, docId);
-      return h.response({ deleted: true });
+      return { deleted: true };
     } catch (error) {
-      return Boom.boomify(error, { statusCode: error.statusCode });
+      throw Boom.boomify(error, { statusCode: error.statusCode });
     }
   };
 }

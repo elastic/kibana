@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import {
   ConditionalHeaders,
   EnqueueJobFn,
@@ -36,7 +35,7 @@ export function enqueueJobFactory(reporting: ReportingCore, parentLogger: Logger
   return async function enqueueJob<JobParamsType>(
     exportTypeId: string,
     jobParams: JobParamsType,
-    user: string,
+    username: string,
     headers: ConditionalHeaders['headers'],
     request: RequestFacade
   ): Promise<Job> {
@@ -54,7 +53,7 @@ export function enqueueJobFactory(reporting: ReportingCore, parentLogger: Logger
 
     const options = {
       timeout: queueTimeout,
-      created_by: get(user, 'username', false),
+      created_by: username,
       browser_type: browserType,
       max_attempts: maxAttempts,
     };

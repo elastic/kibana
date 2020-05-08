@@ -47,10 +47,6 @@ export function jobsQueryFactory(
   const index = config.get('index');
   const { callAsInternalUser } = elasticsearch.adminClient;
 
-  function getUsername(user: any) {
-    return get(user, 'username', false);
-  }
-
   function execQuery(queryType: string, body: QueryBody) {
     const defaultBody: Record<string, object> = {
       search: {
@@ -82,9 +78,13 @@ export function jobsQueryFactory(
   }
 
   return {
-    list(jobTypes: string[], user: any, page = 0, size = defaultSize, jobIds: string[] | null) {
-      const username = getUsername(user);
-
+    list(
+      jobTypes: string[],
+      username: string,
+      page = 0,
+      size = defaultSize,
+      jobIds: string[] | null
+    ) {
       const body: QueryBody = {
         size,
         from: size * page,
@@ -108,9 +108,7 @@ export function jobsQueryFactory(
       return getHits(execQuery('search', body));
     },
 
-    count(jobTypes: string[], user: any) {
-      const username = getUsername(user);
-
+    count(jobTypes: string[], username: string) {
       const body: QueryBody = {
         query: {
           constant_score: {
@@ -129,10 +127,8 @@ export function jobsQueryFactory(
       });
     },
 
-    get(user: any, id: string, opts: GetOpts = {}): Promise<JobSource<unknown> | void> {
+    get(username: string, id: string, opts: GetOpts = {}): Promise<JobSource<unknown> | void> {
       if (!id) return Promise.resolve();
-
-      const username = getUsername(user);
 
       const body: QueryBody = {
         query: {

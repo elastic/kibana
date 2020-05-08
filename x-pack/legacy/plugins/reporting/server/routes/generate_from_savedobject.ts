@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
+import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
+import { IRouter, IBasePath } from 'src/core/server';
 import { API_BASE_GENERATE_V1, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../common/constants';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
-import { Logger, ReportingResponseToolkit, ServerFacade } from '../../types';
+import { Logger } from '../../types';
 import { ReportingCore, ReportingSetupDeps } from '../types';
 import { makeRequestFacade } from './lib/make_request_facade';
-import { getRouteOptionsCsv } from './lib/route_config_factories';
 import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types';
 
 /*
@@ -25,21 +25,33 @@ import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types
  */
 export function registerGenerateCsvFromSavedObject(
   reporting: ReportingCore,
-  server: ServerFacade,
   plugins: ReportingSetupDeps,
+  router: IRouter,
+  basePath: IBasePath['get'],
   handleRoute: HandlerFunction,
   handleRouteError: HandlerErrorFunction,
   logger: Logger
 ) {
-  const config = reporting.getConfig();
-  const routeOptions = getRouteOptionsCsv(config, plugins, logger);
-
-  server.route({
-    path: `${API_BASE_GENERATE_V1}/csv/saved-object/{savedObjectType}:{savedObjectId}`,
-    method: 'POST',
-    options: routeOptions,
-    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
-      const requestFacade = makeRequestFacade(legacyRequest);
+  router.post(
+    {
+      path: `${API_BASE_GENERATE_V1}/csv/saved-object/{savedObjectType}:{savedObjectId}`,
+      validate: {
+        params: schema.object({
+          savedObjectType: schema.string({ minLength: 2 }),
+          savedObjectId: schema.string({ minLength: 2 }),
+        }),
+        body: schema.object({
+          state: schema.object({}),
+          timerange: schema.object({
+            timezone: schema.string({ defaultValue: 'UTC' }),
+            min: schema.duration(),
+            max: schema.duration(),
+          }),
+        }),
+      },
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      const requestFacade = makeRequestFacade(context, req, basePath);
 
       /*
        * 1. Build `jobParams` object: job data that execution will need to reference in various parts of the lifecycle
@@ -49,7 +61,7 @@ export function registerGenerateCsvFromSavedObject(
       let result: QueuedJobPayload<any>;
       try {
         const jobParams = getJobParamsFromRequest(requestFacade, { isImmediate: false });
-        result = await handleRoute(CSV_FROM_SAVEDOBJECT_JOB_TYPE, jobParams, legacyRequest, h); // pass the original request because the handler will make the request facade on its own
+        result = await handleRoute(CSV_FROM_SAVEDOBJECT_JOB_TYPE, jobParams, requestFacade, res);
       } catch (err) {
         throw handleRouteError(CSV_FROM_SAVEDOBJECT_JOB_TYPE, err);
       }
@@ -60,7 +72,12 @@ export function registerGenerateCsvFromSavedObject(
         );
       }
 
-      return result;
-    },
-  });
+      return res.ok({
+        body: result,
+        headers: {
+          'content-type': 'application/json',
+        },
+      });
+    })
+  );
 }

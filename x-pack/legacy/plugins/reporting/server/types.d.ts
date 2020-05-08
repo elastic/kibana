@@ -5,10 +5,10 @@
  */
 
 import { Legacy } from 'kibana';
-import { ElasticsearchServiceSetup } from 'src/core/server';
+import { ElasticsearchServiceSetup, KibanaRequest } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
-import { SecurityPluginSetup } from '../../../../plugins/security/server';
+import { SecurityPluginSetup, AuthenticatedUser } from '../../../../plugins/security/server';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import { ReportingPluginSpecOptions } from '../types';
 import { ReportingConfigType } from './core';
@@ -43,3 +43,7 @@ export { ReportingConfig, ReportingConfigType, ReportingCore } from './core';
 
 export type CaptureConfig = ReportingConfigType['capture'];
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
+
+export interface KibanaRequestWithUser extends KibanaRequest {
+  user: AuthenticatedUser;
+}
