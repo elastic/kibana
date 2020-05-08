@@ -36,6 +36,7 @@ import { debouncedComponent } from '../../debounced_component';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public';
+import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -54,7 +55,7 @@ export interface WorkspacePanelProps {
   dispatch: (action: Action) => void;
   ExpressionRenderer: ReactExpressionRendererType;
   core: CoreStart | CoreSetup;
-  plugins: { uiActions?: UiActionsStart };
+  plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
 }
 
 export const WorkspacePanel = debouncedComponent(InnerWorkspacePanel);
@@ -224,6 +225,7 @@ export function InnerWorkspacePanel({
           className="lnsExpressionRenderer__component"
           padding="m"
           expression={expression!}
+          refreshSubject={plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$()}
           onEvent={(event: ExpressionRendererEvent) => {
             if (!plugins.uiActions) {
               // ui actions not available, not handling event...

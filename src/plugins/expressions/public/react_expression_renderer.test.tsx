@@ -88,6 +88,39 @@ describe('ExpressionRenderer', () => {
     expect(instance.find(EuiProgress)).toHaveLength(0);
   });
 
+  it('updates the expression loader when refresh subject emits', () => {
+    const dataSubject = new Subject();
+    const data$ = dataSubject.asObservable().pipe(share());
+    const renderSubject = new Subject();
+    const render$ = renderSubject.asObservable().pipe(share());
+    const loadingSubject = new Subject();
+    const loading$ = loadingSubject.asObservable().pipe(share());
+
+    const refreshSubject = new Subject();
+    const loaderUpdate = jest.fn();
+
+    (ExpressionLoader as jest.Mock).mockImplementation(() => {
+      return {
+        render$,
+        data$,
+        loading$,
+        update: loaderUpdate,
+      };
+    });
+
+    const instance = mount(
+      <ReactExpressionRenderer refreshSubject={refreshSubject} expression="" />
+    );
+
+    act(() => {
+      refreshSubject.next();
+    });
+
+    instance.update();
+
+    expect(loaderUpdate).toHaveBeenCalled();
+  });
+
   it('should display a custom error message if the user provides one and then remove it after successful render', () => {
     const dataSubject = new Subject();
     const data$ = dataSubject.asObservable().pipe(share());
