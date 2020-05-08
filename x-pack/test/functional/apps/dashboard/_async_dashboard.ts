@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
+  const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const pieChart = getService('pieChart');
@@ -95,6 +96,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       ]`;
 
       await kibanaServer.uiSettings.update({ 'timepicker:quickRanges': SAMPLE_DATA_RANGE });
+      // refresh page to make sure ui settings update is picked up
+      await browser.refresh();
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await appMenu.clickLink('Discover');
       await PageObjects.discover.selectIndexPattern('kibana_sample_data_flights');
       await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
