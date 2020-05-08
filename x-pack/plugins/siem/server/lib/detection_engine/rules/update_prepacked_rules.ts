@@ -16,66 +16,68 @@ export const updatePrepackagedRules = async (
   rules: PrepackagedRules[],
   outputIndex: string
 ): Promise<void> => {
-  await rules.forEach(async rule => {
-    const {
-      description,
-      false_positives: falsePositives,
-      from,
-      immutable,
-      query,
-      language,
-      saved_id: savedId,
-      meta,
-      filters,
-      rule_id: ruleId,
-      index,
-      interval,
-      max_signals: maxSignals,
-      risk_score: riskScore,
-      name,
-      severity,
-      tags,
-      to,
-      type,
-      threat,
-      references,
-      version,
-      note,
-    } = rule;
+  await Promise.all(
+    rules.map(async rule => {
+      const {
+        description,
+        false_positives: falsePositives,
+        from,
+        immutable,
+        query,
+        language,
+        saved_id: savedId,
+        meta,
+        filters,
+        rule_id: ruleId,
+        index,
+        interval,
+        max_signals: maxSignals,
+        risk_score: riskScore,
+        name,
+        severity,
+        tags,
+        to,
+        type,
+        threat,
+        references,
+        version,
+        note,
+      } = rule;
 
-    const existingRule = await readRules({ alertsClient, ruleId, id: undefined });
+      const existingRule = await readRules({ alertsClient, ruleId, id: undefined });
 
-    // Note: we do not pass down enabled as we do not want to suddenly disable
-    // or enable rules on the user when they were not expecting it if a rule updates
-    return patchRules({
-      alertsClient,
-      description,
-      falsePositives,
-      from,
-      immutable,
-      query,
-      language,
-      outputIndex,
-      rule: existingRule,
-      id: undefined, // We never have an id when updating from pre-packaged rules
-      savedId,
-      savedObjectsClient,
-      meta,
-      filters,
-      ruleId,
-      index,
-      interval,
-      maxSignals,
-      riskScore,
-      name,
-      severity,
-      tags,
-      to,
-      type,
-      threat,
-      references,
-      version,
-      note,
-    });
-  });
+      // Note: we do not pass down enabled as we do not want to suddenly disable
+      // or enable rules on the user when they were not expecting it if a rule updates
+      return patchRules({
+        alertsClient,
+        description,
+        falsePositives,
+        from,
+        immutable,
+        query,
+        language,
+        outputIndex,
+        rule: existingRule,
+        id: undefined, // We never have an id when updating from pre-packaged rules
+        savedId,
+        savedObjectsClient,
+        meta,
+        filters,
+        ruleId,
+        index,
+        interval,
+        maxSignals,
+        riskScore,
+        name,
+        severity,
+        tags,
+        to,
+        type,
+        threat,
+        references,
+        version,
+        note,
+      });
+    })
+  );
 };
