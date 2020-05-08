@@ -9,6 +9,7 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import { EuiIconTip } from '@elastic/eui';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ErrorGroupListAPIResponse } from '../../../../../server/lib/errors/get_error_groups';
@@ -60,13 +61,31 @@ const ErrorGroupList: React.FC<Props> = props => {
   if (!serviceName) {
     throw new Error('Service name is required');
   }
-
   const columns = useMemo(
     () => [
       {
-        name: i18n.translate('xpack.apm.errorsTable.groupIdColumnLabel', {
-          defaultMessage: 'Group ID'
-        }),
+        name: (
+          <>
+            {i18n.translate('xpack.apm.errorsTable.groupIdColumnLabel', {
+              defaultMessage: 'Group ID'
+            })}{' '}
+            <EuiIconTip
+              size="s"
+              type="questionInCircle"
+              color="subdued"
+              iconProps={{
+                className: 'eui-alignTop'
+              }}
+              content={i18n.translate(
+                'xpack.apm.errorsTable.groupIdColumnDescription',
+                {
+                  defaultMessage:
+                    'Hash of the stack trace. Groups similar errors together, even when the error message is different due to dynamic parameters.'
+                }
+              )}
+            />
+          </>
+        ),
         field: 'groupId',
         sortable: false,
         width: px(unit * 6),

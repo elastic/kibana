@@ -8,7 +8,7 @@ import { SavedObjectsType } from '../../../../../../../src/core/server';
 
 export const ruleStatusSavedObjectType = 'siem-detection-engine-rule-status';
 
-export const ruleStatusSavedObjectMappings = {
+export const ruleStatusSavedObjectMappings: SavedObjectsType['mappings'] = {
   properties: {
     alertId: {
       type: 'keyword',
