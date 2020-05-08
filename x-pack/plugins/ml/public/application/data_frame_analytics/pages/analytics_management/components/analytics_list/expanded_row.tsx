@@ -171,11 +171,11 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     position: 'left',
   };
 
-  const totalSteps = item.stats.progress.length;
-  let step = 0;
-  for (const progressStep of item.stats.progress) {
-    step++;
-    if (progressStep.progress_percent < 100) {
+  const totalPhases = item.stats.progress.length;
+  let phase = 0;
+  for (const progressPhase of item.stats.progress) {
+    phase++;
+    if (progressPhase.progress_percent < 100) {
       break;
     }
   }
@@ -188,10 +188,10 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     items: [
       {
         title: i18n.translate(
-          'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.step',
-          { defaultMessage: 'Step' }
+          'xpack.ml.dataframe.analyticsList.expandedRow.tabs.jobSettings.phase',
+          { defaultMessage: 'Phase' }
         ),
-        description: `${step}/${totalSteps}`,
+        description: `${phase}/${totalPhases}`,
       },
       ...item.stats.progress.map(s => {
         return {
