@@ -46,4 +46,6 @@ export const initRoutes = (router: IRouter): void => {
   createListIndexRoute(router);
   readListIndexRoute(router);
   deleteListIndexRoute(router);
+
+  // exception lists
 };

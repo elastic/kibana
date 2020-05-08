@@ -24,6 +24,7 @@ import {
 import { createConfig$ } from './create_config';
 import { getSpaceId } from './get_space_id';
 import { getUser } from './get_user';
+import { initSavedObjects } from './saved_objects';
 
 export class ListPlugin
   implements Plugin<Promise<ListPluginSetup>, ListsPluginStart, PluginsSetup> {
@@ -47,6 +48,8 @@ export class ListPlugin
     this.spaces = plugins.spaces?.spacesService;
     this.config = config;
     this.security = plugins.security;
+
+    initSavedObjects(core.savedObjects);
 
     core.http.registerRouteHandlerContext('lists', this.createRouteHandlerContext());
     const router = core.http.createRouter();
