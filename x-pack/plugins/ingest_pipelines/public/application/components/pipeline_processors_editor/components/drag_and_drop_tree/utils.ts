@@ -59,7 +59,7 @@ export const resolveDestinationLocation = (
 
   if (dragDirection === 'down') {
     const below: ProcessorSelector = items[destinationIndex + 1];
-    return mapSelectorToDragLocation(below);
+    return mapSelectorToDragLocation(below ?? displacing);
   } else {
     return mapSelectorToDragLocation(displacing);
   }
