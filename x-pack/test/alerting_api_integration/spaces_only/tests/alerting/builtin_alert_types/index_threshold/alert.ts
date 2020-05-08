@@ -381,7 +381,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
 async function createAction(supertest: any, objectRemover: ObjectRemover): Promise<string> {
   const { statusCode, body: createdAction } = await supertest
-    .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+    .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions`)
     .set('kbn-xsrf', 'foo')
     .send({
       name: 'index action for index threshold FT',

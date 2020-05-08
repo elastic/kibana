@@ -19,7 +19,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
 
     it('should handle get all action request appropriately', async () => {
       const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
@@ -34,7 +34,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
 
-      await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/action/_getAll`).expect(200, [
+      await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/actions`).expect(200, [
         {
           id: createdAction.id,
           isPreconfigured: false,
@@ -78,7 +78,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
 
     it(`shouldn't get all action from another space`, async () => {
       const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
@@ -93,7 +93,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
 
-      await supertest.get(`${getUrlPrefix(Spaces.other.id)}/api/action/_getAll`).expect(200, [
+      await supertest.get(`${getUrlPrefix(Spaces.other.id)}/api/actions`).expect(200, [
         {
           id: 'preconfigured-es-index-action',
           isPreconfigured: true,

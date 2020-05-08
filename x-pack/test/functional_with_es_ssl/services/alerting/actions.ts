@@ -31,7 +31,7 @@ export class Actions {
     this.log.debug(`creating action ${actionParams.name}`);
 
     const { data: action, status: actionStatus, actionStatusText } = await this.axios.post(
-      `/api/action`,
+      `/api/actions`,
       actionParams
     );
     if (actionStatus !== 200) {

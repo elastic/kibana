@@ -45,7 +45,7 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
       await esTestIndexTool.setup();
       await es.indices.create({ index: authorizationIndex });
       const { body: createdAction } = await supertestWithoutAuth
-        .post(`${getUrlPrefix(space.id)}/api/action`)
+        .post(`${getUrlPrefix(space.id)}/api/actions`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',
@@ -174,7 +174,7 @@ instanceStateValue: true
       const retryDate = new Date(Date.now() + 60000);
 
       const { body: createdAction } = await supertestWithoutAuth
-        .post(`${getUrlPrefix(space.id)}/api/action`)
+        .post(`${getUrlPrefix(space.id)}/api/actions`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'Test rate limit',
@@ -292,7 +292,7 @@ instanceStateValue: true
     it('should have proper callCluster and savedObjectsClient authorization for action type executor', async () => {
       const reference = alertUtils.generateReference();
       const { body: createdAction } = await supertestWithoutAuth
-        .post(`${getUrlPrefix(space.id)}/api/action`)
+        .post(`${getUrlPrefix(space.id)}/api/actions`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',

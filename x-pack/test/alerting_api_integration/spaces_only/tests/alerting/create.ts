@@ -28,7 +28,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
     it('should handle create alert request appropriately', async () => {
       const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'MY action',

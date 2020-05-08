@@ -50,7 +50,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         before(async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
@@ -324,7 +324,7 @@ instanceStateValue: true
           const retryDate = new Date(Date.now() + 60000);
 
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'Test rate limit',
@@ -523,7 +523,7 @@ instanceStateValue: true
           const testStart = new Date();
           const reference = alertUtils.generateReference();
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',

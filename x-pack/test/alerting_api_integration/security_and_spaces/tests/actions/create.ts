@@ -24,7 +24,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should handle create action request appropriately', async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
@@ -78,7 +78,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
         it(`should handle create action request appropriately when action type isn't registered`, async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
@@ -114,7 +114,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
         it('should handle create action request appropriately when payload is empty and invalid', async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({});
@@ -146,7 +146,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
         it(`should handle create action request appropriately when config isn't valid`, async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
@@ -185,7 +185,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
         it(`should handle create action requests for action types that are not enabled`, async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({

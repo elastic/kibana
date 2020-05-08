@@ -20,7 +20,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
     it('should handle create action request appropriately', async () => {
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions`)
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My action',

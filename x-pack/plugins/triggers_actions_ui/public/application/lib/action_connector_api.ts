@@ -9,11 +9,11 @@ import { BASE_ACTION_API_PATH } from '../constants';
 import { ActionConnector, ActionConnectorWithoutId, ActionType } from '../../types';
 
 export async function loadActionTypes({ http }: { http: HttpSetup }): Promise<ActionType[]> {
-  return await http.get(`${BASE_ACTION_API_PATH}/types`);
+  return await http.get(`${BASE_ACTION_API_PATH}/list_action_types`);
 }
 
 export async function loadAllActions({ http }: { http: HttpSetup }): Promise<ActionConnector[]> {
-  return await http.get(`${BASE_ACTION_API_PATH}/_getAll`);
+  return await http.get(`${BASE_ACTION_API_PATH}`);
 }
 
 export async function createActionConnector({

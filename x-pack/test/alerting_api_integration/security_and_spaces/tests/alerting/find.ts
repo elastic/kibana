@@ -84,7 +84,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
         it('should handle find alert request with filter appropriately', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
