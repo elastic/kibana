@@ -39,14 +39,13 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       const currentStatsMap = new Map(statsMap);
       /**
        * Set the waiting indicator for this event to indicate that related event results are pending.
-       * It will be replaced by the actual results from the API when they are returned. 
+       * It will be replaced by the actual results from the API when they are returned.
        */
       currentStatsMap.set(resolverEvent, waitingForRelatedEventData);
       return { ...state, [resultsEnrichedWithRelatedEventInfo]: currentStatsMap };
     }
     return state;
   } else if (action.type === 'serverFailedToReturnRelatedEventData') {
-    
     const statsMap = state[resultsEnrichedWithRelatedEventInfo];
     if (statsMap) {
       const currentStatsMap = new Map(statsMap);
@@ -55,8 +54,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       return { ...state, [resultsEnrichedWithRelatedEventInfo]: currentStatsMap };
     }
     return state;
-  } 
-  else if (action.type === 'serverReturnedRelatedEventData') {
+  } else if (action.type === 'serverReturnedRelatedEventData') {
     /**
      * REMOVE: pending resolution of https://github.com/elastic/endpoint-app-team/issues/379
      * When this data is inlined with results, there won't be a need for this.
@@ -72,11 +70,12 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
           // do stats
           const statsForEntry = newStatsEntry?.relatedEvents.reduce(
             (
-              a: Partial<Record<RelatedEventType, number>>,
-              v: { relatedEventType: RelatedEventType }
+              compiledStats: Partial<Record<RelatedEventType, number>>,
+              relatedEvent: { relatedEventType: RelatedEventType }
             ) => {
-              a[v.relatedEventType] = (a[v.relatedEventType] || 0) + 1;
-              return a;
+              compiledStats[relatedEvent.relatedEventType] =
+                (compiledStats[relatedEvent.relatedEventType] || 0) + 1;
+              return compiledStats;
             },
             {}
           );
