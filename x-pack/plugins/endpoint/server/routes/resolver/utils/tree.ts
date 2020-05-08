@@ -12,7 +12,7 @@ import {
   ResolverNodePagination,
 } from '../../../../common/types';
 import { entityId, parentEntityId } from '../../../../common/models/event';
-import { buildPaginationCursor } from './pagination';
+import { PaginationBuilder } from './pagination';
 
 type ExtractFunction = (event: ResolverEvent) => string | undefined;
 
@@ -215,7 +215,7 @@ export class Tree {
            */
           const currentNode = this.cache.get(id);
           if (currentNode !== undefined) {
-            currentNode.pagination[attribute] = buildPaginationCursor(total, grouped[id]);
+            currentNode.pagination[attribute] = PaginationBuilder.buildCursor(total, grouped[id]);
           }
         }
       }

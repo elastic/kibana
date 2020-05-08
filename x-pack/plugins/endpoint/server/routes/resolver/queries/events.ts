@@ -6,13 +6,12 @@
 import { SearchResponse } from 'elasticsearch';
 import { ResolverEvent } from '../../../../common/types';
 import { ResolverQuery } from './base';
-import { PaginationParams } from '../utils/pagination';
+import { PaginationBuilder, PaginatedResults } from '../utils/pagination';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
-import { TotalsAggregation, TotalsResult } from './totals_aggs';
 
-export class EventsQuery extends ResolverQuery<TotalsResult> {
+export class EventsQuery extends ResolverQuery<PaginatedResults> {
   constructor(
-    private readonly pagination: PaginationParams,
+    private readonly pagination: PaginationBuilder,
     indexPattern: string,
     endpointID?: string
   ) {
@@ -20,11 +19,6 @@ export class EventsQuery extends ResolverQuery<TotalsResult> {
   }
 
   protected legacyQuery(endpointID: string, uniquePIDs: string[]): JsonObject {
-    const totalsAggs = new TotalsAggregation(
-      'endgame.serial_event_id',
-      'endgame.unique_pid',
-      this.pagination
-    );
     return {
       query: {
         bool: {
@@ -48,12 +42,15 @@ export class EventsQuery extends ResolverQuery<TotalsResult> {
           ],
         },
       },
-      ...totalsAggs.createFields(uniquePIDs.length),
+      ...this.pagination.buildQueryFields(
+        uniquePIDs.length,
+        'endgame.serial_event_id',
+        'endgame.unique_pid'
+      ),
     };
   }
 
   protected query(entityIDs: string[]): JsonObject {
-    const totalsAggs = new TotalsAggregation('event.id', 'process.entity_id', this.pagination);
     return {
       query: {
         bool: {
@@ -74,11 +71,14 @@ export class EventsQuery extends ResolverQuery<TotalsResult> {
           ],
         },
       },
-      ...totalsAggs.createFields(entityIDs.length),
+      ...this.pagination.buildQueryFields(entityIDs.length, 'event.id', 'process.entity_id'),
     };
   }
 
-  formatResponse(response: SearchResponse<ResolverEvent>): TotalsResult {
-    return TotalsAggregation.formatResponse(response);
+  formatResponse(response: SearchResponse<ResolverEvent>): PaginatedResults {
+    return {
+      results: ResolverQuery.getResults(response),
+      totals: PaginationBuilder.getTotals(response.aggregations),
+    };
   }
 }

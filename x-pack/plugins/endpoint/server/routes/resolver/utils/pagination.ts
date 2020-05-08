@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResolverEvent } from '../../../../common/types';
+import { ResolverEvent, AggBucket } from '../../../../common/types';
 import { entityId } from '../../../../common/models/event';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 
-export interface PaginationParams {
-  size: number;
-  timestamp?: number;
-  eventID?: string;
+interface TotalsAggregation {
+  totals?: {
+    buckets?: AggBucket[];
+  };
 }
 
 interface PaginationCursor {
@@ -19,67 +19,91 @@ interface PaginationCursor {
   eventID: string;
 }
 
-function urlEncodeCursor(data: PaginationCursor): string {
-  const value = JSON.stringify(data);
-  return Buffer.from(value, 'utf8')
-    .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/g, '');
+export interface PaginatedResults {
+  results: ResolverEvent[];
+  totals: Record<string, number>;
 }
 
-function urlDecodeCursor(value: string): PaginationCursor {
-  value = value.replace(/\-/g, '+').replace(/_/g, '/');
-  const data = Buffer.from(value, 'base64').toString('utf8');
-  const { timestamp, eventID } = JSON.parse(data);
-  // take some extra care to only grab the things we want
-  // convert the timestamp string to date object
-  return { timestamp, eventID };
-}
+export class PaginationBuilder {
+  constructor(
+    private readonly size: number,
+    private readonly timestamp?: number,
+    private readonly eventID?: string
+  ) {}
 
-export function getPaginationParams(limit: number, after?: string): PaginationParams {
-  if (after) {
-    try {
-      const cursor = urlDecodeCursor(after);
-      if (cursor.timestamp && cursor.eventID) {
-        return {
-          size: limit,
-          timestamp: cursor.timestamp,
-          eventID: cursor.eventID,
-        };
-      }
-    } catch (err) {
-      /* tslint:disable:no-empty */
-    } // ignore invalid cursor values
+  private static urlEncodeCursor(data: PaginationCursor): string {
+    const value = JSON.stringify(data);
+    return Buffer.from(value, 'utf8')
+      .toString('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/g, '');
   }
-  return { size: limit };
-}
 
-export function paginate(
-  pagination: PaginationParams,
-  tiebreaker: string,
-  aggregator: string,
-  query: JsonObject
-): JsonObject {
-  const { size, timestamp, eventID } = pagination;
-  query.sort = [{ '@timestamp': 'asc' }, { [tiebreaker]: 'asc' }];
-  query.aggs = query.aggs || {};
-  query.aggs = Object.assign({}, query.aggs, { totals: { terms: { field: aggregator, size } } });
-  query.size = size;
-  if (timestamp && eventID) {
-    query.search_after = [timestamp, eventID] as Array<number | string>;
+  private static urlDecodeCursor(value: string): PaginationCursor {
+    value = value.replace(/\-/g, '+').replace(/_/g, '/');
+    const data = Buffer.from(value, 'base64').toString('utf8');
+    const { timestamp, eventID } = JSON.parse(data);
+    // take some extra care to only grab the things we want
+    // convert the timestamp string to date object
+    return { timestamp, eventID };
   }
-  return query;
-}
 
-export function buildPaginationCursor(total: number, results: ResolverEvent[]): string | null {
-  if (total > results.length && results.length > 0) {
-    const lastResult = results[results.length - 1];
-    const cursor = {
-      timestamp: lastResult['@timestamp'],
-      eventID: entityId(lastResult),
-    };
-    return urlEncodeCursor(cursor);
+  static buildCursor(total: number, results: ResolverEvent[]): string | null {
+    if (total > results.length && results.length > 0) {
+      const lastResult = results[results.length - 1];
+      const cursor = {
+        timestamp: lastResult['@timestamp'],
+        eventID: entityId(lastResult),
+      };
+      return PaginationBuilder.urlEncodeCursor(cursor);
+    }
+    return null;
   }
-  return null;
+
+  static createBuilder(limit: number, after?: string): PaginationBuilder {
+    if (after) {
+      try {
+        const cursor = PaginationBuilder.urlDecodeCursor(after);
+        if (cursor.timestamp && cursor.eventID) {
+          return new PaginationBuilder(limit, cursor.timestamp, cursor.eventID);
+        }
+      } catch (err) {
+        /* tslint:disable:no-empty */
+      } // ignore invalid cursor values
+    }
+    return new PaginationBuilder(limit);
+  }
+
+  buildQueryFields(
+    numTerms: number,
+    tiebreaker: string,
+    aggregator: string,
+    aggs: JsonObject = {}
+  ): JsonObject {
+    const fields: JsonObject = {};
+    fields.sort = [{ '@timestamp': 'asc' }, { [tiebreaker]: 'asc' }];
+    fields.aggs = Object.assign({}, aggs, {
+      totals: { terms: { field: aggregator, size: numTerms } },
+    });
+    fields.size = this.size;
+    if (this.timestamp && this.eventID) {
+      fields.search_after = [this.timestamp, this.eventID] as Array<number | string>;
+    }
+    return fields;
+  }
+
+  static getTotals(aggregations?: TotalsAggregation): Record<string, number> {
+    if (!aggregations?.totals?.buckets) {
+      return {};
+    }
+
+    return aggregations?.totals?.buckets?.reduce(
+      (cumulative: Record<string, number>, bucket: AggBucket) => ({
+        ...cumulative,
+        [bucket.key]: bucket.doc_count,
+      }),
+      {}
+    );
+  }
 }

@@ -6,7 +6,7 @@
 
 import { IScopedClusterClient } from 'kibana/server';
 import { entityId, parentEntityId } from '../../../../common/models/event';
-import { getPaginationParams } from './pagination';
+import { PaginationBuilder } from './pagination';
 import { Tree } from './tree';
 import { LifecycleQuery } from '../queries/lifecycle';
 import { ChildrenQuery } from '../queries/children';
@@ -67,7 +67,7 @@ export class Fetcher {
 
   private async doEvents(tree: Tree, limit: number, after?: string) {
     const query = new EventsQuery(
-      getPaginationParams(limit, after),
+      PaginationBuilder.createBuilder(limit, after),
       this.indexPattern,
       this.endpointID
     );
@@ -88,7 +88,7 @@ export class Fetcher {
     if (levels === 0 || ids.length === 0) return;
 
     const childrenQuery = new ChildrenQuery(
-      getPaginationParams(limit, after),
+      PaginationBuilder.createBuilder(limit, after),
       this.indexPattern,
       this.endpointID
     );

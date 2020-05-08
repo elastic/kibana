@@ -29,7 +29,6 @@ export class LifecycleQuery extends ResolverQuery<ResolverEvent[]> {
           ],
         },
       },
-      // TODO remove these?
       size: 10000,
       sort: [{ '@timestamp': 'asc' }],
     };
@@ -52,13 +51,12 @@ export class LifecycleQuery extends ResolverQuery<ResolverEvent[]> {
           ],
         },
       },
-      // TODO remove these?
       size: 10000,
       sort: [{ '@timestamp': 'asc' }],
     };
   }
 
   formatResponse(response: SearchResponse<ResolverEvent>): ResolverEvent[] {
-    return response.hits.hits.map(hit => hit._source);
+    return ResolverQuery.getResults(response);
   }
 }

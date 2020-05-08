@@ -38,6 +38,10 @@ export abstract class ResolverQuery<T> implements MSearchQuery {
     return ResolverQuery.formatBody(query, index);
   }
 
+  protected static getResults(response: SearchResponse<ResolverEvent>): ResolverEvent[] {
+    return response.hits.hits.map(hit => hit._source);
+  }
+
   buildMSearch(ids: string | string[]): JsonObject[] {
     const { query, index } = this.buildQuery(ids);
     return [{ index }, query];
