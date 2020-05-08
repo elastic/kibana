@@ -213,8 +213,8 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getScriptedFieldsTabCount() {
       return await retry.try(async () => {
-        const theText = await testSubjects.getVisibleText('tab-scriptedFields');
-        return theText.split(' ')[1].replace(/\((.*)\)/, '$1');
+        const text = await testSubjects.getVisibleText('tab-scriptedFields');
+        return text.split(' ')[2].replace(/\((.*)\)/, '$1');
       });
     }
 
