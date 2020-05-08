@@ -226,8 +226,8 @@ export function geoShapeToGeometry(value, accumulator) {
 }
 
 function createGeoBoundBoxFilter({ maxLat, maxLon, minLat, minLon }, geoFieldName) {
-  const top = maxLat > 90 ? 90 : maxLat;
-  const bottom = minLat < -90 ? -90 : minLat;
+  const top = clampToLatBounds(maxLat);
+  const bottom = clampToLatBounds(minLat);
 
   // geo_bounding_box does not support ranges outside of -180 and 180
   // Split into two bounding boxes when ranges are outside those values
@@ -423,8 +423,8 @@ export function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
   // when the shape crosses the dateline
   const left = minLon;
   const right = maxLon;
-  const top = maxLat > 90 ? 90 : maxLat;
-  const bottom = minLat < -90 ? -90 : minLat;
+  const top = clampToLatBounds(maxLat);
+  const bottom = clampToLatBounds(minLat);
   const topLeft = [left, top];
   const bottomLeft = [left, bottom];
   const bottomRight = [right, bottom];
