@@ -23,16 +23,7 @@ module.exports = {
   presets: ['@babel/preset-react', '@babel/typescript'],
   env: {
     web: {
-      presets: [
-        [
-          '@babel/preset-env',
-          {
-            targets: {
-              browsers: ['last 2 versions', '> 5%', 'Safari 7'],
-            },
-          },
-        ],
-      ],
+      presets: ['@babel/preset-env'],
     },
     node: {
       presets: [

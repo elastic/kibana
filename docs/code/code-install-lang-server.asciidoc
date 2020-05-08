@@ -6,11 +6,9 @@
 [role="screenshot"]
 image::images/code-lang-server-tab.png[]
 
-The following languages are supported for the current version:
+For the current version, *Code* supports the following languages in addition to TypeScript:
 
-* Built-in language support: `TypeScript`
-
-* Additional language support: `Java`
+* `Java`
 
 You can check the status of the language servers and get installation instructions on the *Language Servers* tab.  Make sure the status of the language server is `INSTALLED` or `RUNNING` after you restart the {kib} instance.
 [role="screenshot"]

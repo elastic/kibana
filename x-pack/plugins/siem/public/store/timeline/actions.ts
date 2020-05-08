@@ -13,6 +13,7 @@ import {
   QueryOperator,
 } from '../../components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
+import { TimelineResult } from '../../graphql/types';
 
 import { KqlMode, TimelineModel } from './model';
 
@@ -76,7 +77,7 @@ export const updateTimeline = actionCreator<{
 
 export const addTimeline = actionCreator<{
   id: string;
-  timeline: TimelineModel;
+  timeline: TimelineResult;
 }>('ADD_TIMELINE');
 
 export const startTimelineSaving = actionCreator<{

@@ -34,7 +34,7 @@
     "@babel/polyfill": "^7.2.5",
     "@elastic/eui": "0.0.23",
     "@kbn/babel-preset": "1.0.0",
-    "autoprefixer": "6.5.4",
+    "autoprefixer": "9.6.1",
     "babel-loader": "^8.0.5",
     "brace": "0.10.0",
     "chalk": "^2.4.1",

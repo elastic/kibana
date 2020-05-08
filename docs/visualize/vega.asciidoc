@@ -324,7 +324,7 @@ replace `"url": "data/world-110m.json"` with
 `"url": "https://vega.github.io/editor/data/world-110m.json"`. Also,
 regular Vega examples use `"autosize": "pad"` layout model, whereas
 Kibana uses `fit`. Remove all `autosize`, `width`, and `height`
-values. See link:#sizing-and-positioning[sizing and positioning] below.
+values. See link:#sizing-and-positioning[sizing and positioning].
 
 [[vega-additional-configuration-options]]
 ==== Additional configuration options

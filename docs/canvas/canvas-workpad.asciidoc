@@ -14,7 +14,7 @@ When you create a workpad, you'll start with a blank page, or you can choose a w
 
 * To import an existing workpad, click and drag a workpad JSON file to the *Import workpad JSON file* field.
 
-For advanced workpad examples, add a {kibana-ref}/add-sample-data.html[sample Kibana data set], then select *Canvas* from the *View Data* dropdown list.
+For advanced workpad examples, add a <<add-sample-data, sample Kibana data set>>, then select *Canvas* from the *View Data* dropdown list.
 
 For more workpad inspiration, go to the link:https://www.elastic.co/blog/[Elastic Blog]. 
 

@@ -1,0 +1,53 @@
+[role="xpack"]
+[[cluster-alerts]]
+== Cluster Alerts
+
+The *Stack Monitoring > Clusters* page in {kib} summarizes the status of your
+{stack}. You can drill down into the metrics to view more information about your
+cluster and specific nodes, instances, and indices.
+
+The Top Cluster Alerts shown on the Clusters page notify you of
+conditions that require your attention:
+
+* {es} Cluster Health Status is Yellow (missing at least one replica)
+or Red (missing at least one primary).
+* {es} Version Mismatch. You have {es} nodes with
+different versions in the same cluster.
+* {kib} Version Mismatch. You have {kib} instances with different
+versions running against the same {es} cluster.
+* Logstash Version Mismatch. You have Logstash nodes with different
+versions reporting stats to the same monitoring cluster.
+* {es} Nodes Changed. You have {es} nodes that were recently added or removed.
+* {es} License Expiration. The cluster's license is about to expire.
++
+--
+If you do not preserve the data directory when upgrading a {kib} or
+Logstash node, the instance is assigned a new persistent UUID and shows up
+as a new instance
+--
+* {xpack} License Expiration. When the {xpack} license expiration date
+approaches, you will get notifications with a severity level relative to how
+soon the expiration date is:
+  ** 60 days: Informational alert
+  ** 30 days: Low-level alert
+  ** 15 days: Medium-level alert
+  ** 7 days: Severe-level alert
++
+The 60-day and 30-day thresholds are skipped for Trial licenses, which are only
+valid for 30 days.
+
+The {monitor-features} check the cluster alert conditions every minute. Cluster
+alerts are automatically dismissed when the condition is resolved.
+
+include::cluster-alerts-license.asciidoc[]
+
+[float]
+[[cluster-alert-email-notifications]]
+==== Email Notifications
+To receive email notifications for the Cluster Alerts:
+
+1. Configure an email account as described in
+{ref}/actions-email.html#configuring-email[Configuring email accounts].
+2. Configure the `xpack.monitoring.cluster_alerts.email_notifications.email_address` setting in `kibana.yml` with your email address.
+
+Email notifications are sent only when Cluster Alerts are triggered and resolved.

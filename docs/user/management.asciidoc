@@ -1,0 +1,43 @@
+[[management]]
+= Management
+
+[partintro]
+--
+The Management application is where you perform your runtime configuration of
+Kibana, including both the initial setup and ongoing configuration of index
+patterns, advanced settings that tweak the behaviors of Kibana itself, and
+the various "objects" that you can save throughout Kibana such as searches,
+visualizations, and dashboards.
+
+--
+
+include::{kib-repo-dir}/management/managing-licenses.asciidoc[]
+
+include::{kib-repo-dir}/management/index-patterns.asciidoc[]
+
+include::{kib-repo-dir}/management/rollups/create_and_manage_rollups.asciidoc[]
+
+include::{kib-repo-dir}/management/index-lifecycle-policies/intro-to-lifecycle-policies.asciidoc[]
+
+include::{kib-repo-dir}/management/index-lifecycle-policies/create-policy.asciidoc[]
+
+include::{kib-repo-dir}/management/index-lifecycle-policies/manage-policy.asciidoc[]
+
+include::{kib-repo-dir}/management/index-lifecycle-policies/add-policy-to-index.asciidoc[]
+
+include::{kib-repo-dir}/management/index-lifecycle-policies/example-index-lifecycle-policy.asciidoc[]
+
+include::{kib-repo-dir}/management/managing-fields.asciidoc[]
+
+include::{kib-repo-dir}/management/managing-indices.asciidoc[]
+
+include::{kib-repo-dir}/management/advanced-options.asciidoc[]
+
+include::{kib-repo-dir}/management/managing-saved-objects.asciidoc[]
+
+include::{kib-repo-dir}/management/managing-beats.asciidoc[]
+
+include::{kib-repo-dir}/management/managing-remote-clusters.asciidoc[]
+
+include::{kib-repo-dir}/management/snapshot-restore/index.asciidoc[]
+

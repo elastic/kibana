@@ -39,7 +39,8 @@ import { preventParallelCalls } from './prevent_parallel_calls';
 
 import { Browsers } from './browsers';
 
-const throttleOption = process.env.TEST_THROTTLE_NETWORK;
+const throttleOption: string = process.env.TEST_THROTTLE_NETWORK as string;
+const headlessBrowser: string = process.env.TEST_BROWSER_HEADLESS as string;
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const NO_QUEUE_COMMANDS = ['getStatus', 'newSession', 'quit'];
@@ -74,7 +75,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
           'use-fake-device-for-media-stream',
           'use-fake-ui-for-media-stream',
         ];
-        if (process.env.TEST_BROWSER_HEADLESS) {
+        if (headlessBrowser === '1') {
           // Use --disable-gpu to avoid an error from a missing Mesa library, as per
           // See: https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
           chromeOptions.push('headless', 'disable-gpu');
@@ -91,7 +92,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
           .build();
       case 'firefox':
         const firefoxOptions = new firefox.Options();
-        if (process.env.TEST_BROWSER_HEADLESS) {
+        if (headlessBrowser === '1') {
           // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
           firefoxOptions.addArguments('-headless');
         }
@@ -107,7 +108,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: Browsers) {
 
   const session = await buildDriverInstance();
 
-  if (throttleOption === 'true' && browserType === 'chrome') {
+  if (throttleOption === '1' && browserType === 'chrome') {
     // Only chrome supports this option.
     log.debug('NETWORK THROTTLED: 768k down, 256k up, 100ms latency.');
 

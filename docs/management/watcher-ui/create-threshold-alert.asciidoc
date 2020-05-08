@@ -56,17 +56,17 @@ Selecting an action will allow you to customize settings for the respective acti
 
 image:management/watcher-ui/images/threshold-alert/threshold-alert-action.png["Threshold Alert Logging Action",link="management/watcher-ui/images/threshold-alert/threshold-alert-action.png"]
 
-All fields for an alert support using http://mustache.github.io/mustache.5.html[mustache syntax] and expose a `{{ctx}}` variable which exposes {stack-ov}/condition-script.html#accessing-watch-payload[various properties of the alert]
+All fields for an alert support using http://mustache.github.io/mustache.5.html[mustache syntax] and expose a `{{ctx}}` variable which exposes {ref}/condition-script.html#accessing-watch-payload[various properties of the alert]
 
 The supported actions are:
 
-* {stack-ov}/actions-slack.html[Slack]
-* {stack-ov}/actions-logging.html[Logging]
-* {stack-ov}/actions-email.html[Email]
+* {ref}/actions-slack.html[Slack]
+* {ref}/actions-logging.html[Logging]
+* {ref}/actions-email.html[Email]
 
 Note that certain actions require configuration within {es}, such as 
-{stack-ov}/actions-email.html#configuring-email[email] and 
-{stack-ov}/actions-slack.html#configuring-slack[slack].
+{ref}/actions-email.html#configuring-email[email] and 
+{ref}/actions-slack.html#configuring-slack[slack].
 
 include::create-advanced-watch.asciidoc[]
 

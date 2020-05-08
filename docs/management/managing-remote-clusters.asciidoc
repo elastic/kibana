@@ -8,7 +8,7 @@ can be used to provide remote backups for disaster recovery or for geo-proximite
 
 Before using these features, you should be familiar with the following concepts:
 
-* {stack-ov}/xpack-ccr.html[{ccr-cap}]
+* {ref}/xpack-ccr.html[{ccr-cap}]
 * {ref}/modules-cross-cluster-search.html[{ccs-cap}]
 * {stack-ov}/cross-cluster-configuring.html[Cross-cluster security requirements]
 
@@ -55,8 +55,8 @@ a given remote cluster, and monitor whether the replication is active.
 
 Before you use these features, you should be familiar with the following concepts:
 
-* {stack-ov}/ccr-requirements.html[Requirements for leader indices] 
-* {stack-ov}/ccr-auto-follow.html[Automatically following indices]
+* {ref}/ccr-requirements.html[Requirements for leader indices] 
+* {ref}/ccr-auto-follow.html[Automatically following indices]
 
 To get started, go to *Management > Elasticsearch > {ccr-cap}*. 
 
