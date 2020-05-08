@@ -82,3 +82,6 @@ export const ServiceNowConnectorFlyout = withConnectorFlyout<ServiceNowActionCon
   secretKeys: ['username', 'password'],
   connectorActionTypeId: '.servicenow',
 });
+
+// eslint-disable-next-line import/no-default-export
+export { ServiceNowConnectorFlyout as default };
