@@ -5,9 +5,13 @@
  */
 
 import { IESTermSource } from '../sources/es_term_source';
+import { IJoin } from './join';
 import { JoinDescriptor } from '../../../common/descriptor_types';
+import { ISource } from '../../layers/sources/source';
 
-export interface IJoin {
+export class InnerJoin implements IJoin {
+  constructor(joinDescriptor: JoinDescriptor, leftSource: ISource);
+
   getRightJoinSource(): IESTermSource;
 
   toDescriptor(): JoinDescriptor;

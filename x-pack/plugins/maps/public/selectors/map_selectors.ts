@@ -6,17 +6,23 @@
 
 import { createSelector } from 'reselect';
 import _ from 'lodash';
+import { Adapters } from 'src/plugins/inspector/public';
 import { TileLayer } from '../layers/tile_layer';
+// @ts-ignore
 import { VectorTileLayer } from '../layers/vector_tile_layer';
 import { VectorLayer } from '../layers/vector_layer';
+import { VectorStyle } from '../layers/styles/vector/vector_style';
+// @ts-ignore
 import { HeatmapLayer } from '../layers/heatmap_layer';
 import { BlendedVectorLayer } from '../layers/blended_vector_layer';
 import { getTimeFilter } from '../kibana_services';
 import { getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { TiledVectorLayer } from '../layers/tiled_vector_layer';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
+import { IJoin } from '../layers/joins/join';
 import { InnerJoin } from '../layers/joins/inner_join';
 import { getSourceByType } from '../layers/sources/source_registry';
+// @ts-ignore
 import { GeojsonFileSource } from '../layers/sources/client_file_source';
 import {
   LAYER_TYPE,
@@ -25,37 +31,67 @@ import {
   VECTOR_STYLES,
   SPATIAL_FILTERS_LAYER_ID,
 } from '../../common/constants';
+// @ts-ignore
 import { extractFeaturesFromFilters } from '../elasticsearch_geo_utils';
+import { MapStoreState } from '../reducers/store';
+import {
+  DataRequestDescriptor,
+  DrawState,
+  Goto,
+  LayerDescriptor,
+  MapCenter,
+  MapExtent,
+  MapQuery,
+  MapRefreshConfig,
+  TooltipState,
+  VectorLayerDescriptor,
+} from '../../common/descriptor_types';
+import { MapSettings } from '../reducers/map';
+import { Filter, TimeRange } from '../../../../../src/plugins/data/public';
+import { ISource } from '../layers/sources/source';
+import { ITMSSource } from '../layers/sources/tms_source';
+import { IVectorSource } from '../layers/sources/vector_source';
 
-function createLayerInstance(layerDescriptor, inspectorAdapters) {
-  const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
+function createLayerInstance(layerDescriptor: LayerDescriptor, inspectorAdapters: Adapters) {
+  const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
 
   switch (layerDescriptor.type) {
     case TileLayer.type:
-      return new TileLayer({ layerDescriptor, source });
+      return new TileLayer({ layerDescriptor, source: source as ITMSSource });
     case VectorLayer.type:
-      const joins = [];
-      if (layerDescriptor.joins) {
-        layerDescriptor.joins.forEach(joinDescriptor => {
+      const joins: IJoin[] = [];
+      const vectorLayerDescriptor = layerDescriptor as VectorLayerDescriptor;
+      if (vectorLayerDescriptor.joins) {
+        vectorLayerDescriptor.joins.forEach(joinDescriptor => {
           const join = new InnerJoin(joinDescriptor, source);
           joins.push(join);
         });
       }
-      return new VectorLayer({ layerDescriptor, source, joins });
+      return new VectorLayer({
+        layerDescriptor: vectorLayerDescriptor,
+        source: source as IVectorSource,
+        joins,
+      });
     case VectorTileLayer.type:
       return new VectorTileLayer({ layerDescriptor, source });
     case HeatmapLayer.type:
       return new HeatmapLayer({ layerDescriptor, source });
     case BlendedVectorLayer.type:
-      return new BlendedVectorLayer({ layerDescriptor, source });
+      return new BlendedVectorLayer({
+        layerDescriptor: layerDescriptor as VectorLayerDescriptor,
+        source: source as IVectorSource,
+      });
     case TiledVectorLayer.type:
-      return new TiledVectorLayer({ layerDescriptor, source });
+      return new TiledVectorLayer({
+        layerDescriptor: layerDescriptor as VectorLayerDescriptor,
+        source: source as IVectorSource,
+      });
     default:
       throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
   }
 }
 
-function createSourceInstance(sourceDescriptor, inspectorAdapters) {
+function createSourceInstance(sourceDescriptor: any, inspectorAdapters: Adapters): ISource {
   const source = getSourceByType(sourceDescriptor.type);
   if (!source) {
     throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
@@ -63,9 +99,10 @@ function createSourceInstance(sourceDescriptor, inspectorAdapters) {
   return new source.ConstructorFunction(sourceDescriptor, inspectorAdapters);
 }
 
-export const getMapSettings = ({ map }) => map.settings;
+export const getMapSettings = ({ map }: MapStoreState): MapSettings => map.settings;
 
-const getRollbackMapSettings = ({ map }) => map.__rollbackSettings;
+const getRollbackMapSettings = ({ map }: MapStoreState): MapSettings | null =>
+  map.__rollbackSettings;
 
 export const hasMapSettingsChanges = createSelector(
   getMapSettings,
@@ -75,76 +112,86 @@ export const hasMapSettingsChanges = createSelector(
   }
 );
 
-export const getOpenTooltips = ({ map }) => {
+export const getOpenTooltips = ({ map }: MapStoreState): TooltipState[] => {
   return map && map.openTooltips ? map.openTooltips : [];
 };
 
-export const getHasLockedTooltips = state => {
-  return getOpenTooltips(state).some(({ isLocked }) => {
+export const getHasLockedTooltips = (state: MapStoreState): boolean => {
+  return getOpenTooltips(state).some(({ isLocked }: TooltipState) => {
     return isLocked;
   });
 };
 
-export const getMapReady = ({ map }) => map && map.ready;
+export const getMapReady = ({ map }: MapStoreState): boolean => map && map.ready;
 
-export const getMapInitError = ({ map }) => map.mapInitError;
+export const getMapInitError = ({ map }: MapStoreState): string | null | undefined =>
+  map.mapInitError;
 
-export const getGoto = ({ map }) => map && map.goto;
+export const getGoto = ({ map }: MapStoreState): Goto | null | undefined => map && map.goto;
 
-export const getSelectedLayerId = ({ map }) => {
+export const getSelectedLayerId = ({ map }: MapStoreState): string | null => {
   return !map.selectedLayerId || !map.layerList ? null : map.selectedLayerId;
 };
 
-export const getTransientLayerId = ({ map }) => map.__transientLayerId;
+export const getTransientLayerId = ({ map }: MapStoreState): string | null =>
+  map.__transientLayerId;
 
-export const getLayerListRaw = ({ map }) => (map.layerList ? map.layerList : []);
+export const getLayerListRaw = ({ map }: MapStoreState): LayerDescriptor[] =>
+  map.layerList ? map.layerList : [];
 
-export const getWaitingForMapReadyLayerListRaw = ({ map }) =>
+export const getWaitingForMapReadyLayerListRaw = ({ map }: MapStoreState): LayerDescriptor[] =>
   map.waitingForMapReadyLayerList ? map.waitingForMapReadyLayerList : [];
 
-export const getScrollZoom = ({ map }) => map.mapState.scrollZoom;
+export const getScrollZoom = ({ map }: MapStoreState): boolean => map.mapState.scrollZoom;
 
-export const isInteractiveDisabled = ({ map }) => map.mapState.disableInteractive;
+export const isInteractiveDisabled = ({ map }: MapStoreState): boolean =>
+  map.mapState.disableInteractive;
 
-export const isTooltipControlDisabled = ({ map }) => map.mapState.disableTooltipControl;
+export const isTooltipControlDisabled = ({ map }: MapStoreState): boolean =>
+  map.mapState.disableTooltipControl;
 
-export const isToolbarOverlayHidden = ({ map }) => map.mapState.hideToolbarOverlay;
+export const isToolbarOverlayHidden = ({ map }: MapStoreState): boolean =>
+  map.mapState.hideToolbarOverlay;
 
-export const isLayerControlHidden = ({ map }) => map.mapState.hideLayerControl;
+export const isLayerControlHidden = ({ map }: MapStoreState): boolean =>
+  map.mapState.hideLayerControl;
 
-export const isViewControlHidden = ({ map }) => map.mapState.hideViewControl;
+export const isViewControlHidden = ({ map }: MapStoreState): boolean =>
+  map.mapState.hideViewControl;
 
-export const getMapExtent = ({ map }) => (map.mapState.extent ? map.mapState.extent : {});
+export const getMapExtent = ({ map }: MapStoreState): MapExtent | undefined => map.mapState.extent;
 
-export const getMapBuffer = ({ map }) => (map.mapState.buffer ? map.mapState.buffer : {});
+export const getMapBuffer = ({ map }: MapStoreState): MapExtent | undefined => map.mapState.buffer;
 
-export const getMapZoom = ({ map }) => (map.mapState.zoom ? map.mapState.zoom : 0);
+export const getMapZoom = ({ map }: MapStoreState): number =>
+  map.mapState.zoom ? map.mapState.zoom : 0;
 
-export const getMapCenter = ({ map }) =>
+export const getMapCenter = ({ map }: MapStoreState): MapCenter =>
   map.mapState.center ? map.mapState.center : { lat: 0, lon: 0 };
 
-export const getMouseCoordinates = ({ map }) => map.mapState.mouseCoordinates;
+export const getMouseCoordinates = ({ map }: MapStoreState) => map.mapState.mouseCoordinates;
 
-export const getTimeFilters = ({ map }) =>
+export const getTimeFilters = ({ map }: MapStoreState): TimeRange =>
   map.mapState.timeFilters ? map.mapState.timeFilters : getTimeFilter().getTime();
 
-export const getQuery = ({ map }) => map.mapState.query;
+export const getQuery = ({ map }: MapStoreState): MapQuery | undefined => map.mapState.query;
 
-export const getFilters = ({ map }) => map.mapState.filters;
+export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.filters;
 
-export const isUsingSearch = state => {
+export const isUsingSearch = (state: MapStoreState): boolean => {
   const filters = getFilters(state).filter(filter => !filter.meta.disabled);
   const queryString = _.get(getQuery(state), 'query', '');
-  return filters.length || queryString.length;
+  return !!filters.length || !!queryString.length;
 };
 
-export const getDrawState = ({ map }) => map.mapState.drawState;
+export const getDrawState = ({ map }: MapStoreState): DrawState | undefined =>
+  map.mapState.drawState;
 
-export const isDrawingFilter = ({ map }) => {
+export const isDrawingFilter = ({ map }: MapStoreState): boolean => {
   return !!map.mapState.drawState;
 };
 
-export const getRefreshConfig = ({ map }) => {
+export const getRefreshConfig = ({ map }: MapStoreState): MapRefreshConfig => {
   if (map.mapState.refreshConfig) {
     return map.mapState.refreshConfig;
   }
@@ -156,19 +203,20 @@ export const getRefreshConfig = ({ map }) => {
   };
 };
 
-export const getRefreshTimerLastTriggeredAt = ({ map }) => map.mapState.refreshTimerLastTriggeredAt;
+export const getRefreshTimerLastTriggeredAt = ({ map }: MapStoreState): string | undefined =>
+  map.mapState.refreshTimerLastTriggeredAt;
 
-function getLayerDescriptor(state = {}, layerId) {
+function getLayerDescriptor(state: MapStoreState, layerId: string) {
   const layerListRaw = getLayerListRaw(state);
   return layerListRaw.find(layer => layer.id === layerId);
 }
 
-export function getDataRequestDescriptor(state = {}, layerId, dataId) {
+export function getDataRequestDescriptor(state: MapStoreState, layerId: string, dataId: string) {
   const layerDescriptor = getLayerDescriptor(state, layerId);
   if (!layerDescriptor || !layerDescriptor.__dataRequests) {
     return;
   }
-  return _.get(layerDescriptor, '__dataRequests', []).find(dataRequest => {
+  return layerDescriptor.__dataRequests.find((dataRequest: DataRequestDescriptor) => {
     return dataRequest.dataId === dataId;
   });
 }
@@ -208,34 +256,31 @@ export const getSpatialFiltersLayer = createSelector(
     );
 
     return new VectorLayer({
-      layerDescriptor: {
+      layerDescriptor: VectorLayer.createDescriptor({
         id: SPATIAL_FILTERS_LAYER_ID,
         visible: settings.showSpatialFilters,
         alpha: settings.spatialFiltersAlpa,
-        type: LAYER_TYPE.VECTOR,
         __dataRequests: [
           {
             dataId: SOURCE_DATA_ID_ORIGIN,
             data: featureCollection,
           },
         ],
-        style: {
-          properties: {
-            [VECTOR_STYLES.FILL_COLOR]: {
-              type: STYLE_TYPE.STATIC,
-              options: {
-                color: settings.spatialFiltersFillColor,
-              },
-            },
-            [VECTOR_STYLES.LINE_COLOR]: {
-              type: STYLE_TYPE.STATIC,
-              options: {
-                color: settings.spatialFiltersLineColor,
-              },
+        style: VectorStyle.createDescriptor({
+          [VECTOR_STYLES.FILL_COLOR]: {
+            type: STYLE_TYPE.STATIC,
+            options: {
+              color: settings.spatialFiltersFillColor,
             },
           },
-        },
-      },
+          [VECTOR_STYLES.LINE_COLOR]: {
+            type: STYLE_TYPE.STATIC,
+            options: {
+              color: settings.spatialFiltersLineColor,
+            },
+          },
+        }),
+      }),
       source: new GeojsonFileSource(geoJsonSourceDescriptor),
     });
   }
@@ -253,8 +298,8 @@ export const getLayerList = createSelector(
 
 export const getFittableLayers = createSelector(getLayerList, layerList => {
   return layerList.filter(layer => {
-    //These are the only layer-types that implement bounding-box retrieval reliably
-    //This will _not_ work if Maps will allow register custom layer types
+    // These are the only layer-types that implement bounding-box retrieval reliably
+    // This will _not_ work if Maps will allow register custom layer types
     const isFittable =
       layer.getType() === LAYER_TYPE.VECTOR ||
       layer.getType() === LAYER_TYPE.BLENDED_VECTOR ||
@@ -280,25 +325,25 @@ export const getMapColors = createSelector(
   getTransientLayerId,
   getLayerListRaw,
   (transientLayerId, layerList) =>
-    layerList.reduce((accu, layer) => {
+    layerList.reduce((accu: string[], layer: LayerDescriptor) => {
       if (layer.id === transientLayerId) {
         return accu;
       }
-      const color = _.get(layer, 'style.properties.fillColor.options.color');
+      const color: string | undefined = _.get(layer, 'style.properties.fillColor.options.color');
       if (color) accu.push(color);
       return accu;
     }, [])
 );
 
 export const getSelectedLayerJoinDescriptors = createSelector(getSelectedLayer, selectedLayer => {
-  return selectedLayer.getJoins().map(join => {
+  return selectedLayer.getJoins().map((join: IJoin) => {
     return join.toDescriptor();
   });
 });
 
 // Get list of unique index patterns used by all layers
 export const getUniqueIndexPatternIds = createSelector(getLayerList, layerList => {
-  const indexPatternIds = [];
+  const indexPatternIds: string[] = [];
   layerList.forEach(layer => {
     indexPatternIds.push(...layer.getIndexPatternIds());
   });
@@ -307,7 +352,7 @@ export const getUniqueIndexPatternIds = createSelector(getLayerList, layerList =
 
 // Get list of unique index patterns, excluding index patterns from layers that disable applyGlobalQuery
 export const getQueryableUniqueIndexPatternIds = createSelector(getLayerList, layerList => {
-  const indexPatternIds = [];
+  const indexPatternIds: string[] = [];
   layerList.forEach(layer => {
     indexPatternIds.push(...layer.getQueryableIndexPatternIds());
   });

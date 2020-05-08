@@ -26,13 +26,17 @@ jest.mock('../kibana_services', () => ({
   }),
 }));
 
+import { DEFAULT_MAP_STORE_STATE } from '../reducers/store';
 import { getTimeFilters } from './map_selectors';
 
 describe('getTimeFilters', () => {
   it('should return timeFilters when contained in state', () => {
     const state = {
+      ...DEFAULT_MAP_STORE_STATE,
       map: {
+        ...DEFAULT_MAP_STORE_STATE.map,
         mapState: {
+          ...DEFAULT_MAP_STORE_STATE.map.mapState,
           timeFilters: {
             to: '2001-01-01',
             from: '2001-12-31',
@@ -45,9 +49,12 @@ describe('getTimeFilters', () => {
 
   it('should return kibana time filters when not contained in state', () => {
     const state = {
+      ...DEFAULT_MAP_STORE_STATE,
       map: {
+        ...DEFAULT_MAP_STORE_STATE.map,
         mapState: {
-          timeFilters: null,
+          ...DEFAULT_MAP_STORE_STATE.map.mapState,
+          timeFilters: undefined,
         },
       },
     };
