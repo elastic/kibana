@@ -11,7 +11,6 @@ import { OBSERVABILITY_LAYER_TYPE } from './layer_select';
 
 export enum OBSERVABILITY_METRIC_TYPE {
   TRANSACTION_DURATION = 'TRANSACTION_DURATION',
-  SLA_PERCENTAGE = 'SLA_PERCENTAGE',
   COUNT = 'COUNT',
   UNIQUE_COUNT = 'UNIQUE_COUNT',
 }
@@ -21,12 +20,6 @@ const APM_RUM_PERFORMANCE_METRIC_OPTIONS = [
     value: OBSERVABILITY_METRIC_TYPE.TRANSACTION_DURATION,
     text: i18n.translate('xpack.maps.observability.transactionDurationLabel', {
       defaultMessage: 'Transaction duraction',
-    }),
-  },
-  {
-    value: OBSERVABILITY_METRIC_TYPE.SLA_PERCENTAGE,
-    text: i18n.translate('xpack.maps.observability.slaPercentageLabel', {
-      defaultMessage: 'SLA percentage',
     }),
   },
 ];

@@ -985,8 +985,8 @@ Each action type should be defined as an `ActionTypeModel` object with the follo
 |selectMessage|Short description of action type responsibility, that will be displayed on the select card in UI.|
 |validateConnector|Validation function for action connector.|
 |validateParams|Validation function for action params.|
-|actionConnectorFields|React functional component for building UI of current action type connector.|
-|actionParamsFields|React functional component for building UI of current action type params. Displayed as a part of Create Alert flyout.|
+|actionConnectorFields|A lazy loaded React component for building UI of current action type connector.|
+|actionParamsFields|A lazy loaded React component for building UI of current action type params. Displayed as a part of Create Alert flyout.|
 
 ## Register action type model
 
@@ -1082,8 +1082,8 @@ export function getActionType(): ActionTypeModel {
       }
       return validationResult;
     },
-    actionConnectorFields: ExampleConnectorFields,
-    actionParamsFields: ExampleParamsFields,
+    actionConnectorFields: lazy(() => import('./example_connector_fields')),
+    actionParamsFields: lazy(() => import('./example_params_fields')),
   };
 }
 ```
@@ -1130,6 +1130,9 @@ const ExampleConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps
     </Fragment>
   );
 };
+
+// Export as default in order to support lazy loading
+export {ExampleConnectorFields as default};
 ```
 
 3. Define action type params fields using the property of `ActionTypeModel` `actionParamsFields`: 
@@ -1175,6 +1178,9 @@ const ExampleParamsFields: React.FunctionComponent<ActionParamsProps<ExampleActi
     </Fragment>
   );
 };
+
+// Export as default in order to support lazy loading
+export {ExampleParamsFields as default};
 ```
 
 4. Extend registration code with the new action type register in the file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/index.ts`
