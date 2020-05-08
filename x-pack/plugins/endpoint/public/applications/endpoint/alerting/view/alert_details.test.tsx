@@ -5,17 +5,17 @@
  */
 
 import * as reactTestingLibrary from '@testing-library/react';
-import { appStoreFactory } from '../../store';
 import { fireEvent } from '@testing-library/react';
 import { MemoryHistory } from 'history';
-import { AppAction } from '../../types';
+import { AppAction, ImmutableStore } from '../../types';
 import { mockAlertDetailsResult } from '../store/mock_alert_result_list';
 import { alertPageTestRender } from './test_helpers/render_alert_page';
+import { AlertingState } from '../../../../../common/alerting/types';
 
 describe('when the alert details flyout is open', () => {
   let render: () => reactTestingLibrary.RenderResult;
   let history: MemoryHistory<never>;
-  let store: ReturnType<typeof appStoreFactory>;
+  let store: ImmutableStore<AlertingState, AppAction>;
 
   beforeEach(async () => {
     // Creates the render elements for the tests to use

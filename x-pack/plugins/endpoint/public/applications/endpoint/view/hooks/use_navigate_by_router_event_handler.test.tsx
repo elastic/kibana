@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../mocks';
+import { StatelessAppContextTestRender, createAppRootMockRenderer } from '../../mocks';
 import { useNavigateByRouterEventHandler } from './use_navigate_by_router_event_handler';
 import { act, fireEvent, cleanup } from '@testing-library/react';
 
@@ -14,9 +14,9 @@ type ClickHandlerMock<Return = void> = jest.Mock<
 >;
 
 describe('useNavigateByRouterEventHandler hook', () => {
-  let render: AppContextTestRender['render'];
-  let history: AppContextTestRender['history'];
-  let renderResult: ReturnType<AppContextTestRender['render']>;
+  let render: StatelessAppContextTestRender['render'];
+  let history: StatelessAppContextTestRender['history'];
+  let renderResult: ReturnType<StatelessAppContextTestRender['render']>;
   let linkEle: HTMLAnchorElement;
   let clickHandlerSpy: ClickHandlerMock;
   const Link = React.memo<{

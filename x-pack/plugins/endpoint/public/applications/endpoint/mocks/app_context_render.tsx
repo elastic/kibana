@@ -9,6 +9,7 @@ import { createMemoryHistory } from 'history';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { applyMiddleware, createStore, Reducer, Store } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
+import { Provider } from 'react-redux';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { EndpointPluginStartDependencies } from '../../../plugin';
 import { depsStartMock } from './dependencies_start_mock';
@@ -21,12 +22,10 @@ type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResul
 /**
  * Mocked app root context renderer
  */
-export interface AppContextTestRender<S> {
-  store: Store<S, AppAction>;
+export interface StatelessAppContextTestRender {
   history: ReturnType<typeof createMemoryHistory>;
   coreStart: ReturnType<typeof coreMock.createStart>;
   depsStart: EndpointPluginStartDependencies;
-  middlewareSpy: MiddlewareActionSpyHelper<S>;
   /**
    * A wrapper around `AppRootContext` component. Uses the mocked modules as input to the
    * `AppRootContext`
@@ -39,32 +38,55 @@ export interface AppContextTestRender<S> {
   render: UiRender;
 }
 
+export interface AppContextTestRender<S> extends StatelessAppContextTestRender {
+  store: Store<S, AppAction>;
+  middlewareSpy: MiddlewareActionSpyHelper<S>;
+}
+
 /**
  * Creates a mocked endpoint app context custom renderer that can be used to render
  * component that depend upon the application's surrounding context providers.
  * Factory also returns the content that was used to create the custom renderer, allowing
  * for further customization.
  */
+export function createAppRootMockRenderer(): StatelessAppContextTestRender;
 export function createAppRootMockRenderer<S extends {}>(
   subpluginDefinition: Pick<SubpluginProviderDefinition<S>, 'reducer' | 'middleware'>
-): AppContextTestRender<S> {
+): AppContextTestRender<S>;
+export function createAppRootMockRenderer<S extends {}>(
+  subpluginDefinition?: Pick<SubpluginProviderDefinition<S>, 'reducer' | 'middleware'>
+): StatelessAppContextTestRender | AppContextTestRender<S> {
   const history = createMemoryHistory<never>();
   const coreStart = coreMock.createStart({ basePath: '/mock' });
   const params = coreMock.createAppMountParamters('/mock');
   const depsStart = depsStartMock();
-  const middlewareSpyHelper = createSpyMiddleware<S>();
   const composeWithReduxDevTools = composeWithDevTools({ name: 'EndpointApp' });
-  const { reducer } = subpluginDefinition;
-  const middleware = subpluginDefinition.middleware(coreStart, depsStart, params);
-  const enhancedMiddleware = composeWithReduxDevTools(
-    applyMiddleware(middleware, middlewareSpyHelper.actionSpyMiddleware)
-  );
+  let middlewareSpyHelper: MiddlewareActionSpyHelper<S> | undefined;
+  let store: Store<S, AppAction> | undefined;
+  if (subpluginDefinition) {
+    const { reducer } = subpluginDefinition;
+    const middleware = subpluginDefinition.middleware(coreStart, depsStart, params);
+    middlewareSpyHelper = createSpyMiddleware<S>();
+    const enhancedMiddleware = composeWithReduxDevTools(
+      applyMiddleware(middleware, middlewareSpyHelper.actionSpyMiddleware)
+    );
 
-  const store = createStore(reducer as Reducer<S, AppAction>, enhancedMiddleware); // TODO: Fix this shit
+    store = createStore(reducer as Reducer<S, AppAction>, enhancedMiddleware); // TODO: Fix this
+  }
   const AppWrapper = ({ children }: { children: React.ReactChildren }) => (
-    <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
-      {children}
-    </AppRootProvider>
+    <>
+      {store !== undefined ? (
+        <Provider store={store}>
+          <AppRootProvider history={history} coreStart={coreStart} depsStart={depsStart}>
+            {children}
+          </AppRootProvider>
+        </Provider>
+      ) : (
+        <AppRootProvider history={history} coreStart={coreStart} depsStart={depsStart}>
+          {children}
+        </AppRootProvider>
+      )}
+    </>
   );
   const render: UiRender = (ui, options) => {
     return reactRender(ui, {

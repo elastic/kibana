@@ -10,6 +10,7 @@ import {
   AnyAction as ReduxAnyAction,
   Action,
   Middleware,
+  Store,
 } from 'redux';
 import {
   HostMetadata,
@@ -340,6 +341,8 @@ export type ImmutableCombineReducers = <S, A extends ReduxAction = ReduxAnyActio
 type ImmutableReducersMapObject<S, A extends ReduxAction = ReduxAction> = {
   [K in keyof S]: ImmutableReducer<S[K], A>;
 };
+
+export type ImmutableStore<S, A extends ReduxAction> = Store<Immutable<S> | S, Immutable<A>>;
 
 export interface Subplugin<State> {
   middleware: SubstateMiddleware<State>;

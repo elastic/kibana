@@ -7,7 +7,7 @@ import * as React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Route, Switch } from 'react-router-dom';
 import { Store } from 'redux';
-import { useSelector } from 'react-redux';
+import { useSelector, Provider } from 'react-redux';
 import { HostList } from './hosts';
 import { PolicyList } from './policy';
 import { PolicyDetails } from './policy';
@@ -67,10 +67,12 @@ const AppRootChildren: React.FunctionComponent<{ subplugins: EndpointAppSubplugi
 export const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
   ({ history, store, coreStart, depsStart, subplugins }) => {
     return (
-      <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
-        <Setup ingestManager={depsStart.ingestManager} notifications={coreStart.notifications} />
-        <AppRootChildren subplugins={subplugins} />
-      </AppRootProvider>
+      <Provider store={store}>
+        <AppRootProvider history={history} coreStart={coreStart} depsStart={depsStart}>
+          <Setup ingestManager={depsStart.ingestManager} notifications={coreStart.notifications} />
+          <AppRootChildren subplugins={subplugins} />
+        </AppRootProvider>
+      </Provider>
     );
   }
 );

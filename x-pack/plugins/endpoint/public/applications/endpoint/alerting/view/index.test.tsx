@@ -6,18 +6,18 @@
 
 import * as reactTestingLibrary from '@testing-library/react';
 import { IIndexPattern } from 'src/plugins/data/public';
-import { appStoreFactory } from '../../store';
 import { fireEvent, act } from '@testing-library/react';
 import { MemoryHistory } from 'history';
-import { AppAction } from '../../types';
+import { AppAction, ImmutableStore } from '../../types';
 import { mockAlertResultList } from '../store/mock_alert_result_list';
 import { DepsStartMock } from '../../mocks';
 import { alertPageTestRender } from './test_helpers/render_alert_page';
+import { AlertingState } from '../../../../../common/alerting/types';
 
 describe('when on the alerting page', () => {
   let render: () => reactTestingLibrary.RenderResult;
   let history: MemoryHistory<never>;
-  let store: ReturnType<typeof appStoreFactory>;
+  let store: ImmutableStore<AlertingState, AppAction>;
   let depsStart: DepsStartMock;
 
   beforeEach(async () => {

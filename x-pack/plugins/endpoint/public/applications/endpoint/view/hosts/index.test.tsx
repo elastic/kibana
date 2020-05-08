@@ -7,7 +7,7 @@
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import { fireEvent } from '@testing-library/react';
-import { AppAction } from '../../types';
+import { AppAction, HostState } from '../../types';
 import { HostList } from './index';
 import {
   mockHostDetailsApiResult,
@@ -16,17 +16,21 @@ import {
 import { AppContextTestRender, createAppRootMockRenderer } from '../../mocks';
 import { HostInfo, HostStatus, HostPolicyResponseActionStatus } from '../../../../../common/types';
 import { EndpointDocGenerator } from '../../../../../common/generate_data';
+import { hostListReducer, hostMiddlewareFactory } from '../../store/hosts';
 
 describe('when on the hosts page', () => {
   const docGenerator = new EndpointDocGenerator();
-  let render: () => ReturnType<AppContextTestRender['render']>;
-  let history: AppContextTestRender['history'];
-  let store: AppContextTestRender['store'];
-  let coreStart: AppContextTestRender['coreStart'];
-  let middlewareSpy: AppContextTestRender['middlewareSpy'];
+  let render: () => ReturnType<AppContextTestRender<HostState>['render']>;
+  let history: AppContextTestRender<HostState>['history'];
+  let store: AppContextTestRender<HostState>['store'];
+  let coreStart: AppContextTestRender<HostState>['coreStart'];
+  let middlewareSpy: AppContextTestRender<HostState>['middlewareSpy'];
 
   beforeEach(async () => {
-    const mockedContext = createAppRootMockRenderer();
+    const mockedContext = createAppRootMockRenderer<HostState>({
+      reducer: hostListReducer,
+      middleware: hostMiddlewareFactory,
+    });
     ({ history, store, coreStart, middlewareSpy } = mockedContext);
     render = () => mockedContext.render(<HostList />);
   });
@@ -41,8 +45,8 @@ describe('when on the hosts page', () => {
     it('should not show the flyout', () => {
       const renderResult = render();
       expect.assertions(1);
-      return renderResult.findByTestId('hostDetailsFlyout').catch(e => {
-        expect(e).not.toBeNull();
+      return renderResult.findByTestId('hostDetailsFlyout').catch((error: unknown) => {
+        expect(error).not.toBeNull();
       });
     });
     describe('when list data loads', () => {
@@ -112,7 +116,7 @@ describe('when on the hosts page', () => {
         });
 
         it('should show the flyout', () => {
-          return renderResult.findByTestId('hostDetailsFlyout').then(flyout => {
+          return renderResult.findByTestId('hostDetailsFlyout').then((flyout: unknown) => {
             expect(flyout).not.toBeNull();
           });
         });

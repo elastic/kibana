@@ -9,13 +9,18 @@ import { mount } from 'enzyme';
 import { createAppRootMockRenderer } from '../../mocks';
 import { PolicyDetails } from './policy_details';
 import { EndpointDocGenerator } from '../../../../../common/generate_data';
+import { PolicyDetailsState } from '../../types';
+import { policyDetailsMiddlewareFactory, policyDetailsReducer } from '../../store/policy_details';
 
 describe('Policy Details', () => {
   type FindReactWrapperResponse = ReturnType<ReturnType<typeof render>['find']>;
 
   const sleep = (ms = 100) => new Promise(wakeup => setTimeout(wakeup, ms));
   const generator = new EndpointDocGenerator();
-  const { history, AppWrapper, coreStart } = createAppRootMockRenderer();
+  const { history, AppWrapper, coreStart } = createAppRootMockRenderer<PolicyDetailsState>({
+    reducer: policyDetailsReducer,
+    middleware: policyDetailsMiddlewareFactory,
+  });
   const http = coreStart.http;
   const render = (ui: Parameters<typeof mount>[0]) => mount(ui, { wrappingComponent: AppWrapper });
   let policyDatasource: ReturnType<typeof generator.generatePolicyDatasource>;
