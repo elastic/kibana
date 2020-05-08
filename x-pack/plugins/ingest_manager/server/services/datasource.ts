@@ -36,6 +36,10 @@ class DatasourceService {
       {
         ...datasource,
         revision: 1,
+        created_on: new Date().toISOString(),
+        created_by: options?.user?.username ?? 'system',
+        updated_on: new Date().toISOString(),
+        updated_by: options?.user?.username ?? 'system',
       },
       options
     );
@@ -134,6 +138,8 @@ class DatasourceService {
     await soClient.update<Datasource>(SAVED_OBJECT_TYPE, id, {
       ...datasource,
       revision: oldDatasource.revision + 1,
+      updated_on: new Date().toISOString(),
+      updated_by: options?.user?.username ?? 'system',
     });
 
     // Bump revision of associated agent config
