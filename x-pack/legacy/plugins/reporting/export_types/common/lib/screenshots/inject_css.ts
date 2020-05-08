@@ -7,8 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import fs from 'fs';
 import { promisify } from 'util';
-import { LevelLogger } from '../../../../server/lib';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
+import { LevelLogger, startTrace } from '../../../../server/lib';
 import { Layout } from '../../layouts/layout';
 import { CONTEXT_INJECTCSS } from './constants';
 
@@ -19,6 +19,7 @@ export const injectCustomCss = async (
   layout: Layout,
   logger: LevelLogger
 ): Promise<void> => {
+  const endTrace = startTrace('inject_css', 'correction');
   logger.debug(
     i18n.translate('xpack.reporting.screencapture.injectingCss', {
       defaultMessage: 'injecting custom css',
@@ -49,4 +50,6 @@ export const injectCustomCss = async (
       })
     );
   }
+
+  endTrace();
 };

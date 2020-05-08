@@ -58,6 +58,7 @@ export default function({ getService, getPageObjects }) {
     });
 
     it('should create shakespeare index pattern', async function() {
+      await PageObjects.common.navigateToApp('settings');
       log.debug('Create shakespeare index pattern');
       await PageObjects.settings.createIndexPattern('shakespeare', null);
       const patternName = await PageObjects.settings.getIndexPageHeading();
