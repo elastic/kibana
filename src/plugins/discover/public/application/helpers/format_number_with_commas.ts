@@ -24,4 +24,4 @@ const COMMA_SEPARATOR_RE = /(\d)(?=(\d{3})+(?!\d))/g;
  * as thousands separators
  */
 export const formatNumWithCommas = (input: number) =>
-  input.toString().replace(COMMA_SEPARATOR_RE, '$1,');
+  String(input).replace(COMMA_SEPARATOR_RE, '$1,');
