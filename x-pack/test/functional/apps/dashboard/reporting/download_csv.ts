@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { REPO_ROOT } from '@kbn/dev-utils';
 import expect from '@kbn/expect';
 import fs from 'fs';
 import path from 'path';
@@ -11,10 +12,7 @@ import * as Rx from 'rxjs';
 import { filter, first, map, timeout } from 'rxjs/operators';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-const csvPath = path.resolve(
-  __dirname,
-  '../../../../../../target/functional-tests/downloads/Ecommerce Data.csv'
-);
+const csvPath = path.resolve(REPO_ROOT, 'target/functional-tests/downloads/Ecommerce Data.csv');
 
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
