@@ -13,6 +13,7 @@ import { ProcessorInternal } from '../../types';
 
 import { getProcessorForm } from './map_processor_type_to_form';
 import { CommonProcessorFields, ProcessorTypeField } from './processors/common_fields';
+import { Custom } from './processors/custom';
 
 export type ProcessorSettingsFromOnSubmitArg = Omit<ProcessorInternal, 'id'>;
 
@@ -30,10 +31,10 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = ({
   const handleSubmit = useCallback(
     (data: any, isValid: boolean) => {
       if (isValid) {
-        const { type, ...options } = data;
+        const { type, customOptions, ...options } = data;
         onSubmit({
           type,
-          options,
+          options: customOptions ? customOptions : options,
         });
       }
     },
@@ -59,23 +60,26 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = ({
     <Form form={form}>
       <ProcessorTypeField initialType={processor?.type} />
       <FormDataProvider pathsToWatch="type">
-        {({ type }) => {
-          let FormFields: FunctionComponent | null = null;
+        {({ type, customOptions, ...options }) => {
+          let formContent: React.ReactNode | undefined;
 
-          if (type) {
-            FormFields = getProcessorForm(type as any);
+          if (type?.length) {
+            const ProcessorFormFields = getProcessorForm(type as any);
 
-            // TODO: Handle this error in a different way
-            if (!FormFields) {
-              throw new Error(`Could not find form for type ${type}`);
+            if (ProcessorFormFields) {
+              formContent = (
+                <>
+                  <ProcessorFormFields />
+                  <CommonProcessorFields />
+                </>
+              );
+            } else {
+              formContent = <Custom defaultOptions={options} />;
             }
-          }
 
-          return (
-            FormFields && (
+            return (
               <>
-                <FormFields />
-                <CommonProcessorFields />
+                {formContent}
                 <EuiButton onClick={form.submit}>
                   {i18n.translate(
                     'xpack.ingestPipelines.pipelineEditor.settingsForm.submitButtonLabel',
@@ -83,8 +87,11 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = ({
                   )}
                 </EuiButton>
               </>
-            )
-          );
+            );
+          }
+
+          // If the user has not yet defined a type, we do not show any settings fields
+          return null;
         }}
       </FormDataProvider>
     </Form>

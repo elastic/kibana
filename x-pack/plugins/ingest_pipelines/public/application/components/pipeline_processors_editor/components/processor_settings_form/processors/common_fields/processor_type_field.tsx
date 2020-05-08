@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 import {
   FIELD_TYPES,
   FieldConfig,
   UseField,
   fieldValidators,
-  FormRow,
+  ComboBoxField,
 } from '../../../../../../../shared_imports';
 import { types } from '../../map_processor_type_to_form';
 
@@ -39,27 +38,21 @@ const typeConfig: FieldConfig = {
 
 export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) => {
   return (
-    <FormRow
-      title={i18n.translate('xpack.ingestPipelines.pipelineEditor.typeFieldTitle', {
-        defaultMessage: 'Type',
-      })}
-    >
-      <UseField config={typeConfig} path={'type'} defaultValue={initialType}>
-        {typeField => {
-          return (
-            <EuiComboBox
-              onChange={([selected]) => typeField.setValue(selected?.value)}
-              selectedOptions={
-                typeField.value
-                  ? [{ value: typeField.value as string, label: typeField.value as string }]
-                  : []
-              }
-              singleSelection={{ asPlainText: true }}
-              options={types.map(type => ({ label: type, value: type }))}
-            />
-          );
-        }}
-      </UseField>
-    </FormRow>
+    <UseField
+      config={typeConfig}
+      defaultValue={Array.isArray(initialType) ? initialType : initialType ? [initialType] : []}
+      path="type"
+      component={ComboBoxField}
+      componentProps={{
+        euiFieldProps: {
+          fullWidth: true,
+          options: types.map(type => ({ label: type, value: type })),
+          noSuggestions: false,
+          singleSelection: {
+            asPlainText: true,
+          },
+        },
+      }}
+    />
   );
 };

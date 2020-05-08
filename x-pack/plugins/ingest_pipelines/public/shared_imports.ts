@@ -42,6 +42,7 @@ export {
   JsonEditorField,
   FormRow,
   ToggleField,
+  ComboBoxField,
 } from '../../../../src/plugins/es_ui_shared/static/forms/components';
 
 export {
