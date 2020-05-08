@@ -8,6 +8,9 @@ import { ResolverQuery } from './base';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 import { ResolverEvent } from '../../../../common/types';
 
+/**
+ * Builds a query for retrieving life cycle information about a node (start, stop, etc).
+ */
 export class LifecycleQuery extends ResolverQuery<ResolverEvent[]> {
   protected legacyQuery(endpointID: string, uniquePIDs: string[]): JsonObject {
     return {

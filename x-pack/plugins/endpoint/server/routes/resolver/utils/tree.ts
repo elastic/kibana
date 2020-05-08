@@ -17,7 +17,7 @@ import { PaginationBuilder } from './pagination';
 type ExtractFunction = (event: ResolverEvent) => string | undefined;
 
 function createNode(id: string): ResolverNode {
-  return { id, children: [], pagination: {}, events: [], lifecycle: [] };
+  return { id, children: [], pagination: {}, events: [], lifecycle: [], ancestors: [] };
 }
 /**
  * This class aids in constructing a tree of process events. It works in the following way:
@@ -53,14 +53,11 @@ function createNode(id: string): ResolverNode {
  */
 
 export class Tree {
-  protected cache: Map<string, ResolverNode>;
+  protected cache: Map<string, ResolverNode> = new Map();
   protected root: ResolverNode;
-  protected id: string;
 
-  constructor(id: string) {
-    const root = createNode(id);
-    this.id = id;
-    this.cache = new Map();
+  constructor(protected readonly id: string) {
+    const root = createNode(this.id);
     this.root = root;
     this.cache.set(id, root);
   }
@@ -113,22 +110,20 @@ export class Tree {
       const id = entityId(event);
 
       this.ensureCache(id);
-      const currentNode = this.cache.get(id);
-      if (currentNode !== undefined) {
-        currentNode.events.push(event);
+      const node = this.cache.get(id);
+      if (node !== undefined) {
+        node.events.push(event);
       }
     });
   }
 
-  public addAncestor(id: string, events: ResolverEvent[]): void {
+  public addAncestor(events: ResolverEvent[]): void {
     events.forEach(event => {
       const ancestorID = entityId(event);
       if (this.cache.get(ancestorID) === undefined) {
         const newParent = createNode(ancestorID);
         this.cache.set(ancestorID, newParent);
-        if (!this.root.ancestors) {
-          this.root.ancestors = [];
-        }
+
         this.root.ancestors.push(newParent);
       }
       const currentAncestor = this.cache.get(ancestorID);
@@ -190,10 +185,6 @@ export class Tree {
     });
   }
 
-  public paginateEvents(totals: Record<string, number>, events: ResolverEvent[]): void {
-    return this.paginate(entityId, 'nextEvent', totals, events);
-  }
-
   public paginateChildren(totals: Record<string, number>, children: ResolverEvent[]): void {
     return this.paginate(parentEntityId, 'nextChild', totals, children);
   }
@@ -206,17 +197,15 @@ export class Tree {
   ): void {
     const grouped = _.groupBy(records, grouper);
     Object.entries(totals).forEach(([id, total]) => {
-      if (this.cache.get(id) !== undefined) {
+      const currentNode = this.cache.get(id);
+      if (currentNode !== undefined) {
         if (grouped[id]) {
           /*
            * if we have any results, attempt to build a pagination cursor, the function
            * below hands back a null value if no cursor is necessary because we have
            * all of the records.
            */
-          const currentNode = this.cache.get(id);
-          if (currentNode !== undefined) {
-            currentNode.pagination[attribute] = PaginationBuilder.buildCursor(total, grouped[id]);
-          }
+          currentNode.pagination[attribute] = PaginationBuilder.buildCursor(total, grouped[id]);
         }
       }
     });

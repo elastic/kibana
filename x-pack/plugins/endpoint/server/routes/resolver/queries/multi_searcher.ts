@@ -10,18 +10,45 @@ import { MSearchResponse } from 'elasticsearch';
 import { ResolverEvent } from '../../../../common/types';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 
+/**
+ * Contract for queries to be compatible with ES multi search api
+ */
 export interface MSearchQuery {
+  /**
+   * Builds an array of header and body pairs for use in a multi search
+   *
+   * @param ids one or many unique identifiers for nodes.
+   * @returns an array of header and body pairs describing multi search queries
+   */
   buildMSearch(ids: string | string[]): JsonObject[];
 }
 
+/**
+ * Contract for adding a query for multi search
+ */
 export interface QueryInfo {
+  /**
+   * A multi search query
+   */
   query: MSearchQuery;
+  /**
+   * one or many unique identifiers to be searched for in this query
+   */
   ids: string | string[];
 }
 
+/**
+ * Executes a multi search within ES.
+ */
 export class MultiSearcher {
   constructor(private readonly client: IScopedClusterClient) {}
 
+  /**
+   * Perform the multi search on the passed in queries
+   *
+   * @param queries multi search queries
+   * @returns an array of SearchResponse<ResolverEvent>
+   */
   async search(queries: QueryInfo[]) {
     if (queries.length === 0) {
       throw new Error('No queries provided to MultiSearcher');

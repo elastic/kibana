@@ -11,18 +11,17 @@ import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public
 import { legacyEventIndexPattern } from './legacy_event_index_pattern';
 import { MSearchQuery } from './multi_searcher';
 
+/**
+ * ResolverQuery provides the base structure for queries to retrieve events when building a resolver graph.
+ *
+ * @param T the structured return type of a resolver query. This represents the type that is returned when translating
+ * Elasticsearch's SearchResponse<ResolverEvent> response.
+ */
 export abstract class ResolverQuery<T> implements MSearchQuery {
   constructor(private readonly indexPattern: string, private readonly endpointID?: string) {}
 
   private static createIdsArray(ids: string | string[]): string[] {
     return Array.isArray(ids) ? ids : [ids];
-  }
-
-  private static formatBody(body: JsonObject, index: string): JsonObject {
-    return {
-      body,
-      index,
-    };
   }
 
   private buildQuery(ids: string | string[]): { query: JsonObject; index: string } {
@@ -35,18 +34,35 @@ export abstract class ResolverQuery<T> implements MSearchQuery {
 
   private buildSearch(ids: string | string[]) {
     const { query, index } = this.buildQuery(ids);
-    return ResolverQuery.formatBody(query, index);
+    return {
+      body: query,
+      index,
+    };
   }
 
   protected static getResults(response: SearchResponse<ResolverEvent>): ResolverEvent[] {
     return response.hits.hits.map(hit => hit._source);
   }
 
+  /**
+   * Builds a multi search representation for this query
+   *
+   * @param ids a single more multiple (e.g. entity_id or unique_pid) to search for in the query
+   * @returns an array of header and body pairs that represents a multi search
+   * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html
+   * https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/msearch_examples.html
+   */
   buildMSearch(ids: string | string[]): JsonObject[] {
     const { query, index } = this.buildQuery(ids);
     return [{ index }, query];
   }
 
+  /**
+   * Searches ES for the specified ids.
+   *
+   * @param client a client for searching ES
+   * @param ids a single more multiple unique node ids (e.g. entity_id or unique_pid)
+   */
   async search(client: IScopedClusterClient, ids: string | string[]): Promise<T> {
     const res: SearchResponse<ResolverEvent> = await client.callAsCurrentUser(
       'search',
@@ -55,7 +71,27 @@ export abstract class ResolverQuery<T> implements MSearchQuery {
     return this.formatResponse(res);
   }
 
+  /**
+   * Builds a query to search the legacy data format.
+   *
+   * @param endpointID a unique identifier for a sensor
+   * @param uniquePIDs array of unique process IDs to search for
+   * @returns a query to use in ES
+   */
   protected abstract legacyQuery(endpointID: string, uniquePIDs: string[]): JsonObject;
+
+  /**
+   * Builds a query to search for events in ES.
+   *
+   * @param entityIDs array of unique identifiers for events treated as nodes
+   */
   protected abstract query(entityIDs: string[]): JsonObject;
-  protected abstract formatResponse(response: SearchResponse<ResolverEvent>): T;
+
+  /**
+   * Translates the response from executing the derived class's query into a structured object
+   *
+   * @param response a SearchResponse from ES resulting from executing this query
+   * @returns the translated ES response into a structured object
+   */
+  public abstract formatResponse(response: SearchResponse<ResolverEvent>): T;
 }

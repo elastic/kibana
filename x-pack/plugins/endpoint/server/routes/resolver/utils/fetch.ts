@@ -5,6 +5,7 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
+import { ResolverEvent } from '../../../../common/types';
 import { entityId, parentEntityId } from '../../../../common/models/event';
 import { PaginationBuilder } from './pagination';
 import { Tree } from './tree';
@@ -12,6 +13,27 @@ import { LifecycleQuery } from '../queries/lifecycle';
 import { ChildrenQuery } from '../queries/children';
 import { EventsQuery } from '../queries/events';
 import { StatsQuery } from '../queries/stats';
+
+// TODO move these to common types
+export interface RelatedEvents {
+  events: ResolverEvent[];
+  nextEvent: string | null;
+}
+
+interface LifecycleEvents {
+  lifecycle: ResolverEvent[];
+}
+
+export interface AncestorEvents {
+  ancestors: LifecycleEvents[];
+  nextAncestor: string | null;
+}
+
+export interface ChildrenNode {
+  lifecycle: ResolverEvent[];
+  children: ChildrenNode[];
+  nextChild: string | null;
+}
 
 export class Fetcher {
   constructor(
@@ -21,10 +43,8 @@ export class Fetcher {
     private readonly endpointID?: string
   ) {}
 
-  public async ancestors(limit: number): Promise<Tree> {
-    const tree = new Tree(this.id);
-    await this.doAncestors(tree, this.id, this.id, limit);
-    return tree;
+  public async ancestors(limit: number): Promise<AncestorEvents> {
+    return await this.doAncestors(this.id, limit);
   }
 
   public async children(limit: number, generations: number, after?: string): Promise<Tree> {
@@ -33,10 +53,8 @@ export class Fetcher {
     return tree;
   }
 
-  public async events(limit: number, after?: string): Promise<Tree> {
-    const tree = new Tree(this.id);
-    await this.doEvents(tree, limit, after);
-    return tree;
+  public async events(limit: number, after?: string): Promise<RelatedEvents> {
+    return await this.doEvents(limit, after);
   }
 
   public async stats(tree: Tree): Promise<Tree> {
@@ -44,28 +62,31 @@ export class Fetcher {
     return tree;
   }
 
-  private async doAncestors(tree: Tree, curNode: string, previousNode: string, levels: number) {
+  private async doAncestors(
+    curNode: string,
+    levels: number,
+    ancestors: LifecycleEvents[] = []
+  ): Promise<AncestorEvents> {
     if (levels === 0) {
-      tree.setNextAncestor(curNode);
-      return;
+      return { ancestors, nextAncestor: curNode };
     }
 
     const query = new LifecycleQuery(this.indexPattern, this.endpointID);
     const results = await query.search(this.client, curNode);
 
     if (results.length === 0) {
-      tree.setNextAncestor(null);
-      return;
+      return { ancestors, nextAncestor: null };
     }
-    tree.addAncestor(previousNode, results);
+    ancestors.push({ lifecycle: results });
 
     const next = parentEntityId(results[0]);
-    if (next !== undefined) {
-      await this.doAncestors(tree, next, curNode, levels - 1);
+    if (next === undefined) {
+      return { ancestors, nextAncestor: null };
     }
+    return await this.doAncestors(next, levels - 1, ancestors);
   }
 
-  private async doEvents(tree: Tree, limit: number, after?: string) {
+  private async doEvents(limit: number, after?: string) {
     const query = new EventsQuery(
       PaginationBuilder.createBuilder(limit, after),
       this.indexPattern,
@@ -73,9 +94,14 @@ export class Fetcher {
     );
 
     const { totals, results } = await query.search(this.client, this.id);
-    tree.addEvent(results);
-    tree.paginateEvents(totals, results);
-    if (results.length === 0) tree.setNextEvent(null);
+    if (results.length === 0) {
+      return { events: [], nextEvent: null };
+    }
+    if (!totals[this.id]) {
+      throw new Error(`Could not find the totals for related events entity_id: ${this.id}`);
+    }
+
+    return { events: results, nextEvent: PaginationBuilder.buildCursor(totals[this.id], results) };
   }
 
   private async doChildren(

@@ -35,6 +35,9 @@ type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
  */
 export type AlertAPIOrdering = 'asc' | 'desc';
 
+/**
+ * Represents a single result bucket of an aggregation
+ */
 export interface AggBucket {
   key: string;
   doc_count: number;
@@ -57,11 +60,11 @@ export interface ResolverNodePagination {
  */
 export interface ResolverNode {
   id: string;
+  pagination: ResolverNodePagination;
   children: ResolverNode[];
   events: ResolverEvent[];
   lifecycle: ResolverEvent[];
-  ancestors?: ResolverNode[];
-  pagination: ResolverNodePagination;
+  ancestors: ResolverNode[];
   stats?: ResolverNodeStats;
 }
 

@@ -9,6 +9,9 @@ import { ResolverQuery } from './base';
 import { PaginationBuilder, PaginatedResults } from '../utils/pagination';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 
+/**
+ * Builds a query for retrieving related events for a node.
+ */
 export class EventsQuery extends ResolverQuery<PaginatedResults> {
   constructor(
     private readonly pagination: PaginationBuilder,
