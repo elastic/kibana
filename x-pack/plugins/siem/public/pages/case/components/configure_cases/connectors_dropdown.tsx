@@ -65,9 +65,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <span data-test-subj={`dropdown-connector-${connector.id}`}>
-                    {connector.name}
-                  </span>
+                  <span>{connector.name}</span>
                 </EuiFlexItem>
               </EuiFlexGroup>
             ),
