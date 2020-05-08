@@ -209,8 +209,6 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       meta,
                       filters,
                       rule,
-                      id: undefined,
-                      ruleId,
                       index,
                       interval,
                       maxSignals,

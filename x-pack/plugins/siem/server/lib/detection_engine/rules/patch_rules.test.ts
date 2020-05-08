@@ -26,7 +26,6 @@ describe('patchRules', () => {
       alertsClient,
       savedObjectsClient,
       rule: existingRule,
-      id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
       ...params,
       enabled: false,
       interval: '',
@@ -36,7 +35,7 @@ describe('patchRules', () => {
 
     expect(alertsClient.disable).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        id: existingRule.id,
       })
     );
   });
@@ -52,7 +51,6 @@ describe('patchRules', () => {
       alertsClient,
       savedObjectsClient,
       rule: existingRule,
-      id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
       ...params,
       enabled: true,
       interval: '',
@@ -62,7 +60,7 @@ describe('patchRules', () => {
 
     expect(alertsClient.enable).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        id: existingRule.id,
       })
     );
   });
@@ -79,7 +77,6 @@ describe('patchRules', () => {
       alertsClient,
       savedObjectsClient,
       rule: existingRule,
-      id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
       ...params,
     });
 

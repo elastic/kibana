@@ -140,8 +140,7 @@ export interface Clients {
   alertsClient: AlertsClient;
 }
 
-export type PatchRuleParams = Partial<Omit<RuleAlertParams, 'throttle'>> & {
-  id: string | undefined | null;
+export type PatchRuleParams = Partial<Omit<RuleAlertParams, 'ruleId' | 'throttle'>> & {
   rule: SanitizedAlert | null;
   savedObjectsClient: SavedObjectsClientContract;
 } & Clients;

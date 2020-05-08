@@ -103,8 +103,6 @@ export const patchRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
           meta,
           filters,
           rule: existingRule,
-          id,
-          ruleId,
           index,
           interval,
           maxSignals,

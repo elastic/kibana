@@ -107,8 +107,6 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
               timelineTitle,
               meta,
               filters,
-              id,
-              ruleId,
               index,
               interval,
               maxSignals,

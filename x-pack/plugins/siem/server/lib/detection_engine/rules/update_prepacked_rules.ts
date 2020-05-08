@@ -58,12 +58,10 @@ export const updatePrepackagedRules = async (
         language,
         outputIndex,
         rule: existingRule,
-        id: undefined, // We never have an id when updating from pre-packaged rules
         savedId,
         savedObjectsClient,
         meta,
         filters,
-        ruleId,
         index,
         interval,
         maxSignals,

@@ -27,8 +27,6 @@ export const patchRules = async ({
   filters,
   from,
   immutable,
-  id,
-  ruleId,
   index,
   interval,
   maxSignals,
