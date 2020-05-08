@@ -18,6 +18,7 @@ export interface ITelemetrySavedObject {
     no_as_account: number;
   };
   ui_clicked: {
+    create_first_engine_button: number;
     header_launch_button: number;
     engine_table_link: number;
   };
@@ -55,6 +56,10 @@ export const appSearchTelemetryType: SavedObjectsType = {
       },
       ui_clicked: {
         properties: {
+          create_first_engine_button: {
+            type: 'long',
+            null_value: 0,
+          },
           header_launch_button: {
             type: 'long',
             null_value: 0,
