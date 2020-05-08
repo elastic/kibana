@@ -54,7 +54,6 @@ import {
   updateSort,
   upsertColumn,
   updateTimeline,
-  getDraftTimeline,
   updateTitle,
   updateAutoSaveMsg,
   setFilters,
