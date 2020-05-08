@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Logger, LogMeta } from 'src/core/server/logging';
+import { Logger, LogMeta } from '../../../logging';
 
 /*
  * This file provides a helper class for ensuring that all logging
