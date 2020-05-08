@@ -16,18 +16,25 @@ import { useGetCase } from '../../containers/use_get_case';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { wait } from '../../../common/lib/helpers';
 import { usePushToService } from '../use_push_to_service';
+
+import { useConnectors } from '../../containers/configure/use_connectors';
+import { connectorsMock } from '../../containers/configure/mock';
+
 jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_user_actions');
 jest.mock('../../containers/use_get_case');
 jest.mock('../use_push_to_service');
+jest.mock('../../../../containers/case/configure/use_connectors');
+
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const usePushToServiceMock = usePushToService as jest.Mock;
+const useConnectorsMock = useConnectors as jest.Mock;
 
 export const caseProps: CaseProps = {
   caseId: basicCase.id,
   userCanCrud: true,
-  caseData: basicCase,
+  caseData: { ...basicCase, connectorId: 'servicenow-2' },
   fetchCase: jest.fn(),
   updateCase: jest.fn(),
 };
@@ -97,6 +104,8 @@ describe('CaseView ', () => {
       ),
       pushCallouts: null,
     }));
+
+    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, isLoading: false }));
   });
 
   it('should render CaseComponent', async () => {
@@ -428,5 +437,28 @@ describe('CaseView ', () => {
       .simulate('click');
     expect(fetchCaseUserActions).toBeCalledWith(caseProps.caseData.id);
     expect(fetchCase).toBeCalled();
+  });
+
+  it('should hide push button when connector is invalid', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <CaseComponent
+            {...{
+              ...caseProps,
+              updateCase,
+              caseData: { ...caseProps.caseData, connectorId: 'not-exist' },
+            }}
+          />
+        </Router>
+      </TestProviders>
+    );
+
+    expect(
+      wrapper
+        .find('[data-test-subj="has-data-to-push-button"]')
+        .first()
+        .exists()
+    ).toBeFalsy();
   });
 });
