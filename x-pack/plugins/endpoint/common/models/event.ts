@@ -49,7 +49,6 @@ export function parentEntityId(event: ResolverEvent): string | undefined {
 }
 
 export function eventCategoryDisplayName(event: ResolverEvent): EventCategory {
-  //This was transcribed from the Endgame app:
   const eventTypeToNameMap = new Map<string, EventCategory | undefined>([
     ['process', 'Process'],
     ['alert', 'Alert'],
@@ -61,30 +60,29 @@ export function eventCategoryDisplayName(event: ResolverEvent): EventCategory {
     ['clr', 'CLR'],
     ['image_load', 'Image Load'],
     ['powershell', 'Powershell'],
-    //these did *not* have corresponding entries in the Endgame map
-    ['wmi','WMI'],
-    ['api','API'],
-    ['user','User'],
-  ])
+    ['wmi', 'WMI'],
+    ['api', 'API'],
+    ['user', 'User'],
+  ]);
 
-  //Returning "Security" as a catch-all because it seems pretty general
-  let eventCategoryToReturn: EventCategory = 'Security'
+  // Returning "Process" as a catch-all here because it seems pretty general
+  let eventCategoryToReturn: EventCategory = 'Process';
   if (isLegacyEvent(event)) {
     const legacyFullType = event.endgame.event_type_full;
-    if(legacyFullType){
-      const mappedLegacyCategory = eventTypeToNameMap.get( legacyFullType )
+    if (legacyFullType) {
+      const mappedLegacyCategory = eventTypeToNameMap.get(legacyFullType);
       if (mappedLegacyCategory) {
         eventCategoryToReturn = mappedLegacyCategory;
       }
     }
-  }
-  else {
+  } else {
     const eventCategories = event.event.category;
-    const eventCategory = typeof eventCategories === 'string' ? eventCategories : (eventCategories[0] || '');
+    const eventCategory =
+      typeof eventCategories === 'string' ? eventCategories : eventCategories[0] || '';
     const mappedCategoryValue = eventTypeToNameMap.get(eventCategory);
-    if(mappedCategoryValue){
+    if (mappedCategoryValue) {
       eventCategoryToReturn = mappedCategoryValue;
     }
   }
-  return eventCategoryToReturn
+  return eventCategoryToReturn;
 }
