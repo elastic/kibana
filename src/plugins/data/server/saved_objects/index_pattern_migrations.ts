@@ -20,7 +20,7 @@
 import { flow, omit } from 'lodash';
 import { SavedObjectMigrationFn } from 'kibana/server';
 
-const migrateAttributeTypeAndAttributeTypeMeta: SavedObjectMigrationFn = doc => ({
+const migrateAttributeTypeAndAttributeTypeMeta: SavedObjectMigrationFn<any, any> = doc => ({
   ...doc,
   attributes: {
     ...doc.attributes,
@@ -29,7 +29,7 @@ const migrateAttributeTypeAndAttributeTypeMeta: SavedObjectMigrationFn = doc => 
   },
 });
 
-const migrateSubTypeAndParentFieldProperties: SavedObjectMigrationFn = doc => {
+const migrateSubTypeAndParentFieldProperties: SavedObjectMigrationFn<any, any> = doc => {
   if (!doc.attributes.fields) return doc;
 
   const fieldsString = doc.attributes.fields;
