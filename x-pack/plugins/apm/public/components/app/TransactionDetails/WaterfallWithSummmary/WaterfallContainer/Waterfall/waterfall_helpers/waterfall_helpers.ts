@@ -13,7 +13,8 @@ import {
   sortBy,
   sum,
   uniq,
-  zipObject
+  zipObject,
+  cloneDeep
 } from 'lodash';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TraceAPIResponse } from '../../../../../../../../server/lib/traces/get_trace';
@@ -243,12 +244,14 @@ const getWaterfallItems = (items: TraceAPIResponse['trace']['items']) =>
  * @param waterfallItems
  */
 const reparentSpans = (waterfallItems: IWaterfallItem[]) => {
-  return waterfallItems.map(waterfallItem => {
+  // clones the waterfall items to avoid mutating the original
+  const clonedWaterfallItems = cloneDeep(waterfallItems);
+  return clonedWaterfallItems.map(waterfallItem => {
     if (waterfallItem.docType === 'span') {
       const childId = waterfallItem.doc.child?.id;
       if (childId) {
         childId.forEach(id => {
-          const item = waterfallItems.find(_item => _item.id === id);
+          const item = clonedWaterfallItems.find(_item => _item.id === id);
           if (item) {
             item.parentId = waterfallItem.id;
           }
