@@ -48,8 +48,8 @@ interface AppRequestedResolverData {
  * The action dispatched when the app requests related event data for one or more
  * subjects (whose ids should be included as an array @ `payload`)
  */
-interface AppRequestedRelatedEventData {
-  readonly type: 'appRequestedRelatedEventData';
+interface UserRequestedRelatedEventData {
+  readonly type: 'userRequestedRelatedEventData';
   readonly payload: ResolverEvent;
 }
 
@@ -94,4 +94,4 @@ export type ResolverAction =
   | AppRequestedResolverData
   | UserFocusedOnResolverNode
   | UserSelectedResolverNode
-  | AppRequestedRelatedEventData;
+  | UserRequestedRelatedEventData;

@@ -32,7 +32,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       isLoading: false,
       hasError: false,
     };
-  } else if (action.type === 'appRequestedRelatedEventData') {
+  } else if (action.type === 'userRequestedRelatedEventData') {
     const evt = action.payload;
     const statsMap = state[resultsEnrichedWithRelatedEventInfo];
     if (statsMap) {
