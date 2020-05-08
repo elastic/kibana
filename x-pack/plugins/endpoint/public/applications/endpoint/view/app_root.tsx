@@ -5,73 +5,99 @@
  */
 import * as React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Router } from 'react-router-dom';
 import { Store } from 'redux';
 import { useSelector, Provider } from 'react-redux';
-import { HostList } from './hosts';
-import { PolicyList } from './policy';
-import { PolicyDetails } from './policy';
+import { AppMountParameters } from 'kibana/public';
 import { HeaderNavigation } from './components/header_navigation';
-import { AppRootProvider } from './app_root_provider';
 import { Setup } from './setup';
 import { EndpointPluginStartDependencies } from '../../../plugin';
-import { ScopedHistory, CoreStart } from '../../../../../../../src/core/public';
+import { CoreStart } from '../../../../../../../src/core/public';
 import { EndpointAppSubplugins, GlobalState } from '../types';
 
 interface RouterProps {
-  history: ScopedHistory;
+  appMountParams: AppMountParameters;
   store: Store;
   coreStart: CoreStart;
   depsStart: EndpointPluginStartDependencies;
   subplugins: EndpointAppSubplugins;
 }
 
-const AppRootChildren: React.FunctionComponent<{ subplugins: EndpointAppSubplugins }> = React.memo(
-  ({ subplugins: { alerting } }) => {
-    const { Routes, SelectorContextProvider } = alerting;
+const Routes: React.FunctionComponent<{ subplugins: EndpointAppSubplugins }> = React.memo(
+  ({ subplugins: { alerting, hosts, policyList, policyDetails } }) => {
     const alertingState = useSelector((state: GlobalState) => state.alerting);
+    const hostsState = useSelector((state: GlobalState) => state.hostList);
+    const policyListState = useSelector((state: GlobalState) => state.policyList);
+    const policyDetailsState = useSelector((state: GlobalState) => state.policyDetails);
 
     return (
       <>
         <HeaderNavigation />
-        <Switch>
-          <Route
-            exact
-            path="/"
-            render={() => (
-              <h1 data-test-subj="welcomeTitle">
-                <FormattedMessage id="xpack.endpoint.welcomeTitle" defaultMessage="Hello World" />
-              </h1>
-            )}
-          />
-          <Route path="/hosts" component={HostList} />
-          <SelectorContextProvider value={alertingState}>
-            <Routes />
-          </SelectorContextProvider>
-          <Route path="/policy" exact component={PolicyList} />
-          <Route path="/policy/:id" exact component={PolicyDetails} />
-          <Route
-            render={() => (
-              <FormattedMessage id="xpack.endpoint.notFound" defaultMessage="Page Not Found" />
-            )}
-          />
-        </Switch>
+        <Route
+          exact
+          path="/"
+          render={() => (
+            <h1 data-test-subj="welcomeTitle">
+              <FormattedMessage id="xpack.endpoint.welcomeTitle" defaultMessage="Hello World" />
+            </h1>
+          )}
+        />
+        <hosts.SelectorContextProvider value={hostsState}>
+          <hosts.Routes />
+        </hosts.SelectorContextProvider>
+        <alerting.SelectorContextProvider value={alertingState}>
+          <alerting.Routes />
+        </alerting.SelectorContextProvider>
+        <policyList.SelectorContextProvider value={policyListState}>
+          <policyList.Routes />
+        </policyList.SelectorContextProvider>
+        <policyDetails.SelectorContextProvider value={policyDetailsState}>
+          <policyDetails.Routes />
+        </policyDetails.SelectorContextProvider>
+        <Route
+          render={() => (
+            <FormattedMessage id="xpack.endpoint.notFound" defaultMessage="Page Not Found" />
+          )}
+        />
       </>
     );
   }
+);
+
+// TODO: use this elsewhere
+export interface SubpluginDependencies {
+  appMountParams: AppMountParameters;
+  coreStart: CoreStart;
+  depsStart: EndpointPluginStartDependencies;
+}
+
+export const SubpluginDependenciesContext = React.createContext<SubpluginDependencies | undefined>(
+  undefined
 );
 
 /**
  * The root of the Endpoint application react view.
  */
 export const AppRoot: React.FunctionComponent<RouterProps> = React.memo(
-  ({ history, store, coreStart, depsStart, subplugins }) => {
+  ({ appMountParams, store, coreStart, depsStart, subplugins }) => {
+    const value = React.useMemo(() => {
+      return {
+        appMountParams,
+        coreStart,
+        depsStart,
+      };
+    }, [appMountParams, coreStart, depsStart]);
     return (
       <Provider store={store}>
-        <AppRootProvider history={history} coreStart={coreStart} depsStart={depsStart}>
-          <Setup ingestManager={depsStart.ingestManager} notifications={coreStart.notifications} />
-          <AppRootChildren subplugins={subplugins} />
-        </AppRootProvider>
+        <Router history={appMountParams.history}>
+          <SubpluginDependenciesContext.Provider value={value}>
+            <Setup
+              ingestManager={depsStart.ingestManager}
+              notifications={coreStart.notifications}
+            />
+            <Routes subplugins={subplugins} />
+          </SubpluginDependenciesContext.Provider>
+        </Router>
       </Provider>
     );
   }

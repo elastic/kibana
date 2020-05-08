@@ -11,24 +11,24 @@ import { Query, TimeRange } from 'src/plugins/data/public';
 import { encode, RisonValue } from 'rison-node';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { urlFromQueryParams } from './url_from_query_params';
-import { useAlertListSelector } from './hooks/use_alerts_selector';
+import { useAlertingSelector } from './hooks/use_alerting_selector';
 import * as selectors from '../store/selectors';
 import { EndpointPluginServices } from '../../../../plugin';
 import { clone } from '../models/index_pattern';
 
 export const AlertIndexSearchBar = memo(() => {
   const history = useHistory();
-  const queryParams = useAlertListSelector(selectors.uiQueryParams);
-  const searchBarIndexPatterns = useAlertListSelector(selectors.searchBarIndexPatterns);
+  const queryParams = useAlertingSelector(selectors.uiQueryParams);
+  const searchBarIndexPatterns = useAlertingSelector(selectors.searchBarIndexPatterns);
 
   // Deeply clone the search bar index patterns as the receiving component may mutate them
   const clonedSearchBarIndexPatterns = useMemo(
     () => searchBarIndexPatterns.map(pattern => clone(pattern)),
     [searchBarIndexPatterns]
   );
-  const searchBarQuery = useAlertListSelector(selectors.searchBarQuery);
-  const searchBarDateRange = useAlertListSelector(selectors.searchBarDateRange);
-  const searchBarFilters = useAlertListSelector(selectors.searchBarFilters);
+  const searchBarQuery = useAlertingSelector(selectors.searchBarQuery);
+  const searchBarDateRange = useAlertingSelector(selectors.searchBarDateRange);
+  const searchBarFilters = useAlertingSelector(selectors.searchBarFilters);
 
   const kibanaContext = useKibana<EndpointPluginServices>();
   const {

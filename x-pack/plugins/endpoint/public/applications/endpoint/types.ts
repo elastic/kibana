@@ -368,21 +368,17 @@ export interface SubpluginProviderDefinition<State> {
 
 export interface EndpointAppSubplugins {
   alerting: Subplugin<AlertingState>;
+  hosts: Subplugin<HostState>;
+  policyList: Subplugin<PolicyListState>;
+  policyDetails: Subplugin<PolicyDetailsState>;
 }
 
 export type EndpointAppSubpluginMiddlewares = {
   [Key in keyof EndpointAppSubplugins]: EndpointAppSubplugins[Key]['middleware'];
 } & {
   spyMiddleware?: AppMiddleware;
-  hostList: SubstateMiddleware<HostState>;
-  policyList: SubstateMiddleware<PolicyListState>;
-  policyDetails: SubstateMiddleware<PolicyDetailsState>;
 };
 
 export type EndpointAppSubpluginReducers = {
   [Key in keyof EndpointAppSubplugins]: EndpointAppSubplugins[Key]['reducer'];
-} & {
-  hostList: ImmutableReducer<HostState, AppAction>;
-  policyList: ImmutableReducer<PolicyListState, AppAction>;
-  policyDetails: ImmutableReducer<PolicyDetailsState, AppAction>;
 };

@@ -67,6 +67,7 @@ const NavTab = memo<{ tab: NavTabs }>(({ tab }) => {
   );
 });
 
+// TODO: move this to individual pages
 export const HeaderNavigation: React.FunctionComponent = React.memo(() => {
   const tabList = useMemo(() => {
     return navTabs.map((tab, index) => {

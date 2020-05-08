@@ -5,17 +5,20 @@
  */
 
 import React from 'react';
-import { createMemoryHistory } from 'history';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { applyMiddleware, createStore, Reducer, Store } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import { Provider } from 'react-redux';
+import { ScopedHistory } from 'kibana/public';
+import { Router } from 'react-router-dom';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { EndpointPluginStartDependencies } from '../../../plugin';
 import { depsStartMock } from './dependencies_start_mock';
-import { AppRootProvider } from '../view/app_root_provider';
 import { createSpyMiddleware, MiddlewareActionSpyHelper } from '../store/test_utils';
 import { AppAction, SubpluginProviderDefinition } from '../types';
+import { SubpluginDependenciesContext, SubpluginDependencies } from '../view/app_root';
+import { AppRootProvider } from '../view/app_root_provider';
+import { RouteCapture } from '../view/route_capture';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -23,7 +26,7 @@ type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResul
  * Mocked app root context renderer
  */
 export interface StatelessAppContextTestRender {
-  history: ReturnType<typeof createMemoryHistory>;
+  history: ScopedHistory<unknown>;
   coreStart: ReturnType<typeof coreMock.createStart>;
   depsStart: EndpointPluginStartDependencies;
   /**
@@ -56,11 +59,15 @@ export function createAppRootMockRenderer<S extends {}>(
 export function createAppRootMockRenderer<S extends {}>(
   subpluginDefinition?: Pick<SubpluginProviderDefinition<S>, 'reducer' | 'middleware'>
 ): StatelessAppContextTestRender | AppContextTestRender<S> {
-  const history = createMemoryHistory<never>();
   const coreStart = coreMock.createStart({ basePath: '/mock' });
   const params = coreMock.createAppMountParamters('/mock');
   const depsStart = depsStartMock();
   const composeWithReduxDevTools = composeWithDevTools({ name: 'EndpointApp' });
+  const value: SubpluginDependencies = {
+    appMountParams: params,
+    coreStart,
+    depsStart,
+  };
   let middlewareSpyHelper: MiddlewareActionSpyHelper<S> | undefined;
   let store: Store<S, AppAction> | undefined;
   if (subpluginDefinition) {
@@ -77,14 +84,20 @@ export function createAppRootMockRenderer<S extends {}>(
     <>
       {store !== undefined ? (
         <Provider store={store}>
-          <AppRootProvider history={history} coreStart={coreStart} depsStart={depsStart}>
-            {children}
-          </AppRootProvider>
+          <Router history={params.history}>
+            <SubpluginDependenciesContext.Provider value={value}>
+              <AppRootProvider>
+                <RouteCapture>{children}</RouteCapture>
+              </AppRootProvider>
+            </SubpluginDependenciesContext.Provider>
+          </Router>
         </Provider>
       ) : (
-        <AppRootProvider history={history} coreStart={coreStart} depsStart={depsStart}>
-          {children}
-        </AppRootProvider>
+        <Router history={params.history}>
+          <SubpluginDependenciesContext.Provider value={value}>
+            {children}
+          </SubpluginDependenciesContext.Provider>
+        </Router>
       )}
     </>
   );
@@ -97,7 +110,7 @@ export function createAppRootMockRenderer<S extends {}>(
 
   return {
     store,
-    history,
+    history: params.history,
     coreStart,
     depsStart,
     middlewareSpy: middlewareSpyHelper,

@@ -29,10 +29,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { urlFromQueryParams } from './url_from_query_params';
 import { AlertData } from '../../../../../common/alerting/types';
 import * as selectors from '../store/selectors';
-import { useAlertListSelector } from './hooks/use_alerts_selector';
 import { AlertDetailsOverview } from './details';
 import { FormattedDate } from './formatted_date';
 import { AlertIndexSearchBar } from './index_search_bar';
+import { useAlertingSelector } from './hooks/use_alerting_selector';
 
 export const AlertIndex = memo(() => {
   const history = useHistory();
@@ -90,10 +90,10 @@ export const AlertIndex = memo(() => {
     ];
   }, []);
 
-  const { pageIndex, pageSize, total } = useAlertListSelector(selectors.alertListPagination);
-  const alertListData = useAlertListSelector(selectors.alertListData);
-  const hasSelectedAlert = useAlertListSelector(selectors.hasSelectedAlert);
-  const queryParams = useAlertListSelector(selectors.uiQueryParams);
+  const { pageIndex, pageSize, total } = useAlertingSelector(selectors.alertListPagination);
+  const alertListData = useAlertingSelector(selectors.alertListData);
+  const hasSelectedAlert = useAlertingSelector(selectors.hasSelectedAlert);
+  const queryParams = useAlertingSelector(selectors.uiQueryParams);
 
   const onChangeItemsPerPage = useCallback(
     newPageSize => {
@@ -207,7 +207,7 @@ export const AlertIndex = memo(() => {
     [setVisibleColumns, visibleColumns]
   );
 
-  const selectedAlertData = useAlertListSelector(selectors.selectedAlertDetailsData);
+  const selectedAlertData = useAlertingSelector(selectors.selectedAlertDetailsData);
 
   return (
     <>

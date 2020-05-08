@@ -16,9 +16,6 @@ import {
   EndpointAppSubpluginMiddlewares,
   EndpointAppSubpluginReducers,
 } from './types';
-import { policyListMiddlewareFactory, policyListReducer } from './store/policy_list';
-import { hostMiddlewareFactory, hostListReducer } from './store/hosts';
-import { policyDetailsMiddlewareFactory, policyDetailsReducer } from './store/policy_details';
 import { appReducerFactory } from './store/reducer';
 
 /**
@@ -27,21 +24,21 @@ import { appReducerFactory } from './store/reducer';
 export function renderApp(
   coreStart: CoreStart,
   depsStart: EndpointPluginStartDependencies,
-  { element, history }: AppMountParameters,
+  appMountParams: AppMountParameters,
   subplugins: EndpointAppSubplugins
 ) {
   // TODO: Rethink this
   const subpluginMiddlewares: EndpointAppSubpluginMiddlewares = {
     alerting: subplugins.alerting.middleware,
-    hostList: hostMiddlewareFactory(coreStart, depsStart),
-    policyList: policyListMiddlewareFactory(coreStart, depsStart),
-    policyDetails: policyDetailsMiddlewareFactory(coreStart, depsStart),
+    hosts: subplugins.hosts.middleware,
+    policyList: subplugins.policyList.middleware,
+    policyDetails: subplugins.policyDetails.middleware,
   };
   const subpluginReducers: EndpointAppSubpluginReducers = {
     alerting: subplugins.alerting.reducer,
-    hostList: hostListReducer,
-    policyList: policyListReducer,
-    policyDetails: policyDetailsReducer,
+    hosts: subplugins.hosts.reducer,
+    policyList: subplugins.policyList.reducer,
+    policyDetails: subplugins.policyDetails.reducer,
   };
 
   const middleware = appStoreEnhancerFactory(subpluginMiddlewares);
@@ -49,15 +46,15 @@ export function renderApp(
   const store = createStore(reducer, middleware);
   ReactDOM.render(
     <AppRoot
-      history={history}
+      appMountParams={appMountParams}
       store={store}
       coreStart={coreStart}
       depsStart={depsStart}
       subplugins={subplugins}
     />,
-    element
+    appMountParams.element
   );
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    ReactDOM.unmountComponentAtNode(appMountParams.element);
   };
 }

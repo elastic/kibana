@@ -15,7 +15,7 @@ import {
   EuiTabbedContent,
   EuiTabbedContentTab,
 } from '@elastic/eui';
-import { useAlertListSelector } from '../../hooks/use_alerts_selector';
+import { useAlertingSelector } from '../../hooks/use_alerting_selector';
 import * as selectors from '../../../store/selectors';
 import { MetadataPanel } from './metadata_panel';
 import { FormattedDate } from '../../formatted_date';
@@ -25,7 +25,7 @@ import { TakeActionDropdown } from './take_action_dropdown';
 
 export const AlertDetailsOverview = styled(
   memo(() => {
-    const alertDetailsData = useAlertListSelector(selectors.selectedAlertDetailsData);
+    const alertDetailsData = useAlertingSelector(selectors.selectedAlertDetailsData);
     if (alertDetailsData === undefined) {
       return null;
     }

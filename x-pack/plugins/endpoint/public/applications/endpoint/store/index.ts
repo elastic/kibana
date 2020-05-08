@@ -29,7 +29,7 @@ export const appStoreEnhancerFactory: (
 ) => StoreEnhancer = subpluginMiddlewares => {
   return composeWithReduxDevTools(
     applyMiddleware(
-      substateMiddlewareFactory(globalState => globalState.hostList, subpluginMiddlewares.hostList),
+      substateMiddlewareFactory(globalState => globalState.hostList, subpluginMiddlewares.hosts),
       substateMiddlewareFactory(
         globalState => globalState.policyList,
         subpluginMiddlewares.policyList

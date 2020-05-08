@@ -10,7 +10,7 @@ import { Immutable } from '../../../../../../common/types';
 import { AlertingState } from '../../../../../../common/alerting/types';
 import { alertingSelectorContext } from '../..';
 
-export function useAlertListSelector<TSelected>(
+export function useAlertingSelector<TSelected>(
   selector: (
     state: Immutable<AlertingState>
   ) => TSelected extends Immutable<TSelected> ? TSelected : never

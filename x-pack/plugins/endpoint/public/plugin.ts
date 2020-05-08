@@ -71,13 +71,30 @@ export class EndpointPlugin
       euiIconType: 'securityApp',
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
-        const [{ renderApp }, { alertingSubprovider: alertsSubprovider }] = await Promise.all([
+        const [
+          { renderApp },
+          { alertingSubprovider },
+          { hostsSubprovider },
+          { policyListSubprovider },
+          { policyDetailsSubprovider },
+        ] = await Promise.all([
           import('./applications/endpoint'),
           import('./applications/endpoint/alerting'),
+          import('./applications/endpoint/hosts'),
+          import('./applications/endpoint/policy_list'),
+          import('./applications/endpoint/policy_details'),
         ]);
 
         const subplugins: EndpointAppSubplugins = {
-          alerting: instantiatedSubplugin(alertsSubprovider, coreStart, depsStart, params),
+          alerting: instantiatedSubplugin(alertingSubprovider, coreStart, depsStart, params),
+          hosts: instantiatedSubplugin(hostsSubprovider, coreStart, depsStart, params),
+          policyList: instantiatedSubplugin(policyListSubprovider, coreStart, depsStart, params),
+          policyDetails: instantiatedSubplugin(
+            policyDetailsSubprovider,
+            coreStart,
+            depsStart,
+            params
+          ),
         };
 
         return renderApp(coreStart, depsStart, params, subplugins);

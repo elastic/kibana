@@ -5,14 +5,25 @@
  */
 
 import { useSelector } from 'react-redux';
-import { useMemo } from 'react';
-import { GlobalState, HostState } from '../../types';
+import { useMemo, useContext } from 'react';
+import { Immutable } from '../../../../../common/types';
+import { HostState } from '../../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { hostsSelectorContext } from '../../hosts';
 
-export function useHostSelector<TSelected>(selector: (state: HostState) => TSelected) {
-  return useSelector(function(state: GlobalState) {
-    return selector(state.hostList);
-  });
+export function useHostSelector<TSelected>(
+  selector: (
+    state: Immutable<HostState>
+  ) => TSelected extends Immutable<TSelected> ? TSelected : never
+) {
+  const substate = useContext(hostsSelectorContext);
+  const globalState = useSelector((state: HostState) => state);
+  return useMemo(() => {
+    if (substate === undefined) {
+      return selector(globalState);
+    }
+    return selector(substate);
+  }, [substate, globalState, selector]);
 }
 
 /**

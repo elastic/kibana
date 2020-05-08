@@ -6,7 +6,7 @@
 
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { useAlertListSelector } from '../../hooks/use_alerts_selector';
+import { useAlertingSelector } from '../../hooks/use_alerting_selector';
 import * as selectors from '../../../store/selectors';
 import {
   GeneralAccordion,
@@ -18,7 +18,7 @@ import {
 } from '../metadata';
 
 export const MetadataPanel = memo(() => {
-  const alertDetailsData = useAlertListSelector(selectors.selectedAlertDetailsData);
+  const alertDetailsData = useAlertingSelector(selectors.selectedAlertDetailsData);
   if (alertDetailsData === undefined) {
     return null;
   }

@@ -4,28 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, ReactNode, useMemo } from 'react';
+import React, { memo, ReactNode, useMemo, useContext } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
-import { Router } from 'react-router-dom';
-import { History } from 'history';
-import { CoreStart } from 'kibana/public';
 import { useObservable } from 'react-use';
 import { EuiThemeProvider } from '../../../../../../legacy/common/eui_styled_components';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
-import { RouteCapture } from './route_capture';
-import { EndpointPluginStartDependencies } from '../../../plugin';
+import { SubpluginDependenciesContext } from './app_root';
 
-function ProviderFunction<S>({
-  history,
-  coreStart: { http, notifications, uiSettings, application },
-  depsStart: { data },
-  children,
-}: {
-  history: History;
-  coreStart: CoreStart;
-  depsStart: EndpointPluginStartDependencies;
-  children: ReactNode | ReactNode[];
-}) {
+/**
+ * Provides the context for rendering the endpoint app
+ */
+// TODO: Eventually put this in each subplugin
+export const AppRootProvider = memo(({ children }: { children: ReactNode | ReactNode[] }) => {
+  const context = useContext(SubpluginDependenciesContext)!; // TODO: maybe revisit null assertion
+  const {
+    coreStart: { http, notifications, uiSettings, application },
+    depsStart: { data },
+  } = context;
   const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
   const services = useMemo(() => ({ http, notifications, application, data }), [
     application,
@@ -36,17 +31,8 @@ function ProviderFunction<S>({
   return (
     <I18nProvider>
       <KibanaContextProvider services={services}>
-        <EuiThemeProvider darkMode={isDarkMode}>
-          <Router history={history}>
-            <RouteCapture>{children}</RouteCapture>
-          </Router>
-        </EuiThemeProvider>
+        <EuiThemeProvider darkMode={isDarkMode}>{children}</EuiThemeProvider>
       </KibanaContextProvider>
     </I18nProvider>
   );
-}
-
-/**
- * Provides the context for rendering the endpoint app
- */
-export const AppRootProvider = memo(ProviderFunction);
+});
