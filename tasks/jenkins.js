@@ -32,7 +32,7 @@ module.exports = function (grunt) {
     'run:checkFileCasing',
     'licenses',
     'verifyDependencyVersions',
-    'run:verifyNotice',
+    // 'run:verifyNotice',
     'test:server',
     'test:jest',
     'test:jest_integration',
