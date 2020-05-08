@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-const { set, get, isEmpty } = require('lodash');
+import { get, isEmpty } from 'lodash';
+import { overwrite } from '../../helpers';
 
 const isEmptyFilter = (filter = {}) => Boolean(filter.match_all) && isEmpty(filter.match_all);
 
@@ -30,8 +31,8 @@ function removeEmptyTopLevelAggregation(doc, series) {
 
   if (isEmptyFilter(filter)) {
     const meta = get(doc, `aggs.${series.id}.meta`);
-    set(doc, `aggs`, doc.aggs[series.id].aggs);
-    set(doc, `aggs.timeseries.meta`, meta);
+    overwrite(doc, `aggs`, doc.aggs[series.id].aggs);
+    overwrite(doc, `aggs.timeseries.meta`, meta);
   }
 
   return doc;
