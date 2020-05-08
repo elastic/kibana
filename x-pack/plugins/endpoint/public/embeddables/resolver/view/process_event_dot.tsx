@@ -71,6 +71,9 @@ const subMenuAssets = {
   initialMenuStatus: Symbol(
     'The state of a Resolver submenu before it has been opened or requested data.'
   ),
+  menuError: Symbol(
+    'The options in this submenu cannot be displayed because of an error'
+  ),
   relatedAlerts: {
     title: i18n.translate('xpack.endpoint.resolver.relatedAlerts', {
       defaultMessage: 'Related Alerts',
@@ -91,7 +94,7 @@ type ResolverSubmenuOption = {
 type ResolverSubmenuOptionList = Array<ResolverSubmenuOption>;
 
 const OptionList = React.memo(
-  ({ subMenuOptions }: { subMenuOptions: ResolverSubmenuOptionList }) => {
+  ({ subMenuOptions, isLoading }: { subMenuOptions: ResolverSubmenuOptionList; isLoading: boolean; }) => {
     const selectableOptions = subMenuOptions.map((opt: ResolverSubmenuOption): {
       label: string;
       prepend?: ReactNode;
@@ -114,6 +117,7 @@ const OptionList = React.memo(
             setOptions(newOptions);
           }}
           listProps={{ showIcons: true, bordered: true }}
+          isLoading={isLoading}
         >
           {list => list}
         </EuiSelectable>
@@ -161,6 +165,10 @@ const NodeSubMenu = styled(
         return typeof optionsWithActions === 'object'; 
       }, [optionsWithActions])
 
+      const isMenuLoading = useMemo(()=>{
+        return optionsWithActions === waitingForRelatedEventData; 
+      }, [optionsWithActions])
+
       if (!optionsWithActions) {
         /**
          * When called with a `menuAction`
@@ -191,11 +199,10 @@ const NodeSubMenu = styled(
             {menuTitle}
           </EuiButton>
           {menuIsOpen && isMenuDataAvailable &&
-            (typeof optionsWithActions === 'symbol' ? (
-              'loading'
-            ) : (
-              <OptionList subMenuOptions={optionsWithActions} />
-            ))}
+            (
+              <OptionList isLoading={isMenuLoading} subMenuOptions={optionsWithActions} />
+            )
+          }
         </div>
       );
     }
@@ -216,7 +223,7 @@ const NodeSubMenu = styled(
 `;
 
 /**
- * An artefact that represents a process node.
+ * An artifact that represents a process node.
  */
 export const ProcessEventDot = styled(
   React.memo(
@@ -269,6 +276,9 @@ export const ProcessEventDot = styled(
       const relatedEventOptions = useMemo(()=>{
         if(!relatedEvents){
           return subMenuAssets.initialMenuStatus
+        }
+        if(relatedEvents instanceof Error){
+          return subMenuAssets.menuError;
         }
         if(relatedEvents === waitingForRelatedEventData) {
           return relatedEvents
@@ -378,7 +388,7 @@ export const ProcessEventDot = styled(
       const handleRelatedEventRequest = useCallback(
         () => {
           dispatch({
-            type: 'appRequestedRelatedEventData',
+            type: 'userRequestedRelatedEventData',
             payload: event
           });
         },
