@@ -37,14 +37,14 @@ describe('hits counter', function() {
 
   it('HitsCounter renders a button by providing the showResetButton property', () => {
     component = mountWithIntl(<HitsCounter {...props} />);
-    expect(component).toMatchSnapshot();
+    expect(findTestSubject(component, 'resetSavedSearch').length).toBe(1);
   });
 
   it('HitsCounter not renders a button when the showResetButton property is false', () => {
     component = mountWithIntl(
       <HitsCounter hits={2} showResetButton={false} onResetQuery={jest.fn()} />
     );
-    expect(component).toMatchSnapshot();
+    expect(findTestSubject(component, 'resetSavedSearch').length).toBe(0);
   });
 
   it('expect to render the number of hits', function() {
