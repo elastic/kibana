@@ -1,0 +1,14 @@
+{
+  "id": "pipeline_builder",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "ui": true,
+  "requiredPlugins": [
+    "data",
+    "expressions",
+    "navigation",
+    "visualizations"
+  ],
+  "optionalPlugins": ["embeddable"],
+  "configPath": ["xpack", "pipeline_builder"]
+}
