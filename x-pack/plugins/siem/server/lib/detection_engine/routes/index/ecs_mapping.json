@@ -1,6 +1,23 @@
 {
+  "index_patterns": [
+    "ecs-*"
+  ],
   "mappings": {
-    "dynamic": false,
+    "_meta": {
+      "version": "1.6.0-dev"
+    },
+    "date_detection": false,
+    "dynamic_templates": [
+      {
+        "strings_as_keyword": {
+          "mapping": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "match_mapping_type": "string"
+        }
+      }
+    ],
     "properties": {
       "@timestamp": {
         "type": "date"
@@ -684,13 +701,28 @@
               }
             }
           },
+          "event": {
+            "properties": {
+              "process": {
+                "properties": {
+                  "ancestry": {
+                    "ignore_above": 1024,
+                    "type": "keyword"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
           "policy": {
             "properties": {
               "id": {
                 "ignore_above": 1024,
                 "type": "keyword"
               }
-            }
+            },
+            "type": "object"
           }
         }
       },
@@ -949,7 +981,8 @@
                 "type": "nested"
               },
               "file_extension": {
-                "type": "long"
+                "ignore_above": 1024,
+                "type": "keyword"
               },
               "project_file": {
                 "properties": {
@@ -1115,6 +1148,13 @@
                 "type": "keyword"
               }
             }
+          },
+          "quarantine_path": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "quarantine_result": {
+            "type": "boolean"
           },
           "size": {
             "type": "long"
@@ -1363,6 +1403,10 @@
                 "ignore_above": 1024,
                 "type": "keyword"
               },
+              "variant": {
+                "ignore_above": 1024,
+                "type": "keyword"
+              },
               "version": {
                 "ignore_above": 1024,
                 "type": "keyword"
@@ -1492,6 +1536,10 @@
               },
               "status_code": {
                 "type": "long"
+              },
+              "version": {
+                "ignore_above": 1024,
+                "type": "keyword"
               }
             }
           },
@@ -1814,6 +1862,10 @@
                 "type": "keyword"
               },
               "platform": {
+                "ignore_above": 1024,
+                "type": "keyword"
+              },
+              "variant": {
                 "ignore_above": 1024,
                 "type": "keyword"
               },
@@ -2293,6 +2345,13 @@
                     "ignore_above": 1024,
                     "type": "keyword"
                   },
+                  "elevation": {
+                    "type": "boolean"
+                  },
+                  "elevation_type": {
+                    "ignore_above": 1024,
+                    "type": "keyword"
+                  },
                   "impersonation_level": {
                     "ignore_above": 1024,
                     "type": "keyword"
@@ -2355,6 +2414,13 @@
           "token": {
             "properties": {
               "domain": {
+                "ignore_above": 1024,
+                "type": "keyword"
+              },
+              "elevation": {
+                "type": "boolean"
+              },
+              "elevation_type": {
                 "ignore_above": 1024,
                 "type": "keyword"
               },
@@ -3385,6 +3451,13 @@
                         "ignore_above": 1024,
                         "type": "keyword"
                       },
+                      "elevation": {
+                        "type": "boolean"
+                      },
+                      "elevation_type": {
+                        "ignore_above": 1024,
+                        "type": "keyword"
+                      },
                       "impersonation_level": {
                         "ignore_above": 1024,
                         "type": "keyword"
@@ -3447,6 +3520,13 @@
               "token": {
                 "properties": {
                   "domain": {
+                    "ignore_above": 1024,
+                    "type": "keyword"
+                  },
+                  "elevation": {
+                    "type": "boolean"
+                  },
+                  "elevation_type": {
                     "ignore_above": 1024,
                     "type": "keyword"
                   },
@@ -4097,6 +4177,10 @@
                 "type": "keyword"
               },
               "platform": {
+                "ignore_above": 1024,
+                "type": "keyword"
+              },
+              "variant": {
                 "ignore_above": 1024,
                 "type": "keyword"
               },
