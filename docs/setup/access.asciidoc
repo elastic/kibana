@@ -2,8 +2,8 @@
 == Accessing Kibana
 
 Kibana is a web application that you access through port 5601. All you need to do is point your web browser at the
-machine where Kibana is running and specify the port number. For example, `localhost:5601` or
-`http://YOURDOMAIN.com:5601`.
+machine where Kibana is running and specify the port number. For example, `localhost:5601` or `http://YOURDOMAIN.com:5601`.
+If you want to allow remote users to connect, set the parameter `server.host` in `kibana.yml` to a non-loopback address.
 
 When you access Kibana, the <<discover,Discover>> page loads by default with the default index pattern selected. The
 time filter is set to the last 15 minutes and the search query is set to match-all (\*).
@@ -15,9 +15,10 @@ If you still don't see any results, it's possible that you don't *have* any docu
 [[status]]
 === Checking Kibana Status
 
-You can reach the Kibana server's status page by navigating to `localhost:5601/status`. The status page displays
+You can reach the Kibana server's status page by navigating to the status endpoint, for example, `localhost:5601/status`. The status page displays
 information about the server's resource usage and lists the installed plugins.
 
-image::images/kibana-status-page.png[]
+[role="screenshot"]
+image::images/kibana-status-page-7_5_0.png[]
 
 NOTE: For JSON-formatted server status details, use the API endpoint at `localhost:5601/api/status`

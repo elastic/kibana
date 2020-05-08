@@ -64,8 +64,9 @@ export default function ({ getService }) {
     })
   );
 
-  // Flaky tests; possible race condition with ES.
-  describe('follower indices', () => {
+  describe('follower indices', function () {
+    this.tags(['skipCloud']);
+
     before(() => addCluster());
     after(() => cleanUp());
 

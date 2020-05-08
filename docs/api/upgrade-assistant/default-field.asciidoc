@@ -1,7 +1,7 @@
 [[upgrade-assistant-api-default-field]]
 === Add Default Field API
 
-experimental[This API is *experimental* and may be changed or removed completely in a future release. The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are currently experimental.]
+experimental["This API is *experimental* and may be changed or removed completely in a future release. The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are currently experimental."]
 
 Starting in Elasticsearch 7.0, some query types such as Simple Query String, have a limit to the number of fields they will query against. You can configure this cap in Elasticsearch by setting the `indices.query.bool.max_clause_count` cluster setting, which is 1024 by default.
 

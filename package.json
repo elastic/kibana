@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "7.1.1",
+  "version": "7.1.2",
   "branch": "7.1",
   "types": "./kibana.d.ts",
   "build": {
@@ -96,7 +96,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "6.10.7",
+    "@elastic/eui": "6.10.8",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.2",
@@ -244,7 +244,7 @@
     "webpack-merge": "4.1.4",
     "whatwg-fetch": "^3.0.0",
     "wreck": "^14.0.2",
-    "x-pack": "7.1.1",
+    "x-pack": "7.1.2",
     "yauzl": "2.7.0"
   },
   "devDependencies": {
