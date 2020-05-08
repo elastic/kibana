@@ -19,9 +19,6 @@
 
 import React from 'react';
 
-// todo
-// import './time_field.css';
-
 import {
   EuiForm,
   EuiFormRow,
