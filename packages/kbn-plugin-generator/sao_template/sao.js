@@ -40,7 +40,7 @@ module.exports = function({ name }) {
       },
       kbnVersion: {
         message: 'What Kibana version are you targeting?',
-        default: kibanaPkg.branch,
+        default: kibanaPkg.version,
       },
       generateApp: {
         type: 'confirm',

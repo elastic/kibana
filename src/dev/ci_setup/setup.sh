@@ -108,6 +108,10 @@ yarn config set yarn-offline-mirror "$cacheDir/yarn-offline-cache"
 yarnGlobalDir="$(yarn global bin)"
 export PATH="$PATH:$yarnGlobalDir"
 
+# use a proxy to fetch chromedriver/geckodriver asset
+export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
+export CHROMEDRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
+
 ###
 ### install dependencies
 ###

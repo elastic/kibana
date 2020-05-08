@@ -18,9 +18,7 @@ Returns true if all of the conditions are true.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_*
 |boolean
@@ -40,9 +38,7 @@ and rename columns.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |column*
 |string
@@ -69,9 +65,7 @@ Returns true if any of the conditions are true.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_*
 |boolean
@@ -90,9 +84,7 @@ Creates a datatable with a single value.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_ (Alias: `name`)
 |string
@@ -111,9 +103,7 @@ Configures axis of a visualization.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |show
 |boolean
@@ -136,9 +126,7 @@ Builds a case (including a condition/result) to pass to the switch function.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_
 |any
@@ -176,9 +164,7 @@ Includes or excludes columns from a data table. If you specify both, this will e
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |include
 |string
@@ -205,9 +191,7 @@ such as number, string, and boolean.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_ (Alias: `op`)
 |string
@@ -233,9 +217,7 @@ You would usually use this inside of a charting function.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |border
 |string
@@ -292,9 +274,7 @@ Creates a datatable from CSV input.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_* 
 |string
@@ -321,9 +301,7 @@ Returns the current time, or a time parsed from a string, as milliseconds since 
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_ 
 |string
@@ -350,9 +328,7 @@ actions producing functions.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_ 
 |any
@@ -372,9 +348,7 @@ Configures a dropdown filter control element.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |filterColumn
 |any
@@ -398,9 +372,7 @@ Returns whether the context is equal to the argument.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_*
 |boolean, number, string
@@ -418,9 +390,7 @@ Creates a filter that matches a given column for a perfectly exact value.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |column* (Aliases: `field`, `c`)
 |string
@@ -444,9 +414,7 @@ Filters rows in a datatable based on the return value of a subexpression.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_* (Alias: `fn`)
 |boolean
@@ -467,9 +435,7 @@ Creates font style.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |size
 |number
@@ -517,9 +483,7 @@ Outputs milliseconds since epoch as a formatted string.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_* 
 |string
@@ -538,9 +502,7 @@ Turns a number into a string using a Number.js format.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_* 
 |string
@@ -559,9 +521,7 @@ Fetches a single cell in a table.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_* (Aliases: `column`, `c`)
 |string
@@ -584,9 +544,7 @@ Returns whether the context is greater than the argument.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_* 
 |boolean, number, string
@@ -605,9 +563,7 @@ Returns whether the context is greater than or equal to the argument.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_* 
 |boolean, number, string
@@ -626,9 +582,7 @@ Gets the first N rows from the datatable. Also see `tail`.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_ 
 |number
@@ -647,9 +601,7 @@ Performs conditional logic.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_ (Alias: `condition`)
 |boolean
@@ -678,9 +630,7 @@ Displays an image.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |dataurl (Alias: `_,`, `url`)
 |string
@@ -710,9 +660,7 @@ Returns whether the context is less than the argument passed in.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_* 
 |boolean, number, string
@@ -731,9 +679,7 @@ Returns whether the context is less than or equal to the argument passed in.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_* 
 |boolean, number, string
@@ -752,9 +698,7 @@ Adds a column calculated as the result of other columns, or not.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_* (Alias: `column`)
 |string
@@ -777,9 +721,7 @@ Adds an element for rendering Markdown text. Great for single numbers, metrics, 
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_
 |string
@@ -805,9 +747,7 @@ available as "value" (without the quotes).
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_*
 |string
@@ -826,9 +766,7 @@ A number with a label.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_
 |string
@@ -857,9 +795,7 @@ Returns whether the context is not equal to the argument.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_*
 |boolean, number, string
@@ -878,9 +814,7 @@ Creates a color palette.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_*
 |string
@@ -907,9 +841,7 @@ Configures a pie chart element.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |palette
 |palette
@@ -962,9 +894,7 @@ Configures a plot element.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |seriesStyle
 |seriesStyle
@@ -1008,9 +938,7 @@ then merges the output.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |by*
 |string
@@ -1038,9 +966,7 @@ such as styling.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |as
 |string
@@ -1068,9 +994,7 @@ Configures a repeating image element.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |image
 |string
@@ -1110,9 +1034,7 @@ Uses a regular expression to replace parts of a string.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_* (Aliases: `pattern`, `regex`)
 |string
@@ -1143,9 +1065,7 @@ Configures an image reveal element.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |image
 |string
@@ -1181,9 +1101,7 @@ milliseconds since epoch.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_*
 |string
@@ -1215,9 +1133,7 @@ You typically use this inside of a charting function.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |label*
 |string
@@ -1265,9 +1181,7 @@ Creates a shape.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_ (Alias: `shape`)
 |string
@@ -1302,9 +1216,7 @@ Sorts a datatable on a column.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_* (Alias: `column`)
 |string
@@ -1329,9 +1241,7 @@ Adds a column with a static value.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_* (Alias: `column`)
 |string
@@ -1356,9 +1266,7 @@ sub-expressions that output a string, or something castable to a string.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_*
 |string
@@ -1378,9 +1286,7 @@ which builds a case to pass to the switch function.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_* (Alias: `case`)
 |case
@@ -1403,9 +1309,7 @@ Configures a data table element.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |font
 |style
@@ -1437,9 +1341,7 @@ Gets the last N rows from the end of a datatable. See also, `head`.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_*
 |case
@@ -1458,9 +1360,7 @@ Creates a time filter for querying a source.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |column (Aliases: `field`, `c`)
 |any
@@ -1487,9 +1387,7 @@ Configures a time filter control element.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |column (Aliases: `field`, `c`)
 |any
@@ -1512,9 +1410,7 @@ Explicitly casts from one type to another.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_* (Alias: `type`)
 |string

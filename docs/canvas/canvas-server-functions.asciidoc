@@ -18,9 +18,7 @@ A mock data set that includes project CI times with usernames, countries, and ru
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_ (Alias: `type`)
 |string
@@ -40,9 +38,7 @@ especially if you are asking for a lot of rows.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |index
 |string
@@ -81,9 +77,7 @@ Queries {es} for a count of the number of hits matching a query.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |index
 |string
@@ -106,9 +100,7 @@ Specifies an {es} SQL.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_*  (Alias: `query`, `q`)
 |string
@@ -135,9 +127,7 @@ then deduplicated by those keys using the specified TinyMath function.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |x
 |string
@@ -182,9 +172,7 @@ Uses Timelion to extract one or more time series from many sources.
 
 [cols="3*^<"]
 |===
-s|Argument
-s|Type
-s|Description
+|Argument |Type |Description
 
 |_Unnamed_ (Aliases: `query`, `q`)
 |string

@@ -1,52 +1,22 @@
 [role="xpack"]
 [[profiler-getting-started]]
-
-ifndef::gs-mini[]
 === Getting Started
-endif::gs-mini[]
 
-ifdef::gs-mini[]
-== Getting Started
-endif::gs-mini[]
+The {searchprofiler} is automatically enabled in {kib}.  Go to *Dev Tools > Search Profiler*
+to get started. 
 
-The {searchprofiler} is automatically enabled in {kib}.  It is located under the
-*Dev Tools* tab in {kib}. 
-
-[[first-profile]]
-To start profiling queries:
-
-. Open Kibana in your web browser and log in. If you are running Kibana
-locally, go to `http://localhost:5601/`.
-
-. Click **DevTools** in the side navigation to open the {searchprofiler}.
-Console is the default tool to open when first accessing DevTools.
-+
-image::dev-tools/searchprofiler/images/gs1.png["Opening DevTools"]
-+
-On the top navigation bar, click the second item: *Search Profiler*
-+
-image::dev-tools/searchprofiler/images/gs2.png["Opening the {searchprofiler}"]
-
-. This opens the {searchprofiler} interface.
-+
-image::dev-tools/searchprofiler/images/gs3.png["{searchprofiler} Interface"]
-
-. Replace the default `match_all` query with the query you want to profile and click *Profile*.
-+
-image::dev-tools/searchprofiler/images/gs4.png["Profiling the match_all query"]
-+
 {searchprofiler} displays the names of the indices searched, the shards in each index,
-and how long the query took.  The following example shows the results of profiling
-the match_all query. Three indices were searched: `.monitoring-kibana-2-2016.11.30`,
-`.monitoring-data-2` and `test`.
-+
-If we take a closer look at the information for the test index, we can see from the
-Cumulative Time that the query took 0.132ms to execute. Of the five shards in the
-index (`DWZD0iosQNeJMTvb4q1JDw` 0 through 5), shard 3 was the slowest (0.053ms), followed by shard 2 (0.038ms). Shards are
-sorted by their time in descending order.
-+
-image::dev-tools/searchprofiler/images/gs5.png["Profile details for the test index"]
-+
+and how long it took for the query to complete. To try it out, replace the default `match_all` query 
+with the query you want to profile and click *Profile*.
+
+The following example shows the results of profiling the `match_all` query.
+If we take a closer look at the information for the `.kibana_1` sample index, the
+Cumulative Time field shows us that the query took 0.067ms to execute.
+
+[role="screenshot"]
+image::dev-tools/searchprofiler/images/query.png["{searchprofiler} example"]
+
+
 [NOTE]
 ====
 The Cumulative Time metric is the sum of individual shard times.
@@ -59,14 +29,21 @@ While the Cumulative Time metric is useful for comparing the performance of your
 indices and shards, it doesn't necessarily represent the actual physical query times.
 ====
 
-. To view more detailed profiling information for a shard, click the Expand button.
-This displays details about the query component(s) that ran on the shard.
-+
-In this example, there is a single `"MatchAllDocsQuery"` that ran on the shard.
-Since it was the only query run, it took 100% of the time.  When you mouse over
-a row, the {searchprofiler} displays additional information about the query component."
-+
-image::dev-tools/searchprofiler/images/gs6.png["Profile details for the first shard"]
-+
-This panel shows the timing breakdown of low-level Lucene methods.  For more information,
-see the reference docs for timing breakdowns in {ref}/search-profile-queries.html[Profiling queries].
+You can select the name of the shard and then click *View details* to see more profiling information, 
+including details about the query component(s) that ran on the shard, as well as the timing 
+breakdown of low-level Lucene methods. For more information, see {ref}/search-profile-queries.html[Profiling queries].
+
+[float]
+=== Index and type filtering
+
+By default, all queries executed by the {searchprofiler} are sent
+to `GET /_search`. It searches across your entire cluster (all indices, all types).
+
+If you need to query a specific index or type (or several), you can use the Index
+and Type filters at the top left.
+
+In the following example, the query is executed against the indices `test` and `kibana_1`
+and the type `my_type`. This is equivalent making a request to `GET /test,kibana_1/my_type/_search`.
+
+[role="screenshot"]
+image::dev-tools/searchprofiler/images/filter.png["Filtering by index and type"]
