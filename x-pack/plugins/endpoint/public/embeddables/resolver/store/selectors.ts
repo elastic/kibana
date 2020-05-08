@@ -60,6 +60,9 @@ export const processAdjacencies = composeSelectors(
   dataSelectors.processAdjacencies
 );
 
+/**
+ * Returns a map of `ResolverEvent`s to their related `ResolverEvent`s
+ */
 export const relatedEvents = composeSelectors(dataStateSelector, dataSelectors.relatedEvents);
 
 /**
