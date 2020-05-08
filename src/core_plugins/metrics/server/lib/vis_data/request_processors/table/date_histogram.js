@@ -1,4 +1,4 @@
-import { set } from 'lodash';
+import { overwrite } from '../../helpers';
 import getBucketSize from '../../helpers/get_bucket_size';
 import getIntervalAndTimefield from '../../get_interval_and_timefield';
 import getTimerange from '../../helpers/get_timerange';
@@ -11,7 +11,7 @@ export default function dateHistogram(req, panel) {
     const { from, to }  = getTimerange(req);
     panel.series.forEach(column => {
       const aggRoot = calculateAggRoot(doc, column);
-      set(doc, `${aggRoot}.timeseries.date_histogram`, {
+      overwrite(doc, `${aggRoot}.timeseries.date_histogram`, {
         field: timeField,
         interval: intervalString,
         min_doc_count: 0,
@@ -20,7 +20,7 @@ export default function dateHistogram(req, panel) {
           max: to.valueOf()
         }
       });
-      set(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
+      overwrite(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
         timeField,
         intervalString,
         bucketSize
