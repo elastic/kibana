@@ -130,7 +130,6 @@ interface PrimitiveRecord extends Record<string, Serializable> {}
  * Context passed to server-side {@GlobalSearchResultProvider | result provider}'s `find` method.
  */
 export interface GlobalSearchProviderContext {
-  request: KibanaRequest;
   core: {
     savedObjects: {
       client: SavedObjectsClientContract;
@@ -162,11 +161,11 @@ type GlobalSearchResultProvider = {
 
 Notes:
 
-- initial implementation will only provide a static / non extensible `GlobalSearchProviderContext` context.
+- Initial implementation will only provide a static / non extensible `GlobalSearchProviderContext` context.
   It would be possible to allow plugins to register their own context providers as it's done for `RequestHandlerContext`,
   but this will not be done until the need arises.
-- Because of the previous point, the performing `request` object is also exposed on the context to allow result providers
-  to scope their custom services if needed.
+- The performing `request` object could also be exposed on the context to allow result providers
+  to scope their custom services if needed. However as the previous option, this should only be done once needed.
 
 #### public
 
