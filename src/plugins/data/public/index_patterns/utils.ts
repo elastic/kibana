@@ -48,13 +48,3 @@ export async function findByTitle(
     (obj: SimpleSavedObject<any>) => obj.get('title').toLowerCase() === title.toLowerCase()
   );
 }
-
-export function getRoutes() {
-  return {
-    edit: '/management/kibana/indexPatterns/patterns/{{id}}',
-    addField: '/management/kibana/indexPatterns/patterns/{{id}}/create-field',
-    indexedFields: '/management/kibana/indexPatterns/patterns/{{id}}?_a=(tab:indexedFields)',
-    scriptedFields: '/management/kibana/indexPatterns/patterns/{{id}}?_a=(tab:scriptedFields)',
-    sourceFilters: '/management/kibana/indexPatterns/patterns/{{id}}?_a=(tab:sourceFilters)',
-  };
-}

@@ -25,12 +25,12 @@ The following example shows a valid configuration of two out-of-the box connecto
 
 ```js
   xpack.actions.preconfigured:
-    - id: 'my-slack1'           <1>
+    my-slack1:                  <1>
       actionTypeId: .slack      <2>
       name: 'Slack #xyz'        <3>
       config:                   <4>
         webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz'
-    - id: 'webhook-service'
+    webhook-service:
       actionTypeId: .webhook
       name: 'Email service'
       config:
@@ -44,7 +44,7 @@ The following example shows a valid configuration of two out-of-the box connecto
         password: changeme
 ```
 
-<1> `id` is the action connector identifier.
+<1> the key is the action connector identifier, eg `my-slack1` in this example.
 <2> `actionTypeId` is the action type identifier.
 <3> `name` is the name of the preconfigured connector.
 <4> `config` is the action type specific to the configuration.
@@ -69,7 +69,7 @@ The following example shows a valid configuration of preconfigured action type w
 ```js
   xpack.actions.enabledActionTypes: ['.slack', '.email', '.index'] <1>
   xpack.actions.preconfigured:                                     <2>
-    - id: 'my-server-log'
+    my-server-log:
       actionTypeId: .server-log
       name: 'Server log #xyz'
 ```
