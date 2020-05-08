@@ -23,17 +23,17 @@ Password::  An optional password. If set, HTTP basic authentication is used. Cur
 
 [source,text]
 --
- id: 'my-webhook'
- name: preconfigured-webhook-action-type
- actionTypeId: .webhook
- config:
-   url: https://test.host <1.1>
-   method: POST <1.2>
-   headers: <1.3>
-     testheader: testvalue
- secrets:
-   user: testuser <2.1>
-   password: passwordkeystorevalue <2.2>
+ my-webhook:
+   name: preconfigured-webhook-action-type
+   actionTypeId: .webhook
+   config:
+     url: https://test.host <1.1>
+     method: POST <1.2>
+     headers: <1.3>
+       testheader: testvalue
+   secrets:
+     user: testuser <2.1>
+     password: passwordkeystorevalue <2.2>
 --
 
 `config` defines the action type specific to the configuration and contains the following properties:
