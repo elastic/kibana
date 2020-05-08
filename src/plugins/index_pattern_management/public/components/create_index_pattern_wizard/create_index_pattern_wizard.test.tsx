@@ -41,7 +41,7 @@ jest.mock('./lib/get_indices', () => ({
   },
 }));
 
-const { savedObjects, overlays, uiSettings } = coreMock.createStart();
+const { savedObjects, overlays, uiSettings, chrome } = coreMock.createStart();
 const { indexPatterns, search } = dataPluginMock.createStartContract();
 
 const mockIndexPatternCreationType = new IndexPatternCreationConfig({
@@ -60,6 +60,7 @@ const services = ({
   changeUrl: jest.fn(),
   openConfirm: overlays.openConfirm,
   setBreadcrumbs: jest.fn(),
+  docTitle: chrome.docTitle,
 } as unknown) as CreateIndexPatternWizardProps['services'];
 
 const routeComponentPropsMock = {

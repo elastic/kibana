@@ -32,7 +32,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsClientContract, IUiSettingsClient } from '../../../../../core/public';
+import {
+  SavedObjectsClientContract,
+  IUiSettingsClient,
+  ChromeDocTitle,
+} from '../../../../../core/public';
 import { INDEX_PATTERN_MANAGEMENT_SECTION_PATH } from '../../../../data/public';
 import { ManagementAppMountParams } from '../../../../management/public';
 import { CreateButton } from '../create_button';
@@ -99,6 +103,10 @@ const ariaRegion = i18n.translate('indexPatternManagement.editIndexPatternLiveRe
   defaultMessage: 'Index patterns',
 });
 
+const title = i18n.translate('indexPatternManagement.indexPatternTable.title', {
+  defaultMessage: 'Index patterns',
+});
+
 interface Props extends RouteComponentProps {
   getIndexPatternCreationOptions: IndexPatternManagementStart['creation']['getIndexPatternCreationOptions'];
   canSave: boolean;
@@ -107,6 +115,7 @@ interface Props extends RouteComponentProps {
     uiSettings: IUiSettingsClient;
     setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
     indexPatternManagement: IndexPatternManagementStart;
+    docTitle: ChromeDocTitle;
   };
 }
 
@@ -143,6 +152,8 @@ export const IndexPatternTable = ({
     services.uiSettings,
   ]);
 
+  services.docTitle.change(title);
+
   const createButton = canSave ? (
     <CreateButton options={creationOptions}>
       <FormattedMessage
@@ -167,12 +178,7 @@ export const IndexPatternTable = ({
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiText>
-                <h2>
-                  <FormattedMessage
-                    id="indexPatternManagement.indexPatternTable.title"
-                    defaultMessage="Index patterns"
-                  />
-                </h2>
+                <h2>{title}</h2>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

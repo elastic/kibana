@@ -4,15 +4,7 @@ exports[`Header should render a different name, prompt, and beta tag if provided
 <div>
   <EuiTitle>
     <h1>
-      <FormattedMessage
-        defaultMessage="Create {indexPatternName}"
-        id="indexPatternManagement.createIndexPatternHeader"
-        values={
-          Object {
-            "indexPatternName": "test index pattern",
-          }
-        }
-      />
+      Create test index pattern
        
       <EuiBetaBadge
         label="Beta"
@@ -59,15 +51,7 @@ exports[`Header should render normally 1`] = `
 <div>
   <EuiTitle>
     <h1>
-      <FormattedMessage
-        defaultMessage="Create {indexPatternName}"
-        id="indexPatternManagement.createIndexPatternHeader"
-        values={
-          Object {
-            "indexPatternName": "test index pattern",
-          }
-        }
-      />
+      Create test index pattern
     </h1>
   </EuiTitle>
   <EuiFlexGroup
@@ -104,15 +88,7 @@ exports[`Header should render without including system indices 1`] = `
 <div>
   <EuiTitle>
     <h1>
-      <FormattedMessage
-        defaultMessage="Create {indexPatternName}"
-        id="indexPatternManagement.createIndexPatternHeader"
-        values={
-          Object {
-            "indexPatternName": "test index pattern",
-          }
-        }
-      />
+      Create test index pattern
     </h1>
   </EuiTitle>
   <EuiFlexGroup

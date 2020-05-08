@@ -74,6 +74,7 @@ export async function mountManagementSection(
                 indexPatterns: data.indexPatterns,
                 savedObjectsClient: savedObjects.client,
                 uiSettings,
+                docTitle: chrome.docTitle,
                 openConfirm: overlays.openConfirm,
                 setBreadcrumbs: params.setBreadcrumbs,
               }}
@@ -126,6 +127,7 @@ export async function mountManagementSection(
               services={{
                 savedObjectsClient: savedObjects.client,
                 uiSettings,
+                docTitle: chrome.docTitle,
                 setBreadcrumbs: params.setBreadcrumbs,
                 indexPatternManagement: indexPatternManagementStart as IndexPatternManagementStart,
               }}

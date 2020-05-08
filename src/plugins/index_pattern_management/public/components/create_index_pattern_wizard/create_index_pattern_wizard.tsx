@@ -24,7 +24,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
-import { SavedObjectsClientContract, IUiSettingsClient, OverlayStart } from 'src/core/public';
+import {
+  SavedObjectsClientContract,
+  IUiSettingsClient,
+  OverlayStart,
+  ChromeDocTitle,
+} from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ManagementAppMountParams } from '../../../../management/public';
 import { StepIndexPattern } from './components/step_index_pattern';
@@ -48,6 +53,7 @@ export interface CreateIndexPatternWizardProps extends RouteComponentProps {
     uiSettings: IUiSettingsClient;
     openConfirm: OverlayStart['openConfirm'];
     setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
+    docTitle: ChromeDocTitle;
   };
 }
 
@@ -223,6 +229,7 @@ export class CreateIndexPatternWizard extends Component<
 
   renderHeader() {
     const { isIncludingSystemIndices } = this.state;
+    const { services } = this.props;
 
     return (
       <Header
@@ -232,6 +239,7 @@ export class CreateIndexPatternWizard extends Component<
         onChangeIncludingSystemIndices={this.onChangeIncludingSystemIndices}
         indexPatternName={this.state.indexPatternCreationType.getIndexPatternName()}
         isBeta={this.state.indexPatternCreationType.getIsBeta()}
+        changeTitle={services.docTitle.change}
       />
     );
   }
