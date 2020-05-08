@@ -24,11 +24,11 @@ import getTimerange from '../../helpers/get_timerange';
 import { calculateAggRoot } from './calculate_agg_root';
 
 export default function dateHistogram(req, panel) {
-  return (next) => (doc) => {
+  return next => doc => {
     const { timeField, interval } = getIntervalAndTimefield(panel);
     const { bucketSize, intervalString } = getBucketSize(req, interval);
-    const { from, to } = getTimerange(req);
-    panel.series.forEach((column) => {
+    const { from, to }  = getTimerange(req);
+    panel.series.forEach(column => {
       const aggRoot = calculateAggRoot(doc, column);
       overwrite(doc, `${aggRoot}.timeseries.date_histogram`, {
         field: timeField,
@@ -36,13 +36,13 @@ export default function dateHistogram(req, panel) {
         min_doc_count: 0,
         extended_bounds: {
           min: from.valueOf(),
-          max: to.valueOf(),
-        },
+          max: to.valueOf()
+        }
       });
       overwrite(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
         timeField,
         intervalString,
-        bucketSize,
+        bucketSize
       });
     });
     return next(doc);

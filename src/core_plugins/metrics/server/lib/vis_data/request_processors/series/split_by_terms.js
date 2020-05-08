@@ -23,19 +23,17 @@ import getBucketsPath from '../../helpers/get_buckets_path';
 import bucketTransform from '../../helpers/bucket_transform';
 
 export default function splitByTerm(req, panel, series) {
-  return (next) => (doc) => {
+  return next => doc => {
     if (series.split_mode === 'terms' && series.terms_field) {
       const direction = series.terms_direction || 'desc';
       overwrite(doc, `aggs.${series.id}.terms.field`, series.terms_field);
       overwrite(doc, `aggs.${series.id}.terms.size`, series.terms_size);
-      const metric = series.metrics.find((item) => item.id === series.terms_order_by);
+      const metric = series.metrics.find(item => item.id === series.terms_order_by);
       if (metric && metric.type !== 'count' && ~basicAggs.indexOf(metric.type)) {
         const sortAggKey = `${series.terms_order_by}-SORT`;
         const fn = bucketTransform[metric.type];
-        const bucketPath = getBucketsPath(series.terms_order_by, series.metrics).replace(
-          series.terms_order_by,
-          sortAggKey
-        );
+        const bucketPath = getBucketsPath(series.terms_order_by, series.metrics)
+          .replace(series.terms_order_by, sortAggKey);
         overwrite(doc, `aggs.${series.id}.terms.order`, { [bucketPath]: direction });
         overwrite(doc, `aggs.${series.id}.aggs`, { [sortAggKey]: fn(metric) });
       } else if (['_term', '_count'].includes(series.terms_order_by)) {
