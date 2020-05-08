@@ -30,10 +30,10 @@ module.exports = function (grunt) {
     'rejectRejFiles',
 
     'run:eslint',
-    'licenses',
+    // 'licenses',
     'test:server',
     'test:jest',
-    'test:browser-ci',
+    // 'test:browser-ci',
     'test:api',
     '_build:verifyTranslations',
   ]);
