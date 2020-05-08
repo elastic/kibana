@@ -56,7 +56,6 @@ describe('alert_edit', () => {
       },
       alertParamsExpression: () => <React.Fragment />,
       isEditable: true,
-      consumer: 'alerting',
     };
 
     const actionTypeModel = {

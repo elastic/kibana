@@ -15,6 +15,10 @@ import { AlertsContextProvider } from '../../context/alerts_context';
 import { coreMock } from 'src/core/public/mocks';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
+jest.mock('../../lib/alert_api', () => ({
+  loadAlertTypes: jest.fn(),
+}));
+
 describe('alert_form', () => {
   let deps: any;
   const alertType = {
@@ -26,7 +30,6 @@ describe('alert_form', () => {
     },
     alertParamsExpression: () => <Fragment />,
     isEditable: true,
-    consumer: 'alerting',
   };
 
   const actionType = {
@@ -53,7 +56,6 @@ describe('alert_form', () => {
     },
     alertParamsExpression: () => <Fragment />,
     isEditable: false,
-    consumer: 'alerting',
   };
 
   describe('alert_form create alert', () => {
@@ -144,6 +146,134 @@ describe('alert_form', () => {
       await setup();
       const alertTypeSelectOptions = wrapper.find(
         '[data-test-subj=".server-log-ActionTypeSelectOption"]'
+      );
+      expect(alertTypeSelectOptions.exists()).toBeFalsy();
+    });
+  });
+
+  describe('alert_form create alert non alerting consumer and producer', () => {
+    let wrapper: ReactWrapper<any>;
+
+    async function setup() {
+      const { loadAlertTypes } = jest.requireMock('../../lib/alert_api');
+      loadAlertTypes.mockResolvedValue([
+        {
+          id: 'other-consumer-producer-alert-type',
+          name: 'Test',
+          actionGroups: [
+            {
+              id: 'testActionGroup',
+              name: 'Test Action Group',
+            },
+          ],
+          defaultActionGroupId: 'testActionGroup',
+          producer: 'alerting',
+        },
+        {
+          id: 'same-consumer-producer-alert-type',
+          name: 'Test',
+          actionGroups: [
+            {
+              id: 'testActionGroup',
+              name: 'Test Action Group',
+            },
+          ],
+          defaultActionGroupId: 'testActionGroup',
+          producer: 'test',
+        },
+      ]);
+      const mocks = coreMock.createSetup();
+      const [
+        {
+          application: { capabilities },
+        },
+      ] = await mocks.getStartServices();
+      deps = {
+        toastNotifications: mocks.notifications.toasts,
+        http: mocks.http,
+        uiSettings: mocks.uiSettings,
+        actionTypeRegistry: actionTypeRegistry as any,
+        alertTypeRegistry: alertTypeRegistry as any,
+        docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
+        capabilities,
+      };
+      alertTypeRegistry.list.mockReturnValue([
+        {
+          id: 'same-consumer-producer-alert-type',
+          iconClass: 'test',
+          name: 'test-alert',
+          validate: (): ValidationResult => {
+            return { errors: {} };
+          },
+          alertParamsExpression: () => <Fragment />,
+          isEditable: false,
+        },
+        {
+          id: 'other-consumer-producer-alert-type',
+          iconClass: 'test',
+          name: 'test-alert',
+          validate: (): ValidationResult => {
+            return { errors: {} };
+          },
+          alertParamsExpression: () => <Fragment />,
+          isEditable: true,
+        },
+      ]);
+      alertTypeRegistry.has.mockReturnValue(true);
+
+      const initialAlert = ({
+        name: 'non alerting consumer test',
+        params: {},
+        consumer: 'test',
+        schedule: {
+          interval: '1m',
+        },
+        actions: [],
+        tags: [],
+        muteAll: false,
+        enabled: false,
+        mutedInstanceIds: [],
+      } as unknown) as Alert;
+
+      wrapper = mountWithIntl(
+        <AlertsContextProvider
+          value={{
+            reloadAlerts: () => {
+              return new Promise<void>(() => {});
+            },
+            http: deps!.http,
+            docLinks: deps.docLinks,
+            actionTypeRegistry: deps!.actionTypeRegistry,
+            alertTypeRegistry: deps!.alertTypeRegistry,
+            toastNotifications: deps!.toastNotifications,
+            uiSettings: deps!.uiSettings,
+            capabilities: deps!.capabilities,
+          }}
+        >
+          <AlertForm alert={initialAlert} dispatch={() => {}} errors={{ name: [], interval: [] }} />
+        </AlertsContextProvider>
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(loadAlertTypes).toHaveBeenCalled();
+    }
+
+    it('renders alert type options which producer correspond to the alert consumer', async () => {
+      await setup();
+      const alertTypeSelectOptions = wrapper.find(
+        '[data-test-subj="same-consumer-producer-alert-type-SelectOption"]'
+      );
+      expect(alertTypeSelectOptions.exists()).toBeTruthy();
+    });
+
+    it('does not render alert type options which producer does not correspond to the alert consumer', async () => {
+      await setup();
+      const alertTypeSelectOptions = wrapper.find(
+        '[data-test-subj="other-consumer-producer-alert-type-SelectOption"]'
       );
       expect(alertTypeSelectOptions.exists()).toBeFalsy();
     });

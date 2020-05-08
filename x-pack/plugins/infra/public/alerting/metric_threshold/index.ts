@@ -31,6 +31,5 @@ Reason:
       }
     ),
     isEditable: true,
-    consumer: 'metrics',
   };
 }

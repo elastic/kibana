@@ -21,7 +21,7 @@ import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AlertTypeModel } from '../../../../x-pack/plugins/triggers_actions_ui/public';
-import { DEFAULT_INSTANCES_TO_GENERATE, ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
+import { DEFAULT_INSTANCES_TO_GENERATE } from '../../common/constants';
 
 interface AlwaysFiringParamsProps {
   alertParams: { instances?: number };
@@ -52,7 +52,6 @@ export function getAlertType(): AlertTypeModel {
       return validationResult;
     },
     isEditable: true,
-    consumer: ALERTING_EXAMPLE_APP_ID,
   };
 }
 

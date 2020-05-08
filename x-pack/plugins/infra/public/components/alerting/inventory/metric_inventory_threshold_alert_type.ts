@@ -31,6 +31,5 @@ Current value is \\{\\{context.valueOf.condition0\\}\\}
       }
     ),
     isEditable: true,
-    consumer: 'metrics',
   };
 }

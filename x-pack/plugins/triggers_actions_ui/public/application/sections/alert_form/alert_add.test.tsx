@@ -72,7 +72,6 @@ describe('alert_add', () => {
       },
       alertParamsExpression: TestExpression,
       isEditable: true,
-      consumer: 'alerting',
     };
 
     const actionTypeModel = {

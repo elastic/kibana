@@ -100,7 +100,6 @@ export function getAlertType(): AlertTypeModel {
       return validationResult;
     },
     isEditable: true,
-    consumer: ALERTING_EXAMPLE_APP_ID,
   };
 }
 

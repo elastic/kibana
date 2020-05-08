@@ -40,7 +40,6 @@ jest.mock('../../../app_context', () => ({
           return { errors: {} };
         },
         isEditable: true,
-        consumer: 'alerting',
       }),
       list: jest.fn(),
     },
@@ -85,6 +84,7 @@ describe('alert_details', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
+      producer: 'alerting',
     };
 
     expect(
@@ -122,6 +122,7 @@ describe('alert_details', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
+      producer: 'alerting',
     };
 
     expect(
@@ -150,6 +151,7 @@ describe('alert_details', () => {
         actionGroups: [{ id: 'default', name: 'Default' }],
         actionVariables: { context: [], state: [] },
         defaultActionGroupId: 'default',
+        producer: 'alerting',
       };
 
       const actionTypes: ActionType[] = [
@@ -202,6 +204,7 @@ describe('alert_details', () => {
         actionGroups: [{ id: 'default', name: 'Default' }],
         actionVariables: { context: [], state: [] },
         defaultActionGroupId: 'default',
+        producer: 'alerting',
       };
       const actionTypes: ActionType[] = [
         {
@@ -259,6 +262,7 @@ describe('alert_details', () => {
         actionGroups: [{ id: 'default', name: 'Default' }],
         actionVariables: { context: [], state: [] },
         defaultActionGroupId: 'default',
+        producer: 'alerting',
       };
 
       expect(
@@ -277,6 +281,7 @@ describe('alert_details', () => {
         actionGroups: [{ id: 'default', name: 'Default' }],
         actionVariables: { context: [], state: [] },
         defaultActionGroupId: 'default',
+        producer: 'alerting',
       };
 
       expect(
@@ -304,6 +309,7 @@ describe('disable button', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
+      producer: 'alerting',
     };
 
     const enableButton = shallow(
@@ -330,6 +336,7 @@ describe('disable button', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
+      producer: 'alerting',
     };
 
     const enableButton = shallow(
@@ -356,6 +363,7 @@ describe('disable button', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
+      producer: 'alerting',
     };
 
     const disableAlert = jest.fn();
@@ -391,6 +399,7 @@ describe('disable button', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
+      producer: 'alerting',
     };
 
     const enableAlert = jest.fn();
@@ -429,6 +438,7 @@ describe('mute button', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
+      producer: 'alerting',
     };
 
     const enableButton = shallow(
@@ -456,6 +466,7 @@ describe('mute button', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
+      producer: 'alerting',
     };
 
     const enableButton = shallow(
@@ -483,6 +494,7 @@ describe('mute button', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
+      producer: 'alerting',
     };
 
     const muteAlert = jest.fn();
@@ -519,6 +531,7 @@ describe('mute button', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
+      producer: 'alerting',
     };
 
     const unmuteAlert = jest.fn();
@@ -555,6 +568,7 @@ describe('mute button', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       actionVariables: { context: [], state: [] },
       defaultActionGroupId: 'default',
+      producer: 'alerting',
     };
 
     const enableButton = shallow(

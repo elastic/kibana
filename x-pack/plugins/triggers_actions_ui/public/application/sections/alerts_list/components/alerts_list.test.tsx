@@ -45,7 +45,6 @@ const alertType = {
   },
   alertParamsExpression: () => null,
   isEditable: true,
-  consumer: 'alerting',
 };
 alertTypeRegistry.list.mockReturnValue([alertType]);
 actionTypeRegistry.list.mockReturnValue([]);

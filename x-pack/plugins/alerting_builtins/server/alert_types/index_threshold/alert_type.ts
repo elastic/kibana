@@ -85,6 +85,7 @@ export function getAlertType(service: Service): AlertType {
       ],
     },
     executor,
+    producer: 'alerting',
   };
 
   async function executor(options: AlertExecutorOptions) {

@@ -171,6 +171,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
     ],
     state: [...commonStateTranslations],
   },
+  producer: 'uptime',
   async executor(options: AlertExecutorOptions) {
     const { params: rawParams } = options;
     const decoded = StatusCheckExecutorParamsType.decode(rawParams);

@@ -99,6 +99,7 @@ export interface AlertType {
   actionGroups: ActionGroup[];
   actionVariables: ActionVariables;
   defaultActionGroupId: ActionGroup['id'];
+  producer: string;
 }
 
 export type SanitizedAlertType = Omit<AlertType, 'apiKey'>;
@@ -117,7 +118,6 @@ export interface AlertTypeModel {
   validate: (alertParams: any) => ValidationResult;
   alertParamsExpression: React.FunctionComponent<any>;
   isEditable: boolean;
-  consumer: string;
   defaultActionMessage?: string;
 }
 

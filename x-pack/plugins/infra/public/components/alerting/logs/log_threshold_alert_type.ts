@@ -26,6 +26,5 @@ export function getAlertType(): AlertTypeModel {
       }
     ),
     isEditable: true,
-    consumer: 'logs',
   };
 }
