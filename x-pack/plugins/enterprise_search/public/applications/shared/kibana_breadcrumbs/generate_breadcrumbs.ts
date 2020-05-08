@@ -16,19 +16,24 @@ import { letBrowserHandleEvent } from '../react_router_helpers';
 
 interface IGenerateBreadcrumbProps {
   text: string;
-  path: string;
-  history: History;
+  path?: string;
+  history?: History;
 }
 
-export const generateBreadcrumb = ({ text, path, history }: IGenerateBreadcrumbProps) => ({
-  text,
-  href: history.createHref({ pathname: path }),
-  onClick: event => {
-    if (letBrowserHandleEvent(event)) return;
-    event.preventDefault();
-    history.push(path);
-  },
-});
+export const generateBreadcrumb = ({ text, path, history }: IGenerateBreadcrumbProps) => {
+  const breadcrumb = { text };
+
+  if (path && history) {
+    breadcrumb.href = history.createHref({ pathname: path });
+    breadcrumb.onClick = event => {
+      if (letBrowserHandleEvent(event)) return;
+      event.preventDefault();
+      history.push(path);
+    };
+  }
+
+  return breadcrumb;
+};
 
 /**
  * Product-specific breadcrumb helpers
@@ -39,12 +44,9 @@ type TBreadcrumbs = EuiBreadcrumb[] | [];
 export const enterpriseSearchBreadcrumbs = (history: History) => (
   breadcrumbs: TBreadcrumbs = []
 ) => [
-  generateBreadcrumb({ text: 'Enterprise Search', path: '/', history }),
+  generateBreadcrumb({ text: 'Enterprise Search' }),
   ...breadcrumbs.map(({ text, path }) => generateBreadcrumb({ text, path, history })),
 ];
 
 export const appSearchBreadcrumbs = (history: History) => (breadcrumbs: TBreadcrumbs = []) =>
-  enterpriseSearchBreadcrumbs(history)([
-    { text: 'App Search', path: '/app_search' },
-    ...breadcrumbs,
-  ]);
+  enterpriseSearchBreadcrumbs(history)([{ text: 'App Search', path: '/' }, ...breadcrumbs]);
