@@ -71,9 +71,7 @@ const subMenuAssets = {
   initialMenuStatus: Symbol(
     'The state of a Resolver submenu before it has been opened or requested data.'
   ),
-  menuError: Symbol(
-    'The options in this submenu cannot be displayed because of an error'
-  ),
+  menuError: Symbol('The options in this submenu cannot be displayed because of an error'),
   relatedAlerts: {
     title: i18n.translate('xpack.endpoint.resolver.relatedAlerts', {
       defaultMessage: 'Related Alerts',
@@ -86,27 +84,35 @@ const subMenuAssets = {
   },
 };
 
-type ResolverSubmenuOption = {
+interface ResolverSubmenuOption {
   optionTitle: string;
   action: () => unknown;
   prefix?: number | JSX.Element;
 }
-type ResolverSubmenuOptionList = Array<ResolverSubmenuOption>;
+type ResolverSubmenuOptionList = ResolverSubmenuOption[];
 
 const OptionList = React.memo(
-  ({ subMenuOptions, isLoading }: { subMenuOptions: ResolverSubmenuOptionList; isLoading: boolean; }) => {
+  ({
+    subMenuOptions,
+    isLoading,
+  }: {
+    subMenuOptions: ResolverSubmenuOptionList;
+    isLoading: boolean;
+  }) => {
     const selectableOptions = subMenuOptions.map((opt: ResolverSubmenuOption): {
       label: string;
       prepend?: ReactNode;
     } => {
-      return opt.prefix ? {
-        label: opt.optionTitle,
-        prepend: (<span>{opt.prefix}</span>),
-      } : {
-        label: opt.optionTitle,
-        prepend: (<span></span>),
-      };
-    })
+      return opt.prefix
+        ? {
+            label: opt.optionTitle,
+            prepend: <span>{opt.prefix}</span>,
+          }
+        : {
+            label: opt.optionTitle,
+            prepend: <span />,
+          };
+    });
     const [options, setOptions] = useState(selectableOptions);
     return useMemo(
       () => (
@@ -122,7 +128,7 @@ const OptionList = React.memo(
           {list => list}
         </EuiSelectable>
       ),
-      [options]
+      [isLoading, options]
     );
   }
 );
@@ -134,7 +140,7 @@ const NodeSubMenu = styled(
       menuAction,
       optionsWithActions,
       className,
-    }: { menuTitle: string; className?: string; menuAction: () => unknown; } & (
+    }: { menuTitle: string; className?: string; menuAction: () => unknown } & (
       | {
           optionsWithActions:
             | ResolverSubmenuOptionList
@@ -150,7 +156,7 @@ const NodeSubMenu = styled(
           clickEvent.stopPropagation();
           setMenuOpen(!menuIsOpen);
         },
-        [menuIsOpen, optionsWithActions]
+        [menuIsOpen]
       );
       const handleMenuActionClick = useCallback(
         (clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -161,13 +167,13 @@ const NodeSubMenu = styled(
         },
         [menuAction]
       );
-      const isMenuDataAvailable = useMemo(()=>{
-        return typeof optionsWithActions === 'object'; 
-      }, [optionsWithActions])
+      const isMenuDataAvailable = useMemo(() => {
+        return typeof optionsWithActions === 'object';
+      }, [optionsWithActions]);
 
-      const isMenuLoading = useMemo(()=>{
-        return optionsWithActions === waitingForRelatedEventData; 
-      }, [optionsWithActions])
+      const isMenuLoading = useMemo(() => {
+        return optionsWithActions === waitingForRelatedEventData;
+      }, [optionsWithActions]);
 
       if (!optionsWithActions) {
         /**
@@ -176,7 +182,7 @@ const NodeSubMenu = styled(
          */
         return (
           <div className={className}>
-            <EuiButton onClick={ handleMenuActionClick } color="ghost" size="s" tabIndex={-1}>
+            <EuiButton onClick={handleMenuActionClick} color="ghost" size="s" tabIndex={-1}>
               {menuTitle}
             </EuiButton>
           </div>
@@ -192,17 +198,15 @@ const NodeSubMenu = styled(
             onClick={isMenuDataAvailable ? handleMenuOpenClick : handleMenuActionClick}
             color="ghost"
             size="s"
-            iconType={(menuIsOpen ? 'arrowUp' : 'arrowDown')}
+            iconType={menuIsOpen ? 'arrowUp' : 'arrowDown'}
             iconSide="right"
             tabIndex={-1}
           >
             {menuTitle}
           </EuiButton>
-          {menuIsOpen && isMenuDataAvailable &&
-            (
-              <OptionList isLoading={isMenuLoading} subMenuOptions={optionsWithActions} />
-            )
-          }
+          {menuIsOpen && isMenuDataAvailable && (
+            <OptionList isLoading={isMenuLoading} subMenuOptions={optionsWithActions} />
+          )}
         </div>
       );
     }
@@ -273,17 +277,17 @@ export const ProcessEventDot = styled(
       const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
       const selectedDescendantId = useSelector(selectors.uiSelectedDescendantId);
 
-      const relatedEventOptions = useMemo(()=>{
-        if(!relatedEvents){
-          return subMenuAssets.initialMenuStatus
+      const relatedEventOptions = useMemo(() => {
+        if (!relatedEvents) {
+          return subMenuAssets.initialMenuStatus;
         }
-        if(relatedEvents instanceof Error){
+        if (relatedEvents instanceof Error) {
           return subMenuAssets.menuError;
         }
-        if(relatedEvents === waitingForRelatedEventData) {
-          return relatedEvents
+        if (relatedEvents === waitingForRelatedEventData) {
+          return relatedEvents;
         }
-        return Object.entries(relatedEvents.stats).map((k,v) => {
+        return Object.entries(relatedEvents.stats).map((k, v) => {
           return {
             prefix: k[1],
             optionTitle: `${k[0]}`,
@@ -292,10 +296,10 @@ export const ProcessEventDot = styled(
                * COMING SOON TO A THEATER NEAR YOU:
                * OPENING SIDE MENUS
                */
-            }
-          }
-        })
-      },[relatedEvents])
+            },
+          };
+        });
+      }, [relatedEvents]);
 
       const nodeViewportStyle = useMemo(
         () => ({
@@ -371,7 +375,6 @@ export const ProcessEventDot = styled(
 
       const handleClick = useCallback(
         (clickEvent: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-          
           if (animationTarget.current !== null) {
             (animationTarget.current as any).beginElement();
           }
@@ -385,15 +388,12 @@ export const ProcessEventDot = styled(
         [animationTarget, dispatch, nodeId]
       );
 
-      const handleRelatedEventRequest = useCallback(
-        () => {
-          dispatch({
-            type: 'userRequestedRelatedEventData',
-            payload: event
-          });
-        },
-        [dispatch, event, selfId]
-      );
+      const handleRelatedEventRequest = useCallback(() => {
+        dispatch({
+          type: 'userRequestedRelatedEventData',
+          payload: event,
+        });
+      }, [dispatch, event]);
 
       /* eslint-disable jsx-a11y/click-events-have-key-events */
       /**
@@ -532,7 +532,7 @@ export const ProcessEventDot = styled(
                   <EuiFlexItem grow={false}>
                     <NodeSubMenu
                       menuTitle={subMenuAssets.relatedAlerts.title}
-                      menuAction={()=>{}}
+                      menuAction={() => {}}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -576,7 +576,7 @@ export const ProcessEventDot = styled(
 
   & .related-dropdown {
     width: 4.5em;
-  } 
+  }
   & .euiSelectableList-bordered {
     border-top-right-radius: 0px;
     border-top-left-radius: 0px;
