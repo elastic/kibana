@@ -49,7 +49,7 @@ interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   };
 }
 
-const searchAriaLabel = i18n.translate('kbn.management.editIndexPattern.fields.filterAria', {
+const searchAriaLabel = i18n.translate('kbn.management.editIndexPattern.fields.searchAria', {
   defaultMessage: 'Search fields',
 });
 
