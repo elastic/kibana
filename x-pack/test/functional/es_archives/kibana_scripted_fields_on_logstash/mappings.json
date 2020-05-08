@@ -2,298 +2,6 @@
   "type": "index",
   "value": {
     "aliases": {
-    },
-    "index": ".kibana_1",
-    "mappings": {
-      "dynamic": "true",
-      "properties": {
-        "config": {
-          "dynamic": "true",
-          "properties": {
-            "buildNum": {
-              "type": "keyword"
-            },
-            "dateFormat:tz": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 256,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            }
-          }
-        },
-        "dashboard": {
-          "dynamic": "strict",
-          "properties": {
-            "description": {
-              "type": "text"
-            },
-            "hits": {
-              "type": "integer"
-            },
-            "kibanaSavedObjectMeta": {
-              "properties": {
-                "searchSourceJSON": {
-                  "type": "text"
-                }
-              }
-            },
-            "optionsJSON": {
-              "type": "text"
-            },
-            "panelsJSON": {
-              "type": "text"
-            },
-            "refreshInterval": {
-              "properties": {
-                "display": {
-                  "type": "keyword"
-                },
-                "pause": {
-                  "type": "boolean"
-                },
-                "section": {
-                  "type": "integer"
-                },
-                "value": {
-                  "type": "integer"
-                }
-              }
-            },
-            "timeFrom": {
-              "type": "keyword"
-            },
-            "timeRestore": {
-              "type": "boolean"
-            },
-            "timeTo": {
-              "type": "keyword"
-            },
-            "title": {
-              "type": "text"
-            },
-            "uiStateJSON": {
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
-            }
-          }
-        },
-        "index-pattern": {
-          "dynamic": "strict",
-          "properties": {
-            "fieldFormatMap": {
-              "type": "text"
-            },
-            "fields": {
-              "type": "text"
-            },
-            "intervalName": {
-              "type": "keyword"
-            },
-            "notExpandable": {
-              "type": "boolean"
-            },
-            "sourceFilters": {
-              "type": "text"
-            },
-            "timeFieldName": {
-              "type": "keyword"
-            },
-            "title": {
-              "type": "text"
-            }
-          }
-        },
-        "search": {
-          "dynamic": "strict",
-          "properties": {
-            "columns": {
-              "type": "keyword"
-            },
-            "description": {
-              "type": "text"
-            },
-            "hits": {
-              "type": "integer"
-            },
-            "kibanaSavedObjectMeta": {
-              "properties": {
-                "searchSourceJSON": {
-                  "type": "text"
-                }
-              }
-            },
-            "sort": {
-              "type": "keyword"
-            },
-            "title": {
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
-            }
-          }
-        },
-        "server": {
-          "dynamic": "strict",
-          "properties": {
-            "uuid": {
-              "type": "keyword"
-            }
-          }
-        },
-        "space": {
-          "properties": {
-            "_reserved": {
-              "type": "boolean"
-            },
-            "color": {
-              "type": "keyword"
-            },
-            "description": {
-              "type": "text"
-            },
-            "disabledFeatures": {
-              "type": "keyword"
-            },
-            "initials": {
-              "type": "keyword"
-            },
-            "name": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 2048,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            }
-          }
-        },
-        "spaceId": {
-          "type": "keyword"
-        },
-        "timelion-sheet": {
-          "dynamic": "strict",
-          "properties": {
-            "description": {
-              "type": "text"
-            },
-            "hits": {
-              "type": "integer"
-            },
-            "kibanaSavedObjectMeta": {
-              "properties": {
-                "searchSourceJSON": {
-                  "type": "text"
-                }
-              }
-            },
-            "timelion_chart_height": {
-              "type": "integer"
-            },
-            "timelion_columns": {
-              "type": "integer"
-            },
-            "timelion_interval": {
-              "type": "keyword"
-            },
-            "timelion_other_interval": {
-              "type": "keyword"
-            },
-            "timelion_rows": {
-              "type": "integer"
-            },
-            "timelion_sheet": {
-              "type": "text"
-            },
-            "title": {
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
-            }
-          }
-        },
-        "type": {
-          "type": "keyword"
-        },
-        "updated_at": {
-          "type": "date"
-        },
-        "url": {
-          "dynamic": "strict",
-          "properties": {
-            "accessCount": {
-              "type": "long"
-            },
-            "accessDate": {
-              "type": "date"
-            },
-            "createDate": {
-              "type": "date"
-            },
-            "url": {
-              "fields": {
-                "keyword": {
-                  "ignore_above": 2048,
-                  "type": "keyword"
-                }
-              },
-              "type": "text"
-            }
-          }
-        },
-        "visualization": {
-          "dynamic": "strict",
-          "properties": {
-            "description": {
-              "type": "text"
-            },
-            "kibanaSavedObjectMeta": {
-              "properties": {
-                "searchSourceJSON": {
-                  "type": "text"
-                }
-              }
-            },
-            "savedSearchId": {
-              "type": "keyword"
-            },
-            "title": {
-              "type": "text"
-            },
-            "uiStateJSON": {
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
-            },
-            "visState": {
-              "type": "text"
-            }
-          }
-        }
-      }
-    },
-    "settings": {
-      "index": {
-        "auto_expand_replicas": "0-1",
-        "number_of_replicas": "0",
-        "number_of_shards": "1"
-      }
-    }
-  }
-}
-
-{
-  "type": "index",
-  "value": {
-    "aliases": {
       ".kibana": {
       }
     },
@@ -320,7 +28,7 @@
           "graph-workspace": "cd7ba1330e6682e9cc00b78850874be1",
           "index-pattern": "66eccb05066c5a89924f48a9e9736499",
           "infrastructure-ui-source": "ddc0ecb18383f6b26101a2fadb2dab0c",
-          "inventory-view": "9ecce5b58867403613d82fe496470b34",
+          "inventory-view": "5299b67717e96502c77babf1c16fd4d3",
           "kql-telemetry": "d12a98a6f19a2d273696597547e064ee",
           "lens": "21c3ea0763beb1ecb0162529706b88c5",
           "lens-ui-telemetry": "509bfa5978586998e05f9e303c07a327",
@@ -330,14 +38,15 @@
           "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
           "ml-telemetry": "257fd1d4b4fdbb9cb4b8a3b27da201e9",
           "namespace": "2f4316de49999235636386fe51dc06c1",
+          "namespaces": "2f4316de49999235636386fe51dc06c1",
           "query": "11aaeb7f5f7fa5bb43f25e18ce26e7d9",
           "references": "7997cf5a56cc02bdc9c93361bde732b0",
           "sample-data-telemetry": "7d3cfeb915303c9641c59681967ffeb4",
           "search": "181661168bbadd1eff5902361e2a0d5c",
           "server": "ec97f1c5da1a19609a60874e5af1100c",
-          "siem-detection-engine-rule-actions": "90eee2e4635260f4be0a1da8f5bc0aa0",
+          "siem-detection-engine-rule-actions": "6569b288c169539db10cb262bf79de18",
           "siem-detection-engine-rule-status": "ae783f41c6937db6b7a2ef5c93a9e9b0",
-          "siem-ui-timeline": "ac8020190f5950dd3250b6499144e7fb",
+          "siem-ui-timeline": "f2d929253ecd06ffbac78b4047f45a86",
           "siem-ui-timeline-note": "8874706eedc49059d4cf0f5094559084",
           "siem-ui-timeline-pinned-event": "20638091112f0e14f0e443d512301c29",
           "space": "c5ca8acafa0beaa4d08d014a97b6bc6b",
@@ -347,10 +56,10 @@
           "type": "2f4316de49999235636386fe51dc06c1",
           "ui-metric": "0d409297dc5ebe1e3a1da691c6ee32e3",
           "updated_at": "00da57df13e94e9d98437d13ace4bfe0",
-          "upgrade-assistant-reindex-operation": "a53a20fe086b72c9a86da3cc12dad8a6",
+          "upgrade-assistant-reindex-operation": "296a89039fc4260292be36b1b005d8f2",
           "upgrade-assistant-telemetry": "56702cec857e0a9dacfb696655b4ff7b",
-          "uptime-dynamic-settings": "b6289473c8985c79b6c47eebc19a0ca5",
-          "url": "c7f66a0df8b1b52f17c28c4adb111105",
+          "uptime-dynamic-settings": "a6f3af21b612339cbe6eecc1e5a60871",
+          "url": "b675c3be8d76ecf029294d51dc7ec65d",
           "visualization": "52d7a13ad68a150c4525b292d23e12cc"
         }
       },
@@ -1740,6 +1449,15 @@
                 }
               },
               "type": "text"
+            },
+            "timepicker:quickRanges": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
             }
           }
         },
@@ -1930,6 +1648,9 @@
         },
         "inventory-view": {
           "properties": {
+            "accountId": {
+              "type": "keyword"
+            },
             "autoBounds": {
               "type": "boolean"
             },
@@ -2023,8 +1744,11 @@
             "nodeType": {
               "type": "keyword"
             },
+            "region": {
+              "type": "keyword"
+            },
             "time": {
-              "type": "integer"
+              "type": "long"
             },
             "view": {
               "type": "keyword"
@@ -2260,6 +1984,9 @@
         "namespace": {
           "type": "keyword"
         },
+        "namespaces": {
+          "type": "keyword"
+        },
         "query": {
           "properties": {
             "description": {
@@ -2363,7 +2090,7 @@
                   "type": "keyword"
                 },
                 "params": {
-                  "dynamic": "true",
+                  "enabled": false,
                   "type": "object"
                 }
               }
@@ -2665,6 +2392,15 @@
                 }
               }
             },
+            "templateTimelineId": {
+              "type": "text"
+            },
+            "templateTimelineVersion": {
+              "type": "integer"
+            },
+            "timelineType": {
+              "type": "keyword"
+            },
             "title": {
               "type": "text"
             },
@@ -2848,10 +2584,47 @@
           "type": "date"
         },
         "upgrade-assistant-reindex-operation": {
-          "dynamic": "true",
           "properties": {
+            "errorMessage": {
+              "type": "keyword"
+            },
             "indexName": {
               "type": "keyword"
+            },
+            "lastCompletedStep": {
+              "type": "integer"
+            },
+            "locked": {
+              "type": "date"
+            },
+            "newIndexName": {
+              "type": "keyword"
+            },
+            "reindexOptions": {
+              "properties": {
+                "openAndClose": {
+                  "type": "boolean"
+                },
+                "queueSettings": {
+                  "properties": {
+                    "queuedAt": {
+                      "type": "long"
+                    },
+                    "startedAt": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "reindexTaskId": {
+              "type": "keyword"
+            },
+            "reindexTaskPercComplete": {
+              "type": "float"
+            },
+            "runningReindexCount": {
+              "type": "integer"
             },
             "status": {
               "type": "integer"
@@ -2912,6 +2685,16 @@
         },
         "uptime-dynamic-settings": {
           "properties": {
+            "certThresholds": {
+              "properties": {
+                "age": {
+                  "type": "long"
+                },
+                "expiration": {
+                  "type": "long"
+                }
+              }
+            },
             "heartbeatIndices": {
               "type": "keyword"
             }
@@ -2931,7 +2714,6 @@
             "url": {
               "fields": {
                 "keyword": {
-                  "ignore_above": 2048,
                   "type": "keyword"
                 }
               },
@@ -2974,7 +2756,8 @@
       "index": {
         "auto_expand_replicas": "0-1",
         "number_of_replicas": "0",
-        "number_of_shards": "1"
+        "number_of_shards": "1",
+        "prefer_v2_templates": "true"
       }
     }
   }

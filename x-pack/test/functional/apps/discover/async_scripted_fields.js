@@ -24,46 +24,46 @@ export default function({ getService, getPageObjects }) {
     before(async function() {
       await esArchiver.load('kibana_scripted_fields_on_logstash'); // TODO, save a new .kibana index with the index pattern with scripted field already there
       await esArchiver.loadIfNeeded('logstash_functional');
-
-      // delete .kibana index and then wait for Kibana to re-create it
-      await kibanaServer.uiSettings.replace({});
-      // await PageObjects.settings.createIndexPattern();
-      await kibanaServer.uiSettings.update({});
+      // changing the timepicker default here saves us from having to set it in Discover (~8s)
+      await kibanaServer.uiSettings.update({
+        'timepicker:timeDefaults':
+          '{  "from": "Sep 18, 2015 @ 19:37:13.000",  "to": "Sep 23, 2015 @ 02:30:09.000"}',
+      });
     });
 
     after(async function afterAll() {
-      // await esArchiver.unload('logstash_functional');
+      await kibanaServer.uiSettings.replace({});
+      await kibanaServer.uiSettings.update({});
+      await esArchiver.unload('logstash_functional');
+      await esArchiver.load('empty_kibana');
     });
 
     it('query should show failed shards pop up', async function() {
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
-      await PageObjects.settings.createIndexPattern('logsta*');
-      await PageObjects.settings.clickScriptedFieldsTab();
-      await log.debug('add scripted field');
-      await PageObjects.settings.addScriptedField(
-        'sharedFail',
-        'painless',
-        'string',
-        null,
-        '1',
-        // "'test'" << trivial static string passes on 7.7.0 BC8
-        // Scripted field below with multiple string checking actually should cause share failure message but just gets "no results" message
-        // "if (doc['response.raw'].value == '200') { if (doc['url.raw'].value != null) { return 'good ' + doc['url.raw'].value } else { return 'good' } } else { if (doc['machine.os.raw'].value != null) { return 'bad ' + doc['machine.os.raw'].value } else { return 'bad' } }"
-        "if (doc['response.raw'].value == '200') { return 'good ' + doc['url.raw'].value } else { return 'bad ' + doc['machine.os.raw'].value } "
-      );
+      /* If you had to modify the scripted fields, you could un-comment all this, run it, use es_archiver to update 'kibana_scripted_fields_on_logstash'
+       */
 
-      const fromTime = 'Sep 19, 2015 @ 19:37:13.000';
-      const toTime = 'Sep 23, 2015 @ 02:30:09.000';
+      // await PageObjects.settings.navigateTo();
+      // await PageObjects.settings.clickKibanaIndexPatterns();
+      // await PageObjects.settings.createIndexPattern('logsta');
+      // await PageObjects.settings.clickScriptedFieldsTab();
+      // await log.debug('add scripted field');
+      // await PageObjects.settings.addScriptedField(
+      //   'sharedFail',
+      //   'painless',
+      //   'string',
+      //   null,
+      //   '1',
+      //   // Scripted field below with multiple string checking actually should cause share failure message
+      //   // bcause it's not checking if all the fields it uses exist in each doc (and they don't)
+      //   "if (doc['response.raw'].value == '200') { return 'good ' + doc['url.raw'].value } else { return 'bad ' + doc['machine.os.raw'].value } "
+      // );
+
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      // await PageObjects.common.sleep(20000);
+      await PageObjects.discover.selectIndexPattern('logsta*');
 
       await retry.tryForTime(20000, async function() {
         // wait for shards failed message
         const shardMessage = await testSubjects.getVisibleText('euiToastHeader');
-        // const shardMessage = await toasts.getErrorToast();
-        log.debug(shardMessage);
         log.debug(shardMessage);
         expect(shardMessage).to.be('1 of 3 shards failed');
       });
@@ -71,8 +71,7 @@ export default function({ getService, getPageObjects }) {
 
     it('query return results with valid scripted field', async function() {
       // the commented-out steps below were used to create the scripted fields in the logstash-* index pattern
-      // which are now saved in the esArchive.  TODO: add the 'logsts*' index pattern above with the bad scripted field
-      // to the same esArchive to save more runtime.
+      // which are now saved in the esArchive.
 
       // await PageObjects.settings.navigateTo();
       // await PageObjects.settings.clickKibanaIndexPatterns();
@@ -86,7 +85,6 @@ export default function({ getService, getPageObjects }) {
       //   'string',
       //   null,
       //   '1',
-      //   // "'test'" << trivial static string passes on 7.7.0 BC8
       //   // Scripted field below with should work
       //   "if (doc['response.raw'].value == '200') { if (doc['url.raw'].size() > 0) { return 'good ' + doc['url.raw'].value } else { return 'good' } } else { if (doc['machine.os.raw'].size() > 0) { return 'bad ' + doc['machine.os.raw'].value } else { return 'bad' } }"
       // );
@@ -102,8 +100,7 @@ export default function({ getService, getPageObjects }) {
       //   'string',
       //   null,
       //   '1',
-      //   // "'test'" << trivial static string passes on 7.7.0 BC8
-      //   // Scripted field below with should work
+      //   // Scripted field below which should work
       //   "if (doc['url.raw'].size() > 0) { String tempString = \"\"; for ( int i = (doc['url.raw'].value.length() - 1); i >= 0 ; i--) { tempString = tempString + (doc['url.raw'].value).charAt(i); } return tempString; } else { return \"emptyUrl\"; }"
       // );
       // await retry.try(async function() {
@@ -116,7 +113,6 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.discover.selectIndexPattern('logstash-*');
       await queryBar.setQuery('php* OR *jpg OR *css*');
       await testSubjects.click('querySubmitButton');
-      // await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await retry.tryForTime(30000, async function() {
         expect(await PageObjects.discover.getHitCount()).to.be('13,301');
       });
