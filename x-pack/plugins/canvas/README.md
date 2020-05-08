@@ -12,7 +12,7 @@ To develop your own Canvas plugins, you simply create a Kibana plugin, and regis
 
 The following is a step-by-step guide to adding your own custom random number Canvas plugin.
 
-#### Generating a Kibana plugin
+### Generating a Kibana plugin
 
 ```bash
 # in the kibana directory
