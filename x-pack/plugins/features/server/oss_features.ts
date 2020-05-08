@@ -81,11 +81,11 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       order: 200,
       icon: 'visualizeApp',
       navLinkId: 'visualize',
-      app: ['visualize', 'lens'],
+      app: ['visualize', 'lens', 'kibana'],
       catalogue: ['visualize'],
       privileges: {
         all: {
-          app: ['visualize', 'lens'],
+          app: ['visualize', 'lens', 'kibana'],
           catalogue: ['visualize'],
           savedObject: {
             all: ['visualization', 'query', 'lens'],
@@ -94,7 +94,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           ui: ['show', 'delete', 'save', 'saveQuery'],
         },
         read: {
-          app: ['visualize', 'lens'],
+          app: ['visualize', 'lens', 'kibana'],
           catalogue: ['visualize'],
           savedObject: {
             all: [],
@@ -141,11 +141,11 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       order: 300,
       icon: 'dashboardApp',
       navLinkId: 'dashboards',
-      app: ['dashboards'],
+      app: ['dashboards', 'kibana'],
       catalogue: ['dashboard'],
       privileges: {
         all: {
-          app: ['dashboards'],
+          app: ['dashboards', 'kibana'],
           catalogue: ['dashboard'],
           savedObject: {
             all: ['dashboard', 'url', 'query'],
@@ -162,7 +162,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           ui: ['createNew', 'show', 'showWriteControls', 'saveQuery'],
         },
         read: {
-          app: ['dashboards'],
+          app: ['dashboards', 'kibana'],
           catalogue: ['dashboard'],
           savedObject: {
             all: [],
@@ -218,11 +218,11 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
       order: 1300,
       icon: 'devToolsApp',
       navLinkId: 'dev_tools',
-      app: ['dev_tools'],
+      app: ['dev_tools', 'kibana'],
       catalogue: ['console', 'searchprofiler', 'grokdebugger'],
       privileges: {
         all: {
-          app: ['dev_tools'],
+          app: ['dev_tools', 'kibana'],
           catalogue: ['console', 'searchprofiler', 'grokdebugger'],
           api: ['console'],
           savedObject: {
@@ -232,7 +232,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           ui: ['show', 'save'],
         },
         read: {
-          app: ['dev_tools'],
+          app: ['dev_tools', 'kibana'],
           catalogue: ['console', 'searchprofiler', 'grokdebugger'],
           api: ['console'],
           savedObject: {
