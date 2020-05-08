@@ -10,6 +10,7 @@ import { ReactExpressionRendererProps } from 'src/plugins/expressions/public';
 import { Query, TimeRange, Filter, TimefilterContract } from 'src/plugins/data/public';
 import { Document } from '../../persistence';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public/embeddable';
 
 jest.mock('../../../../../../src/plugins/inspector/public/', () => ({
   isAvailable: false,
@@ -34,10 +35,14 @@ const savedVis: Document = {
 describe('embeddable', () => {
   let mountpoint: HTMLDivElement;
   let expressionRenderer: jest.Mock<null, [ReactExpressionRendererProps]>;
+  let getTrigger: jest.Mock;
+  let trigger: { exec: jest.Mock };
 
   beforeEach(() => {
     mountpoint = document.createElement('div');
     expressionRenderer = jest.fn(_props => null);
+    trigger = { exec: jest.fn() };
+    getTrigger = jest.fn(() => trigger);
   });
 
   afterEach(() => {
@@ -48,6 +53,7 @@ describe('embeddable', () => {
     const embeddable = new Embeddable(
       dataPluginMock.createSetupContract().query.timefilter.timefilter,
       expressionRenderer,
+      getTrigger,
       {
         editUrl: '',
         editable: true,
@@ -69,6 +75,7 @@ describe('embeddable', () => {
     const embeddable = new Embeddable(
       dataPluginMock.createSetupContract().query.timefilter.timefilter,
       expressionRenderer,
+      getTrigger,
       {
         editUrl: '',
         editable: true,
@@ -95,6 +102,7 @@ describe('embeddable', () => {
     const embeddable = new Embeddable(
       dataPluginMock.createSetupContract().query.timefilter.timefilter,
       expressionRenderer,
+      getTrigger,
       {
         editUrl: '',
         editable: true,
@@ -111,6 +119,31 @@ describe('embeddable', () => {
     });
   });
 
+  it('should execute trigger on event from expression renderer', () => {
+    const embeddable = new Embeddable(
+      dataPluginMock.createSetupContract().query.timefilter.timefilter,
+      expressionRenderer,
+      getTrigger,
+      {
+        editUrl: '',
+        editable: true,
+        savedVis,
+      },
+      { id: '123' }
+    );
+    embeddable.render(mountpoint);
+
+    const onEvent = expressionRenderer.mock.calls[0][0].onEvent!;
+
+    const eventData = {};
+    onEvent({ name: 'brush', data: eventData });
+
+    expect(getTrigger).toHaveBeenCalledWith(VIS_EVENT_TO_TRIGGER.brush);
+    expect(trigger.exec).toHaveBeenCalledWith(
+      expect.objectContaining({ data: eventData, embeddable: expect.anything() })
+    );
+  });
+
   it('should not re-render if only change is in disabled filter', () => {
     const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
     const query: Query = { language: 'kquery', query: '' };
@@ -119,6 +152,7 @@ describe('embeddable', () => {
     const embeddable = new Embeddable(
       dataPluginMock.createSetupContract().query.timefilter.timefilter,
       expressionRenderer,
+      getTrigger,
       {
         editUrl: '',
         editable: true,
@@ -150,6 +184,7 @@ describe('embeddable', () => {
     const embeddable = new Embeddable(
       timefilter,
       expressionRenderer,
+      getTrigger,
       {
         editUrl: '',
         editable: true,

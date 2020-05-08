@@ -53,16 +53,16 @@ export function selectRangeAction(
       });
     },
     isCompatible,
-    execute: async ({ timeFieldName, data }: SelectRangeActionContext) => {
-      if (!(await isCompatible({ timeFieldName, data }))) {
+    execute: async ({ data }: SelectRangeActionContext) => {
+      if (!(await isCompatible({ data }))) {
         throw new IncompatibleActionError();
       }
 
       const selectedFilters = await createFiltersFromRangeSelectAction(data);
 
-      if (timeFieldName) {
+      if (data.timeFieldName) {
         const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
-          timeFieldName,
+          data.timeFieldName,
           selectedFilters
         );
         filterManager.addFilters(restOfFilters);

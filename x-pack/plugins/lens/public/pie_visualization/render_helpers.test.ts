@@ -96,16 +96,14 @@ describe('render helpers', () => {
         ],
       };
       expect(getFilterContext([{ groupByRollup: 'Test', value: 100 }], ['a'], table)).toEqual({
-        data: {
-          data: [
-            {
-              row: 1,
-              column: 0,
-              value: 'Test',
-              table,
-            },
-          ],
-        },
+        data: [
+          {
+            row: 1,
+            column: 0,
+            value: 'Test',
+            table,
+          },
+        ],
       });
     });
 
@@ -124,16 +122,14 @@ describe('render helpers', () => {
         ],
       };
       expect(getFilterContext([{ groupByRollup: 'Test', value: 100 }], ['a', 'b'], table)).toEqual({
-        data: {
-          data: [
-            {
-              row: 1,
-              column: 0,
-              value: 'Test',
-              table,
-            },
-          ],
-        },
+        data: [
+          {
+            row: 1,
+            column: 0,
+            value: 'Test',
+            table,
+          },
+        ],
       });
     });
 
@@ -161,22 +157,20 @@ describe('render helpers', () => {
           table
         )
       ).toEqual({
-        data: {
-          data: [
-            {
-              row: 1,
-              column: 0,
-              value: 'Test',
-              table,
-            },
-            {
-              row: 1,
-              column: 1,
-              value: 'Two',
-              table,
-            },
-          ],
-        },
+        data: [
+          {
+            row: 1,
+            column: 0,
+            value: 'Test',
+            table,
+          },
+          {
+            row: 1,
+            column: 1,
+            value: 'Two',
+            table,
+          },
+        ],
       });
     });
   });

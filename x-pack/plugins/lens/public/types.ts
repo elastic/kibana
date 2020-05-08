@@ -7,11 +7,21 @@
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
-import { KibanaDatatable, SerializedFieldFormat } from '../../../../src/plugins/expressions/public';
+import {
+  ExpressionRendererEvent,
+  IInterpreterRenderHandlers,
+  KibanaDatatable,
+  SerializedFieldFormat,
+} from '../../../../src/plugins/expressions/public';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';
 import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
+import {
+  SELECT_RANGE_TRIGGER,
+  TriggerContext,
+  VALUE_CLICK_TRIGGER,
+} from '../../../../src/plugins/ui_actions/public';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -466,4 +476,30 @@ export interface Visualization<T = unknown, P = unknown> {
    * If there is no expression provided, the preview icon is used.
    */
   toPreviewExpression?: (state: T, frame: FramePublicAPI) => Ast | string | null;
+}
+
+export interface LensFilterEvent {
+  name: 'filter';
+  data: TriggerContext<typeof VALUE_CLICK_TRIGGER>['data'];
+}
+export interface LensBrushEvent {
+  name: 'brush';
+  data: TriggerContext<typeof SELECT_RANGE_TRIGGER>['data'];
+}
+
+export function isLensFilterEvent(event: ExpressionRendererEvent): event is LensFilterEvent {
+  return event.name === 'filter';
+}
+
+export function isLensBrushEvent(event: ExpressionRendererEvent): event is LensBrushEvent {
+  return event.name === 'brush';
+}
+
+/**
+ * Expression renderer handlers specifically for lens renderers. This is a narrowed down
+ * version of the general render handlers, specifying supported event types. If this type is
+ * used, dispatched events will be handled correctly.
+ */
+export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandlers {
+  event: (event: LensFilterEvent | LensBrushEvent) => void;
 }

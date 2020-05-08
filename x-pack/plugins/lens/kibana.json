@@ -9,9 +9,8 @@
     "expressions",
     "navigation",
     "kibanaLegacy",
-    "uiActions",
     "visualizations"
   ],
-  "optionalPlugins": ["embeddable", "usageCollection", "taskManager"],
+  "optionalPlugins": ["embeddable", "usageCollection", "taskManager", "uiActions"],
   "configPath": ["xpack", "lens"]
 }

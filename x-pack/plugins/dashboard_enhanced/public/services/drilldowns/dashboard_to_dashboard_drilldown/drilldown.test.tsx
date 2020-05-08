@@ -138,10 +138,12 @@ describe('.execute() & getHref', () => {
     };
 
     const context = ({
-      data: useRangeEvent
-        ? ({ range: {} } as RangeSelectTriggerContext['data'])
-        : ({ data: [] } as ValueClickTriggerContext['data']),
-      timeFieldName: 'order_date',
+      data: {
+        ...(useRangeEvent
+          ? ({ range: {} } as RangeSelectTriggerContext['data'])
+          : ({ data: [] } as ValueClickTriggerContext['data'])),
+        timeFieldName: 'order_date',
+      },
       embeddable: {
         getInput: () => ({
           filters: [],

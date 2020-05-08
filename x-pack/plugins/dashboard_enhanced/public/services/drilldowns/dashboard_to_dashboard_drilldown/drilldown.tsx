@@ -131,9 +131,9 @@ export class DashboardToDashboardDrilldown
       }
     })();
 
-    if (context.timeFieldName) {
+    if (context.data.timeFieldName) {
       const { timeRangeFilter, restOfFilters } = esFilters.extractTimeFilter(
-        context.timeFieldName,
+        context.data.timeFieldName,
         filtersFromEvent
       );
       filtersFromEvent = restOfFilters;

@@ -26,6 +26,7 @@ import { mergeTables } from './merge_tables';
 import { formatColumn } from './format_column';
 import { EmbeddableFactory } from './embeddable/embeddable_factory';
 import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 
 export interface EditorFrameSetupPlugins {
   data: DataPublicPluginSetup;
@@ -37,6 +38,7 @@ export interface EditorFrameStartPlugins {
   data: DataPublicPluginStart;
   embeddable?: EmbeddableStart;
   expressions: ExpressionsStart;
+  uiActions?: UiActionsStart;
 }
 
 async function collectAsyncDefinitions<T extends { id: string }>(
@@ -73,6 +75,7 @@ export class EditorFrameService {
         timefilter: deps.data.query.timefilter.timefilter,
         expressionRenderer: deps.expressions.ReactExpressionRenderer,
         indexPatternService: deps.data.indexPatterns,
+        uiActions: deps.uiActions,
       };
     };
 
@@ -116,6 +119,7 @@ export class EditorFrameService {
                   (doc && doc.visualizationType) || firstVisualizationId || null
                 }
                 core={core}
+                plugins={plugins}
                 ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
                 doc={doc}
                 dateRange={dateRange}

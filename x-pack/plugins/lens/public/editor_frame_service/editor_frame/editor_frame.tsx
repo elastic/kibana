@@ -26,6 +26,7 @@ import { getSavedObjectFormat } from './save';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { generateId } from '../../id_generator';
 import { Filter, Query, SavedQuery } from '../../../../../../src/plugins/data/public';
+import { EditorFrameStartPlugins } from '../service';
 
 export interface EditorFrameProps {
   doc?: Document;
@@ -36,6 +37,7 @@ export interface EditorFrameProps {
   ExpressionRenderer: ReactExpressionRendererType;
   onError: (e: { message: string }) => void;
   core: CoreSetup | CoreStart;
+  plugins: EditorFrameStartPlugins;
   dateRange: {
     fromDate: string;
     toDate: string;
@@ -285,6 +287,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 dispatch={dispatch}
                 ExpressionRenderer={props.ExpressionRenderer}
                 core={props.core}
+                plugins={props.plugins}
               />
             </WorkspacePanelWrapper>
           )
