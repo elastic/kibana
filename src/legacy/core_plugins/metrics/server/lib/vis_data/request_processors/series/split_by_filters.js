@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { overwrite } from '../../helpers';
 import { buildEsQuery } from '@kbn/es-query';
 export function splitByFilters(req, panel, series, esQueryConfig, indexPattern) {
   return next => doc => {
     if (series.split_mode === 'filters' && series.split_filters) {
       series.split_filters.forEach(filter => {
         const builtEsQuery = buildEsQuery(indexPattern, [filter.filter], [], esQueryConfig);
-        _.set(doc, `aggs.${series.id}.filters.filters.${filter.id}`, builtEsQuery);
+        overwrite(doc, `aggs.${series.id}.filters.filters.${filter.id}`, builtEsQuery);
       });
     }
     return next(doc);

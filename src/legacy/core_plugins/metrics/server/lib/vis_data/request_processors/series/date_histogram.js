@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { set } from 'lodash';
+import { overwrite } from '../../helpers';
 import { dateHistogramInterval } from '../../../../../../data/server';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { offsetTime } from '../../offset_time';
@@ -33,7 +33,7 @@ export function dateHistogram(req, panel, series, esQueryConfig, indexPatternObj
       const { from, to } = offsetTime(req, series.offset_time);
       const timezone = capabilities.searchTimezone;
 
-      set(doc, `aggs.${series.id}.aggs.timeseries.date_histogram`, {
+      overwrite(doc, `aggs.${series.id}.aggs.timeseries.date_histogram`, {
         field: timeField,
         min_doc_count: 0,
         time_zone: timezone,
@@ -46,7 +46,7 @@ export function dateHistogram(req, panel, series, esQueryConfig, indexPatternObj
     };
 
     const getDateHistogramForEntireTimerangeMode = () =>
-      set(doc, `aggs.${series.id}.aggs.timeseries.auto_date_histogram`, {
+      overwrite(doc, `aggs.${series.id}.aggs.timeseries.auto_date_histogram`, {
         field: timeField,
         buckets: 1,
       });
@@ -57,7 +57,7 @@ export function dateHistogram(req, panel, series, esQueryConfig, indexPatternObj
 
     // master
 
-    set(doc, `aggs.${series.id}.meta`, {
+    overwrite(doc, `aggs.${series.id}.meta`, {
       timeField,
       intervalString,
       bucketSize,
