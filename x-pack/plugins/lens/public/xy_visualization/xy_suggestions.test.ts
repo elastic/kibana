@@ -11,7 +11,7 @@ import {
   DataType,
   TableSuggestion,
 } from '../types';
-import { State, XYState } from './types';
+import { State, XYState, visualizationTypes } from './types';
 import { generateId } from '../id_generator';
 
 jest.mock('../id_generator');
@@ -106,7 +106,68 @@ describe('xy_suggestions', () => {
     );
   });
 
-  test('suggests a basic x y chart with date on x', () => {
+  test('suggests all basic x y charts when switching from another vis', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    const suggestions = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('bytes'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+    });
+
+    expect(suggestions).toHaveLength(visualizationTypes.length);
+    expect(suggestions.map(({ state }) => state.preferredSeriesType)).toEqual([
+      'bar_stacked',
+      'area_stacked',
+      'area',
+      'line',
+      'bar_horizontal_stacked',
+      'bar_horizontal',
+      'bar',
+    ]);
+  });
+
+  test('suggests all basic x y charts when switching from another x y chart', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    const suggestions = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('bytes'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: ['first'],
+      state: {
+        legend: { isVisible: true, position: 'bottom' },
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            seriesType: 'bar',
+            xAccessor: 'date',
+            accessors: ['bytes'],
+            splitAccessor: undefined,
+          },
+        ],
+      },
+    });
+
+    expect(suggestions).toHaveLength(visualizationTypes.length);
+    expect(suggestions.map(({ state }) => state.preferredSeriesType)).toEqual([
+      'line',
+      'bar',
+      'bar_horizontal',
+      'bar_stacked',
+      'bar_horizontal_stacked',
+      'area',
+      'area_stacked',
+    ]);
+  });
+
+  test('suggests all basic x y chart with date on x', () => {
     (generateId as jest.Mock).mockReturnValueOnce('aaa');
     const [suggestion, ...rest] = getSuggestions({
       table: {
@@ -118,7 +179,7 @@ describe('xy_suggestions', () => {
       keptLayerIds: [],
     });
 
-    expect(rest).toHaveLength(0);
+    expect(rest).toHaveLength(visualizationTypes.length - 1);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -164,7 +225,7 @@ describe('xy_suggestions', () => {
       keptLayerIds: [],
     });
 
-    expect(rest).toHaveLength(0);
+    expect(rest).toHaveLength(visualizationTypes.length - 1);
     expect(suggestionSubset(suggestion)).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -208,8 +269,8 @@ describe('xy_suggestions', () => {
       keptLayerIds: [],
     });
 
-    expect(rest).toHaveLength(0);
-    expect(suggestion.title).toEqual('Bar chart');
+    expect(rest).toHaveLength(visualizationTypes.length - 1);
+    expect(suggestion.title).toEqual('Stacked bar');
     expect(suggestion.state).toEqual(
       expect.objectContaining({
         layers: [
@@ -267,7 +328,7 @@ describe('xy_suggestions', () => {
     expect(suggestion.hide).toBeTruthy();
   });
 
-  test('only makes a seriesType suggestion for unchanged table without split', () => {
+  test('makes a visible seriesType suggestion for unchanged table without split', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
       preferredSeriesType: 'bar',
@@ -292,8 +353,9 @@ describe('xy_suggestions', () => {
       keptLayerIds: ['first'],
     });
 
-    expect(suggestions).toHaveLength(1);
+    expect(suggestions).toHaveLength(visualizationTypes.length);
 
+    expect(suggestions[0].hide).toEqual(false);
     expect(suggestions[0].state).toEqual({
       ...currentState,
       preferredSeriesType: 'line',
@@ -327,7 +389,7 @@ describe('xy_suggestions', () => {
       keptLayerIds: [],
     });
 
-    expect(rest).toHaveLength(0);
+    expect(rest).toHaveLength(visualizationTypes.length - 2);
     expect(seriesSuggestion.state).toEqual({
       ...currentState,
       preferredSeriesType: 'line',
@@ -368,7 +430,7 @@ describe('xy_suggestions', () => {
       keptLayerIds: [],
     });
 
-    expect(rest).toHaveLength(0);
+    expect(rest).toHaveLength(visualizationTypes.length - 1);
     expect(suggestion.state.preferredSeriesType).toEqual('bar_horizontal');
     expect(suggestion.state.layers.every(l => l.seriesType === 'bar_horizontal')).toBeTruthy();
     expect(suggestion.title).toEqual('Flip');
@@ -399,14 +461,13 @@ describe('xy_suggestions', () => {
       keptLayerIds: [],
     });
 
-    const suggestion = suggestions[suggestions.length - 1];
-
-    expect(suggestion.state).toEqual({
-      ...currentState,
-      preferredSeriesType: 'bar_stacked',
-      layers: [{ ...currentState.layers[0], seriesType: 'bar_stacked' }],
-    });
-    expect(suggestion.title).toEqual('Stacked');
+    const visibleSuggestions = suggestions.filter(suggestion => !suggestion.hide);
+    expect(visibleSuggestions).toContainEqual(
+      expect.objectContaining({
+        title: 'Stacked',
+        state: expect.objectContaining({ preferredSeriesType: 'bar_stacked' }),
+      })
+    );
   });
 
   test('keeps column to dimension mappings on extended tables', () => {

@@ -22,10 +22,15 @@ import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
 const maxTitle = i18n.translate('data.search.aggs.metrics.maxTitle', {
   defaultMessage: 'Max',
 });
+
+export interface AggParamsMax extends BaseAggParams {
+  field: string;
+}
 
 export interface MaxMetricAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;

@@ -17,7 +17,7 @@
  * under the License.
  */
 import '../../../application/models/sense_editor/sense_editor.test.mocks';
-const mappings = require('../mappings');
+import * as mappings from '../mappings';
 
 describe('Mappings', () => {
   beforeEach(() => {

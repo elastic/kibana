@@ -93,7 +93,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.ingestPipelines.form.descriptionFieldDescription"
-            defaultMessage="The description to apply to the pipeline."
+            defaultMessage="A description of what this pipeline does."
           />
         }
       >

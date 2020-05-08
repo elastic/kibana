@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiDescribedFormGroup,
   EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiButton,
 } from '@elastic/eui';
 
 import styled from 'styled-components';
@@ -28,35 +29,55 @@ const EuiFormRowExtended = styled(EuiFormRow)`
   }
 `;
 
+const AddConnectorEuiFormRow = styled(EuiFormRow)`
+  width: 100%;
+  max-width: 100%;
+  text-align: right;
+`;
+
 export interface Props {
   connectors: Connector[];
   disabled: boolean;
   isLoading: boolean;
+  updateConnectorDisabled: boolean;
   onChangeConnector: (id: string) => void;
   selectedConnector: string;
   handleShowAddFlyout: () => void;
+  handleShowEditFlyout: () => void;
 }
 const ConnectorsComponent: React.FC<Props> = ({
   connectors,
-  disabled,
   isLoading,
+  disabled,
+  updateConnectorDisabled,
   onChangeConnector,
   selectedConnector,
   handleShowAddFlyout,
+  handleShowEditFlyout,
 }) => {
-  const dropDownLabel = (
-    <EuiFlexGroup justifyContent="spaceBetween">
-      <EuiFlexItem grow={false}>{i18n.INCIDENT_MANAGEMENT_SYSTEM_LABEL}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiLink
-          disabled={disabled}
-          onClick={handleShowAddFlyout}
-          data-test-subj="case-configure-add-connector-button"
-        >
-          {i18n.ADD_NEW_CONNECTOR}
-        </EuiLink>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+  const connectorsName = useMemo(
+    () => connectors.find(c => c.id === selectedConnector)?.name ?? 'none',
+    [connectors, selectedConnector]
+  );
+
+  const dropDownLabel = useMemo(
+    () => (
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>{i18n.INCIDENT_MANAGEMENT_SYSTEM_LABEL}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {connectorsName !== 'none' && (
+            <EuiLink
+              disabled={updateConnectorDisabled}
+              onClick={handleShowEditFlyout}
+              data-test-subj="case-configure-update-selected-connector-button"
+            >
+              {i18n.UPDATE_SELECTED_CONNECTOR(connectorsName)}
+            </EuiLink>
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    [connectorsName]
   );
 
   return (
@@ -81,6 +102,16 @@ const ConnectorsComponent: React.FC<Props> = ({
             data-test-subj="case-connectors-dropdown"
           />
         </EuiFormRowExtended>
+        <AddConnectorEuiFormRow>
+          <EuiButton
+            fill
+            disabled={disabled}
+            onClick={handleShowAddFlyout}
+            data-test-subj="case-configure-add-connector-button"
+          >
+            {i18n.ADD_NEW_CONNECTOR}
+          </EuiButton>
+        </AddConnectorEuiFormRow>
       </EuiDescribedFormGroup>
     </>
   );

@@ -16,7 +16,7 @@ import { TileLayer } from '../../tile_layer';
 import { getKibanaTileMap } from '../../../meta';
 
 export const kibanaBasemapLayerWizardConfig: LayerWizard = {
-  checkVisibility: () => {
+  checkVisibility: async () => {
     const tilemap = getKibanaTileMap();
     return !!tilemap.url;
   },
