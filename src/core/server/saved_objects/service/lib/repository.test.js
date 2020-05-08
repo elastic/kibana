@@ -825,17 +825,15 @@ describe('SavedObjectsRepository', () => {
         // Assert that both raw docs from the ES response are deserialized
         expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(1, {
           ...response.items[0].create,
-          _id: expect.stringMatching(/myspace:config:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          _id: expect.stringMatching(/^myspace:config:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/),
         });
         expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(2, response.items[1].create);
 
         // Assert that ID's are deserialized to remove the type and namespace
         expect(result.saved_objects[0].id).toEqual(
-          expect.not.stringMatching(/config|index-pattern|myspace/)
+          expect.stringMatching(/^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/)
         );
-        expect(result.saved_objects[1].id).toEqual(
-          expect.not.stringMatching(/config|index-pattern|myspace/)
-        );
+        expect(result.saved_objects[1].id).toEqual(obj2.id);
       });
     });
   });
