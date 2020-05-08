@@ -225,9 +225,9 @@ interface GlobalSearchFindOptions {
 /**
  * Response returned from the server-side {@link GlobalSearchServiceStart | global search service}'s `find` API
  */
-type GlobalSearchResponse = {
+type GlobalSearchBatchedResults = {
   /**
-   * Current results fetched from the providers.
+   * Results for this batch
    */
   results: GlobalSearchResult[];
 };
@@ -243,7 +243,7 @@ interface GlobalSearchPluginStart {
     term: string,
     options: GlobalSearchFindOptions,
     request: KibanaRequest
-  ): Observable<GlobalSearchResponse>;
+  ): Observable<GlobalSearchBatchedResults>;
 }
 ```
 
@@ -276,9 +276,9 @@ interface NavigableGlobalSearchResult extends GlobalSearchResult {
 /**
  * Response returned from the client-side {@link GlobalSearchServiceStart | global search service}'s `find` API
  */
-type GlobalSearchResponse = {
+type GlobalSearchBatchedResults = {
   /**
-   * Current results fetched from the providers.
+   * Results for this batch
    */
   results: NavigableGlobalSearchResult[];
 };
@@ -290,7 +290,7 @@ interface GlobalSearchPluginSetup {
 
 /** @public */
 interface GlobalSearchPluginStart {
-  find(term: string, options: GlobalSearchFindOptions): Observable<GlobalSearchResponse>;
+  find(term: string, options: GlobalSearchFindOptions): Observable<GlobalSearchBatchedResults>;
 }
 ```
 
@@ -330,7 +330,7 @@ router.post(
     const { term, options } = req.body;
     const results = await ctx.globalSearch
       .find(term, { ...options, $aborted: req.events.aborted$ })
-      .pipe(last())
+      .pipe(reduce((acc, results) => [...acc, ...results]))
       .toPromise();
     return res.ok({
       body: {
@@ -346,10 +346,8 @@ Notes:
 - This API is only for internal use and communication between the client and the server parts of the `GS` API. When
   the need to expose an API for external consumers will appear, a new public API will be exposed for that.
 - A new `globalSearch` context will be exposed on core's `RequestHandlerContext` to wrap a `find` call with current request.
-- Initial implementation will await for all results and then return them as a single response. As it's supported by
-  the service, it could theoretically be possible to stream the results instead, however that makes the consumption of
-  the API from the client more difficult. If this become important at some point, a new `/api/core/global_search/find/async`
-  endpoint could be added.
+- Example implementation is awaiting for all results and then returns them as a single response. Ideally, we would
+  leverage the `bfetch` plugin to stream the results to the client instead.
 
 ## Functional behavior
 
@@ -364,10 +362,8 @@ Notes:
   - When using the public `find` API, results from provider registered from both server and public sides will be returned.
 - During a `find` call, the service will call all the registered result providers and collect their result observables.
   Every time a result provider emits some new results, the `globalSearch` service will:
-  - Consolidate/enhance them
-  - Merge them with the already present results
-  - Sort and order the new aggregated results
-  - Emit this up to date list of results
+  - process them to convert their url to the expected output format
+  - emit the processed results
 
 ### result provider registration
 
@@ -422,9 +418,8 @@ When calling `GlobalSearchPluginStart.find` from the server-side service:
 - then, the service will merge every result observable and trigger the next step on every emission until either
   - A predefined timeout duration is reached
   - All result observables are completed
-  
-- on every emission of the merged observable, the results will be aggregated to the existing list and sorted following
-  the logic defined in the [results aggregation](#results-aggregation) section
+
+- on every emission of the merged observable, the results will be processed then emitted.
 
 A very naive implementation of this behavior would be:
 
@@ -438,12 +433,10 @@ search(
   const fromProviders$ = this.providers.map(p =>
     p.find(term, { ...options, aborted$ }, contextFromRequest(request))
   );
-  const results: GlobalSearchResult[] = [];
   return merge([...fromProviders$]).pipe(
     takeUntil(aborted$),
     map(newResults => {
-      results.push(...newResults);
-      return order(results);
+      return process(newResults);
     }),
   );
 }
@@ -454,15 +447,16 @@ search(
 When calling `GlobalSearchPluginStart.find` from the public-side service:
 
 - The service will call:
+
   - the server-side API via an http call to fetch results from the server-side result providers
   - `find` on each client-side registered result provider and collect the resulting observables
 
 - Then, the service will merge every result observable and trigger the next step on every emission until either
+
   - A predefined timeout duration is reached
   - All result observables are completed
-  
-- On every emission of the merged observable, the results will be aggregated to the existing list and sorted following
-  the logic defined in the [results aggregation](#results-aggregation) section
+
+- on every emission of the merged observable, the results will be processed then emitted.
 
 A very naive implementation of this behavior would be:
 
@@ -476,13 +470,10 @@ search(
     p.find(term, { ...options, aborted$ })
   );
   const fromServer$ = of(this.fetchServerResults(term, options, aborted$))
-
-  const results: GlobalSearchResult[] = [];
   return merge([...fromProviders$, fromServer$]).pipe(
     takeUntil(aborted$),
     map(newResults => {
-      results.push(...newResults);
-      return order(results);
+      return process(newResults);
     }),
   );
 }
@@ -490,49 +481,16 @@ search(
 
 Notes:
 
-- Due to the complexity of the process, the initial implementation will not be streaming results from the server,
-  meaning that all results from server-side registered providers will all be fetched at the same time (via a 'classic'
-  http call to the GS endpoint). The observable-based API architecture is ready for this however, and the enhancement
-  could be added at a later time.
+- The example implementation is not streaming results from the server, meaning that all results from server-side 
+  registered providers will all be fetched and emitted in a single batch. Ideally, we would leverage the `bfetch` plugin 
+  to stream the results to the client instead.
 
-### results aggregation
+### results sorting
 
-On every emission of an underlying provider, the service will aggregate the new results with the existing list and
-sort the results following this logic before emitting them:
-
-- Results will be sorted by descending `score` value.
-- Results with the same score will then be sorted by ascending `id` value. This arbitrary sort is only performed to
-  ensure consistent order when multiple results have the exact same score
-
-This is an equivalent of the following lodash call:
-
-```ts
-const sorted = _.sortBy(unsorted, ['score', 'id'], ['desc', 'asc']);
-```
-
-For example, given this list of unsorted results:
-
-```ts
-const unsorted = [
-  { id: 'viz-1', type: 'visualization', score: 100 },
-  { id: 'dash-2', type: 'dashboard', score: 25 },
-  { id: 'app-1', type: 'application', score: 50 },
-  { id: 'dash-1', type: 'dashboard', score: 50 },
-  { id: 'app-1', type: 'application', score: 100 },
-];
-```
-
-the resulting sorted results would be:
-
-```ts
-const sorted = [
-  { id: 'app-1', type: 'application', score: 100 },
-  { id: 'viz-1', type: 'visualization', score: 100 },
-  { id: 'app-1', type: 'application', score: 50 },
-  { id: 'dash-1', type: 'dashboard', score: 50 },
-  { id: 'dash-2', type: 'dashboard', score: 25 },
-];
-```
+As the GS `find` API is 'streaming' the results from the result providers by emitting the results in batches, sorting results in
+each individual batch, even if technically possible, wouldn't provide much value as the consumer will need to sort the
+aggregated results on each emission anyway. This is why the results emitted by the `find` API should be considered as
+unsorted. Consumers should implement sorting themselves, using either the `score` attribute, or any other arbitrary logic.
 
 #### Note on score value
 
