@@ -234,4 +234,20 @@ export const aggregationType: { [key: string]: any } = {
     value: AGGREGATION_TYPES.SUM,
     validNormalizedTypes: ['number'],
   },
+  p95: {
+    text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.p95', {
+      defaultMessage: '95th Percentile',
+    }),
+    fieldRequired: false,
+    value: AGGREGATION_TYPES.P95,
+    validNormalizedTypes: ['number'],
+  },
+  p99: {
+    text: i18n.translate('xpack.infra.metrics.alertFlyout.aggregationText.p99', {
+      defaultMessage: '99th Percentile',
+    }),
+    fieldRequired: false,
+    value: AGGREGATION_TYPES.P99,
+    validNormalizedTypes: ['number'],
+  },
 };
