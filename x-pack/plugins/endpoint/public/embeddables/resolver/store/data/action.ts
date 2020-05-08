@@ -17,7 +17,7 @@ interface ServerFailedToReturnResolverData {
 }
 
 /**
- * Will occur when a request for related event data is fulfilled.
+ * Will occur when a request for related event data is fulfilled by the API.
  */
 interface ServerReturnedRelatedEventData {
   readonly type: 'serverReturnedRelatedEventData';
