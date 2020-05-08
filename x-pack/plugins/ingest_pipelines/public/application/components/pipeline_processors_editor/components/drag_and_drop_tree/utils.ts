@@ -17,29 +17,50 @@ export const mapSelectorToDragLocation = (selector: ProcessorSelector): Draggabl
   };
 };
 
+export type DragDirection = 'up' | 'down' | 'none';
+
+/**
+ *
+ * @param items
+ * @param destinationIndex
+ * @param baseDestinationSelector
+ * @param dragDirection
+ * @param isSourceAtRootLevel
+ */
 export const resolveDestinationLocation = (
   items: ProcessorSelector[],
   destinationIndex: number,
-  baseSelector: ProcessorSelector
+  baseDestinationSelector: ProcessorSelector,
+  dragDirection: DragDirection,
+  isSourceAtRootLevel = false
 ): DraggableLocation => {
   // Dragged to top, place at root level
-  if (destinationIndex === 0) {
-    const destinationSelector = items[destinationIndex] ?? baseSelector;
+  if (destinationIndex <= 0) {
+    const destinationSelector = items[destinationIndex] ?? baseDestinationSelector;
     return { selector: destinationSelector.slice(0, 1), index: 0 };
   }
 
-  // Dragged to bottom, place at root level
-  if (destinationIndex === items.length - 1 || destinationIndex === items.length) {
-    const destinationSelector = items[destinationIndex] ?? baseSelector;
+  // Dragged to bottom, place at root level if source is already at root
+  if (destinationIndex === items.length - 1 && isSourceAtRootLevel) {
+    const destinationSelector = items[destinationIndex] ?? baseDestinationSelector;
     return { selector: destinationSelector.slice(0, 1), index: items.length - 1 };
   }
 
-  const above: ProcessorSelector = items[destinationIndex - 1];
-  const below: ProcessorSelector = items[destinationIndex]; // This is the processor we are displacing
-
-  if (above.length !== below.length) {
-    return mapSelectorToDragLocation(below);
+  // This can happen when dragging across trees
+  if (destinationIndex > items.length - 1) {
+    return { selector: baseDestinationSelector.slice(0), index: destinationIndex };
   }
 
-  return mapSelectorToDragLocation(items[destinationIndex]);
+  const displacing: ProcessorSelector = items[destinationIndex];
+
+  if (dragDirection === 'none') {
+    return mapSelectorToDragLocation(displacing);
+  }
+
+  if (dragDirection === 'down') {
+    const below: ProcessorSelector = items[destinationIndex + 1];
+    return mapSelectorToDragLocation(below);
+  } else {
+    return mapSelectorToDragLocation(displacing);
+  }
 };
