@@ -23,6 +23,7 @@ import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import {
   getDataFrameAnalyticsProgress,
+  getDataFrameAnalyticsProgressPhase,
   isDataFrameAnalyticsFailed,
   isDataFrameAnalyticsRunning,
   isDataFrameAnalyticsStopped,
@@ -71,17 +72,7 @@ export const progressColumn = {
   sortable: (item: DataFrameAnalyticsListRow) => getDataFrameAnalyticsProgress(item.stats),
   truncateText: true,
   render(item: DataFrameAnalyticsListRow) {
-    const totalPhases = item.stats.progress.length;
-    let phase = 0;
-    let progress = 0;
-
-    for (const progressPhase of item.stats.progress) {
-      phase++;
-      progress = progressPhase.progress_percent;
-      if (progressPhase.progress_percent < 100) {
-        break;
-      }
-    }
+    const { currentPhase, progress, totalPhases } = getDataFrameAnalyticsProgressPhase(item.stats);
 
     // For now all analytics jobs are batch jobs.
     const isBatchTransform = true;
@@ -92,11 +83,11 @@ export const progressColumn = {
           <Fragment>
             <EuiFlexItem style={{ width: '60px' }} grow={false}>
               <EuiText size="xs">
-                Phase {phase}/{totalPhases}
+                Phase {currentPhase}/{totalPhases}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem style={{ width: '40px' }} grow={false}>
-              <EuiToolTip content={`Progress of phase ${phase}: ${progress}%`}>
+              <EuiToolTip content={`Progress of phase ${currentPhase}: ${progress}%`}>
                 <EuiProgress
                   value={progress}
                   max={100}
