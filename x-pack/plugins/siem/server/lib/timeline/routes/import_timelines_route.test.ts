@@ -29,6 +29,7 @@ describe('import timelines', () => {
   let securitySetup: SecurityPluginSetup;
   let { context } = requestContextMock.createTools();
   let mockGetTimeline: jest.Mock;
+  let mockGetTemplateTimeline: jest.Mock;
   let mockPersistTimeline: jest.Mock;
   let mockPersistPinnedEventOnTimeline: jest.Mock;
   let mockPersistNote: jest.Mock;
@@ -51,6 +52,7 @@ describe('import timelines', () => {
     } as unknown) as SecurityPluginSetup;
 
     mockGetTimeline = jest.fn();
+    mockGetTemplateTimeline = jest.fn();
     mockPersistTimeline = jest.fn();
     mockPersistPinnedEventOnTimeline = jest.fn();
     mockPersistNote = jest.fn();
@@ -83,6 +85,7 @@ describe('import timelines', () => {
       jest.doMock('../saved_object', () => {
         return {
           getTimeline: mockGetTimeline.mockReturnValue(null),
+          getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue(null),
           persistTimeline: mockPersistTimeline.mockReturnValue({
             timeline: { savedObjectId: newTimelineSavedObjectId, version: newTimelineVersion },
           }),
@@ -212,11 +215,12 @@ describe('import timelines', () => {
     });
   });
 
-  describe('Import a timeline already exist but overwrite is not allowed', () => {
+  describe('Import a timeline already exist', () => {
     beforeEach(() => {
       jest.doMock('../saved_object', () => {
         return {
           getTimeline: mockGetTimeline.mockReturnValue(mockGetTimelineValue),
+          getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue(null),
           persistTimeline: mockPersistTimeline,
         };
       });

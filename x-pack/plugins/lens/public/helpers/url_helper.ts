@@ -37,8 +37,10 @@ export function addEmbeddableToDashboardUrl(url: string, embeddableId: string, u
   keys.forEach(key => {
     dashboardParsedUrl.query[key] = urlVars[key];
   });
-  dashboardParsedUrl.query[DashboardConstants.ADD_EMBEDDABLE_TYPE] = 'lens';
-  dashboardParsedUrl.query[DashboardConstants.ADD_EMBEDDABLE_ID] = embeddableId;
+  if (embeddableId) {
+    dashboardParsedUrl.query[DashboardConstants.ADD_EMBEDDABLE_TYPE] = 'lens';
+    dashboardParsedUrl.query[DashboardConstants.ADD_EMBEDDABLE_ID] = embeddableId;
+  }
   const query = stringify(dashboardParsedUrl.query);
 
   return `${dashboardParsedUrl.url}?${query}`;

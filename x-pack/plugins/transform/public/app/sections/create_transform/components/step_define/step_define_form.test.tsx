@@ -24,7 +24,8 @@ import {
 } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
-import { StepDefineForm, getAggNameConflictToastMessages } from './step_define_form';
+import { getAggNameConflictToastMessages } from './common';
+import { StepDefineForm } from './step_define_form';
 
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../../app/app_dependencies');

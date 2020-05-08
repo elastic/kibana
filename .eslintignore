@@ -25,11 +25,11 @@ target
 /src/plugins/vis_type_timelion/public/_generated_/**
 /src/plugins/vis_type_timelion/public/webpackShims/jquery.flot.*
 /x-pack/legacy/plugins/**/__tests__/fixtures/**
-/x-pack/legacy/plugins/apm/e2e/cypress/**/snapshots.js
-/x-pack/legacy/plugins/canvas/canvas_plugin
-/x-pack/legacy/plugins/canvas/canvas_plugin_src/lib/flot-charts
-/x-pack/legacy/plugins/canvas/shareable_runtime/build
-/x-pack/legacy/plugins/canvas/storybook
+/x-pack/plugins/apm/e2e/cypress/**/snapshots.js
+/x-pack/plugins/canvas/canvas_plugin
+/x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts
+/x-pack/plugins/canvas/shareable_runtime/build
+/x-pack/plugins/canvas/storybook
 /x-pack/plugins/monitoring/public/lib/jquery_flot
 /x-pack/legacy/plugins/infra/common/graphql/types.ts
 /x-pack/legacy/plugins/infra/public/graphql/types.ts

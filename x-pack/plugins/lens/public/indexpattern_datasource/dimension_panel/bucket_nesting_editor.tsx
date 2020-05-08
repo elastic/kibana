@@ -127,7 +127,7 @@ export function BucketNestingEditor({
                 defaultMessage: 'Entire data set',
               }),
             },
-            ...aggColumns,
+            ...aggColumns.map(({ value, text }) => ({ value, text })),
           ]}
           value={prevColumn}
           onChange={e => setColumns(nestColumn(layer.columnOrder, e.target.value, columnId))}

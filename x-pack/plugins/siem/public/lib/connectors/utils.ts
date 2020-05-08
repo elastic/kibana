@@ -7,7 +7,6 @@
 import {
   ActionTypeModel,
   ValidationResult,
-  ActionParamsProps,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../triggers_actions_ui/public/types';
 
@@ -16,10 +15,12 @@ import {
   ActionConnectorParams,
   ActionConnectorValidationErrors,
   Optional,
+  ThirdPartyField,
 } from './types';
 import { isUrlInvalid } from './validators';
 
 import * as i18n from './translations';
+import { CasesConfigurationMapping } from '../../containers/case/configure/types';
 
 export const createActionType = ({
   id,
@@ -29,7 +30,7 @@ export const createActionType = ({
   validateConnector,
   validateParams = connectorParamsValidator,
   actionConnectorFields,
-  actionParamsFields = ConnectorParamsFields,
+  actionParamsFields = null,
 }: Optional<ActionTypeModel, 'validateParams' | 'actionParamsFields'>) => (): ActionTypeModel => {
   return {
     id,
@@ -57,15 +58,18 @@ export const createActionType = ({
   };
 };
 
-const ConnectorParamsFields: React.FunctionComponent<ActionParamsProps<ActionConnectorParams>> = ({
-  actionParams,
-  editAction,
-  index,
-  errors,
-}) => {
-  return null;
-};
-
 const connectorParamsValidator = (actionParams: ActionConnectorParams): ValidationResult => {
   return { errors: {} };
 };
+
+export const createDefaultMapping = (
+  fields: Record<string, ThirdPartyField>
+): CasesConfigurationMapping[] =>
+  Object.keys(fields).map(
+    key =>
+      ({
+        source: fields[key].defaultSourceField,
+        target: key,
+        actionType: fields[key].defaultActionType,
+      } as CasesConfigurationMapping)
+  );
