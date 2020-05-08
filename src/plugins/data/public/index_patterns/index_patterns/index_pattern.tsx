@@ -215,8 +215,7 @@ export class IndexPattern implements IIndexPattern {
       // 2019-12-01 The usage of kbnUrl had to be removed due to the transition to NP.
       // It's now temporarily replaced by a simple replace of the single argument used by all URLs.
       // Once kbnUrl is migrated to NP, this can be updated.
-      const editUrlTemplate = getRoutes().edit;
-      const editUrl = '/app/kibana#' + editUrlTemplate.replace('{{id}}', this.id!);
+      const editUrl = `/app/kibana#/management/kibana/index_patterns/${this.id! || ''}`;
 
       const { toasts } = getNotifications();
 
