@@ -4204,6 +4204,7 @@
     "xpack.apm.errorRateAlertTrigger.isAbove": "の下限は",
     "xpack.apm.errorsTable.errorMessageAndCulpritColumnLabel": "エラーメッセージと原因",
     "xpack.apm.errorsTable.groupIdColumnLabel": "グループ ID",
+    "xpack.apm.errorsTable.groupIdColumnDescription": "スタックトレースのハッシュ。動的パラメーターによりエラーメッセージが異なる場合でも、同様のエラーをグループ化します。",
     "xpack.apm.errorsTable.latestOccurrenceColumnLabel": "最近のオカレンス",
     "xpack.apm.errorsTable.noErrorsLabel": "エラーが見つかりませんでした",
     "xpack.apm.errorsTable.occurrencesColumnLabel": "オカレンス",
