@@ -16,6 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { HitsCounter } from './hits_counter';
 
-export { shortenDottedString } from './shorten_dotted_string';
-export { formatNumWithCommas } from './format_number_with_commas';
+export function createHitsCounterDirective(reactDirective: any) {
+  return reactDirective(HitsCounter, [
+    ['hits', { watchDepth: 'reference' }],
+    ['showResetButton', { watchDepth: 'reference' }],
+    ['onResetQuery', { watchDepth: 'reference' }],
+  ]);
+}
