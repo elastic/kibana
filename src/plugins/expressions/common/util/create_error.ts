@@ -17,9 +17,11 @@
  * under the License.
  */
 
+import { ExpressionValueError } from '../../public';
+
 type ErrorLike = Partial<Pick<Error, 'name' | 'message' | 'stack'>>;
 
-export const createError = (err: string | ErrorLike) => ({
+export const createError = (err: string | ErrorLike): ExpressionValueError => ({
   type: 'error',
   error: {
     stack:
@@ -28,7 +30,7 @@ export const createError = (err: string | ErrorLike) => ({
         : typeof err === 'object'
         ? err.stack
         : undefined,
-    message: typeof err === 'string' ? err : err.message,
+    message: typeof err === 'string' ? err : String(err.message),
     name: typeof err === 'object' ? err.name || 'Error' : 'Error',
   },
 });

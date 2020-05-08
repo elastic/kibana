@@ -18,14 +18,15 @@
  */
 
 // @ts-ignore
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 // @ts-ignore
 import { setToasts, setUiSettings, setInjectedVarFunc } from './kibana_services';
 // @ts-ignore
 import { ServiceSettings } from './map/service_settings';
 // @ts-ignore
 import { getPrecision, getZoomPrecision } from './map/precision';
-import { MapsLegacyPluginSetup, MapsLegacyPluginStart } from './index';
+import { MapsLegacyConfigType, MapsLegacyPluginSetup, MapsLegacyPluginStart } from './index';
+import { ConfigSchema } from '../config';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -33,23 +34,34 @@ import { MapsLegacyPluginSetup, MapsLegacyPluginStart } from './index';
  * @public
  */
 
+export const bindSetupCoreAndPlugins = (core: CoreSetup) => {
+  setToasts(core.notifications.toasts);
+  setUiSettings(core.uiSettings);
+  setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
+};
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsLegacySetupDependencies {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsLegacyStartDependencies {}
 
 export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegacyPluginStart> {
-  constructor() {}
+  readonly _initializerContext: PluginInitializerContext<ConfigSchema>;
+
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+    this._initializerContext = initializerContext;
+  }
 
   public setup(core: CoreSetup, plugins: MapsLegacySetupDependencies) {
-    setToasts(core.notifications.toasts);
-    setUiSettings(core.uiSettings);
-    setInjectedVarFunc(core.injectedMetadata.getInjectedVar);
+    bindSetupCoreAndPlugins(core);
+
+    const config = this._initializerContext.config.get<MapsLegacyConfigType>();
 
     return {
-      serviceSettings: new ServiceSettings(),
+      serviceSettings: new ServiceSettings(config, config.tilemap),
       getZoomPrecision,
       getPrecision,
+      config,
     };
   }
 

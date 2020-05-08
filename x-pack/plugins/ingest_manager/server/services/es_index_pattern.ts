@@ -4,15 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SavedObjectsClientContract } from 'kibana/server';
-import { getInstallation } from './epm/packages/get';
-
-export interface ESIndexPatternService {
-  getESIndexPattern(
-    savedObjectsClient: SavedObjectsClientContract,
-    pkgName: string,
-    datasetPath: string
-  ): Promise<string | undefined>;
-}
+import { getInstallation } from './epm/packages';
+import { ESIndexPatternService } from '../../server';
 
 export class ESIndexPatternSavedObjectService implements ESIndexPatternService {
   public async getESIndexPattern(

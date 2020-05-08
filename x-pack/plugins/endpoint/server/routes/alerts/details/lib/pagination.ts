@@ -5,12 +5,8 @@
  */
 
 import { GetResponse, SearchResponse } from 'elasticsearch';
-import {
-  AlertEvent,
-  AlertHits,
-  Direction,
-  EndpointAppConstants,
-} from '../../../../../common/types';
+import { AlertEvent, AlertHits, AlertAPIOrdering } from '../../../../../common/types';
+import { AlertConstants } from '../../../../../common/alert_constants';
 import { EndpointConfigType } from '../../../../config';
 import { searchESForAlerts, Pagination } from '../../lib';
 import { AlertSearchQuery, SearchCursor, AlertDetailsRequestParams } from '../../types';
@@ -36,12 +32,12 @@ export class AlertDetailsPagination extends Pagination<
   }
 
   protected async doSearch(
-    direction: Direction,
+    direction: AlertAPIOrdering,
     cursor: SearchCursor
   ): Promise<SearchResponse<AlertEvent>> {
     const reqData: AlertSearchQuery = {
       pageSize: 1,
-      sort: EndpointAppConstants.ALERT_LIST_DEFAULT_SORT,
+      sort: AlertConstants.ALERT_LIST_DEFAULT_SORT,
       order: 'desc',
       query: { query: '', language: 'kuery' },
       filters: [] as Filter[],

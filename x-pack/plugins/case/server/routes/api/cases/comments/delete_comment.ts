@@ -11,11 +11,12 @@ import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
+import { CASE_COMMENT_DETAILS_URL } from '../../../../../common/constants';
 
 export function initDeleteCommentApi({ caseService, router, userActionService }: RouteDeps) {
   router.delete(
     {
-      path: '/api/cases/{case_id}/comments/{comment_id}',
+      path: CASE_COMMENT_DETAILS_URL,
       validate: {
         params: schema.object({
           case_id: schema.string(),

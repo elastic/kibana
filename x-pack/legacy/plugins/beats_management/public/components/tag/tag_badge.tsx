@@ -31,7 +31,7 @@ export const TagBadge = (props: TagBadgeProps) => {
       <EuiBadge
         color={tag.color || 'primary'}
         iconType={iconType}
-        onClick={onClick}
+        onClick={onClick as React.MouseEventHandler<HTMLButtonElement>}
         onClickAriaLabel={onClickAriaLabel}
       >
         {idToRender}

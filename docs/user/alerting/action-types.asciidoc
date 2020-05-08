@@ -41,11 +41,12 @@ see https://www.elastic.co/subscriptions[the subscription page].
 
 [float]
 [[create-connectors]]
-=== Connectors
+=== Preconfigured connectors and action types
 
-You can create connectors for actions in <<managing-alerts-and-actions, Alerts and Actions>> or via the action API.
-For out-of-the-box and standardized connectors, you can <<pre-configured-connectors, preconfigure connectors>>
+For out-of-the-box and standardized connectors, you can <<preconfigured-connector-example, preconfigure connectors>>
 before {kib} starts.
+
+If you preconfigure a connector, you can also <<preconfigured-action-type-example, preconfigure its action type>>.
 
 include::action-types/email.asciidoc[]
 include::action-types/index.asciidoc[]

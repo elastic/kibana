@@ -29,7 +29,11 @@ import {
   JobSpecificOverride,
   isGeneralJobOverride,
 } from '../../../common/types/modules';
-import { getLatestDataOrBucketTimestamp, prefixDatafeedId } from '../../../common/util/job_utils';
+import {
+  getLatestDataOrBucketTimestamp,
+  prefixDatafeedId,
+  splitIndexPatternNames,
+} from '../../../common/util/job_utils';
 import { mlLog } from '../../client/log';
 import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_limit';
 import { fieldsServiceProvider } from '../fields_service';
@@ -106,7 +110,7 @@ export class DataRecognizer {
   /**
    * List of the module jobs that require model memory estimation
    */
-  jobsForModelMemoryEstimation: ModuleJob[] = [];
+  jobsForModelMemoryEstimation: Array<{ job: ModuleJob; query: any }> = [];
 
   constructor(
     private callAsCurrentUser: APICaller,
@@ -370,7 +374,7 @@ export class DataRecognizer {
     end?: number,
     jobOverrides?: JobOverride | JobOverride[],
     datafeedOverrides?: DatafeedOverride | DatafeedOverride[],
-    estimateModelMemory?: boolean
+    estimateModelMemory: boolean = true
   ) {
     // load the config from disk
     const moduleConfig = await this.getModule(moduleId, jobPrefix);
@@ -412,7 +416,10 @@ export class DataRecognizer {
       savedObjects: [] as KibanaObjectResponse[],
     };
 
-    this.jobsForModelMemoryEstimation = moduleConfig.jobs;
+    this.jobsForModelMemoryEstimation = moduleConfig.jobs.map(job => ({
+      job,
+      query: moduleConfig.datafeeds.find(d => d.config.job_id === job.id)?.config.query ?? null,
+    }));
 
     this.applyJobConfigOverrides(moduleConfig, jobOverrides, jobPrefix);
     this.applyDatafeedConfigOverrides(moduleConfig, datafeedOverrides, jobPrefix);
@@ -828,9 +835,7 @@ export class DataRecognizer {
   updateDatafeedIndices(moduleConfig: Module) {
     // if the supplied index pattern contains a comma, split into multiple indices and
     // add each one to the datafeed
-    const indexPatternNames = this.indexPatternName.includes(',')
-      ? this.indexPatternName.split(',').map(i => i.trim())
-      : [this.indexPatternName];
+    const indexPatternNames = splitIndexPatternNames(this.indexPatternName);
 
     moduleConfig.datafeeds.forEach(df => {
       const newIndices: string[] = [];
@@ -956,7 +961,7 @@ export class DataRecognizer {
    */
   async updateModelMemoryLimits(
     moduleConfig: Module,
-    estimateMML: boolean = false,
+    estimateMML: boolean,
     start?: number,
     end?: number
   ) {
@@ -965,53 +970,57 @@ export class DataRecognizer {
     }
 
     if (estimateMML && this.jobsForModelMemoryEstimation.length > 0) {
-      const calculateModelMemoryLimit = calculateModelMemoryLimitProvider(this.callAsCurrentUser);
-      const query = moduleConfig.query ?? null;
+      try {
+        const calculateModelMemoryLimit = calculateModelMemoryLimitProvider(this.callAsCurrentUser);
 
-      // Checks if all jobs in the module have the same time field configured
-      const isSameTimeFields = this.jobsForModelMemoryEstimation.every(
-        job =>
-          job.config.data_description.time_field ===
-          this.jobsForModelMemoryEstimation[0].config.data_description.time_field
-      );
-
-      if (isSameTimeFields && (start === undefined || end === undefined)) {
-        // In case of time range is not provided and the time field is the same
-        // set the fallback range for all jobs
-        const { start: fallbackStart, end: fallbackEnd } = await this.getFallbackTimeRange(
-          this.jobsForModelMemoryEstimation[0].config.data_description.time_field,
-          query
+        // Checks if all jobs in the module have the same time field configured
+        const firstJobTimeField = this.jobsForModelMemoryEstimation[0].job.config.data_description
+          .time_field;
+        const isSameTimeFields = this.jobsForModelMemoryEstimation.every(
+          ({ job }) => job.config.data_description.time_field === firstJobTimeField
         );
-        start = fallbackStart;
-        end = fallbackEnd;
-      }
 
-      for (const job of this.jobsForModelMemoryEstimation) {
-        let earliestMs = start;
-        let latestMs = end;
-        if (earliestMs === undefined || latestMs === undefined) {
-          const timeFieldRange = await this.getFallbackTimeRange(
+        if (isSameTimeFields && (start === undefined || end === undefined)) {
+          // In case of time range is not provided and the time field is the same
+          // set the fallback range for all jobs
+          // as there may not be a common query, we use a match_all
+          const {
+            start: fallbackStart,
+            end: fallbackEnd,
+          } = await this.getFallbackTimeRange(firstJobTimeField, { match_all: {} });
+          start = fallbackStart;
+          end = fallbackEnd;
+        }
+
+        for (const { job, query } of this.jobsForModelMemoryEstimation) {
+          let earliestMs = start;
+          let latestMs = end;
+          if (earliestMs === undefined || latestMs === undefined) {
+            const timeFieldRange = await this.getFallbackTimeRange(
+              job.config.data_description.time_field,
+              query
+            );
+            earliestMs = timeFieldRange.start;
+            latestMs = timeFieldRange.end;
+          }
+
+          const { modelMemoryLimit } = await calculateModelMemoryLimit(
+            job.config.analysis_config,
+            this.indexPatternName,
+            query,
             job.config.data_description.time_field,
-            query
+            earliestMs,
+            latestMs
           );
-          earliestMs = timeFieldRange.start;
-          latestMs = timeFieldRange.end;
+
+          if (!job.config.analysis_limits) {
+            job.config.analysis_limits = {} as AnalysisLimits;
+          }
+
+          job.config.analysis_limits.model_memory_limit = modelMemoryLimit;
         }
-
-        const { modelMemoryLimit } = await calculateModelMemoryLimit(
-          job.config.analysis_config,
-          this.indexPatternName,
-          query,
-          job.config.data_description.time_field,
-          earliestMs,
-          latestMs
-        );
-
-        if (!job.config.analysis_limits) {
-          job.config.analysis_limits = {} as AnalysisLimits;
-        }
-
-        job.config.analysis_limits.model_memory_limit = modelMemoryLimit;
+      } catch (error) {
+        mlLog.warn(`Data recognizer could not estimate model memory limit ${error}`);
       }
     }
 
@@ -1096,10 +1105,15 @@ export class DataRecognizer {
     if (generalOverrides.some(override => !!override.analysis_limits?.model_memory_limit)) {
       this.jobsForModelMemoryEstimation = [];
     } else {
-      this.jobsForModelMemoryEstimation = moduleConfig.jobs.filter(job => {
-        const override = jobSpecificOverrides.find(o => `${jobPrefix}${o.job_id}` === job.id);
-        return override?.analysis_limits?.model_memory_limit === undefined;
-      });
+      this.jobsForModelMemoryEstimation = moduleConfig.jobs
+        .filter(job => {
+          const override = jobSpecificOverrides.find(o => `${jobPrefix}${o.job_id}` === job.id);
+          return override?.analysis_limits?.model_memory_limit === undefined;
+        })
+        .map(job => ({
+          job,
+          query: moduleConfig.datafeeds.find(d => d.config.job_id === job.id)?.config.query || null,
+        }));
     }
 
     function processArrayValues(source: any, update: any) {

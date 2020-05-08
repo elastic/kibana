@@ -9,17 +9,16 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { findRulesStatusesSchema } from '../schemas/find_rules_statuses_schema';
 import {
   FindRulesStatusesRequestParams,
-  IRuleSavedAttributesSavedObjectAttributes,
   RuleStatusResponse,
   IRuleStatusAttributes,
 } from '../../rules/types';
-import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import {
   buildRouteValidation,
   transformError,
   convertToSnakeCase,
   buildSiemResponse,
 } from '../utils';
+import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
 export const findRulesStatusesRoute = (router: IRouter) => {
   router.post(
@@ -50,12 +49,10 @@ export const findRulesStatusesRoute = (router: IRouter) => {
         }
     */
       try {
+        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
         const statuses = await body.ids.reduce<Promise<RuleStatusResponse | {}>>(
           async (acc, id) => {
-            const lastFiveErrorsForId = await savedObjectsClient.find<
-              IRuleSavedAttributesSavedObjectAttributes
-            >({
-              type: ruleStatusSavedObjectType,
+            const lastFiveErrorsForId = await ruleStatusClient.find({
               perPage: 6,
               sortField: 'statusDate',
               sortOrder: 'desc',

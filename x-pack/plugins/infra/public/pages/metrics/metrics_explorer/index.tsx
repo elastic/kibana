@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import React from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
+import { useTrackPageview } from '../../../../../observability/public';
+import { SourceQuery } from '../../../../common/graphql/types';
 import { DocumentTitle } from '../../../components/document_title';
+import { NoData } from '../../../components/empty_states';
 import { MetricsExplorerCharts } from './components/charts';
 import { MetricsExplorerToolbar } from './components/toolbar';
-import { SourceQuery } from '../../../../common/graphql/types';
-import { NoData } from '../../../components/empty_states';
 import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
-import { useTrackPageview } from '../../../../../observability/public';
 
 interface MetricsExplorerPageProps {
   source: SourceQuery.Query['source']['configuration'];
@@ -45,7 +45,7 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer', delay: 15000 });
 
   return (
-    <React.Fragment>
+    <EuiErrorBoundary>
       <DocumentTitle
         title={(previousTitle: string) =>
           i18n.translate('xpack.infra.infrastructureMetricsExplorerPage.documentTitle', {
@@ -95,6 +95,6 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
           onTimeChange={handleTimeChange}
         />
       )}
-    </React.Fragment>
+    </EuiErrorBoundary>
   );
 };

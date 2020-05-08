@@ -7,10 +7,11 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { exactCheck } from './exact_check';
-import { foldLeftRight, getErrorPayload, getPaths } from './__mocks__/utils';
+import { getErrorPayload } from './__mocks__/utils';
 import { errorSchema, ErrorSchema } from './error_schema';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
+import { exactCheck } from '../../../../../utils/build_validation/exact_check';
+import { foldLeftRight, getPaths } from '../../../../../utils/build_validation/__mocks__/utils';
 
 describe('error_schema', () => {
   beforeAll(() => {

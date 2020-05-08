@@ -7,12 +7,13 @@
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
-import { failure } from 'io-ts/lib/PathReporter';
 import {
   RouteValidationFunction,
   RouteValidationResultFactory,
   RouteValidationError,
 } from '../../../../../../src/core/server';
+import { exactCheck } from './exact_check';
+import { formatErrors } from './format_errors';
 
 type RequestValidationResult<T> =
   | {
@@ -32,8 +33,9 @@ export const buildRouteValidation = <T extends rt.Mixed, A = rt.TypeOf<T>>(
 ) =>
   pipe(
     schema.decode(inputValue),
+    decoded => exactCheck(inputValue, decoded),
     fold<rt.Errors, A, RequestValidationResult<A>>(
-      (errors: rt.Errors) => validationResult.badRequest(failure(errors).join('\n')),
+      (errors: rt.Errors) => validationResult.badRequest(formatErrors(errors).join()),
       (validatedInput: A) => validationResult.ok(validatedInput)
     )
   );

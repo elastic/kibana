@@ -12,7 +12,6 @@ import { InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../../../../lib/
 import { AutoSizer } from '../../../../../components/auto_sizer';
 import { GroupOfGroups } from './group_of_groups';
 import { GroupOfNodes } from './group_of_nodes';
-import { Legend } from './legend';
 import { applyWaffleMapLayout } from '../../lib/apply_wafflemap_layout';
 import { SnapshotNode } from '../../../../../../common/http_api/snapshot_api';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
@@ -78,12 +77,6 @@ export const Map: React.FC<Props> = ({
                 }
               })}
             </WaffleMapInnerContainer>
-            <Legend
-              formatter={formatter}
-              bounds={bounds}
-              dataBounds={dataBounds}
-              legend={options.legend}
-            />
           </WaffleMapOuterContainer>
         );
       }}

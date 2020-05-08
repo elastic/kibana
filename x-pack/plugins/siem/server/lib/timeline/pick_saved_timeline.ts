@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import uuid from 'uuid';
 import { AuthenticatedUser } from '../../../../security/common/model';
 import { UNAUTHENTICATED_USER } from '../../../common/constants';
-import { SavedTimeline } from './types';
+import { SavedTimeline, TimelineType } from '../../../common/types/timeline';
 
 export const pickSavedTimeline = (
   timelineId: string | null,
@@ -15,6 +16,7 @@ export const pickSavedTimeline = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any => {
   const dateNow = new Date().valueOf();
+
   if (timelineId == null) {
     savedTimeline.created = dateNow;
     savedTimeline.createdBy = userInfo?.username ?? UNAUTHENTICATED_USER;
@@ -24,5 +26,23 @@ export const pickSavedTimeline = (
     savedTimeline.updated = dateNow;
     savedTimeline.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
   }
+
+  if (savedTimeline.timelineType === TimelineType.template) {
+    if (savedTimeline.templateTimelineId == null) {
+      // create template timeline
+      savedTimeline.templateTimelineId = uuid.v4();
+      savedTimeline.templateTimelineVersion = 1;
+    } else {
+      // update template timeline
+      if (savedTimeline.templateTimelineVersion != null) {
+        savedTimeline.templateTimelineVersion = savedTimeline.templateTimelineVersion + 1;
+      }
+    }
+  } else {
+    savedTimeline.timelineType = TimelineType.default;
+    savedTimeline.templateTimelineId = null;
+    savedTimeline.templateTimelineVersion = null;
+  }
+
   return savedTimeline;
 };

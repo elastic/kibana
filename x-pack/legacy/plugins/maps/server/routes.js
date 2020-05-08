@@ -21,7 +21,7 @@ import {
   GIS_API_PATH,
   EMS_SPRITES_PATH,
   INDEX_SETTINGS_API_PATH,
-} from '../common/constants';
+} from '../../../../plugins/maps/common/constants';
 import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
@@ -31,9 +31,8 @@ import Boom from 'boom';
 
 const ROOT = `/${GIS_API_PATH}`;
 
-export function initRoutes(server, licenseUid) {
+export function initRoutes(server, licenseUid, mapConfig) {
   const serverConfig = server.config();
-  const mapConfig = serverConfig.get('map');
 
   let emsClient;
   if (mapConfig.includeElasticMapsService) {

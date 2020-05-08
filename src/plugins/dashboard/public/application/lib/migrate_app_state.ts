@@ -22,18 +22,16 @@ import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { DashboardAppState, SavedDashboardPanel } from '../../types';
 import {
-  DashboardAppState,
+  migratePanelsTo730,
   SavedDashboardPanelTo60,
   SavedDashboardPanel730ToLatest,
   SavedDashboardPanel610,
   SavedDashboardPanel630,
   SavedDashboardPanel640To720,
   SavedDashboardPanel620,
-  SavedDashboardPanel,
-} from '../../types';
-// should be moved in src/plugins/dashboard/common right after https://github.com/elastic/kibana/pull/61895 is merged
-import { migratePanelsTo730 } from '../../../../../legacy/core_plugins/kibana/public/dashboard/migrations/migrate_to_730_panels';
+} from '../../../common';
 
 /**
  * Attempts to migrate the state stored in the URL into the latest version of it.

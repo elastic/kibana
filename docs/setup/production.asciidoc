@@ -133,7 +133,8 @@ server.port
 Settings that must be the same:
 --------
 xpack.security.encryptionKey //decrypting session cookies
-xpack.reporting.encryptionKey //decrypting reports stored in Elasticsearch
+xpack.reporting.encryptionKey //decrypting reports
+xpack.encryptedSavedObjects.encryptionKey // decrypting saved objects
 --------
 
 Separate configuration files can be used from the command line by using the `-c` flag:

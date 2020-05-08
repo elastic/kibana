@@ -5,7 +5,7 @@
  */
 
 import { getMlIndex } from '../../../../../common/ml_job_constants';
-import { PromiseReturnType } from '../../../../../typings/common';
+import { PromiseReturnType } from '../../../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../../../helpers/setup_request';
 
 export type ESResponse = Exclude<
