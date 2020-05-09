@@ -17,35 +17,9 @@
  * under the License.
  */
 
-import { LegacyManagementSection } from './section';
 import { i18n } from '@kbn/i18n';
-
-export const sections = [
-  {
-    id: 'ingest',
-    title: 'Ingest',
-  },
-  {
-    id: 'data',
-    title: 'Data',
-  },
-  {
-    id: 'insightsAndAlerting',
-    title: 'Insights and Alerting',
-  },
-  {
-    id: 'security',
-    title: 'Security',
-  },
-  {
-    id: 'kibana',
-    title: 'Kibana',
-  },
-  {
-    id: 'stack',
-    title: 'Stack',
-  },
-];
+import { LegacyManagementSection } from './section';
+import { managementSections } from '../management_section';
 
 export class LegacyManagementAdapter {
   main = undefined;
@@ -60,7 +34,7 @@ export class LegacyManagementAdapter {
       capabilities
     );
 
-    sections.forEach(({ id, title }, idx) => {
+    managementSections.forEach(({ id, title }, idx) => {
       this.main.register(id, {
         display: title,
         order: idx,

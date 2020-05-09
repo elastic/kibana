@@ -18,6 +18,7 @@
  */
 
 import { ManagementSection } from './management_section';
+import { ManagementSectionId } from './types';
 // @ts-ignore
 import { LegacyManagementSection } from './legacy';
 import { coreMock } from '../../../core/public/mocks';
@@ -27,7 +28,7 @@ function createSection(registerLegacyApp: () => void) {
   const getLegacySection = () => legacySection;
   const getManagementSections: () => ManagementSection[] = () => [];
 
-  const testSectionConfig = { id: 'test-section', title: 'Test Section' };
+  const testSectionConfig = { id: ManagementSectionId.Data, title: 'Test Section' };
   return new ManagementSection(
     testSectionConfig,
     getManagementSections,

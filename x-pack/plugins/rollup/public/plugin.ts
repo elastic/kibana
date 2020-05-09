@@ -18,7 +18,7 @@ import {
 } from '../../../../src/plugins/home/public';
 // @ts-ignore
 import { CRUD_APP_BASE_PATH } from './crud_app/constants';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
+import { ManagementSetup, ManagementSectionId } from '../../../../src/plugins/management/public';
 import { IndexManagementPluginSetup } from '../../index_management/public';
 import { IndexPatternManagementSetup } from '../../../../src/plugins/index_pattern_management/public';
 // @ts-ignore
@@ -77,7 +77,7 @@ export class RollupPlugin implements Plugin {
       });
     }
 
-    management.sections.getSection('data')!.registerApp({
+    management.sections.getSection(ManagementSectionId.Data).registerApp({
       id: 'rollup_jobs',
       title: i18n.translate('xpack.rollupJobs.appTitle', { defaultMessage: 'Rollup Jobs' }),
       order: 4,

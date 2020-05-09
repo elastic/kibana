@@ -17,9 +17,9 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/public';
-import { ManagementSetup } from 'src/plugins/management/public';
 import { UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { JobId, JobStatusBuckets } from '../';
+import { ManagementSetup, ManagementSectionId } from '../../../../src/plugins/management/public';
 import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
 import {
   FeatureCatalogueCategory,
@@ -117,7 +117,7 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
       category: FeatureCatalogueCategory.ADMIN,
     });
 
-    management.sections.getSection('insightsAndAlerting')!.registerApp({
+    management.sections.getSection(ManagementSectionId.InsightsAndAlerting).registerApp({
       id: 'reporting',
       title: this.title,
       order: 1,

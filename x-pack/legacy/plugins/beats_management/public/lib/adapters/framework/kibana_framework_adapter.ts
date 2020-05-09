@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { UIRoutes } from 'ui/routes';
 import { isLeft } from 'fp-ts/lib/Either';
 import { npSetup } from 'ui/new_platform';
+import { ManagementSectionId } from '../../../../../../../../src/plugins/management/public';
 import { SecurityPluginSetup } from '../../../../../../../plugins/security/public';
 import { BufferedKibanaServiceCall, KibanaAdapterServiceRefs, KibanaUIConfig } from '../../types';
 import { BASE_PATH } from '../../../../common/constants';
@@ -151,7 +152,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   }
 
   public registerManagementSection() {
-    this.management.getSection('ingest')!.register('beats_central_management', {
+    this.management.getSection(ManagementSectionId.Ingest).register('beats_central_management', {
       display: i18n.translate('xpack.beatsManagement.centralManagementSectionLabel', {
         defaultMessage: 'Beats Central Management',
       }),

@@ -98,7 +98,6 @@ describe('ManagementService', () => {
           sections: {
             getSection: jest.fn(),
             getAllSections: jest.fn(),
-            register: jest.fn().mockReturnValue({ registerApp: jest.fn() }),
           },
         },
       });

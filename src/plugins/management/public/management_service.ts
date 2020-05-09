@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { ManagementSection } from './management_section';
+import { ManagementSection, managementSections } from './management_section';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
 // @ts-ignore
 import { LegacyManagementSection, sections } from './legacy';
-import { CreateSection } from './types';
+import { CreateSection, ManagementSectionId } from './types';
 import { StartServicesAccessor, CoreStart } from '../../../core/public';
 
 export class ManagementService {
@@ -48,8 +48,9 @@ export class ManagementService {
       return newSection;
     };
   }
-  private getSection(sectionId: ManagementSection['id']) {
-    return this.sections.find(section => section.id === sectionId);
+
+  private getSection(sectionId: ManagementSectionId): ManagementSection {
+    return this.sections.find(section => section.id === sectionId) as ManagementSection;
   }
 
   private getAllSections() {
@@ -79,12 +80,13 @@ export class ManagementService {
       getStartServices
     );
 
-    sections.forEach(({ id, title }: { id: string; title: string }, idx: number) => {
-      register({ id, title, order: idx });
-    });
+    managementSections.forEach(
+      ({ id, title }: { id: ManagementSectionId; title: string }, idx: number) => {
+        register({ id, title, order: idx });
+      }
+    );
 
     return {
-      register,
       ...this.sharedInterface,
     };
   }

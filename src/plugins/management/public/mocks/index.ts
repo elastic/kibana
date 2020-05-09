@@ -30,7 +30,6 @@ const createManagementSectionMock = (): jest.Mocked<PublicMethodsOf<ManagementSe
 
 const createSetupContract = (): DeeplyMockedKeys<ManagementSetup> => ({
   sections: {
-    register: jest.fn(),
     getSection: jest.fn().mockReturnValue(createManagementSectionMock()),
     getAllSections: jest.fn().mockReturnValue([]),
   },

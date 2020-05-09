@@ -7,7 +7,7 @@ import { first } from 'rxjs/operators';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
 
 import { TelemetryPluginSetup } from '../../../../src/plugins/telemetry/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
+import { ManagementSetup, ManagementSectionId } from '../../../../src/plugins/management/public';
 import { LicensingPluginSetup } from '../../../plugins/licensing/public';
 import { PLUGIN } from '../common/constants';
 import { ClientConfigType } from './types';
@@ -44,7 +44,7 @@ export class LicenseManagementUIPlugin
     const { getStartServices } = coreSetup;
     const { management, telemetry, licensing } = plugins;
 
-    management.sections.getSection('stack')!.registerApp({
+    management.sections.getSection(ManagementSectionId.Stack).registerApp({
       id: PLUGIN.id,
       title: PLUGIN.title,
       order: 0,
