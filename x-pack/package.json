@@ -109,6 +109,7 @@
     "@types/styled-components": "^4.4.2",
     "@types/supertest": "^2.0.5",
     "@types/tar-fs": "^1.16.1",
+    "@types/testing-library__jest-dom": "^5.0.4",
     "@types/tinycolor2": "^1.4.1",
     "@types/use-resize-observer": "^6.0.0",
     "@types/uuid": "^3.4.4",

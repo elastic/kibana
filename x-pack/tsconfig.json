@@ -41,7 +41,10 @@
     "types": [
       "node",
       "jest",
-      "flot"
+      "flot",
+      "jest-styled-components",
+      "@testing-library/jest-dom",
+      "@types/testing-library__jest-dom"
     ]
   }
 }
