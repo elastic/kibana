@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Reducer, useReducer } from 'react';
-import { euiDragDropReorder } from '@elastic/eui';
 
 import { DeserializeResult } from './serialize';
 import { getValue, setValue, unsafeProcessorMove, PARENT_CHILD_NEST_ERROR } from './utils';
@@ -43,20 +42,11 @@ type Action =
 export const reducer: Reducer<State, Action> = (state, action) => {
   if (action.type === 'moveProcessor') {
     const { destination, source } = action.payload;
-    if (source.selector.join('.') === destination.selector.join('.')) {
-      const selector = source.selector;
-      return setValue(
-        selector,
-        state,
-        euiDragDropReorder(getValue(selector, state), source.index, destination.index)
-      );
-    } else {
-      try {
-        return unsafeProcessorMove(state, source, destination);
-      } catch (e) {
-        if (e.message === PARENT_CHILD_NEST_ERROR) {
-          return { ...state };
-        }
+    try {
+      return unsafeProcessorMove(state, source, destination);
+    } catch (e) {
+      if (e.message === PARENT_CHILD_NEST_ERROR) {
+        return { ...state };
       }
     }
   }

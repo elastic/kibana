@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import React, {
   createContext,
   useState,
@@ -159,7 +160,8 @@ export const DragAndDropTreeProvider: FunctionComponent<Props> = ({ children, on
               destinationTree.selectors,
               destination.index,
               destinationTree.baseSelector,
-              xTreeDrag ? 'none' : dragDirection,
+              dragDirection,
+              sourceSelector,
               sourceSelector.length <= 2
             );
 

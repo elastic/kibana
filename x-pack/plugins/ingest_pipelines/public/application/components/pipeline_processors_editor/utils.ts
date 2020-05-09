@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DraggableLocation, ProcessorInternal } from './types';
+import { DraggableLocation, ProcessorInternal, ProcessorSelector } from './types';
 import { State } from './processors_reducer';
 
 type Path = string[];
@@ -98,6 +98,11 @@ export const setValue = <Target = any, Value = any>(
 
 export const PARENT_CHILD_NEST_ERROR = 'PARENT_CHILD_NEST_ERROR';
 
+export const checkIfSamePath = (pathA: ProcessorSelector, pathB: ProcessorSelector) => {
+  if (pathA.length !== pathB.length) return false;
+  return pathA.join('.') === pathB.join('.');
+};
+
 /**
  * Unsafe!
  *
@@ -120,6 +125,8 @@ export const unsafeProcessorMove = (
   if (selectorToSource.every((pathSegment, idx) => pathSegment === destination.selector[idx])) {
     throw new Error(PARENT_CHILD_NEST_ERROR);
   }
+  const isXArrayMove = !checkIfSamePath(source.selector, destination.selector);
+
   // Start by setting up references to objects of interest using our selectors
   // At this point, our selectors are consistent with the data passed in.
   const sourceProcessors = getValue<ProcessorInternal[]>(source.selector, state);
@@ -127,22 +134,28 @@ export const unsafeProcessorMove = (
   const processor = sourceProcessors[source.index];
   const sourceProcessor = getValue<ProcessorInternal>(source.selector.slice(0, -1), state);
 
-  // First perform the add operation.
-  if (destinationProcessors) {
-    destinationProcessors.splice(destination.index, 0, processor);
+  if (isXArrayMove) {
+    // First perform the add operation.
+    if (destinationProcessors) {
+      destinationProcessors.splice(destination.index, 0, processor);
+    } else {
+      const targetProcessor = getValue<ProcessorInternal>(destination.selector.slice(0, -1), state);
+      targetProcessor.onFailure = [processor];
+    }
+    // !! Beyond this point, selectors are no longer usable because we have mutated the data structure!
+    // Second, we perform the deletion operation
+    sourceProcessors.splice(source.index, 1);
+    // If onFailure is empty, delete the array.
+    if (!sourceProcessors.length && !((sourceProcessor as unknown) as State).isRoot) {
+      sourceProcessor.onFailure = undefined;
+    }
   } else {
-    const targetProcessor = getValue<ProcessorInternal>(destination.selector.slice(0, -1), state);
-    targetProcessor.onFailure = [processor];
+    const finalDestinationIndex =
+      source.index > destination.index ? destination.index : destination.index + 1;
+    destinationProcessors.splice(finalDestinationIndex, 0, processor);
+    const targetIdx = source.index > destination.index ? source.index + 1 : source.index;
+    sourceProcessors.splice(targetIdx, 1);
   }
 
-  // !! Beyond this point, selectors are no longer usable because we have mutated the data structure!
-
-  // Second, we perform the deletion operation
-  sourceProcessors.splice(source.index, 1);
-  // If onFailure is empty, delete the array.
-  if (!sourceProcessors.length && !((sourceProcessor as unknown) as State).isRoot) {
-    sourceProcessor.onFailure = undefined;
-  }
-
-  return { ...state, processors: [...state.processors] };
+  return { ...state, processors: [...state.processors], onFailure: [...state.onFailure] };
 };

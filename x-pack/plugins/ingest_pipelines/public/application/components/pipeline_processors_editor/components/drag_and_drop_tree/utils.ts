@@ -5,6 +5,7 @@
  */
 
 import { DraggableLocation, ProcessorSelector } from '../../types';
+import { checkIfSamePath } from '../../utils';
 
 export const mapSelectorToDragLocation = (selector: ProcessorSelector): DraggableLocation => {
   const stringIndex = selector[selector.length - 1];
@@ -19,19 +20,12 @@ export const mapSelectorToDragLocation = (selector: ProcessorSelector): Draggabl
 
 export type DragDirection = 'up' | 'down' | 'none';
 
-/**
- *
- * @param items
- * @param destinationIndex
- * @param baseDestinationSelector
- * @param dragDirection
- * @param isSourceAtRootLevel
- */
 export const resolveDestinationLocation = (
   items: ProcessorSelector[],
   destinationIndex: number,
   baseDestinationSelector: ProcessorSelector,
   dragDirection: DragDirection,
+  sourceSelector: ProcessorSelector,
   isSourceAtRootLevel = false
 ): DraggableLocation => {
   // Dragged to top, place at root level
@@ -42,8 +36,8 @@ export const resolveDestinationLocation = (
 
   // Dragged to bottom, place at root level if source is already at root
   if (destinationIndex === items.length - 1 && isSourceAtRootLevel) {
-    const destinationSelector = items[destinationIndex] ?? baseDestinationSelector;
-    return { selector: destinationSelector.slice(0, 1), index: items.length - 1 };
+    const destinationSelector = items[items.length - 1] ?? baseDestinationSelector;
+    return { selector: destinationSelector.slice(0, 1), index: Infinity };
   }
 
   // This can happen when dragging across trees
@@ -57,10 +51,26 @@ export const resolveDestinationLocation = (
     return mapSelectorToDragLocation(displacing);
   }
 
-  if (dragDirection === 'down') {
-    const below: ProcessorSelector = items[destinationIndex + 1];
-    return mapSelectorToDragLocation(below ?? displacing);
-  } else {
-    return mapSelectorToDragLocation(displacing);
+  const below: ProcessorSelector = items[destinationIndex + 1];
+  if (dragDirection === 'down' && below) {
+    if (
+      checkIfSamePath(sourceSelector.slice(0, -1), below.slice(0, -1)) &&
+      displacing.length >= below.length
+    ) {
+      const location = mapSelectorToDragLocation(below);
+      return {
+        ...location,
+        index: location.index - 1,
+      };
+    }
+    if (
+      checkIfSamePath(sourceSelector.slice(0, -1), displacing.slice(0, -1)) &&
+      displacing.length >= below.length
+    ) {
+      return mapSelectorToDragLocation(displacing);
+    }
+    return mapSelectorToDragLocation(below);
   }
+
+  return mapSelectorToDragLocation(displacing);
 };

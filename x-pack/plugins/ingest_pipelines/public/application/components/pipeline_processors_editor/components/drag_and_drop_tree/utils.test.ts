@@ -20,25 +20,10 @@ describe('Resolve destination location', () => {
       testItems,
       0 /* corresponds to position 0, when dragging up */,
       testBaseSelector,
-      'up'
+      'up',
+      ['processors', '0']
     );
     expect(result).toEqual({ selector: ['processors'], index: 0 });
-  });
-
-  it('resolves to root level when dragged to bottom if source comes from root', () => {
-    const testItems = [
-      ['processors', '0'],
-      ['processors', '1'],
-      ['processors', '1', 'onFailure', '0'],
-    ];
-    const result1 = resolveDestinationLocation(
-      testItems,
-      testItems.length - 1,
-      testBaseSelector,
-      'down',
-      testItems[0].length === 2
-    );
-    expect(result1).toEqual({ selector: ['processors'], index: testItems.length - 1 });
   });
 
   it('nests an element at the position it was placed', () => {
@@ -58,7 +43,9 @@ describe('Resolve destination location', () => {
       2 /* corresponds to pos 2, when dragging down */,
       testBaseSelector,
       'down',
-      false
+      ['processors', '0'],
+
+      true
     );
     expect(result2).toEqual({ selector: ['processors', '1', 'onFailure'], index: 0 });
   });
@@ -66,23 +53,19 @@ describe('Resolve destination location', () => {
   it('handles special case of dragging to bottom with root level item', () => {
     const testItems = [
       ['processors', '0'],
-      /* pos 0 -- this should displace item below, same with rest */
       ['processors', '0', 'onFailure', '0'],
-      /* pos 1 */
       ['processors', '1'],
-      /* pos 2 */
       ['processors', '1', 'onFailure', '0'],
-      /* pos 3 */
-      ['processors', '2'],
     ];
     const result2 = resolveDestinationLocation(
       testItems,
       3 /* corresponds to pos 3, when dragging down */,
       testBaseSelector,
       'down',
+      ['processors', '0'],
       true
     );
-    expect(result2).toEqual({ selector: ['processors'], index: 2 });
+    expect(result2).toEqual({ selector: ['processors'], index: Infinity });
   });
 
   it('sets the base selector if there are no items', () => {
@@ -91,14 +74,15 @@ describe('Resolve destination location', () => {
       testItems,
       testItems.length - 1,
       testBaseSelector,
-      'none'
+      'none',
+      []
     );
     expect(result).toEqual({ selector: testBaseSelector, index: 0 });
   });
 
   it('displaces the current item if surrounded by items at same level', () => {
     const testItems = [['0'], ['0', 'onFailure', '0'], ['0', 'onFailure', '1']];
-    const result = resolveDestinationLocation(testItems, 1, testBaseSelector, 'up');
+    const result = resolveDestinationLocation(testItems, 1, testBaseSelector, 'up', ['0']);
     expect(result).toEqual({ selector: ['0', 'onFailure'], index: 0 });
   });
 
@@ -120,7 +104,8 @@ describe('Resolve destination location', () => {
       testItems1,
       2 /* corresponds to pos 2, when dragging from above */,
       testBaseSelector,
-      'down'
+      'down',
+      ['0']
     );
     expect(result1).toEqual({
       selector: ['0', 'onFailure', '1', 'onFailure'],
@@ -129,15 +114,16 @@ describe('Resolve destination location', () => {
 
     const testItems2 = [
       ['0'],
-      ['0', 'onFailure', '0'],
-      ['0', 'onFailure', '1', 'onFailure', '0'],
-      ['0', 'onFailure', '1', 'onFailure', '1'],
-      ['0', 'onFailure', '2'],
-      ['0', 'onFailure', '3'],
+      ['1'],
+      ['1', 'onFailure', '0'],
+      ['1', 'onFailure', '1', 'onFailure', '0'],
+      ['1', 'onFailure', '1', 'onFailure', '1'],
+      ['1', 'onFailure', '2'],
+      ['1', 'onFailure', '3'],
     ];
 
-    const result2 = resolveDestinationLocation(testItems2, 3, testBaseSelector, 'down');
-    expect(result2).toEqual({ selector: ['0', 'onFailure'], index: 2 });
+    const result2 = resolveDestinationLocation(testItems2, 4, testBaseSelector, 'down', ['0']);
+    expect(result2).toEqual({ selector: ['1', 'onFailure'], index: 2 });
   });
 
   it('throws for bad array data', () => {
@@ -146,7 +132,7 @@ describe('Resolve destination location', () => {
       ['0', 'onFailure' /* should end in a number! */],
       ['0', 'onFailure' /* should end in a number! */],
     ];
-    expect(() => resolveDestinationLocation(testItems, 1, testBaseSelector, 'down')).toThrow(
+    expect(() => resolveDestinationLocation(testItems, 1, testBaseSelector, 'down', ['0'])).toThrow(
       'Expected an integer but received "onFailure"'
     );
   });
