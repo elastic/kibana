@@ -60,11 +60,10 @@ export class LegacyManagementAdapter {
       capabilities
     );
 
-    sections.forEach(({ id, title, icon }, idx) => {
+    sections.forEach(({ id, title }, idx) => {
       this.main.register(id, {
         display: title,
         order: idx,
-        icon,
       });
     });
 

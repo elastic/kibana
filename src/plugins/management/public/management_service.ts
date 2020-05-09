@@ -79,11 +79,9 @@ export class ManagementService {
       getStartServices
     );
 
-    sections.forEach(
-      ({ id, title, icon }: { id: string; title: string; icon?: string }, idx: number) => {
-        register({ id, title, euiIconType: icon, order: idx });
-      }
-    );
+    sections.forEach(({ id, title }: { id: string; title: string }, idx: number) => {
+      register({ id, title, order: idx });
+    });
 
     return {
       register,
