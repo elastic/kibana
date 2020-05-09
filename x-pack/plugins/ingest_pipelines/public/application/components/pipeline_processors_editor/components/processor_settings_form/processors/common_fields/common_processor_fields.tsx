@@ -5,8 +5,9 @@
  */
 
 import React, { FunctionComponent } from 'react';
+import { i18n } from '@kbn/i18n';
+
 import {
-  FormRow,
   FieldConfig,
   UseField,
   FIELD_TYPES,
@@ -16,32 +17,39 @@ import {
 
 const ignoreFailureConfig: FieldConfig = {
   defaultValue: false,
-  label: 'Ignore Failure',
+  label: i18n.translate(
+    'xpack.ingestPipelines.pipelineEditor.commonFields.ignoreFailureFieldLabel',
+    {
+      defaultMessage: 'Ignore failure',
+    }
+  ),
   type: FIELD_TYPES.TOGGLE,
 };
+
 const ifConfig: FieldConfig = {
   defaultValue: undefined,
-  label: 'If',
+  label: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.ifFieldLabel', {
+    defaultMessage: 'Condition (optional)',
+  }),
   type: FIELD_TYPES.TEXT,
 };
+
 const tagConfig: FieldConfig = {
   defaultValue: undefined,
-  label: 'Tag',
+  label: i18n.translate('xpack.ingestPipelines.pipelineEditor.commonFields.tagFieldLabel', {
+    defaultMessage: 'Tag (optional)',
+  }),
   type: FIELD_TYPES.TEXT,
 };
 
 export const CommonProcessorFields: FunctionComponent = () => {
   return (
     <>
-      <FormRow title="Ignore Failure">
-        <UseField config={ignoreFailureConfig} component={ToggleField} path={'ignore_failure'} />
-      </FormRow>
-      <FormRow title="If">
-        <UseField config={ifConfig} component={Field} path={'if'} />
-      </FormRow>
-      <FormRow title="Tag">
-        <UseField config={tagConfig} component={Field} path={'tag'} />
-      </FormRow>
+      <UseField config={ignoreFailureConfig} component={ToggleField} path={'ignore_failure'} />
+
+      <UseField config={ifConfig} component={Field} path={'if'} />
+
+      <UseField config={tagConfig} component={Field} path={'tag'} />
     </>
   );
 };

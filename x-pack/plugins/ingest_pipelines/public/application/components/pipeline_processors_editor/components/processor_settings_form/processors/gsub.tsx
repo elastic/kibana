@@ -11,7 +11,7 @@ import {
   FieldConfig,
   FIELD_TYPES,
   fieldValidators,
-  FormRow,
+  ToggleField,
   UseField,
   Field,
 } from '../../../../../../shared_imports';
@@ -66,33 +66,33 @@ const replacementConfig: FieldConfig = {
   ],
 };
 
+const targetConfig: FieldConfig = {
+  type: FIELD_TYPES.TEXT,
+  label: i18n.translate('xpack.ingestPipelines.pipelineEditor.gsubForm.targetFieldLabel', {
+    defaultMessage: 'Target field (optional)',
+  }),
+};
+
+const ignoreMissingConfig: FieldConfig = {
+  defaultValue: false,
+  label: i18n.translate('xpack.ingestPipelines.pipelineEditor.gsubForm.ignoreMissingFieldLabel', {
+    defaultMessage: 'Ignore missing',
+  }),
+  type: FIELD_TYPES.TOGGLE,
+};
+
 export const Gsub: FunctionComponent = () => {
   return (
     <>
-      <FormRow
-        title={i18n.translate('xpack.ingestPipelines.pipelineEditor.gsubForm.fieldFieldTitle', {
-          defaultMessage: 'Field',
-        })}
-      >
-        <UseField config={fieldConfig} component={Field} path="field" />
-      </FormRow>
-      <FormRow
-        title={i18n.translate('xpack.ingestPipelines.pipelineEditor.gsubForm.patternFieldTitle', {
-          defaultMessage: 'Pattern',
-        })}
-      >
-        <UseField config={patternConfig} component={Field} path="pattern" />
-      </FormRow>
-      <FormRow
-        title={i18n.translate(
-          'xpack.ingestPipelines.pipelineEditor.gsubForm.replacementFieldTitle',
-          {
-            defaultMessage: 'Replacement',
-          }
-        )}
-      >
-        <UseField config={replacementConfig} component={Field} path="replacement" />
-      </FormRow>
+      <UseField config={fieldConfig} component={Field} path="field" />
+
+      <UseField config={patternConfig} component={Field} path="pattern" />
+
+      <UseField config={replacementConfig} component={Field} path="replacement" />
+
+      <UseField config={targetConfig} component={Field} path="target_field" />
+
+      <UseField config={ignoreMissingConfig} component={ToggleField} path={'ignore_missing'} />
     </>
   );
 };

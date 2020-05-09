@@ -23,7 +23,7 @@ const { emptyField } = fieldValidators;
 const typeConfig: FieldConfig = {
   type: FIELD_TYPES.COMBO_BOX,
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.typeField.typeFieldLabel', {
-    defaultMessage: 'Type',
+    defaultMessage: 'Processor',
   }),
   validations: [
     {

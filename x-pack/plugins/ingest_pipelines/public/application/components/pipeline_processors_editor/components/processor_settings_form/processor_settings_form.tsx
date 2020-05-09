@@ -5,7 +5,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent, useCallback, useEffect } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiHorizontalRule } from '@elastic/eui';
 
 import { Form, useForm, FormDataProvider, OnFormUpdateArg } from '../../../../../shared_imports';
 
@@ -59,6 +59,9 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = ({
   return (
     <Form form={form}>
       <ProcessorTypeField initialType={processor?.type} />
+
+      <EuiHorizontalRule />
+
       <FormDataProvider pathsToWatch="type">
         {({ type, customOptions, ...options }) => {
           let formContent: React.ReactNode | undefined;

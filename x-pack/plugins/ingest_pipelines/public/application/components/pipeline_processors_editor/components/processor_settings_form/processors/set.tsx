@@ -11,7 +11,7 @@ import {
   FieldConfig,
   FIELD_TYPES,
   fieldValidators,
-  FormRow,
+  ToggleField,
   UseField,
   Field,
 } from '../../../../../../shared_imports';
@@ -50,26 +50,25 @@ const valueConfig: FieldConfig = {
   ],
 };
 
+const overrideConfig: FieldConfig = {
+  defaultValue: false,
+  label: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.overrideFieldLabel', {
+    defaultMessage: 'Override',
+  }),
+  type: FIELD_TYPES.TOGGLE,
+};
+
 /**
  * Disambiguate name from the Set data structure
  */
 export const SetProcessor: FunctionComponent = () => {
   return (
     <>
-      <FormRow
-        title={i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.fieldFieldTitle', {
-          defaultMessage: 'Field',
-        })}
-      >
-        <UseField config={fieldConfig} component={Field} path="field" />
-      </FormRow>
-      <FormRow
-        title={i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.valueFieldTitle', {
-          defaultMessage: 'Value',
-        })}
-      >
-        <UseField config={valueConfig} component={Field} path="value" />
-      </FormRow>
+      <UseField config={fieldConfig} component={Field} path="field" />
+
+      <UseField config={valueConfig} component={Field} path="value" />
+
+      <UseField config={overrideConfig} component={ToggleField} path={'override'} />
     </>
   );
 };
