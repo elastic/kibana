@@ -94,7 +94,7 @@ describe('ExplorerSwimlane', () => {
     expect(swimlaneRenderDoneListener.mock.calls.length).toBeGreaterThanOrEqual(1);
   });
 
-  test('Overall swimlane', () => {
+  test.skip('Overall swimlane', () => {
     const mocks = getExplorerSwimlaneMocks();
     const swimlaneRenderDoneListener = jest.fn();
 

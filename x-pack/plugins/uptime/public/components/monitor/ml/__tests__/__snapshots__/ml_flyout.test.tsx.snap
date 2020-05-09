@@ -31,11 +31,11 @@ exports[`ML Flyout component renders without errors 1`] = `
           id="xpack.uptime.ml.enableAnomalyDetectionPanel.manageMLJobDescription"
           values={
             Object {
-              "mlJobsPageLink": <ForwardRef
+              "mlJobsPageLink": <EuiLink
                 href="/app/ml"
               >
                 Machine Learning jobs management page
-              </ForwardRef>,
+              </EuiLink>,
             }
           }
         />

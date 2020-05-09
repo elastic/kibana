@@ -10,7 +10,7 @@ exports[`DateFormatEditor should render normally 1`] = `
     hasEmptyLabelSpace={false}
     helpText={
       <span>
-        <ForwardRef
+        <EuiLink
           href="https://momentjs.com/"
           target="_blank"
         >
@@ -23,7 +23,7 @@ exports[`DateFormatEditor should render normally 1`] = `
           <EuiIcon
             type="link"
           />
-        </ForwardRef>
+        </EuiLink>
       </span>
     }
     isInvalid={false}
