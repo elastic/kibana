@@ -559,7 +559,8 @@ function discoverController(
       getSortForSearchSource(
         $scope.state.sort,
         $scope.indexPattern,
-        config.get('discover:sort:defaultOrder')
+        config.get('discover:sort:defaultOrder'),
+        $scope.state.columns
       )
     );
     searchSource.setField('highlight', null);
@@ -583,6 +584,8 @@ function discoverController(
   };
 
   function getStateDefaults() {
+    const columns =
+      savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice();
     const query =
       $scope.searchSource.getField('query') ||
       getDefaultQuery(
@@ -590,9 +593,8 @@ function discoverController(
       );
     return {
       query,
-      sort: getSortArray(savedSearch.sort, $scope.indexPattern),
-      columns:
-        savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
+      sort: getSortArray(savedSearch.sort, $scope.indexPattern, columns),
+      columns,
       index: $scope.indexPattern.id,
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.getOwnField('filter')),
@@ -600,7 +602,7 @@ function discoverController(
   }
 
   $scope.state.index = $scope.indexPattern.id;
-  $scope.state.sort = getSortArray($scope.state.sort, $scope.indexPattern);
+  $scope.state.sort = getSortArray($scope.state.sort, $scope.indexPattern, $scope.columns);
 
   $scope.getBucketIntervalToolTipText = () => {
     return i18n.translate('discover.bucketIntervalTooltip', {
@@ -943,7 +945,8 @@ function discoverController(
         getSortForSearchSource(
           $scope.state.sort,
           indexPattern,
-          config.get('discover:sort:defaultOrder')
+          config.get('discover:sort:defaultOrder'),
+          $scope.state.columns
         )
       )
       .setField('query', $scope.state.query || null)
@@ -977,7 +980,8 @@ function discoverController(
   $scope.removeColumn = function removeColumn(columnName) {
     $scope.indexPattern.popularizeField(columnName, 1);
     const columns = columnActions.removeColumn($scope.state.columns, columnName);
-    setAppState({ columns });
+    const sort = $scope.state.sort.filter(s => s[0] !== columnName);
+    setAppState({ columns, sort });
   };
 
   $scope.moveColumn = function moveColumn(columnName, newIndex) {
