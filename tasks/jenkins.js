@@ -39,11 +39,11 @@ module.exports = function (grunt) {
   ]);
 
   grunt.config.set('functional_test_runner.functional.options.configOverrides.mochaOpts.bail', true);
-  // grunt.registerTask('jenkins:selenium', [
-  //   'jenkins:env',
-  //   'rejectRejFiles',
+  grunt.registerTask('jenkins:selenium', [
+    'jenkins:env',
+    'rejectRejFiles',
 
-  //   'test:uiRelease'
-  // ]);
+    'test:uiRelease'
+  ]);
 
 };
