@@ -322,8 +322,8 @@ describe('createExtentFilter', () => {
       expect(filter).toEqual({
         geo_bounding_box: {
           location: {
-            bottom_right: [-83, 35],
             top_left: [-89, 39],
+            bottom_right: [-83, 35],
           },
         },
       });
@@ -340,14 +340,14 @@ describe('createExtentFilter', () => {
       expect(filter).toEqual({
         geo_bounding_box: {
           location: {
-            bottom_right: [180, -90],
-            top_left: [-180, 90],
+            top_left: [-180, 89],
+            bottom_right: [180, -89],
           },
         },
       });
     });
 
-    it('should split into two bounding boxes when extent exceeds 180', () => {
+    it('should make left longitude greater then right longitude when area crosses 180 meridian east to west', () => {
       const mapExtent = {
         maxLat: 39,
         maxLon: 200,
@@ -355,33 +355,20 @@ describe('createExtentFilter', () => {
         minLon: 100,
       };
       const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_point');
+      const leftLon = filter.geo_bounding_box.location.top_left[0];
+      const rightLon = filter.geo_bounding_box.location.bottom_right[0];
+      expect(leftLon).toBeGreaterThan(rightLon);
       expect(filter).toEqual({
-        query: {
-          bool: {
-            should: [
-              {
-                geo_bounding_box: {
-                  location: {
-                    bottom_right: [180, 35],
-                    top_left: [100, 39],
-                  },
-                },
-              },
-              {
-                geo_bounding_box: {
-                  location: {
-                    bottom_right: [-160, 35],
-                    top_left: [-180, 39],
-                  },
-                },
-              },
-            ],
+        geo_bounding_box: {
+          location: {
+            top_left: [100, 39],
+            bottom_right: [-160, 35],
           },
         },
       });
     });
 
-    it('should split into two bounding boxes when extent is less then -180', () => {
+    it('should make left longitude greater then right longitude when area crosses 180 meridian west to east', () => {
       const mapExtent = {
         maxLat: 39,
         maxLon: -100,
@@ -389,27 +376,14 @@ describe('createExtentFilter', () => {
         minLon: -200,
       };
       const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_point');
+      const leftLon = filter.geo_bounding_box.location.top_left[0];
+      const rightLon = filter.geo_bounding_box.location.bottom_right[0];
+      expect(leftLon).toBeGreaterThan(rightLon);
       expect(filter).toEqual({
-        query: {
-          bool: {
-            should: [
-              {
-                geo_bounding_box: {
-                  location: {
-                    bottom_right: [-100, 35],
-                    top_left: [-180, 39],
-                  },
-                },
-              },
-              {
-                geo_bounding_box: {
-                  location: {
-                    bottom_right: [180, 35],
-                    top_left: [160, 39],
-                  },
-                },
-              },
-            ],
+        geo_bounding_box: {
+          location: {
+            top_left: [160, 39],
+            bottom_right: [-100, 35],
           },
         },
       });

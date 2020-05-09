@@ -230,57 +230,39 @@ function createGeoBoundBoxFilter({ maxLat, maxLon, minLat, minLon }, geoFieldNam
   const bottom = clampToLatBounds(minLat);
 
   // geo_bounding_box does not support ranges outside of -180 and 180
-  // Split into two bounding boxes when ranges are outside those values
-  const boundingBoxes = [];
+  // When the area crosses the 180° meridian,
+  // the value of the lower left longitude will be greater than the value of the upper right longitude.
+  // http://docs.opengeospatial.org/is/12-063r5/12-063r5.html#30
+  let boundingBox;
   if (maxLon - minLon >= 360) {
-    boundingBoxes.push({
+    boundingBox = {
       top_left: [-180, top],
       bottom_right: [180, bottom],
-    });
+    };
   } else if (maxLon > 180) {
-    boundingBoxes.push({
-      top_left: [minLon, top],
-      bottom_right: [180, bottom],
-    });
     const overflow = maxLon - 180;
-    boundingBoxes.push({
-      top_left: [-180, top],
+    boundingBox = {
+      top_left: [minLon, top],
       bottom_right: [-180 + overflow, bottom],
-    });
+    };
   } else if (minLon < -180) {
-    boundingBoxes.push({
-      top_left: [-180, top],
-      bottom_right: [maxLon, bottom],
-    });
     const overflow = Math.abs(minLon) - 180;
-    boundingBoxes.push({
+    boundingBox = {
       top_left: [180 - overflow, top],
-      bottom_right: [180, bottom],
-    });
+      bottom_right: [maxLon, bottom],
+    };
   } else {
-    boundingBoxes.push({
+    boundingBox = {
       top_left: [minLon, top],
       bottom_right: [maxLon, bottom],
-    });
+    };
   }
 
-  const boundingBoxFilters = boundingBoxes.map(boundingBox => {
-    return {
-      geo_bounding_box: {
-        [geoFieldName]: boundingBox,
-      },
-    };
-  });
-
-  return boundingBoxFilters.length === 1
-    ? boundingBoxFilters[0]
-    : {
-        query: {
-          bool: {
-            should: boundingBoxFilters,
-          },
-        },
-      };
+  return {
+    geo_bounding_box: {
+      [geoFieldName]: boundingBox,
+    },
+  };
 }
 
 export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
