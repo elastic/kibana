@@ -44,7 +44,7 @@ describe('KuiTextInput', () => {
       expect(render(component)).toMatchSnapshot();
     });
 
-    describe.only('autoFocus', () => {
+    describe('autoFocus', () => {
       test('sets focus on the element', () => {
         const component = mount(
           <KuiTextInput autoFocus onChange={() => {}} data-test-subj="input" />
