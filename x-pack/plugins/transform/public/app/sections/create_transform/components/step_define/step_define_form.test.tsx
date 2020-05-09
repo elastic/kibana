@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { render, wait } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect';
 
 import { I18nProvider } from '@kbn/i18n/react';
 

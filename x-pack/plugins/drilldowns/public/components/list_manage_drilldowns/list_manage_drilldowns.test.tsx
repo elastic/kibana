@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { cleanup, fireEvent, render } from '@testing-library/react/pure';
-import '@testing-library/jest-dom/extend-expect'; // TODO: this should be global
 import {
   DrilldownListItem,
   ListManageDrilldowns,
