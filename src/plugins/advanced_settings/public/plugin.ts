@@ -37,7 +37,7 @@ export class AdvancedSettingsPlugin
     this.managementApp = kibanaSection.registerApp({
       id: 'settings',
       title,
-      order: 20,
+      order: 3,
       async mount(params) {
         const { mountManagementSection } = await import(
           './management_app/mount_management_section'
@@ -53,7 +53,7 @@ export class AdvancedSettingsPlugin
 
   public start(core: CoreStart) {
     if (!core.application.capabilities.management.kibana.settings) {
-      this.managementApp!.disable();
+      this.managementApp.disable();
     }
 
     return {

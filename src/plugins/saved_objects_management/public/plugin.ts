@@ -93,7 +93,7 @@ export class SavedObjectsManagementPlugin
       title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
         defaultMessage: 'Saved Objects',
       }),
-      order: 10,
+      order: 1,
       mount: async mountParams => {
         const { mountManagementSection } = await import('./management_section');
         return mountManagementSection({
