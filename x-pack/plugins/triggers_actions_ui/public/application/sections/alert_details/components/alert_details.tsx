@@ -127,26 +127,27 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                           defaultMessage="Edit"
                         />
                       </EuiButtonEmpty>
-                      <AlertsContextProvider
-                        value={{
-                          http,
-                          actionTypeRegistry,
-                          alertTypeRegistry,
-                          toastNotifications,
-                          uiSettings,
-                          docLinks,
-                          charts,
-                          dataFieldsFormats: dataPlugin.fieldFormats,
-                          reloadAlerts: setAlert,
-                          capabilities,
-                        }}
-                      >
-                        <AlertEdit
-                          initialAlert={alert}
-                          editFlyoutVisible={editFlyoutVisible}
-                          setEditFlyoutVisibility={setEditFlyoutVisibility}
-                        />
-                      </AlertsContextProvider>
+                      {editFlyoutVisible && (
+                        <AlertsContextProvider
+                          value={{
+                            http,
+                            actionTypeRegistry,
+                            alertTypeRegistry,
+                            toastNotifications,
+                            uiSettings,
+                            docLinks,
+                            charts,
+                            dataFieldsFormats: dataPlugin.fieldFormats,
+                            reloadAlerts: setAlert,
+                            capabilities,
+                          }}
+                        >
+                          <AlertEdit
+                            initialAlert={alert}
+                            onClose={() => setEditFlyoutVisibility(false)}
+                          />
+                        </AlertsContextProvider>
+                      )}
                     </Fragment>
                   </EuiFlexItem>
                 ) : null}
