@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/extend-expect';
 /**
  * Have to import "/pure" here to not register afterEach() hook clean up
  * in the very beginning. There are couple tests which fail with clean up hook.
