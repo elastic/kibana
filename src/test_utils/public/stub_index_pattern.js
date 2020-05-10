@@ -65,7 +65,6 @@ export default function StubIndexPattern(pattern, getConfig, timeField, fields, 
   this.getSourceFiltering = sinon.stub();
   this.metaFields = ['_id', '_type', '_source'];
   this.fieldFormatMap = {};
-  this.routes = indexPatterns.getRoutes();
 
   this.getComputedFields = IndexPattern.prototype.getComputedFields.bind(this);
   this.flattenHit = indexPatterns.flattenHitWrapper(this, this.metaFields);

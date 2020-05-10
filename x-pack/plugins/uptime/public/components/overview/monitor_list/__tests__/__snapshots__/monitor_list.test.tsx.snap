@@ -953,6 +953,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 <button
                   aria-label="Expand row for monitor with ID foo"
                   class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="xpack.uptime.monitorList.foo.expandMonitorDetail"
                   type="button"
                 >
                   <div
@@ -1129,6 +1130,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 <button
                   aria-label="Expand row for monitor with ID bar"
                   class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="xpack.uptime.monitorList.bar.expandMonitorDetail"
                   type="button"
                 >
                   <div

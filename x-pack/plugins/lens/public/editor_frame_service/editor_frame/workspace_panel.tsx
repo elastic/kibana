@@ -122,6 +122,16 @@ export function InnerWorkspacePanel({
     framePublicAPI.filters,
   ]);
 
+  useEffect(() => {
+    // reset expression error if component attempts to run it again
+    if (expression && localState.expressionBuildError) {
+      setLocalState(s => ({
+        ...s,
+        expressionBuildError: undefined,
+      }));
+    }
+  }, [expression]);
+
   function onDrop() {
     if (suggestionForDraggedField) {
       trackUiEvent('drop_onto_workspace');
@@ -174,16 +184,6 @@ export function InnerWorkspacePanel({
   }
 
   function renderVisualization() {
-    useEffect(() => {
-      // reset expression error if component attempts to run it again
-      if (expression && localState.expressionBuildError) {
-        setLocalState(s => ({
-          ...s,
-          expressionBuildError: undefined,
-        }));
-      }
-    }, [expression]);
-
     if (expression === null) {
       return renderEmptyWorkspace();
     }

@@ -20,6 +20,7 @@ import {
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 import { DynamicSettings } from '../../../common/runtime_types';
 import { SettingsFormProps } from '../../pages/settings';
+import { certificateFormTranslations } from './translations';
 
 export type OnFieldChangeType = (changedValues: Partial<DynamicSettings>) => void;
 
@@ -80,6 +81,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={2}>
             <EuiFieldNumber
+              aria-label={certificateFormTranslations.expirationInputAriaLabel}
               data-test-subj={`expiration-threshold-input-${loading ? 'loading' : 'loaded'}`}
               fullWidth
               disabled={isDisabled}
@@ -126,6 +128,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={2}>
             <EuiFieldNumber
+              aria-label={certificateFormTranslations.ageInputAriaLabel}
               data-test-subj={`age-threshold-input-${loading ? 'loading' : 'loaded'}`}
               fullWidth
               disabled={isDisabled}
