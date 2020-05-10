@@ -42,8 +42,7 @@
       "node",
       "jest",
       "flot",
-      "jest-styled-components",
-      "@testing-library/jest-dom",
+      "jest-styled-components"
     ]
   }
 }
