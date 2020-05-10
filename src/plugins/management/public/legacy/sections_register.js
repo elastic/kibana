@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { LegacyManagementSection } from './section';
-import { managementSections } from '../management_section';
+import { managementSections } from '../management_sections';
 
 export class LegacyManagementAdapter {
   main = undefined;

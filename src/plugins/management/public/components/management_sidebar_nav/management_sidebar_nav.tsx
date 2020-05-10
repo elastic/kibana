@@ -25,14 +25,14 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { LegacySection, LegacyApp } from '../../types';
 import { ManagementApp } from '../../management_app';
 import { ManagementSection } from '../../management_section';
 
 interface NavApp {
   id: string;
-  name: string;
+  name: ReactElement | string;
   [key: string]: unknown;
   order: number; // only needed while merging platform and legacy
 }

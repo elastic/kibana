@@ -72,7 +72,7 @@ interface SectionsServiceStart {
 
 export interface CreateSection {
   id: ManagementSectionId;
-  title: string;
+  title: string | ReactElement;
   order?: number;
   euiIconType?: string; // takes precedence over `icon` property.
   icon?: string; // URL to image file; fallback if no `euiIconType`

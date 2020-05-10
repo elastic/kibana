@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { ManagementSection, managementSections } from './management_section';
+import { ReactElement } from 'react';
+
+import { ManagementSection } from './management_section';
+import { managementSections } from './management_sections';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
 // @ts-ignore
 import { LegacyManagementSection, sections } from './legacy';
@@ -81,7 +84,7 @@ export class ManagementService {
     );
 
     managementSections.forEach(
-      ({ id, title }: { id: ManagementSectionId; title: string }, idx: number) => {
+      ({ id, title }: { id: ManagementSectionId; title: ReactElement }, idx: number) => {
         register({ id, title, order: idx });
       }
     );

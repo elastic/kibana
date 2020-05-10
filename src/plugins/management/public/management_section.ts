@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { ReactElement } from 'react';
+
 import { CreateSection, RegisterManagementAppArgs, ManagementSectionId } from './types';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
 import { StartServicesAccessor } from '../../../core/public';
@@ -24,36 +26,9 @@ import { StartServicesAccessor } from '../../../core/public';
 import { LegacyManagementSection } from './legacy';
 import { ManagementApp } from './management_app';
 
-export const managementSections = [
-  {
-    id: ManagementSectionId.Ingest,
-    title: 'Ingest',
-  },
-  {
-    id: ManagementSectionId.Data,
-    title: 'Data',
-  },
-  {
-    id: ManagementSectionId.InsightsAndAlerting,
-    title: 'Insights and Alerting',
-  },
-  {
-    id: ManagementSectionId.Security,
-    title: 'Security',
-  },
-  {
-    id: ManagementSectionId.Kibana,
-    title: 'Kibana',
-  },
-  {
-    id: ManagementSectionId.Stack,
-    title: 'Stack',
-  },
-];
-
 export class ManagementSection {
   public readonly id: ManagementSectionId;
-  public readonly title: string = '';
+  public readonly title: string | ReactElement = '';
   public readonly apps: ManagementApp[] = [];
   public readonly order: number;
   public readonly euiIconType?: string;
