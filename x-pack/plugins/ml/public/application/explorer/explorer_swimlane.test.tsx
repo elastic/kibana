@@ -16,6 +16,13 @@ import { TimeBuckets as TimeBucketsClass } from '../util/time_buckets';
 import { ChartTooltipService } from '../components/chart_tooltip';
 import { OverallSwimlaneData } from './explorer_utils';
 
+jest.mock('d3', () => ({
+  ...jest.requireActual('d3'),
+  transform: jest.fn().mockReturnValue({
+    translate: jest.fn().mockReturnValue(0),
+  }),
+}));
+
 jest.mock('./explorer_dashboard_service', () => ({
   dragSelect$: {
     subscribe: jest.fn(() => ({
@@ -94,7 +101,7 @@ describe('ExplorerSwimlane', () => {
     expect(swimlaneRenderDoneListener.mock.calls.length).toBeGreaterThanOrEqual(1);
   });
 
-  test.skip('Overall swimlane', () => {
+  test('Overall swimlane', () => {
     const mocks = getExplorerSwimlaneMocks();
     const swimlaneRenderDoneListener = jest.fn();
 
