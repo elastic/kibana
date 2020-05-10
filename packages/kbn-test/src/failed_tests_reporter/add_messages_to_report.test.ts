@@ -26,7 +26,7 @@ import { createPatch } from 'diff';
 // turns out Jest can't encode xml diffs in their JUnit reports...
 expect.addSnapshotSerializer({
   test: v => typeof v === 'string' && (v.includes('<') || v.includes('>')),
-  print: v =>
+  print: (v: any) =>
     v
       .replace(/</g, '‹')
       .replace(/>/g, '›')
