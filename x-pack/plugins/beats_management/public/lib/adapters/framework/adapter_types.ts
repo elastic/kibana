@@ -18,13 +18,14 @@ export interface FrameworkAdapter {
   // Methods
   waitUntilFrameworkReady(): Promise<void>;
   registerManagementSection(settings: {
-    id?: string;
+    id: string;
     name: string;
     iconName: string;
     order?: number;
   }): void;
   registerManagementUI(settings: {
-    sectionId?: string;
+    sectionId: string;
+    appId: string;
     name: string;
     basePath: string;
     visable?: boolean;

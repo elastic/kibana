@@ -28,7 +28,7 @@ export const renderApp = (
   ReactDOM.render(
     <ThemeProvider theme={{ eui: euiVars }}>
       <services.I18nContext>
-        <HashRouter basename="/management/beats/beats">
+        <HashRouter basename="/management/beats/beats_management">
           <UnstatedProvider inject={[new BeatsContainer(libs), new TagsContainer(libs)]}>
             <BreadcrumbProvider useGlobalBreadcrumbs={libs.framework.versionGreaterThen('6.7.0')}>
               <Subscribe to={[BeatsContainer, TagsContainer]}>

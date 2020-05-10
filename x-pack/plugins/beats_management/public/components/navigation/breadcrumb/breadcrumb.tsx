@@ -53,7 +53,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ title, path, parentBread
     {context => (
       <BreadcrumbManager
         text={title}
-        href={`#${BASE_PATH}${path}`}
+        href={path ? `#${BASE_PATH}${path}` : `#${BASE_PATH}`}
         parents={parentBreadcrumbs}
         context={context}
       />

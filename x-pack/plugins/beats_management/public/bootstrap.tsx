@@ -20,7 +20,7 @@ import { BeatsManagementConfigType } from '../common';
 async function startApp(libs: FrontendLibs, core: CoreSetup<StartDeps>) {
   await libs.framework.waitUntilFrameworkReady();
 
-  if (true || libs.framework.licenseIsAtLeast('standard')) {
+  if (libs.framework.licenseIsAtLeast('standard')) {
     libs.framework.registerManagementSection({
       id: 'beats',
       name: i18n.translate('xpack.beatsManagement.centralManagementSectionLabel', {
@@ -31,6 +31,7 @@ async function startApp(libs: FrontendLibs, core: CoreSetup<StartDeps>) {
 
     libs.framework.registerManagementUI({
       sectionId: 'beats',
+      appId: 'beats_management',
       name: i18n.translate('xpack.beatsManagement.centralManagementLinkLabel', {
         defaultMessage: 'Central Management',
       }),

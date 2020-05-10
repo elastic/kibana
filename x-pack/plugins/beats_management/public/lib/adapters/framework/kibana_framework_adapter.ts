@@ -74,7 +74,6 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
           enabled: license.getFeature('security').isEnabled,
           available: license.getFeature('security').isAvailable,
         },
-        // TODO: this really has nothing to do with licensing, but should be server config
         settings: this.config,
       };
     } catch (e) {
@@ -104,15 +103,13 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   }
 
   public registerManagementSection(settings: {
-    id?: string;
+    id: string;
     name: string;
     iconName: string;
     order?: number;
   }) {
-    const sectionId = settings.id || this.PLUGIN_ID;
-
     this.management.sections.register({
-      id: sectionId,
+      id: settings.id,
       title: settings.name,
       euiIconType: settings.iconName,
       order: settings.order || 30,
@@ -120,25 +117,24 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   }
 
   public registerManagementUI(settings: {
-    sectionId?: string;
+    sectionId: string;
+    appId: string;
     name: string;
     basePath: string;
     visable?: boolean;
     order?: number;
     mount: RegisterManagementAppArgs['mount'];
   }) {
-    const sectionId = settings.sectionId || this.PLUGIN_ID;
-
-    const section = this.management.sections.getSection(sectionId);
+    const section = this.management.sections.getSection(settings.sectionId);
 
     if (!section) {
       throw new Error(
-        `registerManagementUI was called with a sectionId of ${sectionId}, and that is is not yet regestered as a section`
+        `registerManagementUI was called with a sectionId of ${settings.sectionId}, and that is is not yet regestered as a section`
       );
     }
 
     section.registerApp({
-      id: sectionId,
+      id: settings.appId,
       title: settings.name,
       order: settings.order || 30,
       mount: settings.mount,
