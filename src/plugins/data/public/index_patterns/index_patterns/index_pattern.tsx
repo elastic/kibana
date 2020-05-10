@@ -35,7 +35,7 @@ import { toMountPoint } from '../../../../kibana_react/public';
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
 
-import { findByTitle, getRoutes } from '../utils';
+import { findByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
 import { Field, IIndexPatternFieldList, getIndexPatternFieldListCreator } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
@@ -215,8 +215,7 @@ export class IndexPattern implements IIndexPattern {
       // 2019-12-01 The usage of kbnUrl had to be removed due to the transition to NP.
       // It's now temporarily replaced by a simple replace of the single argument used by all URLs.
       // Once kbnUrl is migrated to NP, this can be updated.
-      const editUrlTemplate = getRoutes().edit;
-      const editUrl = '/app/kibana#' + editUrlTemplate.replace('{{id}}', this.id!);
+      const editUrl = `/app/kibana#/management/kibana/index_patterns/${this.id! || ''}`;
 
       const { toasts } = getNotifications();
 
@@ -241,10 +240,6 @@ export class IndexPattern implements IIndexPattern {
     }
 
     return this.indexFields(forceFieldRefresh);
-  }
-
-  public get routes() {
-    return getRoutes();
   }
 
   getComputedFields() {
