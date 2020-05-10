@@ -82,6 +82,7 @@ export interface ISearchStart {
   setInterceptor: (searchInterceptor: SearchInterceptor) => void;
   search: ISearchGeneric;
   getSessionId: () => string;
+  setSessionId: (sessionId: string) => void;
   startSession: () => void;
   clearSession: () => void;
   searchSource: {

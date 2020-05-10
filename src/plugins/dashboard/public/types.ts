@@ -90,6 +90,7 @@ export interface DashboardAppState {
   filters: Filter[];
   viewMode: ViewMode;
   savedQuery?: string;
+  sessionId?: string;
 }
 
 export type DashboardAppStateDefaults = DashboardAppState & {

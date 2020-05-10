@@ -35,7 +35,7 @@ export function registerBackgroundSessionRoute(router: IRouter): void {
 
       try {
         const savedObject: SavedObject<BackgroundSessionSavedObjectAttributes> = await context.backgroundSession!.store(
-          context.core.savedObjects.client,
+          request,
           sessionId
         );
         return res.ok({ body: savedObject });

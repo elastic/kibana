@@ -32,6 +32,7 @@ const searchStartMock: jest.Mocked<ISearchStart> = {
   setInterceptor: jest.fn(),
   search: jest.fn(),
   getSessionId: jest.fn().mockReturnValue(''),
+  setSessionId: jest.fn(),
   startSession: jest.fn(),
   clearSession: jest.fn(),
   searchSource: searchSourceMock,

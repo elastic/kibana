@@ -35,6 +35,7 @@ export const backgroundSession: SavedObjectsType = {
       idMapping: {
         dynamic: 'true',
         type: 'object',
+        enabled: false,
       },
       optOutIds: {
         type: 'keyword',

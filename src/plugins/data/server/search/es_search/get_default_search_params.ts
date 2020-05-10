@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SharedGlobalConfig } from '../../../../../core/server';
+import { SharedGlobalConfig } from 'kibana/server';
 
 export function getDefaultSearchParams(config: SharedGlobalConfig) {
   return {

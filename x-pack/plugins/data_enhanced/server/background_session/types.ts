@@ -16,4 +16,5 @@ export interface SessionInfo {
   requests: Map<string, string>;
   insertTime: Moment;
   userId: string;
+  retryCount: number;
 }

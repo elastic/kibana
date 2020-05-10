@@ -7,7 +7,7 @@
 import { first } from 'rxjs/operators';
 import { mapKeys, snakeCase } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
-import { APICaller } from '../../../../../src/core/server';
+import { APICaller } from 'kibana/server';
 import { ES_SEARCH_STRATEGY } from '../../../../../src/plugins/data/common';
 import {
   ISearchContext,
@@ -21,7 +21,6 @@ import {
 import { IEnhancedEsSearchRequest, BACKGROUND_SESSION_STORE_DAYS } from '../../common';
 import { shimHitsTotal } from './shim_hits_total';
 import { BackgroundSessionService } from '../background_session';
-import { SecurityPluginSetup } from '../../../security/server';
 
 export interface AsyncSearchResponse<T> {
   id: string;
@@ -32,7 +31,6 @@ export interface AsyncSearchResponse<T> {
 
 export interface IEnhancedSearchContext extends ISearchContext {
   backgroundSearchService?: BackgroundSessionService;
-  security?: SecurityPluginSetup;
 }
 
 export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
@@ -61,6 +59,26 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
   return { search, cancel };
 };
 
+async function getBackgroundSession(
+  request: IEnhancedEsSearchRequest,
+  options?: ISearchOptions,
+  context?: IEnhancedSearchContext
+) {
+  if (
+    context &&
+    context.backgroundSearchService &&
+    options?.rawRequest &&
+    !!request.sessionId &&
+    !request.id
+  ) {
+    return await context.backgroundSearchService.getId(
+      options?.rawRequest,
+      request.sessionId,
+      request.params
+    );
+  }
+}
+
 function trackBackgroundSearch(
   request: IEnhancedEsSearchRequest,
   asyncId: string,
@@ -70,21 +88,17 @@ function trackBackgroundSearch(
   if (
     context &&
     context.backgroundSearchService &&
-    context.security &&
     options?.rawRequest &&
     !!request.sessionId &&
     !!asyncId &&
     !request.id
   ) {
-    const user = context?.security?.authc.getCurrentUser(options.rawRequest);
-    if (user) {
-      context.backgroundSearchService.trackId(
-        user.email,
-        request.sessionId,
-        request.params,
-        asyncId
-      );
-    }
+    context.backgroundSearchService.trackId(
+      options.rawRequest,
+      request.sessionId,
+      request.params,
+      asyncId
+    );
   }
 }
 
@@ -122,11 +136,20 @@ async function asyncSearch(
   const { body = undefined, index = undefined, ...queryParams } = request.id ? {} : params;
 
   const method = request.id ? 'GET' : 'POST';
-  const path = encodeURI(request.id ? `/_async_search/${request.id}` : `/${index}/_async_search`);
+  const storedAsyncId = await getBackgroundSession(request, options, context);
+  const asyncId = request.id ? request.id : storedAsyncId;
+  const path = encodeURI(request.id ? `/_async_search/${asyncId}` : `/${index}/_async_search`);
 
   // Wait up to 1s for the response to return
   // TODO: DONT MERGE WITH 1ms!!!!!!!!!!!!!!!!!!!!!!!
-  const query = toSnakeCase({ waitForCompletionTimeout: '1ms', ...queryParams });
+  const query = toSnakeCase({
+    ...(asyncId
+      ? {}
+      : {
+          waitForCompletionTimeout: '1ms',
+        }),
+    ...queryParams,
+  });
 
   const { id, response, is_partial, is_running } = (await caller(
     'transport.request',
@@ -134,7 +157,10 @@ async function asyncSearch(
     options
   )) as AsyncSearchResponse<any>;
 
-  trackBackgroundSearch(request, id, options, context);
+  // Track if ID wasn't recovered from a BG search
+  if (!storedAsyncId) {
+    trackBackgroundSearch(request, id, options, context);
+  }
 
   return {
     id,

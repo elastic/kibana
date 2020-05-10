@@ -32,8 +32,9 @@ export interface EnhancedDataPluginStart {
 
 export class EnhancedDataServerPlugin
   implements Plugin<void, EnhancedDataPluginStart, SetupDependencies> {
-  private backgroundSessionService!: BackgroundSessionService;
   private readonly logger: Logger;
+  private backgroundSessionService!: BackgroundSessionService;
+  private security?: SecurityPluginSetup;
 
   constructor(private initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('enhanced-data');
@@ -45,11 +46,6 @@ export class EnhancedDataServerPlugin
       'backgroundSearchService',
       () => this.backgroundSessionService
     );
-    deps.data.search.registerSearchStrategyContext(
-      this.initializerContext.opaqueId,
-      'security',
-      () => deps.security
-    );
     deps.data.search.registerSearchStrategyProvider(
       this.initializerContext.opaqueId,
       ES_SEARCH_STRATEGY,
@@ -57,6 +53,7 @@ export class EnhancedDataServerPlugin
     );
 
     // Background session registrations
+    this.security = deps.security;
     core.savedObjects.registerType(backgroundSession);
     core.http.registerRouteHandlerContext<'backgroundSession'>('backgroundSession', () => {
       return this.backgroundSessionService;
@@ -70,6 +67,7 @@ export class EnhancedDataServerPlugin
     const updateExpirationHandler = updateExpirationProvider(internalApiCaller);
     this.backgroundSessionService = new BackgroundSessionService(
       core.savedObjects,
+      this.security!,
       updateExpirationHandler,
       this.logger
     );

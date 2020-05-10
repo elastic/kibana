@@ -308,7 +308,11 @@ export class DashboardAppController {
     };
 
     const updateState = () => {
-      searchService.startSession();
+      if (dashboardStateManager.appState.sessionId) {
+        searchService.setSessionId(dashboardStateManager.appState.sessionId);
+      } else {
+        searchService.startSession();
+      }
       // Following the "best practice" of always have a '.' in your ng-models –
       // https://github.com/angular/angular.js/wiki/Understanding-Scopes
       $scope.model = {

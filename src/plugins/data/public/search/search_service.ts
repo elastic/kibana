@@ -173,6 +173,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       },
       search,
       getSessionId: () => this.sessionId,
+      setSessionId: (sessionId: string) => (this.sessionId = sessionId),
       startSession: () => (this.sessionId = uuidV4()),
       clearSession: () => (this.sessionId = uuidV4()),
       searchSource: {
