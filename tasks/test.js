@@ -42,7 +42,7 @@ module.exports = function (grunt) {
 
     grunt.log.ok(`Running UI tests in ${ciShardTasks.length} shards`);
     grunt.task.run(['run:browserSCSS']);
-    grunt.task.run(['run:browserTestServer', ...ciShardTasks]);
+    // grunt.task.run(['run:browserTestServer', ...ciShardTasks]);
   });
 
   grunt.registerTask('test:coverage', ['run:testCoverageServer', 'karma:coverage']);
