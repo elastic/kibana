@@ -25,7 +25,7 @@ export const pipelineFormSchema: FormSchema = {
       {
         validator: emptyField(
           i18n.translate('xpack.ingestPipelines.form.pipelineNameRequiredError', {
-            defaultMessage: 'A pipeline name is required.',
+            defaultMessage: 'Name is required.',
           })
         ),
       },
@@ -40,7 +40,7 @@ export const pipelineFormSchema: FormSchema = {
       {
         validator: emptyField(
           i18n.translate('xpack.ingestPipelines.form.pipelineDescriptionRequiredError', {
-            defaultMessage: 'A pipeline description is required.',
+            defaultMessage: 'A description is required.',
           })
         ),
       },
@@ -83,7 +83,7 @@ export const pipelineFormSchema: FormSchema = {
       {
         validator: isJsonField(
           i18n.translate('xpack.ingestPipelines.form.processorsJsonError', {
-            defaultMessage: 'The processors JSON is not valid.',
+            defaultMessage: 'The input is not valid.',
           })
         ),
       },
@@ -91,7 +91,7 @@ export const pipelineFormSchema: FormSchema = {
   },
   on_failure: {
     label: i18n.translate('xpack.ingestPipelines.form.onFailureFieldLabel', {
-      defaultMessage: 'On-failure processors (optional)',
+      defaultMessage: 'Failure processors (optional)',
     }),
     helpText: (
       <FormattedMessage
@@ -130,7 +130,7 @@ export const pipelineFormSchema: FormSchema = {
           }
           return isJsonField(
             i18n.translate('xpack.ingestPipelines.form.onFailureProcessorsJsonError', {
-              defaultMessage: 'The on-failure processors JSON is not valid.',
+              defaultMessage: 'The input is not valid.',
             })
           )(validationArg);
         },

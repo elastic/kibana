@@ -7,18 +7,17 @@ import { chunk } from 'lodash';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
-  SERVICE_FRAMEWORK_NAME,
   SERVICE_NAME
 } from '../../../common/elasticsearch_fieldnames';
+import { getMlIndex } from '../../../common/ml_job_constants';
 import { getServicesProjection } from '../../../common/projections/services';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
 import { PromiseReturnType } from '../../../typings/common';
+import { rangeFilter } from '../helpers/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { dedupeConnections } from './dedupe_connections';
+import { transformServiceMapResponses } from './transform_service_map_responses';
 import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getTraceSampleIds } from './get_trace_sample_ids';
-import { addAnomaliesToServicesData } from './ml_helpers';
-import { getMlIndex } from '../../../common/ml_job_constants';
 
 export interface IEnvOptions {
   setup: Setup & SetupTimeRange;
@@ -107,11 +106,6 @@ async function getServicesData(options: IEnvOptions) {
               terms: {
                 field: AGENT_NAME
               }
-            },
-            service_framework_name: {
-              terms: {
-                field: SERVICE_FRAMEWORK_NAME
-              }
             }
           }
         }
@@ -129,38 +123,32 @@ async function getServicesData(options: IEnvOptions) {
         [SERVICE_NAME]: bucket.key as string,
         [AGENT_NAME]:
           (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
-        [SERVICE_ENVIRONMENT]: options.environment || null,
-        [SERVICE_FRAMEWORK_NAME]:
-          (bucket.service_framework_name.buckets[0]?.key as
-            | string
-            | undefined) || null
+        [SERVICE_ENVIRONMENT]: options.environment || null
       };
     }) || []
   );
 }
 
 function getAnomaliesData(options: IEnvOptions) {
-  const { client } = options.setup;
+  const { start, end, client } = options.setup;
+  const rangeQuery = { range: rangeFilter(start, end, 'timestamp') };
 
   const params = {
     index: getMlIndex('*'),
     body: {
       size: 0,
       query: {
-        exists: {
-          field: 'bucket_span'
-        }
+        bool: { filter: [{ term: { result_type: 'record' } }, rangeQuery] }
       },
       aggs: {
         jobs: {
-          terms: {
-            field: 'job_id',
-            size: 10
-          },
+          terms: { field: 'job_id', size: 10 },
           aggs: {
-            max_score: {
-              max: {
-                field: 'anomaly_score'
+            top_score_hits: {
+              top_hits: {
+                sort: [{ record_score: { order: 'desc' as const } }],
+                _source: ['job_id', 'record_score', 'typical', 'actual'],
+                size: 1
               }
             }
           }
@@ -178,19 +166,21 @@ export type ServicesResponse = PromiseReturnType<typeof getServicesData>;
 export type ServiceMapAPIResponse = PromiseReturnType<typeof getServiceMap>;
 
 export async function getServiceMap(options: IEnvOptions) {
-  const [connectionData, servicesData, anomaliesData] = await Promise.all([
+  const [connectionData, servicesData, anomaliesData]: [
+    // explicit types to avoid TS "excessively deep" error
+    ConnectionsResponse,
+    ServicesResponse,
+    AnomaliesResponse
+    // @ts-ignore
+  ] = await Promise.all([
     getConnectionData(options),
     getServicesData(options),
     getAnomaliesData(options)
   ]);
 
-  const servicesDataWithAnomalies = addAnomaliesToServicesData(
-    servicesData,
-    anomaliesData
-  );
-
-  return dedupeConnections({
+  return transformServiceMapResponses({
     ...connectionData,
-    services: servicesDataWithAnomalies
+    anomalies: anomaliesData,
+    services: servicesData
   });
 }

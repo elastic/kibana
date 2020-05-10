@@ -80,4 +80,8 @@ const ServiceNowConnectorForm: React.FC<ConnectorFlyoutFormProps<ServiceNowActio
 export const ServiceNowConnectorFlyout = withConnectorFlyout<ServiceNowActionConnector>({
   ConnectorFormComponent: ServiceNowConnectorForm,
   secretKeys: ['username', 'password'],
+  connectorActionTypeId: '.servicenow',
 });
+
+// eslint-disable-next-line import/no-default-export
+export { ServiceNowConnectorFlyout as default };

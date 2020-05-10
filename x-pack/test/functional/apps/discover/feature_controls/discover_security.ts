@@ -82,7 +82,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows discover navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map(link => link.text)).to.eql(['Discover', 'Management']);
+        expect(navLinks.map(link => link.text)).to.eql(['Discover', 'Stack Management']);
       });
 
       it('shows save button', async () => {
@@ -169,7 +169,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows discover navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Discover', 'Management']);
+        expect(navLinks).to.eql(['Discover', 'Stack Management']);
       });
 
       it(`doesn't show save button`, async () => {
@@ -258,7 +258,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows discover navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.eql(['Discover', 'Management']);
+        expect(navLinks).to.eql(['Discover', 'Stack Management']);
       });
 
       it(`doesn't show save button`, async () => {
