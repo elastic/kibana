@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ServiceStatusLevels, ServiceStatusLevel } from './types';
+import { ServiceStatusLevels } from './types';
 
 export const ServiceStatusLevelSnapshotSerializer: jest.SnapshotSerializerPlugin = {
   test: (val: any) => Object.values(ServiceStatusLevels).includes(val),
