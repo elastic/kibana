@@ -17,13 +17,11 @@
  * under the License.
  */
 
-import { run, createFailError } from '@kbn/dev-utils';
-import { registerPrecommitGitHook } from './register_git_hook';
+// The following require statements MUST be executed before any others - BEGIN
+require('./exit_on_warning');
+require('./harden');
+// The following require statements MUST be executed before any others - END
 
-run(async ({ log }) => {
-  try {
-    await registerPrecommitGitHook(log);
-  } catch (error) {
-    throw createFailError(error);
-  }
-});
+require('symbol-observable');
+require('./root');
+require('./node_version_validator');
