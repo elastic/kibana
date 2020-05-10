@@ -17,19 +17,11 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { npSetup, npStart } from 'ui/new_platform';
+import { FileLayer, VectorLayer } from '../../maps_legacy/public';
+import { ORIGIN } from '../../maps_legacy/public';
 
-import { RegionMapPluginSetupDependencies } from './plugin';
-import { plugin } from '.';
-
-const plugins: Readonly<RegionMapPluginSetupDependencies> = {
-  expressions: npSetup.plugins.expressions,
-  visualizations: npSetup.plugins.visualizations,
-  mapsLegacy: npSetup.plugins.mapsLegacy,
-};
-
-const pluginInstance = plugin({} as PluginInitializerContext);
-
-export const setup = pluginInstance.setup(npSetup.core, plugins);
-export const start = pluginInstance.start(npStart.core);
+export const mapToLayerWithId = (prefix: string, layer: FileLayer): VectorLayer => ({
+  ...layer,
+  layerId: `${prefix}.${layer.name}`,
+  isEMS: ORIGIN.EMS === prefix,
+});

@@ -17,11 +17,14 @@
  * under the License.
  */
 
-import { FileLayer, VectorLayer } from '../../../../plugins/maps_legacy/public';
-import { ORIGIN } from '../../../../plugins/maps_legacy/public';
+import { NotificationsStart } from 'kibana/public';
+import { createGetterSetter } from '../../kibana_utils/public';
+import { DataPublicPluginStart } from '../../data/public';
 
-export const mapToLayerWithId = (prefix: string, layer: FileLayer): VectorLayer => ({
-  ...layer,
-  layerId: `${prefix}.${layer.name}`,
-  isEMS: ORIGIN.EMS === prefix,
-});
+export const [getFormatService, setFormatService] = createGetterSetter<
+  DataPublicPluginStart['fieldFormats']
+>('data.fieldFormats');
+
+export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
+  'Notifications'
+);
