@@ -36988,7 +36988,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const repo_root_1 = __webpack_require__(421);
 function createAbsolutePathSerializer(rootPath = repo_root_1.REPO_ROOT) {
     return {
-        print: (value) => value.replace(rootPath, '<absolute path>').replace(/\\/g, '/'),
+        serialize: (value) => value.replace(rootPath, '<absolute path>').replace(/\\/g, '/'),
         test: (value) => typeof value === 'string' && value.startsWith(rootPath),
     };
 }
