@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
@@ -109,27 +109,26 @@ export function TransactionList({ items, isLoading }: Props) {
       {
         field: 'impact',
         name: (
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.apm.transactionsTable.impactColumnDescription',
-              {
-                defaultMessage:
-                  "The most used and slowest endpoints in your service. It's calculated by taking the relative average duration times the number of transactions per minute."
-              }
-            )}
-          >
-            <>
-              {i18n.translate('xpack.apm.transactionsTable.impactColumnLabel', {
-                defaultMessage: 'Impact'
-              })}{' '}
-              <EuiIcon
-                size="s"
-                color="subdued"
-                type="questionInCircle"
-                className="eui-alignTop"
-              />
-            </>
-          </EuiToolTip>
+          <>
+            {i18n.translate('xpack.apm.transactionsTable.impactColumnLabel', {
+              defaultMessage: 'Impact'
+            })}{' '}
+            <EuiIconTip
+              size="s"
+              type="questionInCircle"
+              color="subdued"
+              iconProps={{
+                className: 'eui-alignTop'
+              }}
+              content={i18n.translate(
+                'xpack.apm.transactionsTable.impactColumnDescription',
+                {
+                  defaultMessage:
+                    "The most used and slowest endpoints in your service. It's calculated by taking the relative average duration times the number of transactions per minute."
+                }
+              )}
+            />
+          </>
         ),
         sortable: true,
         dataType: 'number',

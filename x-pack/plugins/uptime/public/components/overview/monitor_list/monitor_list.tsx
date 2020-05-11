@@ -171,6 +171,7 @@ export const MonitorListComponent: React.FC<Props> = ({
         return (
           <EuiButtonIcon
             aria-label={labels.getExpandDrawerLabel(id)}
+            data-test-subj={`xpack.uptime.monitorList.${id}.expandMonitorDetail`}
             iconType={drawerIds.includes(id) ? 'arrowUp' : 'arrowDown'}
             onClick={() => {
               if (drawerIds.includes(id)) {
@@ -192,10 +193,7 @@ export const MonitorListComponent: React.FC<Props> = ({
       <EuiBasicTable
         aria-label={labels.getDescriptionLabel(items.length)}
         error={error?.message}
-        // Only set loading to true when there are no items present to prevent the bug outlined in
-        // in https://github.com/elastic/eui/issues/2393 . Once that is fixed we can simply set the value here to
-        // loading={loading}
-        loading={loading && (!items || items.length < 1)}
+        loading={loading}
         isExpandable={true}
         hasActions={true}
         itemId="monitor_id"

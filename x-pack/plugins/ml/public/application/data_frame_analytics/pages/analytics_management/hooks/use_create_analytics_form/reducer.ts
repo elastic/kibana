@@ -124,6 +124,7 @@ export const validateAdvancedEditor = (state: State): State => {
     createIndexPattern,
     excludes,
     maxDistinctValuesError,
+    requiredFieldsError,
   } = state.form;
   const { jobConfig } = state;
 
@@ -330,6 +331,7 @@ export const validateAdvancedEditor = (state: State): State => {
 
   state.isValid =
     maxDistinctValuesError === undefined &&
+    requiredFieldsError === undefined &&
     excludesValid &&
     trainingPercentValid &&
     state.form.modelMemoryLimitUnitValid &&
@@ -397,6 +399,7 @@ const validateForm = (state: State): State => {
     maxDistinctValuesError,
     modelMemoryLimit,
     numTopFeatureImportanceValuesValid,
+    requiredFieldsError,
   } = state.form;
   const { estimatedModelMemoryLimit } = state;
 
@@ -412,6 +415,7 @@ const validateForm = (state: State): State => {
 
   state.isValid =
     maxDistinctValuesError === undefined &&
+    requiredFieldsError === undefined &&
     !jobTypeEmpty &&
     !mmlValidationResult &&
     !jobIdEmpty &&

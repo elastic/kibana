@@ -8,13 +8,13 @@ import React from 'react';
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { HeaderSection } from '../../header_section';
 
+import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import * as i18n from './translations';
 import { convertAnomaliesToNetwork } from './convert_anomalies_to_network';
 import { Loader } from '../../loader';
 import { AnomaliesNetworkTableProps } from '../types';
 import { getAnomaliesNetworkTableColumnsCurated } from './get_anomalies_network_table_columns';
 import { useMlCapabilities } from '../../ml_popover/hooks/use_ml_capabilities';
-import { hasMlUserPermissions } from '../permissions/has_ml_user_permissions';
 import { BasicTable } from './basic_table';
 import { networkEquality } from './network_equality';
 import { getCriteriaFromNetworkType } from '../criteria/get_criteria_from_network_type';
