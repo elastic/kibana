@@ -5,16 +5,16 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import {
   Embeddable,
   IContainer,
-  EmbeddableInput,
   EmbeddableOutput,
 } from '../../../../../src/plugins/embeddable/public';
 import { APPLY_FILTER_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
@@ -26,8 +26,8 @@ import {
   Query,
   RefreshInterval,
 } from '../../../../../src/plugins/data/public';
-import { GisMap } from '../connected_components/gis_map';
 import { createMapStore, MapStore } from '../reducers/store';
+import { MapSettings } from '../reducers/map';
 import {
   setGotoWithCenter,
   replaceLayerList,
@@ -40,8 +40,8 @@ import {
   hideLayerControl,
   hideViewControl,
   setHiddenLayers,
+  setMapSettings,
 } from '../actions/map_actions';
-import { MapCenterAndZoom } from '../../common/descriptor_types';
 import { setReadOnly, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions/ui_actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -54,35 +54,14 @@ import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { RenderToolTipContent } from '../layers/tooltips/tooltip_property';
 import { getUiActions, getCoreI18n } from '../kibana_services';
 
-interface MapEmbeddableConfig {
-  editUrl?: string;
-  indexPatterns: IIndexPattern[];
-  editable: boolean;
-  title?: string;
-  layerList: unknown[];
-}
-
-export interface MapEmbeddableInput extends EmbeddableInput {
-  timeRange?: TimeRange;
-  filters: Filter[];
-  query?: Query;
-  refreshConfig: RefreshInterval;
-  isLayerTOCOpen: boolean;
-  openTOCDetails?: string[];
-  disableTooltipControl?: boolean;
-  disableInteractive?: boolean;
-  hideToolbarOverlay?: boolean;
-  hideLayerControl?: boolean;
-  hideViewControl?: boolean;
-  mapCenter?: MapCenterAndZoom;
-  hiddenLayers?: string[];
-  hideFilterActions?: boolean;
-}
+import { MapEmbeddableInput, MapEmbeddableConfig } from './types';
+export { MapEmbeddableInput, MapEmbeddableConfig };
 
 export interface MapEmbeddableOutput extends EmbeddableOutput {
   indexPatterns: IIndexPattern[];
 }
 
+const GisMap = lazy(() => import('../connected_components/gis_map'));
 export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput> {
   type = MAP_SAVED_OBJECT_TYPE;
 
@@ -97,6 +76,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
   private _prevFilters?: Filter[];
   private _domNode?: HTMLElement;
   private _unsubscribeFromStore?: Unsubscribe;
+  private _settings?: MapSettings;
 
   constructor(
     config: MapEmbeddableConfig,
@@ -119,6 +99,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     this._renderTooltipContent = renderTooltipContent;
     this._eventHandlers = eventHandlers;
     this._layerList = config.layerList;
+    this._settings = config.settings;
     this._store = createMapStore();
 
     this._subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
@@ -194,6 +175,10 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     this._store.dispatch(setReadOnly(true));
     this._store.dispatch(disableScrollZoom());
 
+    if (this._settings) {
+      this._store.dispatch(setMapSettings(this._settings));
+    }
+
     if (_.has(this.input, 'isLayerTOCOpen')) {
       this._store.dispatch(setIsLayerTOCOpen(this.input.isLayerTOCOpen));
     }
@@ -245,10 +230,12 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     render(
       <Provider store={this._store}>
         <I18nContext>
-          <GisMap
-            addFilters={this.input.hideFilterActions ? null : this.addFilters}
-            renderTooltipContent={this._renderTooltipContent}
-          />
+          <Suspense fallback={<EuiLoadingSpinner />}>
+            <GisMap
+              addFilters={this.input.hideFilterActions ? null : this.addFilters}
+              renderTooltipContent={this._renderTooltipContent}
+            />
+          </Suspense>
         </I18nContext>
       </Provider>,
       this._domNode

@@ -6,6 +6,7 @@
 import { min, max, sum, isNumber } from 'lodash';
 import { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
 import { MetricsExplorerOptionsMetric } from '../../hooks/use_metrics_explorer_options';
+import { getMetricId } from './get_metric_id';
 
 const getMin = (values: Array<number | null>) => {
   const minValue = min(values);
@@ -26,7 +27,7 @@ export const calculateDomain = (
     .reduce((acc, row) => {
       const rowValues = metrics
         .map((m, index) => {
-          return (row[`metric_${index}`] as number) || null;
+          return (row[getMetricId(m, index)] as number) || null;
         })
         .filter(v => isNumber(v));
       const minValue = getMin(rowValues);

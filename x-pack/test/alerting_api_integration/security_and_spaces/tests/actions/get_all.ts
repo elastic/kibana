@@ -73,11 +73,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   isPreconfigured: true,
                   actionTypeId: '.index',
                   name: 'preconfigured_es_index_action',
-                  config: {
-                    index: 'functional-test-actions-index-preconfigured',
-                    refresh: true,
-                    executionTimeField: 'timestamp',
-                  },
                   referencedByCount: 0,
                 },
                 {
@@ -85,9 +80,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   isPreconfigured: true,
                   actionTypeId: '.slack',
                   name: 'Slack#xyz',
-                  config: {
-                    webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
-                  },
                   referencedByCount: 0,
                 },
                 {
@@ -95,11 +87,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   isPreconfigured: true,
                   actionTypeId: 'system-abc-action-type',
                   name: 'SystemABC',
-                  config: {
-                    xyzConfig1: 'value1',
-                    xyzConfig2: 'value2',
-                    listOfThings: ['a', 'b', 'c', 'd'],
-                  },
                   referencedByCount: 0,
                 },
                 {
@@ -107,9 +94,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   isPreconfigured: true,
                   actionTypeId: 'test.index-record',
                   name: 'Test:_Preconfigured_Index_Record',
-                  config: {
-                    unencrypted: 'ignored-but-required',
-                  },
                   referencedByCount: 0,
                 },
               ]);
@@ -194,11 +178,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   isPreconfigured: true,
                   actionTypeId: '.index',
                   name: 'preconfigured_es_index_action',
-                  config: {
-                    index: 'functional-test-actions-index-preconfigured',
-                    refresh: true,
-                    executionTimeField: 'timestamp',
-                  },
                   referencedByCount: 0,
                 },
                 {
@@ -206,9 +185,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   isPreconfigured: true,
                   actionTypeId: '.slack',
                   name: 'Slack#xyz',
-                  config: {
-                    webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
-                  },
                   referencedByCount: 1,
                 },
                 {
@@ -216,11 +192,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   isPreconfigured: true,
                   actionTypeId: 'system-abc-action-type',
                   name: 'SystemABC',
-                  config: {
-                    xyzConfig1: 'value1',
-                    xyzConfig2: 'value2',
-                    listOfThings: ['a', 'b', 'c', 'd'],
-                  },
                   referencedByCount: 0,
                 },
                 {
@@ -228,9 +199,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   isPreconfigured: true,
                   actionTypeId: 'test.index-record',
                   name: 'Test:_Preconfigured_Index_Record',
-                  config: {
-                    unencrypted: 'ignored-but-required',
-                  },
                   referencedByCount: 0,
                 },
               ]);
@@ -281,11 +249,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   isPreconfigured: true,
                   actionTypeId: '.index',
                   name: 'preconfigured_es_index_action',
-                  config: {
-                    index: 'functional-test-actions-index-preconfigured',
-                    refresh: true,
-                    executionTimeField: 'timestamp',
-                  },
                   referencedByCount: 0,
                 },
                 {
@@ -293,9 +256,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   isPreconfigured: true,
                   actionTypeId: '.slack',
                   name: 'Slack#xyz',
-                  config: {
-                    webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
-                  },
                   referencedByCount: 0,
                 },
                 {
@@ -303,11 +263,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   isPreconfigured: true,
                   actionTypeId: 'system-abc-action-type',
                   name: 'SystemABC',
-                  config: {
-                    xyzConfig1: 'value1',
-                    xyzConfig2: 'value2',
-                    listOfThings: ['a', 'b', 'c', 'd'],
-                  },
                   referencedByCount: 0,
                 },
                 {
@@ -315,9 +270,6 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   isPreconfigured: true,
                   actionTypeId: 'test.index-record',
                   name: 'Test:_Preconfigured_Index_Record',
-                  config: {
-                    unencrypted: 'ignored-but-required',
-                  },
                   referencedByCount: 0,
                 },
               ]);

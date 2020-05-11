@@ -376,7 +376,7 @@ export default function({ getService }: FtrProviderContext) {
   }
 
   describe('index based', function() {
-    this.tags(['smoke', 'mlqa']);
+    this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');

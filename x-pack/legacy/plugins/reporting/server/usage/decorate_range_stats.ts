@@ -6,7 +6,7 @@
 
 import { uniq } from 'lodash';
 import { CSV_JOB_TYPE, PDF_JOB_TYPE, PNG_JOB_TYPE } from '../../common/constants';
-import { AvailableTotal, FeatureAvailabilityMap, RangeStats, ExportType } from './types';
+import { AvailableTotal, ExportType, FeatureAvailabilityMap, RangeStats } from './types';
 
 function getForFeature(
   range: Partial<RangeStats>,
@@ -47,6 +47,7 @@ export const decorateRangeStats = (
   const {
     _all: rangeAll,
     status: rangeStatus,
+    statuses: rangeStatusByApp,
     [PDF_JOB_TYPE]: rangeStatsPdf,
     ...rangeStatsBasic
   } = rangeStats;
@@ -73,6 +74,7 @@ export const decorateRangeStats = (
   const resultStats = {
     _all: rangeAll || 0,
     status: { completed: 0, failed: 0, ...rangeStatus },
+    statuses: rangeStatusByApp,
     ...rangePdf,
     ...rangeBasic,
   } as RangeStats;

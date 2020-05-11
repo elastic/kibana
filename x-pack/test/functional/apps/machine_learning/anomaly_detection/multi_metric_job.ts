@@ -61,7 +61,6 @@ export default function({ getService }: FtrProviderContext) {
       job_id: expectedJobId,
       result_type: 'model_size_stats',
       model_bytes_exceeded: '0.0 B',
-      model_bytes_memory_limit: '20.0 MB',
       total_by_field_count: '59',
       total_over_field_count: '0',
       total_partition_field_count: '58',
@@ -74,7 +73,7 @@ export default function({ getService }: FtrProviderContext) {
   const calendarId = `wizard-test-calendar_${Date.now()}`;
 
   describe('multi metric', function() {
-    this.tags(['smoke', 'mlqa']);
+    this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');

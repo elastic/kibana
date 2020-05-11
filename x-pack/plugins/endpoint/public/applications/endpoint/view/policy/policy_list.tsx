@@ -24,28 +24,24 @@ import { useKibana } from '../../../../../../../../src/plugins/kibana_react/publ
 import { PageView } from '../components/page_view';
 import { LinkToApp } from '../components/link_to_app';
 import { Immutable, PolicyData } from '../../../../../common/types';
+import { useNavigateByRouterEventHandler } from '../hooks/use_navigate_by_router_event_handler';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
 }
 
-const PolicyLink: React.FC<{ name: string; route: string }> = ({ name, route }) => {
-  const history = useHistory();
-
+const PolicyLink: React.FC<{ name: string; route: string; href: string }> = ({
+  name,
+  route,
+  href,
+}) => {
+  const clickHandler = useNavigateByRouterEventHandler(route);
   return (
-    <EuiLink
-      onClick={(event: React.MouseEvent) => {
-        event.preventDefault();
-        history.push(route);
-      }}
-    >
+    // eslint-disable-next-line @elastic/eui/href-or-on-click
+    <EuiLink href={href} onClick={clickHandler} data-test-subj="policyNameLink">
       {name}
     </EuiLink>
   );
-};
-
-const renderPolicyNameLink = (value: string, item: Immutable<PolicyData>) => {
-  return <PolicyLink name={value} route={`/policy/${item.id}`} />;
 };
 
 export const PolicyList = React.memo(() => {
@@ -95,7 +91,16 @@ export const PolicyList = React.memo(() => {
         name: i18n.translate('xpack.endpoint.policyList.nameField', {
           defaultMessage: 'Policy Name',
         }),
-        render: renderPolicyNameLink,
+        render: (value: string, item: Immutable<PolicyData>) => {
+          const routeUri = `/policy/${item.id}`;
+          return (
+            <PolicyLink
+              name={value}
+              route={routeUri}
+              href={services.application.getUrlForApp('endpoint') + routeUri}
+            />
+          );
+        },
         truncateText: true,
       },
       {
@@ -129,6 +134,7 @@ export const PolicyList = React.memo(() => {
         render(version: string) {
           return (
             <LinkToApp
+              data-test-subj="agentConfigLink"
               appId="ingestManager"
               appPath={`#/configs/${version}`}
               href={`${services.application.getUrlForApp('ingestManager')}#/configs/${version}`}

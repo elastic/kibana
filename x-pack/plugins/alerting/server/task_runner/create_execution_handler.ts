@@ -9,7 +9,7 @@ import { AlertAction, State, Context, AlertType } from '../types';
 import { Logger } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
 import { PluginStartContract as ActionsPluginStartContract } from '../../../../plugins/actions/server';
-import { IEventLogger, IEvent } from '../../../event_log/server';
+import { IEventLogger, IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 
 interface CreateExecutionHandlerOptions {
@@ -71,7 +71,7 @@ export function createExecutionHandler({
     const alertLabel = `${alertType.id}:${alertId}: '${alertName}'`;
 
     for (const action of actions) {
-      if (!actionsPlugin.isActionTypeEnabled(action.actionTypeId)) {
+      if (!actionsPlugin.isActionExecutable(action.id, action.actionTypeId)) {
         logger.warn(
           `Alert "${alertId}" skipped scheduling action "${action.id}" because it is disabled`
         );
@@ -96,7 +96,7 @@ export function createExecutionHandler({
             instance_id: alertInstanceId,
           },
           saved_objects: [
-            { type: 'alert', id: alertId, ...namespace },
+            { rel: SAVED_OBJECT_REL_PRIMARY, type: 'alert', id: alertId, ...namespace },
             { type: 'action', id: action.id, ...namespace },
           ],
         },
