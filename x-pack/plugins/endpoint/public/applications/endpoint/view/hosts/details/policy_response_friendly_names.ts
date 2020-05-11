@@ -159,8 +159,7 @@ responseMap.set(
 );
 
 /**
- * Takes in the snake-cased response from the API and
- * removes the underscores and capitalizes the string.
+ * Maps a server provided value to corresponding i18n'd string.
  */
 export function formatResponse(responseString: string) {
   if (responseMap.has(responseString)) {
