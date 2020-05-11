@@ -7,9 +7,10 @@ import querystring from 'querystring';
 import { createSelector } from 'reselect';
 import {
   Immutable,
-  HostPolicyResponseActions,
+  HostPolicyResponseAppliedAction,
   HostPolicyResponseConfiguration,
   HostPolicyResponseActionStatus,
+  ImmutableArray,
 } from '../../../../../common/types';
 import { HostState, HostIndexUIQueryParams } from '../../types';
 
@@ -62,7 +63,8 @@ export const policyResponseFailedOrWarningActionCount: (
     Object.entries(applied.response.configurations).map(([key, val]) => {
       let count = 0;
       for (const action of val.concerned_actions) {
-        const actionStatus = applied.actions[action]?.status;
+        const actionStatus = applied.actions.find(policyActions => policyActions.name === action)
+          ?.status;
         if (
           actionStatus === HostPolicyResponseActionStatus.failure ||
           actionStatus === HostPolicyResponseActionStatus.warning
@@ -81,7 +83,7 @@ export const policyResponseFailedOrWarningActionCount: (
  */
 export const policyResponseActions: (
   state: Immutable<HostState>
-) => undefined | Partial<HostPolicyResponseActions> = createSelector(
+) => undefined | ImmutableArray<HostPolicyResponseAppliedAction> = createSelector(
   detailsPolicyAppliedResponse,
   applied => {
     return applied?.actions;

@@ -9,9 +9,10 @@ import { EuiAccordion, EuiNotificationBadge, EuiHealth } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { htmlIdGenerator } from '@elastic/eui';
 import {
-  HostPolicyResponseActions,
+  HostPolicyResponseAppliedAction,
   HostPolicyResponseConfiguration,
   Immutable,
+  ImmutableArray,
 } from '../../../../../../common/types';
 import { formatResponse } from './policy_response_friendly_names';
 import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
@@ -59,15 +60,15 @@ const PolicyResponseConfigAccordion = styled(EuiAccordion)`
 const ResponseActions = memo(
   ({
     actions,
-    actionStatus,
+    responseActions,
   }: {
-    actions: Immutable<Array<keyof HostPolicyResponseActions>>;
-    actionStatus: Partial<HostPolicyResponseActions>;
+    actions: ImmutableArray<string>;
+    responseActions: ImmutableArray<HostPolicyResponseAppliedAction>;
   }) => {
     return (
       <>
         {actions.map((action, index) => {
-          const statuses = actionStatus[action];
+          const statuses = responseActions.find(responseAction => responseAction.name === action);
           if (statuses === undefined) {
             return undefined;
           }
@@ -116,11 +117,11 @@ const ResponseActions = memo(
 export const PolicyResponse = memo(
   ({
     responseConfig,
-    responseActionStatus,
+    responseActions,
     responseAttentionCount,
   }: {
     responseConfig: Immutable<HostPolicyResponseConfiguration>;
-    responseActionStatus: Partial<HostPolicyResponseActions>;
+    responseActions: ImmutableArray<HostPolicyResponseAppliedAction>;
     responseAttentionCount: Map<string, number>;
   }) => {
     return (
@@ -150,10 +151,7 @@ export const PolicyResponse = memo(
                 )
               }
             >
-              <ResponseActions
-                actions={val.concerned_actions}
-                actionStatus={responseActionStatus}
-              />
+              <ResponseActions actions={val.concerned_actions} responseActions={responseActions} />
             </PolicyResponseConfigAccordion>
           );
         })}
