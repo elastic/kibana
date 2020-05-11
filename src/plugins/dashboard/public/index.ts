@@ -31,7 +31,7 @@ export {
 } from './application';
 export { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 
-export { DashboardStart } from './plugin';
+export { DashboardStart, DashboardUrlGenerator } from './plugin';
 export { DASHBOARD_APP_URL_GENERATOR } from './url_generator';
 
 export function plugin(initializerContext: PluginInitializerContext) {
