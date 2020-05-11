@@ -20,7 +20,6 @@
 import moment from 'moment';
 import { Subscription } from 'rxjs';
 import { History } from 'history';
-import { FlexGroupJustifyContent } from '@elastic/eui/src/components/flex/flex_group';
 
 import { ViewMode } from 'src/plugins/embeddable/public';
 import { IIndexPattern, TimeRange, Query, Filter, SavedQuery } from 'src/plugins/data/public';
@@ -55,14 +54,6 @@ export interface DashboardAppScope extends ng.IScope {
   getShouldShowViewHelp: () => boolean;
   updateQueryAndFetch: ({ query, dateRange }: { query: Query; dateRange?: TimeRange }) => void;
   topNavMenu: any;
-  showTopNav: () => boolean;
-  showTopNavMenu: () => boolean;
-  showSearchBar: () => boolean;
-  showQueryBar: () => boolean;
-  showQueryInput: () => boolean;
-  showDatePicker: () => boolean;
-  showFilterBar: () => boolean;
-  justifyContent: FlexGroupJustifyContent;
   showAddPanel: any;
   showSaveQuery: boolean;
   kbnTopNav: any;
