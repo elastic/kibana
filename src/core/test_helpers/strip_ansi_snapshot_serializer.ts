@@ -21,7 +21,7 @@ import hasAnsi from 'has-ansi';
 import stripAnsi from 'strip-ansi';
 
 export const stripAnsiSnapshotSerializer: jest.SnapshotSerializerPlugin = {
-  serialize(val: string) {
+  serialize(value: string) {
     return stripAnsi(value);
   },
 
