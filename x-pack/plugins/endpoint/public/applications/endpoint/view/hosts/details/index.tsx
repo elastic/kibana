@@ -37,6 +37,7 @@ import { HostDetails } from './host_details';
 import { PolicyResponse } from './policy_response';
 import { HostMetadata } from '../../../../../../common/types';
 import { FlyoutSubHeader, FlyoutSubHeaderProps } from './components/flyout_sub_header';
+import { useNavigateByRouterEventHandler } from '../../hooks/use_navigate_by_router_event_handler';
 
 export const HostDetailsFlyout = memo(() => {
   const history = useHistory();

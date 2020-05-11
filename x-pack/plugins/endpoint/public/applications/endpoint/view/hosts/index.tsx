@@ -5,7 +5,6 @@
  */
 
 import React, { useMemo, useCallback, memo } from 'react';
-import styled from 'styled-components';
 import {
   EuiHorizontalRule,
   EuiBasicTable,
@@ -29,13 +28,6 @@ import { PageView } from '../components/page_view';
 import { useNavigateByRouterEventHandler } from '../hooks/use_navigate_by_router_event_handler';
 import { HOST_STATUS_TO_HEALTH_COLOR } from './host_constants';
 
-const EllipsisText = styled.span`
-  max-width: 150px;
-  text-overflow: ellipsis;
-  display: inline-block;
-  white-space: nowrap;
-  overflow: hidden;
-`;
 const HostLink = memo<{
   name: string;
   href: string;
@@ -146,7 +138,7 @@ export const HostList = () => {
         }),
         render: () => {
           return (
-            <EuiHealth color="success" className="eui-truncateText">
+            <EuiHealth color="success" className="eui-textTruncate">
               <FormattedMessage
                 id="xpack.endpoint.host.list.policyStatus"
                 defaultMessage="PolicyStatus"
@@ -179,11 +171,13 @@ export const HostList = () => {
         }),
         render: (ip: string[]) => {
           return (
-            <EuiText size="s" className="eui-textTruncate">
-              <EuiToolTip content={ip.toString().replace(',', ', ')}>
-                <span className="eui-textTruncate">{ip.toString().replace(',', ', ')}</span>
-              </EuiToolTip>
-            </EuiText>
+            <EuiToolTip content={ip.toString().replace(',', ', ')} anchorClassName="eui-fullWidth">
+              <EuiText size="s" className="eui-fullWidth">
+                <span className="eui-textTruncate eui-fullWidth">
+                  {ip.toString().replace(',', ', ')}
+                </span>
+              </EuiText>
+            </EuiToolTip>
           );
         },
       },
