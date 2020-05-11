@@ -15,6 +15,7 @@ import {
 
 import { mockCaseConfigure } from '../../__fixtures__/mock_saved_objects';
 import { initPatchCaseConfigure } from './patch_configure';
+import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
 
 describe('PATCH configuration', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -29,7 +30,7 @@ describe('PATCH configuration', () => {
 
   it('patch configuration', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'patch',
       body: {
         closure_type: 'close-by-pushing',
@@ -61,7 +62,7 @@ describe('PATCH configuration', () => {
     routeHandler = await createRoute(initPatchCaseConfigure, 'patch', true);
 
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'patch',
       body: {
         closure_type: 'close-by-pushing',
@@ -91,7 +92,7 @@ describe('PATCH configuration', () => {
 
   it('throw error when configuration have not being created', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'patch',
       body: {
         closure_type: 'close-by-pushing',
@@ -113,7 +114,7 @@ describe('PATCH configuration', () => {
 
   it('throw error when the versions are different', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'patch',
       body: {
         closure_type: 'close-by-pushing',
@@ -135,7 +136,7 @@ describe('PATCH configuration', () => {
 
   it('handles undefined version correctly', async () => {
     const req = httpServerMock.createKibanaRequest({
-      path: '/api/cases/configure',
+      path: CASE_CONFIGURE_URL,
       method: 'patch',
       body: { connector_id: 'no-version', version: mockCaseConfigure[0].version },
     });

@@ -10,11 +10,11 @@ export interface IngestManagerConfigType {
   enabled: boolean;
   epm: {
     enabled: boolean;
-    registryUrl: string;
+    registryUrl?: string;
   };
   fleet: {
     enabled: boolean;
-    defaultOutputHost: string;
+    tlsCheckDisabled: boolean;
     kibana: {
       host?: string;
       ca_sha256?: string;

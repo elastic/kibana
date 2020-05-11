@@ -187,44 +187,24 @@ export function MachineLearningJobTableProvider({ getService }: FtrProviderConte
       expectedCounts: object,
       expectedModelSizeStats: object
     ) {
-      const countDetails = await this.parseJobCounts(jobId);
-      const counts = countDetails.counts;
+      const { counts, modelSizeStats } = await this.parseJobCounts(jobId);
 
-      // fields that have changing values are only validated
-      // to be present and then removed so they don't make
-      // the object validation fail
-      expect(counts).to.have.property('last_data_time');
-      delete counts.last_data_time;
+      // Only check for expected keys / values, ignore additional properties
+      // This way the tests stay stable when new properties are added on the ES side
+      for (const [key, value] of Object.entries(expectedCounts)) {
+        expect(counts)
+          .to.have.property(key)
+          .eql(value, `Expected counts property '${key}' to exist with value '${value}'`);
+      }
 
-      expect(counts).to.eql(expectedCounts);
-
-      const modelSizeStats = countDetails.modelSizeStats;
-
-      // fields that have changing values are only validated
-      // to be present and then removed so they don't make
-      // the object validation fail
-      expect(modelSizeStats).to.have.property('log_time');
-      delete modelSizeStats.log_time;
-      expect(modelSizeStats).to.have.property('model_bytes');
-      delete modelSizeStats.model_bytes;
-
-      // remove categorization fields from validation until
-      // the ES version is updated
-      delete modelSizeStats.categorization_status;
-      delete modelSizeStats.categorized_doc_count;
-      delete modelSizeStats.dead_category_count;
-      delete modelSizeStats.frequent_category_count;
-      delete modelSizeStats.rare_category_count;
-      delete modelSizeStats.total_category_count;
-
-      // MML during clone has changed in #61589
-      // TODO: adjust test code to reflect the new behavior
-      expect(modelSizeStats).to.have.property('model_bytes_memory_limit');
-      delete modelSizeStats.model_bytes_memory_limit;
-      // @ts-ignore
-      delete expectedModelSizeStats.model_bytes_memory_limit;
-
-      expect(modelSizeStats).to.eql(expectedModelSizeStats);
+      for (const [key, value] of Object.entries(expectedModelSizeStats)) {
+        expect(modelSizeStats)
+          .to.have.property(key)
+          .eql(
+            value,
+            `Expected model size stats property '${key}' to exist with value '${value}')`
+          );
+      }
     }
 
     public async clickActionsMenu(jobId: string) {

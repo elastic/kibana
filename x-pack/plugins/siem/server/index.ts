@@ -5,7 +5,7 @@
  */
 
 import { PluginInitializerContext } from '../../../../src/core/server';
-import { Plugin } from './plugin';
+import { Plugin, PluginSetup, PluginStart } from './plugin';
 import { configSchema, ConfigType } from './config';
 
 export const plugin = (context: PluginInitializerContext) => {
@@ -14,4 +14,4 @@ export const plugin = (context: PluginInitializerContext) => {
 
 export const config = { schema: configSchema };
 
-export { ConfigType };
+export { ConfigType, Plugin, PluginSetup, PluginStart };

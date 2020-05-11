@@ -5,11 +5,13 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
+import Boom from 'boom';
+import { PACKAGES_SAVED_OBJECT_TYPE, DATASOURCE_SAVED_OBJECT_TYPE } from '../../../constants';
 import { AssetReference, AssetType, ElasticsearchAssetType } from '../../../types';
 import { CallESAsCurrentUser } from '../../../types';
 import { getInstallation, savedObjectTypes } from './index';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
+import { datasourceService } from '../..';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -20,7 +22,21 @@ export async function removeInstallation(options: {
   // TODO:  the epm api should change to /name/version so we don't need to do this
   const [pkgName] = pkgkey.split('-');
   const installation = await getInstallation({ savedObjectsClient, pkgName });
-  const installedObjects = installation?.installed || [];
+  if (!installation) throw Boom.badRequest(`${pkgName} is not installed`);
+  if (installation.removable === false)
+    throw Boom.badRequest(`${pkgName} is installed by default and cannot be removed`);
+  const installedObjects = installation.installed || [];
+
+  const { total } = await datasourceService.list(savedObjectsClient, {
+    kuery: `${DATASOURCE_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+    page: 0,
+    perPage: 0,
+  });
+
+  if (total > 0)
+    throw Boom.badRequest(
+      `unable to remove package with existing datasource(s) in use by agent(s)`
+    );
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
@@ -29,7 +45,17 @@ export async function removeInstallation(options: {
   // recreate or delete index patterns when a package is uninstalled
   await installIndexPatterns(savedObjectsClient);
 
-  // Delete the installed assets
+  // Delete the installed asset
+  await deleteAssets(installedObjects, savedObjectsClient, callCluster);
+
+  // successful delete's in SO client return {}. return something more useful
+  return installedObjects;
+}
+async function deleteAssets(
+  installedObjects: AssetReference[],
+  savedObjectsClient: SavedObjectsClientContract,
+  callCluster: CallESAsCurrentUser
+) {
   const deletePromises = installedObjects.map(async ({ id, type }) => {
     const assetType = type as AssetType;
     if (savedObjectTypes.includes(assetType)) {
@@ -40,22 +66,80 @@ export async function removeInstallation(options: {
       deleteTemplate(callCluster, id);
     }
   });
-  await Promise.all([...deletePromises]);
-
-  // successful delete's in SO client return {}. return something more useful
-  return installedObjects;
+  try {
+    await Promise.all([...deletePromises]);
+  } catch (err) {
+    throw new Error(err.message);
+  }
 }
-
 async function deletePipeline(callCluster: CallESAsCurrentUser, id: string): Promise<void> {
   // '*' shouldn't ever appear here, but it still would delete all ingest pipelines
   if (id && id !== '*') {
-    await callCluster('ingest.deletePipeline', { id });
+    try {
+      await callCluster('ingest.deletePipeline', { id });
+    } catch (err) {
+      throw new Error(`error deleting pipeline ${id}`);
+    }
   }
 }
 
 async function deleteTemplate(callCluster: CallESAsCurrentUser, name: string): Promise<void> {
   // '*' shouldn't ever appear here, but it still would delete all templates
   if (name && name !== '*') {
-    await callCluster('indices.deleteTemplate', { name });
+    try {
+      const callClusterParams: {
+        method: string;
+        path: string;
+        ignore: number[];
+      } = {
+        method: 'DELETE',
+        path: `/_index_template/${name}`,
+        ignore: [404],
+      };
+      // This uses the catch-all endpoint 'transport.request' because there is no
+      // convenience endpoint using the new _index_template API yet.
+      // The existing convenience endpoint `indices.putTemplate` only sends to _template,
+      // which does not support v2 templates.
+      // See src/core/server/elasticsearch/api_types.ts for available endpoints.
+      await callCluster('transport.request', callClusterParams);
+    } catch {
+      throw new Error(`error deleting template ${name}`);
+    }
+  }
+}
+
+export async function deleteAssetsByType({
+  savedObjectsClient,
+  callCluster,
+  installedObjects,
+  assetType,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  callCluster: CallESAsCurrentUser;
+  installedObjects: AssetReference[];
+  assetType: ElasticsearchAssetType;
+}) {
+  const toDelete = installedObjects.filter(asset => asset.type === assetType);
+  try {
+    await deleteAssets(toDelete, savedObjectsClient, callCluster);
+  } catch (err) {
+    throw new Error(err.message);
+  }
+}
+
+export async function deleteKibanaSavedObjectsAssets(
+  savedObjectsClient: SavedObjectsClientContract,
+  installedObjects: AssetReference[]
+) {
+  const deletePromises = installedObjects.map(({ id, type }) => {
+    const assetType = type as AssetType;
+    if (savedObjectTypes.includes(assetType)) {
+      return savedObjectsClient.delete(assetType, id);
+    }
+  });
+  try {
+    await Promise.all(deletePromises);
+  } catch (err) {
+    throw new Error('error deleting saved object asset');
   }
 }

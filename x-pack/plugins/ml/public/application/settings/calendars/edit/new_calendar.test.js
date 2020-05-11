@@ -7,15 +7,15 @@
 jest.mock('../../../components/navigation_menu', () => ({
   NavigationMenu: () => <div id="mockNavigationMenu" />,
 }));
-jest.mock('../../../privilege/check_privilege', () => ({
+jest.mock('../../../capabilities/check_capabilities', () => ({
   checkPermission: () => true,
 }));
 jest.mock('../../../license', () => ({
   hasLicenseExpired: () => false,
   isFullLicense: () => false,
 }));
-jest.mock('../../../privilege/get_privileges', () => ({
-  getPrivileges: () => {},
+jest.mock('../../../capabilities/get_capabilities', () => ({
+  getCapabilities: () => {},
 }));
 jest.mock('../../../ml_nodes_check/check_ml_nodes', () => ({
   mlNodesAvailable: () => true,

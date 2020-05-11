@@ -15,7 +15,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
   describe('lens app', () => {
     before(async () => {
       log.debug('Starting lens before method');
-      browser.setWindowSize(1280, 800);
+      await browser.setWindowSize(1280, 800);
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.loadIfNeeded('lens/basic');
     });

@@ -3,7 +3,7 @@
 exports[`ScriptedFieldsTable should filter based on the lang filter 1`] = `
 <Fragment>
   <header
-    addScriptedFieldUrl="#"
+    addScriptedFieldUrl="http://localhost/#/management/kibana/index_patterns/undefined/create-field/"
   />
   <call-outs
     deprecatedLangsInUse={
@@ -45,7 +45,7 @@ exports[`ScriptedFieldsTable should filter based on the lang filter 1`] = `
 exports[`ScriptedFieldsTable should filter based on the query bar 1`] = `
 <Fragment>
   <header
-    addScriptedFieldUrl="#"
+    addScriptedFieldUrl="http://localhost/#/management/kibana/index_patterns/undefined/create-field/"
   />
   <call-outs
     deprecatedLangsInUse={Array []}
@@ -78,7 +78,7 @@ exports[`ScriptedFieldsTable should filter based on the query bar 1`] = `
 exports[`ScriptedFieldsTable should hide the table if there are no scripted fields 1`] = `
 <Fragment>
   <header
-    addScriptedFieldUrl="#"
+    addScriptedFieldUrl="http://localhost/#/management/kibana/index_patterns/undefined/create-field/"
   />
   <call-outs
     deprecatedLangsInUse={Array []}
@@ -103,7 +103,7 @@ exports[`ScriptedFieldsTable should hide the table if there are no scripted fiel
 exports[`ScriptedFieldsTable should render normally 1`] = `
 <Fragment>
   <header
-    addScriptedFieldUrl="#"
+    addScriptedFieldUrl="http://localhost/#/management/kibana/index_patterns/undefined/create-field/"
   />
   <call-outs
     deprecatedLangsInUse={Array []}
@@ -141,7 +141,7 @@ exports[`ScriptedFieldsTable should render normally 1`] = `
 exports[`ScriptedFieldsTable should show a delete modal 1`] = `
 <Fragment>
   <header
-    addScriptedFieldUrl="#"
+    addScriptedFieldUrl="http://localhost/#/management/kibana/index_patterns/undefined/create-field/"
   />
   <call-outs
     deprecatedLangsInUse={Array []}

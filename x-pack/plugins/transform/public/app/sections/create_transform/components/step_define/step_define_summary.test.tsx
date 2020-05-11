@@ -16,7 +16,7 @@ import {
 } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
-import { StepDefineExposedState } from './step_define_form';
+import { StepDefineExposedState } from './common';
 import { StepDefineSummary } from './step_define_summary';
 
 jest.mock('../../../../../shared_imports');

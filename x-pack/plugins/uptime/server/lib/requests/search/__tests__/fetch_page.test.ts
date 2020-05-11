@@ -12,7 +12,7 @@ import {
   MonitorGroupsPage,
 } from '../fetch_page';
 import { QueryContext } from '../query_context';
-import { MonitorSummary } from '../../../../../../../legacy/plugins/uptime/common/runtime_types';
+import { MonitorSummary } from '../../../../../common/runtime_types';
 import { nextPagination, prevPagination, simpleQueryContext } from './test_helpers';
 
 const simpleFixture: MonitorGroups[] = [

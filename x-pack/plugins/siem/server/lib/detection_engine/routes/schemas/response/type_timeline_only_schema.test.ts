@@ -7,10 +7,10 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { exactCheck } from './exact_check';
-import { foldLeftRight, getPaths } from './__mocks__/utils';
 import { TypeAndTimelineOnly, typeAndTimelineOnlySchema } from './type_timeline_only_schema';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
+import { exactCheck } from '../../../../../utils/build_validation/exact_check';
+import { foldLeftRight, getPaths } from '../../../../../utils/build_validation/__mocks__/utils';
 
 describe('prepackaged_rule_schema', () => {
   beforeAll(() => {

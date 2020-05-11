@@ -15,20 +15,6 @@ beta[]
 * Save your visualization for use in a dashboard.
 
 [float]
-[[lens-aggregation]]
-=== Supported aggregations
-
-Lens supports the following aggregations:
-
-* <<visualize-metric-aggregations,Metric>>
-
-* <<visualize-parent-pipeline-aggregations,Parent pipeline>>
-
-* <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
-
-* <<visualize-bucket-aggregations,Bucket>>
-
-[float]
 [[drag-drop]]
 === Drag and drop
 

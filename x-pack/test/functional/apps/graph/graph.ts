@@ -19,6 +19,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('load graph/secrepo data');
       await esArchiver.loadIfNeeded('graph/secrepo');
       await esArchiver.load('empty_kibana');
+      await PageObjects.common.navigateToApp('settings');
       log.debug('create secrepo index pattern');
       await PageObjects.settings.createIndexPattern('secrepo', '@timestamp');
       log.debug('navigateTo graph');
@@ -76,7 +77,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     }
 
     it('should show correct node labels', async function() {
-      await PageObjects.graph.selectIndexPattern('secrepo*');
+      await PageObjects.graph.selectIndexPattern('secrepo');
       await buildGraph();
       const { nodes } = await PageObjects.graph.getGraphObjects();
       const circlesText = nodes.map(({ label }) => label);
@@ -120,7 +121,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should create new Graph workspace', async function() {
       await PageObjects.graph.newGraph();
-      await PageObjects.graph.selectIndexPattern('secrepo*');
+      await PageObjects.graph.selectIndexPattern('secrepo');
       const { nodes, edges } = await PageObjects.graph.getGraphObjects();
       expect(nodes).to.be.empty();
       expect(edges).to.be.empty();

@@ -48,7 +48,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { OverlayStart, HttpStart } from 'src/core/public';
-import { IndexPatternsContract, IIndexPattern } from '../../../../../data/public';
+import {
+  IndexPatternsContract,
+  IIndexPattern,
+  DataPublicPluginStart,
+} from '../../../../../data/public';
 import {
   importFile,
   importLegacyFile,
@@ -75,6 +79,7 @@ export interface FlyoutProps {
   indexPatterns: IndexPatternsContract;
   overlays: OverlayStart;
   http: HttpStart;
+  search: DataPublicPluginStart['search'];
 }
 
 export interface FlyoutState {
@@ -362,7 +367,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       failedImports,
     } = this.state;
 
-    const { serviceRegistry, indexPatterns } = this.props;
+    const { serviceRegistry, indexPatterns, search } = this.props;
 
     this.setState({
       error: undefined,
@@ -388,7 +393,10 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             resolutions,
             conflictedIndexPatterns!,
             isOverwriteAllChecked,
-            indexPatterns
+            {
+              indexPatterns,
+              search,
+            }
           );
         }
         this.setState({

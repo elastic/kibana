@@ -6,7 +6,7 @@
 
 import { AuthenticatedUser } from '../../../security/public';
 import { RequestHandlerContext } from '../../../../../src/core/server';
-export { ConfigType as Configuration } from '../';
+export { ConfigType as Configuration } from '../config';
 
 import { Authentications } from './authentications';
 import { Events } from './events';

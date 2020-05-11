@@ -11,19 +11,16 @@ import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
   CoreStart,
+  Plugin as IPlugin,
   PluginInitializerContext,
   Logger,
 } from '../../../../src/core/server';
-import {
-  PluginStartContract as AlertingStart,
-  PluginSetupContract as AlertingSetup,
-} from '../../alerting/server';
+import { PluginSetupContract as AlertingSetup } from '../../alerting/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../encrypted_saved_objects/server';
 import { SpacesPluginSetup as SpacesSetup } from '../../spaces/server';
-import { PluginStartContract as ActionsStart } from '../../actions/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { initServer } from './init_server';
 import { compose } from './lib/compose/kibana';
@@ -33,17 +30,11 @@ import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule
 import { rulesNotificationAlertType } from './lib/detection_engine/notifications/rules_notification_alert_type';
 import { isNotificationAlertExecutor } from './lib/detection_engine/notifications/types';
 import { hasListsFeature, listsEnvFeatureFlagName } from './lib/detection_engine/feature_flags';
-import {
-  noteSavedObjectType,
-  pinnedEventSavedObjectType,
-  timelineSavedObjectType,
-  ruleStatusSavedObjectType,
-  ruleActionsSavedObjectType,
-} from './saved_objects';
+import { initSavedObjects, savedObjectTypes } from './saved_objects';
 import { SiemClientFactory } from './client';
 import { createConfig$, ConfigType } from './config';
-
-export { CoreSetup, CoreStart };
+import { initUiSettings } from './ui_settings';
+import { APP_ID, APP_ICON } from '../common/constants';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -55,13 +46,15 @@ export interface SetupPlugins {
   ml?: MlSetup;
 }
 
-export interface StartPlugins {
-  actions: ActionsStart;
-  alerting: AlertingStart;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StartPlugins {}
 
-export class Plugin {
-  readonly name = 'siem';
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PluginStart {}
+
+export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
   private readonly config$: Observable<ConfigType>;
   private context: PluginInitializerContext;
@@ -69,14 +62,14 @@ export class Plugin {
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
-    this.logger = context.logger.get('plugins', this.name);
+    this.logger = context.logger.get('plugins', APP_ID);
     this.config$ = createConfig$(context);
     this.siemClientFactory = new SiemClientFactory();
 
     this.logger.debug('plugin initialized');
   }
 
-  public async setup(core: CoreSetup, plugins: SetupPlugins) {
+  public async setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
     this.logger.debug('plugin setup');
 
     if (hasListsFeature()) {
@@ -86,8 +79,11 @@ export class Plugin {
       );
     }
 
+    initSavedObjects(core.savedObjects);
+    initUiSettings(core.uiSettings);
+
     const router = core.http.createRouter();
-    core.http.registerRouteHandlerContext(this.name, (context, request, response) => ({
+    core.http.registerRouteHandlerContext(APP_ID, (context, request, response) => ({
       getSiemClient: () => this.siemClientFactory.create(request),
     }));
 
@@ -106,12 +102,12 @@ export class Plugin {
     );
 
     plugins.features.registerFeature({
-      id: this.name,
+      id: APP_ID,
       name: i18n.translate('xpack.siem.featureRegistry.linkSiemTitle', {
         defaultMessage: 'SIEM',
       }),
       order: 1100,
-      icon: 'securityAnalyticsApp',
+      icon: APP_ICON,
       navLinkId: 'siem',
       app: ['siem', 'kibana'],
       catalogue: ['siem'],
@@ -125,15 +121,11 @@ export class Plugin {
               'alert',
               'action',
               'action_task_params',
-              noteSavedObjectType,
-              pinnedEventSavedObjectType,
-              timelineSavedObjectType,
-              ruleStatusSavedObjectType,
-              ruleActionsSavedObjectType,
               'cases',
               'cases-comments',
               'cases-configure',
               'cases-user-actions',
+              ...savedObjectTypes,
             ],
             read: ['config'],
           },
@@ -156,15 +148,11 @@ export class Plugin {
             all: ['alert', 'action', 'action_task_params'],
             read: [
               'config',
-              noteSavedObjectType,
-              pinnedEventSavedObjectType,
-              timelineSavedObjectType,
-              ruleStatusSavedObjectType,
-              ruleActionsSavedObjectType,
               'cases',
               'cases-comments',
               'cases-configure',
               'cases-user-actions',
+              ...savedObjectTypes,
             ],
           },
           ui: [
@@ -201,7 +189,11 @@ export class Plugin {
 
     const libs = compose(core, plugins, this.context.env.mode.prod);
     initServer(libs);
+
+    return {};
   }
 
-  public start(core: CoreStart, plugins: StartPlugins) {}
+  public start(core: CoreStart, plugins: StartPlugins) {
+    return {};
+  }
 }

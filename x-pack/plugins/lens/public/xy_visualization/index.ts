@@ -12,8 +12,8 @@ import { xyVisualization } from './xy_visualization';
 import { xyChart, getXyChartRenderer } from './xy_expression';
 import { legendConfig, xConfig, layerConfig } from './types';
 import { EditorFrameSetup, FormatFactory } from '../types';
+import { setExecuteTriggerActions } from '../services';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
-import { setExecuteTriggerActions } from './services';
 
 export interface XyVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
@@ -53,6 +53,7 @@ export class XyVisualization {
           ? EUI_CHARTS_THEME_DARK.theme
           : EUI_CHARTS_THEME_LIGHT.theme,
         timeZone: getTimeZone(core.uiSettings),
+        histogramBarTarget: core.uiSettings.get<number>('histogram:barTarget'),
       })
     );
 

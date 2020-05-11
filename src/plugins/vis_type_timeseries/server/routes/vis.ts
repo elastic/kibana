@@ -38,16 +38,18 @@ export const visDataRoutes = (
       },
     },
     async (requestContext, request, response) => {
-      const { error: validationError } = visPayloadSchema.validate(request.body);
-      if (validationError) {
+      try {
+        visPayloadSchema.validate(request.body);
+      } catch (error) {
         logFailedValidation();
         const savedObjectId =
           (typeof request.body === 'object' && (request.body as any).savedObjectId) ||
           'unavailable';
         framework.logger.warn(
-          `Request validation error: ${validationError.message} (saved object id: ${savedObjectId}). This most likely means your TSVB visualization contains outdated configuration. You can report this problem under https://github.com/elastic/kibana/issues/new?template=Bug_report.md`
+          `Request validation error: ${error.message} (saved object id: ${savedObjectId}). This most likely means your TSVB visualization contains outdated configuration. You can report this problem under https://github.com/elastic/kibana/issues/new?template=Bug_report.md`
         );
       }
+
       try {
         const results = await getVisData(
           requestContext,

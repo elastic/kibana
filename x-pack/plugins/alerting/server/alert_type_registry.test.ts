@@ -72,6 +72,25 @@ describe('register()', () => {
     `);
   });
 
+  test('shallow clones the given alert type', () => {
+    const alertType: AlertType = {
+      id: 'test',
+      name: 'Test',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      defaultActionGroupId: 'default',
+      executor: jest.fn(),
+    };
+    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+    registry.register(alertType);
+    alertType.name = 'Changed';
+    expect(registry.get('test').name).toEqual('Test');
+  });
+
   test('should throw an error if type is already registered', () => {
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
     registry.register({
@@ -231,7 +250,7 @@ function alertTypeWithVariables(id: string, context: string, state: string): Ale
     name: `${id}-name`,
     actionGroups: [],
     defaultActionGroupId: id,
-    executor: (params: any): any => {},
+    async executor() {},
   };
 
   if (!context && !state) {

@@ -192,7 +192,7 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
   return (
     <EuiLink
       id={columnId}
-      className="lnsConfigPanel__triggerLink"
+      className="lnsLayerPanel__triggerLink"
       onClick={() => {
         props.togglePopover();
       }}
