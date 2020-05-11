@@ -12,7 +12,6 @@ import {
   HostPolicyResponseActions,
   HostPolicyResponseConfiguration,
   Immutable,
-  ImmutableArray,
 } from '../../../../../../common/types';
 import { formatResponse } from './policy_response_friendly_names';
 import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
@@ -62,7 +61,7 @@ const ResponseActions = memo(
     actions,
     actionStatus,
   }: {
-    actions: ImmutableArray<keyof HostPolicyResponseActions>;
+    actions: Immutable<Array<keyof HostPolicyResponseActions>>;
     actionStatus: Partial<HostPolicyResponseActions>;
   }) => {
     return (
