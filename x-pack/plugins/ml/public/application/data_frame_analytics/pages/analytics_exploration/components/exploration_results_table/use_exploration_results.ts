@@ -52,6 +52,10 @@ export const useExplorationResults = (
   );
 
   useEffect(() => {
+    dataGrid.resetPagination();
+  }, [JSON.stringify(searchQuery)]);
+
+  useEffect(() => {
     getIndexData(jobConfig, dataGrid, searchQuery);
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
