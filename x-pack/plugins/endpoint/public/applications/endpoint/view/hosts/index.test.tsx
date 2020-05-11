@@ -329,7 +329,10 @@ describe('when on the hosts page', () => {
         expect(message).not.toBeNull();
       });
       it('should not show any numbered badges if all actions are successful', () => {
-        const policyResponse = docGenerator.generateAllSuccessPolicyResponse();
+        const policyResponse = docGenerator.generatePolicyResponse(
+          new Date().getTime(),
+          HostPolicyResponseActionStatus.success
+        );
         store.dispatch({
           type: 'serverReturnedHostPolicyResponse',
           payload: {

@@ -536,8 +536,14 @@ export class EndpointDocGenerator {
   /**
    * Generates a Host Policy response message
    */
-  public generatePolicyResponse(ts = new Date().getTime()): HostPolicyResponse {
+  public generatePolicyResponse(
+    ts = new Date().getTime(),
+    allStatus?: HostPolicyResponseActionStatus
+  ): HostPolicyResponse {
     const policyVersion = this.seededUUIDv4();
+    const status = () => {
+      return allStatus || this.randomHostPolicyResponseActionStatus();
+    };
     return {
       '@timestamp': ts,
       agent: {
@@ -649,165 +655,19 @@ export class EndpointDocGenerator {
               configurations: {
                 events: {
                   concerned_actions: ['download_model'],
-                  status: this.randomHostPolicyResponseActionStatus(),
+                  status: status(),
                 },
                 logging: {
                   concerned_actions: this.randomHostPolicyResponseActions(),
-                  status: this.randomHostPolicyResponseActionStatus(),
+                  status: status(),
                 },
                 malware: {
                   concerned_actions: this.randomHostPolicyResponseActions(),
-                  status: this.randomHostPolicyResponseActionStatus(),
+                  status: status(),
                 },
                 streaming: {
                   concerned_actions: this.randomHostPolicyResponseActions(),
-                  status: this.randomHostPolicyResponseActionStatus(),
-                },
-              },
-            },
-            status: this.randomHostPolicyResponseActionStatus(),
-            version: policyVersion,
-          },
-        },
-      },
-      event: {
-        created: ts,
-        id: this.seededUUIDv4(),
-        kind: 'policy_response',
-      },
-    };
-  }
-
-  /**
-   * Returns a policy response with all successful configuration and action
-   * statuses.
-   */
-  public generateAllSuccessPolicyResponse(ts = new Date().getTime()): HostPolicyResponse {
-    const policyVersion = this.seededUUIDv4();
-    return {
-      '@timestamp': ts,
-      agent: {
-        id: this.commonInfo.agent.id,
-        version: '1.0.0-local.20200416.0',
-      },
-      elastic: {
-        agent: {
-          id: this.commonInfo.elastic.agent.id,
-        },
-      },
-      ecs: {
-        version: '1.4.0',
-      },
-      host: {
-        id: this.commonInfo.host.id,
-      },
-      endpoint: {
-        policy: {
-          applied: {
-            actions: {
-              configure_elasticsearch_connection: {
-                message: 'elasticsearch communications configured successfully',
-                status: HostPolicyResponseActionStatus.success,
-              },
-              configure_kernel: {
-                message: 'Successfully configured kernel',
-                status: HostPolicyResponseActionStatus.success,
-              },
-              configure_logging: {
-                message: 'Successfully configured logging',
-                status: HostPolicyResponseActionStatus.success,
-              },
-              configure_malware: {
-                message: 'Successfully configured malware',
-                status: HostPolicyResponseActionStatus.success,
-              },
-              connect_kernel: {
-                message: 'Successfully initialized minifilter',
-                status: HostPolicyResponseActionStatus.success,
-              },
-              detect_file_open_events: {
-                message: 'Successfully stopped file open event reporting',
-                status: HostPolicyResponseActionStatus.success,
-              },
-              detect_file_write_events: {
-                message: 'Successfully detected file write events',
-                status: HostPolicyResponseActionStatus.success,
-              },
-              detect_image_load_events: {
-                message: 'Successfully started image load event reporting',
-                status: HostPolicyResponseActionStatus.success,
-              },
-              detect_process_events: {
-                message: 'Successfully started process event reporting',
-                status: HostPolicyResponseActionStatus.success,
-              },
-              download_global_artifacts: {
-                message: 'Successfully downloaded global artifacts',
-                status: HostPolicyResponseActionStatus.success,
-              },
-              load_config: {
-                message: 'successfully parsed configuration',
-                status: HostPolicyResponseActionStatus.success,
-              },
-              load_malware_model: {
-                message: 'Successfully loaded malware model',
-                status: HostPolicyResponseActionStatus.success,
-              },
-              read_elasticsearch_config: {
-                message: 'Successfully read Elasticsearch configuration',
-                status: HostPolicyResponseActionStatus.success,
-              },
-              read_events_config: {
-                message: 'Successfully read events configuration',
-                status: HostPolicyResponseActionStatus.success,
-              },
-              read_kernel_config: {
-                message: 'Succesfully read kernel configuration',
-                status: HostPolicyResponseActionStatus.success,
-              },
-              read_logging_config: {
-                message: 'Successfully read logging configuration',
-                status: HostPolicyResponseActionStatus.success,
-              },
-              read_malware_config: {
-                message: 'Successfully read malware detect configuration',
-                status: HostPolicyResponseActionStatus.success,
-              },
-              workflow: {
-                message: 'Successfully started workflow',
-                status: HostPolicyResponseActionStatus.success,
-              },
-              download_model: {
-                message: 'Successfully downloaded model',
-                status: HostPolicyResponseActionStatus.success,
-              },
-              ingest_events_config: {
-                message: 'Successfully started ingest events configuration',
-                status: HostPolicyResponseActionStatus.success,
-              },
-            },
-            id: this.commonInfo.endpoint.policy.id,
-            policy: {
-              id: this.commonInfo.endpoint.policy.id,
-              version: policyVersion,
-            },
-            response: {
-              configurations: {
-                events: {
-                  concerned_actions: ['download_model'],
-                  status: HostPolicyResponseActionStatus.success,
-                },
-                logging: {
-                  concerned_actions: this.randomHostPolicyResponseActions(),
-                  status: HostPolicyResponseActionStatus.success,
-                },
-                malware: {
-                  concerned_actions: this.randomHostPolicyResponseActions(),
-                  status: HostPolicyResponseActionStatus.success,
-                },
-                streaming: {
-                  concerned_actions: this.randomHostPolicyResponseActions(),
-                  status: HostPolicyResponseActionStatus.success,
+                  status: status(),
                 },
               },
             },
