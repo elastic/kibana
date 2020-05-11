@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
-import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import apm from 'elastic-apm-node';
 
-export function validateCardinality(
-  callAsCurrentUser: APICaller,
-  job?: CombinedJob
-): Promise<any[]>;
+export function startTrace(name: string, category: string) {
+  const span = apm.startSpan(name, category);
+  return () => {
+    if (span) span.end();
+  };
+}

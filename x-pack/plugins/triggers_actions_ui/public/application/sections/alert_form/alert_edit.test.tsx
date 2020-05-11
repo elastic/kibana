@@ -132,11 +132,7 @@ describe('alert_edit', () => {
             capabilities: deps!.capabilities,
           }}
         >
-          <AlertEdit
-            editFlyoutVisible={true}
-            setEditFlyoutVisibility={() => {}}
-            initialAlert={alert}
-          />
+          <AlertEdit onClose={() => {}} initialAlert={alert} />
         </AlertsContextProvider>
       </AppContextProvider>
     );
