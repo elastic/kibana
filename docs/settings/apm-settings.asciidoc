@@ -74,6 +74,9 @@ Changing these settings may disable features of the APM App.
 | `apm_oss.sourcemapIndices`
   | Matcher for all {apm-server-ref}/sourcemap-indices.html[source map indices]. Defaults to `apm-*`.
 
+| New setting
+  | New setting description
+
 |===
 
 // end::general-apm-settings[]
