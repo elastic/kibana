@@ -413,27 +413,31 @@ export const indexedProcessTree = createSelector(graphableProcesses, function in
 export const relatedEventStats = createSelector(
   (data: DataState) => data,
   function(data) {
-    return data[resultsEnrichedWithRelatedEventInfo]
+    return data[resultsEnrichedWithRelatedEventInfo];
   }
 );
 
-export const relatedEvents = createSelector(graphableProcesses, relatedEventStats, function getRelatedEvents(
-  /* eslint-disable no-shadow */
+export const relatedEvents = createSelector(
   graphableProcesses,
   relatedEventStats,
-  /* eslint-enable no-shadow */
-) {
-  const eventsRelatedByProcess: RelatedEventData = new Map();
-  /* eslint-disable no-shadow */
-  return graphableProcesses.reduce((relatedEvents, graphableProcess) => {
+  function getRelatedEvents(
+    /* eslint-disable no-shadow */
+    graphableProcesses,
+    relatedEventStats
     /* eslint-enable no-shadow */
-    const relatedEventDataEntry = relatedEventStats?.get(graphableProcess)
-    if(relatedEventDataEntry){
-      relatedEvents.set(graphableProcess, relatedEventDataEntry);
-    }
-    return relatedEvents;
-  }, eventsRelatedByProcess);
-});
+  ) {
+    const eventsRelatedByProcess: RelatedEventData = new Map();
+    /* eslint-disable no-shadow */
+    return graphableProcesses.reduce((relatedEvents, graphableProcess) => {
+      /* eslint-enable no-shadow */
+      const relatedEventDataEntry = relatedEventStats?.get(graphableProcess);
+      if (relatedEventDataEntry) {
+        relatedEvents.set(graphableProcess, relatedEventDataEntry);
+      }
+      return relatedEvents;
+    }, eventsRelatedByProcess);
+  }
+);
 
 export const processAdjacencies = createSelector(
   indexedProcessTree,
