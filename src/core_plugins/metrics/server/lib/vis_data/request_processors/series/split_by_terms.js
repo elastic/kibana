@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { overwrite } from '../../helpers';
 import basicAggs from '../../../../../common/basic_aggs';
 import getBucketSize from '../../helpers/get_bucket_size';
 import getTimerange from '../../helpers/get_timerange';
@@ -17,16 +17,16 @@ export default function splitByTerm(req, panel, series) {
         to
       }  = getTimerange(req);
 
-      _.set(doc, `aggs.${series.id}.terms.field`, series.terms_field);
-      _.set(doc, `aggs.${series.id}.terms.size`, series.terms_size);
+      overwrite(doc, `aggs.${series.id}.terms.field`, series.terms_field);
+      overwrite(doc, `aggs.${series.id}.terms.size`, series.terms_size);
       const metric = series.metrics.find(item => item.id === series.terms_order_by);
       if (metric && metric.type !== 'count' && ~basicAggs.indexOf(metric.type)) {
         const sortAggKey = `${series.terms_order_by}-SORT`;
         const fn = bucketTransform[metric.type];
         const bucketPath = getBucketsPath(series.terms_order_by, series.metrics)
           .replace(series.terms_order_by, `${sortAggKey} > SORT`);
-        _.set(doc, `aggs.${series.id}.terms.order`, { [bucketPath]: 'desc' });
-        _.set(doc, `aggs.${series.id}.aggs`, {
+        overwrite(doc, `aggs.${series.id}.terms.order`, { [bucketPath]: 'desc' });
+        overwrite(doc, `aggs.${series.id}.aggs`, {
           [sortAggKey]: {
             filter: {
               range: {
