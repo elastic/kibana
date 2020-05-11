@@ -22,6 +22,7 @@ import { CoreStart, Plugin } from 'src/core/public';
 import './index.scss';
 import { createSavedObjectClass } from './saved_object';
 import { DataPublicPluginStart } from '../../data/public';
+import { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
 
 export interface SavedObjectsStart {
   SavedObjectClass: any;
@@ -43,6 +44,10 @@ export class SavedObjectsPublicPlugin
         chrome: core.chrome,
         overlays: core.overlays,
       }),
+      settings: {
+        getPerPage: () => core.uiSettings.get(PER_PAGE_SETTING),
+        getListingLimit: () => core.uiSettings.get(LISTING_LIMIT_SETTING),
+      },
     };
   }
 }

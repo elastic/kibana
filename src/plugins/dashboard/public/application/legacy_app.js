@@ -35,7 +35,7 @@ import {
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
 import { syncQueryStateWithUrl } from '../../../data/public';
-import { LISTING_LIMIT_SETTING } from '../../../saved_objects/common';
+import { LISTING_LIMIT_SETTING, PER_PAGE_SETTING } from '../../../saved_objects/common';
 
 export function initDashboardApp(app, deps) {
   initDashboardAppDirective(app, deps);
@@ -51,6 +51,7 @@ export function initDashboardApp(app, deps) {
       ['listingLimit', { watchDepth: 'reference' }],
       ['hideWriteControls', { watchDepth: 'reference' }],
       ['initialFilter', { watchDepth: 'reference' }],
+      ['initialPageSize', { watchDepth: 'reference' }],
     ]);
   });
 
@@ -105,6 +106,7 @@ export function initDashboardApp(app, deps) {
           );
 
           $scope.listingLimit = deps.uiSettings.get(LISTING_LIMIT_SETTING);
+          $scope.initialPageSize = deps.uiSettings.get(PER_PAGE_SETTING);
           $scope.create = () => {
             history.push(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
           };

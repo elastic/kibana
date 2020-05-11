@@ -45,6 +45,7 @@ class VisualizeListingTable extends Component {
         editItem={visualizeCapabilities.save ? this.props.editItem : null}
         tableColumns={this.getTableColumns()}
         listingLimit={this.props.listingLimit}
+        initialPageSize={this.props.initialPageSize}
         selectable={item => item.canDelete}
         initialFilter={''}
         noItemsFragment={this.getNoItemsMessage()}

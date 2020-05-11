@@ -12,7 +12,10 @@ import { isColorDark, hexToRgb } from '@elastic/eui';
 
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
 import { showSaveModal } from '../../../../src/plugins/saved_objects/public';
-import { LISTING_LIMIT_SETTING } from '../../../../src/plugins/saved_objects/common';
+import {
+  LISTING_LIMIT_SETTING,
+  PER_PAGE_SETTING,
+} from '../../../../src/plugins/saved_objects/common';
 
 import appTemplate from './angular/templates/index.html';
 import listingTemplate from './angular/templates/listing_ng_wrapper.html';
@@ -78,6 +81,7 @@ export function initGraphApp(angularModule, deps) {
       ['hideWriteControls', { watchDepth: 'reference' }],
       ['capabilities', { watchDepth: 'reference' }],
       ['initialFilter', { watchDepth: 'reference' }],
+      ['initialPageSize', { watchDepth: 'reference' }],
     ]);
   });
 
@@ -113,6 +117,7 @@ export function initGraphApp(angularModule, deps) {
         badge: getReadonlyBadge,
         controller: function($location, $scope) {
           $scope.listingLimit = config.get(LISTING_LIMIT_SETTING);
+          $scope.initialPageSize = config.get(PER_PAGE_SETTING);
           $scope.create = () => {
             $location.url(getNewPath());
           };
