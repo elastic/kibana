@@ -5,6 +5,8 @@
  */
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../machine_learning/mocks';
+import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
   getEmptyFindResult,
   typicalPayload,
@@ -17,9 +19,12 @@ import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { patchRulesBulkRoute } from './patch_rules_bulk_route';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
+jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
+
 describe('patch_rules_bulk', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+  let ml: ReturnType<typeof mlServicesMock.create>;
 
   beforeAll(() => {
     setFeatureFlagsForTestsOnly();
@@ -32,11 +37,12 @@ describe('patch_rules_bulk', () => {
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
+    ml = mlServicesMock.create();
 
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.alertsClient.update.mockResolvedValue(getResult()); // update succeeds
 
-    patchRulesBulkRoute(server.router);
+    patchRulesBulkRoute(server.router, ml);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -90,21 +96,51 @@ describe('patch_rules_bulk', () => {
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
-    it('rejects patching of an ML rule with an insufficient license', async () => {
-      (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+    it('rejects patching a rule to ML if mlAuthz fails', async () => {
+      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
+        validateRuleType: jest
+          .fn()
+          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
+      });
       const request = requestMock.create({
         method: 'patch',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
         body: [typicalMlRulePayload()],
       });
-
       const response = await server.inject(request, context);
+
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
         {
           error: {
-            message: 'Your license does not support machine learning. Please upgrade your license.',
-            status_code: 400,
+            message: 'mocked validation message',
+            status_code: 403,
+          },
+          rule_id: 'rule-1',
+        },
+      ]);
+    });
+
+    it('rejects patching an existing ML rule if mlAuthz fails', async () => {
+      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
+        validateRuleType: jest
+          .fn()
+          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
+      });
+      const { type, ...payloadWithoutType } = typicalMlRulePayload();
+      const request = requestMock.create({
+        method: 'patch',
+        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+        body: [payloadWithoutType],
+      });
+      const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual([
+        {
+          error: {
+            message: 'mocked validation message',
+            status_code: 403,
           },
           rule_id: 'rule-1',
         },

@@ -6,7 +6,7 @@
 
 import { cloneDeep } from 'lodash/fp';
 import { hasMlUserPermissions } from './has_ml_user_permissions';
-import { emptyMlCapabilities } from '../empty_ml_capabilities';
+import { emptyMlCapabilities } from './empty_ml_capabilities';
 
 describe('has_ml_user_permissions', () => {
   let mlCapabilities = cloneDeep(emptyMlCapabilities);
