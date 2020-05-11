@@ -64,13 +64,11 @@ export const getTaskStateBadge = (
   );
 };
 
-export const getJobTypeBadge = (jobType: string) => {
-  return (
-    <EuiBadge className="mlTaskStateBadge" color="hollow">
-      {jobType}
-    </EuiBadge>
-  );
-};
+export const getJobTypeBadge = (jobType: string) => (
+  <EuiBadge className="mlTaskStateBadge" color="hollow">
+    {jobType}
+  </EuiBadge>
+);
 
 export const progressColumn = {
   name: i18n.translate('xpack.ml.dataframe.analyticsList.progress', {
