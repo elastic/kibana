@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MlCapabilities } from './types';
+import { MlCapabilitiesResponse } from '../../../ml/common/types/capabilities';
 
-export const emptyMlCapabilities: MlCapabilities = {
+export const emptyMlCapabilities: MlCapabilitiesResponse = {
   capabilities: {
+    canAccessML: false,
+    canGetAnnotations: false,
+    canCreateAnnotation: false,
+    canDeleteAnnotation: false,
     canGetJobs: false,
     canCreateJob: false,
     canDeleteJob: false,
@@ -26,11 +30,8 @@ export const emptyMlCapabilities: MlCapabilities = {
     canCreateFilter: false,
     canDeleteFilter: false,
     canFindFileStructure: false,
-    canGetDataFrame: false,
-    canDeleteDataFrame: false,
-    canPreviewDataFrame: false,
-    canCreateDataFrame: false,
-    canStartStopDataFrame: false,
+    canCreateDatafeed: false,
+    canDeleteDatafeed: false,
     canGetDataFrameAnalytics: false,
     canDeleteDataFrameAnalytics: false,
     canCreateDataFrameAnalytics: false,

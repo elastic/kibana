@@ -7,17 +7,12 @@
 import Boom from 'boom';
 import Joi from 'joi';
 import { has, snakeCase } from 'lodash/fp';
-import { i18n } from '@kbn/i18n';
 
 import {
   RouteValidationFunction,
   KibanaResponseFactory,
   CustomHttpResponseOptions,
 } from '../../../../../../../src/core/server';
-import { ILicense } from '../../../../../licensing/server';
-import { MINIMUM_ML_LICENSE } from '../../../../common/constants';
-import { RuleType } from '../../../../common/detection_engine/types';
-import { isMlRule } from '../../../../common/detection_engine/ml_helpers';
 import { BadRequestError } from '../errors/bad_request_error';
 
 export interface OutputError {
@@ -293,29 +288,4 @@ export const convertToSnakeCase = <T extends Record<string, unknown>>(
     const newKey = snakeCase(item);
     return { ...acc, [newKey]: obj[item] };
   }, {});
-};
-
-/**
- * Checks the current Kibana License against the rule under operation.
- *
- * @param license ILicense representing the user license
- * @param ruleType the type of the current rule
- *
- * @throws BadRequestError if rule and license are incompatible
- */
-export const validateLicenseForRuleType = ({
-  license,
-  ruleType,
-}: {
-  license: ILicense;
-  ruleType: RuleType;
-}): void => {
-  if (isMlRule(ruleType) && !license.hasAtLeast(MINIMUM_ML_LICENSE)) {
-    const message = i18n.translate('xpack.siem.licensing.unsupportedMachineLearningMessage', {
-      defaultMessage:
-        'Your license does not support machine learning. Please upgrade your license.',
-    });
-
-    throw new BadRequestError(message);
-  }
 };
