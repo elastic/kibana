@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../machine_learning/mocks';
+import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
   getEmptyFindResult,
   getResult,
@@ -16,12 +19,14 @@ import {
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { updateRulesBulkRoute } from './update_rules_bulk_route';
 import { BulkError } from '../utils';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
+
+jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
 describe('update_rules_bulk', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+  let ml: ReturnType<typeof mlServicesMock.create>;
 
   beforeAll(() => {
     setFeatureFlagsForTestsOnly();
@@ -34,12 +39,13 @@ describe('update_rules_bulk', () => {
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
+    ml = mlServicesMock.create();
 
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
     clients.alertsClient.update.mockResolvedValue(getResult());
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
 
-    updateRulesBulkRoute(server.router);
+    updateRulesBulkRoute(server.router, ml);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -92,8 +98,12 @@ describe('update_rules_bulk', () => {
       expect(response.body).toEqual(expected);
     });
 
-    it('returns an error object if creating an ML rule with an insufficient license', async () => {
-      (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+    it('returns a 403 error object if mlAuthz fails', async () => {
+      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
+        validateRuleType: jest
+          .fn()
+          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
+      });
       const request = requestMock.create({
         method: 'put',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
@@ -105,8 +115,8 @@ describe('update_rules_bulk', () => {
       expect(response.body).toEqual([
         {
           error: {
-            message: 'Your license does not support machine learning. Please upgrade your license.',
-            status_code: 400,
+            message: 'mocked validation message',
+            status_code: 403,
           },
           rule_id: 'rule-1',
         },

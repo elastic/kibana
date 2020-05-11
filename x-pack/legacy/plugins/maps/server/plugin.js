@@ -19,41 +19,9 @@ import { emsBoundariesSpecProvider } from './tutorials/ems';
 
 export class MapPlugin {
   setup(core, plugins, __LEGACY) {
-    const { featuresPlugin, home, licensing, usageCollection, mapsLegacy } = plugins;
+    const { home, licensing, usageCollection, mapsLegacy } = plugins;
     let routesInitialized = false;
     const mapConfig = mapsLegacy.config;
-
-    featuresPlugin.registerFeature({
-      id: APP_ID,
-      name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
-        defaultMessage: 'Maps',
-      }),
-      order: 600,
-      icon: APP_ICON,
-      navLinkId: APP_ID,
-      app: [APP_ID, 'kibana'],
-      catalogue: [APP_ID],
-      privileges: {
-        all: {
-          app: [APP_ID, 'kibana'],
-          catalogue: [APP_ID],
-          savedObject: {
-            all: [MAP_SAVED_OBJECT_TYPE, 'query'],
-            read: ['index-pattern'],
-          },
-          ui: ['save', 'show', 'saveQuery'],
-        },
-        read: {
-          app: [APP_ID, 'kibana'],
-          catalogue: [APP_ID],
-          savedObject: {
-            all: [],
-            read: [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'query'],
-          },
-          ui: ['show'],
-        },
-      },
-    });
 
     licensing.license$.subscribe(license => {
       const { state } = license.check('maps', 'basic');
