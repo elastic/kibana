@@ -12,6 +12,8 @@ import { AndOrBadge } from '../../and_or_badge';
 
 import * as i18n from './translations';
 
+export const HIGHLIGHTED_DROP_TARGET_CLASS_NAME = 'highlighted-drop-target';
+
 const Text = styled(EuiText)`
   overflow: hidden;
   margin: 5px 0 5px 0;
@@ -88,7 +90,9 @@ export const Empty = React.memo<Props>(({ showSmallMsg = false }) => (
             {i18n.DROP_ANYTHING}
           </Text>
           <HighlightedBackground>
-            <BadgeHighlighted>{i18n.HIGHLIGHTED}</BadgeHighlighted>
+            <BadgeHighlighted className={HIGHLIGHTED_DROP_TARGET_CLASS_NAME}>
+              {i18n.HIGHLIGHTED}
+            </BadgeHighlighted>
           </HighlightedBackground>
         </NoWrap>
 

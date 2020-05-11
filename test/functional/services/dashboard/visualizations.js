@@ -116,7 +116,10 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       await PageObjects.visualize.clickMarkdownWidget();
       await PageObjects.visEditor.setMarkdownTxt(markdown);
       await PageObjects.visEditor.clickGo();
-      await PageObjects.visualize.saveVisualizationExpectSuccess(name);
+      await PageObjects.visualize.saveVisualizationExpectSuccess(name, {
+        saveAsNew: false,
+        redirectToOrigin: true,
+      });
     }
   })();
 }

@@ -94,7 +94,8 @@ export function initPushCaseUserActionApi({
             client,
             caseId,
             updatedAttributes: {
-              ...(myCaseConfigure.saved_objects[0].attributes.closure_type === 'close-by-pushing'
+              ...(myCaseConfigure.total > 0 &&
+              myCaseConfigure.saved_objects[0].attributes.closure_type === 'close-by-pushing'
                 ? {
                     status: 'closed',
                     closed_at: pushedDate,
@@ -124,7 +125,8 @@ export function initPushCaseUserActionApi({
           userActionService.postUserActions({
             client,
             actions: [
-              ...(myCaseConfigure.saved_objects[0].attributes.closure_type === 'close-by-pushing'
+              ...(myCaseConfigure.total > 0 &&
+              myCaseConfigure.saved_objects[0].attributes.closure_type === 'close-by-pushing'
                 ? [
                     buildCaseUserActionItem({
                       action: 'update',

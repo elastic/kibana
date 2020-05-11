@@ -182,6 +182,9 @@ export const ConnectorEditFlyout = ({
             errors={errors}
             actionTypeName={connector.actionType}
             dispatch={dispatch}
+            actionTypeRegistry={actionTypeRegistry}
+            http={http}
+            docLinks={docLinks}
           />
         ) : (
           <Fragment>

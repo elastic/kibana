@@ -69,6 +69,7 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
               previousJobType: type,
               jobType: value,
               excludes: [],
+              requiredFieldsError: undefined,
             });
           }}
           data-test-subj="mlAnalyticsCreateJobFlyoutJobTypeSelect"
