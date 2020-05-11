@@ -105,6 +105,11 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
 
   const onChangeConnector = useCallback(
     (id: string) => {
+      if (id === 'add-connector') {
+        setAddFlyoutVisibility(true);
+        return;
+      }
+
       setConnector(id);
       persistCaseConfigure({
         connectorId: id,
