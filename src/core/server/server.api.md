@@ -91,7 +91,6 @@ import { IngestGetPipelineParams } from 'elasticsearch';
 import { IngestPutPipelineParams } from 'elasticsearch';
 import { IngestSimulateParams } from 'elasticsearch';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
-import { Logger as Logger_2 } from 'src/core/server/logging';
 import { MGetParams } from 'elasticsearch';
 import { MGetResponse } from 'elasticsearch';
 import { MSearchParams } from 'elasticsearch';
@@ -2168,6 +2167,8 @@ export interface SavedObjectsMappingProperties {
 export interface SavedObjectsMigrationLogger {
     // (undocumented)
     debug: (msg: string) => void;
+    // (undocumented)
+    error: (msg: string, meta: LogMeta) => void;
     // (undocumented)
     info: (msg: string) => void;
     // (undocumented)
