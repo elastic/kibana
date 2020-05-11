@@ -39,6 +39,7 @@ export function setupIngest({ getService }: FtrProviderContext) {
       .send();
     await getService('supertest')
       .post(`/api/ingest_manager/fleet/setup`)
-      .set('kbn-xsrf', 'xxx');
+      .set('kbn-xsrf', 'xxx')
+      .send({ forceRecreate: true });
   });
 }
