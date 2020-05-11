@@ -14,6 +14,13 @@ const callWithRequest: APICaller = (method: string) => {
     if (method === 'fieldCaps') {
       resolve({ fields: [] });
       return;
+    } else if (method === 'ml.info') {
+      resolve({
+        limits: {
+          effective_max_model_memory_limit: '100MB',
+          max_model_memory_limit: '1GB',
+        },
+      });
     }
     resolve({});
   }) as Promise<any>;
@@ -290,6 +297,7 @@ describe('ML - validateJob', () => {
     });
   });
 
+  // Failing https://github.com/elastic/kibana/issues/65865
   it('basic validation passes, extended checks return some messages', () => {
     const payload = getBasicPayload();
     return validateJob(callWithRequest, payload).then(messages => {
@@ -303,6 +311,7 @@ describe('ML - validateJob', () => {
     });
   });
 
+  // Failing https://github.com/elastic/kibana/issues/65866
   it('categorization job using mlcategory passes aggregatable field check', () => {
     const payload: any = {
       job: {
@@ -369,6 +378,7 @@ describe('ML - validateJob', () => {
     });
   });
 
+  // Failing https://github.com/elastic/kibana/issues/65867
   it('script field not reported as non aggregatable', () => {
     const payload: any = {
       job: {

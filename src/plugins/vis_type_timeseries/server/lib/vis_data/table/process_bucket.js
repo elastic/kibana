@@ -21,7 +21,8 @@ import { buildProcessorFunction } from '../build_processor_function';
 import { processors } from '../response_processors/table';
 import { getLastValue } from '../../../../common/get_last_value';
 import regression from 'regression';
-import { first, get, set } from 'lodash';
+import { first, get } from 'lodash';
+import { overwrite } from '../helpers';
 import { getActiveSeries } from '../helpers/get_active_series';
 
 export function processBucket(panel) {
@@ -35,7 +36,7 @@ export function processBucket(panel) {
         const timeseries = {
           buckets: get(bucket, `${series.id}.buckets`),
         };
-        set(bucket, series.id, { meta, timeseries });
+        overwrite(bucket, series.id, { meta, timeseries });
       }
 
       const processor = buildProcessorFunction(processors, bucket, panel, series);
