@@ -32,7 +32,9 @@ To start tracking the real-time percentage of CPU, enter the following in the *T
 
 [source,text]
 ----------------------------------
-.es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct')
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='avg:system.cpu.user.pct')
 ----------------------------------
 
 [role="screenshot"]
@@ -70,7 +72,12 @@ To easily distinguish between the two data sets, add the label names:
 
 [source,text]
 ----------------------------------
-.es(offset=-1h,index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('last hour'), .es(index=metricbeat-*, timefield='@timestamp', metric='avg:system.cpu.user.pct').label('current hour') <1>
+.es(offset=-1h,index=metricbeat-*,
+    timefield='@timestamp',
+    metric='avg:system.cpu.user.pct').label('last hour'),
+.es(index=metricbeat-*,
+    timefield='@timestamp',
+    metric='avg:system.cpu.user.pct').label('current hour') <1>
 ----------------------------------
 
 <1> `.label()` adds custom labels to the visualization.

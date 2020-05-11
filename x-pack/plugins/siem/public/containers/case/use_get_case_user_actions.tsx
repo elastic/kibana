@@ -14,9 +14,10 @@ import { CaseExternalService, CaseUserActions, ElasticUser } from './types';
 import { convertToCamelCase, parseString } from './utils';
 import { CaseFullExternalService } from '../../../../case/common/api/cases';
 
-interface CaseService extends CaseExternalService {
+export interface CaseService extends CaseExternalService {
   firstPushIndex: number;
   lastPushIndex: number;
+  commentsToUpdate: string[];
   hasDataToPush: boolean;
 }
 
@@ -48,6 +49,10 @@ export interface UseGetCaseUserActions extends CaseUserActionsState {
 
 const getExternalService = (value: string): CaseExternalService | null =>
   convertToCamelCase<CaseFullExternalService, CaseExternalService>(parseString(`${value}`));
+interface CommentsAndIndex {
+  commentId: string;
+  commentIndex: number;
+}
 
 export const getPushedInfo = (
   caseUserActions: CaseUserActions[],
@@ -69,11 +74,25 @@ export const getPushedInfo = (
         .action !== 'push-to-service'
     );
   };
+  const commentsAndIndex = caseUserActions.reduce<CommentsAndIndex[]>(
+    (bacc, mua, index) =>
+      mua.actionField[0] === 'comment' && mua.commentId != null
+        ? [
+            ...bacc,
+            {
+              commentId: mua.commentId,
+              commentIndex: index,
+            },
+          ]
+        : bacc,
+    []
+  );
 
-  const caseServices = caseUserActions.reduce<CaseServices>((acc, cua, i) => {
+  let caseServices = caseUserActions.reduce<CaseServices>((acc, cua, i) => {
     if (cua.action !== 'push-to-service') {
       return acc;
     }
+
     const externalService = getExternalService(`${cua.newValue}`);
     if (externalService === null) {
       return acc;
@@ -87,6 +106,7 @@ export const getPushedInfo = (
               ...acc[externalService.connectorId],
               ...externalService,
               lastPushIndex: i,
+              commentsToUpdate: [],
             },
           }
         : {
@@ -95,8 +115,28 @@ export const getPushedInfo = (
               firstPushIndex: i,
               lastPushIndex: i,
               hasDataToPush: hasDataToPushForConnector(externalService.connectorId),
+              commentsToUpdate: [],
             },
           }),
+    };
+  }, {});
+
+  caseServices = Object.keys(caseServices).reduce<CaseServices>((acc, key) => {
+    return {
+      ...acc,
+      [key]: {
+        ...caseServices[key],
+        // if the comment happens after the lastUpdateToCaseIndex, it should be included in commentsToUpdate
+        commentsToUpdate: commentsAndIndex.reduce<string[]>(
+          (bacc, currentComment) =>
+            currentComment.commentIndex > caseServices[key].lastPushIndex
+              ? bacc.indexOf(currentComment.commentId) > -1
+                ? [...bacc.filter(e => e !== currentComment.commentId), currentComment.commentId]
+                : [...bacc, currentComment.commentId]
+              : bacc,
+          []
+        ),
+      },
     };
   }, {});
 
