@@ -10,7 +10,7 @@ import React from 'react';
 import { CreateSourceEditor } from './create_source_editor';
 // @ts-ignore
 import { ESGeoGridSource, clustersTitle } from './es_geo_grid_source';
-import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
+import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { VectorLayer } from '../../layers/vector_layer/vector_layer';
 import {
   ESGeoGridSourceDescriptor,

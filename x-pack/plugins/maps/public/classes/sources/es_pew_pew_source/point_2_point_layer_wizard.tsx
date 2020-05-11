@@ -21,7 +21,7 @@ import {
 import { COLOR_GRADIENTS } from '../../styles/color_utils';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
-import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
+import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { ColorDynamicOptions, SizeDynamicOptions } from '../../../../common/descriptor_types';
 
 export const point2PointLayerWizardConfig: LayerWizard = {
