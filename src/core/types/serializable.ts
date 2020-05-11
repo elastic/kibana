@@ -17,13 +17,10 @@
  * under the License.
  */
 
-/**
- * Use * syntax so that these exports do not break when internal
- * types are stripped.
- */
-export * from './core_service';
-export * from './capabilities';
-export * from './app_category';
-export * from './ui_settings';
-export * from './saved_objects';
-export * from './serializable';
+export type Serializable = string | number | boolean | SerializableArray | SerializableRecord;
+
+// we need interfaces instead of types here to allow cyclic references
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SerializableArray extends Array<Serializable> {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SerializableRecord extends Record<string, Serializable> {}
