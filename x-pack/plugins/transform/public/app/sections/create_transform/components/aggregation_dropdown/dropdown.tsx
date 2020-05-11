@@ -23,6 +23,7 @@ export const DropDown: React.FC<Props> = ({
 }) => {
   return (
     <EuiComboBox
+      fullWidth
       placeholder={placeholder}
       singleSelection={{ asPlainText: true }}
       options={options}

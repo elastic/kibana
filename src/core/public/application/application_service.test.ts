@@ -20,7 +20,7 @@
 import { createElement } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { bufferCount, take, takeUntil } from 'rxjs/operators';
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { contextServiceMock } from '../context/context_service.mock';
@@ -30,6 +30,7 @@ import { MockCapabilitiesService, MockHistory } from './application_service.test
 import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
 import { App, AppNavLinkStatus, AppStatus, AppUpdater, LegacyApp } from './types';
+import { act } from 'react-dom/test-utils';
 
 const createApp = (props: Partial<App>): App => {
   return {
@@ -87,7 +88,7 @@ describe('#setup()', () => {
       ).toThrowErrorMatchingInlineSnapshot(`"Applications cannot be registered after \\"setup\\""`);
     });
 
-    it('allows to register a statusUpdater for the application', async () => {
+    it('allows to register an AppUpdater for the application', async () => {
       const setup = service.setup(setupDeps);
 
       const pluginId = Symbol('plugin');
@@ -118,6 +119,7 @@ describe('#setup()', () => {
       updater$.next(app => ({
         status: AppStatus.inaccessible,
         tooltip: 'App inaccessible due to reason',
+        defaultPath: 'foo/bar',
       }));
 
       applications = await applications$.pipe(take(1)).toPromise();
@@ -128,6 +130,7 @@ describe('#setup()', () => {
           legacy: false,
           navLinkStatus: AppNavLinkStatus.default,
           status: AppStatus.inaccessible,
+          defaultPath: 'foo/bar',
           tooltip: 'App inaccessible due to reason',
         })
       );
@@ -209,7 +212,7 @@ describe('#setup()', () => {
     });
   });
 
-  describe('registerAppStatusUpdater', () => {
+  describe('registerAppUpdater', () => {
     it('updates status fields', async () => {
       const setup = service.setup(setupDeps);
 
@@ -413,6 +416,36 @@ describe('#setup()', () => {
         })
       );
     });
+
+    it('allows to update the basePath', async () => {
+      const setup = service.setup(setupDeps);
+
+      const pluginId = Symbol('plugin');
+      setup.register(pluginId, createApp({ id: 'app1' }));
+
+      const updater = new BehaviorSubject<AppUpdater>(app => ({}));
+      setup.registerAppUpdater(updater);
+
+      const start = await service.start(startDeps);
+      await start.navigateToApp('app1');
+      expect(MockHistory.push).toHaveBeenCalledWith('/app/app1', undefined);
+      MockHistory.push.mockClear();
+
+      updater.next(app => ({ defaultPath: 'default-path' }));
+      await start.navigateToApp('app1');
+      expect(MockHistory.push).toHaveBeenCalledWith('/app/app1/default-path', undefined);
+      MockHistory.push.mockClear();
+
+      updater.next(app => ({ defaultPath: 'another-path' }));
+      await start.navigateToApp('app1');
+      expect(MockHistory.push).toHaveBeenCalledWith('/app/app1/another-path', undefined);
+      MockHistory.push.mockClear();
+
+      updater.next(app => ({}));
+      await start.navigateToApp('app1');
+      expect(MockHistory.push).toHaveBeenCalledWith('/app/app1', undefined);
+      MockHistory.push.mockClear();
+    });
   });
 
   it("`registerMountContext` calls context container's registerContext", () => {
@@ -420,9 +453,9 @@ describe('#setup()', () => {
     const container = setupDeps.context.createContextContainer.mock.results[0].value;
     const pluginId = Symbol();
 
-    const mount = () => () => undefined;
-    registerMountContext(pluginId, 'test' as any, mount);
-    expect(container.registerContext).toHaveBeenCalledWith(pluginId, 'test', mount);
+    const appMount = () => () => undefined;
+    registerMountContext(pluginId, 'test' as any, appMount);
+    expect(container.registerContext).toHaveBeenCalledWith(pluginId, 'test', appMount);
   });
 });
 
@@ -676,6 +709,57 @@ describe('#start()', () => {
       expect(MockHistory.push).toHaveBeenCalledWith('/custom/path#/hash/router/path', undefined);
     });
 
+    it('preserves trailing slash when path contains a hash', async () => {
+      const { register } = service.setup(setupDeps);
+
+      register(Symbol(), createApp({ id: 'app2', appRoute: '/custom/app-path' }));
+
+      const { navigateToApp } = await service.start(startDeps);
+      await navigateToApp('app2', { path: '#/' });
+      expect(MockHistory.push).toHaveBeenCalledWith('/custom/app-path#/', undefined);
+      MockHistory.push.mockClear();
+
+      await navigateToApp('app2', { path: '#/foo/bar/' });
+      expect(MockHistory.push).toHaveBeenCalledWith('/custom/app-path#/foo/bar/', undefined);
+      MockHistory.push.mockClear();
+
+      await navigateToApp('app2', { path: '/path#/' });
+      expect(MockHistory.push).toHaveBeenCalledWith('/custom/app-path/path#/', undefined);
+      MockHistory.push.mockClear();
+
+      await navigateToApp('app2', { path: '/path#/hash/' });
+      expect(MockHistory.push).toHaveBeenCalledWith('/custom/app-path/path#/hash/', undefined);
+      MockHistory.push.mockClear();
+
+      await navigateToApp('app2', { path: '/path/' });
+      expect(MockHistory.push).toHaveBeenCalledWith('/custom/app-path/path', undefined);
+      MockHistory.push.mockClear();
+    });
+
+    it('appends the defaultPath when the path parameter is not specified', async () => {
+      const { register } = service.setup(setupDeps);
+
+      register(Symbol(), createApp({ id: 'app1', defaultPath: 'default/path' }));
+      register(
+        Symbol(),
+        createApp({ id: 'app2', appRoute: '/custom-app-path', defaultPath: '/my-base' })
+      );
+
+      const { navigateToApp } = await service.start(startDeps);
+
+      await navigateToApp('app1', { path: 'defined-path' });
+      expect(MockHistory.push).toHaveBeenCalledWith('/app/app1/defined-path', undefined);
+
+      await navigateToApp('app1', {});
+      expect(MockHistory.push).toHaveBeenCalledWith('/app/app1/default/path', undefined);
+
+      await navigateToApp('app2', { path: 'defined-path' });
+      expect(MockHistory.push).toHaveBeenCalledWith('/custom-app-path/defined-path', undefined);
+
+      await navigateToApp('app2', {});
+      expect(MockHistory.push).toHaveBeenCalledWith('/custom-app-path/my-base', undefined);
+    });
+
     it('includes state if specified', async () => {
       const { register } = service.setup(setupDeps);
 
@@ -722,6 +806,74 @@ describe('#start()', () => {
           "beta",
           "gamma",
           "delta",
+        ]
+      `);
+    });
+
+    it('updates httpLoadingCount$ while mounting', async () => {
+      // Use a memory history so that mounting the component will work
+      const { createMemoryHistory } = jest.requireActual('history');
+      const history = createMemoryHistory();
+      setupDeps.history = history;
+
+      const flushPromises = () => new Promise(resolve => setImmediate(resolve));
+      // Create an app and a promise that allows us to control when the app completes mounting
+      const createWaitingApp = (props: Partial<App>): [App, () => void] => {
+        let finishMount: () => void;
+        const mountPromise = new Promise(resolve => (finishMount = resolve));
+        const app = {
+          id: 'some-id',
+          title: 'some-title',
+          mount: async () => {
+            await mountPromise;
+            return () => undefined;
+          },
+          ...props,
+        };
+
+        return [app, finishMount!];
+      };
+
+      // Create some dummy applications
+      const { register } = service.setup(setupDeps);
+      const [alphaApp, finishAlphaMount] = createWaitingApp({ id: 'alpha' });
+      const [betaApp, finishBetaMount] = createWaitingApp({ id: 'beta' });
+      register(Symbol(), alphaApp);
+      register(Symbol(), betaApp);
+
+      const { navigateToApp, getComponent } = await service.start(startDeps);
+      const httpLoadingCount$ = startDeps.http.addLoadingCountSource.mock.calls[0][0];
+      const stop$ = new Subject();
+      const currentLoadingCount$ = new BehaviorSubject(0);
+      httpLoadingCount$.pipe(takeUntil(stop$)).subscribe(currentLoadingCount$);
+      const loadingPromise = httpLoadingCount$.pipe(bufferCount(5), takeUntil(stop$)).toPromise();
+      mount(getComponent()!);
+
+      await act(() => navigateToApp('alpha'));
+      expect(currentLoadingCount$.value).toEqual(1);
+      await act(async () => {
+        finishAlphaMount();
+        await flushPromises();
+      });
+      expect(currentLoadingCount$.value).toEqual(0);
+
+      await act(() => navigateToApp('beta'));
+      expect(currentLoadingCount$.value).toEqual(1);
+      await act(async () => {
+        finishBetaMount();
+        await flushPromises();
+      });
+      expect(currentLoadingCount$.value).toEqual(0);
+
+      stop$.next();
+      const loadingCounts = await loadingPromise;
+      expect(loadingCounts).toMatchInlineSnapshot(`
+        Array [
+          0,
+          1,
+          0,
+          1,
+          0,
         ]
       `);
     });

@@ -5,15 +5,14 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { Snapshot } from '../../../../../legacy/plugins/uptime/common/runtime_types';
-import { CONTEXT_DEFAULTS } from '../../../../../legacy/plugins/uptime/common/constants';
+import { CONTEXT_DEFAULTS } from '../../../common/constants';
+import { Snapshot } from '../../../common/runtime_types';
 import { QueryContext } from './search';
 
 export interface GetSnapshotCountParams {
   dateRangeStart: string;
   dateRangeEnd: string;
   filters?: string | null;
-  statusFilter?: string;
 }
 
 export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Snapshot> = async ({
@@ -22,12 +21,7 @@ export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Sn
   dateRangeStart,
   dateRangeEnd,
   filters,
-  statusFilter,
 }): Promise<Snapshot> => {
-  if (!(statusFilter === 'up' || statusFilter === 'down' || statusFilter === undefined)) {
-    throw new Error(`Invalid status filter value '${statusFilter}'`);
-  }
-
   const context = new QueryContext(
     callES,
     heartbeatIndices,
@@ -35,18 +29,13 @@ export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Sn
     dateRangeEnd,
     CONTEXT_DEFAULTS.CURSOR_PAGINATION,
     filters && filters !== '' ? JSON.parse(filters) : null,
-    Infinity,
-    statusFilter
+    Infinity
   );
 
   // Calculate the total, up, and down counts.
-  const counts = await statusCount(context);
+  const count = await statusCount(context);
 
-  return {
-    total: statusFilter ? counts[statusFilter] : counts.total,
-    up: statusFilter === 'down' ? 0 : counts.up,
-    down: statusFilter === 'up' ? 0 : counts.down,
-  };
+  return { total: count.total, up: count.up, down: count.down };
 };
 
 const statusCount = async (context: QueryContext): Promise<Snapshot> => {
@@ -55,7 +44,13 @@ const statusCount = async (context: QueryContext): Promise<Snapshot> => {
     body: statusCountBody(await context.dateAndCustomFilters()),
   });
 
-  return res.aggregations.counts.value;
+  return (
+    res.aggregations?.counts?.value ?? {
+      total: 0,
+      up: 0,
+      down: 0,
+    }
+  );
 };
 
 const statusCountBody = (filters: any): any => {

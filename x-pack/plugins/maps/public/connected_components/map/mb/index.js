@@ -23,6 +23,8 @@ import {
   isInteractiveDisabled,
   isTooltipControlDisabled,
   isViewControlHidden,
+  getSpatialFiltersLayer,
+  getMapSettings,
 } from '../../../selectors/map_selectors';
 
 import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
@@ -30,12 +32,13 @@ import { getInspectorAdapters } from '../../../reducers/non_serializable_instanc
 function mapStateToProps(state = {}) {
   return {
     isMapReady: getMapReady(state),
+    settings: getMapSettings(state),
     layerList: getLayerList(state),
+    spatialFiltersLayer: getSpatialFiltersLayer(state),
     goto: getGoto(state),
     inspectorAdapters: getInspectorAdapters(state),
     scrollZoom: getScrollZoom(state),
     disableInteractive: isInteractiveDisabled(state),
-    disableTooltipControl: isTooltipControlDisabled(state),
     disableTooltipControl: isTooltipControlDisabled(state),
     hideViewControl: isViewControlHidden(state),
   };

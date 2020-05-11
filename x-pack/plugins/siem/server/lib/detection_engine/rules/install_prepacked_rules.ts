@@ -5,14 +5,12 @@
  */
 
 import { Alert } from '../../../../../alerting/common';
-import { ActionsClient } from '../../../../../actions/server';
 import { AlertsClient } from '../../../../../alerting/server';
 import { createRules } from './create_rules';
 import { PrepackagedRules } from '../types';
 
 export const installPrepackagedRules = (
   alertsClient: AlertsClient,
-  actionsClient: ActionsClient,
   rules: PrepackagedRules[],
   outputIndex: string
 ): Array<Promise<Alert>> =>
@@ -52,7 +50,6 @@ export const installPrepackagedRules = (
       ...acc,
       createRules({
         alertsClient,
-        actionsClient,
         anomalyThreshold,
         description,
         enabled,

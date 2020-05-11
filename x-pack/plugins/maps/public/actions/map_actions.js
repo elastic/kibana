@@ -19,6 +19,7 @@ import {
   getOpenTooltips,
   getQuery,
   getDataRequestDescriptor,
+  getFittableLayers,
 } from '../selectors/map_selectors';
 
 import { FLYOUT_STATE } from '../reducers/ui';
@@ -76,6 +77,10 @@ export const HIDE_TOOLBAR_OVERLAY = 'HIDE_TOOLBAR_OVERLAY';
 export const HIDE_LAYER_CONTROL = 'HIDE_LAYER_CONTROL';
 export const HIDE_VIEW_CONTROL = 'HIDE_VIEW_CONTROL';
 export const SET_WAITING_FOR_READY_HIDDEN_LAYERS = 'SET_WAITING_FOR_READY_HIDDEN_LAYERS';
+export const SET_MAP_SETTINGS = 'SET_MAP_SETTINGS';
+export const ROLLBACK_MAP_SETTINGS = 'ROLLBACK_MAP_SETTINGS';
+export const TRACK_MAP_SETTINGS = 'TRACK_MAP_SETTINGS';
+export const UPDATE_MAP_SETTING = 'UPDATE_MAP_SETTING';
 
 function getLayerLoadingCallbacks(dispatch, getState, layerId) {
   return {
@@ -142,6 +147,29 @@ export function setMapInitError(errorMessage) {
   return {
     type: SET_MAP_INIT_ERROR,
     errorMessage,
+  };
+}
+
+export function setMapSettings(settings) {
+  return {
+    type: SET_MAP_SETTINGS,
+    settings,
+  };
+}
+
+export function rollbackMapSettings() {
+  return { type: ROLLBACK_MAP_SETTINGS };
+}
+
+export function trackMapSettings() {
+  return { type: TRACK_MAP_SETTINGS };
+}
+
+export function updateMapSetting(settingKey, settingValue) {
+  return {
+    type: UPDATE_MAP_SETTING,
+    settingKey,
+    settingValue,
   };
 }
 
@@ -537,6 +565,55 @@ export function fitToLayerExtent(layerId) {
         await dispatch(setGotoWithBounds(bounds));
       }
     }
+  };
+}
+
+export function fitToDataBounds() {
+  return async function(dispatch, getState) {
+    const layerList = getFittableLayers(getState());
+
+    if (!layerList.length) {
+      return;
+    }
+
+    const dataFilters = getDataFilters(getState());
+    const boundsPromises = layerList.map(async layer => {
+      return layer.getBounds(dataFilters);
+    });
+
+    const bounds = await Promise.all(boundsPromises);
+    const corners = [];
+    for (let i = 0; i < bounds.length; i++) {
+      const b = bounds[i];
+
+      //filter out undefined bounds (uses Infinity due to turf responses)
+
+      if (
+        b.minLon === Infinity ||
+        b.maxLon === Infinity ||
+        b.minLat === -Infinity ||
+        b.maxLat === -Infinity
+      ) {
+        continue;
+      }
+
+      corners.push([b.minLon, b.minLat]);
+      corners.push([b.maxLon, b.maxLat]);
+    }
+
+    if (!corners.length) {
+      return;
+    }
+
+    const turfUnionBbox = turf.bbox(turf.multiPoint(corners));
+    const dataBounds = {
+      minLon: turfUnionBbox[0],
+      minLat: turfUnionBbox[1],
+      maxLon: turfUnionBbox[2],
+      maxLat: turfUnionBbox[3],
+    };
+
+    dispatch(setGotoWithBounds(dataBounds));
   };
 }
 

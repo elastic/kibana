@@ -64,3 +64,4 @@ exports.externals = {
   'elasticsearch-browser': '__kbnSharedDeps__.ElasticsearchBrowser',
   'elasticsearch-browser/elasticsearch': '__kbnSharedDeps__.ElasticsearchBrowser',
 };
+exports.publicPathLoader = require.resolve('./public_path_loader');

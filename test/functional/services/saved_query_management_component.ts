@@ -151,6 +151,12 @@ export function SavedQueryManagementComponentProvider({ getService }: FtrProvide
       await testSubjects.existOrFail(`~load-saved-query-${title}-button`);
     }
 
+    async savedQueryTextExist(text: string) {
+      await this.openSavedQueryManagementComponent();
+      const queryString = await queryBar.getQueryString();
+      expect(queryString).to.eql(text);
+    }
+
     async savedQueryMissingOrFail(title: string) {
       await retry.try(async () => {
         await this.openSavedQueryManagementComponent();

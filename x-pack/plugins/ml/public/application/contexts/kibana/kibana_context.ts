@@ -15,7 +15,7 @@ import { LicenseManagementUIPluginSetup } from '../../../../../license_managemen
 
 interface StartPlugins {
   data: DataPublicPluginStart;
-  security: SecurityPluginSetup;
+  security?: SecurityPluginSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
 }
 export type StartServices = CoreStart & StartPlugins;

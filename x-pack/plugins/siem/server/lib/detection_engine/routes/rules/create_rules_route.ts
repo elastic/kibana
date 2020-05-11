@@ -9,10 +9,8 @@ import uuid from 'uuid';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { createRules } from '../../rules/create_rules';
-import { IRuleSavedAttributesSavedObjectAttributes } from '../../rules/types';
 import { readRules } from '../../rules/read_rules';
 import { RuleAlertParamsRest } from '../../types';
-import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { transformValidate } from './validate';
 import { getIndexExists } from '../../index/get_index_exists';
 import { createRulesSchema } from '../schemas/create_rules_schema';
@@ -23,6 +21,7 @@ import {
   validateLicenseForRuleType,
 } from '../utils';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
+import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
 export const createRulesRoute = (router: IRouter): void => {
   router.post(
@@ -73,16 +72,15 @@ export const createRulesRoute = (router: IRouter): void => {
       try {
         validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
         const alertsClient = context.alerting?.getAlertsClient();
-        const actionsClient = context.actions?.getActionsClient();
         const clusterClient = context.core.elasticsearch.dataClient;
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.siem?.getSiemClient();
 
-        if (!siemClient || !actionsClient || !alertsClient) {
+        if (!siemClient || !alertsClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const finalIndex = outputIndex ?? siemClient.signalsIndex;
+        const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
         const indexExists = await getIndexExists(clusterClient.callAsCurrentUser, finalIndex);
         if (!indexExists) {
           return siemResponse.error({
@@ -101,7 +99,6 @@ export const createRulesRoute = (router: IRouter): void => {
         }
         const createdRule = await createRules({
           alertsClient,
-          actionsClient,
           anomalyThreshold,
           description,
           enabled,
@@ -145,10 +142,7 @@ export const createRulesRoute = (router: IRouter): void => {
           name,
         });
 
-        const ruleStatuses = await savedObjectsClient.find<
-          IRuleSavedAttributesSavedObjectAttributes
-        >({
-          type: ruleStatusSavedObjectType,
+        const ruleStatuses = await ruleStatusSavedObjectsClientFactory(savedObjectsClient).find({
           perPage: 1,
           sortField: 'statusDate',
           sortOrder: 'desc',

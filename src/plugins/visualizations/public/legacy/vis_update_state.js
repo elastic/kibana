@@ -75,6 +75,77 @@ function convertDateHistogramScaleMetrics(visState) {
   }
 }
 
+function convertSeriesParams(visState) {
+  if (visState.params.seriesParams) {
+    return;
+  }
+
+  // update value axis options
+  const isUserDefinedYAxis = visState.params.setYExtents;
+  const defaultYExtents = visState.params.defaultYExtents;
+  const mode = ['stacked', 'overlap'].includes(visState.params.mode)
+    ? 'normal'
+    : visState.params.mode || 'normal';
+
+  if (!visState.params.valueAxes || !visState.params.valueAxes.length) {
+    visState.params.valueAxes = [
+      {
+        id: 'ValueAxis-1',
+        name: 'LeftAxis-1',
+        type: 'value',
+        position: 'left',
+        show: true,
+        style: {},
+        scale: {
+          type: 'linear',
+          mode: 'normal',
+        },
+        labels: {
+          show: true,
+          rotate: 0,
+          filter: false,
+          truncate: 100,
+        },
+        title: {
+          text: 'Count',
+        },
+      },
+    ];
+  }
+
+  visState.params.valueAxes[0].scale = {
+    ...visState.params.valueAxes[0].scale,
+    type: visState.params.scale || 'linear',
+    setYExtents: visState.params.setYExtents || false,
+    defaultYExtents: visState.params.defaultYExtents || false,
+    boundsMargin: defaultYExtents ? visState.params.boundsMargin : 0,
+    min: isUserDefinedYAxis ? visState.params.yAxis.min : undefined,
+    max: isUserDefinedYAxis ? visState.params.yAxis.max : undefined,
+    mode: mode,
+  };
+
+  // update series options
+  const interpolate = visState.params.smoothLines ? 'cardinal' : visState.params.interpolate;
+  const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(visState.params.mode);
+  visState.params.seriesParams = [
+    {
+      show: true,
+      type: visState.params.type || 'line',
+      mode: stacked ? 'stacked' : 'normal',
+      interpolate: interpolate,
+      drawLinesBetweenPoints: visState.params.drawLinesBetweenPoints,
+      showCircles: visState.params.showCircles,
+      radiusRatio: visState.params.radiusRatio,
+      data: {
+        label: 'Count',
+        id: '1',
+      },
+      lineWidth: 2,
+      valueAxis: 'ValueAxis-1',
+    },
+  ];
+}
+
 /**
  * This function is responsible for updating old visStates - the actual saved object
  * object - into the format, that will be required by the current Kibana version.
@@ -89,6 +160,10 @@ export const updateOldState = visState => {
   convertTermAggregation(newState);
   convertPropertyNames(newState);
   convertDateHistogramScaleMetrics(newState);
+
+  if (visState.params && ['line', 'area', 'histogram'].includes(visState.params.type)) {
+    convertSeriesParams(newState);
+  }
 
   if (visState.type === 'gauge' && visState.fontSize) {
     delete newState.fontSize;

@@ -110,7 +110,7 @@ describe('LinkToApp component', () => {
     const clickEventArg = spyOnClickHandler.mock.calls[0][0];
     expect(clickEventArg.isDefaultPrevented()).toBe(true);
   });
-  it('should not navigate if onClick callback prevents defalut', () => {
+  it('should not navigate if onClick callback prevents default', () => {
     const spyOnClickHandler: LinkToAppOnClickMock = jest.fn(ev => {
       ev.preventDefault();
     });

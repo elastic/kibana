@@ -6,27 +6,26 @@
 
 import { createSelector } from 'reselect';
 import _ from 'lodash';
-
 import { TileLayer } from '../layers/tile_layer';
-
 import { VectorTileLayer } from '../layers/vector_tile_layer';
-
 import { VectorLayer } from '../layers/vector_layer';
-
 import { HeatmapLayer } from '../layers/heatmap_layer';
-
 import { BlendedVectorLayer } from '../layers/blended_vector_layer';
-
 import { getTimeFilter } from '../kibana_services';
-
 import { getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { TiledVectorLayer } from '../layers/tiled_vector_layer';
-
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
-
 import { InnerJoin } from '../layers/joins/inner_join';
-
 import { getSourceByType } from '../layers/sources/source_registry';
+import { GeojsonFileSource } from '../layers/sources/client_file_source';
+import {
+  LAYER_TYPE,
+  SOURCE_DATA_ID_ORIGIN,
+  STYLE_TYPE,
+  VECTOR_STYLES,
+  SPATIAL_FILTERS_LAYER_ID,
+} from '../../common/constants';
+import { extractFeaturesFromFilters } from '../elasticsearch_geo_utils';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
@@ -63,6 +62,18 @@ function createSourceInstance(sourceDescriptor, inspectorAdapters) {
   }
   return new source.ConstructorFunction(sourceDescriptor, inspectorAdapters);
 }
+
+export const getMapSettings = ({ map }) => map.settings;
+
+const getRollbackMapSettings = ({ map }) => map.__rollbackSettings;
+
+export const hasMapSettingsChanges = createSelector(
+  getMapSettings,
+  getRollbackMapSettings,
+  (settings, rollbackSettings) => {
+    return rollbackSettings ? !_.isEqual(settings, rollbackSettings) : false;
+  }
+);
 
 export const getOpenTooltips = ({ map }) => {
   return map && map.openTooltips ? map.openTooltips : [];
@@ -183,6 +194,53 @@ export const getDataFilters = createSelector(
   }
 );
 
+export const getSpatialFiltersLayer = createSelector(
+  getFilters,
+  getMapSettings,
+  (filters, settings) => {
+    const featureCollection = {
+      type: 'FeatureCollection',
+      features: extractFeaturesFromFilters(filters),
+    };
+    const geoJsonSourceDescriptor = GeojsonFileSource.createDescriptor(
+      featureCollection,
+      'spatialFilters'
+    );
+
+    return new VectorLayer({
+      layerDescriptor: {
+        id: SPATIAL_FILTERS_LAYER_ID,
+        visible: settings.showSpatialFilters,
+        alpha: settings.spatialFiltersAlpa,
+        type: LAYER_TYPE.VECTOR,
+        __dataRequests: [
+          {
+            dataId: SOURCE_DATA_ID_ORIGIN,
+            data: featureCollection,
+          },
+        ],
+        style: {
+          properties: {
+            [VECTOR_STYLES.FILL_COLOR]: {
+              type: STYLE_TYPE.STATIC,
+              options: {
+                color: settings.spatialFiltersFillColor,
+              },
+            },
+            [VECTOR_STYLES.LINE_COLOR]: {
+              type: STYLE_TYPE.STATIC,
+              options: {
+                color: settings.spatialFiltersLineColor,
+              },
+            },
+          },
+        },
+      },
+      source: new GeojsonFileSource(geoJsonSourceDescriptor),
+    });
+  }
+);
+
 export const getLayerList = createSelector(
   getLayerListRaw,
   getInspectorAdapters,
@@ -192,6 +250,19 @@ export const getLayerList = createSelector(
     );
   }
 );
+
+export const getFittableLayers = createSelector(getLayerList, layerList => {
+  return layerList.filter(layer => {
+    //These are the only layer-types that implement bounding-box retrieval reliably
+    //This will _not_ work if Maps will allow register custom layer types
+    const isFittable =
+      layer.getType() === LAYER_TYPE.VECTOR ||
+      layer.getType() === LAYER_TYPE.BLENDED_VECTOR ||
+      layer.getType() === LAYER_TYPE.HEATMAP;
+
+    return isFittable && layer.isVisible();
+  });
+});
 
 export const getHiddenLayerIds = createSelector(getLayerListRaw, layers =>
   layers.filter(layer => !layer.visible).map(layer => layer.id)

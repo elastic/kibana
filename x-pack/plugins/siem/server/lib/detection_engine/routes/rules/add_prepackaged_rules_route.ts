@@ -34,12 +34,11 @@ export const addPrepackedRulesRoute = (router: IRouter) => {
 
       try {
         const alertsClient = context.alerting?.getAlertsClient();
-        const actionsClient = context.actions?.getActionsClient();
         const clusterClient = context.core.elasticsearch.dataClient;
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.siem?.getSiemClient();
 
-        if (!siemClient || !actionsClient || !alertsClient) {
+        if (!siemClient || !alertsClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
@@ -49,7 +48,7 @@ export const addPrepackedRulesRoute = (router: IRouter) => {
         const rulesToInstall = getRulesToInstall(rulesFromFileSystem, prepackagedRules);
         const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);
 
-        const { signalsIndex } = siemClient;
+        const signalsIndex = siemClient.getSignalsIndex();
         if (rulesToInstall.length !== 0 || rulesToUpdate.length !== 0) {
           const signalsIndexExists = await getIndexExists(
             clusterClient.callAsCurrentUser,
@@ -62,16 +61,8 @@ export const addPrepackedRulesRoute = (router: IRouter) => {
             });
           }
         }
-        await Promise.all(
-          installPrepackagedRules(alertsClient, actionsClient, rulesToInstall, signalsIndex)
-        );
-        await updatePrepackagedRules(
-          alertsClient,
-          actionsClient,
-          savedObjectsClient,
-          rulesToUpdate,
-          signalsIndex
-        );
+        await Promise.all(installPrepackagedRules(alertsClient, rulesToInstall, signalsIndex));
+        await updatePrepackagedRules(alertsClient, savedObjectsClient, rulesToUpdate, signalsIndex);
         const prepackagedRulesOutput: PrePackagedRulesSchema = {
           rules_installed: rulesToInstall.length,
           rules_updated: rulesToUpdate.length,

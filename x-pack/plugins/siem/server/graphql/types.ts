@@ -134,6 +134,12 @@ export interface TimelineInput {
 
   title?: Maybe<string>;
 
+  templateTimelineId?: Maybe<string>;
+
+  templateTimelineVersion?: Maybe<number>;
+
+  timelineType?: Maybe<TimelineType>;
+
   dateRange?: Maybe<DateRangePickerInput>;
 
   savedQueryId?: Maybe<string>;
@@ -334,6 +340,11 @@ export enum NetworkDnsFields {
 
 export enum TlsFields {
   _id = '_id',
+}
+
+export enum TimelineType {
+  default = 'default',
+  template = 'template',
 }
 
 export enum SortFieldTimeline {
@@ -1946,6 +1957,12 @@ export interface TimelineResult {
 
   title?: Maybe<string>;
 
+  templateTimelineId?: Maybe<string>;
+
+  templateTimelineVersion?: Maybe<number>;
+
+  timelineType?: Maybe<TimelineType>;
+
   updated?: Maybe<number>;
 
   updatedBy?: Maybe<string>;
@@ -2220,6 +2237,8 @@ export interface GetAllTimelineQueryArgs {
   sort?: Maybe<SortTimeline>;
 
   onlyUserFavorite?: Maybe<boolean>;
+
+  timelineType?: Maybe<string>;
 }
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
@@ -2676,6 +2695,8 @@ export namespace QueryResolvers {
     sort?: Maybe<SortTimeline>;
 
     onlyUserFavorite?: Maybe<boolean>;
+
+    timelineType?: Maybe<string>;
   }
 }
 
@@ -8023,6 +8044,12 @@ export namespace TimelineResultResolvers {
 
     title?: TitleResolver<Maybe<string>, TypeParent, TContext>;
 
+    templateTimelineId?: TemplateTimelineIdResolver<Maybe<string>, TypeParent, TContext>;
+
+    templateTimelineVersion?: TemplateTimelineVersionResolver<Maybe<number>, TypeParent, TContext>;
+
+    timelineType?: TimelineTypeResolver<Maybe<TimelineType>, TypeParent, TContext>;
+
     updated?: UpdatedResolver<Maybe<number>, TypeParent, TContext>;
 
     updatedBy?: UpdatedByResolver<Maybe<string>, TypeParent, TContext>;
@@ -8127,6 +8154,21 @@ export namespace TimelineResultResolvers {
   > = Resolver<R, Parent, TContext>;
   export type TitleResolver<
     R = Maybe<string>,
+    Parent = TimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TemplateTimelineIdResolver<
+    R = Maybe<string>,
+    Parent = TimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TemplateTimelineVersionResolver<
+    R = Maybe<number>,
+    Parent = TimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TimelineTypeResolver<
+    R = Maybe<TimelineType>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;

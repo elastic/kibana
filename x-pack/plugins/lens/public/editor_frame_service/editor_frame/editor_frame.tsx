@@ -16,7 +16,7 @@ import {
 } from '../../types';
 import { reducer, getInitialState } from './state_management';
 import { DataPanelWrapper } from './data_panel_wrapper';
-import { ConfigPanelWrapper } from './config_panel_wrapper';
+import { ConfigPanelWrapper } from './config_panel';
 import { FrameLayout } from './frame_layout';
 import { SuggestionPanel } from './suggestion_panel';
 import { WorkspacePanel } from './workspace_panel';
@@ -61,6 +61,8 @@ export function EditorFrame(props: EditorFrameProps) {
 
   // Initialize current datasource and all active datasources
   useEffect(() => {
+    // prevents executing dispatch on unmounted component
+    let isUnmounted = false;
     if (!allLoaded) {
       Object.entries(props.datasourceMap).forEach(([datasourceId, datasource]) => {
         if (
@@ -70,16 +72,21 @@ export function EditorFrame(props: EditorFrameProps) {
           datasource
             .initialize(state.datasourceStates[datasourceId].state || undefined)
             .then(datasourceState => {
-              dispatch({
-                type: 'UPDATE_DATASOURCE_STATE',
-                updater: datasourceState,
-                datasourceId,
-              });
+              if (!isUnmounted) {
+                dispatch({
+                  type: 'UPDATE_DATASOURCE_STATE',
+                  updater: datasourceState,
+                  datasourceId,
+                });
+              }
             })
             .catch(onError);
         }
       });
     }
+    return () => {
+      isUnmounted = true;
+    };
   }, [allLoaded]);
 
   const datasourceLayers: Record<string, DatasourcePublicAPI> = {};
