@@ -28,7 +28,7 @@ export const ExpressionExplorer: FC<Props> = ({ encodedExpression = '' }) => {
   }, []);
 
   return (
-    <div className="canvasLayout elementBuilder">
+    <div className="canvasLayout expressionExplorer">
       <div className="canvasLayout__rows">
         <Page />
       </div>

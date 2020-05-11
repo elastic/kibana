@@ -8,12 +8,13 @@ import React, { FC, useRef } from 'react';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { debounce } from 'lodash';
 
-// @ts-ignore
 import { ExpressionInput } from '../../../../components/expression_input/expression_input';
 import { language, LANGUAGE_ID } from '../../../../lib/monaco_language_def';
 
 import { getFunctions } from '../lib/functions';
 import { useExpressions, useExpressionsActions } from '../hooks/use_expressions';
+
+import './editor.scss';
 
 export const Editor: FC = () => {
   const functionDefinitions = getFunctions();

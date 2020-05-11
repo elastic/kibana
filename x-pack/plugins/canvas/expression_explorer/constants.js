@@ -7,7 +7,7 @@
 const path = require('path');
 
 const EXPRESSION_EXPLORER_NAME = 'expression_explorer';
-const COMPONENT_NAME = 'ElementBuilder';
+const COMPONENT_NAME = 'ExpressionExplorer';
 
 const KIBANA_ROOT_PATH = '../../../..';
 const CANVAS_ROOT_PATH = 'x-pack/plugins/canvas';

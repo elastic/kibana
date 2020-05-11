@@ -5,9 +5,9 @@
  */
 
 import { Dispatch } from 'redux';
-import { ExpressionExplorer } from './expression_explorer_app';
+import { ExpressionExplorerApp } from './expression_explorer_app';
 
-interface ElementBuilderParams {
+interface ExpressionExplorerParams {
   params: {
     encodedExpression?: string;
   };
@@ -15,20 +15,20 @@ interface ElementBuilderParams {
 
 export const routes = [
   {
-    name: 'elementBuilder',
+    name: 'expressionExplorer',
     path: '/builder',
     children: [
       {
         name: 'empty',
         path: '/',
         meta: {
-          component: ExpressionExplorer,
+          component: ExpressionExplorerApp,
         },
       },
       {
         name: 'provided',
         path: '/:encodedExpression',
-        action: (dispatch: Dispatch) => ({ params }: ElementBuilderParams) => {
+        action: (dispatch: Dispatch) => ({ params }: ExpressionExplorerParams) => {
           try {
             const { encodedExpression } = params;
             if (encodedExpression) {
@@ -42,7 +42,7 @@ export const routes = [
           }
         },
         meta: {
-          component: ExpressionExplorer,
+          component: ExpressionExplorerApp,
         },
       },
     ],
