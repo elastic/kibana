@@ -16,9 +16,14 @@ import {
   AdjacentProcessMap,
 } from '../../types';
 import { ResolverEvent } from '../../../../../common/types';
+import * as event from '../../../../../common/models/event';
 import { Vector2 } from '../../types';
 import { add as vector2Add, applyMatrix3 } from '../../lib/vector2';
-import { isGraphableProcess, uniquePidForProcess } from '../../models/process_event';
+import {
+  isGraphableProcess,
+  isTerminatedProcess,
+  uniquePidForProcess,
+} from '../../models/process_event';
 import {
   factory as indexedProcessTreeFactory,
   children as indexedProcessTreeChildren,
@@ -57,7 +62,7 @@ export function hasError(state: DataState) {
  * We can multiply both of these matrices to get the final transformation below.
  */
 /* prettier-ignore */
-const isometricTransformMatrix: Matrix3 = [
+export const isometricTransformMatrix: Matrix3 = [
   Math.sqrt(2) / 2,   -(Math.sqrt(2) / 2),  0,
   Math.sqrt(6) / 6,   Math.sqrt(6) / 6,     -(Math.sqrt(6) / 3),
   0,                  0,                    1,
@@ -75,6 +80,24 @@ export const graphableProcesses = createSelector(
   ({ results }: DataState) => results,
   function(results: DataState['results']) {
     return results.filter(isGraphableProcess);
+  }
+);
+
+/**
+ * Process events that will be displayed as terminated.
+ */
+export const terminatedProcesses = createSelector(
+  ({ results }: DataState) => results,
+  function(results: DataState['results']) {
+    return new Set(
+      results.filter(isTerminatedProcess).map(terminatedEvent => {
+        if (event.isLegacyEvent(terminatedEvent)) {
+          return terminatedEvent.endgame.unique_pid;
+        } else {
+          return terminatedEvent.process?.entity_id;
+        }
+      })
+    );
   }
 );
 
@@ -116,7 +139,7 @@ export const graphableProcesses = createSelector(
  *                   H
  *
  */
-function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): ProcessWidths {
+export function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): ProcessWidths {
   const widths = new Map<ResolverEvent, number>();
 
   if (size(indexedProcessTree) === 0) {
@@ -147,7 +170,7 @@ function widthsOfProcessSubtrees(indexedProcessTree: IndexedProcessTree): Proces
   return widths;
 }
 
-function processEdgeLineSegments(
+export function processEdgeLineSegments(
   indexedProcessTree: IndexedProcessTree,
   widths: ProcessWidths,
   positions: ProcessPositions
@@ -314,7 +337,7 @@ function* levelOrderWithWidths(
   }
 }
 
-function processPositions(
+export function processPositions(
   indexedProcessTree: IndexedProcessTree,
   widths: ProcessWidths
 ): ProcessPositions {

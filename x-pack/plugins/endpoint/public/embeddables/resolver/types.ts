@@ -5,6 +5,7 @@
  */
 
 import { Store } from 'redux';
+import { BBox } from 'rbush';
 
 import { ResolverAction } from './store/actions';
 export { ResolverAction } from './store/actions';
@@ -153,6 +154,25 @@ export interface AABB {
    * Vector who's `x` component is the _right_ side of the AABB and who's `y` component is the _bottom_ side of the AABB.
    **/
   readonly maximum: Vector2;
+}
+
+export type IndexedEntity = IndexedEdgeLineSegment | IndexedProcessNode;
+
+/**
+ * The entity stored in rbush for resolver edge lines.
+ */
+export interface IndexedEdgeLineSegment extends BBox {
+  type: 'edgeLine';
+  entity: EdgeLineSegment;
+}
+
+/**
+ * The entity store in rbush for resolver process nodes.
+ */
+export interface IndexedProcessNode extends BBox {
+  type: 'processNode';
+  entity: ResolverEvent;
+  position: Vector2;
 }
 
 /**

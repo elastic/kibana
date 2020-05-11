@@ -4,10 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import rbush from 'rbush';
+import { createSelector } from 'reselect';
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
 import { ResolverState } from '../types';
+import { applyMatrix3 } from '../lib/vector2';
+import { Vector2, IndexedEntity, IndexedEdgeLineSegment, IndexedProcessNode } from '../types';
+import { factory as indexedProcessTreeFactory } from '../models/indexed_process_tree';
+import {
+  widthsOfProcessSubtrees,
+  processPositions,
+  processEdgeLineSegments,
+  isometricTransformMatrix,
+  graphableProcesses,
+} from './data/selectors';
+import { projectionMatrix as projectionMatrixSelector } from './camera/selectors';
 
 /**
  * A matrix that when applied to a Vector2 will convert it from world coordinates to screen coordinates.
@@ -58,6 +71,11 @@ export const processNodePositionsAndEdgeLineSegments = composeSelectors(
 export const processAdjacencies = composeSelectors(
   dataStateSelector,
   dataSelectors.processAdjacencies
+);
+
+export const terminatedProcesses = composeSelectors(
+  dataStateSelector,
+  dataSelectors.terminatedProcesses
 );
 
 /**
@@ -117,3 +135,91 @@ function composeSelectors<OuterState, InnerState, ReturnValue>(
 ): (state: OuterState) => ReturnValue {
   return state => secondSelector(selector(state));
 }
+
+const spatiallyIndexedEntities = createSelector(
+  (state: ResolverState) => state,
+  function(state) {
+    const indexedProcessTree = indexedProcessTreeFactory(graphableProcesses(state.data));
+    const currentProjectionMatrix = projectionMatrixSelector(state.camera)(Date.now());
+    const [magFactorX] = currentProjectionMatrix;
+    const processNodeViewWidth = 360 * magFactorX;
+    const processNodeViewHeight = 120 * magFactorX;
+    const widths = widthsOfProcessSubtrees(indexedProcessTree);
+    const [width, height] = state.camera.rasterSize;
+    const [currentX, currentY] = state.camera.translationNotCountingCurrentPanning;
+
+    const positions = processPositions(indexedProcessTree, widths);
+
+    const edgeLineSegments = processEdgeLineSegments(indexedProcessTree, widths, positions);
+
+    const tree: rbush<IndexedEntity> = new rbush();
+    const processesToIndex: IndexedProcessNode[] = [];
+    const edgeLineSegmentsToIndex: IndexedEdgeLineSegment[] = [];
+    for (const [processEvent, position] of positions) {
+      const transformedPosition = applyMatrix3(position, isometricTransformMatrix);
+      const [nodeX, nodeY] = transformedPosition;
+      const indexedEvent: IndexedProcessNode = {
+        minX: nodeX - 0.5 * processNodeViewWidth,
+        minY: nodeY - 0.5 * processNodeViewHeight,
+        maxX: nodeX + 0.5 * processNodeViewWidth,
+        maxY: nodeY + 0.5 * processNodeViewHeight,
+        position: transformedPosition,
+        entity: processEvent,
+        type: 'processNode',
+      };
+      processesToIndex.push(indexedEvent);
+    }
+    for (const edgeLineSegment of edgeLineSegments) {
+      const transformedSegment: Vector2[] = [];
+      for (const point of edgeLineSegment) {
+        transformedSegment.push(applyMatrix3(point, isometricTransformMatrix));
+      }
+      const [[x1, y1], [x2, y2]] = transformedSegment;
+      const indexedLineSegment: IndexedEdgeLineSegment = {
+        minX: Math.min(x1, x2),
+        minY: Math.min(y1, y2),
+        maxX: Math.max(x1, x2),
+        maxY: Math.max(y1, y2),
+        entity: transformedSegment,
+        type: 'edgeLine',
+      };
+      edgeLineSegmentsToIndex.push(indexedLineSegment);
+    }
+    tree.load([...processesToIndex, ...edgeLineSegmentsToIndex]);
+    return {
+      tree,
+      currentDimensions: [width, height],
+      currentCamera: [currentX, currentY],
+    };
+  }
+);
+
+export const visibleProcessNodePositionsAndEdgeLineSegments = createSelector(
+  spatiallyIndexedEntities,
+  function visibleProcessNodePositionsAndEdgeLineSegments({
+    tree,
+    currentDimensions: [width, height],
+    currentCamera: [currentX, currentY],
+  }) {
+    const maxX = currentX + width / 2;
+    const minX = currentX - width / 2;
+    const maxY = currentY + height / 2;
+    const minY = currentY - height / 2;
+    const visibleEntities = tree.search({
+      minX,
+      minY,
+      maxX,
+      maxY,
+    });
+    const visibleProcessNodePositions = visibleEntities.filter(
+      (entity): entity is IndexedProcessNode => entity.type === 'processNode'
+    );
+    const visibleEdgeLineSegments = visibleEntities.filter(
+      (entity): entity is IndexedEdgeLineSegment => entity.type === 'edgeLine'
+    );
+    return {
+      visibleProcessNodePositions,
+      visibleEdgeLineSegments,
+    };
+  }
+);

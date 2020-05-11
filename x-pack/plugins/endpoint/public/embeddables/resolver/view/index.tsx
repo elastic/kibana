@@ -51,8 +51,8 @@ export const Resolver = styled(
     className?: string;
     selectedEvent?: ResolverEvent;
   }) {
-    const { processNodePositions, edgeLineSegments } = useSelector(
-      selectors.processNodePositionsAndEdgeLineSegments
+    const { visibleProcessNodePositions, visibleEdgeLineSegments } = useSelector(
+      selectors.visibleProcessNodePositionsAndEdgeLineSegments
     );
 
     const dispatch: (action: ResolverAction) => unknown = useDispatch();
@@ -62,6 +62,7 @@ export const Resolver = styled(
     const isLoading = useSelector(selectors.isLoading);
     const hasError = useSelector(selectors.hasError);
     const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
+    const terminatedProcesses = useSelector(selectors.terminatedProcesses);
 
     useLayoutEffect(() => {
       dispatch({
@@ -95,7 +96,7 @@ export const Resolver = styled(
             tabIndex={0}
             aria-activedescendant={activeDescendantId || undefined}
           >
-            {edgeLineSegments.map(([startPosition, endPosition], index) => (
+            {visibleEdgeLineSegments.map(({ entity: [startPosition, endPosition] }, index) => (
               <EdgeLine
                 key={index}
                 startPosition={startPosition}
@@ -103,8 +104,11 @@ export const Resolver = styled(
                 projectionMatrix={projectionMatrix}
               />
             ))}
-            {[...processNodePositions].map(([processEvent, position], index) => {
-              const adjacentNodeMap = processToAdjacencyMap.get(processEvent);
+            {visibleProcessNodePositions.map(({ entity, position }, index) => {
+              const adjacentNodeMap = processToAdjacencyMap.get(entity);
+              const {
+                process: { entity_id },
+              } = entity;
               if (!adjacentNodeMap) {
                 // This should never happen
                 throw new Error('Issue calculating adjacency node map.');
@@ -114,8 +118,10 @@ export const Resolver = styled(
                   key={index}
                   position={position}
                   projectionMatrix={projectionMatrix}
-                  event={processEvent}
+                  event={entity}
                   adjacentNodeMap={adjacentNodeMap}
+                  isProcessTerminated={terminatedProcesses.has(entity_id)}
+                  isProcessOrigin={false}
                 />
               );
             })}

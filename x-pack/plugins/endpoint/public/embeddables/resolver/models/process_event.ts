@@ -16,6 +16,10 @@ export function isGraphableProcess(passedEvent: ResolverEvent) {
   return eventType(passedEvent) === 'processCreated' || eventType(passedEvent) === 'processRan';
 }
 
+export function isTerminatedProcess(passedEvent: ResolverEvent) {
+  return eventType(passedEvent) === 'processTerminated';
+}
+
 function isValue(field: string | string[], value: string) {
   if (field instanceof Array) {
     return field.length === 1 && field[0] === value;

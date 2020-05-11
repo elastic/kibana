@@ -8,6 +8,8 @@
     "test:generate": "ts-node --project scripts/cli_tsconfig.json scripts/resolver_generator.ts"
   },
   "dependencies": {
+    "@types/rbush": "^3.0.0",
+    "rbush": "^3.0.1",
     "react-redux": "^7.1.0"
   },
   "devDependencies": {
