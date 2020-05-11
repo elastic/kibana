@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, CoreStart, KibanaRequest } from 'src/core/server';
+import { CoreStart, KibanaRequest } from 'src/core/server';
 import { GlobalSearchProviderContext } from './types';
 
-export const getContextFactory = (coreSetup: CoreSetup, coreStart: CoreStart) => (
+export type GlobalSearchContextFactory = (request: KibanaRequest) => GlobalSearchProviderContext;
+
+export const getContextFactory = (coreStart: CoreStart) => (
   request: KibanaRequest
 ): GlobalSearchProviderContext => {
   const soClient = coreStart.savedObjects.getScopedClient(request);

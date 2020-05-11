@@ -9,5 +9,6 @@ export {
   GlobalSearchResultProvider,
   GlobalSearchProviderFindOptions,
   GlobalSearchProviderResult,
+  GlobalSearchProviderResultUrl,
 } from './types';
-export { getContextFactory } from './context';
+export { getContextFactory, GlobalSearchContextFactory } from './context';

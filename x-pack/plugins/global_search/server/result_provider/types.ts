@@ -36,6 +36,8 @@ export interface GlobalSearchProviderFindOptions {
   maxResults: number;
 }
 
+export type GlobalSearchProviderResultUrl = string | { path: string; prependBasePath: boolean };
+
 /**
  * Representation of a result returned by a {@link GlobalSearchResultProvider | result provider}
  */
@@ -57,7 +59,7 @@ export interface GlobalSearchProviderResult {
    * `result.url = '/app/my-app/my-result-type/id';`
    * `result.url = { path: '/base-path/app/my-app/my-result-type/id', prependBasePath: false };`
    */
-  url: string | { path: string; prependBasePath: boolean };
+  url: GlobalSearchProviderResultUrl;
   /** the score of the result, from 1 (lowest) to 100 (highest) */
   score: number;
   /** an optional record of metadata for this result */
