@@ -79,9 +79,7 @@ export default function({ getService }) {
       expect(stats.stack_stats.kibana.plugins.apm.services_per_agent).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.infraops.last_24_hours).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.kql.defaultQueryLanguage).to.be.a('string');
-      expect(stats.stack_stats.kibana.plugins['maps-telemetry'].attributes.timeCaptured).to.be.a(
-        'string'
-      );
+      expect(stats.stack_stats.kibana.plugins['maps-telemetry'].timeCaptured).to.be.a('string');
 
       expect(stats.stack_stats.kibana.plugins.reporting.enabled).to.be(true);
       expect(stats.stack_stats.kibana.plugins.rollups.index_patterns).to.be.an('object');
