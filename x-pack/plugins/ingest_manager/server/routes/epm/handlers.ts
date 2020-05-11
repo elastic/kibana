@@ -27,7 +27,6 @@ import {
   installPackage,
   removeInstallation,
 } from '../../services/epm/packages';
-import { appContextService } from '../../services';
 
 export const getCategoriesHandler: RequestHandler = async (context, request, response) => {
   try {
@@ -122,12 +121,10 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
 export const installPackageHandler: RequestHandler<TypeOf<
   typeof InstallPackageRequestSchema.params
 >> = async (context, request, response) => {
-  const logger = appContextService.getLogger();
-  const { pkgkey } = request.params;
-  const savedObjectsClient = context.core.savedObjects.client;
-  const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
-  if (logger) logger.info(`Attempting installation of package ${pkgkey}.`);
   try {
+    const { pkgkey } = request.params;
+    const savedObjectsClient = context.core.savedObjects.client;
+    const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
     const res = await installPackage({
       savedObjectsClient,
       pkgkey,
@@ -139,7 +136,6 @@ export const installPackageHandler: RequestHandler<TypeOf<
     };
     return response.ok({ body });
   } catch (e) {
-    if (logger) logger.error(`Error during installation of package ${pkgkey}: ${e}`);
     if (e.isBoom) {
       return response.customError({
         statusCode: e.output.statusCode,
