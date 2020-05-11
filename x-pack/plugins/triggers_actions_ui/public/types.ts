@@ -128,7 +128,7 @@ export interface AlertTypeModel<AlertParamsType = any, AlertsContextValue = any>
   iconClass: string;
   validate: (alertParams: AlertParamsType) => ValidationResult;
   alertParamsExpression:
-    | React.FunctionComponent<AlertTypeParamsExpressionProps<AlertParamsType, AlertsContextValue>>
+    | React.FunctionComponent<any>
     | React.LazyExoticComponent<
         ComponentType<AlertTypeParamsExpressionProps<AlertParamsType, AlertsContextValue>>
       >;
