@@ -11,15 +11,14 @@ import deepMerge from 'deepmerge';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 
-import { NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS } from '../../../../../../../../../plugins/siem/common/constants';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { loadActionTypes } from '../../../../../../../../../plugins/triggers_actions_ui/public/application/lib/action_connector_api';
+import { NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS } from '../../../../../../common/constants';
 import { SelectField } from '../../../../../shared_imports';
 import {
   ActionForm,
   ActionType,
-} from '../../../../../../../../../plugins/triggers_actions_ui/public';
-import { AlertAction } from '../../../../../../../../../plugins/alerting/common';
+  loadActionTypes,
+} from '../../../../../../../triggers_actions_ui/public';
+import { AlertAction } from '../../../../../../../alerting/common';
 import { useKibana } from '../../../../../lib/kibana';
 import { FORM_ERRORS_TITLE } from './translations';
 
@@ -42,6 +41,8 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
     http,
     triggers_actions_ui: { actionTypeRegistry },
     notifications,
+    docLinks,
+    application: { capabilities },
   } = useKibana().services;
 
   const actions: AlertAction[] = useMemo(
@@ -121,6 +122,8 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
       ) : null}
       <ActionForm
         actions={actions}
+        docLinks={docLinks}
+        capabilities={capabilities}
         messageVariables={messageVariables}
         defaultActionGroupId={DEFAULT_ACTION_GROUP_ID}
         setActionIdByIndex={setActionIdByIndex}

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   AlertAction,
   ActionTypeRegistryContract,
-} from '../../../../../../../../../plugins/triggers_actions_ui/public';
+} from '../../../../../../../triggers_actions_ui/public';
 import { FormSchema, FormData, ValidationFunc, ERROR_CODE } from '../../../../../shared_imports';
 import * as I18n from './translations';
 import { isUuidv4, getActionTypeName, validateMustache, validateActionParams } from './utils';
