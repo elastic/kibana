@@ -76,13 +76,7 @@ export function registerErrorRateAlertType({
       const environmentTerm =
         alertParams.environment === ENVIRONMENT_ALL
           ? []
-          : [
-              {
-                term: {
-                  [SERVICE_ENVIRONMENT]: alertParams.environment
-                }
-              }
-            ];
+          : [{ term: { [SERVICE_ENVIRONMENT]: alertParams.environment } }];
 
       const searchParams = {
         index: indices['apm_oss.errorIndices'],
