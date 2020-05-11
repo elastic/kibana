@@ -10,7 +10,6 @@ import {
   HostPolicyResponseAppliedAction,
   HostPolicyResponseConfiguration,
   HostPolicyResponseActionStatus,
-  ImmutableArray,
 } from '../../../../../common/types';
 import { HostState, HostIndexUIQueryParams } from '../../types';
 
@@ -83,7 +82,7 @@ export const policyResponseFailedOrWarningActionCount: (
  */
 export const policyResponseActions: (
   state: Immutable<HostState>
-) => undefined | ImmutableArray<HostPolicyResponseAppliedAction> = createSelector(
+) => undefined | Immutable<HostPolicyResponseAppliedAction[]> = createSelector(
   detailsPolicyAppliedResponse,
   applied => {
     return applied?.actions;

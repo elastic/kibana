@@ -611,10 +611,36 @@ export enum HostPolicyResponseActionStatus {
 }
 
 /**
+ * The name of actions that can be applied during the processing of a policy
+ */
+type HostPolicyActionName =
+  | 'download_model'
+  | 'ingest_events_config'
+  | 'workflow'
+  | 'configure_elasticsearch_connection'
+  | 'configure_kernel'
+  | 'configure_logging'
+  | 'configure_malware'
+  | 'connect_kernel'
+  | 'detect_file_open_events'
+  | 'detect_file_write_events'
+  | 'detect_image_load_events'
+  | 'detect_process_events'
+  | 'download_global_artifacts'
+  | 'load_config'
+  | 'load_malware_model'
+  | 'read_elasticsearch_config'
+  | 'read_events_config'
+  | 'read_kernel_config'
+  | 'read_logging_config'
+  | 'read_malware_config'
+  | string;
+
+/**
  * Host Policy Response Applied Action
  */
 export interface HostPolicyResponseAppliedAction {
-  name: string;
+  name: HostPolicyActionName;
   status: HostPolicyResponseActionStatus;
   message: string;
 }
@@ -623,7 +649,7 @@ export type HostPolicyResponseConfiguration = HostPolicyResponse['endpoint']['po
 
 interface HostPolicyResponseConfigurationStatus {
   status: HostPolicyResponseActionStatus;
-  concerned_actions: string[];
+  concerned_actions: HostPolicyActionName[];
 }
 
 /**
