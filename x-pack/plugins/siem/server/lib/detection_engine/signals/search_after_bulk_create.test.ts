@@ -15,7 +15,7 @@ import { searchAfterAndBulkCreate } from './search_after_bulk_create';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import uuid from 'uuid';
-import { ListClient } from '../../../../../lists/server/services/lists/client';
+import { ListClient } from '../../../../../lists/server';
 import { ListItemArraySchema } from '../../../../../lists/common/schemas';
 
 describe('searchAfterAndBulkCreate', () => {

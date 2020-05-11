@@ -17,7 +17,7 @@ import { scheduleNotificationActions } from '../notifications/schedule_notificat
 import { RuleAlertType } from '../rules/types';
 import { findMlSignals } from './find_ml_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
-import { ListPluginSetup } from '../../../../../lists/server';
+import { ListPluginSetup } from '../../../../../lists/server/types';
 
 jest.mock('./rule_status_saved_objects_client');
 jest.mock('./rule_status_service');

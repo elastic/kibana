@@ -9,9 +9,10 @@ import { PluginInitializerContext } from '../../../../src/core/server';
 import { ConfigSchema } from './config';
 import { ListPlugin } from './plugin';
 
-export { GetListClientType, ListClientType, ListPluginSetup } from './plugin';
-export { getListItemByValues } from './services/items';
-export { Type } from '../common/schemas/common';
+// exporting these since its required at top level in siem plugin
+export { ListPluginSetup } from './types';
+export { ListClient } from './services/lists/client';
+
 export const config = { schema: ConfigSchema };
 export const plugin = (initializerContext: PluginInitializerContext): ListPlugin =>
   new ListPlugin(initializerContext);

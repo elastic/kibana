@@ -5,11 +5,13 @@
  */
 import { get } from 'lodash/fp';
 
-import { ListClientType, Type as ListValueType } from '../../../../../lists/server';
+import { ListItemArraySchema } from '../../../../../lists/common/schemas/response';
+import { Type as ListValueType } from '../../../../../lists/common/schemas/common';
+import { ListClient } from '../../../../../lists/server';
 import { SignalSearchResponse } from './types';
 
 interface FilterEventsAgainstList {
-  listClient: ListClientType;
+  listClient: ListClient;
   eventSearchResult: SignalSearchResponse;
   type: ListValueType;
   listId: string;
@@ -31,7 +33,7 @@ export const filterEventsAgainstList = async ({
     const valueSet = new Set<string>(valuesOfGivenType); // make them small
 
     // get the ips that match with items in our list
-    const listSignals = await listClient.getListItemByValues({
+    const listSignals: ListItemArraySchema = await listClient.getListItemByValues({
       listId,
       type,
       value: [...valueSet],

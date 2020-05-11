@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable complexity */
+
 import { Logger, KibanaRequest } from 'src/core/server';
 
 import { SIGNALS_ID, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
@@ -54,7 +56,14 @@ export const signalRulesAlertType = ({
       params: signalParamsSchema(),
     },
     producer: 'siem',
-    async executor({ previousStartedAt, alertId, services, params, spaceId }) {
+    async executor({
+      previousStartedAt,
+      alertId,
+      services,
+      params,
+      spaceId,
+      updatedBy: updatedByUser,
+    }) {
       const {
         anomalyThreshold,
         from,
@@ -207,7 +216,11 @@ export const signalRulesAlertType = ({
             throw new Error('lists plugin unavailable during rule execution');
           }
 
-          const listClient = await lists.getListClient(services.callCluster, spaceId);
+          const listClient = await lists.getListClient(
+            services.callCluster,
+            spaceId,
+            updatedByUser ?? 'elastic'
+          );
           const inputIndex = await getInputIndex(services, version, index);
           const esFilter = await getFilter({
             type,

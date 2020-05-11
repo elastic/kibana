@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ListClientType, Type as ListValueType } from '../../../../../lists/server';
+import { ListClient } from '../../../../../lists/server';
+import { Type as ListValueType } from '../../../../../lists/common/schemas/common';
 import { AlertServices } from '../../../../../alerting/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
@@ -17,7 +18,7 @@ import { filterEventsAgainstList } from './filter_events_with_list';
 interface SearchAfterAndBulkCreateParams {
   ruleParams: RuleTypeParams;
   services: AlertServices;
-  listClient: ListClientType; // for now....
+  listClient: ListClient;
   listValueType: ListValueType;
   listValueField: string; // ECS path to field that list values apply to
   listId: string;
