@@ -91,6 +91,7 @@ const ConnectorsComponent: React.FC<Props> = ({
             isLoading={isLoading}
             onChange={onChangeConnector}
             data-test-subj="case-connectors-dropdown"
+            appendAddConnectorButton={true}
           />
         </EuiFormRowExtended>
       </EuiDescribedFormGroup>

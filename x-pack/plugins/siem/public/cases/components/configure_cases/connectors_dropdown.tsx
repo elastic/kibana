@@ -18,6 +18,7 @@ export interface Props {
   isLoading: boolean;
   onChange: (id: string) => void;
   selectedConnector: string;
+  appendAddConnectorButton?: boolean;
 }
 
 const ICON_SIZE = 'm';
@@ -58,36 +59,39 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
   isLoading,
   onChange,
   selectedConnector,
+  appendAddConnectorButton = false,
 }) => {
-  const connectorsAsOptions = useMemo(
-    () =>
-      connectors
-        .reduce(
-          (acc, connector) => [
-            ...acc,
-            {
-              value: connector.id,
-              inputDisplay: (
-                <EuiFlexGroup gutterSize="none" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiIconExtended
-                      type={connectorsConfiguration[connector.actionTypeId]?.logo ?? ''}
-                      size={ICON_SIZE}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <span>{connector.name}</span>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ),
-              'data-test-subj': `dropdown-connector-${connector.id}`,
-            },
-          ],
-          [noConnectorOption]
-        )
-        .concat([addNewConnector]),
-    [connectors]
-  );
+  const connectorsAsOptions = useMemo(() => {
+    const connectorsFormatted = connectors.reduce(
+      (acc, connector) => [
+        ...acc,
+        {
+          value: connector.id,
+          inputDisplay: (
+            <EuiFlexGroup gutterSize="none" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiIconExtended
+                  type={connectorsConfiguration[connector.actionTypeId]?.logo ?? ''}
+                  size={ICON_SIZE}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <span>{connector.name}</span>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+          'data-test-subj': `dropdown-connector-${connector.id}`,
+        },
+      ],
+      [noConnectorOption]
+    );
+
+    if (appendAddConnectorButton) {
+      return [...connectorsFormatted, addNewConnector];
+    }
+
+    return connectorsFormatted;
+  }, [connectors]);
 
   return (
     <EuiSuperSelect
