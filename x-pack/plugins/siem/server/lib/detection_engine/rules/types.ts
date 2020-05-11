@@ -14,7 +14,7 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/server';
 import { AlertsClient, PartialAlert } from '../../../../../alerting/server';
-import { Alert } from '../../../../../alerting/common';
+import { Alert, SanitizedAlert } from '../../../../../alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { RuleAlertParams, RuleTypeParams, RuleAlertParamsRest } from '../types';
 
@@ -140,8 +140,8 @@ export interface Clients {
   alertsClient: AlertsClient;
 }
 
-export type PatchRuleParams = Partial<Omit<RuleAlertParams, 'throttle'>> & {
-  id: string | undefined | null;
+export type PatchRuleParams = Partial<Omit<RuleAlertParams, 'ruleId' | 'throttle'>> & {
+  rule: SanitizedAlert | null;
   savedObjectsClient: SavedObjectsClientContract;
 } & Clients;
 
