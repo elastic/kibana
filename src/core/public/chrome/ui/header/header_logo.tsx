@@ -55,38 +55,31 @@ function onClick(
     return;
   }
 
-  if (!forceNavigation && !event.altKey && !event.metaKey && !event.ctrlKey) {
+  if (event.isDefaultPrevented() || event.altKey || event.metaKey || event.ctrlKey) {
+    return;
+  }
+
+  if (forceNavigation) {
+    const toParsed = Url.parse(anchor.href);
+    const fromParsed = Url.parse(document.location.href);
+    const sameProto = toParsed.protocol === fromParsed.protocol;
+    const sameHost = toParsed.host === fromParsed.host;
+    const samePath = toParsed.path === fromParsed.path;
+
+    if (sameProto && sameHost && samePath) {
+      if (toParsed.hash) {
+        document.location.reload();
+      }
+
+      // event.preventDefault() keeps the browser from seeing the new url as an update
+      // and even setting window.location does not mimic that behavior, so instead
+      // we use stopPropagation() to prevent angular from seeing the click and
+      // starting a digest cycle/attempting to handle it in the router.
+      event.stopPropagation();
+    }
+  } else {
     navigateToApp('home');
     event.preventDefault();
-    return;
-  }
-
-  if (
-    !forceNavigation ||
-    event.isDefaultPrevented() ||
-    event.altKey ||
-    event.metaKey ||
-    event.ctrlKey
-  ) {
-    return;
-  }
-
-  const toParsed = Url.parse(anchor.href);
-  const fromParsed = Url.parse(document.location.href);
-  const sameProto = toParsed.protocol === fromParsed.protocol;
-  const sameHost = toParsed.host === fromParsed.host;
-  const samePath = toParsed.path === fromParsed.path;
-
-  if (sameProto && sameHost && samePath) {
-    if (toParsed.hash) {
-      document.location.reload();
-    }
-
-    // event.preventDefault() keeps the browser from seeing the new url as an update
-    // and even setting window.location does not mimic that behavior, so instead
-    // we use stopPropagation() to prevent angular from seeing the click and
-    // starting a digest cycle/attempting to handle it in the router.
-    event.stopPropagation();
   }
 }
 
