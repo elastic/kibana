@@ -7,9 +7,10 @@
 import boom from 'boom';
 import { errors as elasticsearchErrors } from 'elasticsearch';
 import { Legacy } from 'kibana';
+import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
-import { Logger, ReportingResponseToolkit, ServerFacade } from '../../types';
-import { ReportingCore, ReportingSetupDeps } from '../types';
+import { LevelLogger } from '../lib';
+import { ReportingSetupDeps, ServerFacade } from '../types';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
@@ -21,7 +22,7 @@ export function registerJobGenerationRoutes(
   reporting: ReportingCore,
   server: ServerFacade,
   plugins: ReportingSetupDeps,
-  logger: Logger
+  logger: LevelLogger
 ) {
   const config = reporting.getConfig();
   const downloadBaseUrl =
@@ -34,7 +35,7 @@ export function registerJobGenerationRoutes(
     exportTypeId: string,
     jobParams: object,
     legacyRequest: Legacy.Request,
-    h: ReportingResponseToolkit
+    h: Legacy.ResponseToolkit
   ) {
     const request = makeRequestFacade(legacyRequest);
     const user = request.pre.user;

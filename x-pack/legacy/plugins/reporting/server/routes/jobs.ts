@@ -7,17 +7,11 @@
 import Boom from 'boom';
 import { ResponseObject } from 'hapi';
 import { Legacy } from 'kibana';
+import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
-import {
-  JobDocOutput,
-  JobSource,
-  ListQuery,
-  Logger,
-  ReportingResponseToolkit,
-  ServerFacade,
-} from '../../types';
+import { LevelLogger } from '../lib';
 import { jobsQueryFactory } from '../lib/jobs_query';
-import { ReportingCore, ReportingSetupDeps } from '../types';
+import { JobDocOutput, JobSource, ReportingSetupDeps, ServerFacade } from '../types';
 import {
   deleteJobResponseHandlerFactory,
   downloadJobResponseHandlerFactory,
@@ -29,6 +23,11 @@ import {
   getRouteConfigFactoryManagementPre,
 } from './lib/route_config_factories';
 
+interface ListQuery {
+  page: string;
+  size: string;
+  ids?: string; // optional field forbids us from extending RequestQuery
+}
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
 function isResponse(response: Boom<null> | ResponseObject): response is ResponseObject {
@@ -39,7 +38,7 @@ export function registerJobInfoRoutes(
   reporting: ReportingCore,
   server: ServerFacade,
   plugins: ReportingSetupDeps,
-  logger: Logger
+  logger: LevelLogger
 ) {
   const config = reporting.getConfig();
   const { elasticsearch } = plugins;
@@ -148,7 +147,7 @@ export function registerJobInfoRoutes(
     path: `${MAIN_ENTRY}/download/{docId}`,
     method: 'GET',
     options: getRouteConfigDownload(),
-    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
+    handler: async (legacyRequest: Legacy.Request, h: Legacy.ResponseToolkit) => {
       const request = makeRequestFacade(legacyRequest);
       const { docId } = request.params;
 
@@ -188,7 +187,7 @@ export function registerJobInfoRoutes(
     path: `${MAIN_ENTRY}/delete/{docId}`,
     method: 'DELETE',
     options: getRouteConfigDelete(),
-    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
+    handler: async (legacyRequest: Legacy.Request, h: Legacy.ResponseToolkit) => {
       const request = makeRequestFacade(legacyRequest);
       const { docId } = request.params;
 

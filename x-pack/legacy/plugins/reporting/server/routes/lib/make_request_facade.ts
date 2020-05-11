@@ -7,11 +7,11 @@
 import { RequestQuery } from 'hapi';
 import { Legacy } from 'kibana';
 import {
-  RequestFacade,
   ReportingRequestPayload,
   ReportingRequestPre,
   ReportingRequestQuery,
-} from '../../../types';
+  RequestFacade,
+} from '../../../server/types';
 
 export function makeRequestFacade(request: Legacy.Request): RequestFacade {
   // This condition is for unit tests

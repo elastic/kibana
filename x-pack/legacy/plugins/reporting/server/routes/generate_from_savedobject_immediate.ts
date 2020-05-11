@@ -4,21 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ResponseObject } from 'hapi';
 import { Legacy } from 'kibana';
+import { ReportingCore } from '../';
 import { API_BASE_GENERATE_V1 } from '../../common/constants';
 import { createJobFactory, executeJobFactory } from '../../export_types/csv_from_savedobject';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
 import { JobDocPayloadPanelCsv } from '../../export_types/csv_from_savedobject/types';
-import {
-  JobDocOutput,
-  Logger,
-  ReportingResponseToolkit,
-  ResponseFacade,
-  ServerFacade,
-} from '../../types';
-import { ReportingCore, ReportingSetupDeps } from '../types';
+import { LevelLogger } from '../lib';
+import { JobDocOutput, ReportingSetupDeps, ServerFacade } from '../types';
 import { makeRequestFacade } from './lib/make_request_facade';
 import { getRouteOptionsCsv } from './lib/route_config_factories';
+
+type ResponseFacade = ResponseObject & {
+  isBoom: boolean;
+};
 
 /*
  * This function registers API Endpoints for immediate Reporting jobs. The API inputs are:
@@ -33,7 +33,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
   reporting: ReportingCore,
   server: ServerFacade,
   plugins: ReportingSetupDeps,
-  parentLogger: Logger
+  parentLogger: LevelLogger
 ) {
   const config = reporting.getConfig();
   const routeOptions = getRouteOptionsCsv(config, plugins, parentLogger);
@@ -47,7 +47,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
     path: `${API_BASE_GENERATE_V1}/immediate/csv/saved-object/{savedObjectType}:{savedObjectId}`,
     method: 'POST',
     options: routeOptions,
-    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
+    handler: async (legacyRequest: Legacy.Request, h: Legacy.ResponseToolkit) => {
       const request = makeRequestFacade(legacyRequest);
       const logger = parentLogger.clone(['savedobject-csv']);
       const jobParams = getJobParamsFromRequest(request, { isImmediate: true });

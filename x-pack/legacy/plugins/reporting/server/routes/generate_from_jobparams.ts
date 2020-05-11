@@ -8,16 +8,16 @@ import boom from 'boom';
 import Joi from 'joi';
 import { Legacy } from 'kibana';
 import rison from 'rison-node';
+import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
-import { Logger, ReportingResponseToolkit, ServerFacade } from '../../types';
-import { ReportingCore, ReportingSetupDeps } from '../types';
+import { LevelLogger } from '../lib';
+import { HandlerErrorFunction, HandlerFunction, ReportingSetupDeps, ServerFacade } from '../types';
 import { makeRequestFacade } from './lib/make_request_facade';
 import {
   GetRouteConfigFactoryFn,
   getRouteConfigFactoryReportingPre,
   RouteConfigFactory,
 } from './lib/route_config_factories';
-import { HandlerErrorFunction, HandlerFunction } from './types';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
@@ -27,7 +27,7 @@ export function registerGenerateFromJobParams(
   plugins: ReportingSetupDeps,
   handler: HandlerFunction,
   handleError: HandlerErrorFunction,
-  logger: Logger
+  logger: LevelLogger
 ) {
   const config = reporting.getConfig();
   const getRouteConfig = () => {
@@ -63,7 +63,7 @@ export function registerGenerateFromJobParams(
     path: `${BASE_GENERATE}/{exportType}`,
     method: 'POST',
     options: getRouteConfig(),
-    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
+    handler: async (legacyRequest: Legacy.Request, h: Legacy.ResponseToolkit) => {
       const request = makeRequestFacade(legacyRequest);
       let jobParamsRison: string | null;
 

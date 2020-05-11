@@ -5,9 +5,11 @@
  */
 
 import Hapi from 'hapi';
+import { ReportingConfig, ReportingCore } from '../';
 import { createMockReportingCore } from '../../test_helpers';
-import { Logger, ServerFacade } from '../../types';
-import { ReportingConfig, ReportingCore, ReportingSetupDeps } from '../types';
+import { LevelLogger } from '../lib';
+import { ReportingSetupDeps, ServerFacade } from '../types';
+import { registerJobGenerationRoutes } from './generation';
 
 jest.mock('./lib/authorized_user_pre_routing', () => ({
   authorizedUserPreRoutingFactory: () => () => ({}),
@@ -18,8 +20,6 @@ jest.mock('./lib/reporting_feature_pre_routing', () => ({
   }),
 }));
 
-import { registerJobGenerationRoutes } from './generation';
-
 let mockServer: Hapi.Server;
 let mockReportingPlugin: ReportingCore;
 let mockReportingConfig: ReportingConfig;
@@ -27,7 +27,7 @@ let mockReportingConfig: ReportingConfig;
 const mockLogger = ({
   error: jest.fn(),
   debug: jest.fn(),
-} as unknown) as Logger;
+} as unknown) as LevelLogger;
 
 beforeEach(async () => {
   mockServer = new Hapi.Server({
