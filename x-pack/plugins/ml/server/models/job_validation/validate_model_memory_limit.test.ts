@@ -24,6 +24,7 @@ describe('ML - validateModelMemoryLimit', () => {
     },
     limits: {
       max_model_memory_limit: '30mb',
+      effective_max_model_memory_limit: '40mb',
     },
   };
 
@@ -208,6 +209,30 @@ describe('ML - validateModelMemoryLimit', () => {
     return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
       const ids = messages.map(m => m.id);
       expect(ids).toEqual(['half_estimated_mml_greater_than_mml']);
+    });
+  });
+
+  it('Called with no duration or split and mml above limit, no max setting', () => {
+    const job = getJobConfig();
+    const duration = undefined;
+    // @ts-ignore
+    job.analysis_limits.model_memory_limit = '31mb';
+
+    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
+      const ids = messages.map(m => m.id);
+      expect(ids).toEqual([]);
+    });
+  });
+
+  it('Called with no duration or split and mml above limit, no max setting, above effective max mml', () => {
+    const job = getJobConfig();
+    const duration = undefined;
+    // @ts-ignore
+    job.analysis_limits.model_memory_limit = '41mb';
+
+    return validateModelMemoryLimit(getMockCallWithRequest(), job, duration).then(messages => {
+      const ids = messages.map(m => m.id);
+      expect(ids).toEqual(['mml_greater_than_effective_max_mml']);
     });
   });
 
