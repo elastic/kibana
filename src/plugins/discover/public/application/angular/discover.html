@@ -89,24 +89,12 @@
               </span>
             </button>
 
-            <div class="dscResultCount">
-              <strong data-test-subj="discoverQueryHits">{{(hits || 0) | number:0}}</strong>
-              <span
-                class="dscResultHits"
-                i18n-id="discover.hitsPluralTitle"
-                i18n-default-message="{hits, plural, one {hit} other {hits}}"
-                i18n-values="{ hits }"
-              ></span>
-              <button
-                ng-if="opts.savedSearch.id"
-                class="kuiLink"
-                type="button"
-                id="reload_saved_search"
-                ng-click="resetQuery()"
-              >
-                {{::'discover.reloadSavedSearchButton' | i18n: {defaultMessage: 'Reset search'} }}
-              </button>
-            </div>
+            <hits-counter
+              hits="hits || 0"
+              show-reset-button="opts.savedSearch.id"
+              on-reset-query="resetQuery"
+            >
+            </hits-counter>
 
             <section
               aria-label="{{::'discover.histogramOfFoundDocumentsAriaLabel' | i18n: {defaultMessage: 'Histogram of found documents'} }}"
