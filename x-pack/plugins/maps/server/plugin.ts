@@ -7,6 +7,8 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 
+import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
 }
@@ -15,31 +17,31 @@ export class MapsPlugin implements Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
   setup(core: CoreSetup, plugins: SetupDeps) {
     plugins.features.registerFeature({
-      id: 'maps',
+      id: APP_ID,
       name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
         defaultMessage: 'Maps',
       }),
       order: 600,
-      icon: 'gisApp',
-      navLinkId: 'maps',
-      app: ['maps', 'kibana'],
-      catalogue: ['maps'],
+      icon: APP_ICON,
+      navLinkId: APP_ID,
+      app: [APP_ID, 'kibana'],
+      catalogue: [APP_ID],
       privileges: {
         all: {
-          app: ['maps', 'kibana'],
-          catalogue: ['maps'],
+          app: [APP_ID, 'kibana'],
+          catalogue: [APP_ID],
           savedObject: {
-            all: ['map', 'query'],
+            all: [MAP_SAVED_OBJECT_TYPE, 'query'],
             read: ['index-pattern'],
           },
           ui: ['save', 'show', 'saveQuery'],
         },
         read: {
-          app: ['maps', 'kibana'],
-          catalogue: ['maps'],
+          app: [APP_ID, 'kibana'],
+          catalogue: [APP_ID],
           savedObject: {
             all: [],
-            read: ['map', 'index-pattern', 'query'],
+            read: [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'query'],
           },
           ui: ['show'],
         },
