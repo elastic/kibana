@@ -233,6 +233,58 @@ describe('The metric threshold alert type', () => {
       expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
   });
+  describe('querying with the p99 aggregator', () => {
+    const instanceID = 'test-*';
+    const execute = (comparator: Comparator, threshold: number[]) =>
+      executor({
+        services,
+        params: {
+          criteria: [
+            {
+              ...baseCriterion,
+              comparator,
+              threshold,
+              aggType: 'p99',
+              metric: 'test.metric.2',
+            },
+          ],
+        },
+      });
+    test('alerts based on the p99 values', async () => {
+      await execute(Comparator.GT, [1]);
+      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
+      await execute(Comparator.LT, [1]);
+      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+    });
+  });
+  describe('querying with the p95 aggregator', () => {
+    const instanceID = 'test-*';
+    const execute = (comparator: Comparator, threshold: number[]) =>
+      executor({
+        services,
+        params: {
+          criteria: [
+            {
+              ...baseCriterion,
+              comparator,
+              threshold,
+              aggType: 'p95',
+              metric: 'test.metric.1',
+            },
+          ],
+        },
+      });
+    test('alerts based on the p95 values', async () => {
+      await execute(Comparator.GT, [0.25]);
+      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
+      await execute(Comparator.LT, [0.95]);
+      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+    });
+  });
   describe("querying a metric that hasn't reported data", () => {
     const instanceID = 'test-*';
     const execute = (alertOnNoData: boolean) =>

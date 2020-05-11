@@ -118,10 +118,7 @@ export const ExpressionChart: React.FC<Props> = ({
   const series = {
     ...firstSeries,
     rows: firstSeries.rows.map(row => {
-      const newRow: MetricsExplorerRow = {
-        timestamp: row.timestamp,
-        metric_0: row.metric_0 || null,
-      };
+      const newRow: MetricsExplorerRow = { ...row };
       thresholds.forEach((thresholdValue, index) => {
         newRow[`metric_threshold_${index}`] = thresholdValue;
       });
@@ -224,7 +221,7 @@ export const ExpressionChart: React.FC<Props> = ({
               />
             </>
           ) : null}
-          {isAbove ? (
+          {isAbove && first(expression.threshold) != null ? (
             <RectAnnotation
               id="upper-threshold"
               style={{
