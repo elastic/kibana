@@ -7,6 +7,7 @@
 import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { isString, isEmpty } from 'lodash/fp';
 import React from 'react';
+import styled from 'styled-components';
 
 import { DefaultDraggable } from '../../../draggables';
 import { getEmptyTagValue } from '../../../empty_value';
@@ -17,6 +18,10 @@ import { isUrlInvalid } from '../../../../pages/detection_engine/rules/component
 import endPointSvg from '../../../../utils/logo_endpoint/64_color.svg';
 
 import * as i18n from './translations';
+
+const EventModuleFlexItem = styled(EuiFlexItem)`
+  width: 100%;
+`;
 
 export const renderRuleName = ({
   contextId,
@@ -87,7 +92,7 @@ export const renderEventModule = ({
         endpointRefUrl != null && !isEmpty(endpointRefUrl) ? 'flexStart' : 'spaceBetween'
       }
     >
-      <EuiFlexItem>
+      <EventModuleFlexItem>
         <DefaultDraggable
           field={fieldName}
           id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${moduleName}`}
@@ -96,7 +101,7 @@ export const renderEventModule = ({
         >
           {content}
         </DefaultDraggable>
-      </EuiFlexItem>
+      </EventModuleFlexItem>
       {endpointRefUrl != null && canYouAddEndpointLogo(moduleName, endpointRefUrl) && (
         <EuiFlexItem grow={false}>
           <EuiToolTip

@@ -41,6 +41,7 @@ export const ActionsPopoverComponent = ({
               values: { monitorUrl },
             }
           )}
+          data-test-subj={`xpack.uptime.monitorList.actionsPopover.${summary.monitor_id}`}
           onClick={() => togglePopoverIsVisible({ id: popoverId, open: true })}
           iconType="arrowDown"
           iconSide="right"
