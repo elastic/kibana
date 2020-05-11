@@ -34,6 +34,8 @@ export async function setupIngestManager(
   soClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
 ) {
+  const logger = appContextService.getLogger();
+  if (logger) logger.info('setupIngestManager\n await Promise.all');
   const [installedPackages, defaultOutput, config] = await Promise.all([
     // packages installed by default
     ensureInstalledDefaultPackages(soClient, callCluster),
@@ -67,7 +69,7 @@ export async function setupIngestManager(
       return Promise.reject(e);
     }),
   ]);
-
+  if (logger) logger.info('back from Promise.all');
   // ensure default packages are added to the default conifg
   const configWithDatasource = await agentConfigService.get(soClient, config.id, true);
   if (!configWithDatasource) {
@@ -80,19 +82,24 @@ export async function setupIngestManager(
     throw new Error('Config not found');
   }
   for (const installedPackage of installedPackages) {
+    const logid = [installedPackage.name, installedPackage.version].join('-');
+    if (logger) logger.info(`Check installed package ${logid}`);
     const packageShouldBeInstalled = DEFAULT_AGENT_CONFIGS_PACKAGES.some(
       packageName => installedPackage.name === packageName
     );
     if (!packageShouldBeInstalled) {
       continue;
     }
-
+    if (logger) logger.info(`${logid} should be installed. Is it?`);
     const isInstalled = configWithDatasource.datasources.some((d: Datasource | string) => {
       return typeof d !== 'string' && d.package?.name === installedPackage.name;
     });
 
     if (!isInstalled) {
+      if (logger) logger.info(`${logid} IS NOT installed. await addPackageToConfig()`);
       await addPackageToConfig(soClient, installedPackage, configWithDatasource, defaultOutput);
+    } else {
+      if (logger) logger.info(`${logid} is installed`);
     }
   }
 }
@@ -155,12 +162,24 @@ async function addPackageToConfig(
   config: AgentConfig,
   defaultOutput: Output
 ) {
+  const logger = appContextService.getLogger();
+  const logid = [packageToInstall.name, packageToInstall.version].join('-');
+  if (logger) logger.info(`${logid} addPackageToConfig`);
+  if (logger) logger.info(`await getPackageInfo(${logid})`);
   const packageInfo = await getPackageInfo({
     savedObjectsClient: soClient,
     pkgName: packageToInstall.name,
     pkgVersion: packageToInstall.version,
   });
 
+  if (logger)
+    logger.info(
+      `packageToConfigDatasource(${logid},
+      ${config.id},
+      ${defaultOutput.id},
+      undefined,
+      ${config.namespace})`
+    );
   const newDatasource = packageToConfigDatasource(
     packageInfo,
     config.id,
@@ -168,6 +187,7 @@ async function addPackageToConfig(
     undefined,
     config.namespace
   );
+  if (logger) logger.info(`await datasourceService.assignPackageStream: ${logid}`);
   newDatasource.inputs = await datasourceService.assignPackageStream(
     packageInfo,
     newDatasource.inputs

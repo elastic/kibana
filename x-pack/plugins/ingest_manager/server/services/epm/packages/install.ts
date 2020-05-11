@@ -26,19 +26,23 @@ import { installPipelines } from '../elasticsearch/ingest_pipeline/install';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 import { deleteAssetsByType, deleteKibanaSavedObjectsAssets } from './remove';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
+import { appContextService } from '../../app_context';
 
 export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   callCluster: CallESAsCurrentUser;
 }): Promise<AssetReference[]> {
+  const logger = appContextService.getLogger();
   const { savedObjectsClient, pkgName, callCluster } = options;
   try {
+    if (logger) logger.info(`await registry.fetchFindLatestPackage ${pkgName}`);
     const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
     const pkgkey = Registry.pkgToPkgKey({
       name: latestPackage.name,
       version: latestPackage.version,
     });
+    if (logger) logger.info(`await installPackage ${pkgName}`);
     return installPackage({ savedObjectsClient, pkgkey, callCluster });
   } catch (err) {
     throw err;
@@ -49,9 +53,13 @@ export async function ensureInstalledDefaultPackages(
   savedObjectsClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
 ): Promise<Installation[]> {
+  const logger = appContextService.getLogger();
   const installations = [];
+  // eslint-disable-next-line guard-for-in
   for (const pkgName in DefaultPackages) {
+    if (logger) logger.info(`check ${pkgName}`);
     if (!DefaultPackages.hasOwnProperty(pkgName)) continue;
+    if (logger) logger.info(`await ensureInstalledPackage ${pkgName}`);
     const installation = await ensureInstalledPackage({
       savedObjectsClient,
       pkgName,
@@ -91,6 +99,8 @@ export async function installPackage(options: {
   pkgkey: string;
   callCluster: CallESAsCurrentUser;
 }): Promise<AssetReference[]> {
+  const logger = appContextService.getLogger();
+  if (logger) logger.info(`installPackage ${options.pkgkey}`);
   const { savedObjectsClient, pkgkey, callCluster } = options;
   // TODO: change epm API to /packageName/version so we don't need to do this
   const [pkgName, pkgVersion] = pkgkey.split('-');
@@ -98,8 +108,11 @@ export async function installPackage(options: {
   // see if some version of this package is already installed
   // TODO: calls to getInstallationObject, Registry.fetchInfo, and Registry.fetchFindLatestPackge
   // and be replaced by getPackageInfo after adjusting for it to not group/use archive assets
+  if (logger) logger.info(`await getInstallationObject ${pkgName}`);
   const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+  if (logger) logger.info(`await Registry.fetchInfo ${pkgName} ${pkgVersion}`);
   const registryPackageInfo = await Registry.fetchInfo(pkgName, pkgVersion);
+  if (logger) logger.info(`await Registry.fetchFindLatestPackage ${pkgName} ${pkgVersion}`);
   const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
 
   if (pkgVersion < latestPackage.version)
@@ -118,6 +131,7 @@ export async function installPackage(options: {
     }
   }
 
+  if (logger) logger.info(`await Promise.all install assets, pipelines, etc ${pkgkey}`);
   const [installedKibanaAssets, installedPipelines] = await Promise.all([
     installKibanaAssets({
       savedObjectsClient,
@@ -135,6 +149,7 @@ export async function installPackage(options: {
   ]);
 
   // install or update the templates
+  if (logger) logger.info(`await installTemplates ${pkgkey}`);
   const installedTemplates = await installTemplates(
     registryPackageInfo,
     callCluster,
@@ -172,6 +187,7 @@ export async function installPackage(options: {
     ...installedPipelines,
     ...installedTemplateRefs,
   ];
+  if (logger) logger.info('call saveInstallationReferences');
   // Save references to installed assets in the package's saved object state
   return saveInstallationReferences({
     savedObjectsClient,
