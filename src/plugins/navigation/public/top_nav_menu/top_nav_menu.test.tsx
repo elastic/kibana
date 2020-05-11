@@ -100,6 +100,7 @@ describe('TopNavMenu', () => {
     const component = shallowWithIntl(
       <TopNavMenu
         appName={'test'}
+        config={menuItems}
         showSearchBar={true}
         data={dataShim as any}
         className={'myCoolClass'}
