@@ -19,7 +19,7 @@
 
 import _, { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { EUI_MODAL_CANCEL_BUTTON, EuiCheckboxGroup, EuiHorizontalRule } from '@elastic/eui';
+import { EUI_MODAL_CANCEL_BUTTON, EuiCheckboxGroup } from '@elastic/eui';
 import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/form/checkbox/checkbox_group';
 import { FlexGroupJustifyContent } from '@elastic/eui/src/components/flex/flex_group';
 import React, { useState, ReactElement } from 'react';
@@ -1007,22 +1007,17 @@ export class DashboardAppController {
           };
 
           return (
-            <React.Fragment>
-              <EuiHorizontalRule />
-              <EuiCheckboxGroup
-                options={checkboxes}
-                idToSelectedMap={
-                  (urlParamsSelectedMap as unknown) as EuiCheckboxGroupIdToSelectedMap
-                }
-                onChange={handleChange}
-                legend={{
-                  children: i18n.translate('share.urlPanel.include', {
-                    defaultMessage: 'Include',
-                  }),
-                }}
-                data-test-subj="embedUrlParamExtension"
-              />
-            </React.Fragment>
+            <EuiCheckboxGroup
+              options={checkboxes}
+              idToSelectedMap={(urlParamsSelectedMap as unknown) as EuiCheckboxGroupIdToSelectedMap}
+              onChange={handleChange}
+              legend={{
+                children: i18n.translate('share.urlPanel.include', {
+                  defaultMessage: 'Include',
+                }),
+              }}
+              data-test-subj="embedUrlParamExtension"
+            />
           );
         };
 

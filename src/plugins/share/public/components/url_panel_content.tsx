@@ -103,8 +103,8 @@ export class UrlPanelContent extends Component<Props, State> {
       <I18nProvider>
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
           {this.renderExportAsRadioGroup()}
-          {this.renderShortUrlSwitch()}
           {this.renderUrlParamExtensions()}
+          {this.renderShortUrlSwitch()}
 
           <EuiSpacer size="m" />
 
@@ -280,6 +280,10 @@ export class UrlPanelContent extends Component<Props, State> {
     }
 
     // "Use short URL" is checked but shortUrl has not been generated yet so one needs to be created.
+    this.createShortUrl();
+  };
+
+  private createShortUrl = async () => {
     this.setState({
       isCreatingShortUrl: true,
       shortUrlErrorMsg: undefined,
@@ -295,7 +299,7 @@ export class UrlPanelContent extends Component<Props, State> {
         this.setState(
           {
             isCreatingShortUrl: false,
-            useShortUrl: isChecked,
+            useShortUrl: true,
           },
           this.setUrl
         );
@@ -447,13 +451,15 @@ export class UrlPanelContent extends Component<Props, State> {
           },
         },
       };
-      this.setState(stateUpdate, this.setUrl);
+      this.setState(stateUpdate, this.state.useShortUrl ? this.createShortUrl : this.setUrl);
     };
 
     return (
       <React.Fragment>
         {this.props.urlParamExtensions.map(({ paramName, component: UrlParamComponent }) => (
-          <UrlParamComponent key={paramName} setParamValue={setParamValue(paramName)} />
+          <EuiFormRow key={paramName}>
+            <UrlParamComponent setParamValue={setParamValue(paramName)} />
+          </EuiFormRow>
         ))}
       </React.Fragment>
     );
