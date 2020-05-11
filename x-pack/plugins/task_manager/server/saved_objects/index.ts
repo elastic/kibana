@@ -6,6 +6,7 @@
 
 import { SavedObjectsServiceSetup } from 'kibana/server';
 import mappings from './mappings.json';
+import { migrations } from './migrations';
 import { TaskManagerConfig } from '../config.js';
 
 export function setupSavedObjects(
@@ -18,6 +19,7 @@ export function setupSavedObjects(
     hidden: true,
     convertToAliasScript: `ctx._id = ctx._source.type + ':' + ctx._id`,
     mappings: mappings.task,
+    migrations,
     indexPattern: config.index,
   });
 }
