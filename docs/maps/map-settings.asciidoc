@@ -2,7 +2,8 @@
 [[maps-settings]]
 == Map settings
 
-To configure map settings, click *Map settings* in the application toolbar.
+Elastic Maps offers settings that let you configure how a map is displayed.
+To access these settings, click *Map settings" in the application toolbar.
 
 [float]
 [[maps-settings-navigation]]
@@ -26,7 +27,7 @@ Use spatial filter settings to configure how <<maps-spatial-filters, spatial fil
 image::maps/images/spatial_filters.png[]
 
 *Show spatial filters on map*::
-Clear the checkbox to not show <<maps-spatial-filters, spatial filters>> on the map.
+Clear the checkbox so <<maps-spatial-filters, spatial filters>> do not appear on the map.
 
 *Opacity*::
 Set the opacity of spatial filters.

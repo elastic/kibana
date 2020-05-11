@@ -26,7 +26,7 @@ Use <<maps-aggregations, aggregations>> to plot large data sets.
 *Point to point*:: Aggregated data paths between the source and destination.
 The index must contain at least 2 fields mapped as {ref}/geo-point.html[geo_point], source and destination.
 
-*Upload Geojson*:: Index GeoJSON ta in Elasticsearch
+*Upload Geojson*:: Index GeoJSON data in Elasticsearch.
 
 include::vector-style.asciidoc[]
 include::vector-style-properties.asciidoc[]
