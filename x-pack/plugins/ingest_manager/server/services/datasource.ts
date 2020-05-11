@@ -31,14 +31,15 @@ class DatasourceService {
     datasource: NewDatasource,
     options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<Datasource> {
+    const isoDate = new Date().toISOString();
     const newSo = await soClient.create<Omit<Datasource, 'id'>>(
       SAVED_OBJECT_TYPE,
       {
         ...datasource,
         revision: 1,
-        created_on: new Date().toISOString(),
+        created_on: isoDate,
         created_by: options?.user?.username ?? 'system',
-        updated_on: new Date().toISOString(),
+        updated_on: isoDate,
         updated_by: options?.user?.username ?? 'system',
       },
       options

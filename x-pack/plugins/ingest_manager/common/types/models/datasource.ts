@@ -58,4 +58,8 @@ export interface Datasource extends Omit<NewDatasource, 'inputs'> {
   id: string;
   inputs: DatasourceInput[];
   revision: number;
+  updated_on: string;
+  updated_by: string;
+  created_on: string;
+  created_by: string;
 }
