@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ListClientType } from '../../../../../lists/server';
+import { ListClientType, Type as ListValueType } from '../../../../../lists/server';
 import { AlertServices } from '../../../../../alerting/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
@@ -18,7 +18,9 @@ interface SearchAfterAndBulkCreateParams {
   ruleParams: RuleTypeParams;
   services: AlertServices;
   listClient: ListClientType; // for now....
-  listValueType: string;
+  listValueType: ListValueType;
+  listValueField: string; // ECS path to field that list values apply to
+  listId: string;
   logger: Logger;
   id: string;
   inputIndexPattern: string[];
@@ -53,6 +55,8 @@ export const searchAfterAndBulkCreate = async ({
   listClient,
   logger,
   listValueType,
+  listValueField,
+  listId,
   id,
   inputIndexPattern,
   signalsIndex,
@@ -97,6 +101,12 @@ export const searchAfterAndBulkCreate = async ({
         pageSize, // maximum number of docs to receive per search result.
       });
       toReturn.searchAfterTimes.push(searchDuration);
+      toReturn.lastLookBackDate =
+        searchResult.hits.hits.length > 0
+          ? new Date(
+              searchResult.hits.hits[searchResult.hits.hits.length - 1]?._source['@timestamp']
+            )
+          : null;
       const totalHits =
         typeof searchResult.hits.total === 'number'
           ? searchResult.hits.total
@@ -113,6 +123,8 @@ export const searchAfterAndBulkCreate = async ({
         listClient,
         eventSearchResult: searchResult,
         type: listValueType,
+        field: listValueField,
+        listId,
       });
       if (filteredEvents != null && filteredEvents.hits.hits.length === 0) {
         // everything in the events were allowed, so no need to generate signals
@@ -162,7 +174,8 @@ export const searchAfterAndBulkCreate = async ({
       if (bulkDuration) {
         toReturn.bulkCreateTimes.push(bulkDuration);
       }
-      if (totalHits < ruleParams.maxSignals) {
+
+      if (totalHits < ruleParams.maxSignals && toReturn.createdSignalsCount === totalHits) {
         toReturn.success = true;
         return toReturn;
       }

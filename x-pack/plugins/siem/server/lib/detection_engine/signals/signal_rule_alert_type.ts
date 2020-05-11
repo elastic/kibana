@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { performance } from 'perf_hooks';
 import { Logger, KibanaRequest } from 'src/core/server';
 
 import { SIGNALS_ID, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
@@ -227,6 +226,8 @@ export const signalRulesAlertType = ({
             services,
             logger,
             listValueType: 'ip',
+            listValueField: 'source.ip',
+            listId: 'ci-badguys.txt',
             id: alertId,
             inputIndexPattern: inputIndex,
             signalsIndex: outputIndex,

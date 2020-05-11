@@ -11,6 +11,7 @@ import { ListPlugin } from './plugin';
 
 export { GetListClientType, ListClientType, ListPluginSetup } from './plugin';
 export { getListItemByValues } from './services/items';
+export { Type } from '../common/schemas/common';
 export const config = { schema: ConfigSchema };
 export const plugin = (initializerContext: PluginInitializerContext): ListPlugin =>
   new ListPlugin(initializerContext);
