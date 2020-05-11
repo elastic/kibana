@@ -292,13 +292,10 @@ export default ({ getService }) => {
       );
 
       // It only created the original and the dest
-      assert.deepEqual(
-        _.pluck(
-          await callCluster('cat.indices', { index: '.migration-c*', format: 'json' }),
-          'index'
-        ).sort(),
-        ['.migration-c_1', '.migration-c_2']
-      );
+      const indices = (await callCluster('cat.indices', { index: '.migration-c*', format: 'json' }))
+        .map(({ index }) => index)
+        .sort();
+      assert.deepEqual(indices, ['.migration-c_1', '.migration-c_2']);
 
       // The docs in the original index are unchanged
       assert.deepEqual(await fetchDocs({ callCluster, index: `${index}_1` }), [

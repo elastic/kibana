@@ -5,8 +5,8 @@
  */
 
 export const MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES = Object.freeze({
-  DEFAULT_SPACE_ONLY: Object.freeze({
-    id: 'default_space_only',
+  DEFAULT_ONLY: Object.freeze({
+    id: 'default_only',
     existingNamespaces: ['default'],
   }),
   SPACE_1_ONLY: Object.freeze({

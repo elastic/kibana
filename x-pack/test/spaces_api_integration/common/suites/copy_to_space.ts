@@ -19,6 +19,11 @@ interface CopyToSpaceTest {
   response: (resp: TestResponse) => Promise<void>;
 }
 
+interface CopyToSpaceMultiNamespaceTest extends CopyToSpaceTest {
+  testTitle: string;
+  objects: Array<Record<string, any>>;
+}
+
 interface CopyToSpaceTests {
   noConflictsWithoutReferences: CopyToSpaceTest;
   noConflictsWithReferences: CopyToSpaceTest;
@@ -30,6 +35,7 @@ interface CopyToSpaceTests {
     withConflictsResponse: (resp: TestResponse) => Promise<void>;
     noConflictsResponse: (resp: TestResponse) => Promise<void>;
   };
+  multiNamespaceTestCases: (overwrite: boolean) => CopyToSpaceMultiNamespaceTest[];
 }
 
 interface CopyToSpaceTestDefinition {
@@ -325,6 +331,168 @@ export function copyToSpaceTestSuiteFactory(
     });
   };
 
+  /**
+   * Creates test cases for multi-namespace saved object types.
+   * Note: these are written with the assumption that test data will only be reloaded between each group of test cases, *not* before every
+   * single test case. This saves time during test execution.
+   */
+  const createMultiNamespaceTestCases = (
+    spaceId: string,
+    outcome: 'authorized' | 'unauthorizedRead' | 'unauthorizedWrite' | 'noAccess' = 'authorized'
+  ) => (overwrite: boolean): CopyToSpaceMultiNamespaceTest[] => {
+    // the status code of the HTTP response differs depending on the error type
+    // a 403 error actually comes back as an HTTP 200 response
+    const statusCode = outcome === 'noAccess' ? 404 : 200;
+    const type = 'sharedtype';
+    const v4 = new RegExp(/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i);
+    const noConflictId = `${spaceId}_only`;
+    const exactMatchId = 'all_spaces';
+    const inexactMatchId = `conflict_1_${spaceId}`;
+    const ambiguousConflictId = `conflict_2_${spaceId}`;
+
+    const getResult = (response: TestResponse) => (response.body as CopyResponse).space_2;
+    const expectForbiddenResponse = (response: TestResponse) => {
+      const action = outcome === 'unauthorizedRead' ? 'find' : 'bulk_create';
+      expect(response.body).to.eql({
+        space_2: {
+          success: false,
+          successCount: 0,
+          errors: [
+            { statusCode: 403, error: 'Forbidden', message: `Unable to ${action} sharedtype` },
+          ],
+        },
+      });
+    };
+
+    return [
+      {
+        testTitle: 'copying with no conflict',
+        objects: [{ type, id: noConflictId }],
+        statusCode,
+        response: async (response: TestResponse) => {
+          if (outcome === 'authorized') {
+            const { success, successCount, successResults, errors } = getResult(response);
+            expect(success).to.eql(true);
+            expect(successCount).to.eql(1);
+            const newId = successResults![0].newId;
+            expect(newId).to.match(v4);
+            expect(successResults).to.eql([{ type, id: noConflictId, newId }]);
+            expect(errors).to.be(undefined);
+          } else if (outcome === 'noAccess') {
+            expectNotFoundResponse(response);
+          } else {
+            // unauthorized read/write
+            expectForbiddenResponse(response);
+          }
+        },
+      },
+      {
+        testTitle: 'copying with an exact match conflict',
+        objects: [{ type, id: exactMatchId }],
+        statusCode,
+        response: async (response: TestResponse) => {
+          if (outcome === 'authorized') {
+            const { success, successCount, successResults, errors } = getResult(response);
+            if (overwrite) {
+              expect(success).to.eql(true);
+              expect(successCount).to.eql(1);
+              expect(successResults).to.eql([{ type, id: exactMatchId }]);
+              expect(errors).to.be(undefined);
+            } else {
+              expect(success).to.eql(false);
+              expect(successCount).to.eql(0);
+              expect(successResults).to.be(undefined);
+              expect(errors).to.eql([
+                {
+                  error: { type: 'conflict' },
+                  type,
+                  id: exactMatchId,
+                  title: 'A shared saved-object in the default, space_1, and space_2 spaces',
+                },
+              ]);
+            }
+          } else if (outcome === 'noAccess') {
+            expectNotFoundResponse(response);
+          } else {
+            // unauthorized read/write
+            expectForbiddenResponse(response);
+          }
+        },
+      },
+      {
+        testTitle: 'copying with an inexact match conflict',
+        objects: [{ type, id: inexactMatchId }],
+        statusCode,
+        response: async (response: TestResponse) => {
+          if (outcome === 'authorized') {
+            const { success, successCount, successResults, errors } = getResult(response);
+            const newId = 'conflict_1_space_2';
+            if (overwrite) {
+              expect(success).to.eql(true);
+              expect(successCount).to.eql(1);
+              expect(successResults).to.eql([{ type, id: inexactMatchId, newId }]);
+              expect(errors).to.be(undefined);
+            } else {
+              expect(success).to.eql(false);
+              expect(successCount).to.eql(0);
+              expect(successResults).to.be(undefined);
+              expect(errors).to.eql([
+                {
+                  error: { type: 'conflict', destinationId: newId },
+                  type,
+                  id: inexactMatchId,
+                  title: 'A shared saved-object in one space',
+                },
+              ]);
+            }
+          } else if (outcome === 'noAccess') {
+            expectNotFoundResponse(response);
+          } else {
+            // unauthorized read/write
+            expectForbiddenResponse(response);
+          }
+        },
+      },
+      {
+        testTitle: 'copying with an ambiguous conflict',
+        objects: [{ type, id: ambiguousConflictId }],
+        statusCode,
+        response: async (response: TestResponse) => {
+          if (outcome === 'authorized' || outcome === 'unauthorizedWrite') {
+            // when an ambiguous conflict is encountered, the import function never actually attempts to create the object --
+            // because of that, a consumer who is authorized to read (but not write) will see the same response as a user who is authorized
+            const { success, successCount, successResults, errors } = getResult(response);
+            const updatedAt = '2017-09-21T18:59:16.270Z';
+            const sources = [
+              { id: ambiguousConflictId, title: 'A shared saved-object in one space', updatedAt },
+            ];
+            const destinations = [
+              // response should be sorted by ID in ascending order
+              { id: 'conflict_2_all', title: 'A shared saved-object in all spaces', updatedAt },
+              { id: 'conflict_2_space_2', title: 'A shared saved-object in one space', updatedAt },
+            ];
+            expect(success).to.eql(false);
+            expect(successCount).to.eql(0);
+            expect(successResults).to.be(undefined);
+            expect(errors).to.eql([
+              {
+                error: { type: 'ambiguous_conflict', sources, destinations },
+                type,
+                id: ambiguousConflictId,
+                title: 'A shared saved-object in one space',
+              },
+            ]);
+          } else if (outcome === 'noAccess') {
+            expectNotFoundResponse(response);
+          } else {
+            // unauthorized read
+            expectForbiddenResponse(response);
+          }
+        },
+      },
+    ];
+  };
+
   const makeCopyToSpaceTest = (describeFn: DescribeFn) => (
     description: string,
     { user = {}, spaceId = DEFAULT_SPACE_ID, tests }: CopyToSpaceTestDefinition
@@ -462,6 +630,27 @@ export function copyToSpaceTestSuiteFactory(
             .then(tests.nonExistentSpace.response);
         });
       });
+
+      [false, true].forEach((overwrite) => {
+        const spaces = ['space_2'];
+        const includeReferences = false;
+        describe(`multi-namespace types with overwrite=${overwrite}`, () => {
+          before(() => esArchiver.load('saved_objects/spaces'));
+          after(() => esArchiver.unload('saved_objects/spaces'));
+
+          const testCases = tests.multiNamespaceTestCases(overwrite);
+          testCases.forEach(({ testTitle, objects, statusCode, response }) => {
+            it(`should return ${statusCode} when ${testTitle}`, async () => {
+              return supertest
+                .post(`${getUrlPrefix(spaceId)}/api/spaces/_copy_saved_objects`)
+                .auth(user.username, user.password)
+                .send({ objects, spaces, includeReferences, overwrite })
+                .expect(statusCode)
+                .then(response);
+            });
+          });
+        });
+      });
     });
   };
 
@@ -479,6 +668,7 @@ export function copyToSpaceTestSuiteFactory(
     expectNotFoundResponse,
     createExpectUnauthorizedAtSpaceWithReferencesResult,
     createExpectUnauthorizedAtSpaceWithoutReferencesResult,
+    createMultiNamespaceTestCases,
     originSpaces: ['default', 'space_1'],
   };
 }

@@ -14,27 +14,38 @@ import {
 } from '../../common/suites/resolve_import_errors';
 
 const { fail400, fail409 } = testCaseFailures;
+const newId = (condition?: boolean) => (condition !== false ? { successParam: 'newId' } : {});
 
-const createTestCases = (overwrite: boolean) => {
+const createTestCases = (overwrite: boolean, duplicate: boolean) => {
   // for each permitted (non-403) outcome, if failure !== undefined then we expect
   // to receive an error; otherwise, we expect to receive a success result
-  const importableTypes = [
-    { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, ...fail409(!overwrite) },
-    CASES.SINGLE_NAMESPACE_SPACE_1,
-    CASES.SINGLE_NAMESPACE_SPACE_2,
-    { ...CASES.NAMESPACE_AGNOSTIC, ...fail409(!overwrite) },
-    CASES.NEW_SINGLE_NAMESPACE_OBJ,
-    CASES.NEW_NAMESPACE_AGNOSTIC_OBJ,
+  const group1Importable = [
+    {
+      ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE,
+      ...fail409(!overwrite && !duplicate),
+      ...newId(duplicate),
+    },
+    { ...CASES.NAMESPACE_AGNOSTIC, ...fail409(!overwrite && !duplicate), ...newId(duplicate) },
   ];
-  const nonImportableTypes = [
-    { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, ...fail400() },
-    { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...fail400() },
-    { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...fail400() },
-    { ...CASES.HIDDEN, ...fail400() },
-    { ...CASES.NEW_MULTI_NAMESPACE_OBJ, ...fail400() },
+  const group1NonImportable = [{ ...CASES.HIDDEN, ...fail400() }];
+  const group1All = [...group1Importable, ...group1NonImportable];
+  const group2 = [
+    {
+      ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
+      ...fail409(!overwrite && !duplicate),
+      ...newId(duplicate),
+    },
+    // all of the cases below represent imports that had an inexact match conflict or an ambiguous conflict
+    // if we call _resolve_import_errors and don't specify overwrite or duplicate, each of these will not result in a conflict because they
+    // will skip the preflight search results; so the objects will be created instead.
+    { ...CASES.CONFLICT_1A_OBJ, ...newId(overwrite || duplicate) }, // "ambiguous source" conflict; if overwrite=true, will overwrite 'conflict_1'
+    { ...CASES.CONFLICT_1B_OBJ, ...newId(duplicate) }, // "ambiguous source" conflict; if overwrite=true, will create a new object (since 'conflict_1a' is overwriting 'conflict_1')
+    { ...CASES.CONFLICT_2C_OBJ, ...newId(overwrite || duplicate) }, // "ambiguous source and destination" conflict; if overwrite=true, will overwrite 'conflict_2a'
+    { ...CASES.CONFLICT_2D_OBJ, ...newId(overwrite || duplicate) }, // "ambiguous source and destination" conflict; if overwrite=true, will overwrite 'conflict_2b'
+    { ...CASES.CONFLICT_3A_OBJ, ...newId(overwrite || duplicate) }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_3'
+    { ...CASES.CONFLICT_4_OBJ, ...newId(overwrite || duplicate) }, // "inexact match" conflict; if overwrite=true, will overwrite 'conflict_4a'
   ];
-  const allTypes = importableTypes.concat(nonImportableTypes);
-  return { importableTypes, nonImportableTypes, allTypes };
+  return { group1Importable, group1NonImportable, group1All, group2 };
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -47,26 +58,44 @@ export default function ({ getService }: FtrProviderContext) {
     esArchiver,
     supertest
   );
-  const createTests = (overwrite: boolean) => {
-    const { importableTypes, nonImportableTypes, allTypes } = createTestCases(overwrite);
+  const createTests = (overwrite: boolean, duplicate: boolean) => {
+    const { group1Importable, group1NonImportable, group1All, group2 } = createTestCases(
+      overwrite,
+      duplicate
+    );
     // use singleRequest to reduce execution time and/or test combined cases
     return {
       unauthorized: [
-        createTestDefinitions(importableTypes, true, overwrite),
-        createTestDefinitions(nonImportableTypes, false, overwrite, { singleRequest: true }),
-        createTestDefinitions(allTypes, true, overwrite, {
+        createTestDefinitions(group1Importable, true, overwrite, duplicate),
+        createTestDefinitions(group1NonImportable, false, overwrite, duplicate, {
           singleRequest: true,
-          responseBodyOverride: expectForbidden(['dashboard', 'globaltype', 'isolatedtype']),
         }),
+        createTestDefinitions(group1All, true, overwrite, duplicate, {
+          singleRequest: true,
+          responseBodyOverride: expectForbidden(['globaltype', 'isolatedtype']),
+        }),
+        createTestDefinitions(group2, true, overwrite, duplicate, { singleRequest: true }),
       ].flat(),
-      authorized: createTestDefinitions(allTypes, false, overwrite, { singleRequest: true }),
+      authorized: [
+        createTestDefinitions(group1All, false, overwrite, duplicate, { singleRequest: true }),
+        createTestDefinitions(group2, false, overwrite, duplicate, { singleRequest: true }),
+      ].flat(),
     };
   };
 
   describe('_resolve_import_errors', () => {
-    getTestScenarios([false, true]).security.forEach(({ users, modifier: overwrite }) => {
-      const suffix = overwrite ? ' with overwrite enabled' : '';
-      const { unauthorized, authorized } = createTests(overwrite!);
+    getTestScenarios([
+      [false, false],
+      [false, true],
+      [true, false],
+    ]).security.forEach(({ users, modifier }) => {
+      const [overwrite, duplicate] = modifier!;
+      const suffix = overwrite
+        ? ' with overwrite enabled'
+        : duplicate
+        ? ' with duplicate enabled'
+        : '';
+      const { unauthorized, authorized } = createTests(overwrite, duplicate);
       const _addTests = (user: TestUser, tests: ResolveImportErrorsTestDefinition[]) => {
         addTests(`${user.description}${suffix}`, { user, tests });
       };

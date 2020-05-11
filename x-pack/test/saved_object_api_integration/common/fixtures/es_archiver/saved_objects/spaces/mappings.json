@@ -182,6 +182,9 @@
         "namespaces": {
           "type": "keyword"
         },
+        "originId": {
+          "type": "keyword"
+        },
         "search": {
           "properties": {
             "columns": {

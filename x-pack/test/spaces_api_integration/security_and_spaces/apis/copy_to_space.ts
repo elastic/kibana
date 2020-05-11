@@ -25,6 +25,7 @@ export default function copyToSpaceSpacesAndSecuritySuite({ getService }: TestIn
     createExpectUnauthorizedAtSpaceWithReferencesResult,
     createExpectUnauthorizedAtSpaceWithoutReferencesResult,
     expectNotFoundResponse,
+    createMultiNamespaceTestCases,
   } = copyToSpaceTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
 
   describe('copy to spaces', () => {
@@ -70,6 +71,7 @@ export default function copyToSpaceSpacesAndSecuritySuite({ getService }: TestIn
             noConflictsResponse: expectNotFoundResponse,
           },
           nonExistentSpace: { statusCode: 404, response: expectNotFoundResponse },
+          multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId, 'noAccess'),
         },
       });
       // In *this* test suite, a user who is unauthorized to write (but authorized to read) in the destination space will get the same exact
@@ -118,12 +120,18 @@ export default function copyToSpaceSpacesAndSecuritySuite({ getService }: TestIn
       const definitionUnauthorizedRead = (user: { username: string; password: string }) => ({
         spaceId,
         user,
-        tests: commonUnauthorizedTests,
+        tests: {
+          ...commonUnauthorizedTests,
+          multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId, 'unauthorizedRead'),
+        },
       });
       const definitionUnauthorizedWrite = (user: { username: string; password: string }) => ({
         spaceId,
         user,
-        tests: commonUnauthorizedTests,
+        tests: {
+          ...commonUnauthorizedTests,
+          multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId, 'unauthorizedWrite'),
+        },
       });
       const definitionAuthorized = (user: { username: string; password: string }) => ({
         spaceId,
@@ -154,6 +162,7 @@ export default function copyToSpaceSpacesAndSecuritySuite({ getService }: TestIn
             statusCode: 200,
             response: expectNoConflictsForNonExistentSpaceResult,
           },
+          multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId, 'authorized'),
         },
       });
 

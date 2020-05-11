@@ -20,6 +20,7 @@ export default function copyToSpacesOnlySuite({ getService }: FtrProviderContext
     expectNoConflictsForNonExistentSpaceResult,
     createExpectWithConflictsOverwritingResult,
     createExpectWithConflictsWithoutOverwritingResult,
+    createMultiNamespaceTestCases,
     originSpaces,
   } = copyToSpaceTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
 
@@ -53,6 +54,7 @@ export default function copyToSpacesOnlySuite({ getService }: FtrProviderContext
             statusCode: 200,
             response: expectNoConflictsForNonExistentSpaceResult,
           },
+          multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId),
         },
       });
     });

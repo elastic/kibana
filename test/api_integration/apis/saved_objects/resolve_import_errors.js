@@ -72,6 +72,11 @@ export default function ({ getService }) {
             expect(resp.body).to.eql({
               success: true,
               successCount: 3,
+              successResults: [
+                { type: 'index-pattern', id: '91200a00-9efd-11e7-acb3-3dab96693fab' },
+                { type: 'visualization', id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab' },
+                { type: 'dashboard', id: 'be3733a0-9efe-11e7-acb3-3dab96693fab' },
+              ],
             });
           });
       });
@@ -234,7 +239,15 @@ export default function ({ getService }) {
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({ success: true, successCount: 3 });
+              expect(resp.body).to.eql({
+                success: true,
+                successCount: 3,
+                successResults: [
+                  { type: 'index-pattern', id: '91200a00-9efd-11e7-acb3-3dab96693fab' },
+                  { type: 'visualization', id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab' },
+                  { type: 'dashboard', id: 'be3733a0-9efe-11e7-acb3-3dab96693fab' },
+                ],
+              });
             });
         });
 
@@ -254,7 +267,13 @@ export default function ({ getService }) {
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({ success: true, successCount: 1 });
+              expect(resp.body).to.eql({
+                success: true,
+                successCount: 1,
+                successResults: [
+                  { type: 'visualization', id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab' },
+                ],
+              });
             });
         });
 
@@ -298,6 +317,7 @@ export default function ({ getService }) {
               expect(resp.body).to.eql({
                 success: true,
                 successCount: 1,
+                successResults: [{ type: 'visualization', id: '1' }],
               });
             });
           await supertest

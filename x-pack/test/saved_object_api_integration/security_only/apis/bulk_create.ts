@@ -14,6 +14,7 @@ import {
 } from '../../common/suites/bulk_create';
 
 const { fail400, fail409 } = testCaseFailures;
+const unresolvableConflict = () => ({ fail409Param: 'unresolvableConflict' });
 
 const createTestCases = (overwrite: boolean) => {
   // for each permitted (non-403) outcome, if failure !== undefined then we expect
@@ -23,8 +24,8 @@ const createTestCases = (overwrite: boolean) => {
     CASES.SINGLE_NAMESPACE_SPACE_1,
     CASES.SINGLE_NAMESPACE_SPACE_2,
     { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, ...fail409(!overwrite) },
-    { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...fail409() },
-    { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...fail409() },
+    { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...fail409(), ...unresolvableConflict() },
+    { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...fail409(), ...unresolvableConflict() },
     { ...CASES.NAMESPACE_AGNOSTIC, ...fail409(!overwrite) },
     CASES.NEW_SINGLE_NAMESPACE_OBJ,
     CASES.NEW_MULTI_NAMESPACE_OBJ,

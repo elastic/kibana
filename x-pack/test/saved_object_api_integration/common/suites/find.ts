@@ -34,6 +34,14 @@ export interface FindTestCase {
   failure?: 400 | 403;
 }
 
+// additional sharedtype objects that exist but do not have common test cases defined
+const CID = 'conflict_';
+const CONFLICT_1_OBJ = Object.freeze({ type: 'sharedtype', id: `${CID}1` });
+const CONFLICT_2A_OBJ = Object.freeze({ type: 'sharedtype', id: `${CID}2a`, originId: `${CID}2` });
+const CONFLICT_2B_OBJ = Object.freeze({ type: 'sharedtype', id: `${CID}2b`, originId: `${CID}2` });
+const CONFLICT_3_OBJ = Object.freeze({ type: 'sharedtype', id: `${CID}3` });
+const CONFLICT_4A_OBJ = Object.freeze({ type: 'sharedtype', id: `${CID}4a`, originId: `${CID}4` });
+
 export const getTestCases = (spaceId?: string) => ({
   singleNamespaceType: {
     title: 'find single-namespace type',
@@ -51,12 +59,14 @@ export const getTestCases = (spaceId?: string) => ({
     title: 'find multi-namespace type',
     query: 'type=sharedtype&fields=title',
     successResult: {
-      savedObjects:
-        spaceId === SPACE_1_ID
-          ? [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, CASES.MULTI_NAMESPACE_ONLY_SPACE_1]
-          : spaceId === SPACE_2_ID
-          ? CASES.MULTI_NAMESPACE_ONLY_SPACE_2
-          : CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
+      savedObjects: (spaceId === SPACE_1_ID
+        ? [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, CASES.MULTI_NAMESPACE_ONLY_SPACE_1]
+        : spaceId === SPACE_2_ID
+        ? [CASES.MULTI_NAMESPACE_ONLY_SPACE_2]
+        : [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1]
+      )
+        .concat([CONFLICT_1_OBJ, CONFLICT_2A_OBJ, CONFLICT_2B_OBJ, CONFLICT_3_OBJ, CONFLICT_4A_OBJ])
+        .flat(),
     },
   } as FindTestCase,
   namespaceAgnosticType: {

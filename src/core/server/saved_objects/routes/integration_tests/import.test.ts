@@ -120,6 +120,7 @@ describe('POST /internal/saved_objects/_import', () => {
     expect(result.body).toEqual({
       success: true,
       successCount: 1,
+      successResults: [{ type: 'index-pattern', id: 'my-pattern' }],
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
     const firstBulkCreateCallArray = savedObjectsClient.bulkCreate.mock.calls[0][0];
@@ -173,6 +174,10 @@ describe('POST /internal/saved_objects/_import', () => {
     expect(result.body).toEqual({
       success: true,
       successCount: 2,
+      successResults: [
+        { type: 'index-pattern', id: 'my-pattern' },
+        { type: 'dashboard', id: 'my-dashboard' },
+      ],
     });
   });
 
@@ -219,6 +224,7 @@ describe('POST /internal/saved_objects/_import', () => {
     expect(result.body).toEqual({
       success: false,
       successCount: 1,
+      successResults: [{ type: 'dashboard', id: 'my-dashboard' }],
       errors: [
         {
           id: 'my-pattern',

@@ -113,7 +113,11 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
       )
       .expect(200);
 
-    expect(result.body).toEqual({ success: true, successCount: 1 });
+    expect(result.body).toEqual({
+      success: true,
+      successCount: 1,
+      successResults: [{ type: 'dashboard', id: 'my-dashboard' }],
+    });
     expect(savedObjectsClient.bulkCreate.mock.calls).toHaveLength(1);
     const firstBulkCreateCallArray = savedObjectsClient.bulkCreate.mock.calls[0][0];
     expect(firstBulkCreateCallArray).toHaveLength(1);
@@ -154,7 +158,11 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
       )
       .expect(200);
 
-    expect(result.body).toEqual({ success: true, successCount: 1 });
+    expect(result.body).toEqual({
+      success: true,
+      successCount: 1,
+      successResults: [{ type: 'dashboard', id: 'my-dashboard' }],
+    });
     expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
       [MockFunction] {
         "calls": Array [
@@ -171,6 +179,7 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
             ],
             Object {
               "namespace": undefined,
+              "overwrite": undefined,
             },
           ],
         ],
@@ -219,7 +228,11 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
       )
       .expect(200);
 
-    expect(result.body).toEqual({ success: true, successCount: 1 });
+    expect(result.body).toEqual({
+      success: true,
+      successCount: 1,
+      successResults: [{ type: 'dashboard', id: 'my-dashboard' }],
+    });
     expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
       [MockFunction] {
         "calls": Array [
@@ -300,7 +313,11 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
       )
       .expect(200);
 
-    expect(result.body).toEqual({ success: true, successCount: 1 });
+    expect(result.body).toEqual({
+      success: true,
+      successCount: 1,
+      successResults: [{ type: 'visualization', id: 'my-vis' }],
+    });
     expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
       [MockFunction] {
         "calls": Array [
@@ -324,6 +341,7 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
             ],
             Object {
               "namespace": undefined,
+              "overwrite": undefined,
             },
           ],
         ],

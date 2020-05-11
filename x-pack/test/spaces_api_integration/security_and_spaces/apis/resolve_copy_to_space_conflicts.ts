@@ -25,6 +25,7 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Tes
     createExpectUnauthorizedAtSpaceWithReferencesResult,
     createExpectReadonlyAtSpaceWithReferencesResult,
     createExpectUnauthorizedAtSpaceWithoutReferencesResult,
+    createMultiNamespaceTestCases,
     NON_EXISTENT_SPACE_ID,
   } = resolveCopyToSpaceConflictsSuite(esArchiver, supertestWithAuth, supertestWithoutAuth);
 
@@ -81,6 +82,7 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Tes
             statusCode: 404,
             response: expectNotFoundResponse,
           },
+          multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId, 'noAccess'),
         },
       });
       const definitionUnauthorizedRead = (user: { username: string; password: string }) => ({
@@ -110,6 +112,7 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Tes
               NON_EXISTENT_SPACE_ID
             ),
           },
+          multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId, 'unauthorizedRead'),
         },
       });
       const definitionUnauthorizedWrite = (user: { username: string; password: string }) => ({
@@ -139,6 +142,7 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Tes
               NON_EXISTENT_SPACE_ID
             ),
           },
+          multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId, 'unauthorizedWrite'),
         },
       });
       const definitionAuthorized = (user: { username: string; password: string }) => ({
@@ -168,6 +172,7 @@ export default function resolveCopyToSpaceConflictsTestSuite({ getService }: Tes
               NON_EXISTENT_SPACE_ID
             ),
           },
+          multiNamespaceTestCases: createMultiNamespaceTestCases(spaceId, 'authorized'),
         },
       });
 
