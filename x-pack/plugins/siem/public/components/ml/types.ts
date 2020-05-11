@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Influencer } from '../../../../ml/public';
+import { Influencer } from '../../../../ml/common/types/anomalies';
 
 import { HostsType } from '../../store/hosts/model';
 import { NetworkType } from '../../store/network/model';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MlCapabilitiesResponse } from '../../../../../ml/public';
+import { MlCapabilitiesResponse } from '../../../../../ml/common/types/capabilities';
 import { KibanaServices } from '../../../lib/kibana';
 import { InfluencerInput } from '../types';
 
