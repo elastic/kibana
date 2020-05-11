@@ -16,6 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React, { lazy, Suspense } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { TableVisParams } from '../types';
 
-export { shortenDottedString } from './shorten_dotted_string';
-export { formatNumWithCommas } from './format_number_with_commas';
+const TableOptionsComponent = lazy(() => import('./table_vis_options'));
+
+export const TableOptions = (props: VisOptionsProps<TableVisParams>) => (
+  <Suspense fallback={<EuiLoadingSpinner />}>
+    <TableOptionsComponent {...props} />
+  </Suspense>
+);
