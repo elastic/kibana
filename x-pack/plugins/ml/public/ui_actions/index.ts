@@ -20,7 +20,7 @@ export function registerMlUiActions(
 ) {
   const editSwimlanePanelAction = createEditSwimlanePanelAction(core.getStartServices);
   uiActions.registerAction(editSwimlanePanelAction);
-  uiActions.attachAction(CONTEXT_MENU_TRIGGER, editSwimlanePanelAction);
+  uiActions.attachAction(CONTEXT_MENU_TRIGGER, editSwimlanePanelAction.id);
 }
 
 declare module '../../../../../src/plugins/ui_actions/public' {

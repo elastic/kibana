@@ -8,8 +8,7 @@ import { SetStateAction, Dispatch } from 'react';
 import { AllTimelinesVariables } from '../../containers/timeline/all';
 import { TimelineModel } from '../../store/timeline/model';
 import { NoteResult } from '../../graphql/types';
-import { Refetch } from '../../store/inputs/model';
-import { TimelineType } from '../../../common/types/timeline';
+import { TimelineType, TimelineTypeLiteral } from '../../../common/types/timeline';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {
@@ -150,7 +149,7 @@ export interface OpenTimelineProps {
   /** The currently applied search criteria */
   query: string;
   /** Refetch table */
-  refetch?: Refetch;
+  refetch?: (existingTimeline?: OpenTimelineResult[], existingCount?: number) => void;
   /** The results of executing a search */
   searchResults: OpenTimelineResult[];
   /** the currently-selected timelines in the table */
@@ -161,6 +160,8 @@ export interface OpenTimelineProps {
   sortDirection: 'asc' | 'desc';
   /** the requested field to sort on */
   sortField: string;
+  /** timeline / template timeline */
+  tabs: JSX.Element;
   /** The title of the Open Timeline component  */
   title: string;
   /** The total (server-side) count of the search results */
@@ -188,3 +189,15 @@ export type DispatchUpdateTimeline = ({
   to,
   ruleNote,
 }: UpdateTimeline) => () => void;
+
+export enum TimelineTabsStyle {
+  tab = 'tab',
+  filter = 'filter',
+}
+
+export interface TimelineTab {
+  id: TimelineTypeLiteral;
+  name: string;
+  disabled: boolean;
+  href: string;
+}

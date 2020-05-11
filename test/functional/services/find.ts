@@ -198,7 +198,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       if (isDisplayed) {
         return descendant;
       } else {
-        throw new Error('Element is not displayed');
+        throw new Error(`Element "${selector}" is not displayed`);
       }
     }
 
@@ -476,7 +476,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       value: string
     ): Promise<void> {
       log.debug(`Find.waitForAttributeToChange('${selector}', '${attribute}', '${value}')`);
-      retry.waitFor(`${attribute} to equal "${value}"`, async () => {
+      await retry.waitFor(`${attribute} to equal "${value}"`, async () => {
         const el = await this.byCssSelector(selector);
         return value === (await el.getAttribute(attribute));
       });

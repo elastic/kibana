@@ -2,11 +2,7 @@
 
 exports[`DetailDrawer component If vertices shows basic info and no stats for if 1`] = `
 <EuiFlyout
-  closeButtonAriaLabel="Closes this dialog"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[MockFunction]}
-  ownFocus={false}
   size="s"
 >
   <EuiFlyoutHeader>
@@ -61,11 +57,7 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
 
 exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID shows basic info and stats for plugin, suggesting that user set explicit ID 1`] = `
 <EuiFlyout
-  closeButtonAriaLabel="Closes this dialog"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[MockFunction]}
-  ownFocus={false}
   size="s"
 >
   <EuiFlyoutHeader>
@@ -318,11 +310,7 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
 
 exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows basic info and stats for plugin, including explicit ID 1`] = `
 <EuiFlyout
-  closeButtonAriaLabel="Closes this dialog"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[MockFunction]}
-  ownFocus={false}
   size="s"
 >
   <EuiFlyoutHeader>
@@ -569,11 +557,7 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
 
 exports[`DetailDrawer component Queue vertices shows basic info and no stats for queue 1`] = `
 <EuiFlyout
-  closeButtonAriaLabel="Closes this dialog"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[MockFunction]}
-  ownFocus={false}
   size="s"
 >
   <EuiFlyoutHeader>
@@ -620,11 +604,7 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
 
 exports[`DetailDrawer component shows vertex title 1`] = `
 <EuiFlyout
-  closeButtonAriaLabel="Closes this dialog"
-  hideCloseButton={false}
-  maxWidth={false}
   onClose={[MockFunction]}
-  ownFocus={false}
   size="s"
 >
   <EuiFlyoutHeader>

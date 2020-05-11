@@ -22,6 +22,7 @@ import { Redirect, useParams } from 'react-router-dom';
 import { StickyContainer } from 'react-sticky';
 import { connect, ConnectedProps } from 'react-redux';
 
+import { UpdateDateRange } from '../../../../components/charts/common';
 import { FiltersGlobal } from '../../../../components/filters_global';
 import { FormattedDate } from '../../../../components/formatted_date';
 import {
@@ -68,7 +69,7 @@ import { RuleStatusFailedCallOut } from './status_failed_callout';
 import { FailureHistory } from './failure_history';
 import { RuleStatus } from '../components/rule_status';
 import { useMlCapabilities } from '../../../../components/ml_popover/hooks/use_ml_capabilities';
-import { hasMlAdminPermissions } from '../../../../components/ml/permissions/has_ml_admin_permissions';
+import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 
 enum RuleDetailTabs {
   signals = 'signals',
@@ -209,8 +210,12 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
     signalIndexName,
   ]);
 
-  const updateDateRangeCallback = useCallback(
-    (min: number, max: number) => {
+  const updateDateRangeCallback = useCallback<UpdateDateRange>(
+    ({ x }) => {
+      if (!x) {
+        return;
+      }
+      const [min, max] = x;
       setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
     },
     [setAbsoluteRangeDatePicker]
