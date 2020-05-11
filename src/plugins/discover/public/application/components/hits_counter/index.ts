@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { shortenDottedString } from './shorten_dotted_string';
-export { formatNumWithCommas } from './format_number_with_commas';
+export { HitsCounter } from './hits_counter';
+export { createHitsCounterDirective } from './hits_counter_directive';
