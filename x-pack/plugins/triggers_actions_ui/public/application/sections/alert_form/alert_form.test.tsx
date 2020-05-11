@@ -29,7 +29,7 @@ describe('alert_form', () => {
       return { errors: {} };
     },
     alertParamsExpression: () => <Fragment />,
-    isEditable: true,
+    requiresAppContext: true,
   };
 
   const actionType = {
@@ -55,7 +55,7 @@ describe('alert_form', () => {
       return { errors: {} };
     },
     alertParamsExpression: () => <Fragment />,
-    isEditable: false,
+    requiresAppContext: false,
   };
 
   describe('alert_form create alert', () => {
@@ -206,7 +206,7 @@ describe('alert_form', () => {
             return { errors: {} };
           },
           alertParamsExpression: () => <Fragment />,
-          isEditable: false,
+          requiresAppContext: false,
         },
         {
           id: 'other-consumer-producer-alert-type',
@@ -216,7 +216,7 @@ describe('alert_form', () => {
             return { errors: {} };
           },
           alertParamsExpression: () => <Fragment />,
-          isEditable: true,
+          requiresAppContext: true,
         },
       ]);
       alertTypeRegistry.has.mockReturnValue(true);

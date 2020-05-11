@@ -55,7 +55,7 @@ describe('alert_edit', () => {
         return { errors: {} };
       },
       alertParamsExpression: () => <React.Fragment />,
-      isEditable: true,
+      requiresAppContext: true,
     };
 
     const actionTypeModel = {

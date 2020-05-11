@@ -26,7 +26,7 @@ describe('action_form', () => {
       return { errors: {} };
     },
     alertParamsExpression: () => <Fragment />,
-    isEditable: true,
+    requiresAppContext: true,
   };
 
   const actionType = {

@@ -170,7 +170,9 @@ export const AlertForm = ({
     alert.consumer === 'alerting'
       ? alertTypeRegistry
           .list()
-          .filter((alertTypeRegistryItem: AlertTypeModel) => alertTypeRegistryItem.isEditable)
+          .filter(
+            (alertTypeRegistryItem: AlertTypeModel) => alertTypeRegistryItem.requiresAppContext
+          )
       : alertTypeRegistry
           .list()
           .filter(

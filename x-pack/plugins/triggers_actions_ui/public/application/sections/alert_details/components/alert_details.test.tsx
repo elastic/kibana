@@ -44,7 +44,7 @@ jest.mock('../../../app_context', () => ({
         validate: (): ValidationResult => {
           return { errors: {} };
         },
-        isEditable: true,
+        requiresAppContext: true,
       }),
       list: jest.fn(),
     },
