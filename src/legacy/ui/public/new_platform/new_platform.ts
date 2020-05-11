@@ -176,7 +176,8 @@ export const legacyAppRegister = (app: App<any>) => {
   legacyAppRegistered = true;
 
   require('ui/chrome').setRootController(app.id, ($scope: IScope, $element: JQLite) => {
-    const element = $element[0];
+    const element = document.createElement('div');
+    $element[0].appendChild(element);
 
     // Root controller cannot return a Promise so use an internal async function and call it immediately
     (async () => {

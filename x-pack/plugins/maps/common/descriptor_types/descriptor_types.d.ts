@@ -28,7 +28,7 @@ export type EMSTMSSourceDescriptor = AbstractSourceDescriptor & {
 
 export type EMSFileSourceDescriptor = AbstractSourceDescriptor & {
   // id: EMS file id
-
+  id: string;
   tooltipProperties: string[];
 };
 
