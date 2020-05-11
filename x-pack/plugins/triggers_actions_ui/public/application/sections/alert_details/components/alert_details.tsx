@@ -29,7 +29,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { useAppDependencies } from '../../../app_context';
 import { hasSaveAlertsCapability } from '../../../lib/capabilities';
-import { Alert, AlertType, ActionType, AlertTypeModel } from '../../../../types';
+import { Alert, AlertType, ActionType } from '../../../../types';
 import {
   ComponentOpts as BulkOperationsComponentOpts,
   withBulkAlertOperations,
@@ -72,7 +72,6 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   } = useAppDependencies();
 
   const canSave = hasSaveAlertsCapability(capabilities);
-
   const actionTypesByTypeId = indexBy(actionTypes, 'id');
   const hasEditButton =
     canSave && alertTypeRegistry.has(alert.alertTypeId)

@@ -27,10 +27,15 @@ jest.mock('../../../app_context', () => ({
     http: jest.fn(),
     capabilities: {
       get: jest.fn(() => ({})),
+      siem: {
+        'alerting:show': true,
+        'alerting:save': true,
+        'alerting:delete': true,
+      },
     },
     actionTypeRegistry: jest.fn(),
     alertTypeRegistry: {
-      has: jest.fn(),
+      has: jest.fn().mockReturnValue(true),
       register: jest.fn(),
       get: jest.fn().mockReturnValue({
         id: 'my-alert-type',
