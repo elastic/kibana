@@ -171,6 +171,7 @@ export const MonitorListComponent: React.FC<Props> = ({
         return (
           <EuiButtonIcon
             aria-label={labels.getExpandDrawerLabel(id)}
+            data-test-subj={`xpack.uptime.monitorList.${id}.expandMonitorDetail`}
             iconType={drawerIds.includes(id) ? 'arrowUp' : 'arrowDown'}
             onClick={() => {
               if (drawerIds.includes(id)) {
