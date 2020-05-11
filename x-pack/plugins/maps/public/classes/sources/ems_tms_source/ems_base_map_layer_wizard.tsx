@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
+import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 // @ts-ignore
 import { EMSTMSSource, sourceTitle } from './ems_tms_source';
 // @ts-ignore

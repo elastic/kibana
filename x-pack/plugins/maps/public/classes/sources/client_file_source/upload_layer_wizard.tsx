@@ -13,8 +13,8 @@ import {
   SCALING_TYPES,
 } from '../../../../common/constants';
 // @ts-ignore
-import { ESSearchSource, createDefaultLayerDescriptor } from '../es_search_source';
-import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
+import { createDefaultLayerDescriptor } from '../../sources/es_search_source/es_search_source';
+import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 // @ts-ignore
 import { ClientFileCreateSourceEditor } from './create_client_file_source_editor';
 // @ts-ignore
