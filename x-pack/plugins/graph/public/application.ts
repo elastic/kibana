@@ -10,8 +10,10 @@
 import angular from 'angular';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import '../../../../webpackShims/ace';
-// required for i18nIdDirective
+// required for i18nIdDirective and `ngSanitize` angular module
 import 'angular-sanitize';
+// required for ngRoute
+import 'angular-route';
 // type imports
 import {
   AppMountContext,
@@ -94,7 +96,7 @@ export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) 
   };
 };
 
-const mainTemplate = (basePath: string) => `<div ng-view class="kbnLocalApplicationWrapper">
+const mainTemplate = (basePath: string) => `<div ng-view class="gphAppWrapper">
   <base href="${basePath}" />
 </div>
 `;
@@ -105,14 +107,14 @@ const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react', 'ui.boo
 
 function mountGraphApp(appBasePath: string, element: HTMLElement) {
   const mountpoint = document.createElement('div');
-  mountpoint.setAttribute('class', 'kbnLocalApplicationWrapper');
+  mountpoint.setAttribute('class', 'gphAppWrapper');
   // eslint-disable-next-line
   mountpoint.innerHTML = mainTemplate(appBasePath);
   // bootstrap angular into detached element and attach it later to
   // make angular-within-angular possible
   const $injector = angular.bootstrap(mountpoint, [moduleName]);
   element.appendChild(mountpoint);
-  element.setAttribute('class', 'kbnLocalApplicationWrapper');
+  element.setAttribute('class', 'gphAppWrapper');
   return $injector;
 }
 

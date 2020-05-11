@@ -46,5 +46,6 @@ export default function({ getService, getPageObjects, loadTestFile }: FtrProvide
     loadTestFile(require.resolve('./basic'));
     loadTestFile(require.resolve('./tag_cloud'));
     loadTestFile(require.resolve('./metric'));
+    loadTestFile(require.resolve('./esaggs'));
   });
 }

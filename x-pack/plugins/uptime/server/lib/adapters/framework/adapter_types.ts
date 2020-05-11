@@ -13,7 +13,7 @@ import {
 } from 'src/core/server';
 import { UMKibanaRoute } from '../../../rest_api';
 import { PluginSetupContract } from '../../../../../features/server';
-import { DynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
+import { DynamicSettings } from '../../../../common/runtime_types';
 
 export type APICaller = (
   endpoint: string,
@@ -31,7 +31,7 @@ export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
 ) => Promise<T> | T;
 
 export interface UptimeCoreSetup {
-  route: IRouter;
+  router: IRouter;
 }
 
 export interface UptimeCorePlugins {

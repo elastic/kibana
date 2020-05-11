@@ -279,7 +279,7 @@ function props(doc: SavedObjectUnsanitizedDoc) {
  */
 function propVersion(doc: SavedObjectUnsanitizedDoc | ActiveMigrations, prop: string) {
   return (
-    (doc[prop] && doc[prop].latestVersion) ||
+    ((doc as any)[prop] && (doc as any)[prop].latestVersion) ||
     (doc.migrationVersion && (doc as any).migrationVersion[prop])
   );
 }
@@ -350,7 +350,7 @@ function nextUnmigratedProp(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMi
     if (docVersion && (!latestVersion || Semver.gt(docVersion, latestVersion))) {
       throw Boom.badData(
         `Document "${doc.id}" has property "${p}" which belongs to a more recent` +
-          ` version of Kibana (${docVersion}).`,
+          ` version of Kibana [${docVersion}]. The last known version is [${latestVersion}]`,
         doc
       );
     }

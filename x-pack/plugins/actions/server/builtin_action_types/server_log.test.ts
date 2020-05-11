@@ -7,8 +7,8 @@
 import { ActionType } from '../types';
 import { validateParams } from '../lib';
 import { Logger } from '../../../../../src/core/server';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { createActionTypeRegistry } from './index.test';
+import { actionsMock } from '../mocks';
 
 const ACTION_TYPE_ID = '.server-log';
 
@@ -90,10 +90,7 @@ describe('execute()', () => {
     const actionId = 'some-id';
     await actionType.executor({
       actionId,
-      services: {
-        callCluster: async (path: string, opts: any) => {},
-        savedObjectsClient: savedObjectsClientMock.create(),
-      },
+      services: actionsMock.createServices(),
       params: { message: 'message text here', level: 'info' },
       config: {},
       secrets: {},

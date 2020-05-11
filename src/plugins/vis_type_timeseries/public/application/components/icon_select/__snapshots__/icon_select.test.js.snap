@@ -85,6 +85,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/icon_select/icon_sele
       "asPlainText": true,
     }
   }
+  sortMatchesBy="none"
 />
 `;
 

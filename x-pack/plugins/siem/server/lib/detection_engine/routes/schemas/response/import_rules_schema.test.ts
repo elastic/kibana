@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { exactCheck } from './exact_check';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { foldLeftRight, getPaths } from './__mocks__/utils';
-import { left } from 'fp-ts/lib/Either';
+import { left, Either } from 'fp-ts/lib/Either';
 import { ImportRulesSchema, importRulesSchema } from './import_rules_schema';
 import { ErrorSchema } from './error_schema';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
+import { exactCheck } from '../../../../../utils/build_validation/exact_check';
+import { getPaths, foldLeftRight } from '../../../../../utils/build_validation/__mocks__/utils';
+import { Errors } from 'io-ts';
 
 describe('import_rules_schema', () => {
   beforeAll(() => {
@@ -79,13 +80,31 @@ describe('import_rules_schema', () => {
   });
 
   test('it should NOT validate a success that is not a boolean', () => {
+    type UnsafeCastForTest = Either<
+      Errors,
+      {
+        success: string;
+        success_count: number;
+        errors: Array<
+          {
+            id?: string | undefined;
+            rule_id?: string | undefined;
+          } & {
+            error: {
+              status_code: number;
+              message: string;
+            };
+          }
+        >;
+      }
+    >;
     const payload: Omit<ImportRulesSchema, 'success'> & { success: string } = {
       success: 'hello',
       success_count: 0,
       errors: [],
     };
     const decoded = importRulesSchema.decode(payload);
-    const checked = exactCheck(payload, decoded);
+    const checked = exactCheck(payload, decoded as UnsafeCastForTest);
     const message = pipe(checked, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "hello" supplied to "success"']);

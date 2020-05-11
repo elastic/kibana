@@ -315,12 +315,21 @@ describe('deprecations', () => {
     const { messages } = applyElasticsearchDeprecations({ username: 'elastic' });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting [${CONFIG_PATH}.username] to \\"elastic\\" is deprecated. You should use the \\"kibana\\" user instead.",
+        "Setting [${CONFIG_PATH}.username] to \\"elastic\\" is deprecated. You should use the \\"kibana_system\\" user instead.",
       ]
     `);
   });
 
-  it('does not log a warning if elasticsearch.username is set to something besides "elastic"', () => {
+  it('logs a warning if elasticsearch.username is set to "kibana"', () => {
+    const { messages } = applyElasticsearchDeprecations({ username: 'kibana' });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Setting [${CONFIG_PATH}.username] to \\"kibana\\" is deprecated. You should use the \\"kibana_system\\" user instead.",
+      ]
+    `);
+  });
+
+  it('does not log a warning if elasticsearch.username is set to something besides "elastic" or "kibana"', () => {
     const { messages } = applyElasticsearchDeprecations({ username: 'otheruser' });
     expect(messages).toHaveLength(0);
   });

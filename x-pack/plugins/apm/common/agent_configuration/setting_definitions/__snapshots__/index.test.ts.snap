@@ -4,24 +4,24 @@ exports[`settingDefinitions should have correct default values 1`] = `
 Array [
   Object {
     "key": "api_request_size",
+    "min": "0b",
     "type": "bytes",
     "units": Array [
       "b",
       "kb",
       "mb",
     ],
-    "validationError": "Please specify an integer and a unit",
     "validationName": "bytesRt",
   },
   Object {
     "key": "api_request_time",
+    "min": "1ms",
     "type": "duration",
     "units": Array [
       "ms",
       "s",
       "m",
     ],
-    "validationError": "Please specify an integer and a unit",
     "validationName": "durationRt",
   },
   Object {
@@ -84,24 +84,25 @@ Array [
   },
   Object {
     "key": "profiling_inferred_spans_min_duration",
+    "min": "1ms",
     "type": "duration",
     "units": Array [
       "ms",
       "s",
       "m",
     ],
-    "validationError": "Please specify an integer and a unit",
     "validationName": "durationRt",
   },
   Object {
     "key": "profiling_inferred_spans_sampling_interval",
+    "max": "1s",
+    "min": "1ms",
     "type": "duration",
     "units": Array [
       "ms",
       "s",
       "m",
     ],
-    "validationError": "Please specify an integer and a unit",
     "validationName": "durationRt",
   },
   Object {
@@ -111,81 +112,75 @@ Array [
   },
   Object {
     "key": "server_timeout",
+    "min": "1ms",
     "type": "duration",
     "units": Array [
       "ms",
       "s",
       "m",
     ],
-    "validationError": "Please specify an integer and a unit",
     "validationName": "durationRt",
   },
   Object {
     "key": "span_frames_min_duration",
-    "min": -1,
+    "min": "-1ms",
     "type": "duration",
     "units": Array [
       "ms",
       "s",
       "m",
     ],
-    "validationError": "Please specify an integer and a unit",
     "validationName": "durationRt",
   },
   Object {
     "key": "stack_trace_limit",
+    "max": undefined,
+    "min": undefined,
     "type": "integer",
-    "validationError": "Must be an integer",
     "validationName": "integerRt",
   },
   Object {
     "key": "stress_monitor_cpu_duration_threshold",
+    "min": "1m",
     "type": "duration",
     "units": Array [
       "ms",
       "s",
       "m",
     ],
-    "validationError": "Please specify an integer and a unit",
     "validationName": "durationRt",
   },
   Object {
     "key": "stress_monitor_gc_relief_threshold",
     "type": "float",
-    "validationError": "Must be a number between 0.000 and 1",
-    "validationName": "numberFloatRt",
+    "validationName": "floatRt",
   },
   Object {
     "key": "stress_monitor_gc_stress_threshold",
     "type": "float",
-    "validationError": "Must be a number between 0.000 and 1",
-    "validationName": "numberFloatRt",
+    "validationName": "floatRt",
   },
   Object {
     "key": "stress_monitor_system_cpu_relief_threshold",
     "type": "float",
-    "validationError": "Must be a number between 0.000 and 1",
-    "validationName": "numberFloatRt",
+    "validationName": "floatRt",
   },
   Object {
     "key": "stress_monitor_system_cpu_stress_threshold",
     "type": "float",
-    "validationError": "Must be a number between 0.000 and 1",
-    "validationName": "numberFloatRt",
+    "validationName": "floatRt",
   },
   Object {
     "key": "transaction_max_spans",
     "max": 32000,
     "min": 0,
     "type": "integer",
-    "validationError": "Must be between 0 and 32000",
     "validationName": "integerRt",
   },
   Object {
     "key": "transaction_sample_rate",
     "type": "float",
-    "validationError": "Must be a number between 0.000 and 1",
-    "validationName": "numberFloatRt",
+    "validationName": "floatRt",
   },
 ]
 `;

@@ -17,7 +17,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
-import { checkPermission } from '../../privilege/check_privilege';
+import { checkPermission } from '../../capabilities/check_capabilities';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 import { isRuleSupported } from '../../../../common/util/anomaly_utils';
 import { parseInterval } from '../../../../common/util/parse_interval';

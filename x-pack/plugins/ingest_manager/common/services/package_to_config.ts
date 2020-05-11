@@ -53,7 +53,7 @@ export const packageToConfigDatasourceInputs = (packageInfo: PackageInfo): Datas
               dataset: packageStream.dataset,
             };
             if (packageStream.vars && packageStream.vars.length) {
-              stream.config = packageStream.vars.reduce(varsReducer, {});
+              stream.vars = packageStream.vars.reduce(varsReducer, {});
             }
             return stream;
           })
@@ -66,7 +66,7 @@ export const packageToConfigDatasourceInputs = (packageInfo: PackageInfo): Datas
       };
 
       if (packageInput.vars && packageInput.vars.length) {
-        input.config = packageInput.vars.reduce(varsReducer, {});
+        input.vars = packageInput.vars.reduce(varsReducer, {});
       }
 
       inputs.push(input);

@@ -32,7 +32,7 @@ import {
 // @ts-ignore
 import { updateOldState } from '../legacy/vis_update_state';
 import { extractReferences, injectReferences } from './saved_visualization_references';
-import { IIndexPattern, ISearchSource, SearchSource } from '../../../../plugins/data/public';
+import { IIndexPattern, ISearchSource } from '../../../../plugins/data/public';
 import { ISavedVis, SerializedVis } from '../types';
 import { createSavedSearchesLoader } from '../../../../plugins/discover/public';
 import { getChrome, getOverlays, getIndexPatterns, getSavedObjects, getSearch } from '../services';
@@ -80,20 +80,24 @@ export const convertFromSerializedVis = (vis: SerializedVis): ISavedVis => {
 };
 
 const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?: string) => {
+  const search = getSearch();
+
   const searchSource = inputSearchSource.createCopy
     ? inputSearchSource.createCopy()
-    : new SearchSource({ ...(inputSearchSource as any).fields });
+    : search.searchSource.create({ ...(inputSearchSource as any).fields });
+
   if (savedSearchId) {
     const savedSearch = await createSavedSearchesLoader({
+      search,
       savedObjectsClient: getSavedObjects().client,
       indexPatterns: getIndexPatterns(),
-      search: getSearch(),
       chrome: getChrome(),
       overlays: getOverlays(),
     }).get(savedSearchId);
 
     searchSource.setParent(savedSearch.searchSource);
   }
+
   searchSource!.setField('size', 0);
   return searchSource;
 };
