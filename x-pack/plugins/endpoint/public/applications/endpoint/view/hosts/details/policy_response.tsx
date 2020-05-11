@@ -12,7 +12,6 @@ import {
   HostPolicyResponseAppliedAction,
   HostPolicyResponseConfiguration,
   Immutable,
-  ImmutableArray,
 } from '../../../../../../common/types';
 import { formatResponse } from './policy_response_friendly_names';
 import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
@@ -62,8 +61,8 @@ const ResponseActions = memo(
     actions,
     responseActions,
   }: {
-    actions: ImmutableArray<string>;
-    responseActions: ImmutableArray<HostPolicyResponseAppliedAction>;
+    actions: Immutable<string[]>;
+    responseActions: Immutable<HostPolicyResponseAppliedAction[]>;
   }) => {
     return (
       <>
@@ -121,7 +120,7 @@ export const PolicyResponse = memo(
     responseAttentionCount,
   }: {
     responseConfig: Immutable<HostPolicyResponseConfiguration>;
-    responseActions: ImmutableArray<HostPolicyResponseAppliedAction>;
+    responseActions: Immutable<HostPolicyResponseAppliedAction[]>;
     responseAttentionCount: Map<string, number>;
   }) => {
     return (
