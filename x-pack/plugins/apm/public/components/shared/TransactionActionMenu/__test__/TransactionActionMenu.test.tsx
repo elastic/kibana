@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent, act, wait } from '@testing-library/react';
+import { render, fireEvent, act, waitFor } from '@testing-library/react';
 import { TransactionActionMenu } from '../TransactionActionMenu';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import * as Transactions from './mockData';
@@ -288,7 +288,7 @@ describe('TransactionActionMenu component', () => {
         fireEvent.click(component.getByText('Create custom link'));
       });
       expectTextsInDocument(component, ['Create link']);
-      await wait(() => expect(callApmApiSpy).toHaveBeenCalled());
+      await waitFor(() => expect(callApmApiSpy).toHaveBeenCalled());
       const getFilterKeyValue = (key: string) => {
         return {
           [(component.getAllByText(key)[0] as HTMLOptionElement)
