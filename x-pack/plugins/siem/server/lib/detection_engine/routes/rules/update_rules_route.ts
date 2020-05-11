@@ -6,21 +6,19 @@
 
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { SetupPlugins } from '../../../../plugin';
+import { buildMlAuthz } from '../../../machine_learning/authz';
+import { throwHttpError } from '../../../machine_learning/validation';
 import { UpdateRuleAlertParamsRest } from '../../rules/types';
 import { updateRulesSchema } from '../schemas/update_rules_schema';
-import {
-  buildRouteValidation,
-  transformError,
-  buildSiemResponse,
-  validateLicenseForRuleType,
-} from '../utils';
+import { buildRouteValidation, transformError, buildSiemResponse } from '../utils';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
 import { updateRules } from '../../rules/update_rules';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
-export const updateRulesRoute = (router: IRouter) => {
+export const updateRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
   router.put(
     {
       path: DETECTION_ENGINE_RULES_URL,
@@ -69,8 +67,6 @@ export const updateRulesRoute = (router: IRouter) => {
       const siemResponse = buildSiemResponse(response);
 
       try {
-        validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
-
         const alertsClient = context.alerting?.getAlertsClient();
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.siem?.getSiemClient();
@@ -79,6 +75,9 @@ export const updateRulesRoute = (router: IRouter) => {
         if (!siemClient || !alertsClient) {
           return siemResponse.error({ statusCode: 404 });
         }
+
+        const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
+        throwHttpError(await mlAuthz.validateRuleType(type));
 
         const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
         const rule = await updateRules({
