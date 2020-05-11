@@ -560,7 +560,7 @@ export class EndpointDocGenerator {
           applied: {
             actions: {
               configure_elasticsearch_connection: {
-                message: 'elasticsearch comms configured successfully',
+                message: 'elasticsearch communications configured successfully',
                 status: HostPolicyResponseActionStatus.success,
               },
               configure_kernel: {
@@ -648,7 +648,7 @@ export class EndpointDocGenerator {
             response: {
               configurations: {
                 events: {
-                  concerned_actions: this.randomHostPolicyResponseActions(),
+                  concerned_actions: ['download_model'],
                   status: this.randomHostPolicyResponseActionStatus(),
                 },
                 logging: {

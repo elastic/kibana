@@ -46,6 +46,7 @@ export const MetaFieldSection = () => (
           'aria-label': i18n.translate('xpack.idxMgmt.mappingsEditor.metaFieldEditorAriaLabel', {
             defaultMessage: '_meta field data editor',
           }),
+          'data-test-subj': 'metaField',
         },
       }}
     />

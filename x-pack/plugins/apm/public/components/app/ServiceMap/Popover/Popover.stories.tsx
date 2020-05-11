@@ -16,7 +16,6 @@ storiesOf('app/ServiceMap/Popover/ServiceMetricList', module)
       avgRequestsPerMinute={164.47222031860858}
       avgCpuUsage={0.32809666568309237}
       avgMemoryUsage={0.5504868173242986}
-      numInstances={2}
       isLoading={false}
     />
   ))
@@ -27,7 +26,6 @@ storiesOf('app/ServiceMap/Popover/ServiceMetricList', module)
       avgRequestsPerMinute={null}
       avgCpuUsage={null}
       avgMemoryUsage={null}
-      numInstances={1}
       isLoading={true}
     />
   ))
@@ -38,7 +36,6 @@ storiesOf('app/ServiceMap/Popover/ServiceMetricList', module)
       avgRequestsPerMinute={8.439583235652972}
       avgCpuUsage={null}
       avgMemoryUsage={null}
-      numInstances={1}
       isLoading={false}
     />
   ))
@@ -49,7 +46,6 @@ storiesOf('app/ServiceMap/Popover/ServiceMetricList', module)
       avgRequestsPerMinute={null}
       avgCpuUsage={null}
       avgMemoryUsage={null}
-      numInstances={1}
       isLoading={false}
     />
   ));
