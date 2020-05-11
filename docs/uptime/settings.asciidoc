@@ -4,7 +4,9 @@
 == Settings
 
 [role="screenshot"]
-image::uptime/images/settings.png[Filter bar]
+image::uptime/images/settings.png[Settings page]
+
+=== Indices
 
 The Uptime settings page lets you change which Heartbeat indices are displayed
 by the uptime app. Users must have the 'all' permission to modify items on this page.
@@ -25,3 +27,20 @@ to manually query Elasticsearch for data outside this pattern!
 See the <<uptime-security,Uptime Elasticsearch Security>>
 and {heartbeat-ref}/securing-heartbeat.html[Heartbeat security]
 docs for more information.
+
+=== Certificate thresholds
+
+The settings page also allows you to specify thresholds for all the TLS certificates monitored
+in your environment. There is a field for maximum age, and the minimum number of days before
+expiration before Uptime should consider a monitor to be in warning state.
+
+For example, you may want to make sure that none of your organization's TLS certificates have been
+valid for longer than one year. This is becoming a common security requirement. Modifying the `Age limit`
+field's value to 365 days will help you keep track of which certificates you may want to refresh.
+
+Likewise, if you want to see which of your TLS certificates are close to expiring ahead of time, specify
+an `Expiration threshold` on this page. When the count of a certificate's remaining valid days falls
+below this threshold, Uptime will consider it in a warning state.
+
+The thresholds specified on this page affect how your certificates are visualized on the Certificates page,
+and which certificates Uptime will warn about when running a TLS alert.
