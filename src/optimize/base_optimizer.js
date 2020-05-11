@@ -192,13 +192,13 @@ export default class BaseOptimizer {
           'NODE_ENV': '"production"'
         }
       }),
-      new UglifyJsPlugin({
-        compress: {
-          warnings: false
-        },
-        sourceMap: false,
-        mangle: false
-      }),
+      // new UglifyJsPlugin({
+      //   compress: {
+      //     warnings: false
+      //   },
+      //   sourceMap: false,
+      //   mangle: false
+      // }),
     ];
   }
 
