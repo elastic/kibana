@@ -211,6 +211,13 @@ export const ProcessEventDot = styled(
           payload: event,
         });
       }, [dispatch, event]);
+
+      const handleRelatedAlertsRequest = useCallback(() => {
+        dispatch({
+          type: 'userSelectedRelatedAlerts',
+          payload: event,
+        });
+      }, [dispatch, event]);
       /**
        * Enumerates the stats for related events to display with the node as options,
        * generally in the form `number of related events in category` `category title`
@@ -380,7 +387,7 @@ export const ProcessEventDot = styled(
                   <EuiFlexItem grow={false}>
                     <NodeSubMenu
                       menuTitle={subMenuAssets.relatedAlerts.title}
-                      menuAction={() => {}}
+                      menuAction={handleRelatedAlertsRequest}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

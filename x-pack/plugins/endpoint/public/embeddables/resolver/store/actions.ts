@@ -94,6 +94,11 @@ interface UserSelectedRelatedEventCategory {
   };
 }
 
+interface UserSelectedRelatedAlerts {
+  readonly type: 'userSelectedRelatedAlerts';
+  readonly payload: ResolverEvent;
+}
+
 export type ResolverAction =
   | CameraAction
   | DataAction
@@ -103,4 +108,5 @@ export type ResolverAction =
   | UserFocusedOnResolverNode
   | UserSelectedResolverNode
   | UserRequestedRelatedEventData
-  | UserSelectedRelatedEventCategory;
+  | UserSelectedRelatedEventCategory
+  | UserSelectedRelatedAlerts;
