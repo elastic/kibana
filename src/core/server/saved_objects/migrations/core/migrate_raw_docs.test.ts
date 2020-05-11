@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsSerializer } from '../../serialization';
 import { migrateRawDocs } from './migrate_raw_docs';
-import { createLoggerMock } from '../../migrations/mocks';
+import { createSavedObjectsMigrationLoggerMock } from '../../migrations/mocks';
 
 describe('migrateRawDocs', () => {
   test('converts raw docs to saved objects', async () => {
@@ -33,7 +33,7 @@ describe('migrateRawDocs', () => {
         { _id: 'a:b', _source: { type: 'a', a: { name: 'AAA' } } },
         { _id: 'c:d', _source: { type: 'c', c: { name: 'DDD' } } },
       ],
-      createLoggerMock()
+      createSavedObjectsMigrationLoggerMock()
     );
 
     expect(result).toEqual([
@@ -51,7 +51,7 @@ describe('migrateRawDocs', () => {
   });
 
   test('passes invalid docs through untouched and logs error', async () => {
-    const logger = createLoggerMock();
+    const logger = createSavedObjectsMigrationLoggerMock();
     const transform = jest.fn<any, any>((doc: any) =>
       _.set(_.cloneDeep(doc), 'attributes.name', 'TADA')
     );
