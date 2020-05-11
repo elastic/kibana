@@ -158,7 +158,7 @@ export const importTimelinesRoute = (
                           parsedTimelineObject,
                           null, // timelineSavedObjectId
                           null, // timelineVersion
-                          pinnedEventIds,
+                          timelineStatus.isHandlingTemplateTimeline ? null : pinnedEventIds,
                           timelineStatus.isHandlingTemplateTimeline
                             ? globalNotes
                             : [...globalNotes, ...eventNotes],
@@ -169,7 +169,9 @@ export const importTimelinesRoute = (
                           timeline_id: newTimeline.timeline.savedObjectId,
                           status_code: 200,
                         });
-                      } else if (!timelineStatus.isHandlingTemplateTimeline) {
+                      }
+
+                      if (!timelineStatus.isHandlingTemplateTimeline) {
                         timelineStatus.checkIsFailureCases(TimelineStatusActions.createViaImport);
                         const message =
                           timelineStatus?.errorMessage?.body != null
@@ -193,7 +195,7 @@ export const importTimelinesRoute = (
                           parsedTimelineObject,
                           timelineStatus.timelineInput.id, // timelineSavedObjectId
                           timelineStatus.timelineInput.version?.toString() ?? null, // timelineVersion
-                          pinnedEventIds,
+                          null,
                           globalNotes,
                           timelineStatus.timelineInput?.data?.noteIds ?? [] // existing note ids
                         );

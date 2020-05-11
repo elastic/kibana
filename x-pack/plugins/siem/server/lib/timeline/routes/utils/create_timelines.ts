@@ -90,7 +90,6 @@ export const createTimelines = async (
   );
   const newTimelineSavedObjectId = responseTimeline.timeline.savedObjectId;
   const newTimelineVersion = responseTimeline.timeline.version;
-
   let myPromises: unknown[] = [];
   if (pinnedEventIds != null && !isEmpty(pinnedEventIds)) {
     myPromises = [
@@ -147,5 +146,5 @@ export const getTemplateTimeline = async (
   } catch (e) {
     return null;
   }
-  return templateTimeline.timeline[0];
+  return templateTimeline?.timeline[0] ?? null;
 };

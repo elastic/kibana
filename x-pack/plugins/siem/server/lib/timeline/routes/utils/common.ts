@@ -160,7 +160,6 @@ export class TimelinesStatus {
 
   public async setAvailableActions() {
     await this.getTimelines();
-
     this.setIsCreatable();
     this.setIsCreatableViaImport();
     this.setIsUpdatable();

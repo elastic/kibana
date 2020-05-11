@@ -103,7 +103,7 @@ const getTimelineTypeFilter = (timelineType: string | null) => {
     : /** Show me every timeline whose timelineType is not "template".
        * which includes timelineType === 'default' and
        * those timelineType doesn't exists */
-      `not siem-ui-timeline.attributes.timelineType: ${TimelineType.template} and not siem-ui-timeline.attributes.timelineType: ${TimelineType.draft}`;
+      `not siem-ui-timeline.attributes.timelineType: ${TimelineType.template}`;
 };
 
 export const getAllTimeline = async (
