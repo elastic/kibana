@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { buildBoolArray } from './build_bool_array';
+
 function flatten(obj, keyPrefix = '') {
   let topLevelKeys = {};
   const nestedRows = [];
@@ -32,19 +34,49 @@ function flatten(obj, keyPrefix = '') {
   }
 }
 
-export const queryEsDSL = (elasticsearchClient, { index, query }) =>
-  elasticsearchClient('transport.request', {
+export const queryEsDSL = (elasticsearchClient, { index, query, filter }) => {
+  console.log(
+    JSON.stringify(
+      {
+        aggs: JSON.parse(query),
+        size: 0,
+        query:
+          filter && filter.and
+            ? {
+                bool: {
+                  must: buildBoolArray(filter.and),
+                },
+              }
+            : { match_all: {} },
+      },
+      null,
+      2
+    )
+  );
+  return elasticsearchClient('transport.request', {
     path: `/${index}/_search`,
     method: 'POST',
     body: {
       aggs: JSON.parse(query),
       size: 0,
+      query:
+        filter && filter.and
+          ? {
+              bool: {
+                must: buildBoolArray(filter.and),
+              },
+            }
+          : { match_all: {} },
     },
   })
     .then(res => {
       console.log(res);
       const rows = flatten(res);
-      const columns = Object.keys(rows[0]).map(key => ({ id: key, name: key, type: typeof rows[0][key] }));
+      const columns = Object.keys(rows[0]).map(key => ({
+        id: key,
+        name: key,
+        type: typeof rows[0][key],
+      }));
 
       return {
         type: 'datatable',
@@ -55,3 +87,4 @@ export const queryEsDSL = (elasticsearchClient, { index, query }) =>
     .catch(e => {
       throw new Error(`Unexpected error from Elasticsearch: ${e.message}`);
     });
+};

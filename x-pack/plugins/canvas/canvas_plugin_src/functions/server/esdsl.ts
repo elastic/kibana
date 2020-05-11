@@ -55,6 +55,7 @@ export function esdsl(): ExpressionFunctionDefinition<
       return queryEsDSL(((context as any) as { elasticsearchClient: any }).elasticsearchClient, {
         index,
         query,
+        filter: input,
       });
     },
   };
