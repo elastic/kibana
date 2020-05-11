@@ -45,9 +45,9 @@ const noConnectorOption = {
 const addNewConnector = {
   value: 'add-connector',
   inputDisplay: (
-    <EuiButtonEmpty size={'xs'} flush={'left'}>
+    <span className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft">
       {i18n.ADD_NEW_CONNECTOR}
-    </EuiButtonEmpty>
+    </span>
   ),
   'data-test-subj': 'dropdown-connector-add-connector',
 };
