@@ -11,7 +11,7 @@ import {
   getTimelinesUrl,
   getHostsUrl,
   getCaseUrl,
-} from '../../components/link_to
+} from '../../components/link_to';
 import * as i18n from './translations';
 import { SiemPageName, SiemNavTab } from './types';
 

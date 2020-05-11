@@ -31,7 +31,7 @@ import { InsertTimelinePopover } from '../../../../components/timeline/insert_ti
 import { useInsertTimeline } from '../../../../components/timeline/insert_timeline_popover/use_insert_timeline';
 import * as i18n from '../../translations';
 import { SiemPageName } from '../../../home/types';
-import { MarkdownEditorForm } from '../../../components/markdown_editor/form
+import { MarkdownEditorForm } from '../../../components/markdown_editor/form';
 import { useGetTags } from '../../../../containers/case/use_get_tags';
 
 export const CommonUseField = getUseField({ component: Field });
