@@ -37,9 +37,9 @@ import { resolve } from 'path';
 import { createReadStream } from 'fs';
 import readline from 'readline';
 
-const back4Directories = '../../../..';
+const ROOT = '../../../..';
 const COVERAGE_INGESTION_KIBANA_ROOT =
-  process.env.COVERAGE_INGESTION_KIBANA_ROOT || resolve(__dirname, back4Directories);
+  process.env.COVERAGE_INGESTION_KIBANA_ROOT || resolve(__dirname, ROOT);
 const ms = process.env.DELAY || 0;
 const staticSiteUrlBase = process.env.STATIC_SITE_URL_BASE || 'https://kibana-coverage.elastic.dev';
 const addPrePopulatedTimeStamp = addTimeStamp(process.env.TIME_STAMP);
