@@ -7,7 +7,7 @@
 import { InnerJoin } from './inner_join';
 
 jest.mock('../../kibana_services', () => {});
-jest.mock('../vector_layer', () => {});
+jest.mock('../layers/vector_layer/vector_layer', () => {});
 
 const rightSource = {
   id: 'd3625663-5b34-4d50-a784-0d743f676a0c',
