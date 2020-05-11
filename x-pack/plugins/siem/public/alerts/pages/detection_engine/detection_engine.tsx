@@ -82,7 +82,11 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   const [lastSignals] = useSignalInfo({});
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
-    (min: number, max: number) => {
+    ({ x }) => {
+      if (!x) {
+        return;
+      }
+      const [min, max] = x;
       setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
     },
     [setAbsoluteRangeDatePicker]

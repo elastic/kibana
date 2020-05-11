@@ -9,7 +9,12 @@ import { set } from 'lodash/fp';
 import React from 'react';
 import { ActionCreator } from 'typescript-fsa';
 
-import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../common/mock';
+import {
+  apolloClientObservable,
+  mockGlobalState,
+  TestProviders,
+  SUB_PLUGINS_REDUCER,
+} from '../../../common/mock';
 import { createStore, State } from '../../../common/store';
 import { mockDataProviders } from '../timeline/data_providers/mock/mock_data_providers';
 
@@ -54,7 +59,11 @@ describe('Flyout', () => {
 
     test('it does NOT render the fly out button when its state is set to flyout is true', () => {
       const stateShowIsTrue = set('timeline.timelineById.test.show', true, state);
-      const storeShowIsTrue = createStore(stateShowIsTrue, {}, apolloClientObservable);
+      const storeShowIsTrue = createStore(
+        stateShowIsTrue,
+        SUB_PLUGINS_REDUCER,
+        apolloClientObservable
+      );
 
       const wrapper = mount(
         <TestProviders store={storeShowIsTrue}>
@@ -75,7 +84,7 @@ describe('Flyout', () => {
       );
       const storeWithDataProviders = createStore(
         stateWithDataProviders,
-        {},
+        SUB_PLUGINS_REDUCER,
         apolloClientObservable
       );
 
@@ -96,7 +105,7 @@ describe('Flyout', () => {
       );
       const storeWithDataProviders = createStore(
         stateWithDataProviders,
-        {},
+        SUB_PLUGINS_REDUCER,
         apolloClientObservable
       );
 
@@ -137,7 +146,7 @@ describe('Flyout', () => {
       );
       const storeWithDataProviders = createStore(
         stateWithDataProviders,
-        {},
+        SUB_PLUGINS_REDUCER,
         apolloClientObservable
       );
 

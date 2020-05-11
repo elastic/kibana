@@ -30,7 +30,7 @@ import {
   mockNoChartMappings,
   mockNarrowDateRange,
 } from '../../../network/components/kpi_network/mock';
-import { mockGlobalState, apolloClientObservable } from '../../mock';
+import { mockGlobalState, apolloClientObservable, SUB_PLUGINS_REDUCER } from '../../mock';
 import { State, createStore } from '../../store';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { KpiNetworkData, KpiHostsData } from '../../../graphql/types';
@@ -49,7 +49,7 @@ jest.mock('../charts/barchart', () => {
 describe('Stat Items Component', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
   const state: State = mockGlobalState;
-  const store = createStore(state, {}, apolloClientObservable);
+  const store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
 
   describe.each([
     [

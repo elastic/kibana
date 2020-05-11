@@ -13,10 +13,15 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import '../../common/mock/match_media';
 import { Filter } from '../../../../../../src/plugins/data/common/es_query';
 import { mocksSource } from '../../common/containers/source/mock';
-import { TestProviders, mockGlobalState, apolloClientObservable } from '../../common/mock';
+import {
+  TestProviders,
+  mockGlobalState,
+  apolloClientObservable,
+  SUB_PLUGINS_REDUCER,
+} from '../../common/mock';
 import { State, createStore } from '../../common/store';
 import { inputsActions } from '../../common/store/inputs';
-import { networkReducer } from '../store';
+
 import { Network } from './network';
 import { NetworkRoutes } from './navigation';
 
@@ -150,7 +155,7 @@ describe('rendering - rendering', () => {
     ];
     localSource[0].result.data.source.status.indicesExist = true;
     const myState: State = mockGlobalState;
-    const myStore = createStore(myState, { network: networkReducer }, apolloClientObservable);
+    const myStore = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable);
     const wrapper = mount(
       <TestProviders store={myStore}>
         <MockedProvider mocks={localSource} addTypename={false}>

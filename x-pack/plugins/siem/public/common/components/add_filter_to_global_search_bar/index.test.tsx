@@ -7,10 +7,14 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
-import { apolloClientObservable, mockGlobalState, TestProviders } from '../../mock';
+import {
+  apolloClientObservable,
+  mockGlobalState,
+  TestProviders,
+  SUB_PLUGINS_REDUCER,
+} from '../../mock';
 import { createStore, State } from '../../store';
 import { AddFilterToGlobalSearchBar } from '.';
-import { hostsReducer } from '../../../hosts/store';
 
 const mockAddFilters = jest.fn();
 jest.mock('../../../lib/kibana', () => ({
@@ -29,10 +33,10 @@ jest.mock('../../../lib/kibana', () => ({
 
 describe('AddFilterToGlobalSearchBar Component', () => {
   const state: State = mockGlobalState;
-  let store = createStore(state, { hosts: hostsReducer }, apolloClientObservable);
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
 
   beforeEach(() => {
-    store = createStore(state, { hosts: hostsReducer }, apolloClientObservable);
+    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
     mockAddFilters.mockClear();
   });
 

@@ -69,7 +69,7 @@ import { RuleStatusFailedCallOut } from './status_failed_callout';
 import { FailureHistory } from './failure_history';
 import { RuleStatus } from '../../../../components/rules//rule_status';
 import { useMlCapabilities } from '../../../../../common/components/ml_popover/hooks/use_ml_capabilities';
-import { hasMlAdminPermissions } from '../../../../../common/components/ml/permissions/has_ml_admin_permissions';
+import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
 
 enum RuleDetailTabs {
   signals = 'signals',
@@ -211,7 +211,11 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   ]);
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
-    (min: number, max: number) => {
+    ({ x }) => {
+      if (!x) {
+        return;
+      }
+      const [min, max] = x;
       setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
     },
     [setAbsoluteRangeDatePicker]

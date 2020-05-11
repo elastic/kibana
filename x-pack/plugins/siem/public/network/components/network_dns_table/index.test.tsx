@@ -10,9 +10,14 @@ import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../common/mock';
+import {
+  apolloClientObservable,
+  mockGlobalState,
+  TestProviders,
+  SUB_PLUGINS_REDUCER,
+} from '../../../common/mock';
 import { State, createStore } from '../../../common/store';
-import { networkModel, networkReducer } from '../../store';
+import { networkModel } from '../../store';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
 import { NetworkDnsTable } from '.';
@@ -21,11 +26,11 @@ import { mockData } from './mock';
 describe('NetworkTopNFlow Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
-  let store = createStore(state, { network: networkReducer }, apolloClientObservable);
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
   const mount = useMountAppended();
 
   beforeEach(() => {
-    store = createStore(state, { network: networkReducer }, apolloClientObservable);
+    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
   });
 
   describe('rendering', () => {

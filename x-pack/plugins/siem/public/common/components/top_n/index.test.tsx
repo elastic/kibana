@@ -8,7 +8,12 @@ import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import { mockBrowserFields } from '../../containers/source/mock';
-import { apolloClientObservable, mockGlobalState, TestProviders } from '../../mock';
+import {
+  apolloClientObservable,
+  mockGlobalState,
+  TestProviders,
+  SUB_PLUGINS_REDUCER,
+} from '../../mock';
 import { createKibanaCoreStartMock } from '../../mock/kibana_core';
 import { FilterManager } from '../../../../../../../src/plugins/data/public';
 import { createStore, State } from '../../store';
@@ -19,7 +24,6 @@ import {
 
 import { Props } from './top_n';
 import { ACTIVE_TIMELINE_REDUX_ID, StatefulTopN } from '.';
-import { timelineReducer } from '../../../timelines/store/timeline/reducer';
 
 jest.mock('../../lib/kibana');
 
@@ -136,7 +140,7 @@ const state: State = {
     },
   },
 };
-const store = createStore(state, { timeline: timelineReducer }, apolloClientObservable);
+const store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
 
 describe('StatefulTopN', () => {
   // Suppress warnings about "react-beautiful-dnd"

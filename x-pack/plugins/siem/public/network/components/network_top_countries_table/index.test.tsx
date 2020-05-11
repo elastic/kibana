@@ -16,10 +16,11 @@ import {
   mockGlobalState,
   mockIndexPattern,
   TestProviders,
+  SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { createStore, State } from '../../../common/store';
-import { networkModel, networkReducer } from '../../store';
+import { networkModel } from '../../store';
 
 import { NetworkTopCountriesTable } from '.';
 import { mockData } from './mock';
@@ -29,10 +30,10 @@ describe('NetworkTopCountries Table Component', () => {
   const state: State = mockGlobalState;
   const mount = useMountAppended();
 
-  let store = createStore(state, { network: networkReducer }, apolloClientObservable);
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
 
   beforeEach(() => {
-    store = createStore(state, { network: networkReducer }, apolloClientObservable);
+    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
   });
 
   describe('rendering', () => {

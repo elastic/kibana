@@ -48,7 +48,11 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
       [setAbsoluteRangeDatePicker]
     );
     const updateDateRange = useCallback<UpdateDateRange>(
-      (min: number, max: number) => {
+      ({ x }) => {
+        if (!x) {
+          return;
+        }
+        const [min, max] = x;
         setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
       },
       [setAbsoluteRangeDatePicker]

@@ -14,14 +14,18 @@ import { Filter } from '../../../../../../src/plugins/data/common/es_query';
 import '../../common/mock/match_media';
 import { mocksSource } from '../../common/containers/source/mock';
 import { wait } from '../../common/lib/helpers';
-import { apolloClientObservable, TestProviders, mockGlobalState } from '../../common/mock';
+import {
+  apolloClientObservable,
+  TestProviders,
+  mockGlobalState,
+  SUB_PLUGINS_REDUCER,
+} from '../../common/mock';
 import { SiemNavigation } from '../../common/components/navigation';
 import { inputsActions } from '../../common/store/inputs';
 import { State, createStore } from '../../common/store';
 import { HostsComponentProps } from './types';
 import { Hosts } from './hosts';
 import { HostsTabs } from './hosts_tabs';
-import { hostsReducer } from '../store';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -167,7 +171,7 @@ describe('Hosts - rendering', () => {
     ];
     localSource[0].result.data.source.status.indicesExist = true;
     const myState: State = mockGlobalState;
-    const myStore = createStore(myState, { hosts: hostsReducer }, apolloClientObservable);
+    const myStore = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable);
     const wrapper = mount(
       <TestProviders store={myStore}>
         <MockedProvider mocks={localSource} addTypename={false}>

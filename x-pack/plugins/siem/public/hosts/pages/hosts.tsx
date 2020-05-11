@@ -14,7 +14,7 @@ import { UpdateDateRange } from '../../common/components/charts/common';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { HeaderPage } from '../../common/components/header_page';
 import { LastEventTime } from '../../common/components/last_event_time';
-import { hasMlUserPermissions } from '../../common/components/ml/permissions/has_ml_user_permissions';
+import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
 import { SiemNavigation } from '../../common/components/navigation';
 import { KpiHostsComponent } from '../components/kpi_hosts';
 import { manageQuery } from '../../common/components/page/manage_query';
@@ -67,7 +67,11 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
       return filters;
     }, [tabName, filters]);
     const narrowDateRange = useCallback<UpdateDateRange>(
-      (min: number, max: number) => {
+      ({ x }) => {
+        if (!x) {
+          return;
+        }
+        const [min, max] = x;
         setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
       },
       [setAbsoluteRangeDatePicker]

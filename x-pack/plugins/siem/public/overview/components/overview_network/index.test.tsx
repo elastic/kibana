@@ -8,7 +8,12 @@ import { cloneDeep } from 'lodash/fp';
 import { mount } from 'enzyme';
 import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
-import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../common/mock';
+import {
+  apolloClientObservable,
+  mockGlobalState,
+  TestProviders,
+  SUB_PLUGINS_REDUCER,
+} from '../../../common/mock';
 
 import { OverviewNetwork } from '.';
 import { createStore, State } from '../../../common/store';
@@ -78,11 +83,11 @@ const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
 describe('OverviewNetwork', () => {
   const state: State = mockGlobalState;
 
-  let store = createStore(state, {}, apolloClientObservable);
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
 
   beforeEach(() => {
     const myState = cloneDeep(state);
-    store = createStore(myState, {}, apolloClientObservable);
+    store = createStore(myState, SUB_PLUGINS_REDUCER, apolloClientObservable);
   });
 
   test('it renders the expected widget title', () => {

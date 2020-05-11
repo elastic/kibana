@@ -9,9 +9,9 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { apolloClientObservable, mockGlobalState } from '../../../common/mock';
+import { apolloClientObservable, mockGlobalState, SUB_PLUGINS_REDUCER } from '../../../common/mock';
 import { createStore, State } from '../../../common/store';
-import { hostsModel, hostsReducer } from '../../store';
+import { hostsModel } from '../../store';
 import { mockData } from './mock';
 import * as i18n from './translations';
 import { AuthenticationTable, getAuthenticationColumnsCurated } from '.';
@@ -20,10 +20,10 @@ describe('Authentication Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
 
-  let store = createStore(state, { hosts: hostsReducer }, apolloClientObservable);
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
 
   beforeEach(() => {
-    store = createStore(state, { hosts: hostsReducer }, apolloClientObservable);
+    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
   });
 
   describe('rendering', () => {

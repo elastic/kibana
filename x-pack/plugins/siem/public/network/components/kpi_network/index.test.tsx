@@ -8,9 +8,8 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { apolloClientObservable, mockGlobalState } from '../../../common/mock';
+import { apolloClientObservable, mockGlobalState, SUB_PLUGINS_REDUCER } from '../../../common/mock';
 import { createStore, State } from '../../../common/store';
-import { networkReducer } from '../../store';
 import { KpiNetworkComponent } from '.';
 import { mockData } from './mock';
 
@@ -20,10 +19,10 @@ describe('KpiNetwork Component', () => {
   const to = new Date('2019-06-18T06:00:00.000Z').valueOf();
   const narrowDateRange = jest.fn();
 
-  let store = createStore(state, { network: networkReducer }, apolloClientObservable);
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
 
   beforeEach(() => {
-    store = createStore(state, { network: networkReducer }, apolloClientObservable);
+    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
   });
 
   describe('rendering', () => {

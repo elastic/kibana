@@ -54,7 +54,11 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
 }) => {
   const { signalIndexName } = useSignalIndex();
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
-    (min: number, max: number) => {
+    ({ x }) => {
+      if (!x) {
+        return;
+      }
+      const [min, max] = x;
       setAbsoluteRangeDatePicker({ id: setAbsoluteRangeDatePickerTarget, from: min, to: max });
     },
     [setAbsoluteRangeDatePicker]

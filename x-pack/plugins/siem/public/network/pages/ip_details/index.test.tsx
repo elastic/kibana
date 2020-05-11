@@ -15,11 +15,15 @@ import '../../../common/mock/match_media';
 
 import { mocksSource } from '../../../common/containers/source/mock';
 import { FlowTarget } from '../../../graphql/types';
-import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../common/mock';
+import {
+  apolloClientObservable,
+  mockGlobalState,
+  TestProviders,
+  SUB_PLUGINS_REDUCER,
+} from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { createStore, State } from '../../../common/store';
 import { InputsModelId } from '../../../common/store/inputs/constants';
-import { networkReducer } from '../../store';
 import { IPDetailsComponent, IPDetails } from './index';
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
@@ -114,10 +118,10 @@ describe('Ip Details', () => {
   });
 
   const state: State = mockGlobalState;
-  let store = createStore(state, { network: networkReducer }, apolloClientObservable);
+  let store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
 
   beforeEach(() => {
-    store = createStore(state, { network: networkReducer }, apolloClientObservable);
+    store = createStore(state, SUB_PLUGINS_REDUCER, apolloClientObservable);
     localSource = cloneDeep(mocksSource);
   });
 

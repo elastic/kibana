@@ -8,7 +8,7 @@ import React, { useMemo } from 'react';
 import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
 import { useMlCapabilities } from '../../common/components/ml_popover/hooks/use_ml_capabilities';
-import { hasMlUserPermissions } from '../../common/components/ml/permissions/has_ml_user_permissions';
+import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
 import { FlowTarget } from '../../graphql/types';
 
 import { IPDetails } from './ip_details';
