@@ -71,8 +71,7 @@ export default function({ getService }: FtrProviderContext) {
 
   const calendarId = `wizard-test-calendar_${Date.now()}`;
 
-  // Breaking latest ES snapshots: https://github.com/elastic/kibana/issues/65377
-  describe.skip('single metric', function() {
+  describe('single metric', function() {
     this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('ml/farequote');
