@@ -12,7 +12,10 @@ import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { useUrlParams } from '.';
 
-export const makeBaseBreadcrumb = (params?: UptimeUrlParams): ChromeBreadcrumb => {
+export const makeBaseBreadcrumb = (
+  params?: UptimeUrlParams,
+  extraCrumbs?: ChromeBreadcrumb[]
+): ChromeBreadcrumb => {
   let href = '#/';
   if (params) {
     const crumbParams: Partial<UptimeUrlParams> = { ...params };
@@ -20,7 +23,11 @@ export const makeBaseBreadcrumb = (params?: UptimeUrlParams): ChromeBreadcrumb =
     // values in dateRangeStart are better for a URL.
     delete crumbParams.absoluteDateRangeStart;
     delete crumbParams.absoluteDateRangeEnd;
-    href += stringifyUrlParams(crumbParams, true);
+
+    // On homepage we will reset url params on clicking breadcrumb
+    if (extraCrumbs && extraCrumbs.length > 0) {
+      href += stringifyUrlParams(crumbParams, true);
+    }
   }
   return {
     text: i18n.translate('xpack.uptime.breadcrumbs.overviewBreadcrumbText', {
@@ -35,7 +42,7 @@ export const useBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[]) => {
   const setBreadcrumbs = useKibana().services.chrome?.setBreadcrumbs;
   useEffect(() => {
     if (setBreadcrumbs) {
-      setBreadcrumbs([makeBaseBreadcrumb(params)].concat(extraCrumbs));
+      setBreadcrumbs([makeBaseBreadcrumb(params, extraCrumbs)].concat(extraCrumbs));
     }
   }, [extraCrumbs, params, setBreadcrumbs]);
 };

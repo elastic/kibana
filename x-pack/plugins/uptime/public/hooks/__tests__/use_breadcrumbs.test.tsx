@@ -42,7 +42,9 @@ describe('useBreadcrumbs', () => {
     );
 
     const urlParams: UptimeUrlParams = getSupportedUrlParams({});
-    expect(getBreadcrumbs()).toStrictEqual([makeBaseBreadcrumb(urlParams)].concat(expectedCrumbs));
+    expect(getBreadcrumbs()).toStrictEqual(
+      [makeBaseBreadcrumb(urlParams, expectedCrumbs)].concat(expectedCrumbs)
+    );
   });
 });
 

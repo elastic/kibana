@@ -25,6 +25,7 @@ import { OverviewPageProps } from '../components/overview/overview_container';
 const StyleLink = styled(Link)`
   &&& {
     animation: none !important;
+    color: initial;
   }
 `;
 
