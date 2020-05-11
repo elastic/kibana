@@ -56,7 +56,7 @@ export default function({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'actions');
 
           const reference = `actions-execute-1:${user.username}`;
           const response = await supertestWithoutAuth
@@ -128,7 +128,7 @@ export default function({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'actions');
 
           const reference = `actions-execute-4:${user.username}`;
           const response = await supertestWithoutAuth
@@ -182,7 +182,7 @@ export default function({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'actions');
 
           await supertest
             .put(`${getUrlPrefix(space.id)}/api/actions/${createdAction.id}`)
@@ -340,7 +340,7 @@ export default function({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'actions');
 
           await supertest
             .put(`${getUrlPrefix(space.id)}/api/actions/${createdAction.id}`)
@@ -402,7 +402,7 @@ export default function({ getService }: FtrProviderContext) {
               actionTypeId: 'test.authorization',
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'actions');
 
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/actions/${createdAction.id}/_execute`)

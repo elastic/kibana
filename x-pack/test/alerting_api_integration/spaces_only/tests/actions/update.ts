@@ -32,7 +32,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'actions');
 
       await supertest
         .put(`${getUrlPrefix(Spaces.space1.id)}/api/actions/${createdAction.id}`)
@@ -80,7 +80,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'actions');
 
       await supertest
         .put(`${getUrlPrefix(Spaces.other.id)}/api/actions/${createdAction.id}`)

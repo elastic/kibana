@@ -37,7 +37,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'actions');
 
           const response = await supertestWithoutAuth
             .get(`${getUrlPrefix(space.id)}/api/actions/${createdAction.id}`)
@@ -87,7 +87,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'actions');
 
           const response = await supertestWithoutAuth
             .get(`${getUrlPrefix('other')}/api/actions/${createdAction.id}`)

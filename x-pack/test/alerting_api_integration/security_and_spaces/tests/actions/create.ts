@@ -52,7 +52,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
-              objectRemover.add(space.id, response.body.id, 'action');
+              objectRemover.add(space.id, response.body.id, 'actions');
               expect(response.body).to.eql({
                 id: response.body.id,
                 isPreconfigured: false,

@@ -37,7 +37,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'actions');
 
           const response = await supertestWithoutAuth
             .get(`${getUrlPrefix(space.id)}/api/actions`)
@@ -118,7 +118,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'actions');
 
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alert`)
@@ -223,7 +223,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'actions');
 
           const response = await supertestWithoutAuth
             .get(`${getUrlPrefix('other')}/api/actions`)

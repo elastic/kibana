@@ -70,7 +70,7 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
     after(async () => {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
-      objectRemover.add(space.id, indexRecordActionId, 'action');
+      objectRemover.add(space.id, indexRecordActionId, 'actions');
       await objectRemover.removeAll();
     });
 
@@ -182,7 +182,7 @@ instanceStateValue: true
           config: {},
         })
         .expect(200);
-      objectRemover.add(space.id, createdAction.id, 'action');
+      objectRemover.add(space.id, createdAction.id, 'actions');
 
       const reference = alertUtils.generateReference();
       const response = await supertestWithoutAuth
@@ -299,7 +299,7 @@ instanceStateValue: true
           actionTypeId: 'test.authorization',
         })
         .expect(200);
-      objectRemover.add(space.id, createdAction.id, 'action');
+      objectRemover.add(space.id, createdAction.id, 'actions');
       const response = await supertestWithoutAuth
         .post(`${getUrlPrefix(space.id)}/api/alert`)
         .set('kbn-xsrf', 'foo')

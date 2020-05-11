@@ -32,7 +32,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'actions');
 
       await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/actions`).expect(200, [
         {
@@ -91,7 +91,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'actions');
 
       await supertest.get(`${getUrlPrefix(Spaces.other.id)}/api/actions`).expect(200, [
         {

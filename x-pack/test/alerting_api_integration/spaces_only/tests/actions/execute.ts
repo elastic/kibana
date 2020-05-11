@@ -52,7 +52,7 @@ export default function({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'actions');
 
       const reference = `actions-execute-1:${Spaces.space1.id}`;
       const response = await supertest
@@ -97,7 +97,7 @@ export default function({ getService }: FtrProviderContext) {
           actionTypeId: 'test.failing',
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'actions');
 
       const reference = `actions-failure-1:${Spaces.space1.id}`;
       const response = await supertest
@@ -135,7 +135,7 @@ export default function({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'actions');
 
       const reference = `actions-execute-2:${Spaces.space1.id}`;
       await supertest
@@ -165,7 +165,7 @@ export default function({ getService }: FtrProviderContext) {
           actionTypeId: 'test.authorization',
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action');
+      objectRemover.add(Spaces.space1.id, createdAction.id, 'actions');
 
       const response = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/${createdAction.id}/_execute`)

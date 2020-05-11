@@ -120,7 +120,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
     it('should create pagerduty simulator action successfully', async () => {
       const { body: createdSimulatedAction } = await supertest
-        .post('/api/action')
+        .post('/api/actions')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'A pagerduty simulator',

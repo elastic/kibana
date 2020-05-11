@@ -54,7 +54,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
                 error: 'Not Found',
                 message: 'Not Found',
               });
-              objectRemover.add(space.id, createdAction.id, 'action');
+              objectRemover.add(space.id, createdAction.id, 'actions');
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
@@ -81,7 +81,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'actions');
 
           const response = await supertestWithoutAuth
             .delete(`${getUrlPrefix('other')}/api/actions/${createdAction.id}`)

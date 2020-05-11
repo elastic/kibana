@@ -398,7 +398,7 @@ async function createAction(supertest: any, objectRemover: ObjectRemover): Promi
   expect(statusCode).to.be(200);
 
   const actionId = createdAction.id;
-  objectRemover.add(Spaces.space1.id, actionId, 'action');
+  objectRemover.add(Spaces.space1.id, actionId, 'actions');
 
   return actionId;
 }
