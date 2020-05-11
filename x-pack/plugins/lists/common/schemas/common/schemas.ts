@@ -8,7 +8,7 @@
 
 import * as t from 'io-ts';
 
-import { NonEmptyString } from '../types/non_empty_string';
+import { DefaultStringArray, NonEmptyString } from '../types';
 
 export const name = t.string;
 export type Name = t.TypeOf<typeof name>;
@@ -21,8 +21,9 @@ export const descriptionOrUndefined = t.union([description, t.undefined]);
 export type DescriptionOrUndefined = t.TypeOf<typeof descriptionOrUndefined>;
 
 export const list_id = NonEmptyString;
+export type ListId = t.TypeOf<typeof list_id>;
 export const list_idOrUndefined = t.union([list_id, t.undefined]);
-export type List_idOrUndefined = t.TypeOf<typeof list_idOrUndefined>;
+export type ListIdOrUndefined = t.TypeOf<typeof list_idOrUndefined>;
 
 export const item = t.string;
 export const created_at = t.string; // TODO: Make this into an ISO Date string check
@@ -60,3 +61,11 @@ export type MetaOrUndefined = t.TypeOf<typeof metaOrUndefined>;
 
 export const esDataTypeUnion = t.union([t.type({ ip }), t.type({ keyword })]);
 export type EsDataTypeUnion = t.TypeOf<typeof esDataTypeUnion>;
+
+export const tags = DefaultStringArray;
+export const tagsOrUndefined = t.union([tags, t.undefined]);
+export const _tags = DefaultStringArray;
+export const _tagsOrUndefined = t.union([_tags, t.undefined]);
+
+// TODO: Change this into a t.keyof enumeration when we know what types of lists we going to have.
+export const exceptionListType = t.string;

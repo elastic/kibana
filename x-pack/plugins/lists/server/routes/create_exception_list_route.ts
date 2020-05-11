@@ -7,8 +7,10 @@
 import { IRouter } from 'kibana/server';
 
 import { EXCEPTION_LIST_URL } from '../../common/constants';
-import { buildRouteValidation } from '../siem_server_deps';
-import { createListSchema } from '../../common/schemas';
+import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
+import { createExceptionListSchema } from '../../common/schemas';
+
+import { getExceptionListClient } from './utils/get_exception_list_client';
 
 export const createExceptionListRoute = (router: IRouter): void => {
   router.post(
@@ -18,12 +20,35 @@ export const createExceptionListRoute = (router: IRouter): void => {
       },
       path: EXCEPTION_LIST_URL,
       validate: {
-        body: buildRouteValidation(createListSchema),
+        body: buildRouteValidation(createExceptionListSchema),
       },
     },
     async (context, request, response) => {
-      // const siemResponse = buildSiemResponse(response);
-      return response.ok({ body: { ok: 'starting stub' } });
+      const siemResponse = buildSiemResponse(response);
+      try {
+        const { description, list_id: listId } = request.body;
+        const exceptionLists = getExceptionListClient(context);
+        const list = exceptionLists.getExceptionList({
+          id: undefined,
+          listId,
+          namespaceType: 'single',
+        });
+        if (list != null) {
+          return siemResponse.error({
+            body: `exception list id: "${listId}" already exists`,
+            statusCode: 409,
+          });
+        } else {
+          exceptionLists.createExceptionList({ description });
+        }
+        return response.ok({ body: { ok: 'starting stub' } });
+      } catch (err) {
+        const error = transformError(err);
+        return siemResponse.error({
+          body: error.message,
+          statusCode: error.statusCode,
+        });
+      }
     }
   );
 };

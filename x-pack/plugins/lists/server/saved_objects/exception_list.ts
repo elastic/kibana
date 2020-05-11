@@ -6,6 +6,10 @@
 
 import { SavedObjectsType } from 'kibana/server';
 
+export const exceptionListSavedObjectType = 'exception-list';
+export const exceptionListAgnosticSavedObjectType = 'exception-list-agnostic';
+export type SavedObjectType = 'exception-list' | 'exception-list-agnostic';
+
 export const exceptionListMapping: SavedObjectsType['mappings'] = {
   properties: {
     _tags: {
@@ -41,13 +45,13 @@ export const exceptionListMapping: SavedObjectsType['mappings'] = {
 export const exceptionListType: SavedObjectsType = {
   hidden: false,
   mappings: exceptionListMapping,
-  name: 'exception-list',
+  name: exceptionListSavedObjectType,
   namespaceType: 'single',
 };
 
 export const exceptionListAgnosticType: SavedObjectsType = {
   hidden: false,
   mappings: exceptionListMapping,
-  name: 'exception-list-agnostic',
-  namespaceType: 'single',
+  name: exceptionListAgnosticSavedObjectType,
+  namespaceType: 'agnostic',
 };
