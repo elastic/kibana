@@ -19,7 +19,7 @@ function isValidCategorizationConfig(job: CombinedJob, fieldName: string): boole
 }
 
 function isScriptField(job: CombinedJob, fieldName: string): boolean {
-  const scriptFields = Object.keys(job?.datafeed_config?.script_fields ?? {});
+  const scriptFields = Object.keys(job.datafeed_config.script_fields ?? {});
   return scriptFields.includes(fieldName);
 }
 
@@ -67,9 +67,7 @@ const validateFactory = (callWithRequest: APICaller, job: CombinedJob): Validato
 
     if (relevantDetectors.length > 0) {
       try {
-        const uniqueFieldNames: string[] = [
-          ...new Set(relevantDetectors.map(f => f[fieldName])),
-        ] as string[];
+        const uniqueFieldNames = [...new Set(relevantDetectors.map(f => f[fieldName]))] as string[];
 
         // use fieldCaps endpoint to get data about whether fields are aggregatable
         const fieldCaps = await callWithRequest('fieldCaps', {
@@ -151,14 +149,17 @@ const validateFactory = (callWithRequest: APICaller, job: CombinedJob): Validato
 export async function validateCardinality(
   callWithRequest: APICaller,
   job?: CombinedJob
-): Promise<Array<{ id: string; modelPlotCardinality?: number; fieldName?: string }>> {
+): Promise<Array<{ id: string; modelPlotCardinality?: number; fieldName?: string }>> | never {
   const messages = [];
 
-  validateJobObject(job!);
+  if (!validateJobObject(job)) {
+    // required for TS type casting, validateJobObject throws an error internally.
+    throw new Error();
+  }
 
   // find out if there are any relevant detector field names
   // where cardinality checks could be run against.
-  const numDetectorsWithFieldNames = job!.analysis_config.detectors.filter(d => {
+  const numDetectorsWithFieldNames = job.analysis_config.detectors.filter(d => {
     return d.by_field_name || d.over_field_name || d.partition_field_name;
   });
   if (numDetectorsWithFieldNames.length === 0) {
@@ -166,9 +167,9 @@ export async function validateCardinality(
   }
 
   // validate({ type, isInvalid }) asynchronously returns an array of validation messages
-  const validate = validateFactory(callWithRequest, job!);
+  const validate = validateFactory(callWithRequest, job);
 
-  const modelPlotEnabled = job!.model_plot_config?.enabled ?? false;
+  const modelPlotEnabled = job.model_plot_config?.enabled ?? false;
 
   // check over fields (population analysis)
   const validateOverFieldsLow = validate({
