@@ -17,8 +17,6 @@ import d3 from 'd3';
 import $ from 'jquery';
 import moment from 'moment';
 
-// don't use something like plugins/ml/../common
-// because it won't work with the jest tests
 import { formatHumanReadableDateTime } from '../../util/date_utils';
 import { formatValue } from '../../formatters/format_value';
 import {

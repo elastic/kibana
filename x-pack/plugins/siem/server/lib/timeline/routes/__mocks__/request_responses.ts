@@ -5,8 +5,6 @@
  */
 import * as rt from 'io-ts';
 import {
-  TIMELINE_DRAFT_URL,
-  TIMELINE_DRAFT_CLEAN_URL,
   TIMELINE_EXPORT_URL,
   TIMELINE_IMPORT_URL,
   TIMELINE_URL,
@@ -82,14 +80,6 @@ export const createTimelineWithoutTimelineId = {
   timelineType: TimelineType.default,
 };
 
-export const createDraftTimelineWithoutTimelineId = {
-  templateTimelineId: null,
-  timeline: inputTimeline,
-  timelineId: null,
-  version: null,
-  timelineType: TimelineType.draft,
-};
-
 export const createTemplateTimelineWithoutTimelineId = {
   templateTimelineId: null,
   timeline: inputTemplateTimeline,
@@ -100,11 +90,6 @@ export const createTemplateTimelineWithoutTimelineId = {
 
 export const createTimelineWithTimelineId = {
   ...createTimelineWithoutTimelineId,
-  timelineId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
-};
-
-export const createDraftTimelineWithTimelineId = {
-  ...createDraftTimelineWithoutTimelineId,
   timelineId: '79deb4c0-6bc1-11ea-a90b-f5341fb7a189',
 };
 
@@ -152,18 +137,6 @@ export const getImportTimelinesRequestEnableOverwrite = (filename?: string) =>
     body: {
       file: { hapi: { filename: filename ?? 'filename.ndjson' } },
     },
-  });
-
-export const getDraftTimelinesRequest = () =>
-  requestMock.create({
-    method: 'get',
-    path: TIMELINE_DRAFT_URL,
-  });
-
-export const cleanDraftTimelinesRequest = () =>
-  requestMock.create({
-    method: 'post',
-    path: TIMELINE_DRAFT_CLEAN_URL,
   });
 
 export const mockTimelinesSavedObjects = () => ({

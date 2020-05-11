@@ -8,7 +8,7 @@ import { EuiPanel, EuiBasicTable } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
-import { OpenTimelineProps, OpenTimelineResult, ActionTimelineToShow } from './types';
+import { OpenTimelineProps, OpenTimelineResult } from './types';
 import { SearchRow } from './search_row';
 import { TimelinesTable } from './timelines_table';
 import { ImportDataModal } from '../import_data_modal';
@@ -22,7 +22,7 @@ import {
   UtilityBarSection,
   UtilityBarAction,
 } from '../utility_bar';
-import { useEditTimelineBatchActions } from './edit_timeline_batch_actions';
+import { useEditTimelinBatchActions } from './edit_timeline_batch_actions';
 import { useEditTimelineActions } from './edit_timeline_actions';
 import { EditOneTimelineAction } from './export_timeline';
 
@@ -65,7 +65,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       onCompleteEditTimelineAction,
     } = useEditTimelineActions();
 
-    const { getBatchItemsPopoverContent } = useEditTimelineBatchActions({
+    const { getBatchItemsPopoverContent } = useEditTimelinBatchActions({
       deleteTimelines,
       selectedItems,
       tableRef,
@@ -106,7 +106,6 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         setImportDataModalToggle(false);
       }
     }, [setImportDataModalToggle]);
-
     const handleComplete = useCallback(() => {
       if (setImportDataModalToggle != null) {
         setImportDataModalToggle(false);
@@ -115,14 +114,6 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
         refetch(searchResults, totalSearchResultsCount);
       }
     }, [setImportDataModalToggle, refetch, searchResults, totalSearchResultsCount]);
-
-    const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(
-      () =>
-        onDeleteSelected != null && deleteTimelines != null
-          ? ['delete', 'duplicate', 'export', 'selectable']
-          : ['duplicate', 'export', 'selectable'],
-      [onDeleteSelected, deleteTimelines]
-    );
 
     return (
       <>
@@ -188,7 +179,13 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           </UtilityBar>
 
           <TimelinesTable
-            actionTimelineToShow={actionTimelineToShow}
+            actionTimelineToShow={useMemo(
+              () =>
+                onDeleteSelected != null && deleteTimelines != null
+                  ? ['delete', 'duplicate', 'export', 'selectable']
+                  : ['duplicate', 'export', 'selectable'],
+              [onDeleteSelected, deleteTimelines]
+            )}
             data-test-subj="timelines-table"
             deleteTimelines={deleteTimelines}
             defaultPageSize={defaultPageSize}
