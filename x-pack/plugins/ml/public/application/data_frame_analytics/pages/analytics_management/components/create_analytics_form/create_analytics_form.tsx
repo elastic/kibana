@@ -48,6 +48,13 @@ import {
 } from '../../../../common/analytics';
 import { shouldAddAsDepVarOption, OMIT_FIELDS } from './form_options_validation';
 
+const requiredFieldsErrorText = i18n.translate(
+  'xpack.ml.dataframe.analytics.create.requiredFieldsErrorMessage',
+  {
+    defaultMessage: 'At least one field must be included in the analysis.',
+  }
+);
+
 export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, state }) => {
   const {
     services: { docLinks },
@@ -96,6 +103,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     numTopFeatureImportanceValuesValid,
     previousJobType,
     previousSourceIndex,
+    requiredFieldsError,
     sourceIndex,
     sourceIndexNameEmpty,
     sourceIndexNameValid,
@@ -158,6 +166,8 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
   };
 
   const debouncedGetExplainData = debounce(async () => {
+    const jobTypeOrIndexChanged =
+      previousSourceIndex !== sourceIndex || previousJobType !== jobType;
     const shouldUpdateModelMemoryLimit = !firstUpdate.current || !modelMemoryLimit;
     const shouldUpdateEstimatedMml =
       !firstUpdate.current || !modelMemoryLimit || estimatedModelMemoryLimit === '';
@@ -167,7 +177,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     }
     // Reset if sourceIndex or jobType changes (jobType requires dependent_variable to be set -
     // which won't be the case if switching from outlier detection)
-    if (previousSourceIndex !== sourceIndex || previousJobType !== jobType) {
+    if (jobTypeOrIndexChanged) {
       setFormState({
         loadingFieldOptions: true,
       });
@@ -186,8 +196,21 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
         setEstimatedModelMemoryLimit(expectedMemoryWithoutDisk);
       }
 
+      const fieldSelection: FieldSelectionItem[] | undefined = resp.field_selection;
+
+      let hasRequiredFields = false;
+      if (fieldSelection) {
+        for (let i = 0; i < fieldSelection.length; i++) {
+          const field = fieldSelection[i];
+          if (field.is_included === true && field.is_required === false) {
+            hasRequiredFields = true;
+            break;
+          }
+        }
+      }
+
       // If sourceIndex has changed load analysis field options again
-      if (previousSourceIndex !== sourceIndex || previousJobType !== jobType) {
+      if (jobTypeOrIndexChanged) {
         const analyzedFieldsOptions: EuiComboBoxOptionOption[] = [];
 
         if (resp.field_selection) {
@@ -204,21 +227,24 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
           loadingFieldOptions: false,
           fieldOptionsFetchFail: false,
           maxDistinctValuesError: undefined,
+          requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
         });
       } else {
         setFormState({
           ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemoryWithoutDisk } : {}),
+          requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
         });
       }
     } catch (e) {
       let errorMessage;
       if (
         jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
-        e.message !== undefined &&
-        e.message.includes('status_exception') &&
-        e.message.includes('must have at most')
+        e.body &&
+        e.body.message !== undefined &&
+        e.body.message.includes('status_exception') &&
+        e.body.message.includes('must have at most')
       ) {
-        errorMessage = e.message;
+        errorMessage = e.body.message;
       }
       const fallbackModelMemoryLimit =
         jobType !== undefined
@@ -321,6 +347,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
       excludesOptions: [],
       previousSourceIndex: sourceIndex,
       sourceIndex: selectedOptions[0].label || '',
+      requiredFieldsError: undefined,
     });
   };
 
@@ -367,6 +394,9 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     evt.initEvent('mouseup', true, true);
     forceInput.current.dispatchEvent(evt);
   }, []);
+
+  const noSupportetdAnalysisFields =
+    excludesOptions.length === 0 && fieldOptionsFetchFail === false && !sourceIndexNameEmpty;
 
   return (
     <EuiForm className="mlDataFrameAnalyticsCreateForm">
@@ -716,17 +746,30 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
             </Fragment>
           )}
           <EuiFormRow
+            fullWidth
+            isInvalid={requiredFieldsError !== undefined}
+            error={
+              requiredFieldsError !== undefined && [
+                i18n.translate('xpack.ml.dataframe.analytics.create.requiredFieldsError', {
+                  defaultMessage: 'Invalid. {message}',
+                  values: { message: requiredFieldsError },
+                }),
+              ]
+            }
+          >
+            <Fragment />
+          </EuiFormRow>
+          <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.excludedFieldsLabel', {
               defaultMessage: 'Excluded fields',
             })}
+            isInvalid={noSupportetdAnalysisFields}
             helpText={i18n.translate('xpack.ml.dataframe.analytics.create.excludedFieldsHelpText', {
               defaultMessage:
                 'Select fields to exclude from analysis. All other supported fields are included.',
             })}
             error={
-              excludesOptions.length === 0 &&
-              fieldOptionsFetchFail === false &&
-              !sourceIndexNameEmpty && [
+              noSupportetdAnalysisFields && [
                 i18n.translate(
                   'xpack.ml.dataframe.analytics.create.excludesOptionsNoSupportedFields',
                   {
