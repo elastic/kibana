@@ -30,20 +30,20 @@ module.exports = function (grunt) {
     'rejectRejFiles',
 
     'run:eslint',
-    'licenses',
+    // 'licenses',
     'test:server',
     'test:jest',
-    'test:browser-ci',
+    // 'test:browser-ci',
     'test:api',
     '_build:verifyTranslations',
   ]);
 
   grunt.config.set('functional_test_runner.functional.options.configOverrides.mochaOpts.bail', true);
-  grunt.registerTask('jenkins:selenium', [
-    'jenkins:env',
-    'rejectRejFiles',
+  // grunt.registerTask('jenkins:selenium', [
+  //   'jenkins:env',
+  //   'rejectRejFiles',
 
-    'test:uiRelease'
-  ]);
+  //   'test:uiRelease'
+  // ]);
 
 };

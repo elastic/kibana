@@ -16,7 +16,7 @@ module.exports = function (grunt) {
       '_build:readme',
       '_build:babelCache',
       '_build:installDependencies',
-      '_build:notice',
+      // '_build:notice',
       '_build:removePkgJsonDeps',
       'clean:testsFromModules',
       'clean:examplesFromModules',
