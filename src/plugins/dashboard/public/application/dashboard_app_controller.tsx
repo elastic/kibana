@@ -29,7 +29,6 @@ import angular from 'angular';
 import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { History } from 'history';
-
 import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import { TimeRange } from 'src/plugins/data/public';
@@ -155,6 +154,7 @@ export class DashboardAppController {
     const filterManager = queryService.filterManager;
     const queryFilter = filterManager;
     const timefilter = queryService.timefilter.timefilter;
+    const isEmbeddedExternally = Boolean($routeParams.embed);
     let showTopNavMenu = true;
     let showSearchBar = true;
     let showQueryBar = true;
@@ -163,7 +163,7 @@ export class DashboardAppController {
 
     // url param rules should only apply when embedded (e.g. url?embed=true)
     const shouldForceDisplay = (param: string): boolean =>
-      chrome.isEmbedded && Boolean($routeParams[param]);
+      isEmbeddedExternally && Boolean($routeParams[param]);
 
     const forceShowTopNavMenu = shouldForceDisplay(UrlParams.SHOW_TOP_MENU);
     const forceShowQueryInput = shouldForceDisplay(UrlParams.SHOW_QUERY_INPUT);
@@ -334,7 +334,7 @@ export class DashboardAppController {
         viewMode: dashboardStateManager.getViewMode(),
         panels: embeddablesMap,
         isFullScreenMode: dashboardStateManager.getFullScreenMode(),
-        isEmbeddedExternally: Boolean($routeParams.embed),
+        isEmbeddedExternally,
         isEmptyState: shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadonlyMode,
         useMargins: dashboardStateManager.getUseMargins(),
         lastReloadRequestTime,
@@ -640,7 +640,7 @@ export class DashboardAppController {
         showQueryInput,
         showDatePicker,
         showFilterBar: showFilterBar(),
-        justifyContent: (chrome.isEmbedded ? 'flexStart' : 'flexEnd') as FlexGroupJustifyContent,
+        justifyContent: (isEmbeddedExternally ? 'flexStart' : 'flexEnd') as FlexGroupJustifyContent,
         indexPatterns: $scope.indexPatterns,
         showSaveQuery: $scope.showSaveQuery,
         query: $scope.model.query,
@@ -1063,7 +1063,8 @@ export class DashboardAppController {
 
     const visibleSubscription = chrome.getIsVisible$().subscribe((isVisible) => {
       $scope.$evalAsync(() => {
-        const shouldShow = (forceShow: boolean) => (forceShow || isVisible) && !dashboardStateManager.getFullScreenMode();
+        const shouldShow = (forceShow: boolean) =>
+          (forceShow || isVisible) && !dashboardStateManager.getFullScreenMode();
 
         $scope.isVisible = isVisible;
         showTopNavMenu = shouldShow(forceShowTopNavMenu);
