@@ -17,6 +17,7 @@ import {
   QuerySuggestion,
   DataPublicPluginSetup,
 } from '../../../../../../../src/plugins/data/public';
+import { useIndexPattern } from './use_index_pattern';
 
 const Container = styled.div`
   margin-bottom: 10px;
@@ -36,24 +37,14 @@ interface Props {
   'aria-label': string;
   autocomplete: DataPublicPluginSetup['autocomplete'];
   'data-test-subj': string;
-  loadIndexPattern: () => void;
-  indexPattern: IIndexPattern | null;
-  loading: boolean;
 }
 
-export function KueryBarComponent({
+export function KueryBar({
   'aria-label': ariaLabel,
   autocomplete: autocompleteService,
   'data-test-subj': dataTestSubj,
-  loadIndexPattern,
-  indexPattern,
-  loading,
 }: Props) {
-  useEffect(() => {
-    if (!indexPattern) {
-      loadIndexPattern();
-    }
-  }, [indexPattern, loadIndexPattern]);
+  const { loading, index_pattern: indexPattern } = useIndexPattern();
 
   const [state, setState] = useState<State>({
     suggestions: [],

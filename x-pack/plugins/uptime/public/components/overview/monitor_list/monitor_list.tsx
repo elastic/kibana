@@ -33,9 +33,9 @@ import { CertStatusColumn } from './cert_status_column';
 import { MonitorListHeader } from './monitor_list_header';
 
 interface Props extends MonitorListProps {
-  lastRefresh: number;
+  pageSize: number;
+  setPageSize: (val: number) => void;
   monitorList: MonitorList;
-  getMonitorList: (params: FetchMonitorStatesQueryArgs) => void;
 }
 
 const TruncatedEuiLink = styled(EuiLink)`
@@ -56,36 +56,16 @@ const getPageSizeValue = () => {
 
 export const MonitorListComponent: React.FC<Props> = ({
   filters,
-  getMonitorList,
-  lastRefresh,
   monitorList: { list, error, loading },
   linkParameters,
+  pageSize,
+  setPageSize,
 }) => {
-  const [pageSize, setPageSize] = useState<number>(getPageSizeValue());
-  const [drawerIds, updateDrawerIds] = useState<string[]>([]);
-
-  const [getUrlValues] = useUrlParams();
-  const { dateRangeStart, dateRangeEnd, pagination, statusFilter } = getUrlValues();
-
   useEffect(() => {
-    getMonitorList({
-      dateRangeStart,
-      dateRangeEnd,
-      filters,
-      pageSize,
-      pagination,
-      statusFilter,
-    });
-  }, [
-    getMonitorList,
-    dateRangeStart,
-    dateRangeEnd,
-    filters,
-    lastRefresh,
-    pageSize,
-    pagination,
-    statusFilter,
-  ]);
+    setPageSize(getPageSizeValue());
+  }, [setPageSize]);
+
+  const [drawerIds, updateDrawerIds] = useState<string[]>([]);
 
   const items = list.summaries ?? [];
 

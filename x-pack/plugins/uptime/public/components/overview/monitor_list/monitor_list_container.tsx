@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { getMonitorList } from '../../../state/actions';
-import { FetchMonitorStatesQueryArgs } from '../../../../common/runtime_types';
 import { monitorListSelector } from '../../../state/selectors';
 import { MonitorListComponent } from './monitor_list';
+import { useUrlParams } from '../../../hooks';
 
 export interface MonitorListProps {
   filters?: string;
@@ -17,18 +17,45 @@ export interface MonitorListProps {
 }
 
 export const MonitorList: React.FC<MonitorListProps> = props => {
+  const { filters } = props;
+
+  const [pageSize, setPageSize] = useState<number>(10);
+
   const dispatch = useDispatch();
 
-  const dispatchCallback = useCallback(
-    (params: FetchMonitorStatesQueryArgs) => {
-      dispatch(getMonitorList(params));
-    },
-    [dispatch]
-  );
+  const [getUrlValues] = useUrlParams();
+  const { dateRangeStart, dateRangeEnd, pagination, statusFilter } = getUrlValues();
 
-  const monitorListState = useSelector(monitorListSelector);
+  const { lastRefresh, monitorList } = useSelector(monitorListSelector);
+
+  useEffect(() => {
+    dispatch(
+      getMonitorList({
+        dateRangeStart,
+        dateRangeEnd,
+        filters,
+        pageSize,
+        pagination,
+        statusFilter,
+      })
+    );
+  }, [
+    dispatch,
+    dateRangeStart,
+    dateRangeEnd,
+    filters,
+    lastRefresh,
+    pageSize,
+    pagination,
+    statusFilter,
+  ]);
 
   return (
-    <MonitorListComponent {...props} {...monitorListState} getMonitorList={dispatchCallback} />
+    <MonitorListComponent
+      {...props}
+      monitorList={monitorList}
+      pageSize={pageSize}
+      setPageSize={setPageSize}
+    />
   );
 };

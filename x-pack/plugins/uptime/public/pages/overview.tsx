@@ -57,6 +57,7 @@ export const OverviewPageComponent = ({ autocomplete, indexPattern, setEsKueryFi
   });
 
   useBreadcrumbs([]); // No extra breadcrumbs on overview
+
   return (
     <>
       <PageHeader headingText={heading} extraLinks={true} datePicker={true} />
