@@ -27,6 +27,8 @@ import {
   ConnectorEditFlyout,
 } from '../../../../../triggers_actions_ui/public';
 
+import { ClosureType } from '../../../../containers/case/configure/types';
+
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionConnectorTableItem } from '../../../../../triggers_actions_ui/public/types';
 import { getCaseUrl } from '../../../common/components/link_to';
@@ -145,14 +147,29 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     [currentConfiguration, connectorId, closureType]
   );
 
-  const onChangeConnector = useCallback((id: string) => {
-    setConnector(id);
-    persistCaseConfigure({
-      connectorId: id,
-      connectorName: connectors.find(c => c.id === id)?.name ?? '',
-      closureType,
-    });
-  }, []);
+  const onChangeConnector = useCallback(
+    (id: string) => {
+      setConnector(id);
+      persistCaseConfigure({
+        connectorId: id,
+        connectorName: connectors.find(c => c.id === id)?.name ?? '',
+        closureType,
+      });
+    },
+    [connectorId, closureType]
+  );
+
+  const onChangeClosureType = useCallback(
+    (type: ClosureType) => {
+      setClosureType(type);
+      persistCaseConfigure({
+        connectorId,
+        connectorName: connectors.find(c => c.id === connectorId)?.name ?? '',
+        closureType: type,
+      });
+    },
+    [connectorId, closureType]
+  );
 
   useEffect(() => {
     if (
@@ -205,7 +222,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
         <ClosureOptions
           closureTypeSelected={closureType}
           disabled={persistLoading || isLoadingConnectors || connectorId === 'none' || !userCanCrud}
-          onChangeClosureType={setClosureType}
+          onChangeClosureType={onChangeClosureType}
         />
       </SectionWrapper>
       <SectionWrapper>
