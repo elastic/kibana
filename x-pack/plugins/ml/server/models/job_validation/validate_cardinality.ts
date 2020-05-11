@@ -148,14 +148,17 @@ const validateFactory = (callWithRequest: APICaller, job: CombinedJob): Validato
   };
 };
 
-export async function validateCardinality(callWithRequest: APICaller, job: CombinedJob) {
+export async function validateCardinality(
+  callWithRequest: APICaller,
+  job?: CombinedJob
+): Promise<Array<{ id: string; modelPlotCardinality?: number; fieldName?: string }>> {
   const messages = [];
 
-  validateJobObject(job);
+  validateJobObject(job!);
 
   // find out if there are any relevant detector field names
   // where cardinality checks could be run against.
-  const numDetectorsWithFieldNames = job.analysis_config.detectors.filter(d => {
+  const numDetectorsWithFieldNames = job!.analysis_config.detectors.filter(d => {
     return d.by_field_name || d.over_field_name || d.partition_field_name;
   });
   if (numDetectorsWithFieldNames.length === 0) {
@@ -163,9 +166,9 @@ export async function validateCardinality(callWithRequest: APICaller, job: Combi
   }
 
   // validate({ type, isInvalid }) asynchronously returns an array of validation messages
-  const validate = validateFactory(callWithRequest, job);
+  const validate = validateFactory(callWithRequest, job!);
 
-  const modelPlotEnabled = job.model_plot_config?.enabled ?? false;
+  const modelPlotEnabled = job!.model_plot_config?.enabled ?? false;
 
   // check over fields (population analysis)
   const validateOverFieldsLow = validate({
