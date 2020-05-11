@@ -53,6 +53,9 @@ export const resolveDestinationLocation = (
 
   const below: ProcessorSelector = items[destinationIndex + 1];
   if (dragDirection === 'down' && below) {
+    // Handle special case where we are actually want to reorder
+    // an item in its own list instead of nesting inside of the previous
+    // elements children.
     if (
       checkIfSamePath(sourceSelector.slice(0, -1), below.slice(0, -1)) &&
       displacing.length >= below.length
@@ -63,14 +66,18 @@ export const resolveDestinationLocation = (
         index: location.index - 1,
       };
     }
+    // Handle special case where we do not want reordering an element
+    // to the bottom of a nested list de-indents it
     if (
       checkIfSamePath(sourceSelector.slice(0, -1), displacing.slice(0, -1)) &&
       displacing.length >= below.length
     ) {
       return mapSelectorToDragLocation(displacing);
     }
+    // Every other case for dragging down
     return mapSelectorToDragLocation(below);
   }
 
+  // Just target displaced element when dragging up
   return mapSelectorToDragLocation(displacing);
 };

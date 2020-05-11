@@ -136,4 +136,7 @@ describe('Resolve destination location', () => {
       'Expected an integer but received "onFailure"'
     );
   });
+
+  it('handles dragging down past an item at the same level with child elements', () => {});
+  it('handles dragging a nested item to the bottom of its siblings', () => {});
 });
