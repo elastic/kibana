@@ -145,6 +145,15 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     [currentConfiguration, connectorId, closureType]
   );
 
+  const onChangeConnector = useCallback((id: string) => {
+    setConnector(id);
+    persistCaseConfigure({
+      connectorId: id,
+      connectorName: connectors.find(c => c.id === id)?.name ?? '',
+      closureType,
+    });
+  }, []);
+
   useEffect(() => {
     if (
       !isLoadingConnectors &&
@@ -204,7 +213,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           connectors={connectors ?? []}
           disabled={persistLoading || isLoadingConnectors || !userCanCrud}
           isLoading={isLoadingConnectors}
-          onChangeConnector={setConnector}
+          onChangeConnector={onChangeConnector}
           updateConnectorDisabled={updateConnectorDisabled || !userCanCrud}
           handleShowAddFlyout={onClickAddConnector}
           handleShowEditFlyout={onClickUpdateConnector}
