@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiButton,
 } from '@elastic/eui';
 
 import styled from 'styled-components';
