@@ -22,7 +22,6 @@ import {
   PluginInitializerContext,
   SavedObjectsClientContract,
   ToastsStart,
-  IUiSettingsClient,
   OverlayStart,
 } from 'kibana/public';
 // @ts-ignore
@@ -40,6 +39,7 @@ import {
 } from '../../../../src/plugins/kibana_legacy/public';
 
 import './index.scss';
+import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies
@@ -57,7 +57,6 @@ export interface GraphDependencies {
   navigation: NavigationStart;
   licensing: LicensingPluginSetup;
   chrome: ChromeStart;
-  config: IUiSettingsClient;
   toastNotifications: ToastsStart;
   indexPatterns: IndexPatternsContract;
   data: ReturnType<DataPlugin['start']>;
@@ -68,6 +67,7 @@ export interface GraphDependencies {
   canEditDrillDownUrls: boolean;
   graphSavePolicy: string;
   overlays: OverlayStart;
+  savedObjects: SavedObjectsStart;
 }
 
 export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) => {

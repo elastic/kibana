@@ -12,10 +12,6 @@ import { isColorDark, hexToRgb } from '@elastic/eui';
 
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
 import { showSaveModal } from '../../../../src/plugins/saved_objects/public';
-import {
-  LISTING_LIMIT_SETTING,
-  PER_PAGE_SETTING,
-} from '../../../../src/plugins/saved_objects/common';
 
 import appTemplate from './angular/templates/index.html';
 import listingTemplate from './angular/templates/listing_ng_wrapper.html';
@@ -50,13 +46,13 @@ export function initGraphApp(angularModule, deps) {
     addBasePath,
     getBasePath,
     data,
-    config,
     capabilities,
     coreStart,
     storage,
     canEditDrillDownUrls,
     graphSavePolicy,
     overlays,
+    savedObjects,
   } = deps;
 
   const app = angularModule;
@@ -116,8 +112,8 @@ export function initGraphApp(angularModule, deps) {
         template: listingTemplate,
         badge: getReadonlyBadge,
         controller: function($location, $scope) {
-          $scope.listingLimit = config.get(LISTING_LIMIT_SETTING);
-          $scope.initialPageSize = config.get(PER_PAGE_SETTING);
+          $scope.listingLimit = savedObjects.settings.getListingLimit();
+          $scope.initialPageSize = savedObjects.settings.getPerPage();
           $scope.create = () => {
             $location.url(getNewPath());
           };

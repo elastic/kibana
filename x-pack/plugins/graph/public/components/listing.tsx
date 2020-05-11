@@ -55,7 +55,6 @@ export function Listing(props: ListingProps) {
         tableListTitle={i18n.translate('xpack.graph.listing.graphsTitle', {
           defaultMessage: 'Graphs',
         })}
-        uiSettings={props.coreStart.uiSettings}
       />
     </I18nProvider>
   );

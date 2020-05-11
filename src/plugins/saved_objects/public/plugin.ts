@@ -26,6 +26,10 @@ import { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
 
 export interface SavedObjectsStart {
   SavedObjectClass: any;
+  settings: {
+    getPerPage: () => number;
+    getListingLimit: () => number;
+  };
 }
 
 export interface SavedObjectsStartDeps {
