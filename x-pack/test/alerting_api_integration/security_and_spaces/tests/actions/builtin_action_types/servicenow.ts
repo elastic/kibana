@@ -195,7 +195,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
 
       it('should respond with a 400 Bad Request when creating a servicenow action without casesConfiguration', async () => {
         await supertest
-          .post('/api/action')
+          .post('/api/actions')
           .set('kbn-xsrf', 'foo')
           .send({
             name: 'A servicenow action',
