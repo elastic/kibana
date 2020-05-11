@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createDirectAccessDashboardLinkGenerator } from './url_generator';
+import { createDashboardUrlGenerator } from './url_generator';
 import { hashedItemStore } from '../../kibana_utils/public';
 // eslint-disable-next-line
 import { mockStorage } from '../../kibana_utils/public/storage/hashed_item_store/mock';
@@ -55,7 +55,7 @@ describe('dashboard url generator', () => {
   });
 
   test('creates a link to a saved dashboard', async () => {
-    const generator = createDirectAccessDashboardLinkGenerator(() =>
+    const generator = createDashboardUrlGenerator(() =>
       Promise.resolve({
         appBasePath: APP_BASE_PATH,
         useHashedUrl: false,
@@ -67,7 +67,7 @@ describe('dashboard url generator', () => {
   });
 
   test('creates a link with global time range set up', async () => {
-    const generator = createDirectAccessDashboardLinkGenerator(() =>
+    const generator = createDashboardUrlGenerator(() =>
       Promise.resolve({
         appBasePath: APP_BASE_PATH,
         useHashedUrl: false,
@@ -83,7 +83,7 @@ describe('dashboard url generator', () => {
   });
 
   test('creates a link with filters, time range, refresh interval and query to a saved object', async () => {
-    const generator = createDirectAccessDashboardLinkGenerator(() =>
+    const generator = createDashboardUrlGenerator(() =>
       Promise.resolve({
         appBasePath: APP_BASE_PATH,
         useHashedUrl: false,
@@ -123,7 +123,7 @@ describe('dashboard url generator', () => {
   });
 
   test('if no useHash setting is given, uses the one was start services', async () => {
-    const generator = createDirectAccessDashboardLinkGenerator(() =>
+    const generator = createDashboardUrlGenerator(() =>
       Promise.resolve({
         appBasePath: APP_BASE_PATH,
         useHashedUrl: true,
@@ -137,7 +137,7 @@ describe('dashboard url generator', () => {
   });
 
   test('can override a false useHash ui setting', async () => {
-    const generator = createDirectAccessDashboardLinkGenerator(() =>
+    const generator = createDashboardUrlGenerator(() =>
       Promise.resolve({
         appBasePath: APP_BASE_PATH,
         useHashedUrl: false,
@@ -152,7 +152,7 @@ describe('dashboard url generator', () => {
   });
 
   test('can override a true useHash ui setting', async () => {
-    const generator = createDirectAccessDashboardLinkGenerator(() =>
+    const generator = createDashboardUrlGenerator(() =>
       Promise.resolve({
         appBasePath: APP_BASE_PATH,
         useHashedUrl: true,
@@ -195,7 +195,7 @@ describe('dashboard url generator', () => {
     };
 
     test('attaches filters from destination dashboard', async () => {
-      const generator = createDirectAccessDashboardLinkGenerator(() =>
+      const generator = createDashboardUrlGenerator(() =>
         Promise.resolve({
           appBasePath: APP_BASE_PATH,
           useHashedUrl: false,
@@ -224,7 +224,7 @@ describe('dashboard url generator', () => {
     });
 
     test("doesn't fail if can't retrieve filters from destination dashboard", async () => {
-      const generator = createDirectAccessDashboardLinkGenerator(() =>
+      const generator = createDashboardUrlGenerator(() =>
         Promise.resolve({
           appBasePath: APP_BASE_PATH,
           useHashedUrl: false,
@@ -246,7 +246,7 @@ describe('dashboard url generator', () => {
     });
 
     test('can enforce empty filters', async () => {
-      const generator = createDirectAccessDashboardLinkGenerator(() =>
+      const generator = createDashboardUrlGenerator(() =>
         Promise.resolve({
           appBasePath: APP_BASE_PATH,
           useHashedUrl: false,
@@ -270,7 +270,7 @@ describe('dashboard url generator', () => {
     });
 
     test('no filters in result url if no filters applied', async () => {
-      const generator = createDirectAccessDashboardLinkGenerator(() =>
+      const generator = createDashboardUrlGenerator(() =>
         Promise.resolve({
           appBasePath: APP_BASE_PATH,
           useHashedUrl: false,
@@ -288,7 +288,7 @@ describe('dashboard url generator', () => {
     });
 
     test('can turn off preserving filters', async () => {
-      const generator = createDirectAccessDashboardLinkGenerator(() =>
+      const generator = createDashboardUrlGenerator(() =>
         Promise.resolve({
           appBasePath: APP_BASE_PATH,
           useHashedUrl: false,
