@@ -24,7 +24,7 @@ import {
   AggParamsRange,
   AggParamsIpRange,
   AggParamsDateRange,
-  AggParamsFilter,
+  AggParamsGeoFilter,
   AggParamsFilters,
   AggParamsSignificantTerms,
   AggParamsGeoTile,
@@ -115,7 +115,7 @@ export interface AggParamsMapping {
   [BUCKET_TYPES.RANGE]: AggParamsRange;
   [BUCKET_TYPES.IP_RANGE]: AggParamsIpRange;
   [BUCKET_TYPES.DATE_RANGE]: AggParamsDateRange;
-  [BUCKET_TYPES.FILTER]: AggParamsFilter;
+  [BUCKET_TYPES.GEO_FILTER]: AggParamsGeoFilter;
   [BUCKET_TYPES.FILTERS]: AggParamsFilters;
   [BUCKET_TYPES.SIGNIFICANT_TERMS]: AggParamsSignificantTerms;
   [BUCKET_TYPES.GEOTILE_GRID]: AggParamsGeoTile;

@@ -96,7 +96,7 @@ export const getGeoHashBucketAgg = ({ getInternalStartServices }: GeoHashBucketA
           aggs.push(
             agg.aggConfigs.createAggConfig(
               {
-                type: 'filter',
+                type: 'geo_filter',
                 id: 'filter_agg',
                 enabled: true,
                 params: {

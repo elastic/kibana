@@ -44,7 +44,7 @@ import { getRangeBucketAgg } from './buckets/range';
 import { getDateRangeBucketAgg } from './buckets/date_range';
 import { getIpRangeBucketAgg } from './buckets/ip_range';
 import { getTermsBucketAgg } from './buckets/terms';
-import { getFilterBucketAgg } from './buckets/filter';
+import { getGeoFilterBucketAgg } from './buckets/geo_filter';
 import { getFiltersBucketAgg } from './buckets/filters';
 import { getSignificantTermsBucketAgg } from './buckets/significant_terms';
 import { getGeoHashBucketAgg } from './buckets/geo_hash';
@@ -97,7 +97,7 @@ export const getAggTypes = ({
     getDateRangeBucketAgg({ uiSettings, getInternalStartServices }),
     getIpRangeBucketAgg({ getInternalStartServices }),
     getTermsBucketAgg({ getInternalStartServices }),
-    getFilterBucketAgg({ getInternalStartServices }),
+    getGeoFilterBucketAgg({ getInternalStartServices }),
     getFiltersBucketAgg({ uiSettings, getInternalStartServices }),
     getSignificantTermsBucketAgg({ getInternalStartServices }),
     getGeoHashBucketAgg({ getInternalStartServices }),
@@ -106,12 +106,12 @@ export const getAggTypes = ({
 });
 
 /** Buckets: **/
-import { aggFilter } from './buckets/filter_fn';
 import { aggFilters } from './buckets/filters_fn';
 import { aggSignificantTerms } from './buckets/significant_terms_fn';
 import { aggIpRange } from './buckets/ip_range_fn';
 import { aggDateRange } from './buckets/date_range_fn';
 import { aggRange } from './buckets/range_fn';
+import { aggGeoFilter } from './buckets/geo_filter_fn';
 import { aggGeoTile } from './buckets/geo_tile_fn';
 import { aggGeoHash } from './buckets/geo_hash_fn';
 import { aggHistogram } from './buckets/histogram_fn';
@@ -163,7 +163,7 @@ export const getAggTypesFunctions = () => [
   aggStdDeviation,
   aggSum,
   aggTopHit,
-  aggFilter,
+  aggGeoFilter,
   aggFilters,
   aggSignificantTerms,
   aggIpRange,

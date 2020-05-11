@@ -140,7 +140,7 @@ export const createGaugeVisTypeDefinition = (deps: VisTypeVislibDependencies) =>
         }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!geo_filter'],
       },
     ]),
   },

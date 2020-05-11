@@ -18,11 +18,11 @@
  */
 
 import { functionWrapper } from '../test_helpers';
-import { aggFilter } from './filter_fn';
+import { aggGeoFilter } from './geo_filter_fn';
 
 describe('agg_expression_functions', () => {
-  describe('aggFilter', () => {
-    const fn = functionWrapper(aggFilter());
+  describe('aggGeoFilter', () => {
+    const fn = functionWrapper(aggGeoFilter());
 
     test('fills in defaults when only required args are provided', () => {
       const actual = fn({});
@@ -38,7 +38,7 @@ describe('agg_expression_functions', () => {
               "json": undefined,
             },
             "schema": undefined,
-            "type": "filter",
+            "type": "geo_filter",
           },
         }
       `);
@@ -63,7 +63,7 @@ describe('agg_expression_functions', () => {
             "json": undefined,
           },
           "schema": undefined,
-          "type": "filter",
+          "type": "geo_filter",
         }
       `);
     });

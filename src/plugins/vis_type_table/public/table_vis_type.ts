@@ -78,7 +78,7 @@ export function getTableVisTypeDefinition(core: CoreSetup, context: PluginInitia
           title: i18n.translate('visTypeTable.tableVisEditorConfig.schemas.bucketTitle', {
             defaultMessage: 'Split rows',
           }),
-          aggFilter: ['!filter'],
+          aggFilter: ['!geo_filter'],
         },
         {
           group: AggGroupNames.Buckets,
@@ -88,7 +88,7 @@ export function getTableVisTypeDefinition(core: CoreSetup, context: PluginInitia
           }),
           min: 0,
           max: 1,
-          aggFilter: ['!filter'],
+          aggFilter: ['!geo_filter'],
         },
       ]),
     },

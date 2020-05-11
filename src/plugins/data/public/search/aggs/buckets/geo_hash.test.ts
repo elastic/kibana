@@ -114,7 +114,7 @@ describe('Geohash Agg', () => {
         const requestAggs = geoHashBucketAgg.getRequestAggs(geoHashGridAgg) as IBucketAggConfig[];
 
         expect(requestAggs.length).toEqual(3);
-        expect(requestAggs[0].type.name).toEqual('filter');
+        expect(requestAggs[0].type.name).toEqual('geo_filter');
         expect(requestAggs[1].type.name).toEqual('geohash_grid');
         expect(requestAggs[2].type.name).toEqual('geo_centroid');
       });
@@ -140,7 +140,7 @@ describe('Geohash Agg', () => {
       ) as IBucketAggConfig[];
 
       expect(requestAggs.length).toEqual(2);
-      expect(requestAggs[0].type.name).toEqual('filter');
+      expect(requestAggs[0].type.name).toEqual('geo_filter');
       expect(requestAggs[1].type.name).toEqual('geohash_grid');
     });
   });

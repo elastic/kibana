@@ -116,7 +116,7 @@ export const createHeatmapVisTypeDefinition = (deps: VisTypeVislibDependencies) 
         }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!geo_filter'],
       },
       {
         group: AggGroupNames.Buckets,
@@ -124,7 +124,7 @@ export const createHeatmapVisTypeDefinition = (deps: VisTypeVislibDependencies) 
         title: i18n.translate('visTypeVislib.heatmap.groupTitle', { defaultMessage: 'Y-axis' }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!geo_filter'],
       },
       {
         group: AggGroupNames.Buckets,
@@ -134,7 +134,7 @@ export const createHeatmapVisTypeDefinition = (deps: VisTypeVislibDependencies) 
         }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!geo_filter'],
       },
     ]),
   },

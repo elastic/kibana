@@ -164,7 +164,7 @@ export const createHistogramVisTypeDefinition = (deps: VisTypeVislibDependencies
         }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!geo_filter'],
       },
       {
         group: AggGroupNames.Buckets,
@@ -174,7 +174,7 @@ export const createHistogramVisTypeDefinition = (deps: VisTypeVislibDependencies
         }),
         min: 0,
         max: 3,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!geo_filter'],
       },
       {
         group: AggGroupNames.Buckets,
@@ -184,7 +184,7 @@ export const createHistogramVisTypeDefinition = (deps: VisTypeVislibDependencies
         }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!geo_filter'],
       },
     ]),
   },

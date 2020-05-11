@@ -23,7 +23,7 @@ export * from './histogram';
 export * from './date_histogram';
 export * from './date_range';
 export * from './range';
-export * from './filter';
+export * from './geo_filter';
 export * from './filters';
 export * from './geo_tile';
 export * from './geo_hash';

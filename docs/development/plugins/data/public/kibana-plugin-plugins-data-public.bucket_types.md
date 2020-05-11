@@ -16,8 +16,8 @@ export declare enum BUCKET_TYPES
 |  --- | --- | --- |
 |  DATE\_HISTOGRAM | <code>&quot;date_histogram&quot;</code> |  |
 |  DATE\_RANGE | <code>&quot;date_range&quot;</code> |  |
-|  FILTER | <code>&quot;filter&quot;</code> |  |
 |  FILTERS | <code>&quot;filters&quot;</code> |  |
+|  GEO\_FILTER | <code>&quot;geo_filter&quot;</code> |  |
 |  GEOHASH\_GRID | <code>&quot;geohash_grid&quot;</code> |  |
 |  GEOTILE\_GRID | <code>&quot;geotile_grid&quot;</code> |  |
 |  HISTOGRAM | <code>&quot;histogram&quot;</code> |  |

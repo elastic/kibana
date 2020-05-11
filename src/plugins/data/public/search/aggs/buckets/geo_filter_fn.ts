@@ -23,57 +23,57 @@ import { ExpressionFunctionDefinition } from '../../../../../expressions/public'
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggFilter';
+const fnName = 'aggGeoFilter';
 
 type Input = any;
-type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.FILTER>;
+type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.GEO_FILTER>;
 
 type Arguments = Assign<AggArgs, { geo_bounding_box?: string }>;
 
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, Arguments, Output>;
 
-export const aggFilter = (): FunctionDefinition => ({
+export const aggGeoFilter = (): FunctionDefinition => ({
   name: fnName,
-  help: i18n.translate('data.search.aggs.function.buckets.filter.help', {
+  help: i18n.translate('data.search.aggs.function.buckets.geoFilter.help', {
     defaultMessage: 'Generates a serialized agg config for a Filter agg',
   }),
   type: 'agg_type',
   args: {
     id: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.filter.id.help', {
+      help: i18n.translate('data.search.aggs.buckets.geoFilter.id.help', {
         defaultMessage: 'ID for this aggregation',
       }),
     },
     enabled: {
       types: ['boolean'],
       default: true,
-      help: i18n.translate('data.search.aggs.buckets.filter.enabled.help', {
+      help: i18n.translate('data.search.aggs.buckets.geoFilter.enabled.help', {
         defaultMessage: 'Specifies whether this aggregation should be enabled',
       }),
     },
     schema: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.filter.schema.help', {
+      help: i18n.translate('data.search.aggs.buckets.geoFilter.schema.help', {
         defaultMessage: 'Schema to use for this aggregation',
       }),
     },
     geo_bounding_box: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.filter.geoBoundingBox.help', {
+      help: i18n.translate('data.search.aggs.buckets.geoFilter.geoBoundingBox.help', {
         defaultMessage: 'Filter results based on a point location within a bounding box',
       }),
     },
     json: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.filter.json.help', {
+      help: i18n.translate('data.search.aggs.buckets.geoFilter.json.help', {
         defaultMessage: 'Advanced json to include when the agg is sent to Elasticsearch',
       }),
     },
     customLabel: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.buckets.filter.customLabel.help', {
+      help: i18n.translate('data.search.aggs.buckets.geoFilter.customLabel.help', {
         defaultMessage: 'Represents a custom label for this aggregation',
       }),
     },
@@ -87,7 +87,7 @@ export const aggFilter = (): FunctionDefinition => ({
         id,
         enabled,
         schema,
-        type: BUCKET_TYPES.FILTER,
+        type: BUCKET_TYPES.GEO_FILTER,
         params: {
           ...rest,
           json: getParsedValue(args, 'json'),

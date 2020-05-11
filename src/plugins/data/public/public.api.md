@@ -137,9 +137,9 @@ export enum BUCKET_TYPES {
     // (undocumented)
     DATE_RANGE = "date_range",
     // (undocumented)
-    FILTER = "filter",
-    // (undocumented)
     FILTERS = "filters",
+    // (undocumented)
+    GEO_FILTER = "geo_filter",
     // (undocumented)
     GEOHASH_GRID = "geohash_grid",
     // (undocumented)
