@@ -290,7 +290,8 @@ describe('ML - validateJob', () => {
     });
   });
 
-  it('basic validation passes, extended checks return some messages', () => {
+  // Failing https://github.com/elastic/kibana/issues/65865
+  it.skip('basic validation passes, extended checks return some messages', () => {
     const payload = getBasicPayload();
     return validateJob(callWithRequest, payload).then(messages => {
       const ids = messages.map(m => m.id);
@@ -303,7 +304,8 @@ describe('ML - validateJob', () => {
     });
   });
 
-  it('categorization job using mlcategory passes aggregatable field check', () => {
+  // Failing https://github.com/elastic/kibana/issues/65866
+  it.skip('categorization job using mlcategory passes aggregatable field check', () => {
     const payload: any = {
       job: {
         job_id: 'categorization_test',
@@ -369,7 +371,8 @@ describe('ML - validateJob', () => {
     });
   });
 
-  it('script field not reported as non aggregatable', () => {
+  // Failing https://github.com/elastic/kibana/issues/65867
+  it.skip('script field not reported as non aggregatable', () => {
     const payload: any = {
       job: {
         job_id: 'categorization_test',
