@@ -4,16 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServiceMapResponse } from './';
 import {
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
   AGENT_NAME,
-  SPAN_TYPE,
-  SPAN_SUBTYPE
-} from '../../../../common/elasticsearch_fieldnames';
-import { dedupeConnections } from './';
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_SUBTYPE,
+  SPAN_TYPE
+} from '../../../common/elasticsearch_fieldnames';
+import { AnomaliesResponse } from './get_service_map';
+import {
+  transformServiceMapResponses,
+  ServiceMapResponse
+} from './transform_service_map_responses';
 
 const nodejsService = {
   [SERVICE_NAME]: 'opbeans-node',
@@ -33,9 +36,14 @@ const javaService = {
   [AGENT_NAME]: 'java'
 };
 
-describe('dedupeConnections', () => {
+const anomalies = ({
+  aggregations: { jobs: { buckets: [] } }
+} as unknown) as AnomaliesResponse;
+
+describe('transformServiceMapResponses', () => {
   it('maps external destinations to internal services', () => {
     const response: ServiceMapResponse = {
+      anomalies,
       services: [nodejsService, javaService],
       discoveredServices: [
         {
@@ -51,7 +59,7 @@ describe('dedupeConnections', () => {
       ]
     };
 
-    const { elements } = dedupeConnections(response);
+    const { elements } = transformServiceMapResponses(response);
 
     const connection = elements.find(
       element => 'source' in element.data && 'target' in element.data
@@ -67,6 +75,7 @@ describe('dedupeConnections', () => {
 
   it('collapses external destinations based on span.destination.resource.name', () => {
     const response: ServiceMapResponse = {
+      anomalies,
       services: [nodejsService, javaService],
       discoveredServices: [
         {
@@ -89,7 +98,7 @@ describe('dedupeConnections', () => {
       ]
     };
 
-    const { elements } = dedupeConnections(response);
+    const { elements } = transformServiceMapResponses(response);
 
     const connections = elements.filter(element => 'source' in element.data);
 
@@ -102,6 +111,7 @@ describe('dedupeConnections', () => {
 
   it('picks the first span.type/subtype in an alphabetically sorted list', () => {
     const response: ServiceMapResponse = {
+      anomalies,
       services: [javaService],
       discoveredServices: [],
       connections: [
@@ -126,7 +136,7 @@ describe('dedupeConnections', () => {
       ]
     };
 
-    const { elements } = dedupeConnections(response);
+    const { elements } = transformServiceMapResponses(response);
 
     const nodes = elements.filter(element => !('source' in element.data));
 
@@ -140,6 +150,7 @@ describe('dedupeConnections', () => {
 
   it('processes connections without a matching "service" aggregation', () => {
     const response: ServiceMapResponse = {
+      anomalies,
       services: [javaService],
       discoveredServices: [],
       connections: [
@@ -150,7 +161,7 @@ describe('dedupeConnections', () => {
       ]
     };
 
-    const { elements } = dedupeConnections(response);
+    const { elements } = transformServiceMapResponses(response);
 
     expect(elements.length).toBe(3);
   });

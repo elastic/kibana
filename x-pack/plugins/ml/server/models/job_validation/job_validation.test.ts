@@ -14,6 +14,13 @@ const callWithRequest: APICaller = (method: string) => {
     if (method === 'fieldCaps') {
       resolve({ fields: [] });
       return;
+    } else if (method === 'ml.info') {
+      resolve({
+        limits: {
+          effective_max_model_memory_limit: '100MB',
+          max_model_memory_limit: '1GB',
+        },
+      });
     }
     resolve({});
   }) as Promise<any>;
