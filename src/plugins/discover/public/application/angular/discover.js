@@ -559,8 +559,7 @@ function discoverController(
       getSortForSearchSource(
         $scope.state.sort,
         $scope.indexPattern,
-        config.get('discover:sort:defaultOrder'),
-        $scope.state.columns
+        config.get('discover:sort:defaultOrder')
       )
     );
     searchSource.setField('highlight', null);
@@ -584,8 +583,6 @@ function discoverController(
   };
 
   function getStateDefaults() {
-    const columns =
-      savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice();
     const query =
       $scope.searchSource.getField('query') ||
       getDefaultQuery(
@@ -593,8 +590,9 @@ function discoverController(
       );
     return {
       query,
-      sort: getSortArray(savedSearch.sort, $scope.indexPattern, columns),
-      columns,
+      sort: getSortArray(savedSearch.sort, $scope.indexPattern),
+      columns:
+        savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.getOwnField('filter')),
@@ -602,7 +600,7 @@ function discoverController(
   }
 
   $scope.state.index = $scope.indexPattern.id;
-  $scope.state.sort = getSortArray($scope.state.sort, $scope.indexPattern, $scope.columns);
+  $scope.state.sort = getSortArray($scope.state.sort, $scope.indexPattern);
 
   $scope.getBucketIntervalToolTipText = () => {
     return i18n.translate('discover.bucketIntervalTooltip', {
@@ -945,8 +943,7 @@ function discoverController(
         getSortForSearchSource(
           $scope.state.sort,
           indexPattern,
-          config.get('discover:sort:defaultOrder'),
-          $scope.state.columns
+          config.get('discover:sort:defaultOrder')
         )
       )
       .setField('query', $scope.state.query || null)
