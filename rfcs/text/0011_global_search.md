@@ -60,7 +60,7 @@ should still be generic to answer similar needs from any other consumer, either 
  * Only present to allow consumers and result providers to have aliases to the most common types.
  */
 enum GlobalSearchCommonResultTypes {
-  application = 'application,
+  application = 'application',
   dashboard = 'dashboard',
   visualization = 'visualization',
   search = 'search',
