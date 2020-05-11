@@ -58,7 +58,7 @@ describe('fetchSoon', () => {
     (callClient as jest.Mock).mockClear();
   });
 
-  test('should delay by 0ms if config is set to not batch searches', () => {
+  test('should execute asap if config is set to not batch searches', () => {
     const config = getConfigStub({
       'courier:batchSearches': false,
     });
@@ -67,8 +67,6 @@ describe('fetchSoon', () => {
 
     fetchSoon(request, options, { config } as FetchHandlers);
 
-    expect(callClient).not.toBeCalled();
-    jest.advanceTimersByTime(0);
     expect(callClient).toBeCalled();
   });
 

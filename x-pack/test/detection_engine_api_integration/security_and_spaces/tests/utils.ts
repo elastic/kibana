@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Client } from '@elastic/elasticsearch';
+import { SuperTest } from 'supertest';
+import supertestAsPromised from 'supertest-as-promised';
 import { OutputRuleAlertRest } from '../../../../plugins/siem/server/lib/detection_engine/types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../plugins/siem/common/constants';
 
@@ -187,12 +190,13 @@ export const getSimpleMlRuleOutput = (ruleId = 'rule-1'): Partial<OutputRuleAler
  * Remove all alerts from the .kibana index
  * @param es The ElasticSearch handle
  */
-export const deleteAllAlerts = async (es: any): Promise<void> => {
+export const deleteAllAlerts = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:alert',
-    waitForCompletion: true,
-    refresh: 'wait_for',
+    wait_for_completion: true,
+    refresh: true,
+    body: {},
   });
 };
 
@@ -200,12 +204,13 @@ export const deleteAllAlerts = async (es: any): Promise<void> => {
  * Remove all rules statuses from the .kibana index
  * @param es The ElasticSearch handle
  */
-export const deleteAllRulesStatuses = async (es: any): Promise<void> => {
+export const deleteAllRulesStatuses = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:siem-detection-engine-rule-status',
-    waitForCompletion: true,
-    refresh: 'wait_for',
+    wait_for_completion: true,
+    refresh: true,
+    body: {},
   });
 };
 
@@ -213,7 +218,9 @@ export const deleteAllRulesStatuses = async (es: any): Promise<void> => {
  * Creates the signals index for use inside of beforeEach blocks of tests
  * @param supertest The supertest client library
  */
-export const createSignalsIndex = async (supertest: any): Promise<void> => {
+export const createSignalsIndex = async (
+  supertest: SuperTest<supertestAsPromised.Test>
+): Promise<void> => {
   await supertest
     .post(DETECTION_ENGINE_INDEX_URL)
     .set('kbn-xsrf', 'true')
@@ -225,7 +232,9 @@ export const createSignalsIndex = async (supertest: any): Promise<void> => {
  * Deletes the signals index for use inside of afterEach blocks of tests
  * @param supertest The supertest client library
  */
-export const deleteSignalsIndex = async (supertest: any): Promise<void> => {
+export const deleteSignalsIndex = async (
+  supertest: SuperTest<supertestAsPromised.Test>
+): Promise<void> => {
   await supertest
     .delete(DETECTION_ENGINE_INDEX_URL)
     .set('kbn-xsrf', 'true')

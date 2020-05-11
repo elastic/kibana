@@ -31,6 +31,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
   const tableProps: EuiInMemoryTableProps<Pipeline> = {
     itemId: 'name',
     isSelectable: true,
+    'data-test-subj': 'pipelinesTable',
     sorting: { sort: { field: 'name', direction: 'asc' } },
     selection: {
       onSelectionChange: setSelection,
@@ -91,7 +92,11 @@ export const PipelineTable: FunctionComponent<Props> = ({
           defaultMessage: 'Name',
         }),
         sortable: true,
-        render: (name: string) => <EuiLink href={`#${BASE_PATH}?pipeline=${name}`}>{name}</EuiLink>,
+        render: (name: string) => (
+          <EuiLink href={`#${BASE_PATH}?pipeline=${name}`} data-test-subj="pipelineDetailsLink">
+            {name}
+          </EuiLink>
+        ),
       },
       {
         name: (
