@@ -16,9 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { npSetup } from 'ui/new_platform';
+import React, { lazy, Suspense } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { TableVisParams } from '../types';
 
-export const createUiStatsReporter = (appName: string) => {
-  const { usageCollection } = npSetup.plugins;
-  return usageCollection.reportUiStats.bind(usageCollection, appName);
-};
+const TableOptionsComponent = lazy(() => import('./table_vis_options'));
+
+export const TableOptions = (props: VisOptionsProps<TableVisParams>) => (
+  <Suspense fallback={<EuiLoadingSpinner />}>
+    <TableOptionsComponent {...props} />
+  </Suspense>
+);
