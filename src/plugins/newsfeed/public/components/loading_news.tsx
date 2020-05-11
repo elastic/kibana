@@ -20,12 +20,12 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { EuiLoadingKibana } from '@elastic/eui';
+import { EuiLoadingElastic } from '@elastic/eui';
 
 export const NewsLoadingPrompt = () => {
   return (
     <EuiEmptyPrompt
-      title={<EuiLoadingKibana size="xl" />}
+      title={<EuiLoadingElastic size="xl" />}
       body={
         <p>
           <FormattedMessage

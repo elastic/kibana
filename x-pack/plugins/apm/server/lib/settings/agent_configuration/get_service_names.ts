@@ -5,7 +5,7 @@
  */
 
 import { Setup } from '../../helpers/setup_request';
-import { PromiseReturnType } from '../../../../typings/common';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME

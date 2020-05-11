@@ -149,7 +149,11 @@ export function openContextMenu(
       anchorPosition="downRight"
       withTitle
     >
-      <EuiContextMenu initialPanelId="mainMenu" panels={panels} />
+      <EuiContextMenu
+        initialPanelId="mainMenu"
+        panels={panels}
+        data-test-subj={props['data-test-subj']}
+      />
     </EuiPopover>,
     container
   );

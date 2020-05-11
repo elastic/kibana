@@ -107,4 +107,8 @@ export const JiraConnectorFlyout = withConnectorFlyout<JiraActionConnector>({
   ConnectorFormComponent: JiraConnectorForm,
   secretKeys: ['email', 'apiToken'],
   configKeys: ['projectKey'],
+  connectorActionTypeId: '.jira',
 });
+
+// eslint-disable-next-line import/no-default-export
+export { JiraConnectorFlyout as default };
