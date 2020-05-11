@@ -8,20 +8,21 @@ import React, { useCallback, useMemo, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
-import { inputsActions, timelineActions } from '../../store/actions';
+import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
+import { inputsModel, inputsSelectors, State } from '../../store';
+import { inputsActions } from '../../store/actions';
+import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
 import {
   ColumnHeaderOptions,
   SubsetTimelineModel,
   TimelineModel,
-} from '../../store/timeline/model';
-import { OnChangeItemsPerPage } from '../timeline/events';
-import { Filter } from '../../../../../../src/plugins/data/public';
+} from '../../../timelines/store/timeline/model';
+import { OnChangeItemsPerPage } from '../../../timelines/components/timeline/events';
+import { Filter } from '../../../../../../../src/plugins/data/public';
 import { useUiSetting } from '../../lib/kibana';
 import { EventsViewer } from './events_viewer';
-import { useFetchIndexPatterns } from '../../containers/detection_engine/rules/fetch_index_patterns';
-import { TimelineTypeContextProps } from '../timeline/timeline_context';
+import { useFetchIndexPatterns } from '../../../alerts/containers/detection_engine/rules/fetch_index_patterns';
+import { TimelineTypeContextProps } from '../../../timelines/components/timeline/timeline_context';
 import { InspectButtonContainer } from '../inspect';
 import * as i18n from './translations';
 

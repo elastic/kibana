@@ -9,7 +9,7 @@ import React from 'react';
 
 import { OverviewNetworkStats } from '.';
 import { mockData } from './mock';
-import { TestProviders } from '../../../../mock/test_providers';
+import { TestProviders } from '../../../../common/mock/test_providers';
 
 describe('Overview Network Stat Data', () => {
   describe('rendering', () => {

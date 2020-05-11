@@ -15,7 +15,7 @@ import {
   DEFAULT_TO,
   DEFAULT_INTERVAL_TYPE,
   DEFAULT_INTERVAL_VALUE,
-} from '../../common/constants';
+} from '../../../common/constants';
 import { KibanaServices } from '../lib/kibana';
 import { Policy } from '../store/inputs/model';
 

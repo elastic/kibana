@@ -5,6 +5,6 @@
  */
 
 import { BrowserField } from '../../containers/source';
-import { DetailItem } from '../../graphql/types';
+import { DetailItem } from '../../../graphql/types';
 
 export type EventFieldsData = BrowserField & DetailItem;

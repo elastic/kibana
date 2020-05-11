@@ -7,8 +7,8 @@
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { HostsTableType } from '../../store/hosts/model';
-import { SiemPageName } from '../../pages/home/types';
+import { HostsTableType } from '../../../hosts/store/model';
+import { SiemPageName } from '../../../app/types';
 
 import { appendSearch } from './helpers';
 import { RedirectWrapper } from './redirect_wrapper';

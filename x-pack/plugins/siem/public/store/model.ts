@@ -6,7 +6,5 @@
 
 export { appModel } from './app';
 export { dragAndDropModel } from './drag_and_drop';
-export { hostsModel } from './hosts';
 export { inputsModel } from './inputs';
-export { networkModel } from './network';
 export * from './types';

@@ -5,7 +5,7 @@
  */
 
 import { InfluencerInput } from '../types';
-import { HostItem } from '../../../graphql/types';
+import { HostItem } from '../../../../graphql/types';
 
 export const hostToInfluencers = (hostItem: HostItem): InfluencerInput[] | null => {
   if (hostItem.host != null && hostItem.host.name != null) {

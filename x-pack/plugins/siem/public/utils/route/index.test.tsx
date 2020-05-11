@@ -7,7 +7,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { HostsTableType } from '../../store/hosts/model';
+import { HostsTableType } from '../../../hosts/store/model';
 import { RouteSpyState } from './types';
 import { ManageRoutesSpy } from './manage_spy_routes';
 import { SpyRouteComponent } from './spy_routes';

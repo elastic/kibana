@@ -7,7 +7,7 @@
 import { EuiFormRow } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../shared_imports';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../../shared_imports';
 import { CursorPosition, MarkdownEditor } from '.';
 
 interface IMarkdownEditorForm {

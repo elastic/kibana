@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter, Query } from '../../../../../../src/plugins/data/public';
-import { HostsTableType } from '../../store/hosts/model';
+import { Filter, Query } from '../../../../../../../src/plugins/data/public';
+import { HostsTableType } from '../../../hosts/store/model';
 import { UrlInputsModel } from '../../store/inputs/model';
-import { TimelineUrl } from '../../store/timeline/model';
+import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { CONSTANTS, UrlStateType } from '../url_state/constants';
 
 export interface SiemNavigationProps {

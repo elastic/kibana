@@ -6,7 +6,7 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { DataProvider } from '../../components/timeline/data_providers/data_provider';
+import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/drag_and_drop');
 

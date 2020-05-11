@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 
 import styled from 'styled-components';
-import { useBasePath } from '../../../lib/kibana';
+import { useBasePath } from '../../../common/lib/kibana';
 import * as i18n from './translations';
 import { JobSwitch } from './job_switch';
 import { SiemJob } from '../types';

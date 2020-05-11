@@ -8,7 +8,7 @@ import { isEmpty } from 'lodash/fp';
 import { Location } from 'history';
 
 import { UrlInputsModel } from '../../store/inputs/model';
-import { TimelineUrl } from '../../store/timeline/model';
+import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { CONSTANTS } from '../url_state/constants';
 import { URL_STATE_KEYS, KeyUrlState, UrlState } from '../url_state/types';
 import {
@@ -16,7 +16,7 @@ import {
   replaceStateKeyInQueryString,
   getQueryStringFromLocation,
 } from '../url_state/helpers';
-import { Query, Filter } from '../../../../../../src/plugins/data/public';
+import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 
 import { SearchNavTab } from './types';
 

@@ -7,7 +7,7 @@
 import React from 'react';
 
 import { getEmptyValue } from '../empty_value';
-import { LastEventIndexKey } from '../../graphql/types';
+import { LastEventIndexKey } from '../../../graphql/types';
 import { mockLastEventTimeQuery } from '../../containers/events/last_event_time/mock';
 
 import { useMountAppended } from '../../utils/use_mount_appended';

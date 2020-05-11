@@ -1,4 +1,4 @@
-/*
+\/*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
@@ -7,7 +7,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { fetchNews, getNewsFeedUrl, getNewsItemsFromApiResponse } from './helpers';
-import { useKibana, useUiSetting$, KibanaServices } from '../../lib/kibana';
+import { useKibana, useUiSetting$, KibanaServices } from '../../common/lib/kibana';
 import { NewsFeed } from './news_feed';
 import { NewsItem } from './types';
 

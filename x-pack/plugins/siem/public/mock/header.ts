@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ColumnHeaderOptions } from '../store/timeline/model';
-import { defaultColumnHeaderType } from '../components/timeline/body/column_headers/default_headers';
+import { ColumnHeaderOptions } from '../../timelines/store/timeline/model';
+import { defaultColumnHeaderType } from '../../timelines/components/timeline/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
-} from '../components/timeline/body/constants';
+} from '../../timelines/components/timeline/body/constants';
 
 export const defaultHeaders: ColumnHeaderOptions[] = [
   {

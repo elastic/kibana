@@ -8,7 +8,7 @@ import { EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic
 import React from 'react';
 import styled from 'styled-components';
 
-import { DescriptionList } from '../../../../common/utility_types';
+import { DescriptionList } from '../../../../../common/utility_types';
 import { Anomaly, NarrowDateRange } from '../types';
 import { getScoreString } from './score_health';
 import { PreferenceFormattedDate } from '../../formatted_date';

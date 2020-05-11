@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CasesConfigurationMapping } from '../../containers/case/configure/types';
+import { CasesConfigurationMapping } from '../../../cases/containers/configure/types';
 import serviceNowLogo from './logos/servicenow.svg';
 import { Connector } from './types';
 

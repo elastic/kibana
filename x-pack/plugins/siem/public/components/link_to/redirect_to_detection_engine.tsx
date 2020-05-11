@@ -7,7 +7,7 @@
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { DetectionEngineTab } from '../../pages/detection_engine/types';
+import { DetectionEngineTab } from '../../../alerts/pages/detection_engine/types';
 import { appendSearch } from './helpers';
 import { RedirectWrapper } from './redirect_wrapper';
 

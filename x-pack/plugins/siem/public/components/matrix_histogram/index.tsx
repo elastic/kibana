@@ -18,7 +18,7 @@ import { HeaderSection } from '../header_section';
 import { MatrixLoader } from './matrix_loader';
 import { Panel } from '../panel';
 import { getBarchartConfigs, getCustomChartData } from './utils';
-import { useQuery } from '../../containers/matrix_histogram';
+import { useQuery } from '../../common/containers/matrix_histogram';
 import {
   MatrixHistogramProps,
   MatrixHistogramOption,
@@ -27,17 +27,19 @@ import {
 } from './types';
 import { InspectButtonContainer } from '../inspect';
 
-import { State, inputsSelectors, hostsModel, networkModel } from '../../store';
+import { State, inputsSelectors } from '../../common/store';
+import { hostsModel } from '../../hosts/store';
+import { networkModel } from '../../network/store';
 
 import {
   MatrixHistogramMappingTypes,
   GetTitle,
   GetSubTitle,
-} from '../../components/matrix_histogram/types';
-import { SetQuery } from '../../pages/hosts/navigation/types';
-import { QueryTemplateProps } from '../../containers/query_template';
-import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
-import { InputsModelId } from '../../store/inputs/constants';
+} from './types';
+import { SetQuery } from '../../hosts/pages/navigation/types';
+import { QueryTemplateProps } from '../../common/containers/query_template';
+import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
+import { InputsModelId } from '../../common/store/inputs/constants';
 import { HistogramType } from '../../graphql/types';
 
 export interface OwnProps extends QueryTemplateProps {

@@ -7,7 +7,7 @@
 import React from 'react';
 import numeral from '@elastic/numeral';
 
-import { DEFAULT_BYTES_FORMAT } from '../../../common/constants';
+import { DEFAULT_BYTES_FORMAT } from '../../../../common/constants';
 import { useUiSetting$ } from '../../lib/kibana';
 
 type Bytes = string | number;

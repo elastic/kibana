@@ -7,8 +7,8 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
-import { Direction } from '../../graphql/types';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
+import { Direction } from '../../../graphql/types';
 
 import { BasicTableProps, PaginatedTable } from './index';
 import { getHostsColumns, mockData, rowItems, sortedHosts } from './index.mock';

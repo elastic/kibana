@@ -9,13 +9,13 @@ import { compose, Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import { timelineActions } from '../../store/actions';
+import { timelineActions } from '../../../timelines/store/timeline';
 import { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 
 import { UrlStateContainerPropTypes, UrlStateProps } from './types';
 import { useUrlStateHooks } from './use_url_state';
-import { dispatchUpdateTimeline } from '../open_timeline/helpers';
+import { dispatchUpdateTimeline } from '../../../timelines/components/open_timeline/helpers';
 import { dispatchSetInitialStateFromUrl } from './initialize_redux_by_url';
 import { makeMapStateToProps } from './helpers';
 

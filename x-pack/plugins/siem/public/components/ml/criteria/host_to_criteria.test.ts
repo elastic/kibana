@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostItem } from '../../../graphql/types';
+import { HostItem } from '../../../../graphql/types';
 import { CriteriaFields } from '../types';
 import { hostToCriteria } from './host_to_criteria';
 

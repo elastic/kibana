@@ -33,13 +33,13 @@ describe('Inspect Button', () => {
     state: state.inputs,
   };
 
-  let store = createStore(state, apolloClientObservable);
+  let store = createStore(state, {}, apolloClientObservable);
 
   describe('Render', () => {
     beforeEach(() => {
       const myState = cloneDeep(state);
       myState.inputs = upsertQuery(newQuery);
-      store = createStore(myState, apolloClientObservable);
+      store = createStore(myState, {}, apolloClientObservable);
     });
     test('Eui Empty Button', () => {
       const wrapper = mount(
@@ -155,7 +155,7 @@ describe('Inspect Button', () => {
         response: ['my response'],
       };
       myState.inputs = upsertQuery(myQuery);
-      store = createStore(myState, apolloClientObservable);
+      store = createStore(myState, {}, apolloClientObservable);
     });
     test('Open Inspect Modal', () => {
       const wrapper = mount(

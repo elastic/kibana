@@ -7,8 +7,8 @@
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { SiemPageName } from '../../pages/home/types';
-import { FlowTarget, FlowTargetSourceDest } from '../../graphql/types';
+import { SiemPageName } from '../../../app/types';
+import { FlowTarget, FlowTargetSourceDest } from '../../../graphql/types';
 
 import { appendSearch } from './helpers';
 import { RedirectWrapper } from './redirect_wrapper';

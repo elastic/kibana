@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { OpenTimelineResult } from '../components/open_timeline/types';
-import { GetAllTimeline, SortFieldTimeline, TimelineResult, Direction } from '../graphql/types';
-import { allTimelinesQuery } from '../containers/timeline/all/index.gql_query';
-import { CreateTimelineProps } from '../pages/detection_engine/components/signals/types';
-import { TimelineModel } from '../store/timeline/model';
-import { timelineDefaults } from '../store/timeline/defaults';
-import { FilterStateStore } from '../../../../../src/plugins/data/common/es_query/filters/meta_filter';
+import { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
+import { GetAllTimeline, SortFieldTimeline, TimelineResult, Direction } from '../../graphql/types';
+import { allTimelinesQuery } from '../../timelines/containers/all/index.gql_query';
+import { CreateTimelineProps } from '../../alerts/components/signals/types';
+import { TimelineModel } from '../../timelines/store/timeline/model';
+import { timelineDefaults } from '../../timelines/store/timeline/defaults';
+import { FilterStateStore } from '../../../../../../src/plugins/data/common/es_query/filters/meta_filter';
 export interface MockedProvidedQuery {
   request: {
     query: GetAllTimeline.Query;

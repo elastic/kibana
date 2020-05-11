@@ -8,7 +8,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { HookWrapper } from '../../mock/hook_wrapper';
-import { SiemPageName } from '../../pages/home/types';
+import { SiemPageName } from '../../../app/types';
 
 import { CONSTANTS } from './constants';
 import { getFilterQuery, getMockPropsObj, mockHistory, testCases } from './test_dependencies';

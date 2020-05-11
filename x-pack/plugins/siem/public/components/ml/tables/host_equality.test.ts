@@ -6,7 +6,7 @@
 
 import { hostEquality } from './host_equality';
 import { AnomaliesHostTableProps } from '../types';
-import { HostsType } from '../../../store/hosts/model';
+import { HostsType } from '../../../../hosts/store/model';
 
 describe('host_equality', () => {
   test('it returns true if start and end date are equal', () => {

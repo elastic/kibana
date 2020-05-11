@@ -19,7 +19,7 @@ import * as i18n from './translations';
 import { getEntries } from '../get_entries';
 import { DraggableScore } from '../score/draggable_score';
 import { createExplorerLink } from '../links/create_explorer_link';
-import { HostsType } from '../../../store/hosts/model';
+import { HostsType } from '../../../../hosts/store/model';
 import { escapeDataProviderId } from '../../drag_and_drop/helpers';
 import { FormattedRelativePreferenceDate } from '../../formatted_date';
 

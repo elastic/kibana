@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter } from '../../../../../../src/plugins/data/public';
-import { HostsComponentsQueryProps } from '../../pages/hosts/navigation/types';
-import { NetworkComponentQueryProps } from '../../pages/network/navigation/types';
+import { Filter } from '../../../../../../../src/plugins/data/public';
+import { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
+import { NetworkComponentQueryProps } from '../../../network/pages/navigation/types';
 import { MatrixHistogramOption } from '../matrix_histogram/types';
 
 type CommonQueryProps = HostsComponentsQueryProps | NetworkComponentQueryProps;

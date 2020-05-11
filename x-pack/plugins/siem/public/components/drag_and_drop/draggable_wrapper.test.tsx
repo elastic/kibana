@@ -11,7 +11,7 @@ import { DraggableStateSnapshot, DraggingStyle } from 'react-beautiful-dnd';
 
 import { mockBrowserFields, mocksSource } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
-import { mockDataProviders } from '../timeline/data_providers/mock/mock_data_providers';
+import { mockDataProviders } from '../../../timelines/components/timeline/data_providers/mock/mock_data_providers';
 import { DragDropContextWrapper } from './drag_drop_context_wrapper';
 import { ConditionalPortal, DraggableWrapper, getStyle } from './draggable_wrapper';
 import { useMountAppended } from '../../utils/use_mount_appended';

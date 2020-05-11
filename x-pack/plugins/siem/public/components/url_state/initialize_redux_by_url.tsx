@@ -7,7 +7,7 @@
 import { get, isEmpty } from 'lodash/fp';
 import { Dispatch } from 'redux';
 
-import { Query, Filter } from '../../../../../../src/plugins/data/public';
+import { Query, Filter } from '../../../../../../../src/plugins/data/public';
 import { inputsActions } from '../../store/actions';
 import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
 import {
@@ -16,12 +16,12 @@ import {
   AbsoluteTimeRange,
   RelativeTimeRange,
 } from '../../store/inputs/model';
-import { TimelineUrl } from '../../store/timeline/model';
+import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { CONSTANTS } from './constants';
 import { decodeRisonUrlState } from './helpers';
 import { normalizeTimeRange } from './normalize_time_range';
 import { DispatchSetInitialStateFromUrl, SetInitialStateFromUrl } from './types';
-import { queryTimelineById } from '../open_timeline/helpers';
+import { queryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 
 export const dispatchSetInitialStateFromUrl = (
   dispatch: Dispatch

@@ -21,7 +21,10 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
-import { ImportDataResponse, ImportDataProps } from '../../containers/detection_engine/rules';
+import {
+  ImportDataResponse,
+  ImportDataProps,
+} from '../../alerts/containers/detection_engine/rules';
 import {
   displayErrorToast,
   displaySuccessToast,

@@ -13,8 +13,8 @@ import { wait } from '../../lib/helpers';
 import { useKibana } from '../../lib/kibana';
 import { TestProviders } from '../../mock';
 import { createKibanaCoreStartMock } from '../../mock/kibana_core';
-import { FilterManager } from '../../../../../../src/plugins/data/public';
-import { TimelineContext } from '../timeline/timeline_context';
+import { FilterManager } from '../../../../../../../src/plugins/data/public';
+import { TimelineContext } from '../../../timelines/components/timeline/timeline_context';
 
 import { DraggableWrapperHoverContent } from './draggable_wrapper_hover_content';
 

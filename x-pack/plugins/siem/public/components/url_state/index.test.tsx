@@ -8,7 +8,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { HookWrapper } from '../../mock';
-import { SiemPageName } from '../../pages/home/types';
+import { SiemPageName } from '../../../app/types';
 import { RouteSpyState } from '../../utils/route/types';
 import { CONSTANTS } from './constants';
 import {

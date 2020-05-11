@@ -11,23 +11,31 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
 import { BrowserFields } from '../../containers/source';
-import { TimelineQuery } from '../../containers/timeline';
-import { Direction } from '../../graphql/types';
+import { TimelineQuery } from '../../../timelines/containers';
+import { Direction } from '../../../graphql/types';
 import { useKibana } from '../../lib/kibana';
-import { ColumnHeaderOptions, KqlMode } from '../../store/timeline/model';
+import { ColumnHeaderOptions, KqlMode } from '../../../timelines/store/timeline/model';
 import { HeaderSection } from '../header_section';
-import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
-import { Sort } from '../timeline/body/sort';
-import { StatefulBody } from '../timeline/body/stateful_body';
-import { DataProvider } from '../timeline/data_providers/data_provider';
-import { OnChangeItemsPerPage } from '../timeline/events';
-import { Footer, footerHeight } from '../timeline/footer';
-import { combineQueries } from '../timeline/helpers';
-import { TimelineRefetch } from '../timeline/refetch_timeline';
-import { ManageTimelineContext, TimelineTypeContextProps } from '../timeline/timeline_context';
+import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
+import { Sort } from '../../../timelines/components/timeline/body/sort';
+import { StatefulBody } from '../../../timelines/components/timeline/body/stateful_body';
+import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
+import { OnChangeItemsPerPage } from '../../../timelines/components/timeline/events';
+import { Footer, footerHeight } from '../../../timelines/components/timeline/footer';
+import { combineQueries } from '../../../timelines/components/timeline/helpers';
+import { TimelineRefetch } from '../../../timelines/components/timeline/refetch_timeline';
+import {
+  ManageTimelineContext,
+  TimelineTypeContextProps,
+} from '../../../timelines/components/timeline/timeline_context';
 import { EventDetailsWidthProvider } from './event_details_width_context';
 import * as i18n from './translations';
-import { Filter, esQuery, IIndexPattern, Query } from '../../../../../../src/plugins/data/public';
+import {
+  Filter,
+  esQuery,
+  IIndexPattern,
+  Query,
+} from '../../../../../../../src/plugins/data/public';
 import { inputsModel } from '../../store';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 500;

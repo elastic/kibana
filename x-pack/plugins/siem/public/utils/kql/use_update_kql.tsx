@@ -9,7 +9,7 @@ import { IIndexPattern } from 'src/plugins/data/public';
 import deepEqual from 'fast-deep-equal';
 
 import { KueryFilterQuery } from '../../store';
-import { applyKqlFilterQuery as dispatchApplyTimelineFilterQuery } from '../../store/timeline/actions';
+import { applyKqlFilterQuery as dispatchApplyTimelineFilterQuery } from '../../../timelines/store/timeline/actions';
 import { convertKueryToElasticSearchQuery } from '../../lib/keury';
 import { RefetchKql } from '../../store/inputs/model';
 

@@ -8,7 +8,7 @@ import actionCreatorFactory from 'typescript-fsa';
 
 import { InspectQuery, Refetch, RefetchKql } from './model';
 import { InputsModelId } from './constants';
-import { Filter, SavedQuery } from '../../../../../../src/plugins/data/public';
+import { Filter, SavedQuery } from '../../../../../../../src/plugins/data/public';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/inputs');
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { applyKqlFilterQuery as dispatchApplyTimelineFilterQuery } from '../../store/timeline/actions';
+import { applyKqlFilterQuery as dispatchApplyTimelineFilterQuery } from '../../../timelines/store/timeline/actions';
 
 import { mockIndexPattern } from '../../mock/index_pattern';
 import { useUpdateKql } from './use_update_kql';
@@ -14,7 +14,7 @@ mockDispatch.mockImplementation(fn => fn);
 
 const applyTimelineKqlMock: jest.Mock = (dispatchApplyTimelineFilterQuery as unknown) as jest.Mock;
 
-jest.mock('../../store/timeline/actions', () => ({
+jest.mock('../../../timelines/store/timeline/actions', () => ({
   applyKqlFilterQuery: jest.fn(),
 }));
 

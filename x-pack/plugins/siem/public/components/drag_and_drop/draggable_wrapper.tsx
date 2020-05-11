@@ -18,7 +18,7 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
 import { dragAndDropActions } from '../../store/drag_and_drop';
-import { DataProvider } from '../timeline/data_providers/data_provider';
+import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { TruncatableText } from '../truncatable_text';
 import { WithHoverActions } from '../with_hover_actions';
 

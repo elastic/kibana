@@ -11,9 +11,9 @@ import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 import { addEntitiesToKql } from './add_entities_to_kql';
 import { replaceKQLParts } from './replace_kql_parts';
 import { emptyEntity, getMultipleEntities, multipleEntities } from './entity_helpers';
-import { SiemPageName } from '../../../pages/home/types';
+import { SiemPageName } from '../../../../app/types';
 
-import { url as urlUtils } from '../../../../../../../src/plugins/kibana_utils/public';
+import { url as urlUtils } from '../../../../../../../../src/plugins/kibana_utils/public';
 
 interface QueryStringType {
   '?_g': string;

@@ -10,8 +10,8 @@ import React from 'react';
 import { CONSTANTS } from '../url_state/constants';
 import { SiemNavigationComponent } from './';
 import { setBreadcrumbs } from './breadcrumbs';
-import { navTabs } from '../../pages/home/home_navigations';
-import { HostsTableType } from '../../store/hosts/model';
+import { navTabs } from '../../../app/home/home_navigations';
+import { HostsTableType } from '../../../hosts/store/model';
 import { RouteSpyState } from '../../utils/route/types';
 import { SiemNavigationProps, SiemNavigationComponentProps } from './types';
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostsType } from '../../../store/hosts/model';
+import { HostsType } from '../../../../hosts/store/model';
 import { CriteriaFields } from '../types';
 
 export const getCriteriaFromHostType = (

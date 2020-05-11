@@ -8,7 +8,7 @@ import {
   MatrixHistogramOption,
   MatrixHisrogramConfigs,
 } from '../../../components/matrix_histogram/types';
-import { HistogramType } from '../../../graphql/types';
+import { HistogramType } from '../../../../graphql/types';
 
 export const anomaliesStackByOptions: MatrixHistogramOption[] = [
   {

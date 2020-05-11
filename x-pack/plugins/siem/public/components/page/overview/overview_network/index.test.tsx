@@ -8,14 +8,14 @@ import { cloneDeep } from 'lodash/fp';
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../../mock';
+import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../../common/mock';
 
 import { OverviewNetwork } from '.';
-import { createStore, State } from '../../../../store';
+import { createStore, State } from '../../../../common/store';
 import { overviewNetworkQuery } from '../../../../containers/overview/overview_network/index.gql_query';
 import { GetOverviewHostQuery } from '../../../../graphql/types';
 import { MockedProvider } from 'react-apollo/test-utils';
-import { wait } from '../../../../lib/helpers';
+import { wait } from '../../../../common/lib/helpers';
 
 jest.mock('../../../../lib/kibana');
 

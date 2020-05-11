@@ -6,7 +6,4 @@
 
 export { appActions } from './app';
 export { dragAndDropActions } from './drag_and_drop';
-export { hostsActions } from './hosts';
 export { inputsActions } from './inputs';
-export { networkActions } from './network';
-export { timelineActions } from './timeline';

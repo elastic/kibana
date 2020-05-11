@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostsType } from '../../store/hosts/model';
-import { NetworkType } from '../../store/network/model';
-import { FlowTarget } from '../../graphql/types';
+import { HostsType } from '../../../hosts/store/model';
+import { NetworkType } from '../../../network/store/model';
+import { FlowTarget } from '../../../graphql/types';
 
 export interface Influencer {
   influencer_field_name: string;

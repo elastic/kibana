@@ -22,22 +22,22 @@ import { noop } from 'lodash/fp';
 import React, { FC, memo, useState, useEffect, ComponentType } from 'react';
 import styled from 'styled-components';
 
-import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
-import { AuthTableColumns } from '../page/hosts/authentications_table';
-import { HostsTableColumns } from '../page/hosts/hosts_table';
-import { NetworkDnsColumns } from '../page/network/network_dns_table/columns';
-import { NetworkHttpColumns } from '../page/network/network_http_table/columns';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
+import { AuthTableColumns } from '../../../hosts/components/authentications_table';
+import { HostsTableColumns } from '../../../hosts/components/hosts_table';
+import { NetworkDnsColumns } from '../../../network/components/network_dns_table/columns';
+import { NetworkHttpColumns } from '../../../network/components/network_http_table/columns';
 import {
   NetworkTopNFlowColumns,
   NetworkTopNFlowColumnsIpDetails,
-} from '../page/network/network_top_n_flow_table/columns';
+} from '../../../network/components/network_top_n_flow_table/columns';
 import {
   NetworkTopCountriesColumns,
   NetworkTopCountriesColumnsIpDetails,
-} from '../page/network/network_top_countries_table/columns';
-import { TlsColumns } from '../page/network/tls_table/columns';
-import { UncommonProcessTableColumns } from '../page/hosts/uncommon_process_table';
-import { UsersColumns } from '../page/network/users_table/columns';
+} from '../../../network/components/network_top_countries_table/columns';
+import { TlsColumns } from '../../../network/components/tls_table/columns';
+import { UncommonProcessTableColumns } from '../../../hosts/components/uncommon_process_table';
+import { UsersColumns } from '../../../network/components/users_table/columns';
 import { HeaderSection } from '../header_section';
 import { Loader } from '../loader';
 import { useStateToaster } from '../toasters';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_INDEX_PATTERN } from '../../../common/constants';
+import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 
 import { BrowserFields } from '.';
 import { sourceQuery } from './index.gql_query';

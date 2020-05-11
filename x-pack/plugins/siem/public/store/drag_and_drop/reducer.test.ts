@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataProvider } from '../../components/timeline/data_providers/data_provider';
-import { mockDataProviders } from '../../components/timeline/data_providers/mock/mock_data_providers';
+import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
+import { mockDataProviders } from '../../../timelines/components/timeline/data_providers/mock/mock_data_providers';
 
 import { IdToDataProvider } from './model';
 import { registerProviderHandler, unRegisterProviderHandler } from './reducer';

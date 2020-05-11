@@ -10,7 +10,7 @@
 import {
   ConfigType,
   SecretsType,
-} from '../../../../actions/server/builtin_action_types/servicenow/types';
+} from '../../../../../actions/server/builtin_action_types/servicenow/types';
 
 export interface ServiceNowActionConnector {
   config: ConfigType;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FlowTarget } from '../../../graphql/types';
+import { FlowTarget } from '../../../../graphql/types';
 import { CriteriaFields } from '../types';
 import { networkToCriteria } from './network_to_criteria';
 

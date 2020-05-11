@@ -13,7 +13,7 @@ import {
 } from './utils';
 import { UpdateDateRange } from '../charts/common';
 import { Position } from '@elastic/charts';
-import { MatrixOverTimeHistogramData } from '../../graphql/types';
+import { MatrixOverTimeHistogramData } from '../../../graphql/types';
 import { BarchartConfigs } from './types';
 
 describe('utils', () => {

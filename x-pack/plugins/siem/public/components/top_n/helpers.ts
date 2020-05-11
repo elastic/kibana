@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EventType } from '../../store/timeline/model';
+import { EventType } from '../../../timelines/store/timeline/model';
 
 import * as i18n from './translations';
 

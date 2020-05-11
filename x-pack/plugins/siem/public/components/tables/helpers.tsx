@@ -13,8 +13,8 @@ import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrappe
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems, Spacer } from '../page';
-import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
-import { Provider } from '../timeline/data_providers/provider';
+import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
+import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 
 const Subtext = styled.div`
   font-size: ${props => props.theme.eui.euiFontSizeXS};

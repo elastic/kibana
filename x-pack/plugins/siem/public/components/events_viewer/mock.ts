@@ -5,7 +5,7 @@
  */
 
 import { noop } from 'lodash/fp';
-import { timelineQuery } from '../../containers/timeline/index.gql_query';
+import { timelineQuery } from '../../../timelines/containers/index.gql_query';
 
 export const mockEventViewerResponse = [
   {

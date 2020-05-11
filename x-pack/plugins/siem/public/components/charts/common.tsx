@@ -19,7 +19,7 @@ import {
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { DEFAULT_DARK_MODE } from '../../../common/constants';
+import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import { useUiSetting } from '../../lib/kibana';
 
 export const defaultChartHeight = '100%';

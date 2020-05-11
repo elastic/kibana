@@ -21,7 +21,7 @@ import {
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_INTERVAL_TYPE,
-} from '../../common/constants';
+} from '../../../common/constants';
 import { KibanaServices } from '../lib/kibana';
 import { Policy } from '../store/inputs/model';
 

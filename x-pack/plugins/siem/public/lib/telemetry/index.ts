@@ -6,7 +6,7 @@
 
 import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
 
-import { SetupPlugins } from '../../plugin';
+import { SetupPlugins } from '../../../plugin';
 export { telemetryMiddleware } from './middleware';
 
 export { METRIC_TYPE };

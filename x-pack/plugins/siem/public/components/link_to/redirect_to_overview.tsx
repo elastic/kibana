@@ -7,7 +7,7 @@
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { RedirectWrapper } from './redirect_wrapper';
-import { SiemPageName } from '../../pages/home/types';
+import { SiemPageName } from '../../../app/types';
 
 export type OverviewComponentProps = RouteComponentProps<{
   search: string;

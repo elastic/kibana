@@ -27,7 +27,7 @@ import {
   ALL_URL_STATE_KEYS,
   UrlStateToRedux,
 } from './types';
-import { SiemPageName } from '../../pages/home/types';
+import { SiemPageName } from '../../../app/types';
 
 function usePrevious(value: PreviousLocationUrlState) {
   const ref = useRef<PreviousLocationUrlState>(value);

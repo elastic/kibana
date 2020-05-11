@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export * from '../page/network/ip_overview/translations';
+export * from '../../../network/components/ip_overview/translations';
 
 export const CASE_DETAILS_LINK_ARIA = (detailName: string) =>
   i18n.translate('xpack.siem.case.caseTable.caseDetailsLinkAria', {

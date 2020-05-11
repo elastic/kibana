@@ -6,7 +6,4 @@
 
 export { appSelectors } from './app';
 export { dragAndDropSelectors } from './drag_and_drop';
-export { hostsSelectors } from './hosts';
 export { inputsSelectors } from './inputs';
-export { networkSelectors } from './network';
-export { timelineSelectors } from './timeline';

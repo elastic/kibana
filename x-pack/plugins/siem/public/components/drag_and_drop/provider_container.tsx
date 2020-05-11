@@ -6,7 +6,7 @@
 
 import React from 'react';
 import styled, { css } from 'styled-components';
-import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../timeline/helpers';
+import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../../timelines/components/timeline/helpers';
 
 interface ProviderContainerProps {
   isDragging: boolean;

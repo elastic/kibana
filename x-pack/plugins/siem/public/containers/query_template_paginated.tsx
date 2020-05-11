@@ -10,7 +10,7 @@ import React from 'react';
 import { FetchMoreOptions, FetchMoreQueryOptions, OperationVariables } from 'react-apollo';
 import deepEqual from 'fast-deep-equal';
 
-import { ESQuery } from '../../common/typed_json';
+import { ESQuery } from '../../../common/typed_json';
 import { inputsModel } from '../store/model';
 import { generateTablePaginationOptions } from '../components/paginated_table/helpers';
 

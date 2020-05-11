@@ -9,7 +9,7 @@ import { omit } from 'lodash/fp';
 import React from 'react';
 
 import { inputsModel } from '../../store';
-import { SetQuery } from '../../pages/hosts/navigation/types';
+import { SetQuery } from '../../../hosts/pages/navigation/types';
 
 interface OwnProps {
   deleteQuery?: ({ id }: { id: string }) => void;

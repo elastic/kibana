@@ -14,7 +14,7 @@ import {
   // @ts-ignore no-exported-member
   EuiSearchBar,
 } from '@elastic/eui';
-import { EuiSearchBarQuery } from '../../../open_timeline/types';
+import { EuiSearchBarQuery } from '../../../../../timelines/components/open_timeline/types';
 import * as i18n from './translations';
 import { JobsFilters, SiemJob } from '../../types';
 import { GroupsFilterPopover } from './groups_filter_popover';

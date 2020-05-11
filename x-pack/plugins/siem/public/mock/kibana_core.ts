@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { coreMock } from '../../../../../src/core/public/mocks';
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { coreMock } from '../../../../../../src/core/public/mocks';
+import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 
 export const createKibanaCoreStartMock = () => coreMock.createStart();
 export const createKibanaPluginsStartMock = () => ({

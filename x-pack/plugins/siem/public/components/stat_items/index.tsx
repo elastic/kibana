@@ -18,7 +18,7 @@ import { get, getOr } from 'lodash/fp';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { KpiHostsData, KpiNetworkData } from '../../graphql/types';
+import { KpiHostsData, KpiNetworkData } from '../../../graphql/types';
 import { AreaChart } from '../charts/areachart';
 import { BarChart } from '../charts/barchart';
 import { ChartSeriesData, ChartData, ChartSeriesConfigs, UpdateDateRange } from '../charts/common';

@@ -11,10 +11,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import memoizeOne from 'memoize-one';
 import { IIndexPattern } from 'src/plugins/data/public';
 
-import { DEFAULT_INDEX_KEY } from '../../../common/constants';
+import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { useUiSetting$ } from '../../lib/kibana';
 
-import { IndexField, SourceQuery } from '../../graphql/types';
+import { IndexField, SourceQuery } from '../../../graphql/types';
 
 import { sourceQuery } from './index.gql_query';
 import { useApolloClient } from '../../utils/apollo_context';

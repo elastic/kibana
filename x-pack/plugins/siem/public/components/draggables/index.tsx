@@ -11,8 +11,8 @@ import styled from 'styled-components';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { getEmptyStringTag } from '../empty_value';
-import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
-import { Provider } from '../timeline/data_providers/provider';
+import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
+import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 
 export interface DefaultDraggableType {
   id: string;

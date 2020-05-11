@@ -7,10 +7,10 @@ import '../../../mock/match_media';
 import { encodeIpv6 } from '../../../lib/helpers';
 
 import { getBreadcrumbsForRoute, setBreadcrumbs } from '.';
-import { HostsTableType } from '../../../store/hosts/model';
+import { HostsTableType } from '../../../../hosts/store/model';
 import { RouteSpyState, SiemRouteType } from '../../../utils/route/types';
 import { TabNavigationProps } from '../tab_navigation/types';
-import { NetworkRouteType } from '../../../pages/network/navigation/types';
+import { NetworkRouteType } from '../../../../network/pages/navigation/types';
 
 const setBreadcrumbsMock = jest.fn();
 const chromeMock = {

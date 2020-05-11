@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESTermQuery } from '../../../../common/typed_json';
-import { NarrowDateRange } from '../../../components/ml/types';
-import { UpdateDateRange } from '../../../components/charts/common';
-import { SetQuery } from '../../../pages/hosts/navigation/types';
-import { FlowTarget } from '../../../graphql/types';
-import { HostsType } from '../../../store/hosts/model';
-import { NetworkType } from '../../../store/network/model';
-import { AnomaliesHostTable } from '../../../components/ml/tables/anomalies_host_table';
-import { AnomaliesNetworkTable } from '../../../components/ml/tables/anomalies_network_table';
+import { ESTermQuery } from '../../../../../common/typed_json';
+import { NarrowDateRange } from '../../../../components/ml/types';
+import { UpdateDateRange } from '../../../../components/charts/common';
+import { SetQuery } from '../../../../hosts/pages/navigation/types';
+import { FlowTarget } from '../../../../graphql/types';
+import { HostsType } from '../../../../hosts/store/model';
+import { NetworkType } from '../../../../network/store//model';
+import { AnomaliesHostTable } from '../../../../components/ml/tables/anomalies_host_table';
+import { AnomaliesNetworkTable } from '../../../../components/ml/tables/anomalies_network_table';
 
 interface QueryTabBodyProps {
   type: HostsType | NetworkType;

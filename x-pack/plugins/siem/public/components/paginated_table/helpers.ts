@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PaginationInputPaginated } from '../../graphql/types';
+import { PaginationInputPaginated } from '../../../graphql/types';
 
 export const generateTablePaginationOptions = (
   activePage: number,

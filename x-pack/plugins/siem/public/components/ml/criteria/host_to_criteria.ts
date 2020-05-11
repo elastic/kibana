@@ -5,7 +5,7 @@
  */
 
 import { CriteriaFields } from '../types';
-import { HostItem } from '../../../graphql/types';
+import { HostItem } from '../../../../graphql/types';
 
 export const hostToCriteria = (hostItem: HostItem): CriteriaFields[] => {
   if (hostItem.host != null && hostItem.host.name != null) {

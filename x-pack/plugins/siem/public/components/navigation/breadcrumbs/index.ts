@@ -6,14 +6,15 @@
 
 import { getOr, omit } from 'lodash/fp';
 
-import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
-import { APP_NAME } from '../../../../common/constants';
-import { StartServices } from '../../../plugin';
-import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/details/utils';
-import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../pages/network/ip_details';
-import { getBreadcrumbs as getCaseDetailsBreadcrumbs } from '../../../pages/case/utils';
-import { getBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../pages/detection_engine/rules/utils';
-import { SiemPageName } from '../../../pages/home/types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
+import { APP_NAME } from '../../../../../common/constants';
+import { StartServices } from '../../../../plugin';
+import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../hosts/pages/details/utils';
+import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/pages/ip_details';
+import { getBreadcrumbs as getCaseDetailsBreadcrumbs } from '../../../../cases/pages/utils';
+import { getBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../alerts/pages/detection_engine/rules/utils';
+import { SiemPageName } from '../../../../app/types';
 import { RouteSpyState, HostRouteSpyState, NetworkRouteSpyState } from '../../../utils/route/types';
 import { getOverviewUrl } from '../../link_to';
 

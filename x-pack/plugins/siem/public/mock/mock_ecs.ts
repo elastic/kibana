@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Ecs } from '../graphql/types';
+import { Ecs } from '../../graphql/types';
 
 export const mockEcsData: Ecs[] = [
   {

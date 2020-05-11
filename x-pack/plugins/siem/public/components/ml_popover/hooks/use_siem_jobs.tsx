@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
+import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { checkRecognizer, getJobsSummary, getModules } from '../api';
 import { SiemJob } from '../types';
 import { hasMlUserPermissions } from '../../ml/permissions/has_ml_user_permissions';

@@ -5,13 +5,13 @@
  */
 
 import { getAnomaliesNetworkTableColumnsCurated } from './get_anomalies_network_table_columns';
-import { NetworkType } from '../../../store/network/model';
+import { NetworkType } from '../../../../network/store/model';
 import * as i18n from './translations';
 import { AnomaliesByNetwork, Anomaly } from '../types';
 import { Columns } from '../../paginated_table';
 import React from 'react';
-import { TestProviders } from '../../../mock';
-import { useMountAppended } from '../../../utils/use_mount_appended';
+import { TestProviders } from '../../../common/mock';
+import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
 const startDate = new Date(2001).valueOf();
 const endDate = new Date(3000).valueOf();

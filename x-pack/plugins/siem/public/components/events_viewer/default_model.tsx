@@ -5,8 +5,8 @@
  */
 
 import { defaultHeaders } from './default_headers';
-import { SubsetTimelineModel } from '../../store/timeline/model';
-import { timelineDefaults } from '../../store/timeline/defaults';
+import { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
+import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
 export const eventsDefaultModel: SubsetTimelineModel = {
   ...timelineDefaults,

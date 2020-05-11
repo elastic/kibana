@@ -6,7 +6,7 @@
 
 import React, { useEffect } from 'react';
 
-import { DEFAULT_ANOMALY_SCORE } from '../../../../common/constants';
+import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
 import { AnomaliesQueryTabBodyProps } from './types';
 import { getAnomaliesFilterQuery } from './utils';
 import { useSiemJobs } from '../../../components/ml_popover/hooks/use_siem_jobs';

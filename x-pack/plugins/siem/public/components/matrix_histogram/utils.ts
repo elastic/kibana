@@ -8,7 +8,7 @@ import { get, groupBy, map, toPairs } from 'lodash/fp';
 
 import { UpdateDateRange, ChartSeriesData } from '../charts/common';
 import { MatrixHistogramMappingTypes, BarchartConfigs } from './types';
-import { MatrixOverTimeHistogramData } from '../../graphql/types';
+import { MatrixOverTimeHistogramData } from '../../../graphql/types';
 import { histogramDateTimeFormatter } from '../utils';
 
 interface GetBarchartConfigsProps {

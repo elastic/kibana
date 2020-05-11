@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import * as i18n from './translations';
 import { MatrixHistogramOption, MatrixHisrogramConfigs } from '../matrix_histogram/types';
-import { HistogramType } from '../../graphql/types';
+import { HistogramType } from '../../../graphql/types';
 
 export const alertsStackByOptions: MatrixHistogramOption[] = [
   {

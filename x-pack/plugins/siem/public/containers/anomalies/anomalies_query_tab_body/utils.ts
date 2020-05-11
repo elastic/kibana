@@ -6,10 +6,10 @@
 
 import deepmerge from 'deepmerge';
 
-import { ESTermQuery } from '../../../../common/typed_json';
+import { ESTermQuery } from '../../../../../common/typed_json';
 import { createFilter } from '../../helpers';
 import { SiemJob } from '../../../components/ml_popover/types';
-import { FlowTarget } from '../../../graphql/types';
+import { FlowTarget } from '../../../../graphql/types';
 
 export const getAnomaliesFilterQuery = (
   filterQuery: string | ESTermQuery | undefined,

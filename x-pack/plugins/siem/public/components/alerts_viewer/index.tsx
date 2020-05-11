@@ -6,7 +6,7 @@
 import React, { useEffect, useCallback, useMemo } from 'react';
 import numeral from '@elastic/numeral';
 
-import { DEFAULT_NUMBER_FORMAT } from '../../../common/constants';
+import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 import { AlertsComponentsQueryProps } from './types';
 import { AlertsTable } from './alerts_table';
 import * as i18n from './translations';

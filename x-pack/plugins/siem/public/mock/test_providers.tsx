@@ -20,7 +20,10 @@ import { ThemeProvider } from 'styled-components';
 import { createStore, State } from '../store';
 import { mockGlobalState } from './global_state';
 import { createKibanaContextProviderMock } from './kibana_react';
-import { FieldHook, useForm } from '../shared_imports';
+import { FieldHook, useForm } from '../../shared_imports';
+import { hostsReducer } from '../../hosts/store';
+import { networkReducer } from '../../network/store';
+import { timelineReducer } from '../../timelines/store/timeline/reducer';
 
 const state: State = mockGlobalState;
 
@@ -62,7 +65,15 @@ const MockKibanaContextProvider = createKibanaContextProviderMock();
 /** A utility for wrapping children in the providers required to run most tests */
 const TestProvidersComponent: React.FC<Props> = ({
   children,
-  store = createStore(state, apolloClientObservable),
+  store = createStore(
+    state,
+    {
+      hosts: hostsReducer,
+      network: networkReducer,
+      timeline: timelineReducer,
+    },
+    apolloClientObservable
+  ),
   onDragEnd = jest.fn(),
 }) => (
   <I18nProvider>
@@ -82,7 +93,15 @@ export const TestProviders = React.memo(TestProvidersComponent);
 
 const TestProviderWithoutDragAndDropComponent: React.FC<Props> = ({
   children,
-  store = createStore(state, apolloClientObservable),
+  store = createStore(
+    state,
+    {
+      hosts: hostsReducer,
+      network: networkReducer,
+      timeline: timelineReducer,
+    },
+    apolloClientObservable
+  ),
 }) => (
   <I18nProvider>
     <ReduxStoreProvider store={store}>{children}</ReduxStoreProvider>

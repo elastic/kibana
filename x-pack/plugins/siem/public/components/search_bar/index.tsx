@@ -38,7 +38,9 @@ import {
   startSelector,
   toStrSelector,
 } from './selectors';
-import { timelineActions, hostsActions, networkActions } from '../../store/actions';
+import { hostsActions } from '../../../hosts/store';
+import { networkActions } from '../../../network/store';
+import { timelineActions } from '../../../timelines/store/timeline';
 import { useKibana } from '../../lib/kibana';
 
 interface SiemSearchBarProps {

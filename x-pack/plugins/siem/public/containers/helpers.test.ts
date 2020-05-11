@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESQuery } from '../../common/typed_json';
+import { ESQuery } from '../../../common/typed_json';
 
 import { createFilter } from './helpers';
 

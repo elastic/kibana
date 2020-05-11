@@ -21,9 +21,9 @@ import {
   ValidationResult,
   ActionParamsProps,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../triggers_actions_ui/public/types';
+} from '../../../../../triggers_actions_ui/public/types';
 
-import { FieldMapping } from '../../pages/case/components/configure_cases/field_mapping';
+import { FieldMapping } from '../../../cases/components/configure_cases/field_mapping';
 
 import * as i18n from './translations';
 
@@ -31,7 +31,7 @@ import { ServiceNowActionConnector } from './types';
 import { isUrlInvalid } from './validators';
 
 import { connectors, defaultMapping } from './config';
-import { CasesConfigurationMapping } from '../../containers/case/configure/types';
+import { CasesConfigurationMapping } from '../../../cases/containers/configure/types';
 
 const serviceNowDefinition = connectors['.servicenow'];
 

@@ -9,11 +9,11 @@ import React, { useMemo } from 'react';
 import { isNil } from 'lodash/fp';
 import styled from 'styled-components';
 
-import { IP_REPUTATION_LINKS_SETTING } from '../../../common/constants';
+import { IP_REPUTATION_LINKS_SETTING } from '../../../../common/constants';
 import {
   DefaultFieldRendererOverflow,
   DEFAULT_MORE_MAX_HEIGHT,
-} from '../field_renderers/field_renderers';
+} from '../../../timelines/components/field_renderers/field_renderers';
 import { encodeIpv6 } from '../../lib/helpers';
 import {
   getCaseDetailsUrl,
@@ -21,11 +21,11 @@ import {
   getIPDetailsUrl,
   getCreateCaseUrl,
 } from '../link_to';
-import { FlowTarget, FlowTargetSourceDest } from '../../graphql/types';
+import { FlowTarget, FlowTargetSourceDest } from '../../../graphql/types';
 import { useUiSetting$ } from '../../lib/kibana';
-import { isUrlInvalid } from '../../pages/detection_engine/rules/components/step_about_rule/helpers';
+import { isUrlInvalid } from '../../../alerts/components/rules/step_about_rule/helpers';
 import { ExternalLinkIcon } from '../external_link_icon';
-import { navTabs } from '../../pages/home/home_navigations';
+import { navTabs } from '../../../app/home/home_navigations';
 import { useGetUrlSearch } from '../navigation/use_get_url_search';
 
 import * as i18n from './translations';

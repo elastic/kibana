@@ -11,8 +11,8 @@ import {
   useUiSetting,
   useUiSetting$,
   withKibana,
-} from '../../../../../../src/plugins/kibana_react/public';
-import { StartServices } from '../../plugin';
+} from '../../../../../../../src/plugins/kibana_react/public';
+import { StartServices } from '../../../plugin';
 
 export type KibanaContext = KibanaReactContextValue<StartServices>;
 export interface WithKibanaProps {

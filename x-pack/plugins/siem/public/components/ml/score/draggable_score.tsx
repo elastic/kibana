@@ -7,8 +7,8 @@
 import React from 'react';
 import { DraggableWrapper, DragEffects } from '../../drag_and_drop/draggable_wrapper';
 import { Anomaly } from '../types';
-import { IS_OPERATOR } from '../../timeline/data_providers/data_provider';
-import { Provider } from '../../timeline/data_providers/provider';
+import { IS_OPERATOR } from '../../../../timelines/components/timeline/data_providers/data_provider';
+import { Provider } from '../../../../timelines/components/timeline/data_providers/provider';
 import { Spacer } from '../../page';
 import { getScoreString } from './score_health';
 

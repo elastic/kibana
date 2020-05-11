@@ -7,7 +7,7 @@
 import { useLocation } from 'react-router-dom';
 
 import { useState, useEffect } from 'react';
-import { SiemPageName } from '../../pages/home/types';
+import { SiemPageName } from '../../../app/types';
 
 const hideTimelineForRoutes = [`/${SiemPageName.case}/configure`];
 

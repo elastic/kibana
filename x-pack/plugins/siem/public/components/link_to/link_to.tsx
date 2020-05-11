@@ -7,8 +7,8 @@
 import React from 'react';
 import { match as RouteMatch, Redirect, Route, Switch } from 'react-router-dom';
 
-import { SiemPageName } from '../../pages/home/types';
-import { HostsTableType } from '../../store/hosts/model';
+import { SiemPageName } from '../../../app/types';
+import { HostsTableType } from '../../../hosts/store/model';
 import {
   RedirectToCreateRulePage,
   RedirectToDetectionEnginePage,
@@ -25,7 +25,7 @@ import {
   RedirectToCreatePage,
   RedirectToConfigureCasesPage,
 } from './redirect_to_case';
-import { DetectionEngineTab } from '../../pages/detection_engine/types';
+import { DetectionEngineTab } from '../../../alerts/pages/detection_engine/types';
 
 interface LinkToPageProps {
   match: RouteMatch<{}>;

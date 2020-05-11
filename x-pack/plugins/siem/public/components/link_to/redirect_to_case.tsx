@@ -8,7 +8,7 @@ import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { appendSearch } from './helpers';
 import { RedirectWrapper } from './redirect_wrapper';
-import { SiemPageName } from '../../pages/home/types';
+import { SiemPageName } from '../../../app/types';
 
 export type CaseComponentProps = RouteComponentProps<{
   detailName: string;

@@ -16,10 +16,10 @@ import { State } from '../../store/reducer';
 
 describe('Error Toast Dispatcher', () => {
   const state: State = mockGlobalState;
-  let store = createStore(state, apolloClientObservable);
+  let store = createStore(state, {}, apolloClientObservable);
 
   beforeEach(() => {
-    store = createStore(state, apolloClientObservable);
+    store = createStore(state, {}, apolloClientObservable);
   });
 
   describe('rendering', () => {

@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { useApolloClient } from '../../utils/apollo_context';
 import { errorToToaster } from '../../components/toasters';
-import { MatrixOverTimeHistogramData, HistogramType } from '../../graphql/types';
+import { MatrixOverTimeHistogramData, HistogramType } from '../../../graphql/types';
 import { InspectQuery, Refetch } from '../../store/inputs/model';
 
 const mockQuery = jest.fn().mockResolvedValue({

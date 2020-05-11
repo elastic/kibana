@@ -10,8 +10,8 @@ import moment from 'moment';
 import React, { Dispatch, useCallback, useReducer, useState } from 'react';
 import styled from 'styled-components';
 
-import { useKibana } from '../../lib/kibana';
-import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../lib/telemetry';
+import { useKibana } from '../../common/lib/kibana';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
 import { hasMlAdminPermissions } from '../ml/permissions/has_ml_admin_permissions';
 import { errorToToaster, useStateToaster, ActionToaster } from '../toasters';
 import { setupMlJob, startDatafeeds, stopDatafeeds } from './api';

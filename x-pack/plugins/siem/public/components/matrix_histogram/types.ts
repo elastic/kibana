@@ -7,10 +7,10 @@
 import { EuiTitleSize } from '@elastic/eui';
 import { ScaleType, Position, TickFormatter } from '@elastic/charts';
 import { ActionCreator } from 'redux';
-import { ESQuery } from '../../../common/typed_json';
-import { SetQuery } from '../../pages/hosts/navigation/types';
-import { InputsModelId } from '../../store/inputs/constants';
-import { HistogramType } from '../../graphql/types';
+import { ESQuery } from '../../../../common/typed_json';
+import { SetQuery } from '../../../hosts/pages/navigation/types';
+import { InputsModelId } from '../../common/store/inputs/constants';
+import { HistogramType } from '../../../graphql/types';
 import { UpdateDateRange } from '../charts/common';
 
 export type MatrixHistogramMappingTypes = Record<

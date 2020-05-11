@@ -5,7 +5,7 @@
  */
 
 import { getAnomaliesHostTableColumnsCurated } from './get_anomalies_host_table_columns';
-import { HostsType } from '../../../store/hosts/model';
+import { HostsType } from '../../../../hosts/store/model';
 import * as i18n from './translations';
 import { AnomaliesByHost, Anomaly } from '../types';
 import { Columns } from '../../paginated_table';
