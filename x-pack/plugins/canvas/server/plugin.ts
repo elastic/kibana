@@ -66,7 +66,6 @@ export class CanvasPlugin implements Plugin {
     const canvasRouter = coreSetup.http.createRouter();
 
     initRoutes({ router: canvasRouter, logger: this.logger });
-
     loadSampleData(
       plugins.home.sampleData.addSavedObjectsToSampleDataset,
       plugins.home.sampleData.addAppLinksToSampleDataset

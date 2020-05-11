@@ -7,6 +7,8 @@
 import { axisConfig } from './axis_config';
 // @ts-ignore untyped local
 import { datacolumn } from './datacolumn';
+// @ts-ignore untyped local
+import { modelcolumn } from './model_column';
 import { dateFormatInitializer } from './date_format';
 // @ts-ignore untyped local
 import { filterGroup } from './filter_group';
@@ -37,6 +39,7 @@ import { SetupInitializer } from '../../plugin';
 export const args = [
   axisConfig,
   datacolumn,
+  modelcolumn,
   filterGroup,
   imageUpload,
   number,

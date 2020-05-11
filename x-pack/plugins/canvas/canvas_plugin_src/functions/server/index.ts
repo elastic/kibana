@@ -8,6 +8,8 @@ import { demodata } from './demodata';
 import { escount } from './escount';
 import { esdocs } from './esdocs';
 import { pointseries } from './pointseries';
+import { modelcolumn, modelcolumnarg } from './modelcolumn';
 import { essql } from './essql';
+import { esdsl } from './esdsl';
 
-export const functions = [demodata, esdocs, escount, essql, pointseries];
+export const functions = [demodata, esdocs, escount, essql, pointseries, esdsl, modelcolumn, modelcolumnarg];
