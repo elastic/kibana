@@ -24,6 +24,7 @@ export function animatePanning(
   if (translationDistance === 0) {
     return {
       ...state,
+      animation: undefined,
       panning: undefined,
     };
   }
