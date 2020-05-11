@@ -168,7 +168,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
       <SectionWrapper>
         <ClosureOptions
           closureTypeSelected={closureType}
-          disabled={persistLoading || isLoadingConnectors || connectorId === 'none' || !userCanCrud}
+          disabled={persistLoading || isLoadingConnectors || !userCanCrud}
           onChangeClosureType={onChangeClosureType}
         />
       </SectionWrapper>
