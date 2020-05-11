@@ -141,7 +141,7 @@ export const HostList = () => {
             <EuiHealth color="success" className="eui-textTruncate">
               <FormattedMessage
                 id="xpack.endpoint.host.list.policyStatus"
-                defaultMessage="PolicyStatus"
+                defaultMessage="Policy Status"
               />
             </EuiHealth>
           );
