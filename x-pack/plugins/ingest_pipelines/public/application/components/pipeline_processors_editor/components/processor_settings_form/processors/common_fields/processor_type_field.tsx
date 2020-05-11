@@ -15,7 +15,7 @@ import {
 import { types } from '../../map_processor_type_to_form';
 
 interface Props {
-  initialType?: string;
+  initialType: string[];
 }
 
 const { emptyField } = fieldValidators;
@@ -40,7 +40,7 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
   return (
     <UseField
       config={typeConfig}
-      defaultValue={Array.isArray(initialType) ? initialType : initialType ? [initialType] : []}
+      defaultValue={initialType}
       path="type"
       component={ComboBoxField}
       componentProps={{

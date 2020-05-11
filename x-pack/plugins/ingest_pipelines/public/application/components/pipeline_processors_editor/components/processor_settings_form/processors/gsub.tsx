@@ -92,7 +92,7 @@ export const Gsub: FunctionComponent = () => {
 
       <UseField config={targetConfig} component={Field} path="target_field" />
 
-      <UseField config={ignoreMissingConfig} component={ToggleField} path={'ignore_missing'} />
+      <UseField config={ignoreMissingConfig} component={ToggleField} path="ignore_missing" />
     </>
   );
 };

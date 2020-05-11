@@ -39,14 +39,17 @@ const customConfig: FieldConfig = {
   validations: [
     {
       validator: emptyField(
-        i18n.translate('xpack.ingestPipelines.form.processorsRequiredError', {
-          defaultMessage: 'Processors are required.',
-        })
+        i18n.translate(
+          'xpack.ingestPipelines.pipelineEditor.customForm.configurationRequiredError',
+          {
+            defaultMessage: 'Configuration options are required.',
+          }
+        )
       ),
     },
     {
       validator: isJsonField(
-        i18n.translate('xpack.ingestPipelines.form.processorsJsonError', {
+        i18n.translate('xpack.ingestPipelines.pipelineEditor.customForm.invalidJsonError', {
           defaultMessage: 'The input is not valid.',
         })
       ),
@@ -58,6 +61,12 @@ interface Props {
   defaultOptions?: any;
 }
 
+/**
+ * This is a catch-all component to support settings for custom processors
+ * or existing processors not yet supported by the UI.
+ *
+ * We store the settings in a field called "customOptions"
+ **/
 export const Custom: FunctionComponent<Props> = ({ defaultOptions }) => {
   return (
     <UseField

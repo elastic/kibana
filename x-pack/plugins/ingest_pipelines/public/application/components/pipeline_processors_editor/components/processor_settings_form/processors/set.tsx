@@ -68,7 +68,7 @@ export const SetProcessor: FunctionComponent = () => {
 
       <UseField config={valueConfig} component={Field} path="value" />
 
-      <UseField config={overrideConfig} component={ToggleField} path={'override'} />
+      <UseField config={overrideConfig} component={ToggleField} path="override" />
     </>
   );
 };
