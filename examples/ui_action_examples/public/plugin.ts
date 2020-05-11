@@ -19,7 +19,7 @@
 
 import { Plugin, CoreSetup, CoreStart } from '../../../src/core/public';
 import { UiActionsSetup, UiActionsStart } from '../../../src/plugins/ui_actions/public';
-import { createHelloWorldAction, ACTION_HELLO_WORLD } from './hello_world_action';
+import { ACTION_HELLO_WORLD } from './hello_world_action';
 import { helloWorldTrigger, HELLO_WORLD_TRIGGER_ID } from './hello_world_trigger';
 
 export interface UiActionExamplesSetupDependencies {
@@ -49,12 +49,12 @@ export class UiActionExamplesPlugin
   ) {
     uiActions.registerTrigger(helloWorldTrigger);
 
-    const helloWorldAction = createHelloWorldAction(async () => ({
-      openModal: (await core.getStartServices())[0].overlays.openModal,
-    }));
-
-    uiActions.registerAction(helloWorldAction);
-    uiActions.addTriggerAction(helloWorldTrigger.id, helloWorldAction);
+    uiActions.registerAction('ACTION_HELLO_WORLD', async () =>
+      (await import('./hello_world_action_lazy')).createHelloWorldAction(async () => ({
+        openModal: (await core.getStartServices())[0].overlays.openModal,
+      }))
+    );
+    uiActions.addTriggerAction(helloWorldTrigger.id, 'ACTION_HELLO_WORLD');
   }
 
   public start(core: CoreStart, plugins: UiActionExamplesStartDependencies) {}

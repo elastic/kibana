@@ -76,15 +76,15 @@ export class UiActionsService {
   };
 
   public readonly registerAction = <A extends ActionDefinition>(
-    definition: A
-  ): Action<ActionContext<A>> => {
-    if (this.actions.has(definition.id)) {
-      throw new Error(`Action [action.id = ${definition.id}] already registered.`);
+    actionId: string,
+    definition: () => Promise<A>
+  ): (() => Promise<Action<ActionContext<A>>>) => {
+    if (this.actions.has(actionId)) {
+      throw new Error(`Action [action.id = ${actionId}] already registered.`);
     }
 
-    const action = new ActionInternal(definition);
-
-    this.actions.set(action.id, action);
+    const action = async () => new ActionInternal(await definition());
+    this.actions.set(actionId, action);
 
     return action;
   };
@@ -140,33 +140,39 @@ export class UiActionsService {
     triggerId: T,
     // The action can accept partial or no context, but if it needs context not provided
     // by this type of trigger, typescript will complain. yay!
-    action: Action<TriggerContextMapping[T]>
+    actionId: string
   ): void => {
-    if (!this.actions.has(action.id)) this.registerAction(action);
-    this.attachAction(triggerId, action.id);
+    // if (!this.actions.has(action.id)) this.registerAction(action.id, action.definition);
+    this.attachAction(triggerId, actionId);
   };
 
-  public readonly getAction = <T extends ActionDefinition>(
+  public readonly getAction = async <T extends ActionDefinition>(
     id: string
-  ): Action<ActionContext<T>> => {
+  ): Promise<Action<ActionContext<T>>> => {
     if (!this.actions.has(id)) {
       throw new Error(`Action [action.id = ${id}] not registered.`);
     }
 
-    return this.actions.get(id) as ActionInternal<T>;
+    const actionGetter = this.actions.get(id);
+    const action = await actionGetter!();
+
+    return action as ActionInternal<T>;
   };
 
-  public readonly getTriggerActions = <T extends TriggerId>(
+  public readonly getTriggerActions = async <T extends TriggerId>(
     triggerId: T
-  ): Array<Action<TriggerContextMapping[T]>> => {
+  ): Promise<Array<Action<TriggerContextMapping[T]>>> => {
     // This line checks if trigger exists, otherwise throws.
     this.getTrigger!(triggerId);
 
     const actionIds = this.triggerToActions.get(triggerId);
 
-    const actions = actionIds!
-      .map(actionId => this.actions.get(actionId) as ActionInternal)
-      .filter(Boolean);
+    const actions = await Promise.all(
+      actionIds!
+        .map(actionId => this.actions.get(actionId))
+        .filter(Boolean)
+        .map(actionGetter => actionGetter!())
+    );
 
     return actions as Array<Action<TriggerContext<T>>>;
   };
@@ -175,7 +181,7 @@ export class UiActionsService {
     triggerId: T,
     context: TriggerContextMapping[T]
   ): Promise<Array<Action<TriggerContextMapping[T]>>> => {
-    const actions = this.getTriggerActions!(triggerId);
+    const actions = await this.getTriggerActions!(triggerId);
     const isCompatibles = await Promise.all(actions.map(action => action.isCompatible(context)));
     return actions.reduce(
       (acc: Array<Action<TriggerContextMapping[T]>>, action, i) =>

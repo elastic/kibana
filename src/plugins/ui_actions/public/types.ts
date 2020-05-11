@@ -25,7 +25,7 @@ import { IEmbeddable } from '../../embeddable/public';
 import { RangeSelectTriggerContext, ValueClickTriggerContext } from '../../embeddable/public';
 
 export type TriggerRegistry = Map<TriggerId, TriggerInternal<any>>;
-export type ActionRegistry = Map<string, ActionInternal>;
+export type ActionRegistry = Map<string, () => Promise<ActionInternal>>;
 export type TriggerToActionsRegistry = Map<TriggerId, string[]>;
 
 const DEFAULT_TRIGGER = '';
