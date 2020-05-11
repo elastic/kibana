@@ -28,7 +28,7 @@ import {
   MapFilters,
   StyleDescriptor,
 } from '../../common/descriptor_types';
-import { Attribution, ImmutableSourceProperty, ISource } from './sources/source';
+import { Attribution, ImmutableSourceProperty, ISource, SourceEditorArgs } from './sources/source';
 import { SyncContext } from '../actions/map_actions';
 import { IStyle } from './styles/style';
 
@@ -45,7 +45,7 @@ export interface ILayer {
   supportsFitToBounds(): Promise<boolean>;
   getAttributions(): Promise<Attribution[]>;
   getLabel(): string;
-  getCustomIconAndTooltipContent(): IconAndTooltipContent;
+  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent;
   getIconAndTooltipContent(zoomLevel: number, isUsingSearch: boolean): IconAndTooltipContent;
   renderLegendDetails(): ReactElement<any> | null;
   showAtZoomLevel(zoom: number): boolean;
@@ -58,7 +58,7 @@ export interface ILayer {
   getStyleForEditing(): IStyle;
   getCurrentStyle(): IStyle;
   getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]>;
-  renderSourceSettingsEditor({ onChange }: { onChange: () => void }): ReactElement<any> | null;
+  renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null;
   isLayerLoading(): boolean;
   hasErrors(): boolean;
   getErrors(): string;
@@ -87,7 +87,11 @@ export type Footnote = {
 export type IconAndTooltipContent = {
   icon?: ReactElement<any> | null;
   tooltipContent?: string | null;
-  footnotes?: Footnote[] | null;
+  footnotes: Footnote[];
+};
+export type CustomIconAndTooltipContent = {
+  icon: ReactElement<any> | null;
+  tooltipContent?: string | null;
   areResultsTrimmed?: boolean;
 };
 
@@ -212,7 +216,7 @@ export class AbstractLayer implements ILayer {
     return this._descriptor.label ? this._descriptor.label : '';
   }
 
-  getCustomIconAndTooltipContent(): IconAndTooltipContent {
+  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
     return {
       icon: <EuiIcon size="m" type={this.getLayerTypeIconName()} />,
     };
@@ -364,7 +368,7 @@ export class AbstractLayer implements ILayer {
     return await source.getImmutableProperties();
   }
 
-  renderSourceSettingsEditor({ onChange }: { onChange: () => void }) {
+  renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
     const source = this.getSourceForEditing();
     return source.renderSourceSettingsEditor({ onChange });
   }

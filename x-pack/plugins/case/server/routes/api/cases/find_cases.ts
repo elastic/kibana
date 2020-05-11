@@ -16,6 +16,7 @@ import { transformCases, sortToSnake, wrapError, escapeHatch } from '../utils';
 import { RouteDeps, TotalCommentByCase } from '../types';
 import { CASE_SAVED_OBJECT } from '../../../saved_object_types';
 import { CASES_URL } from '../../../../common/constants';
+import { getConnectorId } from './helpers';
 
 const combineFilters = (filters: string[], operator: 'OR' | 'AND'): string =>
   filters?.filter(i => i !== '').join(` ${operator} `);
@@ -39,7 +40,7 @@ const buildFilter = (
       : `${CASE_SAVED_OBJECT}.attributes.${field}: ${filters}`
     : '';
 
-export function initFindCasesApi({ caseService, router }: RouteDeps) {
+export function initFindCasesApi({ caseService, caseConfigureService, router }: RouteDeps) {
   router.get(
     {
       path: `${CASES_URL}/_find`,
@@ -94,12 +95,12 @@ export function initFindCasesApi({ caseService, router }: RouteDeps) {
             filter: getStatusFilter('closed', myFilters),
           },
         };
-        const [cases, openCases, closesCases] = await Promise.all([
+        const [cases, openCases, closesCases, myCaseConfigure] = await Promise.all([
           caseService.findCases(args),
           caseService.findCases(argsOpenCases),
           caseService.findCases(argsClosedCases),
+          caseConfigureService.find({ client }),
         ]);
-
         const totalCommentsFindByCases = await Promise.all(
           cases.saved_objects.map(c =>
             caseService.getAllCaseComments({
@@ -135,7 +136,8 @@ export function initFindCasesApi({ caseService, router }: RouteDeps) {
               cases,
               openCases.total ?? 0,
               closesCases.total ?? 0,
-              totalCommentsByCases
+              totalCommentsByCases,
+              getConnectorId(myCaseConfigure)
             )
           ),
         });

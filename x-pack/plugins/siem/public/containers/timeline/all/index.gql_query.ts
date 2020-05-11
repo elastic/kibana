@@ -12,12 +12,14 @@ export const allTimelinesQuery = gql`
     $search: String
     $sort: SortTimeline
     $onlyUserFavorite: Boolean
+    $timelineType: String
   ) {
     getAllTimeline(
       pageInfo: $pageInfo
       search: $search
       sort: $sort
       onlyUserFavorite: $onlyUserFavorite
+      timelineType: $timelineType
     ) {
       totalCount
       timeline {
@@ -55,6 +57,9 @@ export const allTimelinesQuery = gql`
         noteIds
         pinnedEventIds
         title
+        timelineType
+        templateTimelineId
+        templateTimelineVersion
         created
         createdBy
         updated

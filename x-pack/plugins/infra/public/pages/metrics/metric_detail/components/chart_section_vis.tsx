@@ -6,7 +6,15 @@
 import React, { useCallback, useMemo } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { Axis, Chart, niceTimeFormatter, Position, Settings, TooltipValue } from '@elastic/charts';
+import {
+  Axis,
+  Chart,
+  niceTimeFormatter,
+  Position,
+  Settings,
+  TooltipValue,
+  BrushEndListener,
+} from '@elastic/charts';
 import { EuiPageContentBody } from '@elastic/eui';
 import { getChartTheme } from '../../metrics_explorer/components/helpers/get_chart_theme';
 import { SeriesChart } from './series_chart';
@@ -45,8 +53,12 @@ export const ChartSectionVis = ({
     () => (metric != null ? niceTimeFormatter(getMaxMinTimestamp(metric)) : undefined),
     [metric]
   );
-  const handleTimeChange = useCallback(
-    (from: number, to: number) => {
+  const handleTimeChange = useCallback<BrushEndListener>(
+    ({ x }) => {
+      if (!x) {
+        return;
+      }
+      const [from, to] = x;
       if (onChangeRangeTime) {
         if (isLiveStreaming && stopLiveStreaming) {
           stopLiveStreaming();

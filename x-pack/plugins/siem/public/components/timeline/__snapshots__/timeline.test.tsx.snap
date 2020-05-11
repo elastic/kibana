@@ -722,8 +722,6 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
             "title": "filebeat-*,auditbeat-*,packetbeat-*",
           }
         }
-        onChangeDataProviderKqlQuery={[MockFunction]}
-        onChangeDroppableAndProvider={[MockFunction]}
         onDataProviderEdited={[MockFunction]}
         onDataProviderRemoved={[MockFunction]}
         onToggleDataProviderEnabled={[MockFunction]}

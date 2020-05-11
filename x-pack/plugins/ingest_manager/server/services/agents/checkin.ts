@@ -7,10 +7,12 @@
 import { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from 'src/core/server';
 import {
   Agent,
+  NewAgentEvent,
   AgentEvent,
   AgentAction,
   AgentSOAttributes,
   AgentEventSOAttributes,
+  AgentMetadata,
 } from '../../types';
 
 import { agentConfigService } from '../agent_config';
@@ -22,13 +24,13 @@ import { appContextService } from '../app_context';
 export async function agentCheckin(
   soClient: SavedObjectsClientContract,
   agent: Agent,
-  events: AgentEvent[],
+  events: NewAgentEvent[],
   localMetadata?: any
 ) {
   const updateData: {
     last_checkin: string;
     default_api_key?: string;
-    local_metadata?: string;
+    local_metadata?: AgentMetadata;
     current_error_events?: string;
   } = {
     last_checkin: new Date().toISOString(),
@@ -84,10 +86,10 @@ export async function agentCheckin(
 async function processEventsForCheckin(
   soClient: SavedObjectsClientContract,
   agent: Agent,
-  events: AgentEvent[]
+  events: NewAgentEvent[]
 ) {
   const acknowledgedActionIds: string[] = [];
-  const updatedErrorEvents = [...agent.current_error_events];
+  const updatedErrorEvents: Array<AgentEvent | NewAgentEvent> = [...agent.current_error_events];
   for (const event of events) {
     // @ts-ignore
     event.config_id = agent.config_id;
@@ -121,7 +123,7 @@ async function processEventsForCheckin(
 async function createEventsForAgent(
   soClient: SavedObjectsClientContract,
   agentId: string,
-  events: AgentEvent[]
+  events: NewAgentEvent[]
 ) {
   const objects: Array<SavedObjectsBulkCreateObject<AgentEventSOAttributes>> = events.map(
     eventData => {
@@ -138,11 +140,11 @@ async function createEventsForAgent(
   return soClient.bulkCreate(objects);
 }
 
-function isErrorOrState(event: AgentEvent) {
+function isErrorOrState(event: AgentEvent | NewAgentEvent) {
   return event.type === 'STATE' || event.type === 'ERROR';
 }
 
-function isActionEvent(event: AgentEvent) {
+function isActionEvent(event: AgentEvent | NewAgentEvent) {
   return (
     event.type === 'ACTION' && (event.subtype === 'ACKNOWLEDGED' || event.subtype === 'UNKNOWN')
   );

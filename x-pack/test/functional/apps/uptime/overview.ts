@@ -10,10 +10,15 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const { uptime } = getPageObjects(['uptime']);
   const retry = getService('retry');
+  const esArchiver = getService('esArchiver');
 
   describe('overview page', function() {
     const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
     const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
+
+    before(async () => {
+      await esArchiver.loadIfNeeded('uptime/full_heartbeat');
+    });
 
     beforeEach(async () => {
       await uptime.goToRoot();
@@ -159,20 +164,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('snapshot counts', () => {
-      it('updates the snapshot count when status filter is set to down', async () => {
+      it('should not update  when status filter is set to down', async () => {
         await uptime.setStatusFilter('down');
 
         await retry.tryForTime(12000, async () => {
           const counts = await uptime.getSnapshotCount();
-          expect(counts).to.eql({ up: '0', down: '7' });
+          expect(counts).to.eql({ up: '93', down: '7' });
         });
       });
 
-      it('updates the snapshot count when status filter is set to up', async () => {
+      it('should not update when status filter is set to up', async () => {
         await uptime.setStatusFilter('up');
         await retry.tryForTime(12000, async () => {
           const counts = await uptime.getSnapshotCount();
-          expect(counts).to.eql({ up: '93', down: '0' });
+          expect(counts).to.eql({ up: '93', down: '7' });
         });
       });
 

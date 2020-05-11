@@ -132,6 +132,12 @@ export interface TimelineInput {
 
   title?: Maybe<string>;
 
+  templateTimelineId?: Maybe<string>;
+
+  templateTimelineVersion?: Maybe<number>;
+
+  timelineType?: Maybe<TimelineType>;
+
   dateRange?: Maybe<DateRangePickerInput>;
 
   savedQueryId?: Maybe<string>;
@@ -332,6 +338,11 @@ export enum NetworkDnsFields {
 
 export enum TlsFields {
   _id = '_id',
+}
+
+export enum TimelineType {
+  default = 'default',
+  template = 'template',
 }
 
 export enum SortFieldTimeline {
@@ -1944,6 +1955,12 @@ export interface TimelineResult {
 
   title?: Maybe<string>;
 
+  templateTimelineId?: Maybe<string>;
+
+  templateTimelineVersion?: Maybe<number>;
+
+  timelineType?: Maybe<TimelineType>;
+
   updated?: Maybe<number>;
 
   updatedBy?: Maybe<string>;
@@ -2218,6 +2235,8 @@ export interface GetAllTimelineQueryArgs {
   sort?: Maybe<SortTimeline>;
 
   onlyUserFavorite?: Maybe<boolean>;
+
+  timelineType?: Maybe<string>;
 }
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
@@ -3995,6 +4014,7 @@ export namespace GetAllTimeline {
     search?: Maybe<string>;
     sort?: Maybe<SortTimeline>;
     onlyUserFavorite?: Maybe<boolean>;
+    timelineType?: Maybe<string>;
   };
 
   export type Query = {
@@ -4029,6 +4049,12 @@ export namespace GetAllTimeline {
     pinnedEventIds: Maybe<string[]>;
 
     title: Maybe<string>;
+
+    timelineType: Maybe<TimelineType>;
+
+    templateTimelineId: Maybe<string>;
+
+    templateTimelineVersion: Maybe<number>;
 
     created: Maybe<number>;
 
@@ -5088,6 +5114,12 @@ export namespace GetOneTimeline {
     pinnedEventsSaveObject: Maybe<PinnedEventsSaveObject[]>;
 
     title: Maybe<string>;
+
+    timelineType: Maybe<TimelineType>;
+
+    templateTimelineId: Maybe<string>;
+
+    templateTimelineVersion: Maybe<number>;
 
     savedQueryId: Maybe<string>;
 
