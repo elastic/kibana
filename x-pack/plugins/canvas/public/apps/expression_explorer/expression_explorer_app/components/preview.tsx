@@ -4,28 +4,59 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
-import { ReactExpressionRenderer } from 'src/plugins/expressions/public';
+import React, { FC, useRef, useEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
+import { ExpressionRenderHandler } from 'src/plugins/expressions/public';
 
+import { ErrorMessage } from './error_message';
 import { useExpressions } from '../hooks';
-import { getFunctionDefinitions } from '../lib/functions';
-import { renderFunctions } from '../lib/renderers';
 
 export const Preview: FC = () => {
-  const { expression, result, ast } = useExpressions();
+  const { result } = useExpressions();
+  const mountRef: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
+  const handlerRef: React.MutableRefObject<null | ExpressionRenderHandler> = useRef(null);
+  const [renderError, setRenderError] = useState<Error | null>(null);
 
-  if (!result || !ast || !expression) {
-    return null;
-  }
+  useEffect(() => {
+    if (mountRef.current) {
+      handlerRef.current = new ExpressionRenderHandler(mountRef.current, {
+        onRenderError: (element, error) => {
+          setRenderError(error);
+          if (element) {
+            ReactDOM.unmountComponentAtNode(element);
+          }
+        },
+      });
+    }
+  }, [mountRef]);
+
+  useEffect(() => {
+    if (mountRef.current && handlerRef.current) {
+      if (!result) {
+        ReactDOM.unmountComponentAtNode(mountRef.current);
+        return;
+      }
+
+      handlerRef.current.render(result);
+    }
+  }, [result]);
+
+  useEffect(
+    () => () => {
+      ReactDOM.unmountComponentAtNode(mountRef.current!);
+      if (handlerRef && handlerRef.current) {
+        handlerRef.current.destroy();
+      }
+    },
+    []
+  );
+
+  const error = renderError ? <ErrorMessage error={renderError} /> : null;
 
   return (
-    <ReactExpressionRenderer
-      expression={expression}
-      customFunctions={getFunctionDefinitions() as []}
-      customRenderers={renderFunctions}
-      renderError={e => {
-        return <p>{e}</p>;
-      }}
-    />
+    <div id="eePreview">
+      <div id="eePreviewMountPoint" ref={mountRef} />
+      {error}
+    </div>
   );
 };

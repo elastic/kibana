@@ -19,7 +19,6 @@ import {
 
 import { Editor } from './editor';
 import { Output } from './output';
-import { Preview } from './preview';
 
 export const Page: FC = () => {
   return (
@@ -43,7 +42,6 @@ export const Page: FC = () => {
                   <EuiResizableButton />
                   <EuiResizablePanel initialSize={50}>
                     <Output />
-                    <Preview />
                   </EuiResizablePanel>
                 </>
               )}

@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useRef } from 'react';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import { debounce } from 'lodash';
 
 // @ts-ignore
 import { ExpressionInput } from '../../../../components/expression_input/expression_input';
@@ -19,11 +20,13 @@ export const Editor: FC = () => {
   const { expression: value } = useExpressions();
   const { setExpression } = useExpressionsActions();
 
-  const onChange = (newValue?: string) => {
+  const updateExpression = (newValue?: string) => {
     if (newValue !== value) {
       setExpression(newValue || '');
     }
   };
+
+  const onChange = useRef(debounce(updateExpression, 500)).current;
 
   // TODO: I don't think this should be necessary.  Check with @poff.
   language.keywords = functionDefinitions.map(fn => fn.name);

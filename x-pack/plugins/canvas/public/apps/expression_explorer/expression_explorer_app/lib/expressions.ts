@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Ast } from '@kbn/interpreter/target/common';
+import { ExpressionAstExpression } from 'src/plugins/expressions';
 
 import { ExpressionsService, ExpressionFunction, Execution } from 'src/plugins/expressions';
 import { plugin, ExpressionRenderDefinition } from 'src/plugins/expressions/public';
@@ -18,7 +18,7 @@ let expressionsService: ExpressionsService | null = null;
 export const getExpressionsService = (
   functionDefinitions: CanvasFunction[]
 ): {
-  getExecution: (ast: Ast) => Execution;
+  getExecution: (ast: ExpressionAstExpression) => Execution;
   getFunctions: () => Record<string, ExpressionFunction>;
 } => {
   if (!expressionsService) {

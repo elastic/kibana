@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 import { ExpressionExplorer as Component, Props } from './expression_explorer';
 import { ContextProvider } from './hooks';
 
-export const ExpressionExplorer: FC<Props> = ({ encodedExpression = '' }) => (
+export const ExpressionExplorerApp: FC<Props> = ({ encodedExpression = '' }) => (
   <ContextProvider>
     <Component encodedExpression={encodedExpression} />
   </ContextProvider>

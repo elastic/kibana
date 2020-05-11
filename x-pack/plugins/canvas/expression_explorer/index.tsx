@@ -11,10 +11,10 @@ import ReactDOM from 'react-dom';
 import { useQueryParams, StringParam, QueryParamProvider } from 'use-query-params';
 
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
-import { ElementBuilder } from '../public/apps/expression_explorer';
+import { ExpressionExplorerApp } from '../public/apps/expression_explorer';
 
 import '../../../../built_assets/css/plugins/kibana/index.light.css';
-import '../../../../built_assets/css/plugins/canvas/style/index.light.css';
+import '../public/style/index.scss';
 import '@elastic/eui/dist/eui_theme_light.css';
 import '@kbn/ui-framework/dist/kui_light.css';
 
@@ -34,7 +34,7 @@ const uiStyles = require.context(
 );
 uiStyles.keys().forEach(key => uiStyles(key));
 
-const ElementBuilderApp = () => {
+const ExpressionExplorer = () => {
   const services = {
     uiSettings: new Map([['darkMode', true]]),
   };
@@ -44,12 +44,12 @@ const ElementBuilderApp = () => {
   return (
     <KibanaContextProvider services={services}>
       <QueryParamProvider>
-        <ElementBuilder encodedExpression={e || ''} />
+        <ExpressionExplorerApp encodedExpression={e || ''} />
       </QueryParamProvider>
     </KibanaContextProvider>
   );
 };
 
 window.onload = () => {
-  ReactDOM.render(<ElementBuilderApp />, document.querySelector('#container'));
+  ReactDOM.render(<ExpressionExplorer />, document.querySelector('#container'));
 };

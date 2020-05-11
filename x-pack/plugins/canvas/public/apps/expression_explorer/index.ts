@@ -5,4 +5,4 @@
  */
 
 export { routes } from './routes';
-export { ExpressionExplorer as ElementBuilder } from './expression_explorer_app';
+export { ExpressionExplorerApp } from './expression_explorer_app';

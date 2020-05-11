@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromExpression, Ast } from '@kbn/interpreter/target/common';
+import { ExpressionAstExpression } from 'src/plugins/expressions';
+import { fromExpression } from '@kbn/interpreter/target/common';
 
 import { getExpressionsService } from '../../lib/expressions';
 import { getFunctions } from '../../lib/functions';
@@ -15,6 +16,7 @@ import {
   setExpression as setExpressionAction,
   setExpressionAst,
   setExpressionDebug,
+  setExpressionError,
   setExpressionResult,
   initialState,
   reducer,
@@ -30,7 +32,7 @@ export const useExpressionsActions = () => {
   const expressionsService = getExpressionsService(getFunctions());
 
   const setExpression = (value: string) => {
-    let ast: Ast | null = null;
+    let ast: ExpressionAstExpression | null = null;
 
     dispatch(setExpressionAction(value));
 
@@ -38,18 +40,15 @@ export const useExpressionsActions = () => {
       ast = fromExpression(value);
       dispatch(setExpressionAst(ast));
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log('error', e);
       ast = null;
-      dispatch(setExpressionAst(null));
-      dispatch(setExpressionResult(null));
-      dispatch(setExpressionDebug(null));
+      dispatch(setExpressionError(e, { ast, result: null, debug: null }));
       return;
     }
 
     const runInterpreter = async () => {
       if (!ast) {
         dispatch(setExpressionResult(null));
+        dispatch(setExpressionDebug(null));
         return;
       }
 
@@ -57,11 +56,9 @@ export const useExpressionsActions = () => {
         const execution = expressionsService.getExecution(ast);
         const result = await execution.result;
         dispatch(setExpressionDebug(execution.state.get().ast.chain));
-        dispatch(setExpressionResult(result as Ast));
+        dispatch(setExpressionResult(result as ExpressionAstExpression));
       } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log('error', e);
-        dispatch(setExpressionResult(null));
+        dispatch(setExpressionError(e, { result: null, debug: null }));
       }
     };
 

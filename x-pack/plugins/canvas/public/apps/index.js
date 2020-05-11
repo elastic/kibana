@@ -7,7 +7,7 @@
 import * as home from './home';
 import * as workpad from './workpad';
 import * as exp from './export';
-import * as explore from './explore';
+import * as explore from './expression_explorer';
 
 export const routes = [].concat(explore.routes, workpad.routes, home.routes, exp.routes);
 
