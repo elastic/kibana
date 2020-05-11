@@ -7,7 +7,13 @@
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { htmlIdGenerator, EuiKeyboardAccessible, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiI18nNumber,
+  EuiKeyboardAccessible,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { NodeSubMenu, subMenuAssets } from './submenu';
 import { applyMatrix3 } from '../lib/vector2';
@@ -172,33 +178,6 @@ export const ProcessEventDot = styled(
 
       const dispatch = useResolverDispatch();
 
-      const relatedEventOptions = useMemo(() => {
-        if (!relatedEvents) {
-          return subMenuAssets.initialMenuStatus;
-        }
-        if (relatedEvents instanceof Error) {
-          return subMenuAssets.menuError;
-        }
-        if (relatedEvents === waitingForRelatedEventData) {
-          return relatedEvents;
-        }
-        return Object.entries(relatedEvents.stats).map(k => {
-          return {
-            prefix: k[1],
-            optionTitle: `${k[0]}`,
-            action: () => {
-              dispatch({
-                type: 'userSelectedRelatedEventCategory',
-                payload: {
-                  subject: event,
-                  category: k[0],
-                },
-              });
-            },
-          };
-        });
-      }, [relatedEvents, dispatch, event]);
-
       const handleFocus = useCallback(
         (focusEvent: React.FocusEvent<HTMLDivElement>) => {
           dispatch({
@@ -232,6 +211,37 @@ export const ProcessEventDot = styled(
           payload: event,
         });
       }, [dispatch, event]);
+      /**
+       * Enumerates the stats for related events to display with the node as options,
+       * generally in the form `number of related events in category` `category title`
+       * e.g. "10 DNS", "230 File"
+       */
+      const relatedEventOptions = useMemo(() => {
+        if (!relatedEvents) {
+          return subMenuAssets.initialMenuStatus;
+        }
+        if (relatedEvents instanceof Error) {
+          return subMenuAssets.menuError;
+        }
+        if (relatedEvents === waitingForRelatedEventData) {
+          return relatedEvents;
+        }
+        return Object.entries(relatedEvents.stats).map(statsEntry => {
+          return {
+            prefix: <EuiI18nNumber value={statsEntry[1] || 0} />,
+            optionTitle: `${statsEntry[0]}`,
+            action: () => {
+              dispatch({
+                type: 'userSelectedRelatedEventCategory',
+                payload: {
+                  subject: event,
+                  category: statsEntry[0],
+                },
+              });
+            },
+          };
+        });
+      }, [relatedEvents, dispatch, event]);
 
       /* eslint-disable jsx-a11y/click-events-have-key-events */
       /**
