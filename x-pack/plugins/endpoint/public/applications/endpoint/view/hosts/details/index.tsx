@@ -9,8 +9,9 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiTitle,
   EuiLoadingContent,
+  EuiTitle,
+  EuiText,
   EuiSpacer,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
@@ -25,6 +26,9 @@ import {
   detailsError,
   showView,
   detailsLoading,
+  policyResponseConfigurations,
+  policyResponseActions,
+  policyResponseFailedOrWarningActionCount,
 } from '../../../store/hosts/selectors';
 import { HostDetails } from './host_details';
 import { PolicyResponse } from './policy_response';
@@ -101,6 +105,9 @@ const PolicyResponseFlyoutPanel = memo<{
   hostMeta: HostMetadata;
 }>(({ hostMeta }) => {
   const { show, ...queryParams } = useHostSelector(uiQueryParams);
+  const responseConfig = useHostSelector(policyResponseConfigurations);
+  const responseActionStatus = useHostSelector(policyResponseActions);
+  const responseAttentionCount = useHostSelector(policyResponseFailedOrWarningActionCount);
   const detailsUri = useMemo(
     () =>
       urlFromQueryParams({
@@ -125,18 +132,28 @@ const PolicyResponseFlyoutPanel = memo<{
       <FlyoutSubHeader
         backButton={backButtonProp}
         data-test-subj="hostDetailsPolicyResponseFlyoutHeader"
-      >
-        <EuiTitle size="xxs" data-test-subj="hostDetailsPolicyResponseFlyoutTitle">
-          <h3>
+      />
+      <EuiFlyoutBody data-test-subj="hostDetailsPolicyResponseFlyoutBody">
+        <EuiText data-test-subj="hostDetailsPolicyResponseFlyoutTitle">
+          <h4>
             <FormattedMessage
               id="xpack.endpoint.host.policyResponse.title"
               defaultMessage="Policy Response"
             />
-          </h3>
-        </EuiTitle>
-      </FlyoutSubHeader>
-      <EuiFlyoutBody data-test-subj="hostDetailsPolicyResponseFlyoutBody">
-        <PolicyResponse />
+          </h4>
+        </EuiText>
+        {responseConfig !== undefined && responseActionStatus !== undefined ? (
+          <PolicyResponse
+            responseConfig={responseConfig}
+            responseActionStatus={responseActionStatus}
+            responseAttentionCount={responseAttentionCount}
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.endpoint.hostDetails.noPolicyResponse"
+            defaultMessage="No Policy Response Available"
+          />
+        )}
       </EuiFlyoutBody>
     </>
   );

@@ -123,8 +123,6 @@ export const usePivotData = (
     tableItems,
   } = dataGrid;
 
-  const previewRequest = getPreviewRequestBody(indexPatternTitle, query, groupByArr, aggsArr);
-
   const getPreviewData = async () => {
     if (aggsArr.length === 0 || groupByArr.length === 0) {
       setTableItems([]);
@@ -142,6 +140,7 @@ export const usePivotData = (
     setStatus(INDEX_STATUS.LOADING);
 
     try {
+      const previewRequest = getPreviewRequestBody(indexPatternTitle, query, groupByArr, aggsArr);
       const resp = await api.getTransformsPreview(previewRequest);
       setTableItems(resp.preview);
       setRowCount(resp.preview.length);

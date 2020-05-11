@@ -3,25 +3,34 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { mapValues } from 'lodash';
+import { mapValues, first } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { convertSavedObjectToSavedSourceConfiguration } from '../../sources/sources';
-import { infraSourceConfigurationSavedObjectType } from '../../sources/saved_object_mappings';
 import { InfraDatabaseSearchResponse } from '../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../utils/create_afterkey_handler';
 import { getAllCompositeData } from '../../../utils/get_all_composite_data';
 import { networkTraffic } from '../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
 import { MetricExpressionParams, Comparator, Aggregators, AlertStates } from './types';
+import {
+  buildErrorAlertReason,
+  buildFiredAlertReason,
+  buildNoDataAlertReason,
+  DOCUMENT_COUNT_I18N,
+  stateToAlertMessage,
+} from './messages';
 import { AlertServices, AlertExecutorOptions } from '../../../../../alerting/server';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { getDateHistogramOffset } from '../../snapshot/query_helpers';
+import { InfraBackendLibs } from '../../infra_types';
+import { createPercentileAggregation } from './create_percentile_aggregation';
 
 const TOTAL_BUCKETS = 5;
-const DEFAULT_INDEX_PATTERN = 'metricbeat-*';
 
 interface Aggregation {
   aggregatedIntervals: {
-    buckets: Array<{ aggregatedValue: { value: number }; doc_count: number }>;
+    buckets: Array<{
+      aggregatedValue: { value: number; values?: Array<{ key: number; value: number }> };
+      doc_count: number;
+    }>;
   };
 }
 
@@ -42,6 +51,12 @@ const getCurrentValueFromAggregations = (
     if (aggType === Aggregators.COUNT) {
       return mostRecentBucket.doc_count;
     }
+    if (aggType === Aggregators.P95 || aggType === Aggregators.P99) {
+      const values = mostRecentBucket.aggregatedValue?.values || [];
+      const firstValue = first(values);
+      if (!firstValue) return null;
+      return firstValue.value;
+    }
     const { value } = mostRecentBucket.aggregatedValue;
     return value;
   } catch (e) {
@@ -51,22 +66,14 @@ const getCurrentValueFromAggregations = (
 
 const getParsedFilterQuery: (
   filterQuery: string | undefined
-) => Record<string, any> = filterQuery => {
+) => Record<string, any> | Array<Record<string, any>> = filterQuery => {
   if (!filterQuery) return {};
-  try {
-    return JSON.parse(filterQuery).bool;
-  } catch (e) {
-    return {
-      query_string: {
-        query: filterQuery,
-        analyze_wildcard: true,
-      },
-    };
-  }
+  return JSON.parse(filterQuery).bool;
 };
 
 export const getElasticsearchMetricQuery = (
   { metric, aggType, timeUnit, timeSize }: MetricExpressionParams,
+  timefield: string,
   groupBy?: string,
   filterQuery?: string
 ) => {
@@ -89,6 +96,8 @@ export const getElasticsearchMetricQuery = (
       ? {}
       : aggType === Aggregators.RATE
       ? networkTraffic('aggregatedValue', metric)
+      : aggType === Aggregators.P95 || aggType === Aggregators.P99
+      ? createPercentileAggregation(aggType, metric)
       : {
           aggregatedValue: {
             [aggType]: {
@@ -100,7 +109,7 @@ export const getElasticsearchMetricQuery = (
   const baseAggs = {
     aggregatedIntervals: {
       date_histogram: {
-        field: '@timestamp',
+        field: timefield,
         fixed_interval: interval,
         offset,
         extended_bounds: {
@@ -159,8 +168,12 @@ export const getElasticsearchMetricQuery = (
   return {
     query: {
       bool: {
-        filter: [...rangeFilters, ...metricFieldFilters],
-        ...parsedFilterQuery,
+        filter: [
+          ...rangeFilters,
+          ...metricFieldFilters,
+          ...(Array.isArray(parsedFilterQuery) ? parsedFilterQuery : []),
+        ],
+        ...(!Array.isArray(parsedFilterQuery) ? parsedFilterQuery : {}),
       },
     },
     size: 0,
@@ -168,43 +181,23 @@ export const getElasticsearchMetricQuery = (
   };
 };
 
-const getIndexPattern: (
-  services: AlertServices,
-  sourceId?: string
-) => Promise<string> = async function({ savedObjectsClient }, sourceId = 'default') {
-  try {
-    const sourceConfiguration = await savedObjectsClient.get(
-      infraSourceConfigurationSavedObjectType,
-      sourceId
-    );
-    const { metricAlias } = convertSavedObjectToSavedSourceConfiguration(
-      sourceConfiguration
-    ).configuration;
-    return metricAlias || DEFAULT_INDEX_PATTERN;
-  } catch (e) {
-    if (e.output.statusCode === 404) {
-      return DEFAULT_INDEX_PATTERN;
-    } else {
-      throw e;
-    }
-  }
-};
-
 const getMetric: (
   services: AlertServices,
   params: MetricExpressionParams,
   index: string,
+  timefield: string,
   groupBy: string | undefined,
   filterQuery: string | undefined
 ) => Promise<Record<string, number>> = async function(
-  { savedObjectsClient, callCluster },
+  { callCluster },
   params,
   index,
+  timefield,
   groupBy,
   filterQuery
 ) {
   const { aggType } = params;
-  const searchBody = getElasticsearchMetricQuery(params, groupBy, filterQuery);
+  const searchBody = getElasticsearchMetricQuery(params, timefield, groupBy, filterQuery);
 
   try {
     if (groupBy) {
@@ -233,6 +226,7 @@ const getMetric: (
       body: searchBody,
       index,
     });
+
     return { '*': getCurrentValueFromAggregations(result.aggregations, aggType) };
   } catch (e) {
     return { '*': undefined }; // Trigger an Error state
@@ -251,47 +245,51 @@ const comparatorMap = {
   [Comparator.LT_OR_EQ]: (a: number, [b]: number[]) => a <= b,
 };
 
-const mapToConditionsLookup = (
-  list: any[],
-  mapFn: (value: any, index: number, array: any[]) => unknown
-) =>
-  list
-    .map(mapFn)
-    .reduce(
-      (result: Record<string, any>, value, i) => ({ ...result, [`condition${i}`]: value }),
-      {}
-    );
-
-export const createMetricThresholdExecutor = (alertUUID: string) =>
+export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: string) =>
   async function({ services, params }: AlertExecutorOptions) {
-    const { criteria, groupBy, filterQuery, sourceId } = params as {
+    const { criteria, groupBy, filterQuery, sourceId, alertOnNoData } = params as {
       criteria: MetricExpressionParams[];
       groupBy: string | undefined;
       filterQuery: string | undefined;
       sourceId?: string;
+      alertOnNoData: boolean;
     };
 
+    const source = await libs.sources.getSourceConfiguration(
+      services.savedObjectsClient,
+      sourceId || 'default'
+    );
+    const config = source.configuration;
     const alertResults = await Promise.all(
-      criteria.map(criterion =>
-        (async () => {
-          const index = await getIndexPattern(services, sourceId);
-          const currentValues = await getMetric(services, criterion, index, groupBy, filterQuery);
+      criteria.map(criterion => {
+        return (async () => {
+          const currentValues = await getMetric(
+            services,
+            criterion,
+            config.metricAlias,
+            config.fields.timestamp,
+            groupBy,
+            filterQuery
+          );
           const { threshold, comparator } = criterion;
           const comparisonFunction = comparatorMap[comparator];
           return mapValues(currentValues, value => ({
+            ...criterion,
+            metric: criterion.metric ?? DOCUMENT_COUNT_I18N,
+            currentValue: value,
             shouldFire:
               value !== undefined && value !== null && comparisonFunction(value, threshold),
-            currentValue: value,
             isNoData: value === null,
             isError: value === undefined,
           }));
-        })()
-      )
+        })();
+      })
     );
 
-    const groups = Object.keys(alertResults[0]);
+    // Because each alert result has the same group definitions, just grap the groups from the first one.
+    const groups = Object.keys(first(alertResults));
     for (const group of groups) {
-      const alertInstance = services.alertInstanceFactory(`${alertUUID}-${group}`);
+      const alertInstance = services.alertInstanceFactory(`${alertId}-${group}`);
 
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every(result => result[group].shouldFire);
@@ -299,23 +297,43 @@ export const createMetricThresholdExecutor = (alertUUID: string) =>
       // whole alert is in a No Data/Error state
       const isNoData = alertResults.some(result => result[group].isNoData);
       const isError = alertResults.some(result => result[group].isError);
-      if (shouldAlertFire) {
+
+      const nextState = isError
+        ? AlertStates.ERROR
+        : isNoData
+        ? AlertStates.NO_DATA
+        : shouldAlertFire
+        ? AlertStates.ALERT
+        : AlertStates.OK;
+
+      let reason;
+      if (nextState === AlertStates.ALERT) {
+        reason = alertResults.map(result => buildFiredAlertReason(result[group])).join('\n');
+      }
+      if (alertOnNoData) {
+        if (nextState === AlertStates.NO_DATA) {
+          reason = alertResults
+            .filter(result => result[group].isNoData)
+            .map(result => buildNoDataAlertReason(result[group]))
+            .join('\n');
+        } else if (nextState === AlertStates.ERROR) {
+          reason = alertResults
+            .filter(result => result[group].isError)
+            .map(result => buildErrorAlertReason(result[group].metric))
+            .join('\n');
+        }
+      }
+      if (reason) {
         alertInstance.scheduleActions(FIRED_ACTIONS.id, {
           group,
-          valueOf: mapToConditionsLookup(alertResults, result => result[group].currentValue),
-          thresholdOf: mapToConditionsLookup(criteria, criterion => criterion.threshold),
-          metricOf: mapToConditionsLookup(criteria, criterion => criterion.metric),
+          alertState: stateToAlertMessage[nextState],
+          reason,
         });
       }
+
       // Future use: ability to fetch display current alert state
       alertInstance.replaceState({
-        alertState: isError
-          ? AlertStates.ERROR
-          : isNoData
-          ? AlertStates.NO_DATA
-          : shouldAlertFire
-          ? AlertStates.ALERT
-          : AlertStates.OK,
+        alertState: nextState,
       });
     }
   };

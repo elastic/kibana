@@ -8,7 +8,6 @@ import {
   ConditionalHeaders,
   EnqueueJobFn,
   ESQueueCreateJobFn,
-  ImmediateCreateJobFn,
   Job,
   Logger,
   RequestFacade,
@@ -39,7 +38,7 @@ export function enqueueJobFactory(reporting: ReportingCore, parentLogger: Logger
     headers: ConditionalHeaders['headers'],
     request: RequestFacade
   ): Promise<Job> {
-    type CreateJobFn = ESQueueCreateJobFn<JobParamsType> | ImmediateCreateJobFn<JobParamsType>;
+    type CreateJobFn = ESQueueCreateJobFn<JobParamsType>;
 
     const esqueue = await reporting.getEsqueue();
     const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);

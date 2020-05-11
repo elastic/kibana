@@ -12,3 +12,5 @@ export * from './enrollment_api_keys';
 export * from './epm';
 export * from './outputs';
 export * from './settings';
+export * from './setup';
+export * from './app';

@@ -32,5 +32,10 @@ Cypress.on('uncaught:exception', err => {
   }
 });
 
+Cypress.on('window:before:load', win => {
+  win.fetch = null;
+  win.Blob = null;
+});
+
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

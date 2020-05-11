@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  LIST_ITEM_ID,
-  LIST_ITEM_INDEX,
-  getCreateListItemOptionsMock,
-  getIndexESListItemMock,
-  getListItemResponseMock,
-} from '../mocks';
+import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
+import { getIndexESListItemMock } from '../../../common/schemas/elastic_query/index_es_list_item_schema.mock';
+import { LIST_ITEM_ID, LIST_ITEM_INDEX } from '../../../common/constants.mock';
 
 import { createListItem } from './create_list_item';
+import { getCreateListItemOptionsMock } from './create_list_item.mock';
 
 describe('crete_list_item', () => {
   beforeEach(() => {
@@ -31,7 +28,7 @@ describe('crete_list_item', () => {
     expect(listItem).toEqual(expected);
   });
 
-  test('It calls "callAsCurrentUser" with body, index, and listIndex', async () => {
+  test('It calls "callCluster" with body, index, and listIndex', async () => {
     const options = getCreateListItemOptionsMock();
     await createListItem(options);
     const body = getIndexESListItemMock();
@@ -40,7 +37,7 @@ describe('crete_list_item', () => {
       id: LIST_ITEM_ID,
       index: LIST_ITEM_INDEX,
     };
-    expect(options.dataClient.callAsCurrentUser).toBeCalledWith('index', expected);
+    expect(options.callCluster).toBeCalledWith('index', expected);
   });
 
   test('It returns an auto-generated id if id is sent in undefined', async () => {

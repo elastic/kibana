@@ -515,7 +515,9 @@ export default function({ getService }: FtrProviderContext) {
     describe('API access with expired access token.', () => {
       let sessionCookie: Cookie;
 
-      beforeEach(async () => {
+      beforeEach(async function() {
+        this.timeout(40000);
+
         const captureURLResponse = await supertest
           .get('/abc/xyz/handshake?one=two three')
           .expect(302);
@@ -539,6 +541,10 @@ export default function({ getService }: FtrProviderContext) {
           .expect(302);
 
         sessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
+
+        // Access token expiration is set to 15s for API integration tests.
+        // Let's wait for 20s to make sure token expires.
+        await delay(20000);
       });
 
       const expectNewSessionCookie = (cookie: Cookie) => {
@@ -549,13 +555,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(cookie.value).to.not.be(sessionCookie.value);
       };
 
-      it('expired access token should be automatically refreshed', async function() {
-        this.timeout(40000);
-
-        // Access token expiration is set to 15s for API integration tests.
-        // Let's wait for 20s to make sure token expires.
-        await delay(20000);
-
+      it('expired access token should be automatically refreshed', async () => {
         // This api call should succeed and automatically refresh token. Returned cookie will contain
         // the new access and refresh token pair.
         const firstResponse = await supertest
@@ -600,6 +600,19 @@ export default function({ getService }: FtrProviderContext) {
           .set('Cookie', secondNewCookie.cookieString())
           .expect(200);
       });
+
+      it('should refresh access token even if multiple concurrent requests try to refresh it', async () => {
+        // Send 5 concurrent requests with a cookie that contains an expired access token.
+        await Promise.all(
+          Array.from({ length: 5 }).map((value, index) =>
+            supertest
+              .get(`/internal/security/me?a=${index}`)
+              .set('kbn-xsrf', 'xxx')
+              .set('Cookie', sessionCookie.cookieString())
+              .expect(200)
+          )
+        );
+      });
     });
 
     describe('API access with missing access token document.', () => {
@@ -629,9 +642,7 @@ export default function({ getService }: FtrProviderContext) {
           .expect(302);
 
         sessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
-      });
 
-      it('should properly set cookie and start new SAML handshake', async function() {
         // Let's delete tokens from `.security` index directly to simulate the case when
         // Elasticsearch automatically removes access/refresh token document from the index
         // after some period of time.
@@ -643,7 +654,9 @@ export default function({ getService }: FtrProviderContext) {
         expect(esResponse)
           .to.have.property('deleted')
           .greaterThan(0);
+      });
 
+      it('should properly set cookie and start new SAML handshake', async () => {
         const handshakeResponse = await supertest
           .get('/abc/xyz/handshake?one=two three')
           .set('Cookie', sessionCookie.cookieString())
@@ -660,6 +673,19 @@ export default function({ getService }: FtrProviderContext) {
 
         expect(handshakeResponse.headers.location).to.be(
           '/internal/security/saml/capture-url-fragment'
+        );
+      });
+
+      it('should start new SAML handshake even if multiple concurrent requests try to refresh access token', async () => {
+        // Issue 5 concurrent requests with a cookie that contains access/refresh token pair without
+        // a corresponding document in Elasticsearch.
+        await Promise.all(
+          Array.from({ length: 5 }).map((value, index) =>
+            supertest
+              .get(`/abc/xyz/handshake?one=two three&a=${index}`)
+              .set('Cookie', sessionCookie.cookieString())
+              .expect(302)
+          )
         );
       });
     });
