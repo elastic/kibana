@@ -154,6 +154,13 @@ export class UrlPanelContent extends Component<Props, State> {
     }
   };
 
+  private updateUrlParams = (url: string) => {
+    const embedUrl = this.props.isEmbedded ? this.makeUrlEmbeddable(url) : url;
+    const extendUrl = this.state.urlParams ? this.getUrlParamExtensions(embedUrl) : embedUrl;
+
+    return extendUrl;
+  };
+
   private getSavedObjectUrl = () => {
     if (this.isNotSaved()) {
       return;
@@ -169,7 +176,7 @@ export class UrlPanelContent extends Component<Props, State> {
     // Get the application route, after the hash, and remove the #.
     const parsedAppUrl = parseUrl(parsedUrl.hash.slice(1), true);
 
-    let formattedUrl = formatUrl({
+    const formattedUrl = formatUrl({
       protocol: parsedUrl.protocol,
       auth: parsedUrl.auth,
       host: parsedUrl.host,
@@ -183,24 +190,14 @@ export class UrlPanelContent extends Component<Props, State> {
         },
       }),
     });
-    if (this.props.isEmbedded) {
-      formattedUrl = this.makeUrlEmbeddable(formattedUrl);
-    }
 
-    return formattedUrl;
+    return this.updateUrlParams(formattedUrl);
   };
 
   private getSnapshotUrl = () => {
-    let url = this.props.shareableUrl || window.location.href;
+    const url = this.props.shareableUrl || window.location.href;
 
-    if (this.props.isEmbedded) {
-      url = this.makeUrlEmbeddable(url);
-    }
-    if (this.state.urlParams) {
-      url = this.getUrlParamExtensions(url);
-    }
-
-    return url;
+    return this.updateUrlParams(url);
   };
 
   private makeUrlEmbeddable = (url: string): string => {
