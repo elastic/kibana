@@ -31,8 +31,9 @@ The default Elastic logo image appears on the page.
 
 . To replace the Elastic logo with your own image, select the image, then use the editor.
 
-[role="screenshot"]
-image::images/canvas-image-element.png[]
+//Need to replace image
+//[role="screenshot"]
+//image::images/canvas-image-element.png[]
 
 You'll notice that the image is tagged as an asset, which allows you to reuse the image from *Add element > Manage assets*.
 
@@ -79,8 +80,9 @@ You're now looking at the raw data syntax that Canvas uses to display the elemen
 
 .. To update, click *Run*.
 
-[role="screenshot"]
-image::images/canvas-metric-element.png[]
+//Need to replace image
+//[role="screenshot"]
+//image::images/canvas-metric-element.png[]
 
 [float]
 === Show off your data with charts
@@ -109,8 +111,9 @@ Although you used the Elasticsearch SQL data source for the metric and area char
 
 .. From the *Y-axis* drop-down lists, select *Value*, then select *taxless_total_price*.
 
-[role="screenshot"]
-image::images/canvas-chart-element.png[]
+//Need to replace image
+//[role="screenshot"]
+//image::images/canvas-chart-element.png[]
 
 [float]
 === Show how your data changes over time
@@ -123,8 +126,9 @@ To focus your data on a specific time range, add a time filter to your workpad.
 
 . To use the date time field from the sample data, enter `order_date` in the *Column* field, then click *Set*.
 
-[role="screenshot"]
-image::images/canvas-timefilter-element.png[]
+//Need to replace image
+//[role="screenshot"]
+//image::images/canvas-timefilter-element.png[]
 
 To see how the data changes, set the time filter to *Last 7 days*. As you change the time filter options, the metrics dynamically update.
 

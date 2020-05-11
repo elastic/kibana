@@ -12,8 +12,9 @@ Choose the type of element you want to use, then connect it to your own data.
 
 . Click *Add element*, then select the element you want to use.
 +
-[role="screenshot"]
-image::images/canvas-element-select.gif[Canvas elements]
+//Need to replace image
+//[role="screenshot"]
+//image::images/canvas-element-select.gif[Canvas elements]
 
 . To familiarize yourself with the element, use the preconfigured data demo data.
 +
@@ -37,8 +38,9 @@ Add <<managing-saved-objects,saved objects>> to your workpad, such as maps, Lens
 
 . Select the visualization you want to add.
 +
-[role="screenshot"]
-image::images/canvas-map-embed.gif[]
+//Need to replace image
+//[role="screenshot"]
+//image::images/canvas-map-embed.gif[]
 
 . To use the customization options, click the panel menu, then select one of the following options:
 
@@ -62,8 +64,9 @@ To personalize your workpad, add your own logos and graphics.
 
 . To add the image to the workpad, click the *Create image element* icon.
 +
-[role="screenshot"]
-image::images/canvas-add-image.gif[]
+//Need to replace image
+//[role="screenshot"]
+//image::images/canvas-add-image.gif[]
 
 [float]
 [[move-canvas-elements]]
@@ -144,8 +147,9 @@ To use the elements across all workpads, save the elements.
 
 When you're ready to save your element, select the element, then click *Edit > Save as new element*.
 
-[role="screenshot"]
-image::images/canvas_save_element.png[]
+//Need to replace image
+//[role="screenshot"]
+//image::images/canvas_save_element.png[]
 
 To save a group of elements, press and hold Shift, select the elements you want to save, then click *Edit > Save as new element*.
 
@@ -161,5 +165,6 @@ When you no longer need an element, delete it from your workpad.
 
 . Click *Edit > Delete*.
 +
-[role="screenshot"]
-image::images/canvas_element_options.png[]
+//Need to replace image
+//[role="screenshot"]
+//image::images/canvas_element_options.png[]

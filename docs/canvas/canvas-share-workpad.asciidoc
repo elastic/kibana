@@ -12,8 +12,9 @@ Create a JSON file of your workpad that you can export outside of {kib}.
 
 Click *Share > Download as JSON*.
 
-[role="screenshot"]
-image::images/canvas-export-workpad.png[Export single workpad]
+//Need to replace image
+//[role="screenshot"]
+//image::images/canvas-export-workpad.png[Export single workpad]
 
 Want to export multiple workpads? Click *Canvas*, select the workpads you want to export, then click *Export*.
 
@@ -25,8 +26,9 @@ If you have a license that supports the {report-features}, you can create a PDF 
 
 Click *Share > PDF reports > Generate PDF*.
 
-[role="screenshot"]
-image::images/canvas-generate-pdf.gif[Generate PDF]
+//Need to replace image
+//[role="screenshot"]
+//image::images/canvas-generate-pdf.gif[Generate PDF]
 
 For more information, refer to <<reporting-getting-started, Reporting from Kibana>>.
 
@@ -38,8 +40,9 @@ If you have a license that supports the {report-features}, you can create a POST
 
 Click *Share > PDF reports > Copy POST URL*.
 
-[role="screenshot"]
-image::images/canvas-create-URL.gif[Create POST URL]
+//Need to replace image
+//[role="screenshot"]
+//image::images/canvas-create-URL.gif[Create POST URL]
 
 For more information, refer to <<automating-report-generation, Automating report generation>>.
 

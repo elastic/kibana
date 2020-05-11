@@ -34,8 +34,9 @@ For example, click *720p* for a traditional presentation layout.
 
 . Click the *Background color* picker, then select the background color for your workpad.
 +
-[role="screenshot"]
-image::images/canvas-background-color-picker.gif[Canvas color picker]
+//Need to replace image
+//[role="screenshot"]
+//image::images/canvas-background-color-picker.gif[Canvas color picker]
 
 [float]
 [[canvas-template-workpad]]
@@ -102,8 +103,9 @@ Change how often the data refreshes on your workpad.
 
 . Select the interval you want to use, or *Set a custom interval*.
 +
-[role="screenshot"]
-image::images/canvas-refresh-interval.png[Element data refresh interval]
+//Need to replace image
+//[role="screenshot"]
+//image::images/canvas-refresh-interval.png[Element data refresh interval]
 +
 To manually refresh the data, click the *Refresh data* icon.
 
@@ -111,14 +113,15 @@ To manually refresh the data, click the *Refresh data* icon.
 [[zoom-in-out]]
 === Use the zoom options
 
-To enlarge a portion of your workpad, use the zoom options.
+To get a closer look at a portion of your workpad, use the zoom options.
 
 . Click *View > Zoom*.
 
 . Select the zoom option.
 +
-[role="screenshot"]
-image::images/canvas-zoom-controls.png[Zoom controls]
+//Need to replace image
+//[role="screenshot"]
+//image::images/canvas-zoom-controls.png[Zoom controls]
 
 [float]
 [[add-more-pages]]
@@ -130,8 +133,9 @@ Organize your ideas onto separate pages by adding more pages.
 
 . On the *Page* editor panel, select the page transition from the *Transition* dropdown.
 +
-[role="screenshot"]
-image::images/canvas-add-pages.gif[Add pages]
+//Need to replace image
+//[role="screenshot"]
+//image::images/canvas-add-pages.gif[Add pages]
 
 include::{kib-repo-dir}/canvas/canvas-elements.asciidoc[]
 
