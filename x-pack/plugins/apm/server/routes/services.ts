@@ -7,7 +7,6 @@
 import * as t from 'io-ts';
 import Boom from 'boom';
 import { unique } from 'lodash';
-import { ScopedAnnotationsClient } from '../../../observability/server';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServices } from '../lib/services/get_services';
@@ -95,13 +94,10 @@ export const serviceAnnotationsRoute = createRoute(() => ({
     const { serviceName } = context.params.path;
     const { environment } = context.params.query;
 
-    let annotationsClient: ScopedAnnotationsClient | undefined;
-
-    if (context.plugins.observability) {
-      annotationsClient = await context.plugins.observability.getScopedAnnotationsClient(
-        request
-      );
-    }
+    const annotationsClient = await context.plugins.observability?.getScopedAnnotationsClient(
+      context,
+      request
+    );
 
     return getServiceAnnotations({
       setup,
@@ -143,6 +139,7 @@ export const serviceAnnotationsCreateRoute = createRoute(() => ({
   },
   handler: async ({ request, context }) => {
     const annotationsClient = await context.plugins.observability?.getScopedAnnotationsClient(
+      context,
       request
     );
 

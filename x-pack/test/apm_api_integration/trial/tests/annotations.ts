@@ -7,10 +7,11 @@
 import expect from '@kbn/expect';
 import { merge, cloneDeep, isPlainObject } from 'lodash';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const DEFAULT_INDEX_NAME = 'observability-annotations';
 
+// eslint-disable-next-line import/no-default-export
 export default function annotationApiTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
@@ -42,7 +43,7 @@ export default function annotationApiTests({ getService }: FtrProviderContext) {
     }
   }
 
-  describe('APM annotations', () => {
+  describe('APM annotations with a trial license', () => {
     describe('when creating an annotation', () => {
       afterEach(async () => {
         const indexExists = (await es.indices.exists({ index: DEFAULT_INDEX_NAME })).body;

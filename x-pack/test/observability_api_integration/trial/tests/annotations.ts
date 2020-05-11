@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 const DEFAULT_INDEX_NAME = 'observability-annotations';
 
+// eslint-disable-next-line import/no-default-export
 export default function annotationApiTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');

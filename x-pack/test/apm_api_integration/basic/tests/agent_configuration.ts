@@ -6,8 +6,9 @@
 
 import expect from '@kbn/expect';
 import { AgentConfigurationIntake } from '../../../../plugins/apm/common/agent_configuration/configuration_types';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
+// eslint-disable-next-line import/no-default-export
 export default function agentConfigurationTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
