@@ -81,10 +81,6 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
   const isLoadingAny = isLoadingConnectors || persistLoading || loadingCaseConfigure;
   const updateConnectorDisabled = isLoadingAny || !connectorIsValid || connectorId === 'none';
 
-  const onClickAddConnector = useCallback(() => {
-    setAddFlyoutVisibility(true);
-  }, []);
-
   const onClickUpdateConnector = useCallback(() => {
     setEditFlyoutVisibility(true);
   }, []);
@@ -183,7 +179,6 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           isLoading={isLoadingConnectors}
           onChangeConnector={onChangeConnector}
           updateConnectorDisabled={updateConnectorDisabled || !userCanCrud}
-          handleShowAddFlyout={onClickAddConnector}
           handleShowEditFlyout={onClickUpdateConnector}
           selectedConnector={connectorId}
         />

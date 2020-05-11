@@ -29,12 +29,6 @@ const EuiFormRowExtended = styled(EuiFormRow)`
   }
 `;
 
-const AddConnectorEuiFormRow = styled(EuiFormRow)`
-  width: 100%;
-  max-width: 100%;
-  text-align: right;
-`;
-
 export interface Props {
   connectors: Connector[];
   disabled: boolean;
@@ -42,7 +36,6 @@ export interface Props {
   updateConnectorDisabled: boolean;
   onChangeConnector: (id: string) => void;
   selectedConnector: string;
-  handleShowAddFlyout: () => void;
   handleShowEditFlyout: () => void;
 }
 const ConnectorsComponent: React.FC<Props> = ({
@@ -52,7 +45,6 @@ const ConnectorsComponent: React.FC<Props> = ({
   updateConnectorDisabled,
   onChangeConnector,
   selectedConnector,
-  handleShowAddFlyout,
   handleShowEditFlyout,
 }) => {
   const connectorsName = useMemo(
@@ -102,16 +94,6 @@ const ConnectorsComponent: React.FC<Props> = ({
             data-test-subj="case-connectors-dropdown"
           />
         </EuiFormRowExtended>
-        <AddConnectorEuiFormRow>
-          <EuiButton
-            fill
-            disabled={disabled}
-            onClick={handleShowAddFlyout}
-            data-test-subj="case-configure-add-connector-button"
-          >
-            {i18n.ADD_NEW_CONNECTOR}
-          </EuiButton>
-        </AddConnectorEuiFormRow>
       </EuiDescribedFormGroup>
     </>
   );
