@@ -10,14 +10,19 @@ import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_TYPE,
   SPAN_SUBTYPE
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../common/elasticsearch_fieldnames';
 import {
   Connection,
   ConnectionNode,
   ServiceConnectionNode,
   ExternalConnectionNode
-} from '../../../../common/service_map';
-import { ConnectionsResponse, ServicesResponse } from '../get_service_map';
+} from '../../../common/service_map';
+import {
+  ConnectionsResponse,
+  ServicesResponse,
+  AnomaliesResponse
+} from './get_service_map';
+import { addAnomaliesDataToNodes } from './ml_helpers';
 
 function getConnectionNodeId(node: ConnectionNode): string {
   if ('span.destination.service.resource' in node) {
@@ -34,13 +39,16 @@ function getConnectionId(connection: Connection) {
 }
 
 export type ServiceMapResponse = ConnectionsResponse & {
+  anomalies: AnomaliesResponse;
   services: ServicesResponse;
 };
 
-export function dedupeConnections(response: ServiceMapResponse) {
-  const { discoveredServices, services, connections } = response;
+export function transformServiceMapResponses(response: ServiceMapResponse) {
+  const { anomalies, discoveredServices, services, connections } = response;
 
-  const allNodes = connections
+  // Derive the rest of the map nodes from the connections and add the services
+  // from the services data query
+  const allNodes: ConnectionNode[] = connections
     .flatMap(connection => [connection.source, connection.destination])
     .map(node => ({ ...node, id: getConnectionNodeId(node) }))
     .concat(
@@ -50,25 +58,21 @@ export function dedupeConnections(response: ServiceMapResponse) {
       }))
     );
 
-  const serviceNodes = allNodes.filter(node => SERVICE_NAME in node) as Array<
-    ServiceConnectionNode & {
-      id: string;
-    }
-  >;
+  // List of nodes that are services
+  const serviceNodes = allNodes.filter(
+    node => SERVICE_NAME in node
+  ) as ServiceConnectionNode[];
 
+  // List of nodes that are externals
   const externalNodes = allNodes.filter(
     node => SPAN_DESTINATION_SERVICE_RESOURCE in node
-  ) as Array<
-    ExternalConnectionNode & {
-      id: string;
-    }
-  >;
+  ) as ExternalConnectionNode[];
 
-  // 1. maps external nodes to internal services
-  // 2. collapses external nodes into one node based on span.destination.service.resource
-  // 3. picks the first available span.type/span.subtype in an alphabetically sorted list
+  // 1. Map external nodes to internal services
+  // 2. Collapse external nodes into one node based on span.destination.service.resource
+  // 3. Pick the first available span.type/span.subtype in an alphabetically sorted list
   const nodeMap = allNodes.reduce((map, node) => {
-    if (map[node.id]) {
+    if (!node.id || map[node.id]) {
       return map;
     }
 
@@ -119,14 +123,14 @@ export function dedupeConnections(response: ServiceMapResponse) {
           .sort()[0]
       }
     };
-  }, {} as Record<string, ConnectionNode & { id: string }>);
+  }, {} as Record<string, ConnectionNode>);
 
-  // maps destination.address to service.name if possible
+  // Map destination.address to service.name if possible
   function getConnectionNode(node: ConnectionNode) {
     return nodeMap[getConnectionNodeId(node)];
   }
 
-  // build connections with mapped nodes
+  // Build connections with mapped nodes
   const mappedConnections = connections
     .map(connection => {
       const sourceData = getConnectionNode(connection.source);
@@ -166,7 +170,7 @@ export function dedupeConnections(response: ServiceMapResponse) {
     {} as Record<string, ConnectionWithId>
   );
 
-  // instead of adding connections in two directions,
+  // Instead of adding connections in two directions,
   // we add a `bidirectional` flag to use in styling
   const dedupedConnections = (sortBy(
     Object.values(connectionsById),
@@ -192,10 +196,18 @@ export function dedupeConnections(response: ServiceMapResponse) {
     return prev.concat(connection);
   }, []);
 
+  // Add anomlies data
+  const dedupedNodesWithAnomliesData = addAnomaliesDataToNodes(
+    dedupedNodes,
+    anomalies
+  );
+
   // Put everything together in elements, with everything in the "data" property
-  const elements = [...dedupedConnections, ...dedupedNodes].map(element => ({
-    data: element
-  }));
+  const elements = [...dedupedConnections, ...dedupedNodesWithAnomliesData].map(
+    element => ({
+      data: element
+    })
+  );
 
   return { elements };
 }
