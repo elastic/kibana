@@ -35,7 +35,7 @@ type RelatedEventAPIResponse = Error | { events: ResolverEvent[] };
 async function* getEachRelatedEventsResult(
   eventsToFetch: ResolverEvent[],
   httpGetter: HttpHandler
-): AsyncGenerator<[ResolverEvent, RelatedEventAPIResponse], any, any> {
+): AsyncGenerator<[ResolverEvent, RelatedEventAPIResponse]> {
   for (const eventToQueryForRelateds of eventsToFetch) {
     const id = event.entityId(eventToQueryForRelateds);
     const relatedEventError = new Error(`Error fetching related events for entity=${id}`);
