@@ -144,7 +144,7 @@ export const MonitorListComponent: React.FC<Props> = ({
       ),
     },
     {
-      align: 'center' as const,
+      align: 'left' as const,
       field: 'state.tls',
       name: labels.TLS_COLUMN_LABEL,
       render: (tls: any) => <CertStatusColumn cert={tls?.[0]} />,

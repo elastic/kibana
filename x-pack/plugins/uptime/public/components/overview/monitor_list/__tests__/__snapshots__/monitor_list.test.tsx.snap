@@ -745,7 +745,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               scope="col"
             >
               <div
-                class="euiTableCellContent euiTableCellContent--alignCenter"
+                class="euiTableCellContent"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -915,7 +915,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 TLS Certificate
               </div>
               <div
-                class="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span>
                   -
@@ -1092,7 +1092,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 TLS Certificate
               </div>
               <div
-                class="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span>
                   -
