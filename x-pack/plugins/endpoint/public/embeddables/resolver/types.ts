@@ -150,8 +150,6 @@ export type EventCategory = RelatedEventType | ('Alert' | 'Process' | 'Security'
 
 /**
  * This symbol is used to tag results with Related event info
- * REMOVE: pending resolution of https://github.com/elastic/endpoint-app-team/issues/379
- * When this data is inlined with results, there won't be a need for this.
  */
 export const resultsEnrichedWithRelatedEventInfo = `resultsEnrichedWithRelatedEventInfo`;
 /**

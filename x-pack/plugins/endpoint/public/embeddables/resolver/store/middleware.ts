@@ -99,10 +99,7 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
         }
       }
     }
-    /**
-     * REMOVE: pending resolution of https://github.com/elastic/endpoint-app-team/issues/379
-     * When this data is inlined with results, there won't be a need for this.
-     */
+
     if (action.type === 'userRequestedRelatedEventData') {
       if (typeof context !== 'undefined') {
         for await (const results of getEachRelatedEventsResult(
