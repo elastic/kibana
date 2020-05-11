@@ -16,24 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React, { lazy, Suspense } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { TableVisParams } from '../types';
 
-import { PluginInitializerContext } from '../../../core/public';
-import { DashboardPlugin } from './plugin';
+const TableOptionsComponent = lazy(() => import('./table_vis_options'));
 
-export {
-  DashboardContainer,
-  DashboardContainerInput,
-  DashboardContainerFactory,
-  DASHBOARD_CONTAINER_TYPE,
-  // Types below here can likely be made private when dashboard app moved into this NP plugin.
-  DEFAULT_PANEL_WIDTH,
-  DEFAULT_PANEL_HEIGHT,
-} from './application';
-export { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
-
-export { DashboardStart, DashboardUrlGenerator } from './plugin';
-export { DASHBOARD_APP_URL_GENERATOR } from './url_generator';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DashboardPlugin(initializerContext);
-}
+export const TableOptions = (props: VisOptionsProps<TableVisParams>) => (
+  <Suspense fallback={<EuiLoadingSpinner />}>
+    <TableOptionsComponent {...props} />
+  </Suspense>
+);

@@ -18,6 +18,7 @@
  */
 
 import * as React from 'react';
+import { EuiFlyout } from '@elastic/eui';
 import { AddPanelFlyout } from './add_panel_flyout';
 import {
   ContactCardEmbeddableFactory,
@@ -74,6 +75,9 @@ test('createNewEmbeddable() add embeddable to container', async () => {
       SavedObjectFinder={() => null}
     />
   ) as ReactWrapper<unknown, unknown, AddPanelFlyout>;
+
+  // https://github.com/elastic/kibana/issues/64789
+  expect(component.exists(EuiFlyout)).toBe(false);
 
   expect(Object.values(container.getInput().panels).length).toBe(0);
   component.instance().createNewEmbeddable(CONTACT_CARD_EMBEDDABLE);
