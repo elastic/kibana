@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash/fp';
+import { Logger } from 'src/core/server';
 
 import { ListItemArraySchema } from '../../../../../lists/common/schemas/response';
 import { Type as ListValueType } from '../../../../../lists/common/schemas/common';
@@ -12,6 +13,7 @@ import { SignalSearchResponse } from './types';
 
 interface FilterEventsAgainstList {
   listClient: ListClient;
+  logger: Logger;
   eventSearchResult: SignalSearchResponse;
   type: ListValueType;
   listId: string;
@@ -20,6 +22,7 @@ interface FilterEventsAgainstList {
 
 export const filterEventsAgainstList = async ({
   listClient,
+  logger,
   eventSearchResult,
   type,
   listId,
@@ -38,25 +41,26 @@ export const filterEventsAgainstList = async ({
       type,
       value: [...valueSet],
     });
+
     // create a set of list values that were a hit
     const badSet = new Set<string>(listSignals.map(item => item.value));
     // console.log({ badSet });
     // filter out the search results that match with the values found in the list.
     const filteredEvents = eventSearchResult.hits.hits.filter(item =>
-      item._source.source?.[type] ? !badSet.has(item._source.source?.[type]) : true
+      get(field, item._source) ? !badSet.has(get(field, item._source)) : true
     );
-
+    const diff = eventSearchResult.hits.hits.length - filteredEvents.length;
+    logger.debug(`Lists filtered out ${diff} events`);
     const toReturn: SignalSearchResponse = {
       took: eventSearchResult.took,
       timed_out: eventSearchResult.timed_out,
       _shards: eventSearchResult._shards,
       hits: {
-        total: eventSearchResult.hits.total,
+        total: filteredEvents.length,
         max_score: eventSearchResult.hits.max_score,
         hits: filteredEvents,
       },
     };
-
     return toReturn;
   } catch (exc) {
     throw new Error('Failed to query lists index');

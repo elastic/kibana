@@ -83,9 +83,26 @@ export const searchAfterAndBulkCreate = async ({
     createdSignalsCount: 0,
   };
 
-  let sortId;
+  let sortId; // tells us where to start our next search_after query
+  let searchResultSize = 0;
 
-  while (toReturn.createdSignalsCount < ruleParams.maxSignals) {
+  /* 
+    The purpose of `maxResults` is to ensure we do not perform
+    extra search_after's. This will be reset on each
+    iteration, although it really only matters for the first
+    iteration of the loop.
+    e.g. if maxSignals = 100 but our search result only yields
+    27 documents, there is no point in performing another search
+    since we know there are no more events that match our rule,
+    and thus, no more signals we could possibly generate.
+    However, if maxSignals = 500 and our search yields a total
+    of 3050 results we don't want to make 3050 signals,
+    we only want 500. So maxResults will help us control how
+    many times we perform a search_after
+  */
+  let maxResults = ruleParams.maxSignals;
+
+  while (searchResultSize < maxResults) {
     try {
       logger.debug(`sortIds: ${sortId}`);
       const {
@@ -113,6 +130,12 @@ export const searchAfterAndBulkCreate = async ({
           ? searchResult.hits.total
           : searchResult.hits.total.value;
       logger.debug(`totalHits: ${totalHits}`);
+
+      // re-calculate maxResults to ensure if our search results
+      // are less than max signals, we are not attempting to
+      // create more signals than there are total search results.
+      maxResults = Math.min(totalHits, ruleParams.maxSignals);
+      searchResultSize += searchResult.hits.hits.length;
       if (searchResult.hits.hits.length === 0) {
         toReturn.success = true;
         return toReturn;
@@ -122,6 +145,7 @@ export const searchAfterAndBulkCreate = async ({
       // the resulting set are valid signals that are not on the allowlist.
       const filteredEvents = await filterEventsAgainstList({
         listClient,
+        logger,
         eventSearchResult: searchResult,
         type: listValueType,
         field: listValueField,
@@ -129,17 +153,11 @@ export const searchAfterAndBulkCreate = async ({
       });
       if (filteredEvents != null && filteredEvents.hits.hits.length === 0) {
         // everything in the events were allowed, so no need to generate signals
-        // return
         toReturn.success = true;
         return toReturn;
       }
 
-      if (filteredEvents?.hits?.hits[0]?.sort == null) {
-        logger.debug('sortIds was empty on search');
-        toReturn.success = true;
-        return toReturn; // no more search results
-      }
-      sortId = filteredEvents.hits.hits[0].sort[0];
+      // cap max signals created to be no more than maxSignals
       if (toReturn.createdSignalsCount + filteredEvents.hits.hits.length > ruleParams.maxSignals) {
         const tempSignalsToIndex = filteredEvents.hits.hits.slice(
           0,
@@ -171,15 +189,18 @@ export const searchAfterAndBulkCreate = async ({
         throttle,
       });
       logger.debug('finished next bulk index');
+      logger.debug(`created ${createdCount} signals`);
       toReturn.createdSignalsCount += createdCount;
       if (bulkDuration) {
         toReturn.bulkCreateTimes.push(bulkDuration);
       }
 
-      if (totalHits < ruleParams.maxSignals && toReturn.createdSignalsCount === totalHits) {
+      if (filteredEvents?.hits?.hits[0]?.sort == null) {
+        logger.debug('sortIds was empty on search');
         toReturn.success = true;
-        return toReturn;
+        return toReturn; // no more search results
       }
+      sortId = filteredEvents.hits.hits[0].sort[0];
     } catch (exc) {
       logger.error(`[-] search_after and bulk threw an error ${exc}`);
       toReturn.success = false;
