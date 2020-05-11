@@ -61,11 +61,11 @@ Password::  password for 'login' type authentication.
 [cols="2*<"]
 |===
 
-|`user`
-|A string that corresponds to *User*.
+| `user`
+| A string that corresponds to *User*.
 
-|`password`
-|A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+| `password`
+| A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>.
 
 |===
 
