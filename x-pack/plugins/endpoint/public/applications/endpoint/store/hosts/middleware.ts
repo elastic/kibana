@@ -80,16 +80,18 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = core
                     version: '1.0.0',
                     status: HostPolicyResponseActionStatus.success,
                     id: '17d4b81d-9940-4b64-9de5-3e03ef1fb5cf',
-                    actions: {
-                      download_model: {
+                    actions: [
+                      {
+                        name: 'download_model',
                         status: 'success',
                         message: 'Model downloaded',
                       },
-                      ingest_events_config: {
+                      {
+                        name: 'ingest_events_config',
                         status: 'failure',
                         message: 'No action taken',
                       },
-                    },
+                    ],
                     response: {
                       configurations: {
                         malware: {

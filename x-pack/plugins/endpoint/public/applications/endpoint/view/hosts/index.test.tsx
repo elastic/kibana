@@ -14,7 +14,12 @@ import {
   mockHostResultList,
 } from '../../store/hosts/mock_host_result_list';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../mocks';
-import { HostInfo, HostStatus, HostPolicyResponseActionStatus } from '../../../../../common/types';
+import {
+  HostInfo,
+  HostStatus,
+  HostPolicyResponseActionStatus,
+  HostPolicyResponseAppliedAction,
+} from '../../../../../common/types';
 import { EndpointDocGenerator } from '../../../../../common/generate_data';
 
 describe('when on the hosts page', () => {
@@ -128,12 +133,23 @@ describe('when on the hosts page', () => {
       const policyResponse = docGenerator.generatePolicyResponse();
       policyResponse.endpoint.policy.applied.status = overallStatus;
       policyResponse.endpoint.policy.applied.response.configurations.malware.status = overallStatus;
-      policyResponse.endpoint.policy.applied.actions.download_model!.status = overallStatus;
+      let downloadModelAction: HostPolicyResponseAppliedAction = policyResponse.endpoint.policy.applied.actions.find(
+        action => action.name === 'download_model'
+      );
+
+      if (!downloadModelAction) {
+        downloadModelAction = {
+          name: 'download_model',
+          message: 'Failed to apply a portion of the configuration (kernel)',
+          status: overallStatus,
+        };
+        policyResponse.endpoint.policy.applied.actions.push(downloadModelAction);
+      }
       if (
         overallStatus === HostPolicyResponseActionStatus.failure ||
         overallStatus === HostPolicyResponseActionStatus.warning
       ) {
-        policyResponse.endpoint.policy.applied.actions.download_model!.message = 'no action taken';
+        downloadModelAction.message = 'no action taken';
       }
       store.dispatch({
         type: 'serverReturnedHostPolicyResponse',
