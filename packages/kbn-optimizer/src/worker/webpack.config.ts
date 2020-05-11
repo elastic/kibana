@@ -137,9 +137,9 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
       // or which have require() statements that should be ignored because the file is
       // already bundled with all its necessary depedencies
       noParse: [
-        /[\///]node_modules[\///]elasticsearch-browser[\///]/,
-        /[\///]node_modules[\///]lodash[\///]index\.js$/,
-        /[\///]node_modules[\///]vega-lib[\///]build[\///]vega\.js$/,
+        /[\/\\]node_modules[\/\\]elasticsearch-browser[\/\\]/,
+        /[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/,
+        /[\/\\]node_modules[\/\\]vega-lib[\/\\]build[\/\\]vega\.js$/,
       ],
 
       rules: [
