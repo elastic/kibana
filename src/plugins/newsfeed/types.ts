@@ -19,16 +19,15 @@
 
 import { Moment } from 'moment';
 
-export interface NewsfeedPluginInjectedConfig {
-  newsfeed: {
-    service: {
-      urlRoot: string;
-      pathTemplate: string;
-    };
-    defaultLanguage: string;
-    mainInterval: number; // how often to check last updated time
-    fetchInterval: number; // how often to fetch remote service and set last updated
+// Ideally, we may want to obtain the type from the configSchema and exposeToBrowser keys...
+export interface NewsfeedPluginBrowserConfig {
+  service: {
+    urlRoot: string;
+    pathTemplate: string;
   };
+  defaultLanguage: string;
+  mainInterval: number; // how often to check last updated time
+  fetchInterval: number; // how often to fetch remote service and set last updated
 }
 
 export interface ApiItem {

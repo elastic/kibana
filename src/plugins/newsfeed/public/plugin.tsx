@@ -23,7 +23,7 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { FetchResult, NewsfeedPluginInjectedConfig } from '../types';
+import { NewsfeedPluginBrowserConfig } from '../types';
 import { NewsfeedNavButton, NewsfeedApiFetchResult } from './components/newsfeed_header_nav_button';
 import { getApi } from './lib/api';
 
@@ -32,9 +32,11 @@ export type Start = object;
 
 export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
   private readonly kibanaVersion: string;
+  private readonly config: NewsfeedPluginBrowserConfig;
   private readonly stop$ = new Rx.ReplaySubject(1);
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<NewsfeedPluginBrowserConfig>) {
+    this.config = initializerContext.config.get();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
@@ -57,16 +59,8 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
   }
 
   private fetchNewsfeed(core: CoreStart) {
-    const { http, injectedMetadata } = core;
-    const config = injectedMetadata.getInjectedVar('newsfeed') as
-      | NewsfeedPluginInjectedConfig['newsfeed']
-      | undefined;
-
-    if (!config) {
-      // running in new platform, injected metadata not available
-      return new Rx.Observable<void | FetchResult | null>();
-    }
-    return getApi(http, config, this.kibanaVersion).pipe(
+    const { http } = core;
+    return getApi(http, this.config, this.kibanaVersion).pipe(
       takeUntil(this.stop$), // stop the interval when stop method is called
       catchError(() => Rx.of(null)) // do not throw error
     );

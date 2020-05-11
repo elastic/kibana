@@ -26,10 +26,10 @@ import {
   NEWSFEED_FALLBACK_LANGUAGE,
   NEWSFEED_LAST_FETCH_STORAGE_KEY,
   NEWSFEED_HASH_SET_STORAGE_KEY,
-} from '../../constants';
-import { NewsfeedPluginInjectedConfig, ApiItem, NewsfeedItem, FetchResult } from '../../types';
+} from '../../common/constants';
+import { ApiItem, NewsfeedItem, FetchResult, NewsfeedPluginBrowserConfig } from '../../types';
 
-type ApiConfig = NewsfeedPluginInjectedConfig['newsfeed']['service'];
+type ApiConfig = NewsfeedPluginBrowserConfig['service'];
 
 export class NewsfeedApiDriver {
   private readonly loadedTime = moment().utc(); // the date is compared to time in UTC format coming from the service
@@ -167,7 +167,7 @@ export class NewsfeedApiDriver {
  */
 export function getApi(
   http: HttpSetup,
-  config: NewsfeedPluginInjectedConfig['newsfeed'],
+  config: NewsfeedPluginBrowserConfig,
   kibanaVersion: string
 ): Rx.Observable<void | FetchResult> {
   const userLanguage = i18n.getLocale() || config.defaultLanguage;

@@ -1,6 +1,6 @@
 {
   "id": "newsfeed",
   "version": "kibana",
-  "server": false,
+  "server": true,
   "ui": true
 }

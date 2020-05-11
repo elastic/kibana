@@ -29,9 +29,9 @@ import {
   EuiButtonEmpty,
   EuiText,
   EuiBadge,
+  EuiHeaderAlert,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiHeaderAlert } from '../../../../legacy/core_plugins/newsfeed/public/np_ready/components/header_alert/header_alert';
 import { NewsfeedContext } from './newsfeed_header_nav_button';
 import { NewsfeedItem } from '../../types';
 import { NewsEmptyPrompt } from './empty_news';
