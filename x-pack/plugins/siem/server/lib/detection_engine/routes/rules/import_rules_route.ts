@@ -202,6 +202,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupP
                       await patchRules({
                         alertsClient,
                         savedObjectsClient,
+                        rule,
                         description,
                         enabled,
                         falsePositives,
