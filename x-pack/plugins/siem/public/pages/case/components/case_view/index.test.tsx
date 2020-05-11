@@ -70,6 +70,7 @@ describe('CaseView ', () => {
 
   const defaultUseGetCaseUserActions = {
     caseUserActions,
+    caseServices: {},
     fetchCaseUserActions,
     firstIndexPushToService: -1,
     hasDataToPush: false,

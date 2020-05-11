@@ -146,6 +146,7 @@ export const CalendarForm = ({
         }
         checked={isGlobalCalendar}
         onChange={onGlobalCalendarChange}
+        disabled={saving === true || canCreateCalendar === false}
       />
 
       {isGlobalCalendar === false && (

@@ -7,35 +7,41 @@
 import { i18n } from '@kbn/i18n';
 
 export const toastDrilldownCreated = {
-  title: i18n.translate(
-    'xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownCreatedTitle',
+  title: (drilldownName: string) =>
+    i18n.translate(
+      'xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownCreatedTitle',
+      {
+        defaultMessage: 'Drilldown "{drilldownName}" created',
+        values: {
+          drilldownName,
+        },
+      }
+    ),
+  text: i18n.translate(
+    'xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownCreatedText',
     {
-      defaultMessage: 'Drilldown created',
+      // TODO: remove `Save your dashboard before testing.` part
+      // when drilldowns are used not only in dashboard
+      // or after https://github.com/elastic/kibana/issues/65179 implemented
+      defaultMessage: 'Save your dashboard before testing.',
     }
   ),
-  text: (drilldownName: string) =>
-    i18n.translate('xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownCreatedText', {
-      defaultMessage: 'You created "{drilldownName}". Save dashboard before testing.',
-      values: {
-        drilldownName,
-      },
-    }),
 };
 
 export const toastDrilldownEdited = {
-  title: i18n.translate(
-    'xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownEditedTitle',
-    {
-      defaultMessage: 'Drilldown edited',
-    }
-  ),
-  text: (drilldownName: string) =>
-    i18n.translate('xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownEditedText', {
-      defaultMessage: 'You edited "{drilldownName}". Save dashboard before testing.',
+  title: (drilldownName: string) =>
+    i18n.translate('xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownEditedTitle', {
+      defaultMessage: 'Drilldown "{drilldownName}" updated',
       values: {
         drilldownName,
       },
     }),
+  text: i18n.translate(
+    'xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownEditedText',
+    {
+      defaultMessage: 'Save your dashboard before testing.',
+    }
+  ),
 };
 
 export const toastDrilldownDeleted = {
@@ -48,28 +54,26 @@ export const toastDrilldownDeleted = {
   text: i18n.translate(
     'xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownDeletedText',
     {
-      defaultMessage: 'You deleted a drilldown.',
+      defaultMessage: 'Save your dashboard before testing.',
     }
   ),
 };
 
 export const toastDrilldownsDeleted = {
-  title: i18n.translate(
-    'xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownsDeletedTitle',
-    {
-      defaultMessage: 'Drilldowns deleted',
-    }
-  ),
-  text: (n: number) =>
+  title: (n: number) =>
     i18n.translate(
-      'xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownsDeletedText',
+      'xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownsDeletedTitle',
       {
-        defaultMessage: 'You deleted {n} drilldowns',
-        values: {
-          n,
-        },
+        defaultMessage: '{n} drilldowns deleted',
+        values: { n },
       }
     ),
+  text: i18n.translate(
+    'xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownsDeletedText',
+    {
+      defaultMessage: 'Save your dashboard before testing.',
+    }
+  ),
 };
 
 export const toastDrilldownsCRUDError = i18n.translate(
@@ -77,12 +81,5 @@ export const toastDrilldownsCRUDError = i18n.translate(
   {
     defaultMessage: 'Error saving drilldown',
     description: 'Title for generic error toast when persisting drilldown updates failed',
-  }
-);
-
-export const toastDrilldownsFetchError = i18n.translate(
-  'xpack.drilldowns.components.flyoutDrilldownWizard.toast.drilldownsFetchErrorTitle',
-  {
-    defaultMessage: 'Error fetching drilldowns',
   }
 );

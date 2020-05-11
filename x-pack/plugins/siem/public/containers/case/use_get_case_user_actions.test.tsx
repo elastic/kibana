@@ -122,13 +122,14 @@ describe('useGetCaseUserActions', () => {
             ...basicPush,
             firstPushIndex: 3,
             lastPushIndex: 3,
+            commentsToUpdate: [],
             hasDataToPush: false,
           },
         },
       });
     });
 
-    it('Correctly marks first/last index - hasDataToPush: true', () => {
+    it('Correctly marks first/last index and comment id - hasDataToPush: true', () => {
       const userActions = [
         ...caseUserActions,
         getUserAction(['pushed'], 'push-to-service'),
@@ -142,6 +143,83 @@ describe('useGetCaseUserActions', () => {
             ...basicPush,
             firstPushIndex: 3,
             lastPushIndex: 3,
+            commentsToUpdate: [userActions[userActions.length - 1].commentId],
+            hasDataToPush: true,
+          },
+        },
+      });
+    });
+
+    it('Correctly marks first/last index and multiple comment ids, both needs push', () => {
+      const userActions = [
+        ...caseUserActions,
+        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['comment'], 'create'),
+        { ...getUserAction(['comment'], 'create'), commentId: 'muahaha' },
+      ];
+      const result = getPushedInfo(userActions, '123');
+      expect(result).toEqual({
+        hasDataToPush: true,
+        caseServices: {
+          '123': {
+            ...basicPush,
+            firstPushIndex: 3,
+            lastPushIndex: 3,
+            commentsToUpdate: [
+              userActions[userActions.length - 2].commentId,
+              userActions[userActions.length - 1].commentId,
+            ],
+            hasDataToPush: true,
+          },
+        },
+      });
+    });
+
+    it('Correctly marks first/last index and multiple comment ids, one needs push', () => {
+      const userActions = [
+        ...caseUserActions,
+        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['comment'], 'create'),
+        getUserAction(['pushed'], 'push-to-service'),
+        { ...getUserAction(['comment'], 'create'), commentId: 'muahaha' },
+      ];
+      const result = getPushedInfo(userActions, '123');
+      expect(result).toEqual({
+        hasDataToPush: true,
+        caseServices: {
+          '123': {
+            ...basicPush,
+            firstPushIndex: 3,
+            lastPushIndex: 5,
+            commentsToUpdate: [userActions[userActions.length - 1].commentId],
+            hasDataToPush: true,
+          },
+        },
+      });
+    });
+
+    it('Correctly marks first/last index and multiple comment ids, one needs push and one needs update', () => {
+      const userActions = [
+        ...caseUserActions,
+        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['comment'], 'create'),
+        getUserAction(['pushed'], 'push-to-service'),
+        { ...getUserAction(['comment'], 'create'), commentId: 'muahaha' },
+        getUserAction(['comment'], 'update'),
+        getUserAction(['comment'], 'update'),
+      ];
+      const result = getPushedInfo(userActions, '123');
+      expect(result).toEqual({
+        hasDataToPush: true,
+        caseServices: {
+          '123': {
+            ...basicPush,
+            firstPushIndex: 3,
+            lastPushIndex: 5,
+            commentsToUpdate: [
+              userActions[userActions.length - 3].commentId,
+              userActions[userActions.length - 1].commentId,
+            ],
             hasDataToPush: true,
           },
         },
@@ -162,6 +240,7 @@ describe('useGetCaseUserActions', () => {
             ...basicPush,
             firstPushIndex: 3,
             lastPushIndex: 3,
+            commentsToUpdate: [],
             hasDataToPush: false,
           },
         },
@@ -182,7 +261,30 @@ describe('useGetCaseUserActions', () => {
             ...basicPush,
             firstPushIndex: 3,
             lastPushIndex: 5,
+            commentsToUpdate: [],
             hasDataToPush: false,
+          },
+        },
+      });
+    });
+    it('Correctly handles comment update with multiple push actions', () => {
+      const userActions = [
+        ...caseUserActions,
+        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['comment'], 'create'),
+        getUserAction(['pushed'], 'push-to-service'),
+        getUserAction(['comment'], 'update'),
+      ];
+      const result = getPushedInfo(userActions, '123');
+      expect(result).toEqual({
+        hasDataToPush: true,
+        caseServices: {
+          '123': {
+            ...basicPush,
+            firstPushIndex: 3,
+            lastPushIndex: 5,
+            commentsToUpdate: [userActions[userActions.length - 1].commentId],
+            hasDataToPush: true,
           },
         },
       });
@@ -215,6 +317,7 @@ describe('useGetCaseUserActions', () => {
             ...basicPush,
             firstPushIndex: 3,
             lastPushIndex: 3,
+            commentsToUpdate: [userActions[userActions.length - 2].commentId],
             hasDataToPush: true,
           },
           '456': {
@@ -224,6 +327,7 @@ describe('useGetCaseUserActions', () => {
             externalId: 'other_external_id',
             firstPushIndex: 5,
             lastPushIndex: 5,
+            commentsToUpdate: [],
             hasDataToPush: false,
           },
         },
@@ -257,6 +361,7 @@ describe('useGetCaseUserActions', () => {
             ...basicPush,
             firstPushIndex: 3,
             lastPushIndex: 3,
+            commentsToUpdate: [userActions[userActions.length - 2].commentId],
             hasDataToPush: true,
           },
           '456': {
@@ -266,6 +371,7 @@ describe('useGetCaseUserActions', () => {
             externalId: 'other_external_id',
             firstPushIndex: 5,
             lastPushIndex: 5,
+            commentsToUpdate: [],
             hasDataToPush: false,
           },
         },
