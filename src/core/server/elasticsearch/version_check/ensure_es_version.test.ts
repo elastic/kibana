@@ -195,7 +195,7 @@ describe('pollEsNodesVersion', () => {
     callWithInternalUser.mockReturnValueOnce([createNodes('5.1.0', '5.2.0', '5.0.0')]);
     callWithInternalUser.mockReturnValueOnce([createNodes('5.1.1', '5.2.0', '5.0.0')]);
 
-    getTestScheduler().run(({ expectObservable, flush }) => {
+    getTestScheduler().run(({ expectObservable }) => {
       const expected = 'a 99ms (b|)';
 
       const esNodesCompatibility$ = pollEsNodesVersion({

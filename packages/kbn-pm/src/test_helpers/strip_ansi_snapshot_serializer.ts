@@ -21,7 +21,7 @@ import hasAnsi from 'has-ansi';
 import stripAnsi from 'strip-ansi';
 
 export const stripAnsiSnapshotSerializer = {
-  print(value: any, serialize: (val: string) => string) {
+  serialize(value: string, serialize: (val: string) => string) {
     return serialize(stripAnsi(value));
   },
 
