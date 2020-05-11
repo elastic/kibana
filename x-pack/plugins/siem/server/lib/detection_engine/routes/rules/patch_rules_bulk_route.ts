@@ -18,6 +18,7 @@ import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 import { patchRules } from '../../rules/patch_rules';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
+import { readRules } from '../../rules/read_rules';
 
 export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
   router.patch(
@@ -80,10 +81,18 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
           try {
             if (type) {
+              // reject an unauthorized "promotion" to ML
               throwHttpError(await mlAuthz.validateRuleType(type));
             }
 
+            const existingRule = await readRules({ alertsClient, ruleId, id });
+            if (existingRule?.params.type) {
+              // reject an unauthorized modification of an ML rule
+              throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
+            }
+
             const rule = await patchRules({
+              rule: existingRule,
               alertsClient,
               description,
               enabled,
@@ -98,8 +107,6 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
               timelineTitle,
               meta,
               filters,
-              id,
-              ruleId,
               index,
               interval,
               maxSignals,

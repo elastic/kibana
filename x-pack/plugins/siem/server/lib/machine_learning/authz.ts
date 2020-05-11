@@ -15,6 +15,7 @@ import { hasMlAdminPermissions } from '../../../common/machine_learning/has_ml_a
 import { isMlRule } from '../../../common/machine_learning/helpers';
 import { RuleType } from '../../../common/detection_engine/types';
 import { Validation } from './validation';
+import { cache } from './cache';
 
 export interface MlAuthz {
   validateRuleType: (type: RuleType) => Promise<Validation>;
@@ -38,16 +39,12 @@ export const buildMlAuthz = ({
   ml: SetupPlugins['ml'];
   request: KibanaRequest;
 }): MlAuthz => {
-  let validation: Promise<Validation> | null = null;
-
+  const cachedValidate = cache(() => validateMlAuthz({ license, ml, request }));
   const validateRuleType = async (type: RuleType): Promise<Validation> => {
     if (!isMlRule(type)) {
       return { valid: true, message: undefined };
     } else {
-      if (!validation) {
-        validation = validateMlAuthz({ license, ml, request });
-      }
-      return validation;
+      return cachedValidate();
     }
   };
 
@@ -90,7 +87,7 @@ export const validateMlAuthz = async ({
   }
 
   return {
-    valid: !message,
+    valid: message === undefined,
     message,
   };
 };

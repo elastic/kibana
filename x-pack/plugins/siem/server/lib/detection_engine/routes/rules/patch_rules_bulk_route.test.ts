@@ -96,7 +96,7 @@ describe('patch_rules_bulk', () => {
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
-    it('returns a 403 if mlAuthz fails', async () => {
+    it('rejects patching a rule to ML if mlAuthz fails', async () => {
       (buildMlAuthz as jest.Mock).mockReturnValueOnce({
         validateRuleType: jest
           .fn()
@@ -107,8 +107,34 @@ describe('patch_rules_bulk', () => {
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
         body: [typicalMlRulePayload()],
       });
-
       const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual([
+        {
+          error: {
+            message: 'mocked validation message',
+            status_code: 403,
+          },
+          rule_id: 'rule-1',
+        },
+      ]);
+    });
+
+    it('rejects patching an existing ML rule if mlAuthz fails', async () => {
+      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
+        validateRuleType: jest
+          .fn()
+          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
+      });
+      const { type, ...payloadWithoutType } = typicalMlRulePayload();
+      const request = requestMock.create({
+        method: 'patch',
+        path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+        body: [payloadWithoutType],
+      });
+      const response = await server.inject(request, context);
+
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
         {
