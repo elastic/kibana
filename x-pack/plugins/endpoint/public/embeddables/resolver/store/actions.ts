@@ -86,6 +86,14 @@ interface UserSelectedResolverNode {
   };
 }
 
+interface UserSelectedRelatedEventCategory {
+  readonly type: 'userSelectedRelatedEventCategory';
+  readonly payload: {
+    subject: ResolverEvent;
+    category: string;
+  };
+}
+
 export type ResolverAction =
   | CameraAction
   | DataAction
@@ -94,4 +102,5 @@ export type ResolverAction =
   | AppRequestedResolverData
   | UserFocusedOnResolverNode
   | UserSelectedResolverNode
-  | UserRequestedRelatedEventData;
+  | UserRequestedRelatedEventData
+  | UserSelectedRelatedEventCategory;

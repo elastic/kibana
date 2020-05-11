@@ -280,30 +280,6 @@ export const ProcessEventDot = styled(
       const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
       const selectedDescendantId = useSelector(selectors.uiSelectedDescendantId);
 
-      const relatedEventOptions = useMemo(() => {
-        if (!relatedEvents) {
-          return subMenuAssets.initialMenuStatus;
-        }
-        if (relatedEvents instanceof Error) {
-          return subMenuAssets.menuError;
-        }
-        if (relatedEvents === waitingForRelatedEventData) {
-          return relatedEvents;
-        }
-        return Object.entries(relatedEvents.stats).map((k, v) => {
-          return {
-            prefix: k[1],
-            optionTitle: `${k[0]}`,
-            action: () => {
-              /**
-               * COMING SOON TO A THEATER NEAR YOU:
-               * OPENING SIDE MENUS
-               */
-            },
-          };
-        });
-      }, [relatedEvents]);
-
       const nodeViewportStyle = useMemo(
         () => ({
           left: `${left}px`,
@@ -363,6 +339,33 @@ export const ProcessEventDot = styled(
       const isSelectedDescendant = nodeId === selectedDescendantId;
 
       const dispatch = useResolverDispatch();
+
+      const relatedEventOptions = useMemo(() => {
+        if (!relatedEvents) {
+          return subMenuAssets.initialMenuStatus;
+        }
+        if (relatedEvents instanceof Error) {
+          return subMenuAssets.menuError;
+        }
+        if (relatedEvents === waitingForRelatedEventData) {
+          return relatedEvents;
+        }
+        return Object.entries(relatedEvents.stats).map(k => {
+          return {
+            prefix: k[1],
+            optionTitle: `${k[0]}`,
+            action: () => {
+              dispatch({
+                type: 'userSelectedRelatedEventCategory',
+                payload: {
+                  subject: event,
+                  category: k[0],
+                },
+              });
+            },
+          };
+        });
+      }, [relatedEvents, dispatch, event]);
 
       const handleFocus = useCallback(
         (focusEvent: React.FocusEvent<HTMLDivElement>) => {
