@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
 import { createRoutes } from './routes/create_routes';
 import { url } from './saved_objects';
@@ -27,6 +29,28 @@ export class SharePlugin implements Plugin {
   public async setup(core: CoreSetup) {
     createRoutes(core, this.initializerContext.logger.get());
     core.savedObjects.registerType(url);
+    core.uiSettings.register({
+      'csv:separator': {
+        name: i18n.translate('kbn.advancedSettings.csv.separatorTitle', {
+          defaultMessage: 'CSV separator',
+        }),
+        value: ',',
+        description: i18n.translate('kbn.advancedSettings.csv.separatorText', {
+          defaultMessage: 'Separate exported values with this string',
+        }),
+        schema: schema.string(),
+      },
+      'csv:quoteValues': {
+        name: i18n.translate('kbn.advancedSettings.csv.quoteValuesTitle', {
+          defaultMessage: 'Quote CSV values',
+        }),
+        value: true,
+        description: i18n.translate('kbn.advancedSettings.csv.quoteValuesText', {
+          defaultMessage: 'Should values be quoted in csv exports?',
+        }),
+        schema: schema.boolean(),
+      },
+    });
   }
 
   public start() {

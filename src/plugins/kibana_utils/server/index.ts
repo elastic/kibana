@@ -16,5 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { KibanaUtilsPlugin } from './plugin';
 export { Get, Set, createGetterSetter, url } from '../common';
+
+export function plugin() {
+  return new KibanaUtilsPlugin();
+}

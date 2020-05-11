@@ -27,6 +27,7 @@ import { KqlTelemetryService } from './kql_telemetry';
 import { UsageCollectionSetup } from '../../usage_collection/server';
 import { AutocompleteService } from './autocomplete';
 import { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats';
+import { initUiSettings } from './ui_settings';
 
 export interface DataPluginSetup {
   search: ISearchSetup;
@@ -63,6 +64,8 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
     this.queryService.setup(core);
     this.autocompleteService.setup(core);
     this.kqlTelemetryService.setup(core, { usageCollection });
+
+    initUiSettings(core.uiSettings);
 
     return {
       fieldFormats: this.fieldFormats.setup(),

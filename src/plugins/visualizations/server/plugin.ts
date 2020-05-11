@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+import { schema } from '@kbn/config-schema';
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -41,6 +43,21 @@ export class VisualizationsPlugin
     this.logger.debug('visualizations: Setup');
 
     core.savedObjects.registerType(visualizationSavedObjectType);
+
+    core.uiSettings.register({
+      'visualize:enableLabs': {
+        name: i18n.translate('kbn.advancedSettings.visualizeEnableLabsTitle', {
+          defaultMessage: 'Enable experimental visualizations',
+        }),
+        value: true,
+        description: i18n.translate('kbn.advancedSettings.visualizeEnableLabsText', {
+          defaultMessage: `Allows users to create, view, and edit experimental visualizations. If disabled,
+            only visualizations that are considered production-ready are available to the user.`,
+        }),
+        category: ['visualization'],
+        schema: schema.boolean(),
+      },
+    });
 
     return {};
   }
