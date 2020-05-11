@@ -74,22 +74,10 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   const canSave = hasSaveAlertsCapability(capabilities);
 
   const actionTypesByTypeId = indexBy(actionTypes, 'id');
-  let alertTypeRegistryModel: AlertTypeModel | undefined;
-  try {
-    alertTypeRegistryModel = alertTypeRegistry.get(alert.alertTypeId);
-  } catch (errorRes) {
-    toastNotifications.addDanger(
-      i18n.translate(
-        'xpack.triggersActionsUI.sections.alertDetails.missingActionTypeErrorMessage',
-        {
-          defaultMessage: 'Object type "{id}" is not registered.',
-          values: {
-            id: alert.alertTypeId,
-          },
-        }
-      )
-    );
-  }
+  const hasEditButton =
+    canSave && alertTypeRegistry.has(alert.alertTypeId)
+      ? alertTypeRegistry.get(alert.alertTypeId).isEditable
+      : false;
 
   const alertActions = alert.actions;
   const uniqueActions = Array.from(new Set(alertActions.map((item: any) => item.actionTypeId)));
@@ -129,7 +117,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
               <EuiFlexGroup responsive={false} gutterSize="xs">
-                {canSave && alertTypeRegistryModel && alertTypeRegistryModel.isEditable ? (
+                {hasEditButton ? (
                   <EuiFlexItem grow={false}>
                     <Fragment>
                       {' '}
