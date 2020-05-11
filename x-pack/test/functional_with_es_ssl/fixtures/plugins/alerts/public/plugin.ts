@@ -35,7 +35,6 @@ export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamp
         return { errors: {} };
       },
       isEditable: true,
-      consumer: 'alerting',
     });
 
     triggers_actions_ui.alertTypeRegistry.register({
@@ -47,7 +46,6 @@ export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamp
         return { errors: {} };
       },
       isEditable: true,
-      consumer: 'alerting',
     });
 
     core.application.register({
