@@ -328,7 +328,7 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
     // create jobs objects containing job stats, datafeeds, datafeed stats and calendars
     if (jobResults && jobResults.jobs) {
       jobResults.jobs.forEach(job => {
-        const tempJob = job as CombinedJobWithStats;
+        let tempJob = job as CombinedJobWithStats;
 
         const calendars: string[] = [
           ...(calendarsByJobId[tempJob.job_id] || []),
@@ -341,9 +341,7 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
         if (jobStatsResults && jobStatsResults.jobs) {
           const jobStats = jobStatsResults.jobs.find(js => js.job_id === tempJob.job_id);
           if (jobStats !== undefined) {
-            tempJob.state = jobStats.state;
-            tempJob.data_counts = jobStats.data_counts;
-            tempJob.model_size_stats = jobStats.model_size_stats;
+            tempJob = { ...tempJob, ...jobStats };
             if (jobStats.node) {
               tempJob.node = jobStats.node;
             }
