@@ -22,6 +22,7 @@ class ModelcolumnArgInput extends Component {
     const updateFunctionValue = () => {
       const type = this.inputRefs.type.value;
       const column = this.inputRefs.column.value;
+      const newName = this.inputRefs.newName.value;
 
       onValueChange({
         type: 'expression',
@@ -32,6 +33,7 @@ class ModelcolumnArgInput extends Component {
             arguments: {
               column: [column],
               dataType: [type],
+              newName: newName ? [newName] : [],
             },
           },
         ],
@@ -42,6 +44,7 @@ class ModelcolumnArgInput extends Component {
 
     const column = columns.map(col => col.name).find(colName => colName === columnId) || '';
     const type = argValue.chain[0].arguments.dataType[0];
+    const newName = argValue.chain[0].arguments.newName?.[0];
 
     const options = [{ value: '', text: 'select column', disabled: true }];
 
@@ -78,7 +81,12 @@ class ModelcolumnArgInput extends Component {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFieldText placeholder="New name" />
+          <EuiFieldText
+            value={newName}
+            placeholder="New name"
+            inputRef={ref => (this.inputRefs.newName = ref)}
+            onChange={updateFunctionValue}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -97,6 +105,11 @@ export const modelcolumn = () => ({
     {
       name: 'type',
       displayName: 'Type',
+      argType: 'string',
+    },
+    {
+      name: 'newName',
+      displayName: 'Name',
       argType: 'string',
     },
   ],

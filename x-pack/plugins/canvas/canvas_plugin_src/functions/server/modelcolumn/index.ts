@@ -58,26 +58,49 @@ export function modelcolumn(): ExpressionFunctionDefinition<'model_column', Data
       // The way the function below is written you can add as many arbitrary named args as you want.
     },
     fn: (input, args) => {
-      console.log(args)
-      console.log(args.column)
-      const newColumns = input.columns
-        .filter(datatableColumn =>
-          args.column.some(argColumn => argColumn.column === datatableColumn.id)
-        )
-        .map(datatableColumn => ({
-          ...datatableColumn,
-          type:
-            datatableColumn.type ||
-            (
-              args.column.find(argColumn => argColumn.column === datatableColumn.id) || {
-                dataType: 'string',
-              }
-            ).dataType,
-        }));
+      console.log(args);
+      console.log(args.column);
+      const renames = args.column
+        .filter(argColumn => !!argColumn.newName)
+        .map(argColumn => ({ from: argColumn.column, to: argColumn.newName }));
+      const idMap = {};
+      renames.forEach(({ from, to }) => {
+        idMap[from] = to;
+      });
+      const newColumns = input.columns.map(datatableColumn => ({
+        ...datatableColumn,
+        id: renames.find(rename => rename.from === datatableColumn.id)?.to || datatableColumn.id,
+        name:
+          renames.find(rename => rename.from === datatableColumn.name)?.to || datatableColumn.name,
+        type:
+          (
+            args.column.find(argColumn => argColumn.column === datatableColumn.id) || {
+              dataType: 'string',
+            }
+          )?.dataType || datatableColumn.type,
+      }));
+
+      const newRows = input.rows.map(row => {
+        const mappedRow: Record<string, unknown> = {};
+        Object.entries(idMap).forEach(([fromId, toId]) => {
+          mappedRow[toId] = row[fromId];
+        });
+
+        Object.entries(row).forEach(([id, value]) => {
+          if (id in idMap) {
+            mappedRow[idMap[id]] = value;
+          } else {
+            mappedRow[id] = value;
+          }
+        });
+
+        return mappedRow;
+      });
+
       return {
         type: 'datatable',
         columns: newColumns,
-        rows: input.rows,
+        rows: newRows,
       };
     },
   };
@@ -98,12 +121,16 @@ export function modelcolumnarg(): any {
       dataType: {
         types: ['string'],
       },
+      newName: {
+        types: ['string'],
+      },
     },
-    fn: (_,args) => {
+    fn: (_, args) => {
       return {
         type: 'modelcolumnarg',
         column: args.column,
         dataType: args.dataType,
+        newName: args.newName,
       };
     },
   };
