@@ -341,7 +341,7 @@ export const CaseComponent = React.memo<CaseProps>(
                   isLoading={isLoadingConnectors}
                   onSubmit={onSubmitConnector}
                   connectors={connectors}
-                  selectedConnector={caseData.connectorId}
+                  selectedConnector={isValidConnector ? caseData.connectorId : 'none'}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
