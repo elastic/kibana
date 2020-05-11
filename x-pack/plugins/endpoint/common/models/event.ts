@@ -49,7 +49,7 @@ export function parentEntityId(event: ResolverEvent): string | undefined {
 }
 
 export function eventCategoryDisplayName(event: ResolverEvent): EventCategory {
-  const eventTypeToNameMap = new Map<string, EventCategory | undefined>([
+  const eventTypeToNameMap = new Map<string, EventCategory>([
     ['process', 'Process'],
     ['alert', 'Alert'],
     ['security', 'Security'],

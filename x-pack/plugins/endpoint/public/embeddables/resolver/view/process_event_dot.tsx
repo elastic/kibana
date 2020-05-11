@@ -226,14 +226,19 @@ export const ProcessEventDot = styled(
        */
       const relatedEventOptions = useMemo(() => {
         if (!relatedEvents) {
+          //If related events have not yet been requested
           return subMenuAssets.initialMenuStatus;
         }
         if (relatedEvents instanceof Error) {
+          //If there was an error when we tried to request the events
           return subMenuAssets.menuError;
         }
         if (relatedEvents === waitingForRelatedEventData) {
+          //If we're waiting for events to be returned
+            //Pass on the waiting symbol
           return relatedEvents;
         }
+        //If we have entries to show, map them into options to display in the selectable list
         return Object.entries(relatedEvents.stats).map(statsEntry => {
           return {
             prefix: <EuiI18nNumber value={statsEntry[1] || 0} />,
