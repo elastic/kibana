@@ -11,7 +11,7 @@ $kbnLoadingIndicatorColor2: tint($euiColorAccent, 60%);
   top: 0; // 1
   left: 0; // 1
   right: 0; // 1
-  z-index: $euiZLevel1; // 1
+  z-index: $euiZLevel2; // 1
   overflow: hidden; // 2
   height: $euiSizeXS / 2;
 
@@ -28,7 +28,7 @@ $kbnLoadingIndicatorColor2: tint($euiColorAccent, 60%);
   right: 0;
   bottom: 0;
   position: absolute;
-  z-index: $euiZLevel1 + 1;
+  z-index: $euiZLevel2 + 1;
   visibility: visible;
   display: block;
   animation: kbn-animate-loading-indicator 2s linear infinite;

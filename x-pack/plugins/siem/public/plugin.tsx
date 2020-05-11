@@ -12,7 +12,11 @@ import {
   CoreStart,
   PluginInitializerContext,
   Plugin as IPlugin,
+<<<<<<< HEAD
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+=======
+  DEFAULT_APP_CATEGORIES,
+>>>>>>> b180fd378dbb622d01c8fefd0712a3c27ed59f39
 } from '../../../../src/core/public';
 import {
   HomePublicPluginSetup,
@@ -30,6 +34,7 @@ import {
 } from '../../triggers_actions_ui/public';
 import { SecurityPluginSetup } from '../../security/public';
 import { APP_ID, APP_NAME, APP_PATH, APP_ICON } from '../common/constants';
+<<<<<<< HEAD
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
 import { serviceNowActionType } from './common/lib/connectors';
@@ -39,12 +44,17 @@ import { Hosts } from './hosts';
 import { Network } from './network';
 import { Overview } from './overview';
 import { Timelines } from './timelines';
+=======
+import { initTelemetry } from './lib/telemetry';
+import { KibanaServices } from './lib/kibana/services';
+import { serviceNowActionType, jiraActionType } from './lib/connectors';
+>>>>>>> b180fd378dbb622d01c8fefd0712a3c27ed59f39
 
 export interface SetupPlugins {
   home: HomePublicPluginSetup;
   security: SecurityPluginSetup;
   triggers_actions_ui: TriggersActionsSetup;
-  usageCollection: UsageCollectionSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface StartPlugins {
@@ -66,7 +76,7 @@ export interface PluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
 
-export class Plugin implements IPlugin<PluginSetup, PluginStart> {
+export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
   private readonly alertsSubPlugin = new Alerts();
   private readonly casesSubPlugin = new Cases();
@@ -79,7 +89,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart> {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup, plugins: SetupPlugins) {
+  public setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
     initTelemetry(plugins.usageCollection, APP_ID);
 
     plugins.home.featureCatalogue.register({
@@ -97,6 +107,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart> {
     });
 
     plugins.triggers_actions_ui.actionTypeRegistry.register(serviceNowActionType());
+    plugins.triggers_actions_ui.actionTypeRegistry.register(jiraActionType());
 
     const mountSecurityApp = async (params: AppMountParameters) => {
       const [coreStart, startPlugins] = await core.getStartServices();
@@ -132,7 +143,22 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart> {
       title: APP_NAME,
       order: 9000,
       euiIconType: APP_ICON,
+<<<<<<< HEAD
       mount: mountSecurityApp,
+=======
+      category: DEFAULT_APP_CATEGORIES.security,
+      async mount(params: AppMountParameters) {
+        const [coreStart, startPlugins] = await core.getStartServices();
+        const { renderApp } = await import('./app');
+        const services = {
+          ...coreStart,
+          ...startPlugins,
+          security: plugins.security,
+        } as StartServices;
+
+        return renderApp(services, params);
+      },
+>>>>>>> b180fd378dbb622d01c8fefd0712a3c27ed59f39
     });
 
     return {};

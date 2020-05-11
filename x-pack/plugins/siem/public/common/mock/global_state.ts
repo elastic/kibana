@@ -22,8 +22,13 @@ import {
   DEFAULT_TO,
   DEFAULT_INTERVAL_TYPE,
   DEFAULT_INTERVAL_VALUE,
+<<<<<<< HEAD:x-pack/plugins/siem/public/common/mock/global_state.ts
 } from '../../../common/constants';
 import { networkModel } from '../../network/store';
+=======
+} from '../../common/constants';
+import { TimelineType } from '../../common/types/timeline';
+>>>>>>> b180fd378dbb622d01c8fefd0712a3c27ed59f39:x-pack/plugins/siem/public/mock/global_state.ts
 
 export const mockGlobalState: State = {
   app: {
@@ -202,6 +207,9 @@ export const mockGlobalState: State = {
         kqlQuery: { filterQuery: null, filterQueryDraft: null },
         loadingEventIds: [],
         title: '',
+        timelineType: TimelineType.default,
+        templateTimelineId: null,
+        templateTimelineVersion: null,
         noteIds: [],
         dateRange: {
           start: 0,

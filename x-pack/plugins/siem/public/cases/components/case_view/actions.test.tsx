@@ -9,8 +9,9 @@ import { mount } from 'enzyme';
 
 import { useDeleteCases } from '../../../../containers/case/use_delete_cases';
 import { TestProviders } from '../../../../mock';
-import { basicCase } from '../../../../containers/case/mock';
+import { basicCase, basicPush } from '../../../../containers/case/mock';
 import { CaseViewActions } from './actions';
+import * as i18n from './translations';
 jest.mock('../../../../containers/case/use_delete_cases');
 const useDeleteCasesMock = useDeleteCases as jest.Mock;
 
@@ -34,7 +35,7 @@ describe('CaseView actions', () => {
   it('clicking trash toggles modal', () => {
     const wrapper = mount(
       <TestProviders>
-        <CaseViewActions caseData={basicCase} />
+        <CaseViewActions caseData={basicCase} currentExternalIncident={null} />
       </TestProviders>
     );
 
@@ -54,7 +55,7 @@ describe('CaseView actions', () => {
     }));
     const wrapper = mount(
       <TestProviders>
-        <CaseViewActions caseData={basicCase} />
+        <CaseViewActions caseData={basicCase} currentExternalIncident={null} />
       </TestProviders>
     );
 
@@ -63,5 +64,34 @@ describe('CaseView actions', () => {
     expect(handleOnDeleteConfirm.mock.calls[0][0]).toEqual([
       { id: basicCase.id, title: basicCase.title },
     ]);
+  });
+  it('displays active incident link', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <CaseViewActions
+          caseData={basicCase}
+          currentExternalIncident={{
+            ...basicPush,
+            firstPushIndex: 5,
+            lastPushIndex: 5,
+            commentsToUpdate: [],
+            hasDataToPush: false,
+          }}
+        />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="confirm-delete-case-modal"]').exists()).toBeFalsy();
+
+    wrapper
+      .find('button[data-test-subj="property-actions-ellipses"]')
+      .first()
+      .simulate('click');
+    expect(
+      wrapper
+        .find('[data-test-subj="property-actions-popout"]')
+        .first()
+        .prop('aria-label')
+    ).toEqual(i18n.VIEW_INCIDENT(basicPush.externalTitle));
   });
 });

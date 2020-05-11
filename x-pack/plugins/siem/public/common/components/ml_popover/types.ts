@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+<<<<<<< HEAD:x-pack/plugins/siem/public/common/components/ml_popover/types.ts
 import { AuditMessageBase } from '../../../../../ml/common/types/audit_message';
+=======
+import { AuditMessageBase } from '../../../../ml/public';
+>>>>>>> b180fd378dbb622d01c8fefd0712a3c27ed59f39:x-pack/plugins/siem/public/components/ml_popover/types.ts
 import { MlError } from '../ml/types';
 
 export interface Group {

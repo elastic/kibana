@@ -6,6 +6,7 @@
 
 import { getOr, omit } from 'lodash/fp';
 
+<<<<<<< HEAD:x-pack/plugins/siem/public/common/components/navigation/breadcrumbs/index.ts
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
 import { APP_NAME } from '../../../../../common/constants';
@@ -16,6 +17,23 @@ import { getBreadcrumbs as getCaseDetailsBreadcrumbs } from '../../../../cases/p
 import { getBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../alerts/pages/detection_engine/rules/utils';
 import { SiemPageName } from '../../../../app/types';
 import { RouteSpyState, HostRouteSpyState, NetworkRouteSpyState } from '../../../utils/route/types';
+=======
+import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
+import { APP_NAME } from '../../../../common/constants';
+import { StartServices } from '../../../plugin';
+import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/details/utils';
+import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../pages/network/ip_details';
+import { getBreadcrumbs as getCaseDetailsBreadcrumbs } from '../../../pages/case/utils';
+import { getBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../pages/detection_engine/rules/utils';
+import { getBreadcrumbs as getTimelinesBreadcrumbs } from '../../../pages/timelines';
+import { SiemPageName } from '../../../pages/home/types';
+import {
+  RouteSpyState,
+  HostRouteSpyState,
+  NetworkRouteSpyState,
+  TimelineRouteSpyState,
+} from '../../../utils/route/types';
+>>>>>>> b180fd378dbb622d01c8fefd0712a3c27ed59f39:x-pack/plugins/siem/public/components/navigation/breadcrumbs/index.ts
 import { getOverviewUrl } from '../../link_to';
 
 import { TabNavigationProps } from '../tab_navigation/types';
@@ -44,6 +62,9 @@ const isNetworkRoutes = (spyState: RouteSpyState): spyState is NetworkRouteSpySt
 
 const isHostsRoutes = (spyState: RouteSpyState): spyState is HostRouteSpyState =>
   spyState != null && spyState.pageName === SiemPageName.hosts;
+
+const isTimelinesRoutes = (spyState: RouteSpyState): spyState is TimelineRouteSpyState =>
+  spyState != null && spyState.pageName === SiemPageName.timelines;
 
 const isCaseRoutes = (spyState: RouteSpyState): spyState is RouteSpyState =>
   spyState != null && spyState.pageName === SiemPageName.case;
@@ -117,6 +138,24 @@ export const getBreadcrumbsForRoute = (
     return [
       ...siemRootBreadcrumb,
       ...getCaseDetailsBreadcrumbs(
+        spyState,
+        urlStateKeys.reduce(
+          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
+          []
+        )
+      ),
+    ];
+  }
+  if (isTimelinesRoutes(spyState) && object.navTabs) {
+    const tempNav: SearchNavTab = { urlKey: 'timeline', isDetailPage: false };
+    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
+    if (spyState.tabName != null) {
+      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
+    }
+
+    return [
+      ...siemRootBreadcrumb,
+      ...getTimelinesBreadcrumbs(
         spyState,
         urlStateKeys.reduce(
           (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],

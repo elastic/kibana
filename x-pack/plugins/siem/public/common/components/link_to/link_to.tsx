@@ -25,7 +25,12 @@ import {
   RedirectToCreatePage,
   RedirectToConfigureCasesPage,
 } from './redirect_to_case';
+<<<<<<< HEAD:x-pack/plugins/siem/public/common/components/link_to/link_to.tsx
 import { DetectionEngineTab } from '../../../alerts/pages/detection_engine/types';
+=======
+import { DetectionEngineTab } from '../../pages/detection_engine/types';
+import { TimelineType } from '../../../common/types/timeline';
+>>>>>>> b180fd378dbb622d01c8fefd0712a3c27ed59f39:x-pack/plugins/siem/public/components/link_to/link_to.tsx
 
 interface LinkToPageProps {
   match: RouteMatch<{}>;
@@ -112,7 +117,12 @@ export const LinkToPage = React.memo<LinkToPageProps>(({ match }) => (
     />
     <Route
       component={RedirectToTimelinesPage}
+      exact
       path={`${match.url}/:pageName(${SiemPageName.timelines})`}
+    />
+    <Route
+      component={RedirectToTimelinesPage}
+      path={`${match.url}/:pageName(${SiemPageName.timelines})/:tabName(${TimelineType.default}|${TimelineType.template})`}
     />
     <Redirect to="/" />
   </Switch>

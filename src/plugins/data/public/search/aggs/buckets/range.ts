@@ -24,6 +24,7 @@ import { RangeKey } from './range_key';
 import { createFilterRange } from './create_filter/range';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
 const keyCaches = new WeakMap();
 const formats = new WeakMap();
@@ -34,6 +35,14 @@ const rangeTitle = i18n.translate('data.search.aggs.buckets.rangeTitle', {
 
 export interface RangeBucketAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
+}
+
+export interface AggParamsRange extends BaseAggParams {
+  field: string;
+  ranges?: Array<{
+    from: number;
+    to: number;
+  }>;
 }
 
 export const getRangeBucketAgg = ({ getInternalStartServices }: RangeBucketAggDependencies) =>

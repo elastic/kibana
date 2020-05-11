@@ -8,11 +8,19 @@ import * as H from 'history';
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
+<<<<<<< HEAD
 import { HostsTableType } from '../../../hosts/store/model';
 import { NetworkRouteType } from '../../../network/pages/navigation/types';
 import { FlowTarget } from '../../../graphql/types';
+=======
+import { TimelineType } from '../../../common/types/timeline';
 
-export type SiemRouteType = HostsTableType | NetworkRouteType;
+import { HostsTableType } from '../../store/hosts/model';
+import { NetworkRouteType } from '../../pages/network/navigation/types';
+import { FlowTarget } from '../../graphql/types';
+>>>>>>> b180fd378dbb622d01c8fefd0712a3c27ed59f39
+
+export type SiemRouteType = HostsTableType | NetworkRouteType | TimelineType;
 export interface RouteSpyState {
   pageName: string;
   detailName: string | undefined;
@@ -30,6 +38,10 @@ export interface HostRouteSpyState extends RouteSpyState {
 
 export interface NetworkRouteSpyState extends RouteSpyState {
   tabName: NetworkRouteType | undefined;
+}
+
+export interface TimelineRouteSpyState extends RouteSpyState {
+  tabName: TimelineType | undefined;
 }
 
 export type RouteSpyAction =

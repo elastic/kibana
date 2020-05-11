@@ -110,11 +110,15 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramProps &
         from: startDate,
         legendPosition,
         to: endDate,
-        onBrushEnd: (min: number, max: number) => {
+        onBrushEnd: ({ x }) => {
+          if (!x) {
+            return;
+          }
+          const [from, to] = x;
           dispatchSetAbsoluteRangeDatePicker({
             id: setAbsoluteRangeDatePickerTarget,
-            from: min,
-            to: max,
+            from,
+            to,
           });
         },
         yTickFormatter,

@@ -148,7 +148,7 @@ describe('Navigation Breadcrumbs', () => {
       );
       expect(breadcrumbs).toEqual([
         { text: 'SIEM', href: '#/link-to/overview' },
-        { text: 'Timelines', href: '' },
+        { text: 'Timelines', href: '#/link-to/timelines' },
       ]);
     });
 

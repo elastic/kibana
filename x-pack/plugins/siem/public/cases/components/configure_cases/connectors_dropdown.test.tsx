@@ -44,8 +44,14 @@ describe('ConnectorsDropdown', () => {
           value: 'none',
           'data-test-subj': 'dropdown-connector-no-connector',
         }),
-        expect.objectContaining({ value: '123', 'data-test-subj': 'dropdown-connector-123' }),
-        expect.objectContaining({ value: '456', 'data-test-subj': 'dropdown-connector-456' }),
+        expect.objectContaining({
+          value: 'servicenow-1',
+          'data-test-subj': 'dropdown-connector-servicenow-1',
+        }),
+        expect.objectContaining({
+          value: 'servicenow-2',
+          'data-test-subj': 'dropdown-connector-servicenow-2',
+        }),
       ])
     );
   });
@@ -77,7 +83,7 @@ describe('ConnectorsDropdown', () => {
   });
 
   test('it selects the correct connector', () => {
-    const newWrapper = mount(<ConnectorsDropdown {...props} selectedConnector={'123'} />, {
+    const newWrapper = mount(<ConnectorsDropdown {...props} selectedConnector={'servicenow-1'} />, {
       wrappingComponent: TestProviders,
     });
 
