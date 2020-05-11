@@ -9,13 +9,13 @@ import React from 'react';
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { HeaderSection } from '../../header_section';
 
+import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import * as i18n from './translations';
 import { getAnomaliesHostTableColumnsCurated } from './get_anomalies_host_table_columns';
 import { convertAnomaliesToHosts } from './convert_anomalies_to_hosts';
 import { Loader } from '../../loader';
 import { getIntervalFromAnomalies } from '../anomaly/get_interval_from_anomalies';
 import { AnomaliesHostTableProps } from '../types';
-import { hasMlUserPermissions } from '../permissions/has_ml_user_permissions';
 import { useMlCapabilities } from '../../ml_popover/hooks/use_ml_capabilities';
 import { BasicTable } from './basic_table';
 import { hostEquality } from './host_equality';
