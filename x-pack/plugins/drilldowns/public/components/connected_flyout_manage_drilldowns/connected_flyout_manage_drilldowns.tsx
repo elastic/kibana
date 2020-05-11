@@ -289,8 +289,8 @@ function useDrilldownsStateManager(
     await run(async () => {
       await actionManager.createEvent(action, selectedTriggers);
       notifications.toasts.addSuccess({
-        title: toastDrilldownCreated.title,
-        text: toastDrilldownCreated.text(action.name),
+        title: toastDrilldownCreated.title(action.name),
+        text: toastDrilldownCreated.text,
       });
     });
   }
@@ -303,8 +303,8 @@ function useDrilldownsStateManager(
     await run(async () => {
       await actionManager.updateEvent(drilldownId, action, selectedTriggers);
       notifications.toasts.addSuccess({
-        title: toastDrilldownEdited.title,
-        text: toastDrilldownEdited.text(action.name),
+        title: toastDrilldownEdited.title(action.name),
+        text: toastDrilldownEdited.text,
       });
     });
   }
@@ -320,8 +320,8 @@ function useDrilldownsStateManager(
               text: toastDrilldownDeleted.text,
             }
           : {
-              title: toastDrilldownsDeleted.title,
-              text: toastDrilldownsDeleted.text(drilldownIds.length),
+              title: toastDrilldownsDeleted.title(drilldownIds.length),
+              text: toastDrilldownsDeleted.text,
             }
       );
     });
