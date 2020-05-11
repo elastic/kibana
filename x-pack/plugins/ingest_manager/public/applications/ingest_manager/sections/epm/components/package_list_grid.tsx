@@ -79,7 +79,7 @@ export function PackageListGrid({
       <EuiFlexItem grow={1}>{controlsContent}</EuiFlexItem>
       <EuiFlexItem grow={3}>
         <EuiSearchBar
-          query={query as Query}
+          query={query || undefined}
           box={{
             placeholder: i18n.translate('xpack.ingestManager.epmList.searchPackagesPlaceholder', {
               defaultMessage: 'Search for integrations',
