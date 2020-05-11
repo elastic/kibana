@@ -124,7 +124,18 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...overviewStart.routes,
           ...timelinesStart.routes,
         ],
-        store: { ...hostsStart.store, ...networkStart.store, ...timelinesStart.store },
+        store: {
+          initialState: {
+            ...hostsStart.store.initialState,
+            ...networkStart.store.initialState,
+            ...timelinesStart.store.initialState,
+          },
+          reducer: {
+            ...hostsStart.store.reducer,
+            ...networkStart.store.reducer,
+            ...timelinesStart.store.reducer,
+          },
+        },
       });
     };
 
@@ -134,7 +145,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       order: 9000,
       euiIconType: APP_ICON,
       category: DEFAULT_APP_CATEGORIES.security,
-      mount: mountSecurityApp,
+      async mount(params: AppMountParameters) {
+        return mountSecurityApp(params);
+      },
     });
 
     return {};

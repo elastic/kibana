@@ -15,7 +15,7 @@ import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redi
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 
 import { isUrlInvalid } from '../../../../../alerts/components/rules/step_about_rule/helpers';
-import endPointSvg from '../../../../utils/logo_endpoint/64_color.svg';
+import endPointSvg from '../../../../../common/utils/logo_endpoint/64_color.svg';
 
 import * as i18n from './translations';
 

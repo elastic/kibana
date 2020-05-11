@@ -10,7 +10,7 @@ import { ApolloLink } from 'apollo-link';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { CoreStart } from '../../../../../../../src/core/public';
-import introspectionQueryResultData from '../../graphql/introspection.json';
+import introspectionQueryResultData from '../../../graphql/introspection.json';
 import { AppFrontendLibs } from '../lib';
 import { getLinks } from './helpers';
 
