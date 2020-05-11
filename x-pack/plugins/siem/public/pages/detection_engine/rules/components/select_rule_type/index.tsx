@@ -16,7 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { isMlRule } from '../../../../../../common/detection_engine/ml_helpers';
+import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { RuleType } from '../../../../../../common/detection_engine/types';
 import { FieldHook } from '../../../../../shared_imports';
 import { useKibana } from '../../../../../lib/kibana';
