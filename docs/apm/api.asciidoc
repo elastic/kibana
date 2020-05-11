@@ -11,11 +11,15 @@ Some APM app features are provided via a REST API:
 * <<agent-config-api>>
 * <<annotation-api>>
 
-TIP: Kibana provides additional <<api,REST APIs>>,
-and general information on <<using-api,how to use APIs>>.
+TIP: The Kibana <<api,REST API reference>> provides additional information on how to use Kibana APIs,
+like required request headers and authentication options.
 
-// Basic auth or API can be used
-// Need to talk about permissions req'd
+// AGENT CONFIG API
+// GET --> Feature (APM) Read
+// CREAT/EDIT/DELETE --> Feature (APM) All
+
+// ANNOTATION API
+// Still in progress
 
 ////
 *******************************************************
@@ -299,7 +303,7 @@ The following APIs are available:
 // * <<obs-annotation-delete>> DELETE /api/observability/annotation/:id
 
 By default, annotations are stored in a newly created `observability-annotations` index.
-The name of this index is configurable with `CONFIG_NAME_AND_LINK_HERE`.
+The name of this index can be changed in your `config.yml` by editing `xpack.observability.annotations.index`.
 
 ////
 *******************************************************
@@ -337,7 +341,8 @@ The name of this index is configurable with `CONFIG_NAME_AND_LINK_HERE`.
 (optional, string) The message displayed in the annotation. Defaults to `service.version`.
 
 `tags`::
-(optional, array) Tags that are useful for what? Defaults to `[apm]`.
+(optional, array) Tags are used by the APM app to distinguish APM annotations from other annotations.
+Tags may have additional functionality in future releases. Defaults to `[apm]`.
 
 [[apm-annotation-config-example]]
 ===== Example
