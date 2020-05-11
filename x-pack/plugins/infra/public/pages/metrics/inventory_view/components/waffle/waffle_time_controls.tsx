@@ -60,6 +60,7 @@ export const WaffleTimeControls = withTheme(({ theme }: Props) => {
           boxShadow: `0px 3px 2px ${theme.eui.euiTableActionsBorderColor}, 0px 1px 1px ${theme.eui.euiTableActionsBorderColor}`,
           marginRight: theme.eui.paddingSizes.m,
         }}
+        data-test-subj="waffleDatePicker"
       >
         <EuiDatePicker
           className="euiFieldText--inGroup"
