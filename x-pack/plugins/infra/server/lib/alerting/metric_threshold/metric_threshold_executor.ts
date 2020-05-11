@@ -14,7 +14,6 @@ import {
   buildErrorAlertReason,
   buildFiredAlertReason,
   buildNoDataAlertReason,
-  buildRecoveredAlertReason,
   DOCUMENT_COUNT_I18N,
   stateToAlertMessage,
 } from './messages';
@@ -279,7 +278,6 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
     const groups = Object.keys(alertResults[0]);
     for (const group of groups) {
       const alertInstance = services.alertInstanceFactory(`${alertId}-${group}`);
-      const prevState = alertInstance.getState();
 
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every(result => result[group].shouldFire);
@@ -313,14 +311,6 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
             .join('\n');
         }
       }
-      if (
-        nextState === AlertStates.OK &&
-        prevState &&
-        'alertState' in prevState &&
-        prevState.alertState !== AlertStates.OK
-      ) {
-        reason = alertResults.map(result => buildRecoveredAlertReason(result[group])).join('\n');
-      }
       if (reason) {
         alertInstance.scheduleActions(FIRED_ACTIONS.id, {
           group,
@@ -329,6 +319,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
         });
       }
 
+      // Future use: ability to fetch display current alert state
       alertInstance.replaceState({
         alertState: nextState,
       });
