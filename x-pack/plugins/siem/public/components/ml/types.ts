@@ -4,14 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Influencer } from '../../../../ml/public';
+
 import { HostsType } from '../../store/hosts/model';
 import { NetworkType } from '../../store/network/model';
 import { FlowTarget } from '../../graphql/types';
-
-export interface Influencer {
-  influencer_field_name: string;
-  influencer_field_values: string[];
-}
 
 export interface Source {
   job_id: string;
@@ -33,11 +30,6 @@ export interface Source {
   typical: number[];
   actual: number[];
   influencers: Influencer[];
-}
-
-export interface Influencer {
-  influencer_field_name: string;
-  influencer_field_values: string[];
 }
 
 export interface CriteriaFields {
@@ -99,41 +91,6 @@ export type AnomaliesNetworkTableProps = HostOrNetworkProps & {
   type: NetworkType;
   flowTarget?: FlowTarget;
 };
-
-export interface MlCapabilities {
-  capabilities: {
-    canGetJobs: boolean;
-    canCreateJob: boolean;
-    canDeleteJob: boolean;
-    canOpenJob: boolean;
-    canCloseJob: boolean;
-    canForecastJob: boolean;
-    canGetDatafeeds: boolean;
-    canStartStopDatafeed: boolean;
-    canUpdateJob: boolean;
-    canUpdateDatafeed: boolean;
-    canPreviewDatafeed: boolean;
-    canGetCalendars: boolean;
-    canCreateCalendar: boolean;
-    canDeleteCalendar: boolean;
-    canGetFilters: boolean;
-    canCreateFilter: boolean;
-    canDeleteFilter: boolean;
-    canFindFileStructure: boolean;
-    canGetDataFrame: boolean;
-    canDeleteDataFrame: boolean;
-    canPreviewDataFrame: boolean;
-    canCreateDataFrame: boolean;
-    canStartStopDataFrame: boolean;
-    canGetDataFrameAnalytics: boolean;
-    canDeleteDataFrameAnalytics: boolean;
-    canCreateDataFrameAnalytics: boolean;
-    canStartStopDataFrameAnalytics: boolean;
-  };
-  isPlatinumOrTrialLicense: boolean;
-  mlFeatureEnabledInSpace: boolean;
-  upgradeInProgress: boolean;
-}
 
 const sourceOrDestination = ['source.ip', 'destination.ip'];
 
