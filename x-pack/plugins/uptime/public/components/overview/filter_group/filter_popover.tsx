@@ -49,7 +49,7 @@ export const FilterPopover = ({
   const [items, setItems] = useState<string[]>([]);
 
   useEffect(() => {
-    // Merge incoming items with selected items, to enable un-selection
+    // Merge incoming items with selected items, to enable deselection
 
     const mItems = selectedItems.concat(allItems ?? []);
     const newItems = mItems.filter((item, index) => mItems.indexOf(item) === index);
