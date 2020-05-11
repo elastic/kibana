@@ -78,7 +78,6 @@ describe('AppRouter', () => {
           history.push('/subpath');
         },
       }),
-      ///
       createAppMounter({
         appId: 'app5',
         html: '<div>App 5</div>',
@@ -89,7 +88,6 @@ describe('AppRouter', () => {
         html: '<div>App 6</div>',
         appRoute: '/app/my-app/app6',
       }),
-      ///
     ] as Array<MockedMounterTuple<EitherApp>>);
     globalHistory = createMemoryHistory();
     appStatuses$ = mountersToAppStatus$();
