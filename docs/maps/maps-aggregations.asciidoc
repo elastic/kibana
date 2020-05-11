@@ -50,11 +50,11 @@ The cluster location is the weighted centroid for all geo-points in the gridded 
 
 To enable a grid aggregation layer:
 
-. Click *Add layer*, then select the *Clusters and grids* or *Heat map* layer card.
+. Click *Add layer*, then select the *Clusters and grids* or *Heat map* layer.
 
 To enable a blended layer that dynamically shows clusters or documents:
 
-. Click *Add layer*, then select the *Documents* layer card.
+. Click *Add layer*, then select the *Documents* layer.
 . Configure *Index pattern* and the *Geospatial field*. To enable clustering, the *Geospatial field* must be set to a field mapped as {ref}/geo-point.html[geo_point].
 . In *Scaling*, select *Show clusters when results exceed 10000*.
 
@@ -69,7 +69,7 @@ then accumulates the most relevant documents based on sort order for each entry 
 
 To enable top hits:
 
-. Click *Add layer*, then select the *Documents* layer card.
+. Click *Add layer*, then select the *Documents* layer.
 . Configure *Index pattern* and *Geospatial field*.
 . In *Scaling*, select *Show top hits per entity*.
 . Set *Entity* to the field that identifies entities in your documents.

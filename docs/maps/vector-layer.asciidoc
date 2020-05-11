@@ -7,7 +7,7 @@ Vector layers display points, lines, and polygons.
 [role="screenshot"]
 image::maps/images/vector_layer.png[]
 
-To add a vector layer to your map, click *Add layer*, then select one of the following layer cards:
+To add a vector layer to your map, click *Add layer*, then select one of the following layers:
 
 *Clusters and grids*:: Geospatial data grouped in grids with metrics for each gridded cell.
 The index must contain at least one field mapped as {ref}/geo-point.html[geo_point].

@@ -7,7 +7,7 @@ In heat map layers, point data is clustered to show locations with higher densit
 [role="screenshot"]
 image::maps/images/heatmap_layer.png[]
 
-To add a heat map layer to your map, click *Add layer*, then select the *Heat map* layer card.
+To add a heat map layer to your map, click *Add layer*, then select the *Heat map* layer.
 The index must contain at least one field mapped as {ref}/geo-point.html[geo_point].
 
 NOTE: Only count, sum, unique count metric aggregations are available with the grid aggregation source and heat map layers.

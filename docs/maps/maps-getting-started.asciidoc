@@ -65,7 +65,7 @@ and lighter shades symbolize countries with less traffic.
 ==== Add a vector layer to display world country boundaries
 
 . Click *Add layer*.
-. Select the *EMS Boundaries* layer card.
+. Select the *EMS Boundaries* layer.
 . From the *Layer* dropdown menu, select *World Countries*.
 . Click the *Add layer* button.
 . Set *Name* to `Total Requests by Country`.
@@ -121,7 +121,7 @@ This layer displays web log documents as points.
 The layer is only visible when users zoom in the map past zoom level 9.
 
 . Click *Add layer*.
-. Click the *Documents* layer card.
+. Click the *Documents* layer.
 . Set *Index pattern* to *kibana_sample_data_logs*.
 . Click the *Add layer* button.
 . Set *Name* to `Actual Requests`.
@@ -155,7 +155,7 @@ image::maps/images/grid_metrics_both.png[]
 ===== Add the layer
 
 . Click *Add layer*.
-. Click the *Clusters and grids* layer card.
+. Click the *Clusters and grids* layer.
 . Set *Index pattern* to *kibana_sample_data_logs*.
 . Click the *Add layer* button.
 . Set *Name* to `Total Requests and Bytes`.
