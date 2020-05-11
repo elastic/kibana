@@ -54,7 +54,6 @@ import {
   updateSort,
   upsertColumn,
   updateTimeline,
-  getDraftTimeline,
   updateTitle,
   updateAutoSaveMsg,
   setFilters,
@@ -75,7 +74,6 @@ import { myEpicTimelineId } from './my_epic_timeline_id';
 import { ActionTimeline, TimelineById } from './types';
 import { persistTimeline } from '../../containers/timeline/api';
 import { ALL_TIMELINE_QUERY_ID } from '../../containers/timeline/all';
-import { epicDraftTimeline } from './epic_draft_timeline';
 
 interface TimelineEpicDependencies<State> {
   timelineByIdSelector: (state: State) => TimelineById;
@@ -150,13 +148,8 @@ export const createTimelineEpic = <State>(): Epic<
           return true;
         }
         if (action.type === createTimeline.type && isItAtimelineAction(timelineId)) {
-          if (timelineObj.timelineType !== 'draft') {
-            myEpicTimelineId.setTimelineVersion(null);
-            myEpicTimelineId.setTimelineId(null);
-          }
-          return true;
-        } else if (action.type === getDraftTimeline.type && isItAtimelineAction(timelineId)) {
-          return true;
+          myEpicTimelineId.setTimelineId(null);
+          myEpicTimelineId.setTimelineVersion(null);
         } else if (action.type === addTimeline.type && isItAtimelineAction(timelineId)) {
           const addNewTimeline: TimelineModel = get('payload.timeline', action);
           myEpicTimelineId.setTimelineId(addNewTimeline.savedObjectId);
@@ -214,10 +207,6 @@ export const createTimelineEpic = <State>(): Epic<
             timeline$,
             allTimelineQuery$
           );
-        } else if (action.type === getDraftTimeline.type) {
-          return epicDraftTimeline(action, action$, timeline$, false);
-        } else if (action.type === createTimeline.type) {
-          return epicDraftTimeline(action, action$, timeline$, true);
         } else if (timelineActionsType.includes(action.type)) {
           return from(
             persistTimeline({

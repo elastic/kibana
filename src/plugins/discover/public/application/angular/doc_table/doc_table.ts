@@ -23,6 +23,7 @@ import { SAMPLE_SIZE_SETTING } from '../../../../common';
 // @ts-ignore
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 import { getServices } from '../../../kibana_services';
+import './index.scss';
 
 export interface LazyScope extends ng.IScope {
   [key: string]: any;

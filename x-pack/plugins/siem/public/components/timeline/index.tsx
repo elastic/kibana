@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
@@ -14,6 +14,7 @@ import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../st
 import { timelineActions } from '../../store/actions';
 import { ColumnHeaderOptions, TimelineModel } from '../../store/timeline/model';
 import { timelineDefaults } from '../../store/timeline/defaults';
+import { defaultHeaders } from './body/column_headers/default_headers';
 import {
   OnChangeItemsPerPage,
   OnDataProviderRemoved,
@@ -34,6 +35,7 @@ type Props = OwnProps & PropsFromRedux;
 const StatefulTimelineComponent = React.memo<Props>(
   ({
     columns,
+    createTimeline,
     dataProviders,
     eventType,
     end,
@@ -141,13 +143,19 @@ const StatefulTimelineComponent = React.memo<Props>(
       [columns, id]
     );
 
+    useEffect(() => {
+      if (createTimeline != null) {
+        createTimeline({ id, columns: defaultHeaders, show: false });
+      }
+    }, []);
+
     return (
       <WithSource sourceId="default" indexToAdd={indexToAdd}>
         {({ indexPattern, browserFields }) => (
           <Timeline
             browserFields={browserFields}
             columns={columns}
-            dataProviders={dataProviders}
+            dataProviders={dataProviders!}
             end={end}
             eventType={eventType}
             filters={filters}
@@ -166,9 +174,9 @@ const StatefulTimelineComponent = React.memo<Props>(
             onDataProviderRemoved={onDataProviderRemoved}
             onToggleDataProviderEnabled={onToggleDataProviderEnabled}
             onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-            show={show}
+            show={show!}
             showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-            sort={sort}
+            sort={sort!}
             start={start}
             toggleColumn={toggleColumn}
             usersViewing={usersViewing}
@@ -247,6 +255,7 @@ const makeMapStateToProps = () => {
 
 const mapDispatchToProps = {
   addProvider: timelineActions.addProvider,
+  createTimeline: timelineActions.createTimeline,
   onDataProviderEdited: timelineActions.dataProviderEdited,
   removeColumn: timelineActions.removeColumn,
   removeProvider: timelineActions.removeProvider,
