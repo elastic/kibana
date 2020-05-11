@@ -211,11 +211,7 @@ export const RuleDetailsPageComponent: FC<PropsFromRedux> = ({
   ]);
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
-    ({ x }) => {
-      if (!x) {
-        return;
-      }
-      const [min, max] = x;
+    (min: number, max: number) => {
       setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
     },
     [setAbsoluteRangeDatePicker]

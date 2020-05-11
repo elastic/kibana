@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SecuritySubPlugins } from '../app/types';
+import { SecuritySubPluginWithStore } from '../app/types';
 import { getTimelinesRoutes } from './routes';
 import { initialTimelineState, timelineReducer } from './store/timeline/reducer';
 import { TimelineState } from './store/timeline/types';
@@ -12,7 +12,7 @@ import { TimelineState } from './store/timeline/types';
 export class Timelines {
   public setup() {}
 
-  public start(): SecuritySubPlugins<TimelineState> {
+  public start(): SecuritySubPluginWithStore<'timeline', TimelineState> {
     return {
       routes: getTimelinesRoutes(),
       store: {

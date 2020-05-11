@@ -33,12 +33,6 @@ import { APP_ID, APP_NAME, APP_PATH, APP_ICON } from '../common/constants';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
 import { serviceNowActionType, jiraActionType } from './common/lib/connectors';
-import { Cases } from './cases';
-import { Alerts } from './alerts';
-import { Hosts } from './hosts';
-import { Network } from './network';
-import { Overview } from './overview';
-import { Timelines } from './timelines';
 
 export interface SetupPlugins {
   home: HomePublicPluginSetup;
@@ -68,12 +62,6 @@ export interface PluginStart {}
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
-  private readonly alertsSubPlugin = new Alerts();
-  private readonly casesSubPlugin = new Cases();
-  private readonly hostsSubPlugin = new Hosts();
-  private readonly networkSubPlugin = new Network();
-  private readonly overviewSubPlugin = new Overview();
-  private readonly timelinesSubPlugin = new Timelines();
 
   constructor(initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
@@ -108,12 +96,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         security: plugins.security,
       } as StartServices;
 
-      const alertsStart = this.alertsSubPlugin.start();
-      const casesStart = this.casesSubPlugin.start();
-      const hostsStart = this.hostsSubPlugin.start();
-      const networkStart = this.networkSubPlugin.start();
-      const overviewStart = this.overviewSubPlugin.start();
-      const timelinesStart = this.timelinesSubPlugin.start();
+      const alertsSubPlugin = new (await import('./alerts')).Alerts();
+      const casesSubPlugin = new (await import('./cases')).Cases();
+      const hostsSubPlugin = new (await import('./hosts')).Hosts();
+      const networkSubPlugin = new (await import('./network')).Network();
+      const overviewSubPlugin = new (await import('./overview')).Overview();
+      const timelinesSubPlugin = new (await import('./timelines')).Timelines();
+
+      const alertsStart = alertsSubPlugin.start();
+      const casesStart = casesSubPlugin.start();
+      const hostsStart = hostsSubPlugin.start();
+      const networkStart = networkSubPlugin.start();
+      const overviewStart = overviewSubPlugin.start();
+      const timelinesStart = timelinesSubPlugin.start();
 
       return renderApp(services, params, {
         routes: [

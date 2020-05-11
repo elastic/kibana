@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SecuritySubPlugins } from '../app/types';
+import { SecuritySubPlugin } from '../app/types';
 import { getCasesRoutes } from './routes';
 
 export class Cases {
   public setup() {}
 
-  public start(): SecuritySubPlugins {
+  public start(): SecuritySubPlugin {
     return {
       routes: getCasesRoutes(),
-      store: {},
     };
   }
 }

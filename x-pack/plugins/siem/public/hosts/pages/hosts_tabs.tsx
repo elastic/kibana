@@ -57,11 +57,7 @@ export const HostsTabs = memo<HostsTabsProps>(
         [setAbsoluteRangeDatePicker]
       ),
       updateDateRange: useCallback<UpdateDateRange>(
-        ({ x }) => {
-          if (!x) {
-            return;
-          }
-          const [min, max] = x;
+        (min: number, max: number) => {
           setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
         },
         [setAbsoluteRangeDatePicker]

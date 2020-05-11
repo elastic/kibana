@@ -10,11 +10,9 @@ import { appReducer, AppState, initialAppState } from './app';
 import { dragAndDropReducer, DragAndDropState, initialDragAndDropState } from './drag_and_drop';
 import { createInitialInputsState, initialInputsState, inputsReducer, InputsState } from './inputs';
 
-import { HostsPluginState, HostsPluginReducer, HostsState } from '../../hosts/store';
+import { HostsPluginState, HostsPluginReducer } from '../../hosts/store';
 import { NetworkPluginState, NetworkPluginReducer } from '../../network/store';
 import { TimelinePluginState, TimelinePluginReducer } from '../../timelines/store/timeline';
-
-export type SubPluginsState = HostsState;
 
 export interface State extends HostsPluginState, NetworkPluginState, TimelinePluginState {
   app: AppState;
@@ -28,7 +26,7 @@ export const initialState: Pick<State, 'app' | 'dragAndDrop' | 'inputs'> = {
   inputs: initialInputsState,
 };
 
-export type SubPluginsInitState = HostsPluginState & NetworkPluginState & TimelinePluginState;
+type SubPluginsInitState = HostsPluginState & NetworkPluginState & TimelinePluginState;
 export type SubPluginsInitReducer = HostsPluginReducer &
   NetworkPluginReducer &
   TimelinePluginReducer;
@@ -39,7 +37,7 @@ export const createInitialState = (pluginsInitState: SubPluginsInitState): State
   inputs: createInitialInputsState(),
 });
 
-export const createReducer = (pluginsReducer: SubPluginsInitReducer | {}) =>
+export const createReducer = (pluginsReducer: SubPluginsInitReducer) =>
   combineReducers<State>({
     app: appReducer,
     dragAndDrop: dragAndDropReducer,

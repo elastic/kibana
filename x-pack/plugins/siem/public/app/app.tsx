@@ -26,13 +26,7 @@ import { compose } from '../common/lib/compose/kibana_compose';
 import { AppFrontendLibs, AppApolloClient } from '../common/lib/lib';
 import { StartServices } from '../plugin';
 import { PageRouter } from './routes';
-import {
-  createStore,
-  createInitialState,
-  SubPluginsInitReducer,
-  SubPluginsInitState,
-  SubPluginsState,
-} from '../common/store';
+import { createStore, createInitialState } from '../common/store';
 import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
 import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_capabilities_provider';
 
@@ -74,7 +68,7 @@ const AppPluginRootComponent: React.FC<AppPluginRootComponentProps> = ({
 const AppPluginRoot = memo(AppPluginRootComponent);
 
 interface StartAppComponent extends AppFrontendLibs {
-  subPlugins: SecuritySubPlugins<SubPluginsState>;
+  subPlugins: SecuritySubPlugins;
 }
 
 const StartAppComponent: FC<StartAppComponent> = ({ subPlugins, ...libs }) => {
@@ -83,16 +77,12 @@ const StartAppComponent: FC<StartAppComponent> = ({ subPlugins, ...libs }) => {
   const history = createHashHistory();
   const libs$ = new BehaviorSubject(libs);
 
-  const initSubPluginsState = ((subPluginsStore?.initialState ??
-    {}) as unknown) as SubPluginsInitState;
-  const initSubPluginsReducer = ((subPluginsStore?.reducer ??
-    {}) as unknown) as SubPluginsInitReducer;
-
   const store = createStore(
-    createInitialState(initSubPluginsState),
-    initSubPluginsReducer,
+    createInitialState(subPluginsStore.initialState),
+    subPluginsStore.reducer,
     libs$.pipe(pluck('apolloClient'))
   );
+
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
   const theme = useMemo(
     () => ({
@@ -132,10 +122,7 @@ const SiemAppComponent: React.FC<SiemAppComponentProps> = ({ services, subPlugin
       ...services,
     }}
   >
-    <StartApp
-      subPlugins={subPlugins as SecuritySubPlugins<SubPluginsState>}
-      {...compose(services)}
-    />
+    <StartApp subPlugins={subPlugins} {...compose(services)} />
   </KibanaContextProvider>
 );
 

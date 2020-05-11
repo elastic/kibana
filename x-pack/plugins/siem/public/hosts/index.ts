@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SecuritySubPlugins } from '../app/types';
+import { SecuritySubPluginWithStore } from '../app/types';
 import { getHostsRoutes } from './routes';
 import { initialHostsState, hostsReducer, HostsState } from './store';
 
 export class Hosts {
   public setup() {}
 
-  public start(): SecuritySubPlugins<HostsState> {
+  public start(): SecuritySubPluginWithStore<'hosts', HostsState> {
     return {
       routes: getHostsRoutes(),
       store: {

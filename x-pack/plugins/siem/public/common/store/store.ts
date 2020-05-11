@@ -27,7 +27,7 @@ let store: Store<State, Action> | null = null;
 export { SubPluginsInitReducer };
 export const createStore = (
   state: State,
-  pluginsReducer: SubPluginsInitReducer | {},
+  pluginsReducer: SubPluginsInitReducer,
   apolloClient: Observable<AppApolloClient>
 ): Store<State, Action> => {
   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;

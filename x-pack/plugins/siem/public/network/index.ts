@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SecuritySubPlugins } from '../app/types';
+import { SecuritySubPluginWithStore } from '../app/types';
 import { getNetworkRoutes } from './routes';
 import { initialNetworkState, networkReducer, NetworkState } from './store';
 
 export class Network {
   public setup() {}
 
-  public start(): SecuritySubPlugins<NetworkState> {
+  public start(): SecuritySubPluginWithStore<'network', NetworkState> {
     return {
       routes: getNetworkRoutes(),
       store: {

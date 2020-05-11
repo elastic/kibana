@@ -5,15 +5,14 @@
  */
 
 import { getAlertsRoutes } from './routes';
-import { SecuritySubPlugins } from '../app/types';
+import { SecuritySubPlugin } from '../app/types';
 
 export class Alerts {
   public setup() {}
 
-  public start(): SecuritySubPlugins {
+  public start(): SecuritySubPlugin {
     return {
       routes: getAlertsRoutes(),
-      store: {},
     };
   }
 }
