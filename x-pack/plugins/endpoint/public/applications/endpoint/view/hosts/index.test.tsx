@@ -14,12 +14,7 @@ import {
   mockHostResultList,
 } from '../../store/hosts/mock_host_result_list';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../mocks';
-import {
-  HostInfo,
-  HostStatus,
-  HostPolicyResponseActionStatus,
-  HostPolicyResponseAppliedAction,
-} from '../../../../../common/types';
+import { HostInfo, HostStatus, HostPolicyResponseActionStatus } from '../../../../../common/types';
 import { EndpointDocGenerator } from '../../../../../common/generate_data';
 
 describe('when on the hosts page', () => {
@@ -133,7 +128,7 @@ describe('when on the hosts page', () => {
       const policyResponse = docGenerator.generatePolicyResponse();
       policyResponse.endpoint.policy.applied.status = overallStatus;
       policyResponse.endpoint.policy.applied.response.configurations.malware.status = overallStatus;
-      let downloadModelAction: HostPolicyResponseAppliedAction = policyResponse.endpoint.policy.applied.actions.find(
+      let downloadModelAction = policyResponse.endpoint.policy.applied.actions.find(
         action => action.name === 'download_model'
       );
 
