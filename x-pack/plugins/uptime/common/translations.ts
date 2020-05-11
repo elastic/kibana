@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
-import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import { i18n } from '@kbn/i18n';
 
-export function validateCardinality(
-  callAsCurrentUser: APICaller,
-  job?: CombinedJob
-): Promise<any[]>;
+export const VALUE_MUST_BE_GREATER_THEN_ZEO = i18n.translate(
+  'xpack.uptime.settings.invalid.error',
+  {
+    defaultMessage: 'Value must be greater than 0.',
+  }
+);
