@@ -43,11 +43,30 @@ export interface AggBucket {
   doc_count: number;
 }
 
+/**
+ * Statistical information for a node in a resolver tree.
+ */
 export interface ResolverNodeStats {
+  /**
+   * The total number of related events (all events except process and alerts) that exist for a node.
+   */
   totalEvents: number;
+  /**
+   * The total number of alerts that exist for a node.
+   */
   totalAlerts: number;
 }
 
+/**
+ * Pagination cursors that can be used for querying additional resolver nodes and events.
+ *
+ * The reason that these are all optional is because they are set depending on the type of node in the tree. If the node
+ * is part of the children of a resolver tree it will have `nextChild` set. If the node is the origin, it will have
+ * `nextEvent`, `nextAncestor`, and `nextAlert` set.
+ *
+ * `null` indicates that at the time the request was executed, no additional events of that type existed. This does not
+ * necessarily mean that additional events have not been received since the request was returned.
+ */
 export interface ResolverNodePagination {
   nextChild?: string | null;
   nextEvent?: string | null;
@@ -66,6 +85,35 @@ export interface ResolverNode {
   lifecycle: ResolverEvent[];
   ancestors: ResolverNode[];
   stats?: ResolverNodeStats;
+}
+
+/**
+ * The lifecycle events (start, stop etc) for ancestor nodes.
+ */
+export interface LifecycleEvents {
+  id: string;
+  lifecycle: ResolverEvent[];
+}
+
+/**
+ * The response structure when searching for ancestors of a node.
+ */
+export interface AncestorEvents {
+  /**
+   * An array of ancestors
+   */
+  ancestors: LifecycleEvents[];
+  /**
+   * A cursor for retrieving additional ancestors for a particular node. `null` indicates that there were no additional
+   * ancestors when the request returned. More could have been ingested by ES after the fact though.
+   */
+  nextAncestor: string | null;
+}
+
+export interface RelatedEvents {
+  id: string;
+  events: ResolverEvent[];
+  nextEvent: string | null;
 }
 
 /**

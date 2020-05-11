@@ -321,18 +321,6 @@ export class EndpointDocGenerator {
   }
 
   /**
-   * Creates an array of events, the contents of the event are randomly generated.
-   * @param size the number of events to create
-   */
-  public generateEvents(size: number): EndpointEvent[] {
-    const events: EndpointEvent[] = [];
-    for (let i = 0; i < size; i++) {
-      events.push(this.generateEvent());
-    }
-    return events;
-  }
-
-  /**
    * Generator function that creates the full set of events needed to render resolver.
    * The number of nodes grows exponentially with the number of generations and children per node.
    * Each node is logically a process, and will have 1 or more process events associated with it.

@@ -10,15 +10,15 @@ import {
   ResolverNode,
   ResolverNodeStats,
   ResolverNodePagination,
+  RelatedEvents,
+  AncestorEvents,
 } from '../../../../common/types';
 import { entityId, parentEntityId } from '../../../../common/models/event';
 import { PaginationBuilder } from './pagination';
+import { createNode } from './node';
 
 type ExtractFunction = (event: ResolverEvent) => string | undefined;
 
-function createNode(id: string): ResolverNode {
-  return { id, children: [], pagination: {}, events: [], lifecycle: [], ancestors: [] };
-}
 /**
  * This class aids in constructing a tree of process events. It works in the following way:
  *
@@ -50,8 +50,10 @@ function createNode(id: string): ResolverNode {
  * what this means is that noisy neighbors for a given level may hide other child process events that occur later
  * temporally in the same level--so, while a heavily forking process might get shown, maybe the actually malicious
  * event doesn't show up in the tree at the beginning.
+ *
+ * This Tree's root/origin could be in the middle of the tree. The origin corresponds to the id passed in when this
+ * Tree object is constructed. The tree can have ancestors and children coming from the origin.
  */
-
 export class Tree {
   protected cache: Map<string, ResolverNode> = new Map();
   protected root: ResolverNode;
@@ -62,77 +64,66 @@ export class Tree {
     this.cache.set(id, root);
   }
 
+  /**
+   * Return the origin node. The origin node is the node with the id that the tree was built using.
+   *
+   * @returns the origin ResolverNode
+   */
   public render(): ResolverNode {
     return this.root;
   }
 
+  /**
+   * Returns an array of all the unique IDs for the nodes stored in this tree.
+   *
+   * @returns an array of strings representing the unique IDs for the nodes in the tree
+   */
   public ids(): string[] {
     return [...this.cache.keys()];
   }
 
-  public static async merge(
-    childrenPromise: Promise<Tree>,
-    ancestorsPromise: Promise<Tree>,
-    eventsPromise: Promise<Tree>
-  ): Promise<Tree> {
-    const [children, ancestors, events] = await Promise.all([
-      childrenPromise,
-      ancestorsPromise,
-      eventsPromise,
-    ]);
-
-    /*
-     * we only allow for merging when we have partial trees that
-     * represent the same root node
-     */
-    const rootID = children.id;
-    if (rootID !== ancestors.id || rootID !== events.id) {
-      throw new Error('cannot merge trees with different roots');
-    }
-
-    Object.entries(ancestors.cache).forEach(([id, node]) => {
-      if (rootID !== id) {
-        children.cache.set(id, node);
-      }
-    });
-
-    children.root.lifecycle = ancestors.root.lifecycle;
-    children.root.ancestors = ancestors.root.ancestors;
-    children.root.events = events.root.events;
-
-    Object.assign(children.root.pagination, ancestors.root.pagination, events.root.pagination);
-
-    return children;
+  /**
+   * Add related events for the tree's origin node. Related events cannot be added for other nodes.
+   *
+   * @param relatedEventsInfo is the related events and pagination information to add to the tree.
+   */
+  public addEvents(relatedEventsInfo: RelatedEvents): void {
+    this.root.events = relatedEventsInfo.events;
+    this.root.pagination.nextEvent = relatedEventsInfo.nextEvent;
   }
 
-  public addEvent(events: ResolverEvent[]): void {
-    events.forEach(event => {
-      const id = entityId(event);
+  /**
+   * Add ancestors to the tree.
+   *
+   * @param ancestorInfo is the ancestors and pagination information to add to the tree.
+   */
+  public addAncestors(ancestorInfo: AncestorEvents): void {
+    this.root.pagination.nextAncestor = ancestorInfo.nextAncestor;
 
-      this.ensureCache(id);
-      const node = this.cache.get(id);
-      if (node !== undefined) {
-        node.events.push(event);
+    ancestorInfo.ancestors.forEach(lifecycleEvents => {
+      const cachedNode = this.cache.get(lifecycleEvents.id);
+      if (cachedNode) {
+        // we should really only get in here for the lifecycle information for the root (aka node with the `this.id`)
+        if (cachedNode.lifecycle.length !== 0) {
+          throw new Error(
+            `Adding ancestors will overwrite existing lifecycle information for ${lifecycleEvents.id}`
+          );
+        }
+        cachedNode.lifecycle.push(...lifecycleEvents.lifecycle);
+      } else {
+        const newAncestor = createNode(lifecycleEvents.id);
+        newAncestor.lifecycle.push(...lifecycleEvents.lifecycle);
+        this.cache.set(lifecycleEvents.id, newAncestor);
       }
     });
   }
 
-  public addAncestor(events: ResolverEvent[]): void {
-    events.forEach(event => {
-      const ancestorID = entityId(event);
-      if (this.cache.get(ancestorID) === undefined) {
-        const newParent = createNode(ancestorID);
-        this.cache.set(ancestorID, newParent);
-
-        this.root.ancestors.push(newParent);
-      }
-      const currentAncestor = this.cache.get(ancestorID);
-      if (currentAncestor !== undefined) {
-        currentAncestor.lifecycle.push(event);
-      }
-    });
-  }
-
+  /**
+   * Add statistics to a node.
+   *
+   * @param id unique node ID to add the stats information to
+   * @param stats information indicating how many related events, and alerts exist for the specific node.
+   */
   public addStats(id: string, stats: ResolverNodeStats): void {
     this.ensureCache(id);
     const currentNode = this.cache.get(id);
@@ -141,18 +132,15 @@ export class Tree {
     }
   }
 
-  public setNextAncestor(next: string | null): void {
-    this.root.pagination.nextAncestor = next;
-  }
-
-  public setNextEvent(next: string | null): void {
-    this.root.pagination.nextEvent = next;
-  }
-
   public setNextAlert(next: string | null): void {
     this.root.pagination.nextAlert = next;
   }
 
+  /**
+   * Add child events to the tree.
+   *
+   * @param events child process events to add to the tree.
+   */
   public addChild(events: ResolverEvent[]): void {
     events.forEach(event => {
       const id = entityId(event);
@@ -175,6 +163,11 @@ export class Tree {
     });
   }
 
+  /**
+   * Mark process nodes as not having any additional child nodes.
+   *
+   * @param ids an array of child process unique IDs
+   */
   public markLeafNode(ids: string[]): void {
     ids.forEach(id => {
       this.ensureCache(id);

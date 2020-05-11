@@ -26,10 +26,10 @@ export function handleChildren(
       const client = context.core.elasticsearch.dataClient;
 
       const fetcher = new Fetcher(client, id, indexPattern, endpointID);
-      const tree = await fetcher.children(children, generations, afterChild);
+      const childrenTree = await fetcher.children(children, generations, afterChild);
 
       return res.ok({
-        body: tree.render(),
+        body: childrenTree.render(),
       });
     } catch (err) {
       log.warn(err);

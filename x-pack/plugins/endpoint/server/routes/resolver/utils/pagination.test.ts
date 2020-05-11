@@ -15,7 +15,8 @@ describe('Pagination', () => {
     return [lastEvent['@timestamp'], lastEvent.process.entity_id];
   };
   describe('cursor', () => {
-    const events = generator.generateEvents(5);
+    const root = generator.generateEvent();
+    const events = Array.from(generator.relatedEventsGenerator(root, 5));
 
     it('does not build a cursor when all events are present', () => {
       expect(PaginationBuilder.buildCursor(0, events)).toBeNull();

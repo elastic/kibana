@@ -5,7 +5,7 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import { ResolverEvent } from '../../../../common/types';
+import { AncestorEvents, RelatedEvents } from '../../../../common/types';
 import { entityId, parentEntityId } from '../../../../common/models/event';
 import { PaginationBuilder } from './pagination';
 import { Tree } from './tree';
@@ -13,77 +13,95 @@ import { LifecycleQuery } from '../queries/lifecycle';
 import { ChildrenQuery } from '../queries/children';
 import { EventsQuery } from '../queries/events';
 import { StatsQuery } from '../queries/stats';
+import { createAncestorEvents, createRelatedEvents, createLifecycleEvents } from './node';
 
-// TODO move these to common types
-export interface RelatedEvents {
-  events: ResolverEvent[];
-  nextEvent: string | null;
-}
-
-interface LifecycleEvents {
-  lifecycle: ResolverEvent[];
-}
-
-export interface AncestorEvents {
-  ancestors: LifecycleEvents[];
-  nextAncestor: string | null;
-}
-
-export interface ChildrenNode {
-  lifecycle: ResolverEvent[];
-  children: ChildrenNode[];
-  nextChild: string | null;
-}
-
+/**
+ * Handles retrieving nodes of a resolver tree.
+ */
 export class Fetcher {
   constructor(
     private readonly client: IScopedClusterClient,
+    /**
+     * The anchoring origin for the tree.
+     */
     private readonly id: string,
+    /**
+     * Index pattern for searching ES
+     */
     private readonly indexPattern: string,
+    /**
+     * This is used for searching legacy events
+     */
     private readonly endpointID?: string
   ) {}
 
+  /**
+   * Retrieves the ancestor nodes for the resolver tree.
+   *
+   * @param limit upper limit of ancestors to retrieve
+   */
   public async ancestors(limit: number): Promise<AncestorEvents> {
-    return await this.doAncestors(this.id, limit);
+    const root = createAncestorEvents();
+    await this.doAncestors(this.id, limit + 1, root);
+    return root;
   }
 
+  /**
+   * Retrieves the children nodes for the resolver tree.
+   *
+   * @param limit the number of children to retrieve for a single level
+   * @param generations number of levels to return
+   * @param after a cursor to use as the starting point for retrieving children
+   */
   public async children(limit: number, generations: number, after?: string): Promise<Tree> {
     const tree = new Tree(this.id);
     await this.doChildren(tree, [this.id], limit, generations, after);
     return tree;
   }
 
+  /**
+   * Retrieves the related events for the origin node.
+   *
+   * @param limit the upper bound number of related events to return
+   * @param after a cursor to use as the starting point for retrieving related events
+   */
   public async events(limit: number, after?: string): Promise<RelatedEvents> {
     return await this.doEvents(limit, after);
   }
 
+  /**
+   * Enriches a resolver tree with statistics for how many related events and alerts exist for each node in the tree.
+   *
+   * @param tree a resolver tree to enrich with statistical information.
+   */
   public async stats(tree: Tree): Promise<Tree> {
     await this.doStats(tree);
     return tree;
   }
 
   private async doAncestors(
-    curNode: string,
+    curNodeID: string,
     levels: number,
-    ancestors: LifecycleEvents[] = []
-  ): Promise<AncestorEvents> {
+    ancestorInfo: AncestorEvents
+  ): Promise<void> {
     if (levels === 0) {
-      return { ancestors, nextAncestor: curNode };
+      ancestorInfo.nextAncestor = curNodeID;
+      return;
     }
 
     const query = new LifecycleQuery(this.indexPattern, this.endpointID);
-    const results = await query.search(this.client, curNode);
+    const results = await query.search(this.client, curNodeID);
 
     if (results.length === 0) {
-      return { ancestors, nextAncestor: null };
+      return;
     }
-    ancestors.push({ lifecycle: results });
+    ancestorInfo.ancestors.push(createLifecycleEvents(curNodeID, results));
 
     const next = parentEntityId(results[0]);
     if (next === undefined) {
-      return { ancestors, nextAncestor: null };
+      return;
     }
-    return await this.doAncestors(next, levels - 1, ancestors);
+    await this.doAncestors(next, levels - 1, ancestorInfo);
   }
 
   private async doEvents(limit: number, after?: string) {
@@ -95,13 +113,18 @@ export class Fetcher {
 
     const { totals, results } = await query.search(this.client, this.id);
     if (results.length === 0) {
-      return { events: [], nextEvent: null };
+      // return an empty set of results
+      return createRelatedEvents(this.id);
     }
     if (!totals[this.id]) {
       throw new Error(`Could not find the totals for related events entity_id: ${this.id}`);
     }
 
-    return { events: results, nextEvent: PaginationBuilder.buildCursor(totals[this.id], results) };
+    return createRelatedEvents(
+      this.id,
+      results,
+      PaginationBuilder.buildCursor(totals[this.id], results)
+    );
   }
 
   private async doChildren(
