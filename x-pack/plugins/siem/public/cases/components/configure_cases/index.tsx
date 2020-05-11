@@ -9,9 +9,9 @@ import styled, { css } from 'styled-components';
 
 import { EuiCallOut } from '@elastic/eui';
 
-import { useKibana } from '../../../../lib/kibana';
-import { useConnectors } from '../../../../containers/case/configure/use_connectors';
-import { useCaseConfigure } from '../../../../containers/case/configure/use_configure';
+import { useKibana } from '../../../common/lib/kibana';
+import { useConnectors } from '../../containers/configure/use_connectors';
+import { useCaseConfigure } from '../../containers/configure/use_configure';
 import {
   ActionsConnectorsContextProvider,
   ActionType,
@@ -19,11 +19,11 @@ import {
   ConnectorEditFlyout,
 } from '../../../../../triggers_actions_ui/public';
 
-import { ClosureType } from '../../../../containers/case/configure/types';
+import { ClosureType } from '../../containers/configure/types';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ActionConnectorTableItem } from '../../../../../../triggers_actions_ui/public/types';
-import { connectorsConfiguration } from '../../../../lib/connectors/config';
+import { ActionConnectorTableItem } from '../../../../../triggers_actions_ui/public/types';
+import { connectorsConfiguration } from '../../../common/lib/connectors/config';
 
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
