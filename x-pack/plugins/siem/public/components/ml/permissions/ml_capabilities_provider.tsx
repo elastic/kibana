@@ -6,14 +6,14 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { MlCapabilities } from '../types';
+import { MlCapabilitiesResponse } from '../../../../../ml/public';
+import { emptyMlCapabilities } from '../../../../common/machine_learning/empty_ml_capabilities';
 import { getMlCapabilities } from '../api/get_ml_capabilities';
-import { emptyMlCapabilities } from '../empty_ml_capabilities';
 import { errorToToaster, useStateToaster } from '../../toasters';
 
 import * as i18n from './translations';
 
-interface MlCapabilitiesProvider extends MlCapabilities {
+interface MlCapabilitiesProvider extends MlCapabilitiesResponse {
   capabilitiesFetched: boolean;
 }
 

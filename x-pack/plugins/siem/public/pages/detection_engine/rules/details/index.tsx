@@ -69,7 +69,7 @@ import { RuleStatusFailedCallOut } from './status_failed_callout';
 import { FailureHistory } from './failure_history';
 import { RuleStatus } from '../components/rule_status';
 import { useMlCapabilities } from '../../../../components/ml_popover/hooks/use_ml_capabilities';
-import { hasMlAdminPermissions } from '../../../../components/ml/permissions/has_ml_admin_permissions';
+import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 
 enum RuleDetailTabs {
   signals = 'signals',
