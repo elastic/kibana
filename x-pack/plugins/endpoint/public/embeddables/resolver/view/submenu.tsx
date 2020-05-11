@@ -10,6 +10,11 @@ import { EuiSelectable, EuiButton } from '@elastic/eui';
 import styled from 'styled-components';
 import { waitingForRelatedEventData } from '../types';
 
+/**
+ * i18n-translated titles for submenus and identifiers for display of states:
+ *   initialMenuStatus: submenu before it has been opened / requested data
+ *   menuError: if the submenu requested data, but received an error
+ */
 export const subMenuAssets = {
   initialMenuStatus: Symbol(
     'The state of a Resolver submenu before it has been opened or requested data.'
@@ -80,6 +85,11 @@ const OptionList = React.memo(
   }
 );
 
+/**
+ * A Submenu to be displayed in one of two forms:
+ *   1) Provided a collection of `optionsWithActions`: it will call `menuAction` then - if and when menuData becomes available - display each item with an optional prefix and call the supplied action for the options when that option is clicked.
+ *   2) Provided `optionsWithActions` is undefined, it will call the supplied `menuAction` when its host button is clicked.
+ */
 export const NodeSubMenu = styled(
   React.memo(
     ({
