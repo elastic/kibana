@@ -333,11 +333,13 @@ describe('when on the hosts page', () => {
           new Date().getTime(),
           HostPolicyResponseActionStatus.success
         );
-        store.dispatch({
-          type: 'serverReturnedHostPolicyResponse',
-          payload: {
-            policy_response: policyResponse,
-          },
+        reactTestingLibrary.act(() => {
+          store.dispatch({
+            type: 'serverReturnedHostPolicyResponse',
+            payload: {
+              policy_response: policyResponse,
+            },
+          });
         });
         return renderResult.findAllByTestId('hostDetailsPolicyResponseAttentionBadge').catch(e => {
           expect(e).not.toBeNull();
