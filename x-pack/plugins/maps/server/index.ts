@@ -3,11 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { PluginInitializerContext } from 'src/core/server';
+import { MapsPlugin } from './plugin';
 
-import { APICaller } from 'kibana/server';
-import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
-
-export function validateCardinality(
-  callAsCurrentUser: APICaller,
-  job?: CombinedJob
-): Promise<any[]>;
+export const plugin = (initializerContext: PluginInitializerContext) =>
+  new MapsPlugin(initializerContext);
