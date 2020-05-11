@@ -16,29 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React, { lazy, Suspense } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
+import { TableVisParams } from '../types';
 
-import { SavedObjectMigrationContext } from './types';
-import { SavedObjectsMigrationLogger } from './core';
+const TableOptionsComponent = lazy(() => import('./table_vis_options'));
 
-export const createSavedObjectsMigrationLoggerMock = (): jest.Mocked<SavedObjectsMigrationLogger> => {
-  const mock = {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warning: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-  };
-
-  return mock;
-};
-
-const createContextMock = (): jest.Mocked<SavedObjectMigrationContext> => {
-  const mock = {
-    log: createSavedObjectsMigrationLoggerMock(),
-  };
-  return mock;
-};
-
-export const migrationMocks = {
-  createContext: createContextMock,
-};
+export const TableOptions = (props: VisOptionsProps<TableVisParams>) => (
+  <Suspense fallback={<EuiLoadingSpinner />}>
+    <TableOptionsComponent {...props} />
+  </Suspense>
+);
