@@ -10,10 +10,10 @@ set -e
 ./check_env_variables.sh
 
 # Uses a default if no argument is specified
-LISTS=(${@:-./exception_lists/new/endpoint.json})
+LISTS=(${@:-./exception_lists/new/exception_list.json})
 
 # Example: ./post_exception_list.sh
-# Example: ./post_exception_list.sh ./lists/new/endpoint.json
+# Example: ./post_exception_list.sh ./exception_lists/new/exception_list.json
 for LIST in "${LISTS[@]}"
 do {
   [ -e "$LIST" ] || continue

@@ -44,10 +44,24 @@ export class ExceptionListClient {
   };
 
   public createExceptionList = async ({
+    _tags,
+    description,
     listId,
+    meta,
+    name,
     namespaceType,
-  }: CreateExceptionListOptions): Promise<ExceptionListSchema | null> => {
+    tags,
+  }: CreateExceptionListOptions): Promise<ExceptionListSchema> => {
     const { savedObjectsClient } = this;
-    return createExceptionList({ listId, namespaceType, savedObjectsClient });
+    return createExceptionList({
+      _tags,
+      description,
+      listId,
+      meta,
+      name,
+      namespaceType,
+      savedObjectsClient,
+      tags,
+    });
   };
 }

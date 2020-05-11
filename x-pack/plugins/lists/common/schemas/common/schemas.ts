@@ -63,9 +63,14 @@ export const esDataTypeUnion = t.union([t.type({ ip }), t.type({ keyword })]);
 export type EsDataTypeUnion = t.TypeOf<typeof esDataTypeUnion>;
 
 export const tags = DefaultStringArray;
+export type Tags = t.TypeOf<typeof tags>;
 export const tagsOrUndefined = t.union([tags, t.undefined]);
+export type TagsOrUndefined = t.TypeOf<typeof tagsOrUndefined>;
+
 export const _tags = DefaultStringArray;
+export type _Tags = t.TypeOf<typeof _tags>;
 export const _tagsOrUndefined = t.union([_tags, t.undefined]);
+export type _TagsOrUndefined = t.TypeOf<typeof _tagsOrUndefined>;
 
 // TODO: Change this into a t.keyof enumeration when we know what types of lists we going to have.
 export const exceptionListType = t.string;

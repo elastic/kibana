@@ -26,9 +26,9 @@ export const createExceptionListRoute = (router: IRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { description, list_id: listId } = request.body;
+        const { name, _tags, tags, meta, description, list_id: listId } = request.body;
         const exceptionLists = getExceptionListClient(context);
-        const list = exceptionLists.getExceptionList({
+        const list = await exceptionLists.getExceptionList({
           id: undefined,
           listId,
           namespaceType: 'single',
@@ -39,9 +39,17 @@ export const createExceptionListRoute = (router: IRouter): void => {
             statusCode: 409,
           });
         } else {
-          exceptionLists.createExceptionList({ description });
+          const createdList = await exceptionLists.createExceptionList({
+            _tags,
+            description,
+            listId,
+            meta,
+            name,
+            namespaceType: 'single',
+            tags,
+          });
+          return response.ok({ body: createdList });
         }
-        return response.ok({ body: { ok: 'starting stub' } });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

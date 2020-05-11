@@ -6,7 +6,16 @@
 
 import { APICaller, SavedObjectsClientContract } from 'kibana/server';
 
-import { IdOrUndefined, ListId, ListIdOrUndefined } from '../../../common/schemas';
+import {
+  Description,
+  IdOrUndefined,
+  ListId,
+  ListIdOrUndefined,
+  MetaOrUndefined,
+  Name,
+  TagsOrUndefined,
+  _TagsOrUndefined,
+} from '../../../common/schemas';
 import { ConfigType } from '../../config';
 
 import { NamespaceType } from './types';
@@ -26,6 +35,11 @@ export interface GetExceptionListOptions {
 }
 
 export interface CreateExceptionListOptions {
+  _tags: _TagsOrUndefined;
   listId: ListId;
   namespaceType: NamespaceType;
+  name: Name;
+  description: Description;
+  meta: MetaOrUndefined;
+  tags: TagsOrUndefined;
 }
