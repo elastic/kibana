@@ -549,6 +549,7 @@ export type Mounter<T = App | LegacyApp> = SelectivePartial<
     appRoute: string;
     appBasePath: string;
     mount: T extends LegacyApp ? LegacyAppMounter : AppMounter;
+    legacy: boolean;
     unmountBeforeMounting: T extends LegacyApp ? true : boolean;
   },
   T extends LegacyApp ? never : 'unmountBeforeMounting'

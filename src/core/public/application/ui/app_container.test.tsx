@@ -54,6 +54,7 @@ describe('AppContainer', () => {
     appBasePath: '/base-path',
     appRoute: '/some-route',
     unmountBeforeMounting: false,
+    legacy: false,
     mount: async ({ element }: AppMountParameters) => {
       await promise;
       const container = document.createElement('div');
@@ -138,9 +139,10 @@ describe('AppContainer', () => {
   it('should call setIsMounting(false) if mounting throws', async () => {
     const [waitPromise, resolvePromise] = createResolver();
     const mounter = {
-      appBasePath: '/base-path',
+      appBasePath: '/base-path/some-route',
       appRoute: '/some-route',
       unmountBeforeMounting: false,
+      legacy: false,
       mount: async ({ element }: AppMountParameters) => {
         await waitPromise;
         throw new Error(`Mounting failed!`);
