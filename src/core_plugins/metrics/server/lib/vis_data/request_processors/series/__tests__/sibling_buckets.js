@@ -3,6 +3,7 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 
 describe('siblingBuckets(req, panel, series)', () => {
+
   let panel;
   let series;
   let req;
@@ -53,12 +54,15 @@ describe('siblingBuckets(req, panel, series)', () => {
           aggs: {
             'metric-2': {
               extended_stats_bucket: {
-                buckets_path: 'timeseries>metric-1'
+                buckets_path: 'timeseries > metric-1'
               }
             }
           }
         }
       }
     });
+
   });
 });
+
+
