@@ -40,7 +40,7 @@ import { KibanaLegacySetup } from 'src/plugins/kibana_legacy/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
-import { SavedObjectLoader, SavedObjectKibanaServices } from '../../saved_objects/public';
+import { SavedObjectLoader } from '../../saved_objects/public';
 import { createKbnUrlTracker } from '../../kibana_utils/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
@@ -75,13 +75,7 @@ export interface DiscoverSetup {
 }
 
 export interface DiscoverStart {
-  savedSearches: {
-    /**
-     * Create a {@link SavedObjectLoader | loader} to handle the saved searches type.
-     * @param services
-     */
-    createLoader(services: SavedObjectKibanaServices): SavedObjectLoader;
-  };
+  savedSearchLoader: SavedObjectLoader;
 }
 
 /**
@@ -272,9 +266,13 @@ export class DiscoverPlugin
     };
 
     return {
-      savedSearches: {
-        createLoader: createSavedSearchesLoader,
-      },
+      savedSearchLoader: createSavedSearchesLoader({
+        savedObjectsClient: core.savedObjects.client,
+        indexPatterns: plugins.data.indexPatterns,
+        search: plugins.data.search,
+        chrome: core.chrome,
+        overlays: core.overlays,
+      }),
     };
   }
 
