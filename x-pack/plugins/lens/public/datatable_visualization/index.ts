@@ -41,5 +41,4 @@ export class DatatableVisualization {
     );
     editorFrame.registerVisualization(datatableVisualization);
   }
-  start() {}
 }
