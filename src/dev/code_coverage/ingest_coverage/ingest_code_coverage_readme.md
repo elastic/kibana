@@ -12,8 +12,7 @@ It starts with this jenkins pipeline file:
 src/dev/code_coverage/shell_scripts/ingest_coverage.sh ${BUILD_NUMBER} ${env.BUILD_URL}
 ```
 
-The above line depends on a number of things happenning before this will run properly.
-But, once that line runs, the ingestion system is hard coded to look for 3 coverage summary files...all json.
+The ingestion system is hard coded to look for 3 coverage summary files...all json.
 
 From there, an event stream is created, that massages the data to an output format in json that is ingested.
 
