@@ -201,6 +201,41 @@ export class MyPlugin implements Plugin {
 }
 ```
 
+*best practice tip!* 
+
+Prefer the pattern show above, using `core.getStartServices()`, over storing local references retrieved from `start`. 
+
+Steer away from usage like this:
+**Bad**
+```ts
+// my_plugin/public/plugin.ts
+
+import { Plugin } from '../../src/core/public';
+
+export class MyPlugin implements Plugin {
+  private coreStart?: CoreStart;
+  private depsStart?: DepsStart;
+
+  public setup(core) {
+    core.application.register({
+      id: 'my-app',
+      async mount(params) {
+        // Load application bundle
+        const { renderApp } = await import('./application/my_app');
+        return renderApp(this.coreStart, this.depsStart, params);
+      }
+    });
+  }
+
+  public start(core, deps) {
+    this.coreStart = core;
+    this.depsStart = deps;
+  }
+}
+```
+
+The main reason against preferring a sync accessor is that it requires the developer to understand and reason about when that function can be called. Having an API that fails sometimes isn't a good API design, and it makes accurately testing this difficult.
+
 #### Services
 
 Service structure should mirror the plugin lifecycle to make reasoning about how the service is executed more clear.
