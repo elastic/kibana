@@ -51,7 +51,7 @@ import {
 } from '../reducers/non_serializable_instances';
 import { getMapCenter, getMapZoom, getHiddenLayerIds } from '../selectors/map_selectors';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { RenderToolTipContent } from '../layers/tooltips/tooltip_property';
+import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import { getUiActions, getCoreI18n } from '../kibana_services';
 
 import { MapEmbeddableInput, MapEmbeddableConfig } from './types';

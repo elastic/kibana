@@ -17,6 +17,11 @@ export const getSignalsTemplate = (index: string) => {
           rollover_alias: index,
         },
       },
+      mapping: {
+        total_fields: {
+          limit: 10000,
+        },
+      },
     },
     index_patterns: [`${index}-*`],
     mappings: ecsMapping.mappings,
