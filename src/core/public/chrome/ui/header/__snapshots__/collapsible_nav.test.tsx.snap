@@ -293,7 +293,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                           class="euiHorizontalRule euiHorizontalRule--full"
                         />
                         <div
-                          class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                          class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                         >
                           <div
                             class="euiAccordion__triggerWrapper"
@@ -346,7 +346,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                   <ul
                                     aria-label="Recently viewed links"
                                     class="euiListGroup eui-yScroll"
-                                    style="max-height: 9.5em; max-width: none;"
+                                    style="max-height: 9.5em; margin-right: -8px; max-width: none;"
                                   >
                                     <li
                                       class="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
@@ -932,7 +932,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                             class="euiHorizontalRule euiHorizontalRule--full"
                           />
                           <div
-                            class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                            class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                           >
                             <div
                               class="euiAccordion__triggerWrapper"
@@ -985,7 +985,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                     <ul
                                       aria-label="Recently viewed links"
                                       class="euiListGroup eui-yScroll"
-                                      style="max-height: 9.5em; max-width: none;"
+                                      style="max-height: 9.5em; margin-right: -8px; max-width: none;"
                                     >
                                       <li
                                         class="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
@@ -1637,6 +1637,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     />
                   </EuiHorizontalRule>
                   <EuiCollapsibleNavGroup
+                    background="light"
                     initialIsOpen={true}
                     isCollapsible={true}
                     key="recentlyViewed"
@@ -1666,14 +1667,14 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                           </EuiFlexItem>
                         </ForwardRef>
                       }
-                      className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                      className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                       id="mockId"
                       initialIsOpen={true}
                       onToggle={[Function]}
                       paddingSize="none"
                     >
                       <div
-                        className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                        className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                         onToggle={[Function]}
                       >
                         <div
@@ -1772,6 +1773,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                     size="s"
                                     style={
                                       Object {
+                                        "marginRight": "-8px",
                                         "maxHeight": "9.5em",
                                       }
                                     }
@@ -1781,6 +1783,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                       className="euiListGroup eui-yScroll"
                                       style={
                                         Object {
+                                          "marginRight": "-8px",
                                           "maxHeight": "9.5em",
                                           "maxWidth": "none",
                                         }
@@ -3285,6 +3288,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
                     />
                   </EuiHorizontalRule>
                   <EuiCollapsibleNavGroup
+                    background="light"
                     initialIsOpen={true}
                     isCollapsible={true}
                     key="recentlyViewed"
@@ -3314,14 +3318,14 @@ exports[`CollapsibleNav renders the default nav 2`] = `
                           </EuiFlexItem>
                         </ForwardRef>
                       }
-                      className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                      className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                       id="mockId"
                       initialIsOpen={true}
                       onToggle={[Function]}
                       paddingSize="none"
                     >
                       <div
-                        className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                        className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                         onToggle={[Function]}
                       >
                         <div
@@ -3767,7 +3771,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                           class="euiHorizontalRule euiHorizontalRule--full"
                         />
                         <div
-                          class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                          class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                         >
                           <div
                             class="euiAccordion__triggerWrapper"
@@ -3961,7 +3965,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                             class="euiHorizontalRule euiHorizontalRule--full"
                           />
                           <div
-                            class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                            class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                           >
                             <div
                               class="euiAccordion__triggerWrapper"
@@ -4221,6 +4225,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                     />
                   </EuiHorizontalRule>
                   <EuiCollapsibleNavGroup
+                    background="light"
                     initialIsOpen={true}
                     isCollapsible={true}
                     key="recentlyViewed"
@@ -4250,14 +4255,14 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                           </EuiFlexItem>
                         </ForwardRef>
                       }
-                      className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                      className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                       id="mockId"
                       initialIsOpen={true}
                       onToggle={[Function]}
                       paddingSize="none"
                     >
                       <div
-                        className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                        className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                         onToggle={[Function]}
                       >
                         <div
