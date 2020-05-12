@@ -25,6 +25,7 @@ export const rulesNotificationAlertType = ({
   name: 'SIEM notification',
   actionGroups: siemRuleActionGroups,
   defaultActionGroupId: 'default',
+  producer: 'siem',
   validate: {
     params: schema.object({
       ruleAlertId: schema.string(),

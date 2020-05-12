@@ -109,7 +109,7 @@ const PolicyResponseFlyoutPanel = memo<{
 }>(({ hostMeta }) => {
   const { show, ...queryParams } = useHostSelector(uiQueryParams);
   const responseConfig = useHostSelector(policyResponseConfigurations);
-  const responseActionStatus = useHostSelector(policyResponseActions);
+  const responseActions = useHostSelector(policyResponseActions);
   const responseAttentionCount = useHostSelector(policyResponseFailedOrWarningActionCount);
   const loading = useHostSelector(policyResponseLoading);
   const error = useHostSelector(policyResponseError);
@@ -158,11 +158,10 @@ const PolicyResponseFlyoutPanel = memo<{
           />
         )}
         {loading && <EuiLoadingContent lines={3} />}
-
-        {responseConfig !== undefined && responseActionStatus !== undefined && (
+        {responseConfig !== undefined && responseActions !== undefined && (
           <PolicyResponse
             responseConfig={responseConfig}
-            responseActionStatus={responseActionStatus}
+            responseActions={responseActions}
             responseAttentionCount={responseAttentionCount}
           />
         )}
