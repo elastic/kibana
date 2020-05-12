@@ -22,7 +22,7 @@ import { always, id, noop } from './utils';
 
 const maybeTotal = x => (x === 'total' ? left(x) : right(x));
 
-export const trimLeftFrom = (text, x) => x.replace(new RegExp(`(?:.*)(${text}.*$)`, 'gm'), '$1');
+const trimLeftFrom = (text, x) => x.substr(x.indexOf(text));
 
 export const statsAndstaticSiteUrl = (...xs) => {
   const [staticSiteUrl] = xs[0][1];
