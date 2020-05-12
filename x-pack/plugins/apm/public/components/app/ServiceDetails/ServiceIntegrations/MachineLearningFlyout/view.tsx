@@ -53,7 +53,7 @@ export function MachineLearningFlyoutView({
 
   const { http } = useApmPluginContext().core;
 
-  const { data: hasMLJob = false, status } = useFetcher(() => {
+  const { data: hasMLJob, status } = useFetcher(() => {
     if (serviceName && selectedTransactionType) {
       return getHasMLJob({
         serviceName,
@@ -73,6 +73,9 @@ export function MachineLearningFlyoutView({
   }
 
   const isLoadingMLJob = status === FETCH_STATUS.LOADING;
+  const mlIsNotAvailable =
+    (status === FETCH_STATUS.SUCCESS && hasMLJob === undefined) ||
+    status === FETCH_STATUS.FAILURE;
 
   return (
     <EuiFlyout onClose={onClose} size="s">
@@ -90,6 +93,31 @@ export function MachineLearningFlyoutView({
         <EuiSpacer size="s" />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        {mlIsNotAvailable && (
+          <div>
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.mlNotAvailable',
+                {
+                  defaultMessage: 'Machine learning not available'
+                }
+              )}
+              color="warning"
+              iconType="alert"
+            >
+              <p>
+                {i18n.translate(
+                  'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.mlNotAvailableDescription',
+                  {
+                    defaultMessage:
+                      'Unable to connect to Machine learning. Make sure it is enabled in Kibana to use anomaly detection.'
+                  }
+                )}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </div>
+        )}
         {hasMLJob && (
           <div>
             <EuiCallOut
@@ -216,7 +244,7 @@ export function MachineLearningFlyoutView({
                   onClickCreate({ transactionType: selectedTransactionType })
                 }
                 fill
-                disabled={isCreatingJob || hasMLJob || isLoadingMLJob}
+                disabled={isCreatingJob || hasMLJob !== false || isLoadingMLJob}
               >
                 {i18n.translate(
                   'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createNewJobButtonLabel',

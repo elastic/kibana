@@ -108,6 +108,12 @@ export async function getHasMLJob({
     });
     return true;
   } catch (e) {
-    return false;
+    if (
+      e?.body?.statusCode === 404 &&
+      e?.body?.attributes?.body?.error?.type === 'resource_not_found_exception'
+    ) {
+      return false; // false only if ML api responds with resource_not_found_exception
+    }
+    return undefined;
   }
 }
