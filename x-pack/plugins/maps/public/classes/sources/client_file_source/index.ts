@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore
 export { GeojsonFileSource } from './geojson_file_source';
 export { uploadLayerWizardConfig } from './upload_layer_wizard';
