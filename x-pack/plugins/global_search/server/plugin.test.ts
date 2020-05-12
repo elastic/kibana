@@ -16,14 +16,14 @@ describe('GlobalSearchPlugin', () => {
     plugin = new GlobalSearchPlugin(coreMock.createPluginInitializerContext());
   });
 
-  it('registers routes during `setup`', () => {
-    plugin.setup(coreMock.createSetup());
+  it('registers routes during `setup`', async () => {
+    await plugin.setup(coreMock.createSetup());
     expect(registerRoutesMock).toHaveBeenCalledTimes(1);
   });
 
-  it('registers the globalSearch route handler context', () => {
+  it('registers the globalSearch route handler context', async () => {
     const coreSetup = coreMock.createSetup();
-    plugin.setup(coreSetup);
+    await plugin.setup(coreSetup);
     expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
     expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledWith(
       'globalSearch',
