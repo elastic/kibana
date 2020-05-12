@@ -109,3 +109,6 @@ export const JiraConnectorFlyout = withConnectorFlyout<JiraActionConnector>({
   configKeys: ['projectKey'],
   connectorActionTypeId: '.jira',
 });
+
+// eslint-disable-next-line import/no-default-export
+export { JiraConnectorFlyout as default };
