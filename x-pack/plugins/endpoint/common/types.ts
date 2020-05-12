@@ -74,6 +74,24 @@ export interface ResolverNodePagination {
   nextAlert?: string | null;
 }
 
+export interface ChildNode extends LifecycleNode {
+  nextChild: string | null;
+}
+
+export interface ResolverChildren {
+  childNodes: ChildNode[];
+  nextChild: string | null;
+}
+
+export interface ResolverTree {
+  id: string;
+  children: ResolverChildren;
+  relatedEvents: Omit<ResolverRelatedEvents, 'id'>;
+  ancestry: ResolverAncestry;
+  lifecycle: ResolverEvent[];
+  stats: ResolverNodeStats;
+}
+
 /**
  * A node that contains pointers to other nodes, arrays of resolver events, and any metadata associated with resolver specific data
  */
@@ -88,21 +106,22 @@ export interface ResolverNode {
 }
 
 /**
- * The lifecycle events (start, stop etc) for ancestor nodes.
+ * The lifecycle events (start, end etc) for a node nodes.
  */
-export interface LifecycleEvents {
+export interface LifecycleNode {
   id: string;
   lifecycle: ResolverEvent[];
+  stats?: ResolverNodeStats;
 }
 
 /**
  * The response structure when searching for ancestors of a node.
  */
-export interface AncestorEvents {
+export interface ResolverAncestry {
   /**
-   * An array of ancestors
+   * An array of ancestors with the lifecycle events grouped together
    */
-  ancestors: LifecycleEvents[];
+  ancestors: LifecycleNode[];
   /**
    * A cursor for retrieving additional ancestors for a particular node. `null` indicates that there were no additional
    * ancestors when the request returned. More could have been ingested by ES after the fact though.
@@ -110,7 +129,7 @@ export interface AncestorEvents {
   nextAncestor: string | null;
 }
 
-export interface RelatedEvents {
+export interface ResolverRelatedEvents {
   id: string;
   events: ResolverEvent[];
   nextEvent: string | null;
@@ -431,6 +450,10 @@ export interface LegacyEndpointEvent {
   process?: object;
   rule?: object;
   user?: object;
+  event?: {
+    action?: string;
+    type?: string;
+  };
 }
 
 export interface EndpointEvent {

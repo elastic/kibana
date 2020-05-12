@@ -5,15 +5,21 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import { AncestorEvents, RelatedEvents } from '../../../../common/types';
-import { entityId, parentEntityId } from '../../../../common/models/event';
+import {
+  ChildNode,
+  ResolverEvent,
+  ResolverChildren,
+  ResolverRelatedEvents,
+  ResolverAncestry,
+} from '../../../../common/types';
+import { entityId, parentEntityId, isProcessStart } from '../../../../common/models/event';
 import { PaginationBuilder } from './pagination';
 import { Tree } from './tree';
 import { LifecycleQuery } from '../queries/lifecycle';
 import { ChildrenQuery } from '../queries/children';
 import { EventsQuery } from '../queries/events';
 import { StatsQuery } from '../queries/stats';
-import { createAncestorEvents, createRelatedEvents, createLifecycleEvents } from './node';
+import { createAncestry, createRelatedEvents, createLifecycle, createChild } from './node';
 
 /**
  * Handles retrieving nodes of a resolver tree.
@@ -40,8 +46,8 @@ export class Fetcher {
    *
    * @param limit upper limit of ancestors to retrieve
    */
-  public async ancestors(limit: number): Promise<AncestorEvents> {
-    const root = createAncestorEvents();
+  public async ancestors(limit: number): Promise<ResolverAncestry> {
+    const root = createAncestry();
     await this.doAncestors(this.id, limit + 1, root);
     return root;
   }
@@ -53,10 +59,26 @@ export class Fetcher {
    * @param generations number of levels to return
    * @param after a cursor to use as the starting point for retrieving children
    */
-  public async children(limit: number, generations: number, after?: string): Promise<Tree> {
-    const tree = new Tree(this.id);
-    await this.doChildren(tree, [this.id], limit, generations, after);
-    return tree;
+  public async children(
+    limit: number,
+    generations: number,
+    after?: string
+  ): Promise<ResolverChildren> {
+    const childrenCache: Map<string, ChildNode> = new Map();
+    // create a node that represents the parent so we can set pagination correctly
+    childrenCache.set(this.id, createChild(this.id));
+
+    await this.doChildren(childrenCache, [this.id], limit, generations, after);
+
+    let nextChild = null;
+    const root = childrenCache.get(this.id);
+    if (root) {
+      nextChild = root.nextChild;
+    }
+
+    childrenCache.delete(this.id);
+    const children = Array.from(childrenCache.values());
+    return { childNodes: children, nextChild };
   }
 
   /**
@@ -65,7 +87,7 @@ export class Fetcher {
    * @param limit the upper bound number of related events to return
    * @param after a cursor to use as the starting point for retrieving related events
    */
-  public async events(limit: number, after?: string): Promise<RelatedEvents> {
+  public async events(limit: number, after?: string): Promise<ResolverRelatedEvents> {
     return await this.doEvents(limit, after);
   }
 
@@ -82,7 +104,7 @@ export class Fetcher {
   private async doAncestors(
     curNodeID: string,
     levels: number,
-    ancestorInfo: AncestorEvents
+    ancestorInfo: ResolverAncestry
   ): Promise<void> {
     if (levels === 0) {
       ancestorInfo.nextAncestor = curNodeID;
@@ -95,7 +117,7 @@ export class Fetcher {
     if (results.length === 0) {
       return;
     }
-    ancestorInfo.ancestors.push(createLifecycleEvents(curNodeID, results));
+    ancestorInfo.ancestors.push(createLifecycle(curNodeID, results));
 
     const next = parentEntityId(results[0]);
     if (next === undefined) {
@@ -128,13 +150,15 @@ export class Fetcher {
   }
 
   private async doChildren(
-    tree: Tree,
+    cache: Map<string, ChildNode>,
     ids: string[],
     limit: number,
     levels: number,
     after?: string
   ) {
-    if (levels === 0 || ids.length === 0) return;
+    if (levels === 0 || ids.length === 0) {
+      return;
+    }
 
     const childrenQuery = new ChildrenQuery(
       PaginationBuilder.createBuilder(limit, after),
@@ -145,18 +169,15 @@ export class Fetcher {
 
     const { totals, results } = await childrenQuery.search(this.client, ids);
     if (results.length === 0) {
-      tree.markLeafNode(ids);
       return;
     }
 
     const childIDs = results.map(entityId);
     const children = await lifecycleQuery.search(this.client, childIDs);
 
-    tree.addChild(children);
-    tree.paginateChildren(totals, results);
-    tree.markLeafNode(childIDs);
+    Fetcher.addChildrenToCache(cache, totals, children);
 
-    await this.doChildren(tree, childIDs, limit * limit, levels - 1);
+    await this.doChildren(cache, childIDs, limit * limit, levels - 1);
   }
 
   private async doStats(tree: Tree) {
@@ -167,6 +188,54 @@ export class Fetcher {
     const events = res?.events || {};
     ids.forEach(id => {
       tree.addStats(id, { totalAlerts: alerts[id] || 0, totalEvents: events[id] || 0 });
+    });
+  }
+
+  public static addChildrenToCache(
+    childrenCache: Map<string, ChildNode>,
+    totals: Record<string, number>,
+    results: ResolverEvent[]
+  ) {
+    const startEventsCache: Map<string, ResolverEvent[]> = new Map();
+
+    results.forEach(event => {
+      const entityID = entityId(event);
+      const parentID = parentEntityId(event);
+      if (!entityID || !parentID) {
+        return;
+      }
+
+      let cachedChild = childrenCache.get(entityID);
+      if (!cachedChild) {
+        cachedChild = createChild(entityID);
+        childrenCache.set(entityID, cachedChild);
+      }
+      cachedChild.lifecycle.push(event);
+
+      if (isProcessStart(event)) {
+        let startEvents = startEventsCache.get(parentID);
+        if (startEvents === undefined) {
+          startEvents = [];
+          startEventsCache.set(parentID, startEvents);
+        }
+        startEvents.push(event);
+      }
+    });
+
+    Fetcher.addChildrenPagination(childrenCache, startEventsCache, totals);
+  }
+
+  private static addChildrenPagination(
+    nodeCache: Map<string, ChildNode>,
+    startEventsCache: Map<string, ResolverEvent[]>,
+    totals: Record<string, number>
+  ) {
+    Object.entries(totals).forEach(([parentID, total]) => {
+      const parentNode = nodeCache.get(parentID);
+      const childrenStartEvents = startEventsCache.get(parentID);
+      if (parentNode && childrenStartEvents) {
+        parentNode.nextChild = PaginationBuilder.buildCursor(total, childrenStartEvents);
+      }
     });
   }
 }

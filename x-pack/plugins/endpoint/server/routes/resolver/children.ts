@@ -24,12 +24,10 @@ export function handleChildren(
       const indexPattern = await indexRetriever.getEventIndexPattern(context);
 
       const client = context.core.elasticsearch.dataClient;
-
       const fetcher = new Fetcher(client, id, indexPattern, endpointID);
-      const childrenTree = await fetcher.children(children, generations, afterChild);
 
       return res.ok({
-        body: childrenTree.render(),
+        body: await fetcher.children(children, generations, afterChild),
       });
     } catch (err) {
       log.warn(err);

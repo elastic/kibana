@@ -6,28 +6,56 @@
 
 import {
   ResolverEvent,
-  ResolverNode,
-  AncestorEvents,
-  LifecycleEvents,
-  RelatedEvents,
+  ResolverAncestry,
+  LifecycleNode,
+  ResolverRelatedEvents,
+  ResolverTree,
+  ChildNode,
 } from '../../../../common/types';
 
 export function createRelatedEvents(
   id: string,
   events: ResolverEvent[] = [],
   nextEvent: string | null = null
-): RelatedEvents {
+): ResolverRelatedEvents {
   return { id, events, nextEvent };
 }
 
-export function createAncestorEvents(): AncestorEvents {
+export function createChild(id: string): ChildNode {
+  const lifecycle = createLifecycle(id, []);
+  return {
+    ...lifecycle,
+    nextChild: null,
+  };
+}
+
+export function createAncestry(): ResolverAncestry {
   return { ancestors: [], nextAncestor: null };
 }
 
-export function createLifecycleEvents(id: string, lifecycle: ResolverEvent[]): LifecycleEvents {
+export function createLifecycle(id: string, lifecycle: ResolverEvent[]): LifecycleNode {
   return { id, lifecycle };
 }
 
-export function createNode(id: string): ResolverNode {
-  return { id, children: [], pagination: {}, events: [], lifecycle: [], ancestors: [] };
+export function createTree(id: string): ResolverTree {
+  return {
+    id,
+    children: {
+      childNodes: [],
+      nextChild: null,
+    },
+    relatedEvents: {
+      events: [],
+      nextEvent: null,
+    },
+    lifecycle: [],
+    ancestry: {
+      ancestors: [],
+      nextAncestor: null,
+    },
+    stats: {
+      totalAlerts: 0,
+      totalEvents: 0,
+    },
+  };
 }
