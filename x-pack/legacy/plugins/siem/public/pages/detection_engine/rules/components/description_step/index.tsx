@@ -9,7 +9,7 @@ import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
 import React, { memo, useState } from 'react';
 import styled from 'styled-components';
 
-import { RuleType } from '../../types';
+import { RuleType } from '../../../../../../common/detection_engine/types';
 import {
   IIndexPattern,
   Filter,
@@ -108,12 +108,12 @@ export const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = 
         {columns === 'single' ? (
           <EuiDescriptionList listItems={listItems} />
         ) : (
-            <DescriptionListContainer
-              data-test-subj="singleSplitStepRuleDescriptionList"
-              type="column"
-              listItems={listItems}
-            />
-          )}
+          <DescriptionListContainer
+            data-test-subj="singleSplitStepRuleDescriptionList"
+            type="column"
+            listItems={listItems}
+          />
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
