@@ -13,6 +13,11 @@ export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
   });
 
 export const validateIsStringElasticsearchJSONFilter = (value: string) => {
+  if (value === '') {
+    // Allow clearing the filter.
+    return;
+  }
+
   const errorMessage = 'filterQuery must be a valid Elasticsearch filter expressed in JSON';
   try {
     const parsedValue = JSON.parse(value);
