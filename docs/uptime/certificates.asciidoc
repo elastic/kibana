@@ -6,10 +6,9 @@
 [role="screenshot"]
 image::uptime/images/certificates-page.png[Certificates]
 
-Uptime has a certificates page; you can use this page to visualize any TLS certificate data
-in your indices. In addition to the common name, associated monitors, issuer information,
-and SHA fingerprints, Uptime also assigns a status derived from the threshold values in
-the <<uptime-settings, Settings page>>.
+The certificates page allows you to visualize TLS certificate data in your indices. In addition to the
+common name, associated monitors, issuer information, and SHA fingerprints, Uptime also assigns a status
+derived from the threshold values in the <<uptime-settings, Settings page>>.
 
 Several of the columns on this page are sortable. You can use the search bar at the top of the view
 to find values in most of the TLS-related fields in your Uptime indices. Additionally, you can
