@@ -43,12 +43,13 @@ export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   getSearchRequestBody: jest.fn(),
   destroy: jest.fn(),
   history: [],
+  getSerializedFields: jest.fn(),
   serialize: jest.fn(),
 };
 
 export const searchSourceMock = {
   create: jest.fn().mockReturnValue(searchSourceInstanceMock),
-  fromJSON: jest.fn().mockReturnValue(searchSourceInstanceMock),
+  createEmpty: jest.fn().mockReturnValue(searchSourceInstanceMock),
 };
 
 export const createSearchSourceMock = (fields?: SearchSourceFields) =>
