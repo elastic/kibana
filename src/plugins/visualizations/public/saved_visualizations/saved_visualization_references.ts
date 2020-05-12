@@ -18,6 +18,7 @@
  */
 import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/public';
 import { VisSavedObject } from '../types';
+import { injectSearchSourceReferences, extractSearchSourceReferences } from '../../../data/public';
 
 export function extractReferences({
   attributes,
@@ -28,6 +29,14 @@ export function extractReferences({
 }) {
   const updatedAttributes = { ...attributes };
   const updatedReferences = [...references];
+
+  if (updatedAttributes.searchSourceFields) {
+    const [searchSource, searchSourceReferences] = extractSearchSourceReferences(
+      updatedAttributes.searchSourceFields as any
+    );
+    updatedAttributes.searchSourceFields = searchSource;
+    searchSourceReferences.forEach(r => updatedReferences.push(r));
+  }
 
   // Extract saved search
   if (updatedAttributes.savedSearchId) {
@@ -66,6 +75,12 @@ export function extractReferences({
 }
 
 export function injectReferences(savedObject: VisSavedObject, references: SavedObjectReference[]) {
+  if (savedObject.searchSourceFields) {
+    savedObject.searchSourceFields = injectSearchSourceReferences(
+      savedObject.searchSourceFields as any,
+      references
+    );
+  }
   if (savedObject.savedSearchRefName) {
     const savedSearchReference = references.find(
       reference => reference.name === savedObject.savedSearchRefName

@@ -111,18 +111,20 @@ export function isModelPlotChartableForDetector(job: CombinedJob, detectorIndex:
     const dtr = detectors[detectorIndex];
     const functionName = dtr.function;
 
-    // Model plot can be charted for any of the functions which map to ES aggregations,
+    // Model plot can be charted for any of the functions which map to ES aggregations
+    // (except rare, for which no model plot results are generated),
     // plus varp and info_content functions.
     isModelPlotChartable =
-      mlFunctionToESAggregation(functionName) !== null ||
-      [
-        'varp',
-        'high_varp',
-        'low_varp',
-        'info_content',
-        'high_info_content',
-        'low_info_content',
-      ].includes(functionName);
+      functionName !== 'rare' &&
+      (mlFunctionToESAggregation(functionName) !== null ||
+        [
+          'varp',
+          'high_varp',
+          'low_varp',
+          'info_content',
+          'high_info_content',
+          'low_info_content',
+        ].includes(functionName));
   }
 
   return isModelPlotChartable;
