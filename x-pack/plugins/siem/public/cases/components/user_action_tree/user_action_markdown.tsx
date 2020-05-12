@@ -111,7 +111,11 @@ export const UserActionMarkdown = ({
     </Form>
   ) : (
     <ContentWrapper>
-      <Markdown raw={content} data-test-subj="user-action-markdown" />
+      <Markdown
+        onClickTimeline={(timelineId: string) => console.log('zomg', timelineId)}
+        raw={content}
+        data-test-subj="user-action-markdown"
+      />
     </ContentWrapper>
   );
 };
