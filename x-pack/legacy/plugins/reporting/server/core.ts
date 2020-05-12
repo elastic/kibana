@@ -18,12 +18,12 @@ import {
 } from 'src/core/server';
 // @ts-ignore no module definition
 import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
+import { ILicense } from '../../../../plugins/licensing/server';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
-import { PLUGIN_ID } from '../common/constants';
 import { EnqueueJobFn, ESQueueInstance, ReportingPluginSpecOptions, ServerFacade } from '../types';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
 import { ReportingConfig, ReportingConfigType } from './config';
-import { checkLicenseFactory, getExportTypesRegistry, LevelLogger } from './lib';
+import { LevelLogger, getExportTypesRegistry, checkLicenseFactory } from './lib';
 import { registerRoutes } from './routes';
 import { ReportingSetupDeps } from './types';
 import {
@@ -34,7 +34,9 @@ import {
 interface ReportingInternalSetup {
   browserDriverFactory: HeadlessChromiumDriverFactory;
   elasticsearch: ElasticsearchServiceSetup;
+  license$: Rx.Observable<ILicense>;
 }
+
 interface ReportingInternalStart {
   enqueueJob: EnqueueJobFn;
   esqueue: ESQueueInstance;
@@ -45,7 +47,7 @@ interface ReportingInternalStart {
 export { ReportingConfig, ReportingConfigType };
 
 export class ReportingCore {
-  private pluginSetupDeps?: ReportingInternalSetup;
+  pluginSetupDeps?: ReportingInternalSetup;
   private pluginStartDeps?: ReportingInternalStart;
   private readonly pluginSetup$ = new Rx.ReplaySubject<ReportingInternalSetup>();
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>();
@@ -56,19 +58,10 @@ export class ReportingCore {
   legacySetup(
     xpackMainPlugin: XPackMainPlugin,
     reporting: ReportingPluginSpecOptions,
-    __LEGACY: ServerFacade,
-    plugins: ReportingSetupDeps
+    __LEGACY: ServerFacade
   ) {
     // legacy plugin status
     mirrorPluginStatus(xpackMainPlugin, reporting);
-
-    // legacy license check
-    const checkLicense = checkLicenseFactory(this.exportTypesRegistry);
-    (xpackMainPlugin as any).status.once('green', () => {
-      // Register a function that is called whenever the xpack info changes,
-      // to re-compute the license check results for this plugin
-      xpackMainPlugin.info.feature(PLUGIN_ID).registerLicenseCheckResultsGenerator(checkLicense);
-    });
   }
 
   public setupRoutes(plugins: ReportingSetupDeps, router: IRouter, basePath: IBasePath['get']) {
@@ -102,9 +95,22 @@ export class ReportingCore {
     return (await this.getPluginStartDeps()).enqueueJob;
   }
 
+  public async getLicenseInfo() {
+    const exportTypeRegistry = this.getExportTypesRegistry();
+    const $license = await this.getLicenseObservable();
+    const getLicenseInfo = await checkLicenseFactory(exportTypeRegistry, $license);
+
+    return getLicenseInfo();
+  }
+
   public getConfig(): ReportingConfig {
     return this.config;
   }
+
+  public async getLicenseObservable(): Promise<Rx.Observable<ILicense>> {
+    return (await this.getPluginSetupDeps()).license$;
+  }
+
   public async getScreenshotsObservable(): Promise<ScreenshotsObservableFn> {
     const { browserDriverFactory } = await this.getPluginSetupDeps();
     return screenshotsObservableFactory(this.config.get('capture'), browserDriverFactory);

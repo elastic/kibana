@@ -37,6 +37,13 @@ export function registerJobGenerationRoutes(
     r: RequestFacade,
     h: typeof kibanaResponseFactory
   ) {
+    const licenseInfo = await reporting.getLicenseInfo();
+    const licenseResults = licenseInfo[exportTypeId];
+
+    if (!licenseResults.enableLinks) {
+      throw boom.forbidden(licenseResults.message);
+    }
+
     const getUser = authorizedUserPreRoutingFactory(config, plugins, logger);
     const { username } = getUser(r.getRawRequest());
     const { headers } = r;

@@ -7,6 +7,7 @@
 import { Legacy } from 'kibana';
 import { ElasticsearchServiceSetup, KibanaRequest } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/server';
 import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
 import { SecurityPluginSetup, AuthenticatedUser } from '../../../../plugins/security/server';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
@@ -17,6 +18,7 @@ export interface ReportingSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
   security: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  licensing: LicensingPluginSetup;
   __LEGACY: LegacySetup;
 }
 
@@ -47,3 +49,12 @@ export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 export interface KibanaRequestWithUser extends KibanaRequest {
   user: AuthenticatedUser;
 }
+
+export interface LicenseCheckResult {
+  showLinks: boolean;
+  enableLinks: boolean;
+  message?: string;
+  jobTypes?: string[];
+}
+
+export type checkLicense = () => Promise<Record<string, LicenseCheckResult>>;

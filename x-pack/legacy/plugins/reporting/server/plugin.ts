@@ -26,22 +26,28 @@ export class ReportingPlugin
 
   public async setup(core: CoreSetup, plugins: ReportingSetupDeps) {
     const { config } = this;
-    const { elasticsearch, __LEGACY } = plugins;
+    const {
+      elasticsearch,
+      __LEGACY,
+      licensing: { license$ },
+    } = plugins;
     const router = core.http.createRouter();
     const basePath = core.http.basePath.get;
+    const { xpack_main: xpackMainLegacy, reporting: reportingLegacy } = __LEGACY.plugins;
+
+    this.reportingCore.legacySetup(xpackMainLegacy, reportingLegacy, __LEGACY);
 
     const browserDriverFactory = await createBrowserDriverFactory(config, this.logger); // required for validations :(
     runValidations(config, elasticsearch, browserDriverFactory, this.logger);
-
-    const { xpack_main: xpackMainLegacy, reporting: reportingLegacy } = __LEGACY.plugins;
-    this.reportingCore.legacySetup(xpackMainLegacy, reportingLegacy, __LEGACY, plugins);
-    this.reportingCore.setupRoutes(plugins, router, basePath);
 
     // Register a function with server to manage the collection of usage stats
     registerReportingUsageCollector(this.reportingCore, plugins);
 
     // regsister setup internals
-    this.reportingCore.pluginSetup({ browserDriverFactory, elasticsearch });
+    this.reportingCore.pluginSetup({ browserDriverFactory, elasticsearch, license$ });
+
+    // Setup routing
+    this.reportingCore.setupRoutes(plugins, router, basePath);
 
     return {};
   }

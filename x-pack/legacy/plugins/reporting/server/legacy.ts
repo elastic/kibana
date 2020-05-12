@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as Rx from 'rxjs';
 import { Legacy } from 'kibana';
 import { take } from 'rxjs/operators';
 import { PluginInitializerContext } from 'src/core/server';
+import { ILicense, LicensingPluginSetup } from '../../../../plugins/licensing/server';
 import { PluginsSetup } from '../../../../plugins/reporting/server';
 import { SecurityPluginSetup } from '../../../../plugins/security/server';
 import { ReportingPluginSpecOptions } from '../types';
@@ -41,11 +43,17 @@ export const legacyInit = async (
     server.newPlatform.coreContext as PluginInitializerContext,
     buildConfig(coreSetup, server, reportingConfig)
   );
+
   await pluginInstance.setup(coreSetup, {
     elasticsearch: coreSetup.elasticsearch,
     security: server.newPlatform.setup.plugins.security as SecurityPluginSetup,
     usageCollection: server.newPlatform.setup.plugins.usageCollection,
     __LEGACY,
+    licensing: {
+      license$: (server.newPlatform.setup.plugins.licensing as any).$license as Rx.Observable<
+        ILicense
+      >,
+    } as LicensingPluginSetup,
   });
 
   // Schedule to call the "start" hook only after start dependencies are ready

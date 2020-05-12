@@ -20,7 +20,7 @@ import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routi
 
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
-export function registerJobInfoRoutes(
+export async function registerJobInfoRoutes(
   reporting: ReportingCore,
   plugins: ReportingSetupDeps,
   router: IRouter,
@@ -36,18 +36,19 @@ export function registerJobInfoRoutes(
   router.get(
     {
       path: `${MAIN_ENTRY}/list`,
-      validate: {},
+      validate: false,
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const request = makeRequestFacade(context, req, basePath);
+      const {
+        management: { jobTypes = [] },
+      } = await reporting.getLicenseInfo();
       const { username } = getUser(request.getRawRequest());
       const { page: queryPage, size: querySize, ids: queryIds } = request.query as ListQuery;
       const page = parseInt(queryPage, 10) || 0;
       const size = Math.min(100, parseInt(querySize, 10) || 10);
       const jobIds = queryIds ? queryIds.split(',') : null;
-
-      // @todo: fill in jobtypes from license checks
-      const results = await jobsQuery.list([], username, page, size, jobIds);
+      const results = await jobsQuery.list(jobTypes, username, page, size, jobIds);
 
       return res.ok({
         body: results,
@@ -62,14 +63,16 @@ export function registerJobInfoRoutes(
   router.get(
     {
       path: `${MAIN_ENTRY}/count`,
-      validate: {},
+      validate: false,
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const request = makeRequestFacade(context, req, basePath);
       const { username } = getUser(request.getRawRequest());
+      const {
+        management: { jobTypes = [] },
+      } = await reporting.getLicenseInfo();
 
-      // @todo: fill in jobtypes from license checks
-      const results = await jobsQuery.count([], username);
+      const results = await jobsQuery.count(jobTypes, username);
 
       return res.ok({
         body: { count: results },
@@ -94,6 +97,9 @@ export function registerJobInfoRoutes(
       const request = makeRequestFacade(context, req, basePath);
       const { username } = getUser(request.getRawRequest());
       const { docId } = req.params;
+      const {
+        management: { jobTypes = [] },
+      } = await reporting.getLicenseInfo();
 
       const result = await jobsQuery.get(username, docId, { includeContent: true });
 
@@ -105,7 +111,7 @@ export function registerJobInfoRoutes(
         _source: { jobtype: jobType, output: jobOutput },
       } = result;
 
-      if (!['@todo'].includes(jobType)) {
+      if (!jobTypes.includes(jobType)) {
         throw Boom.unauthorized(`Sorry, you are not authorized to download ${jobType} reports`);
       }
 
@@ -132,6 +138,9 @@ export function registerJobInfoRoutes(
       const request = makeRequestFacade(context, req, basePath);
       const { username } = getUser(request.getRawRequest());
       const { docId } = req.params;
+      const {
+        management: { jobTypes = [] },
+      } = await reporting.getLicenseInfo();
 
       const result = await jobsQuery.get(username, docId);
 
@@ -142,7 +151,7 @@ export function registerJobInfoRoutes(
       const { _source: job } = result;
       const { jobtype: jobType, payload: jobPayload } = job;
 
-      if (!['@todo'].includes(jobType)) {
+      if (!jobTypes.includes(jobType)) {
         throw Boom.unauthorized(`Sorry, you are not authorized to view ${jobType} info`);
       }
 
@@ -181,9 +190,11 @@ export function registerJobInfoRoutes(
     router.handleLegacyErrors(async (context, req, res) => {
       const { username } = getUser(req);
       const { docId } = req.params;
+      const {
+        management: { jobTypes = [] },
+      } = await reporting.getLicenseInfo();
 
-      // @TODD: JobTypes checks
-      const response = await downloadResponseHandler([], username, { docId });
+      const response = await downloadResponseHandler(jobTypes, username, { docId });
 
       return res.ok({
         body: response.content,
@@ -209,9 +220,11 @@ export function registerJobInfoRoutes(
     router.handleLegacyErrors(async (context, req, res) => {
       const { username } = getUser(req);
       const { docId } = req.params;
+      const {
+        management: { jobTypes = [] },
+      } = await reporting.getLicenseInfo();
 
-      // @TODD Jobtypes here.
-      const response = await deleteResponseHandler([], username, { docId });
+      const response = await deleteResponseHandler(jobTypes, username, { docId });
 
       return res.ok({
         body: response,
