@@ -18,10 +18,10 @@ import { filterEventsAgainstList } from './filter_events_with_list';
 interface SearchAfterAndBulkCreateParams {
   ruleParams: RuleTypeParams;
   services: AlertServices;
-  listClient: ListClient;
-  listValueType: ListValueType;
-  listValueField: string; // ECS path to field that list values apply to
-  listId: string;
+  listClient: ListClient | undefined; // TODO: undefined is for temporary development, remove before merged
+  listValueType: ListValueType | undefined;
+  listValueField: string | undefined; // ECS path to field that list values apply to
+  listId: string | undefined;
   logger: Logger;
   id: string;
   inputIndexPattern: string[];
@@ -143,14 +143,20 @@ export const searchAfterAndBulkCreate = async ({
 
       // filter out the search results that match with the values found in the list.
       // the resulting set are valid signals that are not on the allowlist.
-      const filteredEvents = await filterEventsAgainstList({
-        listClient,
-        logger,
-        eventSearchResult: searchResult,
-        type: listValueType,
-        field: listValueField,
-        listId,
-      });
+      let filteredEvents;
+      if (listClient != null && listValueType != null && listValueField != null && listId != null) {
+        filteredEvents = await filterEventsAgainstList({
+          listClient,
+          logger,
+          eventSearchResult: searchResult,
+          type: listValueType,
+          field: listValueField,
+          listId,
+        });
+      } else {
+        filteredEvents = searchResult;
+      }
+
       if (filteredEvents != null && filteredEvents.hits.hits.length === 0) {
         // everything in the events were allowed, so no need to generate signals
         toReturn.success = true;
