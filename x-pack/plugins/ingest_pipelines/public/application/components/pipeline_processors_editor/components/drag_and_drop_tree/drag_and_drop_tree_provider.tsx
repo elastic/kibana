@@ -131,8 +131,12 @@ export const DragAndDropTreeProvider: FunctionComponent<Props> = ({ children, on
               : sourceTree;
             const sourceSelector = sourceTree.selectors[source.index];
 
-            const destinationIndex =
-              crossTreeDrag && destination.index > 0 ? destination.index - 1 : destination.index;
+            let destinationIndex = destination.index;
+            if (crossTreeDrag && destination.index > 0) {
+              if (dragDirection === 'down') {
+                destinationIndex = destination.index - 1;
+              }
+            }
 
             const locations = resolveLocations({
               destinationItems: destinationTree.selectors,

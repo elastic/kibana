@@ -206,4 +206,43 @@ describe('Resolve destination location', () => {
       destination: ['TREE_A', '2', 'onFailure', '3'],
     });
   });
+
+  it('dragging up across trees resolves correctly', () => {
+    const items = [
+      ['0'],
+      ['1'],
+      ['2'],
+      ['2', 'onFailure', '0'],
+      ['2', 'onFailure', '1'],
+      ['2', 'onFailure', '2'],
+      ['2', 'onFailure', '3'],
+      ['3'],
+      ['3', 'onFailure', '0'],
+    ];
+    const result1 = resolveLocations({
+      destinationItems: items,
+      destinationIndex: items.length,
+      baseDestinationSelector: TREE_A_ROOT,
+      dragDirection: 'up',
+      baseSourceSelector: TREE_B_ROOT,
+      sourceSelector: ['0'],
+    });
+    expect(result1).toEqual({
+      source: ['TREE_B', '0'],
+      destination: ['TREE_A', DragAndDropSpecialLocations.bottom],
+    });
+
+    const result2 = resolveLocations({
+      destinationItems: items,
+      destinationIndex: items.length - 1,
+      baseDestinationSelector: TREE_A_ROOT,
+      dragDirection: 'up',
+      baseSourceSelector: TREE_B_ROOT,
+      sourceSelector: ['0'],
+    });
+    expect(result2).toEqual({
+      source: ['TREE_B', '0'],
+      destination: ['TREE_A', '3', 'onFailure', '0'],
+    });
+  });
 });

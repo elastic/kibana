@@ -63,13 +63,17 @@ export const resolveLocations = ({
   }
 
   // Dragged to bottom, place at root level if source is already at root
-  if (destinationIndex === destinationItems.length - 1 && isSourceAtRootLevel) {
+  if (
+    destinationIndex === destinationItems.length - 1 &&
+    isSourceAtRootLevel &&
+    dragDirection === 'down'
+  ) {
     return addBasePathPrefix([DragAndDropSpecialLocations.bottom]);
   }
 
   // This can happen when dragging across trees
-  if (destinationIndex > destinationItems.length - 1) {
-    return addBasePathPrefix([String(destinationIndex)]);
+  if (destinationIndex === destinationItems.length) {
+    return addBasePathPrefix([DragAndDropSpecialLocations.bottom]);
   }
 
   const displacing: ProcessorSelector = destinationItems[destinationIndex];
@@ -106,6 +110,6 @@ export const resolveLocations = ({
     return addBasePathPrefix(below);
   }
 
-  // Just target displaced element when dragging up
+  // Target displaced element when dragging up
   return addBasePathPrefix(displacing);
 };
