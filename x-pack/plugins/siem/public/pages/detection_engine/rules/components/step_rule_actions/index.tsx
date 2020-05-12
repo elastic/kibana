@@ -9,11 +9,7 @@ import React, { FC, memo, useCallback, useEffect, useMemo, useState } from 'reac
 import deepEqual from 'fast-deep-equal';
 
 import { setFieldValue } from '../../helpers';
-import {
-  RuleStep,
-  RuleStepProps,
-  ActionsStepRule,
-} from '../../types';
+import { RuleStep, RuleStepProps, ActionsStepRule } from '../../types';
 import { StepRuleDescription } from '../description_step';
 import { Form, UseField, useForm } from '../../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
@@ -123,71 +119,71 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       <StepRuleDescription schema={schema} data={myStepData} columns="single" />
     </StepContentWrapper>
   ) : (
-      <>
-        <StepContentWrapper addPadding={!isUpdateView}>
-          <Form form={form} data-test-subj="stepRuleActions">
-            <UseField
-              path="throttle"
-              component={ThrottleSelectField}
-              componentProps={throttleFieldComponentProps}
-            />
-            {myStepData.throttle !== stepActionsDefaultValue.throttle && (
-              <>
-                <EuiSpacer />
-                <UseField
-                  path="actions"
-                  defaultValue={myStepData.actions}
-                  component={RuleActionsField}
-                  componentProps={{
-                    messageVariables: actionMessageParams,
-                  }}
-                />
-                <UseField
-                  path="kibanaSiemAppUrl"
-                  defaultValue={kibanaAbsoluteUrl}
-                  component={GhostFormField}
-                />
-              </>
-            )}
-            <UseField path="enabled" defaultValue={myStepData.enabled} component={GhostFormField} />
-          </Form>
-        </StepContentWrapper>
+    <>
+      <StepContentWrapper addPadding={!isUpdateView}>
+        <Form form={form} data-test-subj="stepRuleActions">
+          <UseField
+            path="throttle"
+            component={ThrottleSelectField}
+            componentProps={throttleFieldComponentProps}
+          />
+          {myStepData.throttle !== stepActionsDefaultValue.throttle && (
+            <>
+              <EuiSpacer />
+              <UseField
+                path="actions"
+                defaultValue={myStepData.actions}
+                component={RuleActionsField}
+                componentProps={{
+                  messageVariables: actionMessageParams,
+                }}
+              />
+              <UseField
+                path="kibanaSiemAppUrl"
+                defaultValue={kibanaAbsoluteUrl}
+                component={GhostFormField}
+              />
+            </>
+          )}
+          <UseField path="enabled" defaultValue={myStepData.enabled} component={GhostFormField} />
+        </Form>
+      </StepContentWrapper>
 
-        {!isUpdateView && (
-          <>
-            <EuiHorizontalRule margin="m" />
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="flexEnd"
-              gutterSize="xs"
-              responsive={false}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill={false}
-                  isDisabled={isLoading}
-                  isLoading={isLoading}
-                  onClick={onSubmit.bind(null, false)}
-                >
-                  {I18n.COMPLETE_WITHOUT_ACTIVATING}
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  isDisabled={isLoading}
-                  isLoading={isLoading}
-                  onClick={onSubmit.bind(null, true)}
-                  data-test-subj="create-activate"
-                >
-                  {I18n.COMPLETE_WITH_ACTIVATING}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        )}
-      </>
-    );
+      {!isUpdateView && (
+        <>
+          <EuiHorizontalRule margin="m" />
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="flexEnd"
+            gutterSize="xs"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill={false}
+                isDisabled={isLoading}
+                isLoading={isLoading}
+                onClick={onSubmit.bind(null, false)}
+              >
+                {I18n.COMPLETE_WITHOUT_ACTIVATING}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                isDisabled={isLoading}
+                isLoading={isLoading}
+                onClick={onSubmit.bind(null, true)}
+                data-test-subj="create-activate"
+              >
+                {I18n.COMPLETE_WITH_ACTIVATING}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
+    </>
+  );
 };
 
 export const StepRuleActions = memo(StepRuleActionsComponent);

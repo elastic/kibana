@@ -108,12 +108,12 @@ export const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = 
         {columns === 'single' ? (
           <EuiDescriptionList listItems={listItems} />
         ) : (
-            <DescriptionListContainer
-              data-test-subj="singleSplitStepRuleDescriptionList"
-              type="column"
-              listItems={listItems}
-            />
-          )}
+          <DescriptionListContainer
+            data-test-subj="singleSplitStepRuleDescriptionList"
+            type="column"
+            listItems={listItems}
+          />
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
