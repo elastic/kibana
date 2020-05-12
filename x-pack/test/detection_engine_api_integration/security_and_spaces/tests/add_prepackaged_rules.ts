@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../plugins/siem/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createSignalsIndex, deleteAllAlerts, deleteSignalsIndex } from './utils';
+import { createSignalsIndex, deleteAllAlerts, deleteSignalsIndex } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
