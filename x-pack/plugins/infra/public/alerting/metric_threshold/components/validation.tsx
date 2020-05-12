@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isNumber, isEmpty } from 'lodash';
+import { isNumber } from 'lodash';
 import {
   MetricExpressionParams,
   Comparator,
