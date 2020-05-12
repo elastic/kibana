@@ -28,9 +28,9 @@ import { IVectorLayer } from '../vector_layer/vector_layer';
 import { IESSource } from '../../sources/es_source';
 import { IESAggSource } from '../../sources/es_agg_source';
 import { ISource } from '../../sources/source';
-import { SyncContext } from '../../../actions/map_actions';
 import { DataRequestAbortError } from '../../util/data_request';
 import {
+  DataRequestContext,
   VectorStyleDescriptor,
   SizeDynamicOptions,
   DynamicStylePropertyOptions,
@@ -247,7 +247,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     return this._documentStyle;
   }
 
-  async syncData(syncContext: SyncContext) {
+  async syncData(syncContext: DataRequestContext) {
     const dataRequestId = ACTIVE_COUNT_DATA_ID;
     const requestToken = Symbol(`layer-active-count:${this.getId()}`);
     const searchFilters = this._getSearchFilters(

@@ -19,6 +19,16 @@ export type MapFilters = {
   zoom: number;
 };
 
+export type DataRequestContext = {
+  startLoading(dataId: string, requestToken: symbol, meta: DataMeta): void;
+  stopLoading(dataId: string, requestToken: symbol, data: unknown, meta: DataMeta): void;
+  onLoadError(dataId: string, requestToken: symbol, errorMessage: string): void;
+  updateSourceData(newData: unknown): void;
+  isRequestStillActive(dataId: string, requestToken: symbol): boolean;
+  registerCancelCallback(requestToken: symbol, callback: () => void): void;
+  dataFilters: MapFilters;
+};
+
 type ESSearchSourceSyncMeta = {
   sortField: string;
   sortOrder: SORT_ORDER;

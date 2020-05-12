@@ -8,6 +8,7 @@
 import { AbstractLayer } from '../layer';
 import { IVectorSource } from '../../sources/vector_source';
 import {
+  DataRequestContext,
   MapFilters,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
@@ -16,7 +17,6 @@ import { ILayer } from '../layer';
 import { IJoin } from '../../joins/join';
 import { IVectorStyle } from '../../styles/vector/vector_style';
 import { IField } from '../../fields/field';
-import { SyncContext } from '../../../actions/map_actions';
 
 export type VectorLayerArguments = {
   source: IVectorSource;
@@ -44,12 +44,12 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   getStyleEditorFields(): Promise<IField[]>;
   getValidJoins(): IJoin[];
   _syncSourceStyleMeta(
-    syncContext: SyncContext,
+    syncContext: DataRequestContext,
     source: IVectorSource,
     style: IVectorStyle
   ): Promise<void>;
   _syncSourceFormatters(
-    syncContext: SyncContext,
+    syncContext: DataRequestContext,
     source: IVectorSource,
     style: IVectorStyle
   ): Promise<void>;
@@ -59,7 +59,11 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     source: IVectorSource,
     style: IVectorStyle
   ): VectorSourceRequestMeta;
-  _syncData(syncContext: SyncContext, source: IVectorSource, style: IVectorStyle): Promise<void>;
+  _syncData(
+    syncContext: DataRequestContext,
+    source: IVectorSource,
+    style: IVectorStyle
+  ): Promise<void>;
   ownsMbSourceId(sourceId: string): boolean;
   ownsMbLayerId(sourceId: string): boolean;
   _setMbPointsProperties(mbMap: unknown, mvtSourceLayer?: string): void;

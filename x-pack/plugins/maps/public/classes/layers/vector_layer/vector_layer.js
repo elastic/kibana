@@ -174,14 +174,14 @@ export class VectorLayer extends AbstractLayer {
     };
   }
 
-  async getBounds(dataFilters) {
+  async getBounds(dataRequestContext) {
     const isStaticLayer = !this.getSource().isBoundsAware();
     if (isStaticLayer) {
       return this._getBoundsBasedOnData();
     }
 
     const searchFilters = this._getSearchFilters(
-      dataFilters,
+      dataRequestContext.dataFilters,
       this.getSource(),
       this.getCurrentStyle()
     );

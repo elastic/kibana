@@ -82,7 +82,7 @@ export const ROLLBACK_MAP_SETTINGS = 'ROLLBACK_MAP_SETTINGS';
 export const TRACK_MAP_SETTINGS = 'TRACK_MAP_SETTINGS';
 export const UPDATE_MAP_SETTING = 'UPDATE_MAP_SETTING';
 
-function getLayerLoadingCallbacks(dispatch, getState, layerId) {
+function getDataRequestCallbacks(dispatch, getState, layerId) {
   return {
     startLoading: (dataId, requestToken, meta) =>
       dispatch(startDataLoad(layerId, dataId, requestToken, meta)),
@@ -115,8 +115,10 @@ async function syncDataForAllLayers(dispatch, getState, dataFilters) {
   const state = getState();
   const layerList = getLayerList(state);
   const syncs = layerList.map(layer => {
-    const loadingFunctions = getLayerLoadingCallbacks(dispatch, getState, layer.getId());
-    return layer.syncData({ ...loadingFunctions, dataFilters });
+    return layer.syncData({
+      ...getDataRequestCallbacks(dispatch, getState, layer.getId()),
+      dataFilters,
+    });
   });
   await Promise.all(syncs);
 }
@@ -559,8 +561,10 @@ export function fitToLayerExtent(layerId) {
     const targetLayer = getLayerById(layerId, getState());
 
     if (targetLayer) {
-      const dataFilters = getDataFilters(getState());
-      const bounds = await targetLayer.getBounds(dataFilters);
+      const bounds = await targetLayer.getBounds({
+        ...getDataRequestCallbacks(dispatch, getState, layerId),
+        dataFilters: getDataFilters(getState()),
+      });
       if (bounds) {
         await dispatch(setGotoWithBounds(bounds));
       }
@@ -578,7 +582,10 @@ export function fitToDataBounds() {
 
     const dataFilters = getDataFilters(getState());
     const boundsPromises = layerList.map(async layer => {
-      return layer.getBounds(dataFilters);
+      return layer.getBounds({
+        ...getDataRequestCallbacks(dispatch, getState, layer.getId()),
+        dataFilters,
+      });
     });
 
     const bounds = await Promise.all(boundsPromises);
@@ -775,11 +782,9 @@ export function syncDataForLayer(layerId) {
   return async (dispatch, getState) => {
     const targetLayer = getLayerById(layerId, getState());
     if (targetLayer) {
-      const dataFilters = getDataFilters(getState());
-      const loadingFunctions = getLayerLoadingCallbacks(dispatch, getState, layerId);
       await targetLayer.syncData({
-        ...loadingFunctions,
-        dataFilters,
+        ...getDataRequestCallbacks(dispatch, getState, layerId),
+        dataFilters: getDataFilters(getState()),
       });
     }
   };

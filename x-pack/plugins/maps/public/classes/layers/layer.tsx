@@ -23,24 +23,24 @@ import {
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { copyPersistentState } from '../../reducers/util.js';
 import {
+  DataRequestContext,
   LayerDescriptor,
   MapExtent,
   MapFilters,
   StyleDescriptor,
 } from '../../../common/descriptor_types';
 import { Attribution, ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
-import { SyncContext } from '../../actions/map_actions';
 import { IStyle } from '../styles/style';
 
 export interface ILayer {
-  getBounds(mapFilters: MapFilters): Promise<MapExtent>;
+  getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent>;
   getDataRequest(id: string): DataRequest | undefined;
   getDisplayName(source?: ISource): Promise<string>;
   getId(): string;
   getSourceDataRequest(): DataRequest | undefined;
   getSource(): ISource;
   getSourceForEditing(): ISource;
-  syncData(syncContext: SyncContext): void;
+  syncData(syncContext: DataRequestContext): void;
   supportsElasticsearchFilters(): boolean;
   supportsFitToBounds(): Promise<boolean>;
   getAttributions(): Promise<Attribution[]>;
@@ -416,7 +416,7 @@ export class AbstractLayer implements ILayer {
       : '';
   }
 
-  async syncData(syncContext: SyncContext) {
+  async syncData(syncContext: DataRequestContext) {
     // no-op by default
   }
 
@@ -449,13 +449,8 @@ export class AbstractLayer implements ILayer {
     return sourceDataRequest ? sourceDataRequest.hasData() : false;
   }
 
-  async getBounds(mapFilters: MapFilters): Promise<MapExtent> {
-    return {
-      minLon: -180,
-      maxLon: 180,
-      minLat: -89,
-      maxLat: 89,
-    };
+  async getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent> {
+    return null;
   }
 
   renderStyleEditor({
