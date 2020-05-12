@@ -20,8 +20,6 @@ const config = yaml.safeLoad(
   )
 );
 
-console.log(config);
-
 const KIBANA_INDEX = config['kibana.index'] as string;
 const TASK_MANAGER_INDEX = config['xpack.task_manager.index'] as string;
 const KIBANA_ROLE_SUFFIX = argv.roleSuffix as string;
