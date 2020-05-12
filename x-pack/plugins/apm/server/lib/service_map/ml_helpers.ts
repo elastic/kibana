@@ -9,10 +9,11 @@ import {
   getMlJobServiceName,
   getSeverity
 } from '../../../common/ml_job_constants';
-import { AnomaliesResponse, ServicesResponse } from './get_service_map';
+import { ConnectionNode } from '../../../common/service_map';
+import { AnomaliesResponse } from './get_service_map';
 
-export function addAnomaliesToServicesData(
-  servicesData: ServicesResponse,
+export function addAnomaliesDataToNodes(
+  nodes: ConnectionNode[],
   anomaliesResponse: AnomaliesResponse
 ) {
   const anomaliesMap = (
@@ -52,7 +53,7 @@ export function addAnomaliesToServicesData(
     };
   }, {});
 
-  const servicesDataWithAnomalies = servicesData.map(service => {
+  const servicesDataWithAnomalies = nodes.map(service => {
     const serviceAnomalies = anomaliesMap[service[SERVICE_NAME]];
     if (serviceAnomalies) {
       const maxScore = serviceAnomalies.max_score;
