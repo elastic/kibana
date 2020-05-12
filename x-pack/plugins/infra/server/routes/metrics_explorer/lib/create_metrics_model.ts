@@ -15,12 +15,15 @@ const percentileToVaue = (agg: 'p95' | 'p99') => {
 };
 
 export const createMetricModel = (options: MetricsExplorerRequestBody): TSVBMetricModel => {
+  // if dropLastBucket is set use the value otherwise default to true.
+  const dropLastBucket: boolean = options.dropLastBucket != null ? options.dropLastBucket : true;
   return {
     id: 'custom',
     requires: [],
     index_pattern: options.indexPattern,
     interval: options.timerange.interval,
     time_field: options.timerange.field,
+    drop_last_bucket: dropLastBucket,
     type: 'timeseries',
     // Create one series per metric requested. The series.id will be used to identify the metric
     // when the responses are processed and combined with the grouping request.
