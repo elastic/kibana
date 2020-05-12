@@ -137,44 +137,46 @@ export function CollapsibleNav({
 
       <EuiHorizontalRule margin="none" />
 
-      <EuiFlexItem className="eui-yScroll">
-        {/* Recently viewed */}
-        <EuiCollapsibleNavGroup
-          key="recentlyViewed"
-          title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
-          isCollapsible={true}
-          initialIsOpen={getIsCategoryOpen('recentlyViewed', storage)}
-          onToggle={isCategoryOpen => setIsCategoryOpen('recentlyViewed', isCategoryOpen, storage)}
-        >
-          {recentNavLinks.length > 0 ? (
-            <EuiListGroup
-              aria-label={i18n.translate('core.ui.recentlyViewedAriaLabel', {
-                defaultMessage: 'Recently viewed links',
+      {/* Recently viewed */}
+      <EuiCollapsibleNavGroup
+        key="recentlyViewed"
+        title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
+        isCollapsible={true}
+        initialIsOpen={getIsCategoryOpen('recentlyViewed', storage)}
+        onToggle={isCategoryOpen => setIsCategoryOpen('recentlyViewed', isCategoryOpen, storage)}
+      >
+        {recentNavLinks.length > 0 ? (
+          <EuiListGroup
+            aria-label={i18n.translate('core.ui.recentlyViewedAriaLabel', {
+              defaultMessage: 'Recently viewed links',
+            })}
+            listItems={recentNavLinks.map(link => {
+              // TODO #64541
+              // Can remove icon from recent links completely
+              const { iconType, ...linkWithoutIcon } = link;
+              return linkWithoutIcon;
+            })}
+            maxWidth="none"
+            color="subdued"
+            gutterSize="none"
+            size="s"
+            className="eui-yScroll"
+            style={{ maxHeight: '9.5em' }}
+          />
+        ) : (
+          <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
+            <p>
+              {i18n.translate('core.ui.EmptyRecentlyViewed', {
+                defaultMessage: 'No recently viewed items',
               })}
-              listItems={recentNavLinks.map(link => {
-                // TODO #64541
-                // Can remove icon from recent links completely
-                const { iconType, ...linkWithoutIcon } = link;
-                return linkWithoutIcon;
-              })}
-              maxWidth="none"
-              color="subdued"
-              gutterSize="none"
-              size="s"
-              className="eui-yScroll"
-              style={{ maxHeight: '9.5em' }}
-            />
-          ) : (
-            <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
-              <p>
-                {i18n.translate('core.ui.EmptyRecentlyViewed', {
-                  defaultMessage: 'No recently viewed items',
-                })}
-              </p>
-            </EuiText>
-          )}
-        </EuiCollapsibleNavGroup>
+            </p>
+          </EuiText>
+        )}
+      </EuiCollapsibleNavGroup>
 
+      <EuiHorizontalRule margin="none" />
+
+      <EuiFlexItem className="eui-yScroll">
         {/* Kibana, Observability, Security, and Management sections */}
         {orderedCategories.map((categoryName, i) => {
           const category = categoryDictionary[categoryName]!;
