@@ -86,7 +86,7 @@ Qualitative data driven styling is available for the following styling propertie
 * *Label color*
 * *Label border color*
 
-To ensure symbols are consistent as you pan, zoom, and filter the map, qualitative data driven styling uses a {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation]. The term aggregation retrieves the top nine categories for the property. Feature values within the top categories are assigned a unique style. Feature values outside of the top categories are grouped into the *Other* category. A feature is assigned the *Other* category when the property value is undefined.
+To ensure symbols are consistent as you pan, zoom, and filter the map, qualitative data driven styling uses a {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation]. The term aggregation retrieves the top categories for the property. Feature values within the top categories are assigned a unique style. Feature values outside of the top categories are grouped into the *Other* category. A feature is assigned the *Other* category when the property value is undefined.
 
 To configure the terms aggregation, click the gear icon image:maps/images/gear_icon.png[]. Clear the *Get categories from indice* checkbox to turn off the terms aggregation request.
 
