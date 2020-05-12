@@ -54,7 +54,7 @@ export function createAnnotationsClient(params: {
       logger,
     });
 
-  function licenseGuard<T extends (...args: any[]) => any>(fn: T): T {
+  function ensureGoldLicense<T extends (...args: any[]) => any>(fn: T): T {
     return ((...args) => {
       if (!license?.hasAtLeast('gold')) {
         throw Boom.forbidden('Annotations require at least a gold license or a trial license.');
@@ -67,7 +67,7 @@ export function createAnnotationsClient(params: {
     get index() {
       return index;
     },
-    create: licenseGuard(
+    create: ensureGoldLicense(
       async (
         createParams: CreateParams
       ): Promise<{ _id: string; _index: string; _source: Annotation }> => {
@@ -98,7 +98,7 @@ export function createAnnotationsClient(params: {
         });
       }
     ),
-    getById: licenseGuard(async (getByIdParams: GetByIdParams) => {
+    getById: ensureGoldLicense(async (getByIdParams: GetByIdParams) => {
       const { id } = getByIdParams;
 
       return apiCaller('get', {
@@ -106,7 +106,7 @@ export function createAnnotationsClient(params: {
         index,
       });
     }),
-    delete: licenseGuard(async (deleteParams: DeleteParams) => {
+    delete: ensureGoldLicense(async (deleteParams: DeleteParams) => {
       const { id } = deleteParams;
 
       const response = (await apiCaller('delete', {
