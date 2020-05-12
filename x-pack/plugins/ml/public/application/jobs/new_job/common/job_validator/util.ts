@@ -12,8 +12,9 @@ import {
   JOB_ID_MAX_LENGTH,
 } from '../../../../../../common/constants/validation';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
-import { ValidationResults, ValidationMessage } from '../../../../../../common/util/job_utils';
+import { ValidationResults } from '../../../../../../common/util/job_utils';
 import { ExistingJobsAndGroups } from '../../../../services/job_service';
+import { JobValidationMessage } from '../../../../../../common/constants/messages';
 
 export function populateValidationMessages(
   validationResults: ValidationResults,
@@ -176,7 +177,7 @@ export function checkForExistingJobAndGroupIds(
   groupIds: string[],
   existingJobsAndGroups: ExistingJobsAndGroups
 ): ValidationResults {
-  const messages: ValidationMessage[] = [];
+  const messages: JobValidationMessage[] = [];
 
   // check that job id does not already exist as a job or group or a newly created group
   if (

@@ -4,21 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { once } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { JOB_ID_MAX_LENGTH } from '../../../common/constants/validation';
+import { JOB_ID_MAX_LENGTH, VALIDATION_STATUS } from './validation';
 
-let messages;
+export type MessageId = keyof ReturnType<typeof getMessages>;
 
-export const getMessages = () => {
-  if (messages) {
-    return messages;
-  }
+export interface JobValidationMessageDef {
+  status: VALIDATION_STATUS;
+  text: string;
+  url?: string;
+  heading?: string;
+}
 
+export type JobValidationMessageId =
+  | MessageId
+  | 'model_memory_limit_invalid'
+  | 'model_memory_limit_valid'
+  | 'model_memory_limit_units_invalid'
+  | 'model_memory_limit_units_valid'
+  | 'query_delay_invalid'
+  | 'query_delay_valid'
+  | 'frequency_valid'
+  | 'frequency_invalid'
+  // because we have some spread around
+  | string;
+
+export type JobValidationMessage = {
+  id: JobValidationMessageId;
+  url?: string;
+  fieldName?: string;
+  modelPlotCardinality?: number;
+} & {
+  [key: string]: any;
+};
+
+export const getMessages = once(() => {
   const createJobsDocsUrl = `https://www.elastic.co/guide/en/machine-learning/{{version}}/create-jobs.html`;
 
-  return (messages = {
+  return {
     field_not_aggregatable: {
-      status: 'ERROR',
+      status: VALIDATION_STATUS.ERROR,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.fieldNotAggregatableMessage', {
         defaultMessage: 'Detector field {fieldName} is not an aggregatable field.',
         values: {
@@ -29,7 +55,7 @@ export const getMessages = () => {
         'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-configuring-aggregation.html',
     },
     fields_not_aggregatable: {
-      status: 'ERROR',
+      status: VALIDATION_STATUS.ERROR,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.fieldsNotAggregatableMessage', {
         defaultMessage: 'One of the detector fields is not an aggregatable field.',
       }),
@@ -37,7 +63,7 @@ export const getMessages = () => {
         'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-configuring-aggregation.html',
     },
     cardinality_by_field: {
-      status: 'WARNING',
+      status: VALIDATION_STATUS.WARNING,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.cardinalityByFieldMessage', {
         defaultMessage:
           'Cardinality of {fieldName} is above 1000 and might result in high memory usage.',
@@ -48,7 +74,7 @@ export const getMessages = () => {
       url: `${createJobsDocsUrl}#cardinality`,
     },
     cardinality_over_field_low: {
-      status: 'WARNING',
+      status: VALIDATION_STATUS.WARNING,
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.cardinalityOverFieldLowMessage',
         {
@@ -62,7 +88,7 @@ export const getMessages = () => {
       url: `${createJobsDocsUrl}#cardinality`,
     },
     cardinality_over_field_high: {
-      status: 'WARNING',
+      status: VALIDATION_STATUS.WARNING,
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.cardinalityOverFieldHighMessage',
         {
@@ -76,7 +102,7 @@ export const getMessages = () => {
       url: `${createJobsDocsUrl}#cardinality`,
     },
     cardinality_partition_field: {
-      status: 'WARNING',
+      status: VALIDATION_STATUS.WARNING,
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.cardinalityPartitionFieldMessage',
         {
@@ -90,7 +116,7 @@ export const getMessages = () => {
       url: `${createJobsDocsUrl}#cardinality`,
     },
     cardinality_model_plot_high: {
-      status: 'WARNING',
+      status: VALIDATION_STATUS.WARNING,
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.cardinalityModelPlotHighMessage',
         {
@@ -104,7 +130,7 @@ export const getMessages = () => {
       ),
     },
     categorization_filters_valid: {
-      status: 'SUCCESS',
+      status: VALIDATION_STATUS.SUCCESS,
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.categorizationFiltersValidMessage',
         {
@@ -115,7 +141,7 @@ export const getMessages = () => {
         'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-configuring-categories.html',
     },
     categorization_filters_invalid: {
-      status: 'ERROR',
+      status: VALIDATION_STATUS.ERROR,
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.categorizationFiltersInvalidMessage',
         {
@@ -131,7 +157,7 @@ export const getMessages = () => {
         'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-analysisconfig',
     },
     bucket_span_empty: {
-      status: 'ERROR',
+      status: VALIDATION_STATUS.ERROR,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.bucketSpanEmptyMessage', {
         defaultMessage: 'The bucket span field must be specified.',
       }),
@@ -139,7 +165,7 @@ export const getMessages = () => {
         'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-analysisconfig',
     },
     bucket_span_estimation_mismatch: {
-      status: 'INFO',
+      status: VALIDATION_STATUS.INFO,
       heading: i18n.translate(
         'xpack.ml.models.jobValidation.messages.bucketSpanEstimationMismatchHeading',
         {
@@ -160,7 +186,7 @@ export const getMessages = () => {
       url: `${createJobsDocsUrl}#bucket-span`,
     },
     bucket_span_high: {
-      status: 'INFO',
+      status: VALIDATION_STATUS.INFO,
       heading: i18n.translate('xpack.ml.models.jobValidation.messages.bucketSpanHighHeading', {
         defaultMessage: 'Bucket span',
       }),
@@ -171,7 +197,7 @@ export const getMessages = () => {
       url: `${createJobsDocsUrl}#bucket-span`,
     },
     bucket_span_valid: {
-      status: 'SUCCESS',
+      status: VALIDATION_STATUS.SUCCESS,
       heading: i18n.translate('xpack.ml.models.jobValidation.messages.bucketSpanValidHeading', {
         defaultMessage: 'Bucket span',
       }),
@@ -185,7 +211,7 @@ export const getMessages = () => {
         'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-analysisconfig',
     },
     bucket_span_invalid: {
-      status: 'ERROR',
+      status: VALIDATION_STATUS.ERROR,
       heading: i18n.translate('xpack.ml.models.jobValidation.messages.bucketSpanInvalidHeading', {
         defaultMessage: 'Bucket span',
       }),
@@ -197,7 +223,7 @@ export const getMessages = () => {
         'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-analysisconfig',
     },
     detectors_duplicates: {
-      status: 'ERROR',
+      status: VALIDATION_STATUS.ERROR,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.detectorsDuplicatesMessage', {
         defaultMessage:
           'Duplicate detectors were found. Detectors having the same combined configuration for ' +
@@ -214,21 +240,21 @@ export const getMessages = () => {
       url: `${createJobsDocsUrl}#detectors`,
     },
     detectors_empty: {
-      status: 'ERROR',
+      status: VALIDATION_STATUS.ERROR,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.detectorsEmptyMessage', {
         defaultMessage: 'No detectors were found. At least one detector must be specified.',
       }),
       url: `${createJobsDocsUrl}#detectors`,
     },
     detectors_function_empty: {
-      status: 'ERROR',
+      status: VALIDATION_STATUS.ERROR,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.detectorsFunctionEmptyMessage', {
         defaultMessage: 'One of the detector functions is empty.',
       }),
       url: `${createJobsDocsUrl}#detectors`,
     },
     detectors_function_not_empty: {
-      status: 'SUCCESS',
+      status: VALIDATION_STATUS.SUCCESS,
       heading: i18n.translate(
         'xpack.ml.models.jobValidation.messages.detectorsFunctionNotEmptyHeading',
         {
@@ -244,19 +270,19 @@ export const getMessages = () => {
       url: `${createJobsDocsUrl}#detectors`,
     },
     index_fields_invalid: {
-      status: 'ERROR',
+      status: VALIDATION_STATUS.ERROR,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.indexFieldsInvalidMessage', {
         defaultMessage: 'Could not load fields from index.',
       }),
     },
     index_fields_valid: {
-      status: 'SUCCESS',
+      status: VALIDATION_STATUS.SUCCESS,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.indexFieldsValidMessage', {
         defaultMessage: 'Index fields are present in the datafeed.',
       }),
     },
     influencer_high: {
-      status: 'WARNING',
+      status: VALIDATION_STATUS.WARNING,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.influencerHighMessage', {
         defaultMessage:
           'The job configuration includes more than 3 influencers. ' +
@@ -265,7 +291,7 @@ export const getMessages = () => {
       url: 'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-influencers.html',
     },
     influencer_low: {
-      status: 'WARNING',
+      status: VALIDATION_STATUS.WARNING,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.influencerLowMessage', {
         defaultMessage:
           'No influencers have been configured. Picking an influencer is strongly recommended.',
@@ -273,7 +299,7 @@ export const getMessages = () => {
       url: 'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-influencers.html',
     },
     influencer_low_suggestion: {
-      status: 'WARNING',
+      status: VALIDATION_STATUS.WARNING,
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.influencerLowSuggestionMessage',
         {
@@ -285,7 +311,7 @@ export const getMessages = () => {
       url: 'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-influencers.html',
     },
     influencer_low_suggestions: {
-      status: 'WARNING',
+      status: VALIDATION_STATUS.WARNING,
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.influencerLowSuggestionsMessage',
         {
@@ -297,7 +323,7 @@ export const getMessages = () => {
       url: 'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-influencers.html',
     },
     job_id_empty: {
-      status: 'ERROR',
+      status: VALIDATION_STATUS.ERROR,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.jobIdEmptyMessage', {
         defaultMessage: 'Job ID field must not be empty.',
       }),
@@ -305,7 +331,7 @@ export const getMessages = () => {
         'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource',
     },
     job_id_invalid: {
-      status: 'ERROR',
+      status: VALIDATION_STATUS.ERROR,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.jobIdInvalidMessage', {
         defaultMessage:
           'Job ID is invalid. It can contain lowercase alphanumeric (a-z and 0-9) characters, ' +
@@ -315,7 +341,7 @@ export const getMessages = () => {
         'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource',
     },
     job_id_invalid_max_length: {
-      status: 'ERROR',
+      status: VALIDATION_STATUS.ERROR,
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.jobIdInvalidMaxLengthErrorMessage',
         {
@@ -330,7 +356,7 @@ export const getMessages = () => {
         'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource',
     },
     job_id_valid: {
-      status: 'SUCCESS',
+      status: VALIDATION_STATUS.SUCCESS,
       heading: i18n.translate('xpack.ml.models.jobValidation.messages.jobIdValidHeading', {
         defaultMessage: 'Job ID format is valid',
       }),
@@ -347,7 +373,7 @@ export const getMessages = () => {
         'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource',
     },
     job_group_id_invalid: {
-      status: 'ERROR',
+      status: VALIDATION_STATUS.ERROR,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.jobGroupIdInvalidMessage', {
         defaultMessage:
           'One of the job group names is invalid. They can contain lowercase ' +
@@ -357,7 +383,7 @@ export const getMessages = () => {
         'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource',
     },
     job_group_id_invalid_max_length: {
-      status: 'ERROR',
+      status: VALIDATION_STATUS.ERROR,
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.jobGroupIdInvalidMaxLengthErrorMessage',
         {
@@ -372,7 +398,7 @@ export const getMessages = () => {
         'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource',
     },
     job_group_id_valid: {
-      status: 'SUCCESS',
+      status: VALIDATION_STATUS.SUCCESS,
       heading: i18n.translate('xpack.ml.models.jobValidation.messages.jobGroupIdValidHeading', {
         defaultMessage: 'Job group id formats are valid',
       }),
@@ -389,14 +415,14 @@ export const getMessages = () => {
         'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource',
     },
     skipped_extended_tests: {
-      status: 'WARNING',
+      status: VALIDATION_STATUS.WARNING,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.skippedExtendedTestsMessage', {
         defaultMessage:
           'Skipped additional checks because the basic requirements of the job configuration were not met.',
       }),
     },
     success_cardinality: {
-      status: 'SUCCESS',
+      status: VALIDATION_STATUS.SUCCESS,
       heading: i18n.translate('xpack.ml.models.jobValidation.messages.successCardinalityHeading', {
         defaultMessage: 'Cardinality',
       }),
@@ -406,7 +432,7 @@ export const getMessages = () => {
       url: `${createJobsDocsUrl}#cardinality`,
     },
     success_bucket_span: {
-      status: 'SUCCESS',
+      status: VALIDATION_STATUS.SUCCESS,
       heading: i18n.translate('xpack.ml.models.jobValidation.messages.successBucketSpanHeading', {
         defaultMessage: 'Bucket span',
       }),
@@ -417,14 +443,14 @@ export const getMessages = () => {
       url: `${createJobsDocsUrl}#bucket-span`,
     },
     success_influencers: {
-      status: 'SUCCESS',
+      status: VALIDATION_STATUS.SUCCESS,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.successInfluencersMessage', {
         defaultMessage: 'Influencer configuration passed the validation checks.',
       }),
       url: 'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-influencers.html',
     },
     estimated_mml_greater_than_max_mml: {
-      status: 'WARNING',
+      status: VALIDATION_STATUS.WARNING,
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.estimatedMmlGreaterThanMaxMmlMessage',
         {
@@ -434,7 +460,7 @@ export const getMessages = () => {
       ),
     },
     mml_greater_than_effective_max_mml: {
-      status: 'WARNING',
+      status: VALIDATION_STATUS.WARNING,
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.mmlGreaterThanEffectiveMaxMmlMessage',
         {
@@ -445,14 +471,14 @@ export const getMessages = () => {
       ),
     },
     mml_greater_than_max_mml: {
-      status: 'ERROR',
+      status: VALIDATION_STATUS.ERROR,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.mmlGreaterThanMaxMmlMessage', {
         defaultMessage:
           'The model memory limit is greater than the max model memory limit configured for this cluster.',
       }),
     },
     mml_value_invalid: {
-      status: 'ERROR',
+      status: VALIDATION_STATUS.ERROR,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.mmlValueInvalidMessage', {
         defaultMessage:
           '{mml} is not a valid value for model memory limit. The value needs to be at least ' +
@@ -462,7 +488,7 @@ export const getMessages = () => {
       url: `${createJobsDocsUrl}#model-memory-limits`,
     },
     half_estimated_mml_greater_than_mml: {
-      status: 'WARNING',
+      status: VALIDATION_STATUS.WARNING,
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.halfEstimatedMmlGreaterThanMmlMessage',
         {
@@ -474,7 +500,7 @@ export const getMessages = () => {
       url: `${createJobsDocsUrl}#model-memory-limits`,
     },
     estimated_mml_greater_than_mml: {
-      status: 'INFO',
+      status: VALIDATION_STATUS.INFO,
       text: i18n.translate(
         'xpack.ml.models.jobValidation.messages.estimatedMmlGreaterThanMmlMessage',
         {
@@ -485,7 +511,7 @@ export const getMessages = () => {
       url: `${createJobsDocsUrl}#model-memory-limits`,
     },
     success_mml: {
-      status: 'SUCCESS',
+      status: VALIDATION_STATUS.SUCCESS,
       heading: i18n.translate('xpack.ml.models.jobValidation.messages.successMmlHeading', {
         defaultMessage: 'Model memory limit',
       }),
@@ -495,7 +521,7 @@ export const getMessages = () => {
       url: `${createJobsDocsUrl}#model-memory-limits`,
     },
     success_time_range: {
-      status: 'SUCCESS',
+      status: VALIDATION_STATUS.SUCCESS,
       heading: i18n.translate('xpack.ml.models.jobValidation.messages.successTimeRangeHeading', {
         defaultMessage: 'Time range',
       }),
@@ -504,7 +530,7 @@ export const getMessages = () => {
       }),
     },
     time_field_invalid: {
-      status: 'ERROR',
+      status: VALIDATION_STATUS.ERROR,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.timeFieldInvalidMessage', {
         defaultMessage: `{timeField} cannot be used as the time field because it is not a field of type 'date' or 'date_nanos'.`,
         values: {
@@ -513,7 +539,7 @@ export const getMessages = () => {
       }),
     },
     time_range_short: {
-      status: 'WARNING',
+      status: VALIDATION_STATUS.WARNING,
       heading: i18n.translate('xpack.ml.models.jobValidation.messages.timeRangeShortHeading', {
         defaultMessage: 'Time range',
       }),
@@ -528,7 +554,7 @@ export const getMessages = () => {
       }),
     },
     time_range_before_epoch: {
-      status: 'WARNING',
+      status: VALIDATION_STATUS.WARNING,
       heading: i18n.translate(
         'xpack.ml.models.jobValidation.messages.timeRangeBeforeEpochHeading',
         {
@@ -541,5 +567,5 @@ export const getMessages = () => {
           'the UNIX epoch beginning. Timestamps before 01/01/1970 00:00:00 (UTC) are not supported for machine learning jobs.',
       }),
     },
-  });
-};
+  };
+});

@@ -6,7 +6,7 @@
 
 import { SKIP_BUCKET_SPAN_ESTIMATION } from '../../../common/constants/validation';
 
-import { ValidationMessage } from './messages';
+import { JobValidationMessage } from '../../../common/constants/messages';
 // @ts-ignore
 import { validateBucketSpan } from './validate_bucket_span';
 
@@ -88,7 +88,7 @@ describe('ML - validateBucketSpan', () => {
     };
 
     return validateBucketSpan(callWithRequestFactory(mockFareQuoteSearchResponse), job).then(
-      (messages: ValidationMessage[]) => {
+      (messages: JobValidationMessage[]) => {
         const ids = messages.map(m => m.id);
         expect(ids).toStrictEqual([]);
       }
@@ -113,7 +113,7 @@ describe('ML - validateBucketSpan', () => {
       callWithRequestFactory(mockFareQuoteSearchResponse),
       job,
       duration
-    ).then((messages: ValidationMessage[]) => {
+    ).then((messages: JobValidationMessage[]) => {
       const ids = messages.map(m => m.id);
       expect(ids).toStrictEqual(['success_bucket_span']);
     });
@@ -127,7 +127,7 @@ describe('ML - validateBucketSpan', () => {
       callWithRequestFactory(mockFareQuoteSearchResponse),
       job,
       duration
-    ).then((messages: ValidationMessage[]) => {
+    ).then((messages: JobValidationMessage[]) => {
       const ids = messages.map(m => m.id);
       expect(ids).toStrictEqual(['bucket_span_high']);
     });
@@ -148,7 +148,7 @@ describe('ML - validateBucketSpan', () => {
     });
 
     return validateBucketSpan(callWithRequestFactory(mockSearchResponse), job, {}).then(
-      (messages: ValidationMessage[]) => {
+      (messages: JobValidationMessage[]) => {
         const ids = messages.map(m => m.id);
         test(ids);
       }

@@ -10,6 +10,7 @@ import { DataVisualizer } from '../data_visualizer';
 import { validateJobObject } from './validate_job_object';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { Detector } from '../../../common/types/anomaly_detection_jobs';
+import { MessageId, JobValidationMessage } from '../../../common/constants/messages';
 
 function isValidCategorizationConfig(job: CombinedJob, fieldName: string): boolean {
   return (
@@ -31,12 +32,12 @@ const PARTITION_FIELD_CARDINALITY_THRESHOLD = 1000;
 const BY_FIELD_CARDINALITY_THRESHOLD = 1000;
 const MODEL_PLOT_THRESHOLD_HIGH = 100;
 
-type Messages = Array<{ id: string; fieldName?: string }>;
+export type Messages = JobValidationMessage[];
 
 type Validator = (obj: {
   type: string;
   isInvalid: (cardinality: number) => boolean;
-  messageId?: string;
+  messageId?: MessageId;
 }) => Promise<{
   modelPlotCardinality: number;
   messages: Messages;
@@ -105,7 +106,7 @@ const validateFactory = (callWithRequest: APICaller, job: CombinedJob): Validato
 
             if (isInvalid(field.stats.cardinality!)) {
               messages.push({
-                id: messageId || `cardinality_${type}_field`,
+                id: messageId || (`cardinality_${type}_field` as MessageId),
                 fieldName: uniqueFieldName,
               });
             }
@@ -149,8 +150,8 @@ const validateFactory = (callWithRequest: APICaller, job: CombinedJob): Validato
 export async function validateCardinality(
   callWithRequest: APICaller,
   job?: CombinedJob
-): Promise<Array<{ id: string; modelPlotCardinality?: number; fieldName?: string }>> | never {
-  const messages = [];
+): Promise<Messages> | never {
+  const messages: Messages = [];
 
   if (!validateJobObject(job)) {
     // required for TS type casting, validateJobObject throws an error internally.
