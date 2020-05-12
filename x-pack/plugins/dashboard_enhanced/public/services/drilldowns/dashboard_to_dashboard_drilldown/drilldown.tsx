@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_react/public';
-import { DASHBOARD_APP_URL_GENERATOR } from '../../../../../../../src/plugins/dashboard/public';
+import { DashboardUrlGenerator } from '../../../../../../../src/plugins/dashboard/public';
 import { ActionContext, Config } from './types';
 import { CollectConfigContainer } from './components';
 import { DASHBOARD_TO_DASHBOARD_DRILLDOWN } from './constants';
@@ -22,7 +22,8 @@ import { StartServicesGetter } from '../../../../../../../src/plugins/kibana_uti
 import { StartDependencies } from '../../../plugin';
 
 export interface Params {
-  start: StartServicesGetter<Pick<StartDependencies, 'data' | 'advancedUiActions' | 'share'>>;
+  start: StartServicesGetter<Pick<StartDependencies, 'data' | 'advancedUiActions'>>;
+  getDashboardUrlGenerator: () => DashboardUrlGenerator;
 }
 
 export class DashboardToDashboardDrilldown
@@ -142,9 +143,7 @@ export class DashboardToDashboardDrilldown
       }
     }
 
-    const { plugins } = this.params.start();
-
-    return plugins.share.urlGenerators.getUrlGenerator(DASHBOARD_APP_URL_GENERATOR).createUrl({
+    return this.params.getDashboardUrlGenerator().createUrl({
       dashboardId: config.dashboardId,
       query: config.useCurrentFilters ? query : undefined,
       timeRange,

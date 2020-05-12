@@ -6,18 +6,18 @@
 
 import { createSelector } from 'reselect';
 import _ from 'lodash';
-import { TileLayer } from '../layers/tile_layer';
-import { VectorTileLayer } from '../layers/vector_tile_layer';
-import { VectorLayer } from '../layers/vector_layer';
-import { HeatmapLayer } from '../layers/heatmap_layer';
-import { BlendedVectorLayer } from '../layers/blended_vector_layer';
+import { TileLayer } from '../classes/layers/tile_layer/tile_layer';
+import { VectorTileLayer } from '../classes/layers/vector_tile_layer/vector_tile_layer';
+import { VectorLayer } from '../classes/layers/vector_layer/vector_layer';
+import { HeatmapLayer } from '../classes/layers/heatmap_layer/heatmap_layer';
+import { BlendedVectorLayer } from '../classes/layers/blended_vector_layer/blended_vector_layer';
 import { getTimeFilter } from '../kibana_services';
 import { getInspectorAdapters } from '../reducers/non_serializable_instances';
-import { TiledVectorLayer } from '../layers/tiled_vector_layer';
+import { TiledVectorLayer } from '../classes/layers/tiled_vector_layer/tiled_vector_layer';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
-import { InnerJoin } from '../layers/joins/inner_join';
-import { getSourceByType } from '../layers/sources/source_registry';
-import { GeojsonFileSource } from '../layers/sources/client_file_source';
+import { InnerJoin } from '../classes/joins/inner_join';
+import { getSourceByType } from '../classes/sources/source_registry';
+import { GeojsonFileSource } from '../classes/sources/client_file_source';
 import {
   LAYER_TYPE,
   SOURCE_DATA_ID_ORIGIN,

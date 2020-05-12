@@ -76,6 +76,7 @@ export interface State {
     numTopFeatureImportanceValuesValid: boolean;
     previousJobType: null | AnalyticsJobType;
     previousSourceIndex: EsIndexName | undefined;
+    requiredFieldsError: string | undefined;
     sourceIndex: EsIndexName;
     sourceIndexNameEmpty: boolean;
     sourceIndexNameValid: boolean;
@@ -133,6 +134,7 @@ export const getInitialState = (): State => ({
     numTopFeatureImportanceValuesValid: true,
     previousJobType: null,
     previousSourceIndex: undefined,
+    requiredFieldsError: undefined,
     sourceIndex: '',
     sourceIndexNameEmpty: true,
     sourceIndexNameValid: false,
