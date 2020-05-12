@@ -8,7 +8,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiBadge, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 
-import { isJobStarted } from '../../../../../../common/detection_engine/ml_helpers';
+import { isJobStarted } from '../../../../../../common/machine_learning/helpers';
 import { useKibana } from '../../../../../lib/kibana';
 import { SiemJob } from '../../../../../components/ml_popover/types';
 import { ListItems } from './types';
