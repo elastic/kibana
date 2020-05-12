@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 
-import { uploadLayerWizardConfig } from '../../../layers/sources/client_file_source';
+import { uploadLayerWizardConfig } from '../../../classes/sources/client_file_source';
 
 export const ImportEditor = props => {
   const editorProperties = getEditorProperties(props);

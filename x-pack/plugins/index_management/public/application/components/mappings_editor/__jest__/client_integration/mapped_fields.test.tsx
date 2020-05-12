@@ -10,7 +10,8 @@ import { componentHelpers, MappingsEditorTestBed, DomFields, nextTick } from './
 const { setup } = componentHelpers.mappingsEditor;
 const onChangeHandler = jest.fn();
 
-describe('Mappings editor: mapped fields', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/65741
+describe.skip('Mappings editor: mapped fields', () => {
   afterEach(() => {
     onChangeHandler.mockReset();
   });
