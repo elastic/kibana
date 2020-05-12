@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MlCapabilities } from '../types';
+import { MlCapabilitiesResponse } from '../../../ml/common/types/capabilities';
 
-export const hasMlUserPermissions = (capabilities: MlCapabilities): boolean =>
+export const hasMlUserPermissions = (capabilities: MlCapabilitiesResponse): boolean =>
   capabilities.capabilities.canGetJobs &&
   capabilities.capabilities.canGetDatafeeds &&
   capabilities.capabilities.canGetCalendars;
