@@ -87,14 +87,13 @@ hot spots are. An advantage of having indexed
 lightning strikes is that you can perform aggregations on the data.
 
 . Click *Add layer*.
-. From the list of layer types, click *Grid aggregation*.
+. From the list of layer types, click *Heat map*.
 +
 Because you indexed `lightning_detected.geojson` using the index name and
 pattern `lightning_detected`, that data is available as a {ref}/geo-point.html[geo_point]
 aggregation.
 
 . Select `lightning_detected`.
-. Click *Show as* and select `heat map`.
 . Click *Add layer* to add the heat map layer
 "Lightning intensity".
 +
