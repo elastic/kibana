@@ -291,7 +291,7 @@ export async function resolveSavedObjects(
         importedObjectCount++;
       }
     } catch (error) {
-      failedImports.push({ indexPatternDoc, error });
+      failedImports.push({ obj: indexPatternDoc, error });
     }
   });
 
