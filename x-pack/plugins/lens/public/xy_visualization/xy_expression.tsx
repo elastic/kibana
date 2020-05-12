@@ -26,8 +26,7 @@ import {
   ExpressionFunctionDefinition,
   ExpressionValueSearchContext,
 } from 'src/plugins/expressions/public';
-import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   ValueClickTriggerContext,
@@ -41,6 +40,7 @@ import { isHorizontalChart } from './state_helpers';
 import { getExecuteTriggerActions } from '../services';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { parseInterval } from '../../../../../src/plugins/data/common';
+import { EmptyPlaceholder } from '../shared_components';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
@@ -193,18 +193,7 @@ export function XYChart({
 
   if (filteredLayers.length === 0) {
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
-    return (
-      <EuiText className="lnsChart__empty" textAlign="center" color="subdued" size="xs">
-        <EuiIcon type={icon} color="subdued" size="l" />
-        <EuiSpacer size="s" />
-        <p>
-          <FormattedMessage
-            id="xpack.lens.xyVisualization.noDataLabel"
-            defaultMessage="No results found"
-          />
-        </p>
-      </EuiText>
-    );
+    return <EmptyPlaceholder icon={icon} />;
   }
 
   // use formatting hint of first x axis column to format ticks
