@@ -11,7 +11,7 @@ import { TileLayer } from '../classes/layers/tile_layer/tile_layer';
 // @ts-ignore
 import { VectorTileLayer } from '../classes/layers/vector_tile_layer/vector_tile_layer';
 import { VectorLayer } from '../classes/layers/vector_layer/vector_layer';
-import { VectorStyle } from '../classes/layers/styles/vector/vector_style';
+import { VectorStyle } from '../classes/styles/vector/vector_style';
 // @ts-ignore
 import { HeatmapLayer } from '../classes/layers/heatmap_layer/heatmap_layer';
 import { BlendedVectorLayer } from '../classes/layers/blended_vector_layer/blended_vector_layer';

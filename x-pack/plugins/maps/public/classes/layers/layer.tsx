@@ -19,7 +19,7 @@ import {
   MIN_ZOOM,
   SOURCE_DATA_ID_ORIGIN,
 } from '../../../common/constants';
-import { copyPersistentState } from '../reducers/util';
+import { copyPersistentState } from '../../reducers/util';
 import {
   LayerDescriptor,
   MapExtent,
