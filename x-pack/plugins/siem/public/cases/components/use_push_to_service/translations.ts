@@ -13,6 +13,12 @@ export const ERROR_PUSH_SERVICE_CALLOUT_TITLE = i18n.translate(
   }
 );
 export const PUSH_THIRD = (thirdParty: string) => {
+  if (thirdParty === 'none') {
+    return i18n.translate('xpack.siem.case.caseView.pushThirdPartyIncident', {
+      defaultMessage: 'Push as external incident',
+    });
+  }
+
   return i18n.translate('xpack.siem.case.caseView.pushNamedIncident', {
     values: { thirdParty },
     defaultMessage: 'Push as { thirdParty } incident',
@@ -20,6 +26,12 @@ export const PUSH_THIRD = (thirdParty: string) => {
 };
 
 export const UPDATE_THIRD = (thirdParty: string) => {
+  if (thirdParty === 'none') {
+    return i18n.translate('xpack.siem.case.caseView.updateThirdPartyIncident', {
+      defaultMessage: 'Update external incident',
+    });
+  }
+
   return i18n.translate('xpack.siem.case.caseView.updateNamedIncident', {
     values: { thirdParty },
     defaultMessage: 'Update { thirdParty } incident',

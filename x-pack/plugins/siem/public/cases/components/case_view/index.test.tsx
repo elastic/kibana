@@ -15,21 +15,22 @@ import { useUpdateCase } from '../../containers/use_update_case';
 import { useGetCase } from '../../containers/use_get_case';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { wait } from '../../../common/lib/helpers';
-import { usePushToService } from '../use_push_to_service';
 
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/configure/mock';
 
+import { usePostPushToService } from '../../containers/use_post_push_to_service';
+
 jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_user_actions');
 jest.mock('../../containers/use_get_case');
-jest.mock('../use_push_to_service');
 jest.mock('../../containers/configure/use_connectors');
+jest.mock('../../containers/use_post_push_to_service');
 
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
-const usePushToServiceMock = usePushToService as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
+const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 
 export const caseProps: CaseProps = {
   caseId: basicCase.id,
@@ -49,6 +50,8 @@ describe('CaseView ', () => {
   const fetchCaseUserActions = jest.fn();
   const fetchCase = jest.fn();
   const updateCase = jest.fn();
+  const postPushToService = jest.fn();
+
   const data = caseProps.caseData;
   const defaultGetCase = {
     isLoading: false,
@@ -92,19 +95,7 @@ describe('CaseView ', () => {
     useUpdateCaseMock.mockImplementation(() => defaultUpdateCaseState);
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
     useGetCaseUserActionsMock.mockImplementation(() => defaultUseGetCaseUserActions);
-    usePushToServiceMock.mockImplementation(({ updateCase: updateCaseMockCall }) => ({
-      pushButton: (
-        <button
-          data-test-subj="mock-button"
-          onClick={() => updateCaseMockCall(caseProps.caseData)}
-          type="button"
-        >
-          {'Hello Button'}
-        </button>
-      ),
-      pushCallouts: null,
-    }));
-
+    usePostPushToServiceMock.mockImplementation(() => ({ isLoading: false, postPushToService }));
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, isLoading: false }));
   });
 
@@ -337,6 +328,7 @@ describe('CaseView ', () => {
       ...defaultUseGetCaseUserActions,
       hasDataToPush: true,
     }));
+
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -344,20 +336,24 @@ describe('CaseView ', () => {
         </Router>
       </TestProviders>
     );
+
+    await wait();
+
     expect(
       wrapper
         .find('[data-test-subj="has-data-to-push-button"]')
         .first()
         .exists()
     ).toBeTruthy();
+
     wrapper
-      .find('[data-test-subj="mock-button"]')
+      .find('[data-test-subj="push-to-external-service"]')
       .first()
       .simulate('click');
+
     wrapper.update();
-    await wait();
-    expect(updateCase).toBeCalledWith(caseProps.caseData);
-    expect(fetchCaseUserActions).toBeCalledWith(caseProps.caseData.id);
+
+    expect(postPushToService).toHaveBeenCalled();
   });
 
   it('should return null if error', () => {
@@ -439,7 +435,12 @@ describe('CaseView ', () => {
     expect(fetchCase).toBeCalled();
   });
 
-  it('should hide push button when connector is invalid', () => {
+  it('should disable the push button when connector is invalid', () => {
+    useGetCaseUserActionsMock.mockImplementation(() => ({
+      ...defaultUseGetCaseUserActions,
+      hasDataToPush: true,
+    }));
+
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -456,9 +457,9 @@ describe('CaseView ', () => {
 
     expect(
       wrapper
-        .find('[data-test-subj="has-data-to-push-button"]')
+        .find('button[data-test-subj="push-to-external-service"]')
         .first()
-        .exists()
-    ).toBeFalsy();
+        .prop('disabled')
+    ).toBeTruthy();
   });
 });

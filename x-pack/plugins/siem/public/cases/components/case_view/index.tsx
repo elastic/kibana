@@ -175,7 +175,7 @@ export const CaseComponent = React.memo<CaseProps>(
     );
 
     const { pushButton, pushCallouts } = usePushToService({
-      caseConnectorId: isValidConnector ? caseData.connectorId : 'none',
+      caseConnectorId: caseData.connectorId,
       caseConnectorName,
       caseServices,
       caseId: caseData.id,
@@ -183,6 +183,7 @@ export const CaseComponent = React.memo<CaseProps>(
       connectors,
       updateCase: handleUpdateCase,
       userCanCrud,
+      isValidConnector,
     });
 
     const onSubmitConnector = useCallback(
@@ -307,7 +308,7 @@ export const CaseComponent = React.memo<CaseProps>(
                           onChange={toggleStatusCase}
                         />
                       </EuiFlexItem>
-                      {hasDataToPush && isValidConnector && (
+                      {hasDataToPush && (
                         <EuiFlexItem data-test-subj="has-data-to-push-button" grow={false}>
                           {pushButton}
                         </EuiFlexItem>
@@ -341,7 +342,7 @@ export const CaseComponent = React.memo<CaseProps>(
                   isLoading={isLoadingConnectors}
                   onSubmit={onSubmitConnector}
                   connectors={connectors}
-                  selectedConnector={isValidConnector ? caseData.connectorId : 'none'}
+                  selectedConnector={caseData.connectorId}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
