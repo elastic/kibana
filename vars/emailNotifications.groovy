@@ -116,7 +116,7 @@ def sendFailedBuild(Map params = [:]) {
 
     emailext(
       to: config.to,
-      replyTo: replyTo,
+      replyTo: config.replyTo,
       subject: config.subject,
       body: config.body,
       mimeType: config.mimeType,
