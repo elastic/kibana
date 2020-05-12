@@ -35,7 +35,10 @@ export interface SearchServiceStart {
 interface SetupDeps {
   basePath: IBasePath;
   config: GlobalSearchConfigType;
+  maxProviderResults?: number;
 }
+
+const defaultMaxProviderResults = 20;
 
 /** @internal */
 export class SearchService {
@@ -43,11 +46,16 @@ export class SearchService {
   private basePath?: IBasePath;
   private config?: GlobalSearchConfigType;
   private contextFactory?: GlobalSearchContextFactory;
-  private readonly maxProviderResults = 20;
+  private maxProviderResults = defaultMaxProviderResults;
 
-  setup({ basePath, config }: SetupDeps): SearchServiceSetup {
+  setup({
+    basePath,
+    config,
+    maxProviderResults = defaultMaxProviderResults,
+  }: SetupDeps): SearchServiceSetup {
     this.basePath = basePath;
     this.config = config;
+    this.maxProviderResults = maxProviderResults;
 
     return {
       registerResultProvider: provider => {
