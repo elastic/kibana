@@ -69,9 +69,9 @@
  *    `appSearchSource`.
  */
 
-import { uniqueId, uniq, extend, pick, difference, set, omit, keys, isFunction } from 'lodash';
+import { uniqueId, uniq, extend, pick, difference, omit, set, keys, isFunction } from 'lodash';
 import { map } from 'rxjs/operators';
-import { CoreStart, SavedObjectReference } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/public';
@@ -82,6 +82,7 @@ import { FetchOptions, RequestFailure, getSearchParams, handleResponse } from '.
 import { getEsQueryConfig, buildEsQuery, Filter } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
 import { fetchSoon } from '../legacy';
+import { extractReferences } from './extract_references';
 import { ISearchStartLegacy } from '../types';
 
 export interface SearchSourceDependencies {
@@ -450,6 +451,25 @@ export class SearchSource {
     return searchRequest;
   }
 
+  public getSerializedFields() {
+    const { filter: originalFilters, ...searchSourceFields } = omit(this.getFields(), [
+      'sort',
+      'size',
+    ]);
+    let serializedSearchSourceFields: SearchSourceFields = {
+      ...searchSourceFields,
+      index: searchSourceFields.index ? searchSourceFields.index.id : undefined,
+    };
+    if (originalFilters) {
+      const filters = this.getFilters(originalFilters);
+      serializedSearchSourceFields = {
+        ...serializedSearchSourceFields,
+        filter: filters,
+      };
+    }
+    return serializedSearchSourceFields;
+  }
+
   /**
    * Serializes the instance to a JSON string and a set of referenced objects.
    * Use this method to get a representation of the search source which can be stored in a saved object.
@@ -461,57 +481,8 @@ export class SearchSource {
    * Using `createSearchSource`, the instance can be re-created.
    * @public */
   public serialize() {
-    const references: SavedObjectReference[] = [];
-
-    const {
-      filter: originalFilters,
-      ...searchSourceFields
-    }: Omit<SearchSourceFields, 'sort' | 'size'> = omit(this.getFields(), ['sort', 'size']);
-    let serializedSearchSourceFields: Omit<SearchSourceFields, 'sort' | 'size' | 'filter'> & {
-      indexRefName?: string;
-      filter?: Array<Omit<Filter, 'meta'> & { meta: Filter['meta'] & { indexRefName?: string } }>;
-    } = searchSourceFields;
-    if (searchSourceFields.index) {
-      const indexId = searchSourceFields.index.id!;
-      const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
-      references.push({
-        name: refName,
-        type: 'index-pattern',
-        id: indexId,
-      });
-      serializedSearchSourceFields = {
-        ...serializedSearchSourceFields,
-        indexRefName: refName,
-        index: undefined,
-      };
-    }
-    if (originalFilters) {
-      const filters = this.getFilters(originalFilters);
-      serializedSearchSourceFields = {
-        ...serializedSearchSourceFields,
-        filter: filters.map((filterRow, i) => {
-          if (!filterRow.meta || !filterRow.meta.index) {
-            return filterRow;
-          }
-          const refName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
-          references.push({
-            name: refName,
-            type: 'index-pattern',
-            id: filterRow.meta.index,
-          });
-          return {
-            ...filterRow,
-            meta: {
-              ...filterRow.meta,
-              indexRefName: refName,
-              index: undefined,
-            },
-          };
-        }),
-      };
-    }
-
-    return { searchSourceJSON: JSON.stringify(serializedSearchSourceFields), references };
+    const [searchSourceFields, references] = extractReferences(this.getSerializedFields());
+    return { searchSourceJSON: JSON.stringify(searchSourceFields), references };
   }
 
   private getFilters(filterField: SearchSourceFields['filter']): Filter[] {
