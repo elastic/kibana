@@ -203,7 +203,7 @@ export class MyPlugin implements Plugin {
 
 *best practice tip!* 
 
-Prefer the pattern show above, using `core.getStartServices()`, over storing local references retrieved from `start`. 
+Prefer the pattern shown above, using `core.getStartServices()`, over storing local references retrieved from `start`. 
 
 Steer away from usage like this:
 **Bad**
