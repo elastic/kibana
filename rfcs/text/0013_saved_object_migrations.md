@@ -21,6 +21,7 @@
   - [4.5 Changes in 8.0](#45-changes-in-80)
     - [Migration algorithm (8.0):](#migration-algorithm-80)
     - [Minimizing data loss (8.0)](#minimizing-data-loss-80)
+- [Alternatives](#alternatives)
 - [How we teach this](#how-we-teach-this)
 - [Unresolved questions](#unresolved-questions)
 
@@ -442,6 +443,18 @@ discussion around minimizing data loss.
    2. Remove the write alias(es) for all previous versions.
 3. All saved object reads and writes use the version-specific read and write
    alias.
+
+# Alternatives
+We considered implementing rolling upgrades to provide zero downtime
+migrations. However, this would introduce significant complexity for plugins:
+they will need to maintain up and down migration transformations and ensure
+that queries match both current and outdated documents across all
+versions. Although we can afford the once-off complexity of implementing
+rolling upgrades, the complexity burden of maintaining plugins that support
+rolling-upgrades will slow down all development in Kibana. Since a predictable
+downtime window is sufficient for our users, we decided against trying to
+achieve zero downtime with rolling upgrades. See "Rolling upgrades" in
+https://github.com/elastic/kibana/issues/52202 for more information.
 
 # How we teach this
 1. Update documentation and server logs to start educating users to depend on
