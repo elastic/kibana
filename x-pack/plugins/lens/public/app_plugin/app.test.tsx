@@ -104,7 +104,12 @@ describe('Lens App', () => {
     storage: Storage;
     docId?: string;
     docStorage: SavedObjectStore;
-    redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
+    redirectTo: (
+      id?: string,
+      returnToOrigin?: boolean,
+      originatingApp?: string | undefined,
+      newlyCreated?: boolean
+    ) => void;
     originatingApp: string | undefined;
   }> {
     return ({
@@ -140,7 +145,14 @@ describe('Lens App', () => {
         load: jest.fn(),
         save: jest.fn(),
       },
-      redirectTo: jest.fn((id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => {}),
+      redirectTo: jest.fn(
+        (
+          id?: string,
+          returnToOrigin?: boolean,
+          originatingApp?: string | undefined,
+          newlyCreated?: boolean
+        ) => {}
+      ),
     } as unknown) as jest.Mocked<{
       navigation: typeof navigationStartMock;
       editorFrame: EditorFrameInstance;
@@ -149,7 +161,12 @@ describe('Lens App', () => {
       storage: Storage;
       docId?: string;
       docStorage: SavedObjectStore;
-      redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
+      redirectTo: (
+        id?: string,
+        returnToOrigin?: boolean,
+        originatingApp?: string | undefined,
+        newlyCreated?: boolean
+      ) => void;
       originatingApp: string | undefined;
     }>;
   }
@@ -348,7 +365,12 @@ describe('Lens App', () => {
         storage: Storage;
         docId?: string;
         docStorage: SavedObjectStore;
-        redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
+        redirectTo: (
+          id?: string,
+          returnToOrigin?: boolean,
+          originatingApp?: string | undefined,
+          newlyCreated?: boolean
+        ) => void;
         originatingApp: string | undefined;
       }>;
 
@@ -677,7 +699,12 @@ describe('Lens App', () => {
       storage: Storage;
       docId?: string;
       docStorage: SavedObjectStore;
-      redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
+      redirectTo: (
+        id?: string,
+        returnToOrigin?: boolean,
+        originatingApp?: string | undefined,
+        newlyCreated?: boolean
+      ) => void;
     }>;
 
     beforeEach(() => {
