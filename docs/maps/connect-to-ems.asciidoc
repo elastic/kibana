@@ -1,6 +1,6 @@
 [role="xpack"]
 [[maps-connect-to-ems]]
-== Connecting to Elastic Maps Service
+== Connect to Elastic Maps Service
 
 https://www.elastic.co/elastic-maps-service[Elastic Maps Service (EMS)] is a service that hosts
 tile layers and vector shapes of administrative boundaries.

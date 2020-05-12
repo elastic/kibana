@@ -1,6 +1,6 @@
 [role="xpack"]
 [[heatmap-layer]]
-== Heat map layer
+=== Heat map layer
 
 Heat map layers cluster point data to show locations with higher densities.
 

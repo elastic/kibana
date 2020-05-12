@@ -1,6 +1,6 @@
 [role="xpack"]
 [[vector-layer]]
-== Vector layer
+=== Vector layer
 
 Vector layers display points, lines, and polygons.
 

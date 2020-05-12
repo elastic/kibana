@@ -1,0 +1,18 @@
+[role="xpack"]
+[[maps-layers]]
+== Work with layers
+
+
+* Heatmap
+* Tile
+* Vector
+[%collapsible]
+====
+* Styling
+* Style properties
+* Tooltips
+====
+
+include::heatmap-layer.asciidoc[]
+include::tile-layer.asciidoc[]
+include::vector-layer.asciidoc[]

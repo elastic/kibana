@@ -1,6 +1,7 @@
 [role="xpack"]
 [[maps-getting-started]]
-== Getting started with Elastic Maps
+== Get started with Elastic Maps
+<titleabbrev>Get started</titleabbrev>
 
 You work with *Elastic Maps* by adding layers. The data for a layer can come from
 sources such as {es} documents, vector sources, tile map services, web map

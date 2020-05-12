@@ -1,6 +1,7 @@
 [role="xpack"]
 [[tile-layer]]
-== Tile layer
+=== Tile layer
+
 
 Tile layers display image tiles served from a tile server.
 
