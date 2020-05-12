@@ -14,6 +14,8 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiModal,
+  EuiOverlayMask,
   EuiSpacer,
   EuiSearchBar,
 } from '@elastic/eui';
@@ -53,6 +55,7 @@ import { CreateAnalyticsButton } from '../create_analytics_button';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import { CreateAnalyticsFlyoutWrapper } from '../create_analytics_flyout_wrapper';
 import { getSelectedJobIdFromUrl } from '../../../../../jobs/jobs_list/components/utils';
+import { SourceSelection } from '../source_selection';
 
 function getItemIdToExpandedRowMap(
   itemIds: DataFrameAnalyticsId[],
@@ -90,6 +93,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   createAnalyticsForm,
 }) => {
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isSourceIndexModalVisible, setIsSourceIndexModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [filterActive, setFilterActive] = useState(false);
 
@@ -402,7 +406,10 @@ export const DataFrameAnalyticsList: FC<Props> = ({
             </EuiFlexItem>
             {!isManagementTable && createAnalyticsForm && (
               <EuiFlexItem grow={false}>
-                <CreateAnalyticsButton {...createAnalyticsForm} />
+                <CreateAnalyticsButton
+                  {...createAnalyticsForm}
+                  setIsSourceIndexModalVisible={setIsSourceIndexModalVisible}
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -434,6 +441,17 @@ export const DataFrameAnalyticsList: FC<Props> = ({
 
       {!isManagementTable && createAnalyticsForm?.state.isModalVisible && (
         <CreateAnalyticsFlyoutWrapper {...createAnalyticsForm} />
+      )}
+      {isSourceIndexModalVisible === true && (
+        <EuiOverlayMask>
+          <EuiModal
+            className="dataFrameAnalyticsCreateSearchDialog"
+            onClose={() => setIsSourceIndexModalVisible(false)}
+            data-test-subj="analyticsCreateSourceIndexModal"
+          >
+            <SourceSelection />
+          </EuiModal>
+        </EuiOverlayMask>
       )}
     </Fragment>
   );

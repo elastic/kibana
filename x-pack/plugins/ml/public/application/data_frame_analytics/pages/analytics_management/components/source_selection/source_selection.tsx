@@ -1,0 +1,83 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { FC } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
+
+import { SavedObjectFinderUi } from '../../../../../../../../../../src/plugins/saved_objects/public';
+import { useMlKibana } from '../../../../../contexts/kibana';
+
+const fixedPageSize: number = 8;
+
+export const SourceSelection: FC = () => {
+  const { uiSettings, savedObjects } = useMlKibana().services;
+
+  const onSearchSelected = (id: string, type: string) => {
+    window.location.href = `ml#/data_frame_analytics/new_job?${
+      type === 'index-pattern' ? 'index' : 'savedSearchId'
+    }=${encodeURIComponent(id)}`;
+  };
+
+  // TODO: keep the height of the modal constant so it doesn't look jerky when you're searching
+  return (
+    <>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          <FormattedMessage
+            id="xpack.ml.dataframe.analytics.create.newAnalyticsTitle"
+            defaultMessage="New analytics job"
+          />{' '}
+          /{' '}
+          <FormattedMessage
+            id="xpack.ml.dataframe.analytics.create.chooseSourceTitle"
+            defaultMessage="Choose a source index pattern"
+          />
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <SavedObjectFinderUi
+          key="searchSavedObjectFinder"
+          onChoose={onSearchSelected}
+          showFilter
+          noItemsMessage={i18n.translate(
+            'xpack.ml.dataFrame.analytics.create.searchSelection.notFoundLabel',
+            {
+              defaultMessage: 'No matching indices or saved searches found.',
+            }
+          )}
+          savedObjectMetaData={[
+            {
+              type: 'search',
+              getIconForSavedObject: () => 'search',
+              name: i18n.translate(
+                'xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.search',
+                {
+                  defaultMessage: 'Saved search',
+                }
+              ),
+            },
+            {
+              type: 'index-pattern',
+              getIconForSavedObject: () => 'indexPatternApp',
+              name: i18n.translate(
+                'xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.indexPattern',
+                {
+                  defaultMessage: 'Index pattern',
+                }
+              ),
+            },
+          ]}
+          fixedPageSize={fixedPageSize}
+          uiSettings={uiSettings}
+          savedObjects={savedObjects}
+        />
+      </EuiModalBody>
+    </>
+  );
+};

@@ -11,6 +11,7 @@ import { debounce } from 'lodash';
 
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { useMlContext } from '../../../../../contexts/ml';
+import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public'; // indexPatterns
 
 import {
   DfAnalyticsExplainResponse,
@@ -26,7 +27,10 @@ import {
   getJobConfigFromFormState,
   State,
 } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import { shouldAddAsDepVarOption } from '../../../analytics_management/components/create_analytics_form/form_options_validation';
+import {
+  OMIT_FIELDS,
+  shouldAddAsDepVarOption,
+} from '../../../analytics_management/components/create_analytics_form/form_options_validation';
 import { ml } from '../../../../../services/ml_api_service';
 import { ANALYTICS_STEPS } from '../../page';
 import { ContinueButton } from '../continue_button';
@@ -46,7 +50,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
   setCurrentStep,
 }) => {
   const mlContext = useMlContext();
-  const { currentIndexPattern: indexPattern } = mlContext;
+  const { currentIndexPattern } = mlContext;
 
   const { initiateWizard, setEstimatedModelMemoryLimit, setFormState } = actions;
   const { estimatedModelMemoryLimit, form, isJobCreated, requestMessages } = state;
@@ -65,6 +69,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
     modelMemoryLimit,
     previousJobType,
     requiredFieldsError,
+    sourceIndexContainsNumericalFields,
     trainingPercent,
   } = form;
 
@@ -79,6 +84,30 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
     maxDistinctValuesError !== undefined ||
     requiredFieldsError !== undefined;
 
+  // Find out if index pattern contain numeric fields. Provides a hint in the form
+  // that an analytics jobs is not able to identify outliers if there are no numeric fields present.
+  const validateSourceIndexFields = async () => {
+    if (currentIndexPattern && currentIndexPattern.id) {
+      try {
+        const indexPattern: IndexPattern = await mlContext.indexPatterns.get(
+          currentIndexPattern.id
+        );
+        const containsNumericalFields: boolean = indexPattern.fields.some(
+          ({ name, type }) => !OMIT_FIELDS.includes(name) && type === 'number'
+        );
+
+        setFormState({
+          sourceIndexContainsNumericalFields: containsNumericalFields,
+          sourceIndexFieldsCheckFailed: false,
+        });
+      } catch (e) {
+        setFormState({
+          sourceIndexFieldsCheckFailed: true,
+        });
+      }
+    }
+  };
+
   const loadDepVarOptions = async (formState: State['form']) => {
     setFormState({
       loadingDepVarOptions: true,
@@ -88,7 +117,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
       sourceIndexContainsNumericalFields: true,
     });
     try {
-      if (indexPattern !== undefined) {
+      if (currentIndexPattern !== undefined) {
         const formStateUpdate: {
           loadingDepVarOptions: boolean;
           dependentVariableFetchFail: boolean;
@@ -100,7 +129,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
           dependentVariableOptions: [] as State['form']['dependentVariableOptions'],
         };
 
-        await newJobCapsService.initializeFromIndexPattern(indexPattern, false, false);
+        await newJobCapsService.initializeFromIndexPattern(currentIndexPattern, false, false);
         // Get fields and filter for supported types for job type
         const { fields } = newJobCapsService;
 
@@ -217,9 +246,10 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
   }, []);
 
   useEffect(() => {
-    // TODO: set source Index after validation check or set callout with link back to selection
-    // disable form if source index doesn't have the fields we need
-    setFormState({ sourceIndex: indexPattern.title });
+    // TODO: validation check or set callout with link back to management page
+    // disable form if source index doesn't have any of the supported fields
+    setFormState({ sourceIndex: currentIndexPattern.title });
+    validateSourceIndexFields();
   }, []);
 
   useEffect(() => {
@@ -247,6 +277,20 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
   return (
     <Fragment>
       <Messages messages={requestMessages} />
+      <EuiFormRow
+        fullWidth
+        helpText={
+          !sourceIndexContainsNumericalFields &&
+          i18n.translate('xpack.ml.dataframe.analytics.create.sourceObjectHelpText', {
+            defaultMessage:
+              'This index pattern does not contain any numeric type fields. The analytics job may not be able to come up with any outliers.',
+          })
+        }
+        // isInvalid={!sourceIndexNameValid}
+        // error={getSourceIndexErrorMessages()}
+      >
+        <Fragment />
+      </EuiFormRow>
       <JobType type={jobType} setFormState={setFormState} />
       {/* <SourceIndexPreview /> */}
       {isJobTypeWithDepVar && (
@@ -280,7 +324,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
             helpText={
               dependentVariableOptions.length === 0 &&
               dependentVariableFetchFail === false &&
-              indexPattern &&
+              currentIndexPattern &&
               i18n.translate(
                 'xpack.ml.dataframe.analytics.create.dependentVariableOptionsNoNumericalFields',
                 {
