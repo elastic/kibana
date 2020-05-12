@@ -236,10 +236,6 @@ export function XYChart({
     // check all the tables to see if all of the rows have the same timestamp
     // that would mean that chart will draw a single bar
     const isSingleTimestampInXDomain = () => {
-      if (!filteredLayers.length) {
-        return;
-      }
-
       const firstRowValue =
         data.tables[filteredLayers[0].layerId].rows[0][filteredLayers[0].xAccessor!];
       for (const layer of filteredLayers) {
