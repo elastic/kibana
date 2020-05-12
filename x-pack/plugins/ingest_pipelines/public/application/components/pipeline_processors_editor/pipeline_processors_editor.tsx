@@ -26,7 +26,7 @@ import {
 } from './components';
 import { deserialize } from './serialize';
 import { serialize, SerializeResult } from './deserialize';
-import { useProcessorsState } from './processors_reducer';
+import { useProcessorsState } from './processors_reducer/processors_reducer';
 import { ProcessorInternal, ProcessorSelector } from './types';
 import { getValue } from './utils';
 

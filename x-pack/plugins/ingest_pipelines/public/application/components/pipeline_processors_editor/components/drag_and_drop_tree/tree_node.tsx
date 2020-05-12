@@ -19,6 +19,7 @@ interface Props {
   component: (args: TreeNodeComponentArgs) => React.ReactNode;
   selector: ProcessorSelector;
   processor: ProcessorInternal;
+  treeId: string;
   index: number;
   level: number;
 }
@@ -29,8 +30,9 @@ export const TreeNode: FunctionComponent<Props> = ({
   index,
   component,
   level,
+  treeId,
 }) => {
-  const id = selector.join('.');
+  const id = [treeId].concat(selector).join('.');
   return (
     <EuiDraggable spacing="l" draggableId={id} key={id} index={index} customDragHandle>
       {provided => (

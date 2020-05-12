@@ -55,7 +55,12 @@ export const ProcessorsTitleAndTestButton: FunctionComponent<Props> = ({
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton size="s" onClick={onTestPipelineClick} disabled={isTestButtonDisabled}>
+        <EuiButton
+          data-test-subj="testPipelineButton"
+          size="s"
+          onClick={onTestPipelineClick}
+          disabled={isTestButtonDisabled}
+        >
           <FormattedMessage
             id="xpack.ingestPipelines.pipelineEditor.testPipelineButtonLabel"
             defaultMessage="Test pipeline"

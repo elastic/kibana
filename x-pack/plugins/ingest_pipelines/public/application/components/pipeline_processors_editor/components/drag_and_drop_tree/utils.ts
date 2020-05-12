@@ -3,81 +3,113 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { DraggableLocation, ProcessorSelector } from '../../types';
+import { ProcessorSelector } from '../../types';
 import { checkIfSamePath } from '../../utils';
-
-export const mapSelectorToDragLocation = (selector: ProcessorSelector): DraggableLocation => {
-  const stringIndex = selector[selector.length - 1];
-  if (!stringIndex.match(/^[0-9]+$/)) {
-    throw new Error(`Expected an integer but received "${stringIndex}"`);
-  }
-  return {
-    selector: selector.slice(0, -1),
-    index: parseInt(stringIndex, 10),
-  };
-};
+import { DragAndDropSpecialLocations } from '../../constants';
 
 export type DragDirection = 'up' | 'down' | 'none';
 
-export const resolveDestinationLocation = (
-  items: ProcessorSelector[],
-  destinationIndex: number,
-  baseDestinationSelector: ProcessorSelector,
-  dragDirection: DragDirection,
-  sourceSelector: ProcessorSelector,
-  isSourceAtRootLevel = false
-): DraggableLocation => {
+export const determineDragDirection = (
+  currentIndex?: number,
+  startIndex?: number
+): DragDirection => {
+  let dragDirection: DragDirection;
+  if (currentIndex == null || startIndex == null) {
+    dragDirection = 'none';
+  } else if (currentIndex === startIndex) {
+    dragDirection = 'none';
+  } else if (currentIndex < startIndex) {
+    dragDirection = 'up';
+  } else {
+    dragDirection = 'down';
+  }
+  return dragDirection;
+};
+
+interface ResolveDestinationArgs {
+  destinationItems: ProcessorSelector[];
+  destinationIndex: number;
+  baseDestinationSelector: ProcessorSelector;
+  baseSourceSelector: ProcessorSelector;
+  dragDirection: DragDirection;
+  sourceSelector: ProcessorSelector;
+  isSourceAtRootLevel?: boolean;
+}
+
+interface ResolveDestinationResult {
+  destination: ProcessorSelector;
+  source: ProcessorSelector;
+}
+
+export const resolveLocations = ({
+  destinationItems,
+  destinationIndex,
+  baseDestinationSelector,
+  dragDirection,
+  baseSourceSelector,
+  sourceSelector,
+  isSourceAtRootLevel = false,
+}: ResolveDestinationArgs): ResolveDestinationResult => {
+  const addBasePathPrefix = (destinationSelector: ProcessorSelector): ResolveDestinationResult => {
+    return {
+      destination: baseDestinationSelector.concat(destinationSelector),
+      source: baseSourceSelector.concat(sourceSelector),
+    };
+  };
+
   // Dragged to top, place at root level
-  if (destinationIndex <= 0) {
-    const destinationSelector = items[destinationIndex] ?? baseDestinationSelector;
-    return { selector: destinationSelector.slice(0, 1), index: 0 };
+  if (destinationIndex <= 0 && dragDirection !== 'down') {
+    return addBasePathPrefix(['0']);
   }
 
   // Dragged to bottom, place at root level if source is already at root
-  if (destinationIndex === items.length - 1 && isSourceAtRootLevel) {
-    const destinationSelector = items[items.length - 1] ?? baseDestinationSelector;
-    return { selector: destinationSelector.slice(0, 1), index: Infinity };
+  if (
+    destinationIndex === destinationItems.length - 1 &&
+    isSourceAtRootLevel &&
+    dragDirection === 'down'
+  ) {
+    return addBasePathPrefix([DragAndDropSpecialLocations.bottom]);
   }
 
   // This can happen when dragging across trees
-  if (destinationIndex > items.length - 1) {
-    return { selector: baseDestinationSelector.slice(0), index: destinationIndex };
+  if (destinationIndex === destinationItems.length) {
+    return addBasePathPrefix([DragAndDropSpecialLocations.bottom]);
   }
 
-  const displacing: ProcessorSelector = items[destinationIndex];
+  const displacing: ProcessorSelector = destinationItems[destinationIndex];
 
   if (dragDirection === 'none') {
-    return mapSelectorToDragLocation(displacing);
+    return addBasePathPrefix(displacing);
   }
 
-  const below: ProcessorSelector = items[destinationIndex + 1];
+  const below: ProcessorSelector = destinationItems[destinationIndex + 1];
   if (dragDirection === 'down' && below) {
-    // Handle special case where we are actually want to reorder
-    // an item in its own list instead of nesting inside of the previous
-    // elements children.
-    if (
-      checkIfSamePath(sourceSelector.slice(0, -1), below.slice(0, -1)) &&
-      displacing.length >= below.length
-    ) {
-      const location = mapSelectorToDragLocation(below);
-      return {
-        ...location,
-        index: location.index - 1,
-      };
+    const displacingSameAsBelow = checkIfSamePath(displacing.slice(0, -1), below.slice(0, -1));
+
+    if (displacingSameAsBelow) {
+      return addBasePathPrefix(below);
     }
+    // Handle special case where we are actually reordering
+    // an item in its own list instead of nesting. This is "dragging past" a nested
+    // element.
+    const sourceSameAsBelowPath = checkIfSamePath(sourceSelector.slice(0, -1), below.slice(0, -1));
+    if (sourceSameAsBelowPath && displacing.length > below.length) {
+      return addBasePathPrefix(below);
+    }
+
+    const sourceSameAsDisplacingPath = checkIfSamePath(
+      sourceSelector.slice(0, -1),
+      displacing.slice(0, -1)
+    );
     // Handle special case where we do not want reordering an element
     // to the bottom of a nested list de-indents it
-    if (
-      checkIfSamePath(sourceSelector.slice(0, -1), displacing.slice(0, -1)) &&
-      displacing.length >= below.length
-    ) {
-      return mapSelectorToDragLocation(displacing);
+    if (sourceSameAsDisplacingPath && displacing.length > below.length) {
+      return addBasePathPrefix(displacing);
     }
     // Every other case for dragging down
-    return mapSelectorToDragLocation(below);
+    return addBasePathPrefix(below);
   }
 
-  // Just target displaced element when dragging up
-  return mapSelectorToDragLocation(displacing);
+  // Target displaced element when dragging up
+  return addBasePathPrefix(displacing);
 };

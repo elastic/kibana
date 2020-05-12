@@ -3,91 +3,111 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { resolveDestinationLocation } from './utils';
+import { resolveLocations } from './utils';
 import { ProcessorSelector } from '../../types';
+import { DragAndDropSpecialLocations } from '../../constants';
 
-const testBaseSelector = ['TEST'];
+const TREE_A_ROOT = ['TREE_A'];
+const TREE_B_ROOT = ['TREE_B'];
 
 describe('Resolve destination location', () => {
   it('resolves to root level when dragged to top', () => {
-    const testItems = [
+    const items = [
       /* pos 0 -- this should displace item below, same with rest */
-      ['processors', '0'],
+      ['0'],
       /* pos 1 */
-      ['processors', '0', 'onFailure', '0'],
+      ['0', 'onFailure', '0'],
     ];
-    const result = resolveDestinationLocation(
-      testItems,
-      0 /* corresponds to position 0, when dragging up */,
-      testBaseSelector,
-      'up',
-      ['processors', '0']
-    );
-    expect(result).toEqual({ selector: ['processors'], index: 0 });
+    const result = resolveLocations({
+      destinationItems: items,
+      destinationIndex: 0 /* corresponds to position 0, when dragging up */,
+      baseDestinationSelector: TREE_A_ROOT,
+      dragDirection: 'up',
+      baseSourceSelector: TREE_A_ROOT,
+      sourceSelector: ['0'],
+    });
+    expect(result).toEqual({ source: ['TREE_A', '0'], destination: ['TREE_A', '0'] });
   });
 
   it('nests an element at the position it was placed', () => {
-    const testItems = [
-      ['processors', '0'],
+    const items = [
+      ['0'],
       /* pos 0 -- this should displace item below, same with rest */
-      ['processors', '0', 'onFailure', '0'],
+      ['0', 'onFailure', '0'],
       /* pos 1 */
-      ['processors', '1'],
+      ['1'],
       /* pos 2 */
-      ['processors', '1', 'onFailure', '0'],
+      ['1', 'onFailure', '0'],
       /* pos 3 */
-      ['processors', '2'],
+      ['2'],
     ];
-    const result2 = resolveDestinationLocation(
-      testItems,
-      2 /* corresponds to pos 2, when dragging down */,
-      testBaseSelector,
-      'down',
-      ['processors', '0'],
+    const result2 = resolveLocations({
+      destinationItems: items,
+      destinationIndex: 2 /* corresponds to pos 2, when dragging down */,
+      baseDestinationSelector: TREE_A_ROOT,
+      dragDirection: 'down',
+      baseSourceSelector: TREE_A_ROOT,
+      sourceSelector: ['0'],
+      isSourceAtRootLevel: true,
+    });
 
-      true
-    );
-    expect(result2).toEqual({ selector: ['processors', '1', 'onFailure'], index: 0 });
+    expect(result2).toEqual({
+      source: ['TREE_A', '0'],
+      destination: ['TREE_A', '1', 'onFailure', '0'],
+    });
   });
 
   it('handles special case of dragging to bottom with root level item', () => {
-    const testItems = [
-      ['processors', '0'],
-      ['processors', '0', 'onFailure', '0'],
-      ['processors', '1'],
-      ['processors', '1', 'onFailure', '0'],
-    ];
-    const result2 = resolveDestinationLocation(
-      testItems,
-      3 /* corresponds to pos 3, when dragging down */,
-      testBaseSelector,
-      'down',
-      ['processors', '0'],
-      true
-    );
-    expect(result2).toEqual({ selector: ['processors'], index: Infinity });
+    const items = [['0'], ['0', 'onFailure', '0'], ['1'], ['1', 'onFailure', '0']];
+    const result2 = resolveLocations({
+      destinationItems: items,
+      destinationIndex: 3 /* corresponds to pos 3, when dragging down */,
+      baseDestinationSelector: TREE_A_ROOT,
+      dragDirection: 'down',
+      baseSourceSelector: TREE_A_ROOT,
+      sourceSelector: ['0'],
+      isSourceAtRootLevel: true,
+    });
+    expect(result2).toEqual({
+      source: ['TREE_A', '0'],
+      destination: ['TREE_A', DragAndDropSpecialLocations.bottom],
+    });
   });
 
   it('sets the base selector if there are no items', () => {
-    const testItems: ProcessorSelector[] = [];
-    const result = resolveDestinationLocation(
-      testItems,
-      testItems.length - 1,
-      testBaseSelector,
-      'none',
-      []
-    );
-    expect(result).toEqual({ selector: testBaseSelector, index: 0 });
+    const items: ProcessorSelector[] = [];
+    const result = resolveLocations({
+      destinationItems: items,
+      destinationIndex: items.length - 1,
+      baseDestinationSelector: TREE_A_ROOT,
+      dragDirection: 'none',
+      baseSourceSelector: TREE_B_ROOT,
+      sourceSelector: ['123'],
+    });
+    expect(result).toEqual({
+      destination: TREE_A_ROOT.concat('0'),
+      source: TREE_B_ROOT.concat('123'),
+    });
   });
 
   it('displaces the current item if surrounded by items at same level', () => {
-    const testItems = [['0'], ['0', 'onFailure', '0'], ['0', 'onFailure', '1']];
-    const result = resolveDestinationLocation(testItems, 1, testBaseSelector, 'up', ['0']);
-    expect(result).toEqual({ selector: ['0', 'onFailure'], index: 0 });
+    const items = [['0'], ['0', 'onFailure', '0'], ['0', 'onFailure', '1']];
+    const result = resolveLocations({
+      destinationItems: items,
+      destinationIndex: 1,
+      baseDestinationSelector: TREE_A_ROOT,
+      dragDirection: 'up',
+      baseSourceSelector: TREE_A_ROOT,
+      sourceSelector: ['0'],
+    });
+    expect(result).toEqual({
+      source: ['TREE_A', '0'],
+      destination: ['TREE_A', '0', 'onFailure', '0'],
+    });
   });
 
   it('displaces bottom item if surrounding items are at different levels', () => {
-    const testItems1 = [
+    const items1 = [
       ['0'],
       /* pos 0 -- this should displace item below, same with rest */
       ['0', 'onFailure', '0'],
@@ -100,19 +120,21 @@ describe('Resolve destination location', () => {
       /* pos 4 */
     ];
 
-    const result1 = resolveDestinationLocation(
-      testItems1,
-      2 /* corresponds to pos 2, when dragging from above */,
-      testBaseSelector,
-      'down',
-      ['0']
-    );
-    expect(result1).toEqual({
-      selector: ['0', 'onFailure', '1', 'onFailure'],
-      index: 0,
+    const result1 = resolveLocations({
+      destinationItems: items1,
+      destinationIndex: 2 /* corresponds to pos 2, when dragging from above */,
+      baseDestinationSelector: TREE_A_ROOT,
+      dragDirection: 'down',
+      baseSourceSelector: TREE_A_ROOT,
+      sourceSelector: ['0'],
     });
 
-    const testItems2 = [
+    expect(result1).toEqual({
+      source: ['TREE_A', '0'],
+      destination: ['TREE_A', '0', 'onFailure', '1', 'onFailure', '0'],
+    });
+
+    const items2 = [
       ['0'],
       ['1'],
       ['1', 'onFailure', '0'],
@@ -122,21 +144,105 @@ describe('Resolve destination location', () => {
       ['1', 'onFailure', '3'],
     ];
 
-    const result2 = resolveDestinationLocation(testItems2, 4, testBaseSelector, 'down', ['0']);
-    expect(result2).toEqual({ selector: ['1', 'onFailure'], index: 2 });
+    const result2 = resolveLocations({
+      destinationItems: items2,
+      destinationIndex: 4,
+      baseDestinationSelector: TREE_A_ROOT,
+      dragDirection: 'down',
+      baseSourceSelector: TREE_A_ROOT,
+      sourceSelector: ['0'],
+    });
+    expect(result2).toEqual({
+      source: ['TREE_A', '0'],
+      destination: ['TREE_A', '1', 'onFailure', '2'],
+    });
   });
 
-  it('throws for bad array data', () => {
-    const testItems = [
+  it('drags down past an item at the same level with child elements _without_ nesting', () => {
+    const items = [
       ['0'],
-      ['0', 'onFailure' /* should end in a number! */],
-      ['0', 'onFailure' /* should end in a number! */],
+      ['1'],
+      ['2'],
+      ['2', 'onFailure', '0'],
+      ['2', 'onFailure', '1'],
+      ['2', 'onFailure', '2'],
+      ['2', 'onFailure', '3'],
+      ['3'],
+      ['3', 'onFailure', '0'],
     ];
-    expect(() => resolveDestinationLocation(testItems, 1, testBaseSelector, 'down', ['0'])).toThrow(
-      'Expected an integer but received "onFailure"'
-    );
+    const result = resolveLocations({
+      destinationItems: items,
+      destinationIndex: 6,
+      baseDestinationSelector: TREE_A_ROOT,
+      dragDirection: 'down',
+      baseSourceSelector: TREE_A_ROOT,
+      sourceSelector: ['1'],
+    });
+    expect(result).toEqual({ source: ['TREE_A', '1'], destination: ['TREE_A', '3'] });
   });
 
-  it('handles dragging down past an item at the same level with child elements', () => {});
-  it('handles dragging a nested item to the bottom of its siblings', () => {});
+  it('drags a nested item to the bottom of its siblings', () => {
+    const items = [
+      ['0'],
+      ['1'],
+      ['2'],
+      ['2', 'onFailure', '0'],
+      ['2', 'onFailure', '1'],
+      ['2', 'onFailure', '2'],
+      ['2', 'onFailure', '3'],
+      ['3'],
+      ['3', 'onFailure', '0'],
+    ];
+    const result = resolveLocations({
+      destinationItems: items,
+      destinationIndex: 6,
+      baseDestinationSelector: TREE_A_ROOT,
+      dragDirection: 'down',
+      baseSourceSelector: TREE_A_ROOT,
+      sourceSelector: ['2', 'onFailure', '0'],
+    });
+    expect(result).toEqual({
+      source: ['TREE_A', '2', 'onFailure', '0'],
+      destination: ['TREE_A', '2', 'onFailure', '3'],
+    });
+  });
+
+  it('dragging up across trees resolves correctly', () => {
+    const items = [
+      ['0'],
+      ['1'],
+      ['2'],
+      ['2', 'onFailure', '0'],
+      ['2', 'onFailure', '1'],
+      ['2', 'onFailure', '2'],
+      ['2', 'onFailure', '3'],
+      ['3'],
+      ['3', 'onFailure', '0'],
+    ];
+    const result1 = resolveLocations({
+      destinationItems: items,
+      destinationIndex: items.length,
+      baseDestinationSelector: TREE_A_ROOT,
+      dragDirection: 'up',
+      baseSourceSelector: TREE_B_ROOT,
+      sourceSelector: ['0'],
+    });
+    expect(result1).toEqual({
+      source: ['TREE_B', '0'],
+      destination: ['TREE_A', DragAndDropSpecialLocations.bottom],
+    });
+
+    const result2 = resolveLocations({
+      destinationItems: items,
+      destinationIndex: items.length - 1,
+      baseDestinationSelector: TREE_A_ROOT,
+      dragDirection: 'up',
+      baseSourceSelector: TREE_B_ROOT,
+      sourceSelector: ['0'],
+    });
+    expect(result2).toEqual({
+      source: ['TREE_B', '0'],
+      destination: ['TREE_A', '3', 'onFailure', '0'],
+    });
+  });
 });

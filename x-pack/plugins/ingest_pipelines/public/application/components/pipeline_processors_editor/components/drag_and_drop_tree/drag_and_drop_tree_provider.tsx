@@ -13,8 +13,8 @@ import React, {
   useRef,
 } from 'react';
 import { EuiDragDropContext } from '@elastic/eui';
-import { DragDirection, mapSelectorToDragLocation, resolveDestinationLocation } from './utils';
-import { DraggableLocation, ProcessorSelector } from '../../types';
+import { determineDragDirection, resolveLocations } from './utils';
+import { ProcessorSelector } from '../../types';
 
 interface PrivateMapTreeEntry {
   selectors: ProcessorSelector[];
@@ -32,8 +32,8 @@ interface DragAndDropTreeContextValue {
 }
 
 export interface OnDragEndArgs {
-  source: DraggableLocation;
-  destination: DraggableLocation;
+  source: ProcessorSelector;
+  destination: ProcessorSelector;
 }
 
 /** This value comes from the {@link ProcessorInternal} type */
@@ -48,7 +48,6 @@ interface Props {
 export const DragAndDropTreeProvider: FunctionComponent<Props> = ({ children, onDragEnd }) => {
   const dragDirectionRef = useRef<{
     start?: { index: number; treeId: string };
-    current?: { index: number; treeId: string };
   }>({});
   const [currentDragSelector, setCurrentDragSelector] = useState<string | undefined>();
   const [privateTreeItemMap] = useState(() => new Map<string, PrivateMapTreeEntry>());
@@ -82,10 +81,6 @@ export const DragAndDropTreeProvider: FunctionComponent<Props> = ({ children, on
         }}
         onDragStart={arg => {
           dragDirectionRef.current = {
-            current: {
-              index: arg.source.index,
-              treeId: arg.source.droppableId,
-            },
             start: {
               index: arg.source.index,
               treeId: arg.source.droppableId,
@@ -99,76 +94,64 @@ export const DragAndDropTreeProvider: FunctionComponent<Props> = ({ children, on
             return;
           }
 
+          // Reset "start" if we have gone x-tree
           if (
             arg.destination &&
             arg.source &&
-            (arg.destination.index !== dragDirectionRef.current.current?.index ||
-              arg.destination.droppableId !== dragDirectionRef.current.current?.treeId)
+            arg.destination.droppableId !== dragDirectionRef.current.start?.treeId
           ) {
             dragDirectionRef.current = {
-              current: { index: arg.destination.index, treeId: arg.destination.droppableId },
-              start:
-                // Reset start if we have gone x-tree
-                arg.destination.droppableId !== dragDirectionRef.current.current?.treeId
-                  ? { index: arg.destination.index, treeId: arg.destination.droppableId }
-                  : dragDirectionRef.current.start,
+              start: { index: arg.destination.index, treeId: arg.destination.droppableId },
             };
           }
         }}
         onDragEnd={arg => {
           setCurrentDragSelector(undefined);
-          const dragPointers = dragDirectionRef.current;
-          dragDirectionRef.current = {};
+          const { start } = dragDirectionRef.current;
 
           const { source, destination, combine } = arg;
           if (source && combine) {
             const sourceTree = privateTreeItemMap.get(source.droppableId)!;
+            const destinationTree = privateTreeItemMap.get(combine.droppableId)!;
             const sourceSelector = sourceTree.selectors[source.index];
-            const destinationSelector = combine.draggableId.split('.');
+            // prettier-ignore
+            const [/* tree id */, ...destinationSelector] = combine.draggableId.split('.');
             onDragEnd({
-              source: {
-                index: parseInt(sourceSelector[sourceSelector.length - 1], 10),
-                selector: sourceSelector.slice(0, -1),
-              },
-              destination: {
-                index: parseInt(destinationSelector[destinationSelector.length - 1], 10),
-                selector: destinationSelector.concat(ON_FAILURE),
-              },
+              source: sourceTree.baseSelector.concat(sourceSelector),
+              destination: destinationTree.baseSelector
+                .concat(destinationSelector)
+                .concat(['onFailure', '0']),
             });
             return;
           }
 
           if (source && destination) {
-            let dragDirection: DragDirection;
-            const { current, start } = dragPointers;
-            if (!current || !start) {
-              dragDirection = 'none';
-            } else if (current.index < start.index) {
-              dragDirection = 'up';
-            } else {
-              dragDirection = 'down';
-            }
-
+            const dragDirection = determineDragDirection(destination.index, start?.index);
             const sourceTree = privateTreeItemMap.get(source.droppableId)!;
-            const xTreeDrag = source.droppableId !== destination.droppableId;
-            const destinationTree = xTreeDrag
+            const crossTreeDrag = source.droppableId !== destination.droppableId;
+            const destinationTree = crossTreeDrag
               ? privateTreeItemMap.get(destination.droppableId)!
               : sourceTree;
             const sourceSelector = sourceTree.selectors[source.index];
 
-            const destinationLocation = resolveDestinationLocation(
-              destinationTree.selectors,
-              destination.index,
-              destinationTree.baseSelector,
+            let destinationIndex = destination.index;
+            if (crossTreeDrag && destination.index > 0) {
+              if (dragDirection === 'down') {
+                destinationIndex = destination.index - 1;
+              }
+            }
+
+            const locations = resolveLocations({
+              destinationItems: destinationTree.selectors,
+              destinationIndex,
+              baseDestinationSelector: destinationTree.baseSelector,
               dragDirection,
               sourceSelector,
-              sourceSelector.length <= 2
-            );
-
-            onDragEnd({
-              source: mapSelectorToDragLocation(sourceSelector),
-              destination: destinationLocation,
+              baseSourceSelector: sourceTree.baseSelector,
+              isSourceAtRootLevel: sourceSelector.length <= 2,
             });
+
+            onDragEnd(locations);
           }
         }}
       >

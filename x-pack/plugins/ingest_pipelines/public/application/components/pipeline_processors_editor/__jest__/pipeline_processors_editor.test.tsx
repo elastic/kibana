@@ -35,6 +35,7 @@ describe('Pipeline Editor', () => {
       isTestButtonDisabled: false,
       onTestPipelineClick: jest.fn(),
       learnMoreAboutProcessorsUrl: 'test',
+      learnMoreAboutOnFailureProcessorsUrl: 'test',
     });
 
     const {
