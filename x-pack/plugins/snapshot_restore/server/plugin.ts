@@ -97,7 +97,6 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('Starting plugin');
     const esClientConfig = { plugins: [elasticsearchJsPlugin] };
     this.snapshotRestoreESClient = core.elasticsearch.legacy.createClient(
       'snapshotRestore',
@@ -106,7 +105,6 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
   }
 
   public stop() {
-    this.logger.debug('Stopping plugin');
     if (this.snapshotRestoreESClient) {
       this.snapshotRestoreESClient.close();
     }
