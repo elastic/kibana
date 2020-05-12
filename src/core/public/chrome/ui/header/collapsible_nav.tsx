@@ -140,6 +140,7 @@ export function CollapsibleNav({
       {/* Recently viewed */}
       <EuiCollapsibleNavGroup
         key="recentlyViewed"
+        background="light"
         title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
         isCollapsible={true}
         initialIsOpen={getIsCategoryOpen('recentlyViewed', storage)}
