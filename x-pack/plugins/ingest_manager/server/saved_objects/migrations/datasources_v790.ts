@@ -10,7 +10,7 @@ import { Datasource } from '../../types/models';
 
 type Pre790Datasource = Exclude<
   Datasource,
-  'created_on' | 'created_by' | 'updated_on' | 'updated_by'
+  'created_at' | 'created_by' | 'updated_at' | 'updated_by'
 >;
 
 export const migrateDatasourcesToV790: SavedObjectMigrationFn<
@@ -21,9 +21,9 @@ export const migrateDatasourcesToV790: SavedObjectMigrationFn<
   const defDate = new Date().toISOString();
 
   updatedDatasource.attributes.created_by = 'system';
-  updatedDatasource.attributes.created_on = updatedDatasource?.updated_at ?? defDate;
+  updatedDatasource.attributes.created_at = updatedDatasource?.updated_at ?? defDate;
   updatedDatasource.attributes.updated_by = 'system';
-  updatedDatasource.attributes.updated_on = updatedDatasource?.updated_at ?? defDate;
+  updatedDatasource.attributes.updated_at = updatedDatasource?.updated_at ?? defDate;
 
   return updatedDatasource;
 };

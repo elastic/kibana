@@ -24,7 +24,7 @@ export const policyDetailsForUpdate: (
   state: Immutable<PolicyDetailsState>
 ) => Immutable<NewPolicyData> | undefined = createSelector(policyDetails, policy => {
   if (policy) {
-    const { id, revision, created_by, created_on, updated_by, updated_on, ...newPolicy } = policy;
+    const { id, revision, created_by, created_at, updated_by, updated_at, ...newPolicy } = policy;
     return newPolicy;
   }
 });

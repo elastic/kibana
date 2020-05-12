@@ -37,9 +37,9 @@ class DatasourceService {
       {
         ...datasource,
         revision: 1,
-        created_on: isoDate,
+        created_at: isoDate,
         created_by: options?.user?.username ?? 'system',
-        updated_on: isoDate,
+        updated_at: isoDate,
         updated_by: options?.user?.username ?? 'system',
       },
       options
@@ -139,7 +139,7 @@ class DatasourceService {
     await soClient.update<Datasource>(SAVED_OBJECT_TYPE, id, {
       ...datasource,
       revision: oldDatasource.revision + 1,
-      updated_on: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
       updated_by: options?.user?.username ?? 'system',
     });
 
