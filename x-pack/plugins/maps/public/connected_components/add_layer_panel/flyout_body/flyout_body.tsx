@@ -8,7 +8,7 @@ import React, { Fragment } from 'react';
 import { EuiButtonEmpty, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { LayerWizardSelect } from './layer_wizard_select';
-import { LayerWizard, RenderWizardArguments } from '../../../layers/layer_wizard_registry';
+import { LayerWizard, RenderWizardArguments } from '../../../classes/layers/layer_wizard_registry';
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 type Props = RenderWizardArguments & {

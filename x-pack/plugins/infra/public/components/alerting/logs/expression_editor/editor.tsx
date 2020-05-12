@@ -129,7 +129,7 @@ export const Editor: React.FC<Props> = props => {
   const { sourceStatus } = useLogSourceContext();
 
   useMount(() => {
-    for (const [key, value] of Object.entries(DEFAULT_EXPRESSION)) {
+    for (const [key, value] of Object.entries({ ...DEFAULT_EXPRESSION, ...alertParams })) {
       setAlertParams(key, value);
       setHasSetDefaults(true);
     }

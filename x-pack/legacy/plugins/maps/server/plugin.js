@@ -19,46 +19,15 @@ import { emsBoundariesSpecProvider } from './tutorials/ems';
 
 export class MapPlugin {
   setup(core, plugins, __LEGACY) {
-    const { featuresPlugin, home, licensing, usageCollection } = plugins;
+    const { home, licensing, usageCollection, mapsLegacy } = plugins;
     let routesInitialized = false;
-
-    featuresPlugin.registerFeature({
-      id: APP_ID,
-      name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
-        defaultMessage: 'Maps',
-      }),
-      order: 600,
-      icon: APP_ICON,
-      navLinkId: APP_ID,
-      app: [APP_ID, 'kibana'],
-      catalogue: [APP_ID],
-      privileges: {
-        all: {
-          app: [APP_ID, 'kibana'],
-          catalogue: [APP_ID],
-          savedObject: {
-            all: [MAP_SAVED_OBJECT_TYPE, 'query'],
-            read: ['index-pattern'],
-          },
-          ui: ['save', 'show', 'saveQuery'],
-        },
-        read: {
-          app: [APP_ID, 'kibana'],
-          catalogue: [APP_ID],
-          savedObject: {
-            all: [],
-            read: [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'query'],
-          },
-          ui: ['show'],
-        },
-      },
-    });
+    const mapConfig = mapsLegacy.config;
 
     licensing.license$.subscribe(license => {
       const { state } = license.check('maps', 'basic');
       if (state === 'valid' && !routesInitialized) {
         routesInitialized = true;
-        initRoutes(__LEGACY, license.uid);
+        initRoutes(__LEGACY, license.uid, mapConfig);
       }
     });
 
@@ -134,7 +103,7 @@ export class MapPlugin {
       home.tutorials.registerTutorial(
         emsBoundariesSpecProvider({
           prependBasePath: core.http.basePath.prepend,
-          emsLandingPageUrl: __LEGACY.mapConfig().emsLandingPageUrl,
+          emsLandingPageUrl: mapConfig.emsLandingPageUrl,
         })
       );
     }
@@ -142,11 +111,5 @@ export class MapPlugin {
     __LEGACY.injectUiAppVars(APP_ID, async () => {
       return await __LEGACY.getInjectedUiAppVars('kibana');
     });
-
-    return {
-      getMapConfig() {
-        return __LEGACY.mapConfig();
-      },
-    };
   }
 }

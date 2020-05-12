@@ -8,6 +8,7 @@ import { first } from 'rxjs/operators';
 import {
   CoreSetup,
   CoreStart,
+  Logger,
   Plugin,
   PluginInitializerContext,
   SavedObjectsServiceStart,
@@ -73,6 +74,7 @@ export interface IngestManagerAppContext {
   isProductionMode: boolean;
   kibanaVersion: string;
   cloud?: CloudSetup;
+  logger?: Logger;
   httpSetup?: HttpServiceSetup;
 }
 
@@ -108,6 +110,7 @@ export class IngestManagerPlugin
   private config$: Observable<IngestManagerConfigType>;
   private security: SecurityPluginSetup | undefined;
   private cloud: CloudSetup | undefined;
+  private logger: Logger | undefined;
 
   private isProductionMode: boolean;
   private kibanaVersion: string;
@@ -117,6 +120,7 @@ export class IngestManagerPlugin
     this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
     this.isProductionMode = this.initializerContext.env.mode.prod;
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
+    this.logger = this.initializerContext.logger.get();
   }
 
   public async setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
@@ -208,6 +212,7 @@ export class IngestManagerPlugin
       kibanaVersion: this.kibanaVersion,
       httpSetup: this.httpSetup,
       cloud: this.cloud,
+      logger: this.logger,
     });
     licenseService.start(this.licensing$);
     return {

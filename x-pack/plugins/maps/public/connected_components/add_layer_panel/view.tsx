@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FlyoutFooter } from './flyout_footer';
 import { FlyoutBody } from './flyout_body';
 import { LayerDescriptor } from '../../../common/descriptor_types';
-import { LayerWizard } from '../../layers/layer_wizard_registry';
+import { LayerWizard } from '../../classes/layers/layer_wizard_registry';
 
 interface Props {
   flyoutVisible: boolean;

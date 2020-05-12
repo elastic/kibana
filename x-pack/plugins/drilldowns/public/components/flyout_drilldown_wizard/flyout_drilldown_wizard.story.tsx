@@ -15,17 +15,25 @@ import {
   urlFactory,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../advanced_ui_actions/public/components/action_wizard/test_data';
+import { AdvancedUiActionsActionFactory as ActionFactory } from '../../../../advanced_ui_actions/public/';
 
 storiesOf('components/FlyoutDrilldownWizard', module)
   .add('default', () => {
-    return <FlyoutDrilldownWizard drilldownActionFactories={[urlFactory, dashboardFactory]} />;
+    return (
+      <FlyoutDrilldownWizard
+        drilldownActionFactories={[urlFactory as ActionFactory, dashboardFactory as ActionFactory]}
+      />
+    );
   })
   .add('open in flyout - create', () => {
     return (
       <EuiFlyout onClose={() => {}}>
         <FlyoutDrilldownWizard
           onClose={() => {}}
-          drilldownActionFactories={[urlFactory, dashboardFactory]}
+          drilldownActionFactories={[
+            urlFactory as ActionFactory,
+            dashboardFactory as ActionFactory,
+          ]}
         />
       </EuiFlyout>
     );
@@ -35,7 +43,10 @@ storiesOf('components/FlyoutDrilldownWizard', module)
       <EuiFlyout onClose={() => {}}>
         <FlyoutDrilldownWizard
           onClose={() => {}}
-          drilldownActionFactories={[urlFactory, dashboardFactory]}
+          drilldownActionFactories={[
+            urlFactory as ActionFactory,
+            dashboardFactory as ActionFactory,
+          ]}
           initialDrilldownWizardConfig={{
             name: 'My fancy drilldown',
             actionFactory: urlFactory as any,
@@ -54,7 +65,7 @@ storiesOf('components/FlyoutDrilldownWizard', module)
       <EuiFlyout onClose={() => {}}>
         <FlyoutDrilldownWizard
           onClose={() => {}}
-          drilldownActionFactories={[dashboardFactory]}
+          drilldownActionFactories={[dashboardFactory as ActionFactory]}
           initialDrilldownWizardConfig={{
             name: 'My fancy drilldown',
             actionFactory: urlFactory as any,
