@@ -59,8 +59,6 @@ export async function mountManagementSection(
     chrome.setBadge(readOnlyBadge);
   }
 
-  // todo path w/o slash
-
   ReactDOM.render(
     <I18nProvider>
       <HashRouter basename={params.basePath}>
@@ -103,7 +101,6 @@ export async function mountManagementSection(
           </Route>
           <Route path={['/patterns/:id']}>
             <EditIndexPatternContainer
-              // indexPattern={data.indexPattern}
               getIndexPattern={data.indexPatterns.get}
               config={uiSettings}
               services={{
@@ -118,7 +115,6 @@ export async function mountManagementSection(
           </Route>
           <Route path={['/']}>
             <IndexPatternTableWithRouter
-              // navTo={kbnUrl.redirect}
               getIndexPatternCreationOptions={
                 (indexPatternManagementStart as IndexPatternManagementStart).creation
                   .getIndexPatternCreationOptions
