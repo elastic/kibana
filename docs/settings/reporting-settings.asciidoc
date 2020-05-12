@@ -126,16 +126,20 @@ control the capturing process.
 [cols="2*<"]
 |===
 | `xpack.reporting.capture.timeouts.openUrl`
-  | How long to allow the Reporting browser to wait for the initial data of the
-  {kib} page to load. Defaults to `30000` (30 seconds).
+  | How long to allow the Reporting browser to wait for the
+  "Loading..." screen to dismiss, and initial data of the {kib} page to load.
+  If the time is exceeded, a screenshot of the page will be captured and the
+  report will show warnings. Defaults to `30000` (30 seconds).
 
 | `xpack.reporting.capture.timeouts.waitForElements`
   | How long to allow the Reporting browser to wait for the visualization panels to
-  load on the {kib} page. Defaults to `30000` (30 seconds).
+  load on the {kib} page. If the time is exceeded, a screenshot of the page will be captured and the
+  report will show warnings. Defaults to `30000` (30 seconds).
 
 | `xpack.reporting.capture.timeouts.renderComplete`
   | How long to allow the Reporting browser to wait for each visualization to
-  signal that it is done renderings. Defaults to `30000` (30 seconds).
+  signal that it is done renderings. If the time is exceeded, a screenshot of the page will be captured and the
+  report will show warnings. Defaults to `30000` (30 seconds).
 
 |===
 
