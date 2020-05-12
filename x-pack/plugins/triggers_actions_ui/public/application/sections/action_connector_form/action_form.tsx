@@ -152,9 +152,10 @@ export const ActionForm = ({
       const preconfiguredConnectors = connectors.filter(connector => connector.isPreconfigured);
       const hasActionsDisabled = actions.some(
         action =>
-          !actionTypesIndex![action.actionTypeId].enabled &&
+          actionTypesIndex &&
+          !actionTypesIndex[action.actionTypeId].enabled &&
           !checkActionFormActionTypeEnabled(
-            actionTypesIndex![action.actionTypeId],
+            actionTypesIndex[action.actionTypeId],
             preconfiguredConnectors
           ).isEnabled
       );
@@ -208,7 +209,11 @@ export const ActionForm = ({
     },
     index: number
   ) => {
-    const actionType = actionTypesIndex![actionItem.actionTypeId];
+    if (!actionTypesIndex) {
+      return null;
+    }
+
+    const actionType = actionTypesIndex[actionItem.actionTypeId];
 
     const optionsList = connectors
       .filter(
@@ -226,7 +231,7 @@ export const ActionForm = ({
     if (!actionTypeRegistered || actionItem.group !== defaultActionGroupId) return null;
     const ParamsFieldsComponent = actionTypeRegistered.actionParamsFields;
     const checkEnabledResult = checkActionFormActionTypeEnabled(
-      actionTypesIndex![actionConnector.actionTypeId],
+      actionTypesIndex[actionConnector.actionTypeId],
       connectors.filter(connector => connector.isPreconfigured)
     );
 
@@ -248,7 +253,8 @@ export const ActionForm = ({
                 />
               }
               labelAppend={
-                actionTypesIndex![actionConnector.actionTypeId].enabledInConfig ? (
+                actionTypesIndex &&
+                actionTypesIndex[actionConnector.actionTypeId].enabledInConfig ? (
                   <EuiButtonEmpty
                     size="xs"
                     data-test-subj={`addNewActionConnectorButton-${actionItem.actionTypeId}`}
