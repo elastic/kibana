@@ -111,6 +111,7 @@
 
 # Operations
 /src/dev/ @elastic/kibana-operations
+/src/dev/code_coverage @elastic/kibana-qa
 /src/setup_node_env/ @elastic/kibana-operations
 /src/optimize/ @elastic/kibana-operations
 /src/es_archiver/ @elastic/kibana-operations

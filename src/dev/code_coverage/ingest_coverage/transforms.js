@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { left, right } from './either';
+import { left, right, fromNullable } from './either';
 import { always, id, noop } from './utils';
 
 const maybeTotal = x => (x === 'total' ? left(x) : right(x));
@@ -99,14 +99,8 @@ export const coveredFilePath = obj => {
     .fold(withoutCoveredFilePath, coveredFilePath => ({ ...obj, coveredFilePath }));
 };
 
-export const ciRunUrl = obj => {
-  const ciRunUrl = process.env.CI_RUN_URL || 'CI RUN URL NOT PROVIDED';
-
-  return {
-    ...obj,
-    ciRunUrl,
-  };
-};
+export const ciRunUrl = obj =>
+  fromNullable(process.env.CI_RUN_URL).fold(always(obj), ciRunUrl => ({ ...obj, ciRunUrl }));
 
 const size = 50;
 const truncateCommitMsg = x => (x.length > size ? `${x.slice(0, 50)}...` : x);

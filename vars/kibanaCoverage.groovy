@@ -21,13 +21,13 @@ def uploadCoverageHtmls(prefix) {
   ].each { uploadWithVault(prefix, it) }
 }
 
-def uploadWithVault(prefix, x) {
+def uploadWithVault(prefix, path) {
   def vaultSecret = 'secret/gce/elastic-bekitzur/service-account/kibana'
 
   withGcpServiceAccount.fromVaultSecret(vaultSecret, 'value') {
-    sh """
-        gsutil -m cp -r -a public-read -z js,css,html ${x} '${prefix}'
-      """
+    kibanaPipeline.bash("""
+      gsutil -m cp -r -a public-read -z js,css,html ${path} '${prefix}'
+    """, "### Upload files to GCS with vault, path: ${path}")
   }
 }
 
