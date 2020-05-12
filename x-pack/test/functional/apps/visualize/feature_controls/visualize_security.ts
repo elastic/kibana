@@ -429,6 +429,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
         await PageObjects.error.expectNotFound();
       });
+
+      it(`edit page shows 404`, async () => {
+        await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await PageObjects.error.expectNotFound();
+      });
     });
   });
 }

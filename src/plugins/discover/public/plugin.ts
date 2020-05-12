@@ -215,6 +215,7 @@ export class DiscoverPlugin
         // make sure the index pattern list is up to date
         await dataStart.indexPatterns.clearCache();
         const { renderApp } = await import('./application/application');
+        params.element.classList.add('dscAppWrapper');
         const unmount = await renderApp(innerAngularName, params.element);
         return () => {
           unmount();

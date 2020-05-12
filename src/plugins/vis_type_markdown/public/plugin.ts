@@ -27,8 +27,6 @@ import { ConfigSchema } from '../config';
 
 import './index.scss';
 
-import './index.scss';
-
 /** @internal */
 export interface MarkdownPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;

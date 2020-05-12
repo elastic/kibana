@@ -14,7 +14,7 @@ export function createScenario({ getService, getPageObjects }: FtrProviderContex
   const supertest = getService('supertest');
   const esSupertestWithoutAuth = getService('esSupertestWithoutAuth');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'security', 'header']);
+  const PageObjects = getPageObjects(['common', 'security']);
 
   const scenario = {
     async setup() {

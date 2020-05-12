@@ -94,6 +94,32 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
         await PageObjects.error.expectNotFound();
       });
+
+      it(`edit visualization for object which doesn't exist shows 404`, async () => {
+        await PageObjects.common.navigateToActualUrl(
+          'visualize',
+          `${VisualizeConstants.EDIT_PATH}/i-dont-exist`,
+          {
+            basePath: '/s/custom_space',
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
+        await PageObjects.error.expectNotFound();
+      });
+
+      it(`edit visualization for object which exists shows 404`, async () => {
+        await PageObjects.common.navigateToActualUrl(
+          'visualize',
+          `${VisualizeConstants.EDIT_PATH}/i-exist`,
+          {
+            basePath: '/s/custom_space',
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
+        await PageObjects.error.expectNotFound();
+      });
     });
   });
 }

@@ -107,7 +107,7 @@ export class LocalApplicationService {
         controller($location: ILocationService) {
           const newPath = forwardDefinition.rewritePath($location.url());
           window.location.replace(
-            npStart.core.http.basePath.prepend(`/app/${forwardDefinition.newAppId}/${newPath}`)
+            npStart.core.http.basePath.prepend(`/app/${forwardDefinition.newAppId}${newPath}`)
           );
         },
       });

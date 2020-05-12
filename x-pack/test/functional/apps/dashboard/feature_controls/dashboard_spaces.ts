@@ -132,6 +132,32 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         );
         await PageObjects.error.expectNotFound();
       });
+
+      it(`edit dashboard for object which doesn't exist shows 404`, async () => {
+        await PageObjects.common.navigateToActualUrl(
+          'dashboard',
+          createDashboardEditUrl('i-dont-exist'),
+          {
+            basePath: '/s/custom_space',
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
+        await PageObjects.error.expectNotFound();
+      });
+
+      it(`edit dashboard for object which exists shows 404`, async () => {
+        await PageObjects.common.navigateToActualUrl(
+          'dashboard',
+          createDashboardEditUrl('i-exist'),
+          {
+            basePath: '/s/custom_space',
+            ensureCurrentUrl: false,
+            shouldLoginIfPrompted: false,
+          }
+        );
+        await PageObjects.error.expectNotFound();
+      });
     });
   });
 }
