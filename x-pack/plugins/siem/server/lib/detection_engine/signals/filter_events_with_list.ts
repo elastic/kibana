@@ -17,9 +17,6 @@ interface FilterEventsAgainstList {
   exceptionsList: RuleAlertParams['exceptions_list'];
   logger: Logger;
   eventSearchResult: SignalSearchResponse;
-  // type: ListValueType;
-  // listId: string;
-  // field: string;
 }
 
 export const filterEventsAgainstList = async ({
@@ -27,10 +24,7 @@ export const filterEventsAgainstList = async ({
   exceptionsList,
   logger,
   eventSearchResult,
-}: // type,
-// listId,
-// field,
-FilterEventsAgainstList): Promise<SignalSearchResponse> => {
+}: FilterEventsAgainstList): Promise<SignalSearchResponse> => {
   try {
     if (exceptionsList == null) {
       return eventSearchResult;
@@ -64,11 +58,6 @@ FilterEventsAgainstList): Promise<SignalSearchResponse> => {
       logger.debug(`Lists filtered out ${diff} events`);
       return filteredEvents;
     });
-    // const listSignals: ListItemArraySchema = await listClient.getListItemByValues({
-    //   listId,
-    //   type,
-    //   value: [...valueSet],
-    // });
 
     const filteredHits = await Promise.all(filteredHitsPromises);
     const toReturn: SignalSearchResponse = {

@@ -215,10 +215,6 @@ export const signalRulesAlertType = ({
             throw new Error('lists plugin unavailable during rule execution');
           }
           let listClient;
-          // let listExceptions;
-          // let listValueType: ListValueType | undefined;
-          // let listValueField;
-          // let listId;
           if (
             process.env.ELASTIC_XPACK_SIEM_LISTS_FEATURE &&
             process.env.ELASTIC_XPACK_SIEM_LISTS_FEATURE === 'true'
@@ -228,13 +224,6 @@ export const signalRulesAlertType = ({
               spaceId,
               updatedByUser ?? 'elastic'
             );
-            // assume only one list per rule right now...
-            // actually... I should probably just pass down the
-            // exceptions and handle them as objects in the filter events function...
-            // listExceptions = exceptionsList?.filter(item => item.values_type === 'list');
-            // listValueType = 'ip';
-            // listValueField = 'source.ip';
-            // listId = 'ci-badguys.txt';
           }
 
           const inputIndex = await getInputIndex(services, version, index);
@@ -256,9 +245,6 @@ export const signalRulesAlertType = ({
             ruleParams: params,
             services,
             logger,
-            // listValueType,
-            // listValueField,
-            // listId,
             id: alertId,
             inputIndexPattern: inputIndex,
             signalsIndex: outputIndex,

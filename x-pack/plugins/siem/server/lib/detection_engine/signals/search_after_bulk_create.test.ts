@@ -212,6 +212,71 @@ describe('searchAfterAndBulkCreate', () => {
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
+  test('should return success when no exceptions list provided', async () => {
+    const sampleParams = sampleRuleAlertParams(30);
+    mockService.callCluster
+      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3)))
+      .mockResolvedValueOnce({
+        took: 100,
+        errors: false,
+        items: [
+          {
+            fakeItemValue: 'fakeItemKey',
+          },
+          {
+            create: {
+              status: 201,
+            },
+          },
+          {
+            create: {
+              status: 201,
+            },
+          },
+          {
+            create: {
+              status: 201,
+            },
+          },
+          {
+            create: {
+              status: 201,
+            },
+          },
+        ],
+      });
+    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+      ruleParams: sampleParams,
+      listClient: ({
+        getListItemByValues: async ({ value }: { type: string; listId: string; value: string[] }) =>
+          (value as unknown) as ListItemArraySchema,
+      } as unknown) as ListClient,
+      exceptionsList: undefined,
+      services: mockService,
+      logger: mockLogger,
+      id: sampleRuleGuid,
+      inputIndexPattern,
+      signalsIndex: DEFAULT_SIGNALS_INDEX,
+      name: 'rule-name',
+      actions: [],
+      createdAt: '2020-01-28T15:58:34.810Z',
+      updatedAt: '2020-01-28T15:59:14.004Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      interval: '5m',
+      enabled: true,
+      pageSize: 1,
+      filter: undefined,
+      refresh: false,
+      tags: ['some fake tag 1', 'some fake tag 2'],
+      throttle: 'no_actions',
+    });
+    expect(success).toEqual(true);
+    expect(mockService.callCluster).toHaveBeenCalledTimes(2);
+    expect(createdSignalsCount).toEqual(4); // should not create any signals because all events were in the allowlist
+    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
+  });
+
   test('if unsuccessful first bulk create', async () => {
     const sampleParams = sampleRuleAlertParams(10);
     mockService.callCluster

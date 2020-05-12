@@ -20,9 +20,6 @@ interface SearchAfterAndBulkCreateParams {
   services: AlertServices;
   listClient: ListClient | undefined; // TODO: undefined is for temporary development, remove before merged
   exceptionsList: RuleAlertParams['exceptions_list'];
-  // listValueType: ListValueType | undefined;
-  // listValueField: string | undefined; // ECS path to field that list values apply to
-  // listId: string | undefined;
   logger: Logger;
   id: string;
   inputIndexPattern: string[];
@@ -57,9 +54,6 @@ export const searchAfterAndBulkCreate = async ({
   services,
   listClient,
   logger,
-  // listValueType,
-  // listValueField,
-  // listId,
   id,
   inputIndexPattern,
   signalsIndex,
@@ -152,9 +146,6 @@ export const searchAfterAndBulkCreate = async ({
           exceptionsList,
           logger,
           eventSearchResult: searchResult,
-          // type: listValueType,
-          // field: listValueField,
-          // listId,
         });
       } else {
         filteredEvents = searchResult;
