@@ -398,6 +398,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
                 return aggs;
               },
             } as any,
+            searchSource: {} as any,
           },
           isHierarchical: () => {
             return false;
@@ -473,6 +474,7 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
                 return aggs;
               },
             } as any,
+            searchSource: {} as any,
           },
           isHierarchical: () => {
             return false;

@@ -125,7 +125,7 @@ export class AbstractESSource extends AbstractVectorSource {
       allFilters.push(getTimeFilter().createFilter(indexPattern, searchFilters.timeFilters));
     }
     const searchService = getSearchService();
-    const searchSource = searchService.searchSource.create(initialSearchContext);
+    const searchSource = await searchService.searchSource.create(initialSearchContext);
 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', limit);
@@ -135,7 +135,7 @@ export class AbstractESSource extends AbstractVectorSource {
     }
 
     if (searchFilters.sourceQuery) {
-      const layerSearchSource = searchService.searchSource.create();
+      const layerSearchSource = searchService.searchSource.createEmpty();
 
       layerSearchSource.setField('index', indexPattern);
       layerSearchSource.setField('query', searchFilters.sourceQuery);
@@ -296,7 +296,7 @@ export class AbstractESSource extends AbstractVectorSource {
 
     const indexPattern = await this.getIndexPattern();
     const searchService = getSearchService();
-    const searchSource = searchService.searchSource.create();
+    const searchSource = searchService.searchSource.createEmpty();
 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);
