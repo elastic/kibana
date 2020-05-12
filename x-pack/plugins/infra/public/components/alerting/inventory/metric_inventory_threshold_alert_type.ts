@@ -30,5 +30,6 @@ Current value is \\{\\{context.valueOf.condition0\\}\\}
 `,
       }
     ),
+    requiresAppContext: false,
   };
 }

@@ -8,7 +8,7 @@ import { performance } from 'perf_hooks';
 import { Logger, KibanaRequest } from 'src/core/server';
 
 import { SIGNALS_ID, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
-import { isJobStarted, isMlRule } from '../../../../common/detection_engine/ml_helpers';
+import { isJobStarted, isMlRule } from '../../../../common/machine_learning/helpers';
 import { SetupPlugins } from '../../../plugin';
 
 import { buildEventsSearchQuery } from './build_events_query';
@@ -50,6 +50,7 @@ export const signalRulesAlertType = ({
     validate: {
       params: signalParamsSchema(),
     },
+    producer: 'siem',
     async executor({ previousStartedAt, alertId, services, params }) {
       const {
         anomalyThreshold,

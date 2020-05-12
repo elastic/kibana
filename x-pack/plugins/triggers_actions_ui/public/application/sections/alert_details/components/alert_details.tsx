@@ -72,8 +72,11 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   } = useAppDependencies();
 
   const canSave = hasSaveAlertsCapability(capabilities);
-
   const actionTypesByTypeId = indexBy(actionTypes, 'id');
+  const hasEditButton =
+    canSave && alertTypeRegistry.has(alert.alertTypeId)
+      ? !alertTypeRegistry.get(alert.alertTypeId).requiresAppContext
+      : false;
 
   const alertActions = alert.actions;
   const uniqueActions = Array.from(new Set(alertActions.map((item: any) => item.actionTypeId)));
@@ -113,7 +116,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
               <EuiFlexGroup responsive={false} gutterSize="xs">
-                {canSave ? (
+                {hasEditButton ? (
                   <EuiFlexItem grow={false}>
                     <Fragment>
                       {' '}
@@ -127,26 +130,27 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                           defaultMessage="Edit"
                         />
                       </EuiButtonEmpty>
-                      <AlertsContextProvider
-                        value={{
-                          http,
-                          actionTypeRegistry,
-                          alertTypeRegistry,
-                          toastNotifications,
-                          uiSettings,
-                          docLinks,
-                          charts,
-                          dataFieldsFormats: dataPlugin.fieldFormats,
-                          reloadAlerts: setAlert,
-                          capabilities,
-                        }}
-                      >
-                        <AlertEdit
-                          initialAlert={alert}
-                          editFlyoutVisible={editFlyoutVisible}
-                          setEditFlyoutVisibility={setEditFlyoutVisibility}
-                        />
-                      </AlertsContextProvider>
+                      {editFlyoutVisible && (
+                        <AlertsContextProvider
+                          value={{
+                            http,
+                            actionTypeRegistry,
+                            alertTypeRegistry,
+                            toastNotifications,
+                            uiSettings,
+                            docLinks,
+                            charts,
+                            dataFieldsFormats: dataPlugin.fieldFormats,
+                            reloadAlerts: setAlert,
+                            capabilities,
+                          }}
+                        >
+                          <AlertEdit
+                            initialAlert={alert}
+                            onClose={() => setEditFlyoutVisibility(false)}
+                          />
+                        </AlertsContextProvider>
+                      )}
                     </Fragment>
                   </EuiFlexItem>
                 ) : null}

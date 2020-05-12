@@ -20,6 +20,7 @@ import {
 import { getEntityFieldList } from '../../../common/util/anomaly_utils';
 import {
   isSourceDataChartableForDetector,
+  isModelPlotChartableForDetector,
   isModelPlotEnabled,
 } from '../../../common/util/job_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
@@ -636,7 +637,10 @@ export async function loadAnomaliesTableData(
           // TODO - when job_service is moved server_side, move this to server endpoint.
           const job = mlJobService.getJob(jobId);
           let isChartable = isSourceDataChartableForDetector(job, anomaly.detectorIndex);
-          if (isChartable === false) {
+          if (
+            isChartable === false &&
+            isModelPlotChartableForDetector(job, anomaly.detectorIndex)
+          ) {
             // Check if model plot is enabled for this job.
             // Need to check the entity fields for the record in case the model plot config has a terms list.
             // If terms is specified, model plot is only stored if both the partition and by fields appear in the list.
