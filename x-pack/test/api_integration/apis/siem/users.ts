@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { usersQuery } from '../../../../plugins/siem/public/containers/users/index.gql_query';
+import { usersQuery } from '../../../../plugins/siem/public/network/containers/users/index.gql_query';
 import {
   Direction,
   UsersFields,
