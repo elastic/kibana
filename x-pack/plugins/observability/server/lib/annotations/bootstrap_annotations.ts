@@ -41,7 +41,7 @@ export async function bootstrapAnnotations({ index, core, context }: Params) {
         index,
         apiCaller: core.elasticsearch.dataClient.asScoped(request).callAsCurrentUser,
         logger,
-        license: requestContext.licensing.license,
+        license: requestContext.licensing?.license,
       });
     },
   };

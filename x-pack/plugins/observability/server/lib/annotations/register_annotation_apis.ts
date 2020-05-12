@@ -56,7 +56,7 @@ export function registerAnnotationAPIs({
         index,
         apiCaller,
         logger,
-        license: context.licensing.license,
+        license: context.licensing?.license,
       });
 
       try {

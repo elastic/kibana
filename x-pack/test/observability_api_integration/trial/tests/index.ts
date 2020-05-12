@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderContext) {

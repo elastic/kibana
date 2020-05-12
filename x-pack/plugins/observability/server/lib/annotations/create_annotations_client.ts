@@ -42,7 +42,7 @@ export function createAnnotationsClient(params: {
   index: string;
   apiCaller: APICaller;
   logger: Logger;
-  license: ILicense;
+  license?: ILicense;
 }) {
   const { index, apiCaller, logger, license } = params;
 
@@ -56,7 +56,7 @@ export function createAnnotationsClient(params: {
 
   function licenseGuard<T extends (...args: any[]) => any>(fn: T): T {
     return ((...args) => {
-      if (!license.hasAtLeast('gold')) {
+      if (!license?.hasAtLeast('gold')) {
         throw Boom.forbidden('Annotations require at least a gold license or a trial license.');
       }
       return fn(...args);
