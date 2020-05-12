@@ -65,7 +65,7 @@ export async function validateBucketSpan(
   }
 
   const messages = [];
-  const parsedBucketSpan = parseInterval(job.analysis_config.bucket_span, false);
+  const parsedBucketSpan = parseInterval(job.analysis_config.bucket_span);
   if (parsedBucketSpan === null || parsedBucketSpan.asMilliseconds() === 0) {
     messages.push({ id: 'bucket_span_invalid' });
     return messages;
