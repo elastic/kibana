@@ -22,7 +22,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useAppDependencies } from '../../../app_context';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
-import { ConnectorAddFlyout, ConnectorEditFlyout } from '../../action_connector_form';
+import ConnectorAddFlyout from '../../action_connector_form/connector_add_flyout';
+import ConnectorEditFlyout from '../../action_connector_form/connector_edit_flyout';
+
 import { hasDeleteActionsCapability, hasSaveActionsCapability } from '../../../lib/capabilities';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { ActionsConnectorsContextProvider } from '../../../context/actions_connectors_context';

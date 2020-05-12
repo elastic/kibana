@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './selectable_spaces_control.scss';
 import React, { Fragment, useState } from 'react';
 import { EuiSelectable, EuiLoadingSpinner } from '@elastic/eui';
 import { SpaceAvatar } from '../../space_avatar';

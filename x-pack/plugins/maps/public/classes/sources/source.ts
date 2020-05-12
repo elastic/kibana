@@ -9,8 +9,6 @@
 import { ReactElement } from 'react';
 
 import { Adapters } from 'src/plugins/inspector/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-// @ts-ignore
 import { copyPersistentState } from '../../reducers/util';
 
 import { SourceDescriptor } from '../../../common/descriptor_types';

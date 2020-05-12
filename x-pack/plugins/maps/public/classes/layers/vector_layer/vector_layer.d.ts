@@ -32,6 +32,8 @@ export interface IVectorLayer extends ILayer {
 }
 
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
+  static type: string;
+
   protected readonly _style: IVectorStyle;
   static createDescriptor(
     options: Partial<VectorLayerDescriptor>,

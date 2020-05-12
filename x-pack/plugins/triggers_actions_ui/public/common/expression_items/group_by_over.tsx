@@ -19,10 +19,11 @@ import {
 import { builtInGroupByTypes } from '../constants';
 import { GroupByType } from '../types';
 import { ClosablePopoverTitle } from './components';
+import { IErrorObject } from '../../types';
 
 interface GroupByExpressionProps {
   groupBy: string;
-  errors: { [key: string]: string[] };
+  errors: IErrorObject;
   onChangeSelectedTermSize: (selectedTermSize?: number) => void;
   onChangeSelectedTermField: (selectedTermField?: string) => void;
   onChangeSelectedGroupBy: (selectedGroupBy?: string) => void;
