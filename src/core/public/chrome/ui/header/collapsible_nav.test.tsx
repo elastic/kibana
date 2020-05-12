@@ -63,6 +63,7 @@ function mockProps() {
     storage: new StubBrowserStorage(),
     onIsOpenUpdate: () => {},
     onIsLockedUpdate: () => {},
+    navigateToApp: () => {},
   };
 }
 

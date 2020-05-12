@@ -288,6 +288,7 @@ export class Header extends Component<HeaderProps, State> {
                 this.toggleCollapsibleNavRef.current.focus();
               }
             }}
+            navigateToApp={this.props.application.navigateToApp}
           />
         ) : (
           // TODO #64541
