@@ -4,5 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { AlertAdd } from './alert_add';
-export { AlertEdit } from './alert_edit';
+import { createTestConfig } from '../common/config';
+
+// eslint-disable-next-line import/no-default-export
+export default createTestConfig('basic', {
+  disabledPlugins: [],
+  license: 'basic',
+  ssl: true,
+});

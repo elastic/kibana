@@ -21,6 +21,8 @@ const initialState = (): HostState => {
     detailsLoading: false,
     detailsError: undefined,
     policyResponse: undefined,
+    policyResponseLoading: false,
+    policyResponseError: undefined,
     location: undefined,
   };
 };
@@ -68,6 +70,14 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
     return {
       ...state,
       policyResponse: action.payload.policy_response,
+      policyResponseLoading: false,
+      policyResponseError: undefined,
+    };
+  } else if (action.type === 'serverFailedToReturnHostPolicyResponse') {
+    return {
+      ...state,
+      policyResponseError: action.payload,
+      policyResponseLoading: false,
     };
   } else if (action.type === 'userChangedUrl') {
     const newState: Immutable<HostState> = {
@@ -97,8 +107,10 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
           ...state,
           location: action.payload,
           detailsLoading: true,
+          policyResponseLoading: true,
           error: undefined,
           detailsError: undefined,
+          policyResponseError: undefined,
         };
       } else {
         // if previous page was not host list or host details, load both list and details
@@ -107,8 +119,10 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
           location: action.payload,
           loading: true,
           detailsLoading: true,
+          policyResponseLoading: true,
           error: undefined,
           detailsError: undefined,
+          policyResponseError: undefined,
         };
       }
     }
@@ -118,6 +132,7 @@ export const hostListReducer: ImmutableReducer<HostState, AppAction> = (
       location: action.payload,
       error: undefined,
       detailsError: undefined,
+      policyResponseError: undefined,
     };
   }
   return state;
