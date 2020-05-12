@@ -67,14 +67,14 @@ function mockProps() {
   };
 }
 
-function expectNavLinksCount(component: ReactWrapper, count: number) {
+function expectShownNavLinksCount(component: ReactWrapper, count: number) {
   expect(
-    component.find('.euiAccordion-isOpen a[data-test-subj="collapsibleNavAppLink"]').length
+    component.find('.euiAccordion-isOpen a[data-test-subj^="collapsibleNavAppLink"]').length
   ).toEqual(count);
 }
 
 function expectNavIsClosed(component: ReactWrapper) {
-  expectNavLinksCount(component, 0);
+  expectShownNavLinksCount(component, 0);
 }
 
 function clickGroup(component: ReactWrapper, group: string) {
@@ -137,14 +137,14 @@ describe('CollapsibleNav', () => {
         recentNavLinks={recentNavLinks}
       />
     );
-    expectNavLinksCount(component, 3);
+    expectShownNavLinksCount(component, 3);
     clickGroup(component, 'kibana');
     clickGroup(component, 'recentlyViewed');
-    expectNavLinksCount(component, 1);
+    expectShownNavLinksCount(component, 1);
     component.setProps({ isOpen: false });
     expectNavIsClosed(component);
     component.setProps({ isOpen: true });
-    expectNavLinksCount(component, 1);
+    expectShownNavLinksCount(component, 1);
   });
 
   it('closes the nav after clicking a link', () => {

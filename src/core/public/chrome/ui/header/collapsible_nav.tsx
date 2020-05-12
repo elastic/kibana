@@ -155,7 +155,7 @@ export function CollapsibleNav({
               // TODO #64541
               // Can remove icon from recent links completely
               listItems={recentNavLinks.map(({ iconType, onClick = () => {}, ...link }) => ({
-                'data-test-subj': 'collapsibleNavAppLink',
+                'data-test-subj': 'collapsibleNavAppLink--recent',
                 onClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
                   onIsOpenUpdate(false);
                   onClick(e);

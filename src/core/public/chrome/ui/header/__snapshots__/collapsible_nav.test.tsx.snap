@@ -360,7 +360,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                         <a
                                           aria-label="recent 1"
                                           class="euiListGroupItem__button"
-                                          data-test-subj="collapsibleNavAppLink"
+                                          data-test-subj="collapsibleNavAppLink--recent"
                                           href="recent 1"
                                           title="recent 1"
                                         >
@@ -378,7 +378,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                         <a
                                           aria-label="recent 2"
                                           class="euiListGroupItem__button"
-                                          data-test-subj="collapsibleNavAppLink"
+                                          data-test-subj="collapsibleNavAppLink--recent"
                                           href="recent 2"
                                           title="recent 2"
                                         >
@@ -999,7 +999,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           <a
                                             aria-label="recent 1"
                                             class="euiListGroupItem__button"
-                                            data-test-subj="collapsibleNavAppLink"
+                                            data-test-subj="collapsibleNavAppLink--recent"
                                             href="recent 1"
                                             title="recent 1"
                                           >
@@ -1017,7 +1017,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           <a
                                             aria-label="recent 2"
                                             class="euiListGroupItem__button"
-                                            data-test-subj="collapsibleNavAppLink"
+                                            data-test-subj="collapsibleNavAppLink--recent"
                                             href="recent 2"
                                             title="recent 2"
                                           >
@@ -1766,7 +1766,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           Array [
                                             Object {
                                               "aria-label": "recent 1",
-                                              "data-test-subj": "collapsibleNavAppLink",
+                                              "data-test-subj": "collapsibleNavAppLink--recent",
                                               "href": "recent 1",
                                               "label": "recent 1",
                                               "onClick": [Function],
@@ -1774,7 +1774,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                             },
                                             Object {
                                               "aria-label": "recent 2",
-                                              "data-test-subj": "collapsibleNavAppLink",
+                                              "data-test-subj": "collapsibleNavAppLink--recent",
                                               "href": "recent 2",
                                               "label": "recent 2",
                                               "onClick": [Function],
@@ -1797,7 +1797,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           <EuiListGroupItem
                                             aria-label="recent 1"
                                             color="subdued"
-                                            data-test-subj="collapsibleNavAppLink"
+                                            data-test-subj="collapsibleNavAppLink--recent"
                                             href="recent 1"
                                             key="title-0"
                                             label="recent 1"
@@ -1813,7 +1813,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                               <a
                                                 aria-label="recent 1"
                                                 className="euiListGroupItem__button"
-                                                data-test-subj="collapsibleNavAppLink"
+                                                data-test-subj="collapsibleNavAppLink--recent"
                                                 href="recent 1"
                                                 onClick={[Function]}
                                                 title="recent 1"
@@ -1830,7 +1830,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           <EuiListGroupItem
                                             aria-label="recent 2"
                                             color="subdued"
-                                            data-test-subj="collapsibleNavAppLink"
+                                            data-test-subj="collapsibleNavAppLink--recent"
                                             href="recent 2"
                                             key="title-1"
                                             label="recent 2"
@@ -1846,7 +1846,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                               <a
                                                 aria-label="recent 2"
                                                 className="euiListGroupItem__button"
-                                                data-test-subj="collapsibleNavAppLink"
+                                                data-test-subj="collapsibleNavAppLink--recent"
                                                 href="recent 2"
                                                 onClick={[Function]}
                                                 title="recent 2"
