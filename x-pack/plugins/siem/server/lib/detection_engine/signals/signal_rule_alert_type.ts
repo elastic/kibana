@@ -212,8 +212,8 @@ export const signalRulesAlertType = ({
         } else {
           let listClient;
           if (
-            process.env.ELASTIC_XPACK_SIEM_LISTS_FEATURE &&
-            process.env.ELASTIC_XPACK_SIEM_LISTS_FEATURE === 'true'
+            process.env.ELASTIC_XPACK_SIEM_EXCEPTIONS_LISTS &&
+            process.env.ELASTIC_XPACK_SIEM_EXCEPTIONS_LISTS === 'true'
           ) {
             if (lists == null) {
               throw new Error('lists plugin unavailable during rule execution');
