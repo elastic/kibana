@@ -12,6 +12,8 @@ declare module 'kibana/server' {
 
 import {
   CoreSetup,
+  CoreStart,
+  ICustomClusterClient,
   IScopedClusterClient,
   Logger,
   Plugin,
@@ -34,7 +36,8 @@ export interface WatcherContext {
 }
 
 export class WatcherServerPlugin implements Plugin<void, void, any, any> {
-  log: Logger;
+  private readonly log: Logger;
+  private watcherESClient?: ICustomClusterClient;
 
   private licenseStatus: LicenseStatus = {
     hasRequired: false,
@@ -44,21 +47,16 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
     this.log = ctx.logger.get();
   }
 
-  async setup(
-    { http, elasticsearch: elasticsearchService }: CoreSetup,
-    { licensing }: Dependencies
-  ) {
+  async setup({ http }: CoreSetup, { licensing }: Dependencies) {
     const router = http.createRouter();
     const routeDependencies: RouteDependencies = {
       router,
       getLicenseStatus: () => this.licenseStatus,
     };
 
-    const config = { plugins: [elasticsearchJsPlugin] };
-    const watcherESClient = elasticsearchService.createClient('watcher', config);
-    http.registerRouteHandlerContext('watcher', (ctx, request) => {
+    http.registerRouteHandlerContext('watcher', async (ctx, request) => {
       return {
-        client: watcherESClient.asScoped(request),
+        client: this.watcherESClient!.asScoped(request),
       };
     });
 
@@ -89,6 +87,15 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
       }
     });
   }
-  start() {}
-  stop() {}
+
+  start(core: CoreStart) {
+    const esConfig = { plugins: [elasticsearchJsPlugin] };
+    this.watcherESClient = core.elasticsearch.legacy.createClient('watcher', esConfig);
+  }
+
+  stop() {
+    if (this.watcherESClient) {
+      this.watcherESClient.close();
+    }
+  }
 }
