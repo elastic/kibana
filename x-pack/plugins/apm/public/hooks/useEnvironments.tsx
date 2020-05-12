@@ -11,6 +11,7 @@ import {
   ENVIRONMENT_NOT_DEFINED,
   ENVIRONMENT_ALL
 } from '../../common/environment_filter_values';
+import { callApmApi } from '../services/rest/createCallApmApi';
 
 export const ALL_OPTION = {
   value: ENVIRONMENT_ALL,
@@ -39,23 +40,20 @@ export function useEnvironments({
   start?: string;
   end?: string;
 }) {
-  const { data: environments = [], status = 'loading' } = useFetcher(
-    callApmApi => {
-      if (start && end) {
-        return callApmApi({
-          pathname: '/api/apm/ui_filters/environments',
-          params: {
-            query: {
-              start,
-              end,
-              serviceName
-            }
+  const { data: environments = [], status = 'loading' } = useFetcher(() => {
+    if (start && end) {
+      return callApmApi({
+        pathname: '/api/apm/ui_filters/environments',
+        params: {
+          query: {
+            start,
+            end,
+            serviceName
           }
-        });
-      }
-    },
-    [start, end, serviceName]
-  );
+        }
+      });
+    }
+  }, [start, end, serviceName]);
 
   const environmentOptions = useMemo(
     () => getEnvironmentOptions(environments),
