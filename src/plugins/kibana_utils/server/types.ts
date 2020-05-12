@@ -17,12 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
-import { KibanaUtilsPlugin } from './plugin';
-export { Get, Set, createGetterSetter, url } from '../common';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new KibanaUtilsPlugin(initializerContext);
-}
-
-export { KibanaUtilsPluginSetup, KibanaUtilsPluginStart } from './types';
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface KibanaUtilsPluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface KibanaUtilsPluginStart {}

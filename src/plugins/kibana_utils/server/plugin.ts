@@ -19,19 +19,26 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, Plugin } from 'kibana/server';
+import { CoreSetup, Plugin, PluginInitializerContext, Logger } from 'kibana/server';
+import { KibanaUtilsPluginSetup, KibanaUtilsPluginStart } from './types';
 
-export class KibanaUtilsPlugin implements Plugin {
-  constructor() {}
+export class KibanaUtilsPlugin implements Plugin<KibanaUtilsPluginSetup, KibanaUtilsPluginStart> {
+  private readonly logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
 
   public async setup(core: CoreSetup) {
+    this.logger.debug('Kibana_utils: Setup');
+
     core.uiSettings.register({
       'state:storeInSessionStorage': {
-        name: i18n.translate('kbn.advancedSettings.storeUrlTitle', {
+        name: i18n.translate('kibana_utils.advancedSettings.storeUrlTitle', {
           defaultMessage: 'Store URLs in session storage',
         }),
         value: false,
-        description: i18n.translate('kbn.advancedSettings.storeUrlText', {
+        description: i18n.translate('kibana_utils.advancedSettings.storeUrlText', {
           defaultMessage:
             'The URL can sometimes grow to be too large for some browsers to handle. ' +
             'To counter-act this we are testing if storing parts of the URL in session storage could help. ' +
@@ -40,8 +47,15 @@ export class KibanaUtilsPlugin implements Plugin {
         schema: schema.boolean(),
       },
     });
+
+    return {};
   }
 
-  public start() {}
+  public start() {
+    this.logger.debug('Kibana_utils: Started');
+
+    return {};
+  }
+
   public stop() {}
 }

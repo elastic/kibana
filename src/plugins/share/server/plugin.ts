@@ -31,21 +31,21 @@ export class SharePlugin implements Plugin {
     core.savedObjects.registerType(url);
     core.uiSettings.register({
       'csv:separator': {
-        name: i18n.translate('kbn.advancedSettings.csv.separatorTitle', {
+        name: i18n.translate('share.advancedSettings.csv.separatorTitle', {
           defaultMessage: 'CSV separator',
         }),
         value: ',',
-        description: i18n.translate('kbn.advancedSettings.csv.separatorText', {
+        description: i18n.translate('share.advancedSettings.csv.separatorText', {
           defaultMessage: 'Separate exported values with this string',
         }),
         schema: schema.string(),
       },
       'csv:quoteValues': {
-        name: i18n.translate('kbn.advancedSettings.csv.quoteValuesTitle', {
+        name: i18n.translate('share.advancedSettings.csv.quoteValuesTitle', {
           defaultMessage: 'Quote CSV values',
         }),
         value: true,
-        description: i18n.translate('kbn.advancedSettings.csv.quoteValuesText', {
+        description: i18n.translate('share.advancedSettings.csv.quoteValuesText', {
           defaultMessage: 'Should values be quoted in csv exports?',
         }),
         schema: schema.boolean(),

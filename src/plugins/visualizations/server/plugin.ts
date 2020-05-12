@@ -46,11 +46,11 @@ export class VisualizationsPlugin
 
     core.uiSettings.register({
       'visualize:enableLabs': {
-        name: i18n.translate('kbn.advancedSettings.visualizeEnableLabsTitle', {
+        name: i18n.translate('visualizations.advancedSettings.visualizeEnableLabsTitle', {
           defaultMessage: 'Enable experimental visualizations',
         }),
         value: true,
-        description: i18n.translate('kbn.advancedSettings.visualizeEnableLabsText', {
+        description: i18n.translate('visualizations.advancedSettings.visualizeEnableLabsText', {
           defaultMessage: `Allows users to create, view, and edit experimental visualizations. If disabled,
             only visualizations that are considered production-ready are available to the user.`,
         }),
