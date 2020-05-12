@@ -58,7 +58,7 @@ export const ProcessorSettingsForm: FunctionComponent<Props> = ({
 
   return (
     <Form form={form}>
-      <ProcessorTypeField initialType={processor?.type ? [processor.type] : []} />
+      <ProcessorTypeField initialType={processor?.type} />
 
       <EuiHorizontalRule />
 

@@ -15,7 +15,7 @@ import {
 import { types } from '../../map_processor_type_to_form';
 
 interface Props {
-  initialType: string[];
+  initialType?: string;
 }
 
 const { emptyField } = fieldValidators;
@@ -25,6 +25,15 @@ const typeConfig: FieldConfig = {
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.typeField.typeFieldLabel', {
     defaultMessage: 'Processor',
   }),
+  deserializer: (value: string | undefined) => {
+    if (value) {
+      return [value];
+    }
+    return [];
+  },
+  serializer: (value: string[]) => {
+    return value[0];
+  },
   validations: [
     {
       validator: emptyField(
