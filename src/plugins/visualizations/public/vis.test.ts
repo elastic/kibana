@@ -18,8 +18,6 @@
  */
 
 import { Vis } from './vis';
-// @ts-ignore
-import fixturesStubbedLogstashIndexPatternProvider from '../../../fixtures/stubbed_logstash_index_pattern';
 
 jest.mock('./services', () => {
   class MockVisualizationController {
@@ -36,7 +34,10 @@ jest.mock('./services', () => {
 
   // eslint-disable-next-line
   const { BaseVisType } = require('./vis_types/base_vis_type');
-
+  // eslint-disable-next-line
+  const { SearchSource } = require('../../data/public/search/search_source');
+  // eslint-disable-next-line
+  const fixturesStubbedLogstashIndexPatternProvider = require('../../../fixtures/stubbed_logstash_index_pattern');
   const visType = new BaseVisType({
     name: 'pie',
     title: 'pie',
@@ -50,6 +51,13 @@ jest.mock('./services', () => {
       createAggConfigs: (indexPattern: any, cfg: any) => ({
         aggs: cfg.map((aggConfig: any) => ({ ...aggConfig, toJSON: () => aggConfig })),
       }),
+    }),
+    getSearch: () => ({
+      searchSource: {
+        create: () => {
+          return new SearchSource({ index: fixturesStubbedLogstashIndexPatternProvider });
+        },
+      },
     }),
   };
 });
@@ -66,19 +74,15 @@ describe('Vis Class', function() {
         { type: 'terms' as any, schema: 'segment', params: { field: 'geo.src' } },
       ],
       searchSource: {
-        getField: (name: string) => {
-          if (name === 'index') {
-            return fixturesStubbedLogstashIndexPatternProvider();
-          }
-        },
-        createCopy: jest.fn(),
+        index: '123',
       },
     },
     params: { isDonut: true },
   };
 
-  beforeEach(function() {
+  beforeEach(async function() {
     vis = new Vis('test', stateFixture as any);
+    await vis.setState(stateFixture as any);
   });
 
   const verifyVis = function(visToVerify: Vis) {
