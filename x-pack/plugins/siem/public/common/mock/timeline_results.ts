@@ -3,16 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FilterStateStore } from '../../../../../src/plugins/data/common/es_query/filters/meta_filter';
+import { FilterStateStore } from '../../../../../../src/plugins/data/common/es_query/filters/meta_filter';
 
-import { TimelineType } from '../../common/types/timeline';
+import { TimelineType } from '../../../common/types/timeline';
 
-import { OpenTimelineResult } from '../components/open_timeline/types';
-import { GetAllTimeline, SortFieldTimeline, TimelineResult, Direction } from '../graphql/types';
-import { allTimelinesQuery } from '../containers/timeline/all/index.gql_query';
-import { CreateTimelineProps } from '../pages/detection_engine/components/signals/types';
-import { TimelineModel } from '../store/timeline/model';
-import { timelineDefaults } from '../store/timeline/defaults';
+import { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
+import { GetAllTimeline, SortFieldTimeline, TimelineResult, Direction } from '../../graphql/types';
+import { allTimelinesQuery } from '../../timelines/containers/all/index.gql_query';
+import { CreateTimelineProps } from '../../alerts/components/signals/types';
+import { TimelineModel } from '../../timelines/store/timeline/model';
+import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 export interface MockedProvidedQuery {
   request: {
     query: GetAllTimeline.Query;

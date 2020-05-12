@@ -28,13 +28,17 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 
-import { esFilters, Filter, MatchAllFilter } from '../../../../../../src/plugins/data/public';
-import { TimelineType } from '../../../common/types/timeline';
-import { TimelineInput, ResponseTimeline, TimelineResult } from '../../graphql/types';
-import { AppApolloClient } from '../../lib/lib';
-import { addError } from '../app/actions';
-import { NotesById } from '../app/model';
-import { inputsModel } from '../inputs';
+import {
+  esFilters,
+  Filter,
+  MatchAllFilter,
+} from '../../../../../../.../../../src/plugins/data/public';
+import { TimelineType } from '../../../../common/types/timeline';
+import { TimelineInput, ResponseTimeline, TimelineResult } from '../../../graphql/types';
+import { AppApolloClient } from '../../../common/lib/lib';
+import { addError } from '../../../common/store/app/actions';
+import { NotesById } from '../../../common/store/app/model';
+import { inputsModel } from '../../../common/store/inputs';
 
 import {
   applyKqlFilterQuery,
@@ -72,8 +76,8 @@ import { isNotNull } from './helpers';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import { ActionTimeline, TimelineById } from './types';
-import { persistTimeline } from '../../containers/timeline/api';
-import { ALL_TIMELINE_QUERY_ID } from '../../containers/timeline/all';
+import { persistTimeline } from '../../containers/api';
+import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';
 
 interface TimelineEpicDependencies<State> {
   timelineByIdSelector: (state: State) => TimelineById;

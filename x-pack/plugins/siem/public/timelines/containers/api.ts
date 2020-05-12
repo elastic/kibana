@@ -21,11 +21,14 @@ import {
   TIMELINE_EXPORT_URL,
 } from '../../../common/constants';
 
-import { KibanaServices } from '../../lib/kibana';
-import { ExportSelectedData } from '../../components/generic_downloader';
+import { KibanaServices } from '../../common/lib/kibana';
+import { ExportSelectedData } from '../../common/components/generic_downloader';
 
-import { createToasterPlainError } from '../case/utils';
-import { ImportDataProps, ImportDataResponse } from '../detection_engine/rules';
+import { createToasterPlainError } from '../../cases/containers/utils';
+import {
+  ImportDataProps,
+  ImportDataResponse,
+} from '../../alerts/containers/detection_engine/rules';
 
 interface RequestPostTimeline {
   timeline: SavedTimeline;

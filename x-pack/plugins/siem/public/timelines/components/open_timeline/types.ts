@@ -5,10 +5,10 @@
  */
 
 import { SetStateAction, Dispatch } from 'react';
-import { AllTimelinesVariables } from '../../containers/timeline/all';
+import { AllTimelinesVariables } from '../../containers/all';
 import { TimelineModel } from '../../store/timeline/model';
-import { NoteResult } from '../../graphql/types';
-import { TimelineTypeLiteral } from '../../../common/types/timeline';
+import { NoteResult } from '../../../graphql/types';
+import { TimelineTypeLiteral } from '../../../../common/types/timeline';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {

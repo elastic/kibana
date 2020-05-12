@@ -10,9 +10,9 @@ import {
   mockTimelineResults,
   mockTimelineResult,
   mockTimelineModel,
-} from '../../mock/timeline_results';
+} from '../../../common/mock/timeline_results';
 import { timelineDefaults } from '../../store/timeline/defaults';
-import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../store/inputs/actions';
+import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../../common/store/inputs/actions';
 import {
   setKqlFilterQueryDraft as dispatchSetKqlFilterQueryDraft,
   applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
@@ -22,7 +22,7 @@ import {
 import {
   addNotes as dispatchAddNotes,
   updateNote as dispatchUpdateNote,
-} from '../../store/app/actions';
+} from '../../../common/store/app/actions';
 import {
   defaultTimelineToTimelineModel,
   getNotesCount,
@@ -32,11 +32,11 @@ import {
   dispatchUpdateTimeline,
 } from './helpers';
 import { OpenTimelineResult, DispatchUpdateTimeline } from './types';
-import { KueryFilterQueryKind } from '../../store/model';
-import { Note } from '../../lib/note';
+import { KueryFilterQueryKind } from '../../../common/store/model';
+import { Note } from '../../../common/lib/note';
 import moment from 'moment';
 import sinon from 'sinon';
-import { TimelineType } from '../../../common/types/timeline';
+import { TimelineType } from '../../../../common/types/timeline';
 
 jest.mock('../../store/inputs/actions');
 jest.mock('../../store/timeline/actions');

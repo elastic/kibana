@@ -11,15 +11,15 @@ import { Switch, Route, Redirect } from 'react-router-dom';
 import { ChromeBreadcrumb } from '../../../../../../src/core/public';
 
 import { TimelineType } from '../../../common/types/timeline';
-import { TAB_TIMELINES, TAB_TEMPLATES } from '../../components/open_timeline/translations';
-import { getTimelinesUrl } from '../../components/link_to';
-import { TimelineRouteSpyState } from '../../utils/route/types';
+import { TAB_TIMELINES, TAB_TEMPLATES } from '../components/open_timeline/translations';
+import { getTimelinesUrl } from '../../common/components/link_to';
+import { TimelineRouteSpyState } from '../../common/utils/route/types';
 
-import { SiemPageName } from '../home/types';
+import { SiemPageName } from '../../app/types';
 
 import { TimelinesPage } from './timelines_page';
 import { PAGE_TITLE } from './translations';
-import { appendSearch } from '../../components/link_to/helpers';
+import { appendSearch } from '../../common/components/link_to/helpers';
 const timelinesPagePath = `/:pageName(${SiemPageName.timelines})/:tabName(${TimelineType.default}|${TimelineType.template})`;
 const timelinesDefaultPath = `/${SiemPageName.timelines}/${TimelineType.default}`;
 
