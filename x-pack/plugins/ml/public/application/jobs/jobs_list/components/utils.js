@@ -367,7 +367,7 @@ function jobProperty(job, prop) {
   return job[propMap[prop]];
 }
 
-export function getJobIdUrl(jobId) {
+export function getJobIdUrl(tabId, jobId) {
   // Create url for filtering by job id for kibana management table
   const settings = {
     jobId,
@@ -376,7 +376,7 @@ export function getJobIdUrl(jobId) {
   const url = `?mlManagement=${encoded}`;
   const basePath = getBasePath();
 
-  return `${basePath.get()}/app/ml#/jobs${url}`;
+  return `${basePath.get()}/app/ml#/${tabId}${url}`;
 }
 
 function getUrlVars(url) {
