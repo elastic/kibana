@@ -38,7 +38,6 @@ export const ProcessorRemoveModal = ({ processor, onResult }: Props) => {
           <FormattedMessage
             id="xpack.ingestPipelines.pipelineEditor.removeProcessorModal.confirmationButtonLabel"
             defaultMessage="Remove processor"
-            values={{ type: processor.type }}
           />
         }
       >
