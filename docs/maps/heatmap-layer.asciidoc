@@ -2,7 +2,7 @@
 [[heatmap-layer]]
 == Heat map layer
 
-In heat map layers, point data is clustered to show locations with higher densities.
+Heat map layers cluster point data to show locations with higher densities.
 
 [role="screenshot"]
 image::maps/images/heatmap_layer.png[]
