@@ -20,11 +20,12 @@ import { getTimeUnitLabel } from '../lib/get_time_unit_label';
 import { TIME_UNITS } from '../../application/constants';
 import { getTimeOptions } from '../lib/get_time_options';
 import { ClosablePopoverTitle } from './components';
+import { IErrorObject } from '../../types';
 
 interface ForLastExpressionProps {
   timeWindowSize?: number;
   timeWindowUnit?: string;
-  errors: { [key: string]: string[] };
+  errors: IErrorObject;
   onChangeWindowSize: (selectedWindowSize: number | undefined) => void;
   onChangeWindowUnit: (selectedWindowUnit: string) => void;
   popupPosition?:
