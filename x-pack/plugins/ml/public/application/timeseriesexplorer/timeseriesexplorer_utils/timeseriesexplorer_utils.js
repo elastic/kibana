@@ -153,10 +153,13 @@ export function processDataForFocusAnomalies(
         chartPoint.anomalyScore = recordScore;
         chartPoint.function = record.function;
 
-        if (chartPoint.value === null) {
-          chartPoint.value = record.actual;
-        }
         if (_.has(record, 'actual')) {
+          // If cannot match chart point for anomaly time
+          // substitute the value with the record's actual so it won't plot as null/0
+          if (chartPoint.value === null) {
+            chartPoint.value = record.actual;
+          }
+
           chartPoint.actual = record.actual;
           chartPoint.typical = record.typical;
         } else {
