@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IBasePath } from 'src/core/server';
-import { GlobalSearchProviderResultUrl } from '../result_provider';
+import { GlobalSearchProviderResultUrl } from './types';
+
+// interface matching both the server and client-side implementation of IBasePath for our needs
+// used to avoid duplicating `convertResultUrl` in server and client code
+interface IBasePath {
+  prepend(path: string): string;
+}
 
 export const convertResultUrl = (
   url: GlobalSearchProviderResultUrl,

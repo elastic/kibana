@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { httpServiceMock } from '../../../../../src/core/server/mocks';
 import { convertResultUrl } from './utils';
 
+const createBasePath = () => ({
+  prepend: jest.fn(),
+});
+
 describe('convertResultUrl', () => {
-  let basePath: ReturnType<typeof httpServiceMock.createBasePath>;
+  let basePath: ReturnType<typeof createBasePath>;
 
   beforeEach(() => {
-    basePath = httpServiceMock.createBasePath('/base-path');
+    basePath = createBasePath();
     basePath.prepend.mockImplementation(path => `/base-path${path}`);
   });
 

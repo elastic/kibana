@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 import { SearchService, SearchServiceStart } from './services';
 import { registerRoutes } from './routes';
@@ -12,6 +14,7 @@ import {
   GlobalSearchPluginStart,
   RouteHandlerGlobalSearchContext,
 } from './types';
+import { GlobalSearchConfigType } from './config';
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
@@ -22,17 +25,22 @@ declare module 'src/core/server' {
 export class GlobalSearchPlugin
   implements Plugin<GlobalSearchPluginSetup, GlobalSearchPluginStart> {
   private readonly logger: Logger;
+  private readonly config$: Observable<GlobalSearchConfigType>;
   private readonly searchService = new SearchService();
   private searchServiceStart?: SearchServiceStart;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
+    this.config$ = context.config.create<GlobalSearchConfigType>();
   }
 
-  public setup(core: CoreSetup<{}, GlobalSearchPluginStart>) {
+  public async setup(core: CoreSetup<{}, GlobalSearchPluginStart>) {
     this.logger.debug('Setting up GlobalSearch plugin');
+
+    const config = await this.config$.pipe(take(1)).toPromise();
     const { registerResultProvider } = this.searchService.setup({
       basePath: core.http.basePath,
+      config,
     });
 
     registerRoutes(core.http.createRouter());

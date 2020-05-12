@@ -12,3 +12,5 @@ export const plugin: PluginInitializer<
   GlobalSearchPluginSetup,
   GlobalSearchPluginStart
 > = context => new GlobalSearchPlugin(context);
+
+export { config } from './config';

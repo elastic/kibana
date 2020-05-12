@@ -4,18 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable, timer, merge } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-import { KibanaRequest, CoreStart, IBasePath } from 'src/core/server';
-import {
-  GlobalSearchResultProvider,
-  getContextFactory,
-  GlobalSearchContextFactory,
-  GlobalSearchProviderResult,
-} from '../result_provider';
-import { GlobalSearchBatchedResults, GlobalSearchFindOptions, GlobalSearchResult } from './types';
-import { GlobalSearchConfigType } from '../config';
+import { merge, Observable, timer } from 'rxjs';
+import { duration } from 'moment';
+import { HttpStart } from 'src/core/public';
 import { takeInArray } from '../../common/operators';
+import { GlobalSearchResultProvider } from '../types';
+import { GlobalSearchConfigType } from '../config';
+import { GlobalSearchBatchedResults, GlobalSearchFindOptions, GlobalSearchResult } from './types';
+import { GlobalSearchProviderResult } from '../../common/types';
 import { convertResultUrl } from '../../common/utils';
 
 /** @public */
@@ -25,28 +22,17 @@ export interface SearchServiceSetup {
 
 /** @public */
 export interface SearchServiceStart {
-  find(
-    term: string,
-    options: GlobalSearchFindOptions,
-    request: KibanaRequest
-  ): Observable<GlobalSearchBatchedResults>;
-}
-
-interface SetupDeps {
-  basePath: IBasePath;
-  config: GlobalSearchConfigType;
+  find(term: string, options: GlobalSearchFindOptions): Observable<GlobalSearchBatchedResults>;
 }
 
 /** @internal */
 export class SearchService {
   private readonly providers: GlobalSearchResultProvider[] = [];
-  private basePath?: IBasePath;
   private config?: GlobalSearchConfigType;
-  private contextFactory?: GlobalSearchContextFactory;
+  private http?: HttpStart;
   private readonly maxProviderResults = 20;
 
-  setup({ basePath, config }: SetupDeps): SearchServiceSetup {
-    this.basePath = basePath;
+  setup({ config }: { config: GlobalSearchConfigType }): SearchServiceSetup {
     this.config = config;
 
     return {
@@ -59,17 +45,17 @@ export class SearchService {
     };
   }
 
-  start(coreStart: CoreStart): SearchServiceStart {
-    this.contextFactory = getContextFactory(coreStart);
+  start({ http }: { http: HttpStart }): SearchServiceStart {
+    this.http = http;
+
     return {
-      find: (term, options, request) => this.performFind(term, options, request),
+      find: (term, options) => this.performFind(term, options),
     };
   }
 
-  private performFind(term: string, options: GlobalSearchFindOptions, request: KibanaRequest) {
-    const context = this.contextFactory!(request);
-
-    const timeout$ = timer(this.config!.search_timeout.asMilliseconds()).pipe(map(() => undefined));
+  private performFind(term: string, options: GlobalSearchFindOptions) {
+    const timeout = duration(this.config!.search_timeout).asMilliseconds();
+    const timeout$ = timer(timeout).pipe(map(() => undefined));
     const aborted$ = options.aborted$ ? merge(options.aborted$, timeout$) : timeout$;
     const providerOptions = {
       ...options,
@@ -78,9 +64,11 @@ export class SearchService {
       aborted$,
     };
 
+    // TODO: perform server request
+
     const providersResults$ = this.providers.map(provider =>
       provider
-        .find(term, providerOptions, context)
+        .find(term, providerOptions)
         .pipe(takeInArray(this.maxProviderResults), takeUntil(aborted$))
     );
 
@@ -94,7 +82,8 @@ export class SearchService {
   private processResult(providerResult: GlobalSearchProviderResult): GlobalSearchResult {
     return {
       ...providerResult,
-      url: convertResultUrl(providerResult.url, this.basePath!),
+      url: convertResultUrl(providerResult.url, this.http!.basePath),
+      navigate: () => Promise.resolve(), // TODO: implements
     };
   }
 }
