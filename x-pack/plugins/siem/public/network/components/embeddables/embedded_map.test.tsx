@@ -12,7 +12,7 @@ import { EmbeddedMapComponent } from './embedded_map';
 import { SetQuery } from './types';
 
 const mockUseIndexPatterns = useIndexPatterns as jest.Mock;
-jest.mock('../../hooks/use_index_patterns');
+jest.mock('../../../common/hooks/use_index_patterns');
 mockUseIndexPatterns.mockImplementation(() => [true, []]);
 
 jest.mock('../../../common/lib/kibana');

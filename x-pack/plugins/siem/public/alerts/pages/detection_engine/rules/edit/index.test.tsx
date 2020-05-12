@@ -12,7 +12,7 @@ import { EditRulePage } from './index';
 import { useUserInfo } from '../../../../components/user_info';
 import { useParams } from 'react-router-dom';
 
-jest.mock('../../components/user_info');
+jest.mock('../../../../components/user_info');
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
 

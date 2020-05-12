@@ -18,11 +18,11 @@ import { useGetAllTimeline, getAllTimeline } from '../../../containers/all';
 import { OpenTimelineModal } from '.';
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../utils/apollo_context', () => ({
+jest.mock('../../../../common/utils/apollo_context', () => ({
   useApolloClient: () => ({}),
 }));
-jest.mock('../../../../timelines/containers/all', () => {
-  const originalModule = jest.requireActual('../../../../timelines/containers/all');
+jest.mock('../../../containers/all', () => {
+  const originalModule = jest.requireActual('../../../containers/all');
   return {
     useGetAllTimeline: jest.fn(),
     getAllTimeline: originalModule.getAllTimeline,

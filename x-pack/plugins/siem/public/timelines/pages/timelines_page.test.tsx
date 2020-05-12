@@ -11,7 +11,7 @@ import React from 'react';
 import { useKibana } from '../../common/lib/kibana';
 import { TimelinesPageComponent } from './timelines_page';
 
-jest.mock('../../pages/overview/events_by_dataset');
+jest.mock('../../overview/components/events_by_dataset');
 
 jest.mock('../../common/lib/kibana', () => {
   return {

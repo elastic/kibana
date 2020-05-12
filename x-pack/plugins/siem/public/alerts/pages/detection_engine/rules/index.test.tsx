@@ -11,7 +11,7 @@ import { RulesPage } from './index';
 import { useUserInfo } from '../../../components/user_info';
 import { usePrePackagedRules } from '../../../../alerts/containers/detection_engine/rules';
 
-jest.mock('../components/user_info');
+jest.mock('../../../components/user_info');
 jest.mock('../../../../alerts/containers/detection_engine/rules');
 
 describe('RulesPage', () => {

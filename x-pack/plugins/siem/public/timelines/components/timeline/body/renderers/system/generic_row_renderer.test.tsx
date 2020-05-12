@@ -48,7 +48,7 @@ import {
 } from './generic_row_renderer';
 import * as i18n from './translations';
 
-jest.mock('../../../../../pages/overview/events_by_dataset');
+jest.mock('../../../../../../overview/components/events_by_dataset');
 
 describe('GenericRowRenderer', () => {
   const mount = useMountAppended();

@@ -9,7 +9,7 @@ import { errorLink, reTryOneTimeOnErrorLink } from '../../containers/errors';
 import { getLinks } from './helpers';
 import { withClientState } from 'apollo-link-state';
 import * as apolloLinkHttp from 'apollo-link-http';
-import introspectionQueryResultData from '../../graphql/introspection.json';
+import introspectionQueryResultData from '../../../graphql/introspection.json';
 
 jest.mock('apollo-cache-inmemory');
 jest.mock('apollo-link-http');

@@ -11,7 +11,7 @@ import { TestProviders } from '../../../../../common/mock';
 import { CreateRulePage } from './index';
 import { useUserInfo } from '../../../../components/user_info';
 
-jest.mock('../../components/user_info');
+jest.mock('../../../../components/user_info');
 
 describe('CreateRulePage', () => {
   it('renders correctly', () => {

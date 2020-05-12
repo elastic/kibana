@@ -17,7 +17,7 @@ import { createStore, State } from '../../store';
 import { AddFilterToGlobalSearchBar } from '.';
 
 const mockAddFilters = jest.fn();
-jest.mock('../../../lib/kibana', () => ({
+jest.mock('../../lib/kibana', () => ({
   useKibana: () => ({
     services: {
       data: {

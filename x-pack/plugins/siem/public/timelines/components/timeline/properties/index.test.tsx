@@ -20,7 +20,7 @@ import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
 jest.mock('../../../../common/lib/kibana');
 
 let mockedWidth = 1000;
-jest.mock('../../utils');
+jest.mock('../../../../common/components/utils');
 (useThrottledResizeObserver as jest.Mock).mockImplementation(() => ({
   width: mockedWidth,
 }));

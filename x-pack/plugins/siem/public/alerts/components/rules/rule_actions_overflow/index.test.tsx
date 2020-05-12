@@ -20,7 +20,7 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-jest.mock('../../all/actions', () => ({
+jest.mock('../../../pages/detection_engine/rules/all/actions', () => ({
   deleteRulesAction: jest.fn(),
   duplicateRulesAction: jest.fn(),
 }));
