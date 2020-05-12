@@ -179,7 +179,6 @@ export const ProcessEventDot = styled(
       ]);
       const labelId = useMemo(() => resolverNodeIdGenerator(), [resolverNodeIdGenerator]);
       const descriptionId = useMemo(() => resolverNodeIdGenerator(), [resolverNodeIdGenerator]);
-
       const isActiveDescendant = nodeId === activeDescendantId;
       const isSelectedDescendant = nodeId === selectedDescendantId;
 
