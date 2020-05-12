@@ -189,7 +189,7 @@ export const formatTimelineResultToModel = (
 
 export interface QueryTimelineById<TCache> {
   apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
-  duplicate: boolean;
+  duplicate?: boolean;
   timelineId: string;
   onOpenTimeline?: (timeline: TimelineModel) => void;
   openTimeline?: boolean;
