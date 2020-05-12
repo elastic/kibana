@@ -686,8 +686,8 @@ export class EndpointDocGenerator {
                 },
                 streaming: {
                   concerned_actions: this.randomHostPolicyResponseActionNames(),
-                  status:status(),
-                }
+                  status: status(),
+                },
               },
             },
             artifacts: {
