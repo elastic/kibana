@@ -6,14 +6,15 @@
 
 export const TRACKED_LAYER_DESCRIPTOR = '__trackedLayerDescriptor';
 
-export function copyPersistentState(input) {
+export function copyPersistentState(input: any) {
   if (typeof input !== 'object' || input === null) {
-    //primitive
+    // primitive
     return input;
   }
   const copyInput = Array.isArray(input) ? [] : {};
   for (const key in input) {
     if (!key.startsWith('__')) {
+      // @ts-ignore
       copyInput[key] = copyPersistentState(input[key]);
     }
   }
