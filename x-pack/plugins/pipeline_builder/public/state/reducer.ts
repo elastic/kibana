@@ -19,10 +19,10 @@ export function reducer(state: State, action: Action): State {
         nodes: {
           ...state.nodes,
           [nodeId]: {
+            id: nodeId,
             type: action.nodeType,
             state: nodeRegistry[action.nodeType].initialize(),
-            inputNodes: action.inputNodes,
-            outputNode: action.outputNode,
+            inputNodeIds: action.inputNodeIds,
           },
         },
       };

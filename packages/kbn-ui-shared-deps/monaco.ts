@@ -31,4 +31,6 @@ import 'monaco-editor/esm/vs/editor/contrib/suggest/suggestController.js'; // Ne
 import 'monaco-editor/esm/vs/editor/contrib/hover/hover.js'; // Needed for hover
 import 'monaco-editor/esm/vs/editor/contrib/parameterHints/parameterHints.js'; // Needed for signature
 
+import 'monaco-editor/esm/vs/language/json/monaco.contribution.js';
+
 export { monaco };

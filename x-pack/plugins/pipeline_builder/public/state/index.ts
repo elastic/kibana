@@ -7,3 +7,4 @@
 export { reducer } from './reducer';
 export * from './sync';
 export { Loader, useLoader } from './loader';
+export { analyzeDag } from './helpers';

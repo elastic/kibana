@@ -1,7 +1,46 @@
 .pipelineBuilderApp {
-  height: 100%;
+  // $euiHeaderChildSize
+  min-height: calc(100vh - 48px);
+
+  display: flex;
+  flex-direction: column;
 }
 
-.pipelineBuilderApp__pageBody {
-  height: 100%;
+.pipelineFrameLayout {
+  display: flex;
+  padding: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+.pipelineFrameLayout__pageContent {
+  display: flex;
+  overflow: auto;
+  flex-grow: 1;
+  flex-direction: column;
+  padding: $euiSize;
+  border-right: 1px solid $euiColorLightShade;
+}
+
+.pipelineFrameLayout__sidebar {
+  margin: 0;
+  flex: 1 0 30%;
+  min-width: $euiSize * 24 + $euiSize;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding: $euiSize;
+  overflow: auto;
+}
+
+.pipelineBuilder__node {
+  margin-top: $euiSize;
+}
+
+.pipelineBuilder__startNode {
+  max-width: 50%;
 }

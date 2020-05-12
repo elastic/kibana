@@ -3,42 +3,109 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/ui-shared-deps/monaco';
-import { EuiPanel, EuiFormRow, EuiFieldText, EuiProgress } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiFormRow,
+  EuiFieldText,
+  EuiProgress,
+  EuiSelect,
+  EuiPopover,
+  EuiButton,
+} from '@elastic/eui';
 import { CodeEditor } from '../../../../../src/plugins/kibana_react/public';
 import { NodeDefinition, RenderNode } from '../types';
 import { useLoader } from '../state';
-// import { Observable } from 'rxjs';
-// import { IKibanaSearchResponse, IKibanaSearchRequest } from '../../../../../src/plugins/data/public';
 
 interface SearchNodeState {
-  endpoint: string;
-  code: string;
+  method: 'POST';
+  path: string;
+  body: string;
 }
 
 function SearchNode({ node, dispatch }: RenderNode<SearchNodeState>) {
   const loader = useLoader();
+  const [isOpen, setState] = useState(false);
   return (
-    <EuiPanel>
+    <div>
       {loader.lastData[node.id]?.loading ? <EuiProgress /> : null}
 
-      <EuiFormRow
-        label={i18n.translate('xpack.pipeline_builder.searchNode.endpointLabel', {
-          defaultMessage: 'Endpoint path',
-        })}
+      <EuiPopover
+        isOpen={isOpen}
+        closePopover={() => {
+          setState(false);
+        }}
+        button={
+          <EuiButton
+            onClick={() => {
+              setState(true);
+            }}
+          >
+            Examples
+          </EuiButton>
+        }
       >
-        <EuiFieldText
-          value={node.state.endpoint}
-          onChange={e => {
+        <EuiButton
+          onClick={() => {
             dispatch({
               type: 'SET_NODE',
               nodeId: node.id,
-              newState: { ...node.state, endpoint: e.target.value },
+              newState: getStateForLogs(),
             });
+            setState(false);
           }}
-        />
+        >
+          Logs example
+        </EuiButton>
+        <EuiButton
+          onClick={() => {
+            dispatch({
+              type: 'SET_NODE',
+              nodeId: node.id,
+              newState: getStateForHistogram(),
+            });
+            setState(false);
+          }}
+        >
+          Histogram example
+        </EuiButton>
+        <EuiButton
+          onClick={() => {
+            dispatch({
+              type: 'SET_NODE',
+              nodeId: node.id,
+              newState: getStateForSql(),
+            });
+            setState(false);
+          }}
+        >
+          SQL example
+        </EuiButton>
+      </EuiPopover>
+
+      <EuiFormRow
+        label={i18n.translate('xpack.pipeline_builder.searchNode.requestMethodLabel', {
+          defaultMessage: 'Request',
+        })}
+      >
+        <div>
+          POST
+          <EuiFieldText
+            value={node.state.path}
+            placeholder={i18n.translate('xpack.pipeline_builder.searchNode.requestPathLabel', {
+              defaultMessage: 'Request path, like /kibana_sample_data_logs/_search',
+            })}
+            onChange={e => {
+              dispatch({
+                type: 'SET_NODE',
+                nodeId: node.id,
+                newState: { ...node.state, path: e.target.value },
+              });
+            }}
+          />
+        </div>
       </EuiFormRow>
 
       <CodeEditor
@@ -46,12 +113,25 @@ function SearchNode({ node, dispatch }: RenderNode<SearchNodeState>) {
         // 99% width allows the editor to resize horizontally. 100% prevents it from resizing.
         width="99%"
         height="200px"
-        value={node.state.code}
+        value={node.state.body}
+        // languageConfiguration={{
+        //   autoClosingPairs: [
+        //     { open: '{', close: '}' },
+        //     { open: '"', close: '"' },
+        //   ],
+        // }}
+        // suggestionProvider={{
+        //   // triggerCharacters: [' ', '{', '"'],
+        //   // provideCompletionItems: async () => [],
+        // }}
+        // hoverProvider={{
+        //   // provideHover: async () => ({}),
+        // }}
         onChange={code => {
           dispatch({
             type: 'SET_NODE',
             nodeId: node.id,
-            newState: { ...node.state, code },
+            newState: { ...node.state, body: code },
           });
         }}
         options={{
@@ -70,93 +150,98 @@ function SearchNode({ node, dispatch }: RenderNode<SearchNodeState>) {
           }
         }}
       />
-    </EuiPanel>
+    </div>
   );
 }
 
 export const definition: NodeDefinition<SearchNodeState> = {
+  title: i18n.translate('xpack.pipeline_builder.searchNodeTitle', {
+    defaultMessage: 'ES Search Query',
+  }),
+  inputNodeTypes: [],
+  outputType: 'json',
+
+  icon: 'search',
+
   initialize(): SearchNodeState {
-    return {
-      endpoint: '',
-      code: '{}',
-    };
+    return getStateForLogs();
   },
 
   renderReact: SearchNode,
 
-  validateInputs: () => [],
-
   async run(state, inputs, deps) {
-    return {
-      aggregations: {
-        buckets: [
-          {
-            key: 'A',
-            value: 100,
-          },
-          {
-            key: 'B',
-            value: 200,
-          },
-        ],
-      },
-    };
+    const fn = deps.http.post;
+    const result = await fn('/api/console/proxy', {
+      query: { path: state.path, method: state.method },
+      body: state.body,
+    });
+
+    return result;
   },
 };
 
-// interface Props {
-//   request: IKibanaSearchRequest;
-//   strategy?: string;
-//   search: (signal: AbortSignal) => Observable<IKibanaSearchResponse>;
-// }
+function getStateForLogs(): SearchNodeState {
+  return {
+    method: 'POST',
+    path: 'kibana_sample_data_logs/_search',
+    body: JSON.stringify(
+      {
+        query: { match_all: {} },
+        aggs: {
+          date: {
+            date_histogram: {
+              field: '@timestamp',
+              calendar_interval: '1d',
+            },
+            aggs: {
+              a: {
+                avg: { field: 'bytes' },
+              },
+            },
+          },
+        },
+        size: 0,
+      },
+      null,
+      2
+    ),
+  };
+}
 
-// interface State {
-//   searching: boolean;
-//   response?: IKibanaSearchResponse;
-//   error?: any;
-// }
+function getStateForHistogram(): SearchNodeState {
+  return {
+    method: 'POST',
+    path: 'kibana_sample_data_logs/_search',
+    body: JSON.stringify(
+      {
+        query: { match_all: {} },
+        aggs: {
+          histo: {
+            histogram: {
+              field: 'bytes',
+              interval: '1000',
+            },
+          },
+        },
+        size: 0,
+      },
+      null,
+      2
+    ),
+  };
+}
 
-// export class DoSearch extends React.Component<Props, State> {
-//   private abortController?: AbortController;
-
-//   constructor(props: Props) {
-//     super(props);
-
-//     this.state = {
-//       searching: false,
-//       response: undefined,
-//     };
-//   }
-
-//   search = async () => {
-//     if (this.state.searching && this.abortController) {
-//       this.abortController.abort();
-//     }
-
-//     this.setState({
-//       searching: true,
-//       response: undefined,
-//       error: undefined,
-//     });
-
-//     this.abortController = new AbortController();
-
-//     this.props.search(this.abortController.signal).subscribe(
-//       response => {
-//         this.setState({ response, error: undefined });
-//       },
-//       error => {
-//         this.setState({ error, searching: false, response: undefined });
-//       },
-//       () => {
-//         this.setState({ searching: false, error: undefined });
-//       }
-//     );
-//   };
-
-//   cancel = () => {
-//     if (this.abortController) {
-//       this.abortController.abort();
-//     }
-//   };
-// }
+function getStateForSql(): SearchNodeState {
+  return {
+    method: 'POST',
+    path: '/_sql?format=json',
+    body: JSON.stringify(
+      {
+        query: 'SELECT * FROM kibana_sample_data_logs ORDER BY @timestamp DESC',
+        fetch_size: 10,
+      },
+      null,
+      2
+    ),
+  };
+}

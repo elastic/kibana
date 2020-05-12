@@ -5,7 +5,9 @@
  */
 
 import React from 'react';
+import { IconType } from '@elastic/eui';
 import { DataPublicPluginSetup } from 'src/plugins/data/public';
+import { CoreStart } from 'kibana/public';
 import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
 import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/public';
 import { VisualizationsSetup } from 'src/plugins/visualizations/public';
@@ -34,14 +36,9 @@ export interface PipelineStartDependencies {
   navigation: NavigationPublicPluginStart;
 }
 
-// interface Data {
-//   isLoading: boolean;
-//   lastKnownData: unknown;
-// }
-
 export interface State {
   nodes: Record<string, Node>;
-  loading: true | 'success' | 'failure';
+  loading: false | 'success' | 'failure';
 }
 
 export type NodeType = keyof typeof nodeRegistry;
@@ -49,22 +46,27 @@ export interface Node<T = unknown> {
   id: string;
   type: NodeType;
   state: T;
-  inputNodes: string[];
-  outputNode?: string;
+  inputNodeIds: string[];
 }
 
 export type Inputs = Record<string, unknown>;
 
 export interface NodeDefinition<T = unknown> {
+  title: string;
+  icon: IconType;
+
   initialize: () => T;
   renderReact: (props: RenderNode<T>) => React.ReactElement;
 
-  validateInputs: (state: T, inputs: Inputs) => string[];
+  inputNodeTypes: string[];
+  outputType: 'json' | 'table' | 'scalar';
+
   run: (
     state: T,
     inputs: Inputs,
     deps: {
       data: DataPublicPluginStart;
+      http: CoreStart['http'];
       signal: AbortSignal;
     }
   ) => Promise<unknown>;
@@ -86,8 +88,8 @@ interface SetNode {
 interface CreateNode {
   type: 'CREATE_NODE';
   nodeType: NodeType;
-  inputNodes: string[];
-  outputNode?: string;
+  inputNodeIds: string[];
+  // outputNode?: string;
 }
 
 interface LoadingStart {

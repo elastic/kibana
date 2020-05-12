@@ -71,11 +71,17 @@ export class EsSearchTest extends React.Component<Props, State> {
     return {
       debug: true,
       params: {
-        index,
+        // index,
+        index: 'kibana_sample_data_logs',
         body: {
-          query: {
-            query_string: {
-              query,
+          size: 0,
+          query: { match_all: {} },
+          aggs: {
+            a: {
+              date_histogram: {
+                field: 'timestamp',
+                calendar_interval: '1d',
+              },
             },
           },
         },

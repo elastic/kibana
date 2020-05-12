@@ -5,8 +5,12 @@
  */
 
 import { NodeDefinition } from '../types';
-import { definition } from './search_node';
+import { definition as searchDef } from './search_node';
+import { definition as joinDef } from './join_node';
+import { definition as tableConvertDef } from './table_convert';
 
 export const nodeRegistry: Record<string, NodeDefinition<any>> = {
-  search: definition,
+  search: searchDef,
+  join: joinDef,
+  convert: tableConvertDef,
 };

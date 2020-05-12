@@ -27,6 +27,7 @@ import {
   useIndexPattern,
   useLoader,
 } from './state';
+import { nodeRegistry } from './nodes';
 
 interface AppState {
   filters: Filter[];
@@ -58,21 +59,21 @@ export const App = (props: {
   useAppStateSyncing(appStateContainer, data.query, kbnUrlStateStorage);
 
   return (
-    <Router history={history}>
-      <I18nProvider>
-        <KibanaContextProvider
-          services={{
-            appName: 'pipeline_builder',
-            ...props.coreStart,
-            ...props.deps,
-          }}
-        >
-          <AppStateContainerProvider value={appStateContainer}>
+    <I18nProvider>
+      <KibanaContextProvider
+        services={{
+          appName: 'pipeline_builder',
+          ...props.coreStart,
+          ...props.deps,
+        }}
+      >
+        <AppStateContainerProvider value={appStateContainer}>
+          <Router history={history}>
             <AppHome deps={props.deps} />
-          </AppStateContainerProvider>
-        </KibanaContextProvider>
-      </I18nProvider>
-    </Router>
+          </Router>
+        </AppStateContainerProvider>
+      </KibanaContextProvider>
+    </I18nProvider>
   );
 };
 
@@ -89,7 +90,21 @@ function AppHome(props: { deps: PipelineAppDeps }) {
   );
 
   const [state, dispatch] = useReducer(reducer, {
-    nodes: {},
+    nodes: {
+      0: {
+        id: '0',
+        type: 'search',
+        state: nodeRegistry.search.initialize(),
+        inputNodeIds: [],
+      },
+      1: {
+        id: '1',
+        type: 'convert',
+        state: nodeRegistry.convert.initialize(),
+        inputNodeIds: ['0'],
+      },
+    },
+    loading: false,
   } as State);
 
   const loader = useLoader();
@@ -107,21 +122,21 @@ function AppHome(props: { deps: PipelineAppDeps }) {
     return <div>No index pattern found. Please create an index pattern before loading...</div>;
 
   return (
-    <div className="pipelineBuilderApp">
-      <navigation.ui.TopNavMenu
-        appName={PLUGIN_ID}
-        showSearchBar={true}
-        indexPatterns={[indexPattern]}
-        useDefaultBehaviors={true}
-        onQuerySubmit={onQuerySubmit}
-        query={appState.query}
-        showSaveQuery={true}
-      />
-      <EuiPage>
-        <EuiPageBody className="pipelineBuilderApp__pageBody" restrictWidth={false}>
-          <Layout state={state} dispatch={dispatch} />
-        </EuiPageBody>
-      </EuiPage>
-    </div>
+    <EuiPage className="pipelineBuilderApp">
+      {/* <div className="pipelineBuilderApp__header">
+        <navigation.ui.TopNavMenu
+          appName={PLUGIN_ID}
+          showSearchBar={true}
+          indexPatterns={[indexPattern]}
+          useDefaultBehaviors={true}
+          onQuerySubmit={onQuerySubmit}
+          query={appState.query}
+          showSaveQuery={true}
+        />
+      </div> */}
+      <EuiPageBody>
+        <Layout state={state} dispatch={dispatch} />
+      </EuiPageBody>
+    </EuiPage>
   );
 }

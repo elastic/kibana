@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Table } from './table';
+import { TableRenderer } from './table';
+import { JsonRenderer } from './json';
+import { ChartRenderer } from './chart';
 
 export const renderersRegistry = {
-  table: Table,
+  table: TableRenderer,
+  json: JsonRenderer,
+  chart: ChartRenderer,
 };
