@@ -8116,7 +8116,6 @@
     "xpack.ingestManager.agentConfigForm.nameRequiredErrorMessage": "エージェント構成名が必要です",
     "xpack.ingestManager.agentConfigForm.namespaceFieldDescription": "この構成を使用するデータソースにデフォルトの名前空間を適用します。データソースはその独自の名前空間を指定できます。",
     "xpack.ingestManager.agentConfigForm.namespaceFieldLabel": "デフォルト名前空間",
-    "xpack.ingestManager.agentConfigForm.namespaceUseDefaultsFieldLabel": "デフォルト名前空間を使用する",
     "xpack.ingestManager.agentConfigForm.systemMonitoringFieldLabel": "オプション",
     "xpack.ingestManager.agentConfigForm.systemMonitoringText": "システムメトリックを収集",
     "xpack.ingestManager.agentConfigForm.systemMonitoringTooltipText": "このオプションを有効にすると、システムメトリックと情報を収集するデータソースで構成をブートストラップできます。",

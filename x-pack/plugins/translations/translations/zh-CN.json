@@ -8120,7 +8120,6 @@
     "xpack.ingestManager.agentConfigForm.nameRequiredErrorMessage": "“代理配置名称”必填",
     "xpack.ingestManager.agentConfigForm.namespaceFieldDescription": "将默认命名空间应用于使用此配置的数据源。数据源可以指定自己的命名空间。",
     "xpack.ingestManager.agentConfigForm.namespaceFieldLabel": "默认命名空间",
-    "xpack.ingestManager.agentConfigForm.namespaceUseDefaultsFieldLabel": "使用默认命名空间",
     "xpack.ingestManager.agentConfigForm.systemMonitoringFieldLabel": "可选",
     "xpack.ingestManager.agentConfigForm.systemMonitoringText": "收集系统指标",
     "xpack.ingestManager.agentConfigForm.systemMonitoringTooltipText": "启用此选项可使用收集系统指标和信息的数据源启动您的配置。",
