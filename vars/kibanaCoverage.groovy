@@ -10,9 +10,7 @@ def uploadBaseWebsiteFiles(prefix) {
   [
     'src/dev/code_coverage/www/index.html',
     'src/dev/code_coverage/www/404.html'
-  ].each { x ->
-    uploadWithVault(prefix, x)
-  }
+  ].each { uploadWithVault(prefix, it) }
 }
 
 def uploadCoverageHtmls(prefix) {
@@ -20,9 +18,7 @@ def uploadCoverageHtmls(prefix) {
     'target/kibana-coverage/functional-combined',
     'target/kibana-coverage/jest-combined',
     'target/kibana-coverage/mocha-combined',
-  ].each { x ->
-    uploadWithVault(prefix, x)
-  }
+  ].each { uploadWithVault(prefix, it) }
 }
 
 def uploadWithVault(prefix, x) {
