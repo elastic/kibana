@@ -41287,60 +41287,52 @@ function toString(val) {
 
 
 
-var toPath = __webpack_require__(436);
+var split = __webpack_require__(404);
 var extend = __webpack_require__(398);
 var isPlainObject = __webpack_require__(407);
 var isObject = __webpack_require__(399);
 
-module.exports = function(obj, path, val) {
+module.exports = function(obj, prop, val) {
   if (!isObject(obj)) {
     return obj;
   }
 
-  if (Array.isArray(path)) {
-    path = toPath(path);
+  if (Array.isArray(prop)) {
+    prop = [].concat.apply([], prop).join('.');
   }
 
-  if (typeof path !== 'string') {
+  if (typeof prop !== 'string') {
     return obj;
   }
 
-  var segs = path.split('.');
-  var len = segs.length, i = -1;
-  var res = obj;
-  var last;
+  var keys = split(prop, {sep: '.', brackets: true}).filter(isValidKey);
+  var len = keys.length;
+  var idx = -1;
+  var current = obj;
 
-  while (++i < len) {
-    var key = segs[i];
-
-    while (key[key.length - 1] === '\\') {
-      key = key.slice(0, -1) + '.' + segs[++i];
+  while (++idx < len) {
+    var key = keys[idx];
+    if (idx !== len - 1) {
+      if (!isObject(current[key])) {
+        current[key] = {};
+      }
+      current = current[key];
+      continue;
     }
 
-    if (i === len - 1) {
-      last = key;
-      break;
-    }
-
-    if (!isObject(obj[key])) {
-      obj[key] = {};
-    }
-    obj = obj[key];
-  }
-
-  if (obj.hasOwnProperty(last) && isObject(obj[last])) {
-    if (isPlainObject(val)) {
-      extend(obj[last], val);
+    if (isPlainObject(current[key]) && isPlainObject(val)) {
+      current[key] = extend({}, current[key], val);
     } else {
-      obj[last] = val;
+      current[key] = val;
     }
-
-  } else {
-    obj[last] = val;
   }
-  return res;
+
+  return obj;
 };
 
+function isValidKey(key) {
+  return key !== '__proto__' && key !== 'constructor' && key !== 'prototype';
+}
 
 
 /***/ }),
@@ -41730,7 +41722,7 @@ module.exports = function(obj, prop, val) {
     return obj;
   }
 
-  var keys = split(prop, {sep: '.', brackets: true});
+  var keys = split(prop, {sep: '.', brackets: true}).filter(isValidKey);
   var len = keys.length;
   var idx = -1;
   var current = obj;
@@ -41754,6 +41746,10 @@ module.exports = function(obj, prop, val) {
 
   return obj;
 };
+
+function isValidKey(key) {
+  return key !== '__proto__' && key !== 'constructor' && key !== 'prototype';
+}
 
 
 /***/ }),
@@ -41786,6 +41782,10 @@ function mixinDeep(target, objects) {
  */
 
 function copy(val, key) {
+  if (!isValidKey(key)) {
+    return;
+  }
+
   var obj = this[key];
   if (isObject(val) && isObject(obj)) {
     mixinDeep(obj, val);
@@ -41804,6 +41804,17 @@ function copy(val, key) {
 function isObject(val) {
   return isExtendable(val) && !Array.isArray(val);
 }
+
+/**
+ * Returns true if `key` is a valid key to use when extending objects.
+ *
+ * @param  {String} `key`
+ * @return {Boolean}
+ */
+
+function isValidKey(key) {
+  return key !== '__proto__' && key !== 'constructor' && key !== 'prototype';
+};
 
 /**
  * Expose `mixinDeep`

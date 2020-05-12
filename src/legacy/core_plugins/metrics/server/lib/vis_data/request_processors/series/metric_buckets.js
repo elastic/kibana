@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import getBucketSize from '../../helpers/get_bucket_size';
 import bucketTransform from '../../helpers/bucket_transform';
 import getIntervalAndTimefield from '../../get_interval_and_timefield';
+import { overwrite } from '../../helpers';
+
 export default function metricBuckets(req, panel, series) {
   return next => doc => {
     const {
@@ -36,7 +37,7 @@ export default function metricBuckets(req, panel, series) {
         if (fn) {
           try {
             const bucket = fn(metric, series.metrics, intervalString);
-            _.set(doc, `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}`, bucket);
+            overwrite(doc, `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}`, bucket);
           } catch (e) {
             // meh
           }
