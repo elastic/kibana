@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RuleType } from './types';
+import { RuleType } from '../detection_engine/types';
 
 // Based on ML Job/Datafeed States from x-pack/legacy/plugins/ml/common/constants/states.js
 const enabledStates = ['started', 'opened'];
