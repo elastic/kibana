@@ -102,6 +102,7 @@ export class DefaultSpaceService {
         }),
         tap<ServiceStatus>(spacesStatus => {
           // This is temporary for debugging/visibility until we get a proper status service from core.
+          // See issue #41983 for details.
           statusLogger.debug(`${spacesStatus.level.toString()}: ${spacesStatus.summary}`);
           this.serviceStatus$!.next(spacesStatus);
         })
