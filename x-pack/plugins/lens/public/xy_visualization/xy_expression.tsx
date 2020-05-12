@@ -236,17 +236,9 @@ export function XYChart({
     // check all the tables to see if all of the rows have the same timestamp
     // that would mean that chart will draw a single bar
     const isSingleTimestampInXDomain = () => {
-      const nonEmptyLayers = layers.filter(
-        layer => data.tables[layer.layerId].rows.length && layer.xAccessor
-      );
-
-      if (!nonEmptyLayers.length) {
-        return;
-      }
-
       const firstRowValue =
-        data.tables[nonEmptyLayers[0].layerId].rows[0][nonEmptyLayers[0].xAccessor!];
-      for (const layer of nonEmptyLayers) {
+        data.tables[filteredLayers[0].layerId].rows[0][filteredLayers[0].xAccessor!];
+      for (const layer of filteredLayers) {
         if (
           layer.xAccessor &&
           data.tables[layer.layerId].rows.some(row => row[layer.xAccessor!] !== firstRowValue)
@@ -270,7 +262,7 @@ export function XYChart({
     return undefined;
   }
 
-  const isTimeViz = data.dateRange && layers.every(l => l.xScaleType === 'time');
+  const isTimeViz = data.dateRange && filteredLayers.every(l => l.xScaleType === 'time');
 
   const xDomain = isTimeViz
     ? {
@@ -299,12 +291,10 @@ export function XYChart({
             return;
           }
 
-          const firstLayerWithData =
-            layers[layers.findIndex(layer => data.tables[layer.layerId].rows.length)];
-          const table = data.tables[firstLayerWithData.layerId];
+          const table = data.tables[filteredLayers[0].layerId];
 
           const xAxisColumnIndex = table.columns.findIndex(
-            el => el.id === firstLayerWithData.xAccessor
+            el => el.id === filteredLayers[0].xAccessor
           );
           const timeFieldName = table.columns[xAxisColumnIndex]?.meta?.aggConfigParams?.field;
 
