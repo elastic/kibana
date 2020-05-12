@@ -20,7 +20,9 @@ export const defaultShapeParameters = {
   ignore_z_value: true,
 };
 
-describe('Mappings editor: shape datatype', () => {
+// That test is being flaky and is under work to be fixed
+// Skipping it for now.
+describe.skip('Mappings editor: shape datatype', () => {
   let testBed: MappingsEditorTestBed;
 
   /**
