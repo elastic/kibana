@@ -25,7 +25,7 @@ export interface DrilldownWizardConfig<ActionConfig extends object = object> {
 }
 
 export interface FlyoutDrilldownWizardProps<CurrentActionConfig extends object = object> {
-  drilldownActionFactories: Array<ActionFactory<any>>;
+  drilldownActionFactories: ActionFactory[];
 
   onSubmit?: (drilldownWizardConfig: Required<DrilldownWizardConfig>) => void;
   onDelete?: () => void;
