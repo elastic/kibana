@@ -28,7 +28,7 @@ import { delay } from 'bluebird';
 import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
 import geckoDriver from 'geckodriver';
-import { Builder, Capabilities, By, logging, until } from 'selenium-webdriver';
+import { Builder, Capabilities, logging } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome';
 import firefox from 'selenium-webdriver/firefox';
 import edge from 'selenium-webdriver/edge';
@@ -310,7 +310,7 @@ async function attemptToCreateCommand(
     return;
   } // abort
 
-  return { driver: session, By, until, consoleLog$ };
+  return { driver: session, consoleLog$ };
 }
 
 export async function initWebDriver(
