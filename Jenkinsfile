@@ -9,4 +9,4 @@ catchError {
   }
 }
 
-sendMail([extra: 'Some extra info', subject: 'Custom Subject'])
+kibanaPipeline.sendMail([extra: 'Some extra info', subject: 'Custom Subject'])
