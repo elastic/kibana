@@ -61,12 +61,12 @@ export enum ManagementSectionId {
 }
 
 interface SectionsServiceSetup {
-  getSection: (sectionId: ManagementSection['id']) => ManagementSection | undefined;
+  getSection: (sectionId: ManagementSectionId) => ManagementSection;
   getAllSections: () => ManagementSection[];
 }
 
 interface SectionsServiceStart {
-  getSection: (sectionId: ManagementSection['id']) => ManagementSection | undefined;
+  getSection: (sectionId: ManagementSectionId) => ManagementSection;
   getAllSections: () => ManagementSection[];
   navigateToApp: ApplicationStart['navigateToApp'];
 }

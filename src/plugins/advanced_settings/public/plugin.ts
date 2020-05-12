@@ -53,7 +53,7 @@ export class AdvancedSettingsPlugin
 
   public start(core: CoreStart) {
     if (!core.application.capabilities.management.kibana.settings) {
-      this.managementApp.disable();
+      this.managementApp!.disable();
     }
 
     return {
