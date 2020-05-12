@@ -154,7 +154,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   public registerManagementSection() {
     this.management.getSection(ManagementSectionId.Ingest).register('beats_central_management', {
       display: i18n.translate('xpack.beatsManagement.centralManagementSectionLabel', {
-        defaultMessage: 'Beats Management',
+        defaultMessage: 'Beats Central Management',
       }),
       order: 2,
       visible: true,
