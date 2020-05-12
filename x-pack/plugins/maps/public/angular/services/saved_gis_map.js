@@ -19,7 +19,7 @@ import {
 } from '../../selectors/map_selectors';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../selectors/ui_selectors';
 
-import { convertMapExtentToPolygon } from '../../elasticsearch_geo_utils';
+import { formatEnvelopeAsPolygon } from '../../elasticsearch_geo_utils';
 
 import { copyPersistentState } from '../../reducers/util';
 import { extractReferences, injectReferences } from '../../../common/migrations/references';
@@ -107,7 +107,7 @@ export function createSavedGisMapClass(services) {
         openTOCDetails: getOpenTOCDetails(state),
       });
 
-      this.bounds = convertMapExtentToPolygon(getMapExtent(state));
+      this.bounds = formatEnvelopeAsPolygon(getMapExtent(state));
     }
   }
   return SavedGisMap;
