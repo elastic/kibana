@@ -9,7 +9,7 @@
 Some APM app features are provided via a REST API:
 
 * <<agent-config-api>>
-* <<annotation-api>>
+* <<apm-annotation-api>>
 
 TIP: The Kibana <<api,REST API reference>> provides additional information on how to use Kibana APIs,
 like required request headers and authentication options.
