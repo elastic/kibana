@@ -9,7 +9,7 @@ import React from 'react';
 
 import { Direction } from '../../../../../../graphql/types';
 import { TestProviders } from '../../../../../../common/mock';
-import { ColumnHeaderType } from '../../../../../../timelines/store/timeline/model';
+import { ColumnHeaderType } from '../../../../../store/timeline/model';
 import { Sort } from '../../sort';
 import { CloseButton } from '../actions';
 import { defaultHeaders } from '../default_headers';
@@ -323,10 +323,9 @@ describe('Header', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find(`[data-test-subj="header-text-${columnHeader.id}"]`)).toHaveStyleRule(
-        'text-overflow',
-        'ellipsis'
-      );
+      expect(
+        wrapper.find(`[data-test-subj="header-text-${columnHeader.id}"]`).at(0)
+      ).toHaveStyleRule('text-overflow', 'ellipsis');
     });
   });
 
