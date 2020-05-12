@@ -13,7 +13,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import * as i18n from './translations';
 import { Case } from '../../containers/types';
@@ -26,7 +26,6 @@ import { UserActionTree } from '../user_action_tree';
 import { UserList } from '../user_list';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
-import { WrapperPage } from '../../../common/components/wrapper_page';
 import { getTypedPayload } from '../../containers/utils';
 import { WhitePageWrapper } from '../wrappers';
 import { useBasePath } from '../../../common/lib/kibana';
@@ -43,8 +42,10 @@ interface Props {
   userCanCrud: boolean;
 }
 
-const MyWrapper = styled(WrapperPage)`
-  padding-bottom: 0;
+const MyWrapper = styled.div`
+  ${({ theme }) => css`
+    padding-top: ${theme.eui.paddingSizes.l};
+  `}
 `;
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
@@ -244,35 +245,33 @@ export const CaseComponent = React.memo<CaseProps>(
 
     return (
       <>
-        <MyWrapper>
-          <HeaderPage
-            backOptions={{
-              href: getCaseUrl(search),
-              text: i18n.BACK_TO_ALL,
-              dataTestSubj: 'backToCases',
-            }}
-            data-test-subj="case-view-title"
-            titleNode={
-              <EditableTitle
-                disabled={!userCanCrud}
-                isLoading={isLoading && updateKey === 'title'}
-                title={caseData.title}
-                onSubmit={onSubmitTitle}
-              />
-            }
-            title={caseData.title}
-          >
-            <CaseStatus
-              currentExternalIncident={currentExternalIncident}
-              caseData={caseData}
+        <HeaderPage
+          backOptions={{
+            href: getCaseUrl(search),
+            text: i18n.BACK_TO_ALL,
+            dataTestSubj: 'backToCases',
+          }}
+          data-test-subj="case-view-title"
+          titleNode={
+            <EditableTitle
               disabled={!userCanCrud}
-              isLoading={isLoading && updateKey === 'status'}
-              onRefresh={handleRefresh}
-              toggleStatusCase={toggleStatusCase}
-              {...caseStatusData}
+              isLoading={isLoading && updateKey === 'title'}
+              title={caseData.title}
+              onSubmit={onSubmitTitle}
             />
-          </HeaderPage>
-        </MyWrapper>
+          }
+          title={caseData.title}
+        >
+          <CaseStatus
+            currentExternalIncident={currentExternalIncident}
+            caseData={caseData}
+            disabled={!userCanCrud}
+            isLoading={isLoading && updateKey === 'status'}
+            onRefresh={handleRefresh}
+            toggleStatusCase={toggleStatusCase}
+            {...caseStatusData}
+          />
+        </HeaderPage>
         <WhitePageWrapper>
           <MyWrapper>
             {!initLoadingData && pushCallouts != null && pushCallouts}
