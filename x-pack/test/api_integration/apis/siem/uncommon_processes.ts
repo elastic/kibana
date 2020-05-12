@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { uncommonProcessesQuery } from '../../../../plugins/siem/public/containers/uncommon_processes/index.gql_query';
+import { uncommonProcessesQuery } from '../../../../plugins/siem/public/hosts/containers/uncommon_processes/index.gql_query';
 import { GetUncommonProcessesQuery } from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

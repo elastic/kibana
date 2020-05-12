@@ -33,7 +33,7 @@ export const FilterPopover = ({
   id,
   disabled,
   loading,
-  items,
+  items: allItems,
   onFilterFieldChange,
   selectedItems,
   title,
@@ -45,6 +45,16 @@ export const FilterPopover = ({
   const [itemsToDisplay, setItemsToDisplay] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [tempSelectedItems, setTempSelectedItems] = useState<string[]>(selectedItems);
+
+  const [items, setItems] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Merge incoming items with selected items, to enable deselection
+
+    const mItems = selectedItems.concat(allItems ?? []);
+    const newItems = mItems.filter((item, index) => mItems.indexOf(item) === index);
+    setItems(newItems);
+  }, [allItems, selectedItems]);
 
   useEffect(() => {
     if (searchQuery !== '') {
@@ -60,7 +70,7 @@ export const FilterPopover = ({
       button={
         btnContent ?? (
           <UptimeFilterButton
-            isDisabled={disabled}
+            isDisabled={disabled && selectedItems.length === 0}
             isSelected={tempSelectedItems.length > 0}
             numFilters={items.length}
             numActiveFilters={tempSelectedItems.length}
