@@ -39,7 +39,7 @@ describe('ManagementService', () => {
       expect(mockKibanaSection.registerApp).toHaveBeenCalledWith({
         id: 'spaces',
         title: 'Spaces',
-        order: 10,
+        order: 2,
         mount: expect.any(Function),
       });
     });
