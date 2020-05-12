@@ -46,6 +46,7 @@ import {
 } from './aggs';
 import { FieldFormatsStart } from '../field_formats';
 import { ISearchGeneric } from './i_search';
+import { SessionService } from './session_service';
 
 interface SearchServiceSetupDependencies {
   expressions: ExpressionsSetup;
@@ -160,6 +161,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       legacySearch,
     };
 
+    const sessionService = new SessionService();
+
     return {
       aggs: {
         calculateAutoTimeExpression: getCalculateAutoTimeExpression(core.uiSettings),
@@ -172,10 +175,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         types: aggTypesStart,
       },
       search,
-      getSessionId: () => this.sessionId,
-      setSessionId: (sessionId: string) => (this.sessionId = sessionId),
-      startSession: () => (this.sessionId = uuidV4()),
-      clearSession: () => (this.sessionId = uuidV4()),
+      session: sessionService,
       searchSource: {
         create: (fields?: SearchSourceFields) => new SearchSource(fields, searchSourceDependencies),
         fromJSON: createSearchSourceFromJSON(dependencies.indexPatterns, searchSourceDependencies),

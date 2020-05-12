@@ -36,7 +36,7 @@ export class BackgroundSessionService {
   constructor(
     private readonly savedObjects: SavedObjectsServiceStart,
     private readonly security: SecurityPluginSetup,
-    private readonly updateExpirationHandler: (searchId: string) => void,
+    private readonly updateExpirationHandler: (searchId: string) => Promise<any>,
     private readonly logger: Logger
   ) {
     this.idMapping = new Map<string, SessionInfo>();
@@ -178,8 +178,14 @@ export class BackgroundSessionService {
         }
       );
       if (res && !res.error) {
-        sessionInfo.requests.forEach(searchId => {
-          this.updateExpirationHandler(searchId);
+        sessionInfo.requests.forEach(async searchId => {
+          try {
+            const updateResult = await this.updateExpirationHandler(searchId);
+          } catch (eUpdate) {
+            this.logger.debug(
+              `${sessionSavedObject.id} Error during expiration update. C'est la vie.`
+            );
+          }
         });
         return true;
       } else {
@@ -201,6 +207,7 @@ export class BackgroundSessionService {
   }
 
   public async store(kibanaRequest: KibanaRequest, sessionId: string) {
+    this.logger.debug(`${sessionId} Storing`);
     const savedObjectsClient = this.savedObjects.getScopedClient(kibanaRequest);
     return await this.createSavedObject(savedObjectsClient, sessionId);
   }
@@ -228,11 +235,20 @@ export class BackgroundSessionService {
     this.idMapping.set(sessionId, sessionIdsInfo);
   }
 
+  public async get(kibanaRequest: KibanaRequest, sessionId: string) {
+    try {
+      const savedObjectsClient = this.savedObjects.getScopedClient(kibanaRequest);
+      return await this.getSavedObject(savedObjectsClient, sessionId);
+    } catch (e) {
+      return undefined;
+    }
+  }
+
   public async getId(kibanaRequest: KibanaRequest, sessionId: string, requestParams: any) {
     try {
+      this.logger.debug(`${sessionId} Checking.`);
       const user = this.security.authc.getCurrentUser(kibanaRequest);
-      const savedObjectsClient = this.savedObjects.getScopedClient(kibanaRequest);
-      const bgSavedObject = await this.getSavedObject(savedObjectsClient, sessionId);
+      const bgSavedObject = await this.get(kibanaRequest, sessionId);
       if (!bgSavedObject || !user) {
         return undefined;
       } else {

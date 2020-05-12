@@ -9,19 +9,14 @@ import {
   IRouter,
   KibanaRequest,
   KibanaResponseFactory,
-  SavedObject,
   RequestHandlerContext,
 } from 'kibana/server';
-import { BackgroundSessionSavedObjectAttributes } from '../../common/background_session';
+import { BackgroundSessionParams } from './types';
 
-interface BackgroundSessionParams {
-  sessionId: string;
-}
-
-export function registerBackgroundSessionRoute(router: IRouter): void {
+export function registerBackgroundSessionGetRoute(router: IRouter): void {
   router.post(
     {
-      path: '/internal/session/{sessionId}/save',
+      path: '/internal/session/{sessionId}',
       validate: {
         params: schema.object({}, { unknowns: 'allow' }),
       },
@@ -34,11 +29,8 @@ export function registerBackgroundSessionRoute(router: IRouter): void {
       const { sessionId } = request.params;
 
       try {
-        const savedObject: SavedObject<BackgroundSessionSavedObjectAttributes> = await context.backgroundSession!.store(
-          request,
-          sessionId
-        );
-        return res.ok({ body: savedObject });
+        const backgroundSearch = await context.backgroundSession!.get(request, sessionId);
+        return res.ok({ body: backgroundSearch });
       } catch (err) {
         return res.customError({
           statusCode: err.statusCode || 500,

@@ -13,7 +13,15 @@ export class BackgroundSessionService {
     private readonly search: DataPublicPluginStart['search']
   ) {}
 
-  public async store() {
-    return await this.http.post(`/internal/session/${this.search.getSessionId()}/save`);
+  public async store(sessionId?: string) {
+    return await this.http.post(`/internal/session/${sessionId || this.search.session.get()}/save`);
+  }
+
+  public async get(sessionId?: string) {
+    try {
+      return await this.http.post(`/internal/session/${sessionId || this.search.session.get()}`);
+    } catch (e) {
+      return undefined;
+    }
   }
 }

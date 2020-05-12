@@ -7,9 +7,11 @@
 import { ApplicationStart, ToastsStart } from 'kibana/public';
 import { getLongQueryNotification } from './long_query_notification';
 import { BackgroundSessionService } from '../background_session';
-import { SearchInterceptor } from '../../../../../src/plugins/data/public';
+import { SearchInterceptor, DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
+  private isRestoreCache: Map<string, boolean> = new Map();
+
   /**
    * This class should be instantiated with a `requestTimeout` corresponding with how many ms after
    * requests are initiated that they should automatically cancel.
@@ -20,6 +22,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
    */
   constructor(
     private readonly backgroundSessionService: BackgroundSessionService,
+    private readonly data: DataPublicPluginStart,
     toasts: ToastsStart,
     application: ApplicationStart,
     requestTimeout?: number
@@ -46,19 +49,43 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     this.backgroundSessionService.store();
   };
 
+  private shouldNotifyLongRunning = async () => {
+    const currentSessionId = this.data.search.session.get();
+    if (this.isRestoreCache.get(currentSessionId) !== undefined) return false;
+
+    // set before await to avoid additional fetches
+    this.isRestoreCache.set(currentSessionId, false);
+
+    const bgSession = await this.backgroundSessionService.get();
+    const isRestore = !bgSession;
+    this.isRestoreCache.set(currentSessionId, isRestore);
+
+    setTimeout(() => {
+      this.isRestoreCache.delete(currentSessionId);
+    }, 60000);
+
+    return isRestore;
+  };
+
+  private showToastIfNewSession = async () => {
+    if (await this.shouldNotifyLongRunning()) {
+      if (this.longRunningToast) this.hideToast();
+      this.longRunningToast = this.toasts.addInfo(
+        {
+          title: 'Your query is taking awhile',
+          text: getLongQueryNotification({
+            cancel: this.cancelPending,
+            runBeyondTimeout: this.runBeyondTimeout,
+          }),
+        },
+        {
+          toastLifeTimeMs: 1000000,
+        }
+      );
+    }
+  };
+
   protected showToast = () => {
-    if (this.longRunningToast) return;
-    this.longRunningToast = this.toasts.addInfo(
-      {
-        title: 'Your query is taking awhile',
-        text: getLongQueryNotification({
-          cancel: this.cancelPending,
-          runBeyondTimeout: this.runBeyondTimeout,
-        }),
-      },
-      {
-        toastLifeTimeMs: 1000000,
-      }
-    );
+    this.showToastIfNewSession();
   };
 }

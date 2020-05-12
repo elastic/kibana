@@ -17,33 +17,27 @@
  * under the License.
  */
 
-import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
-import { ISearchStart } from './types';
-import { searchSourceMock, createSearchSourceMock } from './search_source/mocks';
+import { uuidV4 } from '../../../../plugins/kibana_utils/public';
 
-const searchSetupMock = {
-  aggs: searchAggsSetupMock(),
-  registerSearchStrategyContext: jest.fn(),
-  registerSearchStrategyProvider: jest.fn(),
-};
+export class SessionService {
+  private sessionId: string = uuidV4();
 
-const searchStartMock: jest.Mocked<ISearchStart> = {
-  aggs: searchAggsStartMock(),
-  setInterceptor: jest.fn(),
-  search: jest.fn(),
-  session: {
-    set: jest.fn(),
-    get: jest.fn(),
-    start: jest.fn(),
-    clear: jest.fn(),
-  },
-  searchSource: searchSourceMock,
-  __LEGACY: {
-    esClient: {
-      search: jest.fn(),
-      msearch: jest.fn(),
-    },
-  },
-};
+  public get() {
+    return this.sessionId;
+  }
 
-export { searchSetupMock, searchStartMock, createSearchSourceMock };
+  public set(sessionId: string) {
+    this.sessionId = sessionId;
+  }
+
+  public start() {
+    this.sessionId = uuidV4();
+    return this.sessionId;
+  }
+
+  public clear() {
+    this.sessionId = uuidV4();
+  }
+}
+
+export type ISessionService = PublicMethodsOf<SessionService>;

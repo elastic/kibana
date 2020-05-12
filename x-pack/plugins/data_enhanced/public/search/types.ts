@@ -33,4 +33,6 @@ export interface IAsyncSearchResponse extends IKibanaSearchResponse {
    * Indicates whether the results returned are complete or partial
    */
   is_partial?: boolean;
+
+  restored?: boolean;
 }

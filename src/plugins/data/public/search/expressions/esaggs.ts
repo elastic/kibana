@@ -284,7 +284,7 @@ export const esaggs = (): ExpressionFunctionDefinition<typeof name, Input, Argum
     // we should move searchSource creation inside courier request handler
     const searchSource = searchService.searchSource.create();
 
-    searchSource.setSessionId(searchService.getSessionId());
+    searchSource.setSessionId(searchService.session.get());
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);
 

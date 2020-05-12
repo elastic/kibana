@@ -112,8 +112,7 @@ export function updateExpirationProvider(caller: APICaller) {
       keepAlive: `${BACKGROUND_SESSION_STORE_DAYS}d`,
     });
 
-    // const { id, response, is_partial, is_running } =
-    await caller('transport.request', {
+    return caller('transport.request', {
       method: 'GET',
       path,
       query,
@@ -166,6 +165,7 @@ async function asyncSearch(
     id,
     is_partial,
     is_running,
+    restored: !!storedAsyncId,
     rawResponse: shimHitsTotal(response),
     ...getTotalLoaded(response._shards),
   };

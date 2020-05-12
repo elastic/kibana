@@ -17,7 +17,8 @@ import { enhancedEsSearchStrategyProvider, updateExpirationProvider } from './se
 import {
   BackgroundSessionService,
   backgroundSession,
-  registerBackgroundSessionRoute,
+  registerBackgroundSessionGetRoute,
+  registerBackgroundSessionSaveRoute,
 } from './background_session';
 import { SecurityPluginSetup } from '../../security/server';
 
@@ -27,7 +28,7 @@ interface SetupDependencies {
 }
 
 export interface EnhancedDataPluginStart {
-  backgroundSearch: BackgroundSessionService;
+  backgroundSession: BackgroundSessionService;
 }
 
 export class EnhancedDataServerPlugin
@@ -59,7 +60,8 @@ export class EnhancedDataServerPlugin
       return this.backgroundSessionService;
     });
     const router = core.http.createRouter();
-    registerBackgroundSessionRoute(router);
+    registerBackgroundSessionGetRoute(router);
+    registerBackgroundSessionSaveRoute(router);
   }
 
   public start(core: CoreStart) {
@@ -73,7 +75,7 @@ export class EnhancedDataServerPlugin
     );
 
     return {
-      backgroundSearch: this.backgroundSessionService,
+      backgroundSession: this.backgroundSessionService,
     };
   }
 

@@ -26,6 +26,8 @@ import { ISearchGeneric, ISearchOptions } from './i_search';
 import { RequestTimeoutError } from './request_timeout_error';
 import { getLongQueryNotification } from './long_query_notification';
 
+const LONG_QUERY_NOTIFICATION_DELAY = 1000;
+
 export class SearchInterceptor {
   /**
    * `abortController` used to signal all searches to abort.
@@ -66,9 +68,9 @@ export class SearchInterceptor {
   ) {
     // When search requests go out, a notification is scheduled allowing users to continue the
     // request past the timeout. When all search requests complete, we remove the notification.
-    this.getPendingCount$()
-      .pipe(filter(count => count === 0))
-      .subscribe(this.hideToast);
+    // this.getPendingCount$()
+    //   .pipe(filter(count => count === 0))
+    //   .subscribe(this.hideToast);
   }
 
   /**
@@ -106,7 +108,9 @@ export class SearchInterceptor {
       );
 
       // Schedule the notification to allow users to cancel or wait beyond the timeout
-      const notificationSubscription = timer(10000).subscribe(this.showToast);
+      const notificationSubscription = timer(LONG_QUERY_NOTIFICATION_DELAY).subscribe(
+        this.showToast
+      );
 
       // Get a combined `AbortSignal` that will be aborted whenever the first of the following occurs:
       // 1. The user manually aborts (via `cancelPending`)

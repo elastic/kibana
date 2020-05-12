@@ -24,6 +24,7 @@ import { TStrategyTypes } from './strategy_types';
 import { LegacyApiCaller } from './legacy/es_client';
 import { SearchInterceptor } from './search_interceptor';
 import { ISearchSource, SearchSourceFields } from './search_source';
+import { ISessionService } from './session_service';
 
 export interface ISearchContext {
   core: CoreStart;
@@ -81,10 +82,7 @@ export interface ISearchStart {
   aggs: SearchAggsStart;
   setInterceptor: (searchInterceptor: SearchInterceptor) => void;
   search: ISearchGeneric;
-  getSessionId: () => string;
-  setSessionId: (sessionId: string) => void;
-  startSession: () => void;
-  clearSession: () => void;
+  session: ISessionService;
   searchSource: {
     create: (fields?: SearchSourceFields) => ISearchSource;
     fromJSON: (

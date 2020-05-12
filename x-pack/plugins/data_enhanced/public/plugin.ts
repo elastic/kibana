@@ -28,9 +28,11 @@ export interface DataEnhancedStartDependencies {
 }
 
 export type DataEnhancedSetup = ReturnType<DataEnhancedPlugin['setup']>;
-export type DataEnhancedStart = ReturnType<DataEnhancedPlugin['start']>;
+export interface DataEnhancedStart {
+  backgroundSession: BackgroundSessionService;
+}
 
-export class DataEnhancedPlugin implements Plugin {
+export class DataEnhancedPlugin implements Plugin<void, DataEnhancedStart> {
   private backgroundSessionService!: BackgroundSessionService;
   constructor() {}
 
@@ -46,12 +48,13 @@ export class DataEnhancedPlugin implements Plugin {
     );
   }
 
-  public start(core: CoreStart, plugins: DataEnhancedStartDependencies) {
+  public start(core: CoreStart, plugins: DataEnhancedStartDependencies): DataEnhancedStart {
     setAutocompleteService(plugins.data.autocomplete);
     this.backgroundSessionService = new BackgroundSessionService(core.http, plugins.data.search);
 
     const enhancedSearchInterceptor = new EnhancedSearchInterceptor(
       this.backgroundSessionService,
+      plugins.data,
       core.notifications.toasts,
       core.application,
       core.injectedMetadata.getInjectedVar('esRequestTimeout') as number
@@ -63,7 +66,11 @@ export class DataEnhancedPlugin implements Plugin {
       another application.
      */
     core.application.currentAppId$.subscribe(() => {
-      plugins.data.search.clearSession();
+      plugins.data.search.session.clear();
     });
+
+    return {
+      backgroundSession: this.backgroundSessionService,
+    };
   }
 }

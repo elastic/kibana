@@ -37,7 +37,7 @@ export function LongQueryNotification(props: Props) {
           <EuiButton size="s" fill onClick={props.runBeyondTimeout}>
             <FormattedMessage
               id="xpack.data.query.queryBar.runBeyond"
-              defaultMessage="Run beyond timeout"
+              defaultMessage="Send to Background"
             />
           </EuiButton>
         </EuiFlexItem>
