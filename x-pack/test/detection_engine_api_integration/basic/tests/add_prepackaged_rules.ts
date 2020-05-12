@@ -13,7 +13,7 @@ import { createSignalsIndex, deleteAllAlerts, deleteSignalsIndex } from '../../u
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   describe('add_prepackaged_rules', () => {
     describe('validation errors', () => {

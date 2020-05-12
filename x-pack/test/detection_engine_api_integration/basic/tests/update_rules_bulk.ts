@@ -22,7 +22,7 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   describe('update_rules_bulk', () => {
     describe('update rules bulk', () => {

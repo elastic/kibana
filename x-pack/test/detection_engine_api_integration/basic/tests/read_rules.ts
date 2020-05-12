@@ -21,12 +21,12 @@ import {
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
-export default ({ getService }: FtrProviderContext): void => {
+export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
-  describe('delete_rules', () => {
-    describe('deleting rules', () => {
+  describe('read_rules', () => {
+    describe('reading rules', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
       });
@@ -36,81 +36,83 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteAllAlerts(es);
       });
 
-      it('should delete a single rule with a rule_id', async () => {
-        // create a rule
+      it('should be able to read a single rule using rule_id', async () => {
+        // create a simple rule to read
         await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send(getSimpleRule('rule-1'))
+          .send(getSimpleRule())
           .expect(200);
 
-        // delete the rule by its rule_id
         const { body } = await supertest
-          .delete(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`)
+          .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`)
           .set('kbn-xsrf', 'true')
+          .send(getSimpleRule())
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
         expect(bodyToCompare).to.eql(getSimpleRuleOutput());
       });
 
-      it('should delete a single rule using an auto generated rule_id', async () => {
-        // add a rule where the rule_id is auto-generated
-        const { body: bodyWithCreatedRule } = await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getSimpleRuleWithoutRuleId())
-          .expect(200);
-
-        // delete that rule by its auto-generated rule_id
-        const { body } = await supertest
-          .delete(`${DETECTION_ENGINE_RULES_URL}?rule_id=${bodyWithCreatedRule.rule_id}`)
-          .set('kbn-xsrf', 'true')
-          .expect(200);
-
-        const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
-        expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
-      });
-
-      it('should delete a single rule using an auto generated id', async () => {
-        // add a rule
-        const { body: bodyWithCreatedRule } = await supertest
+      it('should be able to read a single rule using id', async () => {
+        // create a simple rule to read
+        const { body: createRuleBody } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
           .send(getSimpleRule())
           .expect(200);
 
-        // delete that rule by its auto-generated id
         const { body } = await supertest
-          .delete(`${DETECTION_ENGINE_RULES_URL}?id=${bodyWithCreatedRule.id}`)
+          .get(`${DETECTION_ENGINE_RULES_URL}?id=${createRuleBody.id}`)
           .set('kbn-xsrf', 'true')
+          .send(getSimpleRule())
+          .expect(200);
+
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare).to.eql(getSimpleRuleOutput());
+      });
+
+      it('should be able to read a single rule with an auto-generated rule_id', async () => {
+        // create a simple rule to read
+        const { body: createRuleBody } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getSimpleRuleWithoutRuleId())
+          .expect(200);
+
+        const { body } = await supertest
+          .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${createRuleBody.rule_id}`)
+          .set('kbn-xsrf', 'true')
+          .send(getSimpleRule())
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
       });
 
-      it('should return an error if the id does not exist when trying to delete it', async () => {
+      it('should return 404 if given a fake id', async () => {
         const { body } = await supertest
-          .delete(`${DETECTION_ENGINE_RULES_URL}?id=fake_id`)
+          .get(`${DETECTION_ENGINE_RULES_URL}?id=fake_id`)
           .set('kbn-xsrf', 'true')
+          .send(getSimpleRule())
           .expect(404);
 
         expect(body).to.eql({
-          message: 'id: "fake_id" not found',
           status_code: 404,
+          message: 'id: "fake_id" not found',
         });
       });
 
-      it('should return an error if the rule_id does not exist when trying to delete it', async () => {
+      it('should return 404 if given a fake rule_id', async () => {
         const { body } = await supertest
-          .delete(`${DETECTION_ENGINE_RULES_URL}?rule_id=fake_id`)
+          .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=fake_id`)
           .set('kbn-xsrf', 'true')
+          .send(getSimpleRule())
           .expect(404);
 
         expect(body).to.eql({
-          message: 'rule_id: "fake_id" not found',
           status_code: 404,
+          message: 'rule_id: "fake_id" not found',
         });
       });
     });
