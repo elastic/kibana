@@ -49,7 +49,6 @@ export const addTimeStamp = ts => obj => ({
   '@timestamp': ts,
 });
 
-const splitOnRoot = root => x => x.split(root)[1];
 const setTotal = x => obj => (obj.isTotal = x);
 const mutateTrue = setTotal(true);
 const mutateFalse = setTotal(false);
@@ -69,9 +68,7 @@ const prokForCoverageIndex = root => mutateFalse => urlRoot => obj => siteUrl =>
       mutateFalse(obj);
       return x;
     })
-    .map(x => {
-      return splitOnRoot(root)(x);
-    })
+    .map(x => x.replace(root, ''))
     .map(x => `${urlRoot}${x}.html`)
     .fold(noop, id);
 
@@ -96,7 +93,7 @@ export const coveredFilePath = obj => {
   const maybeDropLeadingSlash = x => (leadingSlashRe.test(x) ? right(x) : left(x));
   const dropLeadingSlash = x => x.replace(leadingSlashRe, '');
   const dropRoot = root => x =>
-    maybeDropLeadingSlash(splitOnRoot(root)(x)).fold(id, dropLeadingSlash);
+    maybeDropLeadingSlash(x.replace(root, '')).fold(id, dropLeadingSlash);
   return maybeTotal(staticSiteUrl)
     .map(dropRoot(COVERAGE_INGESTION_KIBANA_ROOT))
     .fold(withoutCoveredFilePath, coveredFilePath => ({ ...obj, coveredFilePath }));
