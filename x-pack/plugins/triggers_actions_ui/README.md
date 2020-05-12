@@ -69,14 +69,14 @@ export function getAlertType(): AlertTypeModel {
     id: '.index-threshold',
     name: 'Index threshold',
     iconClass: 'alert',
-    alertParamsExpression: IndexThresholdAlertTypeExpression,
+    alertParamsExpression: lazy(() => import('./index_threshold_expression')),
     validate: validateAlertType,
     requiresAppContext: false,
   };
 }
 ```
 
-alertParamsExpression form represented as an expression using `EuiExpression` components:
+alertParamsExpression should be a lazy loaded React component extending an expression using `EuiExpression` components:
 ![Index Threshold Alert expression form](https://i.imgur.com/Ysk1ljY.png)
 
 ```
@@ -172,6 +172,7 @@ export const alertReducer = (state: any, action: AlertReducerAction) => {
 
 ```
 
+The Expression component should be lazy loaded which means it'll have to be the default export in `index_threshold_expression.ts`:
 
 ```
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThresholdProps> = ({
@@ -225,6 +226,9 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
       </Fragment>
   );
 };
+
+// Export as default in order to support lazy loading
+export {IndexThresholdAlertTypeExpression as default};
 ```
 
 Index Threshold Alert form with validation:
@@ -238,7 +242,9 @@ Each alert type should be defined as `AlertTypeModel` object with the these prop
   name: string;
   iconClass: string;
   validate: (alertParams: any) => ValidationResult;
-  alertParamsExpression: React.FunctionComponent<any>;
+  alertParamsExpression: React.LazyExoticComponent<
+        ComponentType<AlertTypeParamsExpressionProps<AlertParamsType, AlertsContextValue>>
+      >;
   defaultActionMessage?: string;
 ```
 |Property|Description|
@@ -247,7 +253,7 @@ Each alert type should be defined as `AlertTypeModel` object with the these prop
 |name|Name of the alert type that will be displayed on the select card in the UI.|
 |iconClass|Icon of the alert type that will be displayed on the select card in the UI.|
 |validate|Validation function for the alert params.|
-|alertParamsExpression|React functional component for building UI of the current alert type params.|
+|alertParamsExpression| A lazy loaded React component for building UI of the current alert type params.|
 |defaultActionMessage|Optional property for providing default message for all added actions with `message` property.|
 |requiresAppContext|Define if alert type is enabled for create and edit in the alerting management UI.|
 
@@ -298,8 +304,8 @@ Below is a list of steps that should be done to build and register a new alert t
 
 1. At any suitable place in Kibana, create a file, which will expose an object implementing interface [AlertTypeModel](https://github.com/elastic/kibana/blob/55b7905fb5265b73806006e7265739545d7521d0/x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/types.ts#L83). Example:
 ```
+import { lazy } from 'react';
 import { AlertTypeModel } from '../../../../types';
-import { ExampleExpression } from './expression';
 import { validateExampleAlertType } from './validation';
 
 export function getAlertType(): AlertTypeModel {
@@ -307,7 +313,7 @@ export function getAlertType(): AlertTypeModel {
     id: 'example',
     name: 'Example Alert Type',
     iconClass: 'bell',
-    alertParamsExpression: ExampleExpression,
+    alertParamsExpression: lazy(() => import('./expression')),
     validate: validateExampleAlertType,
     defaultActionMessage: 'Alert [{{ctx.metadata.name}}] has exceeded the threshold',
     requiresAppContext: false,
@@ -364,6 +370,9 @@ export const ExampleExpression: React.FunctionComponent<ExampleProps> = ({
     </Fragment>
   );
 };
+
+// Export as default in order to support lazy loading
+export {ExampleExpression as default};
 
 ```
 This alert type form becomes available, when the card of `Example Alert Type` is selected.
@@ -1021,7 +1030,7 @@ Below is a list of steps that should be done to build and register a new action 
 
 1. At any suitable place in Kibana, create a file, which will expose an object implementing interface [ActionTypeModel]:
 ```
-import React, { Fragment } from 'react';
+import React, { Fragment, lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   ActionTypeModel,
