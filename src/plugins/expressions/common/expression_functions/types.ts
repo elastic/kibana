@@ -101,7 +101,12 @@ export interface ExpressionFunctionDefinition<
 /**
  * Type to capture every possible expression function definition.
  */
-export type AnyExpressionFunctionDefinition = ExpressionFunctionDefinition<any, any, any, any>;
+export type AnyExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  string,
+  any,
+  Record<string, any>,
+  any
+>;
 
 /**
  * Anybody registering an expression function should add a property to this

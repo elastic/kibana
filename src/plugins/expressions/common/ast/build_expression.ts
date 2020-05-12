@@ -69,7 +69,7 @@ export interface ExpressionAstExpressionBuilder {
    * @param fnName Name of the function to search for.
    * @return `ExpressionAstFunctionBuilder[]`
    */
-  findFunction: (fnName: string) => ExpressionAstFunctionBuilder[] | [];
+  findFunction: <Fn extends string>(fnName: Fn) => Array<ExpressionAstFunctionBuilder<Fn>> | [];
   /**
    * Converts expression to an AST.
    *
@@ -125,8 +125,8 @@ export function buildExpression(
     type: 'expression_builder',
     functions: fns,
 
-    findFunction(fnName) {
-      const foundFns: ExpressionAstFunctionBuilder[] = [];
+    findFunction<Fn extends string>(fnName: Fn) {
+      const foundFns: Array<ExpressionAstFunctionBuilder<Fn>> = [];
       return fns.reduce((found, currFn) => {
         Object.values(currFn.arguments).forEach(values => {
           values.forEach(value => {
@@ -137,7 +137,7 @@ export function buildExpression(
           });
         });
         if (currFn.name === fnName) {
-          found.push(currFn);
+          found.push(currFn as ExpressionAstFunctionBuilder<Fn>);
         }
         return found;
       }, foundFns);

@@ -56,11 +56,11 @@ type OptionalKeys<T> = {
   [K in keyof T]-?: {} extends Pick<T, K> ? (K extends string ? K : never) : never;
 }[keyof T];
 
-type ExpressionAstFunctionBuilderArgument =
-  | string
-  | number
-  | boolean
-  | ExpressionAstExpressionBuilder;
+// Represents the shape of arguments as they are stored
+// in the function builder.
+interface FunctionBuilderArguments<F extends string> {
+  [key: string]: Array<FunctionArgs<F>[string] | ExpressionAstExpressionBuilder>;
+}
 
 export interface ExpressionAstFunctionBuilder<Fn extends string = string> {
   /**
@@ -77,7 +77,7 @@ export interface ExpressionAstFunctionBuilder<Fn extends string = string> {
    * however any subexpressions are returned as expression builder
    * instances instead of expression ASTs.
    */
-  arguments: Record<string, ExpressionAstFunctionBuilderArgument[]>;
+  arguments: FunctionBuilderArguments<Fn>;
   /**
    * Adds an additional argument to the function. For multi-args,
    * this should be called once for each new arg. Note that TS
@@ -100,11 +100,11 @@ export interface ExpressionAstFunctionBuilder<Fn extends string = string> {
    * arguments will be returned as expression builder instances.
    *
    * @param name The name of the argument to retrieve.
-   * @return `ExpressionAstFunctionBuilderArgument[]`
+   * @return `ExpressionAstFunctionBuilderArgument[] | undefined`
    */
   getArgument: <A extends FunctionArgName<Fn>>(
     name: A
-  ) => ExpressionAstFunctionBuilderArgument[] | undefined;
+  ) => Array<FunctionArgs<Fn>[A] | ExpressionAstExpressionBuilder> | undefined;
   /**
    * Overwrites an existing argument with a new value.
    * In order to support multi-args, the value given must always be
@@ -116,7 +116,7 @@ export interface ExpressionAstFunctionBuilder<Fn extends string = string> {
    */
   replaceArgument: <A extends FunctionArgName<Fn>>(
     name: A,
-    value: Array<FunctionArgs<Fn>[A]>
+    value: Array<FunctionArgs<Fn>[A] | ExpressionAstExpressionBuilder>
   ) => this;
   /**
    * Removes an (optional) argument from the function.
@@ -180,7 +180,7 @@ export function buildExpressionFunction<F extends string>(
       acc[key] = isExpressionAst(value) ? [buildExpression(value)] : [value];
     }
     return acc;
-  }, initialArgs as Record<string, ExpressionAstFunctionBuilderArgument[]>);
+  }, initialArgs as FunctionBuilderArguments<F>);
 
   return {
     type: 'expression_function_builder',
@@ -206,13 +206,6 @@ export function buildExpressionFunction<F extends string>(
       if (!args.hasOwnProperty(key)) {
         throw new Error('Argument to replace does not exist on this function');
       }
-
-      values.forEach((val, i) => {
-        if (isExpressionAstBuilder(val)) {
-          values[i] = val.toAst();
-        }
-      });
-
       args[key] = values;
       return this;
     },
