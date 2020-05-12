@@ -32,6 +32,7 @@ import { chartPluginMock } from '../../../../../plugins/charts/public/mocks';
 import { advancedSettingsMock } from '../../../../../plugins/advanced_settings/public/mocks';
 import { savedObjectsManagementPluginMock } from '../../../../../plugins/saved_objects_management/public/mocks';
 import { visualizationsPluginMock } from '../../../../../plugins/visualizations/public/mocks';
+import { discoverPluginMock } from '../../../../../plugins/discover/public/mocks';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
 export const pluginsMock = {
@@ -48,6 +49,7 @@ export const pluginsMock = {
     visualizations: visualizationsPluginMock.createSetupContract(),
     kibanaLegacy: kibanaLegacyPluginMock.createSetupContract(),
     savedObjectsManagement: savedObjectsManagementPluginMock.createSetupContract(),
+    discover: discoverPluginMock.createSetupContract(),
   }),
   createStart: () => ({
     data: dataPluginMock.createStartContract(),
@@ -62,6 +64,7 @@ export const pluginsMock = {
     visualizations: visualizationsPluginMock.createStartContract(),
     kibanaLegacy: kibanaLegacyPluginMock.createStartContract(),
     savedObjectsManagement: savedObjectsManagementPluginMock.createStartContract(),
+    discover: discoverPluginMock.createStartContract(),
   }),
 };
 

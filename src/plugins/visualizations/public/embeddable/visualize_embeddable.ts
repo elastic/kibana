@@ -71,6 +71,8 @@ export interface VisualizeOutput extends EmbeddableOutput {
 
 type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
 
+const visTypesWithoutInspector = ['markdown', 'input_control_vis', 'metrics', 'vega', 'timelion'];
+
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private handler?: ExpressionLoader;
   private timefilter: TimefilterContract;
@@ -126,7 +128,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   }
 
   public getInspectorAdapters = () => {
-    if (!this.handler) {
+    if (!this.handler || visTypesWithoutInspector.includes(this.vis.type.name)) {
       return undefined;
     }
     return this.handler.inspect();
@@ -215,19 +217,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
   // this is a hack to make editor still work, will be removed once we clean up editor
   // @ts-ignore
-  hasInspector = () => {
-    const visTypesWithoutInspector = [
-      'markdown',
-      'input_control_vis',
-      'metrics',
-      'vega',
-      'timelion',
-    ];
-    if (visTypesWithoutInspector.includes(this.vis.type.name)) {
-      return false;
-    }
-    return this.getInspectorAdapters();
-  };
+  hasInspector = () => Boolean(this.getInspectorAdapters());
 
   /**
    *
