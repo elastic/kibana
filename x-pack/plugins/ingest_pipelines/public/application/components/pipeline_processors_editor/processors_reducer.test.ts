@@ -5,6 +5,8 @@
  */
 
 import { reducer, State } from './processors_reducer';
+import { DragAndDropSpecialLocations } from './constants';
+import { PARENT_CHILD_NEST_ERROR } from './utils';
 
 const initialState: State = {
   processors: [],
@@ -37,8 +39,8 @@ describe('Processors reducer', () => {
     const s4 = reducer(s3, {
       type: 'moveProcessor',
       payload: {
-        destination: { selector: ['processors'], index: 1 },
-        source: { selector: ['processors'], index: 0 },
+        source: ['processors', '0'],
+        destination: ['processors', '1'],
       },
     });
 
@@ -83,8 +85,8 @@ describe('Processors reducer', () => {
     const s5 = reducer(s4, {
       type: 'moveProcessor',
       payload: {
-        source: { selector: ['processors', '1', 'onFailure'], index: 0 },
-        destination: { selector: ['processors'], index: 1 },
+        source: ['processors', '1', 'onFailure', '0'],
+        destination: ['processors', '1'],
       },
     });
 
@@ -132,11 +134,8 @@ describe('Processors reducer', () => {
     const s5 = reducer(s4, {
       type: 'moveProcessor',
       payload: {
-        source: { selector: ['processors'], index: 0 },
-        destination: {
-          selector: ['processors', '1', 'onFailure', '0', 'onFailure', '0', 'onFailure'],
-          index: 0,
-        },
+        source: ['processors', '0'],
+        destination: ['processors', '1', 'onFailure', '0', 'onFailure', '0', 'onFailure', '0'],
       },
     });
 
@@ -148,11 +147,10 @@ describe('Processors reducer', () => {
     ]);
   });
 
-  it('prevents moving a parent into child list', () => {
+  it('handles sending processor to bottom correctly', () => {
     const processor1 = { type: 'test1', options: {} };
     const processor2 = { type: 'test2', options: {} };
     const processor3 = { type: 'test3', options: {} };
-    const processor4 = { type: 'test4', options: {} };
 
     const s1 = reducer(initialState, {
       type: 'addTopLevelProcessor',
@@ -165,37 +163,21 @@ describe('Processors reducer', () => {
     });
 
     const s3 = reducer(s2, {
-      type: 'addOnFailureProcessor',
-      payload: { onFailureProcessor: processor3, targetSelector: ['processors', '1'] },
+      type: 'addTopLevelProcessor',
+      payload: { processor: processor3, selector: ['processors'] },
     });
-
-    const s4 = reducer(s3, {
-      type: 'addOnFailureProcessor',
-      payload: {
-        onFailureProcessor: processor4,
-        targetSelector: ['processors', '1', 'onFailure', '0'],
-      },
-    });
-
-    expect(s4.processors).toEqual([
-      processor1,
-      { ...processor2, onFailure: [{ ...processor3, onFailure: [processor4] }] },
-    ]);
 
     // Move the parent into a child list
-    const s5 = reducer(s4, {
+    const s4 = reducer(s3, {
       type: 'moveProcessor',
       payload: {
-        source: { selector: ['processors'], index: 1 },
-        destination: {
-          selector: ['processors', '1', 'onFailure', '0', 'onFailure', '0', 'onFailure'],
-          index: 0,
-        },
+        source: ['processors', '0'],
+        destination: ['processors', DragAndDropSpecialLocations.bottom],
       },
     });
 
     // Assert nothing changed
-    expect(s5.processors).toEqual(s4.processors);
+    expect(s4.processors).toEqual([processor2, processor3, processor1]);
   });
 
   it('will not set the root "onFailure" to "undefined" if it is empty', () => {
@@ -216,11 +198,8 @@ describe('Processors reducer', () => {
     const s3 = reducer(s2, {
       type: 'moveProcessor',
       payload: {
-        source: { selector: ['onFailure'], index: 0 },
-        destination: {
-          selector: ['processors'],
-          index: 1,
-        },
+        source: ['onFailure', '0'],
+        destination: ['processors', '1'],
       },
     });
 
@@ -228,6 +207,100 @@ describe('Processors reducer', () => {
       processors: [processor1, processor2],
       onFailure: [],
       isRoot: true,
+    });
+  });
+
+  describe('Error conditions', () => {
+    /* eslint-disable no-console */
+    let originalErrorLogger: any;
+    beforeEach(() => {
+      // eslint-disable-next-line no-console
+      originalErrorLogger = console.error;
+      console.error = jest.fn();
+    });
+
+    afterEach(() => {
+      console.error = originalErrorLogger;
+    });
+
+    it('prevents moving a parent into child list', () => {
+      const processor1 = { type: 'test1', options: {} };
+      const processor2 = { type: 'test2', options: {} };
+      const processor3 = { type: 'test3', options: {} };
+      const processor4 = { type: 'test4', options: {} };
+
+      const s1 = reducer(initialState, {
+        type: 'addTopLevelProcessor',
+        payload: { processor: processor1, selector: ['processors'] },
+      });
+
+      const s2 = reducer(s1, {
+        type: 'addTopLevelProcessor',
+        payload: { processor: processor2, selector: ['processors'] },
+      });
+
+      const s3 = reducer(s2, {
+        type: 'addOnFailureProcessor',
+        payload: { onFailureProcessor: processor3, targetSelector: ['processors', '1'] },
+      });
+
+      const s4 = reducer(s3, {
+        type: 'addOnFailureProcessor',
+        payload: {
+          onFailureProcessor: processor4,
+          targetSelector: ['processors', '1', 'onFailure', '0'],
+        },
+      });
+
+      expect(s4.processors).toEqual([
+        processor1,
+        { ...processor2, onFailure: [{ ...processor3, onFailure: [processor4] }] },
+      ]);
+
+      // Move the parent into a child list
+      const s5 = reducer(s4, {
+        type: 'moveProcessor',
+        payload: {
+          source: ['processors', '1'],
+          destination: ['processors', '1', 'onFailure', '0', 'onFailure', '0', 'onFailure', '0'],
+        },
+      });
+
+      expect(console.error).toHaveBeenCalledWith(new Error(PARENT_CHILD_NEST_ERROR));
+
+      // Assert nothing changed
+      expect(s5.processors).toEqual(s4.processors);
+    });
+
+    it('throws for bad move processor', () => {
+      const processor1 = { type: 'test1', options: {} };
+      const processor2 = { type: 'test2', options: {} };
+
+      const s1 = reducer(initialState, {
+        type: 'addTopLevelProcessor',
+        payload: { processor: processor1, selector: ['processors'] },
+      });
+
+      const s2 = reducer(s1, {
+        type: 'addTopLevelProcessor',
+        payload: { processor: processor2, selector: ['onFailure'] },
+      });
+
+      // Move the parent into a child list
+
+      const s3 = reducer(s2, {
+        type: 'moveProcessor',
+        payload: {
+          source: ['onFailure'],
+          destination: ['processors'],
+        },
+      });
+
+      expect(console.error).toHaveBeenCalledWith(
+        new Error('Expected number but received "processors"')
+      );
+
+      expect(s3.processors).toEqual(s2.processors);
     });
   });
 });

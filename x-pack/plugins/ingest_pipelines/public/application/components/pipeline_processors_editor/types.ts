@@ -18,11 +18,6 @@ import { ESCommonProcessorOptions } from '../../../../common/types';
  */
 export type ProcessorSelector = string[];
 
-export interface DraggableLocation {
-  index: number;
-  selector: ProcessorSelector;
-}
-
 export type ProcessorOptions<CustomProcessorOptions = {}> = ESCommonProcessorOptions &
   CustomProcessorOptions;
 

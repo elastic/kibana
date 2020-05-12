@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DraggableLocation, ProcessorInternal, ProcessorSelector } from './types';
+import { ProcessorInternal, ProcessorSelector } from './types';
+import { DragAndDropSpecialLocations } from './constants';
 import { State } from './processors_reducer';
 
 type Path = string[];
@@ -118,42 +119,56 @@ export const checkIfSamePath = (pathA: ProcessorSelector, pathB: ProcessorSelect
  */
 export const unsafeProcessorMove = (
   state: State,
-  source: DraggableLocation,
-  destination: DraggableLocation
+  source: ProcessorSelector,
+  destination: ProcessorSelector
 ): State => {
-  const selectorToSource = source.selector.concat(String(source.index));
-  if (selectorToSource.every((pathSegment, idx) => pathSegment === destination.selector[idx])) {
+  const pathToSourceArray = source.slice(0, -1);
+  const pathToDestArray = destination.slice(0, -1);
+  if (source.every((pathSegment, idx) => pathSegment === destination[idx])) {
     throw new Error(PARENT_CHILD_NEST_ERROR);
   }
-  const isXArrayMove = !checkIfSamePath(source.selector, destination.selector);
+  const isXArrayMove = !checkIfSamePath(pathToSourceArray, pathToDestArray);
 
   // Start by setting up references to objects of interest using our selectors
   // At this point, our selectors are consistent with the data passed in.
-  const sourceProcessors = getValue<ProcessorInternal[]>(source.selector, state);
-  const destinationProcessors = getValue<ProcessorInternal[]>(destination.selector, state);
-  const processor = sourceProcessors[source.index];
-  const sourceProcessor = getValue<ProcessorInternal>(source.selector.slice(0, -1), state);
+  const sourceProcessors = getValue<ProcessorInternal[]>(pathToSourceArray, state);
+  const destinationProcessors = getValue<ProcessorInternal[]>(pathToDestArray, state);
+  const sourceIndex = parseInt(source[source.length - 1], 10);
+  const sourceProcessor = getValue<ProcessorInternal>(pathToSourceArray.slice(0, -1), state);
+  const processor = sourceProcessors[sourceIndex];
+
+  const lastDestItem = destination[destination.length - 1];
+  let destIndex: number;
+  if (lastDestItem === DragAndDropSpecialLocations.top) {
+    destIndex = 0;
+  } else if (lastDestItem === DragAndDropSpecialLocations.bottom) {
+    destIndex = Infinity;
+  } else if (/^[0-9]+$/.test(lastDestItem)) {
+    destIndex = parseInt(lastDestItem, 10);
+  } else {
+    throw new Error(`Expected number but received "${lastDestItem}"`);
+  }
 
   if (isXArrayMove) {
     // First perform the add operation.
     if (destinationProcessors) {
-      destinationProcessors.splice(destination.index, 0, processor);
+      destinationProcessors.splice(destIndex, 0, processor);
     } else {
-      const targetProcessor = getValue<ProcessorInternal>(destination.selector.slice(0, -1), state);
+      const targetProcessor = getValue<ProcessorInternal>(pathToDestArray.slice(0, -1), state);
       targetProcessor.onFailure = [processor];
     }
     // !! Beyond this point, selectors are no longer usable because we have mutated the data structure!
     // Second, we perform the deletion operation
-    sourceProcessors.splice(source.index, 1);
+    sourceProcessors.splice(sourceIndex, 1);
+
     // If onFailure is empty, delete the array.
     if (!sourceProcessors.length && !((sourceProcessor as unknown) as State).isRoot) {
       sourceProcessor.onFailure = undefined;
     }
   } else {
-    const finalDestinationIndex =
-      source.index > destination.index ? destination.index : destination.index + 1;
+    const finalDestinationIndex = sourceIndex > destIndex ? destIndex : destIndex + 1;
     destinationProcessors.splice(finalDestinationIndex, 0, processor);
-    const targetIdx = source.index > destination.index ? source.index + 1 : source.index;
+    const targetIdx = sourceIndex > destIndex ? sourceIndex + 1 : sourceIndex;
     sourceProcessors.splice(targetIdx, 1);
   }
 

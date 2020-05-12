@@ -44,7 +44,7 @@ export const DragAndDropTreeUI: FunctionComponent<Props> = ({
   const { currentDragSelector, registerTreeItems, unRegisterTreeItems } = useDragDropContext();
 
   const treeIdRef = useRef<string>();
-  const getTreeId = () => {
+  const readTreeId = () => {
     if (!treeIdRef.current) {
       treeIdRef.current = uuid.v4();
     }
@@ -72,6 +72,7 @@ export const DragAndDropTreeUI: FunctionComponent<Props> = ({
             processor={processor}
             selector={nodeSelector}
             component={renderItem}
+            treeId={readTreeId()}
           />,
         ]);
 
@@ -81,11 +82,11 @@ export const DragAndDropTreeUI: FunctionComponent<Props> = ({
       });
     };
 
-    addRenderedItems(processors, baseSelector, 0);
+    addRenderedItems(processors, [], 0);
     return _items;
-  }, [processors, baseSelector, renderItem, currentDragSelector]);
+  }, [processors, renderItem, currentDragSelector]);
 
-  const treeId = `${getTreeId()}_PIPELINE_PROCESSORS_EDITOR`;
+  const treeId = `${readTreeId()}_PIPELINE_PROCESSORS_EDITOR`;
 
   useEffect(() => {
     registerTreeItems(treeId, {

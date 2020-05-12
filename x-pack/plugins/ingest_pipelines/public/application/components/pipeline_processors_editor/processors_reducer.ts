@@ -6,8 +6,8 @@
 import { Reducer, useReducer } from 'react';
 
 import { DeserializeResult } from './serialize';
-import { getValue, setValue, unsafeProcessorMove, PARENT_CHILD_NEST_ERROR } from './utils';
-import { ProcessorInternal, DraggableLocation, ProcessorSelector } from './types';
+import { getValue, setValue, unsafeProcessorMove } from './utils';
+import { ProcessorInternal, ProcessorSelector } from './types';
 
 export type State = Omit<DeserializeResult, 'onFailure'> & {
   onFailure: ProcessorInternal[];
@@ -36,7 +36,7 @@ type Action =
     }
   | {
       type: 'moveProcessor';
-      payload: { source: DraggableLocation; destination: DraggableLocation };
+      payload: { source: ProcessorSelector; destination: ProcessorSelector };
     };
 
 export const reducer: Reducer<State, Action> = (state, action) => {
@@ -45,9 +45,9 @@ export const reducer: Reducer<State, Action> = (state, action) => {
     try {
       return unsafeProcessorMove(state, source, destination);
     } catch (e) {
-      if (e.message === PARENT_CHILD_NEST_ERROR) {
-        return { ...state };
-      }
+      // eslint-disable-next-line no-console
+      console.error(e);
+      return { ...state };
     }
   }
 
