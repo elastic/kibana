@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useEffect } from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
 import { OverviewPage } from './components/overview/overview_container';
 import {
   CERTIFICATES_ROUTE,
@@ -16,33 +15,73 @@ import {
 } from '../common/constants';
 import { MonitorPage, NotFoundPage, SettingsPage } from './pages';
 import { CertificatesPage } from './pages/certificates';
+import { UptimePage, useUptimeTelemetry } from './hooks';
 
-interface RouterProps {
-  autocomplete: DataPublicPluginSetup['autocomplete'];
+interface RouteProps {
+  path: string;
+  component: React.FC;
+  dataTestSubj: string;
+  title: string;
+  telemetryId: UptimePage;
 }
 
-export const PageRouter: FC<RouterProps> = ({ autocomplete }) => (
-  <Switch>
-    <Route path={MONITOR_ROUTE}>
-      <div data-test-subj="uptimeMonitorPage">
-        <MonitorPage />
-      </div>
-    </Route>
-    <Route path={SETTINGS_ROUTE}>
-      <div data-test-subj="uptimeSettingsPage">
-        <SettingsPage />
-      </div>
-    </Route>
-    <Route path={CERTIFICATES_ROUTE}>
-      <div data-test-subj="uptimeCertificatesPage">
-        <CertificatesPage />
-      </div>
-    </Route>
-    <Route path={OVERVIEW_ROUTE}>
-      <div data-test-subj="uptimeOverviewPage">
-        <OverviewPage autocomplete={autocomplete} />
-      </div>
-    </Route>
-    <Route component={NotFoundPage} />
-  </Switch>
-);
+const baseTitle = 'Uptime - Kibana';
+
+const Routes: RouteProps[] = [
+  {
+    title: `Monitor | ${baseTitle}`,
+    path: MONITOR_ROUTE,
+    component: MonitorPage,
+    dataTestSubj: 'uptimeMonitorPage',
+    telemetryId: UptimePage.Monitor,
+  },
+  {
+    title: `Settings | ${baseTitle}`,
+    path: SETTINGS_ROUTE,
+    component: SettingsPage,
+    dataTestSubj: 'uptimeSettingsPage',
+    telemetryId: UptimePage.Settings,
+  },
+  {
+    title: `Certificates | ${baseTitle}`,
+    path: CERTIFICATES_ROUTE,
+    component: CertificatesPage,
+    dataTestSubj: 'uptimeCertificatesPage',
+    telemetryId: UptimePage.Certificates,
+  },
+  {
+    title: baseTitle,
+    path: OVERVIEW_ROUTE,
+    component: OverviewPage,
+    dataTestSubj: 'uptimeOverviewPage',
+    telemetryId: UptimePage.Overview,
+  },
+];
+
+const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>> = ({
+  path,
+  title,
+  telemetryId,
+}) => {
+  useUptimeTelemetry(telemetryId);
+  useEffect(() => {
+    document.title = title;
+  }, [path, title]);
+  return null;
+};
+
+export const PageRouter: FC = () => {
+  return (
+    <Switch>
+      {Routes.map(({ title, path, component: RouteComponent, dataTestSubj, telemetryId }) => (
+        <Route path={path} key={telemetryId}>
+          <div data-test-subj={dataTestSubj}>
+            <RouteInit title={title} path={path} telemetryId={telemetryId} />
+            <RouteComponent />
+          </div>
+        </Route>
+      ))}
+      <Route component={NotFoundPage} />
+    </Switch>
+  );
+};
