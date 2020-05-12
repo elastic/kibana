@@ -4,7 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostPolicyResponseActionStatus } from '../../../../../../common/types';
+import { HostPolicyResponseActionStatus, HostStatus } from '../../../../../common/types';
+
+export const HOST_STATUS_TO_HEALTH_COLOR = Object.freeze<
+  {
+    [key in HostStatus]: string;
+  }
+>({
+  [HostStatus.ERROR]: 'danger',
+  [HostStatus.ONLINE]: 'success',
+  [HostStatus.OFFLINE]: 'subdued',
+});
 
 export const POLICY_STATUS_TO_HEALTH_COLOR = Object.freeze<
   { [key in keyof typeof HostPolicyResponseActionStatus]: string }
