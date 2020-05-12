@@ -48,9 +48,6 @@ export async function getIndexPatterns(
             return {
               id,
               title,
-              url: '',
-              // url: kbnUrl.eval('#/management/kibana/indexPatterns/create{{id}}', { id }),
-              // active: $scope.editingId === id,
               default: isDefault,
               tags,
               // the prepending of 0 at the default pattern takes care of prioritization

@@ -26,8 +26,6 @@ export interface IndexPatternCreationOption {
 export interface IndexPatternTableItem {
   id: string;
   title: string;
-  url: string;
-  // active: boolean;
   default: boolean;
   tag?: string[];
   sort: string;
