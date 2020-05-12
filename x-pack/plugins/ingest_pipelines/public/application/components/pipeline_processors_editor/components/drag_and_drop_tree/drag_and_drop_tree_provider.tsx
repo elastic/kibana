@@ -112,12 +112,15 @@ export const DragAndDropTreeProvider: FunctionComponent<Props> = ({ children, on
           const { source, destination, combine } = arg;
           if (source && combine) {
             const sourceTree = privateTreeItemMap.get(source.droppableId)!;
+            const destinationTree = privateTreeItemMap.get(combine.droppableId)!;
             const sourceSelector = sourceTree.selectors[source.index];
             // prettier-ignore
             const [/* tree id */, ...destinationSelector] = combine.draggableId.split('.');
             onDragEnd({
-              source: sourceSelector,
-              destination: destinationSelector,
+              source: sourceTree.baseSelector.concat(sourceSelector),
+              destination: destinationTree.baseSelector
+                .concat(destinationSelector)
+                .concat(['onFailure', '0']),
             });
             return;
           }

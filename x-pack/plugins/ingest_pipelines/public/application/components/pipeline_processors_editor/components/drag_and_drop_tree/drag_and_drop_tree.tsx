@@ -54,6 +54,7 @@ export const DragAndDropTreeUI: FunctionComponent<Props> = ({
   const items = useMemo<SelectorReactElementTuple[]>(() => {
     let flatTreeIndex = 0;
     const _items: SelectorReactElementTuple[] = [];
+    const treeId = readTreeId();
 
     const addRenderedItems = (
       _processors: ProcessorInternal[],
@@ -72,11 +73,14 @@ export const DragAndDropTreeUI: FunctionComponent<Props> = ({
             processor={processor}
             selector={nodeSelector}
             component={renderItem}
-            treeId={readTreeId()}
+            treeId={treeId}
           />,
         ]);
 
-        if (processor.onFailure?.length && nodeSelector.join('.') !== currentDragSelector) {
+        if (
+          processor.onFailure?.length &&
+          [treeId].concat(nodeSelector).join('.') !== currentDragSelector
+        ) {
           addRenderedItems(processor.onFailure, nodeSelector.concat(ON_FAILURE), level + 1);
         }
       });
