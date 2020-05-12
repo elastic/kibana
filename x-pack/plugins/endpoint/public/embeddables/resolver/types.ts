@@ -166,7 +166,7 @@ export const waitingForRelatedEventData = Symbol(
 export interface RelatedEventDataEntry {
   relatedEvents: Array<{
     relatedEvent: ResolverEvent;
-    relatedEventType: RelatedEventType;
+    relatedEventType: EventCategory;
   }>;
 }
 

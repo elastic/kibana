@@ -16,8 +16,8 @@ import {
   AdjacentProcessMap,
   RelatedEventData,
   resultsEnrichedWithRelatedEventInfo,
-  RelatedEventType,
   RelatedEventDataEntryWithStats,
+  EventCategory,
 } from '../../types';
 import { ResolverEvent } from '../../../../../common/types';
 import { Vector2 } from '../../types';
@@ -441,8 +441,8 @@ export const relatedEventStats = createSelector(relatedEventResults, function ge
       }
       const statsForEntry = newStatsEntry?.relatedEvents.reduce(
         (
-          compiledStats: Partial<Record<RelatedEventType, number>>,
-          relatedEvent: { relatedEventType: RelatedEventType }
+          compiledStats: Partial<Record<EventCategory, number>>,
+          relatedEvent: { relatedEventType: EventCategory }
         ) => {
           compiledStats[relatedEvent.relatedEventType] =
             (compiledStats[relatedEvent.relatedEventType] || 0) + 1;
