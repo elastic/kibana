@@ -11,7 +11,7 @@ import {
 import { getTimeline, getTemplateTimeline } from './create_timelines';
 import { FrameworkRequest } from '../../../framework';
 
-export class TimelineInput {
+export class TimelineObject {
   private id: string | null;
   private type: TimelineTypeLiteralWithNull;
   private version: string | number | null;

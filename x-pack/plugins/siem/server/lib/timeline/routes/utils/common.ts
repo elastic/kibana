@@ -13,7 +13,7 @@ import { SetupPlugins } from '../../../../plugin';
 
 import { FrameworkRequest } from '../../../framework';
 
-import { TimelineInput } from './timeline_input';
+import { TimelineObject } from './timeline_input';
 import {
   checkIsCreateFailureCases,
   checkIsUpdateFailureCases,
@@ -59,8 +59,8 @@ export type TimelineStatusAction =
   | TimelineStatusActions.updateViaImport;
 
 export class TimelinesStatus {
-  public timelineInput: TimelineInput;
-  public templateTimelineInput: TimelineInput;
+  public timelineObject: TimelineObject;
+  public templateTimelineObject: TimelineObject;
   private timelineType: TimelineTypeLiteralWithNull;
 
   constructor({
@@ -74,14 +74,14 @@ export class TimelinesStatus {
     templateTimelineInput: GivenTimelineInput;
     frameworkRequest: FrameworkRequest;
   }) {
-    this.timelineInput = new TimelineInput({
+    this.timelineObject = new TimelineObject({
       id: timelineInput.id,
       type: timelineInput.type,
       version: timelineInput.version,
       frameworkRequest,
     });
 
-    this.templateTimelineInput = new TimelineInput({
+    this.templateTimelineObject = new TimelineObject({
       id: templateTimelineInput.id,
       type: templateTimelineInput.type,
       version: templateTimelineInput.version,
@@ -93,9 +93,9 @@ export class TimelinesStatus {
 
   private isCreatable() {
     return (
-      (this.timelineInput.isCreatable() && !this.isHandlingTemplateTimeline()) ||
-      (this.templateTimelineInput.isCreatable() &&
-        this.timelineInput.isCreatable() &&
+      (this.timelineObject.isCreatable() && !this.isHandlingTemplateTimeline()) ||
+      (this.templateTimelineObject.isCreatable() &&
+        this.timelineObject.isCreatable() &&
         this.isHandlingTemplateTimeline())
     );
   }
@@ -106,15 +106,15 @@ export class TimelinesStatus {
 
   private isUpdatable() {
     return (
-      (this.timelineInput.isUpdatable() && !this.isHandlingTemplateTimeline()) ||
-      (this.templateTimelineInput.isUpdatable() && this.isHandlingTemplateTimeline())
+      (this.timelineObject.isUpdatable() && !this.isHandlingTemplateTimeline()) ||
+      (this.templateTimelineObject.isUpdatable() && this.isHandlingTemplateTimeline())
     );
   }
 
   private isUpdatableViaImport() {
     return (
-      (this.timelineInput.isUpdatableViaImport() && !this.isHandlingTemplateTimeline()) ||
-      (this.templateTimelineInput.isUpdatableViaImport() && this.isHandlingTemplateTimeline())
+      (this.timelineObject.isUpdatableViaImport() && !this.isHandlingTemplateTimeline()) ||
+      (this.templateTimelineObject.isUpdatableViaImport() && this.isHandlingTemplateTimeline())
     );
   }
 
@@ -130,28 +130,28 @@ export class TimelinesStatus {
 
   public checkIsFailureCases(action?: TimelineStatusAction) {
     const failureChecker = this.getFailureChecker(action);
-    const version = this.templateTimelineInput.getVersion();
+    const version = this.templateTimelineObject.getVersion();
     return failureChecker(
       this.isHandlingTemplateTimeline(),
-      this.timelineInput.getVersion()?.toString() ?? null,
+      this.timelineObject.getVersion()?.toString() ?? null,
       version != null && typeof version === 'string' ? parseInt(version, 10) : version,
-      this.timelineInput.data,
-      this.templateTimelineInput.data
+      this.timelineObject.data,
+      this.templateTimelineObject.data
     );
   }
 
   public getTemplateTimelineInput() {
-    return this.templateTimelineInput;
+    return this.templateTimelineObject;
   }
 
   public getTimelineInput() {
-    return this.timelineInput;
+    return this.timelineObject;
   }
 
   private getTimelines() {
     return Promise.all([
-      this.timelineInput.getTimelines(),
-      this.templateTimelineInput.getTimelines(),
+      this.timelineObject.getTimelines(),
+      this.templateTimelineObject.getTimelines(),
     ]);
   }
 
