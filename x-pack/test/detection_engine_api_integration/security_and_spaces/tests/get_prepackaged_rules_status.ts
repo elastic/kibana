@@ -11,12 +11,17 @@ import {
   DETECTION_ENGINE_RULES_URL,
 } from '../../../../plugins/siem/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createSignalsIndex, deleteAllAlerts, deleteSignalsIndex, getSimpleRule } from './utils';
+import {
+  createSignalsIndex,
+  deleteAllAlerts,
+  deleteSignalsIndex,
+  getSimpleRule,
+} from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('get_prepackaged_rules_status', () => {
     describe('getting prepackaged rules status', () => {

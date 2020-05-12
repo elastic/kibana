@@ -17,12 +17,14 @@ import {
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
   getSimpleRuleOutputWithoutRuleId,
-} from './utils';
+  getSimpleMlRule,
+  getSimpleMlRuleOutput,
+} from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('update_rules', () => {
     describe('update rules', () => {
@@ -56,6 +58,33 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const outputRule = getSimpleRuleOutput();
+        outputRule.name = 'some other name';
+        outputRule.version = 2;
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare).to.eql(outputRule);
+      });
+
+      it('should update a single rule property of name using a rule_id with a machine learning job', async () => {
+        // create a simple rule
+        await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getSimpleMlRule('rule-1'))
+          .expect(200);
+
+        // update a simple rule's name
+        const updatedRule = getSimpleMlRule('rule-1');
+        updatedRule.rule_id = 'rule-1';
+        updatedRule.name = 'some other name';
+        delete updatedRule.id;
+
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(updatedRule)
+          .expect(200);
+
+        const outputRule = getSimpleMlRuleOutput();
         outputRule.name = 'some other name';
         outputRule.version = 2;
         const bodyToCompare = removeServerGeneratedProperties(body);

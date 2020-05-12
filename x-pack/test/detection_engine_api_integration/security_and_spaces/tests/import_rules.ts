@@ -17,12 +17,12 @@ import {
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
   ruleToNdjson,
-} from './utils';
+} from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('import_rules', () => {
     describe('importing rules without an index', () => {
