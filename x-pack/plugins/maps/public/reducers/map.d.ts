@@ -22,6 +22,7 @@ export type MapContext = {
   zoom?: number;
   center?: MapCenter;
   scrollZoom: boolean;
+  buffer?: MapExtent;
   extent?: MapExtent;
   mouseCoordinates?: {
     lat: number;
