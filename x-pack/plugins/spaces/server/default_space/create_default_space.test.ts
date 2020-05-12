@@ -6,6 +6,7 @@
 
 import { createDefaultSpace } from './create_default_space';
 import { SavedObjectsErrorHelpers } from 'src/core/server';
+import { loggingServiceMock } from '../../../../../src/core/server/mocks';
 
 interface MockServerSettings {
   defaultExists?: boolean;
@@ -47,14 +48,16 @@ const createMockDeps = (settings: MockServerSettings = {}) => {
   });
 
   return {
-    savedObjects: {
-      createInternalRepository: jest.fn().mockImplementation(() => {
-        return {
-          get: mockGet,
-          create: mockCreate,
-        };
+    getSavedObjects: () =>
+      Promise.resolve({
+        createInternalRepository: jest.fn().mockImplementation(() => {
+          return {
+            get: mockGet,
+            create: mockCreate,
+          };
+        }),
       }),
-    },
+    logger: loggingServiceMock.createLogger(),
   };
 };
 
@@ -65,7 +68,7 @@ test(`it creates the default space when one does not exist`, async () => {
 
   await createDefaultSpace(deps);
 
-  const repository = deps.savedObjects.createInternalRepository();
+  const repository = (await deps.getSavedObjects()).createInternalRepository();
 
   expect(repository.get).toHaveBeenCalledTimes(1);
   expect(repository.create).toHaveBeenCalledTimes(1);
@@ -89,7 +92,7 @@ test(`it does not attempt to recreate the default space if it already exists`, a
 
   await createDefaultSpace(deps);
 
-  const repository = deps.savedObjects.createInternalRepository();
+  const repository = (await deps.getSavedObjects()).createInternalRepository();
 
   expect(repository.get).toHaveBeenCalledTimes(1);
   expect(repository.create).toHaveBeenCalledTimes(0);
@@ -114,7 +117,7 @@ test(`it ignores conflict errors if the default space already exists`, async () 
 
   await createDefaultSpace(deps);
 
-  const repository = deps.savedObjects.createInternalRepository();
+  const repository = (await deps.getSavedObjects()).createInternalRepository();
 
   expect(repository.get).toHaveBeenCalledTimes(1);
   expect(repository.create).toHaveBeenCalledTimes(1);

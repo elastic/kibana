@@ -5,22 +5,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsServiceStart, SavedObjectsRepository } from 'src/core/server';
+import { SavedObjectsServiceStart, SavedObjectsRepository, Logger } from 'src/core/server';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 
 interface Deps {
-  savedObjects: Pick<SavedObjectsServiceStart, 'createInternalRepository'>;
+  getSavedObjects: () => Promise<Pick<SavedObjectsServiceStart, 'createInternalRepository'>>;
+  logger: Logger;
 }
 
-export async function createDefaultSpace({ savedObjects }: Deps) {
-  const { createInternalRepository } = savedObjects;
+export async function createDefaultSpace({ getSavedObjects, logger }: Deps) {
+  const { createInternalRepository } = await getSavedObjects();
 
   const savedObjectsRepository = createInternalRepository(['space']);
+
+  logger.debug('Checking for existing default space');
 
   const defaultSpaceExists = await doesDefaultSpaceExist(savedObjectsRepository);
 
   if (defaultSpaceExists) {
+    logger.debug('Default space already exists');
     return;
   }
 
@@ -28,6 +32,7 @@ export async function createDefaultSpace({ savedObjects }: Deps) {
     id: DEFAULT_SPACE_ID,
   };
 
+  logger.debug('Creating the default space');
   try {
     await savedObjectsRepository.create(
       'space',
@@ -53,6 +58,8 @@ export async function createDefaultSpace({ savedObjects }: Deps) {
     }
     throw error;
   }
+
+  logger.debug('Default space created');
 }
 
 async function doesDefaultSpaceExist(savedObjectsRepository: Pick<SavedObjectsRepository, 'get'>) {
