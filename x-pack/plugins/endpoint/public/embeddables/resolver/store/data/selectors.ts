@@ -424,15 +424,14 @@ export const relatedEventStats = createSelector(relatedEventResults, function ge
   relatedEventResults
   /* eslint-enable no-shadow */
 ) {
-    /* eslint-disable no-shadow */
+  /* eslint-disable no-shadow */
   const relatedEventStats: RelatedEventData = new Map();
-    /* eslint-enable no-shadow */
+  /* eslint-enable no-shadow */
   if (!relatedEventResults) {
     return relatedEventStats;
   }
- 
+
   for (const updatedEvent of relatedEventResults.keys()) {
-    
     const newStatsEntry = relatedEventResults.get(updatedEvent);
     if (typeof newStatsEntry === 'object') {
       // compile stats
@@ -451,7 +450,7 @@ export const relatedEventStats = createSelector(relatedEventResults, function ge
         },
         {}
       );
-     
+
       const newRelatedEventStats: RelatedEventDataEntryWithStats = Object.assign(newStatsEntry, {
         stats: statsForEntry,
       });
