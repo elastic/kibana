@@ -45,9 +45,9 @@ const getResolvedResults = deps => {
 
   return savedVis => {
     results.savedVis = savedVis;
+    const serializedVis = visualizations.convertToSerializedVis(savedVis);
     return visualizations
-      .convertToSerializedVis(savedVis)
-      .then(serializedVis => visualizations.createVis(serializedVis.type, serializedVis))
+      .createVis(serializedVis.type, serializedVis)
       .then(vis => {
         if (vis.type.setup) {
           return vis.type.setup(vis).catch(() => vis);
@@ -171,6 +171,10 @@ export function initVisualizeApp(app, deps) {
             return data.indexPatterns
               .ensureDefaultIndexPattern(history)
               .then(() => savedVisualizations.get($route.current.params))
+              .then(savedVis => {
+                savedVis.searchSourceFields = { index: $route.current.params.indexPattern };
+                return savedVis;
+              })
               .then(getResolvedResults(deps))
               .then(delay)
               .catch(

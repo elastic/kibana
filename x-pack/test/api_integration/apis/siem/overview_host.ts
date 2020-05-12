@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 
 import { DEFAULT_INDEX_PATTERN } from '../../../../plugins/siem/common/constants';
-import { overviewHostQuery } from '../../../../plugins/siem/public/containers/overview/overview_host/index.gql_query';
+import { overviewHostQuery } from '../../../../plugins/siem/public/overview/containers//overview_host/index.gql_query';
 import { GetOverviewHostQuery } from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
