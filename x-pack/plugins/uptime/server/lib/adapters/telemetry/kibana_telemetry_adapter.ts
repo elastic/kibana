@@ -44,7 +44,7 @@ export class KibanaTelemetryAdapter {
       fetch: async (callCluster: APICaller) => {
         const savedObjectsClient = getSavedObjectsClient()!;
         if (savedObjectsClient) {
-          this.countNoOfUniqueMonitorAndLocations(callCluster, savedObjectsClient);
+          await this.countNoOfUniqueMonitorAndLocations(callCluster, savedObjectsClient);
         }
         const report = this.getReport();
         return { last_24_hours: { hits: { ...report } } };
