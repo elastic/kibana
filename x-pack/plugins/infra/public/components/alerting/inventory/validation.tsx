@@ -55,7 +55,7 @@ export function validateMetricThreshold({
 
     // The Threshold component returns an empty array with a length ([empty]) because it's using delete newThreshold[i].
     // We need to use [...c.threshold] to convert it to an array with an undefined value ([undefined]) so we can test each element.
-    if (c.threshold && c.threshold.length && ![...c.threshold].every(t => isNumber(t))) {
+    if (c.threshold && c.threshold.length && ![...c.threshold].every(isNumber)) {
       errors[id].threshold0.push(
         i18n.translate('xpack.infra.metrics.alertFlyout.error.thresholdTypeRequired', {
           defaultMessage: 'Thresholds must contain a valid number.',
