@@ -74,6 +74,7 @@ export function registerTransactionDurationAlertType({
         }
       ]
     },
+    producer: 'apm',
     executor: async ({ services, params }) => {
       const config = await config$.pipe(take(1)).toPromise();
 

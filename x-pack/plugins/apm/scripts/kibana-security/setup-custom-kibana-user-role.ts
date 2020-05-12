@@ -15,7 +15,7 @@ import { argv } from 'yargs';
 
 const config = yaml.safeLoad(
   fs.readFileSync(
-    path.join(__filename, '../../../../../../../config/kibana.dev.yml'),
+    path.join(__filename, '../../../../../../config/kibana.dev.yml'),
     'utf8'
   )
 );

@@ -32,9 +32,15 @@ interface ServerReturnedHostPolicyResponse {
   payload: GetHostPolicyResponse;
 }
 
+interface ServerFailedToReturnHostPolicyResponse {
+  type: 'serverFailedToReturnHostPolicyResponse';
+  payload: ServerApiError;
+}
+
 export type HostAction =
   | ServerReturnedHostList
   | ServerFailedToReturnHostList
   | ServerReturnedHostDetails
   | ServerFailedToReturnHostDetails
-  | ServerReturnedHostPolicyResponse;
+  | ServerReturnedHostPolicyResponse
+  | ServerFailedToReturnHostPolicyResponse;

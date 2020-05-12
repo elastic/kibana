@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './space_result.scss';
 import React from 'react';
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';

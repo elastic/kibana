@@ -19,6 +19,7 @@ import { chartLimits, getChartType } from '../../util/chart_utils';
 import { getEntityFieldList } from '../../../../common/util/anomaly_utils';
 import {
   isSourceDataChartableForDetector,
+  isModelPlotChartableForDetector,
   isModelPlotEnabled,
 } from '../../../../common/util/job_utils';
 import { mlResultsService } from '../../services/results_service';
@@ -420,7 +421,7 @@ function processRecordsForDisplay(anomalyRecords) {
     // is chartable, and if model plot is enabled for the job.
     const job = mlJobService.getJob(record.job_id);
     let isChartable = isSourceDataChartableForDetector(job, record.detector_index);
-    if (isChartable === false) {
+    if (isChartable === false && isModelPlotChartableForDetector(job, record.detector_index)) {
       // Check if model plot is enabled for this job.
       // Need to check the entity fields for the record in case the model plot config has a terms list.
       const entityFields = getEntityFieldList(record);

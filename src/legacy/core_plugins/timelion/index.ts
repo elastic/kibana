@@ -62,7 +62,6 @@ const timelionPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPl
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: [resolve(__dirname, 'public/legacy')],
-      mappings: require('./mappings.json'),
       uiSettingDefaults: {
         'timelion:showTutorial': {
           name: i18n.translate('timelion.uiSettings.showTutorialLabel', {
