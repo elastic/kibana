@@ -11,7 +11,6 @@ import { Logger, KibanaRequest } from 'src/core/server';
 import { SIGNALS_ID, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import { isJobStarted, isMlRule } from '../../../../common/machine_learning/helpers';
 import { SetupPlugins } from '../../../plugin';
-import { Type as ListValueType } from '../../../../../lists/common/schemas/common';
 
 import { getInputIndex } from './get_input_output_index';
 import {
@@ -80,7 +79,7 @@ export const signalRulesAlertType = ({
         query,
         to,
         type,
-        exceptions_list,
+        exceptions_list: exceptionsList,
       } = params;
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
       let hasError: boolean = false;
@@ -216,9 +215,10 @@ export const signalRulesAlertType = ({
             throw new Error('lists plugin unavailable during rule execution');
           }
           let listClient;
-          let listValueType: ListValueType | undefined;
-          let listValueField;
-          let listId;
+          let listExceptions;
+          // let listValueType: ListValueType | undefined;
+          // let listValueField;
+          // let listId;
           if (
             process.env.ELASTIC_XPACK_SIEM_LISTS_FEATURE &&
             process.env.ELASTIC_XPACK_SIEM_LISTS_FEATURE === 'true'
@@ -231,9 +231,10 @@ export const signalRulesAlertType = ({
             // assume only one list per rule right now...
             // actually... I should probably just pass down the
             // exceptions and handle them as objects in the filter events function...
-            listValueType = 'ip';
-            listValueField = 'source.ip';
-            listId = 'ci-badguys.txt';
+            listExceptions = exceptionsList?.filter(item => item.values_type === 'list');
+            // listValueType = 'ip';
+            // listValueField = 'source.ip';
+            // listId = 'ci-badguys.txt';
           }
 
           const inputIndex = await getInputIndex(services, version, index);
@@ -245,17 +246,19 @@ export const signalRulesAlertType = ({
             savedId,
             services,
             index: inputIndex,
-            lists: exceptions_list,
+            // temporary filter out list type
+            lists: exceptionsList?.filter(item => item.values_type !== 'list'),
           });
 
           result = await searchAfterAndBulkCreate({
             listClient,
+            exceptionsList,
             ruleParams: params,
             services,
             logger,
-            listValueType,
-            listValueField,
-            listId,
+            // listValueType,
+            // listValueField,
+            // listId,
             id: alertId,
             inputIndexPattern: inputIndex,
             signalsIndex: outputIndex,

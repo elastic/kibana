@@ -10,57 +10,78 @@ import { ListItemArraySchema } from '../../../../../lists/common/schemas/respons
 import { Type as ListValueType } from '../../../../../lists/common/schemas/common';
 import { ListClient } from '../../../../../lists/server';
 import { SignalSearchResponse } from './types';
+import { RuleAlertParams } from '../types';
 
 interface FilterEventsAgainstList {
   listClient: ListClient;
+  exceptionsList: RuleAlertParams['exceptions_list'];
   logger: Logger;
   eventSearchResult: SignalSearchResponse;
-  type: ListValueType;
-  listId: string;
-  field: string;
+  // type: ListValueType;
+  // listId: string;
+  // field: string;
 }
 
 export const filterEventsAgainstList = async ({
   listClient,
+  exceptionsList,
   logger,
   eventSearchResult,
-  type,
-  listId,
-  field,
-}: FilterEventsAgainstList): Promise<SignalSearchResponse> => {
+}: // type,
+// listId,
+// field,
+FilterEventsAgainstList): Promise<SignalSearchResponse> => {
   try {
-    // acquire the list values we are checking for.
-    const valuesOfGivenType = eventSearchResult.hits.hits
-      .map(item => get(field, item._source))
-      .filter((item: string) => item != null);
-    const valueSet = new Set<string>(valuesOfGivenType); // make them small
+    if (exceptionsList == null) {
+      return eventSearchResult;
+    }
 
-    // get the ips that match with items in our list
-    const listSignals: ListItemArraySchema = await listClient.getListItemByValues({
-      listId,
-      type,
-      value: [...valueSet],
+    // grab the signals with values found in the given exception lists.
+    const filteredHitsPromises = exceptionsList.map(async exceptionItem => {
+      // acquire the list values we are checking for.
+      const valuesOfGivenType = eventSearchResult.hits.hits
+        .map(searchResultItem => get(exceptionItem.field, searchResultItem._source))
+        .filter((searchResultItem: string) => searchResultItem != null);
+      const valueSet = new Set<string>(valuesOfGivenType); // make them small
+      if (exceptionItem.values == null || exceptionItem.values.length === 0) {
+        throw new Error('Malformed exception list provided');
+      }
+      const listSignals: ListItemArraySchema = await listClient.getListItemByValues({
+        listId: exceptionItem.values[0].id!,
+        type: exceptionItem.values[0].name as ListValueType, // bad, I know, I'll write a typeguard later.
+        value: [...valueSet],
+      });
+      // create a set of list values that were a hit
+      const badSet = new Set<string>(listSignals.map(item => item.value));
+      // console.log({ badSet });
+      // filter out the search results that match with the values found in the list.
+      const filteredEvents = eventSearchResult.hits.hits.filter(item =>
+        get(exceptionItem.field, item._source)
+          ? !badSet.has(get(exceptionItem.field, item._source))
+          : true
+      );
+      const diff = eventSearchResult.hits.hits.length - filteredEvents.length;
+      logger.debug(`Lists filtered out ${diff} events`);
+      return filteredEvents;
     });
+    // const listSignals: ListItemArraySchema = await listClient.getListItemByValues({
+    //   listId,
+    //   type,
+    //   value: [...valueSet],
+    // });
 
-    // create a set of list values that were a hit
-    const badSet = new Set<string>(listSignals.map(item => item.value));
-    // console.log({ badSet });
-    // filter out the search results that match with the values found in the list.
-    const filteredEvents = eventSearchResult.hits.hits.filter(item =>
-      get(field, item._source) ? !badSet.has(get(field, item._source)) : true
-    );
-    const diff = eventSearchResult.hits.hits.length - filteredEvents.length;
-    logger.debug(`Lists filtered out ${diff} events`);
+    const filteredHits = await Promise.all(filteredHitsPromises);
     const toReturn: SignalSearchResponse = {
       took: eventSearchResult.took,
       timed_out: eventSearchResult.timed_out,
       _shards: eventSearchResult._shards,
       hits: {
-        total: filteredEvents.length,
+        total: filteredHits.length,
         max_score: eventSearchResult.hits.max_score,
-        hits: filteredEvents,
+        hits: filteredHits.flat(),
       },
     };
+
     return toReturn;
   } catch (exc) {
     throw new Error('Failed to query lists index');

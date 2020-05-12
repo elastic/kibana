@@ -8,7 +8,7 @@ import { ListClient } from '../../../../../lists/server';
 import { Type as ListValueType } from '../../../../../lists/common/schemas/common';
 import { AlertServices } from '../../../../../alerting/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { RuleTypeParams, RefreshTypes } from '../types';
+import { RuleTypeParams, RefreshTypes, RuleAlertParams } from '../types';
 import { Logger } from '../../../../../../../src/core/server';
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
@@ -19,9 +19,10 @@ interface SearchAfterAndBulkCreateParams {
   ruleParams: RuleTypeParams;
   services: AlertServices;
   listClient: ListClient | undefined; // TODO: undefined is for temporary development, remove before merged
-  listValueType: ListValueType | undefined;
-  listValueField: string | undefined; // ECS path to field that list values apply to
-  listId: string | undefined;
+  exceptionsList: RuleAlertParams['exceptions_list'];
+  // listValueType: ListValueType | undefined;
+  // listValueField: string | undefined; // ECS path to field that list values apply to
+  // listId: string | undefined;
   logger: Logger;
   id: string;
   inputIndexPattern: string[];
@@ -52,12 +53,13 @@ export interface SearchAfterAndBulkCreateReturnType {
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
   ruleParams,
+  exceptionsList,
   services,
   listClient,
   logger,
-  listValueType,
-  listValueField,
-  listId,
+  // listValueType,
+  // listValueField,
+  // listId,
   id,
   inputIndexPattern,
   signalsIndex,
@@ -144,14 +146,15 @@ export const searchAfterAndBulkCreate = async ({
       // filter out the search results that match with the values found in the list.
       // the resulting set are valid signals that are not on the allowlist.
       let filteredEvents;
-      if (listClient != null && listValueType != null && listValueField != null && listId != null) {
+      if (listClient != null) {
         filteredEvents = await filterEventsAgainstList({
           listClient,
+          exceptionsList,
           logger,
           eventSearchResult: searchResult,
-          type: listValueType,
-          field: listValueField,
-          listId,
+          // type: listValueType,
+          // field: listValueField,
+          // listId,
         });
       } else {
         filteredEvents = searchResult;
