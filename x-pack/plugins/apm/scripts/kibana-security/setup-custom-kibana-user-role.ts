@@ -15,10 +15,12 @@ import { argv } from 'yargs';
 
 const config = yaml.safeLoad(
   fs.readFileSync(
-    path.join(__filename, '../../../../../../../config/kibana.dev.yml'),
+    path.join(__filename, '../../../../../../config/kibana.dev.yml'),
     'utf8'
   )
 );
+
+console.log(config);
 
 const KIBANA_INDEX = config['kibana.index'] as string;
 const TASK_MANAGER_INDEX = config['xpack.task_manager.index'] as string;
