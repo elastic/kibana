@@ -202,11 +202,12 @@ describe('actions_connectors_list component with items', () => {
     expect(wrapper.find('[data-test-subj="preConfiguredTitleMessage"]')).toHaveLength(2);
   });
 
-  test('if select item for edit should render ConnectorEditFlyout', () => {
-    wrapper
+  test('if select item for edit should render ConnectorEditFlyout', async () => {
+    await wrapper
       .find('[data-test-subj="edit1"]')
       .first()
       .simulate('click');
+
     expect(wrapper.find('ConnectorEditFlyout')).toHaveLength(1);
   });
 });
