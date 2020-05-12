@@ -17,5 +17,6 @@ export function getAlertType(): AlertTypeModel<IndexThresholdAlertParams, Alerts
     iconClass: 'alert',
     alertParamsExpression: lazy(() => import('./expression')),
     validate: validateExpression,
+    requiresAppContext: false,
   };
 }
