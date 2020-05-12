@@ -309,7 +309,7 @@ The name of this index can be changed in your `config.yml` by editing `xpack.obs
 *******************************************************
 ////
 
-[[apm-annotation-config]]
+[[apm-annotation-create]]
 ==== Create or update annotation
 
 [[apm-annotation-config-req]]
