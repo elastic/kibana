@@ -68,5 +68,11 @@ describe('Tree', () => {
     });
   });
 
-  describe('children', () => {});
+  describe('children', () => {
+    const root = generator.generateEvent();
+
+    it('adds children all at once', () => {
+      const children = Array.from(generator.descendantsTreeGenerator(root, 3, 3, 0, 0, 0));
+    });
+  });
 });
