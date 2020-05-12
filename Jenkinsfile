@@ -9,4 +9,7 @@ catchError {
   }
 }
 
-kibanaPipeline.sendMail([extra: 'Some extra info', subject: 'Custom Subject'])
+kibanaPipeline.sendMail([
+  subject: '[7.9.0] ES Snapshot Verification Failure',
+  extra: "Snapshot Manifest: https://storage.googleapis.com/kibana-ci-es-snapshots-daily/7.9.0/archives/20200511-194020_b90c7e3797f/manifest.json",
+])

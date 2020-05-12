@@ -97,7 +97,7 @@ def sendFailedBuild(Map params = [:]) {
     def subject = "${env.JOB_NAME} - Build ${env.BUILD_DISPLAY_NAME} - ${buildUtils.getBuildStatus()}"
     def body = [
       getHeader(),
-      params.extra ?: '',
+      params.extra ? "<p>${params.extra}</p>" : '',
       getFailedBuildParts(),
       getGitChanges(),
     ]
