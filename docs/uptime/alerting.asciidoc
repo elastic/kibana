@@ -3,6 +3,10 @@
 
 == Uptime alerting
 
+The Uptime app integrates with Kibana's {kibana-ref}/alerting-getting-started.html[alerting and actions]
+feature. It provides a set of built-in actions and Uptime specific threshold alerts for you to use
+and enables central management of all alerts from <<management, Kibana Management>>.
+
 [float]
 === Monitor status alerts
 
