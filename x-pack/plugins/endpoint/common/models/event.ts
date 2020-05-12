@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { LegacyEndpointEvent, ResolverEvent } from '../types';
 import { EventCategory } from '../../public/embeddables/resolver/types';
 
@@ -50,19 +51,84 @@ export function parentEntityId(event: ResolverEvent): string | undefined {
 
 export function eventCategoryDisplayName(event: ResolverEvent): EventCategory {
   const eventTypeToNameMap = new Map<string, EventCategory>([
-    ['process', 'Process'],
-    ['alert', 'Alert'],
-    ['security', 'Security'],
-    ['file', 'File'],
-    ['network', 'Network'],
-    ['registry', 'Registry'],
-    ['dns', 'DNS'],
-    ['clr', 'CLR'],
-    ['image_load', 'Image Load'],
-    ['powershell', 'Powershell'],
-    ['wmi', 'WMI'],
-    ['api', 'API'],
-    ['user', 'User'],
+    [
+      'process',
+      i18n.translate('xpack.endpoint.resolver.Process', {
+        defaultMessage: 'Process',
+      }) as EventCategory,
+    ],
+    [
+      'alert',
+      i18n.translate('xpack.endpoint.resolver.Alert', {
+        defaultMessage: 'Alert',
+      }) as EventCategory,
+    ],
+    [
+      'security',
+      i18n.translate('xpack.endpoint.resolver.Security', {
+        defaultMessage: 'Security',
+      }) as EventCategory,
+    ],
+    [
+      'file',
+      i18n.translate('xpack.endpoint.resolver.File', {
+        defaultMessage: 'File',
+      }) as EventCategory,
+    ],
+    [
+      'network',
+      i18n.translate('xpack.endpoint.resolver.Network', {
+        defaultMessage: 'Network',
+      }) as EventCategory,
+    ],
+    [
+      'registry',
+      i18n.translate('xpack.endpoint.resolver.Registry', {
+        defaultMessage: 'Registry',
+      }) as EventCategory,
+    ],
+    [
+      'dns',
+      i18n.translate('xpack.endpoint.resolver.DNS', {
+        defaultMessage: 'DNS',
+      }) as EventCategory,
+    ],
+    [
+      'clr',
+      i18n.translate('xpack.endpoint.resolver.CLR', {
+        defaultMessage: 'CLR',
+      }) as EventCategory,
+    ],
+    [
+      'image_load',
+      i18n.translate('xpack.endpoint.resolver.ImageLoad', {
+        defaultMessage: 'Image Load',
+      }) as EventCategory,
+    ],
+    [
+      'powershell',
+      i18n.translate('xpack.endpoint.resolver.Powershell', {
+        defaultMessage: 'Powershell',
+      }) as EventCategory,
+    ],
+    [
+      'wmi',
+      i18n.translate('xpack.endpoint.resolver.WMI', {
+        defaultMessage: 'WMI',
+      }) as EventCategory,
+    ],
+    [
+      'api',
+      i18n.translate('xpack.endpoint.resolver.API', {
+        defaultMessage: 'API',
+      }) as EventCategory,
+    ],
+    [
+      'user',
+      i18n.translate('xpack.endpoint.resolver.User', {
+        defaultMessage: 'User',
+      }) as EventCategory,
+    ],
   ]);
 
   // Returning "Process" as a catch-all here because it seems pretty general
