@@ -5,7 +5,6 @@
  */
 
 import { ListClient } from '../../../../../lists/server';
-// import { Type as ListValueType } from '../../../../../lists/common/schemas/common';
 import { AlertServices } from '../../../../../alerting/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes, RuleAlertParams } from '../types';
