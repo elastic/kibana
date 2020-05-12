@@ -339,13 +339,17 @@ export class EndpointDocGenerator {
     percentNodesWithRelated?: number,
     percentChildrenTerminated?: number
   ) {
-    const ancestry = this.createAlertEventAncestry(alertAncestors);
+    const ancestry = this.createAlertEventAncestry(
+      alertAncestors,
+      relatedEventsPerNode,
+      percentNodesWithRelated
+    );
     for (let i = 0; i < ancestry.length; i++) {
       yield ancestry[i];
     }
-    // ancestry will always have at least 2 elements, and the second to last element will be the process associated with the alert
+    // ancestry will always have at least 2 elements, and the last element will be the alert
     yield* this.descendantsTreeGenerator(
-      ancestry[ancestry.length - 2],
+      ancestry[ancestry.length - 1],
       childGenerations,
       maxChildrenPerNode,
       relatedEventsPerNode,
@@ -358,18 +362,44 @@ export class EndpointDocGenerator {
    * Creates an alert event and associated process ancestry. The alert event will always be the last event in the return array.
    * @param alertAncestors - number of ancestor generations to create
    */
-  public createAlertEventAncestry(alertAncestors = 3): Event[] {
+  public createAlertEventAncestry(
+    alertAncestors = 3,
+    relatedEventsPerNode = 5,
+    pctWithRelated = 30
+  ): Event[] {
     const events = [];
     const startDate = new Date().getTime();
     const root = this.generateEvent({ timestamp: startDate + 1000 });
     events.push(root);
     let ancestor = root;
+    // generate related alerts for root
+    const processDuration: number = 6 * 3600;
+    if (this.randomN(100) < pctWithRelated) {
+      for (const relatedEvent of this.relatedEventsGenerator(
+        ancestor,
+        relatedEventsPerNode,
+        processDuration
+      )) {
+        events.push(relatedEvent);
+      }
+    }
     for (let i = 0; i < alertAncestors; i++) {
       ancestor = this.generateEvent({
         timestamp: startDate + 1000 * (i + 1),
         parentEntityID: ancestor.process.entity_id,
       });
       events.push(ancestor);
+
+      // generate related alerts for ancestor
+      if (this.randomN(100) < pctWithRelated) {
+        for (const relatedEvent of this.relatedEventsGenerator(
+          ancestor,
+          relatedEventsPerNode,
+          processDuration
+        )) {
+          events.push(relatedEvent);
+        }
+      }
     }
     events.push(
       this.generateAlert(
@@ -506,8 +536,14 @@ export class EndpointDocGenerator {
   /**
    * Generates a Host Policy response message
    */
-  public generatePolicyResponse(ts = new Date().getTime()): HostPolicyResponse {
+  public generatePolicyResponse(
+    ts = new Date().getTime(),
+    allStatus?: HostPolicyResponseActionStatus
+  ): HostPolicyResponse {
     const policyVersion = this.seededUUIDv4();
+    const status = () => {
+      return allStatus || this.randomHostPolicyResponseActionStatus();
+    };
     return {
       '@timestamp': ts,
       agent: {
@@ -530,7 +566,7 @@ export class EndpointDocGenerator {
           applied: {
             actions: {
               configure_elasticsearch_connection: {
-                message: 'elasticsearch comms configured successfully',
+                message: 'elasticsearch communications configured successfully',
                 status: HostPolicyResponseActionStatus.success,
               },
               configure_kernel: {
@@ -558,7 +594,7 @@ export class EndpointDocGenerator {
                 status: HostPolicyResponseActionStatus.success,
               },
               detect_image_load_events: {
-                message: 'Successfuly started image load event reporting',
+                message: 'Successfully started image load event reporting',
                 status: HostPolicyResponseActionStatus.success,
               },
               detect_process_events: {
@@ -566,15 +602,15 @@ export class EndpointDocGenerator {
                 status: HostPolicyResponseActionStatus.success,
               },
               download_global_artifacts: {
-                message: 'Failed to download EXE model',
+                message: 'Succesfully downloaded global artifacts',
                 status: HostPolicyResponseActionStatus.success,
               },
               load_config: {
-                message: 'successfully parsed configuration',
+                message: 'Successfully parsed configuration',
                 status: HostPolicyResponseActionStatus.success,
               },
               load_malware_model: {
-                message: 'Error deserializing EXE model; no valid malware model installed',
+                message: 'Successfully loaded malware model',
                 status: HostPolicyResponseActionStatus.success,
               },
               read_elasticsearch_config: {
@@ -618,20 +654,20 @@ export class EndpointDocGenerator {
             response: {
               configurations: {
                 events: {
-                  concerned_actions: this.randomHostPolicyResponseActions(),
-                  status: this.randomHostPolicyResponseActionStatus(),
+                  concerned_actions: ['download_model'],
+                  status: status(),
                 },
                 logging: {
                   concerned_actions: this.randomHostPolicyResponseActions(),
-                  status: this.randomHostPolicyResponseActionStatus(),
+                  status: status(),
                 },
                 malware: {
                   concerned_actions: this.randomHostPolicyResponseActions(),
-                  status: this.randomHostPolicyResponseActionStatus(),
+                  status: status(),
                 },
                 streaming: {
                   concerned_actions: this.randomHostPolicyResponseActions(),
-                  status: this.randomHostPolicyResponseActionStatus(),
+                  status: status(),
                 },
               },
             },

@@ -6,19 +6,19 @@
 
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import { alertsClientMock } from '../../../../../alerting/server/mocks';
-import { actionsClientMock } from '../../../../../actions/server/mocks';
-import { mockPrepackagedRule } from '../routes/__mocks__/request_responses';
+import {
+  mockPrepackagedRule,
+  getFindResultWithSingleHit,
+} from '../routes/__mocks__/request_responses';
 import { updatePrepackagedRules } from './update_prepacked_rules';
 import { patchRules } from './patch_rules';
 jest.mock('./patch_rules');
 
 describe('updatePrepackagedRules', () => {
-  let actionsClient: ReturnType<typeof actionsClientMock.create>;
   let alertsClient: ReturnType<typeof alertsClientMock.create>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
-    actionsClient = actionsClientMock.create();
     alertsClient = alertsClientMock.create();
     savedObjectsClient = savedObjectsClientMock.create();
   });
@@ -34,27 +34,18 @@ describe('updatePrepackagedRules', () => {
     ];
     const outputIndex = 'outputIndex';
     const prepackagedRule = mockPrepackagedRule();
+    alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     await updatePrepackagedRules(
       alertsClient,
-      actionsClient,
       savedObjectsClient,
       [{ ...prepackagedRule, actions }],
       outputIndex
     );
 
     expect(patchRules).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ruleId: 'rule-1',
-      })
-    );
-    expect(patchRules).not.toHaveBeenCalledWith(
-      expect.objectContaining({
+      expect.not.objectContaining({
         enabled: true,
-      })
-    );
-    expect(patchRules).not.toHaveBeenCalledWith(
-      expect.objectContaining({
         actions,
       })
     );

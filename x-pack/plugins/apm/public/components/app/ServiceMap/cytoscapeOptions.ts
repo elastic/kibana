@@ -13,22 +13,30 @@ import {
 import { severity } from '../../../../common/ml_job_constants';
 import { defaultIcon, iconForNode } from './icons';
 
-const getBorderColor = (el: cytoscape.NodeSingular) => {
-  const nodeSeverity = el.data('severity');
-
+export const getSeverityColor = (nodeSeverity: string) => {
   switch (nodeSeverity) {
     case severity.warning:
       return theme.euiColorVis0;
-    case severity.minor || severity.major:
+    case severity.minor:
+    case severity.major:
       return theme.euiColorVis5;
     case severity.critical:
       return theme.euiColorVis9;
     default:
-      if (el.hasClass('primary') || el.selected()) {
-        return theme.euiColorPrimary;
-      } else {
-        return theme.euiColorMediumShade;
-      }
+      return;
+  }
+};
+
+const getBorderColor = (el: cytoscape.NodeSingular) => {
+  const nodeSeverity = el.data('severity');
+  const severityColor = getSeverityColor(nodeSeverity);
+  if (severityColor) {
+    return severityColor;
+  }
+  if (el.hasClass('primary') || el.selected()) {
+    return theme.euiColorPrimary;
+  } else {
+    return theme.euiColorMediumShade;
   }
 };
 

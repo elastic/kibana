@@ -148,7 +148,7 @@ const rules = {
       shard_size: 10,
       order: {
         __template: {
-          _term: 'asc',
+          _key: 'asc',
         },
         _term: { __one_of: ['asc', 'desc'] },
         _count: { __one_of: ['asc', 'desc'] },

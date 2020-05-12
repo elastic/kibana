@@ -147,7 +147,7 @@ export class ListControl extends Control<PhraseFilterManager> {
       direction: 'desc',
       query,
     });
-    const searchSource = createSearchSource(
+    const searchSource = await createSearchSource(
       this.searchSource,
       initialSearchSourceState,
       indexPattern,

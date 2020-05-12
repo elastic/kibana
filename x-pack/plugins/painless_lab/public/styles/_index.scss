@@ -5,10 +5,10 @@
  * This is a very brittle way of preventing the editor and other content from disappearing
  * behind the bottom bar.
  */
-$bottomBarHeight: calc(#{$euiSize} * 3);
+$bottomBarHeight: $euiSize * 3;
 
 .painlessLabBottomBarPlaceholder {
-  height: $bottomBarHeight
+  height: $bottomBarHeight;
 }
 
 .painlessLabLeftPane {
@@ -40,8 +40,11 @@ $bottomBarHeight: calc(#{$euiSize} * 3);
   line-height: 0;
 }
 
+// This value is calculated to static value using SCSS because calc in calc has issues in IE11
+$headerHeightOffset: $euiHeaderHeightCompensation * 2;
+
 .painlessLabMainContainer {
-  height: calc(100vh - calc(#{$euiHeaderChildSize} * 2) - #{$bottomBarHeight});
+  height: calc(100vh - #{$headerHeightOffset} - #{$bottomBarHeight});
 }
 
 .painlessLabPanelsContainer {

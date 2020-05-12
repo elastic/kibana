@@ -45,9 +45,9 @@ const getResolvedResults = deps => {
 
   return savedVis => {
     results.savedVis = savedVis;
+    const serializedVis = visualizations.convertToSerializedVis(savedVis);
     return visualizations
-      .convertToSerializedVis(savedVis)
-      .then(serializedVis => visualizations.createVis(serializedVis.type, serializedVis))
+      .createVis(serializedVis.type, serializedVis)
       .then(vis => {
         if (vis.type.setup) {
           return vis.type.setup(vis).catch(() => vis);
@@ -160,10 +160,23 @@ export function initVisualizeApp(app, deps) {
               );
             }
 
+            // This delay is needed to prevent some navigation issues in Firefox/Safari.
+            // see https://github.com/elastic/kibana/issues/65161
+            const delay = res => {
+              return new Promise(resolve => {
+                setTimeout(() => resolve(res), 0);
+              });
+            };
+
             return data.indexPatterns
               .ensureDefaultIndexPattern(history)
               .then(() => savedVisualizations.get($route.current.params))
+              .then(savedVis => {
+                savedVis.searchSourceFields = { index: $route.current.params.indexPattern };
+                return savedVis;
+              })
               .then(getResolvedResults(deps))
+              .then(delay)
               .catch(
                 redirectWhenMissing({
                   history,

@@ -20,13 +20,14 @@ import {
 import { getEntityFieldList } from '../../../common/util/anomaly_utils';
 import {
   isSourceDataChartableForDetector,
+  isModelPlotChartableForDetector,
   isModelPlotEnabled,
 } from '../../../common/util/job_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
 import { mlResultsService } from '../services/results_service';
-import { getBoundsRoundedToInterval, TimeBuckets } from '../util/time_buckets';
+import { getBoundsRoundedToInterval, getTimeBucketsFromCache } from '../util/time_buckets';
 import { getTimefilter, getUiSettings } from '../util/dependency_cache';
 
 import {
@@ -235,7 +236,7 @@ export function getSwimlaneBucketInterval(selectedJobs, swimlaneContainerWidth) 
   // and the max bucket span for the jobs shown in the chart.
   const timefilter = getTimefilter();
   const bounds = timefilter.getActiveBounds();
-  const buckets = new TimeBuckets();
+  const buckets = getTimeBucketsFromCache();
   buckets.setInterval('auto');
   buckets.setBounds(bounds);
 
@@ -636,7 +637,10 @@ export async function loadAnomaliesTableData(
           // TODO - when job_service is moved server_side, move this to server endpoint.
           const job = mlJobService.getJob(jobId);
           let isChartable = isSourceDataChartableForDetector(job, anomaly.detectorIndex);
-          if (isChartable === false) {
+          if (
+            isChartable === false &&
+            isModelPlotChartableForDetector(job, anomaly.detectorIndex)
+          ) {
             // Check if model plot is enabled for this job.
             // Need to check the entity fields for the record in case the model plot config has a terms list.
             // If terms is specified, model plot is only stored if both the partition and by fields appear in the list.

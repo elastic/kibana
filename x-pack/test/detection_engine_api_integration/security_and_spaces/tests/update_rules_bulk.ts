@@ -17,12 +17,12 @@ import {
   removeServerGeneratedProperties,
   getSimpleRuleOutputWithoutRuleId,
   removeServerGeneratedPropertiesIncludingRuleId,
-} from './utils';
+} from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('update_rules_bulk', () => {
     describe('update rules bulk', () => {
@@ -98,7 +98,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         const bodyToCompare1 = removeServerGeneratedProperties(body[0]);
         const bodyToCompare2 = removeServerGeneratedProperties(body[1]);
-        expect([bodyToCompare1, bodyToCompare2]).to.eql([outputRule1, outputRule2]);
+        expect(bodyToCompare1).to.eql(outputRule1);
+        expect(bodyToCompare2).to.eql(outputRule2);
       });
 
       it('should update a single rule property of name using an id', async () => {
@@ -170,7 +171,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         const bodyToCompare1 = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
         const bodyToCompare2 = removeServerGeneratedPropertiesIncludingRuleId(body[1]);
-        expect([bodyToCompare1, bodyToCompare2]).to.eql([outputRule1, outputRule2]);
+        expect(bodyToCompare1).to.eql(outputRule1);
+        expect(bodyToCompare2).to.eql(outputRule2);
       });
 
       it('should update a single rule property of name using the auto-generated id', async () => {

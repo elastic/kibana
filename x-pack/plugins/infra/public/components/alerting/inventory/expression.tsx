@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useEffect, useState, ChangeEvent } from 'react';
 import {
   EuiFlexGroup,
@@ -50,6 +51,8 @@ import { MetricExpression } from './metric';
 import { NodeTypeExpression } from './node_type';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
+
+const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 interface AlertContextMeta {
   options?: Partial<InfraWaffleMapOptions>;
@@ -133,6 +136,10 @@ export const Expressions: React.FC<Props> = props => {
     },
     [derivedIndexPattern, setAlertParams]
   );
+
+  const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
+    onFilterChange,
+  ]);
 
   const emptyError = useMemo(() => {
     return {
@@ -291,7 +298,7 @@ export const Expressions: React.FC<Props> = props => {
           <MetricsExplorerKueryBar
             derivedIndexPattern={derivedIndexPattern}
             onSubmit={onFilterChange}
-            onChange={onFilterChange}
+            onChange={debouncedOnFilterChange}
             value={alertParams.filterQueryText}
           />
         )) || (
