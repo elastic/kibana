@@ -28,7 +28,6 @@ export declare class IndexPattern implements IIndexPattern
 |  [formatHit](./kibana-plugin-plugins-data-public.indexpattern.formathit.md) |  | <code>any</code> |  |
 |  [id](./kibana-plugin-plugins-data-public.indexpattern.id.md) |  | <code>string</code> |  |
 |  [metaFields](./kibana-plugin-plugins-data-public.indexpattern.metafields.md) |  | <code>string[]</code> |  |
-|  [routes](./kibana-plugin-plugins-data-public.indexpattern.routes.md) |  | <code>{</code><br/><code>        edit: string;</code><br/><code>        addField: string;</code><br/><code>        indexedFields: string;</code><br/><code>        scriptedFields: string;</code><br/><code>        sourceFilters: string;</code><br/><code>    }</code> |  |
 |  [timeFieldName](./kibana-plugin-plugins-data-public.indexpattern.timefieldname.md) |  | <code>string &#124; undefined</code> |  |
 |  [title](./kibana-plugin-plugins-data-public.indexpattern.title.md) |  | <code>string</code> |  |
 |  [type](./kibana-plugin-plugins-data-public.indexpattern.type.md) |  | <code>string</code> |  |

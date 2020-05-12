@@ -26,7 +26,6 @@ export {
   getFromSavedObject,
   isDefault,
 } from './lib';
-export { getRoutes } from './utils';
 export { flattenHitWrapper, formatHitProvider } from './index_patterns';
 
 export { getIndexPatternFieldListCreator, Field, IIndexPatternFieldList } from './fields';

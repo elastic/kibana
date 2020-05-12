@@ -104,11 +104,12 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
     <EuiFlyout
       onClose={onClose}
       aria-labelledby="pipelineDetailsFlyoutTitle"
+      data-test-subj="pipelineDetails"
       size="m"
       maxWidth={550}
     >
       <EuiFlyoutHeader>
-        <EuiTitle id="pipelineDetailsFlyoutTitle">
+        <EuiTitle id="pipelineDetailsFlyoutTitle" data-test-subj="title">
           <h2>{pipeline.name}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -116,14 +117,16 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
       <EuiFlyoutBody>
         <EuiDescriptionList>
           {/* Pipeline description */}
-          <EuiDescriptionListTitle>
-            {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.descriptionTitle', {
-              defaultMessage: 'Description',
-            })}
-          </EuiDescriptionListTitle>
-          <EuiDescriptionListDescription>
-            {pipeline.description ?? ''}
-          </EuiDescriptionListDescription>
+          {pipeline.description && (
+            <>
+              <EuiDescriptionListTitle>
+                {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.descriptionTitle', {
+                  defaultMessage: 'Description',
+                })}
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>{pipeline.description}</EuiDescriptionListDescription>
+            </>
+          )}
 
           {/* Pipeline version */}
           {pipeline.version && (

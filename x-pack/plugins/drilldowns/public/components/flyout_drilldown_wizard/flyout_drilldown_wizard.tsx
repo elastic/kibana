@@ -25,7 +25,7 @@ export interface DrilldownWizardConfig<ActionConfig extends object = object> {
 }
 
 export interface FlyoutDrilldownWizardProps<CurrentActionConfig extends object = object> {
-  drilldownActionFactories: Array<ActionFactory<any>>;
+  drilldownActionFactories: ActionFactory[];
 
   onSubmit?: (drilldownWizardConfig: Required<DrilldownWizardConfig>) => void;
   onDelete?: () => void;
@@ -41,6 +41,72 @@ export interface FlyoutDrilldownWizardProps<CurrentActionConfig extends object =
   actionFactoryContext?: object;
 }
 
+function useWizardConfigState(
+  initialDrilldownWizardConfig?: DrilldownWizardConfig
+): [
+  DrilldownWizardConfig,
+  {
+    setName: (name: string) => void;
+    setActionConfig: (actionConfig: object) => void;
+    setActionFactory: (actionFactory?: ActionFactory) => void;
+  }
+] {
+  const [wizardConfig, setWizardConfig] = useState<DrilldownWizardConfig>(
+    () =>
+      initialDrilldownWizardConfig ?? {
+        name: '',
+      }
+  );
+  const [actionConfigCache, setActionConfigCache] = useState<Record<string, object>>(
+    initialDrilldownWizardConfig?.actionFactory
+      ? {
+          [initialDrilldownWizardConfig.actionFactory
+            .id]: initialDrilldownWizardConfig.actionConfig!,
+        }
+      : {}
+  );
+
+  return [
+    wizardConfig,
+    {
+      setName: (name: string) => {
+        setWizardConfig({
+          ...wizardConfig,
+          name,
+        });
+      },
+      setActionConfig: (actionConfig: object) => {
+        setWizardConfig({
+          ...wizardConfig,
+          actionConfig,
+        });
+      },
+      setActionFactory: (actionFactory?: ActionFactory) => {
+        if (actionFactory) {
+          setWizardConfig({
+            ...wizardConfig,
+            actionFactory,
+            actionConfig: actionConfigCache[actionFactory.id] ?? actionFactory.createConfig(),
+          });
+        } else {
+          if (wizardConfig.actionFactory?.id) {
+            setActionConfigCache({
+              ...actionConfigCache,
+              [wizardConfig.actionFactory.id]: wizardConfig.actionConfig!,
+            });
+          }
+
+          setWizardConfig({
+            ...wizardConfig,
+            actionFactory: undefined,
+            actionConfig: undefined,
+          });
+        }
+      },
+    },
+  ];
+}
+
 export function FlyoutDrilldownWizard<CurrentActionConfig extends object = object>({
   onClose,
   onBack,
@@ -53,11 +119,8 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
   drilldownActionFactories,
   actionFactoryContext,
 }: FlyoutDrilldownWizardProps<CurrentActionConfig>) {
-  const [wizardConfig, setWizardConfig] = useState<DrilldownWizardConfig>(
-    () =>
-      initialDrilldownWizardConfig ?? {
-        name: '',
-      }
+  const [wizardConfig, { setActionFactory, setActionConfig, setName }] = useWizardConfigState(
+    initialDrilldownWizardConfig
   );
 
   const isActionValid = (
@@ -95,35 +158,11 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
     >
       <FormDrilldownWizard
         name={wizardConfig.name}
-        onNameChange={newName => {
-          setWizardConfig({
-            ...wizardConfig,
-            name: newName,
-          });
-        }}
+        onNameChange={setName}
         actionConfig={wizardConfig.actionConfig}
-        onActionConfigChange={newActionConfig => {
-          setWizardConfig({
-            ...wizardConfig,
-            actionConfig: newActionConfig,
-          });
-        }}
+        onActionConfigChange={setActionConfig}
         currentActionFactory={wizardConfig.actionFactory}
-        onActionFactoryChange={actionFactory => {
-          if (!actionFactory) {
-            setWizardConfig({
-              ...wizardConfig,
-              actionFactory: undefined,
-              actionConfig: undefined,
-            });
-          } else {
-            setWizardConfig({
-              ...wizardConfig,
-              actionFactory,
-              actionConfig: actionFactory.createConfig(),
-            });
-          }
-        }}
+        onActionFactoryChange={setActionFactory}
         actionFactories={drilldownActionFactories}
         actionFactoryContext={actionFactoryContext!}
       />
