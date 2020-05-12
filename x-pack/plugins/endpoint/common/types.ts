@@ -611,47 +611,53 @@ export enum HostPolicyResponseActionStatus {
 }
 
 /**
- * The details of a given action
+ * The name of actions that can be applied during the processing of a policy
  */
-export interface HostPolicyResponseActionDetails {
+type HostPolicyActionName =
+  | 'download_model'
+  | 'ingest_events_config'
+  | 'workflow'
+  | 'configure_elasticsearch_connection'
+  | 'configure_kernel'
+  | 'configure_logging'
+  | 'configure_malware'
+  | 'connect_kernel'
+  | 'detect_file_open_events'
+  | 'detect_file_write_events'
+  | 'detect_image_load_events'
+  | 'detect_process_events'
+  | 'download_global_artifacts'
+  | 'load_config'
+  | 'load_malware_model'
+  | 'read_elasticsearch_config'
+  | 'read_events_config'
+  | 'read_kernel_config'
+  | 'read_logging_config'
+  | 'read_malware_config'
+  | string;
+
+/**
+ * Host Policy Response Applied Action
+ */
+export interface HostPolicyResponseAppliedAction {
+  name: HostPolicyActionName;
   status: HostPolicyResponseActionStatus;
   message: string;
 }
 
-/**
- * A known list of possible Endpoint actions
- */
-export interface HostPolicyResponseActions {
-  download_model: HostPolicyResponseActionDetails;
-  ingest_events_config: HostPolicyResponseActionDetails;
-  workflow: HostPolicyResponseActionDetails;
-  configure_elasticsearch_connection: HostPolicyResponseActionDetails;
-  configure_kernel: HostPolicyResponseActionDetails;
-  configure_logging: HostPolicyResponseActionDetails;
-  configure_malware: HostPolicyResponseActionDetails;
-  connect_kernel: HostPolicyResponseActionDetails;
-  detect_file_open_events: HostPolicyResponseActionDetails;
-  detect_file_write_events: HostPolicyResponseActionDetails;
-  detect_image_load_events: HostPolicyResponseActionDetails;
-  detect_process_events: HostPolicyResponseActionDetails;
-  download_global_artifacts: HostPolicyResponseActionDetails;
-  load_config: HostPolicyResponseActionDetails;
-  load_malware_model: HostPolicyResponseActionDetails;
-  read_elasticsearch_config: HostPolicyResponseActionDetails;
-  read_events_config: HostPolicyResponseActionDetails;
-  read_kernel_config: HostPolicyResponseActionDetails;
-  read_logging_config: HostPolicyResponseActionDetails;
-  read_malware_config: HostPolicyResponseActionDetails;
-}
-
-/**
- * policy configurations returned by the endpoint in response to a user applying a policy
- */
 export type HostPolicyResponseConfiguration = HostPolicyResponse['endpoint']['policy']['applied']['response']['configurations'];
 
 interface HostPolicyResponseConfigurationStatus {
   status: HostPolicyResponseActionStatus;
-  concerned_actions: Array<keyof HostPolicyResponseActions>;
+  concerned_actions: HostPolicyActionName[];
+}
+
+/**
+ * Host Policy Response Applied Artifact
+ */
+interface HostPolicyResponseAppliedArtifact {
+  name: string;
+  sha256: string;
 }
 
 /**
@@ -674,6 +680,11 @@ export interface HostPolicyResponse {
     created: number;
     kind: string;
     id: string;
+    category: string;
+    type: string;
+    module: string;
+    action: string;
+    dataset: string;
   };
   agent: {
     version: string;
@@ -685,7 +696,7 @@ export interface HostPolicyResponse {
         version: string;
         id: string;
         status: HostPolicyResponseActionStatus;
-        actions: Partial<HostPolicyResponseActions>;
+        actions: HostPolicyResponseAppliedAction[];
         policy: {
           id: string;
           version: string;
@@ -696,6 +707,16 @@ export interface HostPolicyResponse {
             events: HostPolicyResponseConfigurationStatus;
             logging: HostPolicyResponseConfigurationStatus;
             streaming: HostPolicyResponseConfigurationStatus;
+          };
+        };
+        artifacts: {
+          global: {
+            version: string;
+            identifiers: HostPolicyResponseAppliedArtifact[];
+          };
+          user: {
+            version: string;
+            identifiers: HostPolicyResponseAppliedArtifact[];
           };
         };
       };
