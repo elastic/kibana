@@ -11,6 +11,9 @@ import { IRouter } from '../../../../../../../../src/core/server';
 import { createPromiseFromStreams } from '../../../../../../../../src/legacy/utils/streams';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { ConfigType } from '../../../../config';
+import { SetupPlugins } from '../../../../plugin';
+import { buildMlAuthz } from '../../../machine_learning/authz';
+import { throwHttpError } from '../../../machine_learning/validation';
 import { createRules } from '../../rules/create_rules';
 import { ImportRulesRequestParams } from '../../rules/types';
 import { readRules } from '../../rules/read_rules';
@@ -24,7 +27,6 @@ import {
   isImportRegular,
   transformError,
   buildSiemResponse,
-  validateLicenseForRuleType,
 } from '../utils';
 import { ImportRuleAlertRest } from '../../types';
 import { patchRules } from '../../rules/patch_rules';
@@ -38,7 +40,7 @@ type PromiseFromStreams = ImportRuleAlertRest | Error;
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 
-export const importRulesRoute = (router: IRouter, config: ConfigType) => {
+export const importRulesRoute = (router: IRouter, config: ConfigType, ml: SetupPlugins['ml']) => {
   router.post(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_import`,
@@ -66,6 +68,8 @@ export const importRulesRoute = (router: IRouter, config: ConfigType) => {
         if (!siemClient || !alertsClient) {
           return siemResponse.error({ statusCode: 404 });
         }
+
+        const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
 
         const { filename } = request.body.file.hapi;
         const fileExtension = extname(filename).toLowerCase();
@@ -148,10 +152,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType) => {
                 } = parsedRule;
 
                 try {
-                  validateLicenseForRuleType({
-                    license: context.licensing.license,
-                    ruleType: type,
-                  });
+                  throwHttpError(await mlAuthz.validateRuleType(type));
 
                   const rule = await readRules({ alertsClient, ruleId });
                   if (rule == null) {
@@ -207,8 +208,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType) => {
                       timelineTitle,
                       meta,
                       filters,
-                      id: undefined,
-                      ruleId,
+                      rule,
                       index,
                       interval,
                       maxSignals,
@@ -240,7 +240,7 @@ export const importRulesRoute = (router: IRouter, config: ConfigType) => {
                   resolve(
                     createBulkErrorObject({
                       ruleId,
-                      statusCode: 400,
+                      statusCode: err.statusCode ?? 400,
                       message: err.message,
                     })
                   );
