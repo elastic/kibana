@@ -328,8 +328,20 @@ describe('when on the hosts page', () => {
         expect(statusHealth).not.toBeNull();
         expect(message).not.toBeNull();
       });
-      it('should not show any numbered badges if all actions are succesful', () => {
-        return renderResult.findByTestId('hostDetailsPolicyResponseAttentionBadge').catch(e => {
+      it('should not show any numbered badges if all actions are successful', () => {
+        const policyResponse = docGenerator.generatePolicyResponse(
+          new Date().getTime(),
+          HostPolicyResponseActionStatus.success
+        );
+        reactTestingLibrary.act(() => {
+          store.dispatch({
+            type: 'serverReturnedHostPolicyResponse',
+            payload: {
+              policy_response: policyResponse,
+            },
+          });
+        });
+        return renderResult.findAllByTestId('hostDetailsPolicyResponseAttentionBadge').catch(e => {
           expect(e).not.toBeNull();
         });
       });
@@ -337,14 +349,18 @@ describe('when on the hosts page', () => {
         reactTestingLibrary.act(() => {
           dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.failure);
         });
-        const attentionBadge = renderResult.findByTestId('hostDetailsPolicyResponseAttentionBadge');
+        const attentionBadge = renderResult.findAllByTestId(
+          'hostDetailsPolicyResponseAttentionBadge'
+        );
         expect(attentionBadge).not.toBeNull();
       });
       it('should show a numbered badge if at least one action has a warning', () => {
         reactTestingLibrary.act(() => {
           dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.warning);
         });
-        const attentionBadge = renderResult.findByTestId('hostDetailsPolicyResponseAttentionBadge');
+        const attentionBadge = renderResult.findAllByTestId(
+          'hostDetailsPolicyResponseAttentionBadge'
+        );
         expect(attentionBadge).not.toBeNull();
       });
       it('should include the back to details link', async () => {
