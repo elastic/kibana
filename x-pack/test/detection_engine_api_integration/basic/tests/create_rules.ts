@@ -19,13 +19,12 @@ import {
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
   getSimpleMlRule,
-  getSimpleMlRuleOutput,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   describe('create_rules', () => {
     describe('validation errors', () => {
@@ -90,15 +89,18 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
       });
 
-      it('should create a single Machine Learning rule', async () => {
+      it('should give a 403 when trying to create a single Machine Learning rule since the license is basic', async () => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
           .send(getSimpleMlRule())
-          .expect(200);
+          .expect(403);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        expect(bodyToCompare).to.eql(getSimpleMlRuleOutput());
+        expect(bodyToCompare).to.eql({
+          message: 'Your license does not support machine learning. Please upgrade your license.',
+          status_code: 403,
+        });
       });
 
       it('should cause a 409 conflict if we attempt to create the same rule_id twice', async () => {

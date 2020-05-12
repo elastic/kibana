@@ -17,14 +17,12 @@ import {
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
   getSimpleRuleOutputWithoutRuleId,
-  getSimpleMlRule,
-  getSimpleMlRuleOutput,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   describe('patch_rules', () => {
     describe('patch rules', () => {
@@ -59,26 +57,25 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare).to.eql(outputRule);
       });
 
-      it('should patch a single rule property of name using a rule_id of type "machine learning"', async () => {
+      it('should return a "403 forbidden" using a rule_id of type "machine learning"', async () => {
         // create a simple rule
         await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send(getSimpleMlRule('rule-1'))
+          .send(getSimpleRule('rule-1'))
           .expect(200);
 
-        // patch a simple rule's name
+        // patch a simple rule's type to machine learning
         const { body } = await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send({ rule_id: 'rule-1', name: 'some other name' })
-          .expect(200);
+          .send({ rule_id: 'rule-1', type: 'machine_learning' })
+          .expect(403);
 
-        const outputRule = getSimpleMlRuleOutput();
-        outputRule.name = 'some other name';
-        outputRule.version = 2;
-        const bodyToCompare = removeServerGeneratedProperties(body);
-        expect(bodyToCompare).to.eql(outputRule);
+        expect(body).to.eql({
+          message: 'Your license does not support machine learning. Please upgrade your license.',
+          status_code: 403,
+        });
       });
 
       it('should patch a single rule property of name using the auto-generated rule_id', async () => {
