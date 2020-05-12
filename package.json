@@ -298,7 +298,7 @@
     "@elastic/eslint-config-kibana": "0.15.0",
     "@elastic/eslint-plugin-eui": "0.0.2",
     "@elastic/github-checks-reporter": "0.0.20b3",
-    "@elastic/makelogs": "^5.0.1",
+    "@elastic/makelogs": "^6.0.0",
     "@kbn/dev-utils": "1.0.0",
     "@kbn/es": "1.0.0",
     "@kbn/eslint-import-resolver-kibana": "2.0.0",
