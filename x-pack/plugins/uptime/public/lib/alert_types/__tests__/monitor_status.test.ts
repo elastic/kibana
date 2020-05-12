@@ -174,8 +174,8 @@ describe('monitor status alert type', () => {
       {{context.downMonitorsWithGeo}}",
         "iconClass": "uptimeApp",
         "id": "xpack.uptime.alerts.monitorStatus",
-        "requiresAppContext": false,
         "name": <MonitorStatusTitle />,
+        "requiresAppContext": false,
         "validate": [Function],
       }
     `);
