@@ -29,6 +29,8 @@ export enum AGGREGATION_TYPES {
   MAX = 'max',
   RATE = 'rate',
   CARDINALITY = 'cardinality',
+  P95 = 'p95',
+  P99 = 'p99',
 }
 
 export interface MetricThresholdAlertParams {

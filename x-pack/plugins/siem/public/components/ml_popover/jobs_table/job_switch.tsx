@@ -11,7 +11,7 @@ import {
   isJobLoading,
   isJobFailed,
   isJobStarted,
-} from '../../../../common/detection_engine/ml_helpers';
+} from '../../../../common/machine_learning/helpers';
 import { SiemJob } from '../types';
 
 const StaticSwitch = styled(EuiSwitch)`

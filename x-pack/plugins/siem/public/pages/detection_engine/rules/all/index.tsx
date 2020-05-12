@@ -48,7 +48,7 @@ import { showRulesTable } from './helpers';
 import { allRulesReducer, State } from './reducer';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
 import { useMlCapabilities } from '../../../../components/ml_popover/hooks/use_ml_capabilities';
-import { hasMlAdminPermissions } from '../../../../components/ml/permissions/has_ml_admin_permissions';
+import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 
 const SORT_FIELD = 'enabled';
 const initialState: State = {
