@@ -14,5 +14,6 @@ export function getAlertType(): AlertTypeModel {
     iconClass: 'alert',
     alertParamsExpression: IndexThresholdAlertTypeExpression,
     validate: validateExpression,
+    requiresAppContext: false,
   };
 }
