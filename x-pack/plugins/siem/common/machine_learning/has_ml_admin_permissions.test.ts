@@ -6,7 +6,7 @@
 
 import { hasMlAdminPermissions } from './has_ml_admin_permissions';
 import { cloneDeep } from 'lodash/fp';
-import { emptyMlCapabilities } from '../empty_ml_capabilities';
+import { emptyMlCapabilities } from './empty_ml_capabilities';
 
 describe('has_ml_admin_permissions', () => {
   let mlCapabilities = cloneDeep(emptyMlCapabilities);
