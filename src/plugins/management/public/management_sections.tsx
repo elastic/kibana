@@ -29,7 +29,7 @@ interface Props {
 
 const ManagementSectionTitle = ({ text, tip }: Props) => (
   <EuiToolTip content={tip} position="right">
-    <EuiFlexGroup alignItems="center" gutterSize="s">
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>{text}</EuiFlexItem>
 
       <EuiFlexItem grow={false}>
