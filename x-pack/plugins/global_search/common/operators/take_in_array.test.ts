@@ -5,20 +5,20 @@
  */
 
 import { TestScheduler } from 'rxjs/testing';
-import { takeFirstInArray } from './take_first_in_array';
+import { takeInArray } from './take_in_array';
 
 const getTestScheduler = () =>
   new TestScheduler((actual, expected) => {
     expect(actual).toEqual(expected);
   });
 
-describe('takeFirstInArray', () => {
+describe('takeInArray', () => {
   it('only emits a given `count` of items from an array observable', () => {
     getTestScheduler().run(({ expectObservable, hot }) => {
       const source = hot('a-b-c', { a: [1], b: [2], c: [3] });
       const expected = 'a-(b|)';
 
-      expectObservable(source.pipe(takeFirstInArray(2))).toBe(expected, {
+      expectObservable(source.pipe(takeInArray(2))).toBe(expected, {
         a: [1],
         b: [2],
       });
@@ -30,7 +30,7 @@ describe('takeFirstInArray', () => {
       const source = hot('a-b-c-|', { a: [1, 2], b: [3, 4], c: [5] });
       const expected = 'a-b-c-|';
 
-      expectObservable(source.pipe(takeFirstInArray(10))).toBe(expected, {
+      expectObservable(source.pipe(takeInArray(10))).toBe(expected, {
         a: [1, 2],
         b: [3, 4],
         c: [5],
@@ -43,7 +43,7 @@ describe('takeFirstInArray', () => {
       const source = hot('a-b-c', { a: [1, 2, 3], b: [4, 5, 6], c: [7, 8] });
       const expected = 'a-(b|)';
 
-      expectObservable(source.pipe(takeFirstInArray(5))).toBe(expected, {
+      expectObservable(source.pipe(takeInArray(5))).toBe(expected, {
         a: [1, 2, 3],
         b: [4, 5],
       });

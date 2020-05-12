@@ -14,7 +14,7 @@ import {
   GlobalSearchProviderResult,
 } from '../result_provider';
 import { GlobalSearchBatchedResults, GlobalSearchFindOptions, GlobalSearchResult } from './types';
-import { takeFirstInArray } from './take_first_in_array';
+import { takeInArray } from '../../common/operators';
 import { convertResultUrl } from './utils';
 
 /** @public */
@@ -70,7 +70,7 @@ export class SearchService {
     };
 
     const providerObs$ = this.providers.map(provider =>
-      provider.find(term, providerOptions, context).pipe(takeFirstInArray(20), takeUntil(aborted$))
+      provider.find(term, providerOptions, context).pipe(takeInArray(20), takeUntil(aborted$))
     );
 
     return merge(...providerObs$).pipe(

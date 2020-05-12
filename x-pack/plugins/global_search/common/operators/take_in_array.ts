@@ -14,17 +14,17 @@ import {
   TeardownLogic,
 } from 'rxjs';
 
-export function takeFirstInArray<T>(count: number): MonoTypeOperatorFunction<T[]> {
+export function takeInArray<T>(count: number): MonoTypeOperatorFunction<T[]> {
   return function takeLastOperatorFunction(source: Observable<T[]>): Observable<T[]> {
     if (count === 0) {
       return EMPTY;
     } else {
-      return source.lift(new TakeFirstInArray(count));
+      return source.lift(new TakeInArray(count));
     }
   };
 }
 
-class TakeFirstInArray<T> implements Operator<T[], T[]> {
+class TakeInArray<T> implements Operator<T[], T[]> {
   constructor(private total: number) {
     if (this.total < 0) {
       throw new Error('Cannot take a negative number of items');
@@ -32,11 +32,11 @@ class TakeFirstInArray<T> implements Operator<T[], T[]> {
   }
 
   call(subscriber: Subscriber<T[]>, source: any): TeardownLogic {
-    return source.subscribe(new TakeFirstInArraySubscriber(subscriber, this.total));
+    return source.subscribe(new TakeInArraySubscriber(subscriber, this.total));
   }
 }
 
-class TakeFirstInArraySubscriber<T> extends Subscriber<T[]> {
+class TakeInArraySubscriber<T> extends Subscriber<T[]> {
   private current: number = 0;
 
   constructor(destination: Subscriber<T>, private total: number) {
