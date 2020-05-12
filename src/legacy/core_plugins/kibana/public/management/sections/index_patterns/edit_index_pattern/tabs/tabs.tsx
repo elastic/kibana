@@ -49,14 +49,18 @@ interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   };
 }
 
+const searchAriaLabel = i18n.translate('kbn.management.editIndexPattern.fields.searchAria', {
+  defaultMessage: 'Search fields',
+});
+
 const filterAriaLabel = i18n.translate('kbn.management.editIndexPattern.fields.filterAria', {
-  defaultMessage: 'Filter',
+  defaultMessage: 'Filter field types',
 });
 
 const filterPlaceholder = i18n.translate(
   'kbn.management.editIndexPattern.fields.filterPlaceholder',
   {
-    defaultMessage: 'Filter',
+    defaultMessage: 'Search',
   }
 );
 
@@ -108,7 +112,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
               value={fieldFilter}
               onChange={e => setFieldFilter(e.target.value)}
               data-test-subj="indexPatternFieldFilter"
-              aria-label={filterAriaLabel}
+              aria-label={searchAriaLabel}
             />
           </EuiFlexItem>
           {type === TAB_INDEXED_FIELDS && indexedFieldTypes.length > 0 && (
@@ -118,6 +122,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
                 value={indexedFieldTypeFilter}
                 onChange={e => setIndexedFieldTypeFilter(e.target.value)}
                 data-test-subj="indexedFieldTypeFilterDropdown"
+                aria-label={filterAriaLabel}
               />
             </EuiFlexItem>
           )}

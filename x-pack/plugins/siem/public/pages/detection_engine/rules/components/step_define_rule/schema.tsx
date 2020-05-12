@@ -9,7 +9,7 @@ import { EuiText } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
 
-import { isMlRule } from '../../../../../../common/detection_engine/ml_helpers';
+import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { esKuery } from '../../../../../../../../../src/plugins/data/public';
 import { FieldValueQueryBar } from '../query_bar';
 import {
