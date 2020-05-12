@@ -5,7 +5,7 @@
  */
 
 import { AnyAction } from 'redux';
-import { FLYOUT_STATE } from '../reducers/ui';
+import { INDEXING_STAGE, FLYOUT_STATE } from '../reducers/ui';
 
 export const UPDATE_FLYOUT: string;
 export const CLOSE_SET_VIEW: string;
@@ -25,3 +25,5 @@ export function setOpenTOCDetails(layerIds?: string[]): AnyAction;
 export function setIsLayerTOCOpen(open: boolean): AnyAction;
 
 export function setReadOnly(readOnly: boolean): AnyAction;
+
+export function updateIndexingStage(state: INDEXING_STAGE | null): AnyAction;
