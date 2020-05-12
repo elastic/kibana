@@ -32,8 +32,7 @@ import {
   toastDrilldownsDeleted,
 } from './i18n';
 
-interface ConnectedFlyoutManageDrilldownsProps<Context extends object = object> {
-  placeContext: Context;
+interface ConnectedFlyoutManageDrilldownsProps {
   dynamicActionManager: DynamicActionManager;
   viewMode?: 'create' | 'manage';
   onClose?: () => void;
@@ -75,10 +74,9 @@ export function createFlyoutManageDrilldowns({
 
     const factoryContext: object = React.useMemo(
       () => ({
-        placeContext: props.placeContext,
         triggers: selectedTriggers,
       }),
-      [props.placeContext, selectedTriggers]
+      [selectedTriggers]
     );
 
     const actionFactories = useCompatibleActionFactoriesForCurrentContext(
@@ -222,12 +220,10 @@ export function createFlyoutManageDrilldowns({
 }
 
 function useCompatibleActionFactoriesForCurrentContext<Context extends object = object>(
-  actionFactories: Array<ActionFactory<any>>,
+  actionFactories: ActionFactory[],
   context: Context
 ) {
-  const [compatibleActionFactories, setCompatibleActionFactories] = useState<
-    Array<ActionFactory<any>>
-  >();
+  const [compatibleActionFactories, setCompatibleActionFactories] = useState<ActionFactory[]>();
   useEffect(() => {
     let canceled = false;
     async function updateCompatibleFactoriesForContext() {
@@ -283,7 +279,7 @@ function useDrilldownsStateManager(
   }
 
   async function createDrilldown(
-    action: UiActionsEnhancedSerializedAction<any>,
+    action: UiActionsEnhancedSerializedAction,
     selectedTriggers: Array<keyof TriggerContextMapping>
   ) {
     await run(async () => {
@@ -297,7 +293,7 @@ function useDrilldownsStateManager(
 
   async function editDrilldown(
     drilldownId: string,
-    action: UiActionsEnhancedSerializedAction<any>,
+    action: UiActionsEnhancedSerializedAction,
     selectedTriggers: Array<keyof TriggerContextMapping>
   ) {
     await run(async () => {
