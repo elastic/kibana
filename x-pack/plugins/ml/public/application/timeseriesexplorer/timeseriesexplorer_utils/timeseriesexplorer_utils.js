@@ -172,6 +172,10 @@ export function processDataForFocusAnomalies(
               const cause = _.first(record.causes);
               chartPoint.actual = cause.actual;
               chartPoint.typical = cause.typical;
+              // substitute the value with the record's actual so it won't plot as null/0
+              if (chartPoint.value === null) {
+                chartPoint.value = cause.actual;
+              }
             }
           }
         }
