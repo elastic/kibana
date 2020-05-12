@@ -41,7 +41,7 @@ export const DocumentsTab: React.FunctionComponent<Props> = ({
   const { setCurrentTestConfig, testConfig } = useTestConfigContext();
   const { verbose: cachedVerbose, documents: cachedDocuments } = testConfig;
 
-  const executePipeline: FormConfig['onSubmit'] = (formData, isValid) => {
+  const executePipeline: FormConfig['onSubmit'] = async (formData, isValid) => {
     if (!isValid || !isPipelineValid) {
       return;
     }
