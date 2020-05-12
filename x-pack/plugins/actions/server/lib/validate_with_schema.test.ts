@@ -8,6 +8,9 @@ import { schema } from '@kbn/config-schema';
 
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
 import { ActionType, ExecutorType } from '../types';
+import { actionsMock } from '../mocks';
+
+const validationService = actionsMock.createValidationService();
 
 const executor: ExecutorType = async (options) => {
   return { status: 'ok', actionId: options.actionId };
@@ -22,7 +25,7 @@ test('should validate when there are no validators', () => {
   };
   const testValue = { any: ['old', 'thing'] };
 
-  const result = validateConfig(actionType, testValue);
+  const result = validateConfig(actionType, testValue, validationService);
   expect(result).toEqual(testValue);
 });
 
@@ -38,13 +41,13 @@ test('should validate when there are no individual validators', () => {
   let result;
   const testValue = { any: ['old', 'thing'] };
 
-  result = validateParams(actionType, testValue);
+  result = validateParams(actionType, testValue, validationService);
   expect(result).toEqual(testValue);
 
-  result = validateConfig(actionType, testValue);
+  result = validateConfig(actionType, testValue, validationService);
   expect(result).toEqual(testValue);
 
-  result = validateSecrets(actionType, testValue);
+  result = validateSecrets(actionType, testValue, validationService);
   expect(result).toEqual(testValue);
 });
 
@@ -65,13 +68,13 @@ test('should validate when validators return incoming value', () => {
   let result;
   const testValue = { any: ['old', 'thing'] };
 
-  result = validateParams(actionType, testValue);
+  result = validateParams(actionType, testValue, validationService);
   expect(result).toEqual(testValue);
 
-  result = validateConfig(actionType, testValue);
+  result = validateConfig(actionType, testValue, validationService);
   expect(result).toEqual(testValue);
 
-  result = validateSecrets(actionType, testValue);
+  result = validateSecrets(actionType, testValue, validationService);
   expect(result).toEqual(testValue);
 });
 
@@ -93,13 +96,13 @@ test('should validate when validators return different values', () => {
   let result;
   const testValue = { any: ['old', 'thing'] };
 
-  result = validateParams(actionType, testValue);
+  result = validateParams(actionType, testValue, validationService);
   expect(result).toEqual(returnedValue);
 
-  result = validateConfig(actionType, testValue);
+  result = validateConfig(actionType, testValue, validationService);
   expect(result).toEqual(returnedValue);
 
-  result = validateSecrets(actionType, testValue);
+  result = validateSecrets(actionType, testValue, validationService);
   expect(result).toEqual(returnedValue);
 });
 
@@ -123,17 +126,17 @@ test('should throw with expected error when validators fail', () => {
 
   const testValue = { any: ['old', 'thing'] };
 
-  expect(() => validateParams(actionType, testValue)).toThrowErrorMatchingInlineSnapshot(
-    `"error validating action params: test error"`
-  );
+  expect(() =>
+    validateParams(actionType, testValue, validationService)
+  ).toThrowErrorMatchingInlineSnapshot(`"error validating action params: test error"`);
 
-  expect(() => validateConfig(actionType, testValue)).toThrowErrorMatchingInlineSnapshot(
-    `"error validating action type config: test error"`
-  );
+  expect(() =>
+    validateConfig(actionType, testValue, validationService)
+  ).toThrowErrorMatchingInlineSnapshot(`"error validating action type config: test error"`);
 
-  expect(() => validateSecrets(actionType, testValue)).toThrowErrorMatchingInlineSnapshot(
-    `"error validating action type secrets: test error"`
-  );
+  expect(() =>
+    validateSecrets(actionType, testValue, validationService)
+  ).toThrowErrorMatchingInlineSnapshot(`"error validating action type secrets: test error"`);
 });
 
 test('should work with @kbn/config-schema', () => {
@@ -150,10 +153,12 @@ test('should work with @kbn/config-schema', () => {
     },
   };
 
-  const result = validateParams(actionType, { foo: 'bar' });
+  const result = validateParams(actionType, { foo: 'bar' }, validationService);
   expect(result).toEqual({ foo: 'bar' });
 
-  expect(() => validateParams(actionType, { bar: 2 })).toThrowErrorMatchingInlineSnapshot(
+  expect(() =>
+    validateParams(actionType, { bar: 2 }, validationService)
+  ).toThrowErrorMatchingInlineSnapshot(
     `"error validating action params: [foo]: expected value of type [string] but got [undefined]"`
   );
 });

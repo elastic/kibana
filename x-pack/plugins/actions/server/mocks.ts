@@ -6,7 +6,7 @@
 
 import { actionsClientMock } from './actions_client.mock';
 import { PluginSetupContract, PluginStartContract } from './plugin';
-import { Services } from './types';
+import { Services, ActionValidationService } from './types';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
@@ -45,8 +45,17 @@ const createServicesMock = () => {
   return mock;
 };
 
+export const createValidationServiceMock = () => {
+  const mock: jest.Mocked<ActionValidationService> = {
+    isWhitelistedHostname: jest.fn(),
+    isWhitelistedUri: jest.fn(),
+  };
+  return mock;
+};
+
 export const actionsMock = {
   createServices: createServicesMock,
   createSetup: createSetupMock,
   createStart: createStartMock,
+  createValidationService: createValidationServiceMock,
 };

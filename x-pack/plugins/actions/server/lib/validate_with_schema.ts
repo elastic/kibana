@@ -5,53 +5,52 @@
  */
 
 import Boom from 'boom';
-import { ActionType } from '../types';
-
-export function validateParams(actionType: ActionType, value: unknown) {
-  return validateWithSchema(actionType, 'params', value);
-}
-
-export function validateConfig(actionType: ActionType, value: unknown) {
-  return validateWithSchema(actionType, 'config', value);
-}
-
-export function validateSecrets(actionType: ActionType, value: unknown) {
-  return validateWithSchema(actionType, 'secrets', value);
-}
+import { ActionType, ActionValidationService } from '../types';
 
 type ValidKeys = 'params' | 'config' | 'secrets';
 
+export function validateParams(
+  actionType: ActionType,
+  value: unknown,
+  validationService: ActionValidationService
+) {
+  return validateWithSchema(actionType, 'action params', 'params', value, validationService);
+}
+
+export function validateConfig(
+  actionType: ActionType,
+  value: unknown,
+  validationService: ActionValidationService
+) {
+  return validateWithSchema(actionType, 'action type config', 'config', value, validationService);
+}
+
+export function validateSecrets(
+  actionType: ActionType,
+  value: unknown,
+  validationService: ActionValidationService
+) {
+  return validateWithSchema(actionType, 'action type secrets', 'secrets', value, validationService);
+}
+
 function validateWithSchema(
   actionType: ActionType,
+  name: string,
   key: ValidKeys,
-  value: unknown
+  value: unknown,
+  validationService: ActionValidationService
 ): Record<string, unknown> {
-  if (actionType.validate) {
-    let name;
-    try {
-      switch (key) {
-        case 'params':
-          name = 'action params';
-          if (actionType.validate.params) {
-            return actionType.validate.params.validate(value);
-          }
-          break;
-        case 'config':
-          name = 'action type config';
-          if (actionType.validate.config) {
-            return actionType.validate.config.validate(value);
-          }
+  const validator = actionType?.validate?.[key];
+  const runtimeValidator = actionType.runtimeValidate?.[key];
 
-          break;
-        case 'secrets':
-          name = 'action type secrets';
-          if (actionType.validate.secrets) {
-            return actionType.validate.secrets.validate(value);
-          }
-          break;
-        default:
-          // should never happen, but left here for future-proofing
-          throw new Error(`invalid actionType validate key: ${key}`);
+  if (validator) {
+    try {
+      value = validator.validate(value);
+      if (runtimeValidator) {
+        const message = runtimeValidator(value, validationService);
+        if (message) {
+          throw new Error(message);
+        }
       }
     } catch (err) {
       // we can't really i18n this yet, since the err.message isn't i18n'd itself

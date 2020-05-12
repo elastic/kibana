@@ -8,9 +8,9 @@ import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { RunContext, TaskManagerSetupContract } from '../../task_manager/server';
 import { ExecutorError, TaskRunnerFactory, ILicenseState } from './lib';
-import { ActionType, PreConfiguredAction } from './types';
+import { ActionType, PreConfiguredAction, ActionValidationService } from './types';
 import { ActionType as CommonActionType } from '../common';
-import { ActionsConfigurationUtilities } from './actions_config';
+import { ActionsConfigurationUtilities, getValidationService } from './actions_config';
 
 export interface ActionTypeRegistryOpts {
   taskManager: TaskManagerSetupContract;
@@ -27,6 +27,7 @@ export class ActionTypeRegistry {
   private readonly actionsConfigUtils: ActionsConfigurationUtilities;
   private readonly licenseState: ILicenseState;
   private readonly preconfiguredActions: PreConfiguredAction[];
+  private readonly validationService: ActionValidationService;
 
   constructor(constructorParams: ActionTypeRegistryOpts) {
     this.taskManager = constructorParams.taskManager;
@@ -34,6 +35,7 @@ export class ActionTypeRegistry {
     this.actionsConfigUtils = constructorParams.actionsConfigUtils;
     this.licenseState = constructorParams.licenseState;
     this.preconfiguredActions = constructorParams.preconfiguredActions;
+    this.validationService = getValidationService(this.actionsConfigUtils);
   }
 
   /**
@@ -41,6 +43,13 @@ export class ActionTypeRegistry {
    */
   public has(id: string) {
     return this.actionTypes.has(id);
+  }
+
+  /**
+   * Return the validation service.
+   */
+  public getValidationService(): ActionValidationService {
+    return this.validationService;
   }
 
   /**

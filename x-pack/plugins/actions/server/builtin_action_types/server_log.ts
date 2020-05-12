@@ -32,7 +32,12 @@ const ParamsSchema = schema.object({
 });
 
 // action type definition
-export function getActionType({ logger }: { logger: Logger }): ActionType {
+export function getActionType({
+  logger,
+}: {
+  logger: Logger;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+}): ActionType<any, any, ActionParamsType> {
   return {
     id: '.server-log',
     minimumLicenseRequired: 'basic',
@@ -50,10 +55,10 @@ export function getActionType({ logger }: { logger: Logger }): ActionType {
 
 async function executor(
   { logger }: { logger: Logger },
-  execOptions: ActionTypeExecutorOptions
+  execOptions: ActionTypeExecutorOptions<void, void, ActionParamsType>
 ): Promise<ActionTypeExecutorResult> {
   const actionId = execOptions.actionId;
-  const params = execOptions.params as ActionParamsType;
+  const params = execOptions.params;
 
   const sanitizedMessage = withoutControlCharacters(params.message);
   try {

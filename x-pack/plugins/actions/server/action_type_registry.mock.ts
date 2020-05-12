@@ -5,6 +5,7 @@
  */
 
 import { ActionTypeRegistryContract } from './types';
+import { createValidationServiceMock } from './mocks';
 
 const createActionTypeRegistryMock = () => {
   const mocked: jest.Mocked<ActionTypeRegistryContract> = {
@@ -15,6 +16,7 @@ const createActionTypeRegistryMock = () => {
     ensureActionTypeEnabled: jest.fn(),
     isActionTypeEnabled: jest.fn(),
     isActionExecutable: jest.fn(),
+    getValidationService: jest.fn(() => createValidationServiceMock()),
   };
   return mocked;
 };

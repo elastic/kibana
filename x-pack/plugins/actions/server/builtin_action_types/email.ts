@@ -12,29 +12,26 @@ import nodemailerGetService from 'nodemailer/lib/well-known';
 import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './lib/send_email';
 import { portSchema } from './lib/schemas';
 import { Logger } from '../../../../../src/core/server';
-import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
+import {
+  ActionType,
+  ActionTypeExecutorOptions,
+  ActionTypeExecutorResult,
+  ActionValidationService,
+} from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 
 // config definition
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
-const ConfigSchemaProps = {
+const ConfigSchema = schema.object({
   service: schema.nullable(schema.string()),
   host: schema.nullable(schema.string()),
   port: schema.nullable(portSchema()),
   secure: schema.nullable(schema.boolean()),
   from: schema.string(),
-};
+});
 
-const ConfigSchema = schema.object(ConfigSchemaProps);
-
-function validateConfig(
-  configurationUtilities: ActionsConfigurationUtilities,
-  configObject: unknown
-): string | void {
-  // avoids circular reference ...
-  const config = configObject as ActionTypeConfigType;
-
+function validateConfig(config: ActionTypeConfigType, validationService: ActionValidationService) {
   // Make sure service is set, or if not, both host/port must be set.
   // If service is set, host/port are ignored, when the email is sent.
   // Note, not currently making these message translated, as will be
@@ -55,7 +52,7 @@ function validateConfig(
       return '[port] is required if [service] is not provided';
     }
 
-    if (!configurationUtilities.isWhitelistedHostname(config.host)) {
+    if (!validationService.isWhitelistedHostname(config.host)) {
       return `[host] value '${config.host}' is not in the whitelistedHosts configuration`;
     }
   } else {
@@ -63,7 +60,7 @@ function validateConfig(
     if (host == null) {
       return `[service] value '${config.service}' is not valid`;
     }
-    if (!configurationUtilities.isWhitelistedHostname(host)) {
+    if (!validationService.isWhitelistedHostname(host)) {
       return `[service] value '${config.service}' resolves to host '${host}' which is not in the whitelistedHosts configuration`;
     }
   }
@@ -82,24 +79,15 @@ const SecretsSchema = schema.object({
 
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 
-const ParamsSchema = schema.object(
-  {
-    to: schema.arrayOf(schema.string(), { defaultValue: [] }),
-    cc: schema.arrayOf(schema.string(), { defaultValue: [] }),
-    bcc: schema.arrayOf(schema.string(), { defaultValue: [] }),
-    subject: schema.string(),
-    message: schema.string(),
-  },
-  {
-    validate: validateParams,
-  }
-);
+const ParamsSchema = schema.object({
+  to: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  cc: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  bcc: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  subject: schema.string(),
+  message: schema.string(),
+});
 
-function validateParams(paramsObject: unknown): string | void {
-  // avoids circular reference ...
-  const params = paramsObject as ActionParamsType;
-
-  const { to, cc, bcc } = params;
+function validateParams({ to, cc, bcc }: ActionParamsType) {
   const addrs = to.length + cc.length + bcc.length;
 
   if (addrs === 0) {
@@ -113,8 +101,10 @@ interface GetActionTypeParams {
 }
 
 // action type definition
-export function getActionType(params: GetActionTypeParams): ActionType {
-  const { logger, configurationUtilities } = params;
+export function getActionType(
+  params: GetActionTypeParams
+): ActionType<ActionTypeConfigType, ActionTypeSecretsType, ActionParamsType> {
+  const { logger } = params;
   return {
     id: '.email',
     minimumLicenseRequired: 'gold',
@@ -122,11 +112,13 @@ export function getActionType(params: GetActionTypeParams): ActionType {
       defaultMessage: 'Email',
     }),
     validate: {
-      config: schema.object(ConfigSchemaProps, {
-        validate: curry(validateConfig)(configurationUtilities),
-      }),
+      config: ConfigSchema,
       secrets: SecretsSchema,
       params: ParamsSchema,
+    },
+    runtimeValidate: {
+      config: validateConfig,
+      params: validateParams,
     },
     executor: curry(executor)({ logger }),
   };
@@ -136,13 +128,13 @@ export function getActionType(params: GetActionTypeParams): ActionType {
 
 async function executor(
   { logger }: { logger: Logger },
-  execOptions: ActionTypeExecutorOptions
+  execOptions: ActionTypeExecutorOptions<
+    ActionTypeConfigType,
+    ActionTypeSecretsType,
+    ActionParamsType
+  >
 ): Promise<ActionTypeExecutorResult> {
-  const actionId = execOptions.actionId;
-  const config = execOptions.config as ActionTypeConfigType;
-  const secrets = execOptions.secrets as ActionTypeSecretsType;
-  const params = execOptions.params as ActionParamsType;
-
+  const { actionId, config, secrets, params } = execOptions;
   const transport: Transport = {};
 
   if (secrets.user != null) {

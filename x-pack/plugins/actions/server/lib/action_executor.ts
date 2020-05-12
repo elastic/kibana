@@ -95,15 +95,16 @@ export class ActionExecutor {
       actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
     }
     const actionType = actionTypeRegistry.get(actionTypeId);
+    const validationService = actionTypeRegistry.getValidationService();
 
     let validatedParams: Record<string, unknown>;
     let validatedConfig: Record<string, unknown>;
     let validatedSecrets: Record<string, unknown>;
 
     try {
-      validatedParams = validateParams(actionType, params);
-      validatedConfig = validateConfig(actionType, config);
-      validatedSecrets = validateSecrets(actionType, secrets);
+      validatedParams = validateParams(actionType, params, validationService);
+      validatedConfig = validateConfig(actionType, config, validationService);
+      validatedSecrets = validateSecrets(actionType, secrets, validationService);
     } catch (err) {
       return { status: 'error', actionId, message: err.message, retry: false };
     }

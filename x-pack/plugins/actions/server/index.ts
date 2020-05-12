@@ -17,6 +17,7 @@ export {
   ActionTypeExecutorOptions,
   ActionType,
   PreConfiguredAction,
+  ActionValidationService,
 } from './types';
 export { PluginSetupContract, PluginStartContract } from './plugin';
 

@@ -22,6 +22,7 @@ const axiosRequestMock = axios.request as jest.Mock;
 const ACTION_TYPE_ID = '.webhook';
 
 const services: Services = actionsMock.createServices();
+const validationService = actionsMock.createValidationService();
 
 let actionType: ActionType;
 let mockedLogger: jest.Mocked<Logger>;
@@ -45,19 +46,22 @@ describe('secrets validation', () => {
       user: 'bob',
       password: 'supersecret',
     };
-    expect(validateSecrets(actionType, secrets)).toEqual(secrets);
+    expect(validateSecrets(actionType, secrets, validationService)).toEqual(secrets);
   });
 
   test('fails when secret user is provided, but password is omitted', () => {
     expect(() => {
-      validateSecrets(actionType, { user: 'bob' });
+      validateSecrets(actionType, { user: 'bob' }, validationService);
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: both user and password must be specified"`
     );
   });
 
   test('succeeds when basic authentication credentials are omitted', () => {
-    expect(validateSecrets(actionType, {})).toEqual({ password: null, user: null });
+    expect(validateSecrets(actionType, {}, validationService)).toEqual({
+      password: null,
+      user: null,
+    });
   });
 });
 
@@ -71,7 +75,7 @@ describe('config validation', () => {
     const config: Record<string, string> = {
       url: 'http://mylisteningserver:9200/endpoint',
     };
-    expect(validateConfig(actionType, config)).toEqual({
+    expect(validateConfig(actionType, config, validationService)).toEqual({
       ...defaultValues,
       ...config,
     });
@@ -83,7 +87,7 @@ describe('config validation', () => {
         url: 'http://mylisteningserver:9200/endpoint',
         method,
       };
-      expect(validateConfig(actionType, config)).toEqual({
+      expect(validateConfig(actionType, config, validationService)).toEqual({
         ...defaultValues,
         ...config,
       });
@@ -96,7 +100,7 @@ describe('config validation', () => {
       method: 'https',
     };
     expect(() => {
-      validateConfig(actionType, config);
+      validateConfig(actionType, config, validationService);
     }).toThrowErrorMatchingInlineSnapshot(`
 "error validating action type config: [method]: types that failed validation:
 - [method.0]: expected value to equal [post]
@@ -108,7 +112,7 @@ describe('config validation', () => {
     const config: Record<string, string> = {
       url: 'http://mylisteningserver:9200/endpoint',
     };
-    expect(validateConfig(actionType, config)).toEqual({
+    expect(validateConfig(actionType, config, validationService)).toEqual({
       ...defaultValues,
       ...config,
     });
@@ -123,7 +127,7 @@ describe('config validation', () => {
         'Content-Type': 'application/json',
       },
     };
-    expect(validateConfig(actionType, config)).toEqual({
+    expect(validateConfig(actionType, config, validationService)).toEqual({
       ...defaultValues,
       ...config,
     });
@@ -135,7 +139,7 @@ describe('config validation', () => {
       headers: 'application/json',
     };
     expect(() => {
-      validateConfig(actionType, config);
+      validateConfig(actionType, config, validationService);
     }).toThrowErrorMatchingInlineSnapshot(`
 "error validating action type config: [headers]: types that failed validation:
 - [headers.0]: could not parse record value from json input
@@ -153,7 +157,7 @@ describe('config validation', () => {
       },
     };
 
-    expect(validateConfig(actionType, config)).toEqual({
+    expect(validateConfig(actionType, config, validationService)).toEqual({
       ...defaultValues,
       ...config,
     });
@@ -180,7 +184,7 @@ describe('config validation', () => {
     };
 
     expect(() => {
-      validateConfig(actionType, config);
+      validateConfig(actionType, config, validationService);
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: error configuring webhook action: target url is not whitelisted"`
     );
@@ -190,14 +194,14 @@ describe('config validation', () => {
 describe('params validation', () => {
   test('param validation passes when no fields are provided as none are required', () => {
     const params: Record<string, string> = {};
-    expect(validateParams(actionType, params)).toEqual({});
+    expect(validateParams(actionType, params, validationService)).toEqual({});
   });
 
   test('params validation passes when a valid body is provided', () => {
     const params: Record<string, string> = {
       body: 'count: {{ctx.payload.hits.total}}',
     };
-    expect(validateParams(actionType, params)).toEqual({
+    expect(validateParams(actionType, params, validationService)).toEqual({
       ...params,
     });
   });

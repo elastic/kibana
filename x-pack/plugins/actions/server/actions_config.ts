@@ -10,7 +10,7 @@ import { URL } from 'url';
 import { curry } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { ActionsConfigType } from './types';
+import { ActionsConfigType, ActionValidationService } from './types';
 import { ActionTypeDisabledError } from './lib';
 
 export enum WhitelistedHosts {
@@ -107,5 +107,15 @@ export function getActionsConfigurationUtilities(
         throw new ActionTypeDisabledError(disabledActionTypeErrorMessage(actionType), 'config');
       }
     },
+  };
+}
+
+export function getValidationService(
+  configUtils: ActionsConfigurationUtilities
+): ActionValidationService {
+  const { isWhitelistedHostname, isWhitelistedUri } = configUtils;
+  return {
+    isWhitelistedHostname,
+    isWhitelistedUri,
   };
 }

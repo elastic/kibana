@@ -18,6 +18,7 @@ import { actionsMock } from '../mocks';
 const ACTION_TYPE_ID = '.slack';
 
 const services: Services = actionsMock.createServices();
+const validationService = actionsMock.createValidationService();
 
 let actionType: ActionType;
 
@@ -37,20 +38,20 @@ describe('action registeration', () => {
 
 describe('validateParams()', () => {
   test('should validate and pass when params is valid', () => {
-    expect(validateParams(actionType, { message: 'a message' })).toEqual({
+    expect(validateParams(actionType, { message: 'a message' }, validationService)).toEqual({
       message: 'a message',
     });
   });
 
   test('should validate and throw error when params is invalid', () => {
     expect(() => {
-      validateParams(actionType, {});
+      validateParams(actionType, {}, validationService);
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action params: [message]: expected value of type [string] but got [undefined]"`
     );
 
     expect(() => {
-      validateParams(actionType, { message: 1 });
+      validateParams(actionType, { message: 1 }, validationService);
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action params: [message]: expected value of type [string] but got [number]"`
     );
@@ -59,26 +60,24 @@ describe('validateParams()', () => {
 
 describe('validateActionTypeSecrets()', () => {
   test('should validate and pass when config is valid', () => {
-    validateSecrets(actionType, {
-      webhookUrl: 'https://example.com',
-    });
+    validateSecrets(actionType, { webhookUrl: 'https://example.com' }, validationService);
   });
 
   test('should validate and throw error when config is invalid', () => {
     expect(() => {
-      validateSecrets(actionType, {});
+      validateSecrets(actionType, {}, validationService);
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: [webhookUrl]: expected value of type [string] but got [undefined]"`
     );
 
     expect(() => {
-      validateSecrets(actionType, { webhookUrl: 1 });
+      validateSecrets(actionType, { webhookUrl: 1 }, validationService);
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: [webhookUrl]: expected value of type [string] but got [number]"`
     );
 
     expect(() => {
-      validateSecrets(actionType, { webhookUrl: 'fee-fi-fo-fum' });
+      validateSecrets(actionType, { webhookUrl: 'fee-fi-fo-fum' }, validationService);
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: error configuring slack action: unable to parse host name from webhookUrl"`
     );
@@ -94,7 +93,9 @@ describe('validateActionTypeSecrets()', () => {
       },
     });
 
-    expect(validateSecrets(actionType, { webhookUrl: 'https://api.slack.com/' })).toEqual({
+    expect(
+      validateSecrets(actionType, { webhookUrl: 'https://api.slack.com/' }, validationService)
+    ).toEqual({
       webhookUrl: 'https://api.slack.com/',
     });
   });
@@ -110,7 +111,7 @@ describe('validateActionTypeSecrets()', () => {
     });
 
     expect(() => {
-      validateSecrets(actionType, { webhookUrl: 'https://api.slack.com/' });
+      validateSecrets(actionType, { webhookUrl: 'https://api.slack.com/' }, validationService);
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: error configuring slack action: target hostname is not whitelisted"`
     );
