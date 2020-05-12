@@ -35,7 +35,7 @@ export const deleteSnapshots = async (
   snapshotIds: Array<{ snapshot: string; repository: string }>
 ) => {
   const result = await sendRequest({
-    path: `${API_BASE_PATH}snapshots/delete`,
+    path: `${API_BASE_PATH}snapshots/bulk_delete`,
     method: 'post',
     body: snapshotIds,
   });

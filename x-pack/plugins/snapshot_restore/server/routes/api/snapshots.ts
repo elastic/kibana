@@ -188,7 +188,7 @@ export function registerSnapshotsRoutes({
 
   // DELETE one or multiple snapshots
   router.post(
-    { path: addBasePath('snapshots/delete'), validate: { body: deleteSchema } },
+    { path: addBasePath('snapshots/bulk_delete'), validate: { body: deleteSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
       const { callAsCurrentUser } = ctx.snapshotRestore!.client;
 
