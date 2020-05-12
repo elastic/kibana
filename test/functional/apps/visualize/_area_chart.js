@@ -282,7 +282,7 @@ export default function({ getService, getPageObjects }) {
     describe('embedded mode', () => {
       it('should hide side editor if embed is set to true in url', async () => {
         const url = await browser.getCurrentUrl();
-        const embedUrl = url.split('/visualize/').pop() + '&embed=true';
+        const embedUrl = url.split('/visualize#').pop() + '&embed=true';
         await PageObjects.common.navigateToUrl('visualize', embedUrl, { useActualUrl: true });
         await PageObjects.header.waitUntilLoadingHasFinished();
         const sideEditorExists = await PageObjects.visualize.getSideEditorExists();
@@ -292,7 +292,7 @@ export default function({ getService, getPageObjects }) {
       after(async () => {
         const url = await browser.getCurrentUrl();
         const embedUrl = url
-          .split('/visualize/')
+          .split('/visualize#')
           .pop()
           .replace('embed=true', '');
         await PageObjects.common.navigateToUrl('visualize', embedUrl, { useActualUrl: true });

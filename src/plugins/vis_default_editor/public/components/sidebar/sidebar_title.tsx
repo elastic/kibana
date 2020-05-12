@@ -118,7 +118,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
           <div style={{ width: 260 }}>
             <EuiText size="s">
               <p>
-                <EuiButtonEmpty flush="left" href={`#/discover/${savedSearch.id}`} size="xs">
+                <EuiButtonEmpty flush="left" href={`discover#/${savedSearch.id}`} size="xs">
                   <FormattedMessage
                     id="visDefaultEditor.sidebar.savedSearch.goToDiscoverButtonText"
                     defaultMessage="View this search in Discover"
