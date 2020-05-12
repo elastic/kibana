@@ -8,7 +8,6 @@ Array [
     "sort": "0test name",
     "tags": undefined,
     "title": "test name",
-    "url": "",
   },
   Object {
     "default": false,
@@ -16,7 +15,6 @@ Array [
     "sort": "1test name 1",
     "tags": undefined,
     "title": "test name 1",
-    "url": "",
   },
 ]
 `;
