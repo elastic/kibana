@@ -20,9 +20,7 @@ export const defaultShapeParameters = {
   ignore_z_value: true,
 };
 
-// That test is being flaky and is under work to be fixed
-// Skipping it for now.
-describe.skip('Mappings editor: shape datatype', () => {
+describe('Mappings editor: shape datatype', () => {
   let testBed: MappingsEditorTestBed;
 
   /**
@@ -51,9 +49,7 @@ describe.skip('Mappings editor: shape datatype', () => {
 
     const updatedMappings = { ...defaultMappings };
 
-    await act(async () => {
-      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
-    });
+    testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
 
     const {
       component,
