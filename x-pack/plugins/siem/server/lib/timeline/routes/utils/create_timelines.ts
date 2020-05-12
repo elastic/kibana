@@ -143,6 +143,7 @@ export const getTemplateTimeline = async (
       frameworkRequest,
       templateTimelineId
     );
+    // eslint-disable-next-line no-empty
   } catch (e) {
     return null;
   }

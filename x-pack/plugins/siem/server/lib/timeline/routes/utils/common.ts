@@ -149,9 +149,10 @@ export class TimelinesStatus {
   }
 
   private getTimelines() {
+    // console.log('getTimelines');
     return Promise.all([
-      this.timelineObject.getTimelines(),
-      this.templateTimelineObject.getTimelines(),
+      this.timelineObject.getTimeline(),
+      this.templateTimelineObject.getTimeline(),
     ]);
   }
 

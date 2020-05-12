@@ -38,7 +38,7 @@ export class TimelineObject {
     this.data = null;
   }
 
-  public async getTimelines() {
+  public async getTimeline() {
     this.data =
       this.id != null
         ? this.type === TimelineType.template
