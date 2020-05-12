@@ -19,14 +19,14 @@ describe('patchRules', () => {
   });
 
   it('should call alertsClient.disable is the rule was enabled and enabled is false', async () => {
-    const rule = getResult();
-    alertsClient.get.mockResolvedValue(getResult());
+    const existingRule = getResult();
+    const params = getResult().params;
 
     await patchRules({
       alertsClient,
       savedObjectsClient,
-      id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-      ...rule.params,
+      rule: existingRule,
+      ...params,
       enabled: false,
       interval: '',
       name: '',
@@ -35,23 +35,23 @@ describe('patchRules', () => {
 
     expect(alertsClient.disable).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        id: existingRule.id,
       })
     );
   });
 
   it('should call alertsClient.enable is the rule was disabled and enabled is true', async () => {
-    const rule = getResult();
-    alertsClient.get.mockResolvedValue({
+    const existingRule = {
       ...getResult(),
       enabled: false,
-    });
+    };
+    const params = getResult().params;
 
     await patchRules({
       alertsClient,
       savedObjectsClient,
-      id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-      ...rule.params,
+      rule: existingRule,
+      ...params,
       enabled: true,
       interval: '',
       name: '',
@@ -60,13 +60,13 @@ describe('patchRules', () => {
 
     expect(alertsClient.enable).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+        id: existingRule.id,
       })
     );
   });
 
   it('calls the alertsClient with ML params', async () => {
-    alertsClient.get.mockResolvedValue(getMlResult());
+    const existingRule = getMlResult();
     const params = {
       ...getMlResult().params,
       anomalyThreshold: 55,
@@ -76,7 +76,7 @@ describe('patchRules', () => {
     await patchRules({
       alertsClient,
       savedObjectsClient,
-      id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+      rule: existingRule,
       ...params,
     });
 

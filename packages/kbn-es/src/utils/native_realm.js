@@ -76,6 +76,10 @@ exports.NativeRealm = class NativeRealm {
     }
 
     const reservedUsers = await this.getReservedUsers();
+    if (!reservedUsers || reservedUsers.length < 1) {
+      throw new Error('no reserved users found, unable to set native realm passwords');
+    }
+
     await Promise.all(
       reservedUsers.map(async user => {
         await this.setPassword(user, options[`password.${user}`]);
