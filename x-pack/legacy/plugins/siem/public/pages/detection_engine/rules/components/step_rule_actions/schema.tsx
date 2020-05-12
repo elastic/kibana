@@ -9,9 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { FormSchema } from '../../../../../shared_imports';
 
 export const schema: FormSchema = {
-  actions: {},
-  enabled: {},
-  kibanaSiemAppUrl: {},
   throttle: {
     label: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepRuleActions.fieldThrottleLabel',
@@ -27,4 +24,14 @@ export const schema: FormSchema = {
       }
     ),
   },
+  actions: {
+    label: i18n.translate(
+      'xpack.siem.detectionEngine.createRule.stepRuleActions.fieldActionsLabel',
+      {
+        defaultMessage: 'Actions',
+      }
+    ),
+  },
+  enabled: {},
+  kibanaSiemAppUrl: {},
 };
