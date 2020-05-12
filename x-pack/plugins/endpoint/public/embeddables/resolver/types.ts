@@ -169,6 +169,16 @@ export interface RelatedEventDataEntry {
     relatedEventType: RelatedEventType;
   }>;
 }
+
+/**
+ * Represents the status of the request for related event data, which will be either the data,
+ * a value indicating that it's still waiting for the data or an Error indicating the data can't be retrieved as expected
+ */
+export type RelatedEventDataResults =
+  | RelatedEventDataEntry
+  | typeof waitingForRelatedEventData
+  | Error;
+
 /**
  * This represents the raw related events data enhanced with statistics
  * (e.g. counts of items grouped by their related event types)
@@ -202,7 +212,7 @@ export interface DataState {
   readonly results: readonly ResolverEvent[];
   isLoading: boolean;
   hasError: boolean;
-  [resultsEnrichedWithRelatedEventInfo]?: RelatedEventData;
+  [resultsEnrichedWithRelatedEventInfo]?: Map<ResolverEvent, RelatedEventDataResults>;
 }
 
 export type Vector2 = readonly [number, number];

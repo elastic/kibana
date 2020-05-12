@@ -9,9 +9,6 @@ import {
   DataState,
   ResolverAction,
   resultsEnrichedWithRelatedEventInfo,
-  RelatedEventDataEntryWithStats,
-  RelatedEventType,
-  RelatedEventData,
   waitingForRelatedEventData,
 } from '../../types';
 
@@ -55,38 +52,10 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     }
     return state;
   } else if (action.type === 'serverReturnedRelatedEventData') {
-    /**
-     * REMOVE: pending resolution of https://github.com/elastic/endpoint-app-team/issues/379
-     * When this data is inlined with results, there won't be a need for this.
-     */
     const statsMap = state[resultsEnrichedWithRelatedEventInfo];
-
     if (statsMap && typeof statsMap?.set === 'function') {
-      const currentStatsMap: RelatedEventData = new Map(statsMap);
-      for (const updatedEvent of action.payload.keys()) {
-        const newStatsEntry = action.payload.get(updatedEvent);
-
-        if (newStatsEntry) {
-          // do stats
-          const statsForEntry = newStatsEntry?.relatedEvents.reduce(
-            (
-              compiledStats: Partial<Record<RelatedEventType, number>>,
-              relatedEvent: { relatedEventType: RelatedEventType }
-            ) => {
-              compiledStats[relatedEvent.relatedEventType] =
-                (compiledStats[relatedEvent.relatedEventType] || 0) + 1;
-              return compiledStats;
-            },
-            {}
-          );
-          const newRelatedEventStats: RelatedEventDataEntryWithStats = Object.assign(
-            newStatsEntry,
-            { stats: statsForEntry }
-          );
-          currentStatsMap.set(updatedEvent, newRelatedEventStats);
-        }
-      }
-      return { ...state, [resultsEnrichedWithRelatedEventInfo]: currentStatsMap };
+      const relatedDataEntries = new Map([...statsMap, ...action.payload]);
+      return { ...state, [resultsEnrichedWithRelatedEventInfo]: relatedDataEntries };
     }
     return state;
   } else if (action.type === 'appRequestedResolverData') {

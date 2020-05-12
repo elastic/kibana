@@ -16,6 +16,8 @@ import {
   AdjacentProcessMap,
   RelatedEventData,
   resultsEnrichedWithRelatedEventInfo,
+  RelatedEventType,
+  RelatedEventDataEntryWithStats,
 } from '../../types';
 import { ResolverEvent } from '../../../../../common/types';
 import { Vector2 } from '../../types';
@@ -410,12 +412,54 @@ export const indexedProcessTree = createSelector(graphableProcesses, function in
 /**
  * Process events that will be graphed.
  */
-export const relatedEventStats = createSelector(
+export const relatedEventResults = createSelector(
   (data: DataState) => data,
   function(data) {
     return data[resultsEnrichedWithRelatedEventInfo];
   }
 );
+
+export const relatedEventStats = createSelector(relatedEventResults, function getRelatedEvents(
+  /* eslint-disable no-shadow */
+  relatedEventResults
+  /* eslint-enable no-shadow */
+) {
+    /* eslint-disable no-shadow */
+  const relatedEventStats: RelatedEventData = new Map();
+    /* eslint-enable no-shadow */
+  if (!relatedEventResults) {
+    return relatedEventStats;
+  }
+ 
+  for (const updatedEvent of relatedEventResults.keys()) {
+    
+    const newStatsEntry = relatedEventResults.get(updatedEvent);
+    if (typeof newStatsEntry === 'object') {
+      // compile stats
+      if (newStatsEntry instanceof Error) {
+        relatedEventStats.set(updatedEvent, newStatsEntry);
+        continue;
+      }
+      const statsForEntry = newStatsEntry?.relatedEvents.reduce(
+        (
+          compiledStats: Partial<Record<RelatedEventType, number>>,
+          relatedEvent: { relatedEventType: RelatedEventType }
+        ) => {
+          compiledStats[relatedEvent.relatedEventType] =
+            (compiledStats[relatedEvent.relatedEventType] || 0) + 1;
+          return compiledStats;
+        },
+        {}
+      );
+     
+      const newRelatedEventStats: RelatedEventDataEntryWithStats = Object.assign(newStatsEntry, {
+        stats: statsForEntry,
+      });
+      relatedEventStats.set(updatedEvent, newRelatedEventStats);
+    }
+  }
+  return relatedEventStats;
+});
 
 export const relatedEvents = createSelector(
   graphableProcesses,
