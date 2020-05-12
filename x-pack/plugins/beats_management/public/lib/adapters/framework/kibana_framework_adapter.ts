@@ -120,8 +120,6 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     sectionId: string;
     appId: string;
     name: string;
-    basePath: string;
-    visable?: boolean;
     order?: number;
     mount: RegisterManagementAppArgs['mount'];
   }) {

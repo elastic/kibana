@@ -27,8 +27,6 @@ export interface FrameworkAdapter {
     sectionId: string;
     appId: string;
     name: string;
-    basePath: string;
-    visable?: boolean;
     order?: number;
     mount: RegisterManagementAppArgs['mount'];
   }): void;
