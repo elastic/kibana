@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObjectMigrationMap, SavedObjectUnsanitizedDoc } from '../../../../../src/core/server';
-import { TaskInstance, TaskInstanceWithDeprecatedFields } from '../task';
+import { SavedObjectMigrationMap } from '../../../../../src/core/server';
 
 export const migrations: SavedObjectMigrationMap = {
   '7.4.0': doc => ({
@@ -14,12 +13,9 @@ export const migrations: SavedObjectMigrationMap = {
   '7.6.0': moveIntervalIntoSchedule,
 };
 
-function moveIntervalIntoSchedule({
-  attributes: { interval, ...attributes },
-  ...doc
-}: SavedObjectUnsanitizedDoc<TaskInstanceWithDeprecatedFields>): SavedObjectUnsanitizedDoc<
-  TaskInstance
-> {
+// Type is wrong here and will be fixed by platform in https://github.com/elastic/kibana/issues/64748
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function moveIntervalIntoSchedule({ attributes: { interval, ...attributes }, ...doc }: any): any {
   return {
     ...doc,
     attributes: {
