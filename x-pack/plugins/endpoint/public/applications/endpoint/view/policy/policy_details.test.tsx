@@ -36,7 +36,7 @@ describe('Policy Details', () => {
       policyView = render(<PolicyDetails />);
     });
 
-    it('should show loader followed by error message', () => {
+    it('should show loader followed by error message c2226', () => {
       expect(policyView.find('EuiLoadingSpinner').length).toBe(1);
       policyView.update();
       const callout = policyView.find('EuiCallOut');
@@ -80,7 +80,7 @@ describe('Policy Details', () => {
       policyView = render(<PolicyDetails />);
     });
 
-    it('should display back to list button and policy title', () => {
+    it('should display back to list button and policy title c2227', () => {
       policyView.update();
       const pageHeaderLeft = policyView.find(
         'EuiPageHeaderSection[data-test-subj="pageViewHeaderLeft"]'
@@ -95,7 +95,7 @@ describe('Policy Details', () => {
       expect(pageTitle).toHaveLength(1);
       expect(pageTitle.text()).toEqual(policyDatasource.name);
     });
-    it('should navigate to list if back to link is clicked', async () => {
+    it('should navigate to list if back to link is clicked c2228', async () => {
       policyView.update();
       const backToListButton = policyView.find(
         'EuiPageHeaderSection[data-test-subj="pageViewHeaderLeft"] EuiButtonEmpty'
@@ -104,7 +104,7 @@ describe('Policy Details', () => {
       backToListButton.simulate('click', { button: 0 });
       expect(history.location.pathname).toEqual('/policy');
     });
-    it('should display agent stats', async () => {
+    it('should display agent stats c2229', async () => {
       await asyncActions;
       policyView.update();
       const headerRight = policyView.find(
@@ -114,7 +114,7 @@ describe('Policy Details', () => {
       expect(agentsSummary).toHaveLength(1);
       expect(agentsSummary.text()).toBe('Hosts5Online3Offline1Error1');
     });
-    it('should display cancel button', async () => {
+    it('should display cancel button c2230', async () => {
       await asyncActions;
       policyView.update();
       const cancelbutton = policyView.find(
@@ -123,7 +123,7 @@ describe('Policy Details', () => {
       expect(cancelbutton).toHaveLength(1);
       expect(cancelbutton.text()).toEqual('Cancel');
     });
-    it('should redirect to policy list when cancel button is clicked', async () => {
+    it('should redirect to policy list when cancel button is clicked c2231', async () => {
       await asyncActions;
       policyView.update();
       const cancelbutton = policyView.find(
@@ -133,7 +133,7 @@ describe('Policy Details', () => {
       cancelbutton.simulate('click', { button: 0 });
       expect(history.location.pathname).toEqual('/policy');
     });
-    it('should display save button', async () => {
+    it('should display save button c2232', async () => {
       await asyncActions;
       policyView.update();
       const saveButton = policyView.find('EuiButton[data-test-subj="policyDetailsSaveButton"]');
@@ -175,7 +175,7 @@ describe('Policy Details', () => {
         });
       });
 
-      it('should show a modal confirmation', () => {
+      it('should show a modal confirmation c2233', () => {
         expect(confirmModal).toHaveLength(1);
         expect(confirmModal.find('div[data-test-subj="confirmModalTitleText"]').text()).toEqual(
           'Save and deploy changes'
@@ -183,7 +183,7 @@ describe('Policy Details', () => {
         expect(modalCancelButton.text()).toEqual('Cancel');
         expect(modalConfirmButton.text()).toEqual('Save and deploy changes');
       });
-      it('should show info callout if policy is in use', () => {
+      it('should show info callout if policy is in use c2234', () => {
         const warningCallout = confirmModal.find(
           'EuiCallOut[data-test-subj="policyDetailsWarningCallout"]'
         );
@@ -192,13 +192,13 @@ describe('Policy Details', () => {
           'This action will update 5 hostsSaving these changes will apply the updates to all active endpoints assigned to this policy'
         );
       });
-      it('should close dialog if cancel button is clicked', () => {
+      it('should close dialog if cancel button is clicked c2235', () => {
         modalCancelButton.simulate('click');
         expect(
           policyView.find('EuiConfirmModal[data-test-subj="policyDetailsConfirmModal"]')
         ).toHaveLength(0);
       });
-      it('should update policy and show success notification when confirm button is clicked', async () => {
+      it('should update policy and show success notification when confirm button is clicked c2236', async () => {
         modalConfirmButton.simulate('click');
         policyView.update();
         // Modal should be closed
@@ -219,7 +219,7 @@ describe('Policy Details', () => {
           iconType: 'check',
         });
       });
-      it('should show an error notification toast if update fails', async () => {
+      it('should show an error notification toast if update fails c2237', async () => {
         policyDatasource.id = 'invalid';
         modalConfirmButton.simulate('click');
 
