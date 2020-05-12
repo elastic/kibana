@@ -7,12 +7,11 @@
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import React, { memo } from 'react';
-import { useCapabilities } from '../../../../../hooks';
-import { useAgentConfigLink } from '../../hooks/use_details_uri';
+import { useCapabilities, useLink } from '../../../../../hooks';
 
 export const NoDatasources = memo<{ configId: string }>(({ configId }) => {
+  const { getHref } = useLink();
   const hasWriteCapabilities = useCapabilities().write;
-  const addDatasourceLink = useAgentConfigLink('add-datasource', { configId });
 
   return (
     <EuiEmptyPrompt
@@ -32,7 +31,11 @@ export const NoDatasources = memo<{ configId: string }>(({ configId }) => {
         />
       }
       actions={
-        <EuiButton isDisabled={!hasWriteCapabilities} fill href={addDatasourceLink}>
+        <EuiButton
+          isDisabled={!hasWriteCapabilities}
+          fill
+          href={getHref('add_datasource_from_configuration', { configId })}
+        >
           <FormattedMessage
             id="xpack.ingestManager.configDetailsDatasources.createFirstButtonText"
             defaultMessage="Create data source"

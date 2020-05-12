@@ -23,9 +23,7 @@ export function EPMHomePage() {
   const {
     params: { tabId },
   } = useRouteMatch<{ tabId?: string }>();
-
-  const ALL_PACKAGES_URI = useLink(EPM_LIST_ALL_PACKAGES_PATH);
-  const INSTALLED_PACKAGES_URI = useLink(EPM_LIST_INSTALLED_PACKAGES_PATH);
+  const { getHref } = useLink();
 
   return (
     <WithHeaderLayout
@@ -38,7 +36,7 @@ export function EPMHomePage() {
             name: i18n.translate('xpack.ingestManager.epmList.allTabText', {
               defaultMessage: 'All integrations',
             }),
-            href: ALL_PACKAGES_URI,
+            href: getHref('integrations_all'),
             isSelected: tabId !== 'installed',
           },
           {
@@ -46,7 +44,7 @@ export function EPMHomePage() {
             name: i18n.translate('xpack.ingestManager.epmList.installedTabText', {
               defaultMessage: 'Installed integrations',
             }),
-            href: INSTALLED_PACKAGES_URI,
+            href: getHref('integrations_installed'),
             isSelected: tabId === 'installed',
           },
         ] as unknown) as EuiTabProps[]

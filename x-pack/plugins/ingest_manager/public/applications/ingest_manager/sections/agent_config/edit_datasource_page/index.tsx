@@ -16,7 +16,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { AGENT_CONFIG_DETAILS_PATH } from '../../../constants';
 import { AgentConfig, PackageInfo, NewDatasource } from '../../../types';
 import {
   useLink,
@@ -49,6 +48,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
     params: { configId, datasourceId },
   } = useRouteMatch();
   const history = useHistory();
+  const { getHref, getPath } = useLink();
 
   // Agent config, package info, and datasource states
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
@@ -163,8 +163,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
   };
 
   // Cancel url
-  const CONFIG_URL = useLink(`${AGENT_CONFIG_DETAILS_PATH}${configId}`);
-  const cancelUrl = CONFIG_URL;
+  const cancelUrl = getHref('configuration_details', { configId });
 
   // Save datasource
   const [formState, setFormState] = useState<DatasourceFormState>('INVALID');
@@ -186,7 +185,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
     }
     const { error } = await saveDatasource();
     if (!error) {
-      history.push(`${AGENT_CONFIG_DETAILS_PATH}${configId}`);
+      history.push(getPath('configuration_details', { configId }));
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.ingestManager.editDatasource.updatedNotificationTitle', {
           defaultMessage: `Successfully updated '{datasourceName}'`,

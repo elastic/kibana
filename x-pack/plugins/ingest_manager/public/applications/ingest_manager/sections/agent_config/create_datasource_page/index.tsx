@@ -17,7 +17,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
-import { AGENT_CONFIG_DETAILS_PATH } from '../../../constants';
 import { AgentConfig, PackageInfo, NewDatasource } from '../../../types';
 import {
   useLink,
@@ -26,7 +25,6 @@ import {
   useConfig,
   sendGetAgentStatus,
 } from '../../../hooks';
-import { useLinks as useEPMLinks } from '../../epm/hooks';
 import { ConfirmDeployConfigModal } from '../components';
 import { CreateDatasourcePageLayout } from './components';
 import { CreateDatasourceFrom, DatasourceFormState } from './types';
@@ -47,6 +45,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   const {
     params: { configId, pkgkey },
   } = useRouteMatch();
+  const { getHref, getPath } = useLink();
   const history = useHistory();
   const from: CreateDatasourceFrom = configId ? 'config' : 'package';
   const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
@@ -155,15 +154,11 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
     }
   };
 
-  // Cancel url
-  const CONFIG_URL = useLink(
-    `${AGENT_CONFIG_DETAILS_PATH}${agentConfig ? agentConfig.id : configId}`
-  );
-  const PACKAGE_URL = useEPMLinks().toDetailView({
-    name: (pkgkey || '-').split('-')[0],
-    version: (pkgkey || '-').split('-')[1],
-  });
-  const cancelUrl = from === 'config' ? CONFIG_URL : PACKAGE_URL;
+  // Cancel path
+  const cancelUrl =
+    from === 'config'
+      ? getHref('configuration_details', { configId: agentConfig?.id || configId })
+      : getHref('integration_details', { pkgkey });
 
   // Save datasource
   const [formState, setFormState] = useState<DatasourceFormState>('INVALID');
@@ -185,7 +180,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
     }
     const { error } = await saveDatasource();
     if (!error) {
-      history.push(`${AGENT_CONFIG_DETAILS_PATH}${agentConfig ? agentConfig.id : configId}`);
+      history.push(getPath('configuration_details', { configId: agentConfig?.id || configId }));
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.ingestManager.createDatasource.addedNotificationTitle', {
           defaultMessage: `Successfully added '{datasourceName}'`,

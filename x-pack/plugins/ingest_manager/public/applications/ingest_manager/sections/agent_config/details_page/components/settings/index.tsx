@@ -9,9 +9,9 @@ import styled from 'styled-components';
 import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AGENT_CONFIG_PATH } from '../../../../../constants';
 import { AgentConfig } from '../../../../../types';
 import {
+  useLink,
   useCore,
   useCapabilities,
   sendUpdateAgentConfig,
@@ -41,6 +41,7 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
       fleet: { enabled: isFleetEnabled },
     } = useConfig();
     const history = useHistory();
+    const { getPath } = useLink();
     const hasWriteCapabilites = useCapabilities().write;
     const refreshConfig = useConfigRefresh();
     const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
@@ -146,7 +147,7 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
           validation={validation}
           isEditing={true}
           onDelete={() => {
-            history.push(AGENT_CONFIG_PATH);
+            history.push(getPath('configurations_list'));
           }}
         />
         {hasChanges ? (

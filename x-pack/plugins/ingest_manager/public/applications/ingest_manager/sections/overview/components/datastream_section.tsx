@@ -17,9 +17,9 @@ import { OverviewPanel } from './overview_panel';
 import { OverviewStats } from './overview_stats';
 import { useLink, useGetDataStreams, useStartDeps } from '../../../hooks';
 import { Loading } from '../../fleet/components';
-import { DATA_STREAM_PATH } from '../../../constants';
 
 export const OverviewDatastreamSection: React.FC = () => {
+  const { getHref } = useLink();
   const datastreamRequest = useGetDataStreams();
   const {
     data: { fieldFormats },
@@ -55,7 +55,7 @@ export const OverviewDatastreamSection: React.FC = () => {
               />
             </h2>
           </EuiTitle>
-          <EuiButtonEmpty size="xs" flush="right" href={useLink(DATA_STREAM_PATH)}>
+          <EuiButtonEmpty size="xs" flush="right" href={getHref('data_streams')}>
             <FormattedMessage
               id="xpack.ingestManager.overviewPageDataStreamsPanelAction"
               defaultMessage="View data streams"

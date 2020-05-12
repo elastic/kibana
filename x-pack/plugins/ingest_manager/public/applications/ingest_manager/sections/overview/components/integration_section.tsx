@@ -16,11 +16,11 @@ import {
 import { OverviewPanel } from './overview_panel';
 import { OverviewStats } from './overview_stats';
 import { useLink, useGetPackages } from '../../../hooks';
-import { EPM_PATH } from '../../../constants';
 import { Loading } from '../../fleet/components';
 import { InstallationStatus } from '../../../types';
 
 export const OverviewIntegrationSection: React.FC = () => {
+  const { getHref } = useLink();
   const packagesRequest = useGetPackages();
   const res = packagesRequest.data?.response;
   const total = res?.length ?? 0;
@@ -40,7 +40,7 @@ export const OverviewIntegrationSection: React.FC = () => {
               />
             </h2>
           </EuiTitle>
-          <EuiButtonEmpty size="xs" flush="right" href={useLink(EPM_PATH)}>
+          <EuiButtonEmpty size="xs" flush="right" href={getHref('integrations_all')}>
             <FormattedMessage
               id="xpack.ingestManager.overviewPageIntegrationsPanelAction"
               defaultMessage="View integrations"

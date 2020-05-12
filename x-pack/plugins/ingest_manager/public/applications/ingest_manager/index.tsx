@@ -174,10 +174,10 @@ const IngestManagerRoutes = ({ ...rest }) => {
   }
 
   return (
-    <PackageInstallProvider notifications={notifications}>
+    <EuiErrorBoundary>
       <FleetStatusProvider>
-        <EuiErrorBoundary>
-          <Router {...rest}>
+        <Router {...rest}>
+          <PackageInstallProvider notifications={notifications}>
             <Switch>
               <ProtectedRoute path={EPM_PATH} isAllowed={epm.enabled}>
                 <DefaultLayout section="epm">
@@ -206,10 +206,10 @@ const IngestManagerRoutes = ({ ...rest }) => {
               </Route>
               <Redirect to="/" />
             </Switch>
-          </Router>
-        </EuiErrorBoundary>
+          </PackageInstallProvider>
+        </Router>
       </FleetStatusProvider>
-    </PackageInstallProvider>
+    </EuiErrorBoundary>
   );
 };
 

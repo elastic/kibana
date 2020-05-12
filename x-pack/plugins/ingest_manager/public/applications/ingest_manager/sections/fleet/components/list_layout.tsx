@@ -36,6 +36,7 @@ const Divider = styled.div`
 `;
 
 export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
+  const { getHref } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
   const agentStatusRequest = useGetAgentStatus(undefined, {
     pollIntervalMs: REFRESH_INTERVAL_MS,
@@ -164,7 +165,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
               />
             ),
             isSelected: routeMatch.path === FLEET_AGENTS_PATH,
-            href: useLink(FLEET_AGENTS_PATH),
+            href: getHref('fleet_agent_list'),
           },
           {
             name: (
@@ -174,7 +175,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
               />
             ),
             isSelected: routeMatch.path === FLEET_ENROLLMENT_TOKENS_PATH,
-            href: useLink(FLEET_ENROLLMENT_TOKENS_PATH),
+            href: getHref('fleet_enrollment_tokens'),
           },
         ] as unknown) as EuiTabProps[]
       }
