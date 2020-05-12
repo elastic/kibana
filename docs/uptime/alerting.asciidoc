@@ -1,0 +1,26 @@
+[role="xpack"]
+[[uptime-alerting]]
+
+== Uptime alerting
+
+[float]
+=== Monitor status alerts
+
+[role="screenshot"]
+image::uptime/images/monitor-status-alert-flyout.png[Create monitor status alert flyout]
+
+To receive alerts when a monitor goes down, use the alerting menu at the top of the 
+overview page. Use a query in the alert flyout to determine which monitors to check
+with your alert. If you already have a query in the overview page search bar it will
+be carried over into this box.
+
+[float]
+=== TLS alerts
+
+[role="screenshot"]
+image::uptime/images/tls-alert-flyout.png[Create TLS alert flyout]
+
+Uptime also provides the ability to create an alert that will notify you when one or
+more of your monitors have a TLS certificate that will expire within some threshold,
+or when its age exceeds a limit. The values for these thresholds are configurable on
+the <<uptime-settings, Settings page>>.
