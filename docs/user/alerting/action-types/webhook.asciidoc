@@ -19,33 +19,52 @@ Password::  An optional password. If set, HTTP basic authentication is used. Cur
 
 [float]
 [[Preconfigured-webhook-configuration]]
-==== Preconfigured action type 
+==== Preconfigured action type
 
 [source,text]
 --
- id: 'my-webhook'
- name: preconfigured-webhook-action-type
- actionTypeId: .webhook
- config:
-   url: https://test.host <1.1>
-   method: POST <1.2>
-   headers: <1.3>
-     testheader: testvalue
- secrets:
-   user: testuser <2.1>
-   password: passwordkeystorevalue <2.2>
+ my-webhook:
+   name: preconfigured-webhook-action-type
+   actionTypeId: .webhook
+   config:
+     url: https://test.host
+     method: POST
+     headers:
+       testheader: testvalue
+   secrets:
+     user: testuser
+     password: passwordkeystorevalue
 --
 
 `config` defines the action type specific to the configuration and contains the following properties:
 
-<1.1> `url:` is URL string and correspond to *URL*.
-<1.2> `method:` is a string and correspond to *Method*.
-<1.3> `headers:` is Record<String, String> and correspond to *Headers*.
+[cols="2*<"]
+|===
 
-`secrets` defines action type sensitive configuration:
+|`url`
+| A URL string that corresponds to *URL*.
 
-<2.1> `user:` is a string and correspond to *User*.
-<2.2> `password:` is a string and correspond to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+|`method`
+| A string that corresponds to *Method*.
+
+|`headers`
+|A record<string, string> that corresponds to *Headers*.
+
+|===
+
+`secrets` defines sensitive information for the action type:
+
+[cols="2*<"]
+|===
+
+|`user`
+|A string that corresponds to *User*.
+
+|`password`
+|A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+
+|===
+
 
 [float]
 [[webhook-action-configuration]]
