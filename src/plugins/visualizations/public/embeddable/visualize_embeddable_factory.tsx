@@ -122,7 +122,9 @@ export class VisualizeEmbeddableFactory
 
     try {
       const savedObject = await savedVisualizations.get(savedObjectId);
-      const vis = new Vis(savedObject.visState.type, await convertToSerializedVis(savedObject));
+      const visState = convertToSerializedVis(savedObject);
+      const vis = new Vis(savedObject.visState.type, visState);
+      await vis.setState(visState);
       return createVisEmbeddableFromObject(this.deps)(vis, input, parent);
     } catch (e) {
       console.error(e); // eslint-disable-line no-console
