@@ -5,27 +5,26 @@
  */
 
 import { connect } from 'react-redux';
-import { ImportEditor } from './view';
-
-import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
-
+import { FlyoutBody } from './flyout_body';
 import { INDEXING_STAGE } from '../../../reducers/ui';
 import { updateIndexingStage } from '../../../actions/ui_actions';
 import { getIndexingStage } from '../../../selectors/ui_selectors';
+import { MapStoreState } from '../../../reducers/store';
+import { getMapColors } from '../../../selectors/map_selectors';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state: MapStoreState) {
   return {
-    inspectorAdapters: getInspectorAdapters(state),
     isIndexingTriggered: getIndexingStage(state) === INDEXING_STAGE.TRIGGERED,
+    mapColors: getMapColors(state),
   };
 }
 
 const mapDispatchToProps = {
-  onIndexReady: indexReady =>
+  onIndexReady: (indexReady: boolean) =>
     indexReady ? updateIndexingStage(INDEXING_STAGE.READY) : updateIndexingStage(null),
   importSuccessHandler: () => updateIndexingStage(INDEXING_STAGE.SUCCESS),
   importErrorHandler: () => updateIndexingStage(INDEXING_STAGE.ERROR),
 };
 
-const connectedFlyOut = connect(mapStateToProps, mapDispatchToProps)(ImportEditor);
-export { connectedFlyOut as ImportEditor };
+const connected = connect(mapStateToProps, mapDispatchToProps)(FlyoutBody);
+export { connected as FlyoutBody };

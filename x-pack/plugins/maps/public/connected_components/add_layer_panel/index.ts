@@ -4,37 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AnyAction, Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { AddLayerPanel } from './view';
-
 import { FLYOUT_STATE, INDEXING_STAGE } from '../../reducers/ui';
 import { updateFlyout, updateIndexingStage } from '../../actions/ui_actions';
 import { getFlyoutDisplay, getIndexingStage } from '../../selectors/ui_selectors';
-import { getMapColors } from '../../selectors/map_selectors';
-
-import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
 import {
   setTransientLayer,
   addLayer,
   setSelectedLayer,
   removeTransientLayer,
 } from '../../actions/map_actions';
+import { MapStoreState } from '../../reducers/store';
+import { LayerDescriptor } from '../../../common/descriptor_types';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state: MapStoreState) {
   const indexingStage = getIndexingStage(state);
   return {
-    inspectorAdapters: getInspectorAdapters(state),
     flyoutVisible: getFlyoutDisplay(state) !== FLYOUT_STATE.NONE,
-    mapColors: getMapColors(state),
     isIndexingTriggered: indexingStage === INDEXING_STAGE.TRIGGERED,
     isIndexingSuccess: indexingStage === INDEXING_STAGE.SUCCESS,
     isIndexingReady: indexingStage === INDEXING_STAGE.READY,
   };
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
   return {
-    previewLayer: async layerDescriptor => {
+    previewLayer: async (layerDescriptor: LayerDescriptor) => {
       await dispatch(setSelectedLayer(null));
       await dispatch(removeTransientLayer());
       dispatch(addLayer(layerDescriptor));
@@ -54,7 +51,7 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-const connectedFlyOut = connect(mapStateToProps, mapDispatchToProps, null, { forwardRef: true })(
+const connected = connect(mapStateToProps, mapDispatchToProps, null, { forwardRef: true })(
   AddLayerPanel
 );
-export { connectedFlyOut as AddLayerPanel };
+export { connected as AddLayerPanel };
