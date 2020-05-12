@@ -83,7 +83,6 @@ export function maps(kibana) {
         },
         savedObjects: {
           savedObjectsClient: new SavedObjectsClient(internalRepository),
-          getSavedObjectsRepository: server.savedObjects.getSavedObjectsRepository,
         },
         injectUiAppVars: server.injectUiAppVars,
         getInjectedUiAppVars: server.getInjectedUiAppVars,

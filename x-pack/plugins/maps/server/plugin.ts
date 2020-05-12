@@ -9,13 +9,19 @@ import { PluginSetupContract as FeaturesPluginSetupContract } from '../../featur
 
 import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { mapSavedObjects, mapsTelemetrySavedObjects } from './saved_objects';
+import { ConfigSchema } from '../../../../src/plugins/maps_legacy/config';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
 }
 
 export class MapsPlugin implements Plugin {
-  constructor(initializerContext: PluginInitializerContext) {}
+  readonly _initializerContext: PluginInitializerContext<ConfigSchema>;
+
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+    this._initializerContext = initializerContext;
+  }
+
   setup(core: CoreSetup, plugins: SetupDeps) {
     plugins.features.registerFeature({
       id: APP_ID,
@@ -51,6 +57,14 @@ export class MapsPlugin implements Plugin {
 
     core.savedObjects.registerType(mapsTelemetrySavedObjects);
     core.savedObjects.registerType(mapSavedObjects);
+
+    // @ts-ignore
+    const config$ = this._initializerContext.config.create();
+
+    return {
+      config: config$,
+    };
   }
+
   start(core: CoreStart) {}
 }
