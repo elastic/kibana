@@ -48,13 +48,7 @@ export class TestingFrameworkAdapter implements FrameworkAdapter {
     throw new Error('not yet implamented');
   }
 
-  public registerManagementUI(settings: {
-    sectionId?: string;
-    name: string;
-    basePath: string;
-    visable?: boolean;
-    order?: number;
-  }) {
+  public registerManagementUI(settings: { sectionId?: string; name: string; order?: number }) {
     throw new Error('not yet implamented');
   }
 }

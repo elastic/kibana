@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BASE_PATH } from '../../../legacy/plugins/beats_management/common/constants';
 import { FrontendLibs } from './lib/types';
 import { compose } from './lib/compose/kibana';
 
@@ -35,7 +34,6 @@ async function startApp(libs: FrontendLibs, core: CoreSetup<StartDeps>) {
       name: i18n.translate('xpack.beatsManagement.centralManagementLinkLabel', {
         defaultMessage: 'Central Management',
       }),
-      basePath: BASE_PATH,
       async mount(params) {
         const [coreStart, pluginsStart] = await core.getStartServices();
         setServices(coreStart, pluginsStart, params);
