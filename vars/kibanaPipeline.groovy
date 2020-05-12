@@ -159,7 +159,7 @@ def sendInfraMail() {
 def sendKibanaMail(options = [:]) {
   catchErrors {
     def buildStatus = buildUtils.getBuildStatus()
-    if(params.NOTIFY_ON_FAILURE && buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') {
+    if(buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') { // TODO params.NOTIFY_ON_FAILURE &&
       emailNotifications.onFailure(options)
     }
   }
