@@ -40,7 +40,9 @@ export function TransactionDurationAlertTrigger(props: Props) {
   const { urlParams } = useUrlParams();
 
   const transactionTypes = useServiceTransactionTypes(urlParams);
-  const { environmentOptions } = useEnvironments();
+
+  const { serviceName, start, end } = urlParams;
+  const { environmentOptions } = useEnvironments({ serviceName, start, end });
 
   if (!transactionTypes.length) {
     return null;

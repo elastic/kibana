@@ -67,10 +67,15 @@ function getOptions(environments: string[]) {
 
 export const EnvironmentFilter: React.FC = () => {
   const location = useLocation();
-  const { uiFilters } = useUrlParams();
+  const { uiFilters, urlParams } = useUrlParams();
 
   const { environment } = uiFilters;
-  const { environments, status = 'loading' } = useEnvironments();
+  const { serviceName, start, end } = urlParams;
+  const { environments, status = 'loading' } = useEnvironments({
+    serviceName,
+    start,
+    end
+  });
 
   return (
     <EuiSelect

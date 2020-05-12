@@ -13,6 +13,7 @@ import { ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
 import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
 import { PopoverExpression } from '../ServiceAlertTrigger/PopoverExpression';
 import { useEnvironments, ALL_OPTION } from '../../../hooks/useEnvironments';
+import { useUrlParams } from '../../../hooks/useUrlParams';
 
 export interface ErrorRateAlertTriggerParams {
   windowSize: number;
@@ -30,7 +31,9 @@ interface Props {
 export function ErrorRateAlertTrigger(props: Props) {
   const { setAlertParams, setAlertProperty, alertParams } = props;
 
-  const { environmentOptions } = useEnvironments();
+  const { urlParams } = useUrlParams();
+  const { serviceName, start, end } = urlParams;
+  const { environmentOptions } = useEnvironments({ serviceName, start, end });
 
   const defaults = {
     threshold: 25,

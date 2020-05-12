@@ -11,7 +11,6 @@ import {
   ENVIRONMENT_NOT_DEFINED,
   ENVIRONMENT_ALL
 } from '../../common/environment_filter_values';
-import { useUrlParams } from './useUrlParams';
 
 export const ALL_OPTION = {
   value: ENVIRONMENT_ALL,
@@ -31,9 +30,15 @@ function getEnvironmentOptions(environments: string[]) {
   return [ALL_OPTION, ...environmentOptions];
 }
 
-export function useEnvironments() {
-  const { urlParams } = useUrlParams();
-  const { serviceName, start, end } = urlParams;
+export function useEnvironments({
+  serviceName,
+  start,
+  end
+}: {
+  serviceName?: string;
+  start?: string;
+  end?: string;
+}) {
   const { data: environments = [], status = 'loading' } = useFetcher(
     callApmApi => {
       if (start && end) {
