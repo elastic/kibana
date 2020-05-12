@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
-import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
+import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_CONFIG_SAVED_OBJECT_TYPE,
@@ -16,7 +16,8 @@ import {
   AGENT_ACTION_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   GLOBAL_SETTINGS_SAVED_OBJET_TYPE,
-} from './constants';
+} from '../constants';
+import { migrateDatasourcesToV790 } from './migrations/datasources_v790';
 
 /*
  * Saved object types and mappings
@@ -218,7 +219,14 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
           },
         },
         revision: { type: 'integer' },
+        updated_at: { type: 'date' },
+        updated_by: { type: 'keyword' },
+        created_at: { type: 'date' },
+        created_by: { type: 'keyword' },
       },
+    },
+    migrations: {
+      '7.9.0': migrateDatasourcesToV790,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {

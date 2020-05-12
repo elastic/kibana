@@ -503,10 +503,15 @@ export class EndpointDocGenerator {
    * Generates an Ingest `datasource` that includes the Endpoint Policy data
    */
   public generatePolicyDatasource(): PolicyData {
+    const created = new Date(Date.now() - 8.64e7).toISOString(); // 24h ago
     return {
       id: this.seededUUIDv4(),
       name: 'Endpoint Policy',
       description: 'Policy to protect the worlds data',
+      created_at: created,
+      created_by: 'elastic',
+      updated_at: new Date().toISOString(),
+      updated_by: 'elastic',
       config_id: this.seededUUIDv4(),
       enabled: true,
       output_id: '',
