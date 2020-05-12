@@ -5,13 +5,18 @@
  */
 
 import { ImmutableMiddlewareFactory, PolicyDetailsState, UpdatePolicyResponse } from '../../types';
-import { policyIdFromParams, isOnPolicyDetailsPage, policyDetails } from './selectors';
+import {
+  policyIdFromParams,
+  isOnPolicyDetailsPage,
+  policyDetails,
+  policyDetailsForUpdate,
+} from './selectors';
 import {
   sendGetDatasource,
   sendGetFleetAgentStatusForConfig,
   sendPutDatasource,
 } from '../policy_list/services/ingest';
-import { PolicyData } from '../../../../../common/types';
+import { NewPolicyData, PolicyData } from '../../../../../common/types';
 import { factory as policyConfigFactory } from '../../../../../common/models/policy_config';
 
 export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDetailsState> = coreStart => {
@@ -71,7 +76,8 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
         });
       }
     } else if (action.type === 'userClickedPolicyDetailsSaveButton') {
-      const { id, revision, ...updatedPolicyItem } = policyDetails(state) as PolicyData;
+      const { id } = policyDetails(state) as PolicyData;
+      const updatedPolicyItem = policyDetailsForUpdate(state) as NewPolicyData;
 
       let apiResponse: UpdatePolicyResponse;
       try {
