@@ -18,6 +18,7 @@ import {
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
+  getSimpleMlRule,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -25,8 +26,24 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
-  describe('read_rules', () => {
-    describe('reading rules', () => {
+  describe('create_rules', () => {
+    describe('validation errors', () => {
+      it('should give an error that the index must exist first if it does not exist before creating a rule', async () => {
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getSimpleRule())
+          .expect(400);
+
+        expect(body).to.eql({
+          message:
+            'To create a rule, the index must exist first. Index .siem-signals-default does not exist',
+          status_code: 400,
+        });
+      });
+    });
+
+    describe('creating rules', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
       });
@@ -36,8 +53,57 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllAlerts(es);
       });
 
-      it('should be able to read a single rule using rule_id', async () => {
-        // create a simple rule to read
+      it('should create a single rule with a rule_id', async () => {
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getSimpleRule())
+          .expect(200);
+
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare).to.eql(getSimpleRuleOutput());
+      });
+
+      it('should create a single rule without an input index', async () => {
+        const { index, ...payload } = getSimpleRule();
+        const { index: _index, ...expected } = getSimpleRuleOutput();
+
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(payload)
+          .expect(200);
+
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare).to.eql(expected);
+      });
+
+      it('should create a single rule without a rule_id', async () => {
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getSimpleRuleWithoutRuleId())
+          .expect(200);
+
+        const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
+        expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
+      });
+
+      it('should give a 403 when trying to create a single Machine Learning rule since the license is basic', async () => {
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getSimpleMlRule())
+          .expect(403);
+
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare).to.eql({
+          message: 'Your license does not support machine learning. Please upgrade your license.',
+          status_code: 403,
+        });
+      });
+
+      it('should cause a 409 conflict if we attempt to create the same rule_id twice', async () => {
         await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
@@ -45,74 +111,14 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const { body } = await supertest
-          .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`)
-          .set('kbn-xsrf', 'true')
-          .send(getSimpleRule())
-          .expect(200);
-
-        const bodyToCompare = removeServerGeneratedProperties(body);
-        expect(bodyToCompare).to.eql(getSimpleRuleOutput());
-      });
-
-      it('should be able to read a single rule using id', async () => {
-        // create a simple rule to read
-        const { body: createRuleBody } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
           .send(getSimpleRule())
-          .expect(200);
-
-        const { body } = await supertest
-          .get(`${DETECTION_ENGINE_RULES_URL}?id=${createRuleBody.id}`)
-          .set('kbn-xsrf', 'true')
-          .send(getSimpleRule())
-          .expect(200);
-
-        const bodyToCompare = removeServerGeneratedProperties(body);
-        expect(bodyToCompare).to.eql(getSimpleRuleOutput());
-      });
-
-      it('should be able to read a single rule with an auto-generated rule_id', async () => {
-        // create a simple rule to read
-        const { body: createRuleBody } = await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .send(getSimpleRuleWithoutRuleId())
-          .expect(200);
-
-        const { body } = await supertest
-          .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${createRuleBody.rule_id}`)
-          .set('kbn-xsrf', 'true')
-          .send(getSimpleRule())
-          .expect(200);
-
-        const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
-        expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
-      });
-
-      it('should return 404 if given a fake id', async () => {
-        const { body } = await supertest
-          .get(`${DETECTION_ENGINE_RULES_URL}?id=fake_id`)
-          .set('kbn-xsrf', 'true')
-          .send(getSimpleRule())
-          .expect(404);
+          .expect(409);
 
         expect(body).to.eql({
-          status_code: 404,
-          message: 'id: "fake_id" not found',
-        });
-      });
-
-      it('should return 404 if given a fake rule_id', async () => {
-        const { body } = await supertest
-          .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=fake_id`)
-          .set('kbn-xsrf', 'true')
-          .send(getSimpleRule())
-          .expect(404);
-
-        expect(body).to.eql({
-          status_code: 404,
-          message: 'rule_id: "fake_id" not found',
+          message: 'rule_id: "rule-1" already exists',
+          status_code: 409,
         });
       });
     });
