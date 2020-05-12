@@ -29,9 +29,11 @@ export class GlobalSearchPlugin
     this.logger = this.context.logger.get();
   }
 
-  public async setup(core: CoreSetup<{}, GlobalSearchPluginStart>) {
+  public setup(core: CoreSetup<{}, GlobalSearchPluginStart>) {
     this.logger.debug('Setting up GlobalSearch plugin');
-    const { registerResultProvider } = this.searchService.setup();
+    const { registerResultProvider } = this.searchService.setup({
+      basePath: core.http.basePath,
+    });
 
     registerRoutes(core.http.createRouter());
 
@@ -48,7 +50,7 @@ export class GlobalSearchPlugin
 
   public start(core: CoreStart) {
     this.logger.debug('Starting up GlobalSearch plugin');
-    this.searchServiceStart = this.searchService.start();
+    this.searchServiceStart = this.searchService.start(core);
     return {
       find: this.searchServiceStart.find,
     };
