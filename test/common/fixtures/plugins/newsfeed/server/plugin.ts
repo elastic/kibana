@@ -20,26 +20,24 @@
 import { schema } from '@kbn/config-schema';
 import { CoreSetup, Plugin } from 'kibana/server';
 
-const PATH = '/api/_newsfeed-FTS-external-service-simulators';
-
 export class NewsFeedSimulatorPlugin implements Plugin {
   public setup({ http }: CoreSetup) {
     const router = http.createRouter();
 
     router.get(
       {
-        path: `${PATH}/kibana/v{version}.json`,
+        path: '/api/_newsfeed-FTS-external-service-simulators/kibana/v{version}.json',
         validate: { params: schema.object({ version: schema.string() }) },
         options: { authRequired: false },
       },
       (context, req, res) => {
-        return res.ok({ body: this.mockNewsfeed(req.params.version) });
+        return res.ok({ body: this.mockNewsfeed() });
       }
     );
 
     router.get(
       {
-        path: `${PATH}/kibana/crash.json`,
+        path: '/api/_newsfeed-FTS-external-service-simulators/kibana/crash.json',
         validate: false,
         options: { authRequired: false },
       },
@@ -51,7 +49,7 @@ export class NewsFeedSimulatorPlugin implements Plugin {
 
   public start() {}
 
-  private mockNewsfeed(version: string) {
+  private mockNewsfeed() {
     return {
       items: [
         {

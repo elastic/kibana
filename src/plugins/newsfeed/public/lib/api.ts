@@ -170,7 +170,7 @@ export function getApi(
   config: NewsfeedPluginBrowserConfig,
   kibanaVersion: string
 ): Rx.Observable<void | FetchResult> {
-  const userLanguage = i18n.getLocale() || config.defaultLanguage;
+  const userLanguage = i18n.getLocale();
   const fetchInterval = config.fetchInterval;
   const driver = new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval);
 

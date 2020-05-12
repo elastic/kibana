@@ -473,7 +473,6 @@ describe('getApi', () => {
         urlRoot: 'http://fakenews.co',
         pathTemplate: '/kibana-test/v{VERSION}.json',
       },
-      defaultLanguage: 'en',
       mainInterval: 86400000,
       fetchInterval: 86400000,
     };

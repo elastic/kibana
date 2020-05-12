@@ -25,10 +25,10 @@ export const config: PluginConfigDescriptor<NewsfeedConfigType> = {
   schema: configSchema,
   exposeToBrowser: {
     service: true,
-    defaultLanguage: true,
     mainInterval: true,
     fetchInterval: true,
   },
+  deprecations: ({ unused }) => [unused('defaultLanguage')],
 };
 
 export function plugin() {

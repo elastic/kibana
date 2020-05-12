@@ -25,7 +25,6 @@ export interface NewsfeedPluginBrowserConfig {
     urlRoot: string;
     pathTemplate: string;
   };
-  defaultLanguage: string;
   mainInterval: number; // how often to check last updated time
   fetchInterval: number; // how often to fetch remote service and set last updated
 }
