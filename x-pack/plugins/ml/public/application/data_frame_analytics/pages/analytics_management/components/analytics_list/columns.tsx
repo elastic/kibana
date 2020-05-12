@@ -88,7 +88,7 @@ export const progressColumn = {
             </EuiFlexItem>
             <EuiFlexItem style={{ width: '40px' }} grow={false}>
               <EuiToolTip
-                content={i18n.translate('xpack.ml.dataframe.analyticsList.progress', {
+                content={i18n.translate('xpack.ml.dataframe.analyticsList.progressOfPhase', {
                   defaultMessage: 'Progress of phase {currentPhase}: {progress}%',
                   values: {
                     currentPhase,
