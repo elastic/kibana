@@ -37,9 +37,9 @@ There are two fields, `age` and `expiration`. Use the `age` threshold to specify
 you about certificates that have been valid for too long. Use the `expiration` threshold to make Uptime warn you
 about certificates that have approaching expiration dates.
 
-For example, you may want to make sure that none of your organization's TLS certificates have been
-valid for longer than one year. Modifying the `Age limit` field's value to 365 days will help you keep track of
-which certificates you may want to refresh.
+For example, a common security requirement is to make sure that none of your organization's TLS certificates have been
+valid for longer than one year. Modifying the `Age limit` field's value to 365 days will help you keep track of which
+certificates you may want to refresh.
 
 Likewise, to see which of your TLS certificates are close to expiring ahead of time, specify
 an `Expiration threshold` on this page. When the count of a certificate's remaining valid days falls
