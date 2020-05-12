@@ -14,6 +14,14 @@ const getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
 describe('Mappings editor: edit field', () => {
   let testBed: MappingsEditorTestBed;
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   afterEach(() => {
     onChangeHandler.mockReset();
   });
@@ -35,23 +43,15 @@ describe('Mappings editor: edit field', () => {
       },
     };
 
-    await act(async () => {
-      testBed = await setup({ value: defaultMappings, onChange: onChangeHandler });
-      // Make sure all the fields are expanded and present in the DOM
-      await testBed.actions.expandAllFieldsAndReturnMetadata();
-    });
+    testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+    await testBed.actions.expandAllFieldsAndReturnMetadata();
 
     const {
       find,
-      waitFor,
       actions: { startEditField },
     } = testBed;
     // Open the flyout to edit the field
-    await act(async () => {
-      startEditField('user.address.street');
-    });
-
-    await waitFor('mappingsEditorFieldEdit');
+    startEditField('user.address.street');
 
     // It should have the correct title
     expect(find('mappingsEditorFieldEdit.flyoutTitle').text()).toEqual(`Edit field 'street'`);
@@ -68,60 +68,46 @@ describe('Mappings editor: edit field', () => {
       _meta: {},
       _source: {},
       properties: {
-        myField: {
+        userName: {
           ...defaultTextParameters,
         },
       },
     };
 
-    await act(async () => {
-      testBed = await setup({ value: defaultMappings, onChange: onChangeHandler });
-    });
+    testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
 
     const {
       find,
       exists,
-      waitFor,
-      waitForFn,
       component,
       actions: { startEditField, updateFieldAndCloseFlyout },
     } = testBed;
 
+    expect(exists('userNameField' as any)).toBe(true);
     // Open the flyout, change the field type and save it
-    await act(async () => {
-      startEditField('myField');
+    startEditField('userName');
+
+    // Change the field type
+    find('mappingsEditorFieldEdit.fieldType').simulate('change', [
+      { label: 'Shape', value: defaultShapeParameters.type },
+    ]);
+    act(() => {
+      jest.advanceTimersByTime(1000);
     });
 
-    await waitFor('mappingsEditorFieldEdit');
+    await updateFieldAndCloseFlyout();
 
-    await act(async () => {
-      // Change the field type
-      find('mappingsEditorFieldEdit.fieldType').simulate('change', [
-        { label: 'Shape', value: defaultShapeParameters.type },
-      ]);
-      component.update();
-    });
-
-    await act(async () => {
-      await updateFieldAndCloseFlyout();
-    });
-
-    await waitForFn(
-      async () => exists('mappingsEditorFieldEdit') === false,
-      'Error waiting for the details flyout to close'
-    );
-
-    const { data } = await getMappingsEditorData();
+    const { data } = await getMappingsEditorData(component);
 
     const updatedMappings = {
       ...defaultMappings,
       properties: {
-        myField: {
+        userName: {
           ...defaultShapeParameters,
         },
       },
     };
 
     expect(data).toEqual(updatedMappings);
-  }, 15000);
+  });
 });

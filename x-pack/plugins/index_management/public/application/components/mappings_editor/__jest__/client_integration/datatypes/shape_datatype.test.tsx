@@ -30,6 +30,14 @@ describe.skip('Mappings editor: shape datatype', () => {
    */
   let data: any;
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   test('initial view and default parameters values', async () => {
     const defaultMappings = {
       _meta: {},
@@ -44,32 +52,19 @@ describe.skip('Mappings editor: shape datatype', () => {
     const updatedMappings = { ...defaultMappings };
 
     await act(async () => {
-      testBed = await setup({ value: defaultMappings, onChange: onChangeHandler });
+      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
     });
 
     const {
-      exists,
-      waitFor,
-      waitForFn,
+      component,
       actions: { startEditField, updateFieldAndCloseFlyout },
     } = testBed;
 
     // Open the flyout to edit the field
-    await act(async () => {
-      startEditField('myField');
-    });
-
-    await waitFor('mappingsEditorFieldEdit');
+    startEditField('myField');
 
     // Save the field and close the flyout
-    await act(async () => {
-      await updateFieldAndCloseFlyout();
-    });
-
-    await waitForFn(
-      async () => exists('mappingsEditorFieldEdit') === false,
-      'Error waiting for the details flyout to close'
-    );
+    await updateFieldAndCloseFlyout();
 
     // It should have the default parameters values added
     updatedMappings.properties.myField = {
@@ -77,7 +72,7 @@ describe.skip('Mappings editor: shape datatype', () => {
       ...defaultShapeParameters,
     };
 
-    ({ data } = await getMappingsEditorData());
+    ({ data } = await getMappingsEditorData(component));
     expect(data).toEqual(updatedMappings);
   });
 });
