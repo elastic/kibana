@@ -69,7 +69,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     data: { query: queryService, indexPatterns },
     toastNotifications,
     chrome,
-    core: { docLinks, fatalErrors, uiSettings },
+    core: { docLinks, fatalErrors, uiSettings, application },
     I18nContext,
     setActiveUrl,
     visualizations,
@@ -684,8 +684,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
                   embeddableType: VISUALIZE_EMBEDDABLE_TYPE,
                 });
               } else {
-                const href = chrome.navLinks.get(lastAppType).url;
-                window.location.href = href;
+                application.navigateToApp(lastAppType);
               }
             } else if (savedVis.id === $route.current.params.id) {
               chrome.docTitle.change(savedVis.lastSavedTitle);

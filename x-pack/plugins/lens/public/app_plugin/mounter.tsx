@@ -70,11 +70,7 @@ export async function mountApp(
           embeddableType: LENS_EMBEDDABLE_TYPE,
         });
       } else {
-        const originatingAppLink = coreStart.chrome.navLinks.get(originatingApp);
-        if (!originatingAppLink || !originatingAppLink.url) {
-          throw new Error('Cannot get originating app url');
-        }
-        window.location.href = originatingAppLink.url;
+        coreStart.application.navigateToApp(originatingApp);
       }
     }
   };
