@@ -111,20 +111,22 @@ export interface ServiceRequirements {
 // https://github.com/elastic/package-registry/blob/master/docs/api/search.json
 export type RegistrySearchResults = RegistrySearchResult[];
 // from getPackageOutput at https://github.com/elastic/package-registry/blob/master/search.go
-export type RegistrySearchResult = Pick<
-  RegistryPackage,
-  | 'name'
-  | 'title'
-  | 'version'
-  | 'description'
-  | 'type'
-  | 'icons'
-  | 'internal'
-  | 'download'
-  | 'path'
-  | 'datasets'
-  | 'datasources'
->;
+export type RegistrySearchResult = RegistryPackage;
+// Pick<
+//   RegistryPackage,
+//   | 'name'
+//   | 'title'
+//   | 'version'
+//   | 'description'
+//   | 'type'
+//   | 'icons'
+//   | 'internal'
+//   | 'download'
+//   | 'path'
+//   | 'datasets'
+//   | 'datasources'
+//   | 'removable'
+// >;
 
 export type ScreenshotItem = RegistryImage;
 

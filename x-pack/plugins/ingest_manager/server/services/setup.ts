@@ -35,7 +35,7 @@ export async function setupIngestManager(
   callCluster: CallESAsCurrentUser
 ) {
   const logger = appContextService.getLogger();
-  if (logger) logger.info('setupIngestManager\n await Promise.all');
+  if (logger) logger.info('setupIngestManager START\n await Promise.all(ensure*)');
   const [installedPackages, defaultOutput, config] = await Promise.all([
     // packages installed by default
     ensureInstalledDefaultPackages(soClient, callCluster),
@@ -69,8 +69,9 @@ export async function setupIngestManager(
       return Promise.reject(e);
     }),
   ]);
-  if (logger) logger.info('back from Promise.all');
+  if (logger) logger.info('back from Promise.all with installedPackages, defaultOutput, config');
   // ensure default packages are added to the default conifg
+  if (logger) logger.info(`await agentConfigService.get ${config.id}`);
   const configWithDatasource = await agentConfigService.get(soClient, config.id, true);
   if (!configWithDatasource) {
     throw new Error('Config not found');
@@ -81,20 +82,20 @@ export async function setupIngestManager(
   ) {
     throw new Error('Config not found');
   }
+  if (logger) logger.info('before for-of installedPackages');
   for (const installedPackage of installedPackages) {
     const logid = [installedPackage.name, installedPackage.version].join('-');
-    if (logger) logger.info(`Check installed package ${logid}`);
     const packageShouldBeInstalled = DEFAULT_AGENT_CONFIGS_PACKAGES.some(
       packageName => installedPackage.name === packageName
     );
+    if (logger) logger.info(`${logid} should be installed? ${packageShouldBeInstalled}`);
     if (!packageShouldBeInstalled) {
       continue;
     }
-    if (logger) logger.info(`${logid} should be installed. Is it?`);
     const isInstalled = configWithDatasource.datasources.some((d: Datasource | string) => {
       return typeof d !== 'string' && d.package?.name === installedPackage.name;
     });
-
+    if (logger) logger.info(`${logid} Is it installed? ${isInstalled}`);
     if (!isInstalled) {
       if (logger) logger.info(`${logid} IS NOT installed. await addPackageToConfig()`);
       await addPackageToConfig(soClient, installedPackage, configWithDatasource, defaultOutput);
@@ -102,6 +103,7 @@ export async function setupIngestManager(
       if (logger) logger.info(`${logid} is installed`);
     }
   }
+  if (logger) logger.info('after for-of installedPackages');
 }
 
 export async function setupFleet(

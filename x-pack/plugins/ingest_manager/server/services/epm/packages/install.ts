@@ -36,13 +36,13 @@ export async function installLatestPackage(options: {
   const logger = appContextService.getLogger();
   const { savedObjectsClient, pkgName, callCluster } = options;
   try {
-    if (logger) logger.info(`await registry.fetchFindLatestPackage ${pkgName}`);
+    if (logger) logger.info(`${pkgName} await registry.fetchFindLatestPackage`);
     const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
     const pkgkey = Registry.pkgToPkgKey({
       name: latestPackage.name,
       version: latestPackage.version,
     });
-    if (logger) logger.info(`await installPackage ${pkgName}`);
+    if (logger) logger.info(`${pkgName} await installPackage`);
     return installPackage({ savedObjectsClient, pkgkey, callCluster });
   } catch (err) {
     throw err;
@@ -54,21 +54,41 @@ export async function ensureInstalledDefaultPackages(
   callCluster: CallESAsCurrentUser
 ): Promise<Installation[]> {
   const logger = appContextService.getLogger();
-  const installations = [];
-  // eslint-disable-next-line guard-for-in
-  for (const pkgName in DefaultPackages) {
-    if (logger) logger.info(`check ${pkgName}`);
-    if (!DefaultPackages.hasOwnProperty(pkgName)) continue;
-    if (logger) logger.info(`await ensureInstalledPackage ${pkgName}`);
-    const installation = await ensureInstalledPackage({
+  // ensure base package is installed first
+  const baseInstallation = await ensureInstalledPackage({
+    savedObjectsClient,
+    pkgName: DefaultPackages.base,
+    callCluster,
+  });
+
+  // don't include base package in list to install in parallel / any order
+  const defaultPackages = Object.keys(DefaultPackages).filter(key => key !== DefaultPackages.base);
+  const installationPromises = defaultPackages.map(pkgName => {
+    if (logger) logger.info(`${pkgName} call ensureInstalledPackage`);
+    return ensureInstalledPackage({
       savedObjectsClient,
       pkgName,
       callCluster,
     });
-    if (installation) installations.push(installation);
-  }
+  });
 
-  return installations;
+  if (logger) logger.info(`await other default installations`);
+  const otherInstallations = await Promise.all(installationPromises);
+  if (logger) logger.info(`back from await other default installations`);
+  const installations = [baseInstallation, ...otherInstallations];
+  if (logger)
+    logger.info(
+      `ensureInstalledDefaultPackages installations ${JSON.stringify(
+        installations.map(({ name, version, installed }) => ({
+          name,
+          version,
+          numInstalled: installed.length,
+        })),
+        null,
+        2
+      )}`
+    );
+  return installations as Installation[];
 }
 
 export async function ensureInstalledPackage(options: {
@@ -88,7 +108,7 @@ export async function ensureInstalledPackage(options: {
       pkgName,
       callCluster,
     });
-    return await getInstallation({ savedObjectsClient, pkgName });
+    return getInstallation({ savedObjectsClient, pkgName });
   } catch (err) {
     throw new Error(err.message);
   }
@@ -100,7 +120,7 @@ export async function installPackage(options: {
   callCluster: CallESAsCurrentUser;
 }): Promise<AssetReference[]> {
   const logger = appContextService.getLogger();
-  if (logger) logger.info(`installPackage ${options.pkgkey}`);
+  if (logger) logger.info(`${options.pkgkey} installPackage`);
   const { savedObjectsClient, pkgkey, callCluster } = options;
   // TODO: change epm API to /packageName/version so we don't need to do this
   const [pkgName, pkgVersion] = pkgkey.split('-');
@@ -108,14 +128,23 @@ export async function installPackage(options: {
   // see if some version of this package is already installed
   // TODO: calls to getInstallationObject, Registry.fetchInfo, and Registry.fetchFindLatestPackge
   // and be replaced by getPackageInfo after adjusting for it to not group/use archive assets
-  if (logger) logger.info(`await getInstallationObject ${pkgName}`);
-  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-  if (logger) logger.info(`await Registry.fetchInfo ${pkgName} ${pkgVersion}`);
-  const registryPackageInfo = await Registry.fetchInfo(pkgName, pkgVersion);
-  if (logger) logger.info(`await Registry.fetchFindLatestPackage ${pkgName} ${pkgVersion}`);
-  const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
+  if (logger)
+    logger.info(
+      `${pkgName} await Promise.all( getInstallationObject, Registry.fetchInfo, Registry.fetchFindLatestPackage )`
+    );
+  const [installedPkg, registryPackageInfo, latestPackage] = await Promise.all([
+    getInstallationObject({ savedObjectsClient, pkgName }),
+    Registry.fetchInfo(pkgName, pkgVersion),
+    Registry.fetchFindLatestPackage(pkgName),
+  ]);
+  if (logger)
+    logger.info(
+      `${pkgName} back from Promise.all( getInstallationObject, Registry.fetchInfo, Registry.fetchFindLatestPackage )`
+    );
+  if (!registryPackageInfo)
+    throw Boom.badRequest(`${pkgName} Cannot find package information for version ${pkgVersion}`);
 
-  if (pkgVersion < latestPackage.version)
+  if (!latestPackage || pkgVersion < latestPackage.version)
     throw Boom.badRequest('Cannot install or update to an out-of-date package');
 
   const reinstall = pkgVersion === installedPkg?.attributes.version;
@@ -131,7 +160,7 @@ export async function installPackage(options: {
     }
   }
 
-  if (logger) logger.info(`await Promise.all install assets, pipelines, etc ${pkgkey}`);
+  if (logger) logger.info(`${pkgkey} await Promise.all install assets, pipelines, etc`);
   const [installedKibanaAssets, installedPipelines] = await Promise.all([
     installKibanaAssets({
       savedObjectsClient,
@@ -147,15 +176,17 @@ export async function installPackage(options: {
     // per dataset and we should then save them
     installILMPolicy(pkgName, pkgVersion, callCluster),
   ]);
+  if (logger) logger.info(`${pkgkey} back from Promise.all install assets, pipelines, etc`);
 
   // install or update the templates
-  if (logger) logger.info(`await installTemplates ${pkgkey}`);
+  if (logger) logger.info(`${pkgkey} await installTemplates`);
   const installedTemplates = await installTemplates(
     registryPackageInfo,
     callCluster,
     pkgName,
     pkgVersion
   );
+  if (logger) logger.info(`${pkgkey} back from installTemplates. generateESIndexPatterns`);
   const toSaveESIndexPatterns = generateESIndexPatterns(registryPackageInfo.datasets);
 
   // get template refs to save
