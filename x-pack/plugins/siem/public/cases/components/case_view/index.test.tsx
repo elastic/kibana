@@ -24,7 +24,7 @@ jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_user_actions');
 jest.mock('../../containers/use_get_case');
 jest.mock('../use_push_to_service');
-jest.mock('../../../../containers/case/configure/use_connectors');
+jest.mock('../../containers/configure/use_connectors');
 
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
