@@ -71,7 +71,7 @@ describe('alert_add', () => {
         return { errors: {} };
       },
       alertParamsExpression: TestExpression,
-      requiresAppContext: true,
+      requiresAppContext: false,
     };
 
     const actionTypeModel = {

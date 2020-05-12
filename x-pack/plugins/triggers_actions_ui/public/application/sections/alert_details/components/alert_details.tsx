@@ -75,7 +75,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   const actionTypesByTypeId = indexBy(actionTypes, 'id');
   const hasEditButton =
     canSave && alertTypeRegistry.has(alert.alertTypeId)
-      ? alertTypeRegistry.get(alert.alertTypeId).requiresAppContext
+      ? !alertTypeRegistry.get(alert.alertTypeId).requiresAppContext
       : false;
 
   const alertActions = alert.actions;

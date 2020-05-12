@@ -99,7 +99,7 @@ export function getAlertType(): AlertTypeModel {
 
       return validationResult;
     },
-    requiresAppContext: true,
+    requiresAppContext: false,
   };
 }
 

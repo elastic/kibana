@@ -171,7 +171,7 @@ export const AlertForm = ({
       ? alertTypeRegistry
           .list()
           .filter(
-            (alertTypeRegistryItem: AlertTypeModel) => alertTypeRegistryItem.requiresAppContext
+            (alertTypeRegistryItem: AlertTypeModel) => !alertTypeRegistryItem.requiresAppContext
           )
       : alertTypeRegistry
           .list()

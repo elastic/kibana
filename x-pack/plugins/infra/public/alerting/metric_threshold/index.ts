@@ -30,6 +30,6 @@ Reason:
 `,
       }
     ),
-    requiresAppContext: true,
+    requiresAppContext: false,
   };
 }

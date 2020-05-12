@@ -44,7 +44,7 @@ const alertType = {
     return { errors: {} };
   },
   alertParamsExpression: () => null,
-  requiresAppContext: true,
+  requiresAppContext: false,
 };
 alertTypeRegistry.list.mockReturnValue([alertType]);
 actionTypeRegistry.list.mockReturnValue([]);
