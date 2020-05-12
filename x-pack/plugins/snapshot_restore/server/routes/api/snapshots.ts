@@ -206,9 +206,6 @@ export function registerSnapshotsRoutes({
         // We intentially perform deletion requests sequentially (blocking) instead of in parallel (non-blocking)
         // because there can only be one snapshot deletion task performed at a time (ES restriction).
         for (let i = 0; i < snapshots.length; i++) {
-          // IDs come in the format of `repository-name/snapshot-name`
-          // Extract the two parts by splitting at last occurrence of `/` in case
-          // repository name contains '/` (from older versions)
           const { snapshot, repository } = snapshots[i];
 
           await callAsCurrentUser('snapshot.delete', { snapshot, repository })
