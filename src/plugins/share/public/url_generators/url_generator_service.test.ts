@@ -30,12 +30,26 @@ test('Asking for a generator that does not exist throws an error', () => {
 });
 
 test('Registering and retrieving a generator', async () => {
-  setup.registerUrlGenerator({
+  const generator = setup.registerUrlGenerator({
     id: 'TEST_GENERATOR',
     createUrl: () => Promise.resolve('myurl'),
   });
-  const generator = start.getUrlGenerator('TEST_GENERATOR');
+
   expect(generator).toMatchInlineSnapshot(`
+    Object {
+      "createUrl": [Function],
+      "id": "TEST_GENERATOR",
+      "isDeprecated": false,
+      "migrate": [Function],
+    }
+  `);
+  await expect(generator.migrate({})).rejects.toEqual(
+    new Error('You cannot call migrate on a non-deprecated generator.')
+  );
+  expect(await generator.createUrl({})).toBe('myurl');
+
+  const retrievedGenerator = start.getUrlGenerator('TEST_GENERATOR');
+  expect(retrievedGenerator).toMatchInlineSnapshot(`
     Object {
       "createUrl": [Function],
       "id": "TEST_GENERATOR",
