@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/machine_learning/security_common';
+import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
@@ -32,7 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         },
         dest: {
-          index: `user-bm_${jobId}_1`,
+          index: `user-${jobId}_1`,
           results_field: 'ml',
         },
         analysis: {
@@ -58,7 +59,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         },
         dest: {
-          index: `user-bm_${jobId}_2`,
+          index: `user-${jobId}_2`,
           results_field: 'ml',
         },
         analysis: {
@@ -76,11 +77,11 @@ export default ({ getService }: FtrProviderContext) => {
     ];
 
     for (const jobConfig of mockJobConfigs) {
-      await ml.api.createDataFrameAnalyticsJob(jobConfig);
+      await ml.api.createDataFrameAnalyticsJob(jobConfig as DataFrameAnalyticsConfig);
     }
   }
 
-  describe('GetDataFrameAnalytics', () => {
+  describe('GET data_frame/analytics', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/bm_classification');
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -166,7 +167,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.count).to.eql(2);
         expect(body.data_frame_analytics.length).to.eql(2);
         expect(body.data_frame_analytics[0].id).to.eql(`${jobId}_1`);
-        expect(body.data_frame_analytics[0]).to.keys(
+        expect(body.data_frame_analytics[0]).to.have.keys(
           'id',
           'state',
           'progress',
@@ -189,7 +190,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('GetDataFrameAnalyticsStatsById', () => {
-      it('should fetch analytics job stats', async () => {
+      it('should fetch single analytics job stats by id', async () => {
         const { body } = await supertest
           .get(`/api/ml/data_frame/analytics/${jobId}_1/_stats`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
@@ -198,7 +199,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.count).to.eql(1);
         expect(body.data_frame_analytics.length).to.eql(1);
         expect(body.data_frame_analytics[0].id).to.eql(`${jobId}_1`);
-        expect(body.data_frame_analytics[0]).to.keys(
+        expect(body.data_frame_analytics[0]).to.have.keys(
           'id',
           'state',
           'progress',
@@ -216,7 +217,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.count).to.eql(2);
         expect(body.data_frame_analytics.length).to.eql(2);
         expect(body.data_frame_analytics[0].id).to.eql(`${jobId}_1`);
-        expect(body.data_frame_analytics[0]).to.keys(
+        expect(body.data_frame_analytics[0]).to.have.keys(
           'id',
           'state',
           'progress',
