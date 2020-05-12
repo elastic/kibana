@@ -106,7 +106,9 @@ def sendFailedBuild(Map params = [:]) {
 
     def config = [
       // to: 'build-kibana@elastic.co',
+      // replyTo: 'build-kibana@elastic.co',
       to: 'brian.seeders@elastic.co',
+      replyTo: 'brian.seeders@elastic.co',
       subject: subject,
       body: body,
       mimeType: 'text/html',
@@ -114,6 +116,7 @@ def sendFailedBuild(Map params = [:]) {
 
     emailext(
       to: config.to,
+      replyTo: replyTo,
       subject: config.subject,
       body: config.body,
       mimeType: config.mimeType,
@@ -127,6 +130,10 @@ def onFailure(Map options = [:], Closure closure) {
     closure()
   }
 
+  onFailure(options)
+}
+
+def onFailure(Map options = [:]) {
   def status = buildUtils.getBuildStatus()
   if (status != "SUCCESS" && status != "UNSTABLE") {
     catchErrors {

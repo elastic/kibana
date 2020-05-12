@@ -3,8 +3,10 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
-node('flyweight') {
-  emailNotifications.onFailure {
+catchError {
+  node('flyweight') {
     sh 'exit 1'
   }
 }
+
+sendMail([extra: 'Some extra info', subject: 'Custom Subject'])

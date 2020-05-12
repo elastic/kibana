@@ -131,7 +131,7 @@ def publishJunit() {
   junit(testResults: 'target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
 }
 
-def sendMail() {
+def sendMail(options = [:]) {
   // If the build doesn't have a result set by this point, there haven't been any errors and it can be marked as a success
   // The e-mail plugin for the infra e-mail depends upon this being set
   currentBuild.result = currentBuild.result ?: 'SUCCESS'
@@ -140,7 +140,7 @@ def sendMail() {
   if (buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') {
     node('flyweight') {
       sendInfraMail()
-      sendKibanaMail()
+      sendKibanaMail(options)
     }
   }
 }
@@ -156,16 +156,11 @@ def sendInfraMail() {
   }
 }
 
-def sendKibanaMail() {
+def sendKibanaMail(options = [:]) {
   catchErrors {
     def buildStatus = buildUtils.getBuildStatus()
     if(params.NOTIFY_ON_FAILURE && buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') {
-      emailext(
-        to: 'build-kibana@elastic.co',
-        subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - ${buildStatus}",
-        body: '${SCRIPT,template="groovy-html.template"}',
-        mimeType: 'text/html',
-      )
+      emailNotifications.onFailure(options)
     }
   }
 }
