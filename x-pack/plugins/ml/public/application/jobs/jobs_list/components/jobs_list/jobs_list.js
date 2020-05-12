@@ -71,7 +71,7 @@ export class JobsList extends Component {
       return id;
     }
 
-    return <EuiLink href={getJobIdUrl(id)}>{id}</EuiLink>;
+    return <EuiLink href={getJobIdUrl('jobs', id)}>{id}</EuiLink>;
   }
 
   getPageOfJobs(index, size, sortField, sortDirection) {
