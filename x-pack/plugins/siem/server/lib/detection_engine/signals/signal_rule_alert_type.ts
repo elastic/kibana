@@ -215,7 +215,7 @@ export const signalRulesAlertType = ({
             throw new Error('lists plugin unavailable during rule execution');
           }
           let listClient;
-          let listExceptions;
+          // let listExceptions;
           // let listValueType: ListValueType | undefined;
           // let listValueField;
           // let listId;
@@ -231,7 +231,7 @@ export const signalRulesAlertType = ({
             // assume only one list per rule right now...
             // actually... I should probably just pass down the
             // exceptions and handle them as objects in the filter events function...
-            listExceptions = exceptionsList?.filter(item => item.values_type === 'list');
+            // listExceptions = exceptionsList?.filter(item => item.values_type === 'list');
             // listValueType = 'ip';
             // listValueField = 'source.ip';
             // listId = 'ci-badguys.txt';

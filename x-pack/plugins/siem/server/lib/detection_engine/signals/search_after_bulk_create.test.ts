@@ -97,9 +97,19 @@ describe('searchAfterAndBulkCreate', () => {
         getListItemByValues: async ({ value }: { type: string; listId: string; value: string[] }) =>
           (value as unknown) as ListItemArraySchema,
       } as unknown) as ListClient,
-      listValueType: 'ip',
-      listValueField: 'source.ip',
-      listId: 'ci-badguys.txt',
+      exceptionsList: [
+        {
+          field: 'source.ip',
+          values_operator: 'excluded',
+          values_type: 'list',
+          values: [
+            {
+              id: 'ci-badguys.txt',
+              name: 'ip',
+            },
+          ],
+        },
+      ],
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
@@ -164,9 +174,19 @@ describe('searchAfterAndBulkCreate', () => {
         getListItemByValues: async ({ value }: { type: string; listId: string; value: string[] }) =>
           (value as unknown) as ListItemArraySchema,
       } as unknown) as ListClient,
-      listValueType: 'ip',
-      listValueField: 'source.ip',
-      listId: 'ci-badguys.txt',
+      exceptionsList: [
+        {
+          field: 'source.ip',
+          values_operator: 'excluded',
+          values_type: 'list',
+          values: [
+            {
+              id: 'ci-badguys.txt',
+              name: 'ip',
+            },
+          ],
+        },
+      ],
       services: mockService,
       logger: mockLogger,
       id: sampleRuleGuid,
@@ -201,9 +221,19 @@ describe('searchAfterAndBulkCreate', () => {
       listClient: ({
         getListItemByValues: ({ value }: { value: string[] }) => value,
       } as unknown) as ListClient,
-      listValueType: 'ip',
-      listValueField: 'source.ip',
-      listId: 'ci-badguys.txt',
+      exceptionsList: [
+        {
+          field: 'source.ip',
+          values_operator: 'excluded',
+          values_type: 'list',
+          values: [
+            {
+              id: 'ci-badguys.txt',
+              name: 'ip',
+            },
+          ],
+        },
+      ],
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
@@ -237,9 +267,19 @@ describe('searchAfterAndBulkCreate', () => {
       listClient: ({
         getListItemByValues: ({ value }: { value: string[] }) => value,
       } as unknown) as ListClient,
-      listValueType: 'ip',
-      listValueField: 'source.ip',
-      listId: 'ci-badguys.txt',
+      exceptionsList: [
+        {
+          field: 'source.ip',
+          values_operator: 'excluded',
+          values_type: 'list',
+          values: [
+            {
+              id: 'ci-badguys.txt',
+              name: 'ip',
+            },
+          ],
+        },
+      ],
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
@@ -335,9 +375,19 @@ describe('searchAfterAndBulkCreate', () => {
       listClient: ({
         getListItemByValues: ({ value }: { value: string[] }) => value,
       } as unknown) as ListClient,
-      listValueType: 'ip',
-      listValueField: 'source.ip',
-      listId: 'ci-badguys.txt',
+      exceptionsList: [
+        {
+          field: 'source.ip',
+          values_operator: 'excluded',
+          values_type: 'list',
+          values: [
+            {
+              id: 'ci-badguys.txt',
+              name: 'ip',
+            },
+          ],
+        },
+      ],
       ruleParams: sampleParams,
       services: mockService,
       logger: mockLogger,
