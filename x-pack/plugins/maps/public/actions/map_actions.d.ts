@@ -10,6 +10,7 @@ import { AnyAction } from 'redux';
 import { LAYER_TYPE } from '../../common/constants';
 import {
   DataMeta,
+  LayerDescriptor,
   MapFilters,
   MapCenterAndZoom,
   MapRefreshConfig,
@@ -86,3 +87,13 @@ export function fitToLayerExtent(layerId: string): AnyAction;
 export function removeLayer(layerId: string): AnyAction;
 
 export function toggleLayerVisible(layerId: string): AnyAction;
+
+export function clearTransientLayerStateAndCloseFlyout(): AnyAction;
+
+export function setTransientLayer(layerId: string | null): AnyAction;
+
+export function removeTransientLayer(): AnyAction;
+
+export function addLayer(layerDescriptor: LayerDescriptor): AnyAction;
+
+export function setSelectedLayer(layerId: string | null): AnyAction;
