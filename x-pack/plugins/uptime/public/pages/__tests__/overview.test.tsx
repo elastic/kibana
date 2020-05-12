@@ -102,6 +102,7 @@ describe('MonitorPage', () => {
           autocomplete={autocomplete}
           indexPattern={indexPattern}
           setEsKueryFilters={jest.fn()}
+          loading={false}
         />
       )
     ).toMatchSnapshot();

@@ -9,7 +9,7 @@ import React, { useContext, useCallback } from 'react';
 import { selectPingList } from '../../../state/selectors';
 import { getPings } from '../../../state/actions';
 import { GetPingsParams } from '../../../../common/runtime_types';
-import { UptimeSettingsContext } from '../../../contexts';
+import { UptimeRefreshContext, UptimeSettingsContext } from '../../../contexts';
 import { PingListComponent } from './index';
 
 export interface PingListProps {
@@ -18,13 +18,12 @@ export interface PingListProps {
 
 export const PingList = (props: PingListProps) => {
   const {
-    lastRefresh,
-    pings: {
-      error,
-      loading,
-      pingList: { locations, pings, total },
-    },
+    error,
+    loading,
+    pingList: { locations, pings, total },
   } = useSelector(selectPingList);
+
+  const { lastRefresh } = useContext(UptimeRefreshContext);
 
   const { dateRangeStart: drs, dateRangeEnd: dre } = useContext(UptimeSettingsContext);
 

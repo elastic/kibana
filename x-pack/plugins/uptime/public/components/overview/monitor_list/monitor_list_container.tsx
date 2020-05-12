@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { getMonitorList } from '../../../state/actions';
 import { monitorListSelector } from '../../../state/selectors';
 import { MonitorListComponent } from './monitor_list';
 import { useUrlParams } from '../../../hooks';
+import { UptimeRefreshContext } from '../../../contexts';
 
 export interface MonitorListProps {
   filters?: string;
@@ -26,7 +27,9 @@ export const MonitorList: React.FC<MonitorListProps> = props => {
   const [getUrlValues] = useUrlParams();
   const { dateRangeStart, dateRangeEnd, pagination, statusFilter } = getUrlValues();
 
-  const { lastRefresh, monitorList } = useSelector(monitorListSelector);
+  const { lastRefresh } = useContext(UptimeRefreshContext);
+
+  const monitorList = useSelector(monitorListSelector);
 
   useEffect(() => {
     dispatch(

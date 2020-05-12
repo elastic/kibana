@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { HistogramPoint, FetchMonitorStatesQueryArgs } from '../../../../common/runtime_types';
+import { HistogramPoint } from '../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../common/runtime_types';
 import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { ExpandedRowMap } from './types';
@@ -28,7 +28,6 @@ import { MonitorListPageSizeSelect } from './monitor_list_page_size_select';
 import { MonitorListDrawer } from './monitor_list_drawer/list_drawer_container';
 import { MonitorListProps } from './monitor_list_container';
 import { MonitorList } from '../../../state/reducers/monitor_list';
-import { useUrlParams } from '../../../hooks';
 import { CertStatusColumn } from './cert_status_column';
 import { MonitorListHeader } from './monitor_list_header';
 
