@@ -142,6 +142,7 @@ export interface RecentNavLink {
   title: string;
   'aria-label': string;
   iconType?: string;
+  onClick?(event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void;
 }
 
 /**
