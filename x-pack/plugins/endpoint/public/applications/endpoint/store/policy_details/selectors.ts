@@ -6,11 +6,28 @@
 
 import { createSelector } from 'reselect';
 import { PolicyDetailsState } from '../../types';
-import { Immutable, PolicyConfig, UIPolicyConfig } from '../../../../../common/types';
+import {
+  Immutable,
+  NewPolicyData,
+  PolicyConfig,
+  UIPolicyConfig,
+} from '../../../../../common/types';
 import { factory as policyConfigFactory } from '../../../../../common/models/policy_config';
 
 /** Returns the policy details */
 export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.policyItem;
+
+/**
+ * Return only the policy structure accepted for update/create
+ */
+export const policyDetailsForUpdate: (
+  state: Immutable<PolicyDetailsState>
+) => Immutable<NewPolicyData> | undefined = createSelector(policyDetails, policy => {
+  if (policy) {
+    const { id, revision, created_by, created_at, updated_by, updated_at, ...newPolicy } = policy;
+    return newPolicy;
+  }
+});
 
 /** Returns a boolean of whether the user is on the policy details page or not */
 export const isOnPolicyDetailsPage = (state: Immutable<PolicyDetailsState>) => {
