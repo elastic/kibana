@@ -21,5 +21,5 @@ export interface SavedObjectsImportOptions
 |  [overwrite](./kibana-plugin-core-server.savedobjectsimportoptions.overwrite.md) | <code>boolean</code> | if true, will override existing object if present |
 |  [readStream](./kibana-plugin-core-server.savedobjectsimportoptions.readstream.md) | <code>Readable</code> | The stream of [saved objects](./kibana-plugin-core-server.savedobject.md) to import |
 |  [savedObjectsClient](./kibana-plugin-core-server.savedobjectsimportoptions.savedobjectsclient.md) | <code>SavedObjectsClientContract</code> | [client](./kibana-plugin-core-server.savedobjectsclientcontract.md) to use to perform the import operation |
-|  [supportedTypes](./kibana-plugin-core-server.savedobjectsimportoptions.supportedtypes.md) | <code>string[]</code> | the list of allowed types to import |
+|  [typeRegistry](./kibana-plugin-core-server.savedobjectsimportoptions.typeregistry.md) | <code>ISavedObjectTypeRegistry</code> | The registry of all known saved object types |
 

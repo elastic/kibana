@@ -4,6 +4,8 @@
 
 ## SavedObjectsImportRetry.overwrite property
 
+Resolve an import conflict by overwriting a destination object. Note: this attribute is mutually-exclusive with `duplicate`<!-- -->. If both are enabled, `overwrite` takes precedence.
+
 <b>Signature:</b>
 
 ```typescript

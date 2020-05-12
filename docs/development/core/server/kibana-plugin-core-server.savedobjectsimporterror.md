@@ -16,7 +16,7 @@ export interface SavedObjectsImportError
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [error](./kibana-plugin-core-server.savedobjectsimporterror.error.md) | <code>SavedObjectsImportConflictError &#124; SavedObjectsImportUnsupportedTypeError &#124; SavedObjectsImportMissingReferencesError &#124; SavedObjectsImportUnknownError</code> |  |
+|  [error](./kibana-plugin-core-server.savedobjectsimporterror.error.md) | <code>SavedObjectsImportConflictError &#124; SavedObjectsImportAmbiguousConflictError &#124; SavedObjectsImportUnsupportedTypeError &#124; SavedObjectsImportMissingReferencesError &#124; SavedObjectsImportUnknownError</code> |  |
 |  [id](./kibana-plugin-core-server.savedobjectsimporterror.id.md) | <code>string</code> |  |
 |  [title](./kibana-plugin-core-server.savedobjectsimporterror.title.md) | <code>string</code> |  |
 |  [type](./kibana-plugin-core-server.savedobjectsimporterror.type.md) | <code>string</code> |  |

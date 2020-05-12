@@ -1031,7 +1031,7 @@ export interface ImageValidation {
 }
 
 // @public
-export function importSavedObjectsFromStream({ readStream, objectLimit, overwrite, savedObjectsClient, supportedTypes, namespace, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+export function importSavedObjectsFromStream({ readStream, objectLimit, overwrite, savedObjectsClient, typeRegistry, namespace, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
 
 // @public (undocumented)
 export interface IndexSettingsDeprecationInfo {
@@ -1595,7 +1595,7 @@ export type RequestHandlerContextProvider<TContextName extends keyof RequestHand
 export type RequestHandlerWrapper = <P, Q, B, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory>(handler: RequestHandler<P, Q, B, Method, ResponseFactory>) => RequestHandler<P, Q, B, Method, ResponseFactory>;
 
 // @public
-export function resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, supportedTypes, namespace, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
+export function resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, typeRegistry, namespace, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
 
 // @public
 export type ResponseError = string | Error | {
@@ -1699,12 +1699,15 @@ export interface SavedObject<T = unknown> {
     attributes: T;
     // (undocumented)
     error?: {
+        error: string;
         message: string;
         statusCode: number;
+        metadata?: Record<string, unknown>;
     };
     id: string;
     migrationVersion?: SavedObjectsMigrationVersion;
     namespaces?: string[];
+    originId?: string;
     references: SavedObjectReference[];
     type: string;
     updated_at?: string;
@@ -1771,6 +1774,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
     // (undocumented)
     id?: string;
     migrationVersion?: SavedObjectsMigrationVersion;
+    originId?: string;
     // (undocumented)
     references?: SavedObjectReference[];
     // (undocumented)
@@ -1902,6 +1906,7 @@ export interface SavedObjectsCoreFieldMapping {
 export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     id?: string;
     migrationVersion?: SavedObjectsMigrationVersion;
+    originId?: string;
     overwrite?: boolean;
     // (undocumented)
     references?: SavedObjectReference[];
@@ -2019,6 +2024,7 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
     page?: number;
     // (undocumented)
     perPage?: number;
+    rawSearchFields?: string[];
     search?: string;
     searchFields?: string[];
     // (undocumented)
@@ -2042,6 +2048,24 @@ export interface SavedObjectsFindResponse<T = unknown> {
 }
 
 // @public
+export interface SavedObjectsImportAmbiguousConflictError {
+    // (undocumented)
+    destinations: Array<{
+        id: string;
+        title?: string;
+        updatedAt?: string;
+    }>;
+    // (undocumented)
+    sources: Array<{
+        id: string;
+        title?: string;
+        updatedAt?: string;
+    }>;
+    // (undocumented)
+    type: 'ambiguous_conflict';
+}
+
+// @public
 export interface SavedObjectsImportConflictError {
     // (undocumented)
     type: 'conflict';
@@ -2050,7 +2074,7 @@ export interface SavedObjectsImportConflictError {
 // @public
 export interface SavedObjectsImportError {
     // (undocumented)
-    error: SavedObjectsImportConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
+    error: SavedObjectsImportConflictError | SavedObjectsImportAmbiguousConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
     // (undocumented)
     id: string;
     // (undocumented)
@@ -2082,7 +2106,7 @@ export interface SavedObjectsImportOptions {
     overwrite: boolean;
     readStream: Readable;
     savedObjectsClient: SavedObjectsClientContract;
-    supportedTypes: string[];
+    typeRegistry: ISavedObjectTypeRegistry;
 }
 
 // @public
@@ -2093,13 +2117,16 @@ export interface SavedObjectsImportResponse {
     success: boolean;
     // (undocumented)
     successCount: number;
+    // (undocumented)
+    successResults?: SavedObjectsImportSuccess[];
 }
 
 // @public
 export interface SavedObjectsImportRetry {
+    duplicate?: boolean;
     // (undocumented)
     id: string;
-    // (undocumented)
+    idToOverwrite?: string;
     overwrite: boolean;
     // (undocumented)
     replaceReferences: Array<{
@@ -2107,6 +2134,15 @@ export interface SavedObjectsImportRetry {
         from: string;
         to: string;
     }>;
+    // (undocumented)
+    type: string;
+}
+
+// @public
+export interface SavedObjectsImportSuccess {
+    // (undocumented)
+    id: string;
+    newId?: string;
     // (undocumented)
     type: string;
 }
@@ -2221,16 +2257,9 @@ export class SavedObjectsRepository {
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<{}>;
     // (undocumented)
-    find<T = unknown>({ search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
+    find<T = unknown>({ search, defaultSearchOperator, searchFields, rawSearchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
-    incrementCounter(type: string, id: string, counterFieldName: string, options?: SavedObjectsIncrementCounterOptions): Promise<{
-        id: string;
-        type: string;
-        updated_at: string;
-        references: any;
-        version: string;
-        attributes: any;
-    }>;
+    incrementCounter(type: string, id: string, counterFieldName: string, options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
     }
 
@@ -2247,7 +2276,7 @@ export interface SavedObjectsResolveImportErrorsOptions {
     readStream: Readable;
     retries: SavedObjectsImportRetry[];
     savedObjectsClient: SavedObjectsClientContract;
-    supportedTypes: string[];
+    typeRegistry: ISavedObjectTypeRegistry;
 }
 
 // @internal @deprecated (undocumented)

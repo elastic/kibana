@@ -16,8 +16,10 @@ export interface SavedObjectsImportRetry
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [duplicate](./kibana-plugin-core-server.savedobjectsimportretry.duplicate.md) | <code>boolean</code> | Resolve an import conflict by creating a duplicate object with a new (undefined) originId. Note: this attribute is mutually-exclusive with <code>overwrite</code>. If both are enabled, <code>overwrite</code> takes precedence. |
 |  [id](./kibana-plugin-core-server.savedobjectsimportretry.id.md) | <code>string</code> |  |
-|  [overwrite](./kibana-plugin-core-server.savedobjectsimportretry.overwrite.md) | <code>boolean</code> |  |
+|  [idToOverwrite](./kibana-plugin-core-server.savedobjectsimportretry.idtooverwrite.md) | <code>string</code> | The object ID that will be overwritten. Only used if <code>overwrite</code> == true. This is required to resolve ambiguous conflicts. |
+|  [overwrite](./kibana-plugin-core-server.savedobjectsimportretry.overwrite.md) | <code>boolean</code> | Resolve an import conflict by overwriting a destination object. Note: this attribute is mutually-exclusive with <code>duplicate</code>. If both are enabled, <code>overwrite</code> takes precedence. |
 |  [replaceReferences](./kibana-plugin-core-server.savedobjectsimportretry.replacereferences.md) | <code>Array&lt;{</code><br/><code>        type: string;</code><br/><code>        from: string;</code><br/><code>        to: string;</code><br/><code>    }&gt;</code> |  |
 |  [type](./kibana-plugin-core-server.savedobjectsimportretry.type.md) | <code>string</code> |  |
 
