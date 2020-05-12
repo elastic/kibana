@@ -341,7 +341,6 @@ export class DashboardAppController {
         .then((container: DashboardContainer | ErrorEmbeddable | undefined) => {
           if (container && !isErrorEmbeddable(container)) {
             dashboardContainer = container;
-
             dashboardContainer.renderEmpty = () => {
               const shouldShowEditHelp = getShouldShowEditHelp();
               const shouldShowViewHelp = getShouldShowViewHelp();
@@ -405,6 +404,7 @@ export class DashboardAppController {
               const type = $routeParams[DashboardConstants.ADD_EMBEDDABLE_TYPE];
               const id = $routeParams[DashboardConstants.ADD_EMBEDDABLE_ID];
               container.addNewEmbeddable<SavedObjectEmbeddableInput>(type, { savedObjectId: id });
+              // debugger;
               removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_TYPE);
               removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_ID);
             }
