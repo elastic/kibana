@@ -30,17 +30,19 @@ docs for more information.
 
 === Certificate thresholds
 
-The settings page also allows you to specify thresholds for all the TLS certificates monitored
-in your environment. There is a field for maximum age, and the minimum number of days before
-expiration before Uptime should consider a monitor to be in warning state.
+You can modify settings in this section to control how Uptime will visualize your TLS values in the Certificates page.
+These settings also determine which certificates will be selected by any TLS alert you define.
+
+There are two fields, `age` and `expiration`. Use the `age` threshold to determine when Uptime should warn
+you about certificates who have been valid for too long. Use the `expiration` threshold to make Uptime warn you
+about certificates that have approaching expiration dates.
 
 For example, you may want to make sure that none of your organization's TLS certificates have been
-valid for longer than one year. This is becoming a common security requirement. Modifying the `Age limit`
-field's value to 365 days will help you keep track of which certificates you may want to refresh.
+valid for longer than one year. Modifying the `Age limit` field's value to 365 days will help you keep track of
+which certificates you may want to refresh.
 
-Likewise, if you want to see which of your TLS certificates are close to expiring ahead of time, specify
+Likewise, to see which of your TLS certificates are close to expiring ahead of time, specify
 an `Expiration threshold` on this page. When the count of a certificate's remaining valid days falls
-below this threshold, Uptime will consider it in a warning state.
+below this threshold, Uptime will consider it in a warning state. If you have defined a TLS alert, you will
+receive a notification from Uptime about the certificate.
 
-The thresholds specified on this page affect how your certificates are visualized on the Certificates page,
-and which certificates Uptime will warn about when running a TLS alert.

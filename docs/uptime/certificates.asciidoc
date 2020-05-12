@@ -6,10 +6,11 @@
 [role="screenshot"]
 image::uptime/images/certificates-page.png[Certificates]
 
-Uptime has a certificates page, which will visualize all of the TLS certificates Heartbeat
-is monitoring in your indices. In addition to the common name, associated monitors, issuer
-information, and SHA fingerprints, Uptime will also assign a status based on the values stored
-in the <<uptime-settings, Settings page>>.
+Uptime has a certificates page; you can use this page to visualize any TLS certificate data
+in your indices. In addition to the common name, associated monitors, issuer information,
+and SHA fingerprints, Uptime also assigns a status derived from the threshold values in
+the <<uptime-settings, Settings page>>.
 
-Several of the columns on this page are sortable, and the search bar at the top of the view
-allows you to search on most of the TLS-related fields in your Uptime indices. Additionally, the `Alerts` dropdown at the top of the page will allow you to define a TLS alert.
+Several of the columns on this page are sortable. You can use the search bar at the top of the view
+to find values in most of the TLS-related fields in your Uptime indices. Additionally, you can
+create a TLS alert using the `Alerts` dropdown at the top of the page.
