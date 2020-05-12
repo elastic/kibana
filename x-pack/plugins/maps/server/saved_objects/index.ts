@@ -3,6 +3,5 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-export { AlertAdd } from './alert_add';
-export { AlertEdit } from './alert_edit';
+export { mapsTelemetrySavedObjects } from './maps_telemetry';
+export { mapSavedObjects } from './map';
