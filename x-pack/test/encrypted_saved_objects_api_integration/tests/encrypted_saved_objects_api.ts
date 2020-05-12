@@ -345,11 +345,12 @@ export default function({ getService }: FtrProviderContext) {
   }
 
   describe('encrypted saved objects API', () => {
-    // To workaround bug in SO bulk operations that return "raw" IDs for SO that were created
-    // without specifying ID.
     function generateRawId(id: string, type: string, spaceId?: string) {
-      const idPrefix = spaceId ? `${spaceId}:${type}` : type;
-      return id.startsWith(idPrefix) ? id : `${idPrefix}:${id}`;
+      return `${
+        spaceId && type !== SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE
+          ? `${spaceId}:${type}`
+          : type
+      }:${id}`;
     }
 
     afterEach(async () => {
@@ -408,12 +409,7 @@ export default function({ getService }: FtrProviderContext) {
         runTests(
           SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE,
           () => `/s/${SPACE_ID}/api/saved_objects/`,
-          (id, type) =>
-            generateRawId(
-              id,
-              type,
-              type === SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE ? undefined : SPACE_ID
-            )
+          (id, type) => generateRawId(id, type, SPACE_ID)
         );
       });
     });

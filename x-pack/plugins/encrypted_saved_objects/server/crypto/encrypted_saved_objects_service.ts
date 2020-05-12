@@ -10,7 +10,7 @@ import typeDetect from 'type-detect';
 import { Logger } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/common/model';
 import { EncryptedSavedObjectsAuditLogger } from '../audit';
-import { EncryptionError } from './encryption_error';
+import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
 import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
 
 /**
@@ -127,39 +127,33 @@ export class EncryptedSavedObjectsService {
 
   /**
    * Takes saved object attributes for the specified type and, depending on the type definition,
-   * either strips or decrypts encrypted attributes.
+   * either decrypts or strips encrypted attributes (e.g. in case AAD or encryption key has changed
+   * and decryption is no longer possible).
    * @param descriptor Saved object descriptor (ID, type and optional namespace)
    * @param attributes Object that includes a dictionary of __ALL__ saved object attributes stored
    * in Elasticsearch.
    * @param [originalAttributes] An optional dictionary of __ALL__ saved object original attributes
    * that were used to create that saved object (i.e. values are NOT encrypted).
    * @param [params] Parameters that control the way encrypted attributes are handled.
-   * @param [params.stripOnDecryptionError] If this flag is set then this method won't throw if
-   * decryption of encrypted attributes fails for whatever reason (e.g. changed AAD or encryption key).
-   * All encrypted attributes will be stripped instead.
    */
   public async stripOrDecryptAttributes<T extends Record<string, unknown>>(
     descriptor: SavedObjectDescriptor,
     attributes: T,
     originalAttributes?: T,
-    params?: { stripOnDecryptionError: boolean } & CommonParameters
+    params?: CommonParameters
   ) {
     const typeDefinition = this.typeDefinitions.get(descriptor.type);
     if (typeDefinition === undefined) {
       return { attributes };
     }
 
-    const stripOnDecryptionFailure = params?.stripOnDecryptionError ?? false;
     let decryptedAttributes: T | null = null;
     let decryptionError: Error | undefined;
     const clonedAttributes: Record<string, unknown> = {};
     for (const [attributeName, attributeValue] of Object.entries(attributes)) {
-      // We should strip encrypted attribute if definition explicitly mandates that or if consumer
-      // requested that in case decryption fails.
-      if (
-        typeDefinition.shouldBeStripped(attributeName) ||
-        (stripOnDecryptionFailure && decryptionError != null)
-      ) {
+      // We should strip encrypted attribute if definition explicitly mandates that or decryption
+      // failed.
+      if (typeDefinition.shouldBeStripped(attributeName) || !!decryptionError) {
         continue;
       }
 
@@ -175,14 +169,15 @@ export class EncryptedSavedObjectsService {
         // reuse for any other attributes.
         if (decryptedAttributes === null) {
           try {
-            decryptedAttributes = await this.decryptAttributes(descriptor, attributes, {
-              user: params?.user,
-            });
+            decryptedAttributes = await this.decryptAttributes(
+              descriptor,
+              // Decrypt only attributes that are supposed to be exposed.
+              Object.fromEntries(
+                Object.entries(attributes).filter(([key]) => !typeDefinition.shouldBeStripped(key))
+              ) as T,
+              { user: params?.user }
+            );
           } catch (err) {
-            if (!stripOnDecryptionFailure) {
-              throw err;
-            }
-
             decryptionError = err;
             continue;
           }
@@ -233,6 +228,7 @@ export class EncryptedSavedObjectsService {
           throw new EncryptionError(
             `Unable to encrypt attribute "${attributeName}"`,
             attributeName,
+            EncryptionErrorOperation.Encryption,
             err
           );
         }
@@ -313,6 +309,7 @@ export class EncryptedSavedObjectsService {
         throw new EncryptionError(
           `Unable to decrypt attribute "${attributeName}"`,
           attributeName,
+          EncryptionErrorOperation.Decryption,
           err
         );
       }

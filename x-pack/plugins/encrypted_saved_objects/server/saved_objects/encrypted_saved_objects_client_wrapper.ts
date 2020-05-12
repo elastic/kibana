@@ -22,8 +22,7 @@ import {
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
   ISavedObjectTypeRegistry,
-  SavedObjectsErrorHelpers,
-} from '../../../../../src/core/server';
+} from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/common/model';
 import { EncryptedSavedObjectsService } from '../crypto';
 
@@ -247,18 +246,19 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     R extends SavedObjectsUpdateResponse<T> | SavedObject<T>
   >(response: R, originalAttributes?: T, namespace?: string): Promise<R> {
     if (response.attributes && this.options.service.isRegistered(response.type)) {
+      // Error is returned when decryption fails, and in this case encrypted attributes will be
+      // stripped from the returned attributes collection. That will let consumer decide whether to
+      // fail or handle recovery gracefully.
       const { attributes, error } = await this.options.service.stripOrDecryptAttributes(
         { id: response.id, type: response.type, namespace },
         response.attributes as Record<string, unknown>,
         originalAttributes as Record<string, unknown>,
-        // If we cannot decrypt encrypted attributes let's strip them off and record the error to
-        // let consumer decide whether to fail or handle recovery gracefully.
-        { stripOnDecryptionError: true, user: this.options.getCurrentUser() }
+        { user: this.options.getCurrentUser() }
       );
 
       response.attributes = attributes as T;
       if (error) {
-        response.error = SavedObjectsErrorHelpers.decorateGeneralError(error) as any;
+        response.error = error as any;
       }
     }
 

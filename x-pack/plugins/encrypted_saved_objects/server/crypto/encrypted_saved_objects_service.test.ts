@@ -128,13 +128,13 @@ describe('#stripOrDecryptAttributes', () => {
           { type: 'known-type-1', id: 'object-id' },
           encryptedAttributes,
           undefined,
-          { stripOnDecryptionError: false, user: mockUser }
+          { user: mockUser }
         )
       ).resolves.toEqual({ attributes: { attrTwo: 'two', attrThree: 'three' } });
 
       expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledTimes(1);
       expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(
-        ['attrOne', 'attrThree'],
+        ['attrThree'],
         { type: 'known-type-1', id: 'object-id' },
         mockUser
       );
@@ -168,42 +168,7 @@ describe('#stripOrDecryptAttributes', () => {
       expect(mockAuditLogger.decryptAttributeFailure).not.toHaveBeenCalled();
     });
 
-    it('fails if failed to decrypt values with `dangerouslyExposeValue` set to `true`', async () => {
-      service.registerType({
-        type: 'known-type-1',
-        attributesToEncrypt: new Set([
-          'attrOne',
-          { key: 'attrThree', dangerouslyExposeValue: true },
-        ]),
-      });
-
-      const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
-      const encryptedAttributes = await service.encryptAttributes(
-        { type: 'known-type-1', id: 'object-id' },
-        attributes
-      );
-
-      encryptedAttributes.attrThree = 'some-undecryptable-value';
-
-      const mockUser = mockAuthenticatedUser();
-      await expect(
-        service.stripOrDecryptAttributes(
-          { type: 'known-type-1', id: 'object-id' },
-          encryptedAttributes,
-          undefined,
-          { stripOnDecryptionError: false, user: mockUser }
-        )
-      ).rejects.toMatchInlineSnapshot(`[Error: Unable to decrypt attribute "attrThree"]`);
-
-      expect(mockAuditLogger.decryptAttributesSuccess).not.toHaveBeenCalled();
-      expect(mockAuditLogger.decryptAttributeFailure).toHaveBeenCalledWith(
-        'attrThree',
-        { type: 'known-type-1', id: 'object-id' },
-        mockUser
-      );
-    });
-
-    it('strips attributes with `dangerouslyExposeValue` set to `true` if failed to decrypt and `stripOnDecryptionError` is set', async () => {
+    it('strips attributes with `dangerouslyExposeValue` set to `true` if failed to decrypt', async () => {
       service.registerType({
         type: 'known-type-1',
         attributesToEncrypt: new Set([
@@ -225,7 +190,7 @@ describe('#stripOrDecryptAttributes', () => {
         { type: 'known-type-1', id: 'object-id' },
         encryptedAttributes,
         undefined,
-        { stripOnDecryptionError: true, user: mockUser }
+        { user: mockUser }
       );
 
       expect(decryptedAttributes).toEqual({ attrTwo: 'two' });

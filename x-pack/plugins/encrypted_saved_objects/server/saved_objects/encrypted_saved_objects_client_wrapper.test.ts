@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('uuid', () => ({ v4: jest.fn().mockReturnValue('uuid-v4-id') }));
-
+import { EncryptionErrorOperation } from '../crypto/encryption_error';
 import { SavedObjectsClientContract } from 'src/core/server';
-import { EncryptedSavedObjectsService } from '../crypto';
+import { EncryptedSavedObjectsService, EncryptionError } from '../crypto';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 
 import { savedObjectsClientMock, savedObjectsTypeRegistryMock } from 'src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../security/common/model/authenticated_user.mock';
 import { encryptedSavedObjectsServiceMock } from '../crypto/index.mock';
+
+jest.mock('uuid', () => ({ v4: jest.fn().mockReturnValue('uuid-v4-id') }));
 
 let wrapper: EncryptedSavedObjectsClientWrapper;
 let mockBaseClient: jest.Mocked<SavedObjectsClientContract>;
@@ -776,7 +777,89 @@ describe('#find', () => {
         attrThree: 'three',
       },
       undefined,
-      { stripOnDecryptionError: true, user: mockAuthenticatedUser() }
+      { user: mockAuthenticatedUser() }
+    );
+  });
+
+  it('includes both attributes and error if decryption fails.', async () => {
+    const mockedResponse = {
+      saved_objects: [
+        {
+          id: 'some-id',
+          type: 'unknown-type',
+          attributes: {
+            attrOne: 'one',
+            attrSecret: 'secret',
+            attrNotSoSecret: 'not-so-secret',
+            attrThree: 'three',
+          },
+          references: [],
+        },
+        {
+          id: 'some-id-2',
+          type: 'known-type',
+          attributes: {
+            attrOne: 'one',
+            attrSecret: '*secret*',
+            attrNotSoSecret: '*not-so-secret*',
+            attrThree: 'three',
+          },
+          references: [],
+        },
+      ],
+      total: 2,
+      per_page: 2,
+      page: 1,
+    };
+
+    mockBaseClient.find.mockResolvedValue(mockedResponse);
+
+    const decryptionError = new EncryptionError(
+      'something failed',
+      'attrNotSoSecret',
+      EncryptionErrorOperation.Decryption
+    );
+    encryptedSavedObjectsServiceMockInstance.stripOrDecryptAttributes.mockResolvedValue({
+      attributes: { attrOne: 'one', attrThree: 'three' },
+      error: decryptionError,
+    });
+
+    const options = { type: ['unknown-type', 'known-type'], search: 'query' };
+    await expect(wrapper.find(options)).resolves.toEqual({
+      ...mockedResponse,
+      saved_objects: [
+        {
+          ...mockedResponse.saved_objects[0],
+          attributes: {
+            attrOne: 'one',
+            attrSecret: 'secret',
+            attrNotSoSecret: 'not-so-secret',
+            attrThree: 'three',
+          },
+        },
+        {
+          ...mockedResponse.saved_objects[1],
+          attributes: { attrOne: 'one', attrThree: 'three' },
+          error: decryptionError,
+        },
+      ],
+    });
+    expect(mockBaseClient.find).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.find).toHaveBeenCalledWith(options);
+
+    expect(encryptedSavedObjectsServiceMockInstance.stripOrDecryptAttributes).toHaveBeenCalledTimes(
+      1
+    );
+    expect(encryptedSavedObjectsServiceMockInstance.stripOrDecryptAttributes).toHaveBeenCalledWith(
+      { type: 'known-type', id: 'some-id-2' },
+      {
+        attrOne: 'one',
+        attrSecret: '*secret*',
+        attrNotSoSecret: '*not-so-secret*',
+        attrThree: 'three',
+      },
+      undefined,
+      { user: mockAuthenticatedUser() }
     );
   });
 
@@ -910,7 +993,94 @@ describe('#bulkGet', () => {
         attrThree: 'three',
       },
       undefined,
-      { stripOnDecryptionError: true, user: mockAuthenticatedUser() }
+      { user: mockAuthenticatedUser() }
+    );
+  });
+
+  it('includes both attributes and error if decryption fails.', async () => {
+    const mockedResponse = {
+      saved_objects: [
+        {
+          id: 'some-id',
+          type: 'unknown-type',
+          attributes: {
+            attrOne: 'one',
+            attrSecret: 'secret',
+            attrNotSoSecret: 'not-so-secret',
+            attrThree: 'three',
+          },
+          references: [],
+        },
+        {
+          id: 'some-id-2',
+          type: 'known-type',
+          attributes: {
+            attrOne: 'one',
+            attrSecret: '*secret*',
+            attrNotSoSecret: '*not-so-secret*',
+            attrThree: 'three',
+          },
+          references: [],
+        },
+      ],
+      total: 2,
+      per_page: 2,
+      page: 1,
+    };
+
+    mockBaseClient.bulkGet.mockResolvedValue(mockedResponse);
+
+    const decryptionError = new EncryptionError(
+      'something failed',
+      'attrNotSoSecret',
+      EncryptionErrorOperation.Decryption
+    );
+    encryptedSavedObjectsServiceMockInstance.stripOrDecryptAttributes.mockResolvedValue({
+      attributes: { attrOne: 'one', attrThree: 'three' },
+      error: decryptionError,
+    });
+
+    const bulkGetParams = [
+      { type: 'unknown-type', id: 'some-id' },
+      { type: 'known-type', id: 'some-id-2' },
+    ];
+
+    const options = { namespace: 'some-ns' };
+    await expect(wrapper.bulkGet(bulkGetParams, options)).resolves.toEqual({
+      ...mockedResponse,
+      saved_objects: [
+        {
+          ...mockedResponse.saved_objects[0],
+          attributes: {
+            attrOne: 'one',
+            attrSecret: 'secret',
+            attrNotSoSecret: 'not-so-secret',
+            attrThree: 'three',
+          },
+        },
+        {
+          ...mockedResponse.saved_objects[1],
+          attributes: { attrOne: 'one', attrThree: 'three' },
+          error: decryptionError,
+        },
+      ],
+    });
+    expect(mockBaseClient.bulkGet).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.bulkGet).toHaveBeenCalledWith(bulkGetParams, options);
+
+    expect(encryptedSavedObjectsServiceMockInstance.stripOrDecryptAttributes).toHaveBeenCalledTimes(
+      1
+    );
+    expect(encryptedSavedObjectsServiceMockInstance.stripOrDecryptAttributes).toHaveBeenCalledWith(
+      { type: 'known-type', id: 'some-id-2', namespace: 'some-ns' },
+      {
+        attrOne: 'one',
+        attrSecret: '*secret*',
+        attrNotSoSecret: '*not-so-secret*',
+        attrThree: 'three',
+      },
+      undefined,
+      { user: mockAuthenticatedUser() }
     );
   });
 
@@ -1009,7 +1179,57 @@ describe('#get', () => {
         attrThree: 'three',
       },
       undefined,
-      { stripOnDecryptionError: true, user: mockAuthenticatedUser() }
+      { user: mockAuthenticatedUser() }
+    );
+  });
+
+  it('includes both attributes and error if decryption fails.', async () => {
+    const mockedResponse = {
+      id: 'some-id',
+      type: 'known-type',
+      attributes: {
+        attrOne: 'one',
+        attrSecret: '*secret*',
+        attrNotSoSecret: '*not-so-secret*',
+        attrThree: 'three',
+      },
+      references: [],
+    };
+
+    mockBaseClient.get.mockResolvedValue(mockedResponse);
+
+    const decryptionError = new EncryptionError(
+      'something failed',
+      'attrNotSoSecret',
+      EncryptionErrorOperation.Decryption
+    );
+    encryptedSavedObjectsServiceMockInstance.stripOrDecryptAttributes.mockResolvedValue({
+      attributes: { attrOne: 'one', attrThree: 'three' },
+      error: decryptionError,
+    });
+
+    const options = { namespace: 'some-ns' };
+    await expect(wrapper.get('known-type', 'some-id', options)).resolves.toEqual({
+      ...mockedResponse,
+      attributes: { attrOne: 'one', attrThree: 'three' },
+      error: decryptionError,
+    });
+    expect(mockBaseClient.get).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.get).toHaveBeenCalledWith('known-type', 'some-id', options);
+
+    expect(encryptedSavedObjectsServiceMockInstance.stripOrDecryptAttributes).toHaveBeenCalledTimes(
+      1
+    );
+    expect(encryptedSavedObjectsServiceMockInstance.stripOrDecryptAttributes).toHaveBeenCalledWith(
+      { type: 'known-type', id: 'some-id', namespace: 'some-ns' },
+      {
+        attrOne: 'one',
+        attrSecret: '*secret*',
+        attrNotSoSecret: '*not-so-secret*',
+        attrThree: 'three',
+      },
+      undefined,
+      { user: mockAuthenticatedUser() }
     );
   });
 
