@@ -40,6 +40,7 @@ import { startServices, stopServices, services } from './services';
 import { destroyHistory } from './lib/history_provider';
 // @ts-ignore Untyped local
 import { stopRouter } from './lib/router_provider';
+import { unloadApp } from './state/actions/app';
 
 import './style/index.scss';
 
@@ -81,6 +82,7 @@ export const renderApp = (
   );
   return () => {
     ReactDOM.unmountComponentAtNode(element);
+    canvasStore.dispatch(unloadApp());
   };
 };
 
@@ -153,10 +155,14 @@ export const initializeCanvas = async (
 };
 
 export const teardownCanvas = (coreStart: CoreStart, startPlugins: CanvasStartDeps) => {
-  stopServices();
   destroyRegistries();
-  resetInterpreter();
-  destroyStore();
+
+  // TODO: Not cleaning these up temporarily.
+  // We have an issue where if requests are inflight, and you navigate away,
+  // those requests could still be trying to act on the store and possibly require services.
+  // stopServices();
+  // resetInterpreter();
+  // destroyStore();
 
   startPlugins.uiActions.detachAction(VALUE_CLICK_TRIGGER, emptyAction.id);
   if (restoreAction) {

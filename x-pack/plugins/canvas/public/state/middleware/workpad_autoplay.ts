@@ -10,6 +10,8 @@ import { getFullscreen } from '../selectors/app';
 import { getInFlight } from '../selectors/resolved_args';
 import { getWorkpad, getPages, getSelectedPageIndex, getAutoplay } from '../selectors/workpad';
 // @ts-ignore untyped local
+import { unloadApp } from '../actions/app';
+// @ts-ignore Untyped Local
 import { routerProvider } from '../../lib/router_provider';
 import { setAutoplayInterval } from '../../lib/app_state';
 import { createTimeInterval } from '../../lib/time_interval';
@@ -81,6 +83,10 @@ export const workpadAutoplay: Middleware<{}, State> = ({ getState }) => next => 
     if (shouldPlay) {
       startDelayedUpdate();
     } else {
+      stopAutoUpdate();
+    }
+
+    if (action.type === unloadApp.toString()) {
       stopAutoUpdate();
     }
   };

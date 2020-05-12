@@ -10,6 +10,8 @@ import { State } from '../../../types';
 import { fetchAllRenderables } from '../actions/elements';
 // @ts-ignore Untyped Local
 import { setRefreshInterval } from '../actions/workpad';
+// @ts-ignore Untyped Local
+import { unloadApp } from '../actions/app';
 import { inFlightComplete } from '../actions/resolved_args';
 import { getInFlight } from '../selectors/resolved_args';
 import { getRefreshInterval } from '../selectors/workpad';
@@ -80,6 +82,10 @@ export const workpadRefresh: Middleware<{}, State> = ({ dispatch, getState }) =>
       if (refreshInterval > 0) {
         startDelayedUpdate();
       }
+    }
+
+    if (action.type === unloadApp.toString()) {
+      cancelDelayedUpdate();
     }
   };
 };
