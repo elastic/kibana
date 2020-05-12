@@ -15,6 +15,8 @@ import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
+  CoreStart,
+  ICustomClusterClient,
   Plugin,
   Logger,
   PluginInitializerContext,
@@ -69,6 +71,7 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
   private readonly config$: Observable<CrossClusterReplicationConfig>;
   private readonly license: License;
   private readonly logger: Logger;
+  private ccrEsClient?: ICustomClusterClient;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -76,10 +79,7 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
     this.license = new License();
   }
 
-  setup(
-    { http, elasticsearch }: CoreSetup,
-    { licensing, indexManagement, remoteClusters }: Dependencies
-  ) {
+  setup({ http }: CoreSetup, { licensing, indexManagement, remoteClusters }: Dependencies) {
     this.config$
       .pipe(first())
       .toPromise()
@@ -115,12 +115,9 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
       }
     );
 
-    // Extend the elasticsearchJs client with additional endpoints.
-    const esClientConfig = { plugins: [elasticsearchJsPlugin] };
-    const ccrEsClient = elasticsearch.createClient('crossClusterReplication', esClientConfig);
     http.registerRouteHandlerContext('crossClusterReplication', (ctx, request) => {
       return {
-        client: ccrEsClient.asScoped(request),
+        client: this.ccrEsClient!.asScoped(request),
       };
     });
 
@@ -134,6 +131,18 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
     });
   }
 
-  start() {}
-  stop() {}
+  start(core: CoreStart) {
+    // Extend the elasticsearchJs client with additional endpoints.
+    const esClientConfig = { plugins: [elasticsearchJsPlugin] };
+    this.ccrEsClient = core.elasticsearch.legacy.createClient(
+      'crossClusterReplication',
+      esClientConfig
+    );
+  }
+
+  stop() {
+    if (this.ccrEsClient) {
+      this.ccrEsClient.close();
+    }
+  }
 }
