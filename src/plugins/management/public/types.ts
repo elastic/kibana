@@ -36,6 +36,7 @@
  * under the License.
  */
 
+import { ReactElement } from 'react';
 import { IconType } from '@elastic/eui';
 import { ManagementApp } from './management_app';
 import { ManagementSection } from './management_section';

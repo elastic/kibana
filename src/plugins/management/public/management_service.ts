@@ -52,8 +52,8 @@ export class ManagementService {
     };
   }
 
-  private getSection(sectionId: ManagementSectionId): ManagementSection {
-    return this.sections.find(section => section.id === sectionId) as ManagementSection;
+  private getSection(sectionId: ManagementSectionId) {
+    return this.sections.find(section => section.id === sectionId);
   }
 
   private getAllSections() {
@@ -67,7 +67,13 @@ export class ManagementService {
   }
 
   private sharedInterface = {
-    getSection: this.getSection.bind(this),
+    getSection: (sectionId: ManagementSectionId) => {
+      const section = this.getSection(sectionId);
+      if (!section) {
+        throw new Error(`Management section with id ${sectionId} is undefined`);
+      }
+      return section;
+    },
     getSectionsEnabled: this.getSectionsEnabled.bind(this),
     getAllSections: this.getAllSections.bind(this),
   };
