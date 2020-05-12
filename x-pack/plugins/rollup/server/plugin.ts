@@ -14,6 +14,8 @@ import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import {
   CoreSetup,
+  CoreStart,
+  ICustomClusterClient,
   Plugin,
   Logger,
   KibanaRequest,
@@ -47,6 +49,7 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
   private readonly logger: Logger;
   private readonly globalConfig$: Observable<SharedGlobalConfig>;
   private readonly license: License;
+  private rollupEsClient?: ICustomClusterClient;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -55,7 +58,7 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
   }
 
   public setup(
-    { http, uiSettings, elasticsearch }: CoreSetup,
+    { http, uiSettings }: CoreSetup,
     { licensing, indexManagement, visTypeTimeseries, usageCollection }: Dependencies
   ) {
     this.license.setup(
@@ -72,12 +75,9 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
       }
     );
 
-    // Extend the elasticsearchJs client with additional endpoints.
-    const esClientConfig = { plugins: [elasticsearchJsPlugin] };
-    const rollupEsClient = elasticsearch.createClient('rollup', esClientConfig);
     http.registerRouteHandlerContext('rollup', (context, request) => {
       return {
-        client: rollupEsClient.asScoped(request),
+        client: this.rollupEsClient!.asScoped(request),
       };
     });
 
@@ -116,7 +116,7 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
       const callWithRequestFactoryShim = (
         elasticsearchServiceShim: CallWithRequestFactoryShim,
         request: KibanaRequest
-      ): APICaller => rollupEsClient.asScoped(request).callAsCurrentUser;
+      ): APICaller => this.rollupEsClient!.asScoped(request).callAsCurrentUser;
 
       const { addSearchStrategy } = visTypeTimeseries;
       registerRollupSearchStrategy(callWithRequestFactoryShim, addSearchStrategy);
@@ -139,6 +139,15 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
     }
   }
 
-  start() {}
-  stop() {}
+  start(core: CoreStart) {
+    // Extend the elasticsearchJs client with additional endpoints.
+    const esClientConfig = { plugins: [elasticsearchJsPlugin] };
+    this.rollupEsClient = core.elasticsearch.legacy.createClient('rollup', esClientConfig);
+  }
+
+  stop() {
+    if (this.rollupEsClient) {
+      this.rollupEsClient.close();
+    }
+  }
 }
