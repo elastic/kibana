@@ -38,12 +38,11 @@ export const signalRulesAlertType = ({
   version,
   ml,
   lists,
-}: // getListItemByValues,
-{
+}: {
   logger: Logger;
   version: string;
   ml: SetupPlugins['ml'];
-  lists: SetupPlugins['lists'];
+  lists: SetupPlugins['lists'] | undefined;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   // getListItemByValues: any;
 }): SignalRuleAlertTypeDefinition => {
@@ -211,14 +210,14 @@ export const signalRulesAlertType = ({
             result.bulkCreateTimes.push(bulkCreateDuration);
           }
         } else {
-          if (lists == null) {
-            throw new Error('lists plugin unavailable during rule execution');
-          }
           let listClient;
           if (
             process.env.ELASTIC_XPACK_SIEM_LISTS_FEATURE &&
             process.env.ELASTIC_XPACK_SIEM_LISTS_FEATURE === 'true'
           ) {
+            if (lists == null) {
+              throw new Error('lists plugin unavailable during rule execution');
+            }
             listClient = await lists.getListClient(
               services.callCluster,
               spaceId,
