@@ -17,17 +17,8 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
-import { initPlugin as initNewsfeed } from './newsfeed_simulation';
+import { NewsFeedSimulatorPlugin } from './plugin';
 
-const NAME = 'newsfeed-FTS-external-service-simulators';
-
-// eslint-disable-next-line import/no-default-export
-export default function(kibana: any) {
-  return new kibana.Plugin({
-    name: NAME,
-    init: (server: Hapi.Server) => {
-      initNewsfeed(server, `/api/_${NAME}`);
-    },
-  });
+export function plugin() {
+  return new NewsFeedSimulatorPlugin();
 }
