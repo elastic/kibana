@@ -8,38 +8,34 @@
 
 import * as t from 'io-ts';
 
-// TODO: Change this to work with saved objects
-
 import {
   _tags,
   created_at,
   created_by,
   description,
   exceptionListType,
-  id,
+  list_id,
   metaOrUndefined,
   name,
   tags,
   tie_breaker_id,
-  updated_at,
   updated_by,
 } from '../common/schemas';
 
-export const exceptionListSchema = t.exact(
+export const exceptionListSoSchema = t.exact(
   t.type({
     _tags,
     created_at,
     created_by,
     description,
-    id,
+    list_id,
     meta: metaOrUndefined,
     name,
     tags,
     tie_breaker_id,
     type: exceptionListType,
-    updated_at,
     updated_by,
   })
 );
 
-export type ExceptionListSchema = t.TypeOf<typeof exceptionListSchema>;
+export type ExceptionListSoSchema = t.TypeOf<typeof exceptionListSoSchema>;

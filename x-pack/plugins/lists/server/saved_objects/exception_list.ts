@@ -27,6 +27,9 @@ export const exceptionListMapping: SavedObjectsType['mappings'] = {
     list_id: {
       type: 'keyword',
     },
+    meta: {
+      type: 'keyword',
+    },
     name: {
       type: 'keyword',
     },
@@ -38,6 +41,9 @@ export const exceptionListMapping: SavedObjectsType['mappings'] = {
     },
     type: {
       type: 'keyword',
+    },
+    updated_by: {
+      type: 'date',
     },
   },
 };

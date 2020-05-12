@@ -6,7 +6,7 @@
 
 import { SavedObject } from 'kibana/server';
 
-import { ExceptionListSchema } from '../../../common/schemas';
+import { ExceptionListSchema, ExceptionListSoSchema } from '../../../common/schemas';
 import {
   SavedObjectType,
   exceptionListAgnosticSavedObjectType,
@@ -30,7 +30,12 @@ export const getSavedObjectType = ({
 export const transformSavedObjetToExceptionList = ({
   savedObject,
 }: {
-  savedObject: SavedObject<ExceptionListSchema>;
+  savedObject: SavedObject<ExceptionListSoSchema>;
 }): ExceptionListSchema => {
-  return savedObject.attributes;
+  const dateNow = new Date().toISOString();
+  return {
+    id: savedObject.id,
+    updated_at: savedObject.updated_at ?? dateNow,
+    ...savedObject.attributes,
+  };
 };

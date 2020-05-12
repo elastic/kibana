@@ -3,5 +3,4 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export * from './get_list_client';
-export * from './get_exception_list_client';
+export * from './exceptions_list_so_schema';

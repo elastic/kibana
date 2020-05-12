@@ -9,21 +9,23 @@
 import * as t from 'io-ts';
 
 import {
+  ListId,
+  Tags,
+  _Tags,
   _tagsOrUndefined,
   description,
   exceptionListType,
-  list_id,
   metaOrUndefined,
   name,
   tagsOrUndefined,
 } from '../common/schemas';
 import { Identity, RequiredKeepUndefined } from '../../types';
+import { DefaultUuid } from '../types/default_uuid';
 
 export const createExceptionListSchema = t.intersection([
   t.exact(
     t.type({
       description,
-      list_id,
       name,
       type: exceptionListType,
     })
@@ -31,6 +33,7 @@ export const createExceptionListSchema = t.intersection([
   t.exact(
     t.partial({
       _tags: _tagsOrUndefined,
+      list_id: DefaultUuid,
       meta: metaOrUndefined,
       tags: tagsOrUndefined,
     })
@@ -40,4 +43,13 @@ export const createExceptionListSchema = t.intersection([
 export type CreateExceptionListSchemaPartial = Identity<t.TypeOf<typeof createExceptionListSchema>>;
 export type CreateExceptionListSchema = RequiredKeepUndefined<
   t.TypeOf<typeof createExceptionListSchema>
+>;
+
+// This type is used after a decode since the arrays turn into defaults of empty arrays.
+export type CreateExceptionListSchemaDecoded = Identity<
+  CreateExceptionListSchema & {
+    _tags: _Tags;
+    tags: Tags;
+    list_id: ListId;
+  }
 >;

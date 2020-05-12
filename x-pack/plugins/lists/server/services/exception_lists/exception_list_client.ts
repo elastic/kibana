@@ -18,10 +18,12 @@ import { getExceptionList } from './get_exception_list';
 import { createExceptionList } from './create_exception_list';
 
 export class ExceptionListClient {
+  // TODO: Delete this if it is not being used
   private readonly spaceId: string;
   private readonly user: string;
+  // TODO: Delete this if it is not being used
   private readonly config: ConfigType;
-  // TODO: Delete this callCluster if it is not being used
+  // TODO: Delete this if it is not being used
   private readonly callCluster: APICaller;
 
   private readonly savedObjectsClient: SavedObjectsClientContract;
@@ -51,8 +53,9 @@ export class ExceptionListClient {
     name,
     namespaceType,
     tags,
+    type,
   }: CreateExceptionListOptions): Promise<ExceptionListSchema> => {
-    const { savedObjectsClient } = this;
+    const { savedObjectsClient, user } = this;
     return createExceptionList({
       _tags,
       description,
@@ -62,6 +65,8 @@ export class ExceptionListClient {
       namespaceType,
       savedObjectsClient,
       tags,
+      type,
+      user,
     });
   };
 }

@@ -8,13 +8,14 @@ import { APICaller, SavedObjectsClientContract } from 'kibana/server';
 
 import {
   Description,
+  ExceptionListType,
   IdOrUndefined,
   ListId,
   ListIdOrUndefined,
   MetaOrUndefined,
   Name,
-  TagsOrUndefined,
-  _TagsOrUndefined,
+  Tags,
+  _Tags,
 } from '../../../common/schemas';
 import { ConfigType } from '../../config';
 
@@ -35,11 +36,12 @@ export interface GetExceptionListOptions {
 }
 
 export interface CreateExceptionListOptions {
-  _tags: _TagsOrUndefined;
+  _tags: _Tags;
   listId: ListId;
   namespaceType: NamespaceType;
   name: Name;
   description: Description;
   meta: MetaOrUndefined;
-  tags: TagsOrUndefined;
+  tags: Tags;
+  type: ExceptionListType;
 }

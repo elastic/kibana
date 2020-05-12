@@ -7,8 +7,17 @@
 import { IRouter } from 'kibana/server';
 
 import { EXCEPTION_LIST_URL } from '../../common/constants';
-import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { createExceptionListSchema } from '../../common/schemas';
+import {
+  buildRouteValidation,
+  buildSiemResponse,
+  transformError,
+  validate,
+} from '../siem_server_deps';
+import {
+  CreateExceptionListSchemaDecoded,
+  createExceptionListSchema,
+  exceptionListSchema,
+} from '../../common/schemas';
 
 import { getExceptionListClient } from './utils/get_exception_list_client';
 
@@ -20,17 +29,21 @@ export const createExceptionListRoute = (router: IRouter): void => {
       },
       path: EXCEPTION_LIST_URL,
       validate: {
-        body: buildRouteValidation(createExceptionListSchema),
+        body: buildRouteValidation<
+          typeof createExceptionListSchema,
+          CreateExceptionListSchemaDecoded
+        >(createExceptionListSchema),
       },
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { name, _tags, tags, meta, description, list_id: listId } = request.body;
+        const { name, _tags, tags, meta, description, list_id: listId, type } = request.body;
         const exceptionLists = getExceptionListClient(context);
         const list = await exceptionLists.getExceptionList({
           id: undefined,
           listId,
+          // TODO: Expose the name space type
           namespaceType: 'single',
         });
         if (list != null) {
@@ -45,10 +58,17 @@ export const createExceptionListRoute = (router: IRouter): void => {
             listId,
             meta,
             name,
+            // TODO: Expose the name space type
             namespaceType: 'single',
             tags,
+            type,
           });
-          return response.ok({ body: createdList });
+          const [validated, errors] = validate(createdList, exceptionListSchema);
+          if (errors != null) {
+            return siemResponse.error({ body: errors, statusCode: 500 });
+          } else {
+            return response.ok({ body: validated ?? {} });
+          }
         }
       } catch (err) {
         const error = transformError(err);

@@ -4,9 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
-
-import { ExceptionListSchema, IdOrUndefined, ListIdOrUndefined } from '../../../common/schemas';
+import {
+  SavedObjectsClientContract,
+  SavedObjectsErrorHelpers,
+} from '../../../../../../src/core/server/';
+import {
+  ExceptionListSchema,
+  ExceptionListSoSchema,
+  IdOrUndefined,
+  ListIdOrUndefined,
+} from '../../../common/schemas';
 
 import { getSavedObjectType, transformSavedObjetToExceptionList } from './utils';
 import { NamespaceType } from './types';
@@ -20,16 +27,36 @@ interface GetExceptionListOptions {
 
 export const getExceptionList = async ({
   id,
+  listId,
   savedObjectsClient,
   namespaceType,
 }: GetExceptionListOptions): Promise<ExceptionListSchema | null> => {
   const savedObjectType = getSavedObjectType({ namespaceType });
   if (id != null) {
-    // TODO: Wrap this in a try/catch block and use the special stuff from saved objects to return null
-    // TODO: Change <ExceptionListSchema> to be a saved object type
-    // TODO: Implement a way to get things by list_id and not just id
-    const savedObject = await savedObjectsClient.get<ExceptionListSchema>(savedObjectType, id);
-    return transformSavedObjetToExceptionList({ savedObject });
+    try {
+      const savedObject = await savedObjectsClient.get<ExceptionListSoSchema>(savedObjectType, id);
+      return transformSavedObjetToExceptionList({ savedObject });
+    } catch (err) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        return null;
+      } else {
+        throw err;
+      }
+    }
+  } else if (listId != null) {
+    const savedObject = await savedObjectsClient.find<ExceptionListSoSchema>({
+      perPage: 1,
+      search: listId,
+      searchFields: ['list_id'],
+      sortField: 'tie_breaker_id',
+      sortOrder: 'desc',
+      type: savedObjectType,
+    });
+    if (savedObject.saved_objects[0] != null) {
+      return transformSavedObjetToExceptionList({ savedObject: savedObject.saved_objects[0] });
+    } else {
+      return null;
+    }
   } else {
     return null;
   }
