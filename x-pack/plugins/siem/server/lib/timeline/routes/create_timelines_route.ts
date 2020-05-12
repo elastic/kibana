@@ -57,10 +57,10 @@ export const createTimelinesRoute = (
           frameworkRequest,
         });
 
-        await timelineStatus.setAvailableActions();
+        const { isCreatable } = await timelineStatus.init();
 
         // Create timeline
-        if (timelineStatus.isCreatable) {
+        if (isCreatable) {
           const newTimeline = await createTimelines(frameworkRequest, timeline, null, version);
           return response.ok({
             body: {

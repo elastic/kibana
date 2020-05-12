@@ -521,13 +521,13 @@ describe('import template timelines', () => {
       );
     });
 
-    test('should UPDATE a new timeline savedObject', async () => {
+    test('should UPDATE timeline savedObject', async () => {
       const mockRequest = getImportTimelinesRequest();
       await server.inject(mockRequest, context);
       expect(mockPersistTimeline).toHaveBeenCalled();
     });
 
-    test('should UPDATE a new timeline savedObject with timelineId', async () => {
+    test('should UPDATE timeline savedObject with timelineId', async () => {
       const mockRequest = getImportTimelinesRequest();
       await server.inject(mockRequest, context);
       expect(mockPersistTimeline.mock.calls[0][1]).toEqual(
@@ -535,7 +535,7 @@ describe('import template timelines', () => {
       );
     });
 
-    test('should UPDATE a new timeline savedObject without timeline version', async () => {
+    test('should UPDATE timeline savedObject without timeline version', async () => {
       const mockRequest = getImportTimelinesRequest();
       await server.inject(mockRequest, context);
       expect(mockPersistTimeline.mock.calls[0][2]).toEqual(

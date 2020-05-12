@@ -59,9 +59,9 @@ export const updateTimelinesRoute = (
           frameworkRequest,
         });
 
-        await timelineStatus.setAvailableActions();
+        const { isUpdatable } = await timelineStatus.init();
 
-        if (timelineStatus.isUpdatable) {
+        if (isUpdatable) {
           const updatedTimeline = await createTimelines(
             (frameworkRequest as unknown) as FrameworkRequest,
             timeline,

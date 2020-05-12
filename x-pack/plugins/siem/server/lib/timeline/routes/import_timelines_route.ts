@@ -149,17 +149,22 @@ export const importTimelinesRoute = (
                         frameworkRequest,
                       });
 
-                      await timelineStatus.setAvailableActions();
+                      const {
+                        isCreatableViaImport,
+                        isUpdatableViaImport,
+                        isHandlingTemplateTimeline,
+                      } = await timelineStatus.init();
+                      const timelineInput = timelineStatus.getTimelineInput();
 
-                      if (timelineStatus.isCreatableViaImport) {
+                      if (isCreatableViaImport) {
                         // create timeline / template timeline
                         newTimeline = await createTimelines(
                           frameworkRequest,
                           parsedTimelineObject,
                           null, // timelineSavedObjectId
                           null, // timelineVersion
-                          timelineStatus.isHandlingTemplateTimeline ? null : pinnedEventIds,
-                          timelineStatus.isHandlingTemplateTimeline
+                          isHandlingTemplateTimeline ? null : pinnedEventIds,
+                          isHandlingTemplateTimeline
                             ? globalNotes
                             : [...globalNotes, ...eventNotes],
                           [] // existing note ids
@@ -171,11 +176,13 @@ export const importTimelinesRoute = (
                         });
                       }
 
-                      if (!timelineStatus.isHandlingTemplateTimeline) {
-                        timelineStatus.checkIsFailureCases(TimelineStatusActions.createViaImport);
+                      if (!isHandlingTemplateTimeline) {
+                        const errorMessage = timelineStatus.checkIsFailureCases(
+                          TimelineStatusActions.createViaImport
+                        );
                         const message =
-                          timelineStatus?.errorMessage?.body != null
-                            ? timelineStatus.errorMessage.body
+                          errorMessage?.body != null
+                            ? errorMessage.body
                             : `${timelineType} timeline ${TimelineStatusActions.createViaImport} error`;
 
                         resolve(
@@ -187,17 +194,16 @@ export const importTimelinesRoute = (
                         );
                       }
 
-                      if (timelineStatus.isUpdatableViaImport) {
+                      if (isUpdatableViaImport) {
                         // update template timeline
-
                         newTimeline = await createTimelines(
                           frameworkRequest,
                           parsedTimelineObject,
-                          timelineStatus.timelineInput.id, // timelineSavedObjectId
-                          timelineStatus.timelineInput.version?.toString() ?? null, // timelineVersion
-                          null,
+                          savedObjectId, // timelineSavedObjectId
+                          version ?? null, // timelineVersion
+                          null, // pinnedEventIds
                           globalNotes,
-                          timelineStatus.timelineInput?.data?.noteIds ?? [] // existing note ids
+                          timelineInput?.data?.noteIds ?? [] // existing note ids
                         );
 
                         resolve({
@@ -205,10 +211,12 @@ export const importTimelinesRoute = (
                           status_code: 200,
                         });
                       } else {
-                        timelineStatus.checkIsFailureCases(TimelineStatusActions.updateViaImport);
+                        const errorMessage = timelineStatus.checkIsFailureCases(
+                          TimelineStatusActions.updateViaImport
+                        );
                         const message =
-                          timelineStatus?.errorMessage?.body != null
-                            ? timelineStatus.errorMessage.body
+                          errorMessage?.body != null
+                            ? errorMessage.body
                             : `${timelineType} timeline ${TimelineStatusActions.updateViaImport} error`;
 
                         resolve(

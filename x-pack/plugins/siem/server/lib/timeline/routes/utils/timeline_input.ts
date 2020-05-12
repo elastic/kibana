@@ -12,16 +12,12 @@ import { getTimeline, getTemplateTimeline } from './create_timelines';
 import { FrameworkRequest } from '../../../framework';
 
 export class TimelineInput {
-  id: string | null;
-  type: TimelineTypeLiteralWithNull;
-  version: string | number | null;
-  frameworkRequest: FrameworkRequest;
-  data: TimelineSavedObject | null;
-  exists: boolean;
-  creatable: boolean;
-  updatable: boolean;
-  allowUpdateViaImport: boolean;
-  versionConflict: boolean;
+  private id: string | null;
+  private type: TimelineTypeLiteralWithNull;
+  private version: string | number | null;
+  private frameworkRequest: FrameworkRequest;
+
+  public data: TimelineSavedObject | null;
 
   constructor({
     id,
@@ -40,14 +36,9 @@ export class TimelineInput {
     this.version = version;
     this.frameworkRequest = frameworkRequest;
     this.data = null;
-    this.exists = false;
-    this.creatable = false;
-    this.updatable = false;
-    this.allowUpdateViaImport = false;
-    this.versionConflict = false;
   }
 
-  async getTimelines() {
+  public async getTimelines() {
     this.data =
       this.id != null
         ? this.type === TimelineType.template
@@ -55,22 +46,38 @@ export class TimelineInput {
           : await getTimeline(this.frameworkRequest, this.id)
         : null;
 
-    this.exists = this.id != null && this.data != null;
-    this.checkIfVersionConflict();
-    this.creatable = !this.exists;
-    this.updatable = this.id != null && this.exists && !this.versionConflict;
-    this.allowUpdateViaImport = this.type === TimelineType.template && this.updatable;
+    return this.data;
   }
 
-  public checkIfVersionConflict() {
+  public isExists() {
+    return this.id != null && this.data != null;
+  }
+
+  public isUpdatable() {
+    return this.id != null && this.isExists() && !this.isVersionConflict();
+  }
+
+  public isCreatable() {
+    return !this.isExists();
+  }
+
+  public isUpdatableViaImport() {
+    return this.type === TimelineType.template && this.isUpdatable();
+  }
+
+  public getVersion() {
+    return this.version;
+  }
+
+  private isVersionConflict() {
     let isVersionConflict = false;
     const existingVersion =
       this.type === TimelineType.template ? this.data?.templateTimelineVersion : this.data?.version;
-    if (this.exists && this.version != null) {
+    if (this.isExists() && this.version != null) {
       isVersionConflict = !(this.version === existingVersion);
-    } else if (this.exists && this.version == null) {
+    } else if (this.isExists() && this.version == null) {
       isVersionConflict = true;
     }
-    this.versionConflict = isVersionConflict;
+    return isVersionConflict;
   }
 }
