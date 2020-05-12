@@ -178,7 +178,7 @@ describe('Resolve destination location', () => {
       baseSourceSelector: TREE_A_ROOT,
       sourceSelector: ['1'],
     });
-    expect(result).toEqual({ source: ['TREE_A', '1'], destination: ['TREE_A', '2'] });
+    expect(result).toEqual({ source: ['TREE_A', '1'], destination: ['TREE_A', '3'] });
   });
 
   it('drags a nested item to the bottom of its siblings', () => {

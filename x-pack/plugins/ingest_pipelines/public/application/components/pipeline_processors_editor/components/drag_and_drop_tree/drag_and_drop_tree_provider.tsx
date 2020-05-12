@@ -48,7 +48,6 @@ interface Props {
 export const DragAndDropTreeProvider: FunctionComponent<Props> = ({ children, onDragEnd }) => {
   const dragDirectionRef = useRef<{
     start?: { index: number; treeId: string };
-    current?: { index: number; treeId: string };
   }>({});
   const [currentDragSelector, setCurrentDragSelector] = useState<string | undefined>();
   const [privateTreeItemMap] = useState(() => new Map<string, PrivateMapTreeEntry>());
@@ -82,10 +81,6 @@ export const DragAndDropTreeProvider: FunctionComponent<Props> = ({ children, on
         }}
         onDragStart={arg => {
           dragDirectionRef.current = {
-            current: {
-              index: arg.source.index,
-              treeId: arg.source.droppableId,
-            },
             start: {
               index: arg.source.index,
               treeId: arg.source.droppableId,
@@ -99,28 +94,20 @@ export const DragAndDropTreeProvider: FunctionComponent<Props> = ({ children, on
             return;
           }
 
-          // Only update drag direction if we have new information about the current drag
-          // index or if we are dragging across trees.
+          // Reset "start" if we have gone x-tree
           if (
             arg.destination &&
             arg.source &&
-            (arg.destination.index !== dragDirectionRef.current.current?.index ||
-              arg.destination.droppableId !== dragDirectionRef.current.current?.treeId)
+            arg.destination.droppableId !== dragDirectionRef.current.start?.treeId
           ) {
             dragDirectionRef.current = {
-              current: { index: arg.destination.index, treeId: arg.destination.droppableId },
-              start:
-                // Reset "start" if we have gone x-tree
-                arg.destination.droppableId !== dragDirectionRef.current.current?.treeId
-                  ? { index: arg.destination.index, treeId: arg.destination.droppableId }
-                  : dragDirectionRef.current.start,
+              start: { index: arg.destination.index, treeId: arg.destination.droppableId },
             };
           }
         }}
         onDragEnd={arg => {
           setCurrentDragSelector(undefined);
-          const dragPointers = dragDirectionRef.current;
-          dragDirectionRef.current = {};
+          const { start } = dragDirectionRef.current;
 
           const { source, destination, combine } = arg;
           if (source && combine) {
@@ -136,8 +123,7 @@ export const DragAndDropTreeProvider: FunctionComponent<Props> = ({ children, on
           }
 
           if (source && destination) {
-            const { current, start } = dragPointers;
-            const dragDirection = determineDragDirection(current?.index, start?.index);
+            const dragDirection = determineDragDirection(destination.index, start?.index);
             const sourceTree = privateTreeItemMap.get(source.droppableId)!;
             const crossTreeDrag = source.droppableId !== destination.droppableId;
             const destinationTree = crossTreeDrag

@@ -5,7 +5,7 @@
  */
 
 import { reducer, State } from './processors_reducer';
-import { DragAndDropSpecialLocations } from './constants';
+import { DragAndDropSpecialLocations } from '../constants';
 import { PARENT_CHILD_NEST_ERROR } from './utils';
 
 const initialState: State = {
@@ -39,8 +39,8 @@ describe('Processors reducer', () => {
     const s4 = reducer(s3, {
       type: 'moveProcessor',
       payload: {
-        source: ['processors', '0'],
-        destination: ['processors', '1'],
+        source: ['processors', '1'],
+        destination: ['processors', '0'],
       },
     });
 

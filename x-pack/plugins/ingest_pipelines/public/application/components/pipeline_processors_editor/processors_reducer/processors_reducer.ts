@@ -5,9 +5,10 @@
  */
 import { Reducer, useReducer } from 'react';
 
-import { DeserializeResult } from './serialize';
-import { getValue, setValue, unsafeProcessorMove } from './utils';
-import { ProcessorInternal, ProcessorSelector } from './types';
+import { DeserializeResult } from '../serialize';
+import { unsafeProcessorMove } from './utils';
+import { getValue, setValue } from '../utils';
+import { ProcessorInternal, ProcessorSelector } from '../types';
 
 export type State = Omit<DeserializeResult, 'onFailure'> & {
   onFailure: ProcessorInternal[];

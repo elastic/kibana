@@ -83,15 +83,14 @@ export const resolveLocations = ({
     const displacingSameAsBelow = checkIfSamePath(displacing.slice(0, -1), below.slice(0, -1));
 
     if (displacingSameAsBelow) {
-      return addBasePathPrefix(displacing);
+      return addBasePathPrefix(below);
     }
-    // Handle special case where we are actually want to reorder
-    // an item in its own list instead of nesting inside of the previous
-    // elements children.
+    // Handle special case where we are actually reordering
+    // an item in its own list instead of nesting. This is "dragging past" a nested
+    // element.
     const sourceSameAsBelowPath = checkIfSamePath(sourceSelector.slice(0, -1), below.slice(0, -1));
     if (sourceSameAsBelowPath && displacing.length > below.length) {
-      const stepBackOneIndex = parseInt(below[below.length - 1], 10) - 1;
-      return addBasePathPrefix(below.slice(0, -1).concat(String(stepBackOneIndex)));
+      return addBasePathPrefix(below);
     }
 
     const sourceSameAsDisplacingPath = checkIfSamePath(
