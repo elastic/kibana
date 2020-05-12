@@ -33,8 +33,8 @@ docs for more information.
 You can modify settings in this section to control how Uptime will visualize your TLS values in the Certificates page.
 These settings also determine which certificates will be selected by any TLS alert you define.
 
-There are two fields, `age` and `expiration`. Use the `age` threshold to determine when Uptime should warn
-you about certificates who have been valid for too long. Use the `expiration` threshold to make Uptime warn you
+There are two fields, `age` and `expiration`. Use the `age` threshold to specify when Uptime should warn
+you about certificates that have been valid for too long. Use the `expiration` threshold to make Uptime warn you
 about certificates that have approaching expiration dates.
 
 For example, you may want to make sure that none of your organization's TLS certificates have been
