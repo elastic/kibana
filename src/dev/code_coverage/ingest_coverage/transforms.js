@@ -108,16 +108,8 @@ export const ciRunUrl = obj => {
   };
 };
 
-const dropAfter = size => x => {
-  return x.slice(0, size);
-};
-
-const truncateCommitMsg = x => {
-  const size = 50;
-  const dropAfterSize = dropAfter(size);
-  const trunkd = x.length > 50 ? `${dropAfterSize(x)}...` : x;
-  return trunkd;
-};
+const size = 50;
+const truncateCommitMsg = x => (x.length > size ? `${x.slice(0, 50)}...` : x);
 
 export const itemizeVcs = vcsInfo => obj => {
   const [branch, sha, author, commitMsg] = vcsInfo;
