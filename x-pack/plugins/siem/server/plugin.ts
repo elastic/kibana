@@ -192,12 +192,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
 
     if (plugins.alerting != null && plugins.ml != null && plugins.lists != null) {
-      // const clusterClient = core.elasticsearch.dataClient;
       const signalRuleType = signalRulesAlertType({
         logger: this.logger,
         version: this.context.env.packageInfo.version,
         ml: plugins.ml,
-        lists: plugins.lists, // need to pass this down here.
+        lists: plugins.lists,
       });
       const ruleNotificationType = rulesNotificationAlertType({
         logger: this.logger,
