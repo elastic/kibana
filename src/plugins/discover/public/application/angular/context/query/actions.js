@@ -30,7 +30,7 @@ import { MarkdownSimple } from '../../../../../../kibana_react/public';
 
 export function QueryActionsProvider(Promise) {
   const { filterManager, indexPatterns, data } = getServices();
-  const fetchAnchor = fetchAnchorProvider(indexPatterns, data.search.searchSource.create());
+  const fetchAnchor = fetchAnchorProvider(indexPatterns, data.search.searchSource.createEmpty());
   const { fetchSurroundingDocs } = fetchContextProvider(indexPatterns);
   const { setPredecessorCount, setQueryParameters, setSuccessorCount } = getQueryParameterActions(
     filterManager,
