@@ -66,7 +66,7 @@ export default function(kibana) {
           title: i18n.translate('kbn.discoverTitle', {
             defaultMessage: 'Discover',
           }),
-          order: 2000,
+          order: 1000,
           url: `${kbnBaseUrl}#/discover`,
           euiIconType: 'discoverApp',
           disableSubUrlTracking: true,
@@ -77,7 +77,7 @@ export default function(kibana) {
           title: i18n.translate('kbn.visualizeTitle', {
             defaultMessage: 'Visualize',
           }),
-          order: 7000,
+          order: 2000,
           url: `${kbnBaseUrl}#/visualize`,
           euiIconType: 'visualizeApp',
           disableSubUrlTracking: true,
@@ -88,7 +88,7 @@ export default function(kibana) {
           title: i18n.translate('kbn.dashboardTitle', {
             defaultMessage: 'Dashboard',
           }),
-          order: 1000,
+          order: 2500,
           url: `${kbnBaseUrl}#/dashboards`,
           euiIconType: 'dashboardApp',
           disableSubUrlTracking: true,
