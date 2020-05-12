@@ -161,6 +161,8 @@ export function CollapsibleNav({
               color="subdued"
               gutterSize="none"
               size="s"
+              className="eui-yScroll"
+              style={{ maxHeight: '9.5em' }}
             />
           ) : (
             <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
