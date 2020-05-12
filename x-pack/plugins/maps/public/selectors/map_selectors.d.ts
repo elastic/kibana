@@ -7,8 +7,8 @@
 import { MapCenter } from '../../common/descriptor_types';
 import { MapStoreState } from '../reducers/store';
 import { MapSettings } from '../reducers/map';
-import { IVectorLayer } from '../layers/vector_layer';
-import { ILayer } from '../layers/layer';
+import { IVectorLayer } from '../classes/layers/vector_layer/vector_layer';
+import { ILayer } from '../classes/layers/layer';
 
 export function getHiddenLayerIds(state: MapStoreState): string[];
 
@@ -28,3 +28,7 @@ export function getSpatialFiltersLayer(state: MapStoreState): IVectorLayer;
 
 export function getLayerList(state: MapStoreState): ILayer[];
 export function getFittableLayers(state: MapStoreState): ILayer[];
+
+export function getSelectedLayer(state: MapStoreState): ILayer | undefined;
+
+export function getMapColors(state: MapStoreState): string[];
