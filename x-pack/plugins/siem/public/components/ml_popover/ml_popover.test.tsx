@@ -11,10 +11,6 @@ import { MlPopover } from './ml_popover';
 
 jest.mock('../../lib/kibana');
 
-jest.mock('../ml/permissions/has_ml_admin_permissions', () => ({
-  hasMlAdminPermissions: () => true,
-}));
-
 describe('MlPopover', () => {
   test('shows upgrade popover on mouse click', () => {
     const wrapper = mountWithIntl(<MlPopover />);

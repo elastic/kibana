@@ -11,7 +11,7 @@ import { MBMapContainer } from '../map/mb';
 import { WidgetOverlay } from '../widget_overlay';
 import { ToolbarOverlay } from '../toolbar_overlay';
 import { LayerPanel } from '../layer_panel';
-import { AddLayerPanel } from '../layer_addpanel';
+import { AddLayerPanel } from '../add_layer_panel';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { ExitFullScreenButton } from '../../../../../../src/plugins/kibana_react/public';
 
@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettingsPanel } from '../map_settings_panel';
-import { registerLayerWizards } from '../../layers/load_layer_wizards';
+import { registerLayerWizards } from '../../classes/layers/load_layer_wizards';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 

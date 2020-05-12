@@ -30,7 +30,8 @@ export default function({ getService, getPageObjects }) {
   const docTable = getService('docTable');
   const PageObjects = getPageObjects(['common', 'context', 'discover', 'timePicker']);
 
-  describe('context link in discover', function contextSize() {
+  // FLAKY: https://github.com/elastic/kibana/issues/62866
+  describe.skip('context link in discover', function contextSize() {
     before(async function() {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
