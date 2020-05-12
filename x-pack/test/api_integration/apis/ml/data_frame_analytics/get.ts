@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/machine_learning/security_common';
 import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
+import { DeepPartial } from '../../../../../plugins/ml/common/types/common';
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
@@ -21,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
   const jobId = `bm_${Date.now()}`;
 
   async function createJobs() {
-    const mockJobConfigs = [
+    const mockJobConfigs: Array<DeepPartial<DataFrameAnalyticsConfig>> = [
       {
         id: `${jobId}_1`,
         description:
