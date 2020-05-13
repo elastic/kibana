@@ -108,7 +108,7 @@ export const UseField = React.memo(UseFieldComp) as typeof UseFieldComp;
  */
 export function getUseField<T1 = unknown>(partialProps: Partial<Props<T1>>) {
   return function<T2 = T1>(props: Partial<Props<T2>>) {
-    const componentProps = { ...partialProps, ...props } as Props<T>;
+    const componentProps = { ...partialProps, ...props } as Props<T2>;
     return <UseField<T2> {...componentProps} />;
   };
 }
