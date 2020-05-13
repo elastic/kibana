@@ -5,18 +5,12 @@
  */
 
 import { Observable } from 'rxjs';
-import { GlobalSearchProviderResult } from '../../common/types';
+import { GlobalSearchResult } from '../../common/types';
 
 /**
  * Representation of a result returned by the {@link GlobalSearchPluginStart.find | `find` API}
  */
-export type GlobalSearchResult = Omit<GlobalSearchProviderResult, 'url'> & {
-  /**
-   * The url associated with this result.
-   * This can be either an absolute url, or a relative path including the basePath
-   */
-  url: string;
-
+export type NavigableGlobalSearchResult = GlobalSearchResult & {
   /**
    * Navigate to this result's associated url. If the result is on this kibana instance, user will be redirected to it
    * in a SPA friendly way using `application.navigateToApp`, else, a full page refresh will be performed.
@@ -47,5 +41,5 @@ export interface GlobalSearchBatchedResults {
   /**
    * Results for this batch
    */
-  results: GlobalSearchResult[];
+  results: NavigableGlobalSearchResult[];
 }

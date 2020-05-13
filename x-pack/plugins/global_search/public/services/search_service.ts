@@ -12,7 +12,8 @@ import { takeInArray } from '../../common/operators';
 import { GlobalSearchResultProvider } from '../types';
 import { GlobalSearchConfigType } from '../config';
 import { GlobalSearchBatchedResults, GlobalSearchFindOptions } from './types';
-import { getResultProcessor } from './process_result';
+import { getResultProcessor, addNavigate } from './process_result';
+import { fetchServerResults } from './fetch_server_results';
 
 /** @public */
 export interface SearchServiceSetup {
@@ -63,19 +64,27 @@ export class SearchService {
     const timeout = duration(this.config!.search_timeout).asMilliseconds();
     const timeout$ = timer(timeout).pipe(map(() => undefined));
     const aborted$ = options.aborted$ ? merge(options.aborted$, timeout$) : timeout$;
+
+    const preference = options.preference ?? 'default_preference'; // TODO: generate a session value
+
     const providerOptions = {
       ...options,
-      preference: options.preference ?? 'default_preference', // TODO: generate a value?
+      preference,
       maxResults: this.maxProviderResults,
       aborted$,
     };
 
+    const navigateToUrl = this.application!.navigateToUrl;
+
     const processResult = getResultProcessor({
       basePath: this.http!.basePath,
-      navigateToUrl: this.application!.navigateToUrl,
+      navigateToUrl,
     });
 
-    // TODO: perform server request
+    const serverResults$ = fetchServerResults(this.http!, term, {
+      preference,
+      aborted$,
+    }).pipe(map(results => results.map(r => addNavigate(r, navigateToUrl))));
 
     const providersResults$ = this.providers.map(provider =>
       provider.find(term, providerOptions).pipe(
@@ -85,7 +94,7 @@ export class SearchService {
       )
     );
 
-    return merge(...providersResults$).pipe(
+    return merge(...providersResults$, serverResults$).pipe(
       map(results => ({
         results,
       }))

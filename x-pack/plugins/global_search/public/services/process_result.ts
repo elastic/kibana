@@ -5,11 +5,13 @@
  */
 
 import { ApplicationStart } from 'src/core/public';
-import { GlobalSearchProviderResult } from '../../common/types';
-import { GlobalSearchResult } from './types';
+import { GlobalSearchProviderResult, GlobalSearchResult } from '../../common/types';
+import { NavigableGlobalSearchResult } from './types';
 import { convertResultUrl, IBasePath } from '../../common/utils';
 
-export type ResultProcessor = (providerResult: GlobalSearchProviderResult) => GlobalSearchResult;
+export type ResultProcessor = (
+  providerResult: GlobalSearchProviderResult
+) => NavigableGlobalSearchResult;
 
 export const getResultProcessor = ({
   basePath,
@@ -17,11 +19,21 @@ export const getResultProcessor = ({
 }: {
   basePath: IBasePath;
   navigateToUrl: ApplicationStart['navigateToUrl'];
-}) => (providerResult: GlobalSearchProviderResult): GlobalSearchResult => {
+}) => (providerResult: GlobalSearchProviderResult): NavigableGlobalSearchResult => {
   const url = convertResultUrl(providerResult.url, basePath);
   return {
     ...providerResult,
     url,
     navigate: () => navigateToUrl(url),
+  };
+};
+
+export const addNavigate = (
+  result: GlobalSearchResult,
+  navigateToUrl: ApplicationStart['navigateToUrl']
+): NavigableGlobalSearchResult => {
+  return {
+    ...result,
+    navigate: () => navigateToUrl(result.url),
   };
 };

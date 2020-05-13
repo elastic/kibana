@@ -34,7 +34,7 @@ export const registerInternalFindRoute = (router: IRouter) => {
         .toPromise();
       return res.ok({
         body: {
-          allResults,
+          results: allResults,
         },
       });
     }

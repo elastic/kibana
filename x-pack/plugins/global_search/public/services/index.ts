@@ -5,4 +5,8 @@
  */
 
 export { SearchService, SearchServiceSetup, SearchServiceStart } from './search_service';
-export { GlobalSearchResult, GlobalSearchFindOptions, GlobalSearchBatchedResults } from './types';
+export {
+  NavigableGlobalSearchResult,
+  GlobalSearchFindOptions,
+  GlobalSearchBatchedResults,
+} from './types';

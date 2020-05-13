@@ -5,18 +5,8 @@
  */
 
 import { Observable } from 'rxjs';
-import { GlobalSearchProviderResult } from '../result_provider';
+import { GlobalSearchResult } from '../../common/types';
 
-/**
- * Representation of a result returned by the {@link GlobalSearchPluginStart.find | `find` API}
- */
-export type GlobalSearchResult = Omit<GlobalSearchProviderResult, 'url'> & {
-  /**
-   * The url associated with this result.
-   * This can be either an absolute url, or a relative path including the basePath
-   */
-  url: string;
-};
 /**
  * Options for the server-side {@link GlobalSearchServiceStart.find | find API}
  */
