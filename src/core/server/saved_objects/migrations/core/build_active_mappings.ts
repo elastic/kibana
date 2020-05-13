@@ -142,6 +142,9 @@ function defaultMapping(): IndexMapping {
       namespaces: {
         type: 'keyword',
       },
+      originId: {
+        type: 'keyword',
+      },
       updated_at: {
         type: 'date',
       },
