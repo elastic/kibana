@@ -6,16 +6,11 @@
 
 import { useDispatch, useSelector } from 'react-redux';
 import React, { useCallback } from 'react';
-import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import { OverviewPageComponent } from '../../pages/overview';
 import { selectIndexPattern } from '../../state/selectors';
 import { setEsKueryString } from '../../state/actions';
 
-export interface OverviewPageProps {
-  autocomplete: DataPublicPluginSetup['autocomplete'];
-}
-
-export const OverviewPage: React.FC<OverviewPageProps> = props => {
+export const OverviewPage: React.FC = props => {
   const dispatch = useDispatch();
   const setEsKueryFilters = useCallback(
     (esFilters: string) => dispatch(setEsKueryString(esFilters)),

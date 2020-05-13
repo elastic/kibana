@@ -62,7 +62,7 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
 
     if (
       !state.copyOnSave ||
-      origin === 'dashboard' // dashboard supports adding a copied panel on save...
+      origin === 'dashboards' // dashboard supports adding a copied panel on save...
     ) {
       const originVerb = !documentInfo.id || state.copyOnSave ? addLabel : returnLabel;
       return (
