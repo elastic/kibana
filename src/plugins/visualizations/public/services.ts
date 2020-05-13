@@ -18,6 +18,7 @@
  */
 
 import {
+  ApplicationStart,
   Capabilities,
   ChromeStart,
   HttpStart,
@@ -45,6 +46,8 @@ export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClie
 export const [getCapabilities, setCapabilities] = createGetterSetter<Capabilities>('Capabilities');
 
 export const [getHttp, setHttp] = createGetterSetter<HttpStart>('Http');
+
+export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');
 
 export const [getSavedObjects, setSavedObjects] = createGetterSetter<SavedObjectsStart>(
   'SavedObjects'

@@ -73,6 +73,7 @@ export class AlertTypeRegistry {
       actionGroups: alertType.actionGroups,
       defaultActionGroupId: alertType.defaultActionGroupId,
       actionVariables: alertType.actionVariables,
+      producer: alertType.producer,
     }));
   }
 }

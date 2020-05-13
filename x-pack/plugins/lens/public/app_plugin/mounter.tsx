@@ -9,19 +9,19 @@ import { AppMountParameters, CoreSetup } from 'kibana/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { render, unmountComponentAtNode } from 'react-dom';
-
-import rison from 'rison-node';
+import { i18n } from '@kbn/i18n';
 import { parse } from 'query-string';
-import { Storage, removeQueryParam } from '../../../../../src/plugins/kibana_utils/public';
+
+import { removeQueryParam, Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
 
 import { App } from './app';
 import { EditorFrameStart } from '../types';
-import { addEmbeddableToDashboardUrl, getUrlVars, isRisonObject } from '../helpers';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { SavedObjectIndexStore } from '../persistence';
 import { LensPluginStartDependencies } from '../plugin';
+import { LENS_EMBEDDABLE_TYPE } from '../../common';
 
 export async function mountApp(
   core: CoreSetup<LensPluginStartDependencies, void>,
@@ -33,6 +33,10 @@ export async function mountApp(
   const savedObjectsClient = coreStart.savedObjects.client;
   addHelpMenuToAppChrome(coreStart.chrome, coreStart.docLinks);
 
+  coreStart.chrome.docTitle.change(
+    i18n.translate('xpack.lens.pageTitle', { defaultMessage: 'Lens' })
+  );
+
   const instance = await createEditorFrame();
 
   setReportManager(
@@ -41,15 +45,6 @@ export async function mountApp(
       http: core.http,
     })
   );
-  const updateUrlTime = (urlVars: Record<string, string>): void => {
-    const decoded = rison.decode(urlVars._g);
-    if (!isRisonObject(decoded)) {
-      return;
-    }
-    // @ts-ignore
-    decoded.time = dataStart.query.timefilter.timefilter.getTime();
-    urlVars._g = rison.encode(decoded);
-  };
   const redirectTo = (
     routeProps: RouteComponentProps<{ id?: string }>,
     id?: string,
@@ -58,29 +53,20 @@ export async function mountApp(
     newlyCreated?: boolean
   ) => {
     if (!id) {
-      routeProps.history.push('/lens');
+      routeProps.history.push('/');
     } else if (!originatingApp) {
-      routeProps.history.push(`/lens/edit/${id}`);
+      routeProps.history.push(`/edit/${id}`);
     } else if (!!originatingApp && id && returnToOrigin) {
-      routeProps.history.push(`/lens/edit/${id}`);
-      const originatingAppLink = coreStart.chrome.navLinks.get(originatingApp);
-      if (!originatingAppLink || !originatingAppLink.url) {
-        throw new Error('Cannot get originating app url');
-      }
+      routeProps.history.push(`/edit/${id}`);
 
-      // TODO: Remove this and use application.redirectTo after https://github.com/elastic/kibana/pull/63443
-      if (originatingApp === 'kibana:dashboard') {
+      if (originatingApp === 'dashboards') {
         const addLensId = newlyCreated ? id : '';
-        const urlVars = getUrlVars(originatingAppLink.url);
-        updateUrlTime(urlVars); // we need to pass in timerange in query params directly
-        const dashboardUrl = addEmbeddableToDashboardUrl(
-          originatingAppLink.url,
-          addLensId,
-          urlVars
-        );
-        window.location.href = dashboardUrl;
+        startDependencies.dashboard.addEmbeddableToDashboard({
+          embeddableId: addLensId,
+          embeddableType: LENS_EMBEDDABLE_TYPE,
+        });
       } else {
-        window.location.href = originatingAppLink.url;
+        coreStart.application.navigateToApp(originatingApp);
       }
     }
   };
@@ -117,13 +103,14 @@ export async function mountApp(
     return <FormattedMessage id="xpack.lens.app404" defaultMessage="404 Not Found" />;
   }
 
+  params.element.classList.add('lnsAppWrapper');
   render(
     <I18nProvider>
       <HashRouter>
         <Switch>
-          <Route exact path="/lens/edit/:id" render={renderEditor} />
-          <Route exact path="/lens" render={renderEditor} />
-          <Route path="/lens" component={NotFound} />
+          <Route exact path="/edit/:id" render={renderEditor} />
+          <Route exact path="/" render={renderEditor} />
+          <Route path="/" component={NotFound} />
         </Switch>
       </HashRouter>
     </I18nProvider>,

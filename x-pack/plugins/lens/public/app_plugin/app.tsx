@@ -129,7 +129,11 @@ export function App({
   useEffect(() => {
     core.chrome.setBreadcrumbs([
       {
-        href: core.http.basePath.prepend(`/app/kibana#/visualize`),
+        href: core.http.basePath.prepend(`/app/visualize#/`),
+        onClick: e => {
+          core.application.navigateToApp('visualize', { path: '/' });
+          e.preventDefault();
+        },
         text: i18n.translate('xpack.lens.breadcrumbsTitle', {
           defaultMessage: 'Visualize',
         }),
