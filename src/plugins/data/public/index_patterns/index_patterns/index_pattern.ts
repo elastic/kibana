@@ -66,6 +66,7 @@ export class IndexPattern implements IIndexPattern {
   private originalBody: { [key: string]: any } = {};
   public fieldsFetcher: any; // probably want to factor out any direct usage and change to private
   private shortDotsEnable: boolean = false;
+  private apiClient: IIndexPatternsApiClient;
 
   private mapping: MappingObject = expandShorthand({
     title: ES_FIELD_TYPES.TEXT,
@@ -112,6 +113,7 @@ export class IndexPattern implements IIndexPattern {
     });
 
     this.fields = this.createFieldList(this, [], this.shortDotsEnable);
+    this.apiClient = apiClient;
     this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig('metaFields'));
     this.flattenHit = flattenHitWrapper(this, this.getConfig('metaFields'));
     this.formatHit = formatHitProvider(
@@ -372,8 +374,8 @@ export class IndexPattern implements IIndexPattern {
           duplicateId,
           this.getConfig,
           this.savedObjectsClient,
-          this.patternCache,
-          this.fieldsFetcher
+          this.apiClient,
+          this.patternCache
         );
         await duplicatePattern.destroy();
       }
