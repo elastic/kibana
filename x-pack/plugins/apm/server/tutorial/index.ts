@@ -20,15 +20,12 @@ const apmIntro = i18n.translate('xpack.apm.tutorial.introduction', {
     'Collect in-depth performance metrics and errors from inside your applications.'
 });
 
+// move this to apm_oss
 export const tutorialProvider = ({
-  isEnabled,
   indexPatternTitle,
-  cloud,
   indices
 }: {
-  isEnabled: boolean;
   indexPatternTitle: string;
-  cloud?: CloudSetup;
   indices: {
     errorIndices: string;
     transactionIndices: string;
@@ -63,18 +60,6 @@ export const tutorialProvider = ({
     ]
   };
 
-  if (isEnabled) {
-    artifacts.application = {
-      path: '/app/apm',
-      label: i18n.translate(
-        'xpack.apm.tutorial.specProvider.artifacts.application.label',
-        {
-          defaultMessage: 'Launch APM'
-        }
-      )
-    };
-  }
-
   return {
     id: 'apm',
     name: i18n.translate('xpack.apm.tutorial.specProvider.name', {
@@ -99,7 +84,6 @@ It allows you to monitor the performance of thousands of applications in real ti
     euiIconType: 'apmApp',
     artifacts,
     onPrem: onPremInstructions(indices),
-    elasticCloud: createElasticCloudInstructions(cloud),
     previewImagePath: '/plugins/apm/assets/apm.png',
     savedObjects,
     savedObjectsInstallMsg: i18n.translate(

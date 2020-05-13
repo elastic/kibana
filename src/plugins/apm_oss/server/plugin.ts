@@ -28,8 +28,20 @@ export class APMOSSPlugin implements Plugin<APMOSSPluginSetup> {
   public setup(core: CoreSetup) {
     const config$ = this.initContext.config.create<APMOSSConfig>();
 
+    const tutorialProvider = tutorialProvider({
+      indexPatternTitle: this.currentConfig['apm_oss.indexPattern'],
+      indices: {
+        errorIndices: this.currentConfig['apm_oss.errorIndices'],
+        metricsIndices: this.currentConfig['apm_oss.metricsIndices'],
+        onboardingIndices: this.currentConfig['apm_oss.onboardingIndices'],
+        sourcemapIndices: this.currentConfig['apm_oss.sourcemapIndices'],
+        transactionIndices: this.currentConfig['apm_oss.transactionIndices'])
+    ;
+    plugins.home.tutorials.registerTutorial(tutorialProvider);
+
     return {
       config$,
+      getRegisteredTutorialProvider: () => tutorialProvider;
     };
   }
 
