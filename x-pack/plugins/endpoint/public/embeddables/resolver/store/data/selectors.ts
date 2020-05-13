@@ -437,6 +437,10 @@ export const relatedEventStats = createSelector(relatedEventResults, function ge
         relatedEventStats.set(updatedEvent, newStatsEntry);
         continue;
       }
+      /**
+       * Folowing reduction, this will be a record like
+       * {DNS: 10, File: 2} etc.
+       */
       const statsForEntry = newStatsEntry?.relatedEvents.reduce(
         (compiledStats: Record<string, number>, relatedEvent: { relatedEventType: string }) => {
           compiledStats[relatedEvent.relatedEventType] =

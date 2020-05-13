@@ -131,24 +131,6 @@ export type CameraState = {
 );
 
 /**
- * This is the current list of known related event types. It has been transcribed from the
- * v0 Endgame app.
- */
-export type RelatedEventType =
-  | 'Network'
-  | 'File'
-  | 'DNS'
-  | 'Registry'
-  | 'Powershell'
-  | 'WMI'
-  | 'API'
-  | 'CLR'
-  | 'Image Load'
-  | 'User';
-
-export type EventCategory = RelatedEventType | ('Alert' | 'Process' | 'Security');
-
-/**
  * This represents all the raw data (sans statistics, metadata, etc.)
  * about a particular subject's related events
  */
@@ -170,7 +152,7 @@ export type RelatedEventDataResults = RelatedEventDataEntry | 'waitingForRelated
  * (e.g. counts of items grouped by their related event types)
  */
 export type RelatedEventDataEntryWithStats = RelatedEventDataEntry & {
-  stats: Partial<Record<RelatedEventType, number>>;
+  stats: Record<string, number>;
 };
 
 /**

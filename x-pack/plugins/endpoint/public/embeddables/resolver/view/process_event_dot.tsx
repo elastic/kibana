@@ -23,7 +23,6 @@ import {
   AdjacentProcessMap,
   ResolverProcessType,
   RelatedEventEntryWithStatsOrWaiting,
-  EventCategory,
 } from '../types';
 import { SymbolIds, NamedColors } from './defs';
 import { ResolverEvent } from '../../../../common/types';
@@ -67,84 +66,84 @@ const nodeAssets = {
   },
 };
 
-const eventTypeToNameMap = new Map<string, EventCategory>([
+const eventTypeToNameMap = new Map<string, string>([
   [
     'process',
     i18n.translate('xpack.endpoint.resolver.Process', {
       defaultMessage: 'Process',
-    }) as EventCategory,
+    }),
   ],
   [
     'alert',
     i18n.translate('xpack.endpoint.resolver.Alert', {
       defaultMessage: 'Alert',
-    }) as EventCategory,
+    }),
   ],
   [
     'security',
     i18n.translate('xpack.endpoint.resolver.Security', {
       defaultMessage: 'Security',
-    }) as EventCategory,
+    }),
   ],
   [
     'file',
     i18n.translate('xpack.endpoint.resolver.File', {
       defaultMessage: 'File',
-    }) as EventCategory,
+    }),
   ],
   [
     'network',
     i18n.translate('xpack.endpoint.resolver.Network', {
       defaultMessage: 'Network',
-    }) as EventCategory,
+    }),
   ],
   [
     'registry',
     i18n.translate('xpack.endpoint.resolver.Registry', {
       defaultMessage: 'Registry',
-    }) as EventCategory,
+    }),
   ],
   [
     'dns',
     i18n.translate('xpack.endpoint.resolver.DNS', {
       defaultMessage: 'DNS',
-    }) as EventCategory,
+    }),
   ],
   [
     'clr',
     i18n.translate('xpack.endpoint.resolver.CLR', {
       defaultMessage: 'CLR',
-    }) as EventCategory,
+    }),
   ],
   [
     'image_load',
     i18n.translate('xpack.endpoint.resolver.ImageLoad', {
       defaultMessage: 'Image Load',
-    }) as EventCategory,
+    }),
   ],
   [
     'powershell',
     i18n.translate('xpack.endpoint.resolver.Powershell', {
       defaultMessage: 'Powershell',
-    }) as EventCategory,
+    }),
   ],
   [
     'wmi',
     i18n.translate('xpack.endpoint.resolver.WMI', {
       defaultMessage: 'WMI',
-    }) as EventCategory,
+    }),
   ],
   [
     'api',
     i18n.translate('xpack.endpoint.resolver.API', {
       defaultMessage: 'API',
-    }) as EventCategory,
+    }),
   ],
   [
     'user',
     i18n.translate('xpack.endpoint.resolver.User', {
       defaultMessage: 'User',
-    }) as EventCategory,
+    }),
   ],
 ]);
 
@@ -305,6 +304,36 @@ export const ProcessEventDot = styled(
        * e.g. "10 DNS", "230 File"
        */
       const relatedEventOptions = useMemo(() => {
+        if (relatedEvents instanceof Error) {
+          // Return an empty set of options if there was an error requesting them
+          return [];
+        }
+        const relatedStats = typeof relatedEvents === 'object' && relatedEvents.stats;
+        if (!relatedStats) {
+          // Return an empty set of options if there are no stats to report
+          return [];
+        }
+        // If we have entries to show, map them into options to display in the selectable list
+        return Object.entries(relatedStats).map(statsEntry => {
+          const displayName = eventTypeToNameMap.get(statsEntry[0]) || 'Process';
+          return {
+            prefix: <EuiI18nNumber value={statsEntry[1] || 0} />,
+            optionTitle: `${displayName}`,
+            action: () => {
+              dispatch({
+                type: 'userSelectedRelatedEventCategory',
+                payload: {
+                  subject: event,
+                  category: statsEntry[0],
+                },
+              });
+              return false;
+            },
+          };
+        });
+      }, [relatedEvents, dispatch, event]);
+
+      const relatedEventStatusOrOptions = useMemo(() => {
         if (!relatedEvents) {
           // If related events have not yet been requested
           return subMenuAssets.initialMenuStatus;
@@ -318,24 +347,8 @@ export const ProcessEventDot = styled(
           // Pass on the waiting symbol
           return relatedEvents;
         }
-        // If we have entries to show, map them into options to display in the selectable list
-        return Object.entries(relatedEvents.stats).map(statsEntry => {
-          const displayName = eventTypeToNameMap.get(statsEntry[0]) || 'Process';
-          return {
-            prefix: <EuiI18nNumber value={statsEntry[1] || 0} />,
-            optionTitle: `${displayName}`,
-            action: () => {
-              dispatch({
-                type: 'userSelectedRelatedEventCategory',
-                payload: {
-                  subject: event,
-                  category: statsEntry[0],
-                },
-              });
-            },
-          };
-        });
-      }, [relatedEvents, dispatch, event]);
+        return relatedEventOptions;
+      }, [relatedEvents, relatedEventOptions]);
 
       /* eslint-disable jsx-a11y/click-events-have-key-events */
       /**
@@ -469,7 +482,7 @@ export const ProcessEventDot = styled(
                   <EuiFlexItem grow={false} className="related-dropdown">
                     <NodeSubMenu
                       menuTitle={subMenuAssets.relatedEvents.title}
-                      optionsWithActions={relatedEventOptions}
+                      optionsWithActions={relatedEventStatusOrOptions}
                       menuAction={handleRelatedEventRequest}
                     />
                   </EuiFlexItem>
