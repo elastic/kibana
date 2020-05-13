@@ -444,7 +444,7 @@ The `.yaxis()` function supports the following parameters:
 [horizontal]
 yaxis :: The numbered y-axis to plot this series on, eg .yaxis(2) for a second y-axis.
 min :: Minimum value for y-axis range
-max :: Max value for y-axis range
+max :: Maximum value for y-axis range
 position :: `left` or `right`  
 label :: Label for axis  
 color :: Color of axis label
