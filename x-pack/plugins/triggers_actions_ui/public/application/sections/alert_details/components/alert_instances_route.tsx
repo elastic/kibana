@@ -19,24 +19,32 @@ import { AlertInstancesWithApi as AlertInstances } from './alert_instances';
 type WithAlertStateProps = {
   alert: Alert;
   requestRefresh: () => Promise<void>;
-} & Pick<AlertApis, 'loadAlertState'>;
+} & Pick<AlertApis, 'loadAlertState' /* | 'getEvents' */>;
 
 export const AlertInstancesRoute: React.FunctionComponent<WithAlertStateProps> = ({
   alert,
   requestRefresh,
   loadAlertState,
+  // getEvents,
 }) => {
   const { toastNotifications } = useAppDependencies();
 
   const [alertState, setAlertState] = useState<AlertTaskState | null>(null);
+  // const [events, setEvents] = useState<unknown | null>(null);
 
   useEffect(() => {
+    // TODO get events here
     getAlertState(alert.id, loadAlertState, setAlertState, toastNotifications);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alert]);
 
-  return alertState ? (
-    <AlertInstances requestRefresh={requestRefresh} alert={alert} alertState={alertState} />
+  return alertState /* && events */ ? (
+    <AlertInstances
+      requestRefresh={requestRefresh}
+      // events={events}
+      alert={alert}
+      alertState={alertState}
+    />
   ) : (
     <div
       style={{
@@ -72,5 +80,13 @@ export async function getAlertState(
     });
   }
 }
+
+// export async function getEvents(
+//   alertId: string,
+//   loadEvents: AlertApis['getEvents'],
+//   setEvents: React.Dispatch<React.SetStateAction<unknown | null>>,
+//   toastNotifications: Pick<ToastsApi, 'addDanger'>
+// ) {
+// }
 
 export const AlertInstancesRouteWithApi = withBulkAlertOperations(AlertInstancesRoute);

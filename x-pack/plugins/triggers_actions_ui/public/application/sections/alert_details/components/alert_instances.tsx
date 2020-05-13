@@ -21,6 +21,7 @@ import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 type AlertInstancesProps = {
   alert: Alert;
   alertState: AlertTaskState;
+  // events: unknown;
   requestRefresh: () => Promise<void>;
   durationEpoch?: number;
 } & Pick<AlertApis, 'muteAlertInstance' | 'unmuteAlertInstance'>;

@@ -24,6 +24,7 @@ import {
   loadAlertState,
   loadAlertTypes,
   health,
+  // getEvents,
 } from '../../../lib/alert_api';
 
 export interface ComponentOpts {
@@ -53,6 +54,7 @@ export interface ComponentOpts {
   loadAlertState: (id: Alert['id']) => Promise<AlertTaskState>;
   loadAlertTypes: () => Promise<AlertType[]>;
   getHealth: () => Promise<AlertingFrameworkHealth>;
+  // getEvents: () => Promise<any>;
 }
 
 export type PropsWithOptionalApiHandlers<T> = Omit<T, keyof ComponentOpts> & Partial<ComponentOpts>;
@@ -121,6 +123,7 @@ export function withBulkAlertOperations<T>(
         loadAlertState={async (alertId: Alert['id']) => loadAlertState({ http, alertId })}
         loadAlertTypes={async () => loadAlertTypes({ http })}
         getHealth={async () => health({ http })}
+        // getEvents={async (alertId: Alert['id']) => getEvents({ http, id: alertId })}
       />
     );
   };

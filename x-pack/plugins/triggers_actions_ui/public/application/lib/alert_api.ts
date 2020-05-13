@@ -221,17 +221,7 @@ export async function health({ http }: { http: HttpSetup }): Promise<AlertingFra
   return await http.get(`${BASE_ALERT_API_PATH}/_health`);
 }
 
-export async function getEvents({
-  id,
-  startDate,
-  endDate = Date.now(),
-  http,
-}: {
-  id: string;
-  startDate: number;
-  endDate: number;
-  http: HttpSetup;
-}): Promise<void> {
+export async function getEvents({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
   // per_page: schema.number({ defaultValue: 10, min: 0 }),
   // page: schema.number({ defaultValue: 1, min: 1 }),
   // start: optionalDateFieldSchema,
@@ -241,8 +231,6 @@ export async function getEvents({
     query: {
       per_page: 1000,
       page: 1,
-      start: new Date(startDate).toISOString(),
-      end: new Date(endDate).toISOString(),
     },
   });
 }
