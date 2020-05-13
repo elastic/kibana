@@ -9,7 +9,7 @@ import { API_URLS } from '../../../common/constants';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
 
-export const DEFAULT_FROM = 'now-15m';
+export const DEFAULT_FROM = 'now-5m';
 export const DEFAULT_TO = 'now';
 
 const DEFAULT_SIZE = 25;
