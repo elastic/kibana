@@ -11,7 +11,8 @@ const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
 const onChangeHandler = jest.fn();
 const getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
 
-describe('Mappings editor: core', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/66457
+describe.skip('Mappings editor: core', () => {
   /**
    * Variable to store the mappings data forwarded to the consumer component
    */
