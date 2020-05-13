@@ -144,21 +144,49 @@ export function IndexPatternDataPanel({
           indexPatternList.map(x => `${x.title}:${x.timeFieldName}`).join(','),
         ]}
       />
-      <MemoizedDataPanel
-        currentIndexPatternId={currentIndexPatternId}
-        indexPatternRefs={indexPatternRefs}
-        indexPatterns={indexPatterns}
-        query={query}
-        dateRange={dateRange}
-        filters={filters}
-        dragDropContext={dragDropContext}
-        showEmptyFields={state.showEmptyFields}
-        onToggleEmptyFields={onToggleEmptyFields}
-        core={core}
-        data={data}
-        onChangeIndexPattern={onChangeIndexPattern}
-        existingFields={state.existingFields}
-      />
+
+      {Object.keys(indexPatterns).length === 0 ? (
+        <EuiFlexGroup
+          gutterSize="m"
+          className="lnsInnerIndexPatternDataPanel"
+          direction="column"
+          responsive={false}
+        >
+          <EuiFlexItem grow={null}>
+            <EuiCallOut
+              data-test-subj="indexPattern-no-indexpatterns"
+              title={i18n.translate('xpack.lens.indexPattern.noPatternsLabel', {
+                defaultMessage: 'No index patterns',
+              })}
+              color="warning"
+              iconType="alert"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.lens.indexPattern.noPatternsDescription"
+                  defaultMessage="Please create an index pattern or switch to another data source"
+                />
+              </p>
+            </EuiCallOut>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <MemoizedDataPanel
+          currentIndexPatternId={currentIndexPatternId}
+          indexPatternRefs={indexPatternRefs}
+          indexPatterns={indexPatterns}
+          query={query}
+          dateRange={dateRange}
+          filters={filters}
+          dragDropContext={dragDropContext}
+          showEmptyFields={state.showEmptyFields}
+          onToggleEmptyFields={onToggleEmptyFields}
+          core={core}
+          data={data}
+          onChangeIndexPattern={onChangeIndexPattern}
+          existingFields={state.existingFields}
+        />
+      )}
     </>
   );
 }
@@ -194,35 +222,6 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   onChangeIndexPattern: (newId: string) => void;
   existingFields: IndexPatternPrivateState['existingFields'];
 }) {
-  if (Object.keys(indexPatterns).length === 0) {
-    return (
-      <EuiFlexGroup
-        gutterSize="m"
-        className="lnsInnerIndexPatternDataPanel"
-        direction="column"
-        responsive={false}
-      >
-        <EuiFlexItem grow={null}>
-          <EuiCallOut
-            data-test-subj="indexPattern-no-indexpatterns"
-            title={i18n.translate('xpack.lens.indexPattern.noPatternsLabel', {
-              defaultMessage: 'No index patterns',
-            })}
-            color="warning"
-            iconType="alert"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.lens.indexPattern.noPatternsDescription"
-                defaultMessage="Please create an index pattern or switch to another data source"
-              />
-            </p>
-          </EuiCallOut>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
   const [localState, setLocalState] = useState<DataPanelState>({
     nameFilter: '',
     typeFilter: [],

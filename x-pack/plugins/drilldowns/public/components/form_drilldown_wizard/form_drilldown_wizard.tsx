@@ -19,7 +19,7 @@ export interface FormDrilldownWizardProps {
   onNameChange?: (name: string) => void;
 
   currentActionFactory?: ActionFactory;
-  onActionFactoryChange?: (actionFactory: ActionFactory | null) => void;
+  onActionFactoryChange?: (actionFactory?: ActionFactory) => void;
   actionFactoryContext: object;
 
   actionConfig?: object;

@@ -69,7 +69,7 @@ export function getUiSettingDefaults() {
       name: i18n.translate('kbn.advancedSettings.defaultRoute.defaultRouteTitle', {
         defaultMessage: 'Default route',
       }),
-      value: '/app/kibana',
+      value: '/app/home',
       schema: schema.string({
         validate(value) {
           if (!value.startsWith('/') || !isRelativeUrl(value)) {
@@ -1171,6 +1171,26 @@ export function getUiSettingDefaults() {
       }),
       category: ['accessibility'],
       requiresPageReload: true,
+    },
+    pageNavigation: {
+      name: i18n.translate('kbn.advancedSettings.pageNavigationName', {
+        defaultMessage: 'Side nav style',
+      }),
+      value: 'modern',
+      description: i18n.translate('kbn.advancedSettings.pageNavigationDesc', {
+        defaultMessage: 'Change the style of navigation',
+      }),
+      type: 'select',
+      options: ['modern', 'legacy'],
+      optionLabels: {
+        modern: i18n.translate('kbn.advancedSettings.pageNavigationModern', {
+          defaultMessage: 'Modern',
+        }),
+        legacy: i18n.translate('kbn.advancedSettings.pageNavigationLegacy', {
+          defaultMessage: 'Legacy',
+        }),
+      },
+      schema: schema.oneOf([schema.literal('modern'), schema.literal('legacy')]),
     },
   };
 }

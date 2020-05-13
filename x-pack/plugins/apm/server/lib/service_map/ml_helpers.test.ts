@@ -5,11 +5,11 @@
  */
 
 import { AnomaliesResponse } from './get_service_map';
-import { addAnomaliesToServicesData } from './ml_helpers';
+import { addAnomaliesDataToNodes } from './ml_helpers';
 
-describe('addAnomaliesToServicesData', () => {
-  it('adds anomalies to services data', () => {
-    const servicesData = [
+describe('addAnomaliesDataToNodes', () => {
+  it('adds anomalies to nodes', () => {
+    const nodes = [
       {
         'service.name': 'opbeans-ruby',
         'agent.name': 'ruby',
@@ -89,8 +89,8 @@ describe('addAnomaliesToServicesData', () => {
     ];
 
     expect(
-      addAnomaliesToServicesData(
-        servicesData,
+      addAnomaliesDataToNodes(
+        nodes,
         (anomaliesResponse as unknown) as AnomaliesResponse
       )
     ).toEqual(result);

@@ -6,7 +6,7 @@
 
 jest.mock('../constants', () => ({ MAIN_DATA_TYPE_DEFINITION: {} }));
 
-import { isStateValid } from './utils';
+import { isStateValid, stripUndefinedValues } from './utils';
 
 describe('utils', () => {
   describe('isStateValid()', () => {
@@ -60,6 +60,51 @@ describe('utils', () => {
       };
 
       expect(isStateValid(components)).toBe(false);
+    });
+  });
+
+  describe('stripUndefinedValues()', () => {
+    test('should remove all undefined value recursively', () => {
+      const myDate = new Date();
+
+      const dataIN = {
+        someString: 'world',
+        someNumber: 123,
+        someBoolean: true,
+        someArray: [1, 2, 3],
+        someEmptyObject: {},
+        someDate: myDate,
+        falsey1: 0,
+        falsey2: '',
+        stripThis: undefined,
+        nested: {
+          value: 'bar',
+          stripThis: undefined,
+          deepNested: {
+            value: 'baz',
+            stripThis: undefined,
+          },
+        },
+      };
+
+      const dataOUT = {
+        someString: 'world',
+        someNumber: 123,
+        someBoolean: true,
+        someArray: [1, 2, 3],
+        someEmptyObject: {},
+        someDate: myDate,
+        falsey1: 0,
+        falsey2: '',
+        nested: {
+          value: 'bar',
+          deepNested: {
+            value: 'baz',
+          },
+        },
+      };
+
+      expect(stripUndefinedValues(dataIN)).toEqual(dataOUT);
     });
   });
 });

@@ -21,6 +21,9 @@ import Bluebird from 'bluebird';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
+
+import 'leaflet/dist/leaflet.js';
+import 'leaflet-vega';
 // Will be replaced with new path when tests are moved
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createVegaVisualization } from '../../../../../../plugins/vis_type_vega/public/vega_visualization';
@@ -100,6 +103,39 @@ describe('VegaVisualizations', () => {
   setSavedObjects(npStart.core.savedObjects);
   setNotifications(npStart.core.notifications);
 
+  const mockMapConfig = {
+    includeElasticMapsService: true,
+    proxyElasticMapsServiceInMaps: false,
+    tilemap: {
+      deprecated: {
+        config: {
+          options: {
+            attribution: '',
+          },
+        },
+      },
+      options: {
+        attribution: '',
+        minZoom: 0,
+        maxZoom: 10,
+      },
+    },
+    regionmap: {
+      includeElasticMapsService: true,
+      layers: [],
+    },
+    manifestServiceUrl: '',
+    emsFileApiUrl: 'https://vector.maps.elastic.co',
+    emsTileApiUrl: 'https://tiles.maps.elastic.co',
+    emsLandingPageUrl: 'https://maps.elastic.co/v7.7',
+    emsFontLibraryUrl: 'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf',
+    emsTileLayerId: {
+      bright: 'road_map',
+      desaturated: 'road_map_desaturated',
+      dark: 'dark_map',
+    },
+  };
+
   beforeEach(ngMock.module('kibana'));
   beforeEach(
     ngMock.inject(() => {
@@ -127,7 +163,7 @@ describe('VegaVisualizations', () => {
             return 'not found';
         }
       });
-      const serviceSettings = new ServiceSettings();
+      const serviceSettings = new ServiceSettings(mockMapConfig, mockMapConfig.tilemap);
       vegaVisualizationDependencies = {
         serviceSettings,
         core: {

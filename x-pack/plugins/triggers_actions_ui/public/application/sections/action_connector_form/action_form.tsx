@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, Suspense, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -27,6 +27,7 @@ import {
   EuiCallOut,
   EuiHorizontalRule,
   EuiText,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { HttpSetup, ToastsApi, ApplicationStart, DocLinksStart } from 'kibana/public';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
@@ -152,9 +153,10 @@ export const ActionForm = ({
       const preconfiguredConnectors = connectors.filter(connector => connector.isPreconfigured);
       const hasActionsDisabled = actions.some(
         action =>
-          !actionTypesIndex![action.actionTypeId].enabled &&
+          actionTypesIndex &&
+          !actionTypesIndex[action.actionTypeId].enabled &&
           !checkActionFormActionTypeEnabled(
-            actionTypesIndex![action.actionTypeId],
+            actionTypesIndex[action.actionTypeId],
             preconfiguredConnectors
           ).isEnabled
       );
@@ -208,7 +210,11 @@ export const ActionForm = ({
     },
     index: number
   ) => {
-    const actionType = actionTypesIndex![actionItem.actionTypeId];
+    if (!actionTypesIndex) {
+      return null;
+    }
+
+    const actionType = actionTypesIndex[actionItem.actionTypeId];
 
     const optionsList = connectors
       .filter(
@@ -226,7 +232,7 @@ export const ActionForm = ({
     if (!actionTypeRegistered || actionItem.group !== defaultActionGroupId) return null;
     const ParamsFieldsComponent = actionTypeRegistered.actionParamsFields;
     const checkEnabledResult = checkActionFormActionTypeEnabled(
-      actionTypesIndex![actionConnector.actionTypeId],
+      actionTypesIndex[actionConnector.actionTypeId],
       connectors.filter(connector => connector.isPreconfigured)
     );
 
@@ -248,7 +254,8 @@ export const ActionForm = ({
                 />
               }
               labelAppend={
-                actionTypesIndex![actionConnector.actionTypeId].enabledInConfig ? (
+                actionTypesIndex &&
+                actionTypesIndex[actionConnector.actionTypeId].enabledInConfig ? (
                   <EuiButtonEmpty
                     size="xs"
                     data-test-subj={`addNewActionConnectorButton-${actionItem.actionTypeId}`}
@@ -282,14 +289,24 @@ export const ActionForm = ({
         </EuiFlexGroup>
         <EuiSpacer size="xl" />
         {ParamsFieldsComponent ? (
-          <ParamsFieldsComponent
-            actionParams={actionItem.params as any}
-            index={index}
-            errors={actionParamsErrors.errors}
-            editAction={setActionParamsProperty}
-            messageVariables={messageVariables}
-            defaultMessage={defaultActionMessage ?? undefined}
-          />
+          <Suspense
+            fallback={
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          >
+            <ParamsFieldsComponent
+              actionParams={actionItem.params as any}
+              index={index}
+              errors={actionParamsErrors.errors}
+              editAction={setActionParamsProperty}
+              messageVariables={messageVariables}
+              defaultMessage={defaultActionMessage ?? undefined}
+            />
+          </Suspense>
         ) : null}
       </Fragment>
     ) : (
@@ -696,3 +713,6 @@ export const ActionForm = ({
     </Fragment>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { ActionForm as default };

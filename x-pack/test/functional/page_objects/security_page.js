@@ -393,9 +393,9 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
                 });
             }
           }) //clicking save button
-          .then(function() {
+          .then(async () => {
             log.debug('click save button');
-            testSubjects.click('roleFormSaveButton');
+            await testSubjects.click('roleFormSaveButton');
           })
           .then(function() {
             return PageObjects.common.sleep(5000);

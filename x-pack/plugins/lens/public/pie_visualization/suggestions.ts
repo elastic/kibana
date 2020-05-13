@@ -115,6 +115,10 @@ export function suggestions({
                 layerId: table.layerId,
                 groups: groups.map(col => col.columnId),
                 metric: metrics[0].columnId,
+                categoryDisplay:
+                  state.layers[0].categoryDisplay === 'inside'
+                    ? 'default'
+                    : state.layers[0].categoryDisplay,
               }
             : {
                 layerId: table.layerId,

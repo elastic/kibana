@@ -16,7 +16,7 @@ import { documentationService } from '../../../../services/documentation';
 type MappingsTemplates = Types['MappingsTemplates'];
 
 interface Props {
-  defaultValue?: MappingsTemplates;
+  value?: MappingsTemplates;
 }
 
 const stringifyJson = (json: { [key: string]: any }) =>
@@ -50,14 +50,14 @@ const formDeserializer = (formData: { [key: string]: any }) => {
   };
 };
 
-export const TemplatesForm = React.memo(({ defaultValue }: Props) => {
+export const TemplatesForm = React.memo(({ value }: Props) => {
   const didMountRef = useRef(false);
 
   const { form } = useForm<MappingsTemplates>({
     schema: templatesFormSchema,
     serializer: formSerializer,
     deserializer: formDeserializer,
-    defaultValue,
+    defaultValue: value,
   });
   const dispatch = useDispatch();
 
@@ -73,14 +73,14 @@ export const TemplatesForm = React.memo(({ defaultValue }: Props) => {
 
   useEffect(() => {
     if (didMountRef.current) {
-      // If the defaultValue has changed (it probably means that we have loaded a new JSON)
+      // If the value has changed (it probably means that we have loaded a new JSON)
       // we need to reset the form to update the fields values.
       form.reset({ resetValues: true });
     } else {
       // Avoid reseting the form on component mount.
       didMountRef.current = true;
     }
-  }, [defaultValue]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     return () => {

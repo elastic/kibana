@@ -12,6 +12,7 @@ import {
   CoreStart,
   PluginInitializerContext,
   Plugin as IPlugin,
+  DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/public';
 import {
   HomePublicPluginSetup,
@@ -29,9 +30,9 @@ import {
 } from '../../triggers_actions_ui/public';
 import { SecurityPluginSetup } from '../../security/public';
 import { APP_ID, APP_NAME, APP_PATH, APP_ICON } from '../common/constants';
-import { initTelemetry } from './lib/telemetry';
-import { KibanaServices } from './lib/kibana/services';
-import { serviceNowActionType, jiraActionType } from './lib/connectors';
+import { initTelemetry } from './common/lib/telemetry';
+import { KibanaServices } from './common/lib/kibana/services';
+import { serviceNowActionType, jiraActionType } from './common/lib/connectors';
 
 export interface SetupPlugins {
   home: HomePublicPluginSetup;
@@ -86,21 +87,61 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     plugins.triggers_actions_ui.actionTypeRegistry.register(serviceNowActionType());
     plugins.triggers_actions_ui.actionTypeRegistry.register(jiraActionType());
 
+    const mountSecurityApp = async (params: AppMountParameters) => {
+      const [coreStart, startPlugins] = await core.getStartServices();
+      const { renderApp } = await import('./app');
+      const services = {
+        ...coreStart,
+        ...startPlugins,
+        security: plugins.security,
+      } as StartServices;
+
+      const alertsSubPlugin = new (await import('./alerts')).Alerts();
+      const casesSubPlugin = new (await import('./cases')).Cases();
+      const hostsSubPlugin = new (await import('./hosts')).Hosts();
+      const networkSubPlugin = new (await import('./network')).Network();
+      const overviewSubPlugin = new (await import('./overview')).Overview();
+      const timelinesSubPlugin = new (await import('./timelines')).Timelines();
+
+      const alertsStart = alertsSubPlugin.start();
+      const casesStart = casesSubPlugin.start();
+      const hostsStart = hostsSubPlugin.start();
+      const networkStart = networkSubPlugin.start();
+      const overviewStart = overviewSubPlugin.start();
+      const timelinesStart = timelinesSubPlugin.start();
+
+      return renderApp(services, params, {
+        routes: [
+          ...alertsStart.routes,
+          ...casesStart.routes,
+          ...hostsStart.routes,
+          ...networkStart.routes,
+          ...overviewStart.routes,
+          ...timelinesStart.routes,
+        ],
+        store: {
+          initialState: {
+            ...hostsStart.store.initialState,
+            ...networkStart.store.initialState,
+            ...timelinesStart.store.initialState,
+          },
+          reducer: {
+            ...hostsStart.store.reducer,
+            ...networkStart.store.reducer,
+            ...timelinesStart.store.reducer,
+          },
+        },
+      });
+    };
+
     core.application.register({
       id: APP_ID,
       title: APP_NAME,
       order: 9000,
       euiIconType: APP_ICON,
+      category: DEFAULT_APP_CATEGORIES.security,
       async mount(params: AppMountParameters) {
-        const [coreStart, startPlugins] = await core.getStartServices();
-        const { renderApp } = await import('./app');
-        const services = {
-          ...coreStart,
-          ...startPlugins,
-          security: plugins.security,
-        } as StartServices;
-
-        return renderApp(services, params);
+        return mountSecurityApp(params);
       },
     });
 

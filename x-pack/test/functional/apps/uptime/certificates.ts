@@ -25,7 +25,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('can navigate to cert page', async () => {
-      await uptimeService.navigation.refreshApp();
       await uptimeService.cert.hasViewCertButton();
       await uptimeService.navigation.goToCertificates();
     });

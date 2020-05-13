@@ -28,7 +28,7 @@ export type EMSTMSSourceDescriptor = AbstractSourceDescriptor & {
 
 export type EMSFileSourceDescriptor = AbstractSourceDescriptor & {
   // id: EMS file id
-
+  id: string;
   tooltipProperties: string[];
 };
 
@@ -132,6 +132,7 @@ export type LayerDescriptor = {
   __dataRequests?: DataRequestDescriptor[];
   __isInErrorState?: boolean;
   __errorMessage?: string;
+  __trackedLayerDescriptor?: LayerDescriptor;
   alpha?: number;
   id: string;
   label?: string | null;

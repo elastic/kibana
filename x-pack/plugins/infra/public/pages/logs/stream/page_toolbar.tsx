@@ -64,6 +64,7 @@ export const LogsToolbar = () => {
                 isLoadingSuggestions={isLoadingSuggestions}
                 isValid={isFilterQueryDraftValid}
                 loadSuggestions={loadSuggestions}
+                disabled={isStreaming}
                 onChange={(expression: string) => {
                   setSurroundingLogsId(null);
                   setLogFilterQueryDraft(expression);

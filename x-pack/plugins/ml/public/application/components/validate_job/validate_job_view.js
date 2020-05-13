@@ -30,8 +30,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { getDocLinks } from '../../util/dependency_cache';
 
-// don't use something like plugins/ml/../common
-// because it won't work with the jest tests
 import { VALIDATION_STATUS } from '../../../../common/constants/validation';
 import { getMostSevereMessageStatus } from '../../../../common/util/validation_utils';
 

@@ -7,6 +7,7 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import { NewOutput, Output } from '../types';
 import { DEFAULT_OUTPUT, OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 import { appContextService } from './app_context';
+import { decodeCloudId } from '../../common';
 
 const SAVED_OBJECT_TYPE = OUTPUT_SAVED_OBJECT_TYPE;
 
@@ -16,11 +17,17 @@ class OutputService {
       type: OUTPUT_SAVED_OBJECT_TYPE,
       filter: `${OUTPUT_SAVED_OBJECT_TYPE}.attributes.is_default:true`,
     });
+    const cloud = appContextService.getCloud();
+    const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
+    const cloudUrl = cloudId && decodeCloudId(cloudId)?.elasticsearchUrl;
+    const flagsUrl = appContextService.getConfig()!.fleet.elasticsearch.host;
+    const defaultUrl = 'http://localhost:9200';
+    const defaultOutputUrl = cloudUrl || flagsUrl || defaultUrl;
 
     if (!outputs.saved_objects.length) {
       const newDefaultOutput = {
         ...DEFAULT_OUTPUT,
-        hosts: [appContextService.getConfig()!.fleet.elasticsearch.host],
+        hosts: [defaultOutputUrl],
         ca_sha256: appContextService.getConfig()!.fleet.elasticsearch.ca_sha256,
       } as NewOutput;
 

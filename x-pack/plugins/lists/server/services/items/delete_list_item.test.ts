@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  LIST_ITEM_ID,
-  LIST_ITEM_INDEX,
-  getDeleteListItemOptionsMock,
-  getListItemResponseMock,
-} from '../mocks';
+import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
+import { LIST_ITEM_ID, LIST_ITEM_INDEX } from '../../../common/constants.mock';
 
 import { getListItem } from './get_list_item';
 import { deleteListItem } from './delete_list_item';
+import { getDeleteListItemOptionsMock } from './delete_list_item.mock';
 
 jest.mock('./get_list_item', () => ({
   getListItem: jest.fn(),

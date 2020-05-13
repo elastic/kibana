@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getSearchListItemMock } from '../../../common/schemas/elastic_response/search_es_list_item_schema.mock';
+import { getCallClusterMock } from '../../../common/get_call_cluster.mock';
+import { LIST_ID, LIST_ITEM_INDEX } from '../../../common/constants.mock';
+
 import {
-  LIST_ID,
-  LIST_ITEM_INDEX,
-  getCallClusterMock,
   getExportListItemsToStreamOptionsMock,
   getResponseOptionsMock,
-  getSearchListItemMock,
   getWriteNextResponseOptions,
   getWriteResponseHitsToStreamOptionsMock,
-} from '../mocks';
+} from './write_list_items_to_streams.mock';
 
 import {
   exportListItemsToStream,

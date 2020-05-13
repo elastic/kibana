@@ -35,8 +35,8 @@ export const IGNORE_FILE_GLOBS = [
   '**/Gruntfile.js',
   'tasks/config/**/*',
   '**/{Dockerfile,docker-compose.yml}',
-  'x-pack/legacy/plugins/canvas/tasks/**/*',
-  'x-pack/legacy/plugins/canvas/canvas_plugin_src/**/*',
+  'x-pack/plugins/canvas/tasks/**/*',
+  'x-pack/plugins/canvas/canvas_plugin_src/**/*',
   'x-pack/plugins/monitoring/public/lib/jquery_flot/**/*',
   '**/.*',
   '**/{webpackShims,__mocks__}/**/*',
@@ -48,7 +48,7 @@ export const IGNORE_FILE_GLOBS = [
   'vars/*',
 
   // Files in this directory must match a pre-determined name in some cases.
-  'x-pack/legacy/plugins/canvas/.storybook/*',
+  'x-pack/plugins/canvas/.storybook/*',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',

@@ -58,7 +58,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     Fs.writeFileSync(path, JSON.stringify(JSON.parse(coverageJson), null, 2));
   };
 
-  const { driver, By, until, consoleLog$ } = await initWebDriver(
+  const { driver, consoleLog$ } = await initWebDriver(
     log,
     browserType,
     lifecycle,
@@ -153,5 +153,5 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     await driver.quit();
   });
 
-  return { driver, By, until, browserType, consoleLog$ };
+  return { driver, browserType, consoleLog$ };
 }

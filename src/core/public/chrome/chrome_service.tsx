@@ -17,27 +17,26 @@
  * under the License.
  */
 
+import { Breadcrumb as EuiBreadcrumb, IconType } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { BehaviorSubject, Observable, ReplaySubject, combineLatest, of, merge } from 'rxjs';
+import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } from 'rxjs';
 import { flatMap, map, takeUntil } from 'rxjs/operators';
 import { parse } from 'url';
-
-import { i18n } from '@kbn/i18n';
-import { IconType, Breadcrumb as EuiBreadcrumb } from '@elastic/eui';
-
+import { InternalApplicationStart } from '../application';
+import { DocLinksStart } from '../doc_links';
+import { HttpStart } from '../http';
 import { InjectedMetadataStart } from '../injected_metadata';
 import { NotificationsStart } from '../notifications';
-import { InternalApplicationStart } from '../application';
-import { HttpStart } from '../http';
-
+import { IUiSettingsClient } from '../ui_settings';
+import { KIBANA_ASK_ELASTIC_LINK } from './constants';
+import { ChromeDocTitle, DocTitleService } from './doc_title';
+import { ChromeNavControls, NavControlsService } from './nav_controls';
 import { ChromeNavLinks, NavLinksService } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
-import { NavControlsService, ChromeNavControls } from './nav_controls';
-import { DocTitleService, ChromeDocTitle } from './doc_title';
-import { LoadingIndicator, Header } from './ui';
-import { DocLinksStart } from '../doc_links';
+import { Header, LoadingIndicator } from './ui';
+import { NavType } from './ui/header';
 import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
-import { KIBANA_ASK_ELASTIC_LINK } from './constants';
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
@@ -84,6 +83,7 @@ interface StartDeps {
   http: HttpStart;
   injectedMetadata: InjectedMetadataStart;
   notifications: NotificationsStart;
+  uiSettings: IUiSettingsClient;
 }
 
 /** @internal */
@@ -136,6 +136,7 @@ export class ChromeService {
     http,
     injectedMetadata,
     notifications,
+    uiSettings,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
 
@@ -159,6 +160,10 @@ export class ChromeService {
     };
 
     const getIsNavDrawerLocked$ = isNavDrawerLocked$.pipe(takeUntil(this.stop$));
+
+    // TODO #64541
+    // Can delete
+    const getNavType$ = uiSettings.get$('pageNavigation').pipe(takeUntil(this.stop$));
 
     if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
       notifications.toasts.addWarning(
@@ -187,7 +192,7 @@ export class ChromeService {
             forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
             helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
             helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
-            homeHref={http.basePath.prepend('/app/kibana#/home')}
+            homeHref={http.basePath.prepend('/app/home')}
             isVisible$={this.isVisible$}
             kibanaVersion={injectedMetadata.getKibanaVersion()}
             legacyMode={injectedMetadata.getLegacyMode()}
@@ -197,6 +202,7 @@ export class ChromeService {
             navControlsRight$={navControls.getRight$()}
             onIsLockedUpdate={setIsNavDrawerLocked}
             isLocked$={getIsNavDrawerLocked$}
+            navType$={getNavType$}
           />
         </React.Fragment>
       ),
@@ -257,6 +263,8 @@ export class ChromeService {
       setHelpSupportUrl: (url: string) => helpSupportUrl$.next(url),
 
       getIsNavDrawerLocked$: () => getIsNavDrawerLocked$,
+
+      getNavType$: () => getNavType$,
     };
   }
 
@@ -403,6 +411,13 @@ export interface ChromeStart {
    * Get an observable of the current locked state of the nav drawer.
    */
   getIsNavDrawerLocked$(): Observable<boolean>;
+
+  /**
+   * Get the navigation type
+   * TODO #64541
+   * Can delete
+   */
+  getNavType$(): Observable<NavType>;
 }
 
 /** @internal */

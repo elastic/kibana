@@ -51,7 +51,6 @@ module.directive('contextApp', function ContextApp() {
       predecessorCount: '=',
       successorCount: '=',
       sort: '=',
-      discoverUrl: '=',
     },
     template: contextAppTemplate,
   };
@@ -63,8 +62,7 @@ function ContextAppController($scope, Private) {
   const queryActions = Private(QueryActionsProvider);
   this.state = createInitialState(
     parseInt(uiSettings.get('context:step'), 10),
-    getFirstSortableField(this.indexPattern, uiSettings.get('context:tieBreakerFields')),
-    this.discoverUrl
+    getFirstSortableField(this.indexPattern, uiSettings.get('context:tieBreakerFields'))
   );
 
   this.actions = _.mapValues(
@@ -129,7 +127,7 @@ function ContextAppController($scope, Private) {
   );
 }
 
-function createInitialState(defaultStepSize, tieBreakerField, discoverUrl) {
+function createInitialState(defaultStepSize, tieBreakerField) {
   return {
     queryParameters: createInitialQueryParametersState(defaultStepSize, tieBreakerField),
     rows: {
@@ -139,10 +137,5 @@ function createInitialState(defaultStepSize, tieBreakerField, discoverUrl) {
       successors: [],
     },
     loadingStatus: createInitialLoadingStatusState(),
-    navigation: {
-      discover: {
-        url: discoverUrl,
-      },
-    },
   };
 }

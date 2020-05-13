@@ -8,7 +8,7 @@ import { SavedObjectsType } from '../../../../../../src/core/server';
 
 export const noteSavedObjectType = 'siem-ui-timeline-note';
 
-export const noteSavedObjectMappings = {
+export const noteSavedObjectMappings: SavedObjectsType['mappings'] = {
   properties: {
     timelineId: {
       type: 'keyword',

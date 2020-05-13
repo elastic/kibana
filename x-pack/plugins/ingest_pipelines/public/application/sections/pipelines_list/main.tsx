@@ -6,7 +6,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Location } from 'history';
 import { parse } from 'query-string';
@@ -19,9 +18,10 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
-
-import { EuiSpacer, EuiText } from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
 import { BASE_PATH } from '../../../../common/constants';
@@ -80,11 +80,15 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
     history.push(BASE_PATH);
   };
 
+  if (data && data.length === 0) {
+    return <EmptyList />;
+  }
+
   let content: React.ReactNode;
 
   if (isLoading) {
     content = (
-      <SectionLoading>
+      <SectionLoading data-test-subj="sectionLoading">
         <FormattedMessage
           id="xpack.ingestPipelines.list.loadingMessage"
           defaultMessage="Loading pipelines..."
@@ -101,8 +105,6 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
         pipelines={data}
       />
     );
-  } else {
-    content = <EmptyList />;
   }
 
   const renderFlyout = (): React.ReactNode => {
@@ -148,6 +150,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
                   href={services.documentation.getIngestNodeUrl()}
                   target="_blank"
                   iconType="help"
+                  data-test-subj="documentationLink"
                 >
                   <FormattedMessage
                     id="xpack.ingestPipelines.list.pipelinesDocsLinkText"
@@ -162,7 +165,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
             <EuiText color="subdued">
               <FormattedMessage
                 id="xpack.ingestPipelines.list.pipelinesDescription"
-                defaultMessage="Use ingest node pipelines to pre-process documents before indexing."
+                defaultMessage="Define a pipeline for preprocessing documents before indexing."
               />
             </EuiText>
           </EuiTitle>
@@ -172,9 +175,23 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
             <EuiCallOut
               iconType="faceSad"
               color="danger"
-              title={i18n.translate('xpack.ingestPipelines.list.loadErrorTitle', {
-                defaultMessage: 'Cannot load pipelines, please refresh the page to try again.',
-              })}
+              data-test-subj="pipelineLoadError"
+              title={
+                <FormattedMessage
+                  id="xpack.ingestPipelines.list.loadErrorTitle"
+                  defaultMessage="Unable to load pipelines. {reloadLink}"
+                  values={{
+                    reloadLink: (
+                      <EuiLink onClick={sendRequest}>
+                        <FormattedMessage
+                          id="xpack.ingestPipelines.list.loadErrorReloadLinkLabel"
+                          defaultMessage="Try again."
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              }
             />
           ) : (
             content

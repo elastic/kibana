@@ -17,18 +17,18 @@
  * under the License.
  */
 
-import * as Rx from 'rxjs';
-import { take, toArray } from 'rxjs/operators';
 import { shallow } from 'enzyme';
 import React from 'react';
-
+import * as Rx from 'rxjs';
+import { take, toArray } from 'rxjs/operators';
+import { App } from '../application';
 import { applicationServiceMock } from '../application/application_service.mock';
+import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
-import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
+import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { ChromeService } from './chrome_service';
-import { App } from '../application';
 
 class FakeApp implements App {
   public title = `${this.id} App`;
@@ -51,6 +51,7 @@ function defaultStartDeps(availableApps?: App[]) {
     http: httpServiceMock.createStartContract(),
     injectedMetadata: injectedMetadataServiceMock.createStartContract(),
     notifications: notificationServiceMock.createStartContract(),
+    uiSettings: uiSettingsServiceMock.createStartContract(),
   };
 
   if (availableApps) {
