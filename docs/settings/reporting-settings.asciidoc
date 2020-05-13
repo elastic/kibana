@@ -138,7 +138,7 @@ control the capturing process.
 
 | `xpack.reporting.capture.timeouts.renderComplete`
   | How long to allow the Reporting browser to wait for each visualization to
-  signal that it is done renderings. If the time is exceeded, a screenshot of the page will be captured and the
+  signal that it is done rendering. If the time is exceeded, a screenshot of the page will be captured and the
   report will show warnings. Defaults to `30000` (30 seconds).
 
 |===
