@@ -36,18 +36,18 @@ export default function({ getService }: FtrProviderContext) {
 
     let savedObjectOriginalAttributes: {
       publicProperty: string;
-      publicPropertyExcludedFromAAD: string;
       publicPropertyStoredEncrypted: string;
       privateProperty: string;
+      publicPropertyExcludedFromAAD: string;
     };
 
     let savedObject: SavedObject;
     beforeEach(async () => {
       savedObjectOriginalAttributes = {
         publicProperty: randomness.string(),
-        publicPropertyExcludedFromAAD: randomness.string(),
         publicPropertyStoredEncrypted: randomness.string(),
         privateProperty: randomness.string(),
+        publicPropertyExcludedFromAAD: randomness.string(),
       };
 
       const { body } = await supertest
@@ -207,6 +207,30 @@ export default function({ getService }: FtrProviderContext) {
         publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
         publicPropertyStoredEncrypted: savedObjectOriginalAttributes.publicPropertyStoredEncrypted,
       });
+      expect(response.error).to.be(undefined);
+    });
+
+    it('#get strips all encrypted attributes from response if decryption fails', async () => {
+      // Update non-encrypted property that is included into AAD to make it impossible to decrypt
+      // encrypted attributes.
+      const updatedPublicProperty = randomness.string();
+      await supertest
+        .put(`${getURLAPIBaseURL()}${encryptedSavedObjectType}/${savedObject.id}`)
+        .set('kbn-xsrf', 'xxx')
+        .send({ attributes: { publicProperty: updatedPublicProperty } })
+        .expect(200);
+
+      const { body: response } = await supertest
+        .get(`${getURLAPIBaseURL()}${encryptedSavedObjectType}/${savedObject.id}`)
+        .expect(200);
+
+      expect(response.attributes).to.eql({
+        publicProperty: updatedPublicProperty,
+        publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
+      });
+      expect(response.error).to.eql({
+        message: 'Unable to decrypt attribute "publicPropertyStoredEncrypted"',
+      });
     });
 
     it('#find strips encrypted attributes from response', async () => {
@@ -222,6 +246,34 @@ export default function({ getService }: FtrProviderContext) {
         publicProperty: savedObjectOriginalAttributes.publicProperty,
         publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
         publicPropertyStoredEncrypted: savedObjectOriginalAttributes.publicPropertyStoredEncrypted,
+      });
+      expect(savedObjects[0].error).to.be(undefined);
+    });
+
+    it('#find strips all encrypted attributes from response if decryption fails', async () => {
+      // Update non-encrypted property that is included into AAD to make it impossible to decrypt
+      // encrypted attributes.
+      const updatedPublicProperty = randomness.string();
+      await supertest
+        .put(`${getURLAPIBaseURL()}${encryptedSavedObjectType}/${savedObject.id}`)
+        .set('kbn-xsrf', 'xxx')
+        .send({ attributes: { publicProperty: updatedPublicProperty } })
+        .expect(200);
+
+      const {
+        body: { saved_objects: savedObjects },
+      } = await supertest
+        .get(`${getURLAPIBaseURL()}_find?type=${encryptedSavedObjectType}`)
+        .expect(200);
+
+      expect(savedObjects).to.have.length(1);
+      expect(savedObjects[0].id).to.be(savedObject.id);
+      expect(savedObjects[0].attributes).to.eql({
+        publicProperty: updatedPublicProperty,
+        publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
+      });
+      expect(savedObjects[0].error).to.eql({
+        message: 'Unable to decrypt attribute "publicPropertyStoredEncrypted"',
       });
     });
 
@@ -240,6 +292,36 @@ export default function({ getService }: FtrProviderContext) {
         publicProperty: savedObjectOriginalAttributes.publicProperty,
         publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
         publicPropertyStoredEncrypted: savedObjectOriginalAttributes.publicPropertyStoredEncrypted,
+      });
+      expect(savedObjects[0].error).to.be(undefined);
+    });
+
+    it('#bulkGet strips all encrypted attributes from response if decryption fails', async () => {
+      // Update non-encrypted property that is included into AAD to make it impossible to decrypt
+      // encrypted attributes.
+      const updatedPublicProperty = randomness.string();
+      await supertest
+        .put(`${getURLAPIBaseURL()}${encryptedSavedObjectType}/${savedObject.id}`)
+        .set('kbn-xsrf', 'xxx')
+        .send({ attributes: { publicProperty: updatedPublicProperty } })
+        .expect(200);
+
+      const {
+        body: { saved_objects: savedObjects },
+      } = await supertest
+        .post(`${getURLAPIBaseURL()}_bulk_get`)
+        .set('kbn-xsrf', 'xxx')
+        .send([{ type: savedObject.type, id: savedObject.id }])
+        .expect(200);
+
+      expect(savedObjects).to.have.length(1);
+      expect(savedObjects[0].id).to.be(savedObject.id);
+      expect(savedObjects[0].attributes).to.eql({
+        publicProperty: updatedPublicProperty,
+        publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
+      });
+      expect(savedObjects[0].error).to.eql({
+        message: 'Unable to decrypt attribute "publicPropertyStoredEncrypted"',
       });
     });
 

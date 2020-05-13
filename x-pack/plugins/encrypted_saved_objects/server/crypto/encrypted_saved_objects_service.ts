@@ -153,7 +153,10 @@ export class EncryptedSavedObjectsService {
     for (const [attributeName, attributeValue] of Object.entries(attributes)) {
       // We should strip encrypted attribute if definition explicitly mandates that or decryption
       // failed.
-      if (typeDefinition.shouldBeStripped(attributeName) || !!decryptionError) {
+      if (
+        typeDefinition.shouldBeStripped(attributeName) ||
+        (!!decryptionError && typeDefinition.shouldBeEncrypted(attributeName))
+      ) {
         continue;
       }
 

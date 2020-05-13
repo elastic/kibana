@@ -177,7 +177,13 @@ describe('#stripOrDecryptAttributes', () => {
         ]),
       });
 
-      const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
+      const attributes = {
+        attrZero: 'zero',
+        attrOne: 'one',
+        attrTwo: 'two',
+        attrThree: 'three',
+        attrFour: 'four',
+      };
       const encryptedAttributes = await service.encryptAttributes(
         { type: 'known-type-1', id: 'object-id' },
         attributes
@@ -193,7 +199,7 @@ describe('#stripOrDecryptAttributes', () => {
         { user: mockUser }
       );
 
-      expect(decryptedAttributes).toEqual({ attrTwo: 'two' });
+      expect(decryptedAttributes).toEqual({ attrZero: 'zero', attrTwo: 'two', attrFour: 'four' });
       expect(error).toMatchInlineSnapshot(`[Error: Unable to decrypt attribute "attrThree"]`);
 
       expect(mockAuditLogger.decryptAttributesSuccess).not.toHaveBeenCalled();
