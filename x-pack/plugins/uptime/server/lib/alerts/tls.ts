@@ -12,12 +12,10 @@ import { updateState } from './common';
 import { ACTION_GROUP_DEFINITIONS, DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 import { Cert, CertResult } from '../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
+import { DEFAULT_FROM, DEFAULT_TO } from '../../rest_api/certs/certs';
 
 const { TLS } = ACTION_GROUP_DEFINITIONS;
 
-const DEFAULT_FROM = 'now-1d';
-const DEFAULT_TO = 'now';
-const DEFAULT_INDEX = 0;
 const DEFAULT_SIZE = 20;
 
 interface TlsAlertState {
@@ -113,7 +111,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory = (_server, libs) => ({
       dynamicSettings,
       from: DEFAULT_FROM,
       to: DEFAULT_TO,
-      index: DEFAULT_INDEX,
+      index: 0,
       size: DEFAULT_SIZE,
       notValidAfter: `now+${dynamicSettings?.certExpirationThreshold ??
         DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold}d`,
