@@ -5,6 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { Filter, TimeRange } from 'src/plugins/data/public';
 import { RENDER_AS, SORT_ORDER, SCALING_TYPES } from '../constants';
 import { MapExtent, MapQuery } from './map_descriptor';
 
@@ -12,10 +13,10 @@ import { MapExtent, MapQuery } from './map_descriptor';
 export type MapFilters = {
   buffer: MapExtent; // extent with additional buffer
   extent: MapExtent; // map viewport
-  filters: unknown[];
+  filters: Filter[];
   query: MapQuery;
   refreshTimerLastTriggeredAt: string;
-  timeFilters: unknown;
+  timeFilters: TimeRange;
   zoom: number;
 };
 

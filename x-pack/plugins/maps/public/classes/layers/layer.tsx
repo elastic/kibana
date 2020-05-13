@@ -17,7 +17,7 @@ import {
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
-  SOURCE_DATA_ID_ORIGIN,
+  SOURCE_DATA_REQUEST_ID,
 } from '../../../common/constants';
 import { copyPersistentState } from '../../reducers/util';
 import {
@@ -393,7 +393,7 @@ export class AbstractLayer implements ILayer {
   }
 
   getSourceDataRequest(): DataRequest | undefined {
-    return this.getDataRequest(SOURCE_DATA_ID_ORIGIN);
+    return this.getDataRequest(SOURCE_DATA_REQUEST_ID);
   }
 
   getDataRequest(id: string): DataRequest | undefined {

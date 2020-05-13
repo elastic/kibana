@@ -54,7 +54,7 @@ import {
 
 import { getDefaultMapSettings } from './default_map_settings';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
-import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
+import { SOURCE_DATA_REQUEST_ID } from '../../common/constants';
 
 const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
 
@@ -448,7 +448,7 @@ function updateSourceDataRequest(state, action) {
     return state;
   }
   const dataRequest = layerDescriptor.__dataRequests.find(dataRequest => {
-    return dataRequest.dataId === SOURCE_DATA_ID_ORIGIN;
+    return dataRequest.dataId === SOURCE_DATA_REQUEST_ID;
   });
   if (!dataRequest) {
     return state;

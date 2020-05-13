@@ -10,9 +10,10 @@ import { AbstractLayer } from '../layer';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import {
   FEATURE_ID_PROPERTY_NAME,
-  SOURCE_DATA_ID_ORIGIN,
-  SOURCE_META_ID_ORIGIN,
-  SOURCE_FORMATTERS_ID_ORIGIN,
+  SOURCE_BOUNDS_DATA_REQUEST_ID,
+  SOURCE_DATA_REQUEST_ID,
+  SOURCE_META_DATA_REQUEST_ID,
+  SOURCE_FORMATTERS_DATA_REQUEST_ID,
   FEATURE_VISIBLE_PROPERTY_NAME,
   EMPTY_FEATURE_COLLECTION,
   LAYER_TYPE,
@@ -174,18 +175,38 @@ export class VectorLayer extends AbstractLayer {
     };
   }
 
-  async getBounds(dataRequestContext) {
+  async getBounds({ startLoading, stopLoading, registerCancelCallback, dataFilters }) {
     const isStaticLayer = !this.getSource().isBoundsAware();
     if (isStaticLayer) {
       return this._getBoundsBasedOnData();
     }
 
+    const requestToken = Symbol(`${SOURCE_BOUNDS_DATA_REQUEST_ID}-${this.getId()}`);
     const searchFilters = this._getSearchFilters(
-      dataRequestContext.dataFilters,
+      dataFilters,
       this.getSource(),
       this.getCurrentStyle()
     );
-    return await this.getSource().getBoundsForFilters(searchFilters);
+    // Do not pass all searchFilters to source.getBoundsForFilters().
+    // For example, do not want to filter bounds request by extent and buffer.
+    const boundsFilters = {
+      sourceQuery: searchFilters.sourceQuery,
+      query: searchFilters.query,
+      timeFilters: searchFilters.timeFilters,
+      filters: searchFilters.filters,
+      applyGlobalQuery: searchFilters.applyGlobalQuery,
+    };
+
+    let bounds = null;
+    try {
+      startLoading(SOURCE_BOUNDS_DATA_REQUEST_ID, requestToken, boundsFilters);
+      bounds = await this.getSource().getBoundsForFilters(boundsFilters, registerCancelCallback);
+    } finally {
+      // Use stopLoading callback instead of onLoadError callback.
+      // Function is loading bounds and not feature data.
+      stopLoading(SOURCE_BOUNDS_DATA_REQUEST_ID, requestToken, bounds, boundsFilters);
+    }
+    return bounds;
   }
 
   async getLeftJoinFields() {
@@ -361,7 +382,7 @@ export class VectorLayer extends AbstractLayer {
       dataFilters,
       isRequestStillActive,
     } = syncContext;
-    const dataRequestId = SOURCE_DATA_ID_ORIGIN;
+    const dataRequestId = SOURCE_DATA_REQUEST_ID;
     const requestToken = Symbol(`layer-${this.getId()}-${dataRequestId}`);
     const searchFilters = this._getSearchFilters(dataFilters, source, style);
     const prevDataRequest = this.getSourceDataRequest();
@@ -413,7 +434,7 @@ export class VectorLayer extends AbstractLayer {
       source,
       style,
       sourceQuery: this.getQuery(),
-      dataRequestId: SOURCE_META_ID_ORIGIN,
+      dataRequestId: SOURCE_META_DATA_REQUEST_ID,
       dynamicStyleProps: style.getDynamicPropertiesArray().filter(dynamicStyleProp => {
         return (
           dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE &&
@@ -507,7 +528,7 @@ export class VectorLayer extends AbstractLayer {
 
     return this._syncFormatters({
       source,
-      dataRequestId: SOURCE_FORMATTERS_ID_ORIGIN,
+      dataRequestId: SOURCE_FORMATTERS_DATA_REQUEST_ID,
       fields: style
         .getDynamicPropertiesArray()
         .filter(dynamicStyleProp => {

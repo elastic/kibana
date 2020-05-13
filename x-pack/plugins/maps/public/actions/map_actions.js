@@ -33,7 +33,7 @@ import { updateFlyout } from './ui_actions';
 import {
   FEATURE_ID_PROPERTY_NAME,
   LAYER_TYPE,
-  SOURCE_DATA_ID_ORIGIN,
+  SOURCE_DATA_REQUEST_ID,
 } from '../../common/constants';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
@@ -671,7 +671,7 @@ export function updateSourceDataRequest(layerId, newData) {
   return dispatch => {
     dispatch({
       type: UPDATE_SOURCE_DATA_REQUEST,
-      dataId: SOURCE_DATA_ID_ORIGIN,
+      dataId: SOURCE_DATA_REQUEST_ID,
       layerId,
       newData,
     });

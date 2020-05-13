@@ -14,6 +14,7 @@ import { IField } from '../../fields/field';
 import { registerSource } from '../source_registry';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import {
+  DataRequestContext,
   MapExtent,
   TiledSingleLayerVectorSourceDescriptor,
   VectorSourceRequestMeta,
@@ -133,13 +134,11 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return this._descriptor.maxSourceZoom;
   }
 
-  getBoundsForFilters(searchFilters: VectorSourceRequestMeta): MapExtent {
-    return {
-      maxLat: 90,
-      maxLon: 180,
-      minLat: -90,
-      minLon: -180,
-    };
+  getBoundsForFilters(
+    dataRequestContext: DataRequestContext,
+    searchFilters: VectorSourceRequestMeta
+  ): MapExtent {
+    return null;
   }
 
   getFieldByName(fieldName: string): IField | null {

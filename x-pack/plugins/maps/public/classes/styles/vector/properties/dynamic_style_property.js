@@ -7,7 +7,11 @@
 import _ from 'lodash';
 import { AbstractStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
-import { STYLE_TYPE, SOURCE_META_ID_ORIGIN, FIELD_ORIGIN } from '../../../../../common/constants';
+import {
+  STYLE_TYPE,
+  SOURCE_META_DATA_REQUEST_ID,
+  FIELD_ORIGIN,
+} from '../../../../../common/constants';
 import React from 'react';
 import { OrdinalLegend } from './components/ordinal_legend';
 import { CategoricalLegend } from './components/categorical_legend';
@@ -32,7 +36,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
 
   _getStyleMetaDataRequestId(fieldName) {
     if (this.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
-      return SOURCE_META_ID_ORIGIN;
+      return SOURCE_META_DATA_REQUEST_ID;
     }
 
     const join = this._layer.getValidJoins().find(join => {

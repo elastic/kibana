@@ -13,7 +13,7 @@ import {
   GEO_JSON_TYPE,
   FIELD_ORIGIN,
   STYLE_TYPE,
-  SOURCE_FORMATTERS_ID_ORIGIN,
+  SOURCE_FORMATTERS_DATA_REQUEST_ID,
   LAYER_STYLE_TYPE,
   DEFAULT_ICON,
   VECTOR_STYLES,
@@ -373,7 +373,7 @@ export class VectorStyle extends AbstractStyle {
 
     let dataRequestId;
     if (dynamicProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE) {
-      dataRequestId = SOURCE_FORMATTERS_ID_ORIGIN;
+      dataRequestId = SOURCE_FORMATTERS_DATA_REQUEST_ID;
     } else {
       const join = this._layer.getValidJoins().find(join => {
         return join.getRightJoinSource().hasMatchingMetricField(fieldName);
