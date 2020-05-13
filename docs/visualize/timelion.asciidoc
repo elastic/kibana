@@ -466,5 +466,5 @@ Example:
   .label('Average Machine RAM amount').yaxis(2,units=bytes,position=right) <2>
 ----------------------------------
 
-<1> `.yaxis(1,units=bytes,position=left)` allows to set a first Y axis for the first series, changing the units, on the left
+<1> `.yaxis(1,units=bytes,position=left)` sets the first y-axis for the first data series, and changes the units on the left
 <2> `.yaxis(2,units=bytes,position=left)` allows to set a second Y axis for the second series, changing the units, on the right
