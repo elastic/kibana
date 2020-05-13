@@ -41,6 +41,7 @@ export const getLicenseExpiration = (
       },
     ],
     defaultActionGroupId: 'default',
+    producer: 'monitoring',
     async executor({ services, params, state }: AlertCommonExecutorOptions): Promise<any> {
       logger.debug(
         `Firing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
