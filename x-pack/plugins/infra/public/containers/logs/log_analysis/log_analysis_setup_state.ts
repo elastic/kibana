@@ -16,7 +16,7 @@ import {
 import {
   AvailableIndex,
   ValidationIndicesError,
-  ValidationIndicesUIError,
+  ValidationUIError,
 } from '../../../components/logging/log_analysis_setup/initial_configuration_step';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
@@ -45,6 +45,11 @@ export const useAnalysisSetupState = <JobType extends string>({
 }: AnalysisSetupStateArguments<JobType>) => {
   const [startTime, setStartTime] = useState<number | undefined>(Date.now() - fourWeeksInMs);
   const [endTime, setEndTime] = useState<number | undefined>(undefined);
+
+  const isTimeRangeValid = useMemo(
+    () => (startTime != null && endTime != null ? startTime < endTime : true),
+    [endTime, startTime]
+  );
 
   const [validatedIndices, setValidatedIndices] = useState<AvailableIndex[]>(
     sourceConfiguration.indices.map(indexName => ({
@@ -201,35 +206,50 @@ export const useAnalysisSetupState = <JobType extends string>({
     [validateDatasetsRequest.state, validateIndicesRequest.state]
   );
 
-  const validationErrors = useMemo<ValidationIndicesUIError[]>(() => {
+  const validationErrors = useMemo<ValidationUIError[]>(() => {
     if (isValidating) {
       return [];
     }
 
-    if (validateIndicesRequest.state === 'rejected') {
-      return [{ error: 'NETWORK_ERROR' }];
-    }
-
-    if (selectedIndexNames.length === 0) {
-      return [{ error: 'TOO_FEW_SELECTED_INDICES' }];
-    }
-
-    return validatedIndices.reduce<ValidationIndicesUIError[]>((errors, index) => {
-      return index.validity === 'invalid' && selectedIndexNames.includes(index.name)
-        ? [...errors, ...index.errors]
-        : errors;
-    }, []);
-  }, [isValidating, validateIndicesRequest.state, selectedIndexNames, validatedIndices]);
+    return [
+      // index count
+      ...(selectedIndexNames.length === 0 ? [{ error: 'TOO_FEW_SELECTED_INDICES' as const }] : []),
+      // time range
+      ...(!isTimeRangeValid ? [{ error: 'INVALID_TIME_RANGE' as const }] : []),
+      // validate request status
+      ...(validateIndicesRequest.state === 'rejected' ? [{ error: 'NETWORK_ERROR' as const }] : []),
+      // validation request results
+      ...validatedIndices.reduce<ValidationUIError[]>((errors, index) => {
+        return index.validity === 'invalid' && selectedIndexNames.includes(index.name)
+          ? [...errors, ...index.errors]
+          : errors;
+      }, []),
+    ];
+  }, [
+    isValidating,
+    validateIndicesRequest.state,
+    selectedIndexNames,
+    isTimeRangeValid,
+    validatedIndices,
+  ]);
 
   const prevStartTime = usePrevious(startTime);
   const prevEndTime = usePrevious(endTime);
   const prevValidIndexNames = usePrevious(validIndexNames);
 
   useEffect(() => {
+    if (!isTimeRangeValid) {
+      return;
+    }
+
     validateIndices();
-  }, [validateIndices]);
+  }, [isTimeRangeValid, validateIndices]);
 
   useEffect(() => {
+    if (!isTimeRangeValid) {
+      return;
+    }
+
     if (
       startTime !== prevStartTime ||
       endTime !== prevEndTime ||
@@ -239,6 +259,7 @@ export const useAnalysisSetupState = <JobType extends string>({
     }
   }, [
     endTime,
+    isTimeRangeValid,
     prevEndTime,
     prevStartTime,
     prevValidIndexNames,
