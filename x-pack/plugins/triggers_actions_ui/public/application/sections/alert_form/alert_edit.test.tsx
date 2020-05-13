@@ -12,7 +12,7 @@ import { ValidationResult } from '../../../types';
 import { AlertsContextProvider } from '../../context/alerts_context';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
-import { AlertEdit } from './alert_edit';
+import AlertEdit from './alert_edit';
 import { AppContextProvider } from '../../app_context';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
