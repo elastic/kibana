@@ -280,7 +280,7 @@ exports[`SavedObjectsTable import should show the flyout 1`] = `
       "search": [MockFunction],
       "searchSource": Object {
         "create": [MockFunction],
-        "fromJSON": [MockFunction],
+        "createEmpty": [MockFunction],
       },
       "setInterceptor": [MockFunction],
     }
@@ -433,7 +433,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
             "editUrl": "#/management/kibana/objects/savedVisualizations/4",
             "icon": "visualizeApp",
             "inAppUrl": Object {
-              "path": "/visualize/edit/4",
+              "path": "/edit/4",
               "uiCapabilitiesPath": "visualize.show",
             },
             "title": "MyViz",

@@ -21,7 +21,12 @@ import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
 import { OverlayStart, SavedObjectReference } from 'src/core/public';
 import { SavedObject, SavedObjectLoader } from '../../../saved_objects/public';
-import { IndexPatternsContract, IIndexPattern, DataPublicPluginStart } from '../../../data/public';
+import {
+  DataPublicPluginStart,
+  IndexPatternsContract,
+  IIndexPattern,
+  injectSearchSourceReferences,
+} from '../../../data/public';
 
 type SavedObjectsRawDoc = Record<string, any>;
 
@@ -207,13 +212,17 @@ export async function resolveIndexPatternConflicts(
       return reference;
     });
 
+    const serializedSearchSourceWithInjectedReferences = injectSearchSourceReferences(
+      serializedSearchSource,
+      replacedReferences
+    );
+
     if (!allResolved) {
       // The user decided to skip this conflict so do nothing
       return;
     }
-    obj.searchSource = await dependencies.search.searchSource.fromJSON(
-      JSON.stringify(serializedSearchSource),
-      replacedReferences
+    obj.searchSource = await dependencies.search.searchSource.create(
+      serializedSearchSourceWithInjectedReferences
     );
     if (await saveObject(obj, overwriteAll)) {
       importCount++;

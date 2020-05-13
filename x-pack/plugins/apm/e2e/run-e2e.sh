@@ -111,7 +111,7 @@ fi
 ##################################################
 echo "\n${bold}Waiting for Kibana to start...${normal}"
 echo "Note: you need to start Kibana manually. Find the instructions at the top."
-yarn wait-on -i 500 -w 500 http://localhost:$KIBANA_PORT > /dev/null
+yarn wait-on -i 500 -w 500 http-get://admin:changeme@localhost:$KIBANA_PORT/api/status > /dev/null
 
 echo "\n✅ Setup completed successfully. Running tests...\n"
 
