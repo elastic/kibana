@@ -25,7 +25,6 @@ import { createActionConnector } from '../../lib/action_connector_api';
 import { TypeRegistry } from '../../type_registry';
 import './connector_add_modal.scss';
 import { PLUGIN } from '../../constants/plugin';
-import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 
 interface ConnectorAddModalProps {
@@ -156,23 +155,16 @@ export const ConnectorAddModal = ({
         </EuiModalHeader>
 
         <EuiModalBody>
-          <ActionsConnectorsContextProvider
-            value={{
-              actionTypeRegistry,
-              http,
-              capabilities,
-              toastNotifications,
-              docLinks,
-            }}
-          >
-            <ActionConnectorForm
-              connector={connector}
-              actionTypeName={actionType.name}
-              dispatch={dispatch}
-              serverError={serverError}
-              errors={errors}
-            />
-          </ActionsConnectorsContextProvider>
+          <ActionConnectorForm
+            connector={connector}
+            actionTypeName={actionType.name}
+            dispatch={dispatch}
+            serverError={serverError}
+            errors={errors}
+            actionTypeRegistry={actionTypeRegistry}
+            docLinks={docLinks}
+            http={http}
+          />
         </EuiModalBody>
         <EuiModalFooter>
           <EuiButtonEmpty onClick={closeModal}>

@@ -142,20 +142,27 @@ export const ProcessEventDot = styled(
       const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
       const selectedDescendantId = useSelector(selectors.uiSelectedDescendantId);
 
+      const logicalProcessNodeViewWidth = 360;
+      const logicalProcessNodeViewHeight = 120;
+      /**
+       * The `left` and `top` values represent the 'center' point of the process node.
+       * Since the view has content to the left and above the 'center' point, offset the
+       * position to accomodate for that. This aligns the logical center of the process node
+       * with the correct position on the map.
+       */
+      const processNodeViewXOffset = -0.172413 * logicalProcessNodeViewWidth * magFactorX;
+      const processNodeViewYOffset = -0.73684 * logicalProcessNodeViewHeight * magFactorX;
+
       const nodeViewportStyle = useMemo(
         () => ({
-          left: `${left}px`,
-          top: `${top}px`,
+          left: `${left + processNodeViewXOffset}px`,
+          top: `${top + processNodeViewYOffset}px`,
           // Width of symbol viewport scaled to fit
-          width: `${360 * magFactorX}px`,
+          width: `${logicalProcessNodeViewWidth * magFactorX}px`,
           // Height according to symbol viewbox AR
-          height: `${120 * magFactorX}px`,
-          // Adjusted to position/scale with camera
-          transform: `translateX(-${0.172413 * 360 * magFactorX + 10}px) translateY(-${0.73684 *
-            120 *
-            magFactorX}px)`,
+          height: `${logicalProcessNodeViewHeight * magFactorX}px`,
         }),
-        [left, magFactorX, top]
+        [left, magFactorX, processNodeViewXOffset, processNodeViewYOffset, top]
       );
 
       /**
@@ -202,32 +209,26 @@ export const ProcessEventDot = styled(
 
       const dispatch = useResolverDispatch();
 
-      const handleFocus = useCallback(
-        (focusEvent: React.FocusEvent<HTMLDivElement>) => {
-          dispatch({
-            type: 'userFocusedOnResolverNode',
-            payload: {
-              nodeId,
-            },
-          });
-        },
-        [dispatch, nodeId]
-      );
+      const handleFocus = useCallback(() => {
+        dispatch({
+          type: 'userFocusedOnResolverNode',
+          payload: {
+            nodeId,
+          },
+        });
+      }, [dispatch, nodeId]);
 
-      const handleClick = useCallback(
-        (clickEvent: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-          if (animationTarget.current !== null) {
-            (animationTarget.current as any).beginElement();
-          }
-          dispatch({
-            type: 'userSelectedResolverNode',
-            payload: {
-              nodeId,
-            },
-          });
-        },
-        [animationTarget, dispatch, nodeId]
-      );
+      const handleClick = useCallback(() => {
+        if (animationTarget.current !== null) {
+          (animationTarget.current as any).beginElement();
+        }
+        dispatch({
+          type: 'userSelectedResolverNode',
+          payload: {
+            nodeId,
+          },
+        });
+      }, [animationTarget, dispatch, nodeId]);
 
       /* eslint-disable jsx-a11y/click-events-have-key-events */
       /**
@@ -375,13 +376,11 @@ export const ProcessEventDot = styled(
   )
 )`
   position: absolute;
-  display: block;
   text-align: left;
   font-size: 10px;
   user-select: none;
   box-sizing: border-box;
   border-radius: 10%;
-  padding: 4px;
   white-space: nowrap;
   will-change: left, top, width, height;
   contain: strict;

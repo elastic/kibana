@@ -31,6 +31,9 @@ Then(`should have correct y-axis ticks`, () => {
   const yAxisTick =
     '[data-cy=transaction-duration-charts] .rv-xy-plot__axis--vertical .rv-xy-plot__axis__tick__text';
 
+  // wait for all loading to finish
+  cy.get('kbnLoadingIndicator').should('not.be.visible');
+
   cy.get(yAxisTick)
     .eq(2)
     .invoke('text')

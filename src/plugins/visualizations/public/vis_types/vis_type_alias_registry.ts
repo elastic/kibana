@@ -19,6 +19,7 @@
 
 export interface VisualizationListItem {
   editUrl: string;
+  editApp?: string;
   icon: string;
   id: string;
   stage: 'experimental' | 'beta' | 'production';
@@ -43,7 +44,8 @@ export interface VisTypeAliasPromotion {
 }
 
 export interface VisTypeAlias {
-  aliasUrl: string;
+  aliasPath: string;
+  aliasApp: string;
   name: string;
   title: string;
   icon: string;

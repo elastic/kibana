@@ -91,7 +91,7 @@ export interface FieldSelectionItem {
 }
 
 export interface DfAnalyticsExplainResponse {
-  field_selection: FieldSelectionItem[];
+  field_selection?: FieldSelectionItem[];
   memory_estimation: {
     expected_memory_without_disk: string;
     expected_memory_with_disk: string;

@@ -5,7 +5,12 @@
  */
 import querystring from 'querystring';
 import { createSelector } from 'reselect';
-import { Immutable } from '../../../../../common/types';
+import {
+  Immutable,
+  HostPolicyResponseAppliedAction,
+  HostPolicyResponseConfiguration,
+  HostPolicyResponseActionStatus,
+} from '../../../../../common/types';
 import { HostState, HostIndexUIQueryParams } from '../../types';
 
 const PAGE_SIZES = Object.freeze([10, 20, 50]);
@@ -27,6 +32,67 @@ export const detailsData = (state: Immutable<HostState>) => state.details;
 export const detailsLoading = (state: Immutable<HostState>): boolean => state.detailsLoading;
 
 export const detailsError = (state: Immutable<HostState>) => state.detailsError;
+
+/**
+ * Returns the full policy response from the endpoint after a user modifies a policy.
+ */
+const detailsPolicyAppliedResponse = (state: Immutable<HostState>) =>
+  state.policyResponse && state.policyResponse.endpoint.policy.applied;
+
+/**
+ * Returns the response configurations from the endpoint after a user modifies a policy.
+ */
+export const policyResponseConfigurations: (
+  state: Immutable<HostState>
+) => undefined | Immutable<HostPolicyResponseConfiguration> = createSelector(
+  detailsPolicyAppliedResponse,
+  applied => {
+    return applied?.response?.configurations;
+  }
+);
+
+/**
+ * Returns a map of the number of failed and warning policy response actions per configuration.
+ */
+export const policyResponseFailedOrWarningActionCount: (
+  state: Immutable<HostState>
+) => Map<string, number> = createSelector(detailsPolicyAppliedResponse, applied => {
+  const failureOrWarningByConfigType = new Map<string, number>();
+  if (applied?.response?.configurations !== undefined && applied?.actions !== undefined) {
+    Object.entries(applied.response.configurations).map(([key, val]) => {
+      let count = 0;
+      for (const action of val.concerned_actions) {
+        const actionStatus = applied.actions.find(policyActions => policyActions.name === action)
+          ?.status;
+        if (
+          actionStatus === HostPolicyResponseActionStatus.failure ||
+          actionStatus === HostPolicyResponseActionStatus.warning
+        ) {
+          count += 1;
+        }
+      }
+      return failureOrWarningByConfigType.set(key, count);
+    });
+  }
+  return failureOrWarningByConfigType;
+});
+
+/**
+ * Returns the actions taken by the endpoint for each response configuration after a user modifies a policy.
+ */
+export const policyResponseActions: (
+  state: Immutable<HostState>
+) => undefined | Immutable<HostPolicyResponseAppliedAction[]> = createSelector(
+  detailsPolicyAppliedResponse,
+  applied => {
+    return applied?.actions;
+  }
+);
+
+export const policyResponseLoading = (state: Immutable<HostState>): boolean =>
+  state.policyResponseLoading;
+
+export const policyResponseError = (state: Immutable<HostState>) => state.policyResponseError;
 
 export const isOnHostPage = (state: Immutable<HostState>) =>
   state.location ? state.location.pathname === '/hosts' : false;

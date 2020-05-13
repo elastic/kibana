@@ -8,7 +8,6 @@ import { HostResultList } from '../../../../../common/types';
 import { isOnHostPage, hasSelectedHost, uiQueryParams, listData } from './selectors';
 import { HostState } from '../../types';
 import { ImmutableMiddlewareFactory } from '../../types';
-import { HostPolicyResponse } from '../../../../../common/types';
 
 export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = coreStart => {
   return ({ getState, dispatch }) => next => async action => {
@@ -70,23 +69,25 @@ export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = core
           type: 'serverReturnedHostDetails',
           payload: response,
         });
-        dispatch({
-          type: 'serverReturnedHostPolicyResponse',
-          payload: {
-            policy_response: ({
-              endpoint: {
-                policy: {
-                  applied: {
-                    status: 'success',
-                  },
-                },
-              },
-            } as unknown) as HostPolicyResponse, // Temporary until we get API
-          },
-        });
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnHostDetails',
+          payload: error,
+        });
+      }
+
+      // call the policy response api
+      try {
+        const policyResponse = await coreStart.http.get(`/api/endpoint/policy_response`, {
+          query: { hostId: selectedHost },
+        });
+        dispatch({
+          type: 'serverReturnedHostPolicyResponse',
+          payload: policyResponse,
+        });
+      } catch (error) {
+        dispatch({
+          type: 'serverFailedToReturnHostPolicyResponse',
           payload: error,
         });
       }

@@ -7,6 +7,7 @@ import React, { useEffect, useRef } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
 import { useForm, Form, SerializerFunc } from '../../shared_imports';
+import { GenericObject } from '../../types';
 import { Types, useDispatch } from '../../mappings_state';
 import { DynamicMappingSection } from './dynamic_mapping_section';
 import { SourceFieldSection } from './source_field_section';
@@ -17,10 +18,10 @@ import { configurationFormSchema } from './configuration_form_schema';
 type MappingsConfiguration = Types['MappingsConfiguration'];
 
 interface Props {
-  defaultValue?: MappingsConfiguration;
+  value?: MappingsConfiguration;
 }
 
-const stringifyJson = (json: { [key: string]: any }) =>
+const stringifyJson = (json: GenericObject) =>
   Object.keys(json).length ? JSON.stringify(json, null, 2) : '{\n\n}';
 
 const formSerializer: SerializerFunc<MappingsConfiguration> = formData => {
@@ -57,7 +58,7 @@ const formSerializer: SerializerFunc<MappingsConfiguration> = formData => {
   };
 };
 
-const formDeserializer = (formData: { [key: string]: any }) => {
+const formDeserializer = (formData: GenericObject) => {
   const {
     dynamic,
     numeric_detection,
@@ -86,14 +87,14 @@ const formDeserializer = (formData: { [key: string]: any }) => {
   };
 };
 
-export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
+export const ConfigurationForm = React.memo(({ value }: Props) => {
   const didMountRef = useRef(false);
 
   const { form } = useForm<MappingsConfiguration>({
     schema: configurationFormSchema,
     serializer: formSerializer,
     deserializer: formDeserializer,
-    defaultValue,
+    defaultValue: value,
   });
   const dispatch = useDispatch();
 
@@ -114,14 +115,14 @@ export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
 
   useEffect(() => {
     if (didMountRef.current) {
-      // If the defaultValue has changed (it probably means that we have loaded a new JSON)
+      // If the value has changed (it probably means that we have loaded a new JSON)
       // we need to reset the form to update the fields values.
       form.reset({ resetValues: true });
     } else {
       // Avoid reseting the form on component mount.
       didMountRef.current = true;
     }
-  }, [defaultValue]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     return () => {

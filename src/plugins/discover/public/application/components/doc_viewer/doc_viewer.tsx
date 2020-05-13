@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import './doc_viewer.scss';
 import React from 'react';
 import { EuiTabbedContent } from '@elastic/eui';
 import { getDocViewsRegistry } from '../../../kibana_services';

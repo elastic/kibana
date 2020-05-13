@@ -6,6 +6,6 @@
 
 import * as t from 'io-ts';
 
-export const acknowledgeSchema = t.type({ acknowledged: t.boolean });
+export const acknowledgeSchema = t.exact(t.type({ acknowledged: t.boolean }));
 
 export type AcknowledgeSchema = t.TypeOf<typeof acknowledgeSchema>;
