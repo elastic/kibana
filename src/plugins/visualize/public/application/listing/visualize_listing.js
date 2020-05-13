@@ -25,7 +25,6 @@ import { i18n } from '@kbn/i18n';
 
 import { getServices } from '../../kibana_services';
 import { syncQueryStateWithUrl } from '../../../../data/public';
-import { LISTING_LIMIT_SETTING, PER_PAGE_SETTING } from '../../../../saved_objects/common';
 
 export function initListingDirective(app, I18nContext) {
   app.directive('visualizeListingTable', reactDirective =>
@@ -43,6 +42,7 @@ export function VisualizeListingController($scope, createNewVis, kbnUrlStateStor
     toastNotifications,
     visualizations,
     core: { docLinks, savedObjects, uiSettings },
+    savedObjects: savedObjectsPublic,
   } = getServices();
 
   // syncs `_g` portion of url with query services
@@ -92,7 +92,7 @@ export function VisualizeListingController($scope, createNewVis, kbnUrlStateStor
   this.fetchItems = filter => {
     const isLabsEnabled = uiSettings.get('visualize:enableLabs');
     return savedVisualizations
-      .findListItems(filter, uiSettings.get(LISTING_LIMIT_SETTING))
+      .findListItems(filter, savedObjectsPublic.settings.getListingLimit())
       .then(result => {
         this.totalItems = result.total;
 
@@ -125,8 +125,8 @@ export function VisualizeListingController($scope, createNewVis, kbnUrlStateStor
     },
   ]);
 
-  this.listingLimit = uiSettings.get(LISTING_LIMIT_SETTING);
-  this.initialPageSize = uiSettings.get(PER_PAGE_SETTING);
+  this.listingLimit = savedObjectsPublic.settings.getListingLimit();
+  this.initialPageSize = savedObjectsPublic.settings.getPerPage();
 
   addHelpMenuToAppChrome(chrome, docLinks);
 

@@ -39,12 +39,14 @@ import { VisualizeConstants } from './application/visualize_constants';
 import { setServices, VisualizeKibanaServices } from './kibana_services';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
 import { DefaultEditorController } from '../../vis_default_editor/public';
+import { SavedObjectsStart } from '../../saved_objects/public';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
   navigation: NavigationStart;
   share?: SharePluginStart;
   visualizations: VisualizationsStart;
+  savedObjects: SavedObjectsStart;
 }
 
 export interface VisualizePluginSetupDependencies {
@@ -120,6 +122,7 @@ export class VisualizePlugin
           DefaultVisualizationEditor: DefaultEditorController,
           createVisEmbeddableFromObject:
             pluginsStart.visualizations.__LEGACY.createVisEmbeddableFromObject,
+          savedObjects: pluginsStart.savedObjects,
         };
         setServices(deps);
 
