@@ -66,89 +66,53 @@ const nodeAssets = {
   },
 };
 
-/**
- * A Map of undfriendly/ugly event types to beautiful translated display strings.
- */
-const eventTypeToNameMap = new Map<string, string>([
-  [
-    'process',
-    i18n.translate('xpack.endpoint.resolver.Process', {
-      defaultMessage: 'Process',
-    }),
-  ],
-  [
-    'alert',
-    i18n.translate('xpack.endpoint.resolver.Alert', {
-      defaultMessage: 'Alert',
-    }),
-  ],
-  [
-    'security',
-    i18n.translate('xpack.endpoint.resolver.Security', {
-      defaultMessage: 'Security',
-    }),
-  ],
-  [
-    'file',
-    i18n.translate('xpack.endpoint.resolver.File', {
-      defaultMessage: 'File',
-    }),
-  ],
-  [
-    'network',
-    i18n.translate('xpack.endpoint.resolver.Network', {
-      defaultMessage: 'Network',
-    }),
-  ],
-  [
-    'registry',
-    i18n.translate('xpack.endpoint.resolver.Registry', {
-      defaultMessage: 'Registry',
-    }),
-  ],
-  [
-    'dns',
-    i18n.translate('xpack.endpoint.resolver.DNS', {
-      defaultMessage: 'DNS',
-    }),
-  ],
-  [
-    'clr',
-    i18n.translate('xpack.endpoint.resolver.CLR', {
-      defaultMessage: 'CLR',
-    }),
-  ],
-  [
-    'image_load',
-    i18n.translate('xpack.endpoint.resolver.ImageLoad', {
-      defaultMessage: 'Image Load',
-    }),
-  ],
-  [
-    'powershell',
-    i18n.translate('xpack.endpoint.resolver.Powershell', {
-      defaultMessage: 'Powershell',
-    }),
-  ],
-  [
-    'wmi',
-    i18n.translate('xpack.endpoint.resolver.WMI', {
-      defaultMessage: 'WMI',
-    }),
-  ],
-  [
-    'api',
-    i18n.translate('xpack.endpoint.resolver.API', {
-      defaultMessage: 'API',
-    }),
-  ],
-  [
-    'user',
-    i18n.translate('xpack.endpoint.resolver.User', {
-      defaultMessage: 'User',
-    }),
-  ],
-]);
+const getDisplayName: (schemaName: string) => string = function nameInSchemaToDisplayName(
+  translator: Pick<typeof i18n, 'translate'>,
+  schemaName: string
+) {
+  return translator.translate(`xpack.endpoint.resolver.${schemaName}`, {
+    defaultMessage: lookupDisplayName(schemaName),
+  });
+  function lookupDisplayName(referenceName: string): string {
+    const displayNameRecord: Record<string, string> = {
+      application: 'Application',
+      apm: 'APM',
+      audit: 'Audit',
+      authentication: 'Authentication',
+      certificate: 'Certificate',
+      cloud: 'Cloud',
+      database: 'Database',
+      driver: 'Driver',
+      email: 'Email',
+      file: 'File',
+      host: 'Host',
+      iam: 'IAM',
+      iam_group: 'IAM Group',
+      intrusion_detection: 'Intrusion Detection',
+      malware: 'Malware',
+      network_flow: 'Network Flow',
+      network: 'Network',
+      package: 'Package',
+      process: 'Process',
+      registry: 'Registry',
+      session: 'Session',
+      service: 'Service',
+      socket: 'Socket',
+      vulnerability: 'Vulnerability',
+      web: 'Web',
+      alert: 'Alert',
+      security: 'Security',
+      dns: 'DNS',
+      clr: 'CLR',
+      image_load: 'Image Load',
+      powershell: 'Powershell',
+      wmi: 'WMI',
+      api: 'API',
+      user: 'User',
+    };
+    return displayNameRecord[referenceName] || 'User';
+  }
+}.bind(null, i18n);
 
 /**
  * An artifact that represents a process node.
@@ -318,7 +282,7 @@ export const ProcessEventDot = styled(
         }
         // If we have entries to show, map them into options to display in the selectable list
         return Object.entries(relatedStats).map(statsEntry => {
-          const displayName = eventTypeToNameMap.get(statsEntry[0]) || 'Process';
+          const displayName = getDisplayName(statsEntry[0]);
           return {
             prefix: <EuiI18nNumber value={statsEntry[1] || 0} />,
             optionTitle: `${displayName}`,
