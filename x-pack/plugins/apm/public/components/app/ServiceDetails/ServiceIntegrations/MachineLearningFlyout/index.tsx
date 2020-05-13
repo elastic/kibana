@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { startMLJob } from '../../../../../services/rest/ml';
+import { startMLJob, MLError } from '../../../../../services/rest/ml';
 import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
 import { MLJobLink } from '../../../../shared/Links/MachineLearningLinks/MLJobLink';
 import { MachineLearningFlyoutView } from './view';
@@ -49,14 +49,14 @@ export class MachineLearningFlyout extends Component<Props, State> {
       }
       this.addSuccessToast({ transactionType });
     } catch (e) {
-      this.addErrorToast(e as Error);
+      this.addErrorToast(e as MLError);
     }
 
     this.setState({ isCreatingJob: false });
     this.props.onClose();
   };
 
-  public addErrorToast = (error: Error & { body?: { message?: string } }) => {
+  public addErrorToast = (error: MLError) => {
     const { core } = this.context;
 
     const { urlParams } = this.props;
