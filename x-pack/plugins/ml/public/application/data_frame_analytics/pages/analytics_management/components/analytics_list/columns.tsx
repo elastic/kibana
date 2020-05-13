@@ -64,6 +64,12 @@ export const getTaskStateBadge = (
   );
 };
 
+export const getJobTypeBadge = (jobType: string) => (
+  <EuiBadge className="mlTaskStateBadge" color="hollow">
+    {jobType}
+  </EuiBadge>
+);
+
 export const progressColumn = {
   name: i18n.translate('xpack.ml.dataframe.analyticsList.progress', {
     defaultMessage: 'Progress per Step',
@@ -230,7 +236,7 @@ export const getColumns = (
       sortable: (item: DataFrameAnalyticsListRow) => getAnalysisType(item.config.analysis),
       truncateText: true,
       render(item: DataFrameAnalyticsListRow) {
-        return <EuiBadge color="hollow">{getAnalysisType(item.config.analysis)}</EuiBadge>;
+        return getJobTypeBadge(getAnalysisType(item.config.analysis));
       },
       width: '150px',
       'data-test-subj': 'mlAnalyticsTableColumnType',

@@ -45,9 +45,9 @@ const getResolvedResults = deps => {
 
   return savedVis => {
     results.savedVis = savedVis;
+    const serializedVis = visualizations.convertToSerializedVis(savedVis);
     return visualizations
-      .convertToSerializedVis(savedVis)
-      .then(serializedVis => visualizations.createVis(serializedVis.type, serializedVis))
+      .createVis(serializedVis.type, serializedVis)
       .then(vis => {
         if (vis.type.setup) {
           return vis.type.setup(vis).catch(() => vis);
@@ -171,6 +171,10 @@ export function initVisualizeApp(app, deps) {
             return data.indexPatterns
               .ensureDefaultIndexPattern(history)
               .then(() => savedVisualizations.get($route.current.params))
+              .then(savedVis => {
+                savedVis.searchSourceFields = { index: $route.current.params.indexPattern };
+                return savedVis;
+              })
               .then(getResolvedResults(deps))
               .then(delay)
               .catch(
@@ -202,14 +206,28 @@ export function initVisualizeApp(app, deps) {
               .catch(
                 redirectWhenMissing({
                   history,
+                  navigateToApp: deps.core.application.navigateToApp,
+                  basePath: deps.core.http.basePath,
                   mapping: {
                     visualization: VisualizeConstants.LANDING_PAGE_PATH,
-                    search:
-                      '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-                    'index-pattern':
-                      '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-                    'index-pattern-field':
-                      '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+                    search: {
+                      app: 'kibana',
+                      path:
+                        '#/management/kibana/objects/savedVisualizations/' +
+                        $route.current.params.id,
+                    },
+                    'index-pattern': {
+                      app: 'kibana',
+                      path:
+                        '#/management/kibana/objects/savedVisualizations/' +
+                        $route.current.params.id,
+                    },
+                    'index-pattern-field': {
+                      app: 'kibana',
+                      path:
+                        '#/management/kibana/objects/savedVisualizations/' +
+                        $route.current.params.id,
+                    },
                   },
                   toastNotifications,
                   onBeforeRedirect() {
@@ -220,8 +238,11 @@ export function initVisualizeApp(app, deps) {
           },
         },
       })
-      .when(`visualize/:tail*?`, {
-        redirectTo: `/${deps.config.defaultAppId}`,
+      .otherwise({
+        template: '<span></span>',
+        controller: function() {
+          deps.kibanaLegacy.navigateToDefaultApp();
+        },
       });
   });
 }
