@@ -17,8 +17,9 @@
  * under the License.
  */
 
+import { PluginInitializerContext } from 'kibana/public';
 import { NewsFeedSimulatorPlugin } from './plugin';
 
-export function plugin() {
-  return new NewsFeedSimulatorPlugin();
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new NewsFeedSimulatorPlugin(initializerContext);
 }

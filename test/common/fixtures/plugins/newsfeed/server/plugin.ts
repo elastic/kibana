@@ -17,17 +17,20 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
 import { CoreSetup, Plugin } from 'kibana/server';
+import { PluginInitializerContext } from 'kibana/public';
 
 export class NewsFeedSimulatorPlugin implements Plugin {
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
+
   public setup({ http }: CoreSetup) {
     const router = http.createRouter();
+    const version = this.initializerContext.env.packageInfo.version;
 
     router.get(
       {
-        path: '/api/_newsfeed-FTS-external-service-simulators/kibana/v{version}.json',
-        validate: { params: schema.object({ version: schema.string() }) },
+        path: `/api/_newsfeed-FTS-external-service-simulators/kibana/v${version}.json`,
+        validate: false,
         options: { authRequired: false },
       },
       (context, req, res) => {
