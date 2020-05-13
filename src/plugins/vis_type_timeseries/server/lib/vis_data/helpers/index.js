@@ -29,6 +29,8 @@ import { getTimerange } from './get_timerange';
 import { mapBucket } from './map_bucket';
 import { parseSettings } from './parse_settings';
 
+export { overwrite } from './overwrite';
+
 export const helpers = {
   bucketTransform,
   getAggValue,

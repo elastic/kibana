@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "7.7.0",
+  "version": "7.7.1",
   "branch": "7.7",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -194,7 +194,7 @@
     "inert": "^5.1.0",
     "inline-style": "^2.0.0",
     "joi": "^13.5.2",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "js-yaml": "3.13.1",
     "json-stable-stringify": "^1.0.1",
     "json-stringify-pretty-compact": "1.2.0",

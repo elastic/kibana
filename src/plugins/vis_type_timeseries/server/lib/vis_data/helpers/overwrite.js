@@ -17,28 +17,15 @@
  * under the License.
  */
 
-const resolve = require('path').resolve;
-const statSync = require('fs').statSync;
+import set from 'set-value';
 
-module.exports = function(plugin) {
-  if (
-    fileExists(resolve(plugin.root, '../kibana/package.json')) &&
-    !fileExists(resolve(plugin.root, '../../kibana/package.json'))
-  ) {
-    process.stdout.write(
-      '\nWARNING: Kibana now requires that plugins must be located in ' +
-        '`../kibana-extra/{pluginName}` relative to the Kibana folder ' +
-        'during development. We found a Kibana in `../kibana`, but not in ' +
-        '`../../kibana`.\n'
-    );
-  }
-};
-
-function fileExists(path) {
-  try {
-    const stat = statSync(path);
-    return stat.isFile();
-  } catch (e) {
-    return false;
-  }
+/**
+ * Set path in obj. Behaves like lodash `set`
+ * @param obj The object to mutate
+ * @param path The path of the sub-property to set
+ * @param val The value to set the sub-property to
+ */
+export function overwrite(obj, path, val) {
+  set(obj, path, undefined);
+  set(obj, path, val);
 }

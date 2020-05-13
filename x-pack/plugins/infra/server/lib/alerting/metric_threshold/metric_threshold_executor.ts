@@ -51,17 +51,19 @@ const getCurrentValueFromAggregations = (
 
 const getParsedFilterQuery: (
   filterQuery: string | undefined
-) => Record<string, any> = filterQuery => {
+) => Record<string, any> | Array<Record<string, any>> = filterQuery => {
   if (!filterQuery) return {};
   try {
     return JSON.parse(filterQuery).bool;
   } catch (e) {
-    return {
-      query_string: {
-        query: filterQuery,
-        analyze_wildcard: true,
+    return [
+      {
+        query_string: {
+          query: filterQuery,
+          analyze_wildcard: true,
+        },
       },
-    };
+    ];
   }
 };
 
@@ -159,8 +161,12 @@ export const getElasticsearchMetricQuery = (
   return {
     query: {
       bool: {
-        filter: [...rangeFilters, ...metricFieldFilters],
-        ...parsedFilterQuery,
+        filter: [
+          ...rangeFilters,
+          ...metricFieldFilters,
+          ...(Array.isArray(parsedFilterQuery) ? parsedFilterQuery : []),
+        ],
+        ...(!Array.isArray(parsedFilterQuery) ? parsedFilterQuery : {}),
       },
     },
     size: 0,
@@ -233,6 +239,7 @@ const getMetric: (
       body: searchBody,
       index,
     });
+
     return { '*': getCurrentValueFromAggregations(result.aggregations, aggType) };
   } catch (e) {
     return { '*': undefined }; // Trigger an Error state
