@@ -76,9 +76,7 @@ export async function mountApp(
     const urlParams = parse(routeProps.location.search) as Record<string, string>;
     const originatingAppFromUrl = urlParams.embeddableOriginatingApp;
     if (urlParams.embeddableOriginatingApp) {
-      setTimeout(() => {
-        removeQueryParam(routeProps.history, 'embeddableOriginatingApp');
-      }, 0);
+      removeQueryParam(routeProps.history, 'embeddableOriginatingApp');
     }
 
     return (
