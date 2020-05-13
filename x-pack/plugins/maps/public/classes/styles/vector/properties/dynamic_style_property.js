@@ -73,6 +73,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     const categoryFieldMetaFromLocalFeatures = styleMeta.getCategoryFieldMetaDescriptor(fieldName);
 
     if (!this.isFieldMetaEnabled()) {
+      console.log('not enabled');
       return categoryFieldMetaFromLocalFeatures;
     }
 
@@ -148,7 +149,8 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     if (this.isOrdinal()) {
       return this._field.getOrdinalFieldMetaRequest();
     } else if (this.isCategorical()) {
-      return this._field.getCategoricalFieldMetaRequest(this.getNumberOfCategories());
+      const numberOfCategories = this.getNumberOfCategories();
+      return this._field.getCategoricalFieldMetaRequest(numberOfCategories);
     } else {
       return null;
     }
