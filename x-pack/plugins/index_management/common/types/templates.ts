@@ -52,6 +52,7 @@ export interface TemplateListItem {
   _kbnMeta: {
     formatVersion: IndexTemplateFormatVersion;
   };
+  type: 'v1' | 'v2' | 'system';
 }
 
 /**

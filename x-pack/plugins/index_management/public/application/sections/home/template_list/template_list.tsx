@@ -15,9 +15,10 @@ import {
   EuiSwitch,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiButton,
 } from '@elastic/eui';
 
-import { UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
+import { BASE_PATH, UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
 import { IndexTemplateFormatVersion } from '../../../../../common';
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { useLoadIndexTemplates } from '../../../services/api';
@@ -52,7 +53,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   // Filter out system index templates
   const filteredTemplates = useMemo(
-    () => (templates ? templates.filter((template) => !template.name.startsWith('.')) : []),
+    () => (templates ? templates.filter(template => !template.name.startsWith('.')) : []),
     [templates]
   );
 
@@ -128,7 +129,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
               id="checkboxShowSystemIndexTemplates"
               data-test-subj="systemTemplatesSwitch"
               checked={showSystemTemplates}
-              onChange={(event) => setShowSystemTemplates(event.target.checked)}
+              onChange={event => setShowSystemTemplates(event.target.checked)}
               label={
                 <FormattedMessage
                   id="xpack.idxMgmt.indexTemplatesTable.systemIndexTemplatesSwitchLabel"
@@ -151,6 +152,50 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   return (
     <div data-test-subj="templateList">
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={true}>
+          <EuiTitle size="s">
+            <EuiText color="subdued">
+              <FormattedMessage
+                id="xpack.idxMgmt.home.indexTemplatesDescription"
+                defaultMessage="Use index templates to automatically apply settings, mappings, and aliases to indices."
+              />
+            </EuiText>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiButton
+                color="secondary"
+                iconType="apps"
+                data-test-subj="componentsButton"
+                key="components"
+              >
+                <FormattedMessage
+                  id="xpack.idxMgmt.templateList.table.componentsButtonLabel"
+                  defaultMessage="Components"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiButton
+                href={`#${BASE_PATH}create_template`}
+                fill
+                iconType="plusInCircle"
+                data-test-subj="createTemplateButton"
+                key="createTemplateButton"
+              >
+                <FormattedMessage
+                  id="xpack.idxMgmt.templateList.table.createTemplatesButtonLabel"
+                  defaultMessage="Create a template"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="l" />
       {content}
       {templateName && queryParamsFormatVersion !== undefined && (
         <TemplateDetails

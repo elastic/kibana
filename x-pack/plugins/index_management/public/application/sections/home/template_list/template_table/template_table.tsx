@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiInMemoryTable, EuiIcon, EuiButton, EuiLink, EuiBasicTableColumn } from '@elastic/eui';
 import { TemplateListItem, IndexTemplateFormatVersion } from '../../../../../../common';
-import { BASE_PATH, UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
+import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import { TemplateDeleteModal } from '../../../../components';
 import { useServices } from '../../../../app_context';
 import { getTemplateDetailsLink } from '../../../../services/routing';
@@ -198,7 +198,23 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     },
   };
 
+  const viewOptions = [
+    {
+      label: 'Index templates',
+      value: 'v2',
+    },
+    {
+      label: 'Index templates (legacy)',
+      value: 'v1',
+    },
+    {
+      label: 'System templates',
+      value: 'system',
+    },
+  ];
+
   const searchConfig = {
+    defaultQuery: 'type:(v2 or v1)',
     box: {
       incremental: true,
     },
@@ -236,18 +252,18 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           defaultMessage="Reload"
         />
       </EuiButton>,
-      <EuiButton
-        href={`#${BASE_PATH}create_template`}
-        fill
-        iconType="plusInCircle"
-        data-test-subj="createTemplateButton"
-        key="createTemplateButton"
-      >
-        <FormattedMessage
-          id="xpack.idxMgmt.templateList.table.createTemplatesButtonLabel"
-          defaultMessage="Create a template"
-        />
-      </EuiButton>,
+    ],
+    filters: [
+      {
+        type: 'field_value_selection' as 'field_value_selection',
+        field: 'type',
+        name: 'View',
+        multiSelect: 'or' as 'or',
+        options: viewOptions.map(option => ({
+          value: option.value,
+          view: option.label,
+        })),
+      },
     ],
   };
 

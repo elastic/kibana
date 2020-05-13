@@ -116,6 +116,11 @@ export function deserializeTemplateList(
       hasSettings: hasEntries(settings),
       hasAliases: hasEntries(aliases),
       hasMappings: hasEntries(mappings),
+      type: name.startsWith('.')
+        ? 'system'
+        : deserializedTemplate._kbnMeta.formatVersion === 1
+        ? 'v1'
+        : 'v2',
     };
   });
 }
