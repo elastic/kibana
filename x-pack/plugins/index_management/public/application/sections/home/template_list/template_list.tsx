@@ -20,7 +20,7 @@ import {
 
 import { BASE_PATH, UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
 import { IndexTemplateFormatVersion } from '../../../../../common';
-import { SectionError, SectionLoading, Error } from '../../../components';
+import { SectionError, SectionLoading, Error, ComponentTemplatesFlyout } from '../../../components';
 import { useLoadIndexTemplates } from '../../../services/api';
 import { useServices } from '../../../app_context';
 import {
@@ -45,7 +45,9 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 }) => {
   const { uiMetricService } = useServices();
   const { error, isLoading, data: templates, sendRequest: reload } = useLoadIndexTemplates();
+  const [isComponentTemplatesVisible, setIsComponentTemplatesVisible] = useState(false);
   const queryParamsFormatVersion = getFormatVersionFromQueryparams(location);
+  const isTemplateDetailsVisible = templateName && queryParamsFormatVersion !== undefined;
 
   let content;
 
@@ -73,6 +75,12 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   useEffect(() => {
     uiMetricService.trackMetric('loaded', UIM_TEMPLATE_LIST_LOAD);
   }, [uiMetricService]);
+
+  useEffect(() => {
+    if (Boolean(templateName)) {
+      setIsComponentTemplatesVisible(false);
+    }
+  }, [templateName]);
 
   if (isLoading) {
     content = (
@@ -171,6 +179,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
                 iconType="apps"
                 data-test-subj="componentsButton"
                 key="components"
+                onClick={() => setIsComponentTemplatesVisible(true)}
               >
                 <FormattedMessage
                   id="xpack.idxMgmt.templateList.table.componentsButtonLabel"
@@ -197,17 +206,20 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
       </EuiFlexGroup>
       <EuiSpacer size="l" />
       {content}
-      {templateName && queryParamsFormatVersion !== undefined && (
+      {isTemplateDetailsVisible && (
         <TemplateDetails
           template={{
-            name: templateName,
-            formatVersion: queryParamsFormatVersion,
+            name: templateName!,
+            formatVersion: queryParamsFormatVersion!,
           }}
           onClose={closeTemplateDetails}
           editTemplate={editTemplate}
           cloneTemplate={cloneTemplate}
           reload={reload}
         />
+      )}
+      {isComponentTemplatesVisible && (
+        <ComponentTemplatesFlyout onClose={() => setIsComponentTemplatesVisible(false)} />
       )}
     </div>
   );

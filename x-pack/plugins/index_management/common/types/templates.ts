@@ -32,6 +32,16 @@ export interface TemplateV2Serialized extends TemplateBaseSerialized {
   composed_of?: string[];
 }
 
+export interface ComponentTemplateSerialized {
+  template: {
+    settings?: IndexSettings;
+    aliases?: Aliases;
+    mappings?: Mappings;
+  };
+  version?: number;
+  _meta?: { [key: string]: any };
+}
+
 /**
  * Interface for the template list in our UI table
  * we don't include the mappings, settings and aliases
