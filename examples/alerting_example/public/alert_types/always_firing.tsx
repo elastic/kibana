@@ -51,6 +51,7 @@ export function getAlertType(): AlertTypeModel {
       }
       return validationResult;
     },
+    requiresAppContext: false,
   };
 }
 
