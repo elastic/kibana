@@ -549,7 +549,7 @@ export function validateModelMemoryLimitUnits(
   let valid = true;
 
   if (modelMemoryLimit !== undefined) {
-    const mml = modelMemoryLimit.toUpperCase();
+    const mml = String(modelMemoryLimit).toUpperCase();
     const mmlSplit = mml.match(/\d+(\w+)$/);
     const unit = mmlSplit && mmlSplit.length === 2 ? mmlSplit[1] : null;
 

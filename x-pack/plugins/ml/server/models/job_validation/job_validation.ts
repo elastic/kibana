@@ -37,7 +37,7 @@ export type ValidateJobPayload = TypeOf<typeof validateJobSchema>;
 export async function validateJob(
   callWithRequest: APICaller,
   payload: ValidateJobPayload,
-  kbnVersion?: string,
+  kbnVersion = 'current',
   callAsInternalUser?: APICaller,
   isSecurityDisabled?: boolean
 ) {
