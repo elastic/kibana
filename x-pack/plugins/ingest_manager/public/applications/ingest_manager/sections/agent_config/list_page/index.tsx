@@ -31,6 +31,7 @@ import {
   useLink,
   useConfig,
   useUrlParams,
+  useBreadcrumbs,
 } from '../../../hooks';
 import { CreateAgentConfigFlyout } from './components';
 import { SearchBar } from '../../../components/search_bar';
@@ -117,6 +118,7 @@ const ConfigRowActions = memo<{ config: AgentConfig; onDelete: () => void }>(
 );
 
 export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
+  useBreadcrumbs('configurations_list');
   const { getHref, getPath } = useLink();
   // Config information
   const hasWriteCapabilites = useCapabilities().write;

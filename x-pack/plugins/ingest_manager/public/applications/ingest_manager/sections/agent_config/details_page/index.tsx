@@ -21,8 +21,9 @@ import {
 } from '@elastic/eui';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import styled from 'styled-components';
+import { AgentConfig } from '../../../types';
 import { PAGE_ROUTING_PATHS } from '../../../constants';
-import { useGetOneAgentConfig, useLink } from '../../../hooks';
+import { useGetOneAgentConfig, useLink, useBreadcrumbs } from '../../../hooks';
 import { Loading } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
 import { ConfigRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
@@ -240,28 +241,37 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
           rightColumn={headerRightContent}
           tabs={(headerTabs as unknown) as EuiTabProps[]}
         >
-          <Switch>
-            <Route
-              path={PAGE_ROUTING_PATHS.configuration_details_yaml}
-              render={() => {
-                return <ConfigYamlView config={agentConfig} />;
-              }}
-            />
-            <Route
-              path={PAGE_ROUTING_PATHS.configuration_details_settings}
-              render={() => {
-                return <ConfigSettingsView config={agentConfig} />;
-              }}
-            />
-            <Route
-              path={PAGE_ROUTING_PATHS.configuration_details}
-              render={() => {
-                return <ConfigDatasourcesView config={agentConfig} />;
-              }}
-            />
-          </Switch>
+          <AgentConfigDetailsContent agentConfig={agentConfig} />
         </WithHeaderLayout>
       </AgentStatusRefreshContext.Provider>
     </ConfigRefreshContext.Provider>
+  );
+};
+
+const AgentConfigDetailsContent: React.FunctionComponent<{ agentConfig: AgentConfig }> = ({
+  agentConfig,
+}) => {
+  useBreadcrumbs('configuration_details', { configName: agentConfig.name });
+  return (
+    <Switch>
+      <Route
+        path={PAGE_ROUTING_PATHS.configuration_details_yaml}
+        render={() => {
+          return <ConfigYamlView config={agentConfig} />;
+        }}
+      />
+      <Route
+        path={PAGE_ROUTING_PATHS.configuration_details_settings}
+        render={() => {
+          return <ConfigSettingsView config={agentConfig} />;
+        }}
+      />
+      <Route
+        path={PAGE_ROUTING_PATHS.configuration_details}
+        render={() => {
+          return <ConfigDatasourcesView config={agentConfig} />;
+        }}
+      />
+    </Switch>
   );
 };

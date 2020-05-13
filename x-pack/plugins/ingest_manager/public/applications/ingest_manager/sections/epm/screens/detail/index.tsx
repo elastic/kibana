@@ -7,12 +7,11 @@ import { EuiPage, EuiPageBody, EuiPageProps } from '@elastic/eui';
 import React, { Fragment, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { DetailViewPanelName, InstallStatus } from '../../../../types';
-import { PackageInfo } from '../../../../types';
+import { DetailViewPanelName, InstallStatus, PackageInfo } from '../../../../types';
+import { sendGetPackageInfoByKey, usePackageIconType, useBreadcrumbs } from '../../../../hooks';
 import { useSetPackageInstallStatus } from '../../hooks';
 import { Content } from './content';
 import { Header } from './header';
-import { sendGetPackageInfoByKey, usePackageIconType } from '../../../../hooks';
 
 export const DEFAULT_PANEL: DetailViewPanelName = 'overview';
 
@@ -66,8 +65,9 @@ const FullWidthContent = styled(EuiPage)`
 
 type LayoutProps = PackageInfo & Pick<DetailParams, 'panel'> & Pick<EuiPageProps, 'restrictWidth'>;
 export function DetailLayout(props: LayoutProps) {
-  const { name: packageName, version, icons, restrictWidth } = props;
+  const { name: packageName, version, icons, restrictWidth, title: packageTitle } = props;
   const iconType = usePackageIconType({ packageName, version, icons });
+  useBreadcrumbs('integration_details', { pkgTitle: packageTitle });
   return (
     <Fragment>
       <FullWidthHeader>

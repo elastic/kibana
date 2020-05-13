@@ -24,6 +24,8 @@ export type DynamicPage =
   | 'edit_datasource'
   | 'fleet_agent_details';
 
+export type Page = StaticPage | DynamicPage;
+
 export interface DynamicPagePathValues {
   [key: string]: string;
 }

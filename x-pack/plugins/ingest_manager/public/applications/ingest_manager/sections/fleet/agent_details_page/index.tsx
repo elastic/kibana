@@ -19,12 +19,13 @@ import {
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { AgentRefreshContext } from './hooks';
+import { Agent, AgentConfig } from '../../../types';
 import { PAGE_ROUTING_PATHS } from '../../../constants';
 import { Loading, Error } from '../../../components';
-import { useGetOneAgent, useGetOneAgentConfig, useLink } from '../../../hooks';
+import { useGetOneAgent, useGetOneAgentConfig, useLink, useBreadcrumbs } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 import { AgentHealth } from '../components';
+import { AgentRefreshContext } from './hooks';
 import { AgentEventsTable, AgentDetailsActionMenu, AgentDetailsContent } from './components';
 
 const Divider = styled.div`
@@ -193,22 +194,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             error={error}
           />
         ) : agentData && agentData.item ? (
-          <Switch>
-            <Route
-              path={PAGE_ROUTING_PATHS.fleet_agent_details_details}
-              render={() => {
-                return (
-                  <AgentDetailsContent agent={agentData.item} agentConfig={agentConfigData?.item} />
-                );
-              }}
-            />
-            <Route
-              path={PAGE_ROUTING_PATHS.fleet_agent_details_events}
-              render={() => {
-                return <AgentEventsTable agent={agentData.item} />;
-              }}
-            />
-          </Switch>
+          <AgentDetailsPageContent agent={agentData.item} agentConfig={agentConfigData?.item} />
         ) : (
           <Error
             title={
@@ -220,7 +206,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             error={i18n.translate(
               'xpack.ingestManager.agentDetails.agentNotFoundErrorDescription',
               {
-                defaultMessage: 'Cannot found agent ID {agentId}',
+                defaultMessage: 'Cannot find agent ID {agentId}',
                 values: {
                   agentId,
                 },
@@ -230,5 +216,34 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         )}
       </WithHeaderLayout>
     </AgentRefreshContext.Provider>
+  );
+};
+
+const AgentDetailsPageContent: React.FunctionComponent<{
+  agent: Agent;
+  agentConfig?: AgentConfig;
+}> = ({ agent, agentConfig }) => {
+  useBreadcrumbs('fleet_agent_details', {
+    agentHost:
+      typeof agent.local_metadata.host === 'object' &&
+      typeof agent.local_metadata.host.hostname === 'string'
+        ? agent.local_metadata.host.hostname
+        : '-',
+  });
+  return (
+    <Switch>
+      <Route
+        path={PAGE_ROUTING_PATHS.fleet_agent_details_details}
+        render={() => {
+          return <AgentDetailsContent agent={agent} agentConfig={agentConfig} />;
+        }}
+      />
+      <Route
+        path={PAGE_ROUTING_PATHS.fleet_agent_details_events}
+        render={() => {
+          return <AgentEventsTable agent={agent} />;
+        }}
+      />
+    </Switch>
   );
 };

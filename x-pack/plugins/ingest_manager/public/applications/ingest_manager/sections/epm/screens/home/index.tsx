@@ -9,7 +9,7 @@ import { useRouteMatch, Switch, Route } from 'react-router-dom';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { i18n } from '@kbn/i18n';
 import { PAGE_ROUTING_PATHS } from '../../../../constants';
-import { useLink, useGetCategories, useGetPackages } from '../../../../hooks';
+import { useLink, useGetCategories, useGetPackages, useBreadcrumbs } from '../../../../hooks';
 import { WithHeaderLayout } from '../../../../layouts';
 import { CategorySummaryItem } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
@@ -60,6 +60,7 @@ export function EPMHomePage() {
 }
 
 function InstalledPackages() {
+  useBreadcrumbs('integrations_installed');
   const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages();
   const [selectedCategory, setSelectedCategory] = useState('');
 
@@ -112,6 +113,7 @@ function InstalledPackages() {
 }
 
 function AvailablePackages() {
+  useBreadcrumbs('integrations_all');
   const [selectedCategory, setSelectedCategory] = useState('');
   const { data: categoryPackagesRes, isLoading: isLoadingPackages } = useGetPackages({
     category: selectedCategory,

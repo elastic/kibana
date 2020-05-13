@@ -34,6 +34,7 @@ import {
   useGetAgents,
   useUrlParams,
   useLink,
+  useBreadcrumbs,
 } from '../../../hooks';
 import { AgentReassignConfigFlyout } from '../components';
 import { SearchBar } from '../../../components/search_bar';
@@ -154,6 +155,7 @@ function safeMetadata(val: any) {
 }
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
+  useBreadcrumbs('fleet_agent_list');
   const { getHref } = useLink();
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
   const hasWriteCapabilites = useCapabilities().write;

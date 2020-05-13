@@ -19,6 +19,7 @@ import {
 import { AgentConfig, PackageInfo, NewDatasource } from '../../../types';
 import {
   useLink,
+  useBreadcrumbs,
   useCore,
   useConfig,
   sendUpdateDatasource,
@@ -239,6 +240,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
         />
       ) : (
         <>
+          <Breadcrumb configName={agentConfig.name} configId={configId} />
           {formState === 'CONFIRM' && (
             <ConfirmDeployConfigModal
               agentCount={agentCount}
@@ -317,4 +319,12 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
       )}
     </CreateDatasourcePageLayout>
   );
+};
+
+const Breadcrumb: React.FunctionComponent<{ configName: string; configId: string }> = ({
+  configName,
+  configId,
+}) => {
+  useBreadcrumbs('edit_datasource', { configName, configId });
+  return null;
 };

@@ -7,12 +7,13 @@
 import React from 'react';
 import { HashRouter as Router, Switch, Route } from 'react-router-dom';
 import { PAGE_ROUTING_PATHS } from '../../constants';
-import { useConfig } from '../../hooks';
+import { useConfig, useBreadcrumbs } from '../../hooks';
 import { CreateDatasourcePage } from '../agent_config/create_datasource_page';
 import { EPMHomePage } from './screens/home';
 import { Detail } from './screens/detail';
 
 export const EPMApp: React.FunctionComponent = () => {
+  useBreadcrumbs('integrations');
   const { epm } = useConfig();
 
   return epm.enabled ? (

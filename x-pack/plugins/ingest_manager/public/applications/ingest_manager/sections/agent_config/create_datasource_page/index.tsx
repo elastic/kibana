@@ -20,6 +20,7 @@ import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { AgentConfig, PackageInfo, NewDatasource } from '../../../types';
 import {
   useLink,
+  useBreadcrumbs,
   sendCreateDatasource,
   useCore,
   useConfig,
@@ -274,6 +275,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
         ) : null,
     },
   ];
+
   return (
     <CreateDatasourcePageLayout {...layoutProps}>
       {formState === 'CONFIRM' && agentConfig && (
@@ -284,6 +286,16 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
           onCancel={() => setFormState('VALID')}
         />
       )}
+      {from === 'package'
+        ? packageInfo && (
+            <IntegrationBreadcrumb
+              pkgTitle={packageInfo.title}
+              pkgkey={`${packageInfo.name}-${packageInfo.version}`}
+            />
+          )
+        : agentConfig && (
+            <ConfigurationBreadcrumb configName={agentConfig.name} configId={agentConfig.id} />
+          )}
       <EuiSteps steps={steps} />
       <EuiSpacer size="l" />
       <EuiBottomBar
@@ -322,4 +334,20 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
       </EuiBottomBar>
     </CreateDatasourcePageLayout>
   );
+};
+
+const ConfigurationBreadcrumb: React.FunctionComponent<{
+  configName: string;
+  configId: string;
+}> = ({ configName, configId }) => {
+  useBreadcrumbs('add_datasource_from_configuration', { configName, configId });
+  return null;
+};
+
+const IntegrationBreadcrumb: React.FunctionComponent<{
+  pkgTitle: string;
+  pkgkey: string;
+}> = ({ pkgTitle, pkgkey }) => {
+  useBreadcrumbs('add_datasource_from_integration', { pkgTitle, pkgkey });
+  return null;
 };

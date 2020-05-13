@@ -8,6 +8,7 @@ export { useCapabilities } from './use_capabilities';
 export { useCore, CoreContext } from './use_core';
 export { useConfig, ConfigContext } from './use_config';
 export { useSetupDeps, useStartDeps, DepsContext } from './use_deps';
+export { useBreadcrumbs } from './use_breadcrumbs';
 export { useLink } from './use_link';
 export { usePackageIconType, UsePackageIconType } from './use_package_icon_type';
 export { usePagination, Pagination } from './use_pagination';
