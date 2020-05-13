@@ -10,6 +10,7 @@ import { shallow } from 'enzyme';
 import { LensMultiTable } from '../types';
 import { PieComponent } from './render_function';
 import { PieExpressionArgs } from './types';
+import { EmptyPlaceholder } from '../shared_components';
 
 describe('PieVisualization component', () => {
   let getFormatSpy: jest.Mock;
@@ -108,6 +109,27 @@ describe('PieVisualization component', () => {
         <PieComponent args={{ ...args, nestedLegend: true }} {...getDefaultArgs()} />
       );
       expect(component.find(Settings).prop('legendMaxDepth')).toBeUndefined();
+    });
+
+    test('it shows emptyPlaceholder for undefined grouped data', () => {
+      const defaultData = getDefaultArgs().data;
+      const emptyData: LensMultiTable = {
+        ...defaultData,
+        tables: {
+          first: {
+            ...defaultData.tables.first,
+            rows: [
+              { a: undefined, b: undefined, c: 'I', d: 'Row 1' },
+              { a: undefined, b: undefined, c: 'J', d: 'Row 2' },
+            ],
+          },
+        },
+      };
+
+      const component = shallow(
+        <PieComponent args={args} {...getDefaultArgs()} data={emptyData} />
+      );
+      expect(component.find(EmptyPlaceholder).prop('icon')).toEqual('visPie');
     });
   });
 });

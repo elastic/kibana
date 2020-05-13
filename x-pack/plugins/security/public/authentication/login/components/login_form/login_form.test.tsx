@@ -172,7 +172,7 @@ describe('LoginForm', () => {
 
   it('properly redirects after successful login', async () => {
     window.location.href = `https://some-host/login?next=${encodeURIComponent(
-      '/some-base-path/app/kibana#/home?_g=()'
+      '/some-base-path/app/home#/?_g=()'
     )}`;
     const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
     coreStartMock.http.post.mockResolvedValue({});
@@ -205,7 +205,7 @@ describe('LoginForm', () => {
       body: JSON.stringify({ username: 'username1', password: 'password1' }),
     });
 
-    expect(window.location.href).toBe('/some-base-path/app/kibana#/home?_g=()');
+    expect(window.location.href).toBe('/some-base-path/app/home#/?_g=()');
     expect(wrapper.find(EuiCallOut).exists()).toBe(false);
   });
 
