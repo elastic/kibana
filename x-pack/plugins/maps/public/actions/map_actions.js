@@ -20,6 +20,7 @@ import {
   getQuery,
   getDataRequestDescriptor,
   getFittableLayers,
+  getMapSettings,
 } from '../selectors/map_selectors';
 
 import { FLYOUT_STATE } from '../reducers/ui';
@@ -925,8 +926,12 @@ export function setQuery({ query, timeFilters, filters = [], refresh = false }) 
       filters,
     });
 
-    const dataFilters = getDataFilters(getState());
-    await syncDataForAllLayers(dispatch, getState, dataFilters);
+    if (getMapSettings(getState()).autoFitToDataBounds) {
+      dispatch(fitToDataBounds());
+    } else {
+      const dataFilters = getDataFilters(getState());
+      await syncDataForAllLayers(dispatch, getState, dataFilters);
+    }
   };
 }
 

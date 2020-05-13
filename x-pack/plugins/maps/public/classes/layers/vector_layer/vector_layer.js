@@ -212,6 +212,11 @@ export class VectorLayer extends AbstractLayer {
     return bounds;
   }
 
+  isLoadingBounds() {
+    const boundsDataRequest = this.getDataRequest(SOURCE_BOUNDS_DATA_REQUEST_ID);
+    return !!boundsDataRequest && boundsDataRequest.isLoading();
+  }
+
   async getLeftJoinFields() {
     return await this.getSource().getLeftJoinFields();
   }
@@ -616,7 +621,11 @@ export class VectorLayer extends AbstractLayer {
   // Given 2 above, which source/style to use can not be pulled from data request state.
   // Therefore, source and style are provided as arugments and must be used instead of calling getSource or getCurrentStyle.
   async _syncData(syncContext, source, style) {
-    if (!this.isVisible() || !this.showAtZoomLevel(syncContext.dataFilters.zoom)) {
+    if (
+      !this.isVisible() ||
+      !this.showAtZoomLevel(syncContext.dataFilters.zoom) ||
+      this.isLoadingBounds()
+    ) {
       return;
     }
 
