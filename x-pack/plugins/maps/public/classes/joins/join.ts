@@ -5,7 +5,10 @@
  */
 
 import { IESTermSource } from '../sources/es_term_source';
+import { JoinDescriptor } from '../../../common/descriptor_types';
 
 export interface IJoin {
   getRightJoinSource(): IESTermSource;
+
+  toDescriptor(): JoinDescriptor;
 }

@@ -138,6 +138,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       const headers = await PageObjects.discover.getColumnHeaders();
+      // will be zero because the query inserted in the url doesn't match anything
       expect(headers.length).to.be(0);
     });
 

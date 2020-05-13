@@ -88,21 +88,10 @@ describe('MonitorPage', () => {
     title: 'heartbeat-8*',
   };
 
-  const autocomplete = {
-    getQuerySuggestions: jest.fn(),
-    hasQuerySuggestions: () => true,
-    getValueSuggestions: jest.fn(),
-    addQuerySuggestionProvider: jest.fn(),
-  };
-
   it('shallow renders expected elements for valid props', () => {
     expect(
       shallowWithRouter(
-        <OverviewPageComponent
-          autocomplete={autocomplete}
-          indexPattern={indexPattern}
-          setEsKueryFilters={jest.fn()}
-        />
+        <OverviewPageComponent indexPattern={indexPattern} setEsKueryFilters={jest.fn()} />
       )
     ).toMatchSnapshot();
   });

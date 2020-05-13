@@ -14,5 +14,6 @@ interface ITileLayerArguments {
 }
 
 export class TileLayer extends AbstractLayer {
+  static type: string;
   constructor(args: ITileLayerArguments);
 }
