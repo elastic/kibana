@@ -6,8 +6,6 @@
 
 Explore the new features in Kibana 7.7.
 
-coming::[7.7.0]
-
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
