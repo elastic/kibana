@@ -17,26 +17,16 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'kibana/server';
+import { CoreSetup, Plugin } from 'kibana/server';
 import { uiSettings } from './ui_settings';
 
 export class SavedObjectsServerPlugin implements Plugin<object, object> {
-  private readonly logger: Logger;
-
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
-  }
-
   public setup(core: CoreSetup) {
-    this.logger.debug('savedObjects: Setup');
-
     core.uiSettings.register(uiSettings);
-
     return {};
   }
 
-  public start(core: CoreStart) {
-    this.logger.debug('savedObjects: Started');
+  public start() {
     return {};
   }
 

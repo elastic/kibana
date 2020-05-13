@@ -161,6 +161,6 @@ export const uiSettings: Record<string, UiSettingsParams> = {
         'From this list the first field that is present and sortable in the current index pattern is used.',
     }),
     category: ['discover'],
-    schema: schema.arrayOf(schema.string()),
+    schema: schema.oneOf([schema.literal('desc'), schema.literal('asc')]),
   },
 };

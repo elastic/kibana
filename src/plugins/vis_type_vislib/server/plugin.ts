@@ -17,26 +17,16 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'kibana/server';
+import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
 import { uiSettings } from './ui_settings';
 
 export class VisTypeVislibServerPlugin implements Plugin<object, object> {
-  private readonly logger: Logger;
-
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
-  }
-
   public setup(core: CoreSetup) {
-    this.logger.debug('visTypeVislib: Setup');
-
     core.uiSettings.register(uiSettings);
-
     return {};
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('visTypeVislib: Started');
     return {};
   }
 
