@@ -20,6 +20,7 @@
 export {
   ChromeBadge,
   ChromeBreadcrumb,
+  ChromeCustomLink,
   ChromeService,
   ChromeStart,
   InternalChromeStart,

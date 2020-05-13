@@ -30,7 +30,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
-import React, { useRef } from 'react';
+import React, { Fragment, useRef } from 'react';
 import { useObservable } from 'react-use';
 import * as Rx from 'rxjs';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
@@ -88,6 +88,7 @@ interface Props {
   onIsLockedUpdate: OnIsLockedUpdate;
   closeNav: () => void;
   navigateToApp: InternalApplicationStart['navigateToApp'];
+  customLink$: Rx.Observable<ChromeNavLink | undefined>;
 }
 
 export function CollapsibleNav({
@@ -105,6 +106,7 @@ export function CollapsibleNav({
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
   const recentlyAccessed = useObservable(observables.recentlyAccessed$, []);
+  const customLink = useObservable(observables.customLink$, undefined);
   const appId = useObservable(observables.appId$, '');
   const lockRef = useRef<HTMLButtonElement>(null);
   const groupedNavLinks = groupBy(navLinks, (link) => link?.category?.id);
@@ -134,6 +136,39 @@ export function CollapsibleNav({
       isDocked={isLocked}
       onClose={closeNav}
     >
+      {customLink && (
+        <Fragment>
+          <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
+            <EuiCollapsibleNavGroup
+              background="light"
+              className="eui-yScroll"
+              style={{ maxHeight: '40vh' }}
+            >
+              <EuiListGroup
+                aria-label={customLink.title}
+                listItems={[
+                  createEuiListItem({
+                    link: customLink,
+                    legacyMode,
+                    basePath,
+                    navigateToApp,
+                    dataTestSubj: 'collapsibleNavCustomLink',
+                    onClick: closeNav,
+                    externalLink: true,
+                  }),
+                ]}
+                maxWidth="none"
+                color="text"
+                gutterSize="none"
+                size="s"
+              />
+            </EuiCollapsibleNavGroup>
+          </EuiFlexItem>
+
+          <EuiHorizontalRule margin="none" />
+        </Fragment>
+      )}
+
       {/* Pinned items */}
       <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
         <EuiCollapsibleNavGroup

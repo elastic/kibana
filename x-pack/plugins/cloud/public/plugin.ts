@@ -5,6 +5,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import { i18n } from '@kbn/i18n';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { ELASTIC_SUPPORT_LINK } from '../common/constants';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
@@ -12,6 +13,7 @@ import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 interface CloudConfigType {
   id?: string;
   resetPasswordUrl?: string;
+  deploymentUrl?: string;
 }
 
 interface CloudSetupDependencies {
@@ -44,6 +46,16 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 
   public start(coreStart: CoreStart) {
+    const { deploymentUrl } = this.initializerContext.config.get<CloudConfigType>();
     coreStart.chrome.setHelpSupportUrl(ELASTIC_SUPPORT_LINK);
+    if (deploymentUrl) {
+      coreStart.chrome.setCustomLink({
+        title: i18n.translate('xpack.cloud.deploymentLinkLabel', {
+          defaultMessage: 'Manage this deployment',
+        }),
+        euiIconType: 'arrowLeft',
+        url: deploymentUrl,
+      });
+    }
   }
 }

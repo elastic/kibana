@@ -58,6 +58,7 @@ export interface HeaderProps {
   appTitle$: Observable<string>;
   badge$: Observable<ChromeBadge | undefined>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  customLink$: Observable<ChromeNavLink | undefined>;
   homeHref: string;
   isVisible$: Observable<boolean>;
   kibanaDocLink: string;
@@ -203,6 +204,7 @@ export function Header({
                 toggleCollapsibleNavRef.current.focus();
               }
             }}
+            customLink$={observables.customLink$}
           />
         ) : (
           // TODO #64541
