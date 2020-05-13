@@ -14,7 +14,6 @@ import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import {
   CoreSetup,
-  CoreStart,
   ICustomClusterClient,
   Plugin,
   Logger,
@@ -57,8 +56,18 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
     this.license = new License();
   }
 
+  private async getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
+    if (!this.rollupEsClient) {
+      const [core] = await getStartServices();
+      // Extend the elasticsearchJs client with additional endpoints.
+      const esClientConfig = { plugins: [elasticsearchJsPlugin] };
+      this.rollupEsClient = core.elasticsearch.legacy.createClient('rollup', esClientConfig);
+    }
+    return this.rollupEsClient;
+  }
+
   public setup(
-    { http, uiSettings }: CoreSetup,
+    { http, uiSettings, getStartServices }: CoreSetup,
     { licensing, indexManagement, visTypeTimeseries, usageCollection }: Dependencies
   ) {
     this.license.setup(
@@ -75,9 +84,10 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
       }
     );
 
-    http.registerRouteHandlerContext('rollup', (context, request) => {
+    http.registerRouteHandlerContext('rollup', async (context, request) => {
+      const client = await this.getCustomEsClient(getStartServices);
       return {
-        client: this.rollupEsClient!.asScoped(request),
+        client: client.asScoped(request),
       };
     });
 
@@ -139,11 +149,7 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
     }
   }
 
-  start(core: CoreStart) {
-    // Extend the elasticsearchJs client with additional endpoints.
-    const esClientConfig = { plugins: [elasticsearchJsPlugin] };
-    this.rollupEsClient = core.elasticsearch.legacy.createClient('rollup', esClientConfig);
-  }
+  start() {}
 
   stop() {
     if (this.rollupEsClient) {

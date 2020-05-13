@@ -6,7 +6,6 @@
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
-  CoreStart,
   ICustomClusterClient,
   Plugin,
   IScopedClusterClient,
@@ -52,7 +51,17 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
     this.license = new License();
   }
 
-  setup({ http }: CoreSetup, { licensing }: Dependencies): {} {
+  private async getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
+    if (!this.transformESClient) {
+      const [core] = await getStartServices();
+      this.transformESClient = core.elasticsearch.legacy.createClient('transform', {
+        plugins: [elasticsearchJsPlugin],
+      });
+    }
+    return this.transformESClient;
+  }
+
+  setup({ http, getStartServices }: CoreSetup, { licensing }: Dependencies): {} {
     const router = http.createRouter();
 
     this.license.setup(
@@ -75,20 +84,17 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
     });
 
     // Can access via new platform router's handler function 'context' parameter - context.transform.client
-    http.registerRouteHandlerContext('transform', (context, request) => {
+    http.registerRouteHandlerContext('transform', async (context, request) => {
+      const client = await this.getCustomEsClient(getStartServices);
       return {
-        dataClient: this.transformESClient!.asScoped(request),
+        dataClient: client.asScoped(request),
       };
     });
 
     return {};
   }
 
-  start(core: CoreStart) {
-    this.transformESClient = core.elasticsearch.legacy.createClient('transform', {
-      plugins: [elasticsearchJsPlugin],
-    });
-  }
+  start() {}
 
   stop() {
     if (this.transformESClient) {

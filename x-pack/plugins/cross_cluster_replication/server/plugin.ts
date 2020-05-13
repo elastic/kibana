@@ -15,7 +15,6 @@ import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
-  CoreStart,
   ICustomClusterClient,
   Plugin,
   Logger,
@@ -79,7 +78,23 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
     this.license = new License();
   }
 
-  setup({ http }: CoreSetup, { licensing, indexManagement, remoteClusters }: Dependencies) {
+  private async getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
+    if (!this.ccrEsClient) {
+      const [core] = await getStartServices();
+      // Extend the elasticsearchJs client with additional endpoints.
+      const esClientConfig = { plugins: [elasticsearchJsPlugin] };
+      this.ccrEsClient = core.elasticsearch.legacy.createClient(
+        'crossClusterReplication',
+        esClientConfig
+      );
+    }
+    return this.ccrEsClient;
+  }
+
+  setup(
+    { http, getStartServices }: CoreSetup,
+    { licensing, indexManagement, remoteClusters }: Dependencies
+  ) {
     this.config$
       .pipe(first())
       .toPromise()
@@ -115,9 +130,10 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
       }
     );
 
-    http.registerRouteHandlerContext('crossClusterReplication', (ctx, request) => {
+    http.registerRouteHandlerContext('crossClusterReplication', async (ctx, request) => {
+      const client = await this.getCustomEsClient(getStartServices);
       return {
-        client: this.ccrEsClient!.asScoped(request),
+        client: client.asScoped(request),
       };
     });
 
@@ -131,14 +147,7 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
     });
   }
 
-  start(core: CoreStart) {
-    // Extend the elasticsearchJs client with additional endpoints.
-    const esClientConfig = { plugins: [elasticsearchJsPlugin] };
-    this.ccrEsClient = core.elasticsearch.legacy.createClient(
-      'crossClusterReplication',
-      esClientConfig
-    );
-  }
+  start() {}
 
   stop() {
     if (this.ccrEsClient) {

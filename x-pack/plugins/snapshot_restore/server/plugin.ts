@@ -13,7 +13,6 @@ import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
-  CoreStart,
   ICustomClusterClient,
   Plugin,
   Logger,
@@ -46,8 +45,20 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
     this.license = new License();
   }
 
+  private async getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
+    if (!this.snapshotRestoreESClient) {
+      const [core] = await getStartServices();
+      const esClientConfig = { plugins: [elasticsearchJsPlugin] };
+      this.snapshotRestoreESClient = core.elasticsearch.legacy.createClient(
+        'snapshotRestore',
+        esClientConfig
+      );
+    }
+    return this.snapshotRestoreESClient;
+  }
+
   public async setup(
-    { http }: CoreSetup,
+    { http, getStartServices }: CoreSetup,
     { licensing, security, cloud }: Dependencies
   ): Promise<void> {
     const pluginConfig = await this.context.config
@@ -75,9 +86,10 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
       }
     );
 
-    http.registerRouteHandlerContext('snapshotRestore', (ctx, request) => {
+    http.registerRouteHandlerContext('snapshotRestore', async (ctx, request) => {
+      const client = await this.getCustomEsClient(getStartServices);
       return {
-        client: this.snapshotRestoreESClient!.asScoped(request),
+        client: client.asScoped(request),
       };
     });
 
@@ -96,13 +108,7 @@ export class SnapshotRestoreServerPlugin implements Plugin<void, void, any, any>
     });
   }
 
-  public start(core: CoreStart) {
-    const esClientConfig = { plugins: [elasticsearchJsPlugin] };
-    this.snapshotRestoreESClient = core.elasticsearch.legacy.createClient(
-      'snapshotRestore',
-      esClientConfig
-    );
-  }
+  public start() {}
 
   public stop() {
     if (this.snapshotRestoreESClient) {
