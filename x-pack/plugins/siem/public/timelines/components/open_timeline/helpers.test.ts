@@ -38,9 +38,9 @@ import moment from 'moment';
 import sinon from 'sinon';
 import { TimelineType } from '../../../../common/types/timeline';
 
-jest.mock('../../store/inputs/actions');
+jest.mock('../../../common/store/inputs/actions');
 jest.mock('../../store/timeline/actions');
-jest.mock('../../store/app/actions');
+jest.mock('../../../common/store/app/actions');
 jest.mock('uuid', () => {
   return {
     v1: jest.fn(() => 'uuid.v1()'),

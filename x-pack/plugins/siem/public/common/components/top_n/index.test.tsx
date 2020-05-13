@@ -26,7 +26,7 @@ import { Props } from './top_n';
 import { ACTIVE_TIMELINE_REDUX_ID, StatefulTopN } from '.';
 
 jest.mock('../../lib/kibana');
-jest.mock('../../store/timeline/actions');
+jest.mock('../../../timelines/store/timeline/actions');
 
 const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
 
