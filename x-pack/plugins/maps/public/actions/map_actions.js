@@ -594,8 +594,8 @@ export function fitToDataBounds() {
       const b = bounds[i];
 
       //filter out undefined bounds (uses Infinity due to turf responses)
-
       if (
+        b === null ||
         b.minLon === Infinity ||
         b.maxLon === Infinity ||
         b.minLat === -Infinity ||
