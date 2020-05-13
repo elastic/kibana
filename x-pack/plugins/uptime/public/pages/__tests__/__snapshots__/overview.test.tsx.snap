@@ -52,14 +52,6 @@ exports[`MonitorPage shallow renders expected elements for valid props 1`] = `
   }
 >
   <Memo()
-    autocomplete={
-      Object {
-        "addQuerySuggestionProvider": [MockFunction],
-        "getQuerySuggestions": [MockFunction],
-        "getValueSuggestions": [MockFunction],
-        "hasQuerySuggestions": [Function],
-      }
-    }
     indexPattern={
       Object {
         "fields": Array [

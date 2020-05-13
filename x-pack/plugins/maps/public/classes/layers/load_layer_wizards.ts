@@ -5,7 +5,6 @@
  */
 
 import { registerLayerWizard } from './layer_wizard_registry';
-// @ts-ignore
 import { uploadLayerWizardConfig } from '../sources/client_file_source';
 // @ts-ignore
 import { esDocumentsLayerWizardConfig } from '../sources/es_search_source';
@@ -35,7 +34,6 @@ export function registerLayerWizards() {
   }
 
   // Registration order determines display order
-  // @ts-ignore
   registerLayerWizard(uploadLayerWizardConfig);
   registerLayerWizard(ObservabilityLayerWizardConfig);
   // @ts-ignore

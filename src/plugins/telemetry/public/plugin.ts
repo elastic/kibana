@@ -24,6 +24,7 @@ import {
   HttpStart,
   PluginInitializerContext,
   SavedObjectsClientContract,
+  SavedObjectsBatchResponse,
 } from '../../../core/public';
 
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
@@ -193,10 +194,15 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
   private async getTelemetrySavedObject(savedObjectsClient: SavedObjectsClientContract) {
     try {
-      const { attributes } = await savedObjectsClient.get<TelemetrySavedObjectAttributes>(
-        'telemetry',
-        'telemetry'
-      );
+      // Use bulk get API here to avoid the queue. This could fail independent requests if we don't have rights to access the telemetry object otherwise
+      const {
+        savedObjects: [{ attributes }],
+      } = (await savedObjectsClient.bulkGet([
+        {
+          id: 'telemetry',
+          type: 'telemetry',
+        },
+      ])) as SavedObjectsBatchResponse<TelemetrySavedObjectAttributes>;
       return attributes;
     } catch (error) {
       const errorCode = error[Symbol('SavedObjectsClientErrorCode')];

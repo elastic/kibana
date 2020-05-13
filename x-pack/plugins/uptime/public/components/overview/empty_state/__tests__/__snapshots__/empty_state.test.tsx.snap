@@ -201,7 +201,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
                           <EuiButton
                             color="primary"
                             fill={true}
-                            href="/app/kibana#/home/tutorial/uptimeMonitors"
+                            href="/app/home#/tutorial/uptimeMonitors"
                           >
                             <FormattedMessage
                               defaultMessage="View setup instructions"
@@ -369,11 +369,11 @@ exports[`EmptyState component does not render empty state with appropriate base 
                               <EuiButton
                                 color="primary"
                                 fill={true}
-                                href="/app/kibana#/home/tutorial/uptimeMonitors"
+                                href="/app/home#/tutorial/uptimeMonitors"
                               >
                                 <a
                                   className="euiButton euiButton--primary euiButton--fill"
-                                  href="/app/kibana#/home/tutorial/uptimeMonitors"
+                                  href="/app/home#/tutorial/uptimeMonitors"
                                   rel="noreferrer"
                                 >
                                   <span
@@ -1080,7 +1080,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                           <EuiButton
                             color="primary"
                             fill={true}
-                            href="/app/kibana#/home/tutorial/uptimeMonitors"
+                            href="/app/home#/tutorial/uptimeMonitors"
                           >
                             <FormattedMessage
                               defaultMessage="View setup instructions"
@@ -1248,11 +1248,11 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                               <EuiButton
                                 color="primary"
                                 fill={true}
-                                href="/app/kibana#/home/tutorial/uptimeMonitors"
+                                href="/app/home#/tutorial/uptimeMonitors"
                               >
                                 <a
                                   className="euiButton euiButton--primary euiButton--fill"
-                                  href="/app/kibana#/home/tutorial/uptimeMonitors"
+                                  href="/app/home#/tutorial/uptimeMonitors"
                                   rel="noreferrer"
                                 >
                                   <span

@@ -58,6 +58,7 @@ export const metricsExplorerRequestBodyOptionalFieldsRT = rt.partial({
   limit: rt.union([rt.number, rt.null, rt.undefined]),
   filterQuery: rt.union([rt.string, rt.null, rt.undefined]),
   forceInterval: rt.boolean,
+  dropLastBucket: rt.boolean,
 });
 
 export const metricsExplorerRequestBodyRT = rt.intersection([
