@@ -62,6 +62,7 @@ async function fetchIndicesCall(
   if (indexNames) {
     catQuery.index = indexNames.join(',');
   }
+
   const catHits: Hit[] = await callAsCurrentUser('transport.request', {
     method: 'GET',
     path: '/_cat/indices',
