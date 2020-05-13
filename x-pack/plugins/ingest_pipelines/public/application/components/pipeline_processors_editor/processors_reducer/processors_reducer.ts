@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Reducer, useReducer } from 'react';
+import { Reducer, useReducer, Dispatch } from 'react';
 
 import { DeserializeResult } from '../serialize';
 import { unsafeProcessorMove } from './utils';
@@ -39,6 +39,8 @@ type Action =
       type: 'moveProcessor';
       payload: { source: ProcessorSelector; destination: ProcessorSelector };
     };
+
+export type ProcessorsDispatch = Dispatch<Action>;
 
 export const reducer: Reducer<State, Action> = (state, action) => {
   if (action.type === 'moveProcessor') {

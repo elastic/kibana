@@ -8,4 +8,4 @@ export {
   PipelineProcessorsEditor,
   OnUpdateHandlerArg,
   OnUpdateHandler,
-} from './pipeline_processors_editor';
+} from './pipeline_processors_editor.container';
