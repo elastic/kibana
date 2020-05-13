@@ -439,7 +439,7 @@ For additional information on Timelion conditional capabilities, go to https://w
 ==== Customize data series y-axis
 
 Use different y-axis scales and ranges for your data series.
-The `.yaxis()` function allows the following parameters:
+The `.yaxis()` function supports the following parameters:
 
 [horizontal]
 yaxis :: The numbered y-axis to plot this series on, eg .yaxis(2) for a 2nd y-axis.
