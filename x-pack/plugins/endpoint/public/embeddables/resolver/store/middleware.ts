@@ -118,7 +118,7 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
            * results here will take the shape of
            * [event requested , response of event against the /related api]
            */
-          const apiResults = results[1];
+          const [baseEvent, apiResults] = results;
           if (apiResults instanceof Error) {
             api.dispatch({
               type: 'serverFailedToReturnRelatedEventData',
@@ -127,7 +127,6 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
             continue;
           }
 
-          const baseEvent = results[0];
           const fetchedResults = apiResults.events;
           // pack up the results into response
           const relatedEventEntry = fetchedResults.map(relatedEvent => {

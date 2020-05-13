@@ -67,7 +67,7 @@ const nodeAssets = {
 };
 
 /**
- * A Map of undfriendly/ugly event types to beautiful translated display strings. 
+ * A Map of undfriendly/ugly event types to beautiful translated display strings.
  */
 const eventTypeToNameMap = new Map<string, string>([
   [
