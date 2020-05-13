@@ -73,7 +73,6 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
     const categoryFieldMetaFromLocalFeatures = styleMeta.getCategoryFieldMetaDescriptor(fieldName);
 
     if (!this.isFieldMetaEnabled()) {
-      console.log('not enabled');
       return categoryFieldMetaFromLocalFeatures;
     }
 
