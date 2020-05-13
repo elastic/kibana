@@ -75,7 +75,7 @@ export type DashboardAppLinkGeneratorState = UrlGeneratorState<{
   preserveSavedFilters?: boolean;
 }>;
 
-export const createDirectAccessDashboardLinkGenerator = (
+export const createDashboardUrlGenerator = (
   getStartServices: () => Promise<{
     appBasePath: string;
     useHashedUrl: boolean;
@@ -87,7 +87,7 @@ export const createDirectAccessDashboardLinkGenerator = (
     const startServices = await getStartServices();
     const useHash = state.useHash ?? startServices.useHashedUrl;
     const appBasePath = startServices.appBasePath;
-    const hash = state.dashboardId ? `dashboard/${state.dashboardId}` : `dashboard`;
+    const hash = state.dashboardId ? `view/${state.dashboardId}` : `create`;
 
     const getSavedFiltersFromDestinationDashboardIfNeeded = async (): Promise<Filter[]> => {
       if (state.preserveSavedFilters === false) return [];

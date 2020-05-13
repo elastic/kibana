@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { networkDnsQuery } from '../../../../plugins/siem/public/containers/network_dns/index.gql_query';
+import { networkDnsQuery } from '../../../../plugins/siem/public/network/containers/network_dns/index.gql_query';
 import {
   Direction,
   GetNetworkDnsQuery,

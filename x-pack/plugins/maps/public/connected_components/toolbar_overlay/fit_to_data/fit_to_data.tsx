@@ -8,7 +8,7 @@ import React from 'react';
 
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ILayer } from '../../../layers/layer';
+import { ILayer } from '../../../classes/layers/layer';
 
 interface Props {
   layerList: ILayer[];

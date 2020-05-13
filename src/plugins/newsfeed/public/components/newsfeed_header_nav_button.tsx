@@ -21,7 +21,7 @@ import React, { useState, Fragment, useEffect } from 'react';
 import * as Rx from 'rxjs';
 import { EuiHeaderSectionItemButton, EuiIcon, EuiNotificationBadge } from '@elastic/eui';
 import { NewsfeedFlyout } from './flyout_list';
-import { FetchResult } from '../../types';
+import { FetchResult } from '../types';
 
 export interface INewsfeedContext {
   setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;

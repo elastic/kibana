@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface SerializedAction<Config> {
+export interface SerializedAction<Config = unknown> {
   readonly factoryId: string;
   readonly name: string;
   readonly config: Config;
@@ -16,5 +16,5 @@ export interface SerializedAction<Config> {
 export interface SerializedEvent {
   eventId: string;
   triggers: string[];
-  action: SerializedAction<unknown>;
+  action: SerializedAction;
 }

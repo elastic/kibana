@@ -18,6 +18,7 @@
  */
 
 import {
+  ApplicationStart,
   Capabilities,
   ChromeStart,
   HttpStart,
@@ -38,12 +39,15 @@ import { UsageCollectionSetup } from '../../../plugins/usage_collection/public';
 import { ExpressionsStart } from '../../../plugins/expressions/public';
 import { UiActionsStart } from '../../../plugins/ui_actions/public';
 import { SavedVisualizationsLoader } from './saved_visualizations';
+import { SavedObjectLoader } from '../../saved_objects/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
 export const [getCapabilities, setCapabilities] = createGetterSetter<Capabilities>('Capabilities');
 
 export const [getHttp, setHttp] = createGetterSetter<HttpStart>('Http');
+
+export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');
 
 export const [getSavedObjects, setSavedObjects] = createGetterSetter<SavedObjectsStart>(
   'SavedObjects'
@@ -84,3 +88,7 @@ export const [getAggs, setAggs] = createGetterSetter<DataPublicPluginStart['sear
 export const [getOverlays, setOverlays] = createGetterSetter<OverlayStart>('Overlays');
 
 export const [getChrome, setChrome] = createGetterSetter<ChromeStart>('Chrome');
+
+export const [getSavedSearchLoader, setSavedSearchLoader] = createGetterSetter<SavedObjectLoader>(
+  'savedSearchLoader'
+);
