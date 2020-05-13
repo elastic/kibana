@@ -8,7 +8,8 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  describe('uptime alerts', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/65948
+  describe.skip('uptime alerts', () => {
     const pageObjects = getPageObjects(['common', 'uptime']);
     const supertest = getService('supertest');
     const retry = getService('retry');
@@ -79,6 +80,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('can save alert', async () => {
         await alerts.clickSaveAlertButton();
+        await pageObjects.common.closeToast();
       });
 
       it('posts an alert, verifies its presence, and deletes the alert', async () => {
@@ -171,6 +173,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('can save alert', async () => {
         await alerts.clickSaveAlertButton();
+        await pageObjects.common.closeToast();
       });
 
       it('has created a valid alert with expected parameters', async () => {

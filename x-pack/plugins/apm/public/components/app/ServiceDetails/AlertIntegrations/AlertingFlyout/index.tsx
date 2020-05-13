@@ -17,14 +17,15 @@ interface Props {
 
 export function AlertingFlyout(props: Props) {
   const { addFlyoutVisible, setAddFlyoutVisibility, alertType } = props;
-
-  return alertType ? (
-    <AlertAdd
-      addFlyoutVisible={addFlyoutVisible}
-      setAddFlyoutVisibility={setAddFlyoutVisibility}
-      consumer="apm"
-      alertTypeId={alertType}
-      canChangeTrigger={false}
-    />
-  ) : null;
+  return (
+    alertType && (
+      <AlertAdd
+        addFlyoutVisible={addFlyoutVisible}
+        setAddFlyoutVisibility={setAddFlyoutVisibility}
+        consumer="apm"
+        alertTypeId={alertType}
+        canChangeTrigger={false}
+      />
+    )
+  );
 }
