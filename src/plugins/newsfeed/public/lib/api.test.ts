@@ -473,8 +473,8 @@ describe('getApi', () => {
         urlRoot: 'http://fakenews.co',
         pathTemplate: '/kibana-test/v{VERSION}.json',
       },
-      mainInterval: 86400000,
-      fetchInterval: 86400000,
+      mainInterval: moment.duration(86400000),
+      fetchInterval: moment.duration(86400000),
     };
     httpMock = ({
       fetch: mockHttpGet,
@@ -623,7 +623,7 @@ describe('getApi', () => {
     ];
 
     it("retries until fetch doesn't error", done => {
-      configMock.mainInterval = 10; // fast retry for testing
+      configMock.mainInterval = moment.duration(10); // fast retry for testing
       mockHttpGet
         .mockImplementationOnce(() => Promise.reject('Sorry, try again later!'))
         .mockImplementationOnce(() => Promise.reject('Sorry, internal server error!'))
@@ -677,7 +677,7 @@ describe('getApi', () => {
     });
 
     it("doesn't retry if fetch succeeds", done => {
-      configMock.mainInterval = 10; // fast retry for testing
+      configMock.mainInterval = moment.duration(10); // fast retry for testing
       mockHttpGet.mockImplementation(getHttpMockWithItems(successItems));
 
       const timeout$ = interval(1000); // lets us capture some results after a short time
