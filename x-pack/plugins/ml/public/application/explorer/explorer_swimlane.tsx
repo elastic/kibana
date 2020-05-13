@@ -631,7 +631,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       if (selectedCellTimes.length > 0) {
         this.highlightOverall(selectedCellTimes);
       }
-      this.maskIrrelevantSwimlanes(!!maskAll);
+      this.maskIrrelevantSwimlanes(Boolean(maskAll));
     } else {
       this.clearSelection();
     }

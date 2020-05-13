@@ -5,6 +5,8 @@
  */
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../machine_learning/mocks';
+import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
   typicalPayload,
   getReadBulkRequest,
@@ -19,9 +21,12 @@ import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { createRulesBulkRoute } from './create_rules_bulk_route';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 
+jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
+
 describe('create_rules_bulk', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+  let ml: ReturnType<typeof mlServicesMock.create>;
 
   beforeAll(() => {
     setFeatureFlagsForTestsOnly();
@@ -34,12 +39,13 @@ describe('create_rules_bulk', () => {
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
+    ml = mlServicesMock.create();
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
     clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no existing rules
     clients.alertsClient.create.mockResolvedValue(getResult()); // successful creation
 
-    createRulesBulkRoute(server.router);
+    createRulesBulkRoute(server.router, ml);
   });
 
   describe('status codes', () => {
@@ -64,16 +70,20 @@ describe('create_rules_bulk', () => {
   });
 
   describe('unhappy paths', () => {
-    it('returns an error object if creating an ML rule with an insufficient license', async () => {
-      (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
+    it('returns a 403 error object if ML Authz fails', async () => {
+      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
+        validateRuleType: jest
+          .fn()
+          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
+      });
 
       const response = await server.inject(createBulkMlRuleRequest(), context);
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
         {
           error: {
-            message: 'Your license does not support machine learning. Please upgrade your license.',
-            status_code: 400,
+            message: 'mocked validation message',
+            status_code: 403,
           },
           rule_id: 'rule-1',
         },
