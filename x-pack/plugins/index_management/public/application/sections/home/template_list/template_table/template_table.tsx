@@ -208,7 +208,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           description: i18n.translate(
             'xpack.idxMgmt.templateList.table.actionConvertFormatDescription',
             {
-              defaultMessage: 'Convert to the new index template format',
+              defaultMessage: 'Convert format',
             }
           ),
           icon: 'copy',

@@ -22,18 +22,25 @@ export function registerGetAllRoute({ router, license }: RouteDependencies) {
       const managedTemplatePrefix = await getManagedTemplatePrefix(callAsCurrentUser);
 
       const indexTemplatesV1 = await callAsCurrentUser('indices.getTemplate');
-      const { index_templates: indexTemplatesV2 } = await await callAsCurrentUser(
-        'transport.request',
-        {
-          path: '_index_template',
-          method: 'GET',
-        }
-      );
+      const { index_templates: indexTemplatesV2 } = await callAsCurrentUser('transport.request', {
+        path: '_index_template',
+        method: 'GET',
+      });
 
       const templateV1 = deserializeTemplateV1List(indexTemplatesV1, managedTemplatePrefix);
       const templateV2 = deserializeTemplateV2List(indexTemplatesV2, managedTemplatePrefix);
 
-      const body = [...templateV1, ...templateV2].sort((a, b) => a.name - b.name);
+      const body = [...templateV1, ...templateV2].sort((a, b) => {
+        if (a.name < b.name) {
+          return -1;
+        }
+        if (a.name > b.name) {
+          return 1;
+        }
+
+        return 0;
+      });
+
       return res.ok({ body });
     })
   );

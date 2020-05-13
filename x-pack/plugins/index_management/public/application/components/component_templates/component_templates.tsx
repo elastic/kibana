@@ -7,12 +7,13 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 
-import { ComponentTemplateSerialized } from '../../../../common';
+import { ComponentTemplateDeserialized } from '../../../../common';
 import { CreateButtonPopOver } from './components';
+import { ComponentTemplatesList } from './component_templates_list';
 
 interface Props {
   isLoading: boolean;
-  components: ComponentTemplateSerialized[];
+  components: ComponentTemplateDeserialized[];
 }
 
 export const ComponentTemplates = ({ isLoading, components }: Props) => {
@@ -22,7 +23,7 @@ export const ComponentTemplates = ({ isLoading, components }: Props) => {
         <p>
           <FormattedMessage
             id="xpackidxMgmt.componentTemplatesFlyout.subhead"
-            defaultMessage="Save your settings, mappings and aliases in components so you can reuse them in any of your index templates."
+            defaultMessage="Create components to save your index template settings, mappings and aliases so you can reuse them in other templates."
           />
           <br />
           <EuiLink href="https://elastic.co" target="_blank">
@@ -60,10 +61,5 @@ export const ComponentTemplates = ({ isLoading, components }: Props) => {
     return renderEmptyPrompt();
   }
 
-  return (
-    <>
-      <h1>Components</h1>
-      <p>Here will come the list</p>
-    </>
-  );
+  return <ComponentTemplatesList components={components} />;
 };

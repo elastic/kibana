@@ -10,6 +10,7 @@ import { registerGetAllRoute, registerGetOneRoute } from './register_get_routes'
 import { registerDeleteRoute } from './register_delete_route';
 import { registerCreateRoute } from './register_create_route';
 import { registerUpdateRoute } from './register_update_route';
+import { registerComponentTemplateRoutes } from './register_component_template_routes';
 
 export function registerTemplateRoutes(dependencies: RouteDependencies) {
   registerGetAllRoute(dependencies);
@@ -17,4 +18,5 @@ export function registerTemplateRoutes(dependencies: RouteDependencies) {
   registerDeleteRoute(dependencies);
   registerCreateRoute(dependencies);
   registerUpdateRoute(dependencies);
+  registerComponentTemplateRoutes(dependencies);
 }

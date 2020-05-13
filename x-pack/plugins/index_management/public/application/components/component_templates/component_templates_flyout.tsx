@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, Fragment } from 'react';
+import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -23,6 +23,7 @@ import {
   EuiContextMenuItem,
 } from '@elastic/eui';
 
+import { ComponentTemplateSerialized } from '../../../../common';
 import { CreateButtonPopOver } from './components';
 import { ComponentTemplatesContainer } from './component_templates_container';
 
@@ -32,6 +33,10 @@ interface Props {
 
 export const ComponentTemplatesFlyout = ({ onClose }: Props) => {
   const [componentTemplatesCount, setComponentTemplatesCount] = useState<number>(0);
+
+  const onComponents = useCallback((components: ComponentTemplateSerialized[]) => {
+    setComponentTemplatesCount(components.length);
+  }, []);
 
   return (
     <EuiFlyout
@@ -52,7 +57,7 @@ export const ComponentTemplatesFlyout = ({ onClose }: Props) => {
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody data-test-subj="content">
-        <ComponentTemplatesContainer />
+        <ComponentTemplatesContainer onComponents={onComponents} />
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
