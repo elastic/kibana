@@ -14,70 +14,11 @@ jest.mock('../components/vector_style_editor', () => ({
   },
 }));
 
-import { COLOR_MAP_TYPE, FIELD_ORIGIN, VECTOR_STYLES } from '../../../../../common/constants';
-
+import React from 'react';
+import { VECTOR_STYLES } from '../../../../../common/constants';
 // @ts-ignore
 import { DynamicIconProperty } from './dynamic_icon_property';
-
-import React from 'react';
-import { StyleMeta } from '../style_meta';
-
-const mockField = {
-  async getLabel() {
-    return 'foobar_label';
-  },
-  getName() {
-    return 'foobar';
-  },
-  getRootName() {
-    return 'foobar';
-  },
-  getOrigin() {
-    return FIELD_ORIGIN.SOURCE;
-  },
-  supportsFieldMeta() {
-    return true;
-  },
-};
-
-class MockStyle {
-  getStyleMeta() {
-    return new StyleMeta({
-      geometryTypes: {
-        isPointsOnly: false,
-        isLinesOnly: false,
-        isPolygonsOnly: false,
-      },
-      fieldMeta: {
-        foobar: {
-          range: { min: 0, max: 100 },
-          categories: {
-            categories: [
-              {
-                key: 'US',
-                count: 10,
-              },
-              {
-                key: 'CN',
-                count: 8,
-              },
-            ],
-          },
-        },
-      },
-    });
-  }
-}
-
-class MockLayer {
-  getStyle() {
-    return new MockStyle();
-  }
-
-  getDataRequest() {
-    return null;
-  }
-}
+import { mockField, MockLayer } from './test_util';
 
 const makeProperty = (options, field = mockField) => {
   return new DynamicIconProperty(options, VECTOR_STYLES.ICON, field, new MockLayer(), () => {
