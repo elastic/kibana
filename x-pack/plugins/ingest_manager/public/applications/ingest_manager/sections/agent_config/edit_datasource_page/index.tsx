@@ -41,7 +41,11 @@ import { StepConfigureDatasource } from '../create_datasource_page/step_configur
 import { StepDefineDatasource } from '../create_datasource_page/step_define_datasource';
 
 export const EditDatasourcePage: React.FunctionComponent = () => {
-  const { notifications } = useCore();
+  const {
+    notifications,
+    chrome: { getIsNavDrawerLocked$ },
+    uiSettings,
+  } = useCore();
   const {
     fleet: { enabled: isFleetEnabled },
   } = useConfig();
@@ -50,6 +54,15 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
   } = useRouteMatch();
   const history = useHistory();
   const { getHref, getPath } = useLink();
+  const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
+
+  useEffect(() => {
+    const subscription = getIsNavDrawerLocked$().subscribe((newIsNavDrawerLocked: boolean) => {
+      setIsNavDrawerLocked(newIsNavDrawerLocked);
+    });
+
+    return () => subscription.unsubscribe();
+  });
 
   // Agent config, package info, and datasource states
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
@@ -297,7 +310,16 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
             ]}
           />
           <EuiSpacer size="l" />
-          <EuiBottomBar css={{ zIndex: 5 }} paddingSize="s">
+          {/* TODO #64541 - Remove classes */}
+          <EuiBottomBar
+            className={
+              uiSettings.get('pageNavigation') === 'legacy'
+                ? isNavDrawerLocked
+                  ? 'ingestManager__bottomBar-isNavDrawerLocked'
+                  : 'ingestManager__bottomBar'
+                : undefined
+            }
+          >
             <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty color="ghost" href={cancelUrl}>

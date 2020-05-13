@@ -39,6 +39,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   const {
     notifications,
     chrome: { getIsNavDrawerLocked$ },
+    uiSettings,
   } = useCore();
   const {
     fleet: { enabled: isFleetEnabled },
@@ -298,12 +299,14 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
           )}
       <EuiSteps steps={steps} />
       <EuiSpacer size="l" />
+      {/* TODO #64541 - Remove classes */}
       <EuiBottomBar
-        css={{ zIndex: 5 }}
         className={
-          isNavDrawerLocked
-            ? 'ingestManager__bottomBar-isNavDrawerLocked'
-            : 'ingestManager__bottomBar'
+          uiSettings.get('pageNavigation') === 'legacy'
+            ? isNavDrawerLocked
+              ? 'ingestManager__bottomBar-isNavDrawerLocked'
+              : 'ingestManager__bottomBar'
+            : undefined
         }
       >
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
