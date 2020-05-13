@@ -10,6 +10,7 @@ export interface AlertType {
   actionGroups: ActionGroup[];
   actionVariables: string[];
   defaultActionGroupId: ActionGroup['id'];
+  producer: string;
 }
 
 export interface ActionGroup {
