@@ -14,6 +14,8 @@ import {
   EuiPanel,
   EuiRadioGroup,
   EuiSpacer,
+  EuiSwitch,
+  EuiSwitchEvent,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -54,6 +56,10 @@ const initialLocationOptions = [
 ];
 
 export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Props) {
+  const onAutoFitToDataBoundsChange = (event: EuiSwitchEvent) => {
+    updateMapSetting('autoFitToDataBounds', event.target.checked);
+  };
+
   const onZoomChange = (value: Value) => {
     const minZoom = Math.max(MIN_ZOOM, parseInt(value[0] as string, 10));
     const maxZoom = Math.min(MAX_ZOOM, parseInt(value[1] as string, 10));
@@ -208,6 +214,18 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
       </EuiTitle>
 
       <EuiSpacer size="m" />
+      <EuiFormRow>
+        <EuiSwitch
+          label={i18n.translate('xpack.maps.mapSettingsPanel.autoFitToDataBoundsLabel', {
+            defaultMessage: 'Auto fit map to data bounds',
+          })}
+          checked={settings.autoFitToDataBounds}
+          onChange={onAutoFitToDataBoundsChange}
+          compressed
+        />
+      </EuiFormRow>
+
+      <EuiSpacer size="m" />
       <ValidatedDualRange
         label={i18n.translate('xpack.maps.mapSettingsPanel.zoomRangeLabel', {
           defaultMessage: 'Zoom range',
@@ -224,6 +242,7 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
         compressed
       />
 
+      <EuiSpacer size="m" />
       <EuiFormRow
         label={i18n.translate('xpack.maps.source.mapSettingsPanel.initialLocationLabel', {
           defaultMessage: 'Initial map location',
