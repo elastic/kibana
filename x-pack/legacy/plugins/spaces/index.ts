@@ -13,9 +13,6 @@ import { SpacesPluginSetup } from '../../../plugins/spaces/server';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 import { wrapError } from './server/lib/errors';
-// @ts-ignore
-import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
-import { initEnterSpaceView } from './server/routes/views';
 
 export interface LegacySpacesPlugin {
   getSpaceId: (request: Legacy.Request) => ReturnType<SpacesServiceSetup['getSpaceId']>;
@@ -51,7 +48,7 @@ export const spaces = (kibana: Record<string, any>) =>
       ) {
         // NOTICE: use of `activeSpace` is deprecated and will not be made available in the New Platform.
         // Known usages:
-        // - x-pack/legacy/plugins/infra/public/utils/use_kibana_space_id.ts
+        // - x-pack/plugins/infra/public/utils/use_kibana_space_id.ts
         const spacesPlugin = server.newPlatform.setup.plugins.spaces as SpacesPluginSetup;
         if (!spacesPlugin) {
           throw new Error('New Platform XPack Spaces plugin is not available.');
@@ -83,19 +80,13 @@ export const spaces = (kibana: Record<string, any>) =>
         throw new Error('New Platform XPack Spaces plugin is not available.');
       }
 
-      const { registerLegacyAPI, createDefaultSpace } = spacesPlugin.__legacyCompat;
+      const { registerLegacyAPI } = spacesPlugin.__legacyCompat;
 
       registerLegacyAPI({
         auditLogger: {
           create: (pluginId: string) =>
             new AuditLogger(server, pluginId, server.config(), server.plugins.xpack_main.info),
         },
-      });
-
-      initEnterSpaceView(server);
-
-      watchStatusAndLicenseToInitialize(server.plugins.xpack_main, this, async () => {
-        await createDefaultSpace();
       });
 
       server.expose('getSpaceId', (request: Legacy.Request) =>
