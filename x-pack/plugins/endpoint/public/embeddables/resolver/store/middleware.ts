@@ -133,7 +133,7 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
           const relatedEventEntry = fetchedResults.map(relatedEvent => {
             return {
               relatedEvent,
-              relatedEventType: event.eventCategoryDisplayName(relatedEvent),
+              relatedEventType: event.eventType(relatedEvent),
             };
           });
 

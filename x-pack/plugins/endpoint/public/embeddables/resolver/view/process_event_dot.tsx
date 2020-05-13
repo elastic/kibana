@@ -24,6 +24,7 @@ import {
   ResolverProcessType,
   waitingForRelatedEventData,
   RelatedEventEntryWithStatsOrWaiting,
+  EventCategory,
 } from '../types';
 import { SymbolIds, NamedColors } from './defs';
 import { ResolverEvent } from '../../../../common/types';
@@ -66,6 +67,87 @@ const nodeAssets = {
     }),
   },
 };
+
+const eventTypeToNameMap = new Map<string, EventCategory>([
+  [
+    'process',
+    i18n.translate('xpack.endpoint.resolver.Process', {
+      defaultMessage: 'Process',
+    }) as EventCategory,
+  ],
+  [
+    'alert',
+    i18n.translate('xpack.endpoint.resolver.Alert', {
+      defaultMessage: 'Alert',
+    }) as EventCategory,
+  ],
+  [
+    'security',
+    i18n.translate('xpack.endpoint.resolver.Security', {
+      defaultMessage: 'Security',
+    }) as EventCategory,
+  ],
+  [
+    'file',
+    i18n.translate('xpack.endpoint.resolver.File', {
+      defaultMessage: 'File',
+    }) as EventCategory,
+  ],
+  [
+    'network',
+    i18n.translate('xpack.endpoint.resolver.Network', {
+      defaultMessage: 'Network',
+    }) as EventCategory,
+  ],
+  [
+    'registry',
+    i18n.translate('xpack.endpoint.resolver.Registry', {
+      defaultMessage: 'Registry',
+    }) as EventCategory,
+  ],
+  [
+    'dns',
+    i18n.translate('xpack.endpoint.resolver.DNS', {
+      defaultMessage: 'DNS',
+    }) as EventCategory,
+  ],
+  [
+    'clr',
+    i18n.translate('xpack.endpoint.resolver.CLR', {
+      defaultMessage: 'CLR',
+    }) as EventCategory,
+  ],
+  [
+    'image_load',
+    i18n.translate('xpack.endpoint.resolver.ImageLoad', {
+      defaultMessage: 'Image Load',
+    }) as EventCategory,
+  ],
+  [
+    'powershell',
+    i18n.translate('xpack.endpoint.resolver.Powershell', {
+      defaultMessage: 'Powershell',
+    }) as EventCategory,
+  ],
+  [
+    'wmi',
+    i18n.translate('xpack.endpoint.resolver.WMI', {
+      defaultMessage: 'WMI',
+    }) as EventCategory,
+  ],
+  [
+    'api',
+    i18n.translate('xpack.endpoint.resolver.API', {
+      defaultMessage: 'API',
+    }) as EventCategory,
+  ],
+  [
+    'user',
+    i18n.translate('xpack.endpoint.resolver.User', {
+      defaultMessage: 'User',
+    }) as EventCategory,
+  ],
+]);
 
 /**
  * An artifact that represents a process node.
@@ -239,9 +321,10 @@ export const ProcessEventDot = styled(
         }
         // If we have entries to show, map them into options to display in the selectable list
         return Object.entries(relatedEvents.stats).map(statsEntry => {
+          const displayName = eventTypeToNameMap.get(statsEntry[0]) || 'Process';
           return {
             prefix: <EuiI18nNumber value={statsEntry[1] || 0} />,
-            optionTitle: `${statsEntry[0]}`,
+            optionTitle: `${displayName}`,
             action: () => {
               dispatch({
                 type: 'userSelectedRelatedEventCategory',

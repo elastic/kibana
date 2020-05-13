@@ -440,10 +440,7 @@ export const relatedEventStats = createSelector(relatedEventResults, function ge
         continue;
       }
       const statsForEntry = newStatsEntry?.relatedEvents.reduce(
-        (
-          compiledStats: Partial<Record<EventCategory, number>>,
-          relatedEvent: { relatedEventType: EventCategory }
-        ) => {
+        (compiledStats: Record<string, number>, relatedEvent: { relatedEventType: string }) => {
           compiledStats[relatedEvent.relatedEventType] =
             (compiledStats[relatedEvent.relatedEventType] || 0) + 1;
           return compiledStats;
