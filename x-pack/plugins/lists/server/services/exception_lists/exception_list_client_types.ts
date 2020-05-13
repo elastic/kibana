@@ -11,6 +11,7 @@ import {
   Description,
   DescriptionOrUndefined,
   EntriesArray,
+  EntriesArrayOrUndefined,
   ExceptionListType,
   ExceptionListTypeOrUndefined,
   IdOrUndefined,
@@ -81,4 +82,18 @@ export interface CreateExceptionListItemOptions {
   meta: MetaOrUndefined;
   tags: Tags;
   type: ExceptionListType;
+}
+
+export interface UpdateExceptionListItemOptions {
+  _tags: _TagsOrUndefined;
+  comment: CommentOrUndefined;
+  entries: EntriesArrayOrUndefined;
+  id: IdOrUndefined;
+  itemId: ItemIdOrUndefined;
+  namespaceType: NamespaceType;
+  name: NameOrUndefined;
+  description: DescriptionOrUndefined;
+  meta: MetaOrUndefined;
+  tags: TagsOrUndefined;
+  type: ExceptionListTypeOrUndefined;
 }

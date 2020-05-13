@@ -32,10 +32,10 @@ export const createExceptionListSchema = t.intersection([
   ),
   t.exact(
     t.partial({
-      _tags,
-      list_id: DefaultUuid,
-      meta,
-      tags,
+      _tags, // defaults to empty array if not set during decode
+      list_id: DefaultUuid, // defaults to a GUID (UUID v4) string if not set during decode
+      meta, // defaults to undefined if not set during decode
+      tags, // defaults to empty array if not set during decode
     })
   ),
 ]);

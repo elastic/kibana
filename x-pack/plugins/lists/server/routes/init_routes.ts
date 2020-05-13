@@ -24,6 +24,7 @@ import {
   readListIndexRoute,
   readListItemRoute,
   readListRoute,
+  updateExceptionListItemRoute,
   updateExceptionListRoute,
   updateListItemRoute,
   updateListRoute,
@@ -59,4 +60,5 @@ export const initRoutes = (router: IRouter): void => {
   // exception list items
   createExceptionListItemRoute(router);
   readExceptionListItemRoute(router);
+  updateExceptionListItemRoute(router);
 };

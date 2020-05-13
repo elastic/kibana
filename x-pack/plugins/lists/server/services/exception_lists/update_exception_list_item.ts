@@ -7,30 +7,34 @@
 import { SavedObjectsClientContract } from 'kibana/server';
 
 import {
+  CommentOrUndefined,
   DescriptionOrUndefined,
-  ExceptionListSchema,
+  EntriesArrayOrUndefined,
+  ExceptionListItemSchema,
   ExceptionListSoSchema,
   ExceptionListTypeOrUndefined,
   IdOrUndefined,
-  ListIdOrUndefined,
+  ItemIdOrUndefined,
   MetaOrUndefined,
   NameOrUndefined,
   TagsOrUndefined,
   _TagsOrUndefined,
 } from '../../../common/schemas';
 
-import { getSavedObjectType, transformSavedObjectUpdateToExceptionList } from './utils';
+import { getSavedObjectType, transformSavedObjectUpdateToExceptionListItem } from './utils';
 import { NamespaceType } from './types';
-import { getExceptionList } from './get_exception_list';
+import { getExceptionListItem } from './get_exception_list_item';
 
-interface UpdateExceptionListOptions {
+interface UpdateExceptionListItemOptions {
   id: IdOrUndefined;
+  comment: CommentOrUndefined;
   _tags: _TagsOrUndefined;
   name: NameOrUndefined;
   description: DescriptionOrUndefined;
+  entries: EntriesArrayOrUndefined;
   savedObjectsClient: SavedObjectsClientContract;
   namespaceType: NamespaceType;
-  listId: ListIdOrUndefined;
+  itemId: ItemIdOrUndefined;
   meta: MetaOrUndefined;
   user: string;
   tags: TagsOrUndefined;
@@ -38,30 +42,39 @@ interface UpdateExceptionListOptions {
   type: ExceptionListTypeOrUndefined;
 }
 
-export const updateExceptionList = async ({
+export const updateExceptionListItem = async ({
   _tags,
+  comment,
+  entries,
   id,
   savedObjectsClient,
   namespaceType,
   name,
   description,
-  listId,
+  itemId,
   meta,
   user,
   tags,
   type,
-}: UpdateExceptionListOptions): Promise<ExceptionListSchema | null> => {
+}: UpdateExceptionListItemOptions): Promise<ExceptionListItemSchema | null> => {
   const savedObjectType = getSavedObjectType({ namespaceType });
-  const exceptionList = await getExceptionList({ id, listId, namespaceType, savedObjectsClient });
-  if (exceptionList == null) {
+  const exceptionListItem = await getExceptionListItem({
+    id,
+    itemId,
+    namespaceType,
+    savedObjectsClient,
+  });
+  if (exceptionListItem == null) {
     return null;
   } else {
     const savedObject = await savedObjectsClient.update<ExceptionListSoSchema>(
       savedObjectType,
-      exceptionList.id,
+      exceptionListItem.id,
       {
         _tags,
+        comment,
         description,
+        entries,
         meta,
         name,
         tags,
@@ -69,6 +82,6 @@ export const updateExceptionList = async ({
         updated_by: user,
       }
     );
-    return transformSavedObjectUpdateToExceptionList({ exceptionList, savedObject });
+    return transformSavedObjectUpdateToExceptionListItem({ exceptionListItem, savedObject });
   }
 };

@@ -14,6 +14,7 @@ import {
   CreateExceptionListOptions,
   GetExceptionListItemOptions,
   GetExceptionListOptions,
+  UpdateExceptionListItemOptions,
   UpdateExceptionListOptions,
 } from './exception_list_client_types';
 import { getExceptionList } from './get_exception_list';
@@ -21,6 +22,7 @@ import { createExceptionList } from './create_exception_list';
 import { getExceptionListItem } from './get_exception_list_item';
 import { createExceptionListItem } from './create_exception_list_item';
 import { updateExceptionList } from './update_exception_list';
+import { updateExceptionListItem } from './update_exception_list_item';
 
 export class ExceptionListClient {
   private readonly user: string;
@@ -123,6 +125,37 @@ export class ExceptionListClient {
       entries,
       itemId,
       listId,
+      meta,
+      name,
+      namespaceType,
+      savedObjectsClient,
+      tags,
+      type,
+      user,
+    });
+  };
+
+  public updateExceptionListItem = async ({
+    _tags,
+    comment,
+    description,
+    entries,
+    id,
+    itemId,
+    meta,
+    name,
+    namespaceType,
+    tags,
+    type,
+  }: UpdateExceptionListItemOptions): Promise<ExceptionListSchema | null> => {
+    const { savedObjectsClient, user } = this;
+    return updateExceptionListItem({
+      _tags,
+      comment,
+      description,
+      entries,
+      id,
+      itemId,
       meta,
       name,
       namespaceType,

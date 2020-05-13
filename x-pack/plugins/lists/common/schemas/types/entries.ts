@@ -18,3 +18,4 @@ export const entriesArray = t.array(entries);
 export type EntriesArray = t.TypeOf<typeof entriesArray>;
 export type Entries = t.TypeOf<typeof entries>;
 export const entriesArrayOrUndefined = t.union([entriesArray, t.undefined]);
+export type EntriesArrayOrUndefined = t.TypeOf<typeof entriesArrayOrUndefined>;

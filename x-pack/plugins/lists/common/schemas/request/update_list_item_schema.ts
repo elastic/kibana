@@ -18,7 +18,11 @@ export const updateListItemSchema = t.intersection([
       value,
     })
   ),
-  t.exact(t.partial({ meta })),
+  t.exact(
+    t.partial({
+      meta, // defaults to undefined if not set during decode
+    })
+  ),
 ]);
 
 export type UpdateListItemSchemaPartial = Identity<t.TypeOf<typeof updateListItemSchema>>;

@@ -75,10 +75,10 @@ export const transformSavedObjectToExceptionList = ({
 };
 
 export const transformSavedObjectUpdateToExceptionList = ({
-  list,
+  exceptionList,
   savedObject,
 }: {
-  list: ExceptionListSchema;
+  exceptionList: ExceptionListSchema;
   savedObject: SavedObjectsUpdateResponse<ExceptionListSoSchema>;
 }): ExceptionListSchema => {
   const dateNow = new Date().toISOString();
@@ -91,19 +91,19 @@ export const transformSavedObjectUpdateToExceptionList = ({
   // TODO: Change this to do a decode and throw if the saved object is not as expected.
   // TODO: Do a throw if after the decode this is not the correct "list_type: list"
   return {
-    _tags: _tags ?? list._tags,
-    created_at: list.created_at,
-    created_by: list.created_by,
-    description: description ?? list.description,
+    _tags: _tags ?? exceptionList._tags,
+    created_at: exceptionList.created_at,
+    created_by: exceptionList.created_by,
+    description: description ?? exceptionList.description,
     id,
-    list_id: list.list_id,
-    meta: meta ?? list.meta,
-    name: name ?? list.name,
-    tags: tags ?? list.tags,
-    tie_breaker_id: list.tie_breaker_id,
-    type: type ?? list.type,
+    list_id: exceptionList.list_id,
+    meta: meta ?? exceptionList.meta,
+    name: name ?? exceptionList.name,
+    tags: tags ?? exceptionList.tags,
+    tie_breaker_id: exceptionList.tie_breaker_id,
+    type: type ?? exceptionList.type,
     updated_at: updatedAt ?? dateNow,
-    updated_by: updatedBy ?? list.updated_by,
+    updated_by: updatedBy ?? exceptionList.updated_by,
   };
 };
 
@@ -153,5 +153,51 @@ export const transformSavedObjectToExceptionListItem = ({
     type,
     updated_at: updatedAt ?? dateNow,
     updated_by,
+  };
+};
+
+export const transformSavedObjectUpdateToExceptionListItem = ({
+  exceptionListItem,
+  savedObject,
+}: {
+  exceptionListItem: ExceptionListItemSchema;
+  savedObject: SavedObjectsUpdateResponse<ExceptionListSoSchema>;
+}): ExceptionListItemSchema => {
+  const dateNow = new Date().toISOString();
+  const {
+    attributes: {
+      _tags,
+      comment,
+      description,
+      entries,
+      meta,
+      name,
+      tags,
+      type,
+      updated_by: updatedBy,
+    },
+    id,
+    updated_at: updatedAt,
+  } = savedObject;
+
+  // TODO: Change this to do a decode and throw if the saved object is not as expected.
+  // TODO: Do a throw if after the decode this is not the correct "list_type: list"
+  return {
+    _tags: _tags ?? exceptionListItem._tags,
+    comment: comment ?? exceptionListItem.comment,
+    created_at: exceptionListItem.created_at,
+    created_by: exceptionListItem.created_by,
+    description: description ?? exceptionListItem.description,
+    entries: entries ?? exceptionListItem.entries,
+    id,
+    item_id: exceptionListItem.item_id,
+    list_id: exceptionListItem.list_id,
+    meta: meta ?? exceptionListItem.meta,
+    name: name ?? exceptionListItem.name,
+    tags: tags ?? exceptionListItem.tags,
+    tie_breaker_id: exceptionListItem.tie_breaker_id,
+    type: type ?? exceptionListItem.type,
+    updated_at: updatedAt ?? dateNow,
+    updated_by: updatedBy ?? exceptionListItem.updated_by,
   };
 };

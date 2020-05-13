@@ -33,11 +33,11 @@ export const updateExceptionListSchema = t.intersection([
   ),
   t.exact(
     t.partial({
-      _tags,
-      id,
-      list_id,
-      meta,
-      tags,
+      _tags, // defaults to empty array if not set during decode
+      id, // defaults to undefined if not set during decode
+      list_id, // defaults to undefined if not set during decode
+      meta, // defaults to undefined if not set during decode
+      tags, // defaults to empty array if not set during decode
     })
   ),
 ]);
