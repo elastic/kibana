@@ -6,5 +6,5 @@ module.exports = {
       "3": "0 ms"
     }
   },
-  "__version": "4.2.0"
+  "__version": "4.5.0"
 }
