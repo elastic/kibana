@@ -21,7 +21,7 @@ import { DynamicSizeProperty } from './dynamic_size_property';
 import { StyleMeta } from '../style_meta';
 import { FIELD_ORIGIN, VECTOR_STYLES } from '../../../../../common/constants';
 import { DataRequest } from '../../../util/data_request';
-import { IVectorLayer } from '../../../vector_layer';
+import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 import { IField } from '../../../fields/field';
 
 // @ts-ignore
