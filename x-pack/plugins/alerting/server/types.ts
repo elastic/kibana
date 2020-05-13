@@ -78,6 +78,7 @@ export interface AlertType {
   actionGroups: ActionGroup[];
   defaultActionGroupId: ActionGroup['id'];
   executor: ({ services, params, state }: AlertExecutorOptions) => Promise<State | void>;
+  producer: string;
   actionVariables?: {
     context?: ActionVariable[];
     state?: ActionVariable[];

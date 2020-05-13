@@ -22,12 +22,7 @@ import { ExpressionsSetup } from '../../../../plugins/expressions/public';
 import { uuidV4 } from '../../../../plugins/kibana_utils/public';
 
 import { SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider } from './sync_search_strategy';
-import {
-  createSearchSourceFromJSON,
-  SearchSource,
-  SearchSourceDependencies,
-  SearchSourceFields,
-} from './search_source';
+import { createSearchSource, SearchSource, SearchSourceDependencies } from './search_source';
 import { ISearchSetup, ISearchStart, TSearchStrategyProvider, TSearchStrategiesMap } from './types';
 import { TStrategyTypes } from './strategy_types';
 import { getEsClient, LegacyApiCaller } from './legacy';
@@ -177,8 +172,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       search,
       session: sessionService,
       searchSource: {
-        create: (fields?: SearchSourceFields) => new SearchSource(fields, searchSourceDependencies),
-        fromJSON: createSearchSourceFromJSON(dependencies.indexPatterns, searchSourceDependencies),
+        create: createSearchSource(dependencies.indexPatterns, searchSourceDependencies),
+        createEmpty: () => {
+          return new SearchSource({}, searchSourceDependencies);
+        },
       },
       setInterceptor: (searchInterceptor: SearchInterceptor) => {
         // TODO: should an interceptor have a destroy method?

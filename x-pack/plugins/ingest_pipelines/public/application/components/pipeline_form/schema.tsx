@@ -34,17 +34,8 @@ export const pipelineFormSchema: FormSchema = {
   description: {
     type: FIELD_TYPES.TEXTAREA,
     label: i18n.translate('xpack.ingestPipelines.form.descriptionFieldLabel', {
-      defaultMessage: 'Description',
+      defaultMessage: 'Description (optional)',
     }),
-    validations: [
-      {
-        validator: emptyField(
-          i18n.translate('xpack.ingestPipelines.form.pipelineDescriptionRequiredError', {
-            defaultMessage: 'A description is required.',
-          })
-        ),
-      },
-    ],
   },
   processors: {
     label: i18n.translate('xpack.ingestPipelines.form.processorsFieldLabel', {

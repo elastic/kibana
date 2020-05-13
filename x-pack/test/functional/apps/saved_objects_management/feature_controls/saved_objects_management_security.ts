@@ -10,7 +10,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'settings', 'security']);
+  const PageObjects = getPageObjects(['common', 'settings', 'security', 'error', 'header']);
   let version: string = '';
 
   describe('feature controls saved objects management', () => {
@@ -306,6 +306,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
           });
+          await PageObjects.header.waitUntilLoadingHasFinished();
           await testSubjects.existOrFail('homeApp');
         });
       });
@@ -320,6 +321,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
               ensureCurrentUrl: false,
             }
           );
+          await PageObjects.header.waitUntilLoadingHasFinished();
           await testSubjects.existOrFail('homeApp');
         });
       });

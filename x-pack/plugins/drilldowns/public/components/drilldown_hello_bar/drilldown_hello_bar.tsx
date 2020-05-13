@@ -30,33 +30,30 @@ export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({
   onHideClick = () => {},
 }) => {
   return (
-    <EuiCallOut
-      data-test-subj={WELCOME_MESSAGE_TEST_SUBJ}
-      title={
-        <EuiFlexGroup className="drdHelloBar__content">
-          <EuiFlexItem grow={false}>
-            <div style={{ marginLeft: '8px' }}>
-              <EuiIcon type="help" />
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem grow={true}>
-            <EuiText size={'s'}>
-              <EuiTextColor color="subdued">{txtHelpText}</EuiTextColor>
-            </EuiText>
-            {docsLink && (
-              <>
-                <EuiSpacer size={'xs'} />
-                <EuiLink href={docsLink}>{txtViewDocsLinkLabel}</EuiLink>
-              </>
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="xs" onClick={onHideClick}>
-              {txtHideHelpButtonLabel}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-    />
+    <EuiCallOut data-test-subj={WELCOME_MESSAGE_TEST_SUBJ}>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <div style={{ marginLeft: '8px' }}>
+            <EuiIcon type="help" />
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <EuiText size={'s'}>
+            <EuiTextColor color="subdued">{txtHelpText}</EuiTextColor>
+          </EuiText>
+          {docsLink && (
+            <>
+              <EuiSpacer size={'xs'} />
+              <EuiLink href={docsLink}>{txtViewDocsLinkLabel}</EuiLink>
+            </>
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty size="xs" onClick={onHideClick}>
+            {txtHideHelpButtonLabel}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiCallOut>
   );
 };
