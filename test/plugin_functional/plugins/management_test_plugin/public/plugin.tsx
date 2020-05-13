@@ -21,19 +21,14 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import { CoreSetup, Plugin } from 'kibana/public';
-import { ManagementSetup } from '../../../../../src/plugins/management/public';
+import { ManagementSetup, ManagementSectionId } from '../../../../../src/plugins/management/public';
 
 export class ManagementTestPlugin
   implements Plugin<ManagementTestPluginSetup, ManagementTestPluginStart> {
   public setup(core: CoreSetup, { management }: { management: ManagementSetup }) {
-    const testSection = management.sections.register({
-      id: 'test-section',
-      title: 'Test Section',
-      euiIconType: 'logoKibana',
-      order: 25,
-    });
+    const testSection = management.sections.getSection(ManagementSectionId.Data);
 
-    testSection!.registerApp({
+    testSection.registerApp({
       id: 'test-management',
       title: 'Management Test',
       mount(params) {
@@ -63,7 +58,7 @@ export class ManagementTestPlugin
       },
     });
 
-    testSection!
+    testSection
       .registerApp({
         id: 'test-management-disabled',
         title: 'Management Test Disabled',
