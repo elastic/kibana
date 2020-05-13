@@ -7,13 +7,12 @@
 import { map, takeUntil } from 'rxjs/operators';
 import { merge, Observable, timer } from 'rxjs';
 import { duration } from 'moment';
-import { HttpStart } from 'src/core/public';
+import { HttpStart, ApplicationStart } from 'src/core/public';
 import { takeInArray } from '../../common/operators';
 import { GlobalSearchResultProvider } from '../types';
 import { GlobalSearchConfigType } from '../config';
-import { GlobalSearchBatchedResults, GlobalSearchFindOptions, GlobalSearchResult } from './types';
-import { GlobalSearchProviderResult } from '../../common/types';
-import { convertResultUrl } from '../../common/utils';
+import { GlobalSearchBatchedResults, GlobalSearchFindOptions } from './types';
+import { getResultProcessor } from './process_result';
 
 /** @public */
 export interface SearchServiceSetup {
@@ -25,11 +24,17 @@ export interface SearchServiceStart {
   find(term: string, options: GlobalSearchFindOptions): Observable<GlobalSearchBatchedResults>;
 }
 
+interface ServiceStartDeps {
+  http: HttpStart;
+  application: ApplicationStart;
+}
+
 /** @internal */
 export class SearchService {
   private readonly providers: GlobalSearchResultProvider[] = [];
   private config?: GlobalSearchConfigType;
   private http?: HttpStart;
+  private application?: ApplicationStart;
   private readonly maxProviderResults = 20;
 
   setup({ config }: { config: GlobalSearchConfigType }): SearchServiceSetup {
@@ -45,8 +50,9 @@ export class SearchService {
     };
   }
 
-  start({ http }: { http: HttpStart }): SearchServiceStart {
+  start({ http, application }: ServiceStartDeps): SearchServiceStart {
     this.http = http;
+    this.application = application;
 
     return {
       find: (term, options) => this.performFind(term, options),
@@ -64,26 +70,25 @@ export class SearchService {
       aborted$,
     };
 
+    const processResult = getResultProcessor({
+      basePath: this.http!.basePath,
+      navigateToUrl: this.application!.navigateToUrl,
+    });
+
     // TODO: perform server request
 
     const providersResults$ = this.providers.map(provider =>
-      provider
-        .find(term, providerOptions)
-        .pipe(takeInArray(this.maxProviderResults), takeUntil(aborted$))
+      provider.find(term, providerOptions).pipe(
+        takeInArray(this.maxProviderResults),
+        takeUntil(aborted$),
+        map(results => results.map(r => processResult(r)))
+      )
     );
 
     return merge(...providersResults$).pipe(
       map(results => ({
-        results: results.map(r => this.processResult(r)),
+        results,
       }))
     );
-  }
-
-  private processResult(providerResult: GlobalSearchProviderResult): GlobalSearchResult {
-    return {
-      ...providerResult,
-      url: convertResultUrl(providerResult.url, this.http!.basePath),
-      navigate: () => Promise.resolve(), // TODO: implements
-    };
   }
 }

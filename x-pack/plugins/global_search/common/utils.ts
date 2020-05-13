@@ -8,7 +8,7 @@ import { GlobalSearchProviderResultUrl } from './types';
 
 // interface matching both the server and client-side implementation of IBasePath for our needs
 // used to avoid duplicating `convertResultUrl` in server and client code
-interface IBasePath {
+export interface IBasePath {
   prepend(path: string): string;
 }
 

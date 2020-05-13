@@ -87,14 +87,16 @@ export class SearchService {
     };
 
     const providersResults$ = this.providers.map(provider =>
-      provider
-        .find(term, providerOptions, context)
-        .pipe(takeInArray(this.maxProviderResults), takeUntil(aborted$))
+      provider.find(term, providerOptions, context).pipe(
+        takeInArray(this.maxProviderResults),
+        takeUntil(aborted$),
+        map(results => results.map(r => this.processResult(r)))
+      )
     );
 
     return merge(...providersResults$).pipe(
       map(results => ({
-        results: results.map(r => this.processResult(r)),
+        results,
       }))
     );
   }
