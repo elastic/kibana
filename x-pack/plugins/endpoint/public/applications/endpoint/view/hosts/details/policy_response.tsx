@@ -9,7 +9,7 @@ import { EuiAccordion, EuiNotificationBadge, EuiHealth } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { htmlIdGenerator } from '@elastic/eui';
 import {
-  HostPolicyResponseActions,
+  HostPolicyResponseAppliedAction,
   HostPolicyResponseConfiguration,
   Immutable,
 } from '../../../../../../common/types';
@@ -59,15 +59,15 @@ const PolicyResponseConfigAccordion = styled(EuiAccordion)`
 const ResponseActions = memo(
   ({
     actions,
-    actionStatus,
+    responseActions,
   }: {
-    actions: Immutable<Array<keyof HostPolicyResponseActions>>;
-    actionStatus: Partial<HostPolicyResponseActions>;
+    actions: Immutable<string[]>;
+    responseActions: Immutable<HostPolicyResponseAppliedAction[]>;
   }) => {
     return (
       <>
         {actions.map((action, index) => {
-          const statuses = actionStatus[action];
+          const statuses = responseActions.find(responseAction => responseAction.name === action);
           if (statuses === undefined) {
             return undefined;
           }
@@ -116,11 +116,11 @@ const ResponseActions = memo(
 export const PolicyResponse = memo(
   ({
     responseConfig,
-    responseActionStatus,
+    responseActions,
     responseAttentionCount,
   }: {
     responseConfig: Immutable<HostPolicyResponseConfiguration>;
-    responseActionStatus: Partial<HostPolicyResponseActions>;
+    responseActions: Immutable<HostPolicyResponseAppliedAction[]>;
     responseAttentionCount: Map<string, number>;
   }) => {
     return (
@@ -150,10 +150,7 @@ export const PolicyResponse = memo(
                 )
               }
             >
-              <ResponseActions
-                actions={val.concerned_actions}
-                actionStatus={responseActionStatus}
-              />
+              <ResponseActions actions={val.concerned_actions} responseActions={responseActions} />
             </PolicyResponseConfigAccordion>
           );
         })}

@@ -116,6 +116,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
       },
     ]
   }
+  navigateToApp={[Function]}
   onIsLockedUpdate={[Function]}
   onIsOpenUpdate={[Function]}
   recentNavLinks={
@@ -124,12 +125,14 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
         "aria-label": "recent 1",
         "href": "recent 1",
         "label": "recent 1",
+        "onClick": undefined,
         "title": "recent 1",
       },
       Object {
         "aria-label": "recent 2",
         "href": "recent 2",
         "label": "recent 2",
+        "onClick": undefined,
         "title": "recent 2",
       },
     ]
@@ -289,11 +292,9 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                             </div>
                           </div>
                         </div>
-                        <hr
-                          class="euiHorizontalRule euiHorizontalRule--full"
-                        />
                         <div
                           class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
+                          data-test-subj="collapsibleNavGroup-recentlyViewed"
                         >
                           <div
                             class="euiAccordion__triggerWrapper"
@@ -345,8 +346,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                 >
                                   <ul
                                     aria-label="Recently viewed links"
-                                    class="euiListGroup eui-yScroll"
-                                    style="max-height: 9.5em; margin-right: -8px; max-width: none;"
+                                    class="euiListGroup kbnCollapsibleNav__recentsListGroup"
+                                    style="max-width: none;"
                                   >
                                     <li
                                       class="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
@@ -354,6 +355,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                       <a
                                         aria-label="recent 1"
                                         class="euiListGroupItem__button"
+                                        data-test-subj="collapsibleNavAppLink--recent"
                                         href="recent 1"
                                         title="recent 1"
                                       >
@@ -371,6 +373,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                       <a
                                         aria-label="recent 2"
                                         class="euiListGroupItem__button"
+                                        data-test-subj="collapsibleNavAppLink--recent"
                                         href="recent 2"
                                         title="recent 2"
                                       >
@@ -928,11 +931,9 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               </div>
                             </div>
                           </div>
-                          <hr
-                            class="euiHorizontalRule euiHorizontalRule--full"
-                          />
                           <div
                             class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
+                            data-test-subj="collapsibleNavGroup-recentlyViewed"
                           >
                             <div
                               class="euiAccordion__triggerWrapper"
@@ -984,8 +985,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                   >
                                     <ul
                                       aria-label="Recently viewed links"
-                                      class="euiListGroup eui-yScroll"
-                                      style="max-height: 9.5em; margin-right: -8px; max-width: none;"
+                                      class="euiListGroup kbnCollapsibleNav__recentsListGroup"
+                                      style="max-width: none;"
                                     >
                                       <li
                                         class="euiListGroupItem euiListGroupItem--small euiListGroupItem--subdued euiListGroupItem-isClickable"
@@ -993,6 +994,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                         <a
                                           aria-label="recent 1"
                                           class="euiListGroupItem__button"
+                                          data-test-subj="collapsibleNavAppLink--recent"
                                           href="recent 1"
                                           title="recent 1"
                                         >
@@ -1010,6 +1012,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                         <a
                                           aria-label="recent 2"
                                           class="euiListGroupItem__button"
+                                          data-test-subj="collapsibleNavAppLink--recent"
                                           href="recent 2"
                                           title="recent 2"
                                         >
@@ -1629,15 +1632,9 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       </EuiCollapsibleNavGroup>
                     </div>
                   </EuiFlexItem>
-                  <EuiHorizontalRule
-                    margin="none"
-                  >
-                    <hr
-                      className="euiHorizontalRule euiHorizontalRule--full"
-                    />
-                  </EuiHorizontalRule>
                   <EuiCollapsibleNavGroup
                     background="light"
+                    data-test-subj="collapsibleNavGroup-recentlyViewed"
                     initialIsOpen={true}
                     isCollapsible={true}
                     key="recentlyViewed"
@@ -1668,6 +1665,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         </ForwardRef>
                       }
                       className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
+                      data-test-subj="collapsibleNavGroup-recentlyViewed"
                       id="mockId"
                       initialIsOpen={true}
                       onToggle={[Function]}
@@ -1675,6 +1673,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                     >
                       <div
                         className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
+                        data-test-subj="collapsibleNavGroup-recentlyViewed"
                         onToggle={[Function]}
                       >
                         <div
@@ -1750,41 +1749,37 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                 >
                                   <EuiListGroup
                                     aria-label="Recently viewed links"
-                                    className="eui-yScroll"
+                                    className="kbnCollapsibleNav__recentsListGroup"
                                     color="subdued"
                                     gutterSize="none"
                                     listItems={
                                       Array [
                                         Object {
                                           "aria-label": "recent 1",
+                                          "data-test-subj": "collapsibleNavAppLink--recent",
                                           "href": "recent 1",
                                           "label": "recent 1",
+                                          "onClick": [Function],
                                           "title": "recent 1",
                                         },
                                         Object {
                                           "aria-label": "recent 2",
+                                          "data-test-subj": "collapsibleNavAppLink--recent",
                                           "href": "recent 2",
                                           "label": "recent 2",
+                                          "onClick": [Function],
                                           "title": "recent 2",
                                         },
                                       ]
                                     }
                                     maxWidth="none"
                                     size="s"
-                                    style={
-                                      Object {
-                                        "marginRight": "-8px",
-                                        "maxHeight": "9.5em",
-                                      }
-                                    }
                                   >
                                     <ul
                                       aria-label="Recently viewed links"
-                                      className="euiListGroup eui-yScroll"
+                                      className="euiListGroup kbnCollapsibleNav__recentsListGroup"
                                       style={
                                         Object {
-                                          "marginRight": "-8px",
-                                          "maxHeight": "9.5em",
                                           "maxWidth": "none",
                                         }
                                       }
@@ -1792,9 +1787,11 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                       <EuiListGroupItem
                                         aria-label="recent 1"
                                         color="subdued"
+                                        data-test-subj="collapsibleNavAppLink--recent"
                                         href="recent 1"
                                         key="title-0"
                                         label="recent 1"
+                                        onClick={[Function]}
                                         showToolTip={false}
                                         size="s"
                                         title="recent 1"
@@ -1806,7 +1803,9 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           <a
                                             aria-label="recent 1"
                                             className="euiListGroupItem__button"
+                                            data-test-subj="collapsibleNavAppLink--recent"
                                             href="recent 1"
+                                            onClick={[Function]}
                                             title="recent 1"
                                           >
                                             <span
@@ -1821,9 +1820,11 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                       <EuiListGroupItem
                                         aria-label="recent 2"
                                         color="subdued"
+                                        data-test-subj="collapsibleNavAppLink--recent"
                                         href="recent 2"
                                         key="title-1"
                                         label="recent 2"
+                                        onClick={[Function]}
                                         showToolTip={false}
                                         size="s"
                                         title="recent 2"
@@ -1835,7 +1836,9 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           <a
                                             aria-label="recent 2"
                                             className="euiListGroupItem__button"
+                                            data-test-subj="collapsibleNavAppLink--recent"
                                             href="recent 2"
+                                            onClick={[Function]}
                                             title="recent 2"
                                           >
                                             <span
@@ -3016,6 +3019,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   isLocked={false}
   isOpen={false}
   navLinks={Array []}
+  navigateToApp={[Function]}
   onIsLockedUpdate={[Function]}
   onIsOpenUpdate={[Function]}
   recentNavLinks={Array []}
@@ -3046,6 +3050,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   isLocked={false}
   isOpen={true}
   navLinks={Array []}
+  navigateToApp={[Function]}
   onIsLockedUpdate={[Function]}
   onIsOpenUpdate={[Function]}
   recentNavLinks={Array []}
@@ -3280,15 +3285,9 @@ exports[`CollapsibleNav renders the default nav 2`] = `
                       </EuiCollapsibleNavGroup>
                     </div>
                   </EuiFlexItem>
-                  <EuiHorizontalRule
-                    margin="none"
-                  >
-                    <hr
-                      className="euiHorizontalRule euiHorizontalRule--full"
-                    />
-                  </EuiHorizontalRule>
                   <EuiCollapsibleNavGroup
                     background="light"
+                    data-test-subj="collapsibleNavGroup-recentlyViewed"
                     initialIsOpen={true}
                     isCollapsible={true}
                     key="recentlyViewed"
@@ -3319,6 +3318,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
                         </ForwardRef>
                       }
                       className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
+                      data-test-subj="collapsibleNavGroup-recentlyViewed"
                       id="mockId"
                       initialIsOpen={true}
                       onToggle={[Function]}
@@ -3326,6 +3326,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
                     >
                       <div
                         className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
+                        data-test-subj="collapsibleNavGroup-recentlyViewed"
                         onToggle={[Function]}
                       >
                         <div
@@ -3620,6 +3621,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
   isLocked={true}
   isOpen={true}
   navLinks={Array []}
+  navigateToApp={[Function]}
   onIsLockedUpdate={[Function]}
   onIsOpenUpdate={[Function]}
   recentNavLinks={Array []}
@@ -3767,11 +3769,9 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                             </div>
                           </div>
                         </div>
-                        <hr
-                          class="euiHorizontalRule euiHorizontalRule--full"
-                        />
                         <div
                           class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
+                          data-test-subj="collapsibleNavGroup-recentlyViewed"
                         >
                           <div
                             class="euiAccordion__triggerWrapper"
@@ -3961,11 +3961,9 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                               </div>
                             </div>
                           </div>
-                          <hr
-                            class="euiHorizontalRule euiHorizontalRule--full"
-                          />
                           <div
                             class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
+                            data-test-subj="collapsibleNavGroup-recentlyViewed"
                           >
                             <div
                               class="euiAccordion__triggerWrapper"
@@ -4217,15 +4215,9 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                       </EuiCollapsibleNavGroup>
                     </div>
                   </EuiFlexItem>
-                  <EuiHorizontalRule
-                    margin="none"
-                  >
-                    <hr
-                      className="euiHorizontalRule euiHorizontalRule--full"
-                    />
-                  </EuiHorizontalRule>
                   <EuiCollapsibleNavGroup
                     background="light"
+                    data-test-subj="collapsibleNavGroup-recentlyViewed"
                     initialIsOpen={true}
                     isCollapsible={true}
                     key="recentlyViewed"
@@ -4256,6 +4248,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                         </ForwardRef>
                       }
                       className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
+                      data-test-subj="collapsibleNavGroup-recentlyViewed"
                       id="mockId"
                       initialIsOpen={true}
                       onToggle={[Function]}
@@ -4263,6 +4256,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                     >
                       <div
                         className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
+                        data-test-subj="collapsibleNavGroup-recentlyViewed"
                         onToggle={[Function]}
                       >
                         <div

@@ -49,7 +49,7 @@ export const TimeSeriesExplorerPage: FC<TimeSeriesExplorerPageProps> = ({
         ref={resizeRef}
         data-test-subj="mlPageSingleMetricViewer"
       >
-        <EuiPage style={{ padding: '0px', background: 'none' }}>
+        <EuiPage style={{ background: 'none' }}>
           <EuiPageBody>
             <EuiScreenReaderOnly>
               <h1>

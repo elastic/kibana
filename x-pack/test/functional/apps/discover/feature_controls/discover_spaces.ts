@@ -12,6 +12,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects([
     'common',
+    'error',
     'discover',
     'timePicker',
     'security',
@@ -98,17 +99,14 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).not.to.contain('Discover');
       });
 
-      it(`redirects to the home page`, async () => {
-        // to test whether they're being redirected properly, we first load
-        // the discover app in the default space, and then we load up the discover
-        // app in the custom space and ensure we end up on the home page
-        await PageObjects.common.navigateToApp('discover');
+      it(`shows 404`, async () => {
         await PageObjects.common.navigateToUrl('discover', '', {
           basePath: '/s/custom_space',
           shouldLoginIfPrompted: false,
           ensureCurrentUrl: false,
+          useActualUrl: true,
         });
-        await PageObjects.spaceSelector.expectHomePage('custom_space');
+        await PageObjects.error.expectNotFound();
       });
     });
 

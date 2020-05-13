@@ -86,7 +86,7 @@ export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine
                   <FlexItem grow={false}>
                     <EuiButtonEmpty
                       data-test-subj="add-data"
-                      href="kibana#home/tutorial_directory/siem"
+                      href="home#/tutorial_directory/siem"
                       iconType="plusInCircle"
                     >
                       {i18n.BUTTON_ADD_DATA}
