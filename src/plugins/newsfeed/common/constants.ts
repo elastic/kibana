@@ -17,17 +17,10 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
-import { initPlugin as initNewsfeed } from './newsfeed_simulation';
+export const NEWSFEED_FALLBACK_LANGUAGE = 'en';
+export const NEWSFEED_LAST_FETCH_STORAGE_KEY = 'newsfeed.lastfetchtime';
+export const NEWSFEED_HASH_SET_STORAGE_KEY = 'newsfeed.hashes';
 
-const NAME = 'newsfeed-FTS-external-service-simulators';
-
-// eslint-disable-next-line import/no-default-export
-export default function(kibana: any) {
-  return new kibana.Plugin({
-    name: NAME,
-    init: (server: Hapi.Server) => {
-      initNewsfeed(server, `/api/_${NAME}`);
-    },
-  });
-}
+export const NEWSFEED_DEFAULT_SERVICE_BASE_URL = 'https://feeds.elastic.co';
+export const NEWSFEED_DEV_SERVICE_BASE_URL = 'https://feeds-staging.elastic.co';
+export const NEWSFEED_DEFAULT_SERVICE_PATH = '/kibana/v{VERSION}.json';
