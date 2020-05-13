@@ -6,6 +6,7 @@
 
 export { BASE_ALERT_API_PATH } from '../../../../alerting/common';
 export { BASE_ACTION_API_PATH } from '../../../../actions/common';
+export { BASE_EVENT_LOG_API_PATH } from '../../../../event_log/common';
 
 export const BASE_PATH = '/management/insightsAndAlerting/triggersActions';
 

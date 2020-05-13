@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { pick } from 'lodash';
 import { alertStateSchema, AlertingFrameworkHealth } from '../../../../alerting/common';
-import { BASE_ALERT_API_PATH } from '../constants';
+import { BASE_ALERT_API_PATH, BASE_EVENT_LOG_API_PATH } from '../constants';
 import { Alert, AlertType, AlertWithoutId, AlertTaskState } from '../../types';
 
 export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
@@ -219,4 +219,30 @@ export async function unmuteAlerts({
 
 export async function health({ http }: { http: HttpSetup }): Promise<AlertingFrameworkHealth> {
   return await http.get(`${BASE_ALERT_API_PATH}/_health`);
+}
+
+export async function getEvents({
+  id,
+  startDate,
+  endDate = Date.now(),
+  http,
+}: {
+  id: string;
+  startDate: number;
+  endDate: number;
+  http: HttpSetup;
+}): Promise<void> {
+  // per_page: schema.number({ defaultValue: 10, min: 0 }),
+  // page: schema.number({ defaultValue: 1, min: 1 }),
+  // start: optionalDateFieldSchema,
+  // end: optionalDateFieldSchema,
+
+  return await http.get(`${BASE_EVENT_LOG_API_PATH}/alert/${id}`, {
+    query: {
+      per_page: 1000,
+      page: 1,
+      start: new Date(startDate).toISOString(),
+      end: new Date(endDate).toISOString(),
+    },
+  });
 }
