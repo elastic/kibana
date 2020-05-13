@@ -135,49 +135,51 @@ export function CollapsibleNav({
         </EuiCollapsibleNavGroup>
       </EuiFlexItem>
 
+      {/* Recently viewed */}
+      <EuiCollapsibleNavGroup
+        key="recentlyViewed"
+        background="light"
+        title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
+        isCollapsible={true}
+        initialIsOpen={getIsCategoryOpen('recentlyViewed', storage)}
+        onToggle={isCategoryOpen => setIsCategoryOpen('recentlyViewed', isCategoryOpen, storage)}
+        data-test-subj="collapsibleNavGroup-recentlyViewed"
+      >
+        {recentNavLinks.length > 0 ? (
+          <EuiListGroup
+            aria-label={i18n.translate('core.ui.recentlyViewedAriaLabel', {
+              defaultMessage: 'Recently viewed links',
+            })}
+            // TODO #64541
+            // Can remove icon from recent links completely
+            listItems={recentNavLinks.map(({ iconType, onClick = () => {}, ...link }) => ({
+              'data-test-subj': 'collapsibleNavAppLink--recent',
+              onClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+                onIsOpenUpdate(false);
+                onClick(e);
+              },
+              ...link,
+            }))}
+            maxWidth="none"
+            color="subdued"
+            gutterSize="none"
+            size="s"
+            className="kbnCollapsibleNav__recentsListGroup"
+          />
+        ) : (
+          <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
+            <p>
+              {i18n.translate('core.ui.EmptyRecentlyViewed', {
+                defaultMessage: 'No recently viewed items',
+              })}
+            </p>
+          </EuiText>
+        )}
+      </EuiCollapsibleNavGroup>
+
       <EuiHorizontalRule margin="none" />
 
       <EuiFlexItem className="eui-yScroll">
-        {/* Recently viewed */}
-        <EuiCollapsibleNavGroup
-          key="recentlyViewed"
-          title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
-          isCollapsible={true}
-          initialIsOpen={getIsCategoryOpen('recentlyViewed', storage)}
-          onToggle={isCategoryOpen => setIsCategoryOpen('recentlyViewed', isCategoryOpen, storage)}
-          data-test-subj="collapsibleNavGroup-recentlyViewed"
-        >
-          {recentNavLinks.length > 0 ? (
-            <EuiListGroup
-              aria-label={i18n.translate('core.ui.recentlyViewedAriaLabel', {
-                defaultMessage: 'Recently viewed links',
-              })}
-              // TODO #64541
-              // Can remove icon from recent links completely
-              listItems={recentNavLinks.map(({ iconType, onClick = () => {}, ...link }) => ({
-                'data-test-subj': 'collapsibleNavAppLink--recent',
-                onClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-                  onIsOpenUpdate(false);
-                  onClick(e);
-                },
-                ...link,
-              }))}
-              maxWidth="none"
-              color="subdued"
-              gutterSize="none"
-              size="s"
-            />
-          ) : (
-            <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
-              <p>
-                {i18n.translate('core.ui.EmptyRecentlyViewed', {
-                  defaultMessage: 'No recently viewed items',
-                })}
-              </p>
-            </EuiText>
-          )}
-        </EuiCollapsibleNavGroup>
-
         {/* Kibana, Observability, Security, and Management sections */}
         {orderedCategories.map((categoryName, i) => {
           const category = categoryDictionary[categoryName]!;
