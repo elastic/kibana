@@ -66,9 +66,7 @@ export const createFleetSetupHandler: RequestHandler = async (context, request, 
 export const ingestManagerSetupHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
-  const logger = appContextService.getLogger();
   try {
-    if (logger) logger.info('await setupIngestManager');
     await setupIngestManager(soClient, callCluster);
     return response.ok({
       body: { isInitialized: true },

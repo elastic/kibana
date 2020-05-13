@@ -26,23 +26,19 @@ import { installPipelines } from '../elasticsearch/ingest_pipeline/install';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 import { deleteAssetsByType, deleteKibanaSavedObjectsAssets } from './remove';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
-import { appContextService } from '../../app_context';
 
 export async function installLatestPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   callCluster: CallESAsCurrentUser;
 }): Promise<AssetReference[]> {
-  const logger = appContextService.getLogger();
   const { savedObjectsClient, pkgName, callCluster } = options;
   try {
-    if (logger) logger.info(`${pkgName} await registry.fetchFindLatestPackage`);
     const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
     const pkgkey = Registry.pkgToPkgKey({
       name: latestPackage.name,
       version: latestPackage.version,
     });
-    if (logger) logger.info(`${pkgName} await installPackage`);
     return installPackage({ savedObjectsClient, pkgkey, callCluster });
   } catch (err) {
     throw err;
@@ -53,7 +49,6 @@ export async function ensureInstalledDefaultPackages(
   savedObjectsClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
 ): Promise<Installation[]> {
-  const logger = appContextService.getLogger();
   // ensure base package is installed first
   const baseInstallation = await ensureInstalledPackage({
     savedObjectsClient,
@@ -63,32 +58,29 @@ export async function ensureInstalledDefaultPackages(
 
   // don't include base package in list to install in parallel / any order
   const defaultPackages = Object.keys(DefaultPackages).filter(key => key !== DefaultPackages.base);
-  const installationPromises = defaultPackages.map(pkgName => {
-    if (logger) logger.info(`${pkgName} call ensureInstalledPackage`);
-    return ensureInstalledPackage({
-      savedObjectsClient,
-      pkgName,
-      callCluster,
-    });
-  });
+  const otherInstallations = await Promise.all(
+    defaultPackages.map(pkgName =>
+      ensureInstalledPackage({
+        savedObjectsClient,
+        pkgName,
+        callCluster,
+      })
+    )
+  );
 
-  if (logger) logger.info(`await other default installations`);
-  const otherInstallations = await Promise.all(installationPromises);
-  if (logger) logger.info(`back from await other default installations`);
-  const installations = [baseInstallation, ...otherInstallations];
-  if (logger)
-    logger.info(
-      `ensureInstalledDefaultPackages installations ${JSON.stringify(
-        installations.map(({ name, version, installed }) => ({
-          name,
-          version,
-          numInstalled: installed.length,
-        })),
-        null,
-        2
-      )}`
-    );
-  return installations as Installation[];
+  // `ensureInstalledPackage` return Installation | undefined
+  // filter out any undefined values
+  // we need the `is Installation` guard because of some TS issues
+  // https://github.com/microsoft/TypeScript/issues/20707#issuecomment-351874491
+  // https://github.com/microsoft/TypeScript/issues/20812
+  // https://github.com/microsoft/TypeScript/issues/16069
+  const installations = [baseInstallation, ...otherInstallations].filter(
+    (installation: Installation | undefined): installation is Installation => {
+      return installation !== undefined;
+    }
+  );
+
+  return installations;
 }
 
 export async function ensureInstalledPackage(options: {
@@ -108,7 +100,7 @@ export async function ensureInstalledPackage(options: {
       pkgName,
       callCluster,
     });
-    return getInstallation({ savedObjectsClient, pkgName });
+    return await getInstallation({ savedObjectsClient, pkgName });
   } catch (err) {
     throw new Error(err.message);
   }
@@ -119,8 +111,6 @@ export async function installPackage(options: {
   pkgkey: string;
   callCluster: CallESAsCurrentUser;
 }): Promise<AssetReference[]> {
-  const logger = appContextService.getLogger();
-  if (logger) logger.info(`${options.pkgkey} installPackage`);
   const { savedObjectsClient, pkgkey, callCluster } = options;
   // TODO: change epm API to /packageName/version so we don't need to do this
   const [pkgName, pkgVersion] = pkgkey.split('-');
@@ -128,23 +118,11 @@ export async function installPackage(options: {
   // see if some version of this package is already installed
   // TODO: calls to getInstallationObject, Registry.fetchInfo, and Registry.fetchFindLatestPackge
   // and be replaced by getPackageInfo after adjusting for it to not group/use archive assets
-  if (logger)
-    logger.info(
-      `${pkgName} await Promise.all( getInstallationObject, Registry.fetchInfo, Registry.fetchFindLatestPackage )`
-    );
-  const [installedPkg, registryPackageInfo, latestPackage] = await Promise.all([
-    getInstallationObject({ savedObjectsClient, pkgName }),
-    Registry.fetchInfo(pkgName, pkgVersion),
-    Registry.fetchFindLatestPackage(pkgName),
-  ]);
-  if (logger)
-    logger.info(
-      `${pkgName} back from Promise.all( getInstallationObject, Registry.fetchInfo, Registry.fetchFindLatestPackage )`
-    );
-  if (!registryPackageInfo)
-    throw Boom.badRequest(`${pkgName} Cannot find package information for version ${pkgVersion}`);
+  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+  const registryPackageInfo = await Registry.fetchInfo(pkgName, pkgVersion);
+  const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
 
-  if (!latestPackage || pkgVersion < latestPackage.version)
+  if (pkgVersion < latestPackage.version)
     throw Boom.badRequest('Cannot install or update to an out-of-date package');
 
   const reinstall = pkgVersion === installedPkg?.attributes.version;
@@ -160,7 +138,6 @@ export async function installPackage(options: {
     }
   }
 
-  if (logger) logger.info(`${pkgkey} await Promise.all install assets, pipelines, etc`);
   const [installedKibanaAssets, installedPipelines] = await Promise.all([
     installKibanaAssets({
       savedObjectsClient,
@@ -176,17 +153,14 @@ export async function installPackage(options: {
     // per dataset and we should then save them
     installILMPolicy(pkgName, pkgVersion, callCluster),
   ]);
-  if (logger) logger.info(`${pkgkey} back from Promise.all install assets, pipelines, etc`);
 
   // install or update the templates
-  if (logger) logger.info(`${pkgkey} await installTemplates`);
   const installedTemplates = await installTemplates(
     registryPackageInfo,
     callCluster,
     pkgName,
     pkgVersion
   );
-  if (logger) logger.info(`${pkgkey} back from installTemplates. generateESIndexPatterns`);
   const toSaveESIndexPatterns = generateESIndexPatterns(registryPackageInfo.datasets);
 
   // get template refs to save
@@ -218,7 +192,6 @@ export async function installPackage(options: {
     ...installedPipelines,
     ...installedTemplateRefs,
   ];
-  if (logger) logger.info('call saveInstallationReferences');
   // Save references to installed assets in the package's saved object state
   return saveInstallationReferences({
     savedObjectsClient,
