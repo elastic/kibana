@@ -30,7 +30,6 @@ export const spaces = (kibana: Record<string, any>) =>
     require: ['kibana', 'elasticsearch', 'xpack_main'],
 
     uiExports: {
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       managementSections: [],
       apps: [],
       hacks: ['plugins/spaces/legacy'],
