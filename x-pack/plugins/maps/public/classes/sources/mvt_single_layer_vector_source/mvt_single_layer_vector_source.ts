@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { AbstractSource, ImmutableSourceProperty } from '../source';
-import { GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
+import { BoundsFilters, GeoJsonWithMeta, ITiledSingleLayerVectorSource } from '../vector_source';
 import { MAX_ZOOM, MIN_ZOOM, SOURCE_TYPES } from '../../../../common/constants';
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
 import { IField } from '../../fields/field';
@@ -130,14 +130,14 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return this._descriptor.minSourceZoom;
   }
 
-  getMaxZoom() {
+  getMaxZoom(
+    boundsFilters: BoundsFilters,
+    registerCancelCallback: (requestToken: symbol, callback: () => void) => void
+  ) {
     return this._descriptor.maxSourceZoom;
   }
 
-  getBoundsForFilters(
-    dataRequestContext: DataRequestContext,
-    searchFilters: VectorSourceRequestMeta
-  ): MapExtent {
+  getBoundsForFilters(): MapExtent {
     return null;
   }
 

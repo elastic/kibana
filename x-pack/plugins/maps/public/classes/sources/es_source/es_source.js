@@ -154,15 +154,25 @@ export class AbstractESSource extends AbstractVectorSource {
         },
       },
     });
-    const abortController = new AbortController();
-    registerCancelCallback(() => abortController.abort());
 
-    const esResp = await searchSource.fetch({ abortSignal: abortController.signal });
-    if (!esResp.aggregations.fitToBounds.bounds) {
-      // aggregations.fitToBounds is empty object when there are no matching documents
+    let esBounds;
+    try {
+      const abortController = new AbortController();
+      registerCancelCallback(() => abortController.abort());
+      const esResp = await searchSource.fetch({ abortSignal: abortController.signal });
+      if (!esResp.aggregations.fitToBounds.bounds) {
+        // aggregations.fitToBounds is empty object when there are no matching documents
+        return null;
+      }
+      esBounds = esResp.aggregations.fitToBounds.bounds;
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        throw new DataRequestAbortError();
+      }
+
       return null;
     }
-    const esBounds = esResp.aggregations.fitToBounds.bounds;
+
     const minLon = esBounds.top_left.lon;
     const maxLon = esBounds.bottom_right.lon;
     return {

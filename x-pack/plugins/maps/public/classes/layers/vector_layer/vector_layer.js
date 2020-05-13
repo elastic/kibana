@@ -200,7 +200,10 @@ export class VectorLayer extends AbstractLayer {
     let bounds = null;
     try {
       startLoading(SOURCE_BOUNDS_DATA_REQUEST_ID, requestToken, boundsFilters);
-      bounds = await this.getSource().getBoundsForFilters(boundsFilters, registerCancelCallback);
+      bounds = await this.getSource().getBoundsForFilters(
+        boundsFilters,
+        registerCancelCallback.bind(null, requestToken)
+      );
     } finally {
       // Use stopLoading callback instead of onLoadError callback.
       // Function is loading bounds and not feature data.
@@ -510,7 +513,7 @@ export class VectorLayer extends AbstractLayer {
         layerName,
         style,
         dynamicStyleProps,
-        registerCancelCallback,
+        registerCancelCallback.bind(null, requestToken),
         nextMeta
       );
       stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);

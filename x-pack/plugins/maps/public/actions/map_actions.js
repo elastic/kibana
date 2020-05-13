@@ -35,6 +35,7 @@ import {
   LAYER_TYPE,
   SOURCE_DATA_REQUEST_ID,
 } from '../../common/constants';
+import { DataRequestAbortError } from '../classes/util/data_request';
 
 export const SET_SELECTED_LAYER = 'SET_SELECTED_LAYER';
 export const SET_TRANSIENT_LAYER = 'SET_TRANSIENT_LAYER';
@@ -561,12 +562,23 @@ export function fitToLayerExtent(layerId) {
     const targetLayer = getLayerById(layerId, getState());
 
     if (targetLayer) {
-      const bounds = await targetLayer.getBounds({
-        ...getDataRequestCallbacks(dispatch, getState, layerId),
-        dataFilters: getDataFilters(getState()),
-      });
-      if (bounds) {
-        await dispatch(setGotoWithBounds(bounds));
+      try {
+        const bounds = await targetLayer.getBounds({
+          ...getDataRequestCallbacks(dispatch, getState, layerId),
+          dataFilters: getDataFilters(getState()),
+        });
+        if (bounds) {
+          dispatch(setGotoWithBounds(bounds));
+        }
+      } catch (error) {
+        if (!(error instanceof DataRequestAbortError)) {
+          console.warn(
+            'Unhandled getBounds error for layer. Only DataRequestAbortError should be surfaced',
+            error
+          );
+        }
+        // new fitToLayerExtent request has superseded this thread of execution. Results no longer needed.
+        return;
       }
     }
   };
@@ -588,7 +600,20 @@ export function fitToDataBounds() {
       });
     });
 
-    const bounds = await Promise.all(boundsPromises);
+    let bounds;
+    try {
+      bounds = await Promise.all(boundsPromises);
+    } catch (error) {
+      if (!(error instanceof DataRequestAbortError)) {
+        console.warn(
+          'Unhandled getBounds error for layer. Only DataRequestAbortError should be surfaced',
+          error
+        );
+      }
+      // new fitToDataBounds request has superseded this thread of execution. Results no longer needed.
+      return;
+    }
+
     const corners = [];
     for (let i = 0; i < bounds.length; i++) {
       const b = bounds[i];
