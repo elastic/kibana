@@ -13,9 +13,9 @@ import {
   GetHostsTableQuery,
   HostsFields,
 } from '../../../../plugins/siem/public/graphql/types';
-import { HostOverviewQuery } from '../../../../plugins/siem/public/containers/hosts/overview/host_overview.gql_query';
-import { HostFirstLastSeenGqlQuery } from '../../../../plugins/siem/public/containers/hosts/first_last_seen/first_last_seen.gql_query';
-import { HostsTableQuery } from '../../../../plugins/siem/public/containers/hosts/hosts_table.gql_query';
+import { HostOverviewQuery } from '../../../../plugins/siem/public/hosts/containers/hosts/overview/host_overview.gql_query';
+import { HostFirstLastSeenGqlQuery } from '../../../../plugins/siem/public/hosts/containers/hosts/first_last_seen/first_last_seen.gql_query';
+import { HostsTableQuery } from '../../../../plugins/siem/public/hosts/containers/hosts/hosts_table.gql_query';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();

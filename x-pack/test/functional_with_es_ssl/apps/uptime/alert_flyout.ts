@@ -79,6 +79,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('can save alert', async () => {
         await alerts.clickSaveAlertButton();
+        await pageObjects.common.closeToast();
       });
 
       it('posts an alert, verifies its presence, and deletes the alert', async () => {
@@ -171,6 +172,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('can save alert', async () => {
         await alerts.clickSaveAlertButton();
+        await pageObjects.common.closeToast();
       });
 
       it('has created a valid alert with expected parameters', async () => {
