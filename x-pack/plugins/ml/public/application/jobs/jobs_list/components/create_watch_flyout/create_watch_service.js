@@ -157,6 +157,7 @@ class CreateWatchService {
             id,
             type: 'json',
             isNew: false, // Set to false, as we want to allow watches to be overwritten.
+            isActive: true,
             watch,
           },
         };

@@ -59,6 +59,9 @@ export {
   SearchSourceFields,
   EsQuerySortValue,
   SortDirection,
+  extractReferences as extractSearchSourceReferences,
+  injectReferences as injectSearchSourceReferences,
+  parseSearchSourceJSON,
 } from './search_source';
 
 export { SearchInterceptor } from './search_interceptor';

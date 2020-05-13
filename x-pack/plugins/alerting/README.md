@@ -91,6 +91,7 @@ The following table describes the properties of the `options` object.
 |actionVariables|An explicit list of action variables the alert type makes available via context and state in action parameter templates, and a short human readable description. Alert UI  will use this to display prompts for the users for these variables, in action parameter editors. We highly encourage using `kbn-i18n` to translate the descriptions. |{ context: Array<{name:string, description:string}, state: Array<{name:string, description:string}>|
 |validate.params|When developing an alert type, you can choose to accept a series of parameters. You may also have the parameters validated before they are passed to the `executor` function or created as an alert saved object. In order to do this, provide a `@kbn/config-schema` schema that we will use to validate the `params` attribute.|@kbn/config-schema|
 |executor|This is where the code of the alert type lives. This is a function to be called when executing an alert on an interval basis. For full details, see executor section below.|Function|
+|producer|The id of the application producing this alert type.|string|
 
 ### Executor
 
@@ -212,6 +213,7 @@ server.newPlatform.setup.plugins.alerting.registerType({
 			lastChecked: new Date(),
 		};
 	},
+	producer: 'alerting',
 });
 ```
 
@@ -287,6 +289,7 @@ server.newPlatform.setup.plugins.alerting.registerType({
 			lastChecked: new Date(),
 		};
 	},
+	producer: 'alerting',
 });
 ```
 
