@@ -1,6 +1,6 @@
 #!/bin/groovy
 
-library 'kibana-pipeline-library'
+library 'kibana-pipeline-library@implement/report-jenkins-url'
 kibanaLibrary.load()
 
 kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
