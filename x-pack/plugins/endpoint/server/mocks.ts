@@ -10,7 +10,7 @@ import {
   SavedObjectsClientContract,
 } from 'kibana/server';
 import { AgentService, IngestManagerStartContract } from '../../ingest_manager/server';
-import { IndexPatternRetriever } from './index_pattern';
+import { IndexPatternRetriever } from './alerts/index_pattern';
 
 /**
  * Creates a mock IndexPatternRetriever for use in tests.
