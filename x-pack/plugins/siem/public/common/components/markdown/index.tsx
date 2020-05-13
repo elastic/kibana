@@ -6,13 +6,7 @@
 
 /* eslint-disable react/display-name */
 
-import {
-  EuiLink,
-  EuiTableRow,
-  EuiTableRowCell,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiLink, EuiTableRow, EuiTableRowCell, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled, { css } from 'styled-components';
@@ -72,7 +66,12 @@ export const Markdown = React.memo<{
         const timelineId = href.split('timelines?timeline=(id:')[1].split("'")[1] ?? '';
         return (
           <EuiToolTip content={i18n.TIMELINE_ID(timelineId)}>
-            <EuiLink onClick={() => onClickTimeline(timelineId)}>{children}</EuiLink>
+            <EuiLink
+              onClick={() => onClickTimeline(timelineId)}
+              data-test-subj="markdown-timeline-link"
+            >
+              {children}
+            </EuiLink>
           </EuiToolTip>
         );
       }
