@@ -212,25 +212,29 @@ export const useAnalysisSetupState = <JobType extends string>({
     }
 
     return [
-      // index count
-      ...(selectedIndexNames.length === 0 ? [{ error: 'TOO_FEW_SELECTED_INDICES' as const }] : []),
-      // time range
-      ...(!isTimeRangeValid ? [{ error: 'INVALID_TIME_RANGE' as const }] : []),
       // validate request status
-      ...(validateIndicesRequest.state === 'rejected' ? [{ error: 'NETWORK_ERROR' as const }] : []),
+      ...(validateIndicesRequest.state === 'rejected' ||
+      validateDatasetsRequest.state === 'rejected'
+        ? [{ error: 'NETWORK_ERROR' as const }]
+        : []),
       // validation request results
       ...validatedIndices.reduce<ValidationUIError[]>((errors, index) => {
         return index.validity === 'invalid' && selectedIndexNames.includes(index.name)
           ? [...errors, ...index.errors]
           : errors;
       }, []),
+      // index count
+      ...(selectedIndexNames.length === 0 ? [{ error: 'TOO_FEW_SELECTED_INDICES' as const }] : []),
+      // time range
+      ...(!isTimeRangeValid ? [{ error: 'INVALID_TIME_RANGE' as const }] : []),
     ];
   }, [
     isValidating,
     validateIndicesRequest.state,
+    validateDatasetsRequest.state,
+    validatedIndices,
     selectedIndexNames,
     isTimeRangeValid,
-    validatedIndices,
   ]);
 
   const prevStartTime = usePrevious(startTime);
