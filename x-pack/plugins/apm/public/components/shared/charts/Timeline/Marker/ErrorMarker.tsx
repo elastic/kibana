@@ -60,9 +60,15 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
   const { error } = mark;
 
   const { rangeTo, rangeFrom } = urlParams;
+
   const query = {
     kuery: encodeURIComponent(
-      `${TRACE_ID} : "${error.trace?.id}" and ${TRANSACTION_ID} : "${error.transaction?.id}"`
+      [
+        ...(error.trace?.id ? [`${TRACE_ID} : "${error.trace?.id}"`] : []),
+        ...(error.transaction?.id
+          ? [`${TRANSACTION_ID} : "${error.transaction?.id}"`]
+          : [])
+      ].join(' and ')
     ),
     rangeFrom,
     rangeTo
