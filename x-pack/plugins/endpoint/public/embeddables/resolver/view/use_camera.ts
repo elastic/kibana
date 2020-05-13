@@ -280,7 +280,7 @@ export function useCamera(): {
  * tracked. So if the element's position moves for some reason, be sure to
  * handle that.
  */
-function useAutoUpdatingClientRect(): [DOMRect | null, (node: Element | null) => void] {
+export function useAutoUpdatingClientRect(): [DOMRect | null, (node: Element | null) => void] {
   const [rect, setRect] = useState<DOMRect | null>(null);
   // Using state as ref.current update does not trigger effect hook when reset
   const [currentNode, setCurrentNode] = useState<Element | null>(null);

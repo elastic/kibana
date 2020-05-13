@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { render, act, RenderResult, fireEvent } from '@testing-library/react';
-import { useCamera } from './use_camera';
+import { renderHook, act as hooksAct } from '@testing-library/react-hooks';
+import { useCamera, useAutoUpdatingClientRect } from './use_camera';
 import { Provider } from 'react-redux';
 import * as selectors from '../store/selectors';
 import { storeFactory } from '../store';
@@ -81,6 +82,27 @@ describe('useCamera on an unpainted element', () => {
         });
       });
     });
+    test('should observe all referenced resize changes', async () => {
+      const wrapper: FunctionComponent = ({ children }) => (
+        <Provider store={store}>
+          <SideEffectContext.Provider value={simulator.mock}>{children}</SideEffectContext.Provider>
+        </Provider>
+      );
+
+      const { result } = renderHook(() => useAutoUpdatingClientRect(), { wrapper });
+      const resizeObserverSpy = jest.spyOn(simulator.mock.ResizeObserver.prototype, 'observe');
+
+      let [rect, ref] = result.current;
+      hooksAct(() => ref(element));
+      const div = document.createElement('div');
+      hooksAct(() => ref(div));
+
+      [rect, ref] = result.current;
+
+      expect(resizeObserverSpy).toHaveBeenCalledTimes(2);
+      expect(rect?.width).toBe(0);
+    });
+
     test('provides a projection matrix that inverts the y axis and translates 400,300 (center of the element)', () => {
       expect(applyMatrix3([0, 0], projectionMatrix)).toEqual([400, 300]);
     });
