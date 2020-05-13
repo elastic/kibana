@@ -17,7 +17,7 @@ import { CombinedJob, CustomSettings, Datafeed, JobId, Job } from '../types/anom
 import { EntityField } from './anomaly_utils';
 import { MlServerLimits } from '../types/ml_server_info';
 import { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
-import { MlJobAggregation } from '../constants/aggregation_types';
+import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';
 
 export interface ValidationResults {
   valid: boolean;
@@ -111,21 +111,21 @@ export function isModelPlotChartableForDetector(job: Job, detectorIndex: number)
   const { detectors } = job.analysis_config;
   if (detectorIndex >= 0 && detectorIndex < detectors.length && modelPlotEnabled) {
     const dtr = detectors[detectorIndex];
-    const functionName = dtr.function;
+    const functionName = dtr.function as ML_JOB_AGGREGATION;
 
     // Model plot can be charted for any of the functions which map to ES aggregations
     // (except rare, for which no model plot results are generated),
     // plus varp and info_content functions.
     isModelPlotChartable =
-      functionName !== 'rare' &&
+      functionName !== ML_JOB_AGGREGATION.RARE &&
       (mlFunctionToESAggregation(functionName) !== null ||
         [
-          'varp',
-          'high_varp',
-          'low_varp',
-          'info_content',
-          'high_info_content',
-          'low_info_content',
+          ML_JOB_AGGREGATION.VARP,
+          ML_JOB_AGGREGATION.HIGH_VARP,
+          ML_JOB_AGGREGATION.LOW_VARP,
+          ML_JOB_AGGREGATION.INFO_CONTENT,
+          ML_JOB_AGGREGATION.HIGH_INFO_CONTENT,
+          ML_JOB_AGGREGATION.LOW_INFO_CONTENT,
         ].includes(functionName));
   }
 
@@ -209,60 +209,62 @@ export function isJobVersionGte(job: CombinedJob, version: string): boolean {
 // for querying metric data. Returns null if there is no suitable ES aggregation.
 // Note that the 'function' field in a record contains what the user entered e.g. 'high_count',
 // whereas the 'function_description' field holds an ML-built display hint for function e.g. 'count'.
-export function mlFunctionToESAggregation(functionName: MlJobAggregation | string): string | null {
+export function mlFunctionToESAggregation(
+  functionName: ML_JOB_AGGREGATION | string
+): ES_AGGREGATION | null {
   if (
-    functionName === 'mean' ||
-    functionName === 'high_mean' ||
-    functionName === 'low_mean' ||
-    functionName === 'metric'
+    functionName === ML_JOB_AGGREGATION.MEAN ||
+    functionName === ML_JOB_AGGREGATION.HIGH_MEAN ||
+    functionName === ML_JOB_AGGREGATION.LOW_MEAN ||
+    functionName === ML_JOB_AGGREGATION.METRIC
   ) {
-    return 'avg';
-  }
-
-  if (
-    functionName === 'sum' ||
-    functionName === 'high_sum' ||
-    functionName === 'low_sum' ||
-    functionName === 'non_null_sum' ||
-    functionName === 'low_non_null_sum' ||
-    functionName === 'high_non_null_sum'
-  ) {
-    return 'sum';
+    return ES_AGGREGATION.AVG;
   }
 
   if (
-    functionName === 'count' ||
-    functionName === 'high_count' ||
-    functionName === 'low_count' ||
-    functionName === 'non_zero_count' ||
-    functionName === 'low_non_zero_count' ||
-    functionName === 'high_non_zero_count'
+    functionName === ML_JOB_AGGREGATION.SUM ||
+    functionName === ML_JOB_AGGREGATION.HIGH_SUM ||
+    functionName === ML_JOB_AGGREGATION.LOW_SUM ||
+    functionName === ML_JOB_AGGREGATION.NON_NULL_SUM ||
+    functionName === ML_JOB_AGGREGATION.LOW_NON_NULL_SUM ||
+    functionName === ML_JOB_AGGREGATION.HIGH_NON_NULL_SUM
   ) {
-    return 'count';
+    return ES_AGGREGATION.SUM;
   }
 
   if (
-    functionName === 'distinct_count' ||
-    functionName === 'low_distinct_count' ||
-    functionName === 'high_distinct_count'
+    functionName === ML_JOB_AGGREGATION.COUNT ||
+    functionName === ML_JOB_AGGREGATION.HIGH_COUNT ||
+    functionName === ML_JOB_AGGREGATION.LOW_COUNT ||
+    functionName === ML_JOB_AGGREGATION.NON_ZERO_COUNT ||
+    functionName === ML_JOB_AGGREGATION.LOW_NON_ZERO_COUNT ||
+    functionName === ML_JOB_AGGREGATION.HIGH_NON_ZERO_COUNT
   ) {
-    return 'cardinality';
+    return ES_AGGREGATION.COUNT;
   }
 
   if (
-    functionName === 'median' ||
-    functionName === 'high_median' ||
-    functionName === 'low_median'
+    functionName === ML_JOB_AGGREGATION.DISTINCT_COUNT ||
+    functionName === ML_JOB_AGGREGATION.LOW_DISTINCT_COUNT ||
+    functionName === ML_JOB_AGGREGATION.HIGH_DISTINCT_COUNT
   ) {
-    return 'percentiles';
+    return ES_AGGREGATION.CARDINALITY;
   }
 
-  if (functionName === 'min' || functionName === 'max') {
-    return functionName;
+  if (
+    functionName === ML_JOB_AGGREGATION.MEDIAN ||
+    functionName === ML_JOB_AGGREGATION.HIGH_MEDIAN ||
+    functionName === ML_JOB_AGGREGATION.LOW_MEDIAN
+  ) {
+    return ES_AGGREGATION.PERCENTILES;
   }
 
-  if (functionName === 'rare') {
-    return 'count';
+  if (functionName === ML_JOB_AGGREGATION.MIN || functionName === ML_JOB_AGGREGATION.MAX) {
+    return (functionName as unknown) as ES_AGGREGATION;
+  }
+
+  if (functionName === ML_JOB_AGGREGATION.RARE) {
+    return ES_AGGREGATION.COUNT;
   }
 
   // Return null if ML function does not map to an ES aggregation.
