@@ -11,3 +11,4 @@ export { RandomProvider } from './random';
 export { AceEditorProvider } from './ace_editor';
 export { GrokDebuggerProvider } from './grok_debugger';
 export { UptimeProvider } from './uptime';
+export { MachineLearningProvider } from './ml';

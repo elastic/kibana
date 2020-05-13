@@ -54,6 +54,7 @@ import {
   AceEditorProvider,
   GrokDebuggerProvider,
   UptimeProvider,
+  MachineLearningProvider,
 
 } from './services';
 
@@ -87,7 +88,8 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/maps'),
       resolve(__dirname, './apps/status_page'),
       resolve(__dirname, './apps/upgrade_assistant'),
-      resolve(__dirname, './apps/uptime')
+      resolve(__dirname, './apps/uptime'),
+      resolve(__dirname, './apps/ml'),
     ],
 
     // define the name and providers for services that should be
@@ -124,6 +126,7 @@ export default async function ({ readConfigFile }) {
       grokDebugger: GrokDebuggerProvider,
       uptime: UptimeProvider,
       rollup: RollupPageProvider,
+      ml: MachineLearningProvider,
     },
 
     // just like services, PageObjects are defined as a map of
@@ -213,7 +216,10 @@ export default async function ({ readConfigFile }) {
       rollupJob: {
         pathname: '/app/kibana',
         hash: '/management/elasticsearch/rollup_jobs/'
-      }
+      },
+      ml: {
+        pathname: '/app/ml'
+      },
     },
 
     // choose where esArchiver should load archives from

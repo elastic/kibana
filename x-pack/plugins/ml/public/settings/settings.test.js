@@ -31,7 +31,7 @@ describe('Settings', () => {
       <Settings canGetFilters={false} canGetCalendars={true}/>
     );
 
-    const button = wrapper.find('[data-testid="ml_filter_lists_button"]');
+    const button = wrapper.find('[data-test-subj="ml_filter_lists_button"]');
     const filterButton = button.find('EuiButtonEmpty');
     expect(filterButton.prop('isDisabled')).toBe(true);
   });
@@ -41,7 +41,7 @@ describe('Settings', () => {
       <Settings canGetFilters={true} canGetCalendars={false} />
     );
 
-    const button = wrapper.find('[data-testid="ml_calendar_mng_button"]');
+    const button = wrapper.find('[data-test-subj="ml_calendar_mng_button"]');
     const calendarButton = button.find('EuiButtonEmpty');
     expect(calendarButton.prop('isDisabled')).toBe(true);
   });

@@ -1,6 +1,6 @@
 <ml-nav-menu name="timeseriesexplorer"></ml-nav-menu>
 <ml-chart-tooltip></ml-chart-tooltip>
-<div class="ml-time-series-explorer" ng-controller="MlTimeSeriesExplorerController">
+<div class="ml-time-series-explorer" ng-controller="MlTimeSeriesExplorerController" data-test-subj="mlPageSingleMetricViewer">
   <navbar ng-show="jobs.length > 0 && chrome.getVisible()">
     <job-select-button
       timeseriesonly="true"
@@ -8,7 +8,7 @@
     </job-select-button>
   </navbar>
 
-  <div class="no-results-container" ng-if="jobs.length === 0 && loading === false">
+  <div class="no-results-container" ng-if="jobs.length === 0 && loading === false" data-test-subj="mlNoSingleMetricJobsFound">
     <div class="no-results">
       <div
         i18n-id="xpack.ml.timeSeriesExplorer.noSingleMetricJobsFoundLabel"
@@ -189,7 +189,7 @@
           i18n-id="xpack.ml.timeSeriesExplorer.annotationsTitle"
           i18n-default-message="Annotations"
         ></span>
-  
+
         <ml-annotation-table
           annotations="focusAnnotationData"
           drill-down="false"
