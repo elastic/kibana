@@ -19,7 +19,7 @@
 
 import { createHashHistory, History, UnregisterCallback } from 'history';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { AppBase, ToastsSetup } from 'kibana/public';
+import { AppUpdater, ToastsSetup } from 'kibana/public';
 import { setStateToKbnUrl } from './kbn_url_storage';
 import { unhashUrl } from './hash_unhash_url';
 
@@ -37,6 +37,7 @@ export interface KbnUrlTracker {
    */
   stop: () => void;
   setActiveUrl: (newUrl: string) => void;
+  getActiveUrl: () => string;
 }
 
 /**
@@ -59,11 +60,8 @@ export function createKbnUrlTracker({
   history,
   getHistory,
   storage,
-  shouldTrackUrlUpdate = pathname => {
-    const currentAppName = defaultSubUrl.slice(2); // cut hash and slash symbols
-    const targetAppName = pathname.split('/')[1];
-
-    return currentAppName === targetAppName;
+  shouldTrackUrlUpdate = () => {
+    return true;
   },
 }: {
   /**
@@ -95,7 +93,7 @@ export function createKbnUrlTracker({
   /**
    * App updater subject passed into the application definition to change nav link url.
    */
-  navLinkUpdater$: BehaviorSubject<(app: AppBase) => { activeUrl?: string } | undefined>;
+  navLinkUpdater$: BehaviorSubject<AppUpdater>;
   /**
    * Toast notifications service to show toasts in error cases.
    */
@@ -130,7 +128,7 @@ export function createKbnUrlTracker({
   let unsubscribeGlobalState: Subscription[] | undefined;
 
   function setNavLink(hash: string) {
-    navLinkUpdater$.next(() => ({ activeUrl: baseUrl + hash }));
+    navLinkUpdater$.next(() => ({ defaultPath: hash }));
   }
 
   function getActiveSubUrl(url: string) {
@@ -168,8 +166,8 @@ export function createKbnUrlTracker({
     const historyInstance = history || (getHistory && getHistory()) || createHashHistory();
     // track current hash when within app
     unsubscribeURLHistory = historyInstance.listen(location => {
-      if (shouldTrackUrlUpdate(location.pathname)) {
-        setActiveUrl(location.pathname + location.search);
+      if (shouldTrackUrlUpdate(location.hash)) {
+        setActiveUrl(location.hash.substr(1));
       }
     });
   }
@@ -216,5 +214,8 @@ export function createKbnUrlTracker({
       unsubscribe();
     },
     setActiveUrl,
+    getActiveUrl() {
+      return activeUrl;
+    },
   };
 }
