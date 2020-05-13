@@ -49,14 +49,14 @@ export class MachineLearningFlyout extends Component<Props, State> {
       }
       this.addSuccessToast({ transactionType });
     } catch (e) {
-      this.addErrorToast();
+      this.addErrorToast(e as Error);
     }
 
     this.setState({ isCreatingJob: false });
     this.props.onClose();
   };
 
-  public addErrorToast = () => {
+  public addErrorToast = (error: Error & { body?: { message?: string } }) => {
     const { core } = this.context;
 
     const { urlParams } = this.props;
@@ -66,6 +66,11 @@ export class MachineLearningFlyout extends Component<Props, State> {
       return;
     }
 
+    const errorDescription = error?.body?.message;
+    const errorText = errorDescription
+      ? `${error.message}: ${errorDescription}`
+      : error.message;
+
     core.notifications.toasts.addWarning({
       title: i18n.translate(
         'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationTitle',
@@ -74,15 +79,18 @@ export class MachineLearningFlyout extends Component<Props, State> {
         }
       ),
       text: toMountPoint(
-        <p>
-          {i18n.translate(
-            'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationText',
-            {
-              defaultMessage:
-                'Your current license may not allow for creating machine learning jobs, or this job may already exist.'
-            }
-          )}
-        </p>
+        <>
+          <p>{errorText}</p>
+          <p>
+            {i18n.translate(
+              'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationText',
+              {
+                defaultMessage:
+                  'Your current license may not allow for creating machine learning jobs, or this job may already exist.'
+              }
+            )}
+          </p>
+        </>
       )
     });
   };
