@@ -155,6 +155,9 @@ export function setActiveApi(api) {
     $.ajax({
       url: '../api/console/api_server',
       dataType: 'json', // disable automatic guessing
+      headers: {
+        'kbn-xsrf': 'kibana',
+      },
     }).then(
       function(data) {
         setActiveApi(loadApisFromJson(data));

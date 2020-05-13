@@ -24,7 +24,7 @@ exports[`DataOrIndexMissing component renders headingMessage 1`] = `
               <EuiButton
                 color="primary"
                 fill={true}
-                href="/app/kibana#/home/tutorial/uptimeMonitors"
+                href="/app/home#/tutorial/uptimeMonitors"
               >
                 <FormattedMessage
                   defaultMessage="View setup instructions"

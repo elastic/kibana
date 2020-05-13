@@ -24,6 +24,7 @@ import { filter, map } from 'rxjs/operators';
 
 import {
   AppMountParameters,
+  AppUpdater,
   CoreSetup,
   CoreStart,
   Plugin,
@@ -35,26 +36,27 @@ import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import { SharePluginStart } from 'src/plugins/share/public';
 import { VisualizationsStart, VisualizationsSetup } from 'src/plugins/visualizations/public';
-import { KibanaLegacySetup, AngularRenderedAppUpdater } from 'src/plugins/kibana_legacy/public';
+import { KibanaLegacySetup } from 'src/plugins/kibana_legacy/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { createKbnUrlTracker } from '../../kibana_utils/public';
+import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
 import { DocViewsRegistry } from './application/doc_views/doc_views_registry';
 import { DocViewTable } from './application/components/table/table';
 import { JsonCodeBlock } from './application/components/json_code_block/json_code_block';
 import {
-  getHistory,
   setDocViewsRegistry,
   setUrlTracker,
   setAngularModule,
   setServices,
+  setScopedHistory,
+  getScopedHistory,
 } from './kibana_services';
 import { createSavedSearchesLoader } from './saved_searches';
-import { getInnerAngularModuleEmbeddable, getInnerAngularModule } from './get_inner_angular';
 import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
 
@@ -114,7 +116,7 @@ export class DiscoverPlugin
   implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  private appStateUpdater = new BehaviorSubject<AngularRenderedAppUpdater>(() => ({}));
+  private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private docViewsRegistry: DocViewsRegistry | null = null;
   private embeddableInjector: auto.IInjectorService | null = null;
   private stopUrlTracking: (() => void) | undefined = undefined;
@@ -155,9 +157,9 @@ export class DiscoverPlugin
       // we pass getter here instead of plain `history`,
       // so history is lazily created (when app is mounted)
       // this prevents redundant `#` when not in discover app
-      getHistory,
-      baseUrl: core.http.basePath.prepend('/app/kibana'),
-      defaultSubUrl: '#/discover',
+      getHistory: getScopedHistory,
+      baseUrl: core.http.basePath.prepend('/app/discover'),
+      defaultSubUrl: '#/',
       storageKey: `lastUrl:${core.http.basePath.get()}:discover`,
       navLinkUpdater$: this.appStateUpdater,
       toastNotifications: core.notifications.toasts,
@@ -182,13 +184,14 @@ export class DiscoverPlugin
     };
 
     this.docViewsRegistry.setAngularInjectorGetter(this.getEmbeddableInjector);
-    plugins.kibanaLegacy.registerLegacyApp({
+    core.application.register({
       id: 'discover',
       title: 'Discover',
       updater$: this.appStateUpdater.asObservable(),
-      navLinkId: 'kibana:discover',
       order: -1004,
       euiIconType: 'discoverApp',
+      defaultPath: '#/',
+      category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         if (!this.initializeServices) {
           throw Error('Discover plugin method initializeServices is undefined');
@@ -196,6 +199,7 @@ export class DiscoverPlugin
         if (!this.initializeInnerAngular) {
           throw Error('Discover plugin method initializeInnerAngular is undefined');
         }
+        setScopedHistory(params.history);
         appMounted();
         const {
           plugins: { data: dataStart },
@@ -205,6 +209,7 @@ export class DiscoverPlugin
         // make sure the index pattern list is up to date
         await dataStart.indexPatterns.clearCache();
         const { renderApp } = await import('./application/application');
+        params.element.classList.add('dscAppWrapper');
         const unmount = await renderApp(innerAngularName, params.element);
         return () => {
           unmount();
@@ -212,6 +217,8 @@ export class DiscoverPlugin
         };
       },
     });
+
+    plugins.kibanaLegacy.forwardApp('discover', 'discover');
 
     if (plugins.home) {
       registerFeature(plugins.home);
@@ -236,6 +243,7 @@ export class DiscoverPlugin
         return;
       }
       // this is used by application mount and tests
+      const { getInnerAngularModule } = await import('./get_inner_angular');
       const module = getInnerAngularModule(
         innerAngularName,
         core,
@@ -305,6 +313,7 @@ export class DiscoverPlugin
         throw Error('Discover plugin getEmbeddableInjector:  initializeServices is undefined');
       }
       const { core, plugins } = await this.initializeServices();
+      const { getInnerAngularModuleEmbeddable } = await import('./get_inner_angular');
       getInnerAngularModuleEmbeddable(
         embeddableAngularName,
         core,
