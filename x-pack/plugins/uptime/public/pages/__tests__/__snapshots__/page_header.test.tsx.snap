@@ -17,7 +17,7 @@ Array [
   }
 
   .c0.c0.c0 .euiSuperDatePicker__flexWrapper {
-    width: 100%;
+    width: calc(100% + 8px);
   }
 }
 
@@ -94,11 +94,7 @@ Array [
                 <span
                   class="euiButtonEmpty__text"
                 >
-                  <span
-                    class="eui-hideFor--xs"
-                  >
-                    Settings
-                  </span>
+                  Settings
                 </span>
               </span>
             </button>
@@ -234,7 +230,7 @@ Array [
   }
 
   .c0.c0.c0 .euiSuperDatePicker__flexWrapper {
-    width: 100%;
+    width: calc(100% + 8px);
   }
 }
 

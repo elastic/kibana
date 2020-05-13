@@ -69,7 +69,7 @@ export const OverviewPageComponent = React.memo(({ indexPattern, setEsKueryFilte
     <>
       <PageHeader headingText={heading} extraLinks={true} datePicker={true} />
       <EmptyState>
-        <EuiFlexGroup gutterSize="xs" wrap responsive>
+        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
           <EuiFlexItem grow={1} style={{ flexBasis: 485 }}>
             <KueryBar
               aria-label={i18n.translate('xpack.uptime.filterBar.ariaLabel', {

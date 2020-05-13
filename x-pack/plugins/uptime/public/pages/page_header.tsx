@@ -5,14 +5,7 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiSpacer,
-  EuiButtonEmpty,
-  EuiHideFor,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -39,7 +32,7 @@ const StyledPicker = styled(EuiFlexItem)`
     @media only screen and (max-width: 880px) {
       flex-grow: 1;
       .euiSuperDatePicker__flexWrapper {
-        width: 100%;
+        width: calc(100% + 8px);
       }
     }
   }
@@ -62,7 +55,7 @@ export const PageHeader = React.memo(
         <EuiFlexItem grow={false}>
           <Link to={SETTINGS_ROUTE}>
             <EuiButtonEmpty data-test-subj="settings-page-link" iconType="gear">
-              <EuiHideFor sizes={['xs']}>{SETTINGS_LINK_TEXT}</EuiHideFor>
+              {SETTINGS_LINK_TEXT}
             </EuiButtonEmpty>
           </Link>
         </EuiFlexItem>
