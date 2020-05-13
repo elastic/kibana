@@ -50,6 +50,7 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
 
   const button = (
     <Button
+      data-test-subj="popover"
       clickable
       color={theme.euiColorDanger}
       shape={Shape.square}
@@ -96,6 +97,7 @@ export const ErrorMarker: React.FC<Props> = ({ mark }) => {
         />
         <EuiText size="s">
           <ErrorLink
+            data-test-subj="errorLink"
             serviceName={error.service.name}
             errorGroupId={error.error.grouping_key}
             query={query}
