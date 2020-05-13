@@ -25,7 +25,7 @@ import {
 import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
-import { getIndexPatternSettings } from './lib/get_index_pattern_settings';
+import { getIndexPatternSettings } from '../../../../plugins/maps/server/lib/get_index_pattern_settings';
 
 import Boom from 'boom';
 
