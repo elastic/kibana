@@ -18,12 +18,11 @@ import {
 import * as i18n from './translations';
 import { getErrorMessage, request } from '../case/utils';
 
-const VERSION = '2';
-const BASE_URL = `rest/api/${VERSION}`;
-const INCIDENT_URL = `issue`;
-const COMMENT_URL = `comment`;
+const BASE_URL = `rest`;
+const INCIDENT_URL = `incidents`;
+const COMMENT_URL = `comments`;
 
-const VIEW_INCIDENT_URL = `browse`;
+const VIEW_INCIDENT_URL = `#incidents`;
 
 export const createExternalService = ({
   config,
@@ -36,8 +35,8 @@ export const createExternalService = ({
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
-  const incidentUrl = `${url}/${BASE_URL}/${INCIDENT_URL}`;
-  const commentUrl = `${incidentUrl}/{issueId}/${COMMENT_URL}`;
+  const incidentUrl = `${url}/${BASE_URL}/${orgId}/${INCIDENT_URL}`;
+  const commentUrl = `${incidentUrl}/{inc_id}/${COMMENT_URL}`;
   const axiosInstance = axios.create({
     auth: { username: apiKeyId, password: apiKeySecret },
   });
@@ -46,8 +45,8 @@ export const createExternalService = ({
     return `${url}/${VIEW_INCIDENT_URL}/${key}`;
   };
 
-  const getCommentsURL = (issueId: string) => {
-    return commentUrl.replace('{issueId}', issueId);
+  const getCommentsURL = (incidentId: string) => {
+    return commentUrl.replace('{inc_id}', incidentId);
   };
 
   const getIncident = async (id: string) => {
