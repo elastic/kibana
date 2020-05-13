@@ -91,7 +91,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
         'Controls the default sort direction for time based index patterns in the Discover app.',
     }),
     category: ['discover'],
-    schema: schema.string(),
+    schema: schema.oneOf([schema.literal('desc'), schema.literal('asc')]),
   },
   [SEARCH_ON_PAGE_LOAD_SETTING]: {
     name: i18n.translate('discover.advancedSettings.searchOnPageLoadTitle', {
@@ -161,6 +161,6 @@ export const uiSettings: Record<string, UiSettingsParams> = {
         'From this list the first field that is present and sortable in the current index pattern is used.',
     }),
     category: ['discover'],
-    schema: schema.oneOf([schema.literal('desc'), schema.literal('asc')]),
+    schema: schema.arrayOf(schema.string()),
   },
 };

@@ -25,7 +25,6 @@ import angular, { IModule } from 'angular';
 import 'angular-sanitize';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import {
-  AppMountContext,
   ChromeStart,
   IUiSettingsClient,
   CoreStart,
@@ -41,7 +40,7 @@ import { NavigationPublicPluginStart as NavigationStart } from '../../../navigat
 import { DataPublicPluginStart } from '../../../data/public';
 import { SharePluginStart } from '../../../share/public';
 import { KibanaLegacyStart, configureAppAngularModule } from '../../../kibana_legacy/public';
-import { SavedObjectLoader } from '../../../saved_objects/public';
+import { SavedObjectLoader, SavedObjectsStart } from '../../../saved_objects/public';
 
 export interface RenderDeps {
   pluginInitializerContext: PluginInitializerContext;
@@ -65,13 +64,14 @@ export interface RenderDeps {
   share?: SharePluginStart;
   config: KibanaLegacyStart['config'];
   usageCollection?: UsageCollectionSetup;
+  savedObjects: SavedObjectsStart;
 }
 
 let angularModuleInstance: IModule | null = null;
 
 export const renderApp = (element: HTMLElement, appBasePath: string, deps: RenderDeps) => {
   if (!angularModuleInstance) {
-    angularModuleInstance = createLocalAngularModule(deps.core, deps.navigation);
+    angularModuleInstance = createLocalAngularModule();
     // global routing stuff
     configureAppAngularModule(
       angularModuleInstance,
@@ -109,7 +109,7 @@ function mountDashboardApp(appBasePath: string, element: HTMLElement) {
   return $injector;
 }
 
-function createLocalAngularModule(core: AppMountContext['core'], navigation: NavigationStart) {
+function createLocalAngularModule() {
   createLocalI18nModule();
   createLocalIconModule();
 
