@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import ApolloClient from 'apollo-client';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
+
 import { HeaderPage } from '../../common/components/header_page';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { useKibana } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { StatefulOpenTimeline } from '../components/open_timeline';
 import * as i18n from './translations';
+import { CreateTemplateTimelineBtn } from '../components/template_timeline/create_template_timeline';
 
 const TimelinesContainer = styled.div`
   width: 100%;
@@ -41,15 +43,22 @@ export const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => 
     <>
       <WrapperPage>
         <HeaderPage border title={i18n.PAGE_TITLE}>
-          {capabilitiesCanUserCRUD && (
-            <EuiButton
-              iconType="indexOpen"
-              onClick={onImportTimelineBtnClick}
-              data-test-subj="open-import-data-modal-btn"
-            >
-              {i18n.ALL_TIMELINES_IMPORT_TIMELINE_TITLE}
-            </EuiButton>
-          )}
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem>
+              {capabilitiesCanUserCRUD && (
+                <EuiButton
+                  iconType="indexOpen"
+                  onClick={onImportTimelineBtnClick}
+                  data-test-subj="open-import-data-modal-btn"
+                >
+                  {i18n.ALL_TIMELINES_IMPORT_TIMELINE_TITLE}
+                </EuiButton>
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {capabilitiesCanUserCRUD && <CreateTemplateTimelineBtn outline={true} />}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </HeaderPage>
 
         <TimelinesContainer>

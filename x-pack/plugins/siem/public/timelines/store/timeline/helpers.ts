@@ -20,6 +20,7 @@ import { timelineDefaults } from './defaults';
 import { ColumnHeaderOptions, KqlMode, TimelineModel, EventType } from './model';
 import { TimelineById, TimelineState } from './types';
 import { TimelineNonEcsData } from '../../../graphql/types';
+import { TimelineTypeLiteral } from '../../../../common/types/timeline';
 
 const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
 
@@ -147,6 +148,7 @@ interface AddNewTimelineParams {
   showCheckboxes?: boolean;
   showRowRenderers?: boolean;
   timelineById: TimelineById;
+  timelineType: TimelineTypeLiteral;
 }
 
 /** Adds a new `Timeline` to the provided collection of `TimelineById` */
@@ -163,6 +165,7 @@ export const addNewTimeline = ({
   showCheckboxes = false,
   showRowRenderers = true,
   timelineById,
+  timelineType,
 }: AddNewTimelineParams): TimelineById => ({
   ...timelineById,
   [id]: {
@@ -182,6 +185,7 @@ export const addNewTimeline = ({
     isLoading: false,
     showCheckboxes,
     showRowRenderers,
+    timelineType,
   },
 });
 

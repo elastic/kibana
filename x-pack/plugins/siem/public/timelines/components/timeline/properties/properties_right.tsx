@@ -22,6 +22,8 @@ import { InspectButton, InspectButtonContainer } from '../../../../common/compon
 import * as i18n from './translations';
 import { AssociateNote } from '../../notes/helpers';
 import { Note } from '../../../../common/lib/note';
+import { CreateTemplateTimelineBtn } from '../../template_timeline/create_template_timeline';
+import { TimelineTypeLiteral, TimelineType } from '../../../../../common/types/timeline';
 
 export const PropertiesRightStyle = styled(EuiFlexGroup)`
   margin-right: 5px;
@@ -54,7 +56,15 @@ const Avatar = styled(EuiAvatar)`
 
 Avatar.displayName = 'Avatar';
 
-type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
+type CreateTimeline = ({
+  id,
+  show,
+  timelineType,
+}: {
+  id: string;
+  show?: boolean;
+  timelineType?: TimelineTypeLiteral;
+}) => void;
 type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
 export type UpdateNote = (note: Note) => void;
 
@@ -130,7 +140,12 @@ const PropertiesRightComponent: React.FC<Props> = ({
                 createTimeline={createTimeline}
                 onClosePopover={onClosePopover}
                 timelineId={timelineId}
+                timelineType={TimelineType.default}
               />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <CreateTemplateTimelineBtn onClosePopover={onClosePopover} timelineId={timelineId} />
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>

@@ -23,6 +23,7 @@ import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
+import { noop } from 'lodash/fp';
 import { Note } from '../../../../common/lib/note';
 import { Notes } from '../../notes';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
@@ -32,6 +33,7 @@ import * as i18n from './translations';
 import { SiemPageName } from '../../../../app/types';
 import { timelineSelectors } from '../../../../timelines/store/timeline';
 import { State } from '../../../../common/store';
+import { TimelineTypeLiteral, TimelineType } from '../../../../../common/types/timeline';
 
 export const historyToolTip = 'The chronological history of actions related to this timeline';
 export const streamLiveToolTip = 'Update the Timeline as new data arrives';
@@ -43,7 +45,15 @@ const NotesCountBadge = (styled(EuiBadge)`
 
 NotesCountBadge.displayName = 'NotesCountBadge';
 
-type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
+type CreateTimeline = ({
+  id,
+  show,
+  timelineType,
+}: {
+  id: string;
+  show?: boolean;
+  timelineType?: TimelineTypeLiteral;
+}) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
 type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
@@ -158,25 +168,42 @@ NewCase.displayName = 'NewCase';
 interface NewTimelineProps {
   createTimeline: CreateTimeline;
   onClosePopover: () => void;
+  outline?: boolean;
+  showTimeline?: (args: { id: string; show: boolean }) => void;
   timelineId: string;
+  timelineType: TimelineTypeLiteral;
+  title?: string;
 }
 
 export const NewTimeline = React.memo<NewTimelineProps>(
-  ({ createTimeline, onClosePopover, timelineId }) => {
+  ({
+    createTimeline,
+    onClosePopover,
+    outline = false,
+    showTimeline = noop,
+    timelineId,
+    timelineType = TimelineType.default,
+    title = i18n.NEW_TIMELINE,
+  }) => {
     const handleClick = useCallback(() => {
-      createTimeline({ id: timelineId, show: true });
+      createTimeline({ id: timelineId, show: true, timelineType });
       onClosePopover();
+      showTimeline({ id: timelineId, show: true });
     }, [createTimeline, timelineId, onClosePopover]);
-
+    const props = {
+      iconType: 'plusInCircle',
+      onClick: handleClick,
+    };
+    if (outline) {
+      return (
+        <EuiButton data-test-subj="timeline-new-with-border" {...props}>
+          {title}
+        </EuiButton>
+      );
+    }
     return (
-      <EuiButtonEmpty
-        data-test-subj="timeline-new"
-        color="text"
-        iconSide="left"
-        iconType="plusInCircle"
-        onClick={handleClick}
-      >
-        {i18n.NEW_TIMELINE}
+      <EuiButtonEmpty data-test-subj="timeline-new" color="text" {...props}>
+        {title}
       </EuiButtonEmpty>
     );
   }

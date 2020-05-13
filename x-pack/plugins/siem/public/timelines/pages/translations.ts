@@ -30,3 +30,10 @@ export const ERROR_FETCHING_TIMELINES_TITLE = i18n.translate(
     defaultMessage: 'Failed to query all timelines data',
   }
 );
+
+export const CREATE_TEMPLATE_TIMELINE_TITLE = i18n.translate(
+  'xpack.siem.timelines.allTimelines.createTemplateTimelineTitle',
+  {
+    defaultMessage: 'Create new template timeline',
+  }
+);
