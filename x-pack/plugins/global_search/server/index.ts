@@ -14,3 +14,17 @@ export const plugin: PluginInitializer<
 > = context => new GlobalSearchPlugin(context);
 
 export { config } from './config';
+
+export {
+  GlobalSearchProviderFindOptions,
+  GlobalSearchProviderResult,
+  GlobalSearchProviderResultUrl,
+  GlobalSearchResult,
+} from '../common/types';
+export {
+  GlobalSearchProviderContext,
+  GlobalSearchPluginStart,
+  GlobalSearchPluginSetup,
+  GlobalSearchResultProvider,
+} from './types';
+export { GlobalSearchFindOptions, GlobalSearchBatchedResults } from './services/types';

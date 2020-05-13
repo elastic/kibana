@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { GlobalSearchResult, GlobalSearchBatchedResults, GlobalSearchFindOptions } from './types';
+export { GlobalSearchBatchedResults, GlobalSearchFindOptions } from './types';
 export { SearchService, SearchServiceSetup, SearchServiceStart } from './search_service';

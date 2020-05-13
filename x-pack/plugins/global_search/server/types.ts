@@ -6,6 +6,12 @@
 
 import { Observable } from 'rxjs';
 import {
+  ISavedObjectTypeRegistry,
+  IScopedClusterClient,
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+} from 'src/core/server';
+import {
   GlobalSearchBatchedResults,
   GlobalSearchFindOptions,
   SearchServiceSetup,
@@ -22,4 +28,36 @@ export type GlobalSearchPluginStart = Pick<SearchServiceStart, 'find'>;
  */
 export interface RouteHandlerGlobalSearchContext {
   find(term: string, options: GlobalSearchFindOptions): Observable<GlobalSearchBatchedResults>;
+}
+
+/**
+ * Context passed to server-side {@GlobalSearchResultProvider | result provider}'s `find` method.
+ */
+export interface GlobalSearchProviderContext {
+  core: {
+    savedObjects: {
+      client: SavedObjectsClientContract;
+      typeRegistry: ISavedObjectTypeRegistry;
+    };
+    elasticsearch: {
+      legacy: {
+        client: IScopedClusterClient;
+      };
+    };
+    uiSettings: {
+      client: IUiSettingsClient;
+    };
+  };
+}
+
+/**
+ * GlobalSearch result provider, to be registered using the {@link GlobalSearchPluginSetup | global search API}
+ */
+export interface GlobalSearchResultProvider {
+  id: string;
+  find(
+    term: string,
+    options: GlobalSearchProviderFindOptions,
+    context: GlobalSearchProviderContext
+  ): Observable<GlobalSearchProviderResult[]>;
 }

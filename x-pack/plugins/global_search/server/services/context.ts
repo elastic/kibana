@@ -5,7 +5,7 @@
  */
 
 import { CoreStart, KibanaRequest } from 'src/core/server';
-import { GlobalSearchProviderContext } from './types';
+import { GlobalSearchProviderContext } from '../types';
 
 export type GlobalSearchContextFactory = (request: KibanaRequest) => GlobalSearchProviderContext;
 
