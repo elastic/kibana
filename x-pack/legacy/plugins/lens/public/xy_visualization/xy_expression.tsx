@@ -359,12 +359,31 @@ export function XYChart({
             enableHistogramMode: isHistogram && (seriesType.includes('stacked') || !splitAccessor),
             timeZone,
             name(d) {
+              const splitHint = table.columns.find(col => col.id === splitAccessor)?.formatHint;
+
+              // For multiple y series, the name of the operation is used on each, either:
+              // * Key - Y name
+              // * Formatted value - Y name
               if (accessors.length > 1) {
                 return d.seriesKeys
-                  .map((key: string | number) => columnToLabelMap[key] || key)
+                  .map((key: string | number, i) => {
+                    if (i === 0 && splitHint) {
+                      return formatFactory(splitHint).convert(key);
+                    }
+                    return splitAccessor && i === 0 ? key : columnToLabelMap[key] ?? '';
+                  })
                   .join(' - ');
               }
-              return columnToLabelMap[d.seriesKeys[0]] ?? d.seriesKeys[0];
+
+              // For formatted split series, format the key
+              // This handles splitting by dates, for example
+              if (splitHint) {
+                return formatFactory(splitHint).convert(d.seriesKeys[0]);
+              }
+              // This handles both split and single-y cases:
+              // * If split series without formatting, show the value literally
+              // * If single Y, the seriesKey will be the acccessor, so we show the human-readable name
+              return splitAccessor ? d.seriesKeys[0] : columnToLabelMap[d.seriesKeys[0]] ?? '';
             },
           };
 
