@@ -17,6 +17,9 @@
  * under the License.
  */
 
-export const NEWSFEED_FALLBACK_LANGUAGE = 'en';
-export const NEWSFEED_LAST_FETCH_STORAGE_KEY = 'newsfeed.lastfetchtime';
-export const NEWSFEED_HASH_SET_STORAGE_KEY = 'newsfeed.hashes';
+import { PluginInitializerContext } from 'kibana/public';
+import { NewsFeedSimulatorPlugin } from './plugin';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new NewsFeedSimulatorPlugin(initializerContext);
+}
