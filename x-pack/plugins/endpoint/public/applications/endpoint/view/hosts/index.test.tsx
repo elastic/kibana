@@ -128,12 +128,23 @@ describe('when on the hosts page', () => {
       const policyResponse = docGenerator.generatePolicyResponse();
       policyResponse.endpoint.policy.applied.status = overallStatus;
       policyResponse.endpoint.policy.applied.response.configurations.malware.status = overallStatus;
-      policyResponse.endpoint.policy.applied.actions.download_model!.status = overallStatus;
+      let downloadModelAction = policyResponse.endpoint.policy.applied.actions.find(
+        action => action.name === 'download_model'
+      );
+
+      if (!downloadModelAction) {
+        downloadModelAction = {
+          name: 'download_model',
+          message: 'Failed to apply a portion of the configuration (kernel)',
+          status: overallStatus,
+        };
+        policyResponse.endpoint.policy.applied.actions.push(downloadModelAction);
+      }
       if (
         overallStatus === HostPolicyResponseActionStatus.failure ||
         overallStatus === HostPolicyResponseActionStatus.warning
       ) {
-        policyResponse.endpoint.policy.applied.actions.download_model!.message = 'no action taken';
+        downloadModelAction.message = 'no action taken';
       }
       store.dispatch({
         type: 'serverReturnedHostPolicyResponse',

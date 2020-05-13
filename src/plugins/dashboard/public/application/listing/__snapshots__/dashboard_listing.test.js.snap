@@ -102,7 +102,7 @@ exports[`after fetch initialFilter 1`] = `
                   values={
                     Object {
                       "sampleDataInstallLink": <EuiLink
-                        href="#/home/tutorial_directory/sampleData"
+                        onClick={[Function]}
                       >
                         <FormattedMessage
                           defaultMessage="Install some sample data"
@@ -203,7 +203,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
                   values={
                     Object {
                       "sampleDataInstallLink": <EuiLink
-                        href="#/home/tutorial_directory/sampleData"
+                        onClick={[Function]}
                       >
                         <FormattedMessage
                           defaultMessage="Install some sample data"
@@ -304,7 +304,7 @@ exports[`after fetch renders table rows 1`] = `
                   values={
                     Object {
                       "sampleDataInstallLink": <EuiLink
-                        href="#/home/tutorial_directory/sampleData"
+                        onClick={[Function]}
                       >
                         <FormattedMessage
                           defaultMessage="Install some sample data"
@@ -405,7 +405,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
                   values={
                     Object {
                       "sampleDataInstallLink": <EuiLink
-                        href="#/home/tutorial_directory/sampleData"
+                        onClick={[Function]}
                       >
                         <FormattedMessage
                           defaultMessage="Install some sample data"
@@ -506,7 +506,7 @@ exports[`renders empty page in before initial fetch to avoid flickering 1`] = `
                   values={
                     Object {
                       "sampleDataInstallLink": <EuiLink
-                        href="#/home/tutorial_directory/sampleData"
+                        onClick={[Function]}
                       >
                         <FormattedMessage
                           defaultMessage="Install some sample data"

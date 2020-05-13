@@ -38,7 +38,6 @@
     "@kbn/plugin-helpers": "9.0.2",
     "@kbn/test": "1.0.0",
     "@kbn/utility-types": "1.0.0",
-    "@mattapperson/slapshot": "1.4.3",
     "@storybook/addon-actions": "^5.2.6",
     "@storybook/addon-console": "^1.2.1",
     "@storybook/addon-knobs": "^5.2.6",

@@ -116,6 +116,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
       },
     ]
   }
+  navigateToApp={[Function]}
   onIsLockedUpdate={[Function]}
   onIsOpenUpdate={[Function]}
   recentNavLinks={
@@ -2995,6 +2996,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   isLocked={false}
   isOpen={false}
   navLinks={Array []}
+  navigateToApp={[Function]}
   onIsLockedUpdate={[Function]}
   onIsOpenUpdate={[Function]}
   recentNavLinks={Array []}
@@ -3025,6 +3027,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   isLocked={false}
   isOpen={true}
   navLinks={Array []}
+  navigateToApp={[Function]}
   onIsLockedUpdate={[Function]}
   onIsOpenUpdate={[Function]}
   recentNavLinks={Array []}
@@ -3591,6 +3594,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
   isLocked={true}
   isOpen={true}
   navLinks={Array []}
+  navigateToApp={[Function]}
   onIsLockedUpdate={[Function]}
   onIsOpenUpdate={[Function]}
   recentNavLinks={Array []}

@@ -19,7 +19,7 @@ exports[`EmptyState should render normally 1`] = `
         values={
           Object {
             "getStartedLink": <EuiLink
-              href="#/home/tutorial_directory/sampleData"
+              href="/app/home#/tutorial_directory/sampleData"
             >
               <FormattedMessage
                 defaultMessage="get started with some sample data sets."
@@ -28,7 +28,7 @@ exports[`EmptyState should render normally 1`] = `
               />
             </EuiLink>,
             "learnHowLink": <EuiLink
-              href="#/home/tutorial_directory"
+              href="/app/home#/tutorial_directory"
             >
               <FormattedMessage
                 defaultMessage="Learn how"
