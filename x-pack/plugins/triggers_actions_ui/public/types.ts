@@ -110,12 +110,28 @@ export interface AlertTableItem extends Alert {
   tagsText: string;
 }
 
-export interface AlertTypeModel {
+export interface AlertTypeParamsExpressionProps<
+  AlertParamsType = unknown,
+  AlertsContextValue = unknown
+> {
+  alertParams: AlertParamsType;
+  alertInterval: string;
+  setAlertParams: (property: string, value: any) => void;
+  setAlertProperty: (key: string, value: any) => void;
+  errors: IErrorObject;
+  alertsContext: AlertsContextValue;
+}
+
+export interface AlertTypeModel<AlertParamsType = any, AlertsContextValue = any> {
   id: string;
   name: string | JSX.Element;
   iconClass: string;
-  validate: (alertParams: any) => ValidationResult;
-  alertParamsExpression: React.FunctionComponent<any>;
+  validate: (alertParams: AlertParamsType) => ValidationResult;
+  alertParamsExpression:
+    | React.FunctionComponent<any>
+    | React.LazyExoticComponent<
+        ComponentType<AlertTypeParamsExpressionProps<AlertParamsType, AlertsContextValue>>
+      >;
   defaultActionMessage?: string;
 }
 

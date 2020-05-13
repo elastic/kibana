@@ -8,6 +8,7 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 
 import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import { mapSavedObjects, mapsTelemetrySavedObjects } from './saved_objects';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
@@ -47,6 +48,9 @@ export class MapsPlugin implements Plugin {
         },
       },
     });
+
+    core.savedObjects.registerType(mapsTelemetrySavedObjects);
+    core.savedObjects.registerType(mapSavedObjects);
   }
   start(core: CoreStart) {}
 }

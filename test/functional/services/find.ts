@@ -194,7 +194,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       if (isDisplayed) {
         return descendant;
       } else {
-        throw new Error('Element is not displayed');
+        throw new Error(`Element "${selector}" is not displayed`);
       }
     }
 
