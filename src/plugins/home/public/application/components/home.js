@@ -41,6 +41,7 @@ import { i18n } from '@kbn/i18n';
 import { Welcome } from './welcome';
 import { getServices } from '../kibana_services';
 import { FeatureCatalogueCategory } from '../../services';
+import { createAppNavigationHandler } from './app_navigation_handler';
 
 const KEY_ENABLE_WELCOME = 'home:welcome:show';
 
@@ -125,6 +126,7 @@ export class Home extends Component {
         return (
           <EuiFlexItem className="homHome__synopsisItem" key={directory.id}>
             <Synopsis
+              onClick={createAppNavigationHandler(directory.path)}
               description={directory.description}
               iconType={directory.icon}
               title={directory.title}
@@ -203,7 +205,7 @@ export class Home extends Component {
                 </p>
               </EuiText>
               <EuiSpacer size="s" />
-              <EuiButton data-test-subj="allPlugins" href="#/home/feature_directory">
+              <EuiButton data-test-subj="allPlugins" href="#/feature_directory">
                 <FormattedMessage
                   id="home.directories.notFound.viewFullButtonLabel"
                   defaultMessage="View full directory of Kibana plugins"
