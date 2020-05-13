@@ -10,7 +10,7 @@ import {
   EuiDescribedFormGroup,
   EuiFormRow,
   EuiCode,
-  EuiFieldNumber,
+  EuiFieldText,
   EuiText,
   EuiTitle,
   EuiSpacer,
@@ -80,7 +80,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
       >
         <EuiFlexGroup>
           <EuiFlexItem grow={2}>
-            <EuiFieldNumber
+            <EuiFieldText
               min={1}
               aria-label={certificateFormTranslations.expirationInputAriaLabel}
               data-test-subj={`expiration-threshold-input-${loading ? 'loading' : 'loaded'}`}
@@ -90,7 +90,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
               value={formFields?.certExpirationThreshold ?? ''}
               onChange={e =>
                 onChange({
-                  certExpirationThreshold: Number(e.target.value),
+                  certExpirationThreshold: Number(e.target.value) || undefined,
                 })
               }
             />
@@ -128,7 +128,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
       >
         <EuiFlexGroup>
           <EuiFlexItem grow={2}>
-            <EuiFieldNumber
+            <EuiFieldText
               min={1}
               aria-label={certificateFormTranslations.ageInputAriaLabel}
               data-test-subj={`age-threshold-input-${loading ? 'loading' : 'loaded'}`}
@@ -138,7 +138,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
               value={formFields?.certAgeThreshold ?? ''}
               onChange={({ currentTarget: { value } }) =>
                 onChange({
-                  certAgeThreshold: Number(value),
+                  certAgeThreshold: Number(value) || undefined,
                 })
               }
             />
