@@ -39,7 +39,7 @@ export interface IVectorSource extends ISource {
   getBoundsForFilters(
     boundsFilters: BoundsFilters,
     registerCancelCallback: (requestToken: symbol, callback: () => void) => void
-  ): MapExtent;
+  ): MapExtent | null;
   getGeoJsonWithMeta(
     layerName: 'string',
     searchFilters: unknown[],
@@ -58,7 +58,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
   getBoundsForFilters(
     boundsFilters: BoundsFilters,
     registerCancelCallback: (requestToken: symbol, callback: () => void) => void
-  ): MapExtent;
+  ): MapExtent | null;
   getGeoJsonWithMeta(
     layerName: 'string',
     searchFilters: unknown[],

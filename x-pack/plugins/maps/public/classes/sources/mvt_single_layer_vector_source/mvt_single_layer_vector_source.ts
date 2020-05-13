@@ -17,7 +17,6 @@ import {
   DataRequestContext,
   MapExtent,
   TiledSingleLayerVectorSourceDescriptor,
-  VectorSourceRequestMeta,
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { MVTSingleLayerVectorSourceConfig } from './mvt_single_layer_vector_source_editor';
@@ -130,14 +129,14 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return this._descriptor.minSourceZoom;
   }
 
-  getMaxZoom(
-    boundsFilters: BoundsFilters,
-    registerCancelCallback: (requestToken: symbol, callback: () => void) => void
-  ) {
+  getMaxZoom() {
     return this._descriptor.maxSourceZoom;
   }
 
-  getBoundsForFilters(): MapExtent {
+  getBoundsForFilters(
+    boundsFilters: BoundsFilters,
+    registerCancelCallback: (requestToken: symbol, callback: () => void) => void
+  ): MapExtent | null {
     return null;
   }
 

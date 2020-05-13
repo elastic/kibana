@@ -24,14 +24,13 @@ import {
   DataRequestContext,
   LayerDescriptor,
   MapExtent,
-  MapFilters,
   StyleDescriptor,
 } from '../../../common/descriptor_types';
 import { Attribution, ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
 import { IStyle } from '../styles/style';
 
 export interface ILayer {
-  getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent>;
+  getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null>;
   getDataRequest(id: string): DataRequest | undefined;
   getDisplayName(source?: ISource): Promise<string>;
   getId(): string;
@@ -447,7 +446,7 @@ export class AbstractLayer implements ILayer {
     return sourceDataRequest ? sourceDataRequest.hasData() : false;
   }
 
-  async getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent> {
+  async getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null> {
     return null;
   }
 
