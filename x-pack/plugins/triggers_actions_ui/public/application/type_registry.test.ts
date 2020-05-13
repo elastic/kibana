@@ -23,7 +23,11 @@ const getTestAlertType = (id?: string, name?: string, iconClass?: string) => {
   };
 };
 
-const getTestActionType = (id?: string, iconClass?: string, selectedMessage?: string) => {
+const getTestActionType = (
+  id?: string,
+  iconClass?: string,
+  selectedMessage?: string
+): ActionTypeModel<any, any> => {
   return {
     id: id || 'my-action-type',
     iconClass: iconClass || 'test',

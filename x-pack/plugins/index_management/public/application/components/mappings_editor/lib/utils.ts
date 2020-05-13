@@ -17,6 +17,7 @@ import {
   ChildFieldName,
   ParameterName,
   ComboBoxOption,
+  GenericObject,
 } from '../types';
 
 import {
@@ -32,11 +33,9 @@ import { State } from '../reducer';
 import { FieldConfig } from '../shared_imports';
 import { TreeItem } from '../components/tree';
 
-export const getUniqueId = () => {
-  return uuid.v4();
-};
+export const getUniqueId = () => uuid.v4();
 
-const getChildFieldsName = (dataType: DataType): ChildFieldName | undefined => {
+export const getChildFieldsName = (dataType: DataType): ChildFieldName | undefined => {
   if (dataType === 'text' || dataType === 'keyword') {
     return 'fields';
   } else if (dataType === 'object' || dataType === 'nested') {
@@ -508,3 +507,39 @@ export const isStateValid = (state: State): boolean | undefined =>
 
       return isValid && value.isValid;
     }, true as undefined | boolean);
+
+/**
+ * This helper removes all the keys on an object with an "undefined" value.
+ * To avoid sending updates from the mappings editor with this type of object:
+ *
+ *```
+ * {
+ *   "dyamic": undefined,
+ *   "date_detection": undefined,
+ *   "dynamic": undefined,
+ *   "dynamic_date_formats": undefined,
+ *   "dynamic_templates": undefined,
+ *   "numeric_detection": undefined,
+ *   "properties": {
+ *     "title": { "type": "text" }
+ *   }
+ * }
+ *```
+ *
+ * @param obj The object to retrieve the undefined values from
+ * @param recursive A flag to strip recursively into children objects
+ */
+export const stripUndefinedValues = <T = GenericObject>(obj: GenericObject, recursive = true): T =>
+  Object.entries(obj).reduce((acc, [key, value]) => {
+    if (value === undefined) {
+      return acc;
+    }
+
+    if (Array.isArray(value) || value instanceof Date || value === null) {
+      return { ...acc, [key]: value };
+    }
+
+    return recursive && typeof value === 'object'
+      ? { ...acc, [key]: stripUndefinedValues(value, recursive) }
+      : { ...acc, [key]: value };
+  }, {} as T);

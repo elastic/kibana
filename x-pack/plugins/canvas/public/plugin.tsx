@@ -4,15 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import {
   CoreSetup,
   CoreStart,
   Plugin,
   AppMountParameters,
+  AppUpdater,
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { initLoadingIndicator } from './lib/loading_indicator';
+import { getSessionStorage } from './lib/storage';
+import { SESSIONSTORAGE_LASTPATH } from '../common/lib/constants';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../src/plugins/expressions/public';
 import { DataPublicPluginSetup } from '../../../../src/plugins/data/public';
@@ -60,6 +64,7 @@ export type CanvasStart = void;
 /** @internal */
 export class CanvasPlugin
   implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps> {
+  private appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   // TODO: Do we want to completely move canvas_plugin_src into it's own plugin?
   private srcPlugin = new CanvasSrcPlugin();
 
@@ -68,12 +73,21 @@ export class CanvasPlugin
 
     this.srcPlugin.setup(core, { canvas: canvasApi });
 
+    // Set the nav link to the last saved url if we have one in storage
+    const lastUrl = getSessionStorage().get(SESSIONSTORAGE_LASTPATH);
+    if (lastUrl) {
+      this.appUpdater.next(() => ({
+        defaultPath: `#${lastUrl}`,
+      }));
+    }
+
     core.application.register({
       category: DEFAULT_APP_CATEGORIES.kibana,
       id: 'canvas',
       title: 'Canvas',
       euiIconType: 'canvasApp',
       order: 3000,
+      updater$: this.appUpdater,
       mount: async (params: AppMountParameters) => {
         // Load application bundle
         const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');
@@ -81,7 +95,14 @@ export class CanvasPlugin
         // Get start services
         const [coreStart, depsStart] = await core.getStartServices();
 
-        const canvasStore = await initializeCanvas(core, coreStart, plugins, depsStart, registries);
+        const canvasStore = await initializeCanvas(
+          core,
+          coreStart,
+          plugins,
+          depsStart,
+          registries,
+          this.appUpdater
+        );
 
         const unmount = renderApp(coreStart, depsStart, params, canvasStore);
 

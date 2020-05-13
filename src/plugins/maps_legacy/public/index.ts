@@ -45,6 +45,7 @@ import {
 import { mapTooltipProvider } from './tooltip_provider';
 
 export interface MapsLegacyConfigType {
+  regionmap: any;
   emsTileLayerId: string;
   includeElasticMapsService: boolean;
   proxyElasticMapsServiceInMaps: boolean;

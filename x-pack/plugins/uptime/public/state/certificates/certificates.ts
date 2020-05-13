@@ -40,4 +40,4 @@ export function* fetchCertificatesEffect() {
   );
 }
 
-export const certificatesSelector = ({ certificates }: AppState) => certificates.certs.data;
+export const certificatesSelector = ({ certificates }: AppState) => certificates.certs;

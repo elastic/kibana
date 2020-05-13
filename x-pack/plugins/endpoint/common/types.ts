@@ -644,6 +644,9 @@ export interface HostPolicyResponseActions {
   read_malware_config: HostPolicyResponseActionDetails;
 }
 
+/**
+ * policy configurations returned by the endpoint in response to a user applying a policy
+ */
 export type HostPolicyResponseConfiguration = HostPolicyResponse['endpoint']['policy']['applied']['response']['configurations'];
 
 interface HostPolicyResponseConfigurationStatus {

@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettingsPanel } from '../map_settings_panel';
-import { registerLayerWizards } from '../../layers/load_layer_wizards';
+import { registerLayerWizards } from '../../classes/layers/load_layer_wizards';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 

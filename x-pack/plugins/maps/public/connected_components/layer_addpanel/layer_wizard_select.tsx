@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { EuiSpacer, EuiCard, EuiIcon } from '@elastic/eui';
-import { getLayerWizards, LayerWizard } from '../../layers/layer_wizard_registry';
+import { getLayerWizards, LayerWizard } from '../../classes/layers/layer_wizard_registry';
 
 interface Props {
   onSelect: (layerWizard: LayerWizard) => void;

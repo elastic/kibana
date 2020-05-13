@@ -4,22 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { LOCALSTORAGE_CLIPBOARD } from '../../common/lib/constants';
-import { getWindow } from './get_window';
-
-let storage: Storage;
-
-const getStorage = (): Storage => {
-  if (!storage) {
-    storage = new Storage(getWindow().localStorage);
-  }
-
-  return storage;
-};
+import { getLocalStorage } from './storage';
 
 export const setClipboardData = (data: any) => {
-  getStorage().set(LOCALSTORAGE_CLIPBOARD, JSON.stringify(data));
+  getLocalStorage().set(LOCALSTORAGE_CLIPBOARD, JSON.stringify(data));
 };
 
-export const getClipboardData = () => getStorage().get(LOCALSTORAGE_CLIPBOARD);
+export const getClipboardData = () => getLocalStorage().get(LOCALSTORAGE_CLIPBOARD);

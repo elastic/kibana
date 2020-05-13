@@ -42,7 +42,11 @@ import {
   DataPublicPluginSetup,
   esFilters,
 } from '../../../plugins/data/public';
-import { SharePluginSetup, SharePluginStart } from '../../../plugins/share/public';
+import {
+  SharePluginSetup,
+  SharePluginStart,
+  UrlGeneratorContract,
+} from '../../../plugins/share/public';
 import { UiActionsSetup, UiActionsStart } from '../../../plugins/ui_actions/public';
 
 import { Start as InspectorStartContract } from '../../../plugins/inspector/public';
@@ -77,7 +81,7 @@ import {
 import {
   DashboardAppLinkGeneratorState,
   DASHBOARD_APP_URL_GENERATOR,
-  createDirectAccessDashboardLinkGenerator,
+  createDashboardUrlGenerator,
 } from './url_generator';
 import { createSavedDashboardLoader } from './saved_dashboards';
 import { DashboardConstants } from './dashboard_constants';
@@ -88,6 +92,8 @@ declare module '../../share/public' {
     [DASHBOARD_APP_URL_GENERATOR]: DashboardAppLinkGeneratorState;
   }
 }
+
+export type DashboardUrlGenerator = UrlGeneratorContract<typeof DASHBOARD_APP_URL_GENERATOR>;
 
 interface SetupDependencies {
   data: DataPublicPluginSetup;
@@ -111,8 +117,10 @@ interface StartDependencies {
 }
 
 export type Setup = void;
+
 export interface DashboardStart {
   getSavedDashboardLoader: () => SavedObjectLoader;
+  dashboardUrlGenerator?: DashboardUrlGenerator;
 }
 
 declare module '../../../plugins/ui_actions/public' {
@@ -130,6 +138,8 @@ export class DashboardPlugin
   private appStateUpdater = new BehaviorSubject<AngularRenderedAppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
 
+  private dashboardUrlGenerator?: DashboardUrlGenerator;
+
   public setup(
     core: CoreSetup<StartDependencies, DashboardStart>,
     { share, uiActions, embeddable, home, kibanaLegacy, data, usageCollection }: SetupDependencies
@@ -140,8 +150,8 @@ export class DashboardPlugin
     const startServices = core.getStartServices();
 
     if (share) {
-      share.urlGenerators.registerUrlGenerator(
-        createDirectAccessDashboardLinkGenerator(async () => {
+      this.dashboardUrlGenerator = share.urlGenerators.registerUrlGenerator(
+        createDashboardUrlGenerator(async () => {
           const [coreStart, , selfStart] = await startServices;
           return {
             appBasePath: coreStart.application.getUrlForApp('dashboard'),
@@ -325,6 +335,7 @@ export class DashboardPlugin
     });
     return {
       getSavedDashboardLoader: () => savedDashboardLoader,
+      dashboardUrlGenerator: this.dashboardUrlGenerator,
     };
   }
 

@@ -38,17 +38,7 @@ discover-app {
 }
 
 .dscResultCount {
-  text-align: center;
   padding-top: $euiSizeXS;
-  padding-left: $euiSizeM;
-
-  .dscResultHits {
-    padding-left: $euiSizeXS;
-  }
-
-  > .kuiLink {
-    padding-left: $euiSizeM;
-  }
 }
 
 .dscTimechart__header {

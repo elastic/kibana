@@ -167,3 +167,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     </EuiPageBody>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { TriggersActionsUIHome as default };

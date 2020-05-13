@@ -21,13 +21,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { ReactElement } from 'react';
 import { CoreSetup } from 'src/core/public';
 
-import {
-  EuiContextMenuItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiContextMenuItem, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 
 import { EmbeddableStart } from 'src/plugins/embeddable/public';
 import { IContainer } from '../../../../containers';
@@ -152,7 +146,7 @@ export class AddPanelFlyout extends React.Component<Props, State> {
     );
 
     return (
-      <EuiFlyout ownFocus onClose={this.props.onClose} data-test-subj="dashboardAddPanel">
+      <>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
@@ -161,7 +155,7 @@ export class AddPanelFlyout extends React.Component<Props, State> {
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{savedObjectsFinder}</EuiFlyoutBody>
-      </EuiFlyout>
+      </>
     );
   }
 }

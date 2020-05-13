@@ -258,7 +258,17 @@ describe('IndexPattern Data Panel', () => {
 
   it('should render a warning if there are no index patterns', () => {
     const wrapper = shallowWithIntl(
-      <InnerIndexPatternDataPanel {...defaultProps} currentIndexPatternId="" indexPatterns={{}} />
+      <IndexPatternDataPanel
+        {...defaultProps}
+        state={{
+          ...initialState,
+          currentIndexPatternId: '',
+          indexPatterns: {},
+        }}
+        setState={jest.fn()}
+        dragDropContext={{ dragging: {}, setDragging: () => {} }}
+        changeIndexPattern={jest.fn()}
+      />
     );
     expect(wrapper.find('[data-test-subj="indexPattern-no-indexpatterns"]')).toHaveLength(1);
   });

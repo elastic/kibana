@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import DragSelect from 'dragselect/dist/ds.min.js';
 import { Subject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 
 import {
   EuiFlexGroup,
@@ -81,6 +81,7 @@ import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 import { getTimefilter, getToastNotifications } from '../util/dependency_cache';
 import { MlTooltipComponent } from '../components/chart_tooltip';
+import { hasMatchingPoints } from './has_matching_points';
 
 function mapSwimlaneOptionsToEuiOptions(options) {
   return options.map(option => ({
@@ -120,6 +121,7 @@ export class Explorer extends React.Component {
   disableDragSelectOnMouseLeave = true;
 
   dragSelect = new DragSelect({
+    selectorClass: 'ml-swimlane-selector',
     selectables: document.getElementsByClassName('sl-cell'),
     callback(elements) {
       if (elements.length > 1 && !ALLOW_CELL_RANGE_SELECTION) {
@@ -169,12 +171,7 @@ export class Explorer extends React.Component {
   };
 
   componentDidMount() {
-    limit$
-      .pipe(
-        takeUntil(this._unsubscribeAll),
-        map(d => d.val)
-      )
-      .subscribe(explorerService.setSwimlaneLimit);
+    limit$.pipe(takeUntil(this._unsubscribeAll)).subscribe(explorerService.setSwimlaneLimit);
 
     // Required to redraw the time series chart when the container is resized.
     this.resizeChecker = new ResizeChecker(this.resizeRef.current);
@@ -288,6 +285,7 @@ export class Explorer extends React.Component {
       annotationsData,
       chartsData,
       filterActive,
+      filteredFields,
       filterPlaceHolder,
       indexPattern,
       influencers,
@@ -422,6 +420,7 @@ export class Explorer extends React.Component {
                     <ExplorerSwimlane
                       chartWidth={swimlaneContainerWidth}
                       filterActive={filterActive}
+                      filteredFields={filteredFields}
                       maskAll={maskAll}
                       timeBuckets={this.timeBuckets}
                       swimlaneCellClick={this.swimlaneCellClick}
@@ -503,7 +502,13 @@ export class Explorer extends React.Component {
                           <ExplorerSwimlane
                             chartWidth={swimlaneContainerWidth}
                             filterActive={filterActive}
-                            maskAll={maskAll}
+                            maskAll={
+                              maskAll &&
+                              !hasMatchingPoints({
+                                filteredFields,
+                                swimlaneData: viewBySwimlaneData,
+                              })
+                            }
                             timeBuckets={this.timeBuckets}
                             swimlaneCellClick={this.swimlaneCellClick}
                             swimlaneData={viewBySwimlaneData}

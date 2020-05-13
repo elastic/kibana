@@ -11,6 +11,7 @@ import { DashboardDrilldownsService } from './services';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { AdvancedUiActionsSetup, AdvancedUiActionsStart } from '../../advanced_ui_actions/public';
 import { DrilldownsSetup, DrilldownsStart } from '../../drilldowns/public';
+import { DashboardStart } from '../../../../src/plugins/dashboard/public';
 
 export interface SetupDependencies {
   advancedUiActions: AdvancedUiActionsSetup;
@@ -25,6 +26,7 @@ export interface StartDependencies {
   drilldowns: DrilldownsStart;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
+  dashboard: DashboardStart;
 }
 
 // eslint-disable-next-line

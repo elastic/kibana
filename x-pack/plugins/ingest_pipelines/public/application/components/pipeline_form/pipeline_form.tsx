@@ -126,6 +126,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-test-subj="showRequestLink"
               onClick={() => setIsRequestVisible(prevIsRequestVisible => !prevIsRequestVisible)}
             >
               {isRequestVisible ? (

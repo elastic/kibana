@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
-import { LevelLogger } from '../../../../server/lib';
+import { LevelLogger, startTrace } from '../../../../server/lib';
 import { CaptureConfig } from '../../../../server/types';
 import { ConditionalHeaders } from '../../../../types';
 
@@ -18,6 +18,7 @@ export const openUrl = async (
   conditionalHeaders: ConditionalHeaders,
   logger: LevelLogger
 ): Promise<void> => {
+  const endTrace = startTrace('open_url', 'wait');
   try {
     await browser.open(
       url,
@@ -32,11 +33,10 @@ export const openUrl = async (
     throw new Error(
       i18n.translate('xpack.reporting.screencapture.couldntLoadKibana', {
         defaultMessage: `An error occurred when trying to open the Kibana URL. You may need to increase '{configKey}'. {error}`,
-        values: {
-          configKey: 'xpack.reporting.capture.timeouts.openUrl',
-          error: err,
-        },
+        values: { configKey: 'xpack.reporting.capture.timeouts.openUrl', error: err },
       })
     );
   }
+
+  endTrace();
 };

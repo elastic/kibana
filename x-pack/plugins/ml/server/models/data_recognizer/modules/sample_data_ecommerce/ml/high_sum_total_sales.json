@@ -27,7 +27,7 @@
     "custom_urls": [
       {
         "url_name": "Raw data",
-        "url_value": "kibana#/discover?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(index:ff959d40-b880-11e8-a6d9-e546fe2bba5f,query:(language:kuery,query:\u0027customer_full_name.keyword:\u0022$customer_full_name.keyword$\u0022\u0027),sort:!('@timestamp',desc))"
+        "url_value": "kibana#/discover?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(index:\u0027ff959d40-b880-11e8-a6d9-e546fe2bba5f\u0027,query:(language:kuery,query:\u0027customer_full_name.keyword:\u0022$customer_full_name.keyword$\u0022\u0027),sort:!('@timestamp',desc))"
       },
       {
         "url_name": "Data dashboard",

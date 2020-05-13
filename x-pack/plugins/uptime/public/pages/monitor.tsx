@@ -11,7 +11,7 @@ import { monitorStatusSelector } from '../state/selectors';
 import { PageHeader } from './page_header';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { useTrackPageview } from '../../../observability/public';
-import { useMonitorId, useUptimeTelemetry, UptimePage } from '../hooks';
+import { useMonitorId } from '../hooks';
 import { MonitorCharts } from '../components/monitor';
 import { MonitorStatusDetails, PingList } from '../components/monitor';
 import { getDynamicSettings } from '../state/actions/dynamic_settings';
@@ -40,8 +40,6 @@ export const MonitorPage: React.FC = () => {
   const monitorId = useMonitorId();
 
   const selectedMonitor = useSelector(monitorStatusSelector);
-
-  useUptimeTelemetry(UptimePage.Monitor);
 
   useTrackPageview({ app: 'uptime', path: 'monitor' });
   useTrackPageview({ app: 'uptime', path: 'monitor', delay: 15000 });

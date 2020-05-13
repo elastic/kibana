@@ -372,12 +372,11 @@ export const ensureDefaultIndices = async (callCluster: CallESAsCurrentUser) =>
   Promise.all(
     Object.keys(IndexPatternType).map(async indexPattern => {
       const defaultIndexPatternName = indexPattern + INDEX_PATTERN_PLACEHOLDER_SUFFIX;
-      const indexExists = await doesIndexExist(defaultIndexPatternName, callCluster);
+      const indexExists = await callCluster('indices.exists', { index: defaultIndexPatternName });
       if (!indexExists) {
         try {
-          await callCluster('transport.request', {
-            method: 'PUT',
-            path: `/${defaultIndexPatternName}`,
+          await callCluster('indices.create', {
+            index: defaultIndexPatternName,
             body: {
               mappings: {
                 properties: {
@@ -387,20 +386,9 @@ export const ensureDefaultIndices = async (callCluster: CallESAsCurrentUser) =>
             },
           });
         } catch (putErr) {
-          throw new Error(`${defaultIndexPatternName} could not be created`);
+          // throw new Error(`${defaultIndexPatternName} could not be created`);
+          throw new Error(putErr);
         }
       }
     })
   );
-
-export const doesIndexExist = async (indexName: string, callCluster: CallESAsCurrentUser) => {
-  try {
-    await callCluster('transport.request', {
-      method: 'HEAD',
-      path: indexName,
-    });
-    return true;
-  } catch (err) {
-    return false;
-  }
-};

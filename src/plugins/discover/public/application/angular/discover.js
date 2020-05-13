@@ -1021,7 +1021,7 @@ function discoverController(
       },
     ];
 
-    $scope.vis = visualizations.createVis('histogram', {
+    $scope.vis = await visualizations.createVis('histogram', {
       title: savedSearch.title,
       params: {
         addLegend: false,
@@ -1029,8 +1029,7 @@ function discoverController(
       },
       data: {
         aggs: visStateAggs,
-        indexPattern: $scope.searchSource.getField('index').id,
-        searchSource: $scope.searchSource,
+        searchSource: $scope.searchSource.getSerializedFields(),
       },
     });
 

@@ -66,21 +66,19 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--plugin-path=${join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
         `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
-        `--xpack.actions.preconfigured=${JSON.stringify([
-          {
-            id: 'my-slack1',
+        `--xpack.actions.preconfigured=${JSON.stringify({
+          'my-slack1': {
             actionTypeId: '.slack',
             name: 'Slack#xyztest',
             config: {
               webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
             },
           },
-          {
-            id: 'my-server-log',
+          'my-server-log': {
             actionTypeId: '.server-log',
             name: 'Serverlog#xyz',
           },
-        ])}`,
+        })}`,
       ],
     },
   };
