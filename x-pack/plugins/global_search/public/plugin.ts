@@ -26,8 +26,8 @@ export class GlobalSearchPlugin
     };
   }
 
-  start({ http }: CoreStart) {
-    const searchStart = this.searchService.start({ http });
+  start({ http, application }: CoreStart) {
+    const searchStart = this.searchService.start({ http, application });
 
     return {
       ...searchStart,
