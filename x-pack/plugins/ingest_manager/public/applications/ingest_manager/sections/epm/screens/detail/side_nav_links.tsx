@@ -36,8 +36,12 @@ export function SideNavLinks({ name, version, active }: NavLinkProps) {
               ? p.theme.eui.euiFontWeightSemiBold
               : p.theme.eui.euiFontWeightRegular};
         `;
-        // don't display Data Sources tab if the package is not installed
-        if (packageInstallStatus.status !== InstallStatus.installed && panel === 'data-sources')
+        // Don't display Data Sources tab as we haven't implemented this yet
+        // FIXME: Restore when we implement data sources page
+        if (
+          panel === 'data-sources' &&
+          (true || packageInstallStatus.status !== InstallStatus.installed)
+        )
           return null;
 
         return (
