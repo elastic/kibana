@@ -91,10 +91,10 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
       // Perform extra check to see if the detector is using a scripted field.
       const scriptFields = Object.keys(job.datafeed_config.script_fields);
       isSourceDataChartable =
-        scriptFields.indexOf(dtr.field_name) === -1 &&
-        scriptFields.indexOf(dtr.partition_field_name) === -1 &&
-        scriptFields.indexOf(dtr.by_field_name) === -1 &&
-        scriptFields.indexOf(dtr.over_field_name) === -1;
+        scriptFields.indexOf(dtr.field_name!) === -1 &&
+        scriptFields.indexOf(dtr.partition_field_name!) === -1 &&
+        scriptFields.indexOf(dtr.by_field_name!) === -1 &&
+        scriptFields.indexOf(dtr.over_field_name!) === -1;
     }
   }
 
@@ -180,14 +180,16 @@ export function isModelPlotEnabled(
           entityField => entityField.fieldName === detector.partition_field_name
         );
         isEnabled =
-          partitionEntity !== undefined && terms.indexOf(String(partitionEntity.fieldValue)) !== -1;
+          partitionEntity?.fieldValue !== undefined &&
+          terms.indexOf(String(partitionEntity.fieldValue)) !== -1;
       }
 
       if (isEnabled === true && detectorHasByField === true) {
         const byEntity = entityFields.find(
           entityField => entityField.fieldName === detector.by_field_name
         );
-        isEnabled = byEntity !== undefined && terms.indexOf(String(byEntity.fieldValue)) !== -1;
+        isEnabled =
+          byEntity?.fieldValue !== undefined && terms.indexOf(String(byEntity.fieldValue)) !== -1;
       }
     }
   }
