@@ -42,7 +42,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     core.application.register({
       id: 'app_search',
       title: 'App Search',
-      // appRoute: '/app/enterprise_search/app_search', // TODO: Switch to this once https://github.com/elastic/kibana/issues/59190 is in
+      appRoute: '/app/enterprise_search/app_search',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
@@ -61,7 +61,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       icon: AppSearchLogo,
       description:
         'Leverage dashboards, analytics, and APIs for advanced application search made simple.',
-      path: '/app/app_search', // TODO: Switch to '/app/enterprise_search/app_search' once https://github.com/elastic/kibana/issues/59190 is in
+      path: '/app/enterprise_search/app_search',
       category: FeatureCatalogueCategory.DATA,
       showOnHomePage: true,
     });
