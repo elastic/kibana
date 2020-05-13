@@ -126,6 +126,7 @@ export const UserActionMarkdown = ({
             cancelAction: handleCancelAction,
             saveAction: handleSaveAction,
           }),
+          onClickTimeline: handleTimelineClick,
           onCursorPositionUpdate: handleCursorChange,
           topRightContent: (
             <InsertTimelinePopover
