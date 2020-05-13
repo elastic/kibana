@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 
 import React, { FunctionComponent } from 'react';
+
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { OnFormUpdateArg } from '../../../../shared_imports';
 
@@ -29,6 +31,16 @@ export const SettingsFormFlyout: FunctionComponent<Props> = ({
 }) => {
   return (
     <EuiFlyout onClose={onClose}>
+      <EuiFlyoutHeader>
+        <EuiTitle>
+          <h2>
+            <FormattedMessage
+              id="xpack.ingestPipelines.settingsFormFlyout.title"
+              defaultMessage="Configure processor"
+            />
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <ProcessorSettingsForm
           onFormUpdate={onFormUpdate}
