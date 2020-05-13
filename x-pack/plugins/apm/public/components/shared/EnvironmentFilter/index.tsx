@@ -7,7 +7,6 @@
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useFetcher } from '../../../hooks/useFetcher';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
@@ -16,6 +15,7 @@ import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED
 } from '../../../../common/environment_filter_values';
+import { useEnvironments, ALL_OPTION } from '../../../hooks/useEnvironments';
 
 function updateEnvironmentUrl(
   location: ReturnType<typeof useLocation>,
@@ -31,13 +31,6 @@ function updateEnvironmentUrl(
     })
   });
 }
-
-const ALL_OPTION = {
-  value: ENVIRONMENT_ALL,
-  text: i18n.translate('xpack.apm.filter.environment.allLabel', {
-    defaultMessage: 'All'
-  })
-};
 
 const NOT_DEFINED_OPTION = {
   value: ENVIRONMENT_NOT_DEFINED,
@@ -74,27 +67,15 @@ function getOptions(environments: string[]) {
 
 export const EnvironmentFilter: React.FC = () => {
   const location = useLocation();
-  const { urlParams, uiFilters } = useUrlParams();
-  const { start, end, serviceName } = urlParams;
+  const { uiFilters, urlParams } = useUrlParams();
 
   const { environment } = uiFilters;
-  const { data: environments = [], status = 'loading' } = useFetcher(
-    callApmApi => {
-      if (start && end) {
-        return callApmApi({
-          pathname: '/api/apm/ui_filters/environments',
-          params: {
-            query: {
-              start,
-              end,
-              serviceName
-            }
-          }
-        });
-      }
-    },
-    [start, end, serviceName]
-  );
+  const { serviceName, start, end } = urlParams;
+  const { environments, status = 'loading' } = useEnvironments({
+    serviceName,
+    start,
+    end
+  });
 
   return (
     <EuiSelect
