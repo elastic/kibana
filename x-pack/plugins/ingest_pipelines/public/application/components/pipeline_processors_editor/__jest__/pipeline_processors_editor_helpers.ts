@@ -5,7 +5,7 @@
  */
 
 import { registerTestBed } from '../../../../../../../test_utils';
-import { PipelineProcessorsEditor, Props } from '../pipeline_processors_editor';
+import { PipelineProcessorsEditor, Props } from '../pipeline_processors_editor.container';
 
 const testBedSetup = registerTestBed<TestSubject>(PipelineProcessorsEditor, {
   doMountAsync: false,
