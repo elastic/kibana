@@ -9,29 +9,36 @@ import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 import { noop } from 'lodash/fp';
 
-import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
-import { State } from '../../../common/store';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { defaultHeaders } from '../body/column_headers/default_headers';
+import { State } from '../../../../common/store';
+import { timelineDefaults } from '../../../store/timeline/defaults';
 
-import * as i18n from '../../pages/translations';
-import { timelineActions, timelineSelectors } from '../../store/timeline';
-import { NewTimeline } from '../timeline/properties/helpers';
-import { TimelineTypeLiteralWithNull, TimelineType } from '../../../../common/types/timeline';
+import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { NewTimeline } from './helpers';
+import {
+  TimelineTypeLiteralWithNull,
+  TimelineType,
+  TimelineTypeLiteral,
+} from '../../../../../common/types/timeline';
 interface OwnProps {
+  title?: string;
   timelineId?: string;
   onClosePopover?: () => void;
   outline?: boolean;
+  timelineType: TimelineTypeLiteral;
 }
 
 type Props = OwnProps & PropsFromRedux;
 
-const createTemplateTimelineBtn = React.memo<Props>(
+const createTimelineBtn = React.memo<Props>(
   ({
     createTimeline,
     onClosePopover = noop,
     outline,
     showTimeline = noop,
+    title,
     timelineId = 'timeline-1',
+    timelineType,
   }) => {
     return (
       <NewTimeline
@@ -40,14 +47,14 @@ const createTemplateTimelineBtn = React.memo<Props>(
         outline={outline}
         showTimeline={showTimeline}
         timelineId={timelineId}
-        timelineType={TimelineType.template}
-        title={i18n.CREATE_TEMPLATE_TIMELINE_TITLE}
+        timelineType={timelineType}
+        title={title}
       />
     );
   }
 );
 
-createTemplateTimelineBtn.displayName = 'createTemplateTimelineBtn';
+createTimelineBtn.displayName = 'createTimelineBtn';
 
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
@@ -85,4 +92,4 @@ const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
-export const CreateTemplateTimelineBtn = connector(createTemplateTimelineBtn);
+export const CreateTimelineBtn = connector(createTimelineBtn);

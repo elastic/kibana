@@ -14,7 +14,7 @@ import {
   EuiToolTip,
   EuiAvatar,
 } from '@elastic/eui';
-import { NewTimeline, Description, NotesButton, NewCase } from './helpers';
+import { Description, NotesButton, NewCase } from './helpers';
 import { OpenTimelineModalButton } from '../../open_timeline/open_timeline_modal/open_timeline_modal_button';
 import { OpenTimelineModal } from '../../open_timeline/open_timeline_modal';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
@@ -22,8 +22,8 @@ import { InspectButton, InspectButtonContainer } from '../../../../common/compon
 import * as i18n from './translations';
 import { AssociateNote } from '../../notes/helpers';
 import { Note } from '../../../../common/lib/note';
-import { CreateTemplateTimelineBtn } from '../../template_timeline/create_template_timeline';
-import { TimelineTypeLiteral, TimelineType } from '../../../../../common/types/timeline';
+import { CreateTimelineBtn } from './statful_create_timeline_btn';
+import { TimelineType, TimelineTypeLiteral } from '../../../../../common/types/timeline';
 
 export const PropertiesRightStyle = styled(EuiFlexGroup)`
   margin-right: 5px;
@@ -136,16 +136,21 @@ const PropertiesRightComponent: React.FC<Props> = ({
         >
           <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
             <EuiFlexItem grow={false}>
-              <NewTimeline
-                createTimeline={createTimeline}
+              <CreateTimelineBtn
                 onClosePopover={onClosePopover}
                 timelineId={timelineId}
                 timelineType={TimelineType.default}
+                title={i18n.NEW_TIMELINE}
               />
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <CreateTemplateTimelineBtn onClosePopover={onClosePopover} timelineId={timelineId} />
+              <CreateTimelineBtn
+                onClosePopover={onClosePopover}
+                timelineId={timelineId}
+                timelineType={TimelineType.template}
+                title={i18n.NEW_TEMPLATE_TIMELINE}
+              />
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>

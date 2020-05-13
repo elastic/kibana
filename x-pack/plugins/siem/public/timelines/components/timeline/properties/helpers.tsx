@@ -183,7 +183,7 @@ export const NewTimeline = React.memo<NewTimelineProps>(
     showTimeline = noop,
     timelineId,
     timelineType = TimelineType.default,
-    title = i18n.NEW_TIMELINE,
+    title,
   }) => {
     const handleClick = useCallback(() => {
       createTimeline({ id: timelineId, show: true, timelineType });

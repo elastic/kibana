@@ -15,8 +15,12 @@ import { useKibana } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { StatefulOpenTimeline } from '../components/open_timeline';
 import * as i18n from './translations';
-import { CreateTemplateTimelineBtn } from '../components/template_timeline/create_template_timeline';
-
+import {
+  NEW_TIMELINE,
+  NEW_TEMPLATE_TIMELINE,
+} from '../components/timeline/properties/translations';
+import { CreateTimelineBtn } from '../components/timeline/properties/statful_create_timeline_btn';
+import { TimelineType } from '../../../common/types/timeline';
 const TimelinesContainer = styled.div`
   width: 100%;
 `;
@@ -56,7 +60,22 @@ export const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => 
               )}
             </EuiFlexItem>
             <EuiFlexItem>
-              {capabilitiesCanUserCRUD && <CreateTemplateTimelineBtn outline={true} />}
+              {capabilitiesCanUserCRUD && (
+                <CreateTimelineBtn
+                  outline={true}
+                  timelineType={TimelineType.default}
+                  title={NEW_TIMELINE}
+                />
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {capabilitiesCanUserCRUD && (
+                <CreateTimelineBtn
+                  outline={true}
+                  timelineType={TimelineType.template}
+                  title={NEW_TEMPLATE_TIMELINE}
+                />
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </HeaderPage>

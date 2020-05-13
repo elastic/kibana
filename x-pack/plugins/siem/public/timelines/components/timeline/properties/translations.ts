@@ -87,7 +87,14 @@ export const STREAM_LIVE_TOOL_TIP = i18n.translate(
 export const NEW_TIMELINE = i18n.translate(
   'xpack.siem.timeline.properties.newTimelineButtonLabel',
   {
-    defaultMessage: 'Create new timeline',
+    defaultMessage: 'Create timeline',
+  }
+);
+
+export const NEW_TEMPLATE_TIMELINE = i18n.translate(
+  'xpack.siem.timeline.properties.newTemplateTimelineButtonLabel',
+  {
+    defaultMessage: 'Create template timeline',
   }
 );
 
