@@ -431,8 +431,8 @@ describe('StatefulOpenTimeline', () => {
             notes={
               mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].notes != null
                 ? mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].notes.map(
-                  note => ({ ...note, savedObjectId: note.noteId })
-                )
+                    note => ({ ...note, savedObjectId: note.noteId })
+                  )
                 : []
             }
           />
@@ -578,7 +578,7 @@ describe('StatefulOpenTimeline', () => {
     wrapper
       .find(
         `[data-test-subj="title-${
-        mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].savedObjectId
+          mockOpenTimelineQueryResults[0].result.data!.getAllTimeline.timeline[0].savedObjectId
         }"]`
       )
       .first()
