@@ -5,7 +5,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiCheckbox } from '@elastic/eui';
+import { EuiCheckbox, EuiCheckboxProps } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { htmlIdGenerator } from '@elastic/eui';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
@@ -13,15 +13,18 @@ import { policyConfig } from '../../../../store/policy_details/selectors';
 import { PolicyDetailsAction } from '../../../../store/policy_details';
 import { UIPolicyConfig } from '../../../../../../../common/types';
 
+type EventsCheckboxProps = Omit<EuiCheckboxProps, 'id' | 'label' | 'checked' | 'onChange'> & {
+  name: string;
+  setter: (config: UIPolicyConfig, checked: boolean) => UIPolicyConfig;
+  getter: (config: UIPolicyConfig) => boolean;
+};
+
 export const EventsCheckbox = React.memo(function({
   name,
   setter,
   getter,
-}: {
-  name: string;
-  setter: (config: UIPolicyConfig, checked: boolean) => UIPolicyConfig;
-  getter: (config: UIPolicyConfig) => boolean;
-}) {
+  ...otherProps
+}: EventsCheckboxProps) {
   const policyDetailsConfig = usePolicyDetailsSelector(policyConfig);
   const selected = getter(policyDetailsConfig);
   const dispatch = useDispatch<(action: PolicyDetailsAction) => void>();
@@ -44,6 +47,7 @@ export const EventsCheckbox = React.memo(function({
       label={name}
       checked={selected}
       onChange={handleCheckboxChange}
+      {...otherProps}
     />
   );
 });

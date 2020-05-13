@@ -7,9 +7,11 @@
 import { pageObjects as xpackFunctionalPageObjects } from '../../functional/page_objects';
 import { EndpointPageProvider } from './endpoint_page';
 import { EndpointAlertsPageProvider } from './endpoint_alerts_page';
+import { EndpointPolicyPageProvider } from './endpoint_policy_page';
 
 export const pageObjects = {
   ...xpackFunctionalPageObjects,
   endpoint: EndpointPageProvider,
   endpointAlerts: EndpointAlertsPageProvider,
+  endpointPolicy: EndpointPolicyPageProvider,
 };
