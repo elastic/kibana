@@ -27,10 +27,7 @@ import {
 import { Table, Header, CallOuts, DeleteScritpedFieldConfirmationModal } from './components';
 import { ScriptedFieldItem } from './types';
 
-import {
-  IIndexPattern,
-  INDEX_PATTERN_MANAGEMENT_SECTION_PATH,
-} from '../../../../../../plugins/data/public';
+import { IIndexPattern } from '../../../../../../plugins/data/public';
 
 interface ScriptedFieldsTableProps {
   indexPattern: IIndexPattern;

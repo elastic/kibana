@@ -40,8 +40,7 @@ export async function getIndexPatterns(
             const isDefault = defaultIndex === id;
 
             const tags = (indexPatternManagementStart as IndexPatternManagementStart).list.getIndexPatternTags(
-              // todo: temporary cast SimpleSavedObject<IIndexPattern> -> IIndexPattern
-              (pattern as unknown) as IIndexPattern,
+              pattern,
               isDefault
             );
 

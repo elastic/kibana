@@ -24,7 +24,7 @@ import { Header } from './header';
 
 describe('Header', () => {
   test('should render normally', () => {
-    const component = shallow(<Header addScriptedFieldUrl="" />);
+    const component = shallow(<Header indexPatternId="test" />);
 
     expect(component).toMatchSnapshot();
   });

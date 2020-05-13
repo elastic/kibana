@@ -19,6 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { IIndexPattern, IFieldType } from 'src/plugins/data/public';
+import { SimpleSavedObject } from 'src/core/public';
 
 export interface IndexPatternTag {
   key: string;
@@ -35,7 +36,10 @@ const defaultIndexPatternListName = i18n.translate(
 export class IndexPatternListConfig {
   public readonly key = 'default';
 
-  public getIndexPatternTags(indexPattern: IIndexPattern, isDefault: boolean): IndexPatternTag[] {
+  public getIndexPatternTags(
+    indexPattern: IIndexPattern | SimpleSavedObject<IIndexPattern>,
+    isDefault: boolean
+  ): IndexPatternTag[] {
     return isDefault
       ? [
           {

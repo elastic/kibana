@@ -75,6 +75,7 @@ export async function mountManagementSection(
                 docTitle: chrome.docTitle,
                 openConfirm: overlays.openConfirm,
                 setBreadcrumbs: params.setBreadcrumbs,
+                prependBasePath: http.basePath.prepend,
               }}
             />
           </Route>

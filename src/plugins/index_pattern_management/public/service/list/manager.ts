@@ -18,6 +18,7 @@
  */
 
 import { IIndexPattern, IFieldType } from 'src/plugins/data/public';
+import { SimpleSavedObject } from 'src/core/public';
 import { IndexPatternListConfig, IndexPatternTag } from './config';
 
 export class IndexPatternListManager {
@@ -38,7 +39,10 @@ export class IndexPatternListManager {
 
   start() {
     return {
-      getIndexPatternTags: (indexPattern: IIndexPattern, isDefault: boolean) =>
+      getIndexPatternTags: (
+        indexPattern: IIndexPattern | SimpleSavedObject<IIndexPattern>,
+        isDefault: boolean
+      ) =>
         this.configs.reduce(
           (tags: IndexPatternTag[], config) =>
             config.getIndexPatternTags
