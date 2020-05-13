@@ -135,8 +135,6 @@ export function CollapsibleNav({
         </EuiCollapsibleNavGroup>
       </EuiFlexItem>
 
-      <EuiHorizontalRule margin="none" />
-
       {/* Recently viewed */}
       <EuiCollapsibleNavGroup
         key="recentlyViewed"
@@ -161,8 +159,7 @@ export function CollapsibleNav({
             color="subdued"
             gutterSize="none"
             size="s"
-            className="eui-yScroll"
-            style={{ maxHeight: '9.5em', marginRight: '-8px' }}
+            className="kbnCollapsibleNav__recentsListGroup"
           />
         ) : (
           <EuiText size="s" color="subdued" style={{ padding: '0 8px 8px' }}>
