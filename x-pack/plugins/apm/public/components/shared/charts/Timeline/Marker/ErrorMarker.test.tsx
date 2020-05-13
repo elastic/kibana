@@ -34,11 +34,14 @@ describe('ErrorMarker', () => {
     expectTextsInDocument(component, ['10,000 μs']);
     return component;
   }
+  function getKueryDecoded(url: string) {
+    return decodeURIComponent(url.substring(url.indexOf('kuery='), url.length));
+  }
   it('renders link with trace and transaction', () => {
     const component = openPopover(mark);
     const errorLink = component.getByTestId('errorLink') as HTMLAnchorElement;
-    expect(errorLink.href).toEqual(
-      'http://localhost/#/services/bar/errors/123?rangeFrom=&rangeTo=&refreshPaused=true&refreshInterval=0&kuery=trace.id%2520%253A%2520%2522123%2522%2520and%2520transaction.id%2520%253A%2520%2522456%2522'
+    expect(getKueryDecoded(errorLink.hash)).toEqual(
+      'kuery=trace.id : "123" and transaction.id : "456"'
     );
   });
   it('renders link with trace', () => {
@@ -49,9 +52,7 @@ describe('ErrorMarker', () => {
     } as ErrorMark;
     const component = openPopover(newMark);
     const errorLink = component.getByTestId('errorLink') as HTMLAnchorElement;
-    expect(errorLink.href).toEqual(
-      'http://localhost/#/services/bar/errors/123?rangeFrom=&rangeTo=&refreshPaused=true&refreshInterval=0&kuery=trace.id%2520%253A%2520%2522123%2522'
-    );
+    expect(getKueryDecoded(errorLink.hash)).toEqual('kuery=trace.id : "123"');
   });
   it('renders link with transaction', () => {
     const { trace, ...withoutTrace } = mark.error;
@@ -61,8 +62,8 @@ describe('ErrorMarker', () => {
     } as ErrorMark;
     const component = openPopover(newMark);
     const errorLink = component.getByTestId('errorLink') as HTMLAnchorElement;
-    expect(errorLink.href).toEqual(
-      'http://localhost/#/services/bar/errors/123?rangeFrom=&rangeTo=&refreshPaused=true&refreshInterval=0&kuery=transaction.id%2520%253A%2520%2522456%2522'
+    expect(getKueryDecoded(errorLink.hash)).toEqual(
+      'kuery=transaction.id : "456"'
     );
   });
   it('renders link without trance and transaction', () => {
@@ -73,8 +74,6 @@ describe('ErrorMarker', () => {
     } as ErrorMark;
     const component = openPopover(newMark);
     const errorLink = component.getByTestId('errorLink') as HTMLAnchorElement;
-    expect(errorLink.href).toEqual(
-      'http://localhost/#/services/bar/errors/123?rangeFrom=&rangeTo=&refreshPaused=true&refreshInterval=0&kuery='
-    );
+    expect(getKueryDecoded(errorLink.hash)).toEqual('kuery=');
   });
 });
