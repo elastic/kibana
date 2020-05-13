@@ -106,9 +106,9 @@ export const UseField = React.memo(UseFieldComp) as typeof UseFieldComp;
  * Get a <UseField /> component providing some common props for all instances.
  * @param partialProps Partial props to apply to all <UseField /> instances
  */
-export function getUseField<T = unknown>(partialProps: Partial<Props<T>>) {
-  return function<T>(props: Partial<Props<T>>) {
+export function getUseField<T1 = unknown>(partialProps: Partial<Props<T1>>) {
+  return function<T2 = T1>(props: Partial<Props<T2>>) {
     const componentProps = { ...partialProps, ...props } as Props<T>;
-    return <UseField {...componentProps} />;
+    return <UseField<T2> {...componentProps} />;
   };
 }

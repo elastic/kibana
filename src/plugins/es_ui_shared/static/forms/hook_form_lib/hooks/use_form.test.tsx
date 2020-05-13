@@ -19,7 +19,7 @@
 import React, { useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, getRandomString } from '../shared_imports';
+import { registerTestBed, getRandomString, TestBed } from '../shared_imports';
 
 import { Form, UseField } from '../components';
 import { FormSubmitHandler, OnUpdateHandler } from '../types';
@@ -61,7 +61,7 @@ describe('use_form() hook', () => {
       const {
         component,
         form: { setInputValue },
-      } = await setup();
+      } = setup() as TestBed;
 
       await act(async () => {
         setInputValue('usernameField', 'John');
@@ -98,7 +98,7 @@ describe('use_form() hook', () => {
       const {
         component,
         form: { setInputValue },
-      } = setup();
+      } = setup() as TestBed;
 
       const expectedData = {
         address: {
@@ -156,7 +156,7 @@ describe('use_form() hook', () => {
 
       const {
         form: { setInputValue },
-      } = await setup();
+      } = setup() as TestBed;
 
       let [{ data, isValid }] = onFormData.mock.calls[
         onFormData.mock.calls.length - 1
@@ -212,7 +212,7 @@ describe('use_form() hook', () => {
         );
       };
 
-      await registerTestBed(TestComp, {
+      registerTestBed(TestComp, {
         defaultProps: { onData: onFormData },
         memoryRouter: { wrapComponent: false },
       })();

@@ -25,7 +25,7 @@ import { Form } from './form';
 import { UseField } from './use_field';
 
 describe('<UseField />', () => {
-  test('should read the default value from the prop and fallback to the config object', async () => {
+  test('should read the default value from the prop and fallback to the config object', () => {
     const onFormData = jest.fn();
 
     const TestComp = ({ onData }: { onData: OnUpdateHandler }) => {
