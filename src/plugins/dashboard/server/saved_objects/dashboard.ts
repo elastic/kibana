@@ -36,7 +36,7 @@ export const dashboardSavedObjectType: SavedObjectsType = {
     },
     getInAppUrl(obj) {
       return {
-        path: `/app/kibana#/dashboard/${encodeURIComponent(obj.id)}`,
+        path: `/app/dashboards#/view/${encodeURIComponent(obj.id)}`,
         uiCapabilitiesPath: 'dashboard.show',
       };
     },

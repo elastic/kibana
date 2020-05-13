@@ -18,7 +18,7 @@ const OverviewEmptyComponent: React.FC = () => {
     <EmptyPage
       actionPrimaryIcon="gear"
       actionPrimaryLabel={i18nCommon.EMPTY_ACTION_PRIMARY}
-      actionPrimaryUrl={`${basePath}/app/kibana#/home/tutorial_directory/siem`}
+      actionPrimaryUrl={`${basePath}/app/home#/tutorial_directory/siem`}
       actionSecondaryIcon="popout"
       actionSecondaryLabel={i18nCommon.EMPTY_ACTION_SECONDARY}
       actionSecondaryTarget="_blank"

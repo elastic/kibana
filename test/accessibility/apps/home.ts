@@ -33,7 +33,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Add Kibana sample data page', async () => {
-      await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
       await a11y.testAppSnapshot();
     });
 

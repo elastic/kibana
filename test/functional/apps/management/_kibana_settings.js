@@ -54,7 +54,7 @@ export default function({ getService, getPageObjects }) {
         if (match) return [match[3], match[2]];
 
         if (!match) {
-          throw new Error('State in url is missing or malformed');
+          throw new Error('State in url is missing or malformed: ' + currentUrl);
         }
       }
 

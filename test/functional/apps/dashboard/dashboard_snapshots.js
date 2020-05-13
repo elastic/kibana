@@ -64,7 +64,6 @@ export default function({ getService, getPageObjects, updateBaselines }) {
       );
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
-
       expect(percentDifference).to.be.lessThan(0.02);
     });
 
@@ -87,7 +86,6 @@ export default function({ getService, getPageObjects, updateBaselines }) {
       );
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
-
       expect(percentDifference).to.be.lessThan(0.02);
     });
   });

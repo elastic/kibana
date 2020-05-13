@@ -407,7 +407,7 @@ const wsState: any = {
   urlTemplates: [
     {
       url:
-        '/app/kibana#/discover?_a=(columns%3A!(_source)%2Cindex%3A%2790943e30-9a47-11e8-b64d-95841ca0b247%27%2Cinterval%3Aauto%2Cquery%3A(language%3Akuery%2Cquery%3A{{gquery}})%2Csort%3A!(_score%2Cdesc))',
+        '/app/discover#/?_a=(columns%3A!(_source)%2Cindex%3A%2790943e30-9a47-11e8-b64d-95841ca0b247%27%2Cinterval%3Aauto%2Cquery%3A(language%3Akuery%2Cquery%3A{{gquery}})%2Csort%3A!(_score%2Cdesc))',
       description: 'Raw documents',
       isDefault: true,
       encoderID: 'kql-loose',

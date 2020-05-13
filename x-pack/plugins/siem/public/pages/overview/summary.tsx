@@ -37,7 +37,7 @@ export const Summary = React.memo(() => {
                 </EuiLink>
               ),
               data: (
-                <EuiLink href="kibana#home/tutorial_directory/siem">
+                <EuiLink href="home#/tutorial_directory/siem">
                   <FormattedMessage
                     id="xpack.siem.overview.startedText.dataLinkText"
                     defaultMessage="ingesting data"

@@ -18,25 +18,28 @@
  */
 
 import { parseUrl, stringify } from 'query-string';
-import { DashboardConstants } from '../../../../../dashboard/public';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../../visualizations/public';
+import { DashboardConstants } from '../index';
 
 /** *
  * Returns relative dashboard URL with added embeddableType and embeddableId query params
  * eg.
- * input: url: lol/app/kibana#/dashboard?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now)), embeddableId: 12345
- * output: /dashboard?addEmbeddableType=visualization&addEmbeddableId=12345&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))
- * @param url dasbhoard absolute url
- * @param embeddableId id of the saved visualization
+ * input: url: #/create?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now)), embeddableId: 12345
+ * output: #/create?addEmbeddableType=visualization&addEmbeddableId=12345&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))
+ * @param url dasbhoard hash part of the url
+ * @param embeddableId id of the saved embeddable
+ * @param embeddableType type of the embeddable
  */
-export function addEmbeddableToDashboardUrl(dashboardUrl: string, embeddableId: string) {
+export function addEmbeddableToDashboardUrl(
+  dashboardUrl: string,
+  embeddableId: string,
+  embeddableType: string
+) {
   const { url, query } = parseUrl(dashboardUrl);
-  const [, dashboardId] = url.split(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
 
   if (embeddableId) {
-    query[DashboardConstants.ADD_EMBEDDABLE_TYPE] = VISUALIZE_EMBEDDABLE_TYPE;
+    query[DashboardConstants.ADD_EMBEDDABLE_TYPE] = embeddableType;
     query[DashboardConstants.ADD_EMBEDDABLE_ID] = embeddableId;
   }
 
-  return `${DashboardConstants.CREATE_NEW_DASHBOARD_URL}${dashboardId}?${stringify(query)}`;
+  return `${url}?${stringify(query)}`;
 }

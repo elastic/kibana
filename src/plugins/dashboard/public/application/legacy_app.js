@@ -90,10 +90,16 @@ export function initDashboardApp(app, deps) {
     };
 
     $routeProvider
+      .when('/', {
+        redirectTo: DashboardConstants.LANDING_PAGE_PATH,
+      })
       .when(DashboardConstants.LANDING_PAGE_PATH, {
         ...defaults,
         template: dashboardListingTemplate,
         controller: function($scope, kbnUrlStateStorage, history) {
+          deps.core.chrome.docTitle.change(
+            i18n.translate('dashboard.dashboardPageTitle', { defaultMessage: 'Dashboards' })
+          );
           const service = deps.savedDashboards;
           const dashboardConfig = deps.dashboardConfig;
 
@@ -178,6 +184,7 @@ export function initDashboardApp(app, deps) {
               .catch(
                 redirectWhenMissing({
                   history,
+                  navigateToApp: deps.core.application.navigateToApp,
                   mapping: {
                     dashboard: DashboardConstants.LANDING_PAGE_PATH,
                   },
@@ -236,6 +243,7 @@ export function initDashboardApp(app, deps) {
               .catch(
                 redirectWhenMissing({
                   history,
+                  navigateToApp: deps.core.application.navigateToApp,
                   mapping: {
                     dashboard: DashboardConstants.LANDING_PAGE_PATH,
                   },
@@ -245,11 +253,11 @@ export function initDashboardApp(app, deps) {
           },
         },
       })
-      .when(`dashboard/:tail*?`, {
-        redirectTo: `/${deps.config.defaultAppId}`,
-      })
-      .when(`dashboards/:tail*?`, {
-        redirectTo: `/${deps.config.defaultAppId}`,
+      .otherwise({
+        template: '<span></span>',
+        controller: function() {
+          deps.navigateToDefaultApp();
+        },
       });
   });
 }
