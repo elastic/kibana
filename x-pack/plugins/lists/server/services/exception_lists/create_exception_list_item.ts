@@ -22,7 +22,7 @@ import {
   _Tags,
 } from '../../../common/schemas';
 
-import { getSavedObjectType, transformSavedObjetToExceptionListItem } from './utils';
+import { getSavedObjectType, transformSavedObjectToExceptionListItem } from './utils';
 import { NamespaceType } from './types';
 
 interface CreateExceptionListItemOptions {
@@ -77,5 +77,5 @@ export const createExceptionListItem = async ({
     type,
     updated_by: dateNow,
   });
-  return transformSavedObjetToExceptionListItem({ savedObject });
+  return transformSavedObjectToExceptionListItem({ savedObject });
 };

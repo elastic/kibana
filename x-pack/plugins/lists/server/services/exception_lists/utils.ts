@@ -31,7 +31,7 @@ export const getSavedObjectType = ({
   }
 };
 
-export const transformSavedObjetToExceptionList = ({
+export const transformSavedObjectToExceptionList = ({
   savedObject,
 }: {
   savedObject: SavedObject<ExceptionListSoSchema>;
@@ -74,7 +74,7 @@ export const transformSavedObjetToExceptionList = ({
   };
 };
 
-export const transformSavedObjetToExceptionListItem = ({
+export const transformSavedObjectToExceptionListItem = ({
   savedObject,
 }: {
   savedObject: SavedObject<ExceptionListSoSchema>;
