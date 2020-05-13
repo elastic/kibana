@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, SavedObject } from 'kibana/server';
+import { CoreSetup, SavedObject } from 'kibana/server';
 
 export class Plugin {
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor() {}
 
   public setup(core: CoreSetup) {
     // called when plugin is setting up during Kibana's startup sequence
@@ -65,7 +65,7 @@ export class Plugin {
     });
   }
 
-  public start(core: CoreStart) {
+  public start() {
     // called after all plugins are set up
   }
 
