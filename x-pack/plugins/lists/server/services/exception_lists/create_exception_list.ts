@@ -66,7 +66,7 @@ export const createExceptionList = async ({
     tags,
     tie_breaker_id: tieBreaker ?? uuid.v4(),
     type,
-    updated_by: dateNow,
+    updated_by: user,
   });
   return transformSavedObjectToExceptionList({ savedObject });
 };

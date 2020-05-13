@@ -18,6 +18,8 @@ export * from './read_exception_list_item_schema';
 export * from './read_exception_list_schema';
 export * from './read_list_item_schema';
 export * from './read_list_schema';
+export * from './update_exception_list_schema';
 export * from './import_list_item_query_schema';
 export * from './update_list_schema';
+export * from './update_exception_list_schema';
 export * from './update_list_item_schema';

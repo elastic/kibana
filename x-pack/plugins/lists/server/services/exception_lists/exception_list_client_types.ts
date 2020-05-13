@@ -9,8 +9,10 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import {
   CommentOrUndefined,
   Description,
+  DescriptionOrUndefined,
   EntriesArray,
   ExceptionListType,
+  ExceptionListTypeOrUndefined,
   IdOrUndefined,
   ItemId,
   ItemIdOrUndefined,
@@ -18,8 +20,11 @@ import {
   ListIdOrUndefined,
   MetaOrUndefined,
   Name,
+  NameOrUndefined,
   Tags,
+  TagsOrUndefined,
   _Tags,
+  _TagsOrUndefined,
 } from '../../../common/schemas';
 
 import { NamespaceType } from './types';
@@ -44,6 +49,18 @@ export interface CreateExceptionListOptions {
   meta: MetaOrUndefined;
   tags: Tags;
   type: ExceptionListType;
+}
+
+export interface UpdateExceptionListOptions {
+  _tags: _TagsOrUndefined;
+  id: IdOrUndefined;
+  listId: ListIdOrUndefined;
+  namespaceType: NamespaceType;
+  name: NameOrUndefined;
+  description: DescriptionOrUndefined;
+  meta: MetaOrUndefined;
+  tags: TagsOrUndefined;
+  type: ExceptionListTypeOrUndefined;
 }
 
 export interface GetExceptionListItemOptions {

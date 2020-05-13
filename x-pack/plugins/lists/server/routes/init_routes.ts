@@ -6,13 +6,9 @@
 
 import { IRouter } from 'kibana/server';
 
-import { updateListRoute } from './update_list_route';
-import { updateListItemRoute } from './update_list_item_route';
-import { createExceptionListRoute } from './create_exception_list_route';
-import { readExceptionListRoute } from './read_exception_list_route';
-import { createExceptionListItemRoute } from './create_exception_list_item_route';
-
 import {
+  createExceptionListItemRoute,
+  createExceptionListRoute,
   createListIndexRoute,
   createListItemRoute,
   createListRoute,
@@ -23,9 +19,14 @@ import {
   importListItemRoute,
   patchListItemRoute,
   patchListRoute,
+  readExceptionListItemRoute,
+  readExceptionListRoute,
   readListIndexRoute,
   readListItemRoute,
   readListRoute,
+  updateExceptionListRoute,
+  updateListItemRoute,
+  updateListRoute,
 } from '.';
 
 export const initRoutes = (router: IRouter): void => {
@@ -53,7 +54,9 @@ export const initRoutes = (router: IRouter): void => {
   // exception lists
   createExceptionListRoute(router);
   readExceptionListRoute(router);
+  updateExceptionListRoute(router);
 
   // exception list items
   createExceptionListItemRoute(router);
+  readExceptionListItemRoute(router);
 };

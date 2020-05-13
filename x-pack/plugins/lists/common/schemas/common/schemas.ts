@@ -74,7 +74,9 @@ export type _TagsOrUndefined = t.TypeOf<typeof _tagsOrUndefined>;
 
 // TODO: Change this into a t.keyof enumeration when we know what types of lists we going to have.
 export const exceptionListType = t.string;
+export const exceptionListTypeOrUndefined = t.union([exceptionListType, t.undefined]);
 export type ExceptionListType = t.TypeOf<typeof exceptionListType>;
+export type ExceptionListTypeOrUndefined = t.TypeOf<typeof exceptionListTypeOrUndefined>;
 
 // TODO: Change this into a t.keyof enumeration when we know what types of lists we going to have.
 export const exceptionListItemType = t.string;

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject } from 'kibana/server';
+import { SavedObject, SavedObjectsUpdateResponse } from 'kibana/server';
 
 import {
   ExceptionListItemSchema,
@@ -71,6 +71,39 @@ export const transformSavedObjectToExceptionList = ({
     type,
     updated_at: updatedAt ?? dateNow,
     updated_by,
+  };
+};
+
+export const transformSavedObjectUpdateToExceptionList = ({
+  list,
+  savedObject,
+}: {
+  list: ExceptionListSchema;
+  savedObject: SavedObjectsUpdateResponse<ExceptionListSoSchema>;
+}): ExceptionListSchema => {
+  const dateNow = new Date().toISOString();
+  const {
+    attributes: { _tags, description, meta, name, tags, type, updated_by: updatedBy },
+    id,
+    updated_at: updatedAt,
+  } = savedObject;
+
+  // TODO: Change this to do a decode and throw if the saved object is not as expected.
+  // TODO: Do a throw if after the decode this is not the correct "list_type: list"
+  return {
+    _tags: _tags ?? list._tags,
+    created_at: list.created_at,
+    created_by: list.created_by,
+    description: description ?? list.description,
+    id,
+    list_id: list.list_id,
+    meta: meta ?? list.meta,
+    name: name ?? list.name,
+    tags: tags ?? list.tags,
+    tie_breaker_id: list.tie_breaker_id,
+    type: type ?? list.type,
+    updated_at: updatedAt ?? dateNow,
+    updated_by: updatedBy ?? list.updated_by,
   };
 };
 

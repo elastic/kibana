@@ -52,7 +52,7 @@ export const commonMapping: SavedObjectsType['mappings'] = {
       type: 'keyword',
     },
     updated_by: {
-      type: 'date',
+      type: 'keyword',
     },
   },
 };
