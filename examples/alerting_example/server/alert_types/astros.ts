@@ -19,7 +19,7 @@
 
 import axios from 'axios';
 import { AlertType } from '../../../../x-pack/plugins/alerting/server';
-import { Operator, Craft } from '../../common/constants';
+import { Operator, Craft, ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 interface PeopleInSpace {
   people: Array<{
@@ -79,4 +79,5 @@ export const alertType: AlertType = {
       peopleInSpace,
     };
   },
+  producer: ALERTING_EXAMPLE_APP_ID,
 };
