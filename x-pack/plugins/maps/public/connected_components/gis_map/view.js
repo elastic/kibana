@@ -11,7 +11,7 @@ import { MBMapContainer } from '../map/mb';
 import { WidgetOverlay } from '../widget_overlay';
 import { ToolbarOverlay } from '../toolbar_overlay';
 import { LayerPanel } from '../layer_panel';
-import { AddLayerPanel } from '../layer_addpanel';
+import { AddLayerPanel } from '../add_layer_panel';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { ExitFullScreenButton } from '../../../../../../src/plugins/kibana_react/public';
 

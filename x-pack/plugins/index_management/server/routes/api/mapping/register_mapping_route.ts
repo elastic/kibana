@@ -13,9 +13,9 @@ const paramsSchema = schema.object({
 });
 
 function formatHit(hit: { [key: string]: { mappings: any } }, indexName: string) {
-  const mapping = hit[indexName].mappings;
+  const mappings = hit[indexName].mappings;
   return {
-    mapping,
+    mappings,
   };
 }
 
