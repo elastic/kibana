@@ -1180,8 +1180,6 @@ export class TimeSeriesExplorer extends React.Component {
           </EuiFlexGroup>
         </div>
 
-        <EuiSpacer size="m" />
-
         {fullRefresh && loading === true && (
           <LoadingIndicator
             label={i18n.translate('xpack.ml.timeSeriesExplorer.loadingLabel', {
