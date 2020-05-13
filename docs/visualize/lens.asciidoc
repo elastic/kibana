@@ -4,7 +4,12 @@
 
 beta[]
 
-*Lens* provides you with a simple and fast way to create visualizations from your {es} data. With Lens, you can:
+*Lens* provides you with a simple and fast way to create visualizations from your {es} data. 
+
+[role="screenshot"]
+image::images/lens_drag_drop.gif[]
+
+With Lens, you can:
 
 * Quickly build visualizations by dragging and dropping data fields.
 
@@ -29,9 +34,6 @@ you'll see two places highlighted in green:
 You can incorporate many fields into your visualization, and Lens uses heuristics to decide how
 to apply each one to the visualization.
 
-[role="screenshot"]
-image::images/lens_drag_drop.gif[]
-
 TIP: Drag-and-drop capabilities are available only when Lens knows how to use the data. You can still customize
 your visualization if Lens is unable to make a suggestion.
 
@@ -43,7 +45,7 @@ Lens shows you fields based on the <<index-patterns, index patterns>> you have d
 {kib}, and the current time range. When you change the index pattern or time filter,
 the list of fields are updated.
 
-To narrow the list of fields, you can:
+To narrow the list of fields:
 
 * Enter the field name in *Search field names*.
 
@@ -177,6 +179,4 @@ image::images/lens_tutorial_3.png[Lens tutorial]
 [[lens-tutorial-next-steps]]
 ==== Next steps
 
-Now that you've created your visualization in Lens, you can add it to a Dashboard.
-
-For more information, see <<dashboard,Dashboard>>.
+Now that you've created your visualization in Lens, you can add it to a <<dashboard,Dashboard>> or <<canvas-add-object,Canvas workpad>>.

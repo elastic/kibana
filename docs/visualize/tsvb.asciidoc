@@ -5,34 +5,7 @@ TSVB is a time series data visualizer that allows you to use the full power of t
 Elasticsearch aggregation framework. With TSVB, you can combine an infinite
 number of aggregations to display complex data.
 
-NOTE: In Elasticsearch version 7.3.0 and later, the time series data visualizer is now referred to as TSVB instead of Time Series Visual Builder.
-
-[float]
-[[tsvb-visualization-types]]
-=== Types of TSVB visualizations
-
-TSVB comes with several types of visualizations that you can easily switch between.
-
-[cols="2*<"]
-|===
-
-| *Time Series*
- | A histogram visualization that supports area, line, bar, and steps along with multiple y-axis.
-
-| *Metric*
- | A metric that displays the latest number in a data series.
-
-| *Top N*
- | A horizontal bar chart where the y-axis is based on a series of metrics, and the x-axis is the latest value in the series.
-
-| *Gauge*
- | A single value gauge visualization based on the latest value in a series.
-
-| *Markdown*
- | Edit the data using using Markdown text and Mustache template syntax.
-
-| *Table*
- | Display data from multiple time series by defining the field group to show in the rows, and the columns of data to display.
+NOTE: In Elasticsearch version 7.3.0 and later, the time series data visualizer is now referred to as TSVB instead of Time Series Visual Builder
  
 [float]
 [[create-tsvb-visualization]]
