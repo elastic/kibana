@@ -103,6 +103,16 @@ module.exports = function (grunt) {
     },
 
     // used by the test and jenkins:unit tasks
+    //    runs the check_lockfile_symlinks script to ensure manifests with non-dev dependencies have adjacent lockfile symlinks
+    checkLockfileSymlinks: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/check_lockfile_symlinks'),
+        '--quiet', // only log errors, not warnings
+      ],
+    },
+
+    // used by the test and jenkins:unit tasks
     //    runs the tslint script to check for Typescript linting errors
     typeCheck: {
       cmd: process.execPath,
