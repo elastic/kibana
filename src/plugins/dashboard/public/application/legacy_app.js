@@ -29,7 +29,6 @@ import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constan
 import {
   createKbnUrlStateStorage,
   redirectWhenMissing,
-  InvalidJSONProperty,
   SavedObjectNotFound,
 } from '../../../kibana_utils/public';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
@@ -206,13 +205,6 @@ export function initDashboardApp(app, deps) {
                 return savedDashboard;
               })
               .catch(error => {
-                // A corrupt dashboard was detected (e.g. with invalid JSON properties)
-                if (error instanceof InvalidJSONProperty) {
-                  deps.core.notifications.toasts.addDanger(error.message);
-                  history.push(DashboardConstants.LANDING_PAGE_PATH);
-                  return;
-                }
-
                 // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
                 // See https://github.com/elastic/kibana/issues/10951 for more context.
                 if (error instanceof SavedObjectNotFound && id === 'create') {
@@ -230,7 +222,9 @@ export function initDashboardApp(app, deps) {
                   );
                   return new Promise(() => {});
                 } else {
-                  throw error;
+                  // E.g. a corrupt dashboard was detected (e.g. with invalid JSON properties)
+                  deps.core.notifications.toasts.addDanger(error.message);
+                  history.push(DashboardConstants.LANDING_PAGE_PATH);
                 }
               })
               .catch(
