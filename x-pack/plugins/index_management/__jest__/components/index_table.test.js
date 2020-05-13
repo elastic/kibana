@@ -354,7 +354,7 @@ describe('index table', () => {
   test('show settings button works from context menu', () => {
     testEditor(0);
   });
-  test('show mapping button works from context menu', () => {
+  test('show mappings button works from context menu', () => {
     testEditor(1);
   });
   test('show stats button works from context menu', () => {
