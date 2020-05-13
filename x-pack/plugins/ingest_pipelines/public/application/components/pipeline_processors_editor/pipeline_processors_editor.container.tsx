@@ -184,7 +184,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = ({
       )}
       {processorToDeleteSelector && (
         <ProcessorRemoveModal
-          processor={getValue(processorToDeleteSelector, processors)}
+          processor={getValue(processorToDeleteSelector, processorsState)}
           onResult={confirmed => {
             if (confirmed) {
               processorsDispatch({
