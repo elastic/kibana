@@ -4,10 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable @elastic/eui/href-or-on-click */
+
 import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiInMemoryTable, EuiIcon, EuiButton, EuiLink, EuiBasicTableColumn } from '@elastic/eui';
+import {
+  EuiInMemoryTable,
+  EuiIcon,
+  EuiButton,
+  EuiLink,
+  EuiBasicTableColumn,
+  EuiButtonEmpty,
+  EuiIconTip,
+} from '@elastic/eui';
 import { TemplateListItem, IndexTemplateFormatVersion } from '../../../../../../common';
 import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import { TemplateDeleteModal } from '../../../../components';
@@ -44,14 +54,35 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       sortable: true,
       render: (name: TemplateListItem['name'], item: TemplateListItem) => {
         return (
-          /* eslint-disable-next-line @elastic/eui/href-or-on-click */
-          <EuiLink
-            href={getTemplateDetailsLink(name, item._kbnMeta.formatVersion, true)}
-            data-test-subj="templateDetailsLink"
-            onClick={() => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)}
-          >
-            {name}
-          </EuiLink>
+          <>
+            <EuiLink
+              href={getTemplateDetailsLink(name, item._kbnMeta.formatVersion, true)}
+              data-test-subj="templateDetailsLink"
+              onClick={() => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)}
+            >
+              {name}
+            </EuiLink>
+            {item._kbnMeta.formatVersion === 1 && (
+              <>
+                &nbsp;
+                <EuiIconTip
+                  aria-label="Deprecated index template format"
+                  size="m"
+                  type="alert"
+                  color="warning"
+                  position="top"
+                  content={
+                    <p>
+                      This index template uses a format that will be deprecated in the next major
+                      release.
+                      <br />
+                      Use the table row actions to convert it to the new format.
+                    </p>
+                  }
+                />
+              </>
+            )}
+          </>
         );
       },
     },
@@ -169,6 +200,30 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           isPrimary: true,
           enabled: ({ isManaged }: TemplateListItem) => !isManaged,
         },
+        {
+          type: 'icon',
+          name: i18n.translate('xpack.idxMgmt.templateList.table.actionConvertFormatTitle', {
+            defaultMessage: 'Upgrade',
+          }),
+          description: i18n.translate(
+            'xpack.idxMgmt.templateList.table.actionConvertFormatDescription',
+            {
+              defaultMessage: 'Convert to the new index template format',
+            }
+          ),
+          icon: 'copy',
+          onClick: ({ name, _kbnMeta: { formatVersion } }: TemplateListItem) => {},
+          render: ({ name, _kbnMeta: { formatVersion } }: TemplateListItem) => {
+            if (formatVersion === 2) {
+              return null;
+            }
+            return (
+              <>
+                <EuiIcon type="refresh" /> <span>Convert to new format</span>
+              </>
+            );
+          },
+        } as any,
       ],
     },
   ];

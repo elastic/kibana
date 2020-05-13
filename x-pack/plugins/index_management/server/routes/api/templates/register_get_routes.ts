@@ -5,7 +5,11 @@
  */
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { deserializeV1Template, deserializeTemplateList } from '../../../../common/lib';
+import {
+  deserializeV1Template,
+  deserializeTemplateV1List,
+  deserializeTemplateV2List,
+} from '../../../../common/lib';
 import { getManagedTemplatePrefix } from '../../../lib/get_managed_templates';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../index';
@@ -17,9 +21,19 @@ export function registerGetAllRoute({ router, license }: RouteDependencies) {
       const { callAsCurrentUser } = ctx.core.elasticsearch.dataClient;
       const managedTemplatePrefix = await getManagedTemplatePrefix(callAsCurrentUser);
 
-      const indexTemplatesByName = await callAsCurrentUser('indices.getTemplate');
-      const body = deserializeTemplateList(indexTemplatesByName, managedTemplatePrefix);
+      const indexTemplatesV1 = await callAsCurrentUser('indices.getTemplate');
+      const { index_templates: indexTemplatesV2 } = await await callAsCurrentUser(
+        'transport.request',
+        {
+          path: '_index_template',
+          method: 'GET',
+        }
+      );
 
+      const templateV1 = deserializeTemplateV1List(indexTemplatesV1, managedTemplatePrefix);
+      const templateV2 = deserializeTemplateV2List(indexTemplatesV2, managedTemplatePrefix);
+
+      const body = [...templateV1, ...templateV2].sort((a, b) => a.name - b.name);
       return res.ok({ body });
     })
   );

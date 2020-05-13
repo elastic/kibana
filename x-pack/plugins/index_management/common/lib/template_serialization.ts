@@ -35,7 +35,9 @@ export function serializeV1Template(template: TemplateDeserialized): TemplateV1S
 }
 
 export function serializeV2Template(template: TemplateDeserialized): TemplateV2Serialized {
-  const { aliases, mappings, settings, ...templateV1serialized } = serializeV1Template(template);
+  const { aliases, mappings, settings, order, ...templateV1serialized } = serializeV1Template(
+    template
+  );
 
   return {
     ...templateV1serialized,
@@ -50,13 +52,12 @@ export function serializeV2Template(template: TemplateDeserialized): TemplateV2S
 }
 
 export function deserializeV2Template(
-  templateEs: TemplateV2Serialized,
+  templateEs: TemplateV2Serialized & { name: string },
   managedTemplatePrefix?: string
 ): TemplateDeserialized {
   const {
     name,
     version,
-    order,
     index_patterns: indexPatterns,
     template,
     priority,
@@ -67,12 +68,11 @@ export function deserializeV2Template(
   const deserializedTemplate: TemplateDeserialized = {
     name,
     version,
-    order,
+    order: priority,
     indexPatterns: indexPatterns.sort(),
     template,
     ilmPolicy: settings && settings.index && settings.index.lifecycle,
     isManaged: Boolean(managedTemplatePrefix && name.startsWith(managedTemplatePrefix)),
-    priority,
     composedOf,
     _kbnMeta: {
       formatVersion: 2,
@@ -83,7 +83,7 @@ export function deserializeV2Template(
 }
 
 export function deserializeV1Template(
-  templateEs: TemplateV1Serialized,
+  templateEs: TemplateV1Serialized & { name: string },
   managedTemplatePrefix?: string
 ): TemplateDeserialized {
   const { settings, aliases, mappings, ...rest } = templateEs;
@@ -101,8 +101,8 @@ export function deserializeV1Template(
   };
 }
 
-export function deserializeTemplateList(
-  indexTemplatesByName: { [key: string]: Omit<TemplateV1Serialized, 'name'> },
+export function deserializeTemplateV1List(
+  indexTemplatesByName: { [key: string]: TemplateV1Serialized },
   managedTemplatePrefix?: string
 ): TemplateListItem[] {
   return Object.entries(indexTemplatesByName).map(([name, templateSerialized]) => {
@@ -116,11 +116,27 @@ export function deserializeTemplateList(
       hasSettings: hasEntries(settings),
       hasAliases: hasEntries(aliases),
       hasMappings: hasEntries(mappings),
-      type: name.startsWith('.')
-        ? 'system'
-        : deserializedTemplate._kbnMeta.formatVersion === 1
-        ? 'v1'
-        : 'v2',
+      type: name.startsWith('.') ? 'system' : 'v1',
+    };
+  });
+}
+
+export function deserializeTemplateV2List(
+  indexTemplates: Array<{ name: string; index_template: TemplateV2Serialized }>,
+  managedTemplatePrefix?: string
+): TemplateListItem[] {
+  return indexTemplates.map(({ name, index_template: templateSerialized }) => {
+    const {
+      template: { mappings, settings, aliases },
+      ...deserializedTemplate
+    } = deserializeV2Template({ name, ...templateSerialized }, managedTemplatePrefix);
+
+    return {
+      ...deserializedTemplate,
+      hasSettings: hasEntries(settings),
+      hasAliases: hasEntries(aliases),
+      hasMappings: hasEntries(mappings),
+      type: name.startsWith('.') ? 'system' : 'v2',
     };
   });
 }

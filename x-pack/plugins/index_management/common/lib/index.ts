@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export {
-  deserializeTemplateList,
+  deserializeTemplateV1List,
+  deserializeTemplateV2List,
   deserializeV1Template,
   serializeV1Template,
 } from './template_serialization';

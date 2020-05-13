@@ -10,16 +10,15 @@ import { Mappings } from './mappings';
 
 // Template serialized (from Elasticsearch)
 interface TemplateBaseSerialized {
-  name: string;
   index_patterns: string[];
   version?: number;
-  order?: number;
 }
 
 export interface TemplateV1Serialized extends TemplateBaseSerialized {
   settings?: IndexSettings;
   aliases?: Aliases;
   mappings?: Mappings;
+  order?: number;
 }
 
 export interface TemplateV2Serialized extends TemplateBaseSerialized {
