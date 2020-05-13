@@ -127,6 +127,7 @@ export const MarkdownEditor = React.memo<{
         {
           id: 'preview',
           name: i18n.PREVIEW,
+          'data-test-subj': 'preview-tab',
           content: (
             <MarkdownContainer data-test-subj="markdown-container" paddingSize="s">
               <Markdown raw={content} onClickTimeline={onClickTimeline} />

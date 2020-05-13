@@ -32,7 +32,7 @@ describe('UserActionMarkdown ', () => {
     jest.resetAllMocks();
   });
 
-  it('Opens timeline when timeline link clicked', async () => {
+  it('Opens timeline when timeline link clicked - isEditable: false', async () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -45,6 +45,30 @@ describe('UserActionMarkdown ', () => {
       .first()
       .simulate('click');
 
+    expect(queryTimelineByIdSpy).toBeCalledWith({
+      apolloClient: mockUseApolloClient(),
+      timelineId,
+      updateIsLoading: expect.any(Function),
+      updateTimeline: expect.any(Function),
+    });
+  });
+
+  it('Opens timeline when timeline link clicked - isEditable: true ', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <UserActionMarkdown {...{ ...defaultProps, isEditable: true }} />
+        </Router>
+      </TestProviders>
+    );
+    wrapper
+      .find(`[data-test-subj="preview-tab"]`)
+      .first()
+      .simulate('click');
+    wrapper
+      .find(`[data-test-subj="markdown-timeline-link"]`)
+      .first()
+      .simulate('click');
     expect(queryTimelineByIdSpy).toBeCalledWith({
       apolloClient: mockUseApolloClient(),
       timelineId,
