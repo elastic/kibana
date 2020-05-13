@@ -58,32 +58,38 @@ export interface ResolverNodeStats {
 }
 
 /**
- * Pagination cursors that can be used for querying additional resolver nodes and events.
- *
- * The reason that these are all optional is because they are set depending on the type of node in the tree. If the node
- * is part of the children of a resolver tree it will have `nextChild` set. If the node is the origin, it will have
- * `nextEvent`, `nextAncestor`, and `nextAlert` set.
- *
- * `null` indicates that at the time the request was executed, no additional events of that type existed. This does not
- * necessarily mean that additional events have not been received since the request was returned.
+ * A child node can also have additional children so we need to provide a pagination cursor.
  */
-export interface ResolverNodePagination {
-  nextChild?: string | null;
-  nextEvent?: string | null;
-  nextAncestor?: string | null;
-  nextAlert?: string | null;
-}
-
 export interface ChildNode extends LifecycleNode {
+  /**
+   * A child node's pagination cursor can be null for a couple reasons:
+   * 1. At the time of querying it could have no children in ES, in which case it will be marked as
+   *  null because we know it does not have children during this query.
+   * 2. If the max level was reached we do not know if this node has children or not so we'll mark it as null
+   */
   nextChild: string | null;
 }
 
+/**
+ * The response structure for the children route. The structure is an array of nodes where each node
+ * has an array of lifecycle events.
+ */
 export interface ResolverChildren {
   childNodes: ChildNode[];
+  /**
+   * This is the children cursor for the origin of a tree.
+   */
   nextChild: string | null;
 }
 
+/**
+ * A flattened tree representing the nodes in a resolver graph.
+ */
 export interface ResolverTree {
+  /**
+   * Origin of the tree. This is in the middle of the tree. Typically this would be the same
+   * process node that generated an alert.
+   */
   id: string;
   children: ResolverChildren;
   relatedEvents: Omit<ResolverRelatedEvents, 'id'>;
@@ -93,24 +99,14 @@ export interface ResolverTree {
 }
 
 /**
- * A node that contains pointers to other nodes, arrays of resolver events, and any metadata associated with resolver specific data
- */
-export interface ResolverNode {
-  id: string;
-  pagination: ResolverNodePagination;
-  children: ResolverNode[];
-  events: ResolverEvent[];
-  lifecycle: ResolverEvent[];
-  ancestors: ResolverNode[];
-  stats?: ResolverNodeStats;
-}
-
-/**
  * The lifecycle events (start, end etc) for a node nodes.
  */
 export interface LifecycleNode {
   id: string;
   lifecycle: ResolverEvent[];
+  /**
+   * stats are only set when the entire tree is being fetched
+   */
   stats?: ResolverNodeStats;
 }
 
@@ -129,6 +125,9 @@ export interface ResolverAncestry {
   nextAncestor: string | null;
 }
 
+/**
+ * Response structure for the related events route.
+ */
 export interface ResolverRelatedEvents {
   id: string;
   events: ResolverEvent[];

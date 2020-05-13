@@ -20,6 +20,7 @@ import { ChildrenQuery } from '../queries/children';
 import { EventsQuery } from '../queries/events';
 import { StatsQuery } from '../queries/stats';
 import { createAncestry, createRelatedEvents, createLifecycle, createChild } from './node';
+import { ChildrenNodesHelper } from './children_helper';
 
 /**
  * Handles retrieving nodes of a resolver tree.
@@ -64,21 +65,11 @@ export class Fetcher {
     generations: number,
     after?: string
   ): Promise<ResolverChildren> {
-    const childrenCache: Map<string, ChildNode> = new Map();
-    // create a node that represents the parent so we can set pagination correctly
-    childrenCache.set(this.id, createChild(this.id));
+    const helper = new ChildrenNodesHelper(this.id);
 
-    await this.doChildren(childrenCache, [this.id], limit, generations, after);
+    await this.doChildren(helper, [this.id], limit, generations, after);
 
-    let nextChild = null;
-    const root = childrenCache.get(this.id);
-    if (root) {
-      nextChild = root.nextChild;
-    }
-
-    childrenCache.delete(this.id);
-    const children = Array.from(childrenCache.values());
-    return { childNodes: children, nextChild };
+    return helper.getNodes();
   }
 
   /**
@@ -150,7 +141,7 @@ export class Fetcher {
   }
 
   private async doChildren(
-    cache: Map<string, ChildNode>,
+    cache: ChildrenNodesHelper,
     ids: string[],
     limit: number,
     levels: number,
@@ -175,7 +166,7 @@ export class Fetcher {
     const childIDs = results.map(entityId);
     const children = await lifecycleQuery.search(this.client, childIDs);
 
-    Fetcher.addChildrenToCache(cache, totals, children);
+    cache.addChildren(totals, children);
 
     await this.doChildren(cache, childIDs, limit * limit, levels - 1);
   }
@@ -188,54 +179,6 @@ export class Fetcher {
     const events = res?.events || {};
     ids.forEach(id => {
       tree.addStats(id, { totalAlerts: alerts[id] || 0, totalEvents: events[id] || 0 });
-    });
-  }
-
-  public static addChildrenToCache(
-    childrenCache: Map<string, ChildNode>,
-    totals: Record<string, number>,
-    results: ResolverEvent[]
-  ) {
-    const startEventsCache: Map<string, ResolverEvent[]> = new Map();
-
-    results.forEach(event => {
-      const entityID = entityId(event);
-      const parentID = parentEntityId(event);
-      if (!entityID || !parentID) {
-        return;
-      }
-
-      let cachedChild = childrenCache.get(entityID);
-      if (!cachedChild) {
-        cachedChild = createChild(entityID);
-        childrenCache.set(entityID, cachedChild);
-      }
-      cachedChild.lifecycle.push(event);
-
-      if (isProcessStart(event)) {
-        let startEvents = startEventsCache.get(parentID);
-        if (startEvents === undefined) {
-          startEvents = [];
-          startEventsCache.set(parentID, startEvents);
-        }
-        startEvents.push(event);
-      }
-    });
-
-    Fetcher.addChildrenPagination(childrenCache, startEventsCache, totals);
-  }
-
-  private static addChildrenPagination(
-    nodeCache: Map<string, ChildNode>,
-    startEventsCache: Map<string, ResolverEvent[]>,
-    totals: Record<string, number>
-  ) {
-    Object.entries(totals).forEach(([parentID, total]) => {
-      const parentNode = nodeCache.get(parentID);
-      const childrenStartEvents = startEventsCache.get(parentID);
-      if (parentNode && childrenStartEvents) {
-        parentNode.nextChild = PaginationBuilder.buildCursor(total, childrenStartEvents);
-      }
     });
   }
 }
