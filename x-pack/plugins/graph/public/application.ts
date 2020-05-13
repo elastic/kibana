@@ -32,7 +32,6 @@ import { checkLicense } from '../common/check_license';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import {
-  addAppRedirectMessageToUrl,
   configureAppAngularModule,
   createTopNavDirective,
   createTopNavHelper,
@@ -83,8 +82,13 @@ export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) 
     const licenseAllowsToShowThisPage = info.showAppLink && info.enableAppLink;
 
     if (!licenseAllowsToShowThisPage) {
-      const newUrl = addAppRedirectMessageToUrl(deps.addBasePath('/app/kibana'), info.message);
-      window.location.href = newUrl;
+      deps.coreStart.notifications.toasts.addDanger(info.message);
+      // This has to happen in the next tick because otherwise the original navigation
+      // bringing us to the graph app in the first place
+      // never completes and the browser enters are redirect loop
+      setTimeout(() => {
+        deps.coreStart.application.navigateToApp('home');
+      }, 0);
     }
   });
 

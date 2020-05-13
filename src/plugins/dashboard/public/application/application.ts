@@ -30,6 +30,7 @@ import {
   CoreStart,
   SavedObjectsClientContract,
   PluginInitializerContext,
+  ScopedHistory,
 } from 'kibana/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { Storage } from '../../../kibana_utils/public';
@@ -41,6 +42,11 @@ import { DataPublicPluginStart } from '../../../data/public';
 import { SharePluginStart } from '../../../share/public';
 import { KibanaLegacyStart, configureAppAngularModule } from '../../../kibana_legacy/public';
 import { SavedObjectLoader, SavedObjectsStart } from '../../../saved_objects/public';
+
+// required for i18nIdDirective
+import 'angular-sanitize';
+// required for ngRoute
+import 'angular-route';
 
 export interface RenderDeps {
   pluginInitializerContext: PluginInitializerContext;
@@ -64,6 +70,8 @@ export interface RenderDeps {
   share?: SharePluginStart;
   config: KibanaLegacyStart['config'];
   usageCollection?: UsageCollectionSetup;
+  navigateToDefaultApp: KibanaLegacyStart['navigateToDefaultApp'];
+  scopedHistory: () => ScopedHistory;
   savedObjects: SavedObjectsStart;
 }
 
@@ -76,7 +84,8 @@ export const renderApp = (element: HTMLElement, appBasePath: string, deps: Rende
     configureAppAngularModule(
       angularModuleInstance,
       { core: deps.core, env: deps.pluginInitializerContext.env },
-      true
+      true,
+      deps.scopedHistory
     );
     initDashboardApp(angularModuleInstance, deps);
   }
@@ -84,11 +93,12 @@ export const renderApp = (element: HTMLElement, appBasePath: string, deps: Rende
   const $injector = mountDashboardApp(appBasePath, element);
 
   return () => {
+    ($injector.get('kbnUrlStateStorage') as any).cancel();
     $injector.get('$rootScope').$destroy();
   };
 };
 
-const mainTemplate = (basePath: string) => `<div ng-view class="kbnLocalApplicationWrapper">
+const mainTemplate = (basePath: string) => `<div ng-view class="dshAppContainer">
   <base href="${basePath}" />
 </div>`;
 
@@ -98,7 +108,7 @@ const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react'];
 
 function mountDashboardApp(appBasePath: string, element: HTMLElement) {
   const mountpoint = document.createElement('div');
-  mountpoint.setAttribute('class', 'kbnLocalApplicationWrapper');
+  mountpoint.setAttribute('class', 'dshAppContainer');
   // eslint-disable-next-line
   mountpoint.innerHTML = mainTemplate(appBasePath);
   // bootstrap angular into detached element and attach it later to

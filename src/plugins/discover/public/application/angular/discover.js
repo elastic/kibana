@@ -113,7 +113,7 @@ app.config($routeProvider => {
       };
     },
   };
-  $routeProvider.when('/discover/:id?', {
+  $routeProvider.when('/:id?', {
     ...defaults,
     template: indexTemplate,
     reloadOnSearch: false,
@@ -158,14 +158,17 @@ app.config($routeProvider => {
               .catch(
                 redirectWhenMissing({
                   history,
+                  navigateToApp: core.application.navigateToApp,
                   mapping: {
-                    search: '/discover',
-                    'index-pattern':
-                      '/management/kibana/objects/savedSearches/' + $route.current.params.id,
+                    search: '/',
+                    'index-pattern': {
+                      app: 'kibana',
+                      path: `#/management/kibana/objects/savedSearches/${$route.current.params.id}`,
+                    },
                   },
                   toastNotifications,
                   onBeforeRedirect() {
-                    getUrlTracker().setTrackedUrl('/discover');
+                    getUrlTracker().setTrackedUrl('/');
                   },
                 })
               ),
@@ -266,11 +269,11 @@ function discoverController(
     }
   });
 
-  // this listener is waiting for such a path http://localhost:5601/app/kibana#/discover
+  // this listener is waiting for such a path http://localhost:5601/app/discover#/
   // which could be set through pressing "New" button in top nav or go to "Discover" plugin from the sidebar
   // to reload the page in a right way
   const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
-    if (!search && !hash && pathname === '/discover') {
+    if (!search && !hash && pathname === '/') {
       $route.reload();
     }
   });
@@ -345,7 +348,7 @@ function discoverController(
       }),
       run: function() {
         $scope.$evalAsync(() => {
-          history.push('/discover');
+          history.push('/');
         });
       },
       testId: 'discoverNewButton',
@@ -415,7 +418,7 @@ function discoverController(
       testId: 'discoverOpenButton',
       run: () => {
         showOpenSearchPanel({
-          makeUrl: searchId => `#/discover/${encodeURIComponent(searchId)}`,
+          makeUrl: searchId => `#/${encodeURIComponent(searchId)}`,
           I18nContext: core.i18n.Context,
         });
       },
@@ -504,7 +507,7 @@ function discoverController(
     chrome.setBreadcrumbs([
       {
         text: discoverBreadcrumbsTitle,
-        href: '#/discover',
+        href: '#/',
       },
       { text: savedSearch.title },
     ]);
@@ -764,7 +767,7 @@ function discoverController(
           });
 
           if (savedSearch.id !== $route.current.params.id) {
-            history.push(`/discover/${encodeURIComponent(savedSearch.id)}`);
+            history.push(`/${encodeURIComponent(savedSearch.id)}`);
           } else {
             // Update defaults so that "reload saved query" functions correctly
             setAppState(getStateDefaults());
@@ -935,11 +938,11 @@ function discoverController(
   };
 
   $scope.resetQuery = function() {
-    history.push(`/discover/${encodeURIComponent($route.current.params.id)}`);
+    history.push(`/${encodeURIComponent($route.current.params.id)}`);
   };
 
   $scope.newQuery = function() {
-    history.push('/discover');
+    history.push('/');
   };
 
   $scope.updateDataSource = () => {
@@ -1030,7 +1033,7 @@ function discoverController(
       },
     ];
 
-    $scope.vis = visualizations.createVis('histogram', {
+    $scope.vis = await visualizations.createVis('histogram', {
       title: savedSearch.title,
       params: {
         addLegend: false,
@@ -1038,8 +1041,7 @@ function discoverController(
       },
       data: {
         aggs: visStateAggs,
-        indexPattern: $scope.searchSource.getField('index').id,
-        searchSource: $scope.searchSource,
+        searchSource: $scope.searchSource.getSerializedFields(),
       },
     });
 

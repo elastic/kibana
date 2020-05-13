@@ -113,7 +113,13 @@ export class DashboardListing extends React.Component {
                   defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
                   values={{
                     sampleDataInstallLink: (
-                      <EuiLink href="#/home/tutorial_directory/sampleData">
+                      <EuiLink
+                        onClick={() =>
+                          this.props.core.application.navigateTo('home', {
+                            path: '#/tutorial_directory/sampleData',
+                          })
+                        }
+                      >
                         <FormattedMessage
                           id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
                           defaultMessage="Install some sample data"

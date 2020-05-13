@@ -83,7 +83,7 @@ function getNoItemsMessage(
     );
   }
 
-  const sampleDataUrl = `${application.getUrlForApp('kibana')}#/home/tutorial_directory/sampleData`;
+  const sampleDataUrl = `${application.getUrlForApp('home')}#/tutorial_directory/sampleData`;
 
   return (
     <div>

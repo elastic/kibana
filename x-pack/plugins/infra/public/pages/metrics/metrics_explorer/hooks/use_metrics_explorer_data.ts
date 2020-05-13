@@ -60,6 +60,7 @@ export function useMetricsExplorerData(
             method: 'POST',
             body: JSON.stringify({
               forceInterval: options.forceInterval,
+              dropLastBucket: options.dropLastBucket != null ? options.dropLastBucket : true,
               metrics:
                 options.aggregation === 'count'
                   ? [{ aggregation: 'count' }]

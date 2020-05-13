@@ -25,6 +25,8 @@ import { i18n } from '@kbn/i18n';
 
 import { getServices } from '../../kibana_services';
 import { syncQueryStateWithUrl } from '../../../../data/public';
+import { EuiLink } from '@elastic/eui';
+import React from 'react';
 
 export function initListingDirective(app, I18nContext) {
   app.directive('visualizeListingTable', reactDirective =>
@@ -41,9 +43,13 @@ export function VisualizeListingController($scope, createNewVis, kbnUrlStateStor
     data: { query },
     toastNotifications,
     visualizations,
-    core: { docLinks, savedObjects, uiSettings },
+    core: { docLinks, savedObjects, uiSettings, application },
     savedObjects: savedObjectsPublic,
   } = getServices();
+
+  chrome.docTitle.change(
+    i18n.translate('visualize.listingPageTitle', { defaultMessage: 'Visualize' })
+  );
 
   // syncs `_g` portion of url with query services
   const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
@@ -66,13 +72,37 @@ export function VisualizeListingController($scope, createNewVis, kbnUrlStateStor
     this.closeNewVisModal = visualizations.showNewVisModal();
   };
 
-  this.editItem = ({ editUrl }) => {
+  this.editItem = ({ editUrl, editApp }) => {
+    if (editApp) {
+      application.navigateToApp(editApp, { path: editUrl });
+      return;
+    }
     // for visualizations the edit and view URLs are the same
     window.location.href = addBasePath(editUrl);
   };
 
-  this.getViewUrl = ({ editUrl }) => {
-    return addBasePath(editUrl);
+  this.getViewElement = (field, record) => {
+    const dataTestSubj = `visListingTitleLink-${record.title.split(' ').join('-')}`;
+    if (record.editApp) {
+      return (
+        <EuiLink
+          onClick={() => {
+            application.navigateToApp(record.editApp, { path: record.editUrl });
+          }}
+          data-test-subj={dataTestSubj}
+        >
+          {field}
+        </EuiLink>
+      );
+    } else if (record.editUrl) {
+      return (
+        <EuiLink href={addBasePath(record.editUrl)} data-test-subj={dataTestSubj}>
+          {field}
+        </EuiLink>
+      );
+    } else {
+      return <span>{field}</span>;
+    }
   };
 
   if (createNewVis) {

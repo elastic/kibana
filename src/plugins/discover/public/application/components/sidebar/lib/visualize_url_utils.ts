@@ -30,13 +30,6 @@ import { DiscoverServices } from '../../../../build_services';
 import { VisualizationsStart, VisTypeAlias } from '../../../../../../visualizations/public';
 import { AGGS_TERMS_SIZE_SETTING } from '../../../../../common';
 
-function getMapsAppBaseUrl(visualizations: VisualizationsStart) {
-  const mapsAppVisAlias = visualizations.getAliases().find(({ name }) => {
-    return name === 'maps';
-  });
-  return mapsAppVisAlias ? mapsAppVisAlias.aliasUrl : null;
-}
-
 export function isMapsAppRegistered(visualizations: VisualizationsStart) {
   return visualizations.getAliases().some(({ name }: VisTypeAlias) => {
     return name === 'maps';
@@ -61,13 +54,12 @@ export function getMapsAppUrl(
   field: IFieldType,
   indexPattern: IIndexPattern,
   appState: AppState,
-  columns: string[],
-  services: DiscoverServices
+  columns: string[]
 ) {
   const mapAppParams = new URLSearchParams();
 
   // Copy global state
-  const locationSplit = window.location.href.split('discover?');
+  const locationSplit = window.location.hash.split('?');
   if (locationSplit.length > 1) {
     const discoverParams = new URLSearchParams(locationSplit[1]);
     const globalStateUrlValue = discoverParams.get('_g');
@@ -110,9 +102,10 @@ export function getMapsAppUrl(
     ])
   );
 
-  return services.addBasePath(
-    `${getMapsAppBaseUrl(services.visualizations)}?${mapAppParams.toString()}`
-  );
+  return {
+    app: 'maps',
+    path: `#/map?${mapAppParams.toString()}`,
+  };
 }
 
 export function getVisualizeUrl(
@@ -129,7 +122,7 @@ export function getVisualizeUrl(
     (field.type === KBN_FIELD_TYPES.GEO_POINT || field.type === KBN_FIELD_TYPES.GEO_SHAPE) &&
     isMapsAppRegistered(services.visualizations)
   ) {
-    return getMapsAppUrl(field, indexPattern, state, columns, services);
+    return getMapsAppUrl(field, indexPattern, state, columns);
   }
 
   let agg;
@@ -182,5 +175,8 @@ export function getVisualizeUrl(
     },
   };
 
-  return `#/visualize/create?${stringify(linkUrlParams)}`;
+  return {
+    app: 'visualize',
+    path: `#/create?${stringify(linkUrlParams)}`,
+  };
 }

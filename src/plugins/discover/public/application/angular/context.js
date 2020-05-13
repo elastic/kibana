@@ -48,10 +48,10 @@ getAngularModule().config($routeProvider => {
   $routeProvider
     // deprecated route, kept for compatibility
     // should be removed in the future
-    .when('/discover/context/:indexPatternId/:type/:id*', {
-      redirectTo: '/discover/context/:indexPatternId/:id',
+    .when('/context/:indexPatternId/:type/:id*', {
+      redirectTo: '/context/:indexPatternId/:id',
     })
-    .when('/discover/context/:indexPatternId/:id*', {
+    .when('/context/:indexPatternId/:id*', {
       controller: ContextAppRouteController,
       k7Breadcrumbs,
       controllerAs: 'contextAppRoute',
@@ -87,7 +87,6 @@ function ContextAppRouteController($routeParams, $scope, $route) {
   this.state = { ...appState.getState() };
   this.anchorId = $routeParams.id;
   this.indexPattern = indexPattern;
-  this.discoverUrl = getServices().chrome.navLinks.get('kibana:discover').url;
   filterManager.setFilters(_.cloneDeep(getFilters()));
   startStateSync();
 

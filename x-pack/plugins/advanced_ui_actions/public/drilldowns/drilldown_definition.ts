@@ -15,11 +15,6 @@ import { ActionFactoryDefinition } from '../dynamic_actions';
  * `Config` is a serializable object containing the configuration that the
  * drilldown is able to collect using UI.
  *
- * `PlaceContext` is an object that the app that opens drilldown management
- * flyout provides to the React component, specifying the contextual information
- * about that app. For example, on Dashboard app this context contains
- * information about the current embeddable and dashboard.
- *
  * `ExecutionContext` is an object created in response to user's interaction
  * and provided to the `execute` function of the drilldown. This object contains
  * information about the action user performed.
