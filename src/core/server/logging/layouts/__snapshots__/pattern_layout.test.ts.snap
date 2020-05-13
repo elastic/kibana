@@ -24,17 +24,17 @@ exports[`\`format()\` correctly formats record with full pattern. 5`] = `"[2012-
 
 exports[`\`format()\` correctly formats record with full pattern. 6`] = `"[2012-02-01T14:30:22.011Z][TRACE][context-6] message-6"`;
 
-exports[`\`format()\` correctly formats record with highlighting. 1`] = `"[2012-02-01T14:30:22.011Z][FATAL][context-1] Some error stack"`;
+exports[`\`format()\` correctly formats record with highlighting. 1`] = `[2012-02-01T14:30:22.011Z][FATAL][context-1] Some error stack`;
 
-exports[`\`format()\` correctly formats record with highlighting. 2`] = `"[2012-02-01T14:30:22.011Z][ERROR][context-2] message-2"`;
+exports[`\`format()\` correctly formats record with highlighting. 2`] = `[2012-02-01T14:30:22.011Z][ERROR][context-2] message-2`;
 
-exports[`\`format()\` correctly formats record with highlighting. 3`] = `"[2012-02-01T14:30:22.011Z][WARN ][context-3] message-3"`;
+exports[`\`format()\` correctly formats record with highlighting. 3`] = `[2012-02-01T14:30:22.011Z][WARN ][context-3] message-3`;
 
-exports[`\`format()\` correctly formats record with highlighting. 4`] = `"[2012-02-01T14:30:22.011Z][DEBUG][context-4] message-4"`;
+exports[`\`format()\` correctly formats record with highlighting. 4`] = `[2012-02-01T14:30:22.011Z][DEBUG][context-4] message-4`;
 
-exports[`\`format()\` correctly formats record with highlighting. 5`] = `"[2012-02-01T14:30:22.011Z][INFO ][context-5] message-5"`;
+exports[`\`format()\` correctly formats record with highlighting. 5`] = `[2012-02-01T14:30:22.011Z][INFO ][context-5] message-5`;
 
-exports[`\`format()\` correctly formats record with highlighting. 6`] = `"[2012-02-01T14:30:22.011Z][TRACE][context-6] message-6"`;
+exports[`\`format()\` correctly formats record with highlighting. 6`] = `[2012-02-01T14:30:22.011Z][TRACE][context-6] message-6`;
 
 exports[`allows specifying the PID in custom pattern 1`] = `"5355-context-1-Some error stack"`;
 

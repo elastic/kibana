@@ -72,10 +72,10 @@ Object {
 exports[`bin script points to a file creates a symlink in the project node_modules/.bin directory: logs 1`] = `
 Array [
   Array [
-    "[foo] bar -> ../bar/bin/bar.js",
+    [foo] bar -> ../bar/bin/bar.js,
   ],
   Array [
-    "[baz] bar -> ../bar/bin/bar.js",
+    [baz] bar -> ../bar/bin/bar.js,
   ],
 ]
 `;

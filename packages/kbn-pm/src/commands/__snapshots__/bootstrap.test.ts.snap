@@ -130,29 +130,29 @@ Array [
 exports[`does not run installer if no deps in package: logs 1`] = `
 Array [
   Array [
-    "
-Running installs in topological order:",
+    
+Running installs in topological order:,
   ],
   Array [
-    "
+    
 
 Installing dependencies in [kibana]:
-",
+,
   ],
   Array [
-    "
+    
 Installs completed, linking package executables:
-",
+,
   ],
   Array [
-    "
+    
 Linking executables completed, running \`kbn:bootstrap\` scripts
-",
+,
   ],
   Array [
-    "
+    
 Bootstrapping completed!
-",
+,
   ],
 ]
 `;
@@ -188,41 +188,41 @@ Array [
 exports[`handles dependencies of dependencies: logs 1`] = `
 Array [
   Array [
-    "
-Running installs in topological order:",
+    
+Running installs in topological order:,
   ],
   Array [
-    "
+    
 
 Installing dependencies in [kibana]:
-",
+,
   ],
   Array [
-    "
+    
 
 Installing dependencies in [bar]:
-",
+,
   ],
   Array [
-    "
+    
 
 Installing dependencies in [foo]:
-",
+,
   ],
   Array [
-    "
+    
 Installs completed, linking package executables:
-",
+,
   ],
   Array [
-    "
+    
 Linking executables completed, running \`kbn:bootstrap\` scripts
-",
+,
   ],
   Array [
-    "
+    
 Bootstrapping completed!
-",
+,
   ],
 ]
 `;
