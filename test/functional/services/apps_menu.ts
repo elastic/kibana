@@ -19,12 +19,38 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function AppsMenuProvider({ getService }: FtrProviderContext) {
+export function AppsMenuProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
+  const config = getService('config');
+  const defaultFindTimeout = config.get('timeouts.find');
   const find = getService('find');
 
   return new (class AppsMenu {
+    private async waitUntilLoadingHasFinished() {
+      try {
+        await this.isGlobalLoadingIndicatorVisible();
+      } catch (exception) {
+        if (exception.name === 'ElementNotVisible') {
+          // selenium might just have been too slow to catch it
+        } else {
+          throw exception;
+        }
+      }
+      await this.awaitGlobalLoadingIndicatorHidden();
+    }
+
+    private async isGlobalLoadingIndicatorVisible() {
+      log.debug('isGlobalLoadingIndicatorVisible');
+      return await testSubjects.exists('globalLoadingIndicator', { timeout: 1500 });
+    }
+
+    private async awaitGlobalLoadingIndicatorHidden() {
+      await testSubjects.existOrFail('globalLoadingIndicator-hidden', {
+        allowHidden: true,
+        timeout: defaultFindTimeout * 10,
+      });
+    }
     /**
      * Close the collapsible nav
      * TODO #64541 can replace with a data-test-subj
@@ -46,6 +72,8 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
      * Get the attributes from each of the links in the apps menu
      */
     public async readLinks() {
+      // wait for the chrome to finish initializing
+      await this.waitUntilLoadingHasFinished();
       await this.openCollapsibleNav();
       const appMenu = await testSubjects.find('collapsibleNav');
       const $ = await appMenu.parseDomContent();
