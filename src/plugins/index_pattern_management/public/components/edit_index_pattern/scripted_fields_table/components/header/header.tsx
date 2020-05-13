@@ -53,7 +53,7 @@ export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => (
       <EuiButton
         data-test-subj="addScriptedFieldLink"
         onClick={() => {
-          history.push(`patterns/${indexPatternId}/create-field/`);
+          history.push(`${indexPatternId}/create-field/`);
         }}
       >
         <FormattedMessage
