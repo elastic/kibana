@@ -17,7 +17,7 @@ import { exceptionListSchema, readExceptionListSchema } from '../../common/schem
 
 import { getExceptionListClient } from './utils';
 
-export const readListExceptionRoute = (router: IRouter): void => {
+export const readExceptionListRoute = (router: IRouter): void => {
   router.get(
     {
       options: {

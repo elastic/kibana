@@ -4,5 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './get_exception_list';
+export * from './create_exception_list_item';
 export * from './create_exception_list';
+export * from './get_exception_list';
+export * from './get_exception_list_item';

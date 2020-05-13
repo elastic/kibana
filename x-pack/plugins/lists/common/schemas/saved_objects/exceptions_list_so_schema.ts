@@ -8,13 +8,18 @@
 
 import * as t from 'io-ts';
 
+import { entriesArrayOrUndefined } from '../types';
 import {
   _tags,
+  commentOrUndefined,
   created_at,
   created_by,
   description,
+  exceptionListItemType,
   exceptionListType,
+  itemIdOrUndefined,
   list_id,
+  list_type,
   metaOrUndefined,
   name,
   tags,
@@ -25,15 +30,19 @@ import {
 export const exceptionListSoSchema = t.exact(
   t.type({
     _tags,
+    comment: commentOrUndefined,
     created_at,
     created_by,
     description,
+    entries: entriesArrayOrUndefined,
+    item_id: itemIdOrUndefined,
     list_id,
+    list_type,
     meta: metaOrUndefined,
     name,
     tags,
     tie_breaker_id,
-    type: exceptionListType,
+    type: t.union([exceptionListType, exceptionListItemType]),
     updated_by,
   })
 );

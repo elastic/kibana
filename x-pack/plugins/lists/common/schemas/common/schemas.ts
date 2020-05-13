@@ -75,3 +75,21 @@ export type _TagsOrUndefined = t.TypeOf<typeof _tagsOrUndefined>;
 // TODO: Change this into a t.keyof enumeration when we know what types of lists we going to have.
 export const exceptionListType = t.string;
 export type ExceptionListType = t.TypeOf<typeof exceptionListType>;
+
+// TODO: Change this into a t.keyof enumeration when we know what types of lists we going to have.
+export const exceptionListItemType = t.string;
+export type ExceptionListItemType = t.TypeOf<typeof exceptionListItemType>;
+
+export const list_type = t.keyof({ item: null, list: null });
+export type ListType = t.TypeOf<typeof list_type>;
+
+// TODO: Investigate what the deep structure of a comment is really going to be
+export const comment = t.string;
+export type Comment = t.TypeOf<typeof comment>;
+export const commentOrUndefined = t.union([comment, t.undefined]);
+export type CommentOrUndefined = t.TypeOf<typeof commentOrUndefined>;
+
+export const item_id = NonEmptyString;
+export type ItemId = t.TypeOf<typeof item_id>;
+export const itemIdOrUndefined = t.union([item_id, t.undefined]);
+export type ItemIdOrUndefined = t.TypeOf<typeof itemIdOrUndefined>;

@@ -11,11 +11,15 @@ import { ConfigType } from '../../config';
 
 import {
   ConstructorOptions,
+  CreateExceptionListItemOptions,
   CreateExceptionListOptions,
+  GetExceptionListItemOptions,
   GetExceptionListOptions,
 } from './exception_list_client_types';
 import { getExceptionList } from './get_exception_list';
 import { createExceptionList } from './create_exception_list';
+import { getExceptionListItem } from './get_exception_list_item';
+import { createExceptionListItem } from './create_exception_list_item';
 
 export class ExceptionListClient {
   // TODO: Delete this if it is not being used
@@ -45,6 +49,15 @@ export class ExceptionListClient {
     return getExceptionList({ id, listId, namespaceType, savedObjectsClient });
   };
 
+  public getExceptionListItem = async ({
+    itemId,
+    id,
+    namespaceType,
+  }: GetExceptionListItemOptions): Promise<ExceptionListSchema | null> => {
+    const { savedObjectsClient } = this;
+    return getExceptionListItem({ id, itemId, namespaceType, savedObjectsClient });
+  };
+
   public createExceptionList = async ({
     _tags,
     description,
@@ -59,6 +72,37 @@ export class ExceptionListClient {
     return createExceptionList({
       _tags,
       description,
+      listId,
+      meta,
+      name,
+      namespaceType,
+      savedObjectsClient,
+      tags,
+      type,
+      user,
+    });
+  };
+
+  public createExceptionListItem = async ({
+    _tags,
+    comment,
+    description,
+    entries,
+    itemId,
+    listId,
+    meta,
+    name,
+    namespaceType,
+    tags,
+    type,
+  }: CreateExceptionListItemOptions): Promise<ExceptionListSchema> => {
+    const { savedObjectsClient, user } = this;
+    return createExceptionListItem({
+      _tags,
+      comment,
+      description,
+      entries,
+      itemId,
       listId,
       meta,
       name,

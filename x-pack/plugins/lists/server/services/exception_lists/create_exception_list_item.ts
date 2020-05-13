@@ -8,10 +8,13 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import uuid from 'uuid';
 
 import {
+  CommentOrUndefined,
   Description,
-  ExceptionListSchema,
+  EntriesArray,
+  ExceptionListItemSchema,
   ExceptionListSoSchema,
   ExceptionListType,
+  ItemId,
   ListId,
   MetaOrUndefined,
   Name,
@@ -19,16 +22,19 @@ import {
   _Tags,
 } from '../../../common/schemas';
 
-import { getSavedObjectType, transformSavedObjetToExceptionList } from './utils';
+import { getSavedObjectType, transformSavedObjetToExceptionListItem } from './utils';
 import { NamespaceType } from './types';
 
-interface CreateExceptionListOptions {
+interface CreateExceptionListItemOptions {
   _tags: _Tags;
+  comment: CommentOrUndefined;
   listId: ListId;
+  itemId: ItemId;
   savedObjectsClient: SavedObjectsClientContract;
   namespaceType: NamespaceType;
   name: Name;
   description: Description;
+  entries: EntriesArray;
   meta: MetaOrUndefined;
   user: string;
   tags: Tags;
@@ -36,8 +42,11 @@ interface CreateExceptionListOptions {
   type: ExceptionListType;
 }
 
-export const createExceptionList = async ({
+export const createExceptionListItem = async ({
   _tags,
+  comment,
+  entries,
+  itemId,
   listId,
   savedObjectsClient,
   namespaceType,
@@ -48,19 +57,19 @@ export const createExceptionList = async ({
   tags,
   tieBreaker,
   type,
-}: CreateExceptionListOptions): Promise<ExceptionListSchema> => {
+}: CreateExceptionListItemOptions): Promise<ExceptionListItemSchema> => {
   const savedObjectType = getSavedObjectType({ namespaceType });
   const dateNow = new Date().toISOString();
   const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(savedObjectType, {
     _tags,
-    comment: undefined,
+    comment,
     created_at: dateNow,
     created_by: user,
     description,
-    entries: undefined,
-    item_id: undefined,
+    entries,
+    item_id: itemId,
     list_id: listId,
-    list_type: 'list',
+    list_type: 'item',
     meta,
     name,
     tags,
@@ -68,5 +77,5 @@ export const createExceptionList = async ({
     type,
     updated_by: dateNow,
   });
-  return transformSavedObjetToExceptionList({ savedObject });
+  return transformSavedObjetToExceptionListItem({ savedObject });
 };

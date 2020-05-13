@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export * from './create_exception_list_item_schema';
 export * from './create_exception_list_schema';
 export * from './create_list_item_schema';
 export * from './create_list_schema';

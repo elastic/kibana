@@ -67,6 +67,7 @@ export const exceptionListMapping: SavedObjectsType['mappings'] = {
 export const exceptionListItemMapping: SavedObjectsType['mappings'] = {
   properties: {
     comment: {
+      // TODO: investigate what the deep mapping structure of this really is
       type: 'keyword',
     },
     entries: {

@@ -6,7 +6,11 @@
 
 import { SavedObject } from 'kibana/server';
 
-import { ExceptionListSchema, ExceptionListSoSchema } from '../../../common/schemas';
+import {
+  ExceptionListItemSchema,
+  ExceptionListSchema,
+  ExceptionListSoSchema,
+} from '../../../common/schemas';
 import {
   SavedObjectType,
   exceptionListAgnosticSavedObjectType,
@@ -33,9 +37,88 @@ export const transformSavedObjetToExceptionList = ({
   savedObject: SavedObject<ExceptionListSoSchema>;
 }): ExceptionListSchema => {
   const dateNow = new Date().toISOString();
+  const {
+    attributes: {
+      _tags,
+      created_at,
+      created_by,
+      description,
+      list_id,
+      meta,
+      name,
+      tags,
+      tie_breaker_id,
+      type,
+      updated_by,
+    },
+    id,
+    updated_at: updatedAt,
+  } = savedObject;
+
+  // TODO: Change this to do a decode and throw if the saved object is not as expected.
+  // TODO: Do a throw if after the decode this is not the correct "list_type: list"
   return {
-    id: savedObject.id,
-    updated_at: savedObject.updated_at ?? dateNow,
-    ...savedObject.attributes,
+    _tags,
+    created_at,
+    created_by,
+    description,
+    id,
+    list_id,
+    meta,
+    name,
+    tags,
+    tie_breaker_id,
+    type,
+    updated_at: updatedAt ?? dateNow,
+    updated_by,
+  };
+};
+
+export const transformSavedObjetToExceptionListItem = ({
+  savedObject,
+}: {
+  savedObject: SavedObject<ExceptionListSoSchema>;
+}): ExceptionListItemSchema => {
+  const dateNow = new Date().toISOString();
+  const {
+    attributes: {
+      _tags,
+      comment,
+      created_at,
+      created_by,
+      description,
+      entries,
+      item_id: itemId,
+      list_id,
+      meta,
+      name,
+      tags,
+      tie_breaker_id,
+      type,
+      updated_by,
+    },
+    id,
+    updated_at: updatedAt,
+  } = savedObject;
+  // TODO: Change this to do a decode and throw if the saved object is not as expected.
+  // TODO: Do a throw if after the decode this is not the correct "list_type: item"
+  // TODO: Do a throw if item_id or entries is not defined.
+  return {
+    _tags,
+    comment,
+    created_at,
+    created_by,
+    description,
+    entries: entries ?? [],
+    id,
+    item_id: itemId ?? '(unknown)',
+    list_id,
+    meta,
+    name,
+    tags,
+    tie_breaker_id,
+    type,
+    updated_at: updatedAt ?? dateNow,
+    updated_by,
   };
 };
