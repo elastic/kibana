@@ -22,7 +22,9 @@ import { i18n } from '@kbn/i18n';
 import { uiModules } from '../modules';
 import { AppStateProvider } from '../state_management/app_state';
 
-uiModules.get('kibana/url').service('kbnUrl', function(Private) {
+uiModules.get('kibana/url').service('kbnUrl', function(Private, $injector) {
+  //config is not directly used but registers global event listeners to kbnUrl to function
+  $injector.get('config');
   return Private(KbnUrlProvider);
 });
 

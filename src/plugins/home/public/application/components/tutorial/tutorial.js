@@ -101,11 +101,11 @@ class TutorialUi extends React.Component {
     getServices().chrome.setBreadcrumbs([
       {
         text: homeTitle,
-        href: '#/home',
+        href: '#/',
       },
       {
         text: addDataTitle,
-        href: '#/home/tutorial_directory',
+        href: '#/tutorial_directory',
       },
       {
         text: tutorial ? tutorial.name : this.props.tutorialId,
@@ -325,7 +325,7 @@ class TutorialUi extends React.Component {
       });
       if (overviewDashboard) {
         label = overviewDashboard.linkLabel;
-        url = this.props.addBasePath(`/app/kibana#/dashboard/${overviewDashboard.id}`);
+        url = this.props.addBasePath(`/app/dashboards#/view/${overviewDashboard.id}`);
       }
     }
 

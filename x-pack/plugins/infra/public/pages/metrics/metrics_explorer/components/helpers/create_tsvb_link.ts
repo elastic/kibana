@@ -158,8 +158,8 @@ export const createTSVBLink = (
   };
 
   return {
-    app: 'kibana',
-    hash: '/visualize/create',
+    app: 'visualize',
+    hash: '/create',
     search: {
       type: 'metrics',
       _g: encode(globalState),

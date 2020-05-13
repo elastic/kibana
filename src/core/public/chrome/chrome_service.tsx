@@ -192,7 +192,7 @@ export class ChromeService {
             forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
             helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
             helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
-            homeHref={http.basePath.prepend('/app/kibana#/home')}
+            homeHref={http.basePath.prepend('/app/home')}
             isVisible$={this.isVisible$}
             kibanaVersion={injectedMetadata.getKibanaVersion()}
             legacyMode={injectedMetadata.getLegacyMode()}

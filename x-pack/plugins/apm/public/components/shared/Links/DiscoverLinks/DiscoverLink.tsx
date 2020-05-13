@@ -50,8 +50,8 @@ export const getDiscoverHref = ({
   };
 
   const href = url.format({
-    pathname: basePath.prepend('/app/kibana'),
-    hash: `/discover?_g=${rison.encode(risonQuery._g)}&_a=${rison.encode(
+    pathname: basePath.prepend('/app/discover'),
+    hash: `/?_g=${rison.encode(risonQuery._g)}&_a=${rison.encode(
       risonQuery._a as RisonValue
     )}`
   });

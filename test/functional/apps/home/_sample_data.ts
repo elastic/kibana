@@ -34,7 +34,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   describe('sample data', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
-      await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
@@ -83,7 +85,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('dashboard', () => {
       beforeEach(async () => {
-        await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+          useActualUrl: true,
+        });
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
@@ -146,7 +150,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     // needs to be in describe block so it is run after 'dashboard describe block'
     describe('uninstall', () => {
       beforeEach(async () => {
-        await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+          useActualUrl: true,
+        });
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
 

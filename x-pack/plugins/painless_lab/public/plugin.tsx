@@ -40,7 +40,7 @@ export class PainlessLabUIPlugin implements Plugin<void, void, PluginDependencie
         defaultMessage: 'Simulate and debug painless code.',
       }),
       icon: '',
-      path: '/app/kibana#/dev_tools/painless_lab',
+      path: '/app/dev_tools#/painless_lab',
       showOnHomePage: false,
       category: FeatureCatalogueCategory.ADMIN,
     });

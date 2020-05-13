@@ -205,7 +205,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
   private renderVisType = (visType: VisTypeListEntry | VisTypeAliasListEntry) => {
     let stage = {};
     let highlightMsg;
-    if (!('aliasUrl' in visType) && visType.stage === 'experimental') {
+    if (!('aliasPath' in visType) && visType.stage === 'experimental') {
       stage = {
         betaBadgeLabel: i18n.translate('visualizations.newVisWizard.experimentalTitle', {
           defaultMessage: 'Experimental',
@@ -219,7 +219,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
         defaultMessage:
           'This visualization is experimental. The design and implementation are less mature than stable visualizations and might be subject to change.',
       });
-    } else if ('aliasUrl' in visType) {
+    } else if ('aliasPath' in visType) {
       if (visType.stage === 'beta') {
         const aliasDescription = i18n.translate('visualizations.newVisWizard.betaDescription', {
           defaultMessage:
@@ -272,7 +272,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
         onBlur={() => this.setHighlightType(null)}
         className="visNewVisDialog__type"
         data-test-subj={`visType-${visType.name}`}
-        data-vis-stage={!('aliasUrl' in visType) ? visType.stage : 'alias'}
+        data-vis-stage={!('aliasPath' in visType) ? visType.stage : 'alias'}
         disabled={isDisabled}
         aria-describedby={`visTypeDescription-${visType.name}`}
         role="menuitem"
@@ -280,7 +280,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       >
         <VisTypeIcon
           icon={visType.icon}
-          image={!('aliasUrl' in visType) ? visType.image : undefined}
+          image={!('aliasPath' in visType) ? visType.image : undefined}
         />
       </EuiKeyPadMenuItem>
     );

@@ -196,7 +196,7 @@ describe('SavedObjectsTable', () => {
             icon: 'visualizeApp',
             editUrl: '#/management/kibana/objects/savedVisualizations/4',
             inAppUrl: {
-              path: '/visualize/edit/4',
+              path: '/edit/4',
               uiCapabilitiesPath: 'visualize.show',
             },
           },

@@ -17,13 +17,18 @@
  * under the License.
  */
 
-// make sure all dev tools are loaded and registered.
-import 'uiExports/devTools';
+import { getServices } from '../kibana_services';
 
-import { npStart } from 'ui/new_platform';
-
-if (npStart.plugins.devTools.getSortedDevTools().length === 0) {
-  npStart.core.chrome.navLinks.update('kibana:dev_tools', {
-    hidden: true,
-  });
-}
+export const createAppNavigationHandler = (targetUrl: string) => (event: MouseEvent) => {
+  if (event.altKey || event.metaKey || event.ctrlKey) {
+    return;
+  }
+  if (targetUrl.startsWith('/app/')) {
+    const [, appId, path] = /\/app\/(.*?)((\/|\?|#|$).*)/.exec(targetUrl) || [];
+    if (!appId) {
+      return;
+    }
+    event.preventDefault();
+    getServices().application.navigateToApp(appId, { path });
+  }
+};

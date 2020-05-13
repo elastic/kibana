@@ -87,7 +87,7 @@ export class SearchEmbeddableFactory
     const filterManager = getServices().filterManager;
 
     const url = await getServices().getSavedSearchUrlById(savedObjectId);
-    const editUrl = getServices().addBasePath(`/app/kibana${url}`);
+    const editUrl = getServices().addBasePath(`/app/discover${url}`);
     try {
       const savedObject = await getServices().getSavedSearchById(savedObjectId);
       const indexPattern = savedObject.searchSource.getField('index');
@@ -98,6 +98,7 @@ export class SearchEmbeddableFactory
           $rootScope,
           $compile,
           editUrl,
+          editPath: url,
           filterManager,
           editable: getServices().capabilities.discover.save as boolean,
           indexPatterns: indexPattern ? [indexPattern] : [],

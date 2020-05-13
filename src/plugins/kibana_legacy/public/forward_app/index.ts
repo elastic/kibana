@@ -17,4 +17,4 @@
  * under the License.
  */
 
-import './style_compile';
+export * from './forward_app';

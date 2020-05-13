@@ -40,8 +40,9 @@ export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDe
   try {
     const visId = vis.id as string;
 
+    const editPath = visId ? savedVisualizations.urlFor(visId) : '';
     const editUrl = visId
-      ? getHttp().basePath.prepend(`/app/kibana${savedVisualizations.urlFor(visId)}`)
+      ? getHttp().basePath.prepend(`/app/visualize${savedVisualizations.urlFor(visId)}`)
       : '';
     const isLabsEnabled = getUISettings().get<boolean>('visualize:enableLabs');
 
@@ -57,6 +58,7 @@ export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDe
       {
         vis,
         indexPatterns,
+        editPath,
         editUrl,
         editable,
         deps,

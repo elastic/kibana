@@ -78,6 +78,7 @@ interface Props {
   storage?: Storage;
   onIsLockedUpdate: OnIsLockedUpdate;
   onIsOpenUpdate: (isOpen?: boolean) => void;
+  navigateToApp: (appId: string) => void;
 }
 
 export function CollapsibleNav({
@@ -89,6 +90,7 @@ export function CollapsibleNav({
   onIsOpenUpdate,
   homeHref,
   id,
+  navigateToApp,
   storage = window.localStorage,
 }: Props) {
   const lockRef = useRef<HTMLButtonElement>(null);
@@ -124,7 +126,19 @@ export function CollapsibleNav({
                 label: 'Home',
                 iconType: 'home',
                 href: homeHref,
-                onClick: () => onIsOpenUpdate(false),
+                onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+                  onIsOpenUpdate(false);
+                  if (
+                    event.isDefaultPrevented() ||
+                    event.altKey ||
+                    event.metaKey ||
+                    event.ctrlKey
+                  ) {
+                    return;
+                  }
+                  event.preventDefault();
+                  navigateToApp('home');
+                },
               },
             ]}
             maxWidth="none"

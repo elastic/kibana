@@ -17,4 +17,22 @@
  * under the License.
  */
 
-export { addAppRedirectMessageToUrl, showAppRedirectNotification } from './app_redirect';
+import { SavedObjectMigrationFn } from 'kibana/server';
+
+/**
+ * To avoid loading the client twice for old short urls pointing to the /app/kibana app,
+ * this PR rewrites them to point to the new platform app url_migrate instead. This app will
+ * migrate the url on the fly and redirect the user to the actual new location of the short url
+ * without loading the page again.
+ * @param doc
+ */
+export const migrateLegacyKibanaAppShortUrls: SavedObjectMigrationFn<any, any> = doc => ({
+  ...doc,
+  attributes: {
+    ...doc.attributes,
+    url:
+      typeof doc.attributes.url === 'string' && doc.attributes.url.startsWith('/app/kibana')
+        ? doc.attributes.url.replace('/app/kibana', '/app/url_migrate')
+        : doc.attributes.url,
+  },
+});

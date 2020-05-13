@@ -96,7 +96,7 @@ export function getTimelionRequestHandler({
     const timeRangeBounds = timefilter.calculateBounds(timeRange);
 
     try {
-      return await http.post('../api/timelion/run', {
+      return await http.post('/api/timelion/run', {
         body: JSON.stringify({
           sheet: [expression],
           extended: {
