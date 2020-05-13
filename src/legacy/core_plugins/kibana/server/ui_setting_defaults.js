@@ -32,6 +32,18 @@ export function getUiSettingDefaults() {
     buildNum: {
       readonly: true,
     },
+    'state:storeInSessionStorage': {
+      name: i18n.translate('kbn.advancedSettings.storeUrlTitle', {
+        defaultMessage: 'Store URLs in session storage',
+      }),
+      value: false,
+      description: i18n.translate('kbn.advancedSettings.storeUrlText', {
+        defaultMessage:
+          'The URL can sometimes grow to be too large for some browsers to handle. ' +
+          'To counter-act this we are testing if storing parts of the URL in session storage could help. ' +
+          'Please let us know how it goes!',
+      }),
+    },
     defaultRoute: {
       name: i18n.translate('kbn.advancedSettings.defaultRoute.defaultRouteTitle', {
         defaultMessage: 'Default route',
