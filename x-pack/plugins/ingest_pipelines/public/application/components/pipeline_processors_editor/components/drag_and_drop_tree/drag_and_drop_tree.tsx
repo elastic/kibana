@@ -64,6 +64,7 @@ export const DragAndDropTreeUI: FunctionComponent<Props> = ({
       _processors.forEach((processor, idx) => {
         const index = flatTreeIndex++;
         const nodeSelector = _selector.concat(String(idx));
+        const id = [treeId].concat(nodeSelector).join('.');
         _items.push([
           nodeSelector,
           <TreeNode
@@ -71,9 +72,9 @@ export const DragAndDropTreeUI: FunctionComponent<Props> = ({
             index={index}
             level={level}
             processor={processor}
-            selector={nodeSelector}
+            id={id}
+            selector={baseSelector.concat(nodeSelector)}
             component={renderItem}
-            treeId={treeId}
           />,
         ]);
 
@@ -88,7 +89,7 @@ export const DragAndDropTreeUI: FunctionComponent<Props> = ({
 
     addRenderedItems(processors, [], 0);
     return _items;
-  }, [processors, renderItem, currentDragSelector]);
+  }, [processors, renderItem, currentDragSelector, baseSelector]);
 
   const treeId = `${readTreeId()}_PIPELINE_PROCESSORS_EDITOR`;
 
