@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import semver from 'semver';
+// @ts-ignore
 import numeral from '@elastic/numeral';
 
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
@@ -86,7 +87,7 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
     // If the datafeed uses script fields, we can only plot the time series if
     // model plot is enabled. Without model plot it will be very difficult or impossible
     // to invert to a reverse search of the underlying metric data.
-    if (isSourceDataChartable === true && typeof job.datafeed_config.script_fields === 'object') {
+    if (isSourceDataChartable === true && typeof job.datafeed_config?.script_fields === 'object') {
       // Perform extra check to see if the detector is using a scripted field.
       const scriptFields = Object.keys(job.datafeed_config.script_fields);
       isSourceDataChartable =
@@ -102,7 +103,7 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
 
 // Returns a flag to indicate whether model plot data can be plotted in a time
 // series chart for the specified detector.
-export function isModelPlotChartableForDetector(job: CombinedJob, detectorIndex: number): boolean {
+export function isModelPlotChartableForDetector(job: Job, detectorIndex: number): boolean {
   let isModelPlotChartable = false;
 
   const modelPlotEnabled = job.model_plot_config?.enabled ?? false;
@@ -598,8 +599,8 @@ function isValidTimeFormat(value: string | undefined): boolean {
 // anomalies might have been raised after the point at which data ingest has stopped.
 export function getLatestDataOrBucketTimestamp(
   latestDataTimestamp: number | undefined,
-  latestBucketTimestamp: number
-): number {
+  latestBucketTimestamp: number | undefined
+): number | undefined {
   if (latestDataTimestamp !== undefined && latestBucketTimestamp !== undefined) {
     return Math.max(latestDataTimestamp, latestBucketTimestamp);
   } else {
