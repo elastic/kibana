@@ -40,3 +40,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export type APMOSSConfig = TypeOf<typeof config.schema>;
 
 export { APMOSSPluginSetup } from './plugin';
+
+export { apmIndexPattern } from './tutorial/index_pattern.json';
