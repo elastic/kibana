@@ -5,8 +5,8 @@
  */
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { EuiButtonEmpty, EuiButtonEmptyProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiButtonEmpty, EuiButtonEmptyProps } from '@elastic/eui';
 import { PackageInfo, entries, DetailViewPanelName, InstallStatus } from '../../../../types';
 import { useLink } from '../../../../hooks';
 import { useGetPackageInstallStatus } from '../../hooks';
@@ -43,8 +43,12 @@ export function SideNavLinks({ name, version, active }: NavLinkProps) {
               ? p.theme.eui.euiFontWeightSemiBold
               : p.theme.eui.euiFontWeightRegular};
         `;
-        // don't display Data Sources tab if the package is not installed
-        if (packageInstallStatus.status !== InstallStatus.installed && panel === 'data-sources')
+        // Don't display Data Sources tab as we haven't implemented this yet
+        // FIXME: Restore when we implement data sources page
+        if (
+          panel === 'data-sources' &&
+          (true || packageInstallStatus.status !== InstallStatus.installed)
+        )
           return null;
 
         return (

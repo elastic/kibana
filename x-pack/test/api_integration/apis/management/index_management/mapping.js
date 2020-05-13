@@ -32,7 +32,7 @@ export default function({ getService }) {
 
       const { body } = await getIndexMapping(index).expect(200);
 
-      expect(body.mapping).to.eql(mappings);
+      expect(body.mappings).to.eql(mappings);
     });
   });
 }

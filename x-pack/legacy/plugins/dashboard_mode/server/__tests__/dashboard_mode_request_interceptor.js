@@ -12,10 +12,6 @@ import { createDashboardModeRequestInterceptor } from '../dashboard_mode_request
 const DASHBOARD_ONLY_MODE_ROLE = 'test_dashboard_only_mode_role';
 
 function setup() {
-  const dashboardViewerApp = {
-    name: 'dashboardViewerApp',
-  };
-
   const server = new Hapi.Server();
 
   server.decorate('request', 'getUiSettingsService', () => {
@@ -25,12 +21,24 @@ function setup() {
   });
 
   // attach the extension
-  server.ext(createDashboardModeRequestInterceptor(dashboardViewerApp));
+  server.ext(createDashboardModeRequestInterceptor());
 
   // allow the extension to fake "render an app"
   server.decorate('toolkit', 'renderApp', function(app) {
     // `this` is the `h` response toolkit
     return this.response({ renderApp: true, app });
+  });
+
+  server.decorate('server', 'newPlatform', {
+    setup: {
+      core: {
+        http: {
+          basePath: {
+            get: () => '',
+          },
+        },
+      },
+    },
   });
 
   server.route({
@@ -54,14 +62,6 @@ function setup() {
 }
 
 describe('DashboardOnlyModeRequestInterceptor', () => {
-  describe('basics', () => {
-    it('throws if it does not get the `dashboardViewerApp`', () => {
-      expect(() => {
-        createDashboardModeRequestInterceptor();
-      }).to.throwError('dashboardViewerApp');
-    });
-  });
-
   describe('request is not for dashboad-only user', () => {
     describe('app route', () => {
       it('lets the route render as normal', async () => {
@@ -119,31 +119,48 @@ describe('DashboardOnlyModeRequestInterceptor', () => {
       });
     });
 
-    function testRendersDashboardViewerApp(url) {
+    describe('requests to dashboard_mode app', () => {
+      it('lets the route render as normal', async () => {
+        const { server } = setup();
+        const response = await server.inject({
+          url: '/app/dashboard_mode',
+          credentials: {
+            roles: [DASHBOARD_ONLY_MODE_ROLE],
+          },
+        });
+
+        expect(response)
+          .to.have.property('statusCode', 200)
+          .and.have.property('result')
+          .eql({
+            renderApp: true,
+            app: { name: 'dashboard_mode' },
+          });
+      });
+    });
+
+    function testRedirectToDashboardModeApp(url) {
       describe(`requests to url:"${url}"`, () => {
-        it('renders the dashboardViewerApp instead', async () => {
+        it('redirects to the dashboard_mode app instead', async () => {
           const { server } = setup();
           const response = await server.inject({
-            url: '/app/kibana',
+            url: url,
             credentials: {
               roles: [DASHBOARD_ONLY_MODE_ROLE],
             },
           });
 
-          expect(response)
-            .to.have.property('statusCode', 200)
-            .and.have.property('result')
-            .eql({
-              renderApp: true,
-              app: { name: 'dashboardViewerApp' },
-            });
+          expect(response).to.have.property('statusCode', 301);
+          expect(response.headers).to.have.property('location', '/app/dashboard_mode');
         });
       });
     }
 
-    testRendersDashboardViewerApp('/app/kibana');
-    testRendersDashboardViewerApp('/app/kibana#/foo/bar');
-    testRendersDashboardViewerApp('/app/kibana/foo/bar');
-    testRendersDashboardViewerApp('/app/kibana?foo=bar');
+    testRedirectToDashboardModeApp('/app/kibana');
+    testRedirectToDashboardModeApp('/app/kibana#/foo/bar');
+    testRedirectToDashboardModeApp('/app/kibana/foo/bar');
+    testRedirectToDashboardModeApp('/app/kibana?foo=bar');
+    testRedirectToDashboardModeApp('/app/dashboards?foo=bar');
+    testRedirectToDashboardModeApp('/app/home?foo=bar');
   });
 });

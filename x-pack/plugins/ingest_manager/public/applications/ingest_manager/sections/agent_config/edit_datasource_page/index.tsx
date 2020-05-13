@@ -79,7 +79,16 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
           setAgentConfig(agentConfigData.item);
         }
         if (datasourceData?.item) {
-          const { id, revision, inputs, ...restOfDatasource } = datasourceData.item;
+          const {
+            id,
+            revision,
+            inputs,
+            created_by,
+            created_at,
+            updated_by,
+            updated_at,
+            ...restOfDatasource
+          } = datasourceData.item;
           // Remove `agent_stream` from all stream info, we assign this after saving
           const newDatasource = {
             ...restOfDatasource,
