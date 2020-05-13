@@ -236,28 +236,33 @@ const getWaterfallItems = (items: TraceAPIResponse['trace']['items']) =>
     }
   });
 
-/**
- * Changes the parent_id of items based on the child.id property.
- * Solves the problem of Inferred spans that are created as child of trace spans
- * when it actually should be its parent.
- * @param waterfallItems
- */
-const reparentSpans = (waterfallItems: IWaterfallItem[]) => {
+function reparentSpans(waterfallItems: IWaterfallItem[]) {
+  // find children that needs to be re-parented and map them to their correct parent id
+  const childIdToParentIdMapping = Object.fromEntries(
+    flatten(
+      waterfallItems.map(waterfallItem => {
+        if (waterfallItem.docType === 'span') {
+          const childIds = waterfallItem.doc.child?.id ?? [];
+          return childIds.map(id => [id, waterfallItem.id]);
+        }
+        return [];
+      })
+    )
+  );
+
+  // update parent id for children that needs it or return unchanged
   return waterfallItems.map(waterfallItem => {
-    if (waterfallItem.docType === 'span') {
-      const childId = waterfallItem.doc.child?.id;
-      if (childId) {
-        childId.forEach(id => {
-          const item = waterfallItems.find(_item => _item.id === id);
-          if (item) {
-            item.parentId = waterfallItem.id;
-          }
-        });
-      }
+    const newParentId = childIdToParentIdMapping[waterfallItem.id];
+    if (newParentId) {
+      return {
+        ...waterfallItem,
+        parentId: newParentId
+      };
     }
+
     return waterfallItem;
   });
-};
+}
 
 const getChildrenGroupedByParentId = (waterfallItems: IWaterfallItem[]) =>
   groupBy(waterfallItems, item => (item.parentId ? item.parentId : ROOT_ID));

@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { networkTopNFlowQuery } from '../../../../plugins/siem/public/containers/network_top_n_flow/index.gql_query';
+import { networkTopNFlowQuery } from '../../../../plugins/siem/public/network/containers/network_top_n_flow/index.gql_query';
 import {
   Direction,
   FlowTargetSourceDest,

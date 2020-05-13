@@ -17,9 +17,9 @@ interface Props {
 export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
-  const currentFilters = useFilterUpdate();
+  const { selectedFilters } = useFilterUpdate();
 
-  const getSelectedItems = (fieldName: string) => currentFilters.get(fieldName) || [];
+  const getSelectedItems = (fieldName: string) => selectedFilters.get(fieldName) || [];
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);

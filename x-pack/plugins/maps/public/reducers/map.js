@@ -102,7 +102,7 @@ const updateLayerSourceDescriptorProp = (state, layerId, propName, value) => {
   return { ...state, layerList: updatedList };
 };
 
-const INITIAL_STATE = {
+export const DEFAULT_MAP_STATE = {
   ready: false,
   mapInitError: null,
   goto: null,
@@ -133,7 +133,7 @@ const INITIAL_STATE = {
   __rollbackSettings: null,
 };
 
-export function map(state = INITIAL_STATE, action) {
+export function map(state = DEFAULT_MAP_STATE, action) {
   switch (action.type) {
     case UPDATE_DRAW_STATE:
       return {

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './copy_to_space_form.scss';
 import React from 'react';
 import {
   EuiSwitch,
