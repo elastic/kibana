@@ -24,4 +24,4 @@ interface EventHandlers {
 
 export function setEventHandlers(eventHandlers?: EventHandlers): AnyAction;
 
-export function getInspectorAdapters(args: unknown): Adapters | undefined;
+export function getInspectorAdapters(args: unknown): Adapters;

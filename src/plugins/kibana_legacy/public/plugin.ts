@@ -23,10 +23,14 @@ import {
   PluginInitializerContext,
   AppUpdatableFields,
   CoreStart,
+  CoreSetup,
 } from 'kibana/public';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { ConfigSchema } from '../config';
 import { getDashboardConfig } from './dashboard_config';
+import { navigateToDefaultApp } from './navigate_to_default_app';
+import { createLegacyUrlForwardApp } from './forward_app';
+import { injectHeaderStyle } from './utils/inject_header_style';
 
 interface LegacyAppAliasDefinition {
   legacyAppId: string;
@@ -34,7 +38,7 @@ interface LegacyAppAliasDefinition {
   keepPrefix: boolean;
 }
 
-interface ForwardDefinition {
+export interface ForwardDefinition {
   legacyAppId: string;
   newAppId: string;
   rewritePath: (legacyPath: string) => string;
@@ -62,10 +66,13 @@ export class KibanaLegacyPlugin {
   private apps: AngularRenderedApp[] = [];
   private legacyAppAliases: LegacyAppAliasDefinition[] = [];
   private forwardDefinitions: ForwardDefinition[] = [];
+  private currentAppId: string | undefined;
+  private currentAppIdSubscription: Subscription | undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
-  public setup() {
+  public setup(core: CoreSetup<{}, KibanaLegacyStart>) {
+    core.application.register(createLegacyUrlForwardApp(core));
     return {
       /**
        * @deprecated
@@ -121,7 +128,9 @@ export class KibanaLegacyPlugin {
        *
        * @param legacyAppId The name of the old app to forward URLs from
        * @param newAppId The name of the new app that handles the URLs now
-       * @param rewritePath Function to rewrite the legacy sub path of the app to the new path in the core app
+       * @param rewritePath Function to rewrite the legacy sub path of the app to the new path in the core app.
+       *        If none is provided, it will just strip the prefix of the legacyAppId away
+       *
        * path into the new path
        *
        * Example usage:
@@ -147,9 +156,13 @@ export class KibanaLegacyPlugin {
       forwardApp: (
         legacyAppId: string,
         newAppId: string,
-        rewritePath: (legacyPath: string) => string
+        rewritePath?: (legacyPath: string) => string
       ) => {
-        this.forwardDefinitions.push({ legacyAppId, newAppId, rewritePath });
+        this.forwardDefinitions.push({
+          legacyAppId,
+          newAppId,
+          rewritePath: rewritePath || (path => `#${path.replace(`/${legacyAppId}`, '') || '/'}`),
+        });
       },
 
       /**
@@ -166,7 +179,11 @@ export class KibanaLegacyPlugin {
     };
   }
 
-  public start({ application }: CoreStart) {
+  public start({ application, http: { basePath }, uiSettings }: CoreStart) {
+    this.currentAppIdSubscription = application.currentAppId$.subscribe(currentAppId => {
+      this.currentAppId = currentAppId;
+    });
+    injectHeaderStyle(uiSettings);
     return {
       /**
        * @deprecated
@@ -185,7 +202,29 @@ export class KibanaLegacyPlugin {
       getForwards: () => this.forwardDefinitions,
       config: this.initializerContext.config.get(),
       dashboardConfig: getDashboardConfig(!application.capabilities.dashboard.showWriteControls),
+      /**
+       * Navigates to the app defined as kibana.defaultAppId.
+       * This takes redirects into account and uses the right mechanism to navigate.
+       */
+      navigateToDefaultApp: (
+        { overwriteHash }: { overwriteHash: boolean } = { overwriteHash: true }
+      ) => {
+        navigateToDefaultApp(
+          this.initializerContext.config.get().defaultAppId,
+          this.forwardDefinitions,
+          application,
+          basePath,
+          this.currentAppId,
+          overwriteHash
+        );
+      },
     };
+  }
+
+  public stop() {
+    if (this.currentAppIdSubscription) {
+      this.currentAppIdSubscription.unsubscribe();
+    }
   }
 }
 

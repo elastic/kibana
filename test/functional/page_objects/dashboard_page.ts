@@ -112,7 +112,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
     }
 
     public getDashboardIdFromUrl(url: string) {
-      const urlSubstring = 'kibana#/dashboard/';
+      const urlSubstring = '#/view/';
       const startOfIdIndex = url.indexOf(urlSubstring) + urlSubstring.length;
       const endIndex = url.indexOf('?');
       const id = url.substring(startOfIdIndex, endIndex < 0 ? url.length : endIndex);

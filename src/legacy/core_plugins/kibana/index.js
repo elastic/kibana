@@ -23,7 +23,6 @@ import { promisify } from 'util';
 
 import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
-import mappings from './mappings.json';
 import { getUiSettingDefaults } from './server/ui_setting_defaults';
 import { registerCspCollector } from './server/lib/csp_usage_collector';
 import { injectVars } from './inject_vars';
@@ -53,7 +52,6 @@ export default function(kibana) {
     },
 
     uiExports: {
-      hacks: ['plugins/kibana/dev_tools'],
       app: {
         id: 'kibana',
         title: 'Kibana',
@@ -62,49 +60,6 @@ export default function(kibana) {
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       links: [
-        {
-          id: 'kibana:discover',
-          title: i18n.translate('kbn.discoverTitle', {
-            defaultMessage: 'Discover',
-          }),
-          order: 2000,
-          url: `${kbnBaseUrl}#/discover`,
-          euiIconType: 'discoverApp',
-          disableSubUrlTracking: true,
-          category: DEFAULT_APP_CATEGORIES.kibana,
-        },
-        {
-          id: 'kibana:visualize',
-          title: i18n.translate('kbn.visualizeTitle', {
-            defaultMessage: 'Visualize',
-          }),
-          order: 7000,
-          url: `${kbnBaseUrl}#/visualize`,
-          euiIconType: 'visualizeApp',
-          disableSubUrlTracking: true,
-          category: DEFAULT_APP_CATEGORIES.kibana,
-        },
-        {
-          id: 'kibana:dashboard',
-          title: i18n.translate('kbn.dashboardTitle', {
-            defaultMessage: 'Dashboard',
-          }),
-          order: 1000,
-          url: `${kbnBaseUrl}#/dashboards`,
-          euiIconType: 'dashboardApp',
-          disableSubUrlTracking: true,
-          category: DEFAULT_APP_CATEGORIES.kibana,
-        },
-        {
-          id: 'kibana:dev_tools',
-          title: i18n.translate('kbn.devToolsTitle', {
-            defaultMessage: 'Dev Tools',
-          }),
-          order: 9001,
-          url: '/app/kibana#/dev_tools',
-          euiIconType: 'devToolsApp',
-          category: DEFAULT_APP_CATEGORIES.management,
-        },
         {
           id: 'kibana:stack_management',
           title: i18n.translate('kbn.managementTitle', {
@@ -138,7 +93,6 @@ export default function(kibana) {
         };
       },
 
-      mappings,
       uiSettingDefaults: getUiSettingDefaults(),
     },
 

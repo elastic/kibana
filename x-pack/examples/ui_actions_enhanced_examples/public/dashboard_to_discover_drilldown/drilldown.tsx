@@ -65,17 +65,17 @@ export class DashboardToDiscoverDrilldown implements Drilldown<Config, ActionCon
     }
 
     const index = indexPatternId ? `,index:'${indexPatternId}'` : '';
-    return `#/discover?_g=(filters:!(),refreshInterval:(pause:!f,value:900000),time:(from:now-7d,to:now))&_a=(columns:!(_source),filters:!()${index},interval:auto,query:(language:kuery,query:''),sort:!())`;
+    return `#/?_g=(filters:!(),refreshInterval:(pause:!f,value:900000),time:(from:now-7d,to:now))&_a=(columns:!(_source),filters:!()${index},interval:auto,query:(language:kuery,query:''),sort:!())`;
   };
 
   public readonly getHref = async (config: Config, context: ActionContext): Promise<string> => {
-    return `kibana${await this.getPath(config, context)}`;
+    return `discover${await this.getPath(config, context)}`;
   };
 
   public readonly execute = async (config: Config, context: ActionContext) => {
     const path = await this.getPath(config, context);
 
-    await this.params.start().core.application.navigateToApp('kibana', {
+    await this.params.start().core.application.navigateToApp('discover', {
       path,
     });
   };

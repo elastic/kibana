@@ -22,7 +22,6 @@ const startTask = require('../tasks/start');
 const testAllTask = require('../tasks/test/all');
 const testKarmaTask = require('../tasks/test/karma');
 const testMochaTask = require('../tasks/test/mocha');
-const postinstallTask = require('../tasks/postinstall');
 
 module.exports = {
   build: buildTask,
@@ -30,5 +29,4 @@ module.exports = {
   testAll: testAllTask,
   testKarma: testKarmaTask,
   testMocha: testMochaTask,
-  postinstall: postinstallTask,
 };

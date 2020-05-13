@@ -13,6 +13,7 @@ import * as Registry from '../../registry';
 import { loadFieldsFromYaml, Fields, Field } from '../../fields/field';
 import { getPackageKeysByStatus } from '../../packages/get';
 import { InstallationStatus, RegistryPackage, CallESAsCurrentUser } from '../../../../types';
+import { appContextService } from '../../../../services';
 
 interface FieldFormatMap {
   [key: string]: FieldFormatMapItem;
@@ -366,10 +367,11 @@ const getFieldFormatParams = (field: Field): FieldFormatParams => {
   return params;
 };
 
-export const ensureDefaultIndices = async (callCluster: CallESAsCurrentUser) =>
+export const ensureDefaultIndices = async (callCluster: CallESAsCurrentUser) => {
   // create placeholder indices to supress errors in the kibana Dashboards app
   // that no matching indices exist https://github.com/elastic/kibana/issues/62343
-  Promise.all(
+  const logger = appContextService.getLogger();
+  return Promise.all(
     Object.keys(IndexPatternType).map(async indexPattern => {
       const defaultIndexPatternName = indexPattern + INDEX_PATTERN_PLACEHOLDER_SUFFIX;
       const indexExists = await callCluster('indices.exists', { index: defaultIndexPatternName });
@@ -386,9 +388,9 @@ export const ensureDefaultIndices = async (callCluster: CallESAsCurrentUser) =>
             },
           });
         } catch (putErr) {
-          // throw new Error(`${defaultIndexPatternName} could not be created`);
-          throw new Error(putErr);
+          logger.error(`${defaultIndexPatternName} could not be created`);
         }
       }
     })
   );
+};

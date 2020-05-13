@@ -39,7 +39,7 @@ import {
   Start as InspectorStart,
 } from '../../../../plugins/inspector/public';
 import { ChartsPluginSetup, ChartsPluginStart } from '../../../../plugins/charts/public';
-import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/public';
+import { DevToolsSetup } from '../../../../plugins/dev_tools/public';
 import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../plugins/kibana_legacy/public';
 import { HomePublicPluginSetup } from '../../../../plugins/home/public';
 import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
@@ -105,7 +105,6 @@ export interface PluginsStart {
   inspector: InspectorStart;
   uiActions: UiActionsStart;
   navigation: NavigationPublicPluginStart;
-  devTools: DevToolsStart;
   kibanaLegacy: KibanaLegacyStart;
   share: SharePluginStart;
   management: ManagementStart;

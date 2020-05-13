@@ -19,4 +19,4 @@
 
 export { useVisualizeAppState } from './visualize_app_state';
 export { makeStateful } from './make_stateful';
-export { addEmbeddableToDashboardUrl } from './url_helper';
+export { addEmbeddableToDashboardUrl } from '../../../../../dashboard/public/url_utils/url_helper';

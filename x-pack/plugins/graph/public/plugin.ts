@@ -72,6 +72,9 @@ export class GraphPlugin
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
+        coreStart.chrome.docTitle.change(
+          i18n.translate('xpack.graph.pageTitle', { defaultMessage: 'Graph' })
+        );
         const { renderApp } = await import('./application');
         return renderApp({
           ...params,

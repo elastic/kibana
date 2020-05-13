@@ -31,7 +31,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     const clonedDashboardName = 'Dashboard Listing A11y Copy';
 
     before(async () => {
-      await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
       await PageObjects.home.addSampleDataSet('flights');
     });
 

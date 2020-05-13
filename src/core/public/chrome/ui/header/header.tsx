@@ -247,6 +247,7 @@ export class Header extends Component<HeaderProps, State> {
                 href={this.props.homeHref}
                 forceNavigation={this.state.forceNavigation}
                 navLinks={navLinks}
+                navigateToApp={this.props.application.navigateToApp}
               />
             </EuiHeaderSectionItem>
 
@@ -287,6 +288,7 @@ export class Header extends Component<HeaderProps, State> {
                 this.toggleCollapsibleNavRef.current.focus();
               }
             }}
+            navigateToApp={this.props.application.navigateToApp}
           />
         ) : (
           // TODO #64541

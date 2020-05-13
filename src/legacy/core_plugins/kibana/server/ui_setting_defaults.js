@@ -69,7 +69,7 @@ export function getUiSettingDefaults() {
       name: i18n.translate('kbn.advancedSettings.defaultRoute.defaultRouteTitle', {
         defaultMessage: 'Default route',
       }),
-      value: '/app/kibana',
+      value: '/app/home',
       schema: schema.string({
         validate(value) {
           if (!value.startsWith('/') || !isRelativeUrl(value)) {

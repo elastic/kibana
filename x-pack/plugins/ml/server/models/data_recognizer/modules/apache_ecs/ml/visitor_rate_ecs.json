@@ -27,7 +27,7 @@
     "custom_urls": [
       {
         "url_name": "Raw data",
-        "url_value": "kibana#/discover/ml_http_access_filebeat_ecs?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(columns:!(_source),filters:!((\u0027$state\u0027:(store:appState),meta:(alias:!n,disabled:!f,index:\u0027INDEX_PATTERN_ID\u0027,key:event.dataset,negate:!f,params:(query:\u0027apache.access\u0027),type:phrase,value:\u0027apache.access\u0027),query:(match:(event.dataset:(query:\u0027apache.access\u0027,type:phrase))))),index:\u0027INDEX_PATTERN_ID\u0027,interval:auto,query:(language:kuery,query:\u0027\u0027),sort:!(\u0027@timestamp\u0027,desc))"
+        "url_value": "discover#/ml_http_access_filebeat_ecs?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(columns:!(_source),filters:!((\u0027$state\u0027:(store:appState),meta:(alias:!n,disabled:!f,index:\u0027INDEX_PATTERN_ID\u0027,key:event.dataset,negate:!f,params:(query:\u0027apache.access\u0027),type:phrase,value:\u0027apache.access\u0027),query:(match:(event.dataset:(query:\u0027apache.access\u0027,type:phrase))))),index:\u0027INDEX_PATTERN_ID\u0027,interval:auto,query:(language:kuery,query:\u0027\u0027),sort:!(\u0027@timestamp\u0027,desc))"
       }
     ]
   }

@@ -21,7 +21,7 @@ class AppContextService {
   private isProductionMode: boolean = false;
   private kibanaVersion: string | undefined;
   private cloud?: CloudSetup;
-  private logger?: Logger;
+  private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
 
   public async start(appContext: IngestManagerAppContext) {
@@ -53,7 +53,7 @@ class AppContextService {
 
   public getSecurity() {
     if (!this.security) {
-      throw new Error('Secury service not set.');
+      throw new Error('Security service not set.');
     }
     return this.security;
   }
@@ -63,6 +63,9 @@ class AppContextService {
   }
 
   public getLogger() {
+    if (!this.logger) {
+      throw new Error('Logger not set.');
+    }
     return this.logger;
   }
 

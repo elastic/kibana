@@ -106,7 +106,9 @@ export class LocalApplicationService {
         template: '<span></span>',
         controller($location: ILocationService) {
           const newPath = forwardDefinition.rewritePath($location.url());
-          npStart.core.application.navigateToApp(forwardDefinition.newAppId, { path: newPath });
+          window.location.replace(
+            npStart.core.http.basePath.prepend(`/app/${forwardDefinition.newAppId}${newPath}`)
+          );
         },
       });
     });

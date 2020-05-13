@@ -43,11 +43,11 @@
         {
             "url_name": "Host overview",
             "time_range": "3h",
-            "url_value": "kibana#/dashboard/79ffd6e0-faa0-11e6-947f-177f697178b8-ecs?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(filters:!(),query:(language:kuery,query:\u0027host.name:\u0022$host.name$\u0022\u0027))"
+            "url_value": "dashboards#/view/79ffd6e0-faa0-11e6-947f-177f697178b8-ecs?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(filters:!(),query:(language:kuery,query:\u0027host.name:\u0022$host.name$\u0022\u0027))"
         },
         {
           "url_name": "Raw data",
-          "url_value": "kibana#/discover/?_g=(refreshInterval:(pause:!t,value:0),time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(columns:!(_source),index:\u0027INDEX_PATTERN_ID\u0027,interval:auto,query:(language:kuery,query:'event.dataset:\u0022system.cpu\u0022'),sort:!('@timestamp',desc))"
+          "url_value": "discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(columns:!(_source),index:\u0027INDEX_PATTERN_ID\u0027,interval:auto,query:(language:kuery,query:'event.dataset:\u0022system.cpu\u0022'),sort:!('@timestamp',desc))"
         }
       ]
     }
