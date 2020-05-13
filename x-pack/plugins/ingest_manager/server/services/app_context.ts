@@ -5,7 +5,7 @@
  */
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { SavedObjectsServiceStart, HttpServiceSetup } from 'src/core/server';
+import { SavedObjectsServiceStart, HttpServiceSetup, Logger } from 'src/core/server';
 import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { IngestManagerConfigType } from '../../common';
@@ -21,6 +21,7 @@ class AppContextService {
   private isProductionMode: boolean = false;
   private kibanaVersion: string | undefined;
   private cloud?: CloudSetup;
+  private logger?: Logger;
   private httpSetup?: HttpServiceSetup;
 
   public async start(appContext: IngestManagerAppContext) {
@@ -29,6 +30,7 @@ class AppContextService {
     this.savedObjects = appContext.savedObjects;
     this.isProductionMode = appContext.isProductionMode;
     this.cloud = appContext.cloud;
+    this.logger = appContext.logger;
     this.kibanaVersion = appContext.kibanaVersion;
     this.httpSetup = appContext.httpSetup;
 
@@ -58,6 +60,10 @@ class AppContextService {
 
   public getCloud() {
     return this.cloud;
+  }
+
+  public getLogger() {
+    return this.logger;
   }
 
   public getConfig() {

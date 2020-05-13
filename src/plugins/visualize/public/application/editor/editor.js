@@ -645,8 +645,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
       title: savedVis.title,
       type: savedVis.type || stateContainer.getState().vis.type,
     });
-    savedVis.searchSource.setField('query', stateContainer.getState().query);
-    savedVis.searchSource.setField('filter', stateContainer.getState().filters);
+    savedVis.searchSourceFields = searchSource.getSerializedFields();
     savedVis.visState = stateContainer.getState().vis;
     savedVis.uiStateJSON = angular.toJson($scope.uiState.toJSON());
     $appStatus.dirty = false;

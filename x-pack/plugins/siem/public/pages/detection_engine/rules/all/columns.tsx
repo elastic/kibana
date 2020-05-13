@@ -19,7 +19,7 @@ import { FormattedRelative } from '@kbn/i18n/react';
 import * as H from 'history';
 import React, { Dispatch } from 'react';
 
-import { isMlRule } from '../../../../../common/detection_engine/ml_helpers';
+import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { Rule, RuleStatus } from '../../../../containers/detection_engine/rules';
 import { getEmptyTagValue } from '../../../../components/empty_value';
 import { FormattedDate } from '../../../../components/formatted_date';

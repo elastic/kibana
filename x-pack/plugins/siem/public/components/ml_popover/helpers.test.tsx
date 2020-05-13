@@ -7,10 +7,6 @@
 import { mockSiemJobs } from './__mocks__/api';
 import { filterJobs, getStablePatternTitles, searchFilter } from './helpers';
 
-jest.mock('../ml/permissions/has_ml_admin_permissions', () => ({
-  hasMlAdminPermissions: () => true,
-}));
-
 describe('helpers', () => {
   describe('filterJobs', () => {
     test('returns all jobs when no filter is suplied', () => {

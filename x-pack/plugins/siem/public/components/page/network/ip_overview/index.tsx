@@ -31,7 +31,7 @@ import { Loader } from '../../../loader';
 import { Anomalies, NarrowDateRange } from '../../../ml/types';
 import { AnomalyScores } from '../../../ml/score/anomaly_scores';
 import { useMlCapabilities } from '../../../ml_popover/hooks/use_ml_capabilities';
-import { hasMlUserPermissions } from '../../../ml/permissions/has_ml_user_permissions';
+import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { InspectButton, InspectButtonContainer } from '../../../inspect';
 
 interface OwnProps {

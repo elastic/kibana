@@ -11,7 +11,7 @@ import deepmerge from 'deepmerge';
 import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../common/constants';
 import { transformAlertToRuleAction } from '../../../../../common/detection_engine/transform_actions';
 import { RuleType } from '../../../../../common/detection_engine/types';
-import { isMlRule } from '../../../../../common/detection_engine/ml_helpers';
+import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { NewRule } from '../../../../containers/detection_engine/rules';
 
 import {

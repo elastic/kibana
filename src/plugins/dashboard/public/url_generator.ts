@@ -75,7 +75,7 @@ export type DashboardAppLinkGeneratorState = UrlGeneratorState<{
   preserveSavedFilters?: boolean;
 }>;
 
-export const createDirectAccessDashboardLinkGenerator = (
+export const createDashboardUrlGenerator = (
   getStartServices: () => Promise<{
     appBasePath: string;
     useHashedUrl: boolean;

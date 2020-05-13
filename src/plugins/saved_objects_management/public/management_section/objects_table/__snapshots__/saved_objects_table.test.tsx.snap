@@ -280,7 +280,7 @@ exports[`SavedObjectsTable import should show the flyout 1`] = `
       "search": [MockFunction],
       "searchSource": Object {
         "create": [MockFunction],
-        "fromJSON": [MockFunction],
+        "createEmpty": [MockFunction],
       },
       "setInterceptor": [MockFunction],
     }

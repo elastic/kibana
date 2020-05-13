@@ -57,6 +57,7 @@ export function setStartServices(npStart: NpStart) {
   dataServices.setIndexPatterns(npStart.plugins.data.indexPatterns);
   dataServices.setQueryService(npStart.plugins.data.query);
   dataServices.setSearchService(npStart.plugins.data.search);
+
   visualizationsServices.setI18n(npStart.core.i18n);
   visualizationsServices.setTypes(
     pick(npStart.plugins.visualizations, ['get', 'all', 'getAliases'])
@@ -82,4 +83,5 @@ export function setStartServices(npStart: NpStart) {
     visualizationTypes: visualizationsServices.getTypes(),
   });
   visualizationsServices.setSavedVisualizationsLoader(savedVisualizationsLoader);
+  visualizationsServices.setSavedSearchLoader(npStart.plugins.discover.savedSearchLoader);
 }

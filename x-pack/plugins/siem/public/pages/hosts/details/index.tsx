@@ -15,7 +15,7 @@ import { HeaderPage } from '../../../components/header_page';
 import { LastEventTime } from '../../../components/last_event_time';
 import { AnomalyTableProvider } from '../../../components/ml/anomaly/anomaly_table_provider';
 import { hostToCriteria } from '../../../components/ml/criteria/host_to_criteria';
-import { hasMlUserPermissions } from '../../../components/ml/permissions/has_ml_user_permissions';
+import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../components/ml_popover/hooks/use_ml_capabilities';
 import { scoreIntervalToDateTime } from '../../../components/ml/score/score_interval_to_datetime';
 import { SiemNavigation } from '../../../components/navigation';
