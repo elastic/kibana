@@ -18,14 +18,14 @@ import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
 // @ts-ignore Untyped local
 import { App } from './components/app';
 import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
-import { initInterpreter, resetInterpreter } from './lib/run_interpreter';
+import { initInterpreter } from './lib/run_interpreter';
 import { registerLanguage } from './lib/monaco_language_def';
 import { SetupRegistries } from './plugin_api';
 import { initRegistries, populateRegistries, destroyRegistries } from './registries';
 import { getDocumentationLinks } from './lib/documentation_links';
 // @ts-ignore untyped component
 import { HelpMenu } from './components/help_menu/help_menu';
-import { createStore, destroyStore } from './store';
+import { createStore } from './store';
 
 import { VALUE_CLICK_TRIGGER, ActionByType } from '../../../../src/plugins/ui_actions/public';
 /* eslint-disable */
@@ -35,12 +35,13 @@ import { init as initStatsReporter } from './lib/ui_metric';
 
 import { CapabilitiesStrings } from '../i18n';
 
-import { startServices, stopServices, services } from './services';
+import { startServices, services } from './services';
 // @ts-ignore Untyped local
 import { destroyHistory } from './lib/history_provider';
 // @ts-ignore Untyped local
 import { stopRouter } from './lib/router_provider';
-import { unloadApp } from './state/actions/app';
+// @ts-ignore Untyped local
+import { appUnload } from './state/actions/app';
 
 import './style/index.scss';
 
@@ -82,7 +83,7 @@ export const renderApp = (
   );
   return () => {
     ReactDOM.unmountComponentAtNode(element);
-    canvasStore.dispatch(unloadApp());
+    canvasStore.dispatch(appUnload());
   };
 };
 

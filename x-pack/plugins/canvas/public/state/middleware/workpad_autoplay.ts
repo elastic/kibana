@@ -10,7 +10,7 @@ import { getFullscreen } from '../selectors/app';
 import { getInFlight } from '../selectors/resolved_args';
 import { getWorkpad, getPages, getSelectedPageIndex, getAutoplay } from '../selectors/workpad';
 // @ts-ignore untyped local
-import { unloadApp } from '../actions/app';
+import { appUnload } from '../actions/app';
 // @ts-ignore Untyped Local
 import { routerProvider } from '../../lib/router_provider';
 import { setAutoplayInterval } from '../../lib/app_state';
@@ -86,7 +86,7 @@ export const workpadAutoplay: Middleware<{}, State> = ({ getState }) => next => 
       stopAutoUpdate();
     }
 
-    if (action.type === unloadApp.toString()) {
+    if (action.type === appUnload.toString()) {
       stopAutoUpdate();
     }
   };
