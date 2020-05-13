@@ -54,7 +54,7 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
       getLicenseStatus: () => this.licenseStatus,
     };
 
-    http.registerRouteHandlerContext('watcher', async (ctx, request) => {
+    http.registerRouteHandlerContext('watcher', (ctx, request) => {
       return {
         client: this.watcherESClient!.asScoped(request),
       };
