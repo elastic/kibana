@@ -82,7 +82,7 @@ describe('useCamera on an unpainted element', () => {
         });
       });
     });
-    test('should observe all referenced resize changes', async () => {
+    test('should observe all resize reference changes', async () => {
       const wrapper: FunctionComponent = ({ children }) => (
         <Provider store={store}>
           <SideEffectContext.Provider value={simulator.mock}>{children}</SideEffectContext.Provider>
@@ -94,12 +94,13 @@ describe('useCamera on an unpainted element', () => {
 
       let [rect, ref] = result.current;
       hooksAct(() => ref(element));
+      expect(resizeObserverSpy).toHaveBeenCalledWith(element);
+
       const div = document.createElement('div');
       hooksAct(() => ref(div));
+      expect(resizeObserverSpy).toHaveBeenCalledWith(div);
 
       [rect, ref] = result.current;
-
-      expect(resizeObserverSpy).toHaveBeenCalledTimes(2);
       expect(rect?.width).toBe(0);
     });
 
