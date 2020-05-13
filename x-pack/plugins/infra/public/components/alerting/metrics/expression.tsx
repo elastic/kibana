@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, useEffect, useState } from 'react';
+import React, { ChangeEvent, useCallback, useMemo, useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,6 +13,7 @@ import {
   EuiText,
   EuiFormRow,
   EuiButtonEmpty,
+  EuiFieldSearch,
 } from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -134,7 +135,7 @@ export const Expressions: React.FC<Props> = props => {
     [setAlertParams, alertParams.criteria]
   );
 
-  const onFilterQuerySubmit = useCallback(
+  const onFilterChange = useCallback(
     (filter: any) => {
       setAlertParams('filterQuery', filter);
     },
@@ -143,7 +144,7 @@ export const Expressions: React.FC<Props> = props => {
 
   const onGroupByChange = useCallback(
     (group: string | null) => {
-      setAlertParams('groupBy', group || undefined);
+      setAlertParams('groupBy', group || '');
     },
     [setAlertParams]
   );
@@ -211,9 +212,19 @@ export const Expressions: React.FC<Props> = props => {
       }
       setAlertParams('sourceId', source?.id);
     } else {
-      setAlertParams('criteria', [defaultExpression]);
+      if (!alertParams.criteria) {
+        setAlertParams('criteria', [defaultExpression]);
+      }
+      if (!alertParams.sourceId) {
+        setAlertParams('sourceId', source?.id || 'default');
+      }
     }
   }, [alertsContext.metadata, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleFieldSearchChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => onFilterChange(e.target.value),
+    [onFilterChange]
+  );
 
   return (
     <>
@@ -269,48 +280,53 @@ export const Expressions: React.FC<Props> = props => {
 
       <EuiSpacer size={'m'} />
 
-      {alertsContext.metadata && (
-        <>
-          <EuiFormRow
-            label={i18n.translate('xpack.infra.metrics.alertFlyout.filterLabel', {
-              defaultMessage: 'Filter (optional)',
-            })}
-            helpText={i18n.translate('xpack.infra.metrics.alertFlyout.filterHelpText', {
-              defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
-            })}
+      <EuiFormRow
+        label={i18n.translate('xpack.infra.metrics.alertFlyout.filterLabel', {
+          defaultMessage: 'Filter (optional)',
+        })}
+        helpText={i18n.translate('xpack.infra.metrics.alertFlyout.filterHelpText', {
+          defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
+        })}
+        fullWidth
+        compressed
+      >
+        {(alertsContext.metadata && (
+          <MetricsExplorerKueryBar
+            derivedIndexPattern={derivedIndexPattern}
+            onChange={onFilterChange}
+            onSubmit={onFilterChange}
+            value={alertParams.filterQuery}
+          />
+        )) || (
+          <EuiFieldSearch
+            onChange={handleFieldSearchChange}
+            value={alertParams.filterQuery}
             fullWidth
-            compressed
-          >
-            <MetricsExplorerKueryBar
-              derivedIndexPattern={derivedIndexPattern}
-              onSubmit={onFilterQuerySubmit}
-              value={alertParams.filterQuery}
-            />
-          </EuiFormRow>
+          />
+        )}
+      </EuiFormRow>
 
-          <EuiSpacer size={'m'} />
-          <EuiFormRow
-            label={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerText', {
-              defaultMessage: 'Create alert per (optional)',
-            })}
-            helpText={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerHelpText', {
-              defaultMessage:
-                'Create an alert for every unique value. For example: "host.id" or "cloud.region".',
-            })}
-            fullWidth
-            compressed
-          >
-            <MetricsExplorerGroupBy
-              onChange={onGroupByChange}
-              fields={derivedIndexPattern.fields}
-              options={{
-                ...options,
-                groupBy: alertParams.groupBy || undefined,
-              }}
-            />
-          </EuiFormRow>
-        </>
-      )}
+      <EuiSpacer size={'m'} />
+      <EuiFormRow
+        label={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerText', {
+          defaultMessage: 'Create alert per (optional)',
+        })}
+        helpText={i18n.translate('xpack.infra.metrics.alertFlyout.createAlertPerHelpText', {
+          defaultMessage:
+            'Create an alert for every unique value. For example: "host.id" or "cloud.region".',
+        })}
+        fullWidth
+        compressed
+      >
+        <MetricsExplorerGroupBy
+          onChange={onGroupByChange}
+          fields={derivedIndexPattern.fields}
+          options={{
+            ...options,
+            groupBy: alertParams.groupBy || undefined,
+          }}
+        />
+      </EuiFormRow>
     </>
   );
 };

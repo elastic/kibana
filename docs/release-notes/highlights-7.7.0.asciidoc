@@ -6,8 +6,6 @@
 
 Explore the new features in Kibana 7.7.
 
-coming::[7.7.0]
-
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
@@ -89,6 +87,20 @@ The distance filter is in addition to the tools for filtering data by custom sha
 
 [role="screenshot"]
 image:release-notes/images/7-7-maps-distance-filter.png[Distance filters in Elastic Maps]
+
+[float]
+[[file-uploader-highlights]]
+=== {data-viz} now recommends {filebeat} config
+
+experimental[] When you upload a file to the *{data-viz}*, a {filebeat} 
+configuration is recommended for you to use. You can then use {filebeat} to add 
+more data of the same structure to the same index that was created during an 
+initial upload.
+
+[role="screenshot"]
+image:release-notes/images/7-7-file-uploader-filebeat.png[Recommended Filebeat config in Data Vizualizer]
+
+For more information about *{data-viz}*, refer to {kibana-ref}/xpack-ml.html[{ml-cap}].
 
 [float]
 === Learn more
