@@ -17,17 +17,11 @@
  * under the License.
  */
 
-import { size } from 'lodash';
 import { IUiSettingsClient } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { KIBANA_STACK_MANAGEMENT_STATS_TYPE } from '../../../common/constants';
 
 export type UsageStats = Record<string, any>;
-
-export async function getTranslationCount(loader: any, locale: string): Promise<number> {
-  const translations = await loader.getTranslationsByLocale(locale);
-  return size(translations.messages);
-}
 
 export function createCollectorFetch(getUiSettingsClient: () => IUiSettingsClient | undefined) {
   return async function fetchUsageStats(): Promise<UsageStats | undefined> {
