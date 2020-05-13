@@ -166,7 +166,18 @@ describe('monitor status alert type', () => {
   });
 
   describe('initMonitorStatusAlertType', () => {
-    expect(initMonitorStatusAlertType({ autocomplete: {} })).toMatchInlineSnapshot(`
+    expect(
+      initMonitorStatusAlertType({
+        autocomplete: {},
+        store: {
+          dispatch: jest.fn(),
+          getState: jest.fn(),
+          replaceReducer: jest.fn(),
+          subscribe: jest.fn(),
+          [Symbol.observable]: jest.fn(),
+        },
+      })
+    ).toMatchInlineSnapshot(`
       Object {
         "alertParamsExpression": [Function],
         "defaultActionMessage": "{{context.message}}
@@ -174,7 +185,19 @@ describe('monitor status alert type', () => {
       {{context.downMonitorsWithGeo}}",
         "iconClass": "uptimeApp",
         "id": "xpack.uptime.alerts.monitorStatus",
-        "name": <MonitorStatusTitle />,
+        "name": <Provider
+          store={
+            Object {
+              "dispatch": [MockFunction],
+              "getState": [MockFunction],
+              "replaceReducer": [MockFunction],
+              "subscribe": [MockFunction],
+              Symbol(observable): [MockFunction],
+            }
+          }
+        >
+          <MonitorStatusTitle />
+        </Provider>,
         "requiresAppContext": true,
         "validate": [Function],
       }
