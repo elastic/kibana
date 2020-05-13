@@ -17,7 +17,8 @@ export const getSeverityColor = (nodeSeverity: string) => {
   switch (nodeSeverity) {
     case severity.warning:
       return theme.euiColorVis0;
-    case severity.minor || severity.major:
+    case severity.minor:
+    case severity.major:
       return theme.euiColorVis5;
     case severity.critical:
       return theme.euiColorVis9;

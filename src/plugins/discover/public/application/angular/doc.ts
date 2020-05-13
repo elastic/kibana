@@ -44,11 +44,11 @@ app.directive('discoverDoc', function(reactDirective: any) {
 
 app.config(($routeProvider: any) => {
   $routeProvider
-    .when('/discover/doc/:indexPattern/:index/:type', {
-      redirectTo: '/discover/doc/:indexPattern/:index',
+    .when('/doc/:indexPattern/:index/:type', {
+      redirectTo: '/doc/:indexPattern/:index',
     })
     // the new route, es 7 deprecated types, es 8 removed them
-    .when('/discover/doc/:indexPattern/:index', {
+    .when('/doc/:indexPattern/:index', {
       // have to be written as function expression, because it's not compiled in dev mode
       // eslint-disable-next-line object-shorthand
       controller: function($scope: LazyScope, $route: any, es: any) {
