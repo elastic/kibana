@@ -111,7 +111,6 @@
 
 # Operations
 /src/dev/ @elastic/kibana-operations
-/src/dev/code_coverage @elastic/kibana-qa
 /src/setup_node_env/ @elastic/kibana-operations
 /src/optimize/ @elastic/kibana-operations
 /src/es_archiver/ @elastic/kibana-operations
@@ -128,6 +127,9 @@
 /src/legacy/server/sass/ @elastic/kibana-operations
 /src/legacy/server/utils/ @elastic/kibana-operations
 /src/legacy/server/warnings/ @elastic/kibana-operations
+
+# Quality Assurance
+/src/dev/code_coverage @elastic/kibana-qa
 
 # Platform
 /src/core/  @elastic/kibana-platform
