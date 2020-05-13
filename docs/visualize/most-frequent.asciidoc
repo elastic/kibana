@@ -16,7 +16,7 @@ Classic visualizations include:
 [float]
 === Configure classic visualizations
 
-You configure visualizations using the Visualize editor. Each visualization supports different metric and bucket configurations.
+You configure classic visualizations using the Visualize editor. Each visualization supports different metric and bucket configurations.
 
 For example, a bar chart allows you to add an x-axis:
 

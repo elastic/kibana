@@ -14,33 +14,35 @@ _Visualize_ enables you to create visualizations of the data from your {es} indi
 [cols="50, 50"]
 |===
 
-a| <<lens, *Lens*>>
+a| <<lens,*Lens*>>
 
-Simply drag and drop data fields into Lens to get an immediate view of your data. Use the smart suggestions to see new ways of visualizing your data. Quickly switch between chart types and index patterns.
+Want to quickly create a visualization? Have zero experience with creating visualizations? 
+Start with Lens, where you simply drag and drop data fields to get an immediate view of your data. 
 
 | <<most-frequent,*Classic visualizations*>>
 
-Create classic visualizations with your Elasticsearch data, including charts, progress monitors, heat map, and more.
+Stick with the classics to visualize your Elasticsearch data, including charts, progress monitors, heat map, and more.
 
 a| <<TSVB,*TSVB*>>
 
-Combine an infinite number of aggregations to display complex time series data in a meaningful way with TSVB.
+Display and compare your time series data by combining an infinite number of data aggregations with TSVB visualizations, including metric, Top N, gauge, markdown, and table. 
+With TSVB, you can analylze multiple index patterns and customize every aspect of your visualization. 
 
 | <<timelion,*Timelion*>>
 
-Create two-dimensional graphs with your time series data using Timelion and the Timelion-specific syntax.
+Create two-dimensional graphs with your time series data using Timelion, which is driven by a simple expression language you use to retrieve data, perform calculations, and visualize the results.
 
 a| <<maps,*Elastic Maps*>>
 
-Use your geospatial data to create maps with multiple layers and indicies.
+Parse through your location-based data to create maps with multiple layers and data sources, map individual geo points and shapes, and use dynamic client-side styling.
 
 | <<for-dashboard, *Dashboard tools*>>
 
-Build tools that enable you to interact with your dashboards.
+Build tools that enable you to interact with the data on your dashboards in real time.
 
 a| <<vega-graph,*Vega*>>
 
-Create custom visualizations with multiple data sources that are available from the Vega library.
+Create fully customizable visualizations with multiple data sources that are available from the Vega library.
 
 |
 
