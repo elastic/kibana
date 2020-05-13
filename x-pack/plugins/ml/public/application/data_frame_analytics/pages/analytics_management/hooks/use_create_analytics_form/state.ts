@@ -73,6 +73,8 @@ export interface State {
     jobIdInvalidMaxLength: boolean;
     jobIdValid: boolean;
     jobType: AnalyticsJobType;
+    jobConfigQuery: any; // TODO update type here
+    jobConfigQueryString: string | undefined;
     lambda: number | undefined;
     loadingDepVarOptions: boolean;
     loadingFieldOptions: boolean;
@@ -146,6 +148,8 @@ export const getInitialState = (): State => ({
     jobIdInvalidMaxLength: false,
     jobIdValid: false,
     jobType: undefined,
+    jobConfigQuery: { match_all: {} }, // TODO: use constant here
+    jobConfigQueryString: undefined,
     lambda: undefined,
     loadingDepVarOptions: false,
     loadingFieldOptions: false,
@@ -160,7 +164,7 @@ export const getInitialState = (): State => ({
     numTopFeatureImportanceValuesValid: true,
     numTopClasses: 2,
     outlierFraction: undefined,
-    predictionFieldName: '', // TODO: change to constant
+    predictionFieldName: '',
     previousJobType: null,
     previousSourceIndex: undefined,
     requiredFieldsError: undefined,

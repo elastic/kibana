@@ -5,7 +5,7 @@
  */
 
 import React, { FC, Fragment, useEffect, useRef } from 'react';
-import { EuiComboBox, EuiFormRow, EuiRange, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiComboBox, EuiFormRow, EuiRange, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 
@@ -32,10 +32,15 @@ import {
   shouldAddAsDepVarOption,
 } from '../../../analytics_management/components/create_analytics_form/form_options_validation';
 import { ml } from '../../../../../services/ml_api_service';
+import { getToastNotifications } from '../../../../../util/dependency_cache';
+
 import { ANALYTICS_STEPS } from '../../page';
 import { ContinueButton } from '../continue_button';
 import { JobType } from './job_type';
 import { AnalysisFieldsTable } from './analysis_fields_table';
+import { DataGrid } from '../../../../../components/data_grid';
+import { useIndexData } from '../../hooks';
+import { ExplorationQueryBar } from '../../../analytics_exploration/components/exploration_query_bar';
 
 const requiredFieldsErrorText = i18n.translate(
   'xpack.ml.dataframe.analytics.createWizard.requiredFieldsErrorMessage',
@@ -62,6 +67,8 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
     excludes,
     excludesTableItems,
     fieldOptionsFetchFail,
+    jobConfigQuery,
+    jobConfigQueryString,
     jobType,
     loadingDepVarOptions,
     loadingFieldOptions,
@@ -72,6 +79,16 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
     sourceIndexContainsNumericalFields,
     trainingPercent,
   } = form;
+
+  const setJobConfigQuery = ({ query, queryString }: { query: any; queryString: string }) => {
+    setFormState({ jobConfigQuery: query, jobConfigQueryString: queryString });
+  };
+
+  const indexPreviewProps = {
+    ...useIndexData(currentIndexPattern, jobConfigQuery),
+    dataTestSubj: 'mlAnalyticsCreationDataGrid',
+    toastNotifications: getToastNotifications(),
+  };
 
   const isJobTypeWithDepVar =
     jobType === ANALYSIS_CONFIG_TYPE.REGRESSION || jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
@@ -246,13 +263,21 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
   }, []);
 
   useEffect(() => {
-    // TODO: validation check or set callout with link back to management page
-    // disable form if source index doesn't have any of the supported fields
     setFormState({ sourceIndex: currentIndexPattern.title });
-    validateSourceIndexFields();
   }, []);
 
   useEffect(() => {
+    if (jobType !== undefined) {
+      setFormState({
+        sourceIndexContainsNumericalFields: true,
+        sourceIndexFieldsCheckFailed: false,
+      });
+
+      if (jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION) {
+        validateSourceIndexFields();
+      }
+    }
+
     if (isJobTypeWithDepVar) {
       loadDepVarOptions(form);
     }
@@ -286,13 +311,37 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
               'This index pattern does not contain any numeric type fields. The analytics job may not be able to come up with any outliers.',
           })
         }
-        // isInvalid={!sourceIndexNameValid}
-        // error={getSourceIndexErrorMessages()}
       >
         <Fragment />
       </EuiFormRow>
       <JobType type={jobType} setFormState={setFormState} />
-      {/* <SourceIndexPreview /> */}
+      <EuiFormRow
+        label={i18n.translate('xpack.ml.dataframe.analytics.create.sourceQueryLabel', {
+          defaultMessage: 'Query',
+        })}
+        fullWidth
+      >
+        <ExplorationQueryBar
+          indexPattern={currentIndexPattern}
+          // @ts-ignore
+          setSearchQuery={setJobConfigQuery}
+          includeQueryString
+          defaultQueryString={jobConfigQueryString}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={
+          <EuiBadge color="hollow">
+            {i18n.translate('xpack.ml.dataframe.analytics.create.sourcePreviewLabel', {
+              defaultMessage: '{sourceTitle}',
+              values: { sourceTitle: currentIndexPattern.title },
+            })}
+          </EuiBadge>
+        }
+        fullWidth
+      >
+        <DataGrid {...indexPreviewProps} />
+      </EuiFormRow>
       {isJobTypeWithDepVar && (
         <Fragment>
           <EuiFormRow

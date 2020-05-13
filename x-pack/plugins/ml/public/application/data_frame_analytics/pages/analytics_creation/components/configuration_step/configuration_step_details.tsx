@@ -24,7 +24,7 @@ export const ConfigurationStepDetails: FC<{ setCurrentStep: any; state: State }>
   const mlContext = useMlContext();
   const { currentIndexPattern } = mlContext;
   const { form } = state;
-  const { dependentVariable, excludes, jobType, trainingPercent } = form;
+  const { dependentVariable, excludes, jobConfigQueryString, jobType, trainingPercent } = form;
 
   const isJobTypeWithDepVar =
     jobType === ANALYSIS_CONFIG_TYPE.REGRESSION || jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
@@ -35,6 +35,12 @@ export const ConfigurationStepDetails: FC<{ setCurrentStep: any; state: State }>
         defaultMessage: 'Source index',
       }),
       description: currentIndexPattern.title || '',
+    },
+    {
+      title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.Query', {
+        defaultMessage: 'Query',
+      }),
+      description: jobConfigQueryString || '',
     },
   ];
 
