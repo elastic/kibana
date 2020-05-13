@@ -17,17 +17,18 @@
  * under the License.
  */
 
+import expect from '@kbn/expect';
 import { ciRunUrl } from '../transforms';
 
 describe(`Transform fn`, () => {
   describe(`ciRunUrl`, () => {
     it(`should add the url when present in the environment`, () => {
       process.env.CI_RUN_URL = 'blah';
-      expect(ciRunUrl()).toEqual(expect.objectContaining({ ciRunUrl: expect.any(String) }));
+      expect(ciRunUrl()).to.have.property('ciRunUrl', 'blah');
     });
     it(`should not include the url if not present in the environment`, () => {
       process.env.CI_RUN_URL = void 0;
-      expect(ciRunUrl()).toEqual(expect.not.objectContaining({ ciRunUrl: 'blah' }));
+      expect(ciRunUrl({ a: 'a' })).not.to.have.property('ciRunUrl');
     });
   });
 });
