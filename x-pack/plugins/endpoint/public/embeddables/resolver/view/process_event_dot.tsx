@@ -66,7 +66,11 @@ const nodeAssets = {
   },
 };
 
+/**
+ * Take a gross `schemaName` and return a beautiful translated one.
+ */
 const getDisplayName: (schemaName: string) => string = function nameInSchemaToDisplayName(
+  // note: i18n is bound below
   translator: Pick<typeof i18n, 'translate'>,
   schemaName: string
 ) {
@@ -115,7 +119,7 @@ const getDisplayName: (schemaName: string) => string = function nameInSchemaToDi
 }.bind(null, i18n);
 
 /**
- * An artifact that represents a process node.
+ * An artifact that represents a process node and the things associated with it in the Resolver
  */
 export const ProcessEventDot = styled(
   React.memo(
