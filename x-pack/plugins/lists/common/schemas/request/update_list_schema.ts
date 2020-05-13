@@ -8,7 +8,7 @@
 
 import * as t from 'io-ts';
 
-import { description, id, metaOrUndefined, name } from '../common/schemas';
+import { description, id, meta, name } from '../common/schemas';
 import { Identity, RequiredKeepUndefined } from '../../types';
 
 export const updateListSchema = t.intersection([
@@ -19,7 +19,7 @@ export const updateListSchema = t.intersection([
       name,
     })
   ),
-  t.exact(t.partial({ meta: metaOrUndefined })),
+  t.exact(t.partial({ meta })),
 ]);
 
 export type UpdateListSchemaPartial = Identity<t.TypeOf<typeof updateListSchema>>;

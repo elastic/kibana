@@ -57,17 +57,9 @@ export class ListPlugin
     initRoutes(router);
 
     return {
-      getExceptionListClient: (
-        callCluster,
-        savedObjectsClient,
-        spaceId,
-        user
-      ): ExceptionListClient => {
+      getExceptionListClient: (savedObjectsClient, user): ExceptionListClient => {
         return new ExceptionListClient({
-          callCluster,
-          config,
           savedObjectsClient,
-          spaceId,
           user,
         });
       },
@@ -109,10 +101,7 @@ export class ListPlugin
         return {
           getExceptionListClient: (): ExceptionListClient =>
             new ExceptionListClient({
-              callCluster,
-              config,
               savedObjectsClient,
-              spaceId,
               user,
             }),
           getListClient: (): ListClient =>

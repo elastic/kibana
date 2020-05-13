@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export * from './create_exception_list_item_route';
 export * from './create_exception_list_route';
 export * from './create_list_index_route';
 export * from './create_list_item_route';
@@ -16,6 +17,7 @@ export * from './import_list_item_route';
 export * from './init_routes';
 export * from './patch_list_item_route';
 export * from './patch_list_route';
+export * from './read_exception_list_item_route';
 export * from './read_exception_list_route';
 export * from './read_list_index_route';
 export * from './read_list_item_route';

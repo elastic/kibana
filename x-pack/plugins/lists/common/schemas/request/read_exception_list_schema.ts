@@ -8,12 +8,12 @@
 
 import * as t from 'io-ts';
 
-import { idOrUndefined, list_idOrUndefined } from '../common/schemas';
+import { id, list_id } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
 
 export const readExceptionListSchema = t.partial({
-  id: idOrUndefined,
-  list_id: list_idOrUndefined,
+  id,
+  list_id,
 });
 
 export type ReadExceptionListSchemaPartial = t.TypeOf<typeof readExceptionListSchema>;

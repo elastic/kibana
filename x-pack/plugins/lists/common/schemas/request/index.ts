@@ -14,6 +14,7 @@ export * from './export_list_item_query_schema';
 export * from './import_list_item_schema';
 export * from './patch_list_item_schema';
 export * from './patch_list_schema';
+export * from './read_exception_list_item_schema';
 export * from './read_exception_list_schema';
 export * from './read_list_item_schema';
 export * from './read_list_schema';

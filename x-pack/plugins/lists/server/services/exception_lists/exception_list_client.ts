@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller, SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from 'kibana/server';
 
 import { ExceptionListSchema } from '../../../common/schemas';
-import { ConfigType } from '../../config';
 
 import {
   ConstructorOptions,
@@ -22,21 +21,12 @@ import { getExceptionListItem } from './get_exception_list_item';
 import { createExceptionListItem } from './create_exception_list_item';
 
 export class ExceptionListClient {
-  // TODO: Delete this if it is not being used
-  private readonly spaceId: string;
   private readonly user: string;
-  // TODO: Delete this if it is not being used
-  private readonly config: ConfigType;
-  // TODO: Delete this if it is not being used
-  private readonly callCluster: APICaller;
 
   private readonly savedObjectsClient: SavedObjectsClientContract;
 
-  constructor({ spaceId, user, config, callCluster, savedObjectsClient }: ConstructorOptions) {
-    this.spaceId = spaceId;
+  constructor({ user, savedObjectsClient }: ConstructorOptions) {
     this.user = user;
-    this.config = config;
-    this.callCluster = callCluster;
     this.savedObjectsClient = savedObjectsClient;
   }
 

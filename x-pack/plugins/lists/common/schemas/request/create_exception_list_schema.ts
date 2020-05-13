@@ -12,12 +12,12 @@ import {
   ListId,
   Tags,
   _Tags,
-  _tagsOrUndefined,
+  _tags,
   description,
   exceptionListType,
-  metaOrUndefined,
+  meta,
   name,
-  tagsOrUndefined,
+  tags,
 } from '../common/schemas';
 import { Identity, RequiredKeepUndefined } from '../../types';
 import { DefaultUuid } from '../types/default_uuid';
@@ -32,10 +32,10 @@ export const createExceptionListSchema = t.intersection([
   ),
   t.exact(
     t.partial({
-      _tags: _tagsOrUndefined,
+      _tags,
       list_id: DefaultUuid,
-      meta: metaOrUndefined,
-      tags: tagsOrUndefined,
+      meta,
+      tags,
     })
   ),
 ]);

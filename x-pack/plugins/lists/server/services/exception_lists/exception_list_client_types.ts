@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller, SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from 'kibana/server';
 
 import {
   CommentOrUndefined,
@@ -21,14 +21,10 @@ import {
   Tags,
   _Tags,
 } from '../../../common/schemas';
-import { ConfigType } from '../../config';
 
 import { NamespaceType } from './types';
 
 export interface ConstructorOptions {
-  callCluster: APICaller;
-  config: ConfigType;
-  spaceId: string;
   user: string;
   savedObjectsClient: SavedObjectsClientContract;
 }

@@ -6,47 +6,47 @@
 
 import { IRouter } from 'kibana/server';
 
-import { EXCEPTION_LIST_URL } from '../../common/constants';
+import { EXCEPTION_LIST_ITEM_URL } from '../../common/constants';
 import {
   buildRouteValidation,
   buildSiemResponse,
   transformError,
   validate,
 } from '../siem_server_deps';
-import { exceptionListSchema, readExceptionListSchema } from '../../common/schemas';
+import { exceptionListItemSchema, readExceptionListItemSchema } from '../../common/schemas';
 
 import { getExceptionListClient } from './utils';
 
-export const readExceptionListRoute = (router: IRouter): void => {
+export const readExceptionListItemRoute = (router: IRouter): void => {
   router.get(
     {
       options: {
         tags: ['access:lists'],
       },
-      path: EXCEPTION_LIST_URL,
+      path: EXCEPTION_LIST_ITEM_URL,
       validate: {
-        query: buildRouteValidation(readExceptionListSchema),
+        query: buildRouteValidation(readExceptionListItemSchema),
       },
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { id, list_id: listId } = request.query;
+        const { id, item_id: itemId } = request.query;
         const exceptionLists = getExceptionListClient(context);
-        if (id != null || listId != null) {
-          const list = await exceptionLists.getExceptionList({
+        if (id != null || itemId != null) {
+          const list = await exceptionLists.getExceptionListItem({
             id,
-            listId,
+            itemId,
             // TODO: Bubble this up
             namespaceType: 'single',
           });
           if (list == null) {
             return siemResponse.error({
-              body: getErrorMessage({ id, listId }),
+              body: getErrorMessage({ id, itemId }),
               statusCode: 404,
             });
           } else {
-            const [validated, errors] = validate(list, exceptionListSchema);
+            const [validated, errors] = validate(list, exceptionListItemSchema);
             if (errors != null) {
               return siemResponse.error({ body: errors, statusCode: 500 });
             } else {
@@ -54,7 +54,7 @@ export const readExceptionListRoute = (router: IRouter): void => {
             }
           }
         } else {
-          return siemResponse.error({ body: 'id or list_id required', statusCode: 400 });
+          return siemResponse.error({ body: 'id or item_id required', statusCode: 400 });
         }
       } catch (err) {
         const error = transformError(err);
@@ -69,16 +69,16 @@ export const readExceptionListRoute = (router: IRouter): void => {
 
 const getErrorMessage = ({
   id,
-  listId,
+  itemId,
 }: {
   id: string | undefined;
-  listId: string | undefined;
+  itemId: string | undefined;
 }): string => {
   if (id != null) {
-    return `Exception list id: "${id}" does not exist`;
-  } else if (listId != null) {
-    return `Exception list list_id: "${listId}" does not exist`;
+    return `Exception list item id: "${id}" does not exist`;
+  } else if (itemId != null) {
+    return `Exception list item list_id: "${itemId}" does not exist`;
   } else {
-    return 'Exception list does not exist';
+    return 'Exception list item does not exist';
   }
 };

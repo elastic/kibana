@@ -31,9 +31,7 @@ export type GetListClientType = (
 ) => ListClient;
 
 export type GetExceptionListClientType = (
-  dataClient: APICaller,
   savedObjectsClient: SavedObjectsClientContract,
-  spaceId: string,
   user: string
 ) => ExceptionListClient;
 
