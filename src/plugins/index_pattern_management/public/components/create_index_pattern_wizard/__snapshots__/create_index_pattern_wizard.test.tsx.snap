@@ -119,6 +119,7 @@ exports[`CreateIndexPatternWizard renders the empty state when there are no indi
     />
     <EmptyState
       onRefresh={[Function]}
+      prependBasePath={[MockFunction]}
     />
   </div>
   <EuiGlobalToastList

@@ -24,7 +24,6 @@ describe('Spaces Plugin', () => {
       expect(spacesSetup).toMatchInlineSnapshot(`
         Object {
           "__legacyCompat": Object {
-            "createDefaultSpace": [Function],
             "registerLegacyAPI": [Function],
           },
           "spacesService": Object {

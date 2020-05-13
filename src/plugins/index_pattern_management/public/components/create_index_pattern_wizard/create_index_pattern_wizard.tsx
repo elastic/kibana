@@ -29,6 +29,7 @@ import {
   IUiSettingsClient,
   OverlayStart,
   ChromeDocTitle,
+  IBasePath,
 } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ManagementAppMountParams } from '../../../../management/public';
@@ -54,6 +55,7 @@ export interface CreateIndexPatternWizardProps extends RouteComponentProps {
     openConfirm: OverlayStart['openConfirm'];
     setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
     docTitle: ChromeDocTitle;
+    prependBasePath: IBasePath['prepend'];
   };
 }
 
@@ -260,7 +262,12 @@ export class CreateIndexPatternWizard extends Component<
 
     const hasDataIndices = allIndices.some(({ name }: MatchedIndex) => !name.startsWith('.'));
     if (!hasDataIndices && !isIncludingSystemIndices && !remoteClustersExist) {
-      return <EmptyState onRefresh={this.fetchData} />;
+      return (
+        <EmptyState
+          onRefresh={this.fetchData}
+          prependBasePath={this.props.services.prependBasePath}
+        />
+      );
     }
 
     if (step === 1) {

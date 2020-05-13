@@ -99,6 +99,7 @@ export interface AlertType {
   actionGroups: ActionGroup[];
   actionVariables: ActionVariables;
   defaultActionGroupId: ActionGroup['id'];
+  producer: string;
 }
 
 export type SanitizedAlertType = Omit<AlertType, 'apiKey'>;
@@ -132,6 +133,7 @@ export interface AlertTypeModel<AlertParamsType = any, AlertsContextValue = any>
     | React.LazyExoticComponent<
         ComponentType<AlertTypeParamsExpressionProps<AlertParamsType, AlertsContextValue>>
       >;
+  requiresAppContext: boolean;
   defaultActionMessage?: string;
 }
 

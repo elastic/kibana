@@ -102,7 +102,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
           footer={
             <EuiButton
               className="homAddData__button"
-              href="#/home/tutorial/apm"
+              href="#/tutorial/apm"
               aria-describedby={apmData.ariaDescribedby}
             >
               <FormattedMessage id="home.addData.apm.addApmButtonLabel" defaultMessage="Add APM" />
@@ -160,7 +160,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
                   <EuiButton
                     className="homAddData__button"
                     data-test-subj="logsData"
-                    href="#/home/tutorial_directory/logging"
+                    href="#/tutorial_directory/logging"
                     aria-describedby={loggingData.ariaDescribedby}
                   >
                     <FormattedMessage
@@ -184,7 +184,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
                 footer={
                   <EuiButton
                     className="homAddData__button"
-                    href="#/home/tutorial_directory/metrics"
+                    href="#/tutorial_directory/metrics"
                     aria-describedby={metricsData.ariaDescribedby}
                   >
                     <FormattedMessage
@@ -221,7 +221,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
             footer={
               <EuiButton
                 className="homAddData__button"
-                href="#/home/tutorial_directory/siem"
+                href="#/tutorial_directory/siem"
                 aria-describedby={siemData.ariaDescribedby}
               >
                 <FormattedMessage
@@ -257,7 +257,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
             </strong>
             <EuiLink
               style={{ display: 'block', textAlign: 'center' }}
-              href="#/home/tutorial_directory/sampleData"
+              href="#/tutorial_directory/sampleData"
             >
               <FormattedMessage
                 id="home.addData.sampleDataLink"

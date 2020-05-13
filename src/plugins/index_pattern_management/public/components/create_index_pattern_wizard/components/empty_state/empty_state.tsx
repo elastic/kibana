@@ -22,8 +22,15 @@ import React from 'react';
 import { EuiCallOut, EuiTextColor, EuiLink, EuiButton } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import { IBasePath } from 'kibana/public';
 
-export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => (
+export const EmptyState = ({
+  onRefresh,
+  prependBasePath,
+}: {
+  onRefresh: () => void;
+  prependBasePath: IBasePath['prepend'];
+}) => (
   <div>
     <EuiCallOut
       color="warning"
@@ -48,7 +55,7 @@ export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => (
               </EuiTextColor>
             ),
             learnHowLink: (
-              <EuiLink href="#/home/tutorial_directory">
+              <EuiLink href={prependBasePath('/app/home#/tutorial_directory')}>
                 <FormattedMessage
                   id="indexPatternManagement.createIndexPattern.emptyStateLabel.learnHowLink"
                   defaultMessage="Learn how"
@@ -56,7 +63,7 @@ export const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => (
               </EuiLink>
             ),
             getStartedLink: (
-              <EuiLink href="#/home/tutorial_directory/sampleData">
+              <EuiLink href={prependBasePath('/app/home#/tutorial_directory/sampleData')}>
                 <FormattedMessage
                   id="indexPatternManagement.createIndexPattern.emptyStateLabel.getStartedLink"
                   defaultMessage="get started with some sample data sets."
