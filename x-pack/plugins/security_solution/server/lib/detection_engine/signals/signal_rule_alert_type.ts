@@ -3,10 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+/* eslint-disable complexity */
 
 /* eslint-disable complexity */
 
 import { Logger, KibanaRequest } from 'src/core/server';
+import dateMath from '@elastic/datemath';
 
 import {
   SIGNALS_ID,
@@ -233,6 +235,37 @@ export const signalRulesAlertType = ({
             index: inputIndex,
             lists: exceptionItems ?? [],
           });
+
+          // add a 'gap' parameter that would add the
+          // 'from' with the 'gap' - need to figure out
+          // how to do datemath with moment.
+          let calculatedFrom = from;
+          if (gap != null) {
+            const unit = from[from.length - 1]; // only seconds (s), minutes (m) or hours (h)
+            calculatedFrom = `now-${gap.add(dateMath.parse(from)?.toString())}${unit}`;
+          }
+          const noReIndex = buildEventsSearchQuery({
+            index: inputIndex,
+            from: calculatedFrom,
+            to,
+            filter: esFilter,
+            size: searchAfterSize,
+            searchAfterSortId: undefined,
+          });
+
+          logger.debug(buildRuleMessage('[+] Initial search call'));
+          const start = performance.now();
+          const noReIndexResult = await services.callCluster('search', noReIndex);
+          const end = performance.now();
+
+          const signalCount = noReIndexResult.hits.total.value;
+          if (signalCount !== 0) {
+            logger.info(
+              buildRuleMessage(
+                `Found ${signalCount} signals from the indexes of "[${inputIndex.join(', ')}]"`
+              )
+            );
+          }
 
           result = await searchAfterAndBulkCreate({
             listClient,
