@@ -9,8 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'console', 'security']);
-  const config = getService('config');
+  const PageObjects = getPageObjects(['common', 'console', 'security', 'error']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const grokDebugger = getService('grokDebugger');
@@ -229,25 +228,31 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks.map((navLink: any) => navLink.text)).to.not.contain(['Dev Tools']);
       });
 
-      it(`navigating to console redirect to homepage`, async () => {
+      it(`navigating to console shows 404`, async () => {
         await PageObjects.common.navigateToUrl('console', '', {
           ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+          useActualUrl: true,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
+        await PageObjects.error.expectNotFound();
       });
 
-      it(`navigating to search profiler redirect to homepage`, async () => {
+      it(`navigating to search profiler shows 404`, async () => {
         await PageObjects.common.navigateToUrl('searchProfiler', '', {
           ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+          useActualUrl: true,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
+        await PageObjects.error.expectNotFound();
       });
 
-      it(`navigating to grok debugger redirect to homepage`, async () => {
+      it(`navigating to grok debugger shows 404`, async () => {
         await PageObjects.common.navigateToUrl('grokDebugger', '', {
           ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+          useActualUrl: true,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
+        await PageObjects.error.expectNotFound();
       });
     });
   });

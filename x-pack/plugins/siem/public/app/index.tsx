@@ -7,11 +7,17 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AppMountParameters } from '../../../../../src/core/public';
 import { StartServices } from '../plugin';
 import { SiemApp } from './app';
+import { SecuritySubPlugins } from './types';
 
-export const renderApp = (services: StartServices, { element }: AppMountParameters) => {
-  render(<SiemApp services={services} />, element);
+export const renderApp = (
+  services: StartServices,
+  { element }: AppMountParameters,
+  subPlugins: SecuritySubPlugins
+) => {
+  render(<SiemApp services={services} subPlugins={subPlugins} />, element);
   return () => unmountComponentAtNode(element);
 };
