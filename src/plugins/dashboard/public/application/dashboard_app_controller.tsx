@@ -341,7 +341,7 @@ export class DashboardAppController {
         .then((container: DashboardContainer | ErrorEmbeddable | undefined) => {
           if (container && !isErrorEmbeddable(container)) {
             dashboardContainer = container;
-            
+
             dashboardContainer.renderEmpty = () => {
               const shouldShowEditHelp = getShouldShowEditHelp();
               const shouldShowViewHelp = getShouldShowViewHelp();
