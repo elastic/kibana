@@ -17,6 +17,12 @@
  * under the License.
  */
 
+import {
+  MockCapabilitiesService,
+  MockHistory,
+  parseAppUrlMock,
+} from './application_service.test.mocks';
+
 import { createElement } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { bufferCount, take, takeUntil } from 'rxjs/operators';
@@ -26,7 +32,6 @@ import { injectedMetadataServiceMock } from '../injected_metadata/injected_metad
 import { contextServiceMock } from '../context/context_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
-import { MockCapabilitiesService, MockHistory } from './application_service.test.mocks';
 import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
 import { App, AppNavLinkStatus, AppStatus, AppUpdater, LegacyApp } from './types';
@@ -61,6 +66,7 @@ describe('#setup()', () => {
       http,
       context: contextServiceMock.createSetupContract(),
       injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
+      redirectTo: jest.fn(),
     };
     setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(false);
     startDeps = { http, overlays: overlayServiceMock.createStartContract() };
@@ -462,12 +468,14 @@ describe('#setup()', () => {
 describe('#start()', () => {
   beforeEach(() => {
     MockHistory.push.mockReset();
+    parseAppUrlMock.mockReset();
 
     const http = httpServiceMock.createSetupContract({ basePath: '/base-path' });
     setupDeps = {
       http,
       context: contextServiceMock.createSetupContract(),
       injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
+      redirectTo: jest.fn(),
     };
     setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(false);
     startDeps = { http, overlays: overlayServiceMock.createStartContract() };
@@ -775,7 +783,6 @@ describe('#start()', () => {
     });
 
     it('redirects when in legacyMode', async () => {
-      setupDeps.redirectTo = jest.fn();
       setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(true);
       service.setup(setupDeps);
 
@@ -881,7 +888,6 @@ describe('#start()', () => {
     it('sets window.location.href when navigating to legacy apps', async () => {
       setupDeps.http = httpServiceMock.createSetupContract({ basePath: '/test' });
       setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(true);
-      setupDeps.redirectTo = jest.fn();
       service.setup(setupDeps);
 
       const { navigateToApp } = await service.start(startDeps);
@@ -893,7 +899,6 @@ describe('#start()', () => {
     it('handles legacy apps with subapps', async () => {
       setupDeps.http = httpServiceMock.createSetupContract({ basePath: '/test' });
       setupDeps.injectedMetadata.getLegacyMode.mockReturnValue(true);
-      setupDeps.redirectTo = jest.fn();
 
       const { registerLegacyApp } = service.setup(setupDeps);
 
@@ -903,6 +908,30 @@ describe('#start()', () => {
 
       await navigateToApp('baseApp:legacyApp1');
       expect(setupDeps.redirectTo).toHaveBeenCalledWith('/test/app/baseApp');
+    });
+  });
+
+  describe('navigateToUrl', () => {
+    it('calls `redirectTo` when the url is not parseable', async () => {
+      parseAppUrlMock.mockReturnValue(undefined);
+      service.setup(setupDeps);
+      const { navigateToUrl } = await service.start(startDeps);
+
+      await navigateToUrl('/not-an-app-path');
+
+      expect(MockHistory.push).not.toHaveBeenCalled();
+      expect(setupDeps.redirectTo).toHaveBeenCalledWith('/not-an-app-path');
+    });
+
+    it('calls `navigateToApp` when the url is an internal app link', async () => {
+      parseAppUrlMock.mockReturnValue({ app: 'foo', path: '/some-path' });
+      service.setup(setupDeps);
+      const { navigateToUrl } = await service.start(startDeps);
+
+      await navigateToUrl('/not-an-app-path');
+
+      expect(MockHistory.push).toHaveBeenCalledWith('/app/foo/some-path', undefined);
+      expect(setupDeps.redirectTo).not.toHaveBeenCalled();
     });
   });
 });

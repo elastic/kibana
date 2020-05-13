@@ -135,6 +135,7 @@ export class LegacyPlatformService {
         capabilities: core.application.capabilities,
         getUrlForApp: core.application.getUrlForApp,
         navigateToApp: core.application.navigateToApp,
+        navigateToUrl: core.application.navigateToUrl,
         registerMountContext: notSupported(`core.application.registerMountContext()`),
       },
     };
