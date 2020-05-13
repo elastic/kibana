@@ -72,7 +72,7 @@ export const CertificatesPage: React.FC = () => {
     );
   }, [dispatch, page, search, sort.direction, sort.field, lastRefresh]);
 
-  const certificates = useSelector(certificatesSelector);
+  const { data: certificates } = useSelector(certificatesSelector);
 
   return (
     <>

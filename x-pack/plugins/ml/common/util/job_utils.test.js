@@ -307,7 +307,14 @@ describe('ML - job utils', () => {
 
     const job2 = {
       analysis_config: {
-        detectors: [{ function: 'count' }, { function: 'info_content' }],
+        detectors: [
+          { function: 'count' },
+          { function: 'info_content' },
+          {
+            function: 'rare',
+            by_field_name: 'mlcategory',
+          },
+        ],
       },
       model_plot_config: {
         enabled: true,
@@ -324,6 +331,10 @@ describe('ML - job utils', () => {
 
     test('returns true for info_content detector when model plot is enabled', () => {
       expect(isModelPlotChartableForDetector(job2, 1)).toBe(true);
+    });
+
+    test('returns false for rare by mlcategory when model plot is enabled', () => {
+      expect(isModelPlotChartableForDetector(job2, 2)).toBe(false);
     });
   });
 

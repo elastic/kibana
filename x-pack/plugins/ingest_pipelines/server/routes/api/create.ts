@@ -12,7 +12,7 @@ import { RouteDependencies } from '../../types';
 
 const bodySchema = schema.object({
   name: schema.string(),
-  description: schema.string(),
+  description: schema.maybe(schema.string()),
   processors: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
   version: schema.maybe(schema.number()),
   on_failure: schema.maybe(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),

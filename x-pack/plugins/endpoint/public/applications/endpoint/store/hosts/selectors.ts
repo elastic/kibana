@@ -88,6 +88,11 @@ export const policyResponseActions: (
   }
 );
 
+export const policyResponseLoading = (state: Immutable<HostState>): boolean =>
+  state.policyResponseLoading;
+
+export const policyResponseError = (state: Immutable<HostState>) => state.policyResponseError;
+
 export const isOnHostPage = (state: Immutable<HostState>) =>
   state.location ? state.location.pathname === '/hosts' : false;
 

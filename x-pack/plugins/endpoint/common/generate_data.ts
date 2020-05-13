@@ -504,10 +504,15 @@ export class EndpointDocGenerator {
    * Generates an Ingest `datasource` that includes the Endpoint Policy data
    */
   public generatePolicyDatasource(): PolicyData {
+    const created = new Date(Date.now() - 8.64e7).toISOString(); // 24h ago
     return {
       id: this.seededUUIDv4(),
       name: 'Endpoint Policy',
       description: 'Policy to protect the worlds data',
+      created_at: created,
+      created_by: 'elastic',
+      updated_at: new Date().toISOString(),
+      updated_by: 'elastic',
       config_id: this.seededUUIDv4(),
       enabled: true,
       output_id: '',
@@ -536,8 +541,14 @@ export class EndpointDocGenerator {
   /**
    * Generates a Host Policy response message
    */
-  public generatePolicyResponse(ts = new Date().getTime()): HostPolicyResponse {
+  public generatePolicyResponse(
+    ts = new Date().getTime(),
+    allStatus?: HostPolicyResponseActionStatus
+  ): HostPolicyResponse {
     const policyVersion = this.seededUUIDv4();
+    const status = () => {
+      return allStatus || this.randomHostPolicyResponseActionStatus();
+    };
     return {
       '@timestamp': ts,
       agent: {
@@ -588,7 +599,7 @@ export class EndpointDocGenerator {
                 status: HostPolicyResponseActionStatus.success,
               },
               detect_image_load_events: {
-                message: 'Successfuly started image load event reporting',
+                message: 'Successfully started image load event reporting',
                 status: HostPolicyResponseActionStatus.success,
               },
               detect_process_events: {
@@ -596,15 +607,15 @@ export class EndpointDocGenerator {
                 status: HostPolicyResponseActionStatus.success,
               },
               download_global_artifacts: {
-                message: 'Failed to download EXE model',
+                message: 'Succesfully downloaded global artifacts',
                 status: HostPolicyResponseActionStatus.success,
               },
               load_config: {
-                message: 'successfully parsed configuration',
+                message: 'Successfully parsed configuration',
                 status: HostPolicyResponseActionStatus.success,
               },
               load_malware_model: {
-                message: 'Error deserializing EXE model; no valid malware model installed',
+                message: 'Successfully loaded malware model',
                 status: HostPolicyResponseActionStatus.success,
               },
               read_elasticsearch_config: {
@@ -649,19 +660,19 @@ export class EndpointDocGenerator {
               configurations: {
                 events: {
                   concerned_actions: ['download_model'],
-                  status: this.randomHostPolicyResponseActionStatus(),
+                  status: status(),
                 },
                 logging: {
                   concerned_actions: this.randomHostPolicyResponseActions(),
-                  status: this.randomHostPolicyResponseActionStatus(),
+                  status: status(),
                 },
                 malware: {
                   concerned_actions: this.randomHostPolicyResponseActions(),
-                  status: this.randomHostPolicyResponseActionStatus(),
+                  status: status(),
                 },
                 streaming: {
                   concerned_actions: this.randomHostPolicyResponseActions(),
-                  status: this.randomHostPolicyResponseActionStatus(),
+                  status: status(),
                 },
               },
             },

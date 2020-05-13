@@ -12,7 +12,7 @@ import styled from 'styled-components';
 
 import { useKibana } from '../../lib/kibana';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../lib/telemetry';
-import { hasMlAdminPermissions } from '../ml/permissions/has_ml_admin_permissions';
+import { hasMlAdminPermissions } from '../../../common/machine_learning/has_ml_admin_permissions';
 import { errorToToaster, useStateToaster, ActionToaster } from '../toasters';
 import { setupMlJob, startDatafeeds, stopDatafeeds } from './api';
 import { filterJobs } from './helpers';

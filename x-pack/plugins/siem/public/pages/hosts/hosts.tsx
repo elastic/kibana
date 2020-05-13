@@ -14,7 +14,7 @@ import { UpdateDateRange } from '../../components/charts/common';
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
 import { LastEventTime } from '../../components/last_event_time';
-import { hasMlUserPermissions } from '../../components/ml/permissions/has_ml_user_permissions';
+import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
 import { SiemNavigation } from '../../components/navigation';
 import { KpiHostsComponent } from '../../components/page/hosts';
 import { manageQuery } from '../../components/page/manage_query';

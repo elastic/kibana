@@ -32,13 +32,12 @@ import {
   OnFieldChangeType,
 } from '../components/settings/certificate_form';
 import * as Translations from './translations';
+import { VALUE_MUST_BE_GREATER_THEN_ZEO } from '../../common/translations';
 
 interface SettingsPageFieldErrors {
-  heartbeatIndices: 'May not be blank' | '';
-  certificatesThresholds: {
-    expirationThresholdError: string | null;
-    ageThresholdError: string | null;
-  } | null;
+  heartbeatIndices: string | '';
+  expirationThresholdError?: string;
+  ageThresholdError?: string;
 }
 
 export interface SettingsFormProps {
@@ -49,22 +48,28 @@ export interface SettingsFormProps {
   isDisabled: boolean;
 }
 
+const isValidCertVal = (val: string | number) => {
+  if (val === '') {
+    return Translations.BLANK_STR;
+  }
+  if (val === 0) {
+    return VALUE_MUST_BE_GREATER_THEN_ZEO;
+  }
+};
+
 const getFieldErrors = (formFields: DynamicSettings | null): SettingsPageFieldErrors | null => {
   if (formFields) {
-    const blankStr = 'May not be blank';
     const { certAgeThreshold, certExpirationThreshold, heartbeatIndices } = formFields;
-    const heartbeatIndErr = heartbeatIndices.match(/^\S+$/) ? '' : blankStr;
-    const expirationThresholdError = certExpirationThreshold ? null : blankStr;
-    const ageThresholdError = certAgeThreshold ? null : blankStr;
+
+    const indError = heartbeatIndices.match(/^\S+$/) ? '' : Translations.BLANK_STR;
+
+    const expError = isValidCertVal(certExpirationThreshold);
+    const ageError = isValidCertVal(certAgeThreshold);
+
     return {
-      heartbeatIndices: heartbeatIndErr,
-      certificatesThresholds:
-        expirationThresholdError || ageThresholdError
-          ? {
-              expirationThresholdError,
-              ageThresholdError,
-            }
-          : null,
+      heartbeatIndices: indError,
+      expirationThresholdError: expError,
+      ageThresholdError: ageError,
     };
   }
   return null;
