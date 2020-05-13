@@ -4,18 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import mappings from './mappings.json';
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
-import { migrations } from './migrations';
 import { getAppTitle } from '../../../plugins/maps/common/i18n_getters';
 import { MapPlugin } from './server/plugin';
-import {
-  APP_ID,
-  APP_ICON,
-  createMapPath,
-  MAP_SAVED_OBJECT_TYPE,
-} from '../../../plugins/maps/common/constants';
+import { APP_ID, APP_ICON } from '../../../plugins/maps/common/constants';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 
 export function maps(kibana) {
@@ -48,29 +41,6 @@ export function maps(kibana) {
         };
       },
       styleSheetPaths: `${__dirname}/public/index.scss`,
-      savedObjectSchemas: {
-        'maps-telemetry': {
-          isNamespaceAgnostic: true,
-        },
-      },
-      savedObjectsManagement: {
-        [MAP_SAVED_OBJECT_TYPE]: {
-          icon: APP_ICON,
-          defaultSearchField: 'title',
-          isImportableAndExportable: true,
-          getTitle(obj) {
-            return obj.attributes.title;
-          },
-          getInAppUrl(obj) {
-            return {
-              path: createMapPath(obj.id),
-              uiCapabilitiesPath: 'maps.show',
-            };
-          },
-        },
-      },
-      mappings,
-      migrations,
     },
     config(Joi) {
       return Joi.object({
