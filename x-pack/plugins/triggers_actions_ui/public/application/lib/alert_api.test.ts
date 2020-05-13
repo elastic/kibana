@@ -42,6 +42,7 @@ describe('loadAlertTypes', () => {
           context: [{ name: 'var1', description: 'val1' }],
           state: [{ name: 'var2', description: 'val2' }],
         },
+        producer: 'alerting',
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
       },
