@@ -125,12 +125,14 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
         "aria-label": "recent 1",
         "href": "recent 1",
         "label": "recent 1",
+        "onClick": undefined,
         "title": "recent 1",
       },
       Object {
         "aria-label": "recent 2",
         "href": "recent 2",
         "label": "recent 2",
+        "onClick": undefined,
         "title": "recent 2",
       },
     ]
@@ -298,6 +300,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         >
                           <div
                             class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                            data-test-subj="collapsibleNavGroup-recentlyViewed"
                           >
                             <div
                               class="euiAccordion__triggerWrapper"
@@ -358,6 +361,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                         <a
                                           aria-label="recent 1"
                                           class="euiListGroupItem__button"
+                                          data-test-subj="collapsibleNavAppLink--recent"
                                           href="recent 1"
                                           title="recent 1"
                                         >
@@ -375,6 +379,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                         <a
                                           aria-label="recent 2"
                                           class="euiListGroupItem__button"
+                                          data-test-subj="collapsibleNavAppLink--recent"
                                           href="recent 2"
                                           title="recent 2"
                                         >
@@ -934,6 +939,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                           >
                             <div
                               class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                              data-test-subj="collapsibleNavGroup-recentlyViewed"
                             >
                               <div
                                 class="euiAccordion__triggerWrapper"
@@ -994,6 +1000,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           <a
                                             aria-label="recent 1"
                                             class="euiListGroupItem__button"
+                                            data-test-subj="collapsibleNavAppLink--recent"
                                             href="recent 1"
                                             title="recent 1"
                                           >
@@ -1011,6 +1018,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           <a
                                             aria-label="recent 2"
                                             class="euiListGroupItem__button"
+                                            data-test-subj="collapsibleNavAppLink--recent"
                                             href="recent 2"
                                             title="recent 2"
                                           >
@@ -1638,6 +1646,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       className="euiFlexItem eui-yScroll"
                     >
                       <EuiCollapsibleNavGroup
+                        data-test-subj="collapsibleNavGroup-recentlyViewed"
                         initialIsOpen={true}
                         isCollapsible={true}
                         key="recentlyViewed"
@@ -1668,6 +1677,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                             </ForwardRef>
                           }
                           className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                          data-test-subj="collapsibleNavGroup-recentlyViewed"
                           id="mockId"
                           initialIsOpen={true}
                           onToggle={[Function]}
@@ -1675,6 +1685,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         >
                           <div
                             className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                            data-test-subj="collapsibleNavGroup-recentlyViewed"
                             onToggle={[Function]}
                           >
                             <div
@@ -1756,14 +1767,18 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           Array [
                                             Object {
                                               "aria-label": "recent 1",
+                                              "data-test-subj": "collapsibleNavAppLink--recent",
                                               "href": "recent 1",
                                               "label": "recent 1",
+                                              "onClick": [Function],
                                               "title": "recent 1",
                                             },
                                             Object {
                                               "aria-label": "recent 2",
+                                              "data-test-subj": "collapsibleNavAppLink--recent",
                                               "href": "recent 2",
                                               "label": "recent 2",
+                                              "onClick": [Function],
                                               "title": "recent 2",
                                             },
                                           ]
@@ -1783,9 +1798,11 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           <EuiListGroupItem
                                             aria-label="recent 1"
                                             color="subdued"
+                                            data-test-subj="collapsibleNavAppLink--recent"
                                             href="recent 1"
                                             key="title-0"
                                             label="recent 1"
+                                            onClick={[Function]}
                                             showToolTip={false}
                                             size="s"
                                             title="recent 1"
@@ -1797,7 +1814,9 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                               <a
                                                 aria-label="recent 1"
                                                 className="euiListGroupItem__button"
+                                                data-test-subj="collapsibleNavAppLink--recent"
                                                 href="recent 1"
+                                                onClick={[Function]}
                                                 title="recent 1"
                                               >
                                                 <span
@@ -1812,9 +1831,11 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           <EuiListGroupItem
                                             aria-label="recent 2"
                                             color="subdued"
+                                            data-test-subj="collapsibleNavAppLink--recent"
                                             href="recent 2"
                                             key="title-1"
                                             label="recent 2"
+                                            onClick={[Function]}
                                             showToolTip={false}
                                             size="s"
                                             title="recent 2"
@@ -1826,7 +1847,9 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                               <a
                                                 aria-label="recent 2"
                                                 className="euiListGroupItem__button"
+                                                data-test-subj="collapsibleNavAppLink--recent"
                                                 href="recent 2"
+                                                onClick={[Function]}
                                                 title="recent 2"
                                               >
                                                 <span
@@ -3274,6 +3297,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
                       className="euiFlexItem eui-yScroll"
                     >
                       <EuiCollapsibleNavGroup
+                        data-test-subj="collapsibleNavGroup-recentlyViewed"
                         initialIsOpen={true}
                         isCollapsible={true}
                         key="recentlyViewed"
@@ -3304,6 +3328,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
                             </ForwardRef>
                           }
                           className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                          data-test-subj="collapsibleNavGroup-recentlyViewed"
                           id="mockId"
                           initialIsOpen={true}
                           onToggle={[Function]}
@@ -3311,6 +3336,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
                         >
                           <div
                             className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                            data-test-subj="collapsibleNavGroup-recentlyViewed"
                             onToggle={[Function]}
                           >
                             <div
@@ -3748,6 +3774,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                         >
                           <div
                             class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                            data-test-subj="collapsibleNavGroup-recentlyViewed"
                           >
                             <div
                               class="euiAccordion__triggerWrapper"
@@ -3939,6 +3966,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                           >
                             <div
                               class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                              data-test-subj="collapsibleNavGroup-recentlyViewed"
                             >
                               <div
                                 class="euiAccordion__triggerWrapper"
@@ -4198,6 +4226,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                       className="euiFlexItem eui-yScroll"
                     >
                       <EuiCollapsibleNavGroup
+                        data-test-subj="collapsibleNavGroup-recentlyViewed"
                         initialIsOpen={true}
                         isCollapsible={true}
                         key="recentlyViewed"
@@ -4228,6 +4257,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                             </ForwardRef>
                           }
                           className="euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                          data-test-subj="collapsibleNavGroup-recentlyViewed"
                           id="mockId"
                           initialIsOpen={true}
                           onToggle={[Function]}
@@ -4235,6 +4265,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                         >
                           <div
                             className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                            data-test-subj="collapsibleNavGroup-recentlyViewed"
                             onToggle={[Function]}
                           >
                             <div

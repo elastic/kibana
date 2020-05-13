@@ -6,67 +6,48 @@
 
 import { i18n } from '@kbn/i18n';
 import Boom from 'boom';
+import { APICaller } from 'kibana/server';
 
+import { TypeOf } from '@kbn/config-schema';
 import { fieldsServiceProvider } from '../fields_service';
 import { renderTemplate } from '../../../common/util/string_utils';
-import { getMessages } from './messages';
+import {
+  getMessages,
+  MessageId,
+  JobValidationMessageDef,
+} from '../../../common/constants/messages';
 import { VALIDATION_STATUS } from '../../../common/constants/validation';
 
 import { basicJobValidation, uniqWithIsEqual } from '../../../common/util/job_utils';
+// @ts-ignore
 import { validateBucketSpan } from './validate_bucket_span';
 import { validateCardinality } from './validate_cardinality';
 import { validateInfluencers } from './validate_influencers';
 import { validateModelMemoryLimit } from './validate_model_memory_limit';
 import { validateTimeRange, isValidTimeField } from './validate_time_range';
+import { validateJobSchema } from '../../routes/schemas/job_validation_schema';
+import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 
+export type ValidateJobPayload = TypeOf<typeof validateJobSchema>;
+
+/**
+ * Validates the job configuration after
+ * @kbn/config-schema has checked the payload {@link validateJobSchema}.
+ */
 export async function validateJob(
-  callWithRequest,
-  payload,
+  callWithRequest: APICaller,
+  payload: ValidateJobPayload,
   kbnVersion = 'current',
-  callAsInternalUser,
-  isSecurityDisabled
+  callAsInternalUser?: APICaller,
+  isSecurityDisabled?: boolean
 ) {
   const messages = getMessages();
 
   try {
-    if (typeof payload !== 'object' || payload === null) {
-      throw new Error(
-        i18n.translate('xpack.ml.models.jobValidation.payloadIsNotObjectErrorMessage', {
-          defaultMessage: 'Invalid {invalidParamName}: Needs to be an object.',
-          values: { invalidParamName: 'payload' },
-        })
-      );
-    }
-
-    const { fields, job } = payload;
+    const { fields } = payload;
     let { duration } = payload;
 
-    if (typeof job !== 'object') {
-      throw new Error(
-        i18n.translate('xpack.ml.models.jobValidation.jobIsNotObjectErrorMessage', {
-          defaultMessage: 'Invalid {invalidParamName}: Needs to be an object.',
-          values: { invalidParamName: 'job' },
-        })
-      );
-    }
-
-    if (typeof job.analysis_config !== 'object') {
-      throw new Error(
-        i18n.translate('xpack.ml.models.jobValidation.analysisConfigIsNotObjectErrorMessage', {
-          defaultMessage: 'Invalid {invalidParamName}: Needs to be an object.',
-          values: { invalidParamName: 'job.analysis_config' },
-        })
-      );
-    }
-
-    if (!Array.isArray(job.analysis_config.detectors)) {
-      throw new Error(
-        i18n.translate('xpack.ml.models.jobValidation.detectorsAreNotArrayErrorMessage', {
-          defaultMessage: 'Invalid {invalidParamName}: Needs to be an array.',
-          values: { invalidParamName: 'job.analysis_config.detectors' },
-        })
-      );
-    }
+    const job = payload.job as CombinedJob;
 
     // check if basic tests pass the requirements to run the extended tests.
     // if so, run the extended tests and merge the messages.
@@ -103,7 +84,7 @@ export async function validateJob(
       const cardinalityMessages = await validateCardinality(callWithRequest, job);
       validationMessages.push(...cardinalityMessages);
       const cardinalityError = cardinalityMessages.some(m => {
-        return VALIDATION_STATUS[messages[m.id].status] === VALIDATION_STATUS.ERROR;
+        return messages[m.id as MessageId].status === VALIDATION_STATUS.ERROR;
       });
 
       validationMessages.push(
@@ -131,27 +112,29 @@ export async function validateJob(
     }
 
     return uniqWithIsEqual(validationMessages).map(message => {
-      if (typeof messages[message.id] !== 'undefined') {
+      const messageId = message.id as MessageId;
+      const messageDef = messages[messageId] as JobValidationMessageDef;
+      if (typeof messageDef !== 'undefined') {
         // render the message template with the provided metadata
-        if (typeof messages[message.id].heading !== 'undefined') {
-          message.heading = renderTemplate(messages[message.id].heading, message);
+        if (typeof messageDef.heading !== 'undefined') {
+          message.heading = renderTemplate(messageDef.heading, message);
         }
-        message.text = renderTemplate(messages[message.id].text, message);
+        message.text = renderTemplate(messageDef.text, message);
         // check if the error message provides a link with further information
         // if so, add it to the message to be returned with it
-        if (typeof messages[message.id].url !== 'undefined') {
+        if (typeof messageDef.url !== 'undefined') {
           // the link is also treated as a template so we're able to dynamically link to
           // documentation links matching the running version of Kibana.
-          message.url = renderTemplate(messages[message.id].url, { version: kbnVersion });
+          message.url = renderTemplate(messageDef.url, { version: kbnVersion! });
         }
 
-        message.status = VALIDATION_STATUS[messages[message.id].status];
+        message.status = messageDef.status;
       } else {
         message.text = i18n.translate(
           'xpack.ml.models.jobValidation.unknownMessageIdErrorMessage',
           {
             defaultMessage: '{messageId} (unknown message id)',
-            values: { messageId: message.id },
+            values: { messageId },
           }
         );
       }
