@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiTitle, IconType, EuiButton } from '@elastic/eui';
 import { PackageInfo } from '../../../../types';
-import { EPM_PATH } from '../../../../constants';
 import { useCapabilities, useLink } from '../../../../hooks';
 import { IconPanel } from '../../components/icon_panel';
 import { NavButtonBack } from '../../components/nav_button_back';

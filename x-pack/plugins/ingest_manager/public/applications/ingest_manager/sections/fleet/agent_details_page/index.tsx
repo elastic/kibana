@@ -20,7 +20,7 @@ import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { AgentRefreshContext } from './hooks';
-import { FLEET_AGENT_DETAIL_PATH } from '../../../constants';
+import { PAGE_ROUTING_PATHS } from '../../../constants';
 import { Loading, Error } from '../../../components';
 import { useGetOneAgent, useGetOneAgentConfig, useLink } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
@@ -195,7 +195,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         ) : agentData && agentData.item ? (
           <Switch>
             <Route
-              path={`${FLEET_AGENT_DETAIL_PATH}:agentId/details`}
+              path={PAGE_ROUTING_PATHS.fleet_agent_details_details}
               render={() => {
                 return (
                   <AgentDetailsContent agent={agentData.item} agentConfig={agentConfigData?.item} />
@@ -203,7 +203,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
               }}
             />
             <Route
-              path={`${FLEET_AGENT_DETAIL_PATH}:agentId`}
+              path={PAGE_ROUTING_PATHS.fleet_agent_details_events}
               render={() => {
                 return <AgentEventsTable agent={agentData.item} />;
               }}

@@ -23,9 +23,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AgentConfig } from '../../../../types';
 import { EnrollmentStepAgentConfig } from './config_selection';
-import { useGetOneEnrollmentAPIKey, useCore, useGetSettings, useLink } from '../../../../hooks';
+import {
+  useGetOneEnrollmentAPIKey,
+  useCore,
+  useGetSettings,
+  useLink,
+  useFleetStatus,
+} from '../../../../hooks';
 import { ManualInstructions } from '../../../../components/enrollment_instructions';
-import { useFleetStatus } from '../../../../hooks/use_fleet_status';
 
 interface Props {
   onClose: () => void;

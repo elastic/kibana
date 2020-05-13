@@ -8,10 +8,7 @@ import React, { useState } from 'react';
 import { useRouteMatch, Switch, Route } from 'react-router-dom';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { i18n } from '@kbn/i18n';
-import {
-  EPM_LIST_ALL_PACKAGES_PATH,
-  EPM_LIST_INSTALLED_PACKAGES_PATH,
-} from '../../../../constants';
+import { PAGE_ROUTING_PATHS } from '../../../../constants';
 import { useLink, useGetCategories, useGetPackages } from '../../../../hooks';
 import { WithHeaderLayout } from '../../../../layouts';
 import { CategorySummaryItem } from '../../../../types';
@@ -51,10 +48,10 @@ export function EPMHomePage() {
       }
     >
       <Switch>
-        <Route path={EPM_LIST_INSTALLED_PACKAGES_PATH}>
+        <Route path={PAGE_ROUTING_PATHS.integrations_installed}>
           <InstalledPackages />
         </Route>
-        <Route path={EPM_LIST_ALL_PACKAGES_PATH}>
+        <Route path={PAGE_ROUTING_PATHS.integrations_all}>
           <AvailablePackages />
         </Route>
       </Switch>

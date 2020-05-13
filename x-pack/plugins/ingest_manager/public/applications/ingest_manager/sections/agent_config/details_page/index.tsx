@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { memo, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Redirect, useRouteMatch, Switch, Route } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
@@ -21,12 +21,12 @@ import {
 } from '@elastic/eui';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import styled from 'styled-components';
+import { PAGE_ROUTING_PATHS } from '../../../constants';
 import { useGetOneAgentConfig, useLink } from '../../../hooks';
 import { Loading } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
 import { ConfigRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
 import { LinkedAgentCount } from '../components';
-import { DETAILS_ROUTER_PATH, DETAILS_ROUTER_SUB_PATH } from './constants';
 import { ConfigDatasourcesView } from './components/datasources';
 import { ConfigYamlView } from './components/yaml';
 import { ConfigSettingsView } from './components/settings';
@@ -37,20 +37,7 @@ const Divider = styled.div`
   border-left: ${props => props.theme.eui.euiBorderThin};
 `;
 
-export const AgentConfigDetailsPage = memo(() => {
-  return (
-    <Switch>
-      <Route path={DETAILS_ROUTER_SUB_PATH}>
-        <AgentConfigDetailsLayout />
-      </Route>
-      <Route path={DETAILS_ROUTER_PATH}>
-        <AgentConfigDetailsLayout />
-      </Route>
-    </Switch>
-  );
-});
-
-export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
+export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   const {
     params: { configId, tabId = '' },
   } = useRouteMatch<{ configId: string; tabId?: string }>();
@@ -255,19 +242,19 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
         >
           <Switch>
             <Route
-              path={`${DETAILS_ROUTER_PATH}/yaml`}
+              path={PAGE_ROUTING_PATHS.configuration_details_yaml}
               render={() => {
                 return <ConfigYamlView config={agentConfig} />;
               }}
             />
             <Route
-              path={`${DETAILS_ROUTER_PATH}/settings`}
+              path={PAGE_ROUTING_PATHS.configuration_details_settings}
               render={() => {
                 return <ConfigSettingsView config={agentConfig} />;
               }}
             />
             <Route
-              path={`${DETAILS_ROUTER_PATH}`}
+              path={PAGE_ROUTING_PATHS.configuration_details}
               render={() => {
                 return <ConfigDatasourcesView config={agentConfig} />;
               }}
