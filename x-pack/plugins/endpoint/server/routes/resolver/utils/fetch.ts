@@ -6,20 +6,18 @@
 
 import { IScopedClusterClient } from 'kibana/server';
 import {
-  ChildNode,
-  ResolverEvent,
   ResolverChildren,
   ResolverRelatedEvents,
   ResolverAncestry,
 } from '../../../../common/types';
-import { entityId, parentEntityId, isProcessStart } from '../../../../common/models/event';
+import { entityId, parentEntityId } from '../../../../common/models/event';
 import { PaginationBuilder } from './pagination';
 import { Tree } from './tree';
 import { LifecycleQuery } from '../queries/lifecycle';
 import { ChildrenQuery } from '../queries/children';
 import { EventsQuery } from '../queries/events';
 import { StatsQuery } from '../queries/stats';
-import { createAncestry, createRelatedEvents, createLifecycle, createChild } from './node';
+import { createAncestry, createRelatedEvents, createLifecycle } from './node';
 import { ChildrenNodesHelper } from './children_helper';
 
 /**

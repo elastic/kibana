@@ -114,11 +114,13 @@ export class PaginationBuilder {
   }
 
   /**
+   * Creates an object for adding the pagination fields to a query
    *
    * @param numTerms number of unique IDs that are being search for in this query
    * @param tiebreaker a unique field to use as the tiebreaker for the search_after
    * @param aggregator the field that specifies a unique ID per event (e.g. entity_id)
    * @param aggs other aggregations being used with this query
+   * @returns an object containing the pagination information
    */
   buildQueryFields(
     numTerms: number,
