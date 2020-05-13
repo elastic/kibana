@@ -88,6 +88,4 @@ program
     }))
   );
 
-program.command('postinstall').action(createCommanderAction('postinstall'));
-
 program.parse(process.argv);
