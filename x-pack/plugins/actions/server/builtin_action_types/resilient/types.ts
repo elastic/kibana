@@ -25,5 +25,5 @@ interface CreateIncidentRequestArgs extends CreateIncidentBasicRequestArgs {
 }
 
 export type CreateIncidentRequest = CreateIncidentRequestArgs;
-
 export type UpdateIncidentRequest = Partial<CreateIncidentBasicRequestArgs>;
+export type CreateCommentRequest = Comment;
