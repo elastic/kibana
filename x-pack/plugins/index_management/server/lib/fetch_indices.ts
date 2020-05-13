@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { CatIndicesParams } from 'elasticsearch';
 import { IndexDataEnricher } from '../services';
 import { Index, CallAsCurrentUser } from '../types';
-import { fetchAliases } from './fetch_aliases';
 
 interface Hit {
   health: string;
@@ -17,20 +17,61 @@ interface Hit {
   'docs.count': any;
   'store.size': any;
   sth: 'true' | 'false';
+  hidden: boolean;
 }
 
-interface Aliases {
-  [key: string]: string[];
+interface IndexInfo {
+  aliases: { [aliasName: string]: unknown };
+  mappings: unknown;
+  settings: {
+    index: {
+      hidden: 'true' | 'false';
+    };
+  };
 }
 
-interface Params {
-  format: string;
-  h: string;
-  index?: string[];
+interface GetIndicesResponse {
+  [indexName: string]: IndexInfo;
 }
 
-function formatHits(hits: Hit[], aliases: Aliases): Index[] {
-  return hits.map((hit: Hit) => {
+async function fetchIndicesCall(
+  callAsCurrentUser: CallAsCurrentUser,
+  indexNames?: string[]
+): Promise<Index[]> {
+  const indices: GetIndicesResponse = await callAsCurrentUser('transport.request', {
+    method: 'GET',
+    path: `/${indexNames ? indexNames : '*'}`,
+    query: {
+      expand_wildcards: 'hidden,all',
+    },
+  });
+
+  if (!Object.keys(indices).length) {
+    return [];
+  }
+
+  const catQuery: Pick<CatIndicesParams, 'format' | 'h'> & {
+    expand_wildcards: string;
+    index?: string;
+  } = {
+    format: 'json',
+    h: 'health,status,index,uuid,pri,rep,docs.count,sth,store.size',
+    expand_wildcards: 'hidden,all',
+  };
+
+  if (indexNames) {
+    catQuery.index = indexNames.join(',');
+  }
+  const catHits: Hit[] = await callAsCurrentUser('transport.request', {
+    method: 'GET',
+    path: '/_cat/indices',
+    query: catQuery,
+  });
+
+  return catHits.map(hit => {
+    const index = indices[hit.index];
+    const aliases = Object.keys(index.aliases);
+
     return {
       health: hit.health,
       status: hit.status,
@@ -41,22 +82,10 @@ function formatHits(hits: Hit[], aliases: Aliases): Index[] {
       documents: hit['docs.count'],
       size: hit['store.size'],
       isFrozen: hit.sth === 'true', // sth value coming back as a string from ES
-      aliases: aliases.hasOwnProperty(hit.index) ? aliases[hit.index] : 'none',
+      aliases: aliases.length ? aliases : 'none',
+      hidden: index.settings.index.hidden === 'true',
     };
   });
-}
-
-async function fetchIndicesCall(callAsCurrentUser: CallAsCurrentUser, indexNames?: string[]) {
-  const params: Params = {
-    format: 'json',
-    h: 'health,status,index,uuid,pri,rep,docs.count,sth,store.size',
-  };
-
-  if (indexNames) {
-    params.index = indexNames;
-  }
-
-  return await callAsCurrentUser('cat.indices', params);
 }
 
 export const fetchIndices = async (
@@ -64,9 +93,6 @@ export const fetchIndices = async (
   indexDataEnricher: IndexDataEnricher,
   indexNames?: string[]
 ) => {
-  const aliases = await fetchAliases(callAsCurrentUser);
-  const hits = await fetchIndicesCall(callAsCurrentUser, indexNames);
-  const indices = formatHits(hits, aliases);
-
-  return await indexDataEnricher.enrichIndices(indices, callAsCurrentUser);
+  const response = await fetchIndicesCall(callAsCurrentUser, indexNames);
+  return await indexDataEnricher.enrichIndices(response, callAsCurrentUser);
 };
