@@ -12,6 +12,7 @@ export {
   DragAndDropTree,
   DragAndDropTreeProvider,
   RenderTreeItemFunction,
+  OnDragEndArgs,
 } from './drag_and_drop_tree';
 
 export { PipelineProcessorEditorItem } from './pipeline_processor_editor_item';
