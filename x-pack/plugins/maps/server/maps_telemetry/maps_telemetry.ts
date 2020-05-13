@@ -9,16 +9,17 @@ import {
   SavedObjectsClientContract,
   SavedObjectAttributes,
   SavedObjectAttribute,
-} from 'src/core/server';
+} from 'kibana/server';
 import { IFieldType, IIndexPattern } from 'src/plugins/data/public';
 import {
   SOURCE_TYPES,
   ES_GEO_FIELD_TYPE,
   MAP_SAVED_OBJECT_TYPE,
   TELEMETRY_TYPE,
-} from '../../../../../plugins/maps/common/constants';
-import { LayerDescriptor } from '../../../../../plugins/maps/common/descriptor_types';
-import { MapSavedObject } from '../../../../../plugins/maps/common/map_saved_object_type';
+} from '../../common/constants';
+import { LayerDescriptor } from '../../common/descriptor_types';
+import { MapSavedObject } from '../../common/map_saved_object_type';
+import { getInternalRepository } from '../kibana_server_services';
 
 interface IStats {
   [key: string]: {
@@ -172,16 +173,14 @@ async function getIndexPatternSavedObjects(savedObjectsClient: SavedObjectsClien
   return _.get(indexPatternSavedObjects, 'saved_objects', []);
 }
 
-export async function getMapsTelemetry(
-  savedObjectsClient: SavedObjectsClientContract,
-  config: Function
-) {
+export async function getMapsTelemetry(config: any) {
+  const savedObjectsClient = getInternalRepository();
   const mapSavedObjects: MapSavedObject[] = await getMapSavedObjects(savedObjectsClient);
   const indexPatternSavedObjects: IIndexPattern[] = await getIndexPatternSavedObjects(
     savedObjectsClient
   );
   const settings: SavedObjectAttribute = {
-    showMapVisualizationTypes: config().get('xpack.maps.showMapVisualizationTypes'),
+    showMapVisualizationTypes: config.showMapVisualizationTypes,
   };
   const mapsTelemetry = buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, settings });
   return await savedObjectsClient.create(TELEMETRY_TYPE, mapsTelemetry, {

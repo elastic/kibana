@@ -5,16 +5,13 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-// @ts-ignore
-import { SavedObjectsClientContract } from 'src/core/server';
 import { getMapsTelemetry } from '../maps_telemetry';
 // @ts-ignore
-import { TELEMETRY_TYPE } from '../../../../../../plugins/maps/common/constants';
+import { TELEMETRY_TYPE } from '../../../common/constants';
 
 export function registerMapsUsageCollector(
   usageCollection: UsageCollectionSetup,
-  savedObjectsClient: SavedObjectsClientContract,
-  config: Function
+  config: any
 ): void {
   if (!usageCollection) {
     return;
@@ -23,7 +20,7 @@ export function registerMapsUsageCollector(
   const mapsUsageCollector = usageCollection.makeUsageCollector({
     type: TELEMETRY_TYPE,
     isReady: () => true,
-    fetch: async () => await getMapsTelemetry(savedObjectsClient, config),
+    fetch: async () => await getMapsTelemetry(config),
   });
 
   usageCollection.registerCollector(mapsUsageCollector);

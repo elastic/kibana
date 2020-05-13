@@ -53,16 +53,10 @@ export function maps(kibana) {
     },
 
     init(server) {
-      const mapsEnabled = server.config().get('xpack.maps.enabled');
-      if (!mapsEnabled) {
-        server.log(['info', 'maps'], 'Maps app disabled by configuration');
-        return;
-      }
-
       // Init saved objects client deps
-      const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
-      const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
-      const internalRepository = getSavedObjectsRepository(callCluster);
+      // const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+      // const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
+      // const internalRepository = getSavedObjectsRepository(callCluster);
 
       const coreSetup = server.newPlatform.setup.core;
       const newPlatformPlugins = server.newPlatform.setup.plugins;
@@ -78,12 +72,6 @@ export function maps(kibana) {
       const __LEGACY = {
         config: server.config,
         route: server.route.bind(server),
-        plugins: {
-          elasticsearch: server.plugins.elasticsearch,
-        },
-        savedObjects: {
-          savedObjectsClient: new SavedObjectsClient(internalRepository),
-        },
         injectUiAppVars: server.injectUiAppVars,
         getInjectedUiAppVars: server.getInjectedUiAppVars,
       };
