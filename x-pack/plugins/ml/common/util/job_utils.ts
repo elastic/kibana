@@ -17,6 +17,7 @@ import { CombinedJob, CustomSettings, Datafeed, JobId, Job } from '../types/anom
 import { EntityField } from './anomaly_utils';
 import { MlServerLimits } from '../types/ml_server_info';
 import { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
+import { MlJobAggregation } from '../constants/aggregation_types';
 
 export interface ValidationResults {
   valid: boolean;
@@ -208,7 +209,7 @@ export function isJobVersionGte(job: CombinedJob, version: string): boolean {
 // for querying metric data. Returns null if there is no suitable ES aggregation.
 // Note that the 'function' field in a record contains what the user entered e.g. 'high_count',
 // whereas the 'function_description' field holds an ML-built display hint for function e.g. 'count'.
-export function mlFunctionToESAggregation(functionName: string): string | null {
+export function mlFunctionToESAggregation(functionName: MlJobAggregation | string): string | null {
   if (
     functionName === 'mean' ||
     functionName === 'high_mean' ||

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export type MlJobAggregation = keyof Record<ML_JOB_AGGREGATION, string>;
+
 export enum ML_JOB_AGGREGATION {
   // count
   COUNT = 'count',
