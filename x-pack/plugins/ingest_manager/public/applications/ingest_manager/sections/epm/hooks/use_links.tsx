@@ -6,18 +6,12 @@
 import { useCore } from '../../../hooks/use_core';
 import { PLUGIN_ID } from '../../../constants';
 import { epmRouteService } from '../../../services';
-import { BASE_PATH } from '../../../constants';
 
 const removeRelativePath = (relativePath: string): string =>
   new URL(relativePath, 'http://example.com').pathname;
 
 export function useLinks() {
   const { http } = useCore();
-  function appRoot(path: string) {
-    // include '#' because we're using HashRouter
-    return http.basePath.prepend(BASE_PATH + '#' + path);
-  }
-
   return {
     toAssets: (path: string) =>
       http.basePath.prepend(
