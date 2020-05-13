@@ -26,8 +26,7 @@ import { exportApi } from './server/routes/api/export';
 import { getUiSettingDefaults } from './server/ui_setting_defaults';
 import { registerCspCollector } from './server/lib/csp_usage_collector';
 import { injectVars } from './inject_vars';
-import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+
 import { kbnBaseUrl } from '../../../plugins/kibana_legacy/server';
 
 const mkdirAsync = promisify(Fs.mkdir);
@@ -59,19 +58,7 @@ export default function(kibana) {
         main: 'plugins/kibana/kibana',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      links: [
-        {
-          id: 'kibana:stack_management',
-          title: i18n.translate('kbn.managementTitle', {
-            defaultMessage: 'Stack Management',
-          }),
-          order: 9003,
-          url: `${kbnBaseUrl}#/management`,
-          euiIconType: 'managementApp',
-          linkToLastSubUrl: false,
-          category: DEFAULT_APP_CATEGORIES.management,
-        },
-      ],
+      links: [],
 
       injectDefaultVars(server, options) {
         const mapConfig = server.config().get('map');

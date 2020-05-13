@@ -1,0 +1,19 @@
+.mgtPanel {
+  margin-bottom: $euiSize;
+  background: $euiColorEmptyShade;
+}
+
+/**
+ * 1. Override kuiPanelBody styles to accommodate padding of items within the panel body..
+ */
+.mgtPanel__body {
+  padding: 5px 10px; /* 1 */
+}
+
+/**
+ * 1. Create vertical space between items when they wrap.
+ */
+.mgtPanel__item {
+  padding: 5px 15px; /* 1 */
+}
+

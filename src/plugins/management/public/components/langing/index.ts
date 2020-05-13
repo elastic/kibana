@@ -17,18 +17,4 @@
  * under the License.
  */
 
-export interface IndexPatternCreationOption {
-  text: string;
-  description?: string;
-  onClick: () => void;
-}
-
-export interface IndexPattern {
-  id: string;
-  title: string;
-  url: string;
-  active: boolean;
-  default: boolean;
-  tag?: string[];
-  sort: string;
-}
+export { ManagementLandingPage } from './landing';

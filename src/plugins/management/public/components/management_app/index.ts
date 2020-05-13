@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { ManagementChrome } from './management_chrome';
+export { ManagementApp, ManagementAppDependencies } from './management_app';

@@ -33,9 +33,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { CreateButton } from '../create_button';
 import { CreateIndexPatternPrompt } from '../create_index_pattern_prompt';
-import { IndexPattern, IndexPatternCreationOption } from '../types';
 
-const columns = [
+const columns: any[] = [
   {
     field: 'title',
     name: 'Pattern',
@@ -86,8 +85,9 @@ const search = {
 };
 
 interface Props {
-  indexPatterns: IndexPattern[];
-  indexPatternCreationOptions: IndexPatternCreationOption[];
+  // Todo: temporary. should be reverted before merge
+  indexPatterns: any[];
+  indexPatternCreationOptions: any[];
 }
 
 interface State {

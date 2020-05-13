@@ -20,14 +20,14 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiIcon } from '@elastic/eui';
 
-import { ManagementSectionId } from './types';
+import { ManagementSectionId } from '../types';
 
-interface Props {
+interface ManagementSectionTitleProps {
   text: string;
   tip: string;
 }
 
-const ManagementSectionTitle = ({ text, tip }: Props) => (
+const ManagementSectionTitle = ({ text, tip }: ManagementSectionTitleProps) => (
   <EuiToolTip content={tip} position="right">
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>{text}</EuiFlexItem>

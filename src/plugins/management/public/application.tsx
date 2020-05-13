@@ -17,31 +17,26 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { LegacyManagementSection } from './section';
-import { managementSections } from '../management_sections';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
-export class LegacyManagementAdapter {
-  main = undefined;
-  init = capabilities => {
-    this.main = new LegacyManagementSection(
-      'management',
-      {
-        display: i18n.translate('management.displayName', {
-          defaultMessage: 'Stack Management',
-        }),
-      },
-      capabilities
-    );
+import { AppMountContext, AppMountParameters } from 'kibana/public';
+import { ManagementApp, ManagementAppDependencies } from './components/management_app';
 
-    managementSections.forEach(({ id, title }, idx) => {
-      this.main.register(id, {
-        display: title,
-        order: idx,
-      });
-    });
+export const renderApp = async (
+  context: AppMountContext,
+  { history, appBasePath, element }: AppMountParameters,
+  dependencies: ManagementAppDependencies
+) => {
+  ReactDOM.render(
+    <ManagementApp
+      context={context}
+      dependencies={dependencies}
+      appBasePath={appBasePath}
+      history={history}
+    />,
+    element
+  );
 
-    return this.main;
-  };
-  getManagement = () => this.main;
-}
+  return () => ReactDOM.unmountComponentAtNode(element);
+};

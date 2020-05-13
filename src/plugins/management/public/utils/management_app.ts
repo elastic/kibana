@@ -17,18 +17,22 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { ManagementPlugin } from './plugin';
+import { CreateManagementItemArgs, Mount } from '../types';
+import { ManagementItem } from './management_item';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new ManagementPlugin(initializerContext);
+export interface RegisterManagementAppArgs extends CreateManagementItemArgs {
+  mount: Mount;
+  basePath: string;
 }
 
-export { RegisterManagementAppArgs, ManagementSection, ManagementApp } from './utils';
+export class ManagementApp extends ManagementItem {
+  public readonly mount: Mount;
+  public readonly basePath: string;
 
-export {
-  ManagementSectionId,
-  ManagementAppMountParams,
-  ManagementSetup,
-  ManagementStart,
-} from './types';
+  constructor(args: RegisterManagementAppArgs) {
+    super(args);
+
+    this.mount = args.mount;
+    this.basePath = args.basePath;
+  }
+}

@@ -17,8 +17,4 @@
  * under the License.
  */
 
-import { npSetup } from 'ui/new_platform';
-
-const registry = npSetup.plugins.savedObjectsManagement?.serviceRegistry;
-
-export const savedObjectManagementRegistry = registry!;
+export { ManagementAppWrapper } from './management_app_wrapper';

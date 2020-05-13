@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { LegacyManagementAdapter } from './sections_register';
-export { LegacyManagementSection } from './section';
+export { ManagementApp, RegisterManagementAppArgs } from './management_app';
+export { ManagementSection, RegisterManagementSectionArgs } from './management_section';

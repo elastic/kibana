@@ -16,19 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { ReactElement } from 'react';
+import { CreateManagementItemArgs } from '../types';
 
-import { PluginInitializerContext } from 'kibana/public';
-import { ManagementPlugin } from './plugin';
+export class ManagementItem {
+  public readonly id: string = '';
+  public readonly title: string | ReactElement = '';
+  public readonly order: number;
+  public readonly euiIconType?: string;
+  public readonly icon?: string;
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new ManagementPlugin(initializerContext);
+  public enabled: boolean = true;
+
+  constructor({ id, title, order = 100, euiIconType, icon }: CreateManagementItemArgs) {
+    this.id = id;
+    this.title = title;
+    this.order = order;
+    this.euiIconType = euiIconType;
+    this.icon = icon;
+  }
+
+  disable() {
+    this.enabled = false;
+  }
+
+  enable() {
+    this.enabled = true;
+  }
 }
-
-export { RegisterManagementAppArgs, ManagementSection, ManagementApp } from './utils';
-
-export {
-  ManagementSectionId,
-  ManagementAppMountParams,
-  ManagementSetup,
-  ManagementStart,
-} from './types';
