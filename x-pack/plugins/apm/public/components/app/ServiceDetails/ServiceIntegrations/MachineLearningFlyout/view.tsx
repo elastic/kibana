@@ -246,7 +246,7 @@ export function MachineLearningFlyoutView({
                   onClickCreate({ transactionType: selectedTransactionType })
                 }
                 fill
-                disabled={isCreatingJob || hasMLJob !== false || isLoadingMLJob}
+                disabled={isCreatingJob || hasMLJob || isLoadingMLJob}
               >
                 {i18n.translate(
                   'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createNewJobButtonLabel',
