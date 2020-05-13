@@ -5,6 +5,6 @@
  */
 
 export const convertResultUrlMock = jest.fn().mockReturnValue('converted-url');
-jest.doMock('../../common/utils', () => ({
+jest.doMock('./utils', () => ({
   convertResultUrl: convertResultUrlMock,
 }));

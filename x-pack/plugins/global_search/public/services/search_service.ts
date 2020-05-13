@@ -8,11 +8,13 @@ import { map, takeUntil } from 'rxjs/operators';
 import { merge, Observable, timer } from 'rxjs';
 import { duration } from 'moment';
 import { HttpStart, ApplicationStart } from 'src/core/public';
+import { GlobalSearchProviderResult } from '../../common/types';
 import { takeInArray } from '../../common/operators';
+import { processProviderResult } from '../../common/process_result';
 import { GlobalSearchResultProvider } from '../types';
 import { GlobalSearchConfigType } from '../config';
 import { GlobalSearchBatchedResults, GlobalSearchFindOptions } from './types';
-import { getResultProcessor, addNavigate } from './process_result';
+import { addNavigate } from './utils';
 import { fetchServerResults } from './fetch_server_results';
 
 /** @public */
@@ -76,10 +78,8 @@ export class SearchService {
 
     const navigateToUrl = this.application!.navigateToUrl;
 
-    const processResult = getResultProcessor({
-      basePath: this.http!.basePath,
-      navigateToUrl,
-    });
+    const processResult = (result: GlobalSearchProviderResult) =>
+      addNavigate(processProviderResult(result, this.http!.basePath), navigateToUrl);
 
     const serverResults$ = fetchServerResults(this.http!, term, {
       preference,

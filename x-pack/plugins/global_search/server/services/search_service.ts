@@ -7,16 +7,16 @@
 import { Observable, timer, merge } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { KibanaRequest, CoreStart, IBasePath } from 'src/core/server';
+import { takeInArray } from '../../common/operators';
+import { processProviderResult } from '../../common/process_result';
 import {
   GlobalSearchResultProvider,
   getContextFactory,
   GlobalSearchContextFactory,
   GlobalSearchProviderResult,
 } from '../result_provider';
-import { GlobalSearchBatchedResults, GlobalSearchFindOptions, GlobalSearchResult } from './types';
+import { GlobalSearchBatchedResults, GlobalSearchFindOptions } from './types';
 import { GlobalSearchConfigType } from '../config';
-import { takeInArray } from '../../common/operators';
-import { convertResultUrl } from '../../common/utils';
 
 /** @public */
 export interface SearchServiceSetup {
@@ -86,11 +86,14 @@ export class SearchService {
       aborted$,
     };
 
+    const processResult = (result: GlobalSearchProviderResult) =>
+      processProviderResult(result, this.basePath!);
+
     const providersResults$ = this.providers.map(provider =>
       provider.find(term, providerOptions, context).pipe(
         takeInArray(this.maxProviderResults),
         takeUntil(aborted$),
-        map(results => results.map(r => this.processResult(r)))
+        map(results => results.map(r => processResult(r)))
       )
     );
 
@@ -99,12 +102,5 @@ export class SearchService {
         results,
       }))
     );
-  }
-
-  private processResult(providerResult: GlobalSearchProviderResult): GlobalSearchResult {
-    return {
-      ...providerResult,
-      url: convertResultUrl(providerResult.url, this.basePath!),
-    };
   }
 }
