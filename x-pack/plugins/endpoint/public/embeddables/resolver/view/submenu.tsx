@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import React, { ReactNode, useState, useMemo, useCallback } from 'react';
 import { EuiSelectable, EuiButton } from '@elastic/eui';
 import styled from 'styled-components';
-import { waitingForRelatedEventData } from '../types';
 
 /**
  * i18n-translated titles for submenus and identifiers for display of states:
@@ -16,10 +15,12 @@ import { waitingForRelatedEventData } from '../types';
  *   menuError: if the submenu requested data, but received an error
  */
 export const subMenuAssets = {
-  initialMenuStatus: Symbol(
-    'The state of a Resolver submenu before it has been opened or requested data.'
-  ),
-  menuError: Symbol('The options in this submenu cannot be displayed because of an error'),
+  initialMenuStatus: i18n.translate('xpack.endpoint.resolver.relatedNotRetrieved', {
+    defaultMessage: 'Related Events have not yet been retrieved.',
+  }),
+  menuError: i18n.translate('xpack.endpoint.resolver.relatedRetrievalError', {
+    defaultMessage: 'There was an error retrieving related events.',
+  }),
   relatedAlerts: {
     title: i18n.translate('xpack.endpoint.resolver.relatedAlerts', {
       defaultMessage: 'Related Alerts',
@@ -38,7 +39,10 @@ interface ResolverSubmenuOption {
   prefix?: number | JSX.Element;
 }
 
-export type ResolverSubmenuOptionList = ResolverSubmenuOption[] | symbol;
+export type ResolverSubmenuOptionList =
+  | ResolverSubmenuOption[]
+  | 'waitingForRelatedEventData'
+  | typeof subMenuAssets.initialMenuStatus;
 
 const OptionList = React.memo(
   ({
@@ -49,7 +53,7 @@ const OptionList = React.memo(
     isLoading: boolean;
   }) => {
     const selectableOptions =
-      typeof subMenuOptions === 'symbol'
+      typeof subMenuOptions !== 'object'
         ? []
         : subMenuOptions.map((opt: ResolverSubmenuOption): {
             label: string;
@@ -102,7 +106,7 @@ export const NodeSubMenu = styled(
           optionsWithActions:
             | ResolverSubmenuOptionList
             | typeof subMenuAssets.initialMenuStatus
-            | typeof waitingForRelatedEventData;
+            | 'waitingForRelatedEventData';
         }
       | { optionsWithActions?: undefined }
     )) => {
@@ -129,7 +133,7 @@ export const NodeSubMenu = styled(
       }, [optionsWithActions]);
 
       const isMenuLoading = useMemo(() => {
-        return optionsWithActions === waitingForRelatedEventData;
+        return optionsWithActions === 'waitingForRelatedEventData';
       }, [optionsWithActions]);
 
       if (!optionsWithActions) {

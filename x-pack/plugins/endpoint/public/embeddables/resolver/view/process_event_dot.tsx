@@ -22,7 +22,6 @@ import {
   Matrix3,
   AdjacentProcessMap,
   ResolverProcessType,
-  waitingForRelatedEventData,
   RelatedEventEntryWithStatsOrWaiting,
   EventCategory,
 } from '../types';
@@ -314,7 +313,7 @@ export const ProcessEventDot = styled(
           // If there was an error when we tried to request the events
           return subMenuAssets.menuError;
         }
-        if (relatedEvents === waitingForRelatedEventData) {
+        if (relatedEvents === 'waitingForRelatedEventData') {
           // If we're waiting for events to be returned
           // Pass on the waiting symbol
           return relatedEvents;

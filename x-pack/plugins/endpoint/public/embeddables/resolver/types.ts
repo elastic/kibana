@@ -149,17 +149,6 @@ export type RelatedEventType =
 export type EventCategory = RelatedEventType | ('Alert' | 'Process' | 'Security');
 
 /**
- * This symbol is used to tag results with Related event info
- */
-export const resultsEnrichedWithRelatedEventInfo = `resultsEnrichedWithRelatedEventInfo`;
-/**
- * This symbol indicates that the app is waiting for related event data for the subject
- * of any particular request.
- */
-export const waitingForRelatedEventData = Symbol(
-  'The app has requested related event data for this entity ID, but has not yet receieved it'
-);
-/**
  * This represents all the raw data (sans statistics, metadata, etc.)
  * about a particular subject's related events
  */
@@ -174,10 +163,7 @@ export interface RelatedEventDataEntry {
  * Represents the status of the request for related event data, which will be either the data,
  * a value indicating that it's still waiting for the data or an Error indicating the data can't be retrieved as expected
  */
-export type RelatedEventDataResults =
-  | RelatedEventDataEntry
-  | typeof waitingForRelatedEventData
-  | Error;
+export type RelatedEventDataResults = RelatedEventDataEntry | 'waitingForRelatedEventData' | Error;
 
 /**
  * This represents the raw related events data enhanced with statistics
@@ -196,12 +182,12 @@ export type RelatedEventDataEntryWithStats = RelatedEventDataEntry & {
  */
 export type RelatedEventEntryWithStatsOrWaiting =
   | RelatedEventDataEntryWithStats
-  | typeof waitingForRelatedEventData
+  | `waitingForRelatedEventData`
   | Error;
 
 /**
  * This represents a Map that will return either a `RelatedEventDataEntryWithStats`
- * or a `waitingForRelatedEventData` symbol when referenced unique event.
+ * or a `waitingForRelatedEventData` symbol when referenced with a unique event.
  */
 export type RelatedEventData = Map<ResolverEvent, RelatedEventEntryWithStatsOrWaiting>;
 
@@ -212,7 +198,7 @@ export interface DataState {
   readonly results: readonly ResolverEvent[];
   isLoading: boolean;
   hasError: boolean;
-  [resultsEnrichedWithRelatedEventInfo]?: Map<ResolverEvent, RelatedEventDataResults>;
+  resultsEnrichedWithRelatedEventInfo?: Map<ResolverEvent, RelatedEventDataResults>;
 }
 
 export type Vector2 = readonly [number, number];

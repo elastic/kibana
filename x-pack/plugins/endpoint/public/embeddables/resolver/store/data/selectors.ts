@@ -15,9 +15,7 @@ import {
   Matrix3,
   AdjacentProcessMap,
   RelatedEventData,
-  resultsEnrichedWithRelatedEventInfo,
   RelatedEventDataEntryWithStats,
-  EventCategory,
 } from '../../types';
 import { ResolverEvent } from '../../../../../common/types';
 import { Vector2 } from '../../types';
@@ -415,7 +413,7 @@ export const indexedProcessTree = createSelector(graphableProcesses, function in
 export const relatedEventResults = createSelector(
   (data: DataState) => data,
   function(data) {
-    return data[resultsEnrichedWithRelatedEventInfo];
+    return data.resultsEnrichedWithRelatedEventInfo;
   }
 );
 
