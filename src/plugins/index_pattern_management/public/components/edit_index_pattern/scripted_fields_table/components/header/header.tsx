@@ -18,15 +18,16 @@
  */
 
 import React from 'react';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-interface HeaderProps {
-  addScriptedFieldUrl: string;
+interface HeaderProps extends RouteComponentProps {
+  indexPatternId: string;
 }
 
-export const Header = ({ addScriptedFieldUrl }: HeaderProps) => (
+export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => (
   <EuiFlexGroup alignItems="center">
     <EuiFlexItem>
       <EuiTitle size="s">
@@ -49,7 +50,12 @@ export const Header = ({ addScriptedFieldUrl }: HeaderProps) => (
     </EuiFlexItem>
 
     <EuiFlexItem grow={false}>
-      <EuiButton data-test-subj="addScriptedFieldLink" href={addScriptedFieldUrl}>
+      <EuiButton
+        data-test-subj="addScriptedFieldLink"
+        onClick={() => {
+          history.push(`patterns/${indexPatternId}/create-field/`);
+        }}
+      >
         <FormattedMessage
           id="indexPatternManagement.editIndexPattern.scripted.addFieldButton"
           defaultMessage="Add scripted field"
@@ -57,4 +63,4 @@ export const Header = ({ addScriptedFieldUrl }: HeaderProps) => (
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>
-);
+));

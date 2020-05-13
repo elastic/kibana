@@ -145,12 +145,7 @@ export class ScriptedFieldsTable extends Component<
 
     return (
       <>
-        <Header
-          addScriptedFieldUrl={`${window.location.origin +
-            window.location.pathname}${INDEX_PATTERN_MANAGEMENT_SECTION_PATH}/patterns/${
-            indexPattern.id
-          }/create-field/`}
-        />
+        <Header indexPatternId={indexPattern.id || ''} />
 
         <CallOuts deprecatedLangsInUse={deprecatedLangsInUse} painlessDocLink={painlessDocLink} />
 
