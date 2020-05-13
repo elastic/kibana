@@ -9,7 +9,7 @@ import { shallow } from 'enzyme';
 
 import { StepRuleActions } from './index';
 
-jest.mock('../../../../../lib/kibana', () => ({
+jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: {
       application: {
