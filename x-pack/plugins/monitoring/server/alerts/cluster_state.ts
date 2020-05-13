@@ -38,6 +38,7 @@ export const getClusterState = (
         }),
       },
     ],
+    producer: 'monitoring',
     defaultActionGroupId: 'default',
     async executor({
       services,

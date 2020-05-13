@@ -36,6 +36,7 @@ describe('has()', () => {
       ],
       defaultActionGroupId: 'default',
       executor: jest.fn(),
+      producer: 'alerting',
     });
     expect(registry.has('foo')).toEqual(true);
   });
@@ -54,6 +55,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       executor: jest.fn(),
+      producer: 'alerting',
     };
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
@@ -84,6 +86,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       executor: jest.fn(),
+      producer: 'alerting',
     };
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
     registry.register(alertType);
@@ -104,6 +107,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       executor: jest.fn(),
+      producer: 'alerting',
     });
     expect(() =>
       registry.register({
@@ -117,6 +121,7 @@ describe('register()', () => {
         ],
         defaultActionGroupId: 'default',
         executor: jest.fn(),
+        producer: 'alerting',
       })
     ).toThrowErrorMatchingInlineSnapshot(`"Alert type \\"test\\" is already registered."`);
   });
@@ -136,6 +141,7 @@ describe('get()', () => {
       ],
       defaultActionGroupId: 'default',
       executor: jest.fn(),
+      producer: 'alerting',
     });
     const alertType = registry.get('test');
     expect(alertType).toMatchInlineSnapshot(`
@@ -154,6 +160,7 @@ describe('get()', () => {
         "executor": [MockFunction],
         "id": "test",
         "name": "Test",
+        "producer": "alerting",
       }
     `);
   });
@@ -186,6 +193,7 @@ describe('list()', () => {
       ],
       defaultActionGroupId: 'testActionGroup',
       executor: jest.fn(),
+      producer: 'alerting',
     });
     const result = registry.list();
     expect(result).toMatchInlineSnapshot(`
@@ -204,6 +212,7 @@ describe('list()', () => {
           "defaultActionGroupId": "testActionGroup",
           "id": "test",
           "name": "Test",
+          "producer": "alerting",
         },
       ]
     `);
@@ -251,6 +260,7 @@ function alertTypeWithVariables(id: string, context: string, state: string): Ale
     actionGroups: [],
     defaultActionGroupId: id,
     async executor() {},
+    producer: 'alerting',
   };
 
   if (!context && !state) {

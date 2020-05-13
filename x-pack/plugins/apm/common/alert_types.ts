@@ -24,7 +24,8 @@ export const ALERT_TYPES_CONFIG = {
         })
       }
     ],
-    defaultActionGroupId: 'threshold_met'
+    defaultActionGroupId: 'threshold_met',
+    producer: 'apm'
   },
   [AlertType.TransactionDuration]: {
     name: i18n.translate('xpack.apm.transactionDurationAlert.name', {
@@ -41,7 +42,8 @@ export const ALERT_TYPES_CONFIG = {
         )
       }
     ],
-    defaultActionGroupId: 'threshold_met'
+    defaultActionGroupId: 'threshold_met',
+    producer: 'apm'
   }
 };
 

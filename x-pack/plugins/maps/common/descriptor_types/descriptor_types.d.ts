@@ -132,6 +132,7 @@ export type LayerDescriptor = {
   __dataRequests?: DataRequestDescriptor[];
   __isInErrorState?: boolean;
   __errorMessage?: string;
+  __trackedLayerDescriptor?: LayerDescriptor;
   alpha?: number;
   id: string;
   label?: string | null;

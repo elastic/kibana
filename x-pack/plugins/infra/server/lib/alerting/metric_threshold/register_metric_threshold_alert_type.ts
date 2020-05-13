@@ -84,5 +84,6 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
         { name: 'reason', description: reasonActionVariableDescription },
       ],
     },
+    producer: 'metrics',
   };
 }

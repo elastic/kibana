@@ -14,7 +14,6 @@ import {
 } from '../../features/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { createDefaultSpace } from './lib/create_default_space';
 // @ts-ignore
 import { AuditLogger } from '../../../../server/lib/audit_logger';
 import { SpacesAuditLogger } from './lib/audit_logger';
@@ -29,6 +28,8 @@ import { initInternalSpacesApi } from './routes/api/internal';
 import { initSpacesViewsRoutes } from './routes/views';
 import { setupCapabilities } from './capabilities';
 import { SpacesSavedObjectsService } from './saved_objects';
+import { DefaultSpaceService } from './default_space';
+import { SpacesLicenseService } from '../common/licensing';
 
 /**
  * Describes a set of APIs that is available in the legacy platform only and required by this plugin
@@ -56,10 +57,6 @@ export interface SpacesPluginSetup {
   spacesService: SpacesServiceSetup;
   __legacyCompat: {
     registerLegacyAPI: (legacyAPI: LegacyAPI) => void;
-    // TODO: We currently need the legacy plugin to inform this plugin when it is safe to create the default space.
-    // The NP does not have the equivilent ES connection/health/comapt checks that the legacy world does.
-    // See: https://github.com/elastic/kibana/issues/43456
-    createDefaultSpace: () => Promise<void>;
   };
 }
 
@@ -71,6 +68,10 @@ export class Plugin {
   private readonly kibanaIndexConfig$: Observable<{ kibana: { index: string } }>;
 
   private readonly log: Logger;
+
+  private readonly spacesLicenseService = new SpacesLicenseService();
+
+  private defaultSpaceService?: DefaultSpaceService;
 
   private legacyAPI?: LegacyAPI;
   private readonly getLegacyAPI = () => {
@@ -115,8 +116,21 @@ export class Plugin {
     const savedObjectsService = new SpacesSavedObjectsService();
     savedObjectsService.setup({ core, spacesService });
 
+    const { license } = this.spacesLicenseService.setup({ license$: plugins.licensing.license$ });
+
+    this.defaultSpaceService = new DefaultSpaceService();
+    this.defaultSpaceService.setup({
+      coreStatus: core.status,
+      getSavedObjects: async () => (await core.getStartServices())[0].savedObjects,
+      license$: plugins.licensing.license$,
+      spacesLicense: license,
+      logger: this.log,
+    });
+
     initSpacesViewsRoutes({
       httpResources: core.http.resources,
+      basePath: core.http.basePath,
+      logger: this.log,
     });
 
     const externalRouter = core.http.createRouter();
@@ -167,15 +181,13 @@ export class Plugin {
         registerLegacyAPI: (legacyAPI: LegacyAPI) => {
           this.legacyAPI = legacyAPI;
         },
-        createDefaultSpace: async () => {
-          const [coreStart] = await core.getStartServices();
-          return await createDefaultSpace({
-            savedObjects: coreStart.savedObjects,
-          });
-        },
       },
     };
   }
 
-  public stop() {}
+  public stop() {
+    if (this.defaultSpaceService) {
+      this.defaultSpaceService.stop();
+    }
+  }
 }
