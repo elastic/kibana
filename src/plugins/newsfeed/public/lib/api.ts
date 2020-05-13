@@ -27,7 +27,7 @@ import {
   NEWSFEED_LAST_FETCH_STORAGE_KEY,
   NEWSFEED_HASH_SET_STORAGE_KEY,
 } from '../../common/constants';
-import { ApiItem, NewsfeedItem, FetchResult, NewsfeedPluginBrowserConfig } from '../../types';
+import { ApiItem, NewsfeedItem, FetchResult, NewsfeedPluginBrowserConfig } from '../types';
 
 type ApiConfig = NewsfeedPluginBrowserConfig['service'];
 
@@ -171,10 +171,10 @@ export function getApi(
   kibanaVersion: string
 ): Rx.Observable<void | FetchResult> {
   const userLanguage = i18n.getLocale();
-  const fetchInterval = config.fetchInterval;
+  const fetchInterval = config.fetchInterval.asMilliseconds();
   const driver = new NewsfeedApiDriver(kibanaVersion, userLanguage, fetchInterval);
 
-  return Rx.timer(0, config.mainInterval).pipe(
+  return Rx.timer(0, config.mainInterval.asMilliseconds()).pipe(
     filter(() => driver.shouldFetch()),
     mergeMap(() =>
       driver.fetchNewsfeedItems(http, config.service).pipe(

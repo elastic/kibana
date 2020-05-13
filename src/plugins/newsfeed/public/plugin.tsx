@@ -21,9 +21,10 @@ import * as Rx from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
 import ReactDOM from 'react-dom';
 import React from 'react';
+import moment from 'moment';
 import { I18nProvider } from '@kbn/i18n/react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { NewsfeedPluginBrowserConfig } from '../types';
+import { NewsfeedPluginBrowserConfig } from './types';
 import { NewsfeedNavButton, NewsfeedApiFetchResult } from './components/newsfeed_header_nav_button';
 import { getApi } from './lib/api';
 
@@ -36,8 +37,14 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
   private readonly stop$ = new Rx.ReplaySubject(1);
 
   constructor(initializerContext: PluginInitializerContext<NewsfeedPluginBrowserConfig>) {
-    this.config = initializerContext.config.get();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    const config = initializerContext.config.get();
+    this.config = Object.freeze({
+      ...config,
+      // We need wrap them in moment.duration because exposeToBrowser stringifies it.
+      mainInterval: moment.duration(config.mainInterval),
+      fetchInterval: moment.duration(config.fetchInterval),
+    });
   }
 
   public setup(core: CoreSetup): Setup {

@@ -26,7 +26,7 @@ import {
   NEWSFEED_HASH_SET_STORAGE_KEY,
   NEWSFEED_LAST_FETCH_STORAGE_KEY,
 } from '../../common/constants';
-import { ApiItem, NewsfeedItem, NewsfeedPluginBrowserConfig } from '../../types';
+import { ApiItem, NewsfeedItem, NewsfeedPluginBrowserConfig } from '../types';
 import { NewsfeedApiDriver, getApi } from './api';
 
 const localStorageGet = sinon.stub();
