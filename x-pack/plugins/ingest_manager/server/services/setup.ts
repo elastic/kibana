@@ -100,7 +100,7 @@ export async function setupIngestManager(
 export async function setupFleet(
   soClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser,
-  forceRecreate: boolean = false
+  options?: { forceRecreate?: boolean }
 ) {
   // Create fleet_enroll role
   // This should be done directly in ES at some point
@@ -118,7 +118,7 @@ export async function setupFleet(
     },
   });
   // If the role is already created skip the rest unless you have forceRecreate set to true
-  if (!forceRecreate && res.role.created === false) {
+  if (options?.forceRecreate !== true && res.role.created === false) {
     return;
   }
   const password = generateRandomPassword();

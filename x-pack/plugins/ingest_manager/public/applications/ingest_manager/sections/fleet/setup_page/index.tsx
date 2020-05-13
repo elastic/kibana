@@ -30,7 +30,7 @@ export const SetupPage: React.FunctionComponent<{
     e.preventDefault();
     setIsFormLoading(true);
     try {
-      await sendPostFleetSetup(true);
+      await sendPostFleetSetup({ forceRecreate: true });
       await refresh();
     } catch (error) {
       core.notifications.toasts.addDanger(error.message);

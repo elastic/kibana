@@ -22,12 +22,12 @@ export const sendGetFleetStatus = () => {
   });
 };
 
-export const sendPostFleetSetup = (forceRecreate: boolean = false) => {
+export const sendPostFleetSetup = ({ forceRecreate }: { forceRecreate: boolean }) => {
   return sendRequest({
     method: 'post',
     path: fleetSetupRouteService.postFleetSetupPath(),
     body: {
-      forceRecreate: true,
+      forceRecreate,
     },
   });
 };
