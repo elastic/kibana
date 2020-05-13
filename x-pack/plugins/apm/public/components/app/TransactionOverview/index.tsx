@@ -95,7 +95,7 @@ export function TransactionOverview() {
       }
     },
     [http, serviceName, transactionType],
-    { showErrorToast: false }
+    { showToastOnError: false }
   );
 
   const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(

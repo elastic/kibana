@@ -64,7 +64,7 @@ export function MachineLearningFlyoutView({
       }
     },
     [serviceName, selectedTransactionType, http],
-    { showErrorToast: false }
+    { showToastOnError: false }
   );
 
   // update selectedTransactionType when list of transaction types has loaded
