@@ -152,13 +152,7 @@ export const importTimelinesRoute = (
                         // create timeline / template timeline
                         newTimeline = await createTimelines(
                           frameworkRequest,
-                          {
-                            ...parsedTimelineObject,
-                            timelineType:
-                              parsedTimelineObject.timelineType === TimelineType.draft
-                                ? TimelineType.default
-                                : parsedTimelineObject.timelineType,
-                          },
+                          parsedTimelineObject,
                           null, // timelineSavedObjectId
                           null, // timelineVersion
                           pinnedEventIds,

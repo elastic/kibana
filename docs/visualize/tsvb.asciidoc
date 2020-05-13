@@ -122,3 +122,17 @@ Edit the source for the Markdown visualization.
 . To insert the mustache template variable into the editor, click the variable name.
 +
 The http://mustache.github.io/mustache.5.html[mustache syntax] uses the Handlebar.js processor, which is an extended version of the Mustache template language.
+
+[float]
+[[tsvb-style-markdown]]
+==== Style Markdown text
+
+Style your Markdown visualization using http://lesscss.org/features/[less syntax].
+
+. Select *Markdown*.
+
+. Select *Panel options*.
+
+. Enter styling rules in *Custom CSS* section
++
+Less in TSVB does not support custom plugins or inline JavaScript.

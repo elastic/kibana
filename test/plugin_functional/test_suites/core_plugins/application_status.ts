@@ -57,7 +57,8 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
     }, i)) as any;
   };
 
-  describe('application status management', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/65423
+  describe.skip('application status management', () => {
     beforeEach(async () => {
       await PageObjects.common.navigateToApp('app_status_start');
     });

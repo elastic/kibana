@@ -14,8 +14,6 @@ import _ from 'lodash';
 import d3 from 'd3';
 import moment from 'moment';
 
-// don't use something like plugins/ml/../common
-// because it won't work with the jest tests
 import { i18n } from '@kbn/i18n';
 import { Subscription } from 'rxjs';
 import { TooltipValue } from '@elastic/charts';
@@ -633,7 +631,7 @@ export class ExplorerSwimlane extends React.Component<ExplorerSwimlaneProps> {
       if (selectedCellTimes.length > 0) {
         this.highlightOverall(selectedCellTimes);
       }
-      this.maskIrrelevantSwimlanes(!!maskAll);
+      this.maskIrrelevantSwimlanes(Boolean(maskAll));
     } else {
       this.clearSelection();
     }

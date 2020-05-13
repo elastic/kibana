@@ -9,13 +9,12 @@ import { EuiAccordion, EuiNotificationBadge, EuiHealth } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { htmlIdGenerator } from '@elastic/eui';
 import {
-  HostPolicyResponseActions,
+  HostPolicyResponseAppliedAction,
   HostPolicyResponseConfiguration,
   Immutable,
-  ImmutableArray,
 } from '../../../../../../common/types';
 import { formatResponse } from './policy_response_friendly_names';
-import { POLICY_STATUS_TO_HEALTH_COLOR } from './host_constants';
+import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
 
 /**
  * Nested accordion in the policy response detailing any concerned
@@ -44,20 +43,31 @@ const PolicyResponseConfigAccordion = styled(EuiAccordion)`
   :hover:not(.euiAccordion-isOpen) {
     background-color: ${props => props.theme.eui.euiColorLightestShade};
   }
+
+  .policyResponseActionsAccordion {
+    svg {
+      height: ${props => props.theme.eui.euiIconSizes.small};
+      width: ${props => props.theme.eui.euiIconSizes.small};
+    }
+  }
+
+  .policyResponseStatusHealth {
+    width: 100px;
+  }
 `;
 
 const ResponseActions = memo(
   ({
     actions,
-    actionStatus,
+    responseActions,
   }: {
-    actions: ImmutableArray<keyof HostPolicyResponseActions>;
-    actionStatus: Partial<HostPolicyResponseActions>;
+    actions: Immutable<string[]>;
+    responseActions: Immutable<HostPolicyResponseAppliedAction[]>;
   }) => {
     return (
       <>
         {actions.map((action, index) => {
-          const statuses = actionStatus[action];
+          const statuses = responseActions.find(responseAction => responseAction.name === action);
           if (statuses === undefined) {
             return undefined;
           }
@@ -66,8 +76,13 @@ const ResponseActions = memo(
               id={action + index}
               key={action + index}
               data-test-subj="hostDetailsPolicyResponseActionsAccordion"
+              className="policyResponseActionsAccordion"
               buttonContent={
-                <EuiText size="xs" data-test-subj="policyResponseAction">
+                <EuiText
+                  size="xs"
+                  className="eui-textTruncate"
+                  data-test-subj="policyResponseAction"
+                >
                   <h4>{formatResponse(action)}</h4>
                 </EuiText>
               }
@@ -76,6 +91,7 @@ const ResponseActions = memo(
                 <EuiHealth
                   color={POLICY_STATUS_TO_HEALTH_COLOR[statuses.status]}
                   data-test-subj="policyResponseStatusHealth"
+                  className="policyResponseStatusHealth"
                 >
                   <EuiText size="xs">
                     <p>{formatResponse(statuses.status)}</p>
@@ -100,11 +116,11 @@ const ResponseActions = memo(
 export const PolicyResponse = memo(
   ({
     responseConfig,
-    responseActionStatus,
+    responseActions,
     responseAttentionCount,
   }: {
     responseConfig: Immutable<HostPolicyResponseConfiguration>;
-    responseActionStatus: Partial<HostPolicyResponseActions>;
+    responseActions: Immutable<HostPolicyResponseAppliedAction[]>;
     responseAttentionCount: Map<string, number>;
   }) => {
     return (
@@ -134,10 +150,7 @@ export const PolicyResponse = memo(
                 )
               }
             >
-              <ResponseActions
-                actions={val.concerned_actions}
-                actionStatus={responseActionStatus}
-              />
+              <ResponseActions actions={val.concerned_actions} responseActions={responseActions} />
             </PolicyResponseConfigAccordion>
           );
         })}

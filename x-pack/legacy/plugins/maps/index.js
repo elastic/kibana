@@ -4,19 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
-import mappings from './mappings.json';
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
-import { migrations } from './migrations';
 import { getAppTitle } from '../../../plugins/maps/common/i18n_getters';
 import { MapPlugin } from './server/plugin';
-import {
-  APP_ID,
-  APP_ICON,
-  createMapPath,
-  MAP_SAVED_OBJECT_TYPE,
-} from '../../../plugins/maps/common/constants';
+import { APP_ID, APP_ICON } from '../../../plugins/maps/common/constants';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 
 export function maps(kibana) {
@@ -39,49 +31,16 @@ export function maps(kibana) {
       },
       injectDefaultVars(server) {
         const serverConfig = server.config();
-        const mapConfig = serverConfig.get('map');
 
         return {
           showMapVisualizationTypes: serverConfig.get('xpack.maps.showMapVisualizationTypes'),
           showMapsInspectorAdapter: serverConfig.get('xpack.maps.showMapsInspectorAdapter'),
           enableVectorTiles: serverConfig.get('xpack.maps.enableVectorTiles'),
           preserveDrawingBuffer: serverConfig.get('xpack.maps.preserveDrawingBuffer'),
-          isEmsEnabled: mapConfig.includeElasticMapsService,
-          emsFontLibraryUrl: mapConfig.emsFontLibraryUrl,
-          emsTileLayerId: mapConfig.emsTileLayerId,
-          proxyElasticMapsServiceInMaps: mapConfig.proxyElasticMapsServiceInMaps,
-          emsFileApiUrl: mapConfig.emsFileApiUrl,
-          emsTileApiUrl: mapConfig.emsTileApiUrl,
-          emsLandingPageUrl: mapConfig.emsLandingPageUrl,
           kbnPkgVersion: serverConfig.get('pkg.version'),
-          regionmapLayers: _.get(mapConfig, 'regionmap.layers', []),
-          tilemap: _.get(mapConfig, 'tilemap', {}),
         };
       },
       styleSheetPaths: `${__dirname}/public/index.scss`,
-      savedObjectSchemas: {
-        'maps-telemetry': {
-          isNamespaceAgnostic: true,
-        },
-      },
-      savedObjectsManagement: {
-        [MAP_SAVED_OBJECT_TYPE]: {
-          icon: APP_ICON,
-          defaultSearchField: 'title',
-          isImportableAndExportable: true,
-          getTitle(obj) {
-            return obj.attributes.title;
-          },
-          getInAppUrl(obj) {
-            return {
-              path: createMapPath(obj.id),
-              uiCapabilitiesPath: 'maps.show',
-            };
-          },
-        },
-      },
-      mappings,
-      migrations,
     },
     config(Joi) {
       return Joi.object({
@@ -112,14 +71,12 @@ export function maps(kibana) {
         licensing: newPlatformPlugins.licensing,
         home: newPlatformPlugins.home,
         usageCollection: newPlatformPlugins.usageCollection,
+        mapsLegacy: newPlatformPlugins.mapsLegacy,
       };
 
       // legacy dependencies
       const __LEGACY = {
         config: server.config,
-        mapConfig() {
-          return server.config().get('map');
-        },
         route: server.route.bind(server),
         plugins: {
           elasticsearch: server.plugins.elasticsearch,
@@ -132,8 +89,8 @@ export function maps(kibana) {
         getInjectedUiAppVars: server.getInjectedUiAppVars,
       };
 
-      const mapPluginSetup = new MapPlugin().setup(coreSetup, pluginsSetup, __LEGACY);
-      server.expose('getMapConfig', mapPluginSetup.getMapConfig);
+      const mapPlugin = new MapPlugin();
+      mapPlugin.setup(coreSetup, pluginsSetup, __LEGACY);
     },
   });
 }

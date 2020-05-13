@@ -112,7 +112,6 @@ module.exports = {
       files: ['x-pack/plugins/lens/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
-        'react-hooks/rules-of-hooks': 'off',
       },
     },
     {
@@ -238,6 +237,7 @@ module.exports = {
                 ],
                 from: [
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
+                  '!(src|x-pack)/plugins/**/(public|server)/mocks/index.{js,ts}',
                   '!(src|x-pack)/plugins/**/(public|server)/(index|mocks).{js,ts,tsx}',
                 ],
                 allowSameFolder: true,

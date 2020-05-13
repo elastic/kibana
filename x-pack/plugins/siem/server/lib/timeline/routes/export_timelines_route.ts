@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { set as _set } from 'lodash/fp';
+
 import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
 import { IRouter } from '../../../../../../../src/core/server';
 import { ConfigType } from '../../../config';

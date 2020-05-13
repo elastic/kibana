@@ -66,6 +66,24 @@ const categoryOptions: Array<{
   },
 ];
 
+const categoryOptionsTreemap: Array<{
+  value: SharedLayerState['categoryDisplay'];
+  inputDisplay: string;
+}> = [
+  {
+    value: 'default',
+    inputDisplay: i18n.translate('xpack.lens.pieChart.showTreemapCategoriesLabel', {
+      defaultMessage: 'Show labels',
+    }),
+  },
+  {
+    value: 'hide',
+    inputDisplay: i18n.translate('xpack.lens.pieChart.categoriesInLegendLabel', {
+      defaultMessage: 'Hide labels',
+    }),
+  },
+];
+
 const legendOptions: Array<{
   value: SharedLayerState['legendDisplay'];
   label: string;
@@ -113,7 +131,7 @@ export function SettingsWidget(props: VisualizationLayerWidgetProps<PieVisualiza
         <EuiSuperSelect
           compressed
           valueOfSelected={layer.categoryDisplay}
-          options={categoryOptions}
+          options={state.shape === 'treemap' ? categoryOptionsTreemap : categoryOptions}
           onChange={option => {
             setState({
               ...state,

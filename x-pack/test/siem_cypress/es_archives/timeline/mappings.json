@@ -2413,9 +2413,6 @@
         },
         "siem-ui-timeline": {
           "properties": {
-            "timelineType": {
-              "type": "keyword"
-            },
             "columns": {
               "properties": {
                 "aggregatable": {

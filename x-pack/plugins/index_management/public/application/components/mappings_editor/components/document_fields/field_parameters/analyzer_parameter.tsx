@@ -25,6 +25,7 @@ interface Props {
   label?: string;
   config?: FieldConfig;
   allowsIndexDefaultOption?: boolean;
+  'data-test-subj'?: string;
 }
 
 const ANALYZER_OPTIONS = PARAMETERS_OPTIONS.analyzer!;
@@ -68,6 +69,7 @@ export const AnalyzerParameter = ({
   label,
   config,
   allowsIndexDefaultOption = true,
+  'data-test-subj': dataTestSubj,
 }: Props) => {
   const indexSettings = useIndexSettings();
   const customAnalyzers = getCustomAnalyzers(indexSettings);
@@ -131,6 +133,11 @@ export const AnalyzerParameter = ({
     !isDefaultValueInOptions && !isDefaultValueInSubOptions
   );
 
+  const [selectsDefaultValue, setSelectsDefaultValue] = useState({
+    main: mainValue,
+    sub: subValue,
+  });
+
   const fieldConfig = config ? config : getFieldConfig('analyzer');
   const fieldConfigWithLabel = label !== undefined ? { ...fieldConfig, label } : fieldConfig;
 
@@ -142,6 +149,7 @@ export const AnalyzerParameter = ({
     }
 
     field.reset({ resetValue: false });
+    setSelectsDefaultValue({ main: undefined, sub: undefined });
 
     setIsCustom(!isCustom);
   };
@@ -154,6 +162,7 @@ export const AnalyzerParameter = ({
             size="xs"
             onClick={toggleCustom(field)}
             className="mappingsEditor__selectWithCustom__button"
+            data-test-subj={`${dataTestSubj}-toggleCustomButton`}
           >
             {isCustom
               ? i18n.translate('xpack.idxMgmt.mappingsEditor.predefinedButtonLabel', {
@@ -169,17 +178,18 @@ export const AnalyzerParameter = ({
             // around the field.
             <EuiFlexGroup>
               <EuiFlexItem>
-                <TextField field={field} />
+                <TextField field={field} data-test-subj={`${dataTestSubj}-custom`} />
               </EuiFlexItem>
             </EuiFlexGroup>
           ) : (
             <AnalyzerParameterSelects
               onChange={field.setValue}
-              mainDefaultValue={mainValue}
-              subDefaultValue={subValue}
+              mainDefaultValue={selectsDefaultValue.main}
+              subDefaultValue={selectsDefaultValue.sub}
               config={fieldConfigWithLabel}
               options={fieldOptions}
               mapOptionsToSubOptions={mapOptionsToSubOptions}
+              data-test-subj={dataTestSubj}
             />
           )}
         </div>

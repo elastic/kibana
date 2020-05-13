@@ -128,12 +128,23 @@ describe('when on the hosts page', () => {
       const policyResponse = docGenerator.generatePolicyResponse();
       policyResponse.endpoint.policy.applied.status = overallStatus;
       policyResponse.endpoint.policy.applied.response.configurations.malware.status = overallStatus;
-      policyResponse.endpoint.policy.applied.actions.download_model!.status = overallStatus;
+      let downloadModelAction = policyResponse.endpoint.policy.applied.actions.find(
+        action => action.name === 'download_model'
+      );
+
+      if (!downloadModelAction) {
+        downloadModelAction = {
+          name: 'download_model',
+          message: 'Failed to apply a portion of the configuration (kernel)',
+          status: overallStatus,
+        };
+        policyResponse.endpoint.policy.applied.actions.push(downloadModelAction);
+      }
       if (
         overallStatus === HostPolicyResponseActionStatus.failure ||
         overallStatus === HostPolicyResponseActionStatus.warning
       ) {
-        policyResponse.endpoint.policy.applied.actions.download_model!.message = 'no action taken';
+        downloadModelAction.message = 'no action taken';
       }
       store.dispatch({
         type: 'serverReturnedHostPolicyResponse',
@@ -328,8 +339,20 @@ describe('when on the hosts page', () => {
         expect(statusHealth).not.toBeNull();
         expect(message).not.toBeNull();
       });
-      it('should not show any numbered badges if all actions are succesful', () => {
-        return renderResult.findByTestId('hostDetailsPolicyResponseAttentionBadge').catch(e => {
+      it('should not show any numbered badges if all actions are successful', () => {
+        const policyResponse = docGenerator.generatePolicyResponse(
+          new Date().getTime(),
+          HostPolicyResponseActionStatus.success
+        );
+        reactTestingLibrary.act(() => {
+          store.dispatch({
+            type: 'serverReturnedHostPolicyResponse',
+            payload: {
+              policy_response: policyResponse,
+            },
+          });
+        });
+        return renderResult.findAllByTestId('hostDetailsPolicyResponseAttentionBadge').catch(e => {
           expect(e).not.toBeNull();
         });
       });
@@ -337,14 +360,18 @@ describe('when on the hosts page', () => {
         reactTestingLibrary.act(() => {
           dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.failure);
         });
-        const attentionBadge = renderResult.findByTestId('hostDetailsPolicyResponseAttentionBadge');
+        const attentionBadge = renderResult.findAllByTestId(
+          'hostDetailsPolicyResponseAttentionBadge'
+        );
         expect(attentionBadge).not.toBeNull();
       });
       it('should show a numbered badge if at least one action has a warning', () => {
         reactTestingLibrary.act(() => {
           dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.warning);
         });
-        const attentionBadge = renderResult.findByTestId('hostDetailsPolicyResponseAttentionBadge');
+        const attentionBadge = renderResult.findAllByTestId(
+          'hostDetailsPolicyResponseAttentionBadge'
+        );
         expect(attentionBadge).not.toBeNull();
       });
       it('should include the back to details link', async () => {

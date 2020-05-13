@@ -182,6 +182,9 @@ export const ConnectorEditFlyout = ({
             errors={errors}
             actionTypeName={connector.actionType}
             dispatch={dispatch}
+            actionTypeRegistry={actionTypeRegistry}
+            http={http}
+            docLinks={docLinks}
           />
         ) : (
           <Fragment>
@@ -251,3 +254,6 @@ export const ConnectorEditFlyout = ({
     </EuiFlyout>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { ConnectorEditFlyout as default };

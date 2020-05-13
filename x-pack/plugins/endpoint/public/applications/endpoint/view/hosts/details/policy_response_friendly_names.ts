@@ -26,6 +26,18 @@ responseMap.set(
   })
 );
 responseMap.set(
+  'logging',
+  i18n.translate('xpack.endpoint.hostDetails.policyResponse.logging', {
+    defaultMessage: 'Logging',
+  })
+);
+responseMap.set(
+  'streaming',
+  i18n.translate('xpack.endpoint.hostDetails.policyResponse.streaming', {
+    defaultMessage: 'Streaming',
+  })
+);
+responseMap.set(
   'malware',
   i18n.translate('xpack.endpoint.hostDetails.policyResponse.malware', {
     defaultMessage: 'Malware',
@@ -159,8 +171,7 @@ responseMap.set(
 );
 
 /**
- * Takes in the snake-cased response from the API and
- * removes the underscores and capitalizes the string.
+ * Maps a server provided value to corresponding i18n'd string.
  */
 export function formatResponse(responseString: string) {
   if (responseMap.has(responseString)) {

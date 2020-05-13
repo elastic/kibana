@@ -51,6 +51,12 @@ export interface Presentable<Context extends object = object> {
   getDisplayName(context: Context): string;
 
   /**
+   * Returns tooltip text which should be displayed when user hovers this object.
+   * Should return empty string if tooltip should not be displayed.
+   */
+  getDisplayNameTooltip(context: Context): string;
+
+  /**
    * This method should return a link if this item can be clicked on. The link
    * is used to navigate user if user middle-clicks it or Ctrl + clicks or
    * right-clicks and selects "Open in new tab".

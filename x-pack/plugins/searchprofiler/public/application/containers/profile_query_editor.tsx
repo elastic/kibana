@@ -120,7 +120,12 @@ export const ProfileQueryEditor = memo(() => {
             <EuiSpacer size="s" />
           </EuiFlexItem>
           <EuiFlexItem grow={5}>
-            <EuiButton fill disabled={!licenseEnabled} onClick={() => handleProfileClick()}>
+            <EuiButton
+              data-test-subj="profileButton"
+              fill
+              disabled={!licenseEnabled}
+              onClick={() => handleProfileClick()}
+            >
               <EuiText>
                 {i18n.translate('xpack.searchProfiler.formProfileButtonLabel', {
                   defaultMessage: 'Profile',

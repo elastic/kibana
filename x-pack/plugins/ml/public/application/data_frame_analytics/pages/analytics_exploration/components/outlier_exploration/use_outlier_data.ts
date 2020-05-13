@@ -58,6 +58,10 @@ export const useOutlierData = (
     d => !d.includes(`.${FEATURE_INFLUENCE}.`) && d !== ML__ID_COPY
   );
 
+  useEffect(() => {
+    dataGrid.resetPagination();
+  }, [JSON.stringify(searchQuery)]);
+
   // initialize sorting: reverse sort on outlier score column
   useEffect(() => {
     if (jobConfig !== undefined) {

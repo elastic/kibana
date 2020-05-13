@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 
-export function validateJobObject(job: CombinedJob | null) {
+export function validateJobObject(job: CombinedJob | null | undefined): job is CombinedJob | never {
   if (job === null || typeof job !== 'object') {
     throw new Error(
       i18n.translate('xpack.ml.models.jobValidation.validateJobObject.jobIsNotObjectErrorMessage', {
@@ -93,4 +93,5 @@ export function validateJobObject(job: CombinedJob | null) {
       )
     );
   }
+  return true;
 }

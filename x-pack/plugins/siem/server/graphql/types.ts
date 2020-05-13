@@ -344,7 +344,6 @@ export enum TlsFields {
 
 export enum TimelineType {
   default = 'default',
-  draft = 'draft',
   template = 'template',
 }
 
