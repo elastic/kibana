@@ -11,6 +11,7 @@ import {
   ExceptionListSchema,
   ExceptionListSoSchema,
   FoundExceptionListItemSchema,
+  FoundExceptionListSchema,
 } from '../../../common/schemas';
 import {
   SavedObjectType,
@@ -211,6 +212,21 @@ export const transformSavedObjectsToFounExceptionListItem = ({
   return {
     data: savedObjectsFindResponse.saved_objects.map(savedObject =>
       transformSavedObjectToExceptionListItem({ savedObject })
+    ),
+    page: savedObjectsFindResponse.page,
+    per_page: savedObjectsFindResponse.per_page,
+    total: savedObjectsFindResponse.total,
+  };
+};
+
+export const transformSavedObjectsToFounExceptionList = ({
+  savedObjectsFindResponse,
+}: {
+  savedObjectsFindResponse: SavedObjectsFindResponse<ExceptionListSoSchema>;
+}): FoundExceptionListSchema => {
+  return {
+    data: savedObjectsFindResponse.saved_objects.map(savedObject =>
+      transformSavedObjectToExceptionList({ savedObject })
     ),
     page: savedObjectsFindResponse.page,
     per_page: savedObjectsFindResponse.per_page,

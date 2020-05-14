@@ -119,3 +119,12 @@ export interface FindExceptionListItemOptions {
   sortField: string | undefined;
   sortOrder: string | undefined;
 }
+
+export interface FindExceptionListOptions {
+  namespaceType: NamespaceType;
+  filter: string | undefined;
+  perPage: number | undefined;
+  page: number | undefined;
+  sortField: string | undefined;
+  sortOrder: string | undefined;
+}

@@ -6,7 +6,11 @@
 
 import { SavedObjectsClientContract } from 'kibana/server';
 
-import { ExceptionListSchema, FoundExceptionListItemSchema } from '../../../common/schemas';
+import {
+  ExceptionListSchema,
+  FoundExceptionListItemSchema,
+  FoundExceptionListSchema,
+} from '../../../common/schemas';
 
 import {
   ConstructorOptions,
@@ -15,6 +19,7 @@ import {
   DeleteExceptionListItemOptions,
   DeleteExceptionListOptions,
   FindExceptionListItemOptions,
+  FindExceptionListOptions,
   GetExceptionListItemOptions,
   GetExceptionListOptions,
   UpdateExceptionListItemOptions,
@@ -29,6 +34,7 @@ import { updateExceptionListItem } from './update_exception_list_item';
 import { deleteExceptionList } from './delete_exception_list';
 import { deleteExceptionListItem } from './delete_exception_list_item';
 import { findExceptionListItem } from './find_exception_list_item';
+import { findExceptionList } from './find_exception_list';
 
 export class ExceptionListClient {
   private readonly user: string;
@@ -213,6 +219,26 @@ export class ExceptionListClient {
     return findExceptionListItem({
       filter,
       listId,
+      namespaceType,
+      page,
+      perPage,
+      savedObjectsClient,
+      sortField,
+      sortOrder,
+    });
+  };
+
+  public findExceptionList = async ({
+    filter,
+    perPage,
+    page,
+    sortField,
+    sortOrder,
+    namespaceType,
+  }: FindExceptionListOptions): Promise<FoundExceptionListSchema> => {
+    const { savedObjectsClient } = this;
+    return findExceptionList({
+      filter,
       namespaceType,
       page,
       perPage,
