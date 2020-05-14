@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AddTooltipFieldPopover, FieldProps } from './add_tooltip_field_popover';
-import { IField } from '../../layers/fields/field';
+import { IField } from '../../classes/fields/field';
 
 // TODO import reorder from EUI once its exposed as service
 // https://github.com/elastic/eui/issues/2372

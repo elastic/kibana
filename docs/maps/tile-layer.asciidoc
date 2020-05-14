@@ -2,12 +2,12 @@
 [[tile-layer]]
 == Tile layer
 
-The tile layer displays image tiles served from a tile server.
+Tile layers display image tiles served from a tile server.
 
 [role="screenshot"]
 image::maps/images/tile_layer.png[]
 
-You can create a tile layer from the following data sources:
+To add a tile layer to your map, click *Add layer*, then select one of the following layers:
 
 *Configured Tile Map Service*:: Tile map service configured in kibana.yml.
 See map.tilemap.url in <<settings>> for details.

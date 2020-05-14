@@ -55,7 +55,7 @@ export function buildSavedObject(
   savedObject.defaults = config.defaults || {};
   // optional search source which this object configures
   savedObject.searchSource = config.searchSource
-    ? services.search.searchSource.create()
+    ? services.search.searchSource.createEmpty()
     : undefined;
   // the id of the document
   savedObject.id = config.id || void 0;
