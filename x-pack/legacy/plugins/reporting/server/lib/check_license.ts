@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Rx from 'rxjs';
 import { ILicense } from '../../../../../plugins/licensing/server';
 import { LicenseCheckResult } from '../types';
 import { ExportTypesRegistry, ExportTypeDefinition } from '../../types';
@@ -23,7 +22,7 @@ const makeManagementFeature = (
 ) => {
   return {
     id: 'management',
-    checkLicense: (license: ILicense) => {
+    checkLicense: (license: ILicense | undefined) => {
       if (!license || !license.type) {
         return {
           showLinks: true,
@@ -58,7 +57,7 @@ const makeExportTypeFeature = (
 ) => {
   return {
     id: exportType.id,
-    checkLicense: (license: ILicense | null) => {
+    checkLicense: (license: ILicense | undefined) => {
       if (!license || !license.type) {
         return {
           showLinks: true,
@@ -91,21 +90,18 @@ const makeExportTypeFeature = (
   };
 };
 
-export function checkLicenseFactory(
+export function checkLicense(
   exportTypesRegistry: ExportTypesRegistry,
-  $license: Rx.Observable<ILicense>
+  license: ILicense | undefined
 ) {
-  return async function checkLicense() {
-    const license = await $license.toPromise();
-    const exportTypes = Array.from(exportTypesRegistry.getAll());
-    const reportingFeatures = [
-      ...exportTypes.map(makeExportTypeFeature),
-      makeManagementFeature(exportTypes),
-    ];
+  const exportTypes = Array.from(exportTypesRegistry.getAll());
+  const reportingFeatures = [
+    ...exportTypes.map(makeExportTypeFeature),
+    makeManagementFeature(exportTypes),
+  ];
 
-    return reportingFeatures.reduce((result, feature) => {
-      result[feature.id] = feature.checkLicense(license);
-      return result;
-    }, {} as Record<string, LicenseCheckResult>);
-  };
+  return reportingFeatures.reduce((result, feature) => {
+    result[feature.id] = feature.checkLicense(license);
+    return result;
+  }, {} as Record<string, LicenseCheckResult>);
 }

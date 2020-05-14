@@ -42,7 +42,7 @@ export async function registerJobInfoRoutes(
       const request = makeRequestFacade(context, req, basePath);
       const {
         management: { jobTypes = [] },
-      } = await reporting.getLicenseInfo();
+      } = reporting.getLicenseInfo();
       const { username } = getUser(request.getRawRequest());
       const { page: queryPage, size: querySize, ids: queryIds } = request.query as ListQuery;
       const page = parseInt(queryPage, 10) || 0;
@@ -70,14 +70,14 @@ export async function registerJobInfoRoutes(
       const { username } = getUser(request.getRawRequest());
       const {
         management: { jobTypes = [] },
-      } = await reporting.getLicenseInfo();
+      } = reporting.getLicenseInfo();
 
-      const results = await jobsQuery.count(jobTypes, username);
+      const count = await jobsQuery.count(jobTypes, username);
 
       return res.ok({
-        body: { count: results },
+        body: count,
         headers: {
-          'content-type': 'application/json',
+          'content-type': 'text/plain',
         },
       });
     })
@@ -99,7 +99,7 @@ export async function registerJobInfoRoutes(
       const { docId } = req.params;
       const {
         management: { jobTypes = [] },
-      } = await reporting.getLicenseInfo();
+      } = reporting.getLicenseInfo();
 
       const result = await jobsQuery.get(username, docId, { includeContent: true });
 
@@ -140,7 +140,7 @@ export async function registerJobInfoRoutes(
       const { docId } = req.params;
       const {
         management: { jobTypes = [] },
-      } = await reporting.getLicenseInfo();
+      } = reporting.getLicenseInfo();
 
       const result = await jobsQuery.get(username, docId);
 
@@ -192,7 +192,7 @@ export async function registerJobInfoRoutes(
       const { docId } = req.params;
       const {
         management: { jobTypes = [] },
-      } = await reporting.getLicenseInfo();
+      } = reporting.getLicenseInfo();
 
       const response = await downloadResponseHandler(jobTypes, username, { docId });
 
@@ -222,7 +222,7 @@ export async function registerJobInfoRoutes(
       const { docId } = req.params;
       const {
         management: { jobTypes = [] },
-      } = await reporting.getLicenseInfo();
+      } = reporting.getLicenseInfo();
 
       const response = await deleteResponseHandler(jobTypes, username, { docId });
 

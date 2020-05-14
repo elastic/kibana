@@ -37,7 +37,7 @@ export function registerJobGenerationRoutes(
     r: RequestFacade,
     h: typeof kibanaResponseFactory
   ) {
-    const licenseInfo = await reporting.getLicenseInfo();
+    const licenseInfo = reporting.getLicenseInfo();
     const licenseResults = licenseInfo[exportTypeId];
 
     if (!licenseResults.enableLinks) {

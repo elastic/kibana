@@ -33,11 +33,15 @@ export function registerGenerateFromJobParams(
         params: schema.object({
           exportType: schema.string({ minLength: 2 }),
         }),
-        body: schema.object({
-          jobParams: schema.string(),
-        }),
+        body: schema.maybe(
+          schema.object({
+            jobParams: schema.maybe(schema.string()),
+          })
+        ),
         query: schema.object({
-          jobParams: schema.string(),
+          jobParams: schema.string({
+            defaultValue: '',
+          }),
         }),
       },
     },

@@ -23,7 +23,7 @@ import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import { EnqueueJobFn, ESQueueInstance, ReportingPluginSpecOptions, ServerFacade } from '../types';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
 import { ReportingConfig, ReportingConfigType } from './config';
-import { LevelLogger, getExportTypesRegistry, checkLicenseFactory } from './lib';
+import { LevelLogger, getExportTypesRegistry, checkLicense } from './lib';
 import { registerRoutes } from './routes';
 import { ReportingSetupDeps } from './types';
 import {
@@ -48,6 +48,7 @@ export { ReportingConfig, ReportingConfigType };
 
 export class ReportingCore {
   pluginSetupDeps?: ReportingInternalSetup;
+  private license?: ILicense;
   private pluginStartDeps?: ReportingInternalStart;
   private readonly pluginSetup$ = new Rx.ReplaySubject<ReportingInternalSetup>();
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>();
@@ -70,6 +71,7 @@ export class ReportingCore {
 
   public pluginSetup(reportingSetupDeps: ReportingInternalSetup) {
     this.pluginSetup$.next(reportingSetupDeps);
+    reportingSetupDeps.license$.subscribe(license => (this.license = license));
   }
 
   public pluginStart(reportingStartDeps: ReportingInternalStart) {
@@ -95,20 +97,12 @@ export class ReportingCore {
     return (await this.getPluginStartDeps()).enqueueJob;
   }
 
-  public async getLicenseInfo() {
-    const exportTypeRegistry = this.getExportTypesRegistry();
-    const $license = await this.getLicenseObservable();
-    const getLicenseInfo = await checkLicenseFactory(exportTypeRegistry, $license);
-
-    return getLicenseInfo();
+  public getLicenseInfo() {
+    return checkLicense(this.getExportTypesRegistry(), this.license);
   }
 
   public getConfig(): ReportingConfig {
     return this.config;
-  }
-
-  public async getLicenseObservable(): Promise<Rx.Observable<ILicense>> {
-    return (await this.getPluginSetupDeps()).license$;
   }
 
   public async getScreenshotsObservable(): Promise<ScreenshotsObservableFn> {

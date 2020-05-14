@@ -12,6 +12,7 @@ import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject
 import { JobDocPayloadPanelCsv } from '../../export_types/csv_from_savedobject/types';
 import { JobDocOutput, Logger } from '../../types';
 import { ReportingCore, ReportingSetupDeps } from '../types';
+import { isoStringValidate } from '../lib/iso_string_validate';
 import { makeRequestFacade } from './lib/make_request_facade';
 
 /*
@@ -44,11 +45,15 @@ export function registerGenerateCsvFromSavedObjectImmediate(
           savedObjectId: schema.string({ minLength: 5 }),
         }),
         body: schema.object({
-          state: schema.object({}),
+          state: schema.object({}, { unknowns: 'allow' }),
           timerange: schema.object({
             timezone: schema.string({ defaultValue: 'UTC' }),
-            min: schema.duration(),
-            max: schema.duration(),
+            min: schema.string({
+              validate: isoStringValidate,
+            }),
+            max: schema.string({
+              validate: isoStringValidate,
+            }),
           }),
         }),
       },

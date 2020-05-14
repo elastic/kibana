@@ -11,6 +11,7 @@ import { API_BASE_GENERATE_V1, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../commo
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
 import { Logger } from '../../types';
 import { ReportingCore, ReportingSetupDeps } from '../types';
+import { isoStringValidate } from '../lib/iso_string_validate';
 import { makeRequestFacade } from './lib/make_request_facade';
 import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types';
 
@@ -44,8 +45,12 @@ export function registerGenerateCsvFromSavedObject(
           state: schema.object({}),
           timerange: schema.object({
             timezone: schema.string({ defaultValue: 'UTC' }),
-            min: schema.duration(),
-            max: schema.duration(),
+            min: schema.string({
+              validate: isoStringValidate,
+            }),
+            max: schema.string({
+              validate: isoStringValidate,
+            }),
           }),
         }),
       },
