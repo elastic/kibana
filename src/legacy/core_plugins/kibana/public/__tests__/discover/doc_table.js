@@ -24,6 +24,8 @@ import 'ui/private';
 import { pluginInstance } from './legacy';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import hits from 'fixtures/real_hits';
+import { setScopedHistory } from '../../../../../../plugins/discover/public/kibana_services';
+import { createBrowserHistory } from 'history';
 
 let $parentScope;
 
@@ -58,6 +60,7 @@ const destroy = function() {
 describe('docTable', function() {
   let $elem;
 
+  before(() => setScopedHistory(createBrowserHistory()));
   beforeEach(() => pluginInstance.initializeInnerAngular());
   beforeEach(() => pluginInstance.initializeServices());
   beforeEach(ngMock.module('app/discover'));

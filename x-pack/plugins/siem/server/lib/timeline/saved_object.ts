@@ -25,6 +25,7 @@ import * as pinnedEvent from '../pinned_event/saved_object';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { pickSavedTimeline } from './pick_saved_timeline';
 import { timelineSavedObjectType } from './saved_object_mappings';
+import { draftTimelineDefaults } from './default_timeline';
 
 interface ResponseTimelines {
   timeline: TimelineSavedObject[];
@@ -103,7 +104,7 @@ const getTimelineTypeFilter = (timelineType: string | null) => {
     : /** Show me every timeline whose timelineType is not "template".
        * which includes timelineType === 'default' and
        * those timelineType doesn't exists */
-      `not siem-ui-timeline.attributes.timelineType: ${TimelineType.template}`;
+      `not siem-ui-timeline.attributes.timelineType: ${TimelineType.template} and not siem-ui-timeline.attributes.timelineType: ${TimelineType.draft}`;
 };
 
 export const getAllTimeline = async (
@@ -125,6 +126,17 @@ export const getAllTimeline = async (
     filter: getTimelineTypeFilter(timelineType),
     sortField: sort != null ? sort.sortField : undefined,
     sortOrder: sort != null ? sort.sortOrder : undefined,
+  };
+  return getAllSavedTimeline(request, options);
+};
+
+export const getDraftTimeline = async (request: FrameworkRequest): Promise<ResponseTimelines> => {
+  const options: SavedObjectsFindOptions = {
+    type: timelineSavedObjectType,
+    perPage: 1,
+    filter: `siem-ui-timeline.attributes.timelineType: ${TimelineType.draft}`,
+    sortField: 'created',
+    sortOrder: 'desc',
   };
   return getAllSavedTimeline(request, options);
 };
@@ -255,6 +267,54 @@ export const persistTimeline = async (
     }
     throw err;
   }
+};
+
+const updatePartialSavedTimeline = async (
+  request: FrameworkRequest,
+  timelineId: string,
+  timeline: SavedTimeline
+) => {
+  const savedObjectsClient = request.context.core.savedObjects.client;
+  const currentSavedTimeline = await savedObjectsClient.get<SavedTimeline>(
+    timelineSavedObjectType,
+    timelineId
+  );
+
+  return savedObjectsClient.update(
+    timelineSavedObjectType,
+    timelineId,
+    pickSavedTimeline(
+      null,
+      {
+        ...timeline,
+        dateRange: currentSavedTimeline.attributes.dateRange,
+      },
+      request.user
+    )
+  );
+};
+
+export const resetTimeline = async (request: FrameworkRequest, timelineIds: string[]) => {
+  if (!timelineIds.length) {
+    return Promise.reject(new Error('timelineIds is empty'));
+  }
+
+  await Promise.all(
+    timelineIds.map(timelineId =>
+      Promise.all([
+        note.deleteNoteByTimelineId(request, timelineId),
+        pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
+      ])
+    )
+  );
+
+  const response = await Promise.all(
+    timelineIds.map(timelineId =>
+      updatePartialSavedTimeline(request, timelineId, draftTimelineDefaults)
+    )
+  );
+
+  return response;
 };
 
 export const deleteTimeline = async (request: FrameworkRequest, timelineIds: string[]) => {
