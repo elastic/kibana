@@ -50,7 +50,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
   public async setup(
     core: CoreSetup,
     plugins: {
-      apm_oss: APMOSSPluginSetup;
+      apmOss: APMOSSPluginSetup;
       home: HomeServerPluginSetup;
       licensing: LicensingPluginSetup;
       cloud?: CloudSetup;
@@ -65,7 +65,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
   ) {
     this.logger = this.initContext.logger.get();
     const config$ = this.initContext.config.create<APMXPackConfig>();
-    const mergedConfig$ = combineLatest(plugins.apm_oss.config$, config$).pipe(
+    const mergedConfig$ = combineLatest(plugins.apmOss.config$, config$).pipe(
       map(([apmOssConfig, apmConfig]) => mergeConfigs(apmOssConfig, apmConfig))
     );
 
