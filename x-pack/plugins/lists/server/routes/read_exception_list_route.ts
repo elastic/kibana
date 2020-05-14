@@ -15,7 +15,7 @@ import {
 } from '../siem_server_deps';
 import { exceptionListSchema, readExceptionListSchema } from '../../common/schemas';
 
-import { getExceptionListClient } from './utils';
+import { getErrorMessageExceptionList, getExceptionListClient } from './utils';
 
 export const readExceptionListRoute = (router: IRouter): void => {
   router.get(
@@ -42,7 +42,7 @@ export const readExceptionListRoute = (router: IRouter): void => {
           });
           if (list == null) {
             return siemResponse.error({
-              body: getErrorMessage({ id, listId }),
+              body: getErrorMessageExceptionList({ id, listId }),
               statusCode: 404,
             });
           } else {
@@ -65,20 +65,4 @@ export const readExceptionListRoute = (router: IRouter): void => {
       }
     }
   );
-};
-
-const getErrorMessage = ({
-  id,
-  listId,
-}: {
-  id: string | undefined;
-  listId: string | undefined;
-}): string => {
-  if (id != null) {
-    return `Exception list id: "${id}" does not exist`;
-  } else if (listId != null) {
-    return `Exception list list_id: "${listId}" does not exist`;
-  } else {
-    return 'Exception list does not exist';
-  }
 };

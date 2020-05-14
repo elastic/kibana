@@ -8,6 +8,7 @@ export * from './create_exception_list_item_schema';
 export * from './create_exception_list_schema';
 export * from './create_list_item_schema';
 export * from './create_list_schema';
+export * from './delete_exception_list_schema';
 export * from './delete_list_item_schema';
 export * from './delete_list_schema';
 export * from './export_list_item_query_schema';

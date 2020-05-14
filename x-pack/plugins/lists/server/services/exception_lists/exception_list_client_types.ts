@@ -64,6 +64,12 @@ export interface UpdateExceptionListOptions {
   type: ExceptionListTypeOrUndefined;
 }
 
+export interface DeleteExceptionListOptions {
+  id: IdOrUndefined;
+  listId: ListIdOrUndefined;
+  namespaceType: NamespaceType;
+}
+
 export interface GetExceptionListItemOptions {
   itemId: ItemIdOrUndefined;
   id: IdOrUndefined;

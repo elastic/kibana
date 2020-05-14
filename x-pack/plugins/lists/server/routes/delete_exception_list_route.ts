@@ -6,55 +6,53 @@
 
 import { IRouter } from 'kibana/server';
 
-import { EXCEPTION_LIST_ITEM_URL } from '../../common/constants';
+import { EXCEPTION_LIST_URL } from '../../common/constants';
 import {
   buildRouteValidation,
   buildSiemResponse,
   transformError,
   validate,
 } from '../siem_server_deps';
-import { exceptionListItemSchema, readExceptionListItemSchema } from '../../common/schemas';
+import { deleteExceptionListSchema, exceptionListSchema } from '../../common/schemas';
 
-import { getErrorMessageExceptionListItem, getExceptionListClient } from './utils';
+import { getErrorMessageExceptionList, getExceptionListClient } from './utils';
 
-export const readExceptionListItemRoute = (router: IRouter): void => {
-  router.get(
+export const deleteExceptionListRoute = (router: IRouter): void => {
+  router.delete(
     {
       options: {
         tags: ['access:lists'],
       },
-      path: EXCEPTION_LIST_ITEM_URL,
+      path: EXCEPTION_LIST_URL,
       validate: {
-        query: buildRouteValidation(readExceptionListItemSchema),
+        query: buildRouteValidation(deleteExceptionListSchema),
       },
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const { id, item_id: itemId } = request.query;
-        const exceptionLists = getExceptionListClient(context);
-        if (id != null || itemId != null) {
-          const list = await exceptionLists.getExceptionListItem({
-            id,
-            itemId,
-            // TODO: Bubble this up
-            namespaceType: 'single',
+        const lists = getExceptionListClient(context);
+        const { list_id: listId, id } = request.query;
+        if (listId == null && id == null) {
+          return siemResponse.error({
+            body: 'Either "list_id" or "id" needs to be defined in the request',
+            statusCode: 400,
           });
-          if (list == null) {
+        } else {
+          const deleted = await lists.deleteExceptionList({ id, listId, namespaceType: 'single' });
+          if (deleted == null) {
             return siemResponse.error({
-              body: getErrorMessageExceptionListItem({ id, itemId }),
+              body: getErrorMessageExceptionList({ id, listId }),
               statusCode: 404,
             });
           } else {
-            const [validated, errors] = validate(list, exceptionListItemSchema);
+            const [validated, errors] = validate(deleted, exceptionListSchema);
             if (errors != null) {
               return siemResponse.error({ body: errors, statusCode: 500 });
             } else {
               return response.ok({ body: validated ?? {} });
             }
           }
-        } else {
-          return siemResponse.error({ body: 'id or item_id required', statusCode: 400 });
         }
       } catch (err) {
         const error = transformError(err);

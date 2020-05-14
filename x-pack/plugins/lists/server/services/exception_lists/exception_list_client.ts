@@ -12,6 +12,7 @@ import {
   ConstructorOptions,
   CreateExceptionListItemOptions,
   CreateExceptionListOptions,
+  DeleteExceptionListOptions,
   GetExceptionListItemOptions,
   GetExceptionListOptions,
   UpdateExceptionListItemOptions,
@@ -23,6 +24,7 @@ import { getExceptionListItem } from './get_exception_list_item';
 import { createExceptionListItem } from './create_exception_list_item';
 import { updateExceptionList } from './update_exception_list';
 import { updateExceptionListItem } from './update_exception_list_item';
+import { deleteExceptionList } from './delete_exception_list';
 
 export class ExceptionListClient {
   private readonly user: string;
@@ -101,6 +103,20 @@ export class ExceptionListClient {
       tags,
       type,
       user,
+    });
+  };
+
+  public deleteExceptionList = async ({
+    id,
+    listId,
+    namespaceType,
+  }: DeleteExceptionListOptions): Promise<ExceptionListSchema | null> => {
+    const { savedObjectsClient } = this;
+    return deleteExceptionList({
+      id,
+      listId,
+      namespaceType,
+      savedObjectsClient,
     });
   };
 
