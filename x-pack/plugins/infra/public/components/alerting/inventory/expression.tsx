@@ -178,6 +178,31 @@ export const Expressions: React.FC<Props> = props => {
     [onFilterChange]
   );
 
+  const preFillAlertCriteria = useCallback(() => {
+    const md = alertsContext.metadata;
+    if (md && md.options) {
+      setAlertParams('criteria', [
+        {
+          ...defaultExpression,
+          metric: md.options.metric!.type,
+        } as InventoryMetricConditions,
+      ]);
+    } else {
+      setAlertParams('criteria', [defaultExpression]);
+    }
+  }, [alertsContext.metadata, setAlertParams]);
+
+  const preFillAlertFilter = useCallback(() => {
+    const md = alertsContext.metadata;
+    if (md && md.filter) {
+      setAlertParams('filterQueryText', md.filter);
+      setAlertParams(
+        'filterQuery',
+        convertKueryToElasticSearchQuery(md.filter, derivedIndexPattern) || ''
+      );
+    }
+  }, [alertsContext.metadata, derivedIndexPattern, setAlertParams]);
+
   useEffect(() => {
     const md = alertsContext.metadata;
     if (!alertParams.nodeType) {
@@ -188,31 +213,19 @@ export const Expressions: React.FC<Props> = props => {
       }
     }
 
-    if (!alertParams.criteria) {
-      if (md && md.options) {
-        setAlertParams('criteria', [
-          {
-            ...defaultExpression,
-            metric: md.options.metric!.type,
-          } as InventoryMetricConditions,
-        ]);
-      } else {
-        setAlertParams('criteria', [defaultExpression]);
-      }
+    if (alertParams.criteria && alertParams.criteria.length) {
+      setTimeSize(alertParams.criteria[0].timeSize);
+      setTimeUnit(alertParams.criteria[0].timeUnit);
+    } else {
+      preFillAlertCriteria();
     }
 
     if (!alertParams.filterQuery) {
-      if (md && md.filter) {
-        setAlertParams('filterQueryText', md.filter);
-        setAlertParams(
-          'filterQuery',
-          convertKueryToElasticSearchQuery(md.filter, derivedIndexPattern) || ''
-        );
-      }
+      preFillAlertFilter();
     }
 
     if (!alertParams.sourceId) {
-      setAlertParams('sourceId', source?.id);
+      setAlertParams('sourceId', source?.id || 'default');
     }
   }, [alertsContext.metadata, derivedIndexPattern, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -228,11 +241,13 @@ export const Expressions: React.FC<Props> = props => {
         </h4>
       </EuiText>
       <StyledExpression>
-        <NodeTypeExpression
-          options={nodeTypes}
-          value={alertParams.nodeType || 'host'}
-          onChange={updateNodeType}
-        />
+        <StyledExpressionRow>
+          <NodeTypeExpression
+            options={nodeTypes}
+            value={alertParams.nodeType || 'host'}
+            onChange={updateNodeType}
+          />
+        </StyledExpressionRow>
       </StyledExpression>
       <EuiSpacer size={'xs'} />
       {alertParams.criteria &&
@@ -418,11 +433,13 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
               />
             </StyledExpression>
             {metric && (
-              <StyledExpression>
-                <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-                  <div>{metricUnit[metric]?.label || ''}</div>
-                </div>
-              </StyledExpression>
+              <div
+                style={{
+                  alignSelf: 'center',
+                }}
+              >
+                <EuiText size={'s'}>{metricUnit[metric]?.label || ''}</EuiText>
+              </div>
             )}
           </StyledExpressionRow>
         </EuiFlexItem>
@@ -495,4 +512,5 @@ const metricUnit: Record<string, { label: string }> = {
   s3UploadBytes: { label: 'bytes' },
   s3DownloadBytes: { label: 'bytes' },
   sqsOldestMessage: { label: 'seconds' },
+  rdsLatency: { label: 'ms' },
 };
