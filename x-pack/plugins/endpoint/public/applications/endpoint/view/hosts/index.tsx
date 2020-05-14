@@ -5,7 +5,14 @@
  */
 
 import React, { useMemo, useCallback, memo } from 'react';
-import { EuiHorizontalRule, EuiBasicTable, EuiText, EuiLink, EuiHealth } from '@elastic/eui';
+import {
+  EuiHorizontalRule,
+  EuiBasicTable,
+  EuiText,
+  EuiLink,
+  EuiHealth,
+  EuiToolTip,
+} from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -16,19 +23,10 @@ import * as selectors from '../../store/hosts/selectors';
 import { useHostSelector } from './hooks';
 import { CreateStructuredSelector } from '../../types';
 import { urlFromQueryParams } from './url_from_query_params';
-import { HostInfo, HostStatus, Immutable } from '../../../../../common/types';
+import { HostInfo, Immutable } from '../../../../../common/types';
 import { PageView } from '../components/page_view';
 import { useNavigateByRouterEventHandler } from '../hooks/use_navigate_by_router_event_handler';
-
-const HOST_STATUS_TO_HEALTH_COLOR = Object.freeze<
-  {
-    [key in HostStatus]: string;
-  }
->({
-  [HostStatus.ERROR]: 'danger',
-  [HostStatus.ONLINE]: 'success',
-  [HostStatus.OFFLINE]: 'subdued',
-});
+import { HOST_STATUS_TO_HEALTH_COLOR } from './host_constants';
 
 const HostLink = memo<{
   name: string;
@@ -39,7 +37,12 @@ const HostLink = memo<{
 
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink data-test-subj="hostnameCellLink" href={href} onClick={clickHandler}>
+    <EuiLink
+      data-test-subj="hostnameCellLink"
+      className="eui-textTruncate"
+      href={href}
+      onClick={clickHandler}
+    >
       {name}
     </EuiLink>
   );
@@ -107,6 +110,7 @@ export const HostList = () => {
             <EuiHealth
               color={HOST_STATUS_TO_HEALTH_COLOR[hostStatus]}
               data-test-subj="rowHostStatus"
+              className="eui-textTruncate"
             >
               <FormattedMessage
                 id="xpack.endpoint.host.list.hostStatusValue"
@@ -124,7 +128,7 @@ export const HostList = () => {
         }),
         truncateText: true,
         render: () => {
-          return 'Policy Name';
+          return <span className="eui-textTruncate">Policy Name</span>;
         },
       },
       {
@@ -133,7 +137,14 @@ export const HostList = () => {
           defaultMessage: 'Policy Status',
         }),
         render: () => {
-          return <EuiHealth color="success">Policy Status</EuiHealth>;
+          return (
+            <EuiHealth color="success" className="eui-textTruncate">
+              <FormattedMessage
+                id="xpack.endpoint.host.list.policyStatus"
+                defaultMessage="Policy Status"
+              />
+            </EuiHealth>
+          );
         },
       },
       {
@@ -151,13 +162,24 @@ export const HostList = () => {
         name: i18n.translate('xpack.endpoint.host.list.os', {
           defaultMessage: 'Operating System',
         }),
+        truncateText: true,
       },
       {
         field: 'metadata.host.ip',
         name: i18n.translate('xpack.endpoint.host.list.ip', {
           defaultMessage: 'IP Address',
         }),
-        truncateText: true,
+        render: (ip: string[]) => {
+          return (
+            <EuiToolTip content={ip.toString().replace(',', ', ')} anchorClassName="eui-fullWidth">
+              <EuiText size="s" className="eui-fullWidth">
+                <span className="eui-textTruncate eui-fullWidth">
+                  {ip.toString().replace(',', ', ')}
+                </span>
+              </EuiText>
+            </EuiToolTip>
+          );
+        },
       },
       {
         field: 'metadata.agent.version',
