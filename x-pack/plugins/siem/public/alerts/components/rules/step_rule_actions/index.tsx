@@ -17,7 +17,11 @@ import {
 import { StepRuleDescription } from '../description_step';
 import { Form, UseField, useForm } from '../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
-import { ThrottleSelectField, THROTTLE_OPTIONS } from '../throttle_select_field';
+import {
+  ThrottleSelectField,
+  THROTTLE_OPTIONS,
+  DEFAULT_THROTTLE_OPTION,
+} from '../throttle_select_field';
 import { RuleActionsField } from '../rule_actions_field';
 import { useKibana } from '../../../../common/lib/kibana';
 import { schema } from './schema';
@@ -33,7 +37,7 @@ const stepActionsDefaultValue = {
   isNew: true,
   actions: [],
   kibanaSiemAppUrl: '',
-  throttle: THROTTLE_OPTIONS[0].value,
+  throttle: DEFAULT_THROTTLE_OPTION.value,
 };
 
 const GhostFormField = () => <></>;
@@ -116,7 +120,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
 
   return isReadOnlyView && myStepData != null ? (
     <StepContentWrapper addPadding={addPadding}>
-      <StepRuleDescription schema={schema} data={myStepData} />
+      <StepRuleDescription schema={schema} data={myStepData} columns="single" />
     </StepContentWrapper>
   ) : (
     <>
