@@ -67,6 +67,10 @@ async function delayedFetch(
   fetchHandlers: FetchHandlers,
   ms: number
 ) {
+  if (ms === 0) {
+    return callClient([request], [options], fetchHandlers)[0];
+  }
+
   const i = requestsToFetch.length;
   requestsToFetch = [...requestsToFetch, request];
   requestOptions = [...requestOptions, options];

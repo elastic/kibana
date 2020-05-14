@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent, act, wait } from '@testing-library/react';
+import { render, fireEvent, act } from '@testing-library/react';
 import { TransactionActionMenu } from '../TransactionActionMenu';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import * as Transactions from './mockData';
@@ -143,13 +143,26 @@ describe('TransactionActionMenu component', () => {
   });
 
   describe('Custom links', () => {
-    let callApmApiSpy: jasmine.Spy;
     beforeAll(() => {
-      callApmApiSpy = spyOn(apmApi, 'callApmApi').and.returnValue({});
+      // Mocks callApmAPI because it's going to be used to fecth the transaction in the custom links flyout.
+      spyOn(apmApi, 'callApmApi').and.returnValue({});
     });
     afterAll(() => {
       jest.resetAllMocks();
     });
+    function renderTransactionActionMenuWithLicense(license: License) {
+      return render(
+        <LicenseContext.Provider value={license}>
+          <MockApmPluginContextWrapper>
+            <TransactionActionMenu
+              transaction={
+                Transactions.transactionWithMinimalData as Transaction
+              }
+            />
+          </MockApmPluginContextWrapper>
+        </LicenseContext.Provider>
+      );
+    }
     it('doesnt show custom links when license is not valid', () => {
       const license = new License({
         signature: 'test signature',
@@ -161,17 +174,7 @@ describe('TransactionActionMenu component', () => {
           uid: '1'
         }
       });
-      const component = render(
-        <LicenseContext.Provider value={license}>
-          <MockApmPluginContextWrapper>
-            <TransactionActionMenu
-              transaction={
-                Transactions.transactionWithMinimalData as Transaction
-              }
-            />
-          </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
-      );
+      const component = renderTransactionActionMenuWithLicense(license);
       act(() => {
         fireEvent.click(component.getByText('Actions'));
       });
@@ -215,17 +218,7 @@ describe('TransactionActionMenu component', () => {
           uid: '1'
         }
       });
-      const component = render(
-        <LicenseContext.Provider value={license}>
-          <MockApmPluginContextWrapper>
-            <TransactionActionMenu
-              transaction={
-                Transactions.transactionWithMinimalData as Transaction
-              }
-            />
-          </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
-      );
+      const component = renderTransactionActionMenuWithLicense(license);
       act(() => {
         fireEvent.click(component.getByText('Actions'));
       });
@@ -242,23 +235,13 @@ describe('TransactionActionMenu component', () => {
           uid: '1'
         }
       });
-      const component = render(
-        <LicenseContext.Provider value={license}>
-          <MockApmPluginContextWrapper>
-            <TransactionActionMenu
-              transaction={
-                Transactions.transactionWithMinimalData as Transaction
-              }
-            />
-          </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
-      );
+      const component = renderTransactionActionMenuWithLicense(license);
       act(() => {
         fireEvent.click(component.getByText('Actions'));
       });
       expectTextsInDocument(component, ['Custom Links']);
     });
-    it('opens flyout with filters prefilled', async () => {
+    it('opens flyout with filters prefilled', () => {
       const license = new License({
         signature: 'test signature',
         license: {
@@ -269,17 +252,7 @@ describe('TransactionActionMenu component', () => {
           uid: '1'
         }
       });
-      const component = render(
-        <LicenseContext.Provider value={license}>
-          <MockApmPluginContextWrapper>
-            <TransactionActionMenu
-              transaction={
-                Transactions.transactionWithMinimalData as Transaction
-              }
-            />
-          </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
-      );
+      const component = renderTransactionActionMenuWithLicense(license);
       act(() => {
         fireEvent.click(component.getByText('Actions'));
       });
@@ -288,7 +261,6 @@ describe('TransactionActionMenu component', () => {
         fireEvent.click(component.getByText('Create custom link'));
       });
       expectTextsInDocument(component, ['Create link']);
-      await wait(() => expect(callApmApiSpy).toHaveBeenCalled());
       const getFilterKeyValue = (key: string) => {
         return {
           [(component.getAllByText(key)[0] as HTMLOptionElement)
@@ -306,6 +278,8 @@ describe('TransactionActionMenu component', () => {
       expect(getFilterKeyValue('transaction.type')).toEqual({
         'transaction.type': 'request'
       });
+      // Forces component to unmount to prevent to update the state when callApmAPI call returns after the test is finished.
+      component.unmount();
     });
   });
 });

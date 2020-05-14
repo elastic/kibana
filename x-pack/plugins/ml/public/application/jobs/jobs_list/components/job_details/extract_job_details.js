@@ -165,6 +165,15 @@ export function extractJobDetails(job) {
     items: filterObjects(job.model_size_stats).map(formatValues),
   };
 
+  const jobTimingStats = {
+    id: 'jobTimingStats',
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.jobTimingStatsTitle', {
+      defaultMessage: 'Job timing stats',
+    }),
+    position: 'left',
+    items: filterObjects(job.timing_stats).map(formatValues),
+  };
+
   const datafeedTimingStats = {
     id: 'datafeedTimingStats',
     title: i18n.translate('xpack.ml.jobsList.jobDetails.datafeedTimingStatsTitle', {
@@ -192,6 +201,7 @@ export function extractJobDetails(job) {
     datafeed,
     counts,
     modelSizeStats,
+    jobTimingStats,
     datafeedTimingStats,
   };
 }

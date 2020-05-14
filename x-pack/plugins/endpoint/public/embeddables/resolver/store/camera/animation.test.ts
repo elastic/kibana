@@ -49,12 +49,56 @@ describe('when the camera is created', () => {
     };
     store = createStore(testReducer);
   });
+
   it('should be at 0,0', () => {
     expect(selectors.translation(store.getState())(0)).toEqual([0, 0]);
   });
   it('should have scale of [1,1]', () => {
     expect(selectors.scale(store.getState())(0)).toEqual([1, 1]);
   });
+
+  describe('When attempting to pan to current position and scale', () => {
+    const duration = 1000;
+    const startTime = 0;
+    beforeEach(() => {
+      const action: TestAction = {
+        type: 'animatePanning',
+        payload: {
+          time: startTime,
+          duration,
+          targetTranslation: [0, 0],
+        },
+      };
+      store.dispatch(action);
+    });
+
+    describe('when the animation is in progress', () => {
+      let translationAtIntervals: Vector2[];
+      let scaleAtIntervals: Vector2[];
+      beforeEach(() => {
+        translationAtIntervals = [];
+        scaleAtIntervals = [];
+        const state = store.getState();
+        for (let progress = 0; progress <= 1; progress += 0.1) {
+          translationAtIntervals.push(
+            selectors.translation(state)(lerp(startTime, startTime + duration, progress))
+          );
+          scaleAtIntervals.push(
+            selectors.scale(state)(lerp(startTime, startTime + duration, progress))
+          );
+        }
+      });
+
+      it('should not translate', () => {
+        expect(translationAtIntervals.every(([x, y]: Vector2) => x === 0 && y === 0)).toBe(true);
+      });
+
+      it('should not scale', () => {
+        expect(scaleAtIntervals.every(([x, y]: Vector2) => x === 1 && y === 1)).toBe(true);
+      });
+    });
+  });
+
   describe('when animation begins', () => {
     const duration = 1000;
     let targetTranslation: Vector2;

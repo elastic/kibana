@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
-import { LevelLogger } from '../../../../server/lib';
+import { LevelLogger, startTrace } from '../../../../server/lib';
 import { CaptureConfig } from '../../../../server/types';
 import { LayoutInstance } from '../../layouts/layout';
 import { CONTEXT_WAITFORELEMENTSTOBEINDOM } from './constants';
@@ -29,6 +29,7 @@ export const waitForVisualizations = async (
   layout: LayoutInstance,
   logger: LevelLogger
 ): Promise<void> => {
+  const endTrace = startTrace('wait_for_visualizations', 'wait');
   const { renderComplete: renderCompleteSelector } = layout.selectors;
 
   logger.debug(
@@ -63,4 +64,6 @@ export const waitForVisualizations = async (
       })
     );
   }
+
+  endTrace();
 };

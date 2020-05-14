@@ -342,8 +342,8 @@ export class DataVisualizer {
     aggregatableFields: string[],
     samplerShardSize: number,
     timeFieldName: string,
-    earliestMs: number,
-    latestMs: number
+    earliestMs?: number,
+    latestMs?: number
   ) {
     const index = indexPatternTitle;
     const size = 0;

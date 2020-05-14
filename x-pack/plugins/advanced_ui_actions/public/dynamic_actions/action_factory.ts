@@ -42,6 +42,10 @@ export class ActionFactory<
     return this.def.getDisplayName(context);
   }
 
+  public getDisplayNameTooltip(context: FactoryContext): string {
+    return '';
+  }
+
   public async isCompatible(context: FactoryContext): Promise<boolean> {
     if (!this.def.isCompatible) return true;
     return await this.def.isCompatible(context);

@@ -30,5 +30,5 @@ export const plugin = () => {
 export {
   RenderTooltipContentParams,
   ITooltipProperty,
-} from '../../../../plugins/maps/public/layers/tooltips/tooltip_property';
+} from '../../../../plugins/maps/public/classes/tooltips/tooltip_property';
 export { MapEmbeddable, MapEmbeddableInput } from '../../../../plugins/maps/public/embeddable';

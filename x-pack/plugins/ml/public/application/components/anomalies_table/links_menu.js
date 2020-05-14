@@ -322,7 +322,7 @@ class LinksMenuUI extends Component {
           // Need to encode the _a parameter as it will contain characters such as '+' if using the regex.
           const { basePath } = this.props.kibana.services.http;
           let path = basePath.get();
-          path += '/app/kibana#/discover';
+          path += '/app/discover#/';
           path += '?_g=' + _g;
           path += '&_a=' + encodeURIComponent(_a);
           window.open(path, '_blank');
