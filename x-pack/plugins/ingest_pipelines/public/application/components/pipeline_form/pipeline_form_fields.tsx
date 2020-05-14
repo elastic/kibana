@@ -159,7 +159,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
           component={JsonEditorField}
           componentProps={{
             euiCodeEditorProps: {
-              ['data-test-subj']: 'processorsField',
+              'data-test-subj': 'processorsEditor',
               height: '300px',
               'aria-label': i18n.translate('xpack.ingestPipelines.form.processorsFieldAriaLabel', {
                 defaultMessage: 'Processors JSON editor',
@@ -217,7 +217,7 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
             component={JsonEditorField}
             componentProps={{
               euiCodeEditorProps: {
-                ['data-test-subj']: 'onFailureEditor',
+                'data-test-subj': 'onFailureEditor',
                 height: '300px',
                 'aria-label': i18n.translate('xpack.ingestPipelines.form.onFailureFieldAriaLabel', {
                   defaultMessage: 'Failure processors JSON editor',

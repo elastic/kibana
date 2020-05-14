@@ -207,11 +207,11 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
         ),
       },
       {
-        field: 'updated_on',
+        field: 'updated_at',
         name: i18n.translate('xpack.ingestManager.agentConfigList.updatedOnColumnTitle', {
           defaultMessage: 'Last updated on',
         }),
-        render: (date: AgentConfig['updated_on']) => (
+        render: (date: AgentConfig['updated_at']) => (
           <FormattedDate value={date} year="numeric" month="short" day="2-digit" />
         ),
       },
