@@ -30,8 +30,6 @@ export interface ClientPluginsStart {
 
 export class UptimePlugin implements Plugin<void, void, ClientPluginsSetup, ClientPluginsStart> {
   private _store: Store<any, any>;
-  private _data: DataPublicPluginSetup | undefined;
-  private _triggersActionsUI: TriggersAndActionsUIPublicPluginSetup | undefined;
 
   constructor(_context: PluginInitializerContext) {
     this._store = initializeStore();
@@ -41,9 +39,6 @@ export class UptimePlugin implements Plugin<void, void, ClientPluginsSetup, Clie
     core: CoreSetup<ClientPluginsStart, unknown>,
     plugins: ClientPluginsSetup
   ): Promise<void> {
-    this._data = plugins.data;
-    this._triggersActionsUI = plugins.triggers_actions_ui;
-
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
         id: PLUGIN.ID,
@@ -55,6 +50,19 @@ export class UptimePlugin implements Plugin<void, void, ClientPluginsSetup, Clie
         category: FeatureCatalogueCategory.DATA,
       });
     }
+
+    alertTypeInitializers.forEach(init => {
+      const alertInitializer = init({
+        autocomplete: plugins.data.autocomplete,
+        store: this._store,
+      });
+      if (
+        plugins.triggers_actions_ui &&
+        !plugins.triggers_actions_ui.alertTypeRegistry.has(alertInitializer.id)
+      ) {
+        plugins.triggers_actions_ui.alertTypeRegistry.register(alertInitializer);
+      }
+    });
 
     const self = this;
     core.application.register({
@@ -83,19 +91,6 @@ export class UptimePlugin implements Plugin<void, void, ClientPluginsSetup, Clie
 
   public start(start: CoreStart, _plugins: {}): void {
     kibanaService.core = start;
-
-    alertTypeInitializers.forEach(init => {
-      const alertInitializer = init({
-        autocomplete: this._data!.autocomplete,
-        store: this._store,
-      });
-      if (
-        this._triggersActionsUI &&
-        !this._triggersActionsUI.alertTypeRegistry.has(alertInitializer.id)
-      ) {
-        this._triggersActionsUI.alertTypeRegistry.register(alertInitializer);
-      }
-    });
   }
 
   public stop(): void {}
