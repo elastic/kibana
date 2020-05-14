@@ -110,7 +110,55 @@ describe('stepRuleActions schema', () => {
         code: 'ERR_FIELD_FORMAT',
         message: `
 **Slack:**
-*   No connector selected`,
+*   No connector selected
+`,
+        path: '',
+      });
+    });
+
+    it('should validate multiple incorrect rule actions field', () => {
+      (isUuidv4 as jest.Mock).mockReturnValueOnce(false);
+      (getActionTypeName as jest.Mock).mockReturnValueOnce('Slack');
+      (isUuidv4 as jest.Mock).mockReturnValueOnce(true);
+      (getActionTypeName as jest.Mock).mockReturnValueOnce('Pagerduty');
+      (validateActionParams as jest.Mock).mockReturnValue(['Summary is required']);
+      (validateMustache as jest.Mock).mockReturnValue(['Component is not valid mustache template']);
+      const validator = validateRuleActionsField(actionTypeRegistry);
+
+      const result = validator({
+        path: '',
+        value: [
+          {
+            id: '817b8bca-91d1-4729-8ee1-3a83aaafd9d4',
+            group: 'default',
+            actionTypeId: '.slack',
+            params: {},
+          },
+          {
+            id: 'a8d1ef21-dcb9-4ac6-9e52-961f938a4c17',
+            group: 'default',
+            actionTypeId: '.pagerduty',
+            params: {
+              component: '{{{',
+            },
+          },
+        ],
+        form: {} as FormHook,
+        formData: jest.fn(),
+        errors: [],
+      });
+
+      expect(result).toEqual({
+        code: 'ERR_FIELD_FORMAT',
+        message: `
+**Slack:**
+*   No connector selected
+
+
+**Pagerduty:**
+*   Summary is required
+*   Component is not valid mustache template
+`,
         path: '',
       });
     });
