@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
+// eslint-disable-next-line import/no-default-export
 export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
-  describe('APM specs', () => {
+  describe('Observability specs (trial)', function() {
+    this.tags('ciGroup1');
     loadTestFile(require.resolve('./annotations'));
-    loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./agent_configuration'));
-    loadTestFile(require.resolve('./custom_link'));
   });
 }
