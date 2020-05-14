@@ -186,7 +186,7 @@ def doSetup() {
       try {
         // Setup expects this directory to be missing, so we need to remove it before we do a retry
         bash("rm -rf ../elasticsearch", "Remove elasticsearch sibling directory, if it exists")
-      } fnally {
+      } finally {
         throw ex
       }
     }
