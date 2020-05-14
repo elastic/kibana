@@ -123,7 +123,10 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
 
     async deleteAllReportingIndexes() {
       log.debug('ReportingAPI.deleteAllReportingIndexes');
-      await esSupertest.delete('/.reporting*').expect(200);
+      await esSupertest
+        .post('/.reporting*/_delete_by_query')
+        .send({ query: { match_all: {} } })
+        .expect(200);
     },
 
     expectRecentPdfAppStats(stats: UsageStats, app: string, count: number) {
