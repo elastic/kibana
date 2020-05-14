@@ -14,7 +14,6 @@ import {
 } from '../../../../src/core/server';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
 import { deepFreeze } from '../../../../src/core/server';
-import { XPackInfo } from '../../../legacy/plugins/xpack_main/server/lib/xpack_info';
 import { PluginSetupContract as TimelionSetupContract } from '../../../../src/plugins/vis_type_timelion/server';
 import { FeatureRegistry } from './feature_registry';
 import { Feature, FeatureConfig } from '../common/feature';
@@ -29,7 +28,6 @@ export interface PluginSetupContract {
   registerFeature(feature: FeatureConfig): void;
   getFeatures(): Feature[];
   getFeaturesUICapabilities(): UICapabilities;
-  registerLegacyAPI: (legacyAPI: LegacyAPI) => void;
 }
 
 export interface PluginStartContract {
@@ -37,31 +35,12 @@ export interface PluginStartContract {
 }
 
 /**
- * Describes a set of APIs that are available in the legacy platform only and required by this plugin
- * to function properly.
- */
-export interface LegacyAPI {
-  xpackInfo: Pick<XPackInfo, 'license'>;
-  savedObjectTypes: string[];
-}
-
-/**
  * Represents Features Plugin instance that will be managed by the Kibana plugin system.
  */
 export class Plugin {
   private readonly logger: Logger;
-
   private readonly featureRegistry: FeatureRegistry = new FeatureRegistry();
-
-  private legacyAPI?: LegacyAPI;
   private isTimelionEnabled: boolean = false;
-
-  private readonly getLegacyAPI = () => {
-    if (!this.legacyAPI) {
-      throw new Error('Legacy API is not registered!');
-    }
-    return this.legacyAPI;
-  };
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -76,17 +55,12 @@ export class Plugin {
     defineRoutes({
       router: core.http.createRouter(),
       featureRegistry: this.featureRegistry,
-      getLegacyAPI: this.getLegacyAPI,
     });
 
     return deepFreeze({
       registerFeature: this.featureRegistry.register.bind(this.featureRegistry),
       getFeatures: this.featureRegistry.getAll.bind(this.featureRegistry),
       getFeaturesUICapabilities: () => uiCapabilitiesForFeatures(this.featureRegistry.getAll()),
-
-      registerLegacyAPI: (legacyAPI: LegacyAPI) => {
-        this.legacyAPI = legacyAPI;
-      },
     });
   }
 
