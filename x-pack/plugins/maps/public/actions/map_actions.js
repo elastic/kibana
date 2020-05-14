@@ -1007,7 +1007,7 @@ export function setJoinsForLayer(layer, joins) {
     });
 
     await dispatch(clearMissingStyleProperties(layer.getId()));
-    dispatch(syncDataForLayerId(layer.getId()));
+    dispatch(syncDataForLayer(layer));
   };
 }
 

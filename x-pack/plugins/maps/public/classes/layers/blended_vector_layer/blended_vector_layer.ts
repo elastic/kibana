@@ -248,10 +248,6 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
   }
 
   async syncData(syncContext: SyncContext) {
-    if (!this.isVisible() || !this.showAtZoomLevel(syncContext.dataFilters.zoom)) {
-      return;
-    }
-
     const dataRequestId = ACTIVE_COUNT_DATA_ID;
     const requestToken = Symbol(`layer-active-count:${this.getId()}`);
     const searchFilters = this._getSearchFilters(
