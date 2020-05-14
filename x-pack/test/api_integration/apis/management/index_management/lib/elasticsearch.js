@@ -34,6 +34,14 @@ export const initElasticsearchHelpers = es => {
 
   const catTemplate = name => es.cat.templates({ name, format: 'json' });
 
+  const createComponentTemplate = componentTemplate => {
+    return es.dataManagement.saveComponentTemplate(componentTemplate);
+  };
+
+  const deleteComponentTemplate = componentTemplateName => {
+    return es.dataManagement.deleteComponentTemplate({ name: componentTemplateName });
+  };
+
   return {
     createIndex,
     deleteIndex,
@@ -42,5 +50,7 @@ export const initElasticsearchHelpers = es => {
     indexStats,
     cleanUp,
     catTemplate,
+    createComponentTemplate,
+    deleteComponentTemplate,
   };
 };
