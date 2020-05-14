@@ -68,5 +68,85 @@ export default function({ getService }: FtrProviderContext) {
         });
       });
     });
+
+    describe('Create', () => {
+      const COMPONENT_NAME = 'test_create_component_template';
+      const REQUIRED_FIELDS_COMPONENT_NAME = 'test_create_required_fields_component_template';
+
+      after(() => {
+        deleteComponentTemplate(COMPONENT_NAME);
+        deleteComponentTemplate(REQUIRED_FIELDS_COMPONENT_NAME);
+      });
+
+      it('should create a component template', async () => {
+        const { body } = await supertest
+          .post(`${API_BASE_PATH}/component_templates`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            name: COMPONENT_NAME,
+            version: 1,
+            template: {
+              settings: {
+                number_of_shards: 1,
+              },
+              aliases: {
+                alias1: {},
+              },
+              mappings: {
+                properties: {
+                  host_name: {
+                    type: 'keyword',
+                  },
+                },
+              },
+            },
+            _meta: {
+              description: 'set number of shards to one',
+              serialization: {
+                class: 'MyComponentTemplate',
+                id: 10,
+              },
+            },
+          })
+          .expect(200);
+
+        expect(body).to.eql({
+          acknowledged: true,
+        });
+      });
+
+      it('should create a component template with only required fields', async () => {
+        const { body } = await supertest
+          .post(`${API_BASE_PATH}/component_templates`)
+          .set('kbn-xsrf', 'xxx')
+          // Excludes version and _meta fields
+          .send({
+            name: REQUIRED_FIELDS_COMPONENT_NAME,
+            template: {},
+          })
+          .expect(200);
+
+        expect(body).to.eql({
+          acknowledged: true,
+        });
+      });
+
+      it('should not allow creation of a component template with the same name of an existing one', async () => {
+        const { body } = await supertest
+          .post(`${API_BASE_PATH}/component_templates`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            name: COMPONENT_NAME,
+            template: {},
+          })
+          .expect(409);
+
+        expect(body).to.eql({
+          statusCode: 409,
+          error: 'Conflict',
+          message: `There is already a component template with name '${COMPONENT_NAME}'.`,
+        });
+      });
+    });
   });
 }
