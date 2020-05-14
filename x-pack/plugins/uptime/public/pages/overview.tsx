@@ -25,7 +25,7 @@ import { OVERVIEW_ROUTE } from '../../common/constants';
 const StyleLink = styled(Link)`
   &&& {
     animation: none !important;
-    color: initial;
+    color: inherit;
   }
 `;
 
