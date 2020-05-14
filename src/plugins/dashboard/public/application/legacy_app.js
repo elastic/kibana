@@ -229,21 +229,12 @@ export function initDashboardApp(app, deps) {
                   );
                   return new Promise(() => {});
                 } else {
-                  // E.g. a corrupt dashboard was detected (e.g. with invalid JSON properties)
+                  // E.g. a corrupt or deleted dashboard
                   deps.core.notifications.toasts.addDanger(error.message);
                   history.push(DashboardConstants.LANDING_PAGE_PATH);
+                  return new Promise(() => {});
                 }
-              })
-              .catch(
-                redirectWhenMissing({
-                  history,
-                  navigateToApp: deps.core.application.navigateToApp,
-                  mapping: {
-                    dashboard: DashboardConstants.LANDING_PAGE_PATH,
-                  },
-                  toastNotifications: deps.core.notifications.toasts,
-                })
-              );
+              });
           },
         },
       })
