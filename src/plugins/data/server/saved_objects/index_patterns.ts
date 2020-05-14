@@ -18,7 +18,6 @@
  */
 
 import { SavedObjectsType } from 'kibana/server';
-import { INDEX_PATTERN_MANAGEMENT_SECTION_PATH } from '../../common';
 import { indexPatternSavedObjectTypeMigrations } from './index_pattern_migrations';
 
 export const indexPatternSavedObjectType: SavedObjectsType = {
@@ -37,9 +36,7 @@ export const indexPatternSavedObjectType: SavedObjectsType = {
     },
     getInAppUrl(obj) {
       return {
-        path: `/app/kibana${INDEX_PATTERN_MANAGEMENT_SECTION_PATH}/patterns/${encodeURIComponent(
-          obj.id
-        )}`,
+        path: `/app/kibana#/management/kibana/indexPatterns/patterns/${encodeURIComponent(obj.id)}`,
         uiCapabilitiesPath: 'management.kibana.index_patterns',
       };
     },

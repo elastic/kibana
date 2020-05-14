@@ -37,7 +37,6 @@ import {
   IUiSettingsClient,
   ChromeDocTitle,
 } from '../../../../../core/public';
-import { INDEX_PATTERN_MANAGEMENT_SECTION_PATH } from '../../../../data/public';
 import { ManagementAppMountParams } from '../../../../management/public';
 import { CreateButton } from '../create_button';
 import { CreateIndexPatternPrompt } from '../create_index_pattern_prompt';
@@ -60,10 +59,7 @@ const columns = [
         }>;
       }
     ) => (
-      <EuiButtonEmpty
-        size="xs"
-        href={`${INDEX_PATTERN_MANAGEMENT_SECTION_PATH}/patterns/${index.id}`}
-      >
+      <EuiButtonEmpty size="xs" href={`#/management/kibana/indexPatterns/patterns/${index.id}`}>
         {name}
         {index.tags &&
           index.tags.map(({ key: tagKey, name: tagName }) => (

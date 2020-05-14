@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { INDEX_PATTERN_MANAGEMENT_SECTION_PATH } from '../../../../../src/plugins/data/public';
 
 export function NoIndexPatternCallout() {
   const http = getHttp();
@@ -25,9 +24,7 @@ export function NoIndexPatternCallout() {
           id="xpack.maps.noIndexPattern.doThisPrefixDescription"
           defaultMessage="You'll need to "
         />
-        <EuiLink
-          href={http.basePath.prepend(`/app/kibana${INDEX_PATTERN_MANAGEMENT_SECTION_PATH}`)}
-        >
+        <EuiLink href={http.basePath.prepend(`/app/kibana#/management/kibana/indexPatterns`)}>
           <FormattedMessage
             id="xpack.maps.noIndexPattern.doThisLinkTextDescription"
             defaultMessage="create an index pattern"

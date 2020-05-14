@@ -28,13 +28,7 @@ import {
   MappingObject,
 } from '../../../../kibana_utils/public';
 
-import {
-  ES_FIELD_TYPES,
-  KBN_FIELD_TYPES,
-  INDEX_PATTERN_MANAGEMENT_SECTION_PATH,
-  IIndexPattern,
-  IFieldType,
-} from '../../../common';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
 
 import { findByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
@@ -175,7 +169,7 @@ export class IndexPattern implements IIndexPattern {
 
   private updateFromElasticSearch(response: any, forceFieldRefresh: boolean = false) {
     if (!response.found) {
-      throw new SavedObjectNotFound(type, this.id, INDEX_PATTERN_MANAGEMENT_SECTION_PATH);
+      throw new SavedObjectNotFound(type, this.id, '#/management/kibana/indexPatterns');
     }
 
     _.forOwn(this.mapping, (fieldMapping: FieldMappingSpec, name: string | undefined) => {

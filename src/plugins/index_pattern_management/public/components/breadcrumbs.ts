@@ -18,7 +18,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { INDEX_PATTERN_MANAGEMENT_SECTION_PATH, IndexPattern } from '../../../data/public';
 
 export function getListBreadcrumbs() {
   return [
@@ -26,7 +25,7 @@ export function getListBreadcrumbs() {
       text: i18n.translate('indexPatternManagement.indexPatterns.listBreadcrumb', {
         defaultMessage: 'Index patterns',
       }),
-      href: `${INDEX_PATTERN_MANAGEMENT_SECTION_PATH}/`,
+      href: `#/management/kibana/indexPatterns/`,
     },
   ];
 }
@@ -38,7 +37,7 @@ export function getCreateBreadcrumbs() {
       text: i18n.translate('indexPatternManagement.indexPatterns.createBreadcrumb', {
         defaultMessage: 'Create index pattern',
       }),
-      href: `${INDEX_PATTERN_MANAGEMENT_SECTION_PATH}/create`,
+      href: `#/management/kibana/indexPatterns/create`,
     },
   ];
 }
@@ -48,7 +47,7 @@ export function getEditBreadcrumbs(indexPattern: IndexPattern) {
     ...getListBreadcrumbs(),
     {
       text: indexPattern.title,
-      href: `${INDEX_PATTERN_MANAGEMENT_SECTION_PATH}/patterns/${indexPattern.id}`,
+      href: `#/management/kibana/indexPatterns/patterns/${indexPattern.id}`,
     },
   ];
 }
