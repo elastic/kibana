@@ -17,6 +17,7 @@ import { ConfigSchema } from '../../../../src/plugins/maps_legacy/config';
 import { setInternalRepository } from './kibana_server_services';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { emsBoundariesSpecProvider } from './tutorials/ems';
+import { initRoutes } from './routes';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
@@ -26,10 +27,13 @@ interface SetupDeps {
 export class MapsPlugin implements Plugin {
   readonly _initializerContext: PluginInitializerContext<ConfigSchema>;
   private readonly _logger: Logger;
+  private readonly kibanaVersion: string;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this._logger = initializerContext.logger.get();
     this._initializerContext = initializerContext;
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.router = null;
   }
 
   _initSampleData(home, prependBasePath, mapConfig) {
@@ -108,10 +112,11 @@ export class MapsPlugin implements Plugin {
   }
 
   async setup(core: CoreSetup, plugins: SetupDeps) {
-    const { usageCollection, home } = plugins;
+    const { usageCollection, home, licensing } = plugins;
     // @ts-ignore
     const config$ = this._initializerContext.config.create();
     const currentConfig = await config$.pipe(take(1)).toPromise();
+    this.router = core.http.createRouter();
 
     const mapsEnabled = currentConfig.enabled;
     // TODO: Consider dynamic way to disable maps app on config change
@@ -119,6 +124,22 @@ export class MapsPlugin implements Plugin {
       this._logger.warn('Maps app disabled by configuration');
       return;
     }
+
+    let routesInitialized = false;
+    licensing.license$.subscribe(license => {
+      const { state } = license.check('maps', 'basic');
+      if (state === 'valid' && !routesInitialized) {
+        routesInitialized = true;
+        initRoutes(
+          core.http.createRouter(),
+          license.uid,
+          currentConfig,
+          this.kibanaVersion,
+          this._logger
+        );
+      }
+    });
+
     this._initSampleData(home, core.http.basePath.prepend, currentConfig);
     plugins.features.registerFeature({
       id: APP_ID,
