@@ -79,7 +79,7 @@ export const usePushToService = ({
           description: (
             <FormattedMessage
               defaultMessage="To open and update cases in external systems, you must configure a {link}."
-              id="xpack.siem.case.caseView.pushToServiceDisableByNoCaseConfigDescription"
+              id="xpack.siem.case.caseView.pushToServiceDisableByNoConnectors"
               values={{
                 link: (
                   <EuiLink href={getConfigureCasesUrl(urlSearch)} target="_blank">
@@ -99,7 +99,7 @@ export const usePushToService = ({
           description: (
             <FormattedMessage
               defaultMessage="To open and update cases in external systems, you must select an external incident management system for this case."
-              id="xpack.siem.case.caseView.pushToServiceDisableByNoCaseConfigDesc"
+              id="xpack.siem.case.caseView.pushToServiceDisableByNoCaseConfigDescription"
             />
           ),
         },
@@ -112,7 +112,7 @@ export const usePushToService = ({
           description: (
             <FormattedMessage
               defaultMessage="The connector used to send updates to external service has been deleted. To update cases in external systems, select a different connector or create a new one."
-              id="xpack.siem.case.caseView.pushToServiceDisableByNoCaseConfigDesc"
+              id="xpack.siem.case.caseView.pushToServiceDisableByInvalidConnector"
             />
           ),
         },
