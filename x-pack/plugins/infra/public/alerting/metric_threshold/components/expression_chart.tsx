@@ -35,6 +35,7 @@ import { getChartTheme } from '../../../pages/metrics/metrics_explorer/component
 import { createFormatterForMetric } from '../../../pages/metrics/metrics_explorer/components/helpers/create_formatter_for_metric';
 import { calculateDomain } from '../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
 import { useMetricsExplorerChartData } from '../hooks/use_metrics_explorer_chart_data';
+import { getMetricId } from '../../../pages/metrics/metrics_explorer/components/helpers/get_metric_id';
 
 interface Props {
   context: AlertsContextValue<AlertContextMeta>;
@@ -120,7 +121,7 @@ export const ExpressionChart: React.FC<Props> = ({
     rows: firstSeries.rows.map(row => {
       const newRow: MetricsExplorerRow = { ...row };
       thresholds.forEach((thresholdValue, index) => {
-        newRow[`metric_threshold_${index}`] = thresholdValue;
+        newRow[getMetricId(metric, `threshold_${index}`)] = thresholdValue;
       });
       return newRow;
     }),
@@ -140,7 +141,8 @@ export const ExpressionChart: React.FC<Props> = ({
 
   const isAbove = [Comparator.GT, Comparator.GT_OR_EQ].includes(expression.comparator);
   const opacity = 0.3;
-  const timeLabel = TIME_LABELS[expression.timeUnit];
+  const { timeSize, timeUnit } = expression;
+  const timeLabel = TIME_LABELS[timeUnit];
 
   return (
     <>
@@ -255,16 +257,16 @@ export const ExpressionChart: React.FC<Props> = ({
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.infra.metrics.alerts.dataTimeRangeLabelWithGrouping"
-              defaultMessage="Last 20 {timeLabel} of data for {id}"
-              values={{ id: series.id, timeLabel }}
+              defaultMessage="Last {lookback} {timeLabel} of data for {id}"
+              values={{ id: series.id, timeLabel, lookback: timeSize * 20 }}
             />
           </EuiText>
         ) : (
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.infra.metrics.alerts.dataTimeRangeLabel"
-              defaultMessage="Last 20 {timeLabel}"
-              values={{ timeLabel }}
+              defaultMessage="Last {lookback} {timeLabel}"
+              values={{ timeLabel, lookback: timeSize * 20 }}
             />
           </EuiText>
         )}

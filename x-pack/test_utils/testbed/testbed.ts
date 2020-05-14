@@ -199,7 +199,11 @@ export const registerTestBed = <T extends string = string>(
         return new Promise(resolve => setTimeout(resolve));
       };
 
-      const setSelectValue: TestBed<T>['form']['setSelectValue'] = (select, value) => {
+      const setSelectValue: TestBed<T>['form']['setSelectValue'] = (
+        select,
+        value,
+        doUpdateComponent = true
+      ) => {
         const formSelect = typeof select === 'string' ? find(select) : (select as ReactWrapper);
 
         if (!formSelect.length) {
@@ -208,7 +212,9 @@ export const registerTestBed = <T extends string = string>(
 
         formSelect.simulate('change', { target: { value } });
 
-        component.update();
+        if (doUpdateComponent) {
+          component.update();
+        }
       };
 
       const selectCheckBox: TestBed<T>['form']['selectCheckBox'] = (
