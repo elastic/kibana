@@ -523,7 +523,7 @@ describe('Lens App', () => {
           expression: 'kibana 3',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa');
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined);
 
         inst.setProps({ docId: 'aaa' });
 
@@ -543,7 +543,7 @@ describe('Lens App', () => {
           expression: 'kibana 3',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa');
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined);
 
         inst.setProps({ docId: 'aaa' });
 
@@ -611,7 +611,7 @@ describe('Lens App', () => {
           title: 'hello there',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa');
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', true);
       });
 
       it('saves app filters and does not save pinned filters', async () => {
