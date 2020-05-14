@@ -17,12 +17,10 @@
  * under the License.
  */
 
-/*eslint-env jest*/
+import { createCommanderAction } from './commander_action';
+import { run } from './run';
 
-const createCommanderAction = require('./commander_action');
-const run = require('./run');
-
-jest.mock('./run', () => jest.fn());
+jest.mock('./run');
 
 const STACK_TRACE_RE = /\n(?:\s+at .+(?:\n|$))+/g;
 expect.addSnapshotSerializer({
