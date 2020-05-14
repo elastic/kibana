@@ -442,11 +442,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
             {metric && (
               <div
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  height: '100%',
-                  paddingTop: '4px',
-                  paddingBottom: '4px',
+                  alignSelf: 'center',
                 }}
               >
                 <EuiText size={'s'}>{metricUnit[metric]?.label || ''}</EuiText>
