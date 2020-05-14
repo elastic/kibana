@@ -38,17 +38,12 @@ async function fetchIndicesCall(
   callAsCurrentUser: CallAsCurrentUser,
   indexNames?: string[]
 ): Promise<Index[]> {
-  let indexNamesCSV: string;
-  if (indexNames && indexNames.length) {
-    indexNamesCSV = indexNames.join(',');
-  } else {
-    indexNamesCSV = '*';
-  }
+  const indexNamesString = indexNames && indexNames.length ? indexNames.join(',') : '*';
 
   // This call retrieves alias and settings (incl. hidden status) information about indices
   const indices: GetIndicesResponse = await callAsCurrentUser('transport.request', {
     method: 'GET',
-    path: `/${indexNamesCSV}`,
+    path: `/${indexNamesString}`,
     query: {
       expand_wildcards: 'hidden,all',
     },
@@ -65,7 +60,7 @@ async function fetchIndicesCall(
     format: 'json',
     h: 'health,status,index,uuid,pri,rep,docs.count,sth,store.size',
     expand_wildcards: 'hidden,all',
-    index: indexNamesCSV,
+    index: indexNamesString,
   };
 
   // This call retrieves health and other high-level information about indices.
