@@ -96,7 +96,13 @@ export class IndexTable extends Component {
   componentDidMount() {
     this.props.loadIndices();
     this.interval = setInterval(this.props.reloadIndices, REFRESH_RATE_INDEX_LIST);
-    const { filterChanged, filterFromURI } = this.props;
+    const {
+      filterChanged,
+      filterFromURI,
+      showHiddenFromURI,
+      showHiddenIndicesChanged,
+    } = this.props;
+
     if (filterFromURI) {
       const decodedFilter = decodeURIComponent(filterFromURI);
 
@@ -106,6 +112,10 @@ export class IndexTable extends Component {
       } catch (e) {
         this.setState({ filterError: e });
       }
+    }
+
+    if (showHiddenFromURI) {
+      showHiddenIndicesChanged(true);
     }
   }
   componentWillUnmount() {
@@ -460,6 +470,7 @@ export class IndexTable extends Component {
                       <EuiFlexItem grow={false}>
                         <EuiSwitch
                           id="checkboxShowHiddenIndices"
+                          data-test-subj="indexTableIncludeHiddenIndicesToggle"
                           checked={showHiddenIndices}
                           onChange={event => showHiddenIndicesChanged(event.target.checked)}
                           label={
