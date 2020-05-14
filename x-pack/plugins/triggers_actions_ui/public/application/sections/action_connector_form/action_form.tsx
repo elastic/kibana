@@ -172,8 +172,8 @@ export const ActionForm = ({
   ) => {
     const optionsList = connectors
       .filter(connectorItem => connectorItem.actionTypeId === actionItem.actionTypeId)
-      .map(({ name, id, isPreconfigured }) => ({
-        label: `${name} ${isPreconfigured ? preconfiguredMessage : ''}`,
+      .map(({ name, id }) => ({
+        label: `${name}`,
         key: id,
         id,
       }));
