@@ -23,6 +23,10 @@
 
   &__createFieldContent {
     position: relative;
+
+    &__formFields {
+      max-width: 600px;
+    }
   }
 
   &__createFieldRequiredProps {

@@ -23,7 +23,7 @@ import { appendSearch } from '../../common/components/link_to/helpers';
 const timelinesPagePath = `/:pageName(${SiemPageName.timelines})/:tabName(${TimelineType.default}|${TimelineType.template})`;
 const timelinesDefaultPath = `/${SiemPageName.timelines}/${TimelineType.default}`;
 
-const TabNameMappedToI18nKey: Record<TimelineType, string> = {
+const TabNameMappedToI18nKey: Record<string, string> = {
   [TimelineType.default]: TAB_TIMELINES,
   [TimelineType.template]: TAB_TEMPLATES,
 };

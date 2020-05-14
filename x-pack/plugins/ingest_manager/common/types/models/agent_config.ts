@@ -28,7 +28,7 @@ export interface AgentConfig extends NewAgentConfig {
   id: string;
   status: AgentConfigStatus;
   datasources: string[] | Datasource[];
-  updated_on: string;
+  updated_at: string;
   updated_by: string;
   revision: number;
 }
