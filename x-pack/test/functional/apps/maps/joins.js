@@ -58,13 +58,14 @@ export default function({ getPageObjects, getService }) {
       const layerTOCDetails = await PageObjects.maps.getLayerTOCDetails('geo_shapes*');
       const split = layerTOCDetails.trim().split('\n');
 
+      console.log(split);
       //field display name
       expect(split[0]).to.equal('max prop1');
 
       //bands 1-8
       expect(split[1]).to.equal('3');
       expect(split[2]).to.equal('4.13');
-      expect(split[3]).to.equal('5.26');
+      expect(split[3]).to.equal('5.25');
       expect(split[4]).to.equal('6.38');
       expect(split[5]).to.equal('7.5');
       expect(split[6]).to.equal('8.63');
