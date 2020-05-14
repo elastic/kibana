@@ -39,7 +39,18 @@ describe('Features Plugin', () => {
 
     const { getFeatures } = await plugin.start(coreStart);
 
-    expect(getFeatures()).toMatchSnapshot();
+    expect(getFeatures().map(f => f.id)).toMatchInlineSnapshot(`
+      Array [
+        "baz",
+        "discover",
+        "visualize",
+        "dashboard",
+        "dev_tools",
+        "advancedSettings",
+        "indexPatterns",
+        "savedObjectsManagement",
+      ]
+    `);
   });
 
   it('returns OSS + registered features with timielion when available', async () => {
@@ -56,6 +67,31 @@ describe('Features Plugin', () => {
 
     const { getFeatures } = await plugin.start(coreStart);
 
-    expect(getFeatures()).toMatchSnapshot();
+    expect(getFeatures().map(f => f.id)).toMatchInlineSnapshot(`
+      Array [
+        "baz",
+        "discover",
+        "visualize",
+        "dashboard",
+        "dev_tools",
+        "advancedSettings",
+        "indexPatterns",
+        "savedObjectsManagement",
+        "timelion",
+      ]
+    `);
+  });
+
+  it('registers not hidden saved objects types', async () => {
+    const plugin = new Plugin(initContext);
+    await plugin.setup(coreSetup, {});
+    const { getFeatures } = await plugin.start(coreStart);
+
+    const soTypes =
+      getFeatures().find(f => f.id === 'savedObjectsManagement')?.privileges?.all.savedObject.all ||
+      [];
+
+    expect(soTypes.includes('foo')).toBe(true);
+    expect(soTypes.includes('bar')).toBe(false);
   });
 });
