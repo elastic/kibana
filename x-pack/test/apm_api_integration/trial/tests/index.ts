@@ -8,7 +8,8 @@ import { FtrProviderContext } from '../../../api_integration/ftr_provider_contex
 
 // eslint-disable-next-line import/no-default-export
 export default function observabilityApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
-  describe('APM specs (trial)', () => {
+  describe('APM specs (trial)', function() {
+    this.tags('ciGroup1');
     loadTestFile(require.resolve('./annotations'));
   });
 }
