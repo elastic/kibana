@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { tlsQuery } from '../../../../plugins/siem/public/containers/tls/index.gql_query';
+import { tlsQuery } from '../../../../plugins/siem/public/network/containers/tls/index.gql_query';
 import {
   Direction,
   TlsFields,
