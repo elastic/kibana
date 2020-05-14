@@ -1,0 +1,12 @@
+{
+  "eql.search": {
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "{indices}/_eql/search"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/eql-search-api.html"
+  }
+}
