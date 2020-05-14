@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
 import { SavedObjectsServerPlugin } from './plugin';
 
-export const plugin = (initContext: PluginInitializerContext) =>
-  new SavedObjectsServerPlugin(initContext);
+export const plugin = () => new SavedObjectsServerPlugin();
