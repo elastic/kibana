@@ -49,18 +49,31 @@ let isTimeRangeSelectorEnabled = true;
 let isAutoRefreshSelectorEnabled = true;
 
 export const mockUiSettings = {
-  get: item => {
-    return mockUiSettings[item];
+  get: (item, defaultValue) => {
+    const defaultValues = {
+      dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
+      'dateFormat:tz': 'UTC',
+      'shortDots:enable': true,
+      'courier:ignoreFilterIfFieldNotInIndex': true,
+      'query:allowLeadingWildcards': true,
+      'query:queryString:options': {},
+      'format:currency:defaultPattern': '($0,0.[00])',
+      'format:number:defaultPattern': '0,0.[000]',
+      'format:percent:defaultPattern': '0,0.[000]%',
+      'format:number:defaultLocale': 'en',
+      'format:defaultTypeMap': {},
+      'csv:separator': ',',
+      'csv:quoteValues': true,
+      'search:queryLanguage': 'kuery',
+      'state:storeInSessionStorage': false,
+    };
+
+    return defaultValues[item] || defaultValue;
   },
   getUpdate$: () => ({
     subscribe: sinon.fake(),
   }),
   isDefault: sinon.fake(),
-  'query:allowLeadingWildcards': true,
-  'query:queryString:options': {},
-  'courier:ignoreFilterIfFieldNotInIndex': true,
-  'dateFormat:tz': 'Browser',
-  'format:defaultTypeMap': {},
 };
 
 const mockCoreSetup = {
@@ -524,6 +537,8 @@ export function __setup__(coreSetup) {
   // bootstrap an LP plugin outside of tests)
   npSetup.core.application.register = () => {};
 
+  npSetup.core.uiSettings.get = mockUiSettings.get;
+
   // Services that need to be set in the legacy platform since the legacy data
   // & vis plugins which previously provided them have been removed.
   setSetupServices(npSetup);
@@ -531,6 +546,8 @@ export function __setup__(coreSetup) {
 
 export function __start__(coreStart) {
   npStart.core = coreStart;
+
+  npStart.core.uiSettings.get = mockUiSettings.get;
 
   // Services that need to be set in the legacy platform since the legacy data
   // & vis plugins which previously provided them have been removed.
