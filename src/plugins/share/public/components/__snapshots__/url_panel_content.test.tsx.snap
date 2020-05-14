@@ -44,7 +44,9 @@ exports[`share url panel content render 1`] = `
                 gutterSize="none"
                 responsive={false}
               >
-                <EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
                   <FormattedMessage
                     defaultMessage="Snapshot"
                     id="share.urlPanel.snapshotLabel"
@@ -79,7 +81,9 @@ exports[`share url panel content render 1`] = `
                 gutterSize="none"
                 responsive={false}
               >
-                <EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
                   <FormattedMessage
                     defaultMessage="Saved object"
                     id="share.urlPanel.savedObjectLabel"
@@ -123,7 +127,9 @@ exports[`share url panel content render 1`] = `
         gutterSize="none"
         responsive={false}
       >
-        <EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
           <EuiSwitch
             checked={false}
             data-test-subj="useShortUrl"
@@ -200,7 +206,9 @@ exports[`share url panel content should enable saved object export option when o
                 gutterSize="none"
                 responsive={false}
               >
-                <EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
                   <FormattedMessage
                     defaultMessage="Snapshot"
                     id="share.urlPanel.snapshotLabel"
@@ -235,7 +243,9 @@ exports[`share url panel content should enable saved object export option when o
                 gutterSize="none"
                 responsive={false}
               >
-                <EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
                   <FormattedMessage
                     defaultMessage="Saved object"
                     id="share.urlPanel.savedObjectLabel"
@@ -279,7 +289,9 @@ exports[`share url panel content should enable saved object export option when o
         gutterSize="none"
         responsive={false}
       >
-        <EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
           <EuiSwitch
             checked={false}
             data-test-subj="useShortUrl"
@@ -356,7 +368,9 @@ exports[`share url panel content should hide short url section when allowShortUr
                 gutterSize="none"
                 responsive={false}
               >
-                <EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
                   <FormattedMessage
                     defaultMessage="Snapshot"
                     id="share.urlPanel.snapshotLabel"
@@ -391,7 +405,9 @@ exports[`share url panel content should hide short url section when allowShortUr
                 gutterSize="none"
                 responsive={false}
               >
-                <EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
                   <FormattedMessage
                     defaultMessage="Saved object"
                     id="share.urlPanel.savedObjectLabel"
@@ -469,7 +485,9 @@ exports[`should show url param extensions 1`] = `
                 gutterSize="none"
                 responsive={false}
               >
-                <EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
                   <FormattedMessage
                     defaultMessage="Snapshot"
                     id="share.urlPanel.snapshotLabel"
@@ -504,7 +522,9 @@ exports[`should show url param extensions 1`] = `
                 gutterSize="none"
                 responsive={false}
               >
-                <EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
                   <FormattedMessage
                     defaultMessage="Saved object"
                     id="share.urlPanel.savedObjectLabel"
@@ -536,6 +556,19 @@ exports[`should show url param extensions 1`] = `
       />
     </EuiFormRow>
     <EuiFormRow
+      describedByIds={Array []}
+      display="row"
+      fullWidth={false}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      key="testExtension"
+      labelType="label"
+    >
+      <TestExtension
+        setParamValue={[Function]}
+      />
+    </EuiFormRow>
+    <EuiFormRow
       data-test-subj="createShortUrl"
       describedByIds={Array []}
       display="row"
@@ -548,7 +581,9 @@ exports[`should show url param extensions 1`] = `
         gutterSize="none"
         responsive={false}
       >
-        <EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
           <EuiSwitch
             checked={false}
             data-test-subj="useShortUrl"
@@ -578,10 +613,6 @@ exports[`should show url param extensions 1`] = `
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFormRow>
-    <TestExtension
-      key="testExtension"
-      setParamValue={[Function]}
-    />
     <EuiSpacer
       size="m"
     />
