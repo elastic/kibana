@@ -300,9 +300,9 @@ suppress all logging output. *Default: `false`*
 (for example, `America/Los_Angeles`) to log events using that timezone. For a
 list of timezones, refer to https://en.wikipedia.org/wiki/List_of_tz_database_time_zones. *Default: `UTC`*
 
-| [[logging-verbose]] `logging.verbose:`
+| [[logging-verbose]] `logging.verbose:` {ece-icon}
  | Set to `true` to log all events, including system usage information and all
-requests. Supported on {ece}. *Default: `false`*
+requests. *Default: `false`*
 
 | `map.includeElasticMapsService:` {ess-icon}
  | Set to `false` to disable connections to Elastic Maps Service.
@@ -313,9 +313,9 @@ and the tile layer configured by `map.tilemap.url` are available in <<maps, Maps
  | Set to `true` to proxy all <<maps, Maps application>> Elastic Maps Service
 requests through the {kib} server. *Default: `false`*
 
-| [[regionmap-settings]] `map.regionmap:` {ess-icon}
+| [[regionmap-settings]] `map.regionmap:` {ess-icon} {ece-icon}
  | Specifies additional vector layers for
-use in <<maps, Maps>> visualizations. Supported on {ece}. Each layer
+use in <<maps, Maps>> visualizations. Each layer
 object points to an external vector file that contains a geojson
 FeatureCollection. The file must use the
 https://en.wikipedia.org/wiki/World_Geodetic_System[WGS84 coordinate reference system (ESPG:4326)]
@@ -343,20 +343,19 @@ map.regionmap:
 [cols="2*<"]
 |===
 
-| [[regionmap-ES-map]] `map.includeElasticMapsService:`
+| [[regionmap-ES-map]] `map.includeElasticMapsService:` {ece-icon}
  | Turns on or off whether layers from the Elastic Maps Service should be included in the vector
-layer option list. Supported on {ece}. By turning this off,
+layer option list. By turning this off,
 only the layers that are configured here will be included. The default is `true`.
 This also affects whether tile-service from the Elastic Maps Service will be available.
 
-| [[regionmap-attribution]] `map.regionmap.layers[].attribution:` {ess-icon}
+| [[regionmap-attribution]] `map.regionmap.layers[].attribution:` {ess-icon} {ece-icon}
  | Optional. References the originating source of the geojson file.
-Supported on {ece}.
 
-| [[regionmap-fields]] `map.regionmap.layers[].fields[]:` {ess-icon}
+| [[regionmap-fields]] `map.regionmap.layers[].fields[]:` {ess-icon} {ece-icon}
  | Mandatory. Each layer
 can contain multiple fields to indicate what properties from the geojson
-features you wish to expose. Supported on {ece}. The following shows how to define multiple
+features you wish to expose. The following shows how to define multiple
 properties:
 
 |===
@@ -379,44 +378,44 @@ map.regionmap:
 [cols="2*<"]
 |===
 
-| [[regionmap-field-description]] `map.regionmap.layers[].fields[].description:` {ess-icon}
+| [[regionmap-field-description]] `map.regionmap.layers[].fields[].description:` {ess-icon} {ece-icon}
  | Mandatory. The human readable text that is shown under the Options tab when
-building the Region Map visualization. Supported on {ece}.
+building the Region Map visualization.
 
-| [[regionmap-field-name]] `map.regionmap.layers[].fields[].name:` {ess-icon}
+| [[regionmap-field-name]] `map.regionmap.layers[].fields[].name:` {ess-icon} {ece-icon}
  | Mandatory.
 This value is used to do an inner-join between the document stored in
 {es} and the geojson file. For example, if the field in the geojson is
 called `Location` and has city names, there must be a field in {es}
 that holds the same values that {kib} can then use to lookup for the geoshape
-data. Supported on {ece}.
+data.
 
-| [[regionmap-name]] `map.regionmap.layers[].name:` {ess-icon}
+| [[regionmap-name]] `map.regionmap.layers[].name:` {ess-icon} {ece-icon}
  | Mandatory. A description of
-the map being provided. Supported on {ece}.
+the map being provided.
 
-| [[regionmap-url]] `map.regionmap.layers[].url:` {ess-icon}
+| [[regionmap-url]] `map.regionmap.layers[].url:` {ess-icon} {ece-icon}
  | Mandatory. The location of the
-geojson file as provided by a webserver. Supported on {ece}.
+geojson file as provided by a webserver.
 
-| [[tilemap-settings]] `map.tilemap.options.attribution:` {ess-icon}
- | The map attribution string. Supported on {ece}.
+| [[tilemap-settings]] `map.tilemap.options.attribution:` {ess-icon} {ece-icon}
+ | The map attribution string.
 *Default: `"© [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)"`*
 
-| [[tilemap-max-zoom]] `map.tilemap.options.maxZoom:` {ess-icon}
- | The maximum zoom level. Supported on {ece}. *Default: `10`*
+| [[tilemap-max-zoom]] `map.tilemap.options.maxZoom:` {ess-icon} {ece-icon}
+ | The maximum zoom level. *Default: `10`*
 
-| [[tilemap-min-zoom]] `map.tilemap.options.minZoom:` {ess-icon}
- | The minimum zoom level. Supported on {ece}. *Default: `1`*
+| [[tilemap-min-zoom]] `map.tilemap.options.minZoom:` {ess-icon} {ece-icon}
+ | The minimum zoom level. *Default: `1`*
 
-| [[tilemap-subdomains]] `map.tilemap.options.subdomains:` {ess-icon}
+| [[tilemap-subdomains]] `map.tilemap.options.subdomains:` {ess-icon} {ece-icon}
  | An array of subdomains
 used by the tile service. Specify the position of the subdomain the URL with
-the token `{s}`. Supported on {ece}.
+the token `{s}`.
 
-| [[tilemap-url]] `map.tilemap.url:` {ess-icon}
+| [[tilemap-url]] `map.tilemap.url:` {ess-icon} {ece-icon}
  | The URL to the tileservice that {kib} uses
-to display map tiles in tilemap visualizations. Supported on {ece}. By default,
+to display map tiles in tilemap visualizations. By default,
 {kib} reads this URL from an external metadata service, but users can
 override this parameter to use their own Tile Map Service. For example:
 `"https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana"`

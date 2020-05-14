@@ -8,7 +8,7 @@ Ready to try out {kib} and see what it can do? To quickest way to get started wi
 
 [float]
 [[cloud-set-up]]
-== Set up on Cloud
+== Set up on cloud
 
 include::{docs-root}/shared/cloud/ess-getting-started.asciidoc[]
 
