@@ -25,6 +25,8 @@ import { getFakeRow, getFakeRowVals } from 'fixtures/fake_row';
 import $ from 'jquery';
 import { pluginInstance } from './legacy';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { setScopedHistory } from '../../../../../../plugins/discover/public/kibana_services';
+import { createBrowserHistory } from 'history';
 
 describe('Doc Table', function() {
   let $parentScope;
@@ -37,6 +39,7 @@ describe('Doc Table', function() {
   let stubFieldFormatConverter;
   beforeEach(() => pluginInstance.initializeServices());
   beforeEach(() => pluginInstance.initializeInnerAngular());
+  before(() => setScopedHistory(createBrowserHistory()));
   beforeEach(ngMock.module('app/discover'));
   beforeEach(
     ngMock.inject(function($rootScope, Private) {

@@ -7,6 +7,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n/react';
 import { PartialTheme } from '@elastic/charts';
 import {
   IInterpreterRenderHandlers,
@@ -111,13 +112,15 @@ export const getPieRenderer = (dependencies: {
     const executeTriggerActions = getExecuteTriggerActions();
     const formatFactory = await dependencies.formatFactory;
     ReactDOM.render(
-      <MemoizedChart
-        {...config}
-        {...dependencies}
-        formatFactory={formatFactory}
-        executeTriggerActions={executeTriggerActions}
-        isDarkMode={dependencies.isDarkMode}
-      />,
+      <I18nProvider>
+        <MemoizedChart
+          {...config}
+          {...dependencies}
+          formatFactory={formatFactory}
+          executeTriggerActions={executeTriggerActions}
+          isDarkMode={dependencies.isDarkMode}
+        />
+      </I18nProvider>,
       domNode,
       () => {
         handlers.done();

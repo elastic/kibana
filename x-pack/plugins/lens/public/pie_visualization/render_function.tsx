@@ -31,6 +31,7 @@ import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
 import { ColumnGroups, PieExpressionProps } from './types';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { getSliceValueWithFallback, getFilterContext } from './render_helpers';
+import { EmptyPlaceholder } from '../shared_components';
 import './visualization.scss';
 
 const EMPTY_SLICE = Symbol('empty_slice');
@@ -201,27 +202,29 @@ export function PieComponent(
     const value = row[metricColumn.id];
     return typeof value === 'number' && value < 0;
   });
-  if (firstTable.rows.length === 0 || hasNegative) {
+  const isEmpty =
+    firstTable.rows.length === 0 ||
+    firstTable.rows.every(row =>
+      groups.every(colId => !row[colId] || typeof row[colId] === 'undefined')
+    );
+
+  if (isEmpty) {
+    return <EmptyPlaceholder icon="visPie" />;
+  }
+
+  if (hasNegative) {
     return (
       <EuiText className="lnsChart__empty" textAlign="center" color="subdued" size="xs">
-        {hasNegative ? (
-          <FormattedMessage
-            id="xpack.lens.pie.pieWithNegativeWarningLabel"
-            defaultMessage="{chartType} charts can't render with negative values. Try a different chart type."
-            values={{
-              chartType: CHART_NAMES[shape].label,
-            }}
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.lens.xyVisualization.noDataLabel"
-            defaultMessage="No results found"
-          />
-        )}
+        <FormattedMessage
+          id="xpack.lens.pie.pieWithNegativeWarningLabel"
+          defaultMessage="{chartType} charts can't render with negative values. Try a different chart type."
+          values={{
+            chartType: CHART_NAMES[shape].label,
+          }}
+        />
       </EuiText>
     );
   }
-
   return (
     <VisualizationContainer className="lnsPieExpression__container" isReady={state.isReady}>
       <Chart>
