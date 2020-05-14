@@ -114,7 +114,7 @@ const getDisplayName: (schemaName: string) => string = function nameInSchemaToDi
       api: 'API',
       user: 'User',
     };
-    return displayNameRecord[referenceName] || 'User';
+    return displayNameRecord[referenceName] || 'Unknown';
   }
 }.bind(null, i18n);
 
