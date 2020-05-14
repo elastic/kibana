@@ -164,7 +164,6 @@
 
 # Pulse
 /packages/kbn-analytics/ @elastic/pulse
-/src/legacy/core_plugins/ui_metric/ @elastic/pulse
 /src/plugins/kibana_usage_collection/ @elastic/pulse
 /src/plugins/newsfeed/ @elastic/pulse
 /src/plugins/telemetry/ @elastic/pulse

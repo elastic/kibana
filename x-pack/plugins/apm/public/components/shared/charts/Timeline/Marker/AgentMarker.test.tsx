@@ -6,8 +6,8 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { AgentMarker } from '../AgentMarker';
-import { AgentMark } from '../../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_agent_marks';
+import { AgentMarker } from './AgentMarker';
+import { AgentMark } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_agent_marks';
 
 describe('AgentMarker', () => {
   const mark = {
