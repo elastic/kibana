@@ -43,9 +43,11 @@ interface Props {
 }
 
 const MyWrapper = styled.div`
-  ${({ theme }) => css`
-    padding-top: ${theme.eui.paddingSizes.l};
-  `}
+  padding: ${({
+    theme,
+  }) => `${theme.eui.paddingSizes.l} ${gutterTimeline} ${theme.eui.paddingSizes.l}
+  ${theme.eui.paddingSizes.l}`};
+`;
 `;
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
@@ -243,14 +245,19 @@ export const CaseComponent = React.memo<CaseProps>(
       }
     }, [initLoadingData, isLoadingUserActions]);
 
+    const backOptions = useMemo(
+      () => ({
+        href: getCaseUrl(search),
+        text: i18n.BACK_TO_ALL,
+        dataTestSubj: 'backToCases',
+      }),
+      [search]
+    );
+
     return (
       <>
         <HeaderPage
-          backOptions={{
-            href: getCaseUrl(search),
-            text: i18n.BACK_TO_ALL,
-            dataTestSubj: 'backToCases',
-          }}
+          backOptions={backOptions}
           data-test-subj="case-view-title"
           titleNode={
             <EditableTitle
