@@ -26,6 +26,11 @@ import { defineRoutes } from './routes';
  */
 export interface PluginSetupContract {
   registerFeature(feature: FeatureConfig): void;
+  /*
+   * Calling this function during setup will crash Kibana.
+   * Use start contract instead.
+   * @deprecated
+   * */
   getFeatures(): Feature[];
   getFeaturesUICapabilities(): UICapabilities;
 }
