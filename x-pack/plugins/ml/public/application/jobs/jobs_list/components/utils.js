@@ -408,3 +408,15 @@ export function clearSelectedJobIdFromUrl(url) {
     }
   }
 }
+
+export function resetMlJobUrl(tabId, url) {
+  // Change current window's url to just the generic tab url without the job ID
+  if (typeof url === 'string') {
+    url = decodeURIComponent(url);
+    if (url.includes('mlManagement') && url.includes('jobId')) {
+      const urlParams = getUrlVars(url);
+      const clearedParams = `ml#/${tabId}?_g=${urlParams._g}`;
+      window.history.replaceState({}, document.title, clearedParams);
+    }
+  }
+}

@@ -23,7 +23,6 @@ import {
 import { getJobIdUrl } from '../../../../../jobs/jobs_list/components/utils';
 
 import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
-import { getResultsUrl } from './common';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import {
   getDataFrameAnalyticsProgress,
@@ -199,7 +198,6 @@ export const getColumns = (
       'data-test-subj': 'mlAnalyticsTableRowDetailsToggle',
     },
     {
-      // field: DataFrameAnalyticsListColumn.id,
       name: 'ID',
       sortable: (item: DataFrameAnalyticsListRow) => item.id,
       truncateText: true,
