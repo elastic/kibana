@@ -202,7 +202,7 @@ export default async function({ readConfigFile }) {
       },
       reporting: {
         pathname: '/app/kibana/',
-        hash: '/management/kibana/reporting',
+        hash: '/management/insightsAndAlerting/reporting',
       },
     },
 
