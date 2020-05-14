@@ -410,12 +410,9 @@ export const indexedProcessTree = createSelector(graphableProcesses, function in
 /**
  * Process events that will be graphed.
  */
-export const relatedEventResults = createSelector(
-  (data: DataState) => data,
-  function(data) {
-    return data.resultsEnrichedWithRelatedEventInfo;
-  }
-);
+export const relatedEventResults = function(data: DataState) {
+  return data.resultsEnrichedWithRelatedEventInfo;
+};
 
 export const relatedEventStats = createSelector(relatedEventResults, function getRelatedEvents(
   /* eslint-disable no-shadow */
