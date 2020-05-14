@@ -24,7 +24,7 @@ import { Vis } from '../../visualizations/public';
 import { tableVisResponseHandler } from './table_vis_response_handler';
 // @ts-ignore
 import tableVisTemplate from './table_vis.html';
-import { TableOptions } from './components/table_vis_options';
+import { TableOptions } from './components/table_vis_options_lazy';
 import { getTableVisualizationControllerClass } from './vis_controller';
 
 export function getTableVisTypeDefinition(core: CoreSetup, context: PluginInitializerContext) {

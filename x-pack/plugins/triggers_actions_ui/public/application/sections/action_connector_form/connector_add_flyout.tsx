@@ -319,3 +319,6 @@ const UpgradeYourLicenseCallOut = ({ http }: { http: HttpSetup }) => (
     </EuiFlexGroup>
   </EuiCallOut>
 );
+
+// eslint-disable-next-line import/no-default-export
+export { ConnectorAddFlyout as default };
