@@ -47,6 +47,6 @@ describe('DocLinksService#start()', () => {
     const service = new DocLinksService();
     expect(() => {
       service.start();
-    }).toThrowError();
+    }).toThrowErrorMatchingInlineSnapshot(`"DocLinksService#setup() must be called first!"`);
   });
 });
