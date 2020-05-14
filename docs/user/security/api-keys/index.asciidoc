@@ -54,7 +54,6 @@ to authenticate to a <<api, Kibana API>>.
 POST /_security/api_key
 {
   "name": "my_api_key",
-  "expiration": "1d"
 }
 
 This creates an API key with the
