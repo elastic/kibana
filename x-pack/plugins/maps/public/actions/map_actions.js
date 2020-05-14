@@ -111,13 +111,15 @@ function getLayerById(layerId, state) {
   });
 }
 
-async function syncDataForAllLayers(dispatch, getState, dataFilters) {
-  const state = getState();
-  const layerList = getLayerList(state);
-  const syncPromises = layerList.map(async (layer) => {
-    return dispatch(syncDataForLayer(layer));
-  });
-  await Promise.all(syncPromises);
+function syncDataForAllLayers() {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const layerList = getLayerList(state);
+    const syncPromises = layerList.map(async layer => {
+      return dispatch(syncDataForLayer(layer));
+    });
+    await Promise.all(syncPromises);
+  };
 }
 
 function syncDataForLayer(layer) {
@@ -488,8 +490,7 @@ export function mapExtentChanged(newMapConstants) {
         ...newMapConstants,
       },
     });
-    const newDataFilters = { ...dataFilters, ...newMapConstants };
-    await syncDataForAllLayers(dispatch, getState, newDataFilters);
+    await dispatch(syncDataForAllLayers());
   };
 }
 
@@ -903,8 +904,7 @@ export function setQuery({ query, timeFilters, filters = [], refresh = false }) 
       filters,
     });
 
-    const dataFilters = getDataFilters(getState());
-    await syncDataForAllLayers(dispatch, getState, dataFilters);
+    await dispatch(syncDataForAllLayers());
   };
 }
 
@@ -917,13 +917,12 @@ export function setRefreshConfig({ isPaused, interval }) {
 }
 
 export function triggerRefreshTimer() {
-  return async (dispatch, getState) => {
+  return async dispatch => {
     dispatch({
       type: TRIGGER_REFRESH_TIMER,
     });
 
-    const dataFilters = getDataFilters(getState());
-    await syncDataForAllLayers(dispatch, getState, dataFilters);
+    await dispatch(syncDataForAllLayers());
   };
 }
 
