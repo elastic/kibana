@@ -50,21 +50,6 @@ describe('Security Plugin', () => {
       await expect(plugin.setup(mockCoreSetup, mockDependencies)).resolves.toMatchInlineSnapshot(`
               Object {
                 "__legacyCompat": Object {
-                  "license": Object {
-                    "features$": Observable {
-                      "_isScalar": false,
-                      "operator": MapOperator {
-                        "project": [Function],
-                        "thisArg": undefined,
-                      },
-                      "source": Observable {
-                        "_isScalar": false,
-                        "_subscribe": [Function],
-                      },
-                    },
-                    "getFeatures": [Function],
-                    "isEnabled": [Function],
-                  },
                   "registerLegacyAPI": [Function],
                   "registerPrivilegesWithCluster": [Function],
                 },
@@ -72,14 +57,10 @@ describe('Security Plugin', () => {
                   "areAPIKeysEnabled": [Function],
                   "createAPIKey": [Function],
                   "getCurrentUser": [Function],
-                  "getSessionInfo": [Function],
                   "grantAPIKeyAsInternalUser": [Function],
                   "invalidateAPIKey": [Function],
                   "invalidateAPIKeyAsInternalUser": [Function],
                   "isAuthenticated": [Function],
-                  "isProviderTypeEnabled": [Function],
-                  "login": [Function],
-                  "logout": [Function],
                 },
                 "authz": Object {
                   "actions": Actions {
@@ -106,6 +87,21 @@ describe('Security Plugin', () => {
                   "mode": Object {
                     "useRbacForRequest": [Function],
                   },
+                },
+                "license": Object {
+                  "features$": Observable {
+                    "_isScalar": false,
+                    "operator": MapOperator {
+                      "project": [Function],
+                      "thisArg": undefined,
+                    },
+                    "source": Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    },
+                  },
+                  "getFeatures": [Function],
+                  "isEnabled": [Function],
                 },
                 "registerSpacesService": [Function],
               }

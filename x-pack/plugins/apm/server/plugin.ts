@@ -10,10 +10,10 @@ import {
   CoreStart,
   Logger
 } from 'src/core/server';
-import { Observable, combineLatest, AsyncSubject } from 'rxjs';
+import { Observable, combineLatest } from 'rxjs';
 import { map, take } from 'rxjs/operators';
-import { Server } from 'hapi';
-import { once } from 'lodash';
+import { ObservabilityPluginSetup } from '../../observability/server';
+import { SecurityPluginSetup } from '../../security/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { TaskManagerSetupContract } from '../../task_manager/server';
 import { AlertingPlugin } from '../../alerting/server';
@@ -31,30 +31,26 @@ import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_
 import { LicensingPluginSetup } from '../../licensing/public';
 import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
 import { createApmTelemetry } from './lib/apm_telemetry';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../../plugins/features/server';
+import { APM_FEATURE } from './feature';
+import { apmIndices, apmTelemetry } from './saved_objects';
 
-export interface LegacySetup {
-  server: Server;
-}
-
-export interface APMPluginContract {
+export interface APMPluginSetup {
   config$: Observable<APMConfig>;
-  registerLegacyAPI: (__LEGACY: LegacySetup) => void;
   getApmIndices: () => ReturnType<typeof getApmIndices>;
 }
 
-export class APMPlugin implements Plugin<APMPluginContract> {
+export class APMPlugin implements Plugin<APMPluginSetup> {
   private currentConfig?: APMConfig;
   private logger?: Logger;
-  legacySetup$: AsyncSubject<LegacySetup>;
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
-    this.legacySetup$ = new AsyncSubject();
   }
 
   public async setup(
     core: CoreSetup,
     plugins: {
-      apm_oss: APMOSSPluginSetup;
+      apmOss: APMOSSPluginSetup;
       home: HomeServerPluginSetup;
       licensing: LicensingPluginSetup;
       cloud?: CloudSetup;
@@ -62,13 +58,19 @@ export class APMPlugin implements Plugin<APMPluginContract> {
       taskManager?: TaskManagerSetupContract;
       alerting?: AlertingPlugin['setup'];
       actions?: ActionsPlugin['setup'];
+      observability?: ObservabilityPluginSetup;
+      features: FeaturesPluginSetup;
+      security?: SecurityPluginSetup;
     }
   ) {
     this.logger = this.initContext.logger.get();
     const config$ = this.initContext.config.create<APMXPackConfig>();
-    const mergedConfig$ = combineLatest(plugins.apm_oss.config$, config$).pipe(
+    const mergedConfig$ = combineLatest(plugins.apmOss.config$, config$).pipe(
       map(([apmOssConfig, apmConfig]) => mergeConfigs(apmOssConfig, apmConfig))
     );
+
+    core.savedObjects.registerType(apmIndices);
+    core.savedObjects.registerType(apmTelemetry);
 
     if (plugins.actions && plugins.alerting) {
       registerApmAlerts({
@@ -77,14 +79,6 @@ export class APMPlugin implements Plugin<APMPluginContract> {
         config$: mergedConfig$
       });
     }
-
-    this.legacySetup$.subscribe(__LEGACY => {
-      createApmApi().init(core, {
-        config$: mergedConfig$,
-        logger: this.logger!,
-        __LEGACY
-      });
-    });
 
     this.currentConfig = await mergedConfig$.pipe(take(1)).toPromise();
 
@@ -116,13 +110,19 @@ export class APMPlugin implements Plugin<APMPluginContract> {
         }
       })
     );
+    plugins.features.registerFeature(APM_FEATURE);
+
+    createApmApi().init(core, {
+      config$: mergedConfig$,
+      logger: this.logger!,
+      plugins: {
+        observability: plugins.observability,
+        security: plugins.security
+      }
+    });
 
     return {
       config$: mergedConfig$,
-      registerLegacyAPI: once((__LEGACY: LegacySetup) => {
-        this.legacySetup$.next(__LEGACY);
-        this.legacySetup$.complete();
-      }),
       getApmIndices: async () =>
         getApmIndices({
           savedObjectsClient: await getInternalSavedObjectsClient(core),

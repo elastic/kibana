@@ -97,6 +97,9 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
           indexPatternTitle: schema.string(),
         }),
       },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -126,6 +129,9 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         params: schema.object({
           ...getModuleIdParamSchema(true),
         }),
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -160,6 +166,9 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
       validate: {
         params: schema.object(getModuleIdParamSchema()),
         body: setupModuleBodySchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateJob'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -217,6 +226,9 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
       path: '/api/ml/modules/jobs_exist/{moduleId}',
       validate: {
         params: schema.object(getModuleIdParamSchema()),
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from '../../../../src/core/server';
+import { SavedObjectsClientContract, KibanaRequest } from '../../../../src/core/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
 import {
   GetBasePathFunction,
@@ -15,7 +15,7 @@ import {
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
-  getScopedSavedObjectsClient: (request: any) => SavedObjectsClientContract;
+  getScopedSavedObjectsClient: (request: KibanaRequest) => SavedObjectsClientContract;
   getBasePath: GetBasePathFunction;
   isESOUsingEphemeralEncryptionKey: boolean;
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -24,7 +24,7 @@ interface CreateExecuteFunctionOptions {
 
 export interface ExecuteOptions {
   id: string;
-  params: Record<string, any>;
+  params: Record<string, unknown>;
   spaceId: string;
   apiKey: string | null;
 }
@@ -52,7 +52,7 @@ export function createExecuteFunction({
 
     // Since we're using API keys and accessing elasticsearch can only be done
     // via a request, we're faking one with the proper authorization headers.
-    const fakeRequest: any = {
+    const fakeRequest: unknown = {
       headers: requestHeaders,
       getBasePath: () => getBasePath(spaceId),
       path: '/',
@@ -67,10 +67,12 @@ export function createExecuteFunction({
       },
     };
 
-    const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest);
+    const savedObjectsClient = getScopedSavedObjectsClient(fakeRequest as KibanaRequest);
     const actionTypeId = await getActionTypeId(id);
 
-    actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    if (!actionTypeRegistry.isActionExecutable(id, actionTypeId)) {
+      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    }
 
     const actionTaskParamsRecord = await savedObjectsClient.create('action_task_params', {
       actionId: id,

@@ -8,7 +8,7 @@
   ],
   "language": "kuery",
   "name": "Potential Shell via Web Server",
-  "query": "process.name:bash and user.name:(apache or www or www-data) and event.action:executed",
+  "query": "process.name:(bash or dash) and user.name:(apache or nginx or www or \"www-data\") and event.action:executed",
   "references": [
     "https://pentestlab.blog/tag/web-shell/"
   ],
@@ -37,5 +37,5 @@
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 3
 }

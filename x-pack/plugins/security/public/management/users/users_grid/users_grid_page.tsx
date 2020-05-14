@@ -26,8 +26,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { NotificationsStart } from 'src/core/public';
 import { User, Role } from '../../../../common/model';
 import { ConfirmDeleteUsers } from '../components';
-import { isUserReserved } from '../user_utils';
-import { DisabledBadge, ReservedBadge } from '../../badges';
+import { isUserReserved, getExtendedUserDeprecationNotice, isUserDeprecated } from '../user_utils';
+import { DisabledBadge, ReservedBadge, DeprecatedBadge } from '../../badges';
 import { RoleTableDisplay } from '../../role_table_display';
 import { RolesAPIClient } from '../../roles';
 import { UserAPIClient } from '..';
@@ -360,6 +360,7 @@ export class UsersGridPage extends Component<Props, State> {
   private getUserStatusBadges = (user: User) => {
     const enabled = user.enabled;
     const reserved = isUserReserved(user);
+    const deprecated = isUserDeprecated(user);
 
     const badges = [];
     if (!enabled) {
@@ -378,9 +379,17 @@ export class UsersGridPage extends Component<Props, State> {
         />
       );
     }
+    if (deprecated) {
+      badges.push(
+        <DeprecatedBadge
+          data-test-subj="userDeprecated"
+          tooltipContent={getExtendedUserDeprecationNotice(user)}
+        />
+      );
+    }
 
     return (
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup gutterSize="s" wrap>
         {badges.map((badge, index) => (
           <EuiFlexItem key={index} grow={false}>
             {badge}

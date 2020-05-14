@@ -136,6 +136,12 @@ export const installPackageHandler: RequestHandler<TypeOf<
     };
     return response.ok({ body });
   } catch (e) {
+    if (e.isBoom) {
+      return response.customError({
+        statusCode: e.output.statusCode,
+        body: { message: e.output.payload.message },
+      });
+    }
     return response.customError({
       statusCode: 500,
       body: { message: e.message },
@@ -157,6 +163,12 @@ export const deletePackageHandler: RequestHandler<TypeOf<
     };
     return response.ok({ body });
   } catch (e) {
+    if (e.isBoom) {
+      return response.customError({
+        statusCode: e.output.statusCode,
+        body: { message: e.output.payload.message },
+      });
+    }
     return response.customError({
       statusCode: 500,
       body: { message: e.message },

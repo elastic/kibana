@@ -8,7 +8,7 @@ import { SavedObjectsType } from '../../../../../../../src/core/server';
 
 export const ruleActionsSavedObjectType = 'siem-detection-engine-rule-actions';
 
-export const ruleActionsSavedObjectMappings = {
+export const ruleActionsSavedObjectMappings: SavedObjectsType['mappings'] = {
   properties: {
     alertThrottle: {
       type: 'keyword',
@@ -31,9 +31,8 @@ export const ruleActionsSavedObjectMappings = {
           type: 'keyword',
         },
         params: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          dynamic: true as any,
-          properties: {},
+          type: 'object',
+          enabled: false,
         },
       },
     },

@@ -6,10 +6,8 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import {
-  defaultDynamicSettings,
-  DynamicSettings,
-} from '../../../../legacy/plugins/uptime/common/runtime_types';
+import { DynamicSettings } from '../../../../plugins/uptime/common/runtime_types';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../plugins/uptime/common/constants';
 import { makeChecks } from '../../../api_integration/apis/uptime/rest/helper/make_checks';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -32,7 +30,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await settings.go();
 
       const fields = await settings.loadFields();
-      expect(fields).to.eql(defaultDynamicSettings);
+      expect(fields).to.eql(DYNAMIC_SETTINGS_DEFAULTS);
     });
 
     it('should disable the apply button when invalid or unchanged', async () => {
@@ -62,7 +60,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await settings.go();
 
-      const newFieldValues: DynamicSettings = { heartbeatIndices: 'new*' };
+      const newFieldValues: DynamicSettings = {
+        heartbeatIndices: 'new*',
+        certAgeThreshold: 365,
+        certExpirationThreshold: 30,
+      };
       await settings.changeHeartbeatIndicesInput(newFieldValues.heartbeatIndices);
       await settings.apply();
 
@@ -82,8 +84,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await settings.go();
 
-      const newErrorThreshold = '5';
-      await settings.changeErrorThresholdInput(newErrorThreshold);
+      const newExpirationThreshold = '5';
+      await settings.changeErrorThresholdInput(newExpirationThreshold);
       await settings.apply();
 
       await uptimePage.goToRoot();
@@ -91,16 +93,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Verify that the settings page shows the value we previously saved
       await settings.go();
       const fields = await settings.loadFields();
-      expect(fields.certificatesThresholds.errorState).to.eql(newErrorThreshold);
+      expect(fields.certExpirationThreshold).to.eql(newExpirationThreshold);
     });
 
-    it('changing certificate expiration warning threshold is reflected in settings page', async () => {
+    it('changing certificate expiration threshold is reflected in settings page', async () => {
       const settings = uptimeService.settings;
 
       await settings.go();
 
-      const newWarningThreshold = '15';
-      await settings.changeWarningThresholdInput(newWarningThreshold);
+      const newAgeThreshold = '15';
+      await settings.changeWarningThresholdInput(newAgeThreshold);
       await settings.apply();
 
       await uptimePage.goToRoot();
@@ -108,7 +110,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Verify that the settings page shows the value we previously saved
       await settings.go();
       const fields = await settings.loadFields();
-      expect(fields.certificatesThresholds.warningState).to.eql(newWarningThreshold);
+      expect(fields.certAgeThreshold).to.eql(newAgeThreshold);
     });
   });
 };

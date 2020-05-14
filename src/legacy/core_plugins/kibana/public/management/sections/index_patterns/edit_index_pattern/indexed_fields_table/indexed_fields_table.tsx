@@ -19,7 +19,11 @@
 
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
-import { IndexPatternField, IIndexPattern } from '../../../../../../../../../plugins/data/public';
+import {
+  IndexPatternField,
+  IIndexPattern,
+  IFieldType,
+} from '../../../../../../../../../plugins/data/public';
 import { Table } from './components/table';
 import { getFieldFormat } from './lib';
 import { IndexedFieldItem } from './types';
@@ -31,7 +35,7 @@ interface IndexedFieldsTableProps {
   indexedFieldTypeFilter?: string;
   helpers: {
     redirectToRoute: (obj: any) => void;
-    getFieldInfo: (indexPattern: IIndexPattern, field: string) => string[];
+    getFieldInfo: (indexPattern: IIndexPattern, field: IFieldType) => string[];
   };
   fieldWildcardMatcher: (filters: any[]) => (val: any) => boolean;
 }
@@ -76,7 +80,7 @@ export class IndexedFieldsTable extends Component<
             indexPattern: field.indexPattern,
             format: getFieldFormat(indexPattern, field.name),
             excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
-            info: helpers.getFieldInfo && helpers.getFieldInfo(indexPattern, field.name),
+            info: helpers.getFieldInfo && helpers.getFieldInfo(indexPattern, field),
           };
         })) ||
       []

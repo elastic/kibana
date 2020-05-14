@@ -28,7 +28,6 @@ import { initDashboardAppDirective } from './dashboard_app';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
 import {
   createKbnUrlStateStorage,
-  ensureDefaultIndexPattern,
   redirectWhenMissing,
   InvalidJSONProperty,
   SavedObjectNotFound,
@@ -91,10 +90,16 @@ export function initDashboardApp(app, deps) {
     };
 
     $routeProvider
+      .when('/', {
+        redirectTo: DashboardConstants.LANDING_PAGE_PATH,
+      })
       .when(DashboardConstants.LANDING_PAGE_PATH, {
         ...defaults,
         template: dashboardListingTemplate,
         controller: function($scope, kbnUrlStateStorage, history) {
+          deps.core.chrome.docTitle.change(
+            i18n.translate('dashboard.dashboardPageTitle', { defaultMessage: 'Dashboards' })
+          );
           const service = deps.savedDashboards;
           const dashboardConfig = deps.dashboardConfig;
 
@@ -138,7 +143,7 @@ export function initDashboardApp(app, deps) {
         },
         resolve: {
           dash: function($route, history) {
-            return ensureDefaultIndexPattern(deps.core, deps.data, history).then(() => {
+            return deps.data.indexPatterns.ensureDefaultIndexPattern(history).then(() => {
               const savedObjectsClient = deps.savedObjectsClient;
               const title = $route.current.params.title;
               if (title) {
@@ -173,11 +178,13 @@ export function initDashboardApp(app, deps) {
         requireUICapability: 'dashboard.createNew',
         resolve: {
           dash: history =>
-            ensureDefaultIndexPattern(deps.core, deps.data, history)
+            deps.data.indexPatterns
+              .ensureDefaultIndexPattern(history)
               .then(() => deps.savedDashboards.get())
               .catch(
                 redirectWhenMissing({
                   history,
+                  navigateToApp: deps.core.application.navigateToApp,
                   mapping: {
                     dashboard: DashboardConstants.LANDING_PAGE_PATH,
                   },
@@ -194,7 +201,8 @@ export function initDashboardApp(app, deps) {
           dash: function($route, history) {
             const id = $route.current.params.id;
 
-            return ensureDefaultIndexPattern(deps.core, deps.data, history)
+            return deps.data.indexPatterns
+              .ensureDefaultIndexPattern(history)
               .then(() => deps.savedDashboards.get(id))
               .then(savedDashboard => {
                 deps.chrome.recentlyAccessed.add(
@@ -235,6 +243,7 @@ export function initDashboardApp(app, deps) {
               .catch(
                 redirectWhenMissing({
                   history,
+                  navigateToApp: deps.core.application.navigateToApp,
                   mapping: {
                     dashboard: DashboardConstants.LANDING_PAGE_PATH,
                   },
@@ -244,11 +253,11 @@ export function initDashboardApp(app, deps) {
           },
         },
       })
-      .when(`dashboard/:tail*?`, {
-        redirectTo: `/${deps.config.defaultAppId}`,
-      })
-      .when(`dashboards/:tail*?`, {
-        redirectTo: `/${deps.config.defaultAppId}`,
+      .otherwise({
+        template: '<span></span>',
+        controller: function() {
+          deps.navigateToDefaultApp();
+        },
       });
   });
 }

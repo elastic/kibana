@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { App, CoreSetup, Plugin } from 'kibana/public';
+import { BehaviorSubject } from 'rxjs';
+import { AppUpdater, CoreSetup, Plugin } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import { sortBy } from 'lodash';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
+import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
+import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
 import './index.scss';
 
@@ -34,103 +38,57 @@ export interface DevToolsSetup {
    * to switch between the tools.
    * @param devTool The dev tools descriptor
    */
-  register: (devTool: DevTool) => void;
+  register: (devTool: CreateDevToolArgs) => DevToolApp;
 }
 
-export interface DevToolsStart {
-  /**
-   * Returns all registered dev tools in an ordered array.
-   * This function is only exposed because the dev tools app
-   * actually rendering the tool has to stay in the legacy platform
-   * for now. Once it is moved into this plugin, this function
-   * becomes an implementation detail.
-   * @deprecated
-   */
-  getSortedDevTools: () => readonly DevTool[];
-}
+export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
+  private readonly devTools = new Map<string, DevToolApp>();
+  private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
 
-/**
- * Descriptor for a dev tool. A dev tool works similar to an application
- * registered in the core application service.
- */
-export interface DevTool {
-  /**
-   * The id of the dev tools. This will become part of the URL path
-   * (`dev_tools/${devTool.id}`. It has to be unique among registered
-   * dev tools.
-   */
-  id: string;
-  /**
-   * The human readable name of the dev tool. Should be internationalized.
-   * This will be used as a label in the tab above the actual tool.
-   */
-  title: string;
-  mount: App['mount'];
-  /**
-   * Flag indicating to disable the tab of this dev tool. Navigating to a
-   * disabled dev tool will be treated as the navigation to an unknown route
-   * (redirect to the console).
-   */
-  disabled?: boolean;
-  /**
-   * Optional tooltip content of the tab.
-   */
-  tooltipContent?: string;
-  /**
-   * Flag indicating whether the dev tool will do routing within the `dev_tools/${devTool.id}/`
-   * prefix. If it is set to true, the dev tool is responsible to redirect
-   * the user when navigating to unknown URLs within the prefix. If set
-   * to false only the root URL of the dev tool will be recognized as valid.
-   */
-  enableRouting: boolean;
-  /**
-   * Number used to order the tabs.
-   */
-  order: number;
-}
-
-export class DevToolsPlugin implements Plugin<DevToolsSetup, DevToolsStart> {
-  private readonly devTools = new Map<string, DevTool>();
-
-  private getSortedDevTools(): readonly DevTool[] {
+  private getSortedDevTools(): readonly DevToolApp[] {
     return sortBy([...this.devTools.values()], 'order');
   }
 
   public setup(core: CoreSetup, { kibanaLegacy }: { kibanaLegacy: KibanaLegacySetup }) {
-    kibanaLegacy.registerLegacyApp({
+    core.application.register({
       id: 'dev_tools',
-      title: 'Dev Tools',
+      title: i18n.translate('devTools.devToolsTitle', {
+        defaultMessage: 'Dev Tools',
+      }),
+      updater$: this.appStateUpdater,
+      euiIconType: 'devToolsApp',
+      order: 9001,
+      category: DEFAULT_APP_CATEGORIES.management,
       mount: async (appMountContext, params) => {
         if (!this.getSortedDevTools) {
           throw new Error('not started yet');
         }
         const { renderApp } = await import('./application');
-        return renderApp(
-          params.element,
-          appMountContext,
-          params.appBasePath,
-          this.getSortedDevTools()
-        );
+        params.element.classList.add('devAppWrapper');
+        return renderApp(params.element, appMountContext, params.history, this.getSortedDevTools());
       },
     });
+    kibanaLegacy.forwardApp('dev_tools', 'dev_tools');
 
     return {
-      register: (devTool: DevTool) => {
-        if (this.devTools.has(devTool.id)) {
+      register: (devToolArgs: CreateDevToolArgs) => {
+        if (this.devTools.has(devToolArgs.id)) {
           throw new Error(
-            `Dev tool with id [${devTool.id}] has already been registered. Use a unique id.`
+            `Dev tool with id [${devToolArgs.id}] has already been registered. Use a unique id.`
           );
         }
 
+        const devTool = createDevToolApp(devToolArgs);
         this.devTools.set(devTool.id, devTool);
+        return devTool;
       },
     };
   }
 
   public start() {
-    return {
-      getSortedDevTools: this.getSortedDevTools.bind(this),
-    };
+    if (this.getSortedDevTools().length === 0) {
+      this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
+    }
   }
 
   public stop() {}

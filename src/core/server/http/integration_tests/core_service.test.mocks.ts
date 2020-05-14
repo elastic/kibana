@@ -24,3 +24,14 @@ jest.doMock('../../elasticsearch/scoped_cluster_client', () => ({
     return elasticsearchServiceMock.createScopedClusterClient();
   }),
 }));
+
+jest.doMock('elasticsearch', () => {
+  const realES = jest.requireActual('elasticsearch');
+  return {
+    ...realES,
+    // eslint-disable-next-line object-shorthand
+    Client: function() {
+      return elasticsearchServiceMock.createElasticsearchClient();
+    },
+  };
+});

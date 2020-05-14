@@ -8,16 +8,26 @@ import { failure } from 'io-ts/lib/PathReporter';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-import { TimelineSavedObjectRuntimeType, TimelineSavedObject } from './types';
+import {
+  TimelineSavedObjectRuntimeType,
+  TimelineSavedObject,
+  TimelineType,
+} from '../../../common/types/timeline';
 
 export const convertSavedObjectToSavedTimeline = (savedObject: unknown): TimelineSavedObject => {
   const timeline = pipe(
     TimelineSavedObjectRuntimeType.decode(savedObject),
-    map(savedTimeline => ({
-      savedObjectId: savedTimeline.id,
-      version: savedTimeline.version,
-      ...savedTimeline.attributes,
-    })),
+    map(savedTimeline => {
+      const attributes = {
+        ...savedTimeline.attributes,
+        timelineType: savedTimeline.attributes.timelineType ?? TimelineType.default,
+      };
+      return {
+        savedObjectId: savedTimeline.id,
+        version: savedTimeline.version,
+        ...attributes,
+      };
+    }),
     fold(errors => {
       throw new Error(failure(errors).join('\n'));
     }, identity)

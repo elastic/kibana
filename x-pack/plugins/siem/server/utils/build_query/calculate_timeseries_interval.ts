@@ -5,7 +5,7 @@
  */
 /*
  ** Applying the same logic as:
- ** x-pack/legacy/plugins/apm/server/lib/helpers/get_bucket_size/calculate_auto.js
+ ** x-pack/plugins/apm/server/lib/helpers/get_bucket_size/calculate_auto.js
  */
 import moment from 'moment';
 import { get } from 'lodash/fp';

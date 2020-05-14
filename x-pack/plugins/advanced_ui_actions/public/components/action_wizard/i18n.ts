@@ -9,6 +9,6 @@ import { i18n } from '@kbn/i18n';
 export const txtChangeButton = i18n.translate(
   'xpack.advancedUiActions.components.actionWizard.changeButton',
   {
-    defaultMessage: 'change',
+    defaultMessage: 'Change',
   }
 );

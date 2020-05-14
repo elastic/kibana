@@ -6,119 +6,36 @@
 
 import uuid from 'uuid';
 import { merge, flattenDeep } from 'lodash';
+import { makePing } from './make_ping';
+import { TlsProps } from './make_tls';
 
-const INDEX_NAME = 'heartbeat-8-generated-test';
+interface CheckProps {
+  es: any;
+  monitorId?: string;
+  numIps?: number;
+  fields?: { [key: string]: any };
+  mogrify?: (doc: any) => any;
+  refresh?: boolean;
+  tls?: boolean | TlsProps;
+}
 
-export const makePing = async (
-  es: any,
-  monitorId: string,
-  fields: { [key: string]: any },
-  mogrify: (doc: any) => any,
-  refresh: boolean = true
-) => {
-  const baseDoc = {
-    tcp: {
-      rtt: {
-        connect: {
-          us: 14687,
-        },
-      },
-    },
-    observer: {
-      geo: {
-        name: 'mpls',
-        location: '37.926868, -78.024902',
-      },
-      hostname: 'avc-x1e',
-    },
-    agent: {
-      hostname: 'avc-x1e',
-      id: '10730a1a-4cb7-45ce-8524-80c4820476ab',
-      type: 'heartbeat',
-      ephemeral_id: '0d9a8dc6-f604-49e3-86a0-d8f9d6f2cbad',
-      version: '8.0.0',
-    },
-    '@timestamp': new Date().toISOString(),
-    resolve: {
-      rtt: {
-        us: 350,
-      },
-      ip: '127.0.0.1',
-    },
-    ecs: {
-      version: '1.1.0',
-    },
-    host: {
-      name: 'avc-x1e',
-    },
-    http: {
-      rtt: {
-        response_header: {
-          us: 19349,
-        },
-        total: {
-          us: 48954,
-        },
-        write_request: {
-          us: 33,
-        },
-        content: {
-          us: 51,
-        },
-        validate: {
-          us: 19400,
-        },
-      },
-      response: {
-        status_code: 200,
-        body: {
-          bytes: 3,
-          hash: '27badc983df1780b60c2b3fa9d3a19a00e46aac798451f0febdca52920faaddf',
-        },
-      },
-    },
-    monitor: {
-      duration: {
-        us: 49347,
-      },
-      ip: '127.0.0.1',
-      id: monitorId,
-      check_group: uuid.v4(),
-      type: 'http',
-      status: 'up',
-    },
-    event: {
-      dataset: 'uptime',
-    },
-    url: {
-      path: '/pattern',
-      scheme: 'http',
-      port: 5678,
-      domain: 'localhost',
-      query: 'r=200x5,500x1',
-      full: 'http://localhost:5678/pattern?r=200x5,500x1',
-    },
-  };
-
-  const doc = mogrify(merge(baseDoc, fields));
-
-  await es.index({
-    index: INDEX_NAME,
-    refresh,
-    body: doc,
-  });
-
-  return doc;
+const getRandomMonitorId = () => {
+  return (
+    'monitor-' +
+    Math.random()
+      .toString(36)
+      .substring(7)
+  );
 };
-
-export const makeCheck = async (
-  es: any,
-  monitorId: string,
-  numIps: number,
-  fields: { [key: string]: any },
-  mogrify: (doc: any) => any,
-  refresh: boolean = true
-) => {
+export const makeCheck = async ({
+  es,
+  monitorId = getRandomMonitorId(),
+  numIps = 1,
+  fields = {},
+  mogrify = d => d,
+  refresh = true,
+  tls = false,
+}: CheckProps): Promise<{ monitorId: string; docs: any }> => {
   const cgFields = {
     monitor: {
       check_group: uuid.v4(),
@@ -139,7 +56,7 @@ export const makeCheck = async (
     if (i === numIps - 1) {
       pingFields.summary = summary;
     }
-    const doc = await makePing(es, monitorId, pingFields, mogrify, false);
+    const doc = await makePing(es, monitorId, pingFields, mogrify, false, tls as any);
     docs.push(doc);
     // @ts-ignore
     summary[doc.monitor.status]++;
@@ -149,15 +66,15 @@ export const makeCheck = async (
     await es.indices.refresh();
   }
 
-  return docs;
+  return { monitorId, docs };
 };
 
 export const makeChecks = async (
   es: any,
   monitorId: string,
-  numChecks: number,
-  numIps: number,
-  every: number, // number of millis between checks
+  numChecks: number = 1,
+  numIps: number = 1,
+  every: number = 10000, // number of millis between checks
   fields: { [key: string]: any } = {},
   mogrify: (doc: any) => any = d => d,
   refresh: boolean = true
@@ -177,7 +94,8 @@ export const makeChecks = async (
         },
       },
     });
-    checks.push(await makeCheck(es, monitorId, numIps, fields, mogrify, false));
+    const { docs } = await makeCheck({ es, monitorId, numIps, fields, mogrify, refresh: false });
+    checks.push(docs);
   }
 
   if (refresh) {

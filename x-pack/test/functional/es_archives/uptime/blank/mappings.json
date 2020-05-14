@@ -1665,6 +1665,13 @@
             },
             "id": {
               "type": "keyword",
+              "fields": {
+                "text": {
+                  "type": "text",
+                  "norms": false,
+                  "analyzer": "simple"
+                }
+              },
               "ignore_above": 1024
             },
             "ip": {
@@ -1672,6 +1679,13 @@
             },
             "name": {
               "type": "keyword",
+              "fields": {
+                "text": {
+                  "type": "text",
+                  "norms": false,
+                  "analyzer": "simple"
+                }
+              },
               "ignore_above": 1024
             },
             "status": {
@@ -3079,10 +3093,21 @@
                 },
                 "x509": {
                   "properties": {
+                    "alternative_names": {
+                      "type": "keyword",
+                      "ignore_above": 1024
+                    },
                     "issuer": {
                       "properties": {
                         "common_name": {
                           "type": "keyword",
+                          "fields": {
+                            "text": {
+                              "type": "text",
+                              "norms": false,
+                              "analyzer": "simple"
+                            }
+                          },
                           "ignore_above": 1024
                         },
                         "distinguished_name": {
@@ -3092,14 +3117,16 @@
                       }
                     },
                     "not_after": {
-                      "type": "keyword",
-                      "ignore_above": 1024
+                      "type": "date"
                     },
                     "not_before": {
+                      "type": "date"
+                    },
+                    "public_key_algorithm": {
                       "type": "keyword",
                       "ignore_above": 1024
                     },
-                    "public_key_algorithm": {
+                    "public_key_curve": {
                       "type": "keyword",
                       "ignore_above": 1024
                     },
@@ -3121,6 +3148,13 @@
                       "properties": {
                         "common_name": {
                           "type": "keyword",
+                          "fields": {
+                            "text": {
+                              "type": "text",
+                              "norms": false,
+                              "analyzer": "simple"
+                            }
+                          },
                           "ignore_above": 1024
                         },
                         "distinguished_name": {
@@ -3128,6 +3162,10 @@
                           "ignore_above": 1024
                         }
                       }
+                    },
+                    "version_number": {
+                      "type": "keyword",
+                      "ignore_above": 1024
                     }
                   }
                 }

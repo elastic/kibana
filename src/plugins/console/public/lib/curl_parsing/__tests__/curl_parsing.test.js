@@ -17,15 +17,15 @@
  * under the License.
  */
 
-const _ = require('lodash');
-const curl = require('../curl');
+import _ from 'lodash';
+import { detectCURL, parseCURL } from '../curl';
 import curlTests from './curl_parsing.txt';
 
 describe('CURL', () => {
   const notCURLS = ['sldhfsljfhs', 's;kdjfsldkfj curl -XDELETE ""', '{ "hello": 1 }'];
   _.each(notCURLS, function(notCURL, i) {
     test('cURL Detection - broken strings ' + i, function() {
-      expect(curl.detectCURL(notCURL)).toEqual(false);
+      expect(detectCURL(notCURL)).toEqual(false);
     });
   });
 
@@ -39,8 +39,8 @@ describe('CURL', () => {
     const response = fixture[2].trim();
 
     test('cURL Detection - ' + name, function() {
-      expect(curl.detectCURL(curlText)).toBe(true);
-      const r = curl.parseCURL(curlText);
+      expect(detectCURL(curlText)).toBe(true);
+      const r = parseCURL(curlText);
       expect(r).toEqual(response);
     });
   });

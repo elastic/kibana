@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Assign } from '@kbn/utility-types';
+import { Assign, Ensure } from '@kbn/utility-types';
 import { ExpressionAstFunction, ExpressionAstArgument } from 'src/plugins/expressions/public';
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
@@ -31,17 +31,22 @@ import { FieldFormatsStart } from '../../field_formats';
 
 type State = string | number | boolean | null | undefined | SerializableState;
 
-interface SerializableState {
+/** @internal **/
+export interface SerializableState {
   [key: string]: State | State[];
 }
 
-export interface AggConfigSerialized {
-  type: string;
-  enabled?: boolean;
-  id?: string;
-  params?: SerializableState;
-  schema?: string;
-}
+/** @internal **/
+export type AggConfigSerialized = Ensure<
+  {
+    type: string;
+    enabled?: boolean;
+    id?: string;
+    params?: SerializableState;
+    schema?: string;
+  },
+  SerializableState
+>;
 
 export interface AggConfigDependencies {
   fieldFormats: FieldFormatsStart;

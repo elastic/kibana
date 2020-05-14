@@ -12,7 +12,6 @@ export default function({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('regression creation', function() {
-    this.tags(['smoke']);
     before(async () => {
       await esArchiver.loadIfNeeded('ml/egs_regression');
       await ml.testResources.createIndexPatternIfNeeded('ft_egs_regression', '@timestamp');

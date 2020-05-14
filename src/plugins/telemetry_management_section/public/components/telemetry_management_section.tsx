@@ -69,7 +69,9 @@ export class TelemetryManagementSection extends Component<Props, State> {
     const { query } = nextProps;
 
     const searchTerm = (query.text || '').toLowerCase();
-    const searchTermMatches = SEARCH_TERMS.some(term => term.indexOf(searchTerm) >= 0);
+    const searchTermMatches =
+      this.props.telemetryService.getCanChangeOptInStatus() &&
+      SEARCH_TERMS.some(term => term.indexOf(searchTerm) >= 0);
 
     if (searchTermMatches !== this.state.queryMatches) {
       this.setState(
@@ -244,3 +246,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
     });
   };
 }
+
+// required for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default TelemetryManagementSection;

@@ -20,12 +20,13 @@ import {
 } from 'src/core/server';
 
 import { ILicense, PublicLicense, PublicFeatures } from '../common/types';
-import { LicensingPluginSetup } from './types';
+import { LicensingPluginSetup, LicensingPluginStart } from './types';
 import { License } from '../common/license';
 import { createLicenseUpdate } from '../common/license_update';
 
 import { ElasticsearchError, RawLicense, RawFeatures } from './types';
 import { registerRoutes } from './routes';
+import { FeatureUsageService } from './services';
 
 import { LicenseConfigType } from './licensing_config';
 import { createRouteHandlerContext } from './licensing_route_handler_context';
@@ -77,18 +78,19 @@ function sign({
  * A plugin for fetching, refreshing, and receiving information about the license for the
  * current Kibana instance.
  */
-export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
+export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPluginStart, {}, {}> {
   private stop$ = new Subject();
   private readonly logger: Logger;
   private readonly config$: Observable<LicenseConfigType>;
   private loggingSubscription?: Subscription;
+  private featureUsage = new FeatureUsageService();
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
     this.config$ = this.context.config.create<LicenseConfigType>();
   }
 
-  public async setup(core: CoreSetup) {
+  public async setup(core: CoreSetup<{}, LicensingPluginStart>) {
     this.logger.debug('Setting up Licensing plugin');
     const config = await this.config$.pipe(take(1)).toPromise();
     const pollingFrequency = config.api_polling_frequency;
@@ -101,13 +103,14 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
 
     core.http.registerRouteHandlerContext('licensing', createRouteHandlerContext(license$));
 
-    registerRoutes(core.http.createRouter());
+    registerRoutes(core.http.createRouter(), core.getStartServices);
     core.http.registerOnPreResponse(createOnPreResponseHandler(refresh, license$));
 
     return {
       refresh,
       license$,
       createLicensePoller: this.createLicensePoller.bind(this),
+      featureUsage: this.featureUsage.setup(),
     };
   }
 
@@ -186,7 +189,11 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
     return error.message;
   }
 
-  public async start(core: CoreStart) {}
+  public async start(core: CoreStart) {
+    return {
+      featureUsage: this.featureUsage.start(),
+    };
+  }
 
   public stop() {
     this.stop$.next();

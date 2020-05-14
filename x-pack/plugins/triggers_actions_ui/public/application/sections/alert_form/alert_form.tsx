@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -23,6 +23,7 @@ import {
   EuiIconTip,
   EuiButtonIcon,
   EuiHorizontalRule,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { some, filter, map, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -36,7 +37,7 @@ import { AlertReducerAction } from './alert_reducer';
 import { AlertTypeModel, Alert, IErrorObject, AlertAction, AlertTypeIndex } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { useAlertsContext } from '../../context/alerts_context';
-import { ActionForm } from '../action_connector_form/action_form';
+import { ActionForm } from '../action_connector_form';
 
 export function validateBaseProperties(alertObject: Alert) {
   const validationResult = { errors: {} };
@@ -87,7 +88,14 @@ export const AlertForm = ({
   setHasActionsDisabled,
 }: AlertFormProps) => {
   const alertsContext = useAlertsContext();
-  const { http, toastNotifications, alertTypeRegistry, actionTypeRegistry } = alertsContext;
+  const {
+    http,
+    toastNotifications,
+    alertTypeRegistry,
+    actionTypeRegistry,
+    docLinks,
+    capabilities,
+  } = alertsContext;
 
   const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(
     alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null
@@ -159,7 +167,21 @@ export const AlertForm = ({
     ? alertTypeModel.alertParamsExpression
     : null;
 
-  const alertTypeNodes = alertTypeRegistry.list().map(function(item, index) {
+  const alertTypeRegistryList =
+    alert.consumer === 'alerting'
+      ? alertTypeRegistry
+          .list()
+          .filter(
+            (alertTypeRegistryItem: AlertTypeModel) => !alertTypeRegistryItem.requiresAppContext
+          )
+      : alertTypeRegistry
+          .list()
+          .filter(
+            (alertTypeRegistryItem: AlertTypeModel) =>
+              alertTypesIndex &&
+              alertTypesIndex[alertTypeRegistryItem.id].producer === alert.consumer
+          );
+  const alertTypeNodes = alertTypeRegistryList.map(function(item, index) {
     return (
       <EuiKeyPadMenuItem
         key={index}
@@ -215,14 +237,24 @@ export const AlertForm = ({
         ) : null}
       </EuiFlexGroup>
       {AlertParamsExpressionComponent ? (
-        <AlertParamsExpressionComponent
-          alertParams={alert.params}
-          alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
-          errors={errors}
-          setAlertParams={setAlertParams}
-          setAlertProperty={setAlertProperty}
-          alertsContext={alertsContext}
-        />
+        <Suspense
+          fallback={
+            <EuiFlexGroup justifyContent="center">
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="m" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        >
+          <AlertParamsExpressionComponent
+            alertParams={alert.params}
+            alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
+            errors={errors}
+            setAlertParams={setAlertParams}
+            setAlertProperty={setAlertProperty}
+            alertsContext={alertsContext}
+          />
+        </Suspense>
       ) : null}
       {defaultActionGroupId ? (
         <ActionForm
@@ -245,6 +277,8 @@ export const AlertForm = ({
           actionTypeRegistry={actionTypeRegistry}
           defaultActionMessage={alertTypeModel?.defaultActionMessage}
           toastNotifications={toastNotifications}
+          docLinks={docLinks}
+          capabilities={capabilities}
         />
       ) : null}
     </Fragment>

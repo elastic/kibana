@@ -5,6 +5,7 @@
  */
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import Boom from 'boom';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   AssetReference,
@@ -93,11 +94,18 @@ export async function installPackage(options: {
   const { savedObjectsClient, pkgkey, callCluster } = options;
   // TODO: change epm API to /packageName/version so we don't need to do this
   const [pkgName, pkgVersion] = pkgkey.split('-');
-  // see if some version of this package is already installed
-  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-  const reinstall = pkgVersion === installedPkg?.attributes.version;
 
+  // see if some version of this package is already installed
+  // TODO: calls to getInstallationObject, Registry.fetchInfo, and Registry.fetchFindLatestPackge
+  // and be replaced by getPackageInfo after adjusting for it to not group/use archive assets
+  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
   const registryPackageInfo = await Registry.fetchInfo(pkgName, pkgVersion);
+  const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
+
+  if (pkgVersion < latestPackage.version)
+    throw Boom.badRequest('Cannot install or update to an out-of-date package');
+
+  const reinstall = pkgVersion === installedPkg?.attributes.version;
   const { internal = false, removable = true } = registryPackageInfo;
 
   // delete the previous version's installation's SO kibana assets before installing new ones
@@ -106,7 +114,7 @@ export async function installPackage(options: {
     try {
       await deleteKibanaSavedObjectsAssets(savedObjectsClient, installedPkg.attributes.installed);
     } catch (err) {
-      // some assets may not exist if deleting during a failed update
+      // log these errors, some assets may not exist if deleted during a failed update
     }
   }
 

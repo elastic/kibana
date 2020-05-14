@@ -1,5 +1,5 @@
 Hard forked from here:
-x-pack/legacy/plugins/apm/scripts/optimize-tsconfig.js
+x-pack/plugins/apm/scripts/optimize-tsconfig.js
 
 
 #### Optimizing TypeScript 

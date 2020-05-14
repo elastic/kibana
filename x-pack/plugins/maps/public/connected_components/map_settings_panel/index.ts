@@ -10,13 +10,20 @@ import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapStoreState } from '../../reducers/store';
 import { MapSettingsPanel } from './map_settings_panel';
 import { rollbackMapSettings, updateMapSetting } from '../../actions/map_actions';
-import { getMapSettings, hasMapSettingsChanges } from '../../selectors/map_selectors';
+import {
+  getMapCenter,
+  getMapSettings,
+  getMapZoom,
+  hasMapSettingsChanges,
+} from '../../selectors/map_selectors';
 import { updateFlyout } from '../../actions/ui_actions';
 
 function mapStateToProps(state: MapStoreState) {
   return {
-    settings: getMapSettings(state),
+    center: getMapCenter(state),
     hasMapSettingsChanges: hasMapSettingsChanges(state),
+    settings: getMapSettings(state),
+    zoom: getMapZoom(state),
   };
 }
 
@@ -29,7 +36,7 @@ function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
     keepChanges: () => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
     },
-    updateMapSetting: (settingKey: string, settingValue: string | number | boolean) => {
+    updateMapSetting: (settingKey: string, settingValue: string | number | boolean | object) => {
       dispatch(updateMapSetting(settingKey, settingValue));
     },
   };

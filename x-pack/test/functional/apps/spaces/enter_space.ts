@@ -13,7 +13,7 @@ export default function enterSpaceFunctonalTests({
   const PageObjects = getPageObjects(['security', 'spaceSelector']);
 
   describe('Enter Space', function() {
-    this.tags('smoke');
+    this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('spaces/enter_space');
       await PageObjects.security.forceLogout();

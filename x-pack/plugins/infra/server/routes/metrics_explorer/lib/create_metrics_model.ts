@@ -4,16 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraMetricModelMetricType } from '../../../lib/adapters/metrics';
 import { MetricsExplorerRequestBody } from '../../../../common/http_api/metrics_explorer';
 import { TSVBMetricModel } from '../../../../common/inventory_models/types';
+
+const percentileToVaue = (agg: 'p95' | 'p99') => {
+  if (agg === 'p95') {
+    return 95;
+  }
+  return 99;
+};
+
 export const createMetricModel = (options: MetricsExplorerRequestBody): TSVBMetricModel => {
+  // if dropLastBucket is set use the value otherwise default to true.
+  const dropLastBucket: boolean = options.dropLastBucket != null ? options.dropLastBucket : true;
   return {
     id: 'custom',
     requires: [],
     index_pattern: options.indexPattern,
     interval: options.timerange.interval,
     time_field: options.timerange.field,
+    drop_last_bucket: dropLastBucket,
     type: 'timeseries',
     // Create one series per metric requested. The series.id will be used to identify the metric
     // when the responses are processed and combined with the grouping request.
@@ -47,6 +57,27 @@ export const createMetricModel = (options: MetricsExplorerRequestBody): TSVBMetr
           ],
         };
       }
+
+      if (metric.aggregation === 'p95' || metric.aggregation === 'p99') {
+        return {
+          id: `metric_${index}`,
+          split_mode: 'everything',
+          metrics: [
+            {
+              field: metric.field,
+              id: `metric_${metric.aggregation}_${index}`,
+              type: 'percentile',
+              percentiles: [
+                {
+                  id: 'percentile_0',
+                  value: percentileToVaue(metric.aggregation),
+                },
+              ],
+            },
+          ],
+        };
+      }
+
       // Create a basic TSVB series with a single metric
       const aggregation = metric.aggregation || 'avg';
 
@@ -57,7 +88,7 @@ export const createMetricModel = (options: MetricsExplorerRequestBody): TSVBMetr
           {
             field: metric.field,
             id: `metric_${aggregation}_${index}`,
-            type: InfraMetricModelMetricType[aggregation],
+            type: aggregation,
           },
         ],
       };

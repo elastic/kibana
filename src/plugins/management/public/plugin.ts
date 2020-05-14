@@ -25,6 +25,7 @@ import { KibanaLegacySetup } from '../../kibana_legacy/public';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
 // @ts-ignore
 import { LegacyManagementAdapter } from './legacy';
+import { showLegacyRedirectMessages } from './legacy/redirect_messages';
 
 export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart> {
   private managementSections = new ManagementService();
@@ -36,8 +37,8 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
   ) {
     home.featureCatalogue.register({
       id: 'stack-management',
-      title: i18n.translate('management.displayName', {
-        defaultMessage: 'Management',
+      title: i18n.translate('management.stackManagement.managementLabel', {
+        defaultMessage: 'Stack Management',
       }),
       description: i18n.translate('management.stackManagement.managementDescription', {
         defaultMessage: 'Your center console for managing the Elastic Stack.',
@@ -58,6 +59,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
   }
 
   public start(core: CoreStart) {
+    showLegacyRedirectMessages(core.notifications, core.overlays);
     return {
       sections: this.managementSections.start(core.application.navigateToApp),
       legacy: this.legacyManagement.init(core.application.capabilities),

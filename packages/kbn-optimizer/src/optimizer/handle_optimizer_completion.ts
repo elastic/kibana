@@ -17,20 +17,20 @@
  * under the License.
  */
 
-import * as Rx from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { createFailError } from '@kbn/dev-utils';
 
-import { pipeClosure, Update } from '../common';
+import { pipeClosure } from '../common';
+import { OptimizerUpdate$ } from '../run_optimizer';
 
 import { OptimizerState } from './optimizer_state';
 import { OptimizerConfig } from './optimizer_config';
 
 export function handleOptimizerCompletion(config: OptimizerConfig) {
-  return pipeClosure((source$: Rx.Observable<Update<any, OptimizerState>>) => {
+  return pipeClosure((update$: OptimizerUpdate$) => {
     let prevState: OptimizerState | undefined;
 
-    return source$.pipe(
+    return update$.pipe(
       tap({
         next: update => {
           prevState = update.state;

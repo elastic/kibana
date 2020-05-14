@@ -46,6 +46,8 @@ export const mlResultsService = {
   fetchPartitionFieldsValues,
 };
 
+export type MlResultsService = typeof mlResultsService;
+
 type time = string;
 export interface ModelPlotOutputResults {
   results: Record<time, { actual: number; modelUpper: number | null; modelLower: number | null }>;

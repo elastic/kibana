@@ -105,18 +105,20 @@ export function isModelPlotChartableForDetector(job, detectorIndex) {
     const dtr = dtrs[detectorIndex];
     const functionName = dtr.function;
 
-    // Model plot can be charted for any of the functions which map to ES aggregations,
+    // Model plot can be charted for any of the functions which map to ES aggregations
+    // (except rare, for which no model plot results are generated),
     // plus varp and info_content functions.
     isModelPlotChartable =
-      mlFunctionToESAggregation(functionName) !== null ||
-      [
-        'varp',
-        'high_varp',
-        'low_varp',
-        'info_content',
-        'high_info_content',
-        'low_info_content',
-      ].includes(functionName) === true;
+      functionName !== 'rare' &&
+      (mlFunctionToESAggregation(functionName) !== null ||
+        [
+          'varp',
+          'high_varp',
+          'low_varp',
+          'info_content',
+          'high_info_content',
+          'low_info_content',
+        ].includes(functionName) === true);
   }
 
   return isModelPlotChartable;
@@ -587,4 +589,10 @@ export function processCreatedBy(customSettings) {
   if (Object.values(CREATED_BY_LABEL).includes(customSettings.created_by)) {
     delete customSettings.created_by;
   }
+}
+
+export function splitIndexPatternNames(indexPatternName) {
+  return indexPatternName.includes(',')
+    ? indexPatternName.split(',').map(i => i.trim())
+    : [indexPatternName];
 }

@@ -9,7 +9,7 @@
 ```typescript
 setup(core: CoreSetup, { usageCollection }: DataPluginSetupDependencies): {
         fieldFormats: {
-            register: (customFieldFormat: import("../common").IFieldFormatType) => number;
+            register: (customFieldFormat: import("../public").FieldFormatInstanceType) => number;
         };
         search: ISearchSetup;
     };
@@ -26,7 +26,7 @@ setup(core: CoreSetup, { usageCollection }: DataPluginSetupDependencies): {
 
 `{
         fieldFormats: {
-            register: (customFieldFormat: import("../common").IFieldFormatType) => number;
+            register: (customFieldFormat: import("../public").FieldFormatInstanceType) => number;
         };
         search: ISearchSetup;
     }`

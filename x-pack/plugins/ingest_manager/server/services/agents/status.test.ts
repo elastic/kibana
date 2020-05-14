@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { savedObjectsClientMock } from '../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { getAgentStatusById } from './status';
 import { AGENT_TYPE_PERMANENT } from '../../../common/constants';
 import { AgentSOAttributes } from '../../../common/types/models';
@@ -18,8 +18,8 @@ describe('Agent status service', () => {
       type: AGENT_TYPE_PERMANENT,
       attributes: {
         active: false,
-        local_metadata: '{}',
-        user_provided_metadata: '{}',
+        local_metadata: {},
+        user_provided_metadata: {},
       },
     } as SavedObject<AgentSOAttributes>);
     const status = await getAgentStatusById(mockSavedObjectsClient, 'id');
@@ -33,8 +33,8 @@ describe('Agent status service', () => {
       type: AGENT_TYPE_PERMANENT,
       attributes: {
         active: true,
-        local_metadata: '{}',
-        user_provided_metadata: '{}',
+        local_metadata: {},
+        user_provided_metadata: {},
       },
     } as SavedObject<AgentSOAttributes>);
     const status = await getAgentStatusById(mockSavedObjectsClient, 'id');

@@ -63,6 +63,7 @@ beforeEach(async () => {
       getAllEmbeddableFactories: api.getEmbeddableFactories,
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
+      application: coreStart.application,
       inspector: {} as any,
       SavedObjectFinder: () => null,
     }

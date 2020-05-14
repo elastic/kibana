@@ -34,6 +34,7 @@ export const AnalyzersParameter = ({ field, withSearchQuoteAnalyzer = false }: P
         href: documentationService.getAnalyzerLink(),
       }}
       withToggle={false}
+      data-test-subj="analyzerParameters"
     >
       <FormDataProvider pathsToWatch="useSameAnalyzerForSearch">
         {({ useSameAnalyzerForSearch }) => {
@@ -50,6 +51,7 @@ export const AnalyzersParameter = ({ field, withSearchQuoteAnalyzer = false }: P
               path="analyzer"
               label={label}
               defaultValue={field.source.analyzer as string}
+              data-test-subj="indexAnalyzer"
             />
           );
         }}
@@ -60,6 +62,9 @@ export const AnalyzersParameter = ({ field, withSearchQuoteAnalyzer = false }: P
       <UseField
         path="useSameAnalyzerForSearch"
         component={CheckBoxField}
+        componentProps={{
+          'data-test-subj': 'useSameAnalyzerForSearchCheckBox',
+        }}
         config={{
           label: i18n.translate(
             'xpack.idxMgmt.mappingsEditor.analyzers.useSameAnalyzerIndexAnSearch',
@@ -80,6 +85,7 @@ export const AnalyzersParameter = ({ field, withSearchQuoteAnalyzer = false }: P
                 path="search_analyzer"
                 defaultValue={field.source.search_analyzer as string}
                 config={getFieldConfig('search_analyzer')}
+                data-test-subj="searchAnalyzer"
               />
               <EuiSpacer size="s" />
             </>
@@ -94,6 +100,7 @@ export const AnalyzersParameter = ({ field, withSearchQuoteAnalyzer = false }: P
             path="search_quote_analyzer"
             defaultValue={field.source.search_quote_analyzer as string}
             config={getFieldConfig('search_quote_analyzer')}
+            data-test-subj="searchQuoteAnalyzer"
           />
         </>
       )}

@@ -12,9 +12,11 @@ import { Query, DataPublicPluginStart } from 'src/plugins/data/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { AppMountContext, NotificationsStart } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { SavedObjectSaveModal } from '../../../../../src/plugins/saved_objects/public';
+import {
+  SavedObjectSaveModalOrigin,
+  OnSaveProps,
+} from '../../../../../src/plugins/saved_objects/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { EditorFrameInstance } from '../types';
 import { NativeRenderer } from '../native_renderer';
@@ -52,7 +54,7 @@ export function App({
   docId,
   docStorage,
   redirectTo,
-  addToDashboardMode,
+  originatingApp,
   navigation,
 }: {
   editorFrame: EditorFrameInstance;
@@ -62,8 +64,8 @@ export function App({
   storage: IStorageWrapper;
   docId?: string;
   docStorage: SavedObjectStore;
-  redirectTo: (id?: string) => void;
-  addToDashboardMode?: boolean;
+  redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
+  originatingApp?: string | undefined;
 }) {
   const language =
     storage.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
@@ -120,7 +122,11 @@ export function App({
   useEffect(() => {
     core.chrome.setBreadcrumbs([
       {
-        href: core.http.basePath.prepend(`/app/kibana#/visualize`),
+        href: core.http.basePath.prepend(`/app/visualize#/`),
+        onClick: e => {
+          core.application.navigateToApp('visualize', { path: '/' });
+          e.preventDefault();
+        },
         text: i18n.translate('xpack.lens.breadcrumbsTitle', {
           defaultMessage: 'Visualize',
         }),
@@ -182,6 +188,63 @@ export function App({
     lastKnownDoc.expression.length > 0 &&
     core.application.capabilities.visualize.save;
 
+  const runSave = (
+    saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
+      returnToOrigin: boolean;
+    }
+  ) => {
+    if (!lastKnownDoc) {
+      return;
+    }
+    const [pinnedFilters, appFilters] = _.partition(
+      lastKnownDoc.state?.filters,
+      esFilters.isFilterPinned
+    );
+    const lastDocWithoutPinned = pinnedFilters?.length
+      ? {
+          ...lastKnownDoc,
+          state: {
+            ...lastKnownDoc.state,
+            filters: appFilters,
+          },
+        }
+      : lastKnownDoc;
+
+    const doc = {
+      ...lastDocWithoutPinned,
+      id: saveProps.newCopyOnSave ? undefined : lastKnownDoc.id,
+      title: saveProps.newTitle,
+    };
+
+    const newlyCreated: boolean = saveProps.newCopyOnSave || !lastKnownDoc?.id;
+    docStorage
+      .save(doc)
+      .then(({ id }) => {
+        // Prevents unnecessary network request and disables save button
+        const newDoc = { ...doc, id };
+        setState(s => ({
+          ...s,
+          isSaveModalVisible: false,
+          persistedDoc: newDoc,
+          lastKnownDoc: newDoc,
+        }));
+        if (docId !== id || saveProps.returnToOrigin) {
+          redirectTo(id, saveProps.returnToOrigin, newlyCreated);
+        }
+      })
+      .catch(e => {
+        // eslint-disable-next-line no-console
+        console.dir(e);
+        trackUiEvent('save_failed');
+        core.notifications.toasts.addDanger(
+          i18n.translate('xpack.lens.app.docSavingError', {
+            defaultMessage: 'Error saving document',
+          })
+        );
+        setState(s => ({ ...s, isSaveModalVisible: false }));
+      });
+  };
+
   const onError = useCallback(
     (e: { message: string }) =>
       core.notifications.toasts.addDanger({
@@ -191,13 +254,6 @@ export function App({
   );
 
   const { TopNavMenu } = navigation.ui;
-
-  const confirmButton = addToDashboardMode ? (
-    <FormattedMessage
-      id="xpack.lens.app.saveAddToDashboard"
-      defaultMessage="Save and add to dashboard"
-    />
-  ) : null;
 
   return (
     <I18nProvider>
@@ -213,10 +269,39 @@ export function App({
           <div className="lnsApp__header">
             <TopNavMenu
               config={[
+                ...(!!originatingApp && lastKnownDoc?.id
+                  ? [
+                      {
+                        label: i18n.translate('xpack.lens.app.saveAndReturn', {
+                          defaultMessage: 'Save and return',
+                        }),
+                        emphasize: true,
+                        iconType: 'check',
+                        run: () => {
+                          if (isSaveable && lastKnownDoc) {
+                            runSave({
+                              newTitle: lastKnownDoc.title,
+                              newCopyOnSave: false,
+                              isTitleDuplicateConfirmed: false,
+                              returnToOrigin: true,
+                            });
+                          }
+                        },
+                        testId: 'lnsApp_saveAndReturnButton',
+                        disableButton: !isSaveable,
+                      },
+                    ]
+                  : []),
                 {
-                  label: i18n.translate('xpack.lens.app.save', {
-                    defaultMessage: 'Save',
-                  }),
+                  label:
+                    lastKnownDoc?.id && !!originatingApp
+                      ? i18n.translate('xpack.lens.app.saveAs', {
+                          defaultMessage: 'Save as',
+                        })
+                      : i18n.translate('xpack.lens.app.save', {
+                          defaultMessage: 'Save',
+                        }),
+                  emphasize: !originatingApp || !lastKnownDoc?.id,
                   run: () => {
                     if (isSaveable && lastKnownDoc) {
                       setState(s => ({ ...s, isSaveModalVisible: true }));
@@ -336,63 +421,18 @@ export function App({
           )}
         </div>
         {lastKnownDoc && state.isSaveModalVisible && (
-          <SavedObjectSaveModal
-            onSave={props => {
-              const [pinnedFilters, appFilters] = _.partition(
-                lastKnownDoc.state?.filters,
-                esFilters.isFilterPinned
-              );
-              const lastDocWithoutPinned = pinnedFilters?.length
-                ? {
-                    ...lastKnownDoc,
-                    state: {
-                      ...lastKnownDoc.state,
-                      filters: appFilters,
-                    },
-                  }
-                : lastKnownDoc;
-
-              const doc = {
-                ...lastDocWithoutPinned,
-                id: props.newCopyOnSave ? undefined : lastKnownDoc.id,
-                title: props.newTitle,
-              };
-
-              docStorage
-                .save(doc)
-                .then(({ id }) => {
-                  // Prevents unnecessary network request and disables save button
-                  const newDoc = { ...doc, id };
-                  setState(s => ({
-                    ...s,
-                    isSaveModalVisible: false,
-                    persistedDoc: newDoc,
-                    lastKnownDoc: newDoc,
-                  }));
-                  if (docId !== id) {
-                    redirectTo(id);
-                  }
-                })
-                .catch(e => {
-                  // eslint-disable-next-line no-console
-                  console.dir(e);
-                  trackUiEvent('save_failed');
-                  core.notifications.toasts.addDanger(
-                    i18n.translate('xpack.lens.app.docSavingError', {
-                      defaultMessage: 'Error saving document',
-                    })
-                  );
-                  setState(s => ({ ...s, isSaveModalVisible: false }));
-                });
-            }}
+          <SavedObjectSaveModalOrigin
+            originatingApp={originatingApp}
+            onSave={props => runSave(props)}
             onClose={() => setState(s => ({ ...s, isSaveModalVisible: false }))}
-            title={lastKnownDoc.title || ''}
-            showCopyOnSave={!!lastKnownDoc.id && !addToDashboardMode}
+            documentInfo={{
+              id: lastKnownDoc.id,
+              title: lastKnownDoc.title || '',
+            }}
             objectType={i18n.translate('xpack.lens.app.saveModalType', {
               defaultMessage: 'Lens visualization',
             })}
-            showDescription={false}
-            confirmButtonLabel={confirmButton}
+            data-test-subj="lnsApp_saveModalOrigin"
           />
         )}
       </KibanaContextProvider>

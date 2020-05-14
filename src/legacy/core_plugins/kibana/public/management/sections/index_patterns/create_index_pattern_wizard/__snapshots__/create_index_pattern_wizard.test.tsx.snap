@@ -111,6 +111,7 @@ exports[`CreateIndexPatternWizard renders the empty state when there are no indi
     />
     <EmptyState
       onRefresh={[Function]}
+      prependBasePath={[MockFunction]}
     />
   </div>
   <EuiGlobalToastList
@@ -149,6 +150,9 @@ exports[`CreateIndexPatternWizard renders time field step when step is set to 2 
       indexPatternsService={
         Object {
           "clearCache": [MockFunction],
+          "createField": [MockFunction],
+          "createFieldList": [MockFunction],
+          "ensureDefaultIndexPattern": [MockFunction],
           "get": [MockFunction],
           "make": [Function],
         }

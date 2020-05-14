@@ -7,7 +7,7 @@
 import { createAgentAction } from './actions';
 import { SavedObject } from 'kibana/server';
 import { AgentAction } from '../../../common/types/models';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
+import { savedObjectsClientMock } from 'src/core/server/mocks';
 
 describe('test agent actions services', () => {
   it('should create a new action', async () => {

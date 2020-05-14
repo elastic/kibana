@@ -31,6 +31,7 @@ import { ExpressionWrapper } from './expression_wrapper';
 export interface LensEmbeddableConfiguration {
   savedVis: Document;
   editUrl: string;
+  editPath: string;
   editable: boolean;
   indexPatterns?: IIndexPattern[];
 }
@@ -64,7 +65,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
   constructor(
     timefilter: TimefilterContract,
     expressionRenderer: ReactExpressionRendererType,
-    { savedVis, editUrl, editable, indexPatterns }: LensEmbeddableConfiguration,
+    { savedVis, editPath, editUrl, editable, indexPatterns }: LensEmbeddableConfiguration,
     initialInput: LensEmbeddableInput,
     parent?: IContainer
   ) {
@@ -77,6 +78,8 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
         // passing edit url and index patterns to the output of this embeddable for
         // the container to pick them up and use them to configure filter bar and
         // config dropdown correctly.
+        editApp: 'lens',
+        editPath,
         editUrl,
         indexPatterns,
       },
@@ -96,9 +99,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
   public supportedTriggers() {
     switch (this.savedVis.visualizationType) {
       case 'lnsXY':
-        // TODO: case 'lnsDatatable':
-        return [VIS_EVENT_TO_TRIGGER.filter];
-
+        return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
       case 'lnsMetric':
       default:
         return [];

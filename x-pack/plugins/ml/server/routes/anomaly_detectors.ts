@@ -37,6 +37,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/anomaly_detectors',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -64,6 +67,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
       path: '/api/ml/anomaly_detectors/{jobId}',
       validate: {
         params: jobIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -93,6 +99,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/anomaly_detectors/_stats',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -120,6 +129,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
       path: '/api/ml/anomaly_detectors/{jobId}/_stats',
       validate: {
         params: jobIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -153,6 +165,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         params: jobIdSchema,
         body: schema.object(anomalyDetectionJobSchema),
+      },
+      options: {
+        tags: ['access:ml:canCreateJob'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -188,6 +203,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         params: jobIdSchema,
         body: anomalyDetectionUpdateJobSchema,
       },
+      options: {
+        tags: ['access:ml:canUpdateJob'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -220,6 +238,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         params: jobIdSchema,
       },
+      options: {
+        tags: ['access:ml:canOpenJob'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -250,6 +271,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
       path: '/api/ml/anomaly_detectors/{jobId}/_close',
       validate: {
         params: jobIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canCloseJob'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -286,6 +310,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         params: jobIdSchema,
       },
+      options: {
+        tags: ['access:ml:canDeleteJob'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -319,6 +346,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         body: schema.any(),
       },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -350,6 +380,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         params: jobIdSchema,
         body: forecastAnomalyDetector,
+      },
+      options: {
+        tags: ['access:ml:canForecastJob'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -389,6 +422,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         params: jobIdSchema,
         body: getRecordsSchema,
       },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -424,6 +460,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         params: getBucketParamsSchema,
         body: getBucketsSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -462,6 +501,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
         params: jobIdSchema,
         body: getOverallBucketsSchema,
       },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -495,6 +537,9 @@ export function jobRoutes({ router, mlLicense }: RouteInitialization) {
       path: '/api/ml/anomaly_detectors/{jobId}/results/categories/{categoryId}',
       validate: {
         params: getCategoriesSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

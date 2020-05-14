@@ -5,26 +5,23 @@
  */
 
 import { uniq } from 'lodash';
-import { RequestHandlerContext } from 'kibana/server';
 import { InfraSnapshotRequestOptions } from './types';
 import { getMetricsAggregations } from './query_helpers';
 import { calculateMetricInterval } from '../../utils/calculate_metric_interval';
 import { SnapshotModel, SnapshotModelMetricAggRT } from '../../../common/inventory_models/types';
-import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
 import { getDatasetForField } from '../../routes/metrics_explorer/lib/get_dataset_for_field';
 import { InfraTimerangeInput } from '../../../common/http_api/snapshot_api';
+import { ESSearchClient } from '.';
 
 export const createTimeRangeWithInterval = async (
-  framework: KibanaFramework,
-  requestContext: RequestHandlerContext,
+  client: ESSearchClient,
   options: InfraSnapshotRequestOptions
 ): Promise<InfraTimerangeInput> => {
   const aggregations = getMetricsAggregations(options);
-  const modules = await aggregationsToModules(framework, requestContext, aggregations, options);
+  const modules = await aggregationsToModules(client, aggregations, options);
   const interval = Math.max(
     (await calculateMetricInterval(
-      framework,
-      requestContext,
+      client,
       {
         indexPattern: options.sourceConfiguration.metricAlias,
         timestampField: options.sourceConfiguration.fields.timestamp,
@@ -43,8 +40,7 @@ export const createTimeRangeWithInterval = async (
 };
 
 const aggregationsToModules = async (
-  framework: KibanaFramework,
-  requestContext: RequestHandlerContext,
+  client: ESSearchClient,
   aggregations: SnapshotModel,
   options: InfraSnapshotRequestOptions
 ): Promise<string[]> => {
@@ -59,12 +55,7 @@ const aggregationsToModules = async (
   const fields = await Promise.all(
     uniqueFields.map(
       async field =>
-        await getDatasetForField(
-          framework,
-          requestContext,
-          field as string,
-          options.sourceConfiguration.metricAlias
-        )
+        await getDatasetForField(client, field as string, options.sourceConfiguration.metricAlias)
     )
   );
   return fields.filter(f => f) as string[];

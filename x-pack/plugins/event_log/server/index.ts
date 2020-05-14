@@ -8,6 +8,12 @@ import { PluginInitializerContext } from 'src/core/server';
 import { ConfigSchema } from './types';
 import { Plugin } from './plugin';
 
-export { IEventLogService, IEventLogger, IEventLogClientService, IEvent } from './types';
+export {
+  IEventLogService,
+  IEventLogger,
+  IEventLogClientService,
+  IEvent,
+  SAVED_OBJECT_REL_PRIMARY,
+} from './types';
 export const config = { schema: ConfigSchema };
 export const plugin = (context: PluginInitializerContext) => new Plugin(context);

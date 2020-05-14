@@ -6,5 +6,5 @@ checks-reporter-with-killswitch "Firefox smoke test" \
   node scripts/functional_tests \
     --bail --debug \
     --kibana-install-dir "$installDir" \
-    --include-tag "smoke" \
+    --include-tag "includeFirefox" \
     --config test/functional/config.firefox.js;

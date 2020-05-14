@@ -4,20 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { actionsClientMock } from '../../../../../actions/server/mocks';
 import { alertsClientMock } from '../../../../../alerting/server/mocks';
 import { deleteRules } from './delete_rules';
 import { readRules } from './read_rules';
 jest.mock('./read_rules');
 
 describe('deleteRules', () => {
-  let actionsClient: ReturnType<typeof actionsClientMock.create>;
   let alertsClient: ReturnType<typeof alertsClientMock.create>;
   const notificationId = 'notification-52128c15-0d1b-4716-a4c5-46997ac7f3bd';
   const ruleId = 'rule-04128c15-0d1b-4716-a4c5-46997ac7f3bd';
 
   beforeEach(() => {
-    actionsClient = actionsClientMock.create();
     alertsClient = alertsClientMock.create();
   });
 
@@ -26,7 +23,6 @@ describe('deleteRules', () => {
 
     const result = await deleteRules({
       alertsClient,
-      actionsClient,
       id: notificationId,
       ruleId,
     });
@@ -41,7 +37,6 @@ describe('deleteRules', () => {
 
     const result = await deleteRules({
       alertsClient,
-      actionsClient,
       id: notificationId,
       ruleId,
     });
@@ -61,7 +56,6 @@ describe('deleteRules', () => {
 
     const result = await deleteRules({
       alertsClient,
-      actionsClient,
       id: notificationId,
       ruleId: null,
     });
@@ -87,7 +81,6 @@ describe('deleteRules', () => {
 
     const result = await deleteRules({
       alertsClient,
-      actionsClient,
       id: notificationId,
       ruleId: null,
     });
@@ -117,7 +110,6 @@ describe('deleteRules', () => {
     try {
       await deleteRules({
         alertsClient,
-        actionsClient,
         id: notificationId,
         ruleId: null,
       });
@@ -140,7 +132,6 @@ describe('deleteRules', () => {
 
     const result = await deleteRules({
       alertsClient,
-      actionsClient,
       id: undefined,
       ruleId: null,
     });

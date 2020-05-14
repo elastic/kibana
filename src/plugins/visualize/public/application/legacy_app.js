@@ -21,11 +21,7 @@ import { find } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { createHashHistory } from 'history';
 
-import {
-  createKbnUrlStateStorage,
-  redirectWhenMissing,
-  ensureDefaultIndexPattern,
-} from '../../../kibana_utils/public';
+import { createKbnUrlStateStorage, redirectWhenMissing } from '../../../kibana_utils/public';
 import { createSavedSearchesLoader } from '../../../discover/public';
 
 import editorTemplate from './editor/editor.html';
@@ -49,9 +45,9 @@ const getResolvedResults = deps => {
 
   return savedVis => {
     results.savedVis = savedVis;
+    const serializedVis = visualizations.convertToSerializedVis(savedVis);
     return visualizations
-      .convertToSerializedVis(savedVis)
-      .then(serializedVis => visualizations.createVis(serializedVis.type, serializedVis))
+      .createVis(serializedVis.type, serializedVis)
       .then(vis => {
         if (vis.type.setup) {
           return vis.type.setup(vis).catch(() => vis);
@@ -127,7 +123,7 @@ export function initVisualizeApp(app, deps) {
         controllerAs: 'listingController',
         resolve: {
           createNewVis: () => false,
-          hasDefaultIndex: history => ensureDefaultIndexPattern(deps.core, deps.data, history),
+          hasDefaultIndex: history => deps.data.indexPatterns.ensureDefaultIndexPattern(history),
         },
       })
       .when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
@@ -138,7 +134,7 @@ export function initVisualizeApp(app, deps) {
         controllerAs: 'listingController',
         resolve: {
           createNewVis: () => true,
-          hasDefaultIndex: history => ensureDefaultIndexPattern(deps.core, deps.data, history),
+          hasDefaultIndex: history => deps.data.indexPatterns.ensureDefaultIndexPattern(history),
         },
       })
       .when(VisualizeConstants.CREATE_PATH, {
@@ -147,7 +143,7 @@ export function initVisualizeApp(app, deps) {
         k7Breadcrumbs: getCreateBreadcrumbs,
         resolve: {
           resolved: function($route, history) {
-            const { core, data, savedVisualizations, visualizations, toastNotifications } = deps;
+            const { data, savedVisualizations, visualizations, toastNotifications } = deps;
             const visTypes = visualizations.all();
             const visType = find(visTypes, { name: $route.current.params.type });
             const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
@@ -164,9 +160,23 @@ export function initVisualizeApp(app, deps) {
               );
             }
 
-            return ensureDefaultIndexPattern(core, data, history)
+            // This delay is needed to prevent some navigation issues in Firefox/Safari.
+            // see https://github.com/elastic/kibana/issues/65161
+            const delay = res => {
+              return new Promise(resolve => {
+                setTimeout(() => resolve(res), 0);
+              });
+            };
+
+            return data.indexPatterns
+              .ensureDefaultIndexPattern(history)
               .then(() => savedVisualizations.get($route.current.params))
+              .then(savedVis => {
+                savedVis.searchSourceFields = { index: $route.current.params.indexPattern };
+                return savedVis;
+              })
               .then(getResolvedResults(deps))
+              .then(delay)
               .catch(
                 redirectWhenMissing({
                   history,
@@ -183,9 +193,10 @@ export function initVisualizeApp(app, deps) {
         k7Breadcrumbs: getEditBreadcrumbs,
         resolve: {
           resolved: function($route, history) {
-            const { chrome, core, data, savedVisualizations, toastNotifications } = deps;
+            const { chrome, data, savedVisualizations, toastNotifications } = deps;
 
-            return ensureDefaultIndexPattern(core, data, history)
+            return data.indexPatterns
+              .ensureDefaultIndexPattern(history)
               .then(() => savedVisualizations.get($route.current.params.id))
               .then(savedVis => {
                 chrome.recentlyAccessed.add(savedVis.getFullPath(), savedVis.title, savedVis.id);
@@ -195,14 +206,28 @@ export function initVisualizeApp(app, deps) {
               .catch(
                 redirectWhenMissing({
                   history,
+                  navigateToApp: deps.core.application.navigateToApp,
+                  basePath: deps.core.http.basePath,
                   mapping: {
                     visualization: VisualizeConstants.LANDING_PAGE_PATH,
-                    search:
-                      '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-                    'index-pattern':
-                      '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-                    'index-pattern-field':
-                      '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+                    search: {
+                      app: 'kibana',
+                      path:
+                        '#/management/kibana/objects/savedVisualizations/' +
+                        $route.current.params.id,
+                    },
+                    'index-pattern': {
+                      app: 'kibana',
+                      path:
+                        '#/management/kibana/objects/savedVisualizations/' +
+                        $route.current.params.id,
+                    },
+                    'index-pattern-field': {
+                      app: 'kibana',
+                      path:
+                        '#/management/kibana/objects/savedVisualizations/' +
+                        $route.current.params.id,
+                    },
                   },
                   toastNotifications,
                   onBeforeRedirect() {
@@ -213,8 +238,11 @@ export function initVisualizeApp(app, deps) {
           },
         },
       })
-      .when(`visualize/:tail*?`, {
-        redirectTo: `/${deps.config.defaultAppId}`,
+      .otherwise({
+        template: '<span></span>',
+        controller: function() {
+          deps.kibanaLegacy.navigateToDefaultApp();
+        },
       });
   });
 }

@@ -1,14 +1,15 @@
 {
   "id": "visualize",
   "version": "kibana",
-  "server": false,
+  "server": true,
   "ui": true,
   "requiredPlugins": [
     "data",
     "kibanaLegacy",
     "navigation",
     "savedObjects",
-    "visualizations"
+    "visualizations",
+    "dashboard"
   ],
   "optionalPlugins": [
     "home",

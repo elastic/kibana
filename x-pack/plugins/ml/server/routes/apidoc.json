@@ -50,6 +50,7 @@
     "GetPartitionFieldsValues",
 
     "Modules",
+    "DataRecognizer",
     "RecognizeIndex",
     "GetModule",
     "SetupModule",
@@ -100,7 +101,7 @@
 
     "SystemRoutes",
     "HasPrivileges",
-    "MlCapabilities",
+    "MlCapabilitiesResponse",
     "MlNodeCount",
     "MlInfo",
     "MlEsSearch",

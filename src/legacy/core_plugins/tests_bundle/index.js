@@ -18,6 +18,7 @@
  */
 
 import { createReadStream } from 'fs';
+import { resolve } from 'path';
 
 import globby from 'globby';
 import MultiStream from 'multistream';
@@ -40,6 +41,7 @@ export default kibana => {
     },
 
     uiExports: {
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       async __bundleProvider__(kbnServer) {
         const modules = new Set();
 

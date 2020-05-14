@@ -9,7 +9,10 @@ import _ from 'lodash';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ml } from '../services/ml_api_service';
-import { isModelPlotEnabled } from '../../../common/util/job_utils';
+import {
+  isModelPlotChartableForDetector,
+  isModelPlotEnabled,
+} from '../../../common/util/job_utils';
 // @ts-ignore
 import { buildConfigFromDetector } from '../util/chart_config_builder';
 import { mlResultsService } from '../services/results_service';
@@ -24,7 +27,10 @@ function getMetricData(
   latestMs: number,
   interval: string
 ): Observable<ModelPlotOutput> {
-  if (isModelPlotEnabled(job, detectorIndex, entityFields)) {
+  if (
+    isModelPlotChartableForDetector(job, detectorIndex) &&
+    isModelPlotEnabled(job, detectorIndex, entityFields)
+  ) {
     // Extract the partition, by, over fields on which to filter.
     const criteriaFields = [];
     const detector = job.analysis_config.detectors[detectorIndex];

@@ -23,7 +23,7 @@ import { Listing } from './components/listing';
 import { Settings } from './components/settings';
 import { GraphVisualization } from './components/graph_visualization';
 
-import gws from './angular/graph_client_workspace.js';
+import { createWorkspace } from './angular/graph_client_workspace.js';
 import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs } from './services/url';
 import { createCachedIndexPatternProvider } from './services/index_pattern_cache';
 import { urlTemplateRegex } from './helpers/url_template';
@@ -277,7 +277,7 @@ export function initGraphApp(angularModule, deps) {
           searchProxy: callSearchNodeProxy,
           exploreControls,
         };
-        $scope.workspace = gws.createWorkspace(options);
+        $scope.workspace = createWorkspace(options);
       },
       setLiveResponseFields: fields => {
         $scope.liveResponseFields = fields;

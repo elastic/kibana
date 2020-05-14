@@ -27,7 +27,6 @@ export default function({ getService }: FtrProviderContext) {
   const transform = getService('transform');
 
   describe('cloning', function() {
-    this.tags(['smoke']);
     const transformConfig = getTransformConfig();
 
     before(async () => {

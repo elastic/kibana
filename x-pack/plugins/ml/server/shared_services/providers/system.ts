@@ -4,23 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'kibana/server';
+import { APICaller, KibanaRequest } from 'kibana/server';
 import { SearchResponse, SearchParams } from 'elasticsearch';
 import { MlServerLicense } from '../../lib/license';
 import { CloudSetup } from '../../../../cloud/server';
 import { LicenseCheck } from '../license_checks';
-import { spacesUtilsProvider, RequestFacade } from '../../lib/spaces_utils';
+import { spacesUtilsProvider } from '../../lib/spaces_utils';
 import { SpacesPluginSetup } from '../../../../spaces/server';
-import { privilegesProvider, MlCapabilities } from '../../lib/check_privileges';
+import { capabilitiesProvider } from '../../lib/capabilities';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
+import { MlCapabilitiesResponse, ResolveMlCapabilities } from '../../../common/types/capabilities';
 
 export interface MlSystemProvider {
   mlSystemProvider(
     callAsCurrentUser: APICaller,
-    request: RequestFacade
+    request: KibanaRequest
   ): {
-    mlCapabilities(ignoreSpaces?: boolean): Promise<MlCapabilities>;
+    mlCapabilities(): Promise<MlCapabilitiesResponse>;
     mlInfo(): Promise<MlInfoResponse>;
     mlSearch<T>(searchParams: SearchParams): Promise<SearchResponse<T>>;
   };
@@ -31,12 +32,13 @@ export function getMlSystemProvider(
   isFullLicense: LicenseCheck,
   mlLicense: MlServerLicense,
   spaces: SpacesPluginSetup | undefined,
-  cloud: CloudSetup | undefined
+  cloud: CloudSetup | undefined,
+  resolveMlCapabilities: ResolveMlCapabilities
 ): MlSystemProvider {
   return {
-    mlSystemProvider(callAsCurrentUser: APICaller, request: RequestFacade) {
+    mlSystemProvider(callAsCurrentUser: APICaller, request: KibanaRequest) {
       return {
-        mlCapabilities(ignoreSpaces?: boolean) {
+        async mlCapabilities() {
           isMinimumLicense();
 
           const { isMlEnabledInSpace } =
@@ -44,13 +46,18 @@ export function getMlSystemProvider(
               ? spacesUtilsProvider(spaces, request)
               : { isMlEnabledInSpace: async () => true };
 
-          const { getPrivileges } = privilegesProvider(
+          const mlCapabilities = await resolveMlCapabilities(request);
+          if (mlCapabilities === null) {
+            throw new Error('resolveMlCapabilities is not defined');
+          }
+
+          const { getCapabilities } = capabilitiesProvider(
             callAsCurrentUser,
+            mlCapabilities,
             mlLicense,
-            isMlEnabledInSpace,
-            ignoreSpaces
+            isMlEnabledInSpace
           );
-          return getPrivileges();
+          return getCapabilities();
         },
         async mlInfo(): Promise<MlInfoResponse> {
           isMinimumLicense();

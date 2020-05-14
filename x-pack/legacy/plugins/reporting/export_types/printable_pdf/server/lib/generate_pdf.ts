@@ -7,13 +7,13 @@
 import { groupBy } from 'lodash';
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
+import { ReportingCore } from '../../../../server';
 import { LevelLogger } from '../../../../server/lib';
-import { CaptureConfig } from '../../../../server/types';
-import { ConditionalHeaders, HeadlessChromiumDriverFactory } from '../../../../types';
+import { ConditionalHeaders } from '../../../../types';
 import { createLayout } from '../../../common/layouts';
 import { LayoutInstance, LayoutParams } from '../../../common/layouts/layout';
-import { screenshotsObservableFactory } from '../../../common/lib/screenshots';
 import { ScreenshotResults } from '../../../common/lib/screenshots/types';
+import { getTracker } from './tracker';
 // @ts-ignore untyped module
 import { pdf } from './pdf';
 
@@ -27,11 +27,10 @@ const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
   return null;
 };
 
-export function generatePdfObservableFactory(
-  captureConfig: CaptureConfig,
-  browserDriverFactory: HeadlessChromiumDriverFactory
-) {
-  const screenshotsObservable = screenshotsObservableFactory(captureConfig, browserDriverFactory);
+export async function generatePdfObservableFactory(reporting: ReportingCore) {
+  const config = reporting.getConfig();
+  const captureConfig = config.get('capture');
+  const getScreenshots = await reporting.getScreenshotsObservable();
 
   return function generatePdfObservable(
     logger: LevelLogger,
@@ -41,9 +40,15 @@ export function generatePdfObservableFactory(
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams,
     logo?: string
-  ): Rx.Observable<{ buffer: Buffer; warnings: string[] }> {
+  ): Rx.Observable<{ buffer: Buffer | null; warnings: string[] }> {
+    const tracker = getTracker();
+    tracker.startLayout();
+
     const layout = createLayout(captureConfig, layoutParams) as LayoutInstance;
-    const screenshots$ = screenshotsObservable({
+    tracker.endLayout();
+
+    tracker.startScreenshots();
+    const screenshots$ = getScreenshots({
       logger,
       urls,
       conditionalHeaders,
@@ -51,16 +56,22 @@ export function generatePdfObservableFactory(
       browserTimezone,
     }).pipe(
       mergeMap(async (results: ScreenshotResults[]) => {
-        const pdfOutput = pdf.create(layout, logo);
+        tracker.endScreenshots();
 
+        tracker.startSetup();
+        const pdfOutput = pdf.create(layout, logo);
         if (title) {
           const timeRange = getTimeRange(results);
           title += timeRange ? ` - ${timeRange.duration}` : '';
           pdfOutput.setTitle(title);
         }
+        tracker.endSetup();
 
         results.forEach(r => {
           r.screenshots.forEach(screenshot => {
+            logger.debug(`Adding image to PDF. Image base64 size: ${screenshot.base64EncodedData?.length || 0}`); // prettier-ignore
+            tracker.startAddImage();
+            tracker.endAddImage();
             pdfOutput.addImage(screenshot.base64EncodedData, {
               title: screenshot.title,
               description: screenshot.description,
@@ -68,10 +79,26 @@ export function generatePdfObservableFactory(
           });
         });
 
-        pdfOutput.generate();
+        let buffer: Buffer | null = null;
+        try {
+          tracker.startCompile();
+          logger.debug(`Compiling PDF...`);
+          pdfOutput.generate();
+          tracker.endCompile();
+
+          tracker.startGetBuffer();
+          logger.debug(`Generating PDF Buffer...`);
+          buffer = await pdfOutput.getBuffer();
+          logger.debug(`PDF buffer byte length: ${buffer?.byteLength || 0}`);
+          tracker.endGetBuffer();
+        } catch (err) {
+          logger.error(`Could not generate the PDF buffer! ${err}`);
+        }
+
+        tracker.end();
 
         return {
-          buffer: await pdfOutput.getBuffer(),
+          buffer,
           warnings: results.reduce((found, current) => {
             if (current.error) {
               found.push(current.error.message);

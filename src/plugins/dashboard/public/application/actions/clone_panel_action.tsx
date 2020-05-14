@@ -39,7 +39,7 @@ export interface ClonePanelActionContext {
 export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL> {
   public readonly type = ACTION_CLONE_PANEL;
   public readonly id = ACTION_CLONE_PANEL;
-  public order = 11;
+  public order = 45;
 
   constructor(private core: CoreStart) {}
 

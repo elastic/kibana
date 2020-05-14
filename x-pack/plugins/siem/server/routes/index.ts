@@ -30,6 +30,8 @@ import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/fin
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
 import { importTimelinesRoute } from '../lib/timeline/routes/import_timelines_route';
 import { exportTimelinesRoute } from '../lib/timeline/routes/export_timelines_route';
+import { createTimelinesRoute } from '../lib/timeline/routes/create_timelines_route';
+import { updateTimelinesRoute } from '../lib/timeline/routes/update_timelines_route';
 import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
 
@@ -37,25 +39,28 @@ export const initRoutes = (
   router: IRouter,
   config: ConfigType,
   usingEphemeralEncryptionKey: boolean,
-  security: SetupPlugins['security']
+  security: SetupPlugins['security'],
+  ml: SetupPlugins['ml']
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
-  createRulesRoute(router);
+  createRulesRoute(router, ml);
   readRulesRoute(router);
-  updateRulesRoute(router);
-  patchRulesRoute(router);
+  updateRulesRoute(router, ml);
+  patchRulesRoute(router, ml);
   deleteRulesRoute(router);
   findRulesRoute(router);
 
   addPrepackedRulesRoute(router);
   getPrepackagedRulesStatusRoute(router);
-  createRulesBulkRoute(router);
-  updateRulesBulkRoute(router);
-  patchRulesBulkRoute(router);
+  createRulesBulkRoute(router, ml);
+  updateRulesBulkRoute(router, ml);
+  patchRulesBulkRoute(router, ml);
   deleteRulesBulkRoute(router);
 
-  importRulesRoute(router, config);
+  createTimelinesRoute(router, config, security);
+  updateTimelinesRoute(router, config, security);
+  importRulesRoute(router, config, ml);
   exportRulesRoute(router, config);
 
   importTimelinesRoute(router, config, security);

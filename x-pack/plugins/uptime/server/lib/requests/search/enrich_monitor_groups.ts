@@ -6,14 +6,14 @@
 
 import { get, sortBy } from 'lodash';
 import { QueryContext } from './query_context';
-import { QUERY, STATES } from '../../../../../../legacy/plugins/uptime/common/constants';
+import { QUERY } from '../../../../common/constants';
 import {
   Check,
   Histogram,
   MonitorSummary,
   CursorDirection,
   SortOrder,
-} from '../../../../../../legacy/plugins/uptime/common/runtime_types';
+} from '../../../../common/runtime_types';
 import { MonitorEnricher } from './fetch_page';
 
 export const enrichMonitorGroups: MonitorEnricher = async (
@@ -137,11 +137,11 @@ export const enrichMonitorGroups: MonitorEnricher = async (
                         if (curCheck.tls == null) {
                           curCheck.tls = new HashMap();
                         }
-                        if (!doc["tls.certificate_not_valid_after"].isEmpty()) {
-                          curCheck.tls.certificate_not_valid_after = doc["tls.certificate_not_valid_after"][0];
+                        if (!doc["tls.server.x509.not_after"].isEmpty()) {
+                          curCheck.tls.not_after = doc["tls.server.x509.not_after"][0];
                         }
-                        if (!doc["tls.certificate_not_valid_before"].isEmpty()) {
-                          curCheck.tls.certificate_not_valid_before = doc["tls.certificate_not_valid_before"][0];
+                        if (!doc["tls.server.x509.not_before"].isEmpty()) {
+                          curCheck.tls.not_before = doc["tls.server.x509.not_before"][0];
                         }
 
                         state.checksByAgentIdIP[agentIdIP] = curCheck;
@@ -314,7 +314,7 @@ const getHistogramForMonitors = async (
         by_id: {
           terms: {
             field: 'monitor.id',
-            size: STATES.LEGACY_STATES_QUERY_SIZE,
+            size: queryContext.size,
           },
           aggs: {
             histogram: {

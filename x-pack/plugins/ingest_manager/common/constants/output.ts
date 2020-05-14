@@ -5,7 +5,7 @@
  */
 import { OutputType } from '../types';
 
-export const OUTPUT_SAVED_OBJECT_TYPE = 'outputs';
+export const OUTPUT_SAVED_OBJECT_TYPE = 'ingest-outputs';
 
 export const DEFAULT_OUTPUT = {
   name: 'default',

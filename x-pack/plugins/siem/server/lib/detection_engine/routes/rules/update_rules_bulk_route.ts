@@ -6,22 +6,20 @@
 
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { SetupPlugins } from '../../../../plugin';
+import { buildMlAuthz } from '../../../machine_learning/authz';
+import { throwHttpError } from '../../../machine_learning/validation';
 import { UpdateRuleAlertParamsRest } from '../../rules/types';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError, validate } from './validate';
-import {
-  buildRouteValidation,
-  transformBulkError,
-  buildSiemResponse,
-  validateLicenseForRuleType,
-} from '../utils';
+import { buildRouteValidation, transformBulkError, buildSiemResponse } from '../utils';
 import { updateRulesBulkSchema } from '../schemas/update_rules_bulk_schema';
 import { updateRules } from '../../rules/update_rules';
 import { rulesBulkSchema } from '../schemas/response/rules_bulk_schema';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 
-export const updateRulesBulkRoute = (router: IRouter) => {
+export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
   router.put(
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
@@ -36,14 +34,14 @@ export const updateRulesBulkRoute = (router: IRouter) => {
       const siemResponse = buildSiemResponse(response);
 
       const alertsClient = context.alerting?.getAlertsClient();
-      const actionsClient = context.actions?.getActionsClient();
       const savedObjectsClient = context.core.savedObjects.client;
       const siemClient = context.siem?.getSiemClient();
 
-      if (!siemClient || !actionsClient || !alertsClient) {
+      if (!siemClient || !alertsClient) {
         return siemResponse.error({ statusCode: 404 });
       }
 
+      const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
       const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
       const rules = await Promise.all(
         request.body.map(async payloadRule => {
@@ -84,11 +82,10 @@ export const updateRulesBulkRoute = (router: IRouter) => {
           const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
           const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
           try {
-            validateLicenseForRuleType({ license: context.licensing.license, ruleType: type });
+            throwHttpError(await mlAuthz.validateRuleType(type));
 
             const rule = await updateRules({
               alertsClient,
-              actionsClient,
               anomalyThreshold,
               description,
               enabled,

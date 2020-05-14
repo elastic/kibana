@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Logger, LoggerFactory, RequestHandlerContext } from 'kibana/server';
-import { EndpointAppConstants } from '../common/types';
+import { AlertConstants } from '../common/alert_constants';
 import { ESIndexPatternService } from '../../ingest_manager/server';
 
 export interface IndexPatternRetriever {
   getIndexPattern(ctx: RequestHandlerContext, datasetPath: string): Promise<string>;
   getEventIndexPattern(ctx: RequestHandlerContext): Promise<string>;
   getMetadataIndexPattern(ctx: RequestHandlerContext): Promise<string>;
+  getPolicyResponseIndexPattern(ctx: RequestHandlerContext): Promise<string>;
 }
 
 /**
@@ -33,7 +34,7 @@ export class IngestIndexPatternRetriever implements IndexPatternRetriever {
    * @returns a string representing the index pattern (e.g. `events-endpoint-*`)
    */
   async getEventIndexPattern(ctx: RequestHandlerContext) {
-    return await this.getIndexPattern(ctx, EndpointAppConstants.EVENT_DATASET);
+    return await this.getIndexPattern(ctx, AlertConstants.EVENT_DATASET);
   }
 
   /**
@@ -73,5 +74,9 @@ export class IngestIndexPatternRetriever implements IndexPatternRetriever {
       this.log.warn(errMsg);
       throw new Error(errMsg);
     }
+  }
+
+  getPolicyResponseIndexPattern(ctx: RequestHandlerContext): Promise<string> {
+    return Promise.resolve('metrics-endpoint.policy-default-1');
   }
 }

@@ -1,13 +1,28 @@
 {
   "id": "apm",
-  "server": true,
   "version": "8.0.0",
   "kibanaVersion": "kibana",
+  "requiredPlugins": [
+    "features",
+    "apmOss",
+    "data",
+    "home",
+    "licensing",
+    "triggers_actions_ui"
+  ],
+  "optionalPlugins": [
+    "cloud",
+    "usageCollection",
+    "taskManager",
+    "actions",
+    "alerting",
+    "observability",
+    "security"
+  ],
+  "server": true,
+  "ui": true,
   "configPath": [
     "xpack",
     "apm"
-  ],
-  "ui": false,
-  "requiredPlugins": ["apm_oss", "data", "home", "licensing"],
-  "optionalPlugins": ["cloud", "usageCollection", "taskManager","actions", "alerting"]
+  ]
 }

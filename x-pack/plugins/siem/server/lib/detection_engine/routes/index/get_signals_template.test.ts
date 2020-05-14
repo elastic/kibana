@@ -7,10 +7,18 @@
 import { getSignalsTemplate } from './get_signals_template';
 
 describe('get_signals_template', () => {
-  test('it should set the lifecycle name and the rollover alias to be the name of the index passed in', () => {
+  test('it should set the lifecycle "name" and "rollover_alias" to be the name of the index passed in', () => {
     const template = getSignalsTemplate('test-index');
     expect(template.settings).toEqual({
-      index: { lifecycle: { name: 'test-index', rollover_alias: 'test-index' } },
+      index: {
+        lifecycle: {
+          name: 'test-index',
+          rollover_alias: 'test-index',
+        },
+      },
+      mapping: {
+        total_fields: { limit: 10000 },
+      },
     });
   });
 
@@ -27,5 +35,10 @@ describe('get_signals_template', () => {
   test('it should have a signals section which is an object type', () => {
     const template = getSignalsTemplate('test-index');
     expect(typeof template.mappings.properties.signal).toEqual('object');
+  });
+
+  test('it should have a "total_fields" section that is at least 10k in size', () => {
+    const template = getSignalsTemplate('test-index');
+    expect(template.settings.mapping.total_fields.limit).toBeGreaterThanOrEqual(10000);
   });
 });

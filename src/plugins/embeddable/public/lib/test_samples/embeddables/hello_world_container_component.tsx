@@ -32,6 +32,7 @@ interface Props {
   getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
   getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
   overlays: CoreStart['overlays'];
+  application: CoreStart['application'];
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
@@ -112,6 +113,7 @@ export class HelloWorldContainerComponent extends Component<Props, State> {
             getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
             overlays={this.props.overlays}
             notifications={this.props.notifications}
+            application={this.props.application}
             inspector={this.props.inspector}
             SavedObjectFinder={this.props.SavedObjectFinder}
           />

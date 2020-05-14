@@ -277,6 +277,7 @@ instanceStateValue: true
       )[0];
       expect(alertTestRecord._source.state).to.eql({
         callClusterSuccess: true,
+        callScopedClusterSuccess: true,
         savedObjectsClientSuccess: false,
         savedObjectsClientError: {
           ...alertTestRecord._source.state.savedObjectsClientError,
@@ -332,6 +333,7 @@ instanceStateValue: true
       )[0];
       expect(actionTestRecord._source.state).to.eql({
         callClusterSuccess: true,
+        callScopedClusterSuccess: true,
         savedObjectsClientSuccess: false,
         savedObjectsClientError: {
           ...actionTestRecord._source.state.savedObjectsClientError,

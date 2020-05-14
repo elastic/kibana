@@ -14,7 +14,6 @@ const alwaysImportedTests = [
 ];
 const onlyNotInCoverageTests = [
   require.resolve('../test/reporting/configs/chromium_api.js'),
-  require.resolve('../test/reporting/configs/chromium_functional.js'),
   require.resolve('../test/reporting/configs/generate_api.js'),
   require.resolve('../test/api_integration/config_security_basic.js'),
   require.resolve('../test/api_integration/config.js'),
@@ -22,6 +21,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/alerting_api_integration/spaces_only/config.ts'),
   require.resolve('../test/alerting_api_integration/security_and_spaces/config.ts'),
   require.resolve('../test/detection_engine_api_integration/security_and_spaces/config.ts'),
+  require.resolve('../test/detection_engine_api_integration/basic/config.ts'),
   require.resolve('../test/plugin_api_integration/config.ts'),
   require.resolve('../test/kerberos_api_integration/config.ts'),
   require.resolve('../test/kerberos_api_integration/anonymous_access.config.ts'),

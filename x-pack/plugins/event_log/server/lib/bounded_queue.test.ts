@@ -5,7 +5,7 @@
  */
 
 import { createBoundedQueue } from './bounded_queue';
-import { loggingServiceMock } from '../../../../../src/core/server/logging/logging_service.mock';
+import { loggingServiceMock } from 'src/core/server/mocks';
 
 const loggingService = loggingServiceMock.create();
 const logger = loggingService.get();

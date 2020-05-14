@@ -150,6 +150,7 @@ describe('creating index patterns from yaml fields', () => {
       { fields: [{ name: 'testField', type: 'text' }], expect: 'string' },
       { fields: [{ name: 'testField', type: 'date' }], expect: 'date' },
       { fields: [{ name: 'testField', type: 'geo_point' }], expect: 'geo_point' },
+      { fields: [{ name: 'testField', type: 'constant_keyword' }], expect: 'string' },
     ];
 
     tests.forEach(test => {
@@ -191,6 +192,7 @@ describe('creating index patterns from yaml fields', () => {
         attr: 'aggregatable',
       },
       { fields: [{ name, type: 'keyword' }], expect: true, attr: 'aggregatable' },
+      { fields: [{ name, type: 'constant_keyword' }], expect: true, attr: 'aggregatable' },
       { fields: [{ name, type: 'text', aggregatable: true }], expect: false, attr: 'aggregatable' },
       { fields: [{ name, type: 'text' }], expect: false, attr: 'aggregatable' },
       {

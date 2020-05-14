@@ -40,18 +40,18 @@ export default function(providerContext: FtrProviderContext) {
         body: { _source: agentDoc },
       } = await esClient.get({
         index: '.kibana',
-        id: 'agents:agent1',
+        id: 'fleet-agents:agent1',
       });
       // @ts-ignore
-      agentDoc.agents.access_api_key_id = accessAPIKeyId;
-      agentDoc.agents.default_api_key_id = outputAPIKeyBody.id;
-      agentDoc.agents.default_api_key = Buffer.from(
+      agentDoc['fleet-agents'].access_api_key_id = accessAPIKeyId;
+      agentDoc['fleet-agents'].default_api_key_id = outputAPIKeyBody.id;
+      agentDoc['fleet-agents'].default_api_key = Buffer.from(
         `${outputAPIKeyBody.id}:${outputAPIKeyBody.api_key}`
       ).toString('base64');
 
       await esClient.update({
         index: '.kibana',
-        id: 'agents:agent1',
+        id: 'fleet-agents:agent1',
         refresh: 'true',
         body: {
           doc: agentDoc,

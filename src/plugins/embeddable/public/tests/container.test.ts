@@ -74,6 +74,7 @@ async function creatHelloWorldContainerAndEmbeddable(
     getAllEmbeddableFactories: start.getEmbeddableFactories,
     overlays: coreStart.overlays,
     notifications: coreStart.notifications,
+    application: coreStart.application,
     inspector: {} as any,
     SavedObjectFinder: () => null,
   });
@@ -147,6 +148,7 @@ test('Container.removeEmbeddable removes and cleans up', async done => {
       getAllEmbeddableFactories: start.getEmbeddableFactories,
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
+      application: coreStart.application,
       inspector: {} as any,
       SavedObjectFinder: () => null,
     }
@@ -327,6 +329,7 @@ test(`Container updates its state when a child's input is updated`, async done =
           getEmbeddableFactory: start.getEmbeddableFactory,
           notifications: coreStart.notifications,
           overlays: coreStart.overlays,
+          application: coreStart.application,
           inspector: {} as any,
           SavedObjectFinder: () => null,
         });
@@ -584,6 +587,7 @@ test('Container changes made directly after adding a new embeddable are propagat
       getAllEmbeddableFactories: start.getEmbeddableFactories,
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
+      application: coreStart.application,
       inspector: {} as any,
       SavedObjectFinder: () => null,
     }
@@ -708,6 +712,7 @@ test('untilEmbeddableLoaded() throws an error if there is no such child panel in
       getAllEmbeddableFactories: start.getEmbeddableFactories,
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
+      application: coreStart.application,
       inspector: {} as any,
       SavedObjectFinder: () => null,
     }
@@ -742,6 +747,7 @@ test('untilEmbeddableLoaded() resolves if child is loaded in the container', asy
       getAllEmbeddableFactories: start.getEmbeddableFactories,
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
+      application: coreStart.application,
       inspector: {} as any,
       SavedObjectFinder: () => null,
     }
@@ -781,6 +787,7 @@ test('untilEmbeddableLoaded resolves with undefined if child is subsequently rem
       getAllEmbeddableFactories: start.getEmbeddableFactories,
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
+      application: coreStart.application,
       inspector: {} as any,
       SavedObjectFinder: () => null,
     }
@@ -821,6 +828,7 @@ test('adding a panel then subsequently removing it before its loaded removes the
       getAllEmbeddableFactories: start.getEmbeddableFactories,
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
+      application: coreStart.application,
       inspector: {} as any,
       SavedObjectFinder: () => null,
     }

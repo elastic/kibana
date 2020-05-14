@@ -7,14 +7,17 @@ import * as rt from 'io-ts';
 
 import { Readable } from 'stream';
 import { either } from 'fp-ts/lib/Either';
+
+import { SavedTimelineRuntimeType } from '../../../../../common/types/timeline';
+
 import { eventNotes, globalNotes, pinnedEventIds } from './schemas';
-import { SavedTimelineRuntimeType } from '../../types';
+import { unionWithNullType } from '../../../../../common/utility_types';
 
 export const ImportTimelinesSchemaRt = rt.intersection([
   SavedTimelineRuntimeType,
   rt.type({
-    savedObjectId: rt.string,
-    version: rt.string,
+    savedObjectId: unionWithNullType(rt.string),
+    version: unionWithNullType(rt.string),
   }),
   rt.type({
     globalNotes,

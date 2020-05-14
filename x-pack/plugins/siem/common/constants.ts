@@ -6,6 +6,8 @@
 
 export const APP_ID = 'siem';
 export const APP_NAME = 'SIEM';
+export const APP_ICON = 'securityAnalyticsApp';
+export const APP_PATH = `/app/${APP_ID}`;
 export const DEFAULT_BYTES_FORMAT = 'format:bytes:defaultPattern';
 export const DEFAULT_DATE_FORMAT = 'dateFormat';
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz';

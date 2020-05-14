@@ -153,7 +153,6 @@ export default function({ getService }: FtrProviderContext) {
         modelSizeStats: {
           result_type: 'model_size_stats',
           model_bytes_exceeded: '0.0 B',
-          model_bytes_memory_limit: '10.0 MB',
           total_by_field_count: '3',
           total_over_field_count: '0',
           total_partition_field_count: '2',
@@ -166,7 +165,7 @@ export default function({ getService }: FtrProviderContext) {
   ];
 
   describe('job on data set with date_nanos time field', function() {
-    this.tags(['smoke', 'mlqa']);
+    this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('ml/event_rate_nanos');
       await ml.testResources.createIndexPatternIfNeeded(
@@ -422,7 +421,6 @@ export default function({ getService }: FtrProviderContext) {
               job_id: testData.jobId,
               result_type: testData.expected.modelSizeStats.result_type,
               model_bytes_exceeded: testData.expected.modelSizeStats.model_bytes_exceeded,
-              model_bytes_memory_limit: testData.expected.modelSizeStats.model_bytes_memory_limit,
               total_by_field_count: testData.expected.modelSizeStats.total_by_field_count,
               total_over_field_count: testData.expected.modelSizeStats.total_over_field_count,
               total_partition_field_count:

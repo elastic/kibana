@@ -32,11 +32,15 @@ export function Detail() {
       const packageInfo = response.data?.response;
       const title = packageInfo?.title;
       const name = packageInfo?.name;
+      let installedVersion;
+      if (packageInfo && 'savedObject' in packageInfo) {
+        installedVersion = packageInfo.savedObject.attributes.version;
+      }
       const status: InstallStatus = packageInfo?.status as any;
 
       // track install status state
       if (name) {
-        setPackageInstallStatus({ name, status });
+        setPackageInstallStatus({ name, status, version: installedVersion || null });
       }
       if (packageInfo) {
         setInfo({ ...packageInfo, title: title || '' });
@@ -64,7 +68,6 @@ type LayoutProps = PackageInfo & Pick<DetailParams, 'panel'> & Pick<EuiPageProps
 export function DetailLayout(props: LayoutProps) {
   const { name: packageName, version, icons, restrictWidth } = props;
   const iconType = usePackageIconType({ packageName, version, icons });
-
   return (
     <Fragment>
       <FullWidthHeader>

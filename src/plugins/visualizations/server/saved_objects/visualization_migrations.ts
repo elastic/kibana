@@ -21,7 +21,7 @@ import { SavedObjectMigrationFn } from 'kibana/server';
 import { cloneDeep, get, omit, has, flow } from 'lodash';
 import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
 
-const migrateIndexPattern: SavedObjectMigrationFn = doc => {
+const migrateIndexPattern: SavedObjectMigrationFn<any, any> = doc => {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
   if (typeof searchSourceJSON !== 'string') {
     return doc;
@@ -64,7 +64,7 @@ const migrateIndexPattern: SavedObjectMigrationFn = doc => {
 };
 
 // [TSVB] Migrate percentile-rank aggregation (value -> values)
-const migratePercentileRankAggregation: SavedObjectMigrationFn = doc => {
+const migratePercentileRankAggregation: SavedObjectMigrationFn<any, any> = doc => {
   const visStateJSON = get<string>(doc, 'attributes.visState');
   let visState;
 
@@ -100,7 +100,7 @@ const migratePercentileRankAggregation: SavedObjectMigrationFn = doc => {
 };
 
 // [TSVB] Remove stale opperator key
-const migrateOperatorKeyTypo: SavedObjectMigrationFn = doc => {
+const migrateOperatorKeyTypo: SavedObjectMigrationFn<any, any> = doc => {
   const visStateJSON = get<string>(doc, 'attributes.visState');
   let visState;
 
@@ -132,7 +132,7 @@ const migrateOperatorKeyTypo: SavedObjectMigrationFn = doc => {
 };
 
 // Migrate date histogram aggregation (remove customInterval)
-const migrateDateHistogramAggregation: SavedObjectMigrationFn = doc => {
+const migrateDateHistogramAggregation: SavedObjectMigrationFn<any, any> = doc => {
   const visStateJSON = get<string>(doc, 'attributes.visState');
   let visState;
 
@@ -174,7 +174,7 @@ const migrateDateHistogramAggregation: SavedObjectMigrationFn = doc => {
   return doc;
 };
 
-const removeDateHistogramTimeZones: SavedObjectMigrationFn = doc => {
+const removeDateHistogramTimeZones: SavedObjectMigrationFn<any, any> = doc => {
   const visStateJSON = get<string>(doc, 'attributes.visState');
   if (visStateJSON) {
     let visState;
@@ -206,7 +206,7 @@ const removeDateHistogramTimeZones: SavedObjectMigrationFn = doc => {
 
 // migrate gauge verticalSplit to alignment
 // https://github.com/elastic/kibana/issues/34636
-const migrateGaugeVerticalSplitToAlignment: SavedObjectMigrationFn = (doc, logger) => {
+const migrateGaugeVerticalSplitToAlignment: SavedObjectMigrationFn<any, any> = (doc, logger) => {
   const visStateJSON = get<string>(doc, 'attributes.visState');
 
   if (visStateJSON) {
@@ -241,7 +241,7 @@ const migrateGaugeVerticalSplitToAlignment: SavedObjectMigrationFn = (doc, logge
   Path to the series array is thus:
   attributes.visState.
 */
-const transformFilterStringToQueryObject: SavedObjectMigrationFn = (doc, logger) => {
+const transformFilterStringToQueryObject: SavedObjectMigrationFn<any, any> = (doc, logger) => {
   // Migrate filters
   // If any filters exist and they are a string, we assume it to be lucene and transform the filter into an object accordingly
   const newDoc = cloneDeep(doc);
@@ -325,7 +325,7 @@ const transformFilterStringToQueryObject: SavedObjectMigrationFn = (doc, logger)
   return newDoc;
 };
 
-const transformSplitFiltersStringToQueryObject: SavedObjectMigrationFn = doc => {
+const transformSplitFiltersStringToQueryObject: SavedObjectMigrationFn<any, any> = doc => {
   // Migrate split_filters in TSVB objects that weren't migrated in 7.3
   // If any filters exist and they are a string, we assume them to be lucene syntax and transform the filter into an object accordingly
   const newDoc = cloneDeep(doc);
@@ -370,7 +370,7 @@ const transformSplitFiltersStringToQueryObject: SavedObjectMigrationFn = doc => 
   return newDoc;
 };
 
-const migrateFiltersAggQuery: SavedObjectMigrationFn = doc => {
+const migrateFiltersAggQuery: SavedObjectMigrationFn<any, any> = doc => {
   const visStateJSON = get<string>(doc, 'attributes.visState');
 
   if (visStateJSON) {
@@ -402,7 +402,7 @@ const migrateFiltersAggQuery: SavedObjectMigrationFn = doc => {
   return doc;
 };
 
-const replaceMovAvgToMovFn: SavedObjectMigrationFn = (doc, logger) => {
+const replaceMovAvgToMovFn: SavedObjectMigrationFn<any, any> = (doc, logger) => {
   const visStateJSON = get<string>(doc, 'attributes.visState');
   let visState;
 
@@ -450,7 +450,7 @@ const replaceMovAvgToMovFn: SavedObjectMigrationFn = (doc, logger) => {
   return doc;
 };
 
-const migrateFiltersAggQueryStringQueries: SavedObjectMigrationFn = (doc, logger) => {
+const migrateFiltersAggQueryStringQueries: SavedObjectMigrationFn<any, any> = (doc, logger) => {
   const visStateJSON = get<string>(doc, 'attributes.visState');
 
   if (visStateJSON) {
@@ -483,12 +483,12 @@ const migrateFiltersAggQueryStringQueries: SavedObjectMigrationFn = (doc, logger
   return doc;
 };
 
-const addDocReferences: SavedObjectMigrationFn = doc => ({
+const addDocReferences: SavedObjectMigrationFn<any, any> = doc => ({
   ...doc,
   references: doc.references || [],
 });
 
-const migrateSavedSearch: SavedObjectMigrationFn = doc => {
+const migrateSavedSearch: SavedObjectMigrationFn<any, any> = doc => {
   const savedSearchId = get<string>(doc, 'attributes.savedSearchId');
 
   if (savedSearchId && doc.references) {
@@ -505,7 +505,7 @@ const migrateSavedSearch: SavedObjectMigrationFn = doc => {
   return doc;
 };
 
-const migrateControls: SavedObjectMigrationFn = doc => {
+const migrateControls: SavedObjectMigrationFn<any, any> = doc => {
   const visStateJSON = get<string>(doc, 'attributes.visState');
 
   if (visStateJSON) {
@@ -536,7 +536,7 @@ const migrateControls: SavedObjectMigrationFn = doc => {
   return doc;
 };
 
-const migrateTableSplits: SavedObjectMigrationFn = doc => {
+const migrateTableSplits: SavedObjectMigrationFn<any, any> = doc => {
   try {
     const visState = JSON.parse(doc.attributes.visState);
     if (get(visState, 'type') !== 'table') {
@@ -572,7 +572,7 @@ const migrateTableSplits: SavedObjectMigrationFn = doc => {
   }
 };
 
-const migrateMatchAllQuery: SavedObjectMigrationFn = doc => {
+const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = doc => {
   const searchSourceJSON = get<string>(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
 
   if (searchSourceJSON) {
@@ -606,7 +606,7 @@ const migrateMatchAllQuery: SavedObjectMigrationFn = doc => {
 };
 
 // [TSVB] Default color palette is changing, keep the default for older viz
-const migrateTsvbDefaultColorPalettes: SavedObjectMigrationFn = doc => {
+const migrateTsvbDefaultColorPalettes: SavedObjectMigrationFn<any, any> = doc => {
   const visStateJSON = get<string>(doc, 'attributes.visState');
   let visState;
 
@@ -649,27 +649,30 @@ export const visualizationSavedObjectTypeMigrations = {
    * in that version. So we apply this twice, once with 6.7.2 and once with 7.0.1 while the backport to 6.7
    * only contained the 6.7.2 migration and not the 7.0.1 migration.
    */
-  '6.7.2': flow<SavedObjectMigrationFn>(migrateMatchAllQuery, removeDateHistogramTimeZones),
-  '7.0.0': flow<SavedObjectMigrationFn>(
+  '6.7.2': flow<SavedObjectMigrationFn<any, any>>(
+    migrateMatchAllQuery,
+    removeDateHistogramTimeZones
+  ),
+  '7.0.0': flow<SavedObjectMigrationFn<any, any>>(
     addDocReferences,
     migrateIndexPattern,
     migrateSavedSearch,
     migrateControls,
     migrateTableSplits
   ),
-  '7.0.1': flow<SavedObjectMigrationFn>(removeDateHistogramTimeZones),
-  '7.2.0': flow<SavedObjectMigrationFn>(
+  '7.0.1': flow<SavedObjectMigrationFn<any, any>>(removeDateHistogramTimeZones),
+  '7.2.0': flow<SavedObjectMigrationFn<any, any>>(
     migratePercentileRankAggregation,
     migrateDateHistogramAggregation
   ),
-  '7.3.0': flow<SavedObjectMigrationFn>(
+  '7.3.0': flow<SavedObjectMigrationFn<any, any>>(
     migrateGaugeVerticalSplitToAlignment,
     transformFilterStringToQueryObject,
     migrateFiltersAggQuery,
     replaceMovAvgToMovFn
   ),
-  '7.3.1': flow<SavedObjectMigrationFn>(migrateFiltersAggQueryStringQueries),
-  '7.4.2': flow<SavedObjectMigrationFn>(transformSplitFiltersStringToQueryObject),
-  '7.7.0': flow<SavedObjectMigrationFn>(migrateOperatorKeyTypo),
-  '7.8.0': flow<SavedObjectMigrationFn>(migrateTsvbDefaultColorPalettes),
+  '7.3.1': flow<SavedObjectMigrationFn<any, any>>(migrateFiltersAggQueryStringQueries),
+  '7.4.2': flow<SavedObjectMigrationFn<any, any>>(transformSplitFiltersStringToQueryObject),
+  '7.7.0': flow<SavedObjectMigrationFn<any, any>>(migrateOperatorKeyTypo),
+  '7.8.0': flow<SavedObjectMigrationFn<any, any>>(migrateTsvbDefaultColorPalettes),
 };

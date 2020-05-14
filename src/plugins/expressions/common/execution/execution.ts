@@ -22,7 +22,7 @@ import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
 import { Defer, now } from '../../../kibana_utils/common';
-import { AbortError } from '../../../data/common';
+import { toPromise } from '../../../data/common/utils/abort_utils';
 import { RequestAdapter, DataAdapter } from '../../../inspector/common';
 import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
@@ -37,6 +37,12 @@ import { getType, ExpressionValue } from '../expression_types';
 import { ArgumentType, ExpressionFunction } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
+
+const createAbortErrorValue = () =>
+  createError({
+    message: 'The expression was aborted.',
+    name: 'AbortError',
+  });
 
 export interface ExecutionParams<
   ExtraContext extends Record<string, unknown> = Record<string, unknown>
@@ -70,7 +76,7 @@ export class Execution<
   /**
    * Dynamic state of the execution.
    */
-  public readonly state: ExecutionContainer<Output>;
+  public readonly state: ExecutionContainer<Output | ExpressionValueError>;
 
   /**
    * Initial input of the execution.
@@ -92,6 +98,18 @@ export class Execution<
   private readonly abortController = new AbortController();
 
   /**
+   * Promise that rejects if/when abort controller sends "abort" signal.
+   */
+  private readonly abortRejection = toPromise(this.abortController.signal, true);
+
+  /**
+   * Races a given promise against the "abort" event of `abortController`.
+   */
+  private race<T>(promise: Promise<T>): Promise<T> {
+    return Promise.race<T>([this.abortRejection, promise]);
+  }
+
+  /**
    * Whether .start() method has been called.
    */
   private hasStarted: boolean = false;
@@ -99,7 +117,7 @@ export class Execution<
   /**
    * Future that tracks result or error of this execution.
    */
-  private readonly firstResultFuture = new Defer<Output>();
+  private readonly firstResultFuture = new Defer<Output | ExpressionValueError>();
 
   /**
    * Contract is a public representation of `Execution` instances. Contract we
@@ -114,7 +132,7 @@ export class Execution<
 
   public readonly expression: string;
 
-  public get result(): Promise<unknown> {
+  public get result(): Promise<Output | ExpressionValueError> {
     return this.firstResultFuture.promise;
   }
 
@@ -134,7 +152,7 @@ export class Execution<
     this.expression = params.expression || formatExpression(params.ast!);
     const ast = params.ast || parseExpression(this.expression);
 
-    this.state = createExecutionContainer<Output>({
+    this.state = createExecutionContainer<Output | ExpressionValueError>({
       ...executor.state.get(),
       state: 'not-started',
       ast,
@@ -173,7 +191,12 @@ export class Execution<
     this.state.transitions.start();
 
     const { resolve, reject } = this.firstResultFuture;
-    this.invokeChain(this.state.get().ast.chain, input).then(resolve, reject);
+    const chainPromise = this.invokeChain(this.state.get().ast.chain, input);
+
+    this.race(chainPromise).then(resolve, error => {
+      if (this.abortController.signal.aborted) resolve(createAbortErrorValue());
+      else reject(error);
+    });
 
     this.firstResultFuture.promise.then(
       result => {
@@ -189,11 +212,6 @@ export class Execution<
     if (!chainArr.length) return input;
 
     for (const link of chainArr) {
-      // if execution was aborted return error
-      if (this.context.abortSignal && this.context.abortSignal.aborted) {
-        return createError(new AbortError('The expression was aborted.'));
-      }
-
       const { function: fnName, arguments: fnArgs } = link;
       const fn = getByAlias(this.state.get().functions, fnName);
 
@@ -207,10 +225,10 @@ export class Execution<
       try {
         // `resolveArgs` returns an object because the arguments themselves might
         // actually have a `then` function which would be treated as a `Promise`.
-        const { resolvedArgs } = await this.resolveArgs(fn, input, fnArgs);
+        const { resolvedArgs } = await this.race(this.resolveArgs(fn, input, fnArgs));
         args = resolvedArgs;
         timeStart = this.params.debug ? now() : 0;
-        const output = await this.invokeFunction(fn, input, resolvedArgs);
+        const output = await this.race(this.invokeFunction(fn, input, resolvedArgs));
 
         if (this.params.debug) {
           const timeEnd: number = now();
@@ -256,7 +274,7 @@ export class Execution<
     args: Record<string, unknown>
   ): Promise<any> {
     const normalizedInput = this.cast(input, fn.inputTypes);
-    const output = await fn.fn(normalizedInput, args, this.context);
+    const output = await this.race(fn.fn(normalizedInput, args, this.context));
 
     // Validate that the function returned the type it said it would.
     // This isn't required, but it keeps function developers honest.

@@ -20,7 +20,7 @@
 import { flow } from 'lodash';
 import { SavedObjectMigrationFn, SavedObjectsType } from 'kibana/server';
 
-const resetCount: SavedObjectMigrationFn = doc => ({
+const resetCount: SavedObjectMigrationFn<any, any> = doc => ({
   ...doc,
   attributes: {
     ...doc.attributes,
@@ -41,5 +41,6 @@ export const tsvbTelemetrySavedObjectType: SavedObjectsType = {
   },
   migrations: {
     '7.7.0': flow<SavedObjectMigrationFn>(resetCount),
+    '7.8.0': flow<SavedObjectMigrationFn>(resetCount),
   },
 };

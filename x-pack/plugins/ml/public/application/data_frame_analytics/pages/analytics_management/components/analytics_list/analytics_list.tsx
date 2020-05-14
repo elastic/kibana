@@ -17,9 +17,14 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
-import { checkPermission } from '../../../../../privilege/check_privilege';
-import { getTaskStateBadge } from './columns';
+import {
+  getAnalysisType,
+  DataFrameAnalyticsId,
+  useRefreshAnalyticsList,
+  ANALYSIS_CONFIG_TYPE,
+} from '../../../../common';
+import { checkPermission } from '../../../../../capabilities/check_capabilities';
+import { getTaskStateBadge, getJobTypeBadge } from './columns';
 
 import {
   DataFrameAnalyticsListColumn,
@@ -154,7 +159,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     clauses.forEach(c => {
       // the search term could be negated with a minus, e.g. -bananas
       const bool = c.match === 'must';
-      let ts = [];
+      let ts: DataFrameAnalyticsListRow[];
 
       if (c.type === 'term') {
         // filter term based clauses, e.g. bananas
@@ -174,8 +179,14 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       } else {
         // filter other clauses, i.e. the mode and status filters
         if (Array.isArray(c.value)) {
-          // the status value is an array of string(s) e.g. ['failed', 'stopped']
-          ts = analytics.filter(d => (c.value as string).includes(d.stats.state));
+          if (c.field === 'job_type') {
+            ts = analytics.filter(d =>
+              (c.value as string).includes(getAnalysisType(d.config.analysis))
+            );
+          } else {
+            // the status value is an array of string(s) e.g. ['failed', 'stopped']
+            ts = analytics.filter(d => (c.value as string).includes(d.stats.state));
+          }
         } else {
           ts = analytics.filter(d => d.mode === c.value);
         }
@@ -291,6 +302,19 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       incremental: true,
     },
     filters: [
+      {
+        type: 'field_value_selection',
+        field: 'job_type',
+        name: i18n.translate('xpack.ml.dataframe.analyticsList.typeFilter', {
+          defaultMessage: 'Type',
+        }),
+        multiSelect: 'or',
+        options: Object.values(ANALYSIS_CONFIG_TYPE).map(val => ({
+          value: val,
+          name: val,
+          view: getJobTypeBadge(val),
+        })),
+      },
       {
         type: 'field_value_selection',
         field: 'state.state',

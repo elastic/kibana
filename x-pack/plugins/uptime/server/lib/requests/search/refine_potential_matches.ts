@@ -5,7 +5,7 @@
  */
 
 import { QueryContext } from './query_context';
-import { CursorDirection } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
+import { CursorDirection } from '../../../../common/runtime_types';
 import { MonitorGroups, MonitorLocCheckGroup } from './fetch_page';
 
 /**

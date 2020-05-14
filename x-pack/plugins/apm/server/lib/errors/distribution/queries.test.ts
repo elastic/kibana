@@ -8,7 +8,7 @@ import { getErrorDistribution } from './get_distribution';
 import {
   SearchParamsMock,
   inspectSearchParams
-} from '../../../../../../legacy/plugins/apm/public/utils/testHelpers';
+} from '../../../../public/utils/testHelpers';
 
 describe('error distribution queries', () => {
   let mock: SearchParamsMock;

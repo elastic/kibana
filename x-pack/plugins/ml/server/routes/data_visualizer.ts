@@ -88,6 +88,9 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
         params: indexPatternTitleSchema,
         body: dataVisualizerFieldStatsSchema,
       },
+      options: {
+        tags: ['access:ml:canAccessML'],
+      },
     },
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -149,6 +152,9 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
       validate: {
         params: indexPatternTitleSchema,
         body: dataVisualizerOverallStatsSchema,
+      },
+      options: {
+        tags: ['access:ml:canAccessML'],
       },
     },
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {

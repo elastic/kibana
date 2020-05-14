@@ -104,13 +104,18 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async getDashboardIdFromCurrentUrl() {
       const currentUrl = await browser.getCurrentUrl();
-      const urlSubstring = 'kibana#/dashboard/';
-      const startOfIdIndex = currentUrl.indexOf(urlSubstring) + urlSubstring.length;
-      const endIndex = currentUrl.indexOf('?');
-      const id = currentUrl.substring(startOfIdIndex, endIndex < 0 ? currentUrl.length : endIndex);
+      const id = this.getDashboardIdFromUrl(currentUrl);
 
       log.debug(`Dashboard id extracted from ${currentUrl} is ${id}`);
 
+      return id;
+    }
+
+    public getDashboardIdFromUrl(url: string) {
+      const urlSubstring = '#/view/';
+      const startOfIdIndex = url.indexOf(urlSubstring) + urlSubstring.length;
+      const endIndex = url.indexOf('?');
+      const id = url.substring(startOfIdIndex, endIndex < 0 ? url.length : endIndex);
       return id;
     }
 
@@ -511,6 +516,20 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       }
 
       return checkList.filter(viz => viz.isPresent === false).map(viz => viz.name);
+    }
+
+    public async getPanelDrilldownCount(panelIndex = 0): Promise<number> {
+      log.debug('getPanelDrilldownCount');
+      const panel = (await this.getDashboardPanels())[panelIndex];
+      try {
+        const count = await panel.findByTestSubject(
+          'embeddablePanelNotification-ACTION_PANEL_NOTIFICATIONS'
+        );
+        return Number.parseInt(await count.getVisibleText(), 10);
+      } catch (e) {
+        // if not found then this is 0 (we don't show badge with 0)
+        return 0;
+      }
     }
   }
 

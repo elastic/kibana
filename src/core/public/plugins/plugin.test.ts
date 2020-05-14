@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { mockInitializer, mockPlugin, mockPluginLoader } from './plugin.test.mocks';
+import { mockInitializer, mockPlugin, mockPluginReader } from './plugin.test.mocks';
 
 import { DiscoveredPlugin } from '../../server';
 import { coreMock } from '../mocks';
@@ -38,10 +38,9 @@ function createManifest(
 let plugin: PluginWrapper<unknown, Record<string, unknown>>;
 const opaqueId = Symbol();
 const initializerContext = coreMock.createPluginInitializerContext();
-const addBasePath = (path: string) => path;
 
 beforeEach(() => {
-  mockPluginLoader.mockClear();
+  mockPluginReader.mockClear();
   mockPlugin.setup.mockClear();
   mockPlugin.start.mockClear();
   mockPlugin.stop.mockClear();
@@ -49,20 +48,8 @@ beforeEach(() => {
 });
 
 describe('PluginWrapper', () => {
-  test('`load` calls loadPluginBundle', () => {
-    plugin.load(addBasePath);
-    expect(mockPluginLoader).toHaveBeenCalledWith(addBasePath, 'plugin-a');
-  });
-
-  test('`setup` fails if load is not called first', async () => {
-    await expect(plugin.setup({} as any, {} as any)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Plugin \\"plugin-a\\" can't be setup since its bundle isn't loaded."`
-    );
-  });
-
   test('`setup` fails if plugin.setup is not a function', async () => {
     mockInitializer.mockReturnValueOnce({ start: jest.fn() } as any);
-    await plugin.load(addBasePath);
     await expect(plugin.setup({} as any, {} as any)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Instance of plugin \\"plugin-a\\" does not define \\"setup\\" function."`
     );
@@ -70,20 +57,17 @@ describe('PluginWrapper', () => {
 
   test('`setup` fails if plugin.start is not a function', async () => {
     mockInitializer.mockReturnValueOnce({ setup: jest.fn() } as any);
-    await plugin.load(addBasePath);
     await expect(plugin.setup({} as any, {} as any)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Instance of plugin \\"plugin-a\\" does not define \\"start\\" function."`
     );
   });
 
   test('`setup` calls initializer with initializer context', async () => {
-    await plugin.load(addBasePath);
     await plugin.setup({} as any, {} as any);
     expect(mockInitializer).toHaveBeenCalledWith(initializerContext);
   });
 
   test('`setup` calls plugin.setup with context and dependencies', async () => {
-    await plugin.load(addBasePath);
     const context = { any: 'thing' } as any;
     const deps = { otherDep: 'value' };
     await plugin.setup(context, deps);
@@ -91,14 +75,12 @@ describe('PluginWrapper', () => {
   });
 
   test('`start` fails if setup is not called first', async () => {
-    await plugin.load(addBasePath);
     await expect(plugin.start({} as any, {} as any)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Plugin \\"plugin-a\\" can't be started since it isn't set up."`
     );
   });
 
   test('`start` calls plugin.start with context and dependencies', async () => {
-    await plugin.load(addBasePath);
     await plugin.setup({} as any, {} as any);
     const context = { any: 'thing' } as any;
     const deps = { otherDep: 'value' };
@@ -114,20 +96,21 @@ describe('PluginWrapper', () => {
     };
 
     let startDependenciesResolved = false;
-    mockPluginLoader.mockResolvedValueOnce(() => ({
-      setup: jest.fn(),
-      start: async () => {
-        // Add small delay to ensure startDependencies is not resolved until after the plugin instance's start resolves.
-        await new Promise(resolve => setTimeout(resolve, 10));
-        expect(startDependenciesResolved).toBe(false);
-        return pluginStartContract;
-      },
-    }));
-    await plugin.load(addBasePath);
+    mockPluginReader.mockReturnValueOnce(
+      jest.fn(() => ({
+        setup: jest.fn(),
+        start: jest.fn(async () => {
+          // Add small delay to ensure startDependencies is not resolved until after the plugin instance's start resolves.
+          await new Promise(resolve => setTimeout(resolve, 10));
+          expect(startDependenciesResolved).toBe(false);
+          return pluginStartContract;
+        }),
+        stop: jest.fn(),
+      }))
+    );
     await plugin.setup({} as any, {} as any);
     const context = { any: 'thing' } as any;
     const deps = { otherDep: 'value' };
-
     // Add promise callback prior to calling `start` to ensure calls in `setup` will not resolve before `start` is
     // called.
     const startDependenciesCheck = plugin.startDependencies.then(res => {
@@ -145,7 +128,6 @@ describe('PluginWrapper', () => {
   });
 
   test('`stop` calls plugin.stop', async () => {
-    await plugin.load(addBasePath);
     await plugin.setup({} as any, {} as any);
     await plugin.stop();
     expect(mockPlugin.stop).toHaveBeenCalled();
@@ -153,7 +135,6 @@ describe('PluginWrapper', () => {
 
   test('`stop` does not fail if plugin.stop does not exist', async () => {
     mockInitializer.mockReturnValueOnce({ setup: jest.fn(), start: jest.fn() } as any);
-    await plugin.load(addBasePath);
     await plugin.setup({} as any, {} as any);
     expect(() => plugin.stop()).not.toThrow();
   });

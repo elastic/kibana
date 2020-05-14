@@ -7,13 +7,13 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import * as CheckPrivilige from '../../../../../privilege/check_privilege';
+import * as CheckPrivilige from '../../../../../capabilities/check_capabilities';
 
 import { DeleteAction } from './action_delete';
 
 import mockAnalyticsListItem from './__mocks__/analytics_list_item.json';
 
-jest.mock('../../../../../privilege/check_privilege', () => ({
+jest.mock('../../../../../capabilities/check_capabilities', () => ({
   checkPermission: jest.fn(() => false),
   createPermissionFailureMessage: jest.fn(),
 }));

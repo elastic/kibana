@@ -22,10 +22,11 @@ describe('chart_switch', () => {
     return {
       ...createMockVisualization(),
       id,
+      getVisualizationTypeId: jest.fn(_state => id),
       visualizationTypes: [
         {
           icon: 'empty',
-          id: `sub${id}`,
+          id,
           label: `Label ${id}`,
         },
       ],
@@ -51,6 +52,7 @@ describe('chart_switch', () => {
       visB: generateVisualization('visB'),
       visC: {
         ...generateVisualization('visC'),
+        initialize: jest.fn((_frame, state) => state ?? { type: 'subvisC1' }),
         visualizationTypes: [
           {
             icon: 'empty',
@@ -62,7 +64,33 @@ describe('chart_switch', () => {
             id: 'subvisC2',
             label: 'C2',
           },
+          {
+            icon: 'empty',
+            id: 'subvisC3',
+            label: 'C3',
+          },
         ],
+        getVisualizationTypeId: jest.fn(state => state.type),
+        getSuggestions: jest.fn(options => {
+          if (options.subVisualizationId === 'subvisC2') {
+            return [];
+          }
+          // Multiple suggestions need to be filtered
+          return [
+            {
+              score: 1,
+              title: 'Primary suggestion',
+              state: { type: 'subvisC3' },
+              previewIcon: 'empty',
+            },
+            {
+              score: 1,
+              title: '',
+              state: { type: 'subvisC1', notPrimary: true },
+              previewIcon: 'empty',
+            },
+          ];
+        }),
       },
     };
   }
@@ -144,7 +172,7 @@ describe('chart_switch', () => {
     const component = mount(
       <ChartSwitch
         visualizationId="visA"
-        visualizationState={{}}
+        visualizationState={'state from a'}
         visualizationMap={visualizations}
         dispatch={dispatch}
         framePublicAPI={mockFrame(['a'])}
@@ -153,7 +181,7 @@ describe('chart_switch', () => {
       />
     );
 
-    switchTo('subvisB', component);
+    switchTo('visB', component);
 
     expect(dispatch).toHaveBeenCalledWith({
       initialState: 'suggestion visB',
@@ -183,7 +211,7 @@ describe('chart_switch', () => {
       />
     );
 
-    switchTo('subvisB', component);
+    switchTo('visB', component);
 
     expect(frame.removeLayers).toHaveBeenCalledWith(['a']);
 
@@ -247,7 +275,7 @@ describe('chart_switch', () => {
       />
     );
 
-    expect(getMenuItem('subvisB', component).prop('betaBadgeIconType')).toEqual('alert');
+    expect(getMenuItem('visB', component).prop('betaBadgeIconType')).toEqual('alert');
   });
 
   it('should indicate data loss if not all layers will be used', () => {
@@ -267,7 +295,7 @@ describe('chart_switch', () => {
       />
     );
 
-    expect(getMenuItem('subvisB', component).prop('betaBadgeIconType')).toEqual('alert');
+    expect(getMenuItem('visB', component).prop('betaBadgeIconType')).toEqual('alert');
   });
 
   it('should indicate data loss if no data will be used', () => {
@@ -288,7 +316,7 @@ describe('chart_switch', () => {
       />
     );
 
-    expect(getMenuItem('subvisB', component).prop('betaBadgeIconType')).toEqual('alert');
+    expect(getMenuItem('visB', component).prop('betaBadgeIconType')).toEqual('alert');
   });
 
   it('should not indicate data loss if there is no data', () => {
@@ -310,21 +338,22 @@ describe('chart_switch', () => {
       />
     );
 
-    expect(getMenuItem('subvisB', component).prop('betaBadgeIconType')).toBeUndefined();
+    expect(getMenuItem('visB', component).prop('betaBadgeIconType')).toBeUndefined();
   });
 
-  it('should not indicate data loss if visualization is not changed', () => {
+  it('should not show a warning when the subvisualization is the same', () => {
     const dispatch = jest.fn();
     const frame = mockFrame(['a', 'b', 'c']);
     const visualizations = mockVisualizations();
-    const switchVisualizationType = jest.fn(() => 'therebedragons');
+    visualizations.visC.getVisualizationTypeId.mockReturnValue('subvisC2');
+    const switchVisualizationType = jest.fn(() => ({ type: 'subvisC1' }));
 
     visualizations.visC.switchVisualizationType = switchVisualizationType;
 
     const component = mount(
       <ChartSwitch
         visualizationId="visC"
-        visualizationState={'therebegriffins'}
+        visualizationState={{ type: 'subvisC2' }}
         visualizationMap={visualizations}
         dispatch={dispatch}
         framePublicAPI={frame}
@@ -333,10 +362,10 @@ describe('chart_switch', () => {
       />
     );
 
-    expect(getMenuItem('subvisC2', component).prop('betaBadgeIconType')).toBeUndefined();
+    expect(getMenuItem('subvisC2', component).prop('betaBadgeIconType')).not.toBeDefined();
   });
 
-  it('should remove all layers if there is no suggestion', () => {
+  it('should get suggestions when switching subvisualization', () => {
     const dispatch = jest.fn();
     const visualizations = mockVisualizations();
     visualizations.visB.getSuggestions.mockReturnValueOnce([]);
@@ -354,7 +383,7 @@ describe('chart_switch', () => {
       />
     );
 
-    switchTo('subvisB', component);
+    switchTo('visB', component);
 
     expect(frame.removeLayers).toHaveBeenCalledTimes(1);
     expect(frame.removeLayers).toHaveBeenCalledWith(['a', 'b', 'c']);
@@ -377,14 +406,14 @@ describe('chart_switch', () => {
     const dispatch = jest.fn();
     const frame = mockFrame(['a', 'b', 'c']);
     const visualizations = mockVisualizations();
-    const switchVisualizationType = jest.fn(() => 'therebedragons');
+    const switchVisualizationType = jest.fn(() => 'switched');
 
     visualizations.visC.switchVisualizationType = switchVisualizationType;
 
     const component = mount(
       <ChartSwitch
         visualizationId="visC"
-        visualizationState={'therebegriffins'}
+        visualizationState={{ type: 'subvisC1' }}
         visualizationMap={visualizations}
         dispatch={dispatch}
         framePublicAPI={frame}
@@ -393,12 +422,12 @@ describe('chart_switch', () => {
       />
     );
 
-    switchTo('subvisC2', component);
-    expect(switchVisualizationType).toHaveBeenCalledWith('subvisC2', 'therebegriffins');
+    switchTo('subvisC3', component);
+    expect(switchVisualizationType).toHaveBeenCalledWith('subvisC3', { type: 'subvisC3' });
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'SWITCH_VISUALIZATION',
-        initialState: 'therebedragons',
+        initialState: 'switched',
       })
     );
     expect(frame.removeLayers).not.toHaveBeenCalled();
@@ -452,7 +481,7 @@ describe('chart_switch', () => {
       />
     );
 
-    switchTo('subvisB', component);
+    switchTo('visB', component);
 
     expect(dispatch).toHaveBeenCalledWith({
       type: 'SWITCH_VISUALIZATION',
@@ -484,14 +513,40 @@ describe('chart_switch', () => {
       />
     );
 
-    switchTo('subvisB', component);
+    switchTo('visB', component);
 
     expect(dispatch).toHaveBeenCalledWith({
-      initialState: 'suggestion visB subvisB',
+      initialState: 'suggestion visB visB',
       newVisualizationId: 'visB',
       type: 'SWITCH_VISUALIZATION',
       datasourceId: 'testDatasource',
       datasourceState: {},
+    });
+  });
+
+  it('should use the suggestion that matches the subtype', () => {
+    const dispatch = jest.fn();
+    const visualizations = mockVisualizations();
+    const switchVisualizationType = jest.fn();
+
+    visualizations.visC.switchVisualizationType = switchVisualizationType;
+
+    const component = mount(
+      <ChartSwitch
+        visualizationId="visC"
+        visualizationState={{ type: 'subvisC3' }}
+        visualizationMap={visualizations}
+        dispatch={dispatch}
+        framePublicAPI={mockFrame(['a'])}
+        datasourceMap={mockDatasourceMap()}
+        datasourceStates={mockDatasourceStates()}
+      />
+    );
+
+    switchTo('subvisC1', component);
+    expect(switchVisualizationType).toHaveBeenCalledWith('subvisC1', {
+      type: 'subvisC1',
+      notPrimary: true,
     });
   });
 
@@ -510,7 +565,7 @@ describe('chart_switch', () => {
 
     showFlyout(component);
 
-    const allDisplayed = ['subvisA', 'subvisB', 'subvisC1', 'subvisC2'].every(
+    const allDisplayed = ['visA', 'visB', 'subvisC1', 'subvisC2', 'subvisC3'].every(
       subType => component.find(`[data-test-subj="lnsChartSwitchPopover_${subType}"]`).length > 0
     );
 

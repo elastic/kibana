@@ -40,7 +40,7 @@ export const LegendControls = ({ autoBounds, boundsOverride, onChange, dataBound
   const [draftBounds, setDraftBounds] = useState(autoBounds ? dataBounds : boundsOverride); // should come from bounds prop
   const buttonComponent = (
     <EuiButtonIcon
-      iconType="gear"
+      iconType="controlsHorizontal"
       color="text"
       aria-label={i18n.translate('xpack.infra.legendControls.buttonLabel', {
         defaultMessage: 'configure legend',

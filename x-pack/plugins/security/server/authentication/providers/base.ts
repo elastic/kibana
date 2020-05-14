@@ -11,7 +11,7 @@ import {
   IClusterClient,
   Headers,
 } from '../../../../../../src/core/server';
-import { deepFreeze } from '../../../../../../src/core/utils';
+import { deepFreeze } from '../../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../common/model';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';

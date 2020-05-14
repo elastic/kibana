@@ -40,6 +40,8 @@ export interface MetricsExplorerOptions {
   groupBy?: string;
   filterQuery?: string;
   aggregation: MetricsExplorerAggregation;
+  forceInterval?: boolean;
+  dropLastBucket?: boolean;
 }
 
 export interface MetricsExplorerTimeOptions {

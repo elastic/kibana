@@ -13,6 +13,7 @@ import { registerExploreRoute } from './routes/explore';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { registerSampleData } from './sample_data';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import { graphWorkspace } from './saved_objects';
 
 export class GraphPlugin implements Plugin {
   private licenseState: LicenseState | null = null;
@@ -32,6 +33,7 @@ export class GraphPlugin implements Plugin {
     const licenseState = new LicenseState();
     licenseState.start(licensing.license$);
     this.licenseState = licenseState;
+    core.savedObjects.registerType(graphWorkspace);
 
     if (home) {
       registerSampleData(home.sampleData, licenseState);

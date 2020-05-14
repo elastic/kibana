@@ -45,7 +45,7 @@ export function getTemplate(
 ): IndexTemplate {
   const template = getBaseTemplate(type, templateName, mappings);
   if (pipelineName) {
-    template.settings.index.default_pipeline = pipelineName;
+    template.template.settings.index.default_pipeline = pipelineName;
   }
   return template;
 }
@@ -71,7 +71,14 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
 
       switch (type) {
         case 'group':
-          fieldProps = generateMappings(field.fields!);
+          fieldProps = { ...generateMappings(field.fields!), ...generateDynamicAndEnabled(field) };
+          break;
+        case 'group-nested':
+          fieldProps = {
+            ...generateMappings(field.fields!),
+            ...generateNestedProps(field),
+            type: 'nested',
+          };
           break;
         case 'integer':
           fieldProps.type = 'long';
@@ -95,13 +102,10 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
           }
           break;
         case 'object':
-          fieldProps.type = 'object';
-          if (field.hasOwnProperty('enabled')) {
-            fieldProps.enabled = field.enabled;
-          }
-          if (field.hasOwnProperty('dynamic')) {
-            fieldProps.dynamic = field.dynamic;
-          }
+          fieldProps = { ...fieldProps, ...generateDynamicAndEnabled(field), type: 'object' };
+          break;
+        case 'nested':
+          fieldProps = { ...fieldProps, ...generateNestedProps(field), type: 'nested' };
           break;
         case 'array':
           // this assumes array fields were validated in an earlier step
@@ -126,6 +130,29 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
   }
 
   return { properties: props };
+}
+
+function generateDynamicAndEnabled(field: Field) {
+  const props: Properties = {};
+  if (field.hasOwnProperty('enabled')) {
+    props.enabled = field.enabled;
+  }
+  if (field.hasOwnProperty('dynamic')) {
+    props.dynamic = field.dynamic;
+  }
+  return props;
+}
+
+function generateNestedProps(field: Field) {
+  const props = generateDynamicAndEnabled(field);
+
+  if (field.hasOwnProperty('include_in_parent')) {
+    props.include_in_parent = field.include_in_parent;
+  }
+  if (field.hasOwnProperty('include_in_root')) {
+    props.include_in_root = field.include_in_root;
+  }
+  return props;
 }
 
 function generateMultiFields(fields: Fields): MultiFields {
@@ -212,59 +239,61 @@ function getBaseTemplate(
   mappings: IndexTemplateMappings
 ): IndexTemplate {
   return {
-    // We need to decide which order we use for the templates
-    order: 1,
+    // This takes precedence over all index templates installed with the 'base' package
+    priority: 1,
     // To be completed with the correct index patterns
     index_patterns: [`${templateName}-*`],
-    settings: {
-      index: {
-        // ILM Policy must be added here, for now point to the default global ILM policy name
-        lifecycle: {
-          name: `${type}-default`,
-        },
-        // What should be our default for the compression?
-        codec: 'best_compression',
-        // W
-        mapping: {
-          total_fields: {
-            limit: '10000',
+    template: {
+      settings: {
+        index: {
+          // ILM Policy must be added here, for now point to the default global ILM policy name
+          lifecycle: {
+            name: `${type}-default`,
           },
-        },
-        // This is the default from Beats? So far seems to be a good value
-        refresh_interval: '5s',
-        // Default in the stack now, still good to have it in
-        number_of_shards: '1',
-        // All the default fields which should be queried have to be added here.
-        // So far we add all keyword and text fields here.
-        query: {
-          default_field: ['message'],
-        },
-        // We are setting 30 because it can be devided by several numbers. Useful when shrinking.
-        number_of_routing_shards: '30',
-      },
-    },
-    mappings: {
-      // All the dynamic field mappings
-      dynamic_templates: [
-        // This makes sure all mappings are keywords by default
-        {
-          strings_as_keyword: {
-            mapping: {
-              ignore_above: 1024,
-              type: 'keyword',
+          // What should be our default for the compression?
+          codec: 'best_compression',
+          // W
+          mapping: {
+            total_fields: {
+              limit: '10000',
             },
-            match_mapping_type: 'string',
           },
+          // This is the default from Beats? So far seems to be a good value
+          refresh_interval: '5s',
+          // Default in the stack now, still good to have it in
+          number_of_shards: '1',
+          // All the default fields which should be queried have to be added here.
+          // So far we add all keyword and text fields here.
+          query: {
+            default_field: ['message'],
+          },
+          // We are setting 30 because it can be devided by several numbers. Useful when shrinking.
+          number_of_routing_shards: '30',
         },
-      ],
-      // As we define fields ahead, we don't need any automatic field detection
-      // This makes sure all the fields are mapped to keyword by default to prevent mapping conflicts
-      date_detection: false,
-      // All the properties we know from the fields.yml file
-      properties: mappings.properties,
+      },
+      mappings: {
+        // All the dynamic field mappings
+        dynamic_templates: [
+          // This makes sure all mappings are keywords by default
+          {
+            strings_as_keyword: {
+              mapping: {
+                ignore_above: 1024,
+                type: 'keyword',
+              },
+              match_mapping_type: 'string',
+            },
+          },
+        ],
+        // As we define fields ahead, we don't need any automatic field detection
+        // This makes sure all the fields are mapped to keyword by default to prevent mapping conflicts
+        date_detection: false,
+        // All the properties we know from the fields.yml file
+        properties: mappings.properties,
+      },
+      // To be filled with the aliases that we need
+      aliases: {},
     },
-    // To be filled with the aliases that we need
-    aliases: {},
   };
 }
 
@@ -322,7 +351,7 @@ const updateExistingIndex = async ({
   callCluster: CallESAsCurrentUser;
   indexTemplate: IndexTemplate;
 }) => {
-  const { settings, mappings } = indexTemplate;
+  const { settings, mappings } = indexTemplate.template;
   // try to update the mappings first
   // for now we assume updates are compatible
   try {

@@ -104,8 +104,8 @@ describe('Lens App', () => {
     storage: Storage;
     docId?: string;
     docStorage: SavedObjectStore;
-    redirectTo: (id?: string) => void;
-    addToDashboardMode?: boolean;
+    redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
+    originatingApp: string | undefined;
   }> {
     return ({
       navigation: navigationStartMock,
@@ -140,7 +140,7 @@ describe('Lens App', () => {
         load: jest.fn(),
         save: jest.fn(),
       },
-      redirectTo: jest.fn(id => {}),
+      redirectTo: jest.fn((id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => {}),
     } as unknown) as jest.Mocked<{
       navigation: typeof navigationStartMock;
       editorFrame: EditorFrameInstance;
@@ -149,8 +149,8 @@ describe('Lens App', () => {
       storage: Storage;
       docId?: string;
       docStorage: SavedObjectStore;
-      redirectTo: (id?: string) => void;
-      addToDashboardMode?: boolean;
+      redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
+      originatingApp: string | undefined;
     }>;
   }
 
@@ -215,7 +215,7 @@ describe('Lens App', () => {
     instance = mount(<App {...defaultArgs} />);
 
     expect(core.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-      { text: 'Visualize', href: '/testbasepath/app/kibana#/visualize' },
+      { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
       { text: 'Create' },
     ]);
 
@@ -233,7 +233,7 @@ describe('Lens App', () => {
     });
 
     expect(defaultArgs.core.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-      { text: 'Visualize', href: '/testbasepath/app/kibana#/visualize' },
+      { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
       { text: 'Daaaaaaadaumching!' },
     ]);
   });
@@ -336,6 +336,7 @@ describe('Lens App', () => {
     describe('save button', () => {
       interface SaveProps {
         newCopyOnSave: boolean;
+        returnToOrigin?: boolean;
         newTitle: string;
       }
 
@@ -347,8 +348,8 @@ describe('Lens App', () => {
         storage: Storage;
         docId?: string;
         docStorage: SavedObjectStore;
-        redirectTo: (id?: string) => void;
-        addToDashboardMode?: boolean;
+        redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
+        originatingApp: string | undefined;
       }>;
 
       beforeEach(() => {
@@ -374,32 +375,25 @@ describe('Lens App', () => {
 
       async function testSave(inst: ReactWrapper, saveProps: SaveProps) {
         await getButton(inst).run(inst.getDOMNode());
-
         inst.update();
-
-        const handler = inst.findWhere(el => el.prop('onSave')).prop('onSave') as (
+        const handler = inst.find('[data-test-subj="lnsApp_saveModalOrigin"]').prop('onSave') as (
           p: unknown
         ) => void;
         handler(saveProps);
       }
 
       async function save({
-        initialDocId,
-        addToDashboardMode,
         lastKnownDoc = { expression: 'kibana 3' },
+        initialDocId,
         ...saveProps
       }: SaveProps & {
         lastKnownDoc?: object;
         initialDocId?: string;
-        addToDashboardMode?: boolean;
       }) {
         const args = {
           ...defaultArgs,
           docId: initialDocId,
         };
-        if (addToDashboardMode) {
-          args.addToDashboardMode = addToDashboardMode;
-        }
         args.editorFrame = frame;
         (args.docStorage.load as jest.Mock).mockResolvedValue({
           id: '1234',
@@ -438,7 +432,7 @@ describe('Lens App', () => {
         expect(getButton(instance).disableButton).toEqual(false);
 
         await act(async () => {
-          testSave(instance, saveProps);
+          testSave(instance, { ...saveProps });
         });
 
         return { args, instance };
@@ -527,7 +521,7 @@ describe('Lens App', () => {
           expression: 'kibana 3',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa');
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, true);
 
         inst.setProps({ docId: 'aaa' });
 
@@ -547,7 +541,7 @@ describe('Lens App', () => {
           expression: 'kibana 3',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa');
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, true);
 
         inst.setProps({ docId: 'aaa' });
 
@@ -601,10 +595,10 @@ describe('Lens App', () => {
         expect(getButton(instance).disableButton).toEqual(false);
       });
 
-      it('saves new doc and redirects to dashboard', async () => {
+      it('saves new doc and redirects to originating app', async () => {
         const { args } = await save({
           initialDocId: undefined,
-          addToDashboardMode: true,
+          returnToOrigin: true,
           newCopyOnSave: false,
           newTitle: 'hello there',
         });
@@ -615,7 +609,7 @@ describe('Lens App', () => {
           title: 'hello there',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa');
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', true, true);
       });
 
       it('saves app filters and does not save pinned filters', async () => {
@@ -666,7 +660,6 @@ describe('Lens App', () => {
           })
         );
         instance.update();
-
         await act(async () => getButton(instance).run(instance.getDOMNode()));
         instance.update();
 
@@ -684,7 +677,7 @@ describe('Lens App', () => {
       storage: Storage;
       docId?: string;
       docStorage: SavedObjectStore;
-      redirectTo: (id?: string) => void;
+      redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
     }>;
 
     beforeEach(() => {

@@ -5,6 +5,9 @@
  */
 
 import * as t from 'io-ts';
+import Boom from 'boom';
+import { unique } from 'lodash';
+import { ScopedAnnotationsClient } from '../../../observability/server';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServices } from '../lib/services/get_services';
@@ -13,6 +16,7 @@ import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadat
 import { createRoute } from './create_route';
 import { uiFiltersRt, rangeRt } from './default_api_types';
 import { getServiceAnnotations } from '../lib/services/annotations';
+import { dateAsStringRt } from '../../common/runtime_types/date_as_string_rt';
 
 export const servicesRoute = createRoute(core => ({
   path: '/api/apm/services',
@@ -74,7 +78,7 @@ export const serviceNodeMetadataRoute = createRoute(() => ({
 }));
 
 export const serviceAnnotationsRoute = createRoute(() => ({
-  path: '/api/apm/services/{serviceName}/annotations',
+  path: '/api/apm/services/{serviceName}/annotation/search',
   params: {
     path: t.type({
       serviceName: t.string
@@ -91,10 +95,74 @@ export const serviceAnnotationsRoute = createRoute(() => ({
     const { serviceName } = context.params.path;
     const { environment } = context.params.query;
 
+    let annotationsClient: ScopedAnnotationsClient | undefined;
+
+    if (context.plugins.observability) {
+      annotationsClient = await context.plugins.observability.getScopedAnnotationsClient(
+        request
+      );
+    }
+
     return getServiceAnnotations({
       setup,
       serviceName,
-      environment
+      environment,
+      annotationsClient,
+      apiCaller: context.core.elasticsearch.dataClient.callAsCurrentUser
+    });
+  }
+}));
+
+export const serviceAnnotationsCreateRoute = createRoute(() => ({
+  path: '/api/apm/services/{serviceName}/annotation',
+  method: 'POST',
+  options: {
+    tags: ['access:apm', 'access:apm_write']
+  },
+  params: {
+    path: t.type({
+      serviceName: t.string
+    }),
+    body: t.intersection([
+      t.type({
+        '@timestamp': dateAsStringRt,
+        service: t.intersection([
+          t.type({
+            version: t.string
+          }),
+          t.partial({
+            environment: t.string
+          })
+        ])
+      }),
+      t.partial({
+        message: t.string,
+        tags: t.array(t.string)
+      })
+    ])
+  },
+  handler: async ({ request, context }) => {
+    const annotationsClient = await context.plugins.observability?.getScopedAnnotationsClient(
+      request
+    );
+
+    if (!annotationsClient) {
+      throw Boom.notFound();
+    }
+
+    const { body, path } = context.params;
+
+    return annotationsClient.create({
+      message: body.service.version,
+      ...body,
+      annotation: {
+        type: 'deployment'
+      },
+      service: {
+        ...body.service,
+        name: path.serviceName
+      },
+      tags: unique(['apm'].concat(body.tags ?? []))
     });
   }
 }));

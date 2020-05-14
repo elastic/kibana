@@ -18,14 +18,17 @@
  */
 
 import { SavedObjectUnsanitizedDoc } from 'kibana/server';
+import { savedObjectsServiceMock } from '../../../../core/server/mocks';
 import { dashboardSavedObjectTypeMigrations as migrations } from './dashboard_migrations';
+
+const contextMock = savedObjectsServiceMock.createMigrationContext();
 
 describe('dashboard', () => {
   describe('7.0.0', () => {
     const migration = migrations['7.0.0'];
 
     test('skips error on empty object', () => {
-      expect(migration({} as SavedObjectUnsanitizedDoc)).toMatchInlineSnapshot(`
+      expect(migration({} as SavedObjectUnsanitizedDoc, contextMock)).toMatchInlineSnapshot(`
 Object {
   "references": Array [],
 }
@@ -44,7 +47,7 @@ Object {
             '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
         },
       };
-      const migratedDoc = migration(doc);
+      const migratedDoc = migration(doc, contextMock);
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -83,7 +86,7 @@ Object {
             '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
         },
       };
-      const migratedDoc = migration(doc);
+      const migratedDoc = migration(doc, contextMock);
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -122,7 +125,7 @@ Object {
             '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
         },
       };
-      expect(migration(doc)).toMatchInlineSnapshot(`
+      expect(migration(doc, contextMock)).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
     "kibanaSavedObjectMeta": Object {
@@ -160,7 +163,7 @@ Object {
             '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
         },
       };
-      expect(migration(doc)).toMatchInlineSnapshot(`
+      expect(migration(doc, contextMock)).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
     "kibanaSavedObjectMeta": Object {
@@ -198,7 +201,7 @@ Object {
             '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
         },
       };
-      const migratedDoc = migration(doc);
+      const migratedDoc = migration(doc, contextMock);
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -237,7 +240,7 @@ Object {
             '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
         },
       };
-      const migratedDoc = migration(doc);
+      const migratedDoc = migration(doc, contextMock);
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -291,7 +294,7 @@ Object {
             '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
         },
       };
-      const migratedDoc = migration(doc);
+      const migratedDoc = migration(doc, contextMock);
 
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
@@ -331,7 +334,7 @@ Object {
           panelsJSON: 123,
         },
       } as SavedObjectUnsanitizedDoc;
-      expect(migration(doc)).toMatchInlineSnapshot(`
+      expect(migration(doc, contextMock)).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
     "panelsJSON": 123,
@@ -349,7 +352,7 @@ Object {
           panelsJSON: '{123abc}',
         },
       } as SavedObjectUnsanitizedDoc;
-      expect(migration(doc)).toMatchInlineSnapshot(`
+      expect(migration(doc, contextMock)).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
     "panelsJSON": "{123abc}",
@@ -367,7 +370,7 @@ Object {
           panelsJSON: '{}',
         },
       } as SavedObjectUnsanitizedDoc;
-      expect(migration(doc)).toMatchInlineSnapshot(`
+      expect(migration(doc, contextMock)).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
     "panelsJSON": "{}",
@@ -385,7 +388,7 @@ Object {
           panelsJSON: '[{"id":"123"}]',
         },
       } as SavedObjectUnsanitizedDoc;
-      expect(migration(doc)).toMatchInlineSnapshot(`
+      expect(migration(doc, contextMock)).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
     "panelsJSON": "[{\\"id\\":\\"123\\"}]",
@@ -403,7 +406,7 @@ Object {
           panelsJSON: '[{"type":"visualization"}]',
         },
       } as SavedObjectUnsanitizedDoc;
-      expect(migration(doc)).toMatchInlineSnapshot(`
+      expect(migration(doc, contextMock)).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
     "panelsJSON": "[{\\"type\\":\\"visualization\\"}]",
@@ -422,7 +425,7 @@ Object {
             '[{"id":"1","type":"visualization","foo":true},{"id":"2","type":"visualization","bar":true}]',
         },
       } as SavedObjectUnsanitizedDoc;
-      const migratedDoc = migration(doc);
+      const migratedDoc = migration(doc, contextMock);
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {

@@ -70,6 +70,9 @@ export class KibanaFramework {
       case 'put':
         this.router.put(routeConfig, handler);
         break;
+      case 'patch':
+        this.router.patch(routeConfig, handler);
+        break;
     }
   }
 

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { flow, set, omit } from 'lodash/fp';
+import { flow, omit } from 'lodash/fp';
+import set from 'set-value';
 import { SearchResponse } from 'elasticsearch';
 
 import { Logger } from '../../../../../../../src/core/server';
@@ -55,8 +56,11 @@ export const transformAnomalyFieldsToEcs = (anomaly: Anomaly): EcsAnomaly => {
   }
 
   const omitDottedFields = omit(errantFields.map(field => field.name));
-  const setNestedFields = errantFields.map(field => set(field.name, field.value));
-  const setTimestamp = set('@timestamp', new Date(timestamp).toISOString());
+  const setNestedFields = errantFields.map(field => (_anomaly: Anomaly) =>
+    set(_anomaly, field.name, field.value)
+  );
+  const setTimestamp = (_anomaly: Anomaly) =>
+    set(_anomaly, '@timestamp', new Date(timestamp).toISOString());
 
   return flow(omitDottedFields, setNestedFields, setTimestamp)(anomaly);
 };

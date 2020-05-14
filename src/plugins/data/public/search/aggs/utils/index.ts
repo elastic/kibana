@@ -18,4 +18,5 @@
  */
 
 export * from './calculate_auto_time_expression';
+export * from './prop_filter';
 export * from './to_angular_json';

@@ -12,7 +12,6 @@ export default function({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('outlier detection creation', function() {
-    this.tags(['smoke']);
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ihp_outlier');
       await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier', '@timestamp');

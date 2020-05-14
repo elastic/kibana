@@ -4,12 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup } from 'kibana/public';
+import { CoreSetup, CoreStart } from 'kibana/public';
 import { datatableVisualization } from './visualization';
 import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
 import { datatable, datatableColumns, getDatatableRenderer } from './expression';
 import { EditorFrameSetup, FormatFactory } from '../types';
+import { setExecuteTriggerActions } from '../services';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 
+interface DatatableVisualizationPluginStartPlugins {
+  uiActions: UiActionsStart;
+  data: DataPublicPluginStart;
+}
 export interface DatatableVisualizationPluginSetupPlugins {
   expressions: ExpressionsSetup;
   formatFactory: Promise<FormatFactory>;
@@ -20,12 +27,22 @@ export class DatatableVisualization {
   constructor() {}
 
   setup(
-    _core: CoreSetup | null,
+    core: CoreSetup<DatatableVisualizationPluginStartPlugins, void>,
     { expressions, formatFactory, editorFrame }: DatatableVisualizationPluginSetupPlugins
   ) {
     expressions.registerFunction(() => datatableColumns);
     expressions.registerFunction(() => datatable);
-    expressions.registerRenderer(() => getDatatableRenderer(formatFactory));
+    expressions.registerRenderer(() =>
+      getDatatableRenderer({
+        formatFactory,
+        getType: core
+          .getStartServices()
+          .then(([_, { data: dataStart }]) => dataStart.search.aggs.types.get),
+      })
+    );
     editorFrame.registerVisualization(datatableVisualization);
+  }
+  start(core: CoreStart, { uiActions }: DatatableVisualizationPluginStartPlugins) {
+    setExecuteTriggerActions(uiActions.executeTriggerActions);
   }
 }

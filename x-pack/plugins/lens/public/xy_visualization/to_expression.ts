@@ -142,7 +142,7 @@ export const buildExpression = (
                 .concat(layer.splitAccessor ? [layer.splitAccessor] : [])
                 .forEach(accessor => {
                   const operation = datasource.getOperationForColumnId(accessor);
-                  if (operation && operation.label) {
+                  if (operation?.label) {
                     columnToLabel[accessor] = operation.label;
                   }
                 });

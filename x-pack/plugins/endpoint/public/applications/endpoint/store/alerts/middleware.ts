@@ -9,7 +9,7 @@ import { AlertResultList, AlertDetails } from '../../../../../common/types';
 import { ImmutableMiddlewareFactory, AlertListState } from '../../types';
 import { isOnAlertPage, apiQueryParams, hasSelectedAlert, uiQueryParams } from './selectors';
 import { cloneHttpFetchQuery } from '../../../../common/clone_http_fetch_query';
-import { EndpointAppConstants } from '../../../../../common/types';
+import { AlertConstants } from '../../../../../common/alert_constants';
 
 export const alertMiddlewareFactory: ImmutableMiddlewareFactory<AlertListState> = (
   coreStart,
@@ -18,7 +18,7 @@ export const alertMiddlewareFactory: ImmutableMiddlewareFactory<AlertListState> 
   async function fetchIndexPatterns(): Promise<IIndexPattern[]> {
     const { indexPatterns } = depsStart.data;
     const eventsPattern: { indexPattern: string } = await coreStart.http.get(
-      `${EndpointAppConstants.INDEX_PATTERN_ROUTE}/${EndpointAppConstants.EVENT_DATASET}`
+      `${AlertConstants.INDEX_PATTERN_ROUTE}/${AlertConstants.EVENT_DATASET}`
     );
     const fields = await indexPatterns.getFieldsForWildcard({
       pattern: eventsPattern.indexPattern,

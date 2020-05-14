@@ -35,7 +35,7 @@ export default function({ getService, getPageObjects }) {
   describe('discover histogram', function describeIndexTests() {
     before(async function() {
       log.debug('load kibana index with default index pattern');
-      await PageObjects.common.navigateToApp('home');
+      await PageObjects.common.navigateToApp('settings');
       await security.testUser.setRoles([
         'kibana_admin',
         'test_logstash_reader',
@@ -48,7 +48,7 @@ export default function({ getService, getPageObjects }) {
 
       log.debug('create long_window_logstash index pattern');
       // NOTE: long_window_logstash load does NOT create index pattern
-      await PageObjects.settings.createIndexPattern('long-window-logstash-');
+      await PageObjects.settings.createIndexPattern('long-window-logstash-*');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await browser.refresh();
 
@@ -56,7 +56,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('long-window-logstash-*');
       // NOTE: For some reason without setting this relative time, the abs times will not fetch data.
-      await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_Last_1 year');
+      await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
     });
     after(async () => {
       await esArchiver.unload('long_window_logstash');

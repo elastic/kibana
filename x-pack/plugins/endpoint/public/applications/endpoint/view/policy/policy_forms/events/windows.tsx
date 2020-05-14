@@ -17,18 +17,18 @@ import {
 } from '../../../../store/policy_details/selectors';
 import { ConfigForm } from '../config_form';
 import { setIn, getIn } from '../../../../models/policy_details_config';
-import { UIPolicyConfig, ImmutableArray } from '../../../../../../../common/types';
+import { UIPolicyConfig, Immutable } from '../../../../../../../common/types';
 
 export const WindowsEvents = React.memo(() => {
   const selected = usePolicyDetailsSelector(selectedWindowsEvents);
   const total = usePolicyDetailsSelector(totalWindowsEvents);
 
   const checkboxes = useMemo(() => {
-    const items: ImmutableArray<{
+    const items: Immutable<Array<{
       name: string;
       os: 'windows';
       protectionField: keyof UIPolicyConfig['windows']['events'];
-    }> = [
+    }>> = [
       {
         name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.dllDriverLoad', {
           defaultMessage: 'DLL and Driver Load',

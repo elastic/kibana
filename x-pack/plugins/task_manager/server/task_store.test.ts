@@ -15,11 +15,17 @@ import {
   TaskInstance,
   TaskStatus,
   TaskLifecycleResult,
+  SerializedConcreteTaskInstance,
+  ConcreteTaskInstance,
 } from './task';
 import { StoreOpts, OwnershipClaimingOpts, TaskStore, SearchOpts } from './task_store';
-import { savedObjectsRepositoryMock } from '../../../../src/core/server/mocks';
-import { SavedObjectsSerializer, SavedObjectTypeRegistry } from '../../../../src/core/server';
-import { SavedObjectsErrorHelpers } from '../../../../src/core/server/saved_objects/service/lib/errors';
+import { savedObjectsRepositoryMock } from 'src/core/server/mocks';
+import {
+  SavedObjectsSerializer,
+  SavedObjectTypeRegistry,
+  SavedObjectAttributes,
+  SavedObjectsErrorHelpers,
+} from 'src/core/server';
 import { asTaskClaimEvent, TaskEvent } from './task_events';
 import { asOk, asErr } from './lib/result_type';
 
@@ -47,6 +53,7 @@ const serializer = new SavedObjectsSerializer(new SavedObjectTypeRegistry());
 beforeEach(() => jest.resetAllMocks());
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).Date = class Date {
   constructor() {
     return mockedDate;
@@ -58,9 +65,9 @@ const mockedDate = new Date('2019-02-12T21:01:22.479Z');
 
 describe('TaskStore', () => {
   describe('schedule', () => {
-    async function testSchedule(task: TaskInstance) {
+    async function testSchedule(task: unknown) {
       const callCluster = jest.fn();
-      savedObjectsClient.create.mockImplementation(async (type: string, attributes: any) => ({
+      savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
         id: 'testid',
         type,
         attributes,
@@ -76,7 +83,7 @@ describe('TaskStore', () => {
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
       });
-      const result = await store.schedule(task);
+      const result = await store.schedule(task as TaskInstance);
 
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
 
@@ -149,14 +156,16 @@ describe('TaskStore', () => {
     test('sets runAt to now if not specified', async () => {
       await testSchedule({ taskType: 'dernstraight', params: {}, state: {} });
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
-      const attributes: any = savedObjectsClient.create.mock.calls[0][1];
+      const attributes = savedObjectsClient.create.mock
+        .calls[0][1] as SerializedConcreteTaskInstance;
       expect(new Date(attributes.runAt as string).getTime()).toEqual(mockedDate.getTime());
     });
 
     test('ensures params and state are not null', async () => {
-      await testSchedule({ taskType: 'yawn' } as any);
+      await testSchedule({ taskType: 'yawn' });
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
-      const attributes: any = savedObjectsClient.create.mock.calls[0][1];
+      const attributes = savedObjectsClient.create.mock
+        .calls[0][1] as SerializedConcreteTaskInstance;
       expect(attributes.params).toEqual('{}');
       expect(attributes.state).toEqual('{}');
     });
@@ -169,8 +178,8 @@ describe('TaskStore', () => {
   });
 
   describe('fetch', () => {
-    async function testFetch(opts?: SearchOpts, hits: any[] = []) {
-      const callCluster = sinon.spy(async (name: string, params?: any) => ({ hits: { hits } }));
+    async function testFetch(opts?: SearchOpts, hits: unknown[] = []) {
+      const callCluster = sinon.spy(async (name: string, params?: unknown) => ({ hits: { hits } }));
       const store = new TaskStore({
         index: 'tasky',
         taskManagerId: '',
@@ -229,11 +238,11 @@ describe('TaskStore', () => {
       claimingOpts,
     }: {
       opts: Partial<StoreOpts>;
-      hits?: any[];
+      hits?: unknown[];
       claimingOpts: OwnershipClaimingOpts;
     }) {
       const versionConflicts = 2;
-      const callCluster = sinon.spy(async (name: string, params?: any) =>
+      const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
           ? {
               total: hits.length + versionConflicts,
@@ -266,7 +275,7 @@ describe('TaskStore', () => {
     }
 
     test('it returns normally with no tasks when the index does not exist.', async () => {
-      const callCluster = sinon.spy(async (name: string, params?: any) => ({
+      const callCluster = sinon.spy(async (name: string, params?: unknown) => ({
         total: 0,
         updated: 0,
       }));
@@ -745,7 +754,7 @@ if (doc['task.runAt'].size()!=0) {
       };
 
       savedObjectsClient.update.mockImplementation(
-        async (type: string, id: string, attributes: any) => {
+        async (type: string, id: string, attributes: SavedObjectAttributes) => {
           return {
             id,
             type,
@@ -1017,7 +1026,7 @@ if (doc['task.runAt'].size()!=0) {
 
     test('emits an event when a task is succesfully claimed by id', async done => {
       const { taskManagerId, runAt, tasks } = generateTasks();
-      const callCluster = sinon.spy(async (name: string, params?: any) =>
+      const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
           ? {
               total: tasks.length,
@@ -1036,9 +1045,9 @@ if (doc['task.runAt'].size()!=0) {
       });
 
       const sub = store.events
-        .pipe(filter((event: TaskEvent<any, any>) => event.id === 'aaa'))
+        .pipe(filter((event: TaskEvent<ConcreteTaskInstance, Error>) => event.id === 'aaa'))
         .subscribe({
-          next: (event: TaskEvent<any, any>) => {
+          next: (event: TaskEvent<ConcreteTaskInstance, Error>) => {
             expect(event).toMatchObject(
               asTaskClaimEvent(
                 'aaa',
@@ -1074,7 +1083,7 @@ if (doc['task.runAt'].size()!=0) {
 
     test('emits an event when a task is succesfully by scheduling', async done => {
       const { taskManagerId, runAt, tasks } = generateTasks();
-      const callCluster = sinon.spy(async (name: string, params?: any) =>
+      const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
           ? {
               total: tasks.length,
@@ -1093,9 +1102,9 @@ if (doc['task.runAt'].size()!=0) {
       });
 
       const sub = store.events
-        .pipe(filter((event: TaskEvent<any, any>) => event.id === 'bbb'))
+        .pipe(filter((event: TaskEvent<ConcreteTaskInstance, Error>) => event.id === 'bbb'))
         .subscribe({
-          next: (event: TaskEvent<any, any>) => {
+          next: (event: TaskEvent<ConcreteTaskInstance, Error>) => {
             expect(event).toMatchObject(
               asTaskClaimEvent(
                 'bbb',
@@ -1131,7 +1140,7 @@ if (doc['task.runAt'].size()!=0) {
 
     test('emits an event when the store fails to claim a required task by id', async done => {
       const { taskManagerId, tasks } = generateTasks();
-      const callCluster = sinon.spy(async (name: string, params?: any) =>
+      const callCluster = sinon.spy(async (name: string, params?: unknown) =>
         name === 'updateByQuery'
           ? {
               total: tasks.length,
@@ -1150,9 +1159,9 @@ if (doc['task.runAt'].size()!=0) {
       });
 
       const sub = store.events
-        .pipe(filter((event: TaskEvent<any, any>) => event.id === 'ccc'))
+        .pipe(filter((event: TaskEvent<ConcreteTaskInstance, Error>) => event.id === 'ccc'))
         .subscribe({
-          next: (event: TaskEvent<any, any>) => {
+          next: (event: TaskEvent<ConcreteTaskInstance, Error>) => {
             expect(event).toMatchObject(
               asTaskClaimEvent('ccc', asErr(new Error(`failed to claim task 'ccc'`)))
             );

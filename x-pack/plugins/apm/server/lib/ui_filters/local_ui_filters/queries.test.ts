@@ -8,7 +8,7 @@ import { getLocalUIFilters } from './';
 import {
   SearchParamsMock,
   inspectSearchParams
-} from '../../../../../../legacy/plugins/apm/public/utils/testHelpers';
+} from '../../../../public/utils/testHelpers';
 import { getServicesProjection } from '../../../../common/projections/services';
 
 describe('local ui filter queries', () => {

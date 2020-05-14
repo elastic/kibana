@@ -32,6 +32,7 @@ export enum KibanaAssetType {
 }
 
 export enum ElasticsearchAssetType {
+  componentTemplate = 'component-template',
   ingestPipeline = 'ingest-pipeline',
   indexTemplate = 'index-template',
   ilmPolicy = 'ilm-policy',
@@ -96,6 +97,7 @@ export interface RegistryStream {
   description?: string;
   enabled?: boolean;
   vars?: RegistryVarsEntry[];
+  template?: string;
 }
 
 export type RequirementVersion = string;
@@ -202,6 +204,7 @@ export interface RegistryVarsEntry {
 // internal until we need them
 interface PackageAdditions {
   title: string;
+  latestVersion: string;
   assets: AssetsGroupedByServiceByType;
 }
 
@@ -246,6 +249,7 @@ export enum IngestAssetType {
   DataFrameTransform = 'data-frame-transform',
   IlmPolicy = 'ilm-policy',
   IndexTemplate = 'index-template',
+  ComponentTemplate = 'component-template',
   IngestPipeline = 'ingest-pipeline',
   MlJob = 'ml-job',
   RollupJob = 'rollup-job',
@@ -261,12 +265,17 @@ export interface IndexTemplateMappings {
   properties: any;
 }
 
+// This is an index template v2, see https://github.com/elastic/elasticsearch/issues/53101
+// until "proper" documentation of the new format is available.
+// Ingest Manager does not use nor support the legacy index template v1 format at all
 export interface IndexTemplate {
-  order: number;
+  priority: number;
   index_patterns: string[];
-  settings: any;
-  mappings: object;
-  aliases: object;
+  template: {
+    settings: any;
+    mappings: object;
+    aliases: object;
+  };
 }
 
 export interface TemplateRef {

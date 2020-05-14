@@ -93,8 +93,7 @@ import { IngestGetPipelineParams } from 'elasticsearch';
 import { IngestPutPipelineParams } from 'elasticsearch';
 import { IngestSimulateParams } from 'elasticsearch';
 import { KibanaConfigType as KibanaConfigType_2 } from 'src/core/server/kibana_config';
-import { Logger as Logger_2 } from 'src/core/server/logging';
-import { Logger as Logger_3 } from 'kibana/server';
+import { Logger as Logger_2 } from 'kibana/server';
 import { MGetParams } from 'elasticsearch';
 import { MGetResponse } from 'elasticsearch';
 import moment from 'moment';
@@ -408,6 +407,8 @@ export interface IIndexPattern {
     // (undocumented)
     fields: IFieldType[];
     // (undocumented)
+    getTimeField?(): IFieldType | undefined;
+    // (undocumented)
     id?: string;
     // (undocumented)
     timeFieldName?: string;
@@ -609,7 +610,7 @@ export class Plugin implements Plugin_2<PluginSetup, PluginStart> {
     // (undocumented)
     setup(core: CoreSetup, { usageCollection }: DataPluginSetupDependencies): {
         fieldFormats: {
-            register: (customFieldFormat: import("../common").IFieldFormatType) => number;
+            register: (customFieldFormat: import("../public").FieldFormatInstanceType) => number;
         };
         search: ISearchSetup;
     };

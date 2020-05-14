@@ -235,7 +235,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
             href={`${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-regression-evaluation`}
           >
             {i18n.translate(
-              'xpack.ml.dataframe.analytics.classificationExploration.regressionDocsLink',
+              'xpack.ml.dataframe.analytics.regressionExploration.regressionDocsLink',
               {
                 defaultMessage: 'Regression evaluation docs ',
               }

@@ -42,6 +42,8 @@ describe('indexDocument', () => {
 });
 
 describe('doesIlmPolicyExist', () => {
+  // ElasticsearchError can be a bit random in shape, we need an any here
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const notFoundError = new Error('Not found') as any;
   notFoundError.statusCode = 404;
 
@@ -187,6 +189,8 @@ describe('createIndex', () => {
   });
 
   test(`shouldn't throw when an error of type resource_already_exists_exception is thrown`, async () => {
+    // ElasticsearchError can be a bit random in shape, we need an any here
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const err = new Error('Already exists') as any;
     err.body = {
       error: {
@@ -222,7 +226,7 @@ describe('queryEventsBySavedObject', () => {
       body: {
         from: 0,
         size: 10,
-        sort: { 'event.start': { order: 'asc' } },
+        sort: { '@timestamp': { order: 'asc' } },
         query: {
           bool: {
             must: [
@@ -232,6 +236,13 @@ describe('queryEventsBySavedObject', () => {
                   query: {
                     bool: {
                       must: [
+                        {
+                          term: {
+                            'kibana.saved_objects.rel': {
+                              value: 'primary',
+                            },
+                          },
+                        },
                         {
                           term: {
                             'kibana.saved_objects.type': {
@@ -317,6 +328,13 @@ describe('queryEventsBySavedObject', () => {
                       must: [
                         {
                           term: {
+                            'kibana.saved_objects.rel': {
+                              value: 'primary',
+                            },
+                          },
+                        },
+                        {
+                          term: {
                             'kibana.saved_objects.type': {
                               value: 'saved-object-type',
                             },
@@ -336,7 +354,7 @@ describe('queryEventsBySavedObject', () => {
               },
               {
                 range: {
-                  'event.start': {
+                  '@timestamp': {
                     gte: start,
                   },
                 },
@@ -386,6 +404,13 @@ describe('queryEventsBySavedObject', () => {
                       must: [
                         {
                           term: {
+                            'kibana.saved_objects.rel': {
+                              value: 'primary',
+                            },
+                          },
+                        },
+                        {
+                          term: {
                             'kibana.saved_objects.type': {
                               value: 'saved-object-type',
                             },
@@ -405,14 +430,14 @@ describe('queryEventsBySavedObject', () => {
               },
               {
                 range: {
-                  'event.start': {
+                  '@timestamp': {
                     gte: start,
                   },
                 },
               },
               {
                 range: {
-                  'event.end': {
+                  '@timestamp': {
                     lte: end,
                   },
                 },

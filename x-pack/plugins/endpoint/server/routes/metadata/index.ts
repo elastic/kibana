@@ -171,7 +171,6 @@ async function enrichHostMetadata(
   try {
     /**
      * Get agent status by elastic agent id if available or use the host id.
-     * https://github.com/elastic/endpoint-app-team/issues/354
      */
 
     if (!elasticAgentId) {

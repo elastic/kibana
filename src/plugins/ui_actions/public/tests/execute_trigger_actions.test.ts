@@ -69,7 +69,7 @@ test('executes a single action mapped to a trigger', async () => {
   const action = createTestAction('test1', () => true);
 
   setup.registerTrigger(trigger);
-  setup.attachAction(trigger.id, action);
+  setup.addTriggerAction(trigger.id, action);
 
   const context = {};
   const start = doStart();
@@ -109,7 +109,7 @@ test('does not execute an incompatible action', async () => {
   );
 
   setup.registerTrigger(trigger);
-  setup.attachAction(trigger.id, action);
+  setup.addTriggerAction(trigger.id, action);
 
   const start = doStart();
   const context = {
@@ -130,8 +130,8 @@ test('shows a context menu when more than one action is mapped to a trigger', as
   const action2 = createTestAction('test2', () => true);
 
   setup.registerTrigger(trigger);
-  setup.attachAction(trigger.id, action1);
-  setup.attachAction(trigger.id, action2);
+  setup.addTriggerAction(trigger.id, action1);
+  setup.addTriggerAction(trigger.id, action2);
 
   expect(openContextMenu).toHaveBeenCalledTimes(0);
 
@@ -155,7 +155,7 @@ test('passes whole action context to isCompatible()', async () => {
   });
 
   setup.registerTrigger(trigger);
-  setup.attachAction(trigger.id, action);
+  setup.addTriggerAction(trigger.id, action);
 
   const start = doStart();
 

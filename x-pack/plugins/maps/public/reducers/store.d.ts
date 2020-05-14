@@ -16,3 +16,5 @@ export interface MapStoreState {
 export type MapStore = Store<MapStoreState>;
 
 export function createMapStore(): MapStore;
+
+export const DEFAULT_MAP_STORE_STATE: MapStoreState;

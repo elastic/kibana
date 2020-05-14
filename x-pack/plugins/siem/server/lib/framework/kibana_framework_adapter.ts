@@ -9,6 +9,7 @@ import { GraphQLSchema } from 'graphql';
 import { runHttpQuery } from 'apollo-server-core';
 import { schema as configSchema } from '@kbn/config-schema';
 import {
+  CoreSetup,
   IRouter,
   KibanaResponseFactory,
   RequestHandlerContext,
@@ -16,7 +17,7 @@ import {
 } from '../../../../../../src/core/server';
 import { IndexPatternsFetcher } from '../../../../../../src/plugins/data/server';
 import { AuthenticatedUser } from '../../../../security/common/model';
-import { CoreSetup, SetupPlugins } from '../../plugin';
+import { SetupPlugins } from '../../plugin';
 
 import {
   FrameworkAdapter,

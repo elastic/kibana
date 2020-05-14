@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MetricsExplorerMetric } from '../../../../../../common/http_api/metrics_explorer';
+import { MetricsExplorerOptionsMetric } from '../../hooks/use_metrics_explorer_options';
 
-export const createMetricLabel = (metric: MetricsExplorerMetric) => {
+export const createMetricLabel = (metric: MetricsExplorerOptionsMetric) => {
+  if (metric.label) {
+    return metric.label;
+  }
   return `${metric.aggregation}(${metric.field || ''})`;
 };

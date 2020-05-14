@@ -19,6 +19,7 @@ import {
   getOpenTooltips,
   getQuery,
   getDataRequestDescriptor,
+  getFittableLayers,
 } from '../selectors/map_selectors';
 
 import { FLYOUT_STATE } from '../reducers/ui';
@@ -564,6 +565,55 @@ export function fitToLayerExtent(layerId) {
         await dispatch(setGotoWithBounds(bounds));
       }
     }
+  };
+}
+
+export function fitToDataBounds() {
+  return async function(dispatch, getState) {
+    const layerList = getFittableLayers(getState());
+
+    if (!layerList.length) {
+      return;
+    }
+
+    const dataFilters = getDataFilters(getState());
+    const boundsPromises = layerList.map(async layer => {
+      return layer.getBounds(dataFilters);
+    });
+
+    const bounds = await Promise.all(boundsPromises);
+    const corners = [];
+    for (let i = 0; i < bounds.length; i++) {
+      const b = bounds[i];
+
+      //filter out undefined bounds (uses Infinity due to turf responses)
+      if (
+        b === null ||
+        b.minLon === Infinity ||
+        b.maxLon === Infinity ||
+        b.minLat === -Infinity ||
+        b.maxLat === -Infinity
+      ) {
+        continue;
+      }
+
+      corners.push([b.minLon, b.minLat]);
+      corners.push([b.maxLon, b.maxLat]);
+    }
+
+    if (!corners.length) {
+      return;
+    }
+
+    const turfUnionBbox = turf.bbox(turf.multiPoint(corners));
+    const dataBounds = {
+      minLon: turfUnionBbox[0],
+      minLat: turfUnionBbox[1],
+      maxLon: turfUnionBbox[2],
+      maxLat: turfUnionBbox[3],
+    };
+
+    dispatch(setGotoWithBounds(dataBounds));
   };
 }
 

@@ -67,14 +67,19 @@ export function EPMHomePage() {
 function InstalledPackages() {
   const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages();
   const [selectedCategory, setSelectedCategory] = useState('');
-  const packages =
-    allPackages && allPackages.response && selectedCategory === ''
-      ? allPackages.response.filter(pkg => pkg.status === 'installed')
-      : [];
 
   const title = i18n.translate('xpack.ingestManager.epmList.installedTitle', {
     defaultMessage: 'Installed integrations',
   });
+
+  const allInstalledPackages =
+    allPackages && allPackages.response
+      ? allPackages.response.filter(pkg => pkg.status === 'installed')
+      : [];
+
+  const updatablePackages = allInstalledPackages.filter(
+    item => 'savedObject' in item && item.version > item.savedObject.attributes.version
+  );
 
   const categories = [
     {
@@ -82,14 +87,14 @@ function InstalledPackages() {
       title: i18n.translate('xpack.ingestManager.epmList.allFilterLinkText', {
         defaultMessage: 'All',
       }),
-      count: packages.length,
+      count: allInstalledPackages.length,
     },
     {
       id: 'updates_available',
       title: i18n.translate('xpack.ingestManager.epmList.updatesAvailableFilterLinkText', {
         defaultMessage: 'Updates available',
       }),
-      count: 0, // TODO: Update with real count when available
+      count: updatablePackages.length,
     },
   ];
 
@@ -106,7 +111,7 @@ function InstalledPackages() {
       isLoading={isLoadingPackages}
       controls={controls}
       title={title}
-      list={packages}
+      list={selectedCategory === 'updates_available' ? updatablePackages : allInstalledPackages}
     />
   );
 }
@@ -134,7 +139,6 @@ function AvailablePackages() {
     },
     ...(categoriesRes ? categoriesRes.response : []),
   ];
-
   const controls = categories ? (
     <CategoryFacets
       isLoading={isLoadingCategories}

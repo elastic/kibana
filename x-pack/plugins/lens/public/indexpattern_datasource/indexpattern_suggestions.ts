@@ -17,6 +17,7 @@ import {
   OperationType,
 } from './operations';
 import { operationDefinitions } from './operations/definitions';
+import { TermsIndexPatternColumn } from './operations/definitions/terms';
 import { hasField } from './utils';
 import {
   IndexPattern,
@@ -232,6 +233,10 @@ function addFieldAsBucketOperation(
     [newColumnId]: newColumn,
   };
 
+  if (buckets.length === 0 && operation === 'terms') {
+    (newColumn as TermsIndexPatternColumn).params.size = 5;
+  }
+
   const oldDateHistogramIndex = layer.columnOrder.findIndex(
     columnId => layer.columns[columnId].operationType === 'date_histogram'
   );
@@ -327,6 +332,9 @@ function createNewLayerWithBucketAggregation(
     field,
     suggestedPriority: undefined,
   });
+  if (operation === 'terms') {
+    (column as TermsIndexPatternColumn).params.size = 5;
+  }
 
   return {
     indexPatternId: indexPattern.id,
@@ -478,7 +486,7 @@ function createChangedNestingSuggestion(state: IndexPatternPrivateState, layerId
     layerId,
     updatedLayer,
     label: getNestedTitle([layer.columns[secondBucket], layer.columns[firstBucket]]),
-    changeType: 'extended',
+    changeType: 'reorder',
   });
 }
 

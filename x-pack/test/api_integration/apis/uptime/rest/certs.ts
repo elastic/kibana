@@ -8,8 +8,8 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { isRight } from 'fp-ts/lib/Either';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { API_URLS } from '../../../../../legacy/plugins/uptime/common/constants';
-import { CertType } from '../../../../../legacy/plugins/uptime/common/runtime_types';
+import { API_URLS } from '../../../../../plugins/uptime/common/constants';
+import { CertType } from '../../../../../plugins/uptime/common/runtime_types';
 import { makeChecksWithStatus } from './helper/make_checks';
 
 export default function({ getService }: FtrProviderContext) {
@@ -21,7 +21,7 @@ export default function({ getService }: FtrProviderContext) {
     describe('empty index', async () => {
       it('returns empty array for no data', async () => {
         const apiResponse = await supertest.get(API_URLS.CERTS);
-        expect(JSON.stringify(apiResponse.body)).to.eql('{"certs":[]}');
+        expect(JSON.stringify(apiResponse.body)).to.eql('{"certs":[],"total":0}');
       });
     });
 
@@ -39,10 +39,10 @@ export default function({ getService }: FtrProviderContext) {
           10000,
           {
             tls: {
-              certificate_not_valid_after: cnva,
-              certificate_not_valid_before: cnvb,
               server: {
                 x509: {
+                  not_after: cnva,
+                  not_before: cnvb,
                   issuer: {
                     common_name: 'issuer-common-name',
                   },
@@ -78,9 +78,12 @@ export default function({ getService }: FtrProviderContext) {
 
         const cert = body.certs[0];
         expect(Array.isArray(cert.monitors)).to.be(true);
-        expect(cert.monitors[0]).to.eql({ id: monitorId });
-        expect(cert.certificate_not_valid_after).to.eql(cnva);
-        expect(cert.certificate_not_valid_before).to.eql(cnvb);
+        expect(cert.monitors[0]).to.eql({
+          id: monitorId,
+          url: 'http://localhost:5678/pattern?r=200x5,500x1',
+        });
+        expect(cert.not_after).to.eql(cnva);
+        expect(cert.not_before).to.eql(cnvb);
         expect(cert.common_name).to.eql('subject-common-name');
         expect(cert.issuer).to.eql('issuer-common-name');
       });

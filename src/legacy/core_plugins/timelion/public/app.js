@@ -18,6 +18,8 @@
  */
 
 import _ from 'lodash';
+// required for `ngSanitize` angular module
+import 'angular-sanitize';
 
 import { i18n } from '@kbn/i18n';
 

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiErrorBoundary, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { RoutedTabs } from '../../components/navigation/routed_tabs';
@@ -28,108 +28,113 @@ import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { WaffleOptionsProvider } from './inventory_view/hooks/use_waffle_options';
 import { WaffleTimeProvider } from './inventory_view/hooks/use_waffle_time';
 import { WaffleFiltersProvider } from './inventory_view/hooks/use_waffle_filters';
-import { AlertDropdown } from '../../components/alerting/metrics/alert_dropdown';
+
+import { InventoryAlertDropdown } from '../../components/alerting/inventory/alert_dropdown';
+import { MetricsAlertDropdown } from '../../alerting/metric_threshold/components/alert_dropdown';
 
 export const InfrastructurePage = ({ match }: RouteComponentProps) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
 
   return (
-    <Source.Provider sourceId="default">
-      <WaffleOptionsProvider>
-        <WaffleTimeProvider>
-          <WaffleFiltersProvider>
-            <ColumnarPage>
-              <DocumentTitle
-                title={i18n.translate('xpack.infra.homePage.documentTitle', {
-                  defaultMessage: 'Metrics',
-                })}
-              />
-
-              <HelpCenterContent
-                feedbackLink="https://discuss.elastic.co/c/metrics"
-                appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
-                  defaultMessage: 'Metrics',
-                })}
-              />
-
-              <Header
-                breadcrumbs={[
-                  {
-                    text: i18n.translate('xpack.infra.header.infrastructureTitle', {
-                      defaultMessage: 'Metrics',
-                    }),
-                  },
-                ]}
-                readOnlyBadge={!uiCapabilities?.infrastructure?.save}
-              />
-              <AppNavigation
-                aria-label={i18n.translate('xpack.infra.header.infrastructureNavigationTitle', {
-                  defaultMessage: 'Metrics',
-                })}
-              >
-                <EuiFlexGroup gutterSize={'none'} alignItems={'center'}>
-                  <EuiFlexItem>
-                    <RoutedTabs
-                      tabs={[
-                        {
-                          app: 'metrics',
-                          title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
-                            defaultMessage: 'Inventory',
-                          }),
-                          pathname: '/inventory',
-                        },
-                        {
-                          app: 'metrics',
-                          title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
-                            defaultMessage: 'Metrics Explorer',
-                          }),
-                          pathname: '/explorer',
-                        },
-                        {
-                          app: 'metrics',
-                          title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
-                            defaultMessage: 'Settings',
-                          }),
-                          pathname: '/settings',
-                        },
-                      ]}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <Route path={'/explorer'} component={AlertDropdown} />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </AppNavigation>
-
-              <Switch>
-                <Route path={'/inventory'} component={SnapshotPage} />
-                <Route
-                  path={'/explorer'}
-                  render={props => (
-                    <WithSource>
-                      {({ configuration, createDerivedIndexPattern }) => (
-                        <MetricsExplorerOptionsContainer.Provider>
-                          <WithMetricsExplorerOptionsUrlState />
-                          {configuration ? (
-                            <MetricsExplorerPage
-                              derivedIndexPattern={createDerivedIndexPattern('metrics')}
-                              source={configuration}
-                              {...props}
-                            />
-                          ) : (
-                            <SourceLoadingPage />
-                          )}
-                        </MetricsExplorerOptionsContainer.Provider>
-                      )}
-                    </WithSource>
-                  )}
+    <EuiErrorBoundary>
+      <Source.Provider sourceId="default">
+        <WaffleOptionsProvider>
+          <WaffleTimeProvider>
+            <WaffleFiltersProvider>
+              <ColumnarPage>
+                <DocumentTitle
+                  title={i18n.translate('xpack.infra.homePage.documentTitle', {
+                    defaultMessage: 'Metrics',
+                  })}
                 />
-                <Route path={'/settings'} component={MetricsSettingsPage} />
-              </Switch>
-            </ColumnarPage>
-          </WaffleFiltersProvider>
-        </WaffleTimeProvider>
-      </WaffleOptionsProvider>
-    </Source.Provider>
+
+                <HelpCenterContent
+                  feedbackLink="https://discuss.elastic.co/c/metrics"
+                  appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
+                    defaultMessage: 'Metrics',
+                  })}
+                />
+
+                <Header
+                  breadcrumbs={[
+                    {
+                      text: i18n.translate('xpack.infra.header.infrastructureTitle', {
+                        defaultMessage: 'Metrics',
+                      }),
+                    },
+                  ]}
+                  readOnlyBadge={!uiCapabilities?.infrastructure?.save}
+                />
+                <AppNavigation
+                  aria-label={i18n.translate('xpack.infra.header.infrastructureNavigationTitle', {
+                    defaultMessage: 'Metrics',
+                  })}
+                >
+                  <EuiFlexGroup gutterSize={'none'} alignItems={'center'}>
+                    <EuiFlexItem>
+                      <RoutedTabs
+                        tabs={[
+                          {
+                            app: 'metrics',
+                            title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
+                              defaultMessage: 'Inventory',
+                            }),
+                            pathname: '/inventory',
+                          },
+                          {
+                            app: 'metrics',
+                            title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
+                              defaultMessage: 'Metrics Explorer',
+                            }),
+                            pathname: '/explorer',
+                          },
+                          {
+                            app: 'metrics',
+                            title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
+                              defaultMessage: 'Settings',
+                            }),
+                            pathname: '/settings',
+                          },
+                        ]}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <Route path={'/explorer'} component={MetricsAlertDropdown} />
+                      <Route path={'/inventory'} component={InventoryAlertDropdown} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </AppNavigation>
+
+                <Switch>
+                  <Route path={'/inventory'} component={SnapshotPage} />
+                  <Route
+                    path={'/explorer'}
+                    render={props => (
+                      <WithSource>
+                        {({ configuration, createDerivedIndexPattern }) => (
+                          <MetricsExplorerOptionsContainer.Provider>
+                            <WithMetricsExplorerOptionsUrlState />
+                            {configuration ? (
+                              <MetricsExplorerPage
+                                derivedIndexPattern={createDerivedIndexPattern('metrics')}
+                                source={configuration}
+                                {...props}
+                              />
+                            ) : (
+                              <SourceLoadingPage />
+                            )}
+                          </MetricsExplorerOptionsContainer.Provider>
+                        )}
+                      </WithSource>
+                    )}
+                  />
+                  <Route path={'/settings'} component={MetricsSettingsPage} />
+                </Switch>
+              </ColumnarPage>
+            </WaffleFiltersProvider>
+          </WaffleTimeProvider>
+        </WaffleOptionsProvider>
+      </Source.Provider>
+    </EuiErrorBoundary>
   );
 };

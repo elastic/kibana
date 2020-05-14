@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { API_BASE_PATH } from '../../../common/constants';
 import { FollowerIndexForm } from '../../app/components/follower_index_form/follower_index_form';
 import './mocks';
 import { FOLLOWER_INDEX_EDIT } from './helpers/constants';
@@ -12,7 +13,7 @@ import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 const { setup } = pageHelpers.followerIndexEdit;
 const { setup: setupFollowerIndexAdd } = pageHelpers.followerIndexAdd;
 
-describe('Edit Auto-follow pattern', () => {
+describe('Edit follower index', () => {
   let server;
   let httpRequestsMockHelpers;
 
@@ -84,6 +85,53 @@ describe('Edit Auto-follow pattern', () => {
             `Input "${input}" does not equal "${expected}". (Value received: "${value}")`
           );
         }
+      });
+    });
+  });
+
+  describe('API', () => {
+    const remoteClusters = [{ name: 'new-york', seeds: ['localhost:123'], isConnected: true }];
+    let testBed;
+
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
+      httpRequestsMockHelpers.setGetFollowerIndexResponse(FOLLOWER_INDEX_EDIT);
+
+      testBed = await setup();
+      await testBed.waitFor('followerIndexForm');
+    });
+
+    test('is consumed correctly', async () => {
+      const { actions, form, component, find, waitFor } = testBed;
+
+      form.setInputValue('maxRetryDelayInput', '10s');
+
+      actions.clickSaveForm();
+      component.update(); // The modal to confirm the update opens
+      await waitFor('confirmModalTitleText');
+      find('confirmModalConfirmButton').simulate('click');
+
+      await nextTick(); // Make sure the Request went through
+
+      const latestRequest = server.requests[server.requests.length - 1];
+      const requestBody = JSON.parse(JSON.parse(latestRequest.requestBody).body);
+
+      // Verify the API endpoint called: method, path and payload
+      expect(latestRequest.method).toBe('PUT');
+      expect(latestRequest.url).toBe(
+        `${API_BASE_PATH}/follower_indices/${FOLLOWER_INDEX_EDIT.name}`
+      );
+      expect(requestBody).toEqual({
+        maxReadRequestOperationCount: 7845,
+        maxOutstandingReadRequests: 16,
+        maxReadRequestSize: '64mb',
+        maxWriteRequestOperationCount: 2456,
+        maxWriteRequestSize: '1048b',
+        maxOutstandingWriteRequests: 69,
+        maxWriteBufferCount: 123456,
+        maxWriteBufferSize: '256mb',
+        maxRetryDelay: '10s',
+        readPollTimeout: '2m',
       });
     });
   });

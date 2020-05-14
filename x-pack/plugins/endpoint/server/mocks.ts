@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  IScopedClusterClient,
+  RequestHandlerContext,
+  SavedObjectsClientContract,
+} from 'kibana/server';
 import { AgentService, IngestManagerStartContract } from '../../ingest_manager/server';
+import { IndexPatternRetriever } from './index_pattern';
 
 /**
  * Creates a mock IndexPatternRetriever for use in tests.
@@ -12,12 +18,13 @@ import { AgentService, IngestManagerStartContract } from '../../ingest_manager/s
  * @param indexPattern a string index pattern to return when any of the mock's public methods are called.
  * @returns the same string passed in via `indexPattern`
  */
-export const createMockIndexPatternRetriever = (indexPattern: string) => {
+export const createMockIndexPatternRetriever = (indexPattern: string): IndexPatternRetriever => {
   const mockGetFunc = jest.fn().mockResolvedValue(indexPattern);
   return {
     getIndexPattern: mockGetFunc,
     getEventIndexPattern: mockGetFunc,
     getMetadataIndexPattern: mockGetFunc,
+    getPolicyResponseIndexPattern: mockGetFunc,
   };
 };
 
@@ -56,3 +63,24 @@ export const createMockIngestManagerStartContract = (
     agentService: createMockAgentService(),
   };
 };
+
+export function createRouteHandlerContext(
+  dataClient: jest.Mocked<IScopedClusterClient>,
+  savedObjectsClient: jest.Mocked<SavedObjectsClientContract>
+) {
+  return ({
+    core: {
+      elasticsearch: {
+        dataClient,
+      },
+      savedObjects: {
+        client: savedObjectsClient,
+      },
+    },
+    /**
+     * Using unknown here because the object defined is not a full `RequestHandlerContext`. We don't
+     * need all of the fields required to run the tests, but the `routeHandler` function requires a
+     * `RequestHandlerContext`.
+     */
+  } as unknown) as RequestHandlerContext;
+}

@@ -22,9 +22,10 @@ import { LegacyPluginSpec } from '../types';
 
 const internalPaths = ['/src/legacy/core_plugins', '/x-pack'];
 
-const breakingChangesUrl =
-  'https://www.elastic.co/guide/en/kibana/master/breaking-changes-8.0.html';
-const migrationGuideUrl = 'https://github.com/elastic/kibana/blob/master/src/core/MIGRATION.md';
+// Use shortened URLs so destinations can be updated if/when documentation moves
+// All platform team members have access to edit these
+const breakingChangesUrl = 'https://ela.st/kibana-breaking-changes-8-0';
+const migrationGuideUrl = 'https://ela.st/kibana-platform-migration';
 
 export const logLegacyThirdPartyPluginDeprecationWarning = ({
   specs,
