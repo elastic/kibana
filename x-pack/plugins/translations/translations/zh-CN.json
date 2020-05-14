@@ -4761,7 +4761,6 @@
     "xpack.beatsManagement.breadcrumb.beatTags": "{beatId} 的 Beat 标记",
     "xpack.beatsManagement.breadcrumb.configurationTags": "配置标记",
     "xpack.beatsManagement.breadcrumb.enrolledBeats": "已注册 Beats",
-    "xpack.beatsManagement.centralManagementLinkLabel": "集中管理",
     "xpack.beatsManagement.config.other.error": "使用有效的 YAML 格式",
     "xpack.beatsManagement.config.otherConfigDescription": "使用 YAML 格式指定 Filebeat 输入的其他设置",
     "xpack.beatsManagement.config.otherConfigLabel": "其他配置",
