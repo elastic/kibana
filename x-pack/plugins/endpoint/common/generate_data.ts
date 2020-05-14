@@ -18,7 +18,6 @@ import {
   PolicyData,
 } from './types';
 import { factory as policyFactory } from './models/policy_config';
-import { entityId } from './models/event';
 
 export type Event = AlertEvent | EndpointEvent;
 
@@ -118,20 +117,42 @@ interface NodeState {
   maxChildren: number;
 }
 
+/**
+ * Defines the fields for each node in the tree.
+ */
 export interface TreeNode {
+  /**
+   * The entity_id for the node
+   */
+  id: string;
   lifecycle: Event[];
   relatedEvents: Event[];
 }
 
+/**
+ * A resolver tree that makes accessing specific nodes easier for tests.
+ */
 export interface Tree {
+  /**
+   * Map of entity_id to node
+   */
   children: Map<string, TreeNode>;
+  /**
+   * Map of entity_id to node
+   */
   ancestry: Map<string, TreeNode>;
   origin: TreeNode;
   alertEvent: Event;
+  /**
+   * All events from children, ancestry, origin, and the alert in a single array
+   */
   allEvents: Event[];
 }
 
 export interface TreeOptions {
+  /**
+   * This does not include the origin/root node
+   */
   ancestors?: number;
   generations?: number;
   children?: number;
@@ -344,7 +365,7 @@ export class EndpointDocGenerator {
     };
   }
 
-  private createNode(events: Event[]): TreeNode {
+  private createNode(id: string, events: Event[]): TreeNode {
     const relatedEvents: Event[] = [];
     const lifecycle: Event[] = [];
     events.forEach(event => {
@@ -354,9 +375,17 @@ export class EndpointDocGenerator {
         relatedEvents.push(event);
       }
     });
-    return { lifecycle, relatedEvents };
+    return { id, lifecycle, relatedEvents };
   }
 
+  /**
+   * This generates a full resolver tree and keeps the entire tree in memory. This is useful for tests that want
+   * to compare results from a elasticsearch with the actual events created by this generator. Because all the events
+   * are stored in memory do not use this function to generate large trees.
+   *
+   * @param options - options for the layout of the tree, like how many children, generations, and ancestry
+   * @returns a Tree structure that makes accessing specific events easier
+   */
   public generateTree(options: TreeOptions = {}): Tree {
     const getEntityID = (event: Event) => {
       return event.process.entity_id;
@@ -374,7 +403,7 @@ export class EndpointDocGenerator {
       _.groupBy(ancestry.slice(0, -1), getEntityID)
       // for each entry in the map lets create a tree node
     ).forEach(([id, events]) => {
-      ancestryNodes.set(id, this.createNode(events));
+      ancestryNodes.set(id, this.createNode(id, events));
     });
 
     const alert = ancestry[ancestry.length - 1];
@@ -398,7 +427,7 @@ export class EndpointDocGenerator {
 
     const childrenNodes: Map<string, TreeNode> = new Map();
     Object.entries(_.groupBy(children, getEntityID)).forEach(([id, events]) => {
-      childrenNodes.set(id, this.createNode(events));
+      childrenNodes.set(id, this.createNode(id, events));
     });
 
     return {

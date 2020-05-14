@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EndpointDocGenerator, Event } from './generate_data';
+import { EndpointDocGenerator, Event, Tree, TreeNode } from './generate_data';
 
 interface Node {
   events: Event[];
@@ -91,6 +91,75 @@ describe('data generator', () => {
     expect(processEvent.host).not.toBeNull();
     expect(processEvent.process.entity_id).not.toBeNull();
     expect(processEvent.process.name).not.toBeNull();
+  });
+
+  describe('creates a resolver tree structure', () => {
+    let tree: Tree;
+    beforeEach(() => {
+      tree = generator.generateTree({
+        alwaysGenMaxChildrenPerNode: true,
+        ancestors: 3,
+        children: 3,
+        generations: 3,
+        percentTerminated: 100,
+        percentWithRelated: 100,
+        relatedEvents: 4,
+      });
+    });
+
+    const eventInNode = (event: Event, node: TreeNode) => {
+      const inLifecycle = node.lifecycle.find(lifecycleEvent => {
+        return lifecycleEvent === event;
+      });
+
+      const inRelated = node.relatedEvents.find(relatedEvent => {
+        return relatedEvent === event;
+      });
+
+      return (inRelated || inLifecycle) && event.process.entity_id === node.id;
+    };
+
+    it('has all events in one of the tree fields', () => {
+      tree.allEvents.forEach(event => {
+        if (event.event.kind === 'alert') {
+          expect(event).toEqual(tree.alertEvent);
+        } else {
+          const ancestor = tree.ancestry.get(event.process.entity_id);
+          if (ancestor) {
+            expect(eventInNode(event, ancestor)).toBeTruthy();
+            return;
+          }
+
+          const children = tree.children.get(event.process.entity_id);
+          if (children) {
+            expect(eventInNode(event, children)).toBeTruthy();
+            return;
+          }
+
+          expect(eventInNode(event, tree.origin)).toBeTruthy();
+        }
+      });
+    });
+
+    const nodeEventCount = (node: TreeNode) => {
+      return node.lifecycle.length + node.relatedEvents.length;
+    };
+
+    it('has the correct number of total events', () => {
+      // starts at 1 because the alert is in the allEvents array
+      let total = 1;
+      Array.from(tree.ancestry.values()).forEach(node => {
+        total += nodeEventCount(node);
+      });
+
+      Array.from(tree.children.values()).forEach(node => {
+        total += nodeEventCount(node);
+      });
+
+      total += nodeEventCount(tree.origin);
+
+      expect(tree.allEvents.length).toEqual(total);
+    });
   });
 
   describe('creates alert ancestor tree', () => {
