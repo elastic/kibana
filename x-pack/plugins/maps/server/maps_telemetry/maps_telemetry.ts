@@ -19,6 +19,7 @@ import {
 } from '../../common/constants';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapSavedObject } from '../../common/map_saved_object_type';
+// @ts-ignore
 import { getInternalRepository } from '../kibana_server_services';
 
 interface IStats {

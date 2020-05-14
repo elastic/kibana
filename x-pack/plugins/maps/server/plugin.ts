@@ -7,21 +7,31 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 import { take } from 'rxjs/operators';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
+// @ts-ignore
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
+// @ts-ignore
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
+// @ts-ignore
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects.js';
 import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
 import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, createMapPath } from '../common/constants';
 import { mapSavedObjects, mapsTelemetrySavedObjects } from './saved_objects';
 import { ConfigSchema } from '../../../../src/plugins/maps_legacy/config';
+// @ts-ignore
 import { setInternalRepository } from './kibana_server_services';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { emsBoundariesSpecProvider } from './tutorials/ems';
+// @ts-ignore
 import { initRoutes } from './routes';
+import { ILicense, LicensingPluginSetup } from '../../licensing/public';
+import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
+import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
   usageCollection: UsageCollectionSetup;
+  home: HomeServerPluginSetup;
+  licensing: LicensingPluginSetup;
 }
 
 export class MapsPlugin implements Plugin {
@@ -33,10 +43,13 @@ export class MapsPlugin implements Plugin {
     this._logger = initializerContext.logger.get();
     this._initializerContext = initializerContext;
     this.kibanaVersion = initializerContext.env.packageInfo.version;
-    this.router = null;
   }
 
-  _initSampleData(home, prependBasePath, mapConfig) {
+  _initHomeData(
+    home: HomePublicPluginSetup,
+    prependBasePath: (path: string) => string,
+    mapConfig: any
+  ) {
     const sampleDataLinkLabel = i18n.translate('xpack.maps.sampleDataLinkLabel', {
       defaultMessage: 'Map',
     });
@@ -111,13 +124,14 @@ export class MapsPlugin implements Plugin {
     }
   }
 
+  // @ts-ignore
   async setup(core: CoreSetup, plugins: SetupDeps) {
-    const { usageCollection, home, licensing } = plugins;
+    const { usageCollection, home, licensing, features } = plugins;
     // @ts-ignore
     const config$ = this._initializerContext.config.create();
     const currentConfig = await config$.pipe(take(1)).toPromise();
-    this.router = core.http.createRouter();
 
+    // @ts-ignore
     const mapsEnabled = currentConfig.enabled;
     // TODO: Consider dynamic way to disable maps app on config change
     if (!mapsEnabled) {
@@ -126,7 +140,7 @@ export class MapsPlugin implements Plugin {
     }
 
     let routesInitialized = false;
-    licensing.license$.subscribe(license => {
+    licensing.license$.subscribe((license: ILicense) => {
       const { state } = license.check('maps', 'basic');
       if (state === 'valid' && !routesInitialized) {
         routesInitialized = true;
@@ -140,8 +154,9 @@ export class MapsPlugin implements Plugin {
       }
     });
 
-    this._initSampleData(home, core.http.basePath.prepend, currentConfig);
-    plugins.features.registerFeature({
+    this._initHomeData(home, core.http.basePath.prepend, currentConfig);
+
+    features.registerFeature({
       id: APP_ID,
       name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
         defaultMessage: 'Maps',
@@ -182,6 +197,7 @@ export class MapsPlugin implements Plugin {
     };
   }
 
+  // @ts-ignore
   start(core: CoreStart) {
     setInternalRepository(core.savedObjects.createInternalRepository);
   }

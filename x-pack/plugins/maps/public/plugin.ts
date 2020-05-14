@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
+import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/public';
 import { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
 // @ts-ignore
 import { MapView } from './inspector/views/map_view';
@@ -20,7 +20,6 @@ import {
   setHttp,
   setIndexPatternSelect,
   setIndexPatternService,
-  setInjectedVarFunc,
   setInspector,
   setLicenseId,
   setMapsCapabilities,
@@ -33,6 +32,8 @@ import {
   setVisualizations,
   setSearchService,
   setMapConfig,
+  setLegacyMapConfig,
+  setKibanaVersion,
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 // @ts-ignore
@@ -42,6 +43,8 @@ import { VisualizationsSetup } from '../../../../src/plugins/visualizations/publ
 import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
+import { ConfigSchema } from '../config';
+import { MapsConfigType } from './index';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -53,19 +56,30 @@ export interface MapsPluginSetupDependencies {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsPluginStartDependencies {}
 
-export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
+export const bindSetupCoreAndPlugins = (
+  core: CoreSetup,
+  plugins: any,
+  config?: MapsConfigType,
+  kibanaVersion?: string
+) => {
   const { licensing, mapsLegacy } = plugins;
-  const { injectedMetadata, uiSettings, http, notifications } = core;
+  const { uiSettings, http, notifications } = core;
   if (licensing) {
     licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
   }
-  setInjectedVarFunc(injectedMetadata.getInjectedVar);
   setHttp(http);
   setToasts(notifications.toasts);
-  setInjectedVarFunc(injectedMetadata.getInjectedVar);
   setVisualizations(plugins.visualizations);
   setUiSettings(uiSettings);
-  setMapConfig(mapsLegacy.config);
+  setLegacyMapConfig(mapsLegacy.config);
+
+  // TODO: Remove conditional logic when last legacy pieces removed
+  if (config) {
+    setMapConfig(config);
+  }
+  if (kibanaVersion) {
+    setKibanaVersion(kibanaVersion);
+  }
 };
 
 export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
@@ -106,9 +120,17 @@ export class MapsPlugin
       MapsPluginSetupDependencies,
       MapsPluginStartDependencies
     > {
+  readonly _initializerContext: PluginInitializerContext<ConfigSchema>;
+
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+    this._initializerContext = initializerContext;
+  }
+
   public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
+    const config = this._initializerContext.config.get<MapsConfigType>();
+    const kibanaVersion = this._initializerContext.env.packageInfo.version;
     const { inspector, home, visualizations, embeddable } = plugins;
-    bindSetupCoreAndPlugins(core, plugins);
+    bindSetupCoreAndPlugins(core, plugins, config, kibanaVersion);
 
     inspector.registerView(MapView);
     home.featureCatalogue.register(featureCatalogueEntry);

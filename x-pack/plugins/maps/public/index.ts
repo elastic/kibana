@@ -5,10 +5,23 @@
  */
 
 import { PluginInitializer } from 'kibana/public';
+import { PluginInitializerContext } from 'kibana/server';
 import { MapsPlugin, MapsPluginSetup, MapsPluginStart } from './plugin';
 
-export const plugin: PluginInitializer<MapsPluginSetup, MapsPluginStart> = () => {
-  return new MapsPlugin();
+export interface MapsConfigType {
+  enabled: boolean;
+  showMapVisualizationTypes: boolean;
+  showMapsInspectorAdapter: boolean;
+  preserveDrawingBuffer: boolean;
+  enableVectorTiles: boolean;
+}
+
+// @ts-ignore
+export const plugin: PluginInitializer<MapsPluginSetup, MapsPluginStart> = (
+  initContext: PluginInitializerContext
+) => {
+  // @ts-ignore
+  return new MapsPlugin(initContext);
 };
 
 export { MAP_SAVED_OBJECT_TYPE } from '../common/constants';

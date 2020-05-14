@@ -36,12 +36,6 @@ export const getFileUploadComponent = () => {
   return fileUploadPlugin.JsonUploadAndParse;
 };
 
-let getInjectedVar;
-export const setInjectedVarFunc = getInjectedVarFunc => {
-  getInjectedVar = getInjectedVarFunc;
-};
-export const getInjectedVarFunc = () => getInjectedVar;
-
 let uiSettings;
 export const setUiSettings = coreUiSettings => (uiSettings = coreUiSettings);
 export const getUiSettings = () => uiSettings;
@@ -141,15 +135,30 @@ let dataSearchService;
 export const setSearchService = searchService => (dataSearchService = searchService);
 export const getSearchService = () => dataSearchService;
 
+let kibanaVersion;
+export const setKibanaVersion = version => (kibanaVersion = version);
+export const getKibanaVersion = () => kibanaVersion;
+
 let mapConfig;
 export const setMapConfig = config => (mapConfig = config);
 export const getMapConfig = () => mapConfig;
 
-export const getIsEmsEnabled = () => getMapConfig().includeElasticMapsService;
-export const getEmsFontLibraryUrl = () => getMapConfig().emsFontLibraryUrl;
-export const getEmsTileLayerId = () => getMapConfig().emsTileLayerId;
-export const getEmsFileApiUrl = () => getMapConfig().emsFileApiUrl;
-export const getEmsTileApiUrl = () => getMapConfig().emsTileApiUrl;
-export const getEmsLandingPageUrl = () => getMapConfig().emsLandingPageUrl;
-export const getRegionmapLayers = () => _.get(getMapConfig(), 'regionmap.layers', []);
-export const getTilemap = () => _.get(getMapConfig(), 'tilemap', []);
+export const getEnabled = () => getMapConfig().enabled;
+export const getShowMapVisualizationTypes = () => getMapConfig().showMapVisualizationTypes;
+export const getShowMapsInspectorAdapter = () => getMapConfig().showMapsInspectorAdapter;
+export const getPreserveDrawingBuffer = () => getMapConfig().preserveDrawingBuffer;
+export const getEnableVectorTiles = () => getMapConfig().enableVectorTiles;
+export const getProxyElasticMapsServiceInMaps = () => getMapConfig().proxyElasticMapsServiceInMaps;
+
+let legacyMapConfig;
+export const setLegacyMapConfig = config => (legacyMapConfig = config);
+export const getLegacyMapConfig = () => legacyMapConfig;
+
+export const getIsEmsEnabled = () => getLegacyMapConfig().includeElasticMapsService;
+export const getEmsFontLibraryUrl = () => getLegacyMapConfig().emsFontLibraryUrl;
+export const getEmsTileLayerId = () => getLegacyMapConfig().emsTileLayerId;
+export const getEmsFileApiUrl = () => getLegacyMapConfig().emsFileApiUrl;
+export const getEmsTileApiUrl = () => getLegacyMapConfig().emsTileApiUrl;
+export const getEmsLandingPageUrl = () => getLegacyMapConfig().emsLandingPageUrl;
+export const getRegionmapLayers = () => _.get(getLegacyMapConfig(), 'regionmap.layers', []);
+export const getTilemap = () => _.get(getLegacyMapConfig(), 'tilemap', []);

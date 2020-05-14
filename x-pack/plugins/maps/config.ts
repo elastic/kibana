@@ -15,6 +15,7 @@ export const configSchema = schema.object({
   preserveDrawingBuffer: schema.boolean({ defaultValue: false }),
   // flag used to enable/disable vector-tiles
   enableVectorTiles: schema.boolean({ defaultValue: false }),
+  proxyElasticMapsServiceInMaps: schema.boolean({ defaultValue: true }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
