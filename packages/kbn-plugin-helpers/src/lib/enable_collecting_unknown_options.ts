@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -19,10 +17,14 @@
  * under the License.
  */
 
-const nodeMajorVersion = parseFloat(process.version.replace(/^v(\d+)\..+/, '$1'));
-if (nodeMajorVersion < 6) {
-  console.error('FATAL: kibana-plugin-helpers requires node 6+');
-  process.exit(1);
-}
+import { Command } from 'commander';
 
-require('../target/cli');
+export function enableCollectingUnknownOptions(command: Command) {
+  const origParse = command.parseOptions;
+  command.allowUnknownOption();
+  command.parseOptions = function(argv: string[]) {
+    const opts = origParse.call(this, argv);
+    this.unknownOptions = opts.unknown;
+    return opts;
+  };
+}
