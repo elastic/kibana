@@ -6,6 +6,8 @@
 
 import {
   CoreSetup,
+  CoreStart,
+  SavedObjectsServiceStart,
   Logger,
   PluginInitializerContext,
   RecursiveReadonly,
@@ -52,6 +54,8 @@ export class Plugin {
   private readonly featureRegistry: FeatureRegistry = new FeatureRegistry();
 
   private legacyAPI?: LegacyAPI;
+  private isTimelionEnabled: boolean = false;
+
   private readonly getLegacyAPI = () => {
     if (!this.legacyAPI) {
       throw new Error('Legacy API is not registered!');
@@ -67,6 +71,8 @@ export class Plugin {
     core: CoreSetup,
     { visTypeTimelion }: { visTypeTimelion?: TimelionSetupContract }
   ): Promise<RecursiveReadonly<PluginSetupContract>> {
+    this.isTimelionEnabled = visTypeTimelion !== undefined && visTypeTimelion.uiEnabled;
+
     defineRoutes({
       router: core.http.createRouter(),
       featureRegistry: this.featureRegistry,
@@ -80,20 +86,13 @@ export class Plugin {
 
       registerLegacyAPI: (legacyAPI: LegacyAPI) => {
         this.legacyAPI = legacyAPI;
-
-        // Register OSS features.
-        for (const feature of buildOSSFeatures({
-          savedObjectTypes: this.legacyAPI.savedObjectTypes,
-          includeTimelion: visTypeTimelion !== undefined && visTypeTimelion.uiEnabled,
-        })) {
-          this.featureRegistry.register(feature);
-        }
       },
     });
   }
 
-  public start(): RecursiveReadonly<PluginStartContract> {
-    this.logger.debug('Starting plugin');
+  public start(core: CoreStart): RecursiveReadonly<PluginStartContract> {
+    this.registerOssFeatures(core.savedObjects);
+
     return deepFreeze({
       getFeatures: this.featureRegistry.getAll.bind(this.featureRegistry),
     });
@@ -101,5 +100,18 @@ export class Plugin {
 
   public stop() {
     this.logger.debug('Stopping plugin');
+  }
+
+  private registerOssFeatures(savedObjects: SavedObjectsServiceStart) {
+    const registry = savedObjects.getTypeRegistry();
+    const savedObjectsTypes = registry.getAllTypes().map(t => t.name);
+    const features = buildOSSFeatures({
+      savedObjectTypes: savedObjectsTypes,
+      includeTimelion: this.isTimelionEnabled,
+    });
+
+    for (const feature of features) {
+      this.featureRegistry.register(feature);
+    }
   }
 }
