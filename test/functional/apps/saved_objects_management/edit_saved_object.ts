@@ -26,6 +26,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'settings']);
+  const browser = getService('browser');
+  const find = getService('find');
 
   const setFieldValue = async (fieldName: string, value: string) => {
     return testSubjects.setValue(`savedObjects-editField-${fieldName}`, value);
@@ -33,6 +35,30 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
   const getFieldValue = async (fieldName: string) => {
     return testSubjects.getAttribute(`savedObjects-editField-${fieldName}`, 'value');
+  };
+
+  const setAceEditorFieldValue = async (fieldName: string, fieldValue: string) => {
+    const editorId = `savedObjects-editField-${fieldName}-aceEditor`;
+    await find.clickByCssSelector(`#${editorId}`);
+    return browser.execute(
+      (editor: string, value: string) => {
+        return (window as any).ace.edit(editor).setValue(value);
+      },
+      editorId,
+      fieldValue
+    );
+  };
+
+  const getAceEditorFieldValue = async (fieldName: string) => {
+    // const element = await testSubjects.find(`savedObjects-editField-${fieldName}`);
+    // const editor = await find.allByCssSelector(`savedObjects-editField-${fieldName}-aceEditor`);
+    // const editorId = await editor.getAttribute('id');
+
+    const editorId = `savedObjects-editField-${fieldName}-aceEditor`;
+    await find.clickByCssSelector(`#${editorId}`);
+    return browser.execute((editor: string) => {
+      return (window as any).ace.edit(editor).getValue() as string;
+    }, editorId);
   };
 
   const focusAndClickButton = async (buttonSubject: string) => {
@@ -98,6 +124,49 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       const objects = await PageObjects.settings.getSavedObjectsInTable();
       expect(objects.includes('A Dashboard')).to.be(false);
+    });
+
+    it('preserves the object references when saving', async () => {
+      const testVisualizationUrl =
+        '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed';
+
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaSavedObjects();
+
+      let objects = await PageObjects.settings.getSavedObjectsInTable();
+      expect(objects.includes('A Pie')).to.be(true);
+
+      await PageObjects.common.navigateToActualUrl('kibana', testVisualizationUrl);
+
+      await testSubjects.existOrFail('savedObjectEditSave');
+
+      expect(await getFieldValue('title')).to.eql('A Pie');
+
+      let referencesValue = await getAceEditorFieldValue('references');
+
+      await focusAndClickButton('savedObjectEditSave');
+
+      objects = await PageObjects.settings.getSavedObjectsInTable();
+      expect(objects.includes('A Pie')).to.be(true);
+
+      await PageObjects.common.navigateToActualUrl('kibana', testVisualizationUrl);
+
+      expect(JSON.parse(await getAceEditorFieldValue('references'))).to.eql(
+        JSON.parse(referencesValue)
+      );
+
+      await setAceEditorFieldValue('references', JSON.stringify([], undefined, 2));
+
+      await focusAndClickButton('savedObjectEditSave');
+
+      objects = await PageObjects.settings.getSavedObjectsInTable();
+      expect(objects.includes('A Pie')).to.be(true);
+
+      await PageObjects.common.navigateToActualUrl('kibana', testVisualizationUrl);
+
+      referencesValue = await getAceEditorFieldValue('references');
+
+      expect(JSON.parse(referencesValue)).to.eql([]);
     });
   });
 }
