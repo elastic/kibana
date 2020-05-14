@@ -19,6 +19,20 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     method: 'GET',
   });
 
+  dataManagement.getComponentTemplate = ca({
+    urls: [
+      {
+        fmt: '/_component_template/<%=name%>',
+        req: {
+          name: {
+            type: 'string',
+          },
+        },
+      },
+    ],
+    method: 'GET',
+  });
+
   dataManagement.saveComponentTemplate = ca({
     urls: [
       {

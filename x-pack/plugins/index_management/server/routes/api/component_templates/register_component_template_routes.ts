@@ -7,7 +7,9 @@
 import { RouteDependencies } from '../../../types';
 
 import { registerGetAllRoute } from './get';
+import { registerCreateRoute } from './create';
 
 export function registerComponentTemplateRoutes(dependencies: RouteDependencies) {
   registerGetAllRoute(dependencies);
+  registerCreateRoute(dependencies);
 }
