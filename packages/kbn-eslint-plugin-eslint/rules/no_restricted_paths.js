@@ -126,6 +126,9 @@ module.exports = {
     }
 
     return {
+      ExportNamedDeclaration(node) {
+        checkForRestrictedImportPath(node.source.value, node.source);
+      },
       ImportDeclaration(node) {
         checkForRestrictedImportPath(node.source.value, node.source);
       },
