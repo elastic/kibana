@@ -115,12 +115,12 @@ async function syncDataForAllLayers(dispatch, getState, dataFilters) {
   const state = getState();
   const layerList = getLayerList(state);
   const syncPromises = layerList.map(async (layer) => {
-    return syncDataForLayer(layer);
+    return dispatch(syncDataForLayer(layer));
   });
   await Promise.all(syncPromises);
 }
 
-async function syncDataForLayer(layer) {
+function syncDataForLayer(layer) {
   return async (dispatch, getState) => {
     const dataFilters = getDataFilters(getState());
     if (!layer.isVisible() || !layer.showAtZoomLevel(dataFilters.zoom)) {
@@ -129,7 +129,7 @@ async function syncDataForLayer(layer) {
 
     await layer.syncData({
       ...getLayerLoadingCallbacks(dispatch, getState, layer.getId()),
-      dataFilters: getDataFilters(getState()),
+      dataFilters,
     });
   };
 }
