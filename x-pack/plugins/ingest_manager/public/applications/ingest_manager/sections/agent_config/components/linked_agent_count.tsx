@@ -22,9 +22,9 @@ export const LinkedAgentCount = memo<{ count: number; agentConfigId: string }>(
     );
     return count > 0 ? (
       <EuiLink
-        href={`${getHref(
-          'fleet_agent_list'
-        )}?kuery=${AGENT_SAVED_OBJECT_TYPE}.config_id : ${agentConfigId}`}
+        href={getHref('fleet_agent_list', {
+          kuery: `${AGENT_SAVED_OBJECT_TYPE}.config_id : ${agentConfigId}`,
+        })}
       >
         {displayValue}
       </EuiLink>

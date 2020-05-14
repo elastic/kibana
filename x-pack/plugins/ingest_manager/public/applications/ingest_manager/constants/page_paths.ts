@@ -12,7 +12,6 @@ export type StaticPage =
   | 'configurations'
   | 'configurations_list'
   | 'fleet'
-  | 'fleet_agent_list'
   | 'fleet_enrollment_tokens'
   | 'data_streams';
 
@@ -22,6 +21,7 @@ export type DynamicPage =
   | 'add_datasource_from_configuration'
   | 'add_datasource_from_integration'
   | 'edit_datasource'
+  | 'fleet_agent_list'
   | 'fleet_agent_details';
 
 export type Page = StaticPage | DynamicPage;
@@ -77,7 +77,7 @@ export const pagePathGetters: {
   edit_datasource: ({ configId, datasourceId }) =>
     `/configs/${configId}/edit-datasource/${datasourceId}`,
   fleet: () => '/fleet',
-  fleet_agent_list: () => '/fleet/agents',
+  fleet_agent_list: ({ kuery }) => `/fleet/agents${kuery ? `?kuery=${kuery}` : ''}`,
   fleet_agent_details: ({ agentId, tabId }) =>
     `/fleet/agents/${agentId}${tabId ? `/${tabId}` : ''}`,
   fleet_enrollment_tokens: () => '/fleet/enrollment-tokens',

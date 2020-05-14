@@ -13,16 +13,14 @@ import {
 } from '../constants';
 import { useCore } from './';
 
-const getPath = (page: StaticPage | DynamicPage, values?: DynamicPagePathValues): string => {
+const getPath = (page: StaticPage | DynamicPage, values: DynamicPagePathValues = {}): string => {
   return values ? pagePathGetters[page](values) : pagePathGetters[page as StaticPage]();
 };
 
 export const useLink = () => {
   const core = useCore();
   return {
-    getPath: (page: StaticPage | DynamicPage, values?: DynamicPagePathValues) => {
-      return getPath(page, values);
-    },
+    getPath,
     getHref: (page: StaticPage | DynamicPage, values?: DynamicPagePathValues) => {
       const path = getPath(page, values);
       return core.http.basePath.prepend(`${BASE_PATH}#${path}`);

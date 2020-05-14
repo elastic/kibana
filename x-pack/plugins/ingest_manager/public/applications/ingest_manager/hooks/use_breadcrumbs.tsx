@@ -219,9 +219,9 @@ export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {
     ...breadcrumb,
     href: breadcrumb.href ? http.basePath.prepend(`${BASE_PATH}#${breadcrumb.href}`) : undefined,
   }));
-  document.title = [...breadcrumbs]
+  const docTitle: string[] = [...breadcrumbs]
     .reverse()
-    .map(breadcrumb => breadcrumb.text)
-    .join(' - ');
+    .map(breadcrumb => breadcrumb.text as string);
+  chrome.docTitle.change(docTitle);
   chrome.setBreadcrumbs(breadcrumbs);
 }

@@ -265,3 +265,8 @@ export function renderApp(
     ReactDOM.unmountComponentAtNode(element);
   };
 }
+
+export const teardownIngestManager = (coreStart: CoreStart) => {
+  coreStart.chrome.docTitle.reset();
+  coreStart.chrome.setBreadcrumbs([]);
+};
