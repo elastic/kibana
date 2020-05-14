@@ -108,6 +108,7 @@ export const useWaffleOptions = () => {
   );
 
   return {
+    ...DEFAULT_WAFFLE_OPTIONS_STATE,
     ...state,
     changeMetric,
     changeGroupBy,
