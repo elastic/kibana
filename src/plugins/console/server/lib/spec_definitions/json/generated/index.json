@@ -21,7 +21,8 @@
       ],
       "if_seq_no": "",
       "if_primary_term": "",
-      "pipeline": ""
+      "pipeline": "",
+      "prefer_v2_templates": "__flag__"
     },
     "methods": [
       "PUT",
@@ -29,9 +30,7 @@
     ],
     "patterns": [
       "{indices}/_doc/{id}",
-      "{indices}/_doc",
-      "{indices}/{type}",
-      "{indices}/{type}/{id}"
+      "{indices}/_doc"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-index_.html"
   }
