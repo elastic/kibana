@@ -50,10 +50,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   };
 
   const getAceEditorFieldValue = async (fieldName: string) => {
-    // const element = await testSubjects.find(`savedObjects-editField-${fieldName}`);
-    // const editor = await find.allByCssSelector(`savedObjects-editField-${fieldName}-aceEditor`);
-    // const editorId = await editor.getAttribute('id');
-
     const editorId = `savedObjects-editField-${fieldName}-aceEditor`;
     await find.clickByCssSelector(`#${editorId}`);
     return browser.execute((editor: string) => {
