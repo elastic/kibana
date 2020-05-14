@@ -19,8 +19,8 @@
 import { Role } from './role';
 import { User } from './user';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { Browser } from '../../../functional/services/common/browser';
-import { TestSubjects } from '../../../functional/services/common/test_subjects';
+import { Browser } from '../../../functional/services/common';
+import { TestSubjects } from '../../../functional/services/common';
 
 export async function createTestUserService(
   role: Role,
