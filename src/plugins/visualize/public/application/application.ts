@@ -20,8 +20,12 @@
 import './index.scss';
 
 import angular, { IModule } from 'angular';
-// required for `ngSanitize` angular module
+
+// required for i18nIdDirective
 import 'angular-sanitize';
+// required for ngRoute
+import 'angular-route';
+
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 
 import { AppMountContext } from 'kibana/public';
@@ -49,7 +53,8 @@ export const renderApp = (
     configureAppAngularModule(
       angularModuleInstance,
       { core: deps.core, env: deps.pluginInitializerContext.env },
-      true
+      true,
+      deps.scopedHistory
     );
     initVisualizeApp(angularModuleInstance, deps);
   }
@@ -57,7 +62,7 @@ export const renderApp = (
   return () => $injector.get('$rootScope').$destroy();
 };
 
-const mainTemplate = (basePath: string) => `<div ng-view class="kbnLocalApplicationWrapper">
+const mainTemplate = (basePath: string) => `<div ng-view class="visAppWrapper">
   <base href="${basePath}" />
 </div>
 `;
@@ -68,7 +73,7 @@ const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react'];
 
 function mountVisualizeApp(appBasePath: string, element: HTMLElement) {
   const mountpoint = document.createElement('div');
-  mountpoint.setAttribute('class', 'kbnLocalApplicationWrapper');
+  mountpoint.setAttribute('class', 'visAppWrapper');
   mountpoint.innerHTML = mainTemplate(appBasePath);
   // bootstrap angular into detached element and attach it later to
   // make angular-within-angular possible

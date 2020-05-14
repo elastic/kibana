@@ -8,13 +8,15 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import { ESSearchResponse } from '../../../typings/elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-  TRANSACTION_DURATION
+  TRANSACTION_DURATION,
+  SERVICE_ENVIRONMENT
 } from '../../../common/elasticsearch_fieldnames';
 import { AlertingPlugin } from '../../../../alerting/server';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
@@ -35,7 +37,8 @@ const paramsSchema = schema.object({
     schema.literal('avg'),
     schema.literal('95th'),
     schema.literal('99th')
-  ])
+  ]),
+  environment: schema.string()
 });
 
 const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.TransactionDuration];
@@ -74,6 +77,7 @@ export function registerTransactionDurationAlertType({
         }
       ]
     },
+    producer: 'apm',
     executor: async ({ services, params }) => {
       const config = await config$.pipe(take(1)).toPromise();
 
@@ -83,6 +87,11 @@ export function registerTransactionDurationAlertType({
         config,
         savedObjectsClient: services.savedObjectsClient
       });
+
+      const environmentTerm =
+        alertParams.environment === ENVIRONMENT_ALL
+          ? []
+          : [{ term: { [SERVICE_ENVIRONMENT]: alertParams.environment } }];
 
       const searchParams = {
         index: indices['apm_oss.transactionIndices'],
@@ -112,7 +121,8 @@ export function registerTransactionDurationAlertType({
                   term: {
                     [TRANSACTION_TYPE]: alertParams.transactionType
                   }
-                }
+                },
+                ...environmentTerm
               ]
             }
           },

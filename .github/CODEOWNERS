@@ -128,6 +128,9 @@
 /src/legacy/server/utils/ @elastic/kibana-operations
 /src/legacy/server/warnings/ @elastic/kibana-operations
 
+# Quality Assurance
+/src/dev/code_coverage @elastic/kibana-qa
+
 # Platform
 /src/core/  @elastic/kibana-platform
 /config/kibana.yml @elastic/kibana-platform
@@ -162,6 +165,8 @@
 # Pulse
 /packages/kbn-analytics/ @elastic/pulse
 /src/legacy/core_plugins/ui_metric/ @elastic/pulse
+/src/plugins/kibana_usage_collection/ @elastic/pulse
+/src/plugins/newsfeed/ @elastic/pulse
 /src/plugins/telemetry/ @elastic/pulse
 /src/plugins/telemetry_collection_manager/ @elastic/pulse
 /src/plugins/telemetry_management_section/ @elastic/pulse
