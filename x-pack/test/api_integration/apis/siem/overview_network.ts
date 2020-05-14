@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { overviewNetworkQuery } from '../../../../plugins/siem/public/containers/overview/overview_network/index.gql_query';
+import { overviewNetworkQuery } from '../../../../plugins/siem/public/overview/containers/overview_network/index.gql_query';
 import { GetOverviewNetworkQuery } from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

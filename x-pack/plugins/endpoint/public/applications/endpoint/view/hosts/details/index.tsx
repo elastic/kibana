@@ -13,6 +13,7 @@ import {
   EuiTitle,
   EuiText,
   EuiSpacer,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -29,6 +30,8 @@ import {
   policyResponseConfigurations,
   policyResponseActions,
   policyResponseFailedOrWarningActionCount,
+  policyResponseError,
+  policyResponseLoading,
 } from '../../../store/hosts/selectors';
 import { HostDetails } from './host_details';
 import { PolicyResponse } from './policy_response';
@@ -106,8 +109,10 @@ const PolicyResponseFlyoutPanel = memo<{
 }>(({ hostMeta }) => {
   const { show, ...queryParams } = useHostSelector(uiQueryParams);
   const responseConfig = useHostSelector(policyResponseConfigurations);
-  const responseActionStatus = useHostSelector(policyResponseActions);
+  const responseActions = useHostSelector(policyResponseActions);
   const responseAttentionCount = useHostSelector(policyResponseFailedOrWarningActionCount);
+  const loading = useHostSelector(policyResponseLoading);
+  const error = useHostSelector(policyResponseError);
   const detailsUri = useMemo(
     () =>
       urlFromQueryParams({
@@ -142,16 +147,22 @@ const PolicyResponseFlyoutPanel = memo<{
             />
           </h4>
         </EuiText>
-        {responseConfig !== undefined && responseActionStatus !== undefined ? (
+        {error && (
+          <EuiEmptyPrompt
+            title={
+              <FormattedMessage
+                id="xpack.endpoint.hostDetails.noPolicyResponse"
+                defaultMessage="No policy response available"
+              />
+            }
+          />
+        )}
+        {loading && <EuiLoadingContent lines={3} />}
+        {responseConfig !== undefined && responseActions !== undefined && (
           <PolicyResponse
             responseConfig={responseConfig}
-            responseActionStatus={responseActionStatus}
+            responseActions={responseActions}
             responseAttentionCount={responseAttentionCount}
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.endpoint.hostDetails.noPolicyResponse"
-            defaultMessage="No Policy Response Available"
           />
         )}
       </EuiFlyoutBody>

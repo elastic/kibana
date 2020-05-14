@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { kpiHostDetailsQuery } from '../../../../plugins/siem/public/containers/kpi_host_details/index.gql_query';
+import { kpiHostDetailsQuery } from '../../../../plugins/siem/public/hosts/containers/kpi_host_details/index.gql_query';
 import { GetKpiHostDetailsQuery } from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

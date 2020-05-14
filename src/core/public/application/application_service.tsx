@@ -196,6 +196,7 @@ export class ApplicationService {
           appBasePath: basePath.prepend(app.appRoute!),
           mount: wrapMount(plugin, app),
           unmountBeforeMounting: false,
+          legacy: false,
         });
       },
       registerLegacyApp: app => {
@@ -230,6 +231,7 @@ export class ApplicationService {
           appBasePath,
           mount,
           unmountBeforeMounting: true,
+          legacy: true,
         });
       },
       registerAppUpdater: (appUpdater$: Observable<AppUpdater>) =>
