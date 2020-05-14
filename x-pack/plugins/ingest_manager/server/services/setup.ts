@@ -34,74 +34,40 @@ export async function setupIngestManager(
   soClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
 ) {
-  const start = Date.now();
-  let last = start;
-  console.log(new Date(start), 'setup start');
   const [installedPackages, defaultOutput, config] = await Promise.all([
     // packages installed by default
-    console.log(new Date(), 'start ensureInstalledDefaultPackages') ||
-      ensureInstalledDefaultPackages(soClient, callCluster).then(
-        value =>
-          console.log(new Date(), 'end ensureInstalledDefaultPackages', Date.now() - start) || value
-      ),
-    console.log(new Date(), 'start outputService.ensureDefaultOutput') ||
-      outputService
-        .ensureDefaultOutput(soClient)
-        .then(
-          value =>
-            console.log(new Date(), 'end outputService.ensureDefaultOutput', Date.now() - start) ||
-            value
-        ),
-    console.log(new Date(), 'start agentConfigService.ensureDefaultAgentConfig') ||
-      agentConfigService
-        .ensureDefaultAgentConfig(soClient)
-        .then(
-          value =>
-            console.log(
-              new Date(),
-              'end agentConfigService.ensureDefaultAgentConfig',
-              Date.now() - start
-            ) || value
-        ),
-    console.log(new Date(), 'start ensureDefaultIndices') ||
-      ensureDefaultIndices(callCluster).then(
-        value => console.log(new Date(), 'end ensureDefaultIndices', Date.now() - start) || value
-      ),
-    console.log(new Date(), 'start settingsService.getSettings') ||
-      settingsService
-        .getSettings(soClient)
-        .then(
-          value =>
-            console.log(new Date(), 'end settingsService.getSettings', Date.now() - start) || value
-        )
-        .catch((e: any) => {
-          if (e.isBoom && e.output.statusCode === 404) {
-            const http = appContextService.getHttpSetup();
-            const serverInfo = http.getServerInfo();
-            const basePath = http.basePath;
+    ensureInstalledDefaultPackages(soClient, callCluster),
+    outputService.ensureDefaultOutput(soClient),
+    agentConfigService.ensureDefaultAgentConfig(soClient),
+    ensureDefaultIndices(callCluster),
+    settingsService.getSettings(soClient).catch((e: any) => {
+      if (e.isBoom && e.output.statusCode === 404) {
+        const http = appContextService.getHttpSetup();
+        const serverInfo = http.getServerInfo();
+        const basePath = http.basePath;
 
-            const cloud = appContextService.getCloud();
-            const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
-            const cloudUrl = cloudId && decodeCloudId(cloudId)?.kibanaUrl;
-            const flagsUrl = appContextService.getConfig()?.fleet?.kibana?.host;
-            const defaultUrl = url.format({
-              protocol: serverInfo.protocol,
-              hostname: serverInfo.host,
-              port: serverInfo.port,
-              pathname: basePath.serverBasePath,
-            });
+        const cloud = appContextService.getCloud();
+        const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
+        const cloudUrl = cloudId && decodeCloudId(cloudId)?.kibanaUrl;
+        const flagsUrl = appContextService.getConfig()?.fleet?.kibana?.host;
+        const defaultUrl = url.format({
+          protocol: serverInfo.protocol,
+          hostname: serverInfo.host,
+          port: serverInfo.port,
+          pathname: basePath.serverBasePath,
+        });
 
-            return settingsService.saveSettings(soClient, {
-              agent_auto_upgrade: true,
-              package_auto_upgrade: true,
-              kibana_url: cloudUrl || flagsUrl || defaultUrl,
-            });
-          }
+        return settingsService.saveSettings(soClient, {
+          agent_auto_upgrade: true,
+          package_auto_upgrade: true,
+          kibana_url: cloudUrl || flagsUrl || defaultUrl,
+        });
+      }
 
-          return Promise.reject(e);
-        }),
+      return Promise.reject(e);
+    }),
   ]);
-  console.log(new Date(), 'setup A', Date.now() - last, (last = Date.now()) - start);
+
   // ensure default packages are added to the default conifg
   const configWithDatasource = await agentConfigService.get(soClient, config.id, true);
   if (!configWithDatasource) {
@@ -113,7 +79,7 @@ export async function setupIngestManager(
   ) {
     throw new Error('Config not found');
   }
-  console.log(new Date(), 'setup B', Date.now() - last, (last = Date.now()) - start);
+
   for (const installedPackage of installedPackages) {
     const packageShouldBeInstalled = DEFAULT_AGENT_CONFIGS_PACKAGES.some(
       packageName => installedPackage.name === packageName
@@ -130,7 +96,6 @@ export async function setupIngestManager(
       await addPackageToConfig(soClient, installedPackage, configWithDatasource, defaultOutput);
     }
   }
-  console.log(new Date(), 'setup C', Date.now() - last, (last = Date.now()) - start);
 }
 
 export async function setupFleet(
