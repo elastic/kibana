@@ -181,7 +181,6 @@ def doSetup() {
   retryWithDelay(2, 15) {
     try {
       runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
-      error "I am error"
     } catch (ex) {
       try {
         // Setup expects this directory to be missing, so we need to remove it before we do a retry
