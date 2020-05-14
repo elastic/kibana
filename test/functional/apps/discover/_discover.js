@@ -126,6 +126,19 @@ export default function({ getService, getPageObjects }) {
         const isVisible = await PageObjects.discover.hasNoResults();
         expect(isVisible).to.be(false);
       });
+
+      it('should reload the saved search with persisted query to show the initial hit count', async function() {
+        // apply query some changes
+        await queryBar.setQuery('test');
+        await queryBar.submitQuery();
+        // reset to persisted state
+        await PageObjects.discover.clickResetSavedSearchButton();
+        const expectedHitCount = '14,004';
+        await retry.try(async function() {
+          expect(await queryBar.getQueryString()).to.be('');
+          expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
+        });
+      });
     });
 
     describe('query #2, which has an empty time range', () => {
