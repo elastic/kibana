@@ -18,11 +18,12 @@
  */
 
 import { CoreStart } from 'kibana/public';
+import { NextObserver, Subscription } from 'rxjs';
 import { SearchAggsSetup, SearchAggsStart } from './aggs';
 import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
 import { LegacyApiCaller } from './legacy/es_client';
-import { SearchInterceptor } from './search_interceptor';
+import { SearchInterceptor, SearchEventInfo } from './search_interceptor';
 import { ISearchSource, SearchSourceFields } from './search_source';
 import { ISessionService } from './session_service';
 
@@ -87,5 +88,6 @@ export interface ISearchStart {
     create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
     createEmpty: () => ISearchSource;
   };
+  subscribe: (handler: (e: SearchEventInfo) => void) => Subscription;
   __LEGACY: ISearchStartLegacy;
 }

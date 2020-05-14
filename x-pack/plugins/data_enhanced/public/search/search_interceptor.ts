@@ -47,6 +47,10 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     this.timeoutSubscriptions.forEach(subscription => subscription.unsubscribe());
     this.timeoutSubscriptions.clear();
     this.backgroundSessionService.store();
+    this.events$.next({
+      name: 'background',
+      sessionId: this.data.search.session.get(),
+    });
   };
 
   private shouldNotifyLongRunning = async () => {

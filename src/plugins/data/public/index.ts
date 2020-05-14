@@ -354,6 +354,7 @@ export {
   ISyncSearchRequest,
   IKibanaSearchResponse,
   IKibanaSearchRequest,
+  SearchEventInfo,
   SearchRequest,
   SearchResponse,
   SearchError,

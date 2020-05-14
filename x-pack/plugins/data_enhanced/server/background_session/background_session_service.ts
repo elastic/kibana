@@ -25,7 +25,7 @@ import { SessionInfo } from './types';
 import { SecurityPluginSetup } from '../../../security/server';
 
 const INMEM_TRACKING_TIMEOUT_SEC = 60;
-const INMEM_TRACKING_INTERVAL = 10000;
+const INMEM_TRACKING_INTERVAL = 2000;
 const MAX_UPDATE_RETRIES = 3;
 
 export class BackgroundSessionService {

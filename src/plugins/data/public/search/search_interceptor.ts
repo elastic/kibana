@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { BehaviorSubject, throwError, timer, Subscription, defer, fromEvent } from 'rxjs';
+import { BehaviorSubject, throwError, timer, Subscription, defer, fromEvent, Subject } from 'rxjs';
 import { takeUntil, finalize, mergeMapTo } from 'rxjs/operators';
 import { ApplicationStart, Toast, ToastsStart } from 'kibana/public';
 import { getCombinedSignal } from '../../common/utils';
@@ -27,6 +27,11 @@ import { RequestTimeoutError } from './request_timeout_error';
 import { getLongQueryNotification } from './long_query_notification';
 
 const LONG_QUERY_NOTIFICATION_DELAY = 1000;
+
+export interface SearchEventInfo {
+  name: string;
+  sessionId: string | undefined;
+}
 
 export class SearchInterceptor {
   /**
@@ -43,6 +48,8 @@ export class SearchInterceptor {
    * Observable that emits when the number of pending requests changes.
    */
   private pendingCount$ = new BehaviorSubject(this.pendingCount);
+
+  protected events$ = new Subject<SearchEventInfo>();
 
   /**
    * The subscriptions from scheduling the automatic timeout for each request.
@@ -80,6 +87,10 @@ export class SearchInterceptor {
   public getPendingCount$ = () => {
     return this.pendingCount$.asObservable();
   };
+
+  public getEvents$() {
+    return this.events$.asObservable();
+  }
 
   /**
    * Searches using the given `search` method. Overrides the `AbortSignal` with one that will abort

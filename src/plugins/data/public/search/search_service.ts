@@ -18,8 +18,8 @@
  */
 
 import { PackageInfo, CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { NextObserver } from 'rxjs';
 import { ExpressionsSetup } from '../../../../plugins/expressions/public';
-import { uuidV4 } from '../../../../plugins/kibana_utils/public';
 
 import { SYNC_SEARCH_STRATEGY, syncSearchStrategyProvider } from './sync_search_strategy';
 import { createSearchSource, SearchSource, SearchSourceDependencies } from './search_source';
@@ -31,7 +31,7 @@ import { esSearchStrategyProvider } from './es_search';
 import { IndexPatternsContract } from '../index_patterns/index_patterns';
 import { QuerySetup } from '../query';
 import { GetInternalStartServicesFn } from '../types';
-import { SearchInterceptor } from './search_interceptor';
+import { SearchInterceptor, SearchEventInfo } from './search_interceptor';
 import {
   getAggTypes,
   getAggTypesFunctions,
@@ -74,7 +74,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private esClient?: LegacyApiCaller;
   private readonly aggTypesRegistry = new AggTypesRegistry();
   private searchInterceptor!: SearchInterceptor;
-  private sessionId: string = uuidV4();
 
   private registerSearchStrategyProvider = <T extends TStrategyTypes>(
     name: T,
@@ -180,6 +179,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       setInterceptor: (searchInterceptor: SearchInterceptor) => {
         // TODO: should an interceptor have a destroy method?
         this.searchInterceptor = searchInterceptor;
+      },
+      subscribe: (handler: (e: SearchEventInfo) => void) => {
+        return this.searchInterceptor?.getEvents$().subscribe({
+          next(e) {
+            handler(e);
+          },
+        });
       },
       __LEGACY: legacySearch,
     };

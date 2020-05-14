@@ -64,5 +64,5 @@ export {
   parseSearchSourceJSON,
 } from './search_source';
 
-export { SearchInterceptor } from './search_interceptor';
+export { SearchInterceptor, SearchEventInfo } from './search_interceptor';
 export { RequestTimeoutError } from './request_timeout_error';

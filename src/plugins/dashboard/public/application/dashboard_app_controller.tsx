@@ -29,7 +29,7 @@ import { map } from 'rxjs/operators';
 import { History } from 'history';
 import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
-import { TimeRange } from 'src/plugins/data/public';
+import { TimeRange, SearchEventInfo } from 'src/plugins/data/public';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
 import {
@@ -148,6 +148,11 @@ export class DashboardAppController {
       kbnUrlStateStorage,
       history,
       usageCollection,
+    });
+
+    // Save session ID to URL
+    const searchEventsSubscription = searchService.subscribe((e: SearchEventInfo) => {
+      dashboardStateManager.setSessionId(e.sessionId);
     });
 
     // sync initial app filters from state to filterManager
@@ -308,8 +313,9 @@ export class DashboardAppController {
     };
 
     const updateState = () => {
-      if (dashboardStateManager.appState.sessionId) {
-        searchService.session.set(dashboardStateManager.appState.sessionId);
+      const sessionId = dashboardStateManager.getSessionId();
+      if (sessionId) {
+        searchService.session.set(sessionId);
       } else {
         searchService.session.start();
       }
@@ -332,6 +338,13 @@ export class DashboardAppController {
     let dashboardContainer: DashboardContainer | undefined;
     let inputSubscription: Subscription | undefined;
     let outputSubscription: Subscription | undefined;
+    let queryServiceSubscription: Subscription | undefined;
+
+    setTimeout(() => {
+      queryServiceSubscription = queryService.state$.subscribe(() => {
+        dashboardStateManager.setSessionId(undefined);
+      });
+    }, 0);
 
     const dashboardDom = document.getElementById('dashboardViewport');
     const dashboardFactory = embeddable.getEmbeddableFactory<
@@ -982,6 +995,9 @@ export class DashboardAppController {
       // we have to unmount nav bar manually to make sure all internal subscriptions are unsubscribed
       unmountNavBar();
 
+      dashboardStateManager.setSessionId(undefined);
+      queryServiceSubscription.unsubscribe();
+      searchEventsSubscription.unsubscribe();
       updateSubscription.unsubscribe();
       stopSyncingQueryServiceStateWithUrl();
       stopSyncingAppFilters();

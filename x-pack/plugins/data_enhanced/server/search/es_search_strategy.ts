@@ -74,7 +74,7 @@ async function getBackgroundSession(
     return await context.backgroundSearchService.getId(
       options?.rawRequest,
       request.sessionId,
-      request.params
+      request.params.body
     );
   }
 }
@@ -96,7 +96,7 @@ function trackBackgroundSearch(
     context.backgroundSearchService.trackId(
       options.rawRequest,
       request.sessionId,
-      request.params,
+      request.params.body,
       asyncId
     );
   }
@@ -143,8 +143,11 @@ async function asyncSearch(
   // TODO: DONT MERGE WITH 1ms!!!!!!!!!!!!!!!!!!!!!!!
   const query = toSnakeCase({
     ...(asyncId
-      ? {}
+      ? {
+          // waitForCompletionTimeout: '10s',
+        }
       : {
+          requestCache: false,
           waitForCompletionTimeout: '1ms',
         }),
     ...queryParams,

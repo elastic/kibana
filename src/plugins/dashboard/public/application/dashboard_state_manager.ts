@@ -286,6 +286,14 @@ export class DashboardStateManager {
     this.stateContainer.transitions.set('filters', filters);
   }
 
+  public getSessionId() {
+    return this.appState.sessionId;
+  }
+
+  public setSessionId(sessionId: string | undefined) {
+    this.stateContainer.transitions.set('sessionId', sessionId);
+  }
+
   /**
    * Resets the state back to the last saved version of the dashboard.
    */
