@@ -169,7 +169,7 @@ export const schema: FormSchema = {
       'xpack.siem.detectionEngine.createRule.stepAboutRule.fieldTimelineTemplateHelpText',
       {
         defaultMessage:
-          'Select an existing timeline to use as a template when investigating generated signals.',
+          'Select which timeline template to use when investigating generated signals.',
       }
     ),
   },

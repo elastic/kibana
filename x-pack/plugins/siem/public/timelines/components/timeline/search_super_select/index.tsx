@@ -11,6 +11,7 @@ import { createGlobalStyle } from 'styled-components';
 import { OpenTimelineResult } from '../../open_timeline/types';
 import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
+import { TimelineType } from '../../../../../common/types/timeline';
 
 const SearchTimelineSuperSelectGlobalStyle = createGlobalStyle`
   .euiPopover__panel.euiPopover__panel-isOpen.timeline-search-super-select-popover__popoverPanel {
@@ -121,6 +122,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
         getSelectableOptions={handleGetSelectableOptions}
         onClosePopover={handleClosePopover}
         onTimelineChange={onTimelineChange}
+        timelineType={TimelineType.template}
       />
       <SearchTimelineSuperSelectGlobalStyle />
     </EuiInputPopover>

@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const DEFAULT_TIMELINE_TITLE = i18n.translate('xpack.siem.timeline.defaultTimelineTitle', {
-  defaultMessage: 'Default blank timeline',
+  defaultMessage: 'None',
 });
 
 export const DEFAULT_TIMELINE_DESCRIPTION = i18n.translate(

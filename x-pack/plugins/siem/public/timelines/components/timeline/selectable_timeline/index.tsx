@@ -21,7 +21,11 @@ import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import { ListProps } from 'react-virtualized';
 import styled from 'styled-components';
 
-import { TimelineType, TimelineTypeLiteralWithNull } from '../../../../../common/types/timeline';
+import {
+  TimelineType,
+  TimelineTypeLiteralWithNull,
+  TimelineTypeLiteral,
+} from '../../../../../common/types/timeline';
 
 import { useGetAllTimeline } from '../../../containers/all';
 import { SortFieldTimeline, Direction } from '../../../../graphql/types';
@@ -87,6 +91,7 @@ interface SelectableTimelineProps {
   }: GetSelectableOptions) => EuiSelectableOption[];
   onClosePopover: () => void;
   onTimelineChange: (timelineTitle: string, timelineId: string | null) => void;
+  timelineType: TimelineTypeLiteral;
 }
 
 const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
@@ -94,6 +99,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   getSelectableOptions,
   onClosePopover,
   onTimelineChange,
+  timelineType,
 }) => {
   const [pageSize, setPageSize] = useState(ORIGINAL_PAGE_SIZE);
   const [heightTrigger, setHeightTrigger] = useState(0);
@@ -232,9 +238,9 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
         sortOrder: Direction.desc,
       },
       onlyUserFavorite: onlyFavorites,
-      timelineType: TimelineType.default,
+      timelineType,
     });
-  }, [onlyFavorites, pageSize, searchTimelineValue]);
+  }, [onlyFavorites, pageSize, searchTimelineValue, timelineType]);
 
   return (
     <EuiSelectableContainer isLoading={loading}>
