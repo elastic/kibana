@@ -24,7 +24,10 @@ import { IndexList } from './index_list';
 import { TemplateList } from './template_list';
 import { breadcrumbService } from '../../services/breadcrumbs';
 
-type Section = 'indices' | 'templates';
+enum Section {
+  Indices = 'indices',
+  IndexTemplates = 'index_templates',
+}
 
 interface MatchParams {
   section: Section;
@@ -38,11 +41,11 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
 }) => {
   const tabs = [
     {
-      id: 'indices' as Section,
+      id: Section.Indices,
       name: <FormattedMessage id="xpack.idxMgmt.home.indicesTabTitle" defaultMessage="Indices" />,
     },
     {
-      id: 'templates' as Section,
+      id: Section.IndexTemplates,
       name: (
         <FormattedMessage
           id="xpack.idxMgmt.home.indexTemplatesTabTitle"
