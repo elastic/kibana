@@ -7,8 +7,9 @@
 import { Filter } from '../../../../../../../src/plugins/data/public';
 
 import { TimelineTypeLiteralWithNull } from '../../../../common/types/timeline';
-import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { Sort } from '../../../timelines/components/timeline/body/sort';
+
+import { DataProvider } from '../../components/timeline/data_providers/data_provider';
+import { Sort } from '../../components/timeline/body/sort';
 import { PinnedEvent, TimelineNonEcsData } from '../../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/model';
 
@@ -151,6 +152,7 @@ export type SubsetTimelineModel = Readonly<
     | 'isLoading'
     | 'savedObjectId'
     | 'version'
+    | 'timelineType'
   >
 >;
 

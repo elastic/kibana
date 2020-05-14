@@ -6,6 +6,7 @@
 
 import React, { useState } from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
+import styled from 'styled-components';
 import { FilterPopoverProps, FilterPopover } from './filter_popover';
 import { OverviewFilters } from '../../../../common/runtime_types/overview_filters';
 import { filterLabels } from './translations';
@@ -15,6 +16,10 @@ interface PresentationalComponentProps {
   loading: boolean;
   overviewFilters: OverviewFilters;
 }
+
+const Container = styled(EuiFilterGroup)`
+  margin-bottom: 10px;
+`;
 
 export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
   overviewFilters,
@@ -79,10 +84,10 @@ export const FilterGroupComponent: React.FC<PresentationalComponentProps> = ({
   ];
 
   return (
-    <EuiFilterGroup>
+    <Container>
       {filterPopoverProps.map(item => (
         <FilterPopover key={item.id} {...item} />
       ))}
-    </EuiFilterGroup>
+    </Container>
   );
 };

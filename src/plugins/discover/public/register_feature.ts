@@ -29,7 +29,7 @@ export function registerFeature(home: HomePublicPluginSetup) {
       defaultMessage: 'Interactively explore your data by querying and filtering raw documents.',
     }),
     icon: 'discoverApp',
-    path: '/app/kibana#/discover',
+    path: '/app/discover#/',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.DATA,
   });

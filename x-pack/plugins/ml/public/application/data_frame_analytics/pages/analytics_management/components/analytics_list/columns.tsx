@@ -23,6 +23,7 @@ import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import {
   getDataFrameAnalyticsProgress,
+  getDataFrameAnalyticsProgressPhase,
   isDataFrameAnalyticsFailed,
   isDataFrameAnalyticsRunning,
   isDataFrameAnalyticsStopped,
@@ -72,22 +73,12 @@ export const getJobTypeBadge = (jobType: string) => (
 
 export const progressColumn = {
   name: i18n.translate('xpack.ml.dataframe.analyticsList.progress', {
-    defaultMessage: 'Progress per Step',
+    defaultMessage: 'Progress',
   }),
   sortable: (item: DataFrameAnalyticsListRow) => getDataFrameAnalyticsProgress(item.stats),
   truncateText: true,
   render(item: DataFrameAnalyticsListRow) {
-    const totalSteps = item.stats.progress.length;
-    let step = 0;
-    let progress = 0;
-
-    for (const progressStep of item.stats.progress) {
-      step++;
-      progress = progressStep.progress_percent;
-      if (progressStep.progress_percent < 100) {
-        break;
-      }
-    }
+    const { currentPhase, progress, totalPhases } = getDataFrameAnalyticsProgressPhase(item.stats);
 
     // For now all analytics jobs are batch jobs.
     const isBatchTransform = true;
@@ -96,24 +87,29 @@ export const progressColumn = {
       <EuiFlexGroup alignItems="center" gutterSize="xs">
         {isBatchTransform && (
           <Fragment>
-            <EuiFlexItem style={{ width: '40px' }} grow={false}>
-              <EuiProgress
-                value={progress}
-                max={100}
-                color="primary"
-                size="m"
-                data-test-subj="mlAnalyticsTableProgress"
-              >
-                {progress}%
-              </EuiProgress>
-            </EuiFlexItem>
-            <EuiFlexItem style={{ width: '35px' }} grow={false}>
-              <EuiText size="xs">{`${progress}%`}</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem style={{ width: '21px' }} grow={false}>
+            <EuiFlexItem style={{ width: '60px' }} grow={false}>
               <EuiText size="xs">
-                {step}/{totalSteps}
+                Phase {currentPhase}/{totalPhases}
               </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem style={{ width: '40px' }} grow={false}>
+              <EuiToolTip
+                content={i18n.translate('xpack.ml.dataframe.analyticsList.progressOfPhase', {
+                  defaultMessage: 'Progress of phase {currentPhase}: {progress}%',
+                  values: {
+                    currentPhase,
+                    progress,
+                  },
+                })}
+              >
+                <EuiProgress
+                  value={progress}
+                  max={100}
+                  color="primary"
+                  size="m"
+                  data-test-subj="mlAnalyticsTableProgress"
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </Fragment>
         )}
