@@ -16,7 +16,7 @@ import { shallow } from 'enzyme';
 
 import { DynamicColorProperty } from './dynamic_color_property';
 import { COLOR_MAP_TYPE, VECTOR_STYLES } from '../../../../../common/constants';
-import { mockField, MockLayer } from './test_util';
+import { mockField, MockLayer } from './__tests__/test_util';
 
 const makeProperty = (options, field = mockField) => {
   return new DynamicColorProperty(options, VECTOR_STYLES.LINE_COLOR, field, new MockLayer(), () => {

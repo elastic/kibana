@@ -18,12 +18,20 @@ import React from 'react';
 import { VECTOR_STYLES } from '../../../../../common/constants';
 // @ts-ignore
 import { DynamicIconProperty } from './dynamic_icon_property';
-import { mockField, MockLayer } from './test_util';
+import { mockField, MockLayer } from './__tests__/test_util';
+import { IconDynamicOptions } from '../../../../../common/descriptor_types';
+import { IField } from '../../../fields/field';
 
-const makeProperty = (options, field = mockField) => {
-  return new DynamicIconProperty(options, VECTOR_STYLES.ICON, field, new MockLayer(), () => {
-    return x => x + '_format';
-  });
+const makeProperty = (options: Partial<IconDynamicOptions>, field: IField = mockField) => {
+  return new DynamicIconProperty(
+    { ...options, fieldMetaOptions: { isEnabled: false } },
+    VECTOR_STYLES.ICON,
+    field,
+    new MockLayer(),
+    () => {
+      return (x: string) => x + '_format';
+    }
+  );
 };
 
 describe('DynamicIconProperty', () => {
