@@ -78,15 +78,17 @@ describe('action_form', () => {
 
     async function setup() {
       const { loadAllActions } = jest.requireMock('../../lib/action_connector_api');
-      loadAllActions.mockResolvedValueOnce([
-        {
-          secrets: {},
-          id: 'test',
-          actionTypeId: actionType.id,
-          name: 'Test connector',
-          config: {},
-        },
-      ]);
+      loadAllActions.mockResolvedValueOnce({
+        data: [
+          {
+            secrets: {},
+            id: 'test',
+            actionTypeId: actionType.id,
+            name: 'Test connector',
+            config: {},
+          },
+        ],
+      });
       const mockes = coreMock.createSetup();
       deps = {
         toastNotifications: mockes.notifications.toasts,
@@ -218,7 +220,7 @@ describe('action_form', () => {
         Object {
           "id": "test",
           "key": "test",
-          "label": "Test connector ",
+          "label": "Test connector",
         },
       ]
       `);
