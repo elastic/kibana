@@ -29,6 +29,13 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
   async function waitForLoginPage() {
     log.debug('Waiting for Login Page to appear.');
     await retry.waitForWithTimeout('login page', config.get('timeouts.waitFor') * 5, async () => {
+      // As a part of the cleanup flow tests usually try to log users out, but there are cases when
+      // browser/Kibana would like users to confirm that they want to navigate away from the current
+      // page and lose the state (e.g. unsaved changes) via native alert dialog.
+      const alert = await browser.getAlert();
+      if (alert && alert.accept) {
+        await alert.accept();
+      }
       return await find.existsByDisplayedByCssSelector('.login-form');
     });
   }
