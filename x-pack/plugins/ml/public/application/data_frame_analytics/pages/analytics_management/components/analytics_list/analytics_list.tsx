@@ -111,7 +111,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const [sortField, setSortField] = useState<string>(DataFrameAnalyticsListColumn.id);
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
-  const [urlFilterIdCleared, setUrlFilterIdCleared] = useState<boolean>(false);
+  const [jobIdSelected, setJobIdSelected] = useState<boolean>(false);
   const disabled =
     !checkPermission('canCreateDataFrameAnalytics') ||
     !checkPermission('canStartStopDataFrameAnalytics');
@@ -124,17 +124,19 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     blockRefresh
   );
 
+  // Query text/job_id based on url but only after getAnalytics is done first
+  // jobIdSelected makes sure the query is only run once since analytics is being refreshed constantly
   const selectedId = getSelectedJobIdFromUrl(window.location.href);
   useEffect(() => {
-    if (urlFilterIdCleared === false && analytics.length > 0) {
+    if (jobIdSelected === false && analytics.length > 0) {
       if (selectedId !== undefined) {
-        setUrlFilterIdCleared(true);
+        setJobIdSelected(true);
         setQueryText(selectedId);
         const selectedIdQuery: Query = EuiSearchBar.Query.parse(selectedId);
         onQueryChange({ query: selectedIdQuery, error: undefined });
       }
     }
-  }, [urlFilterIdCleared, analytics]);
+  }, [jobIdSelected, analytics]);
 
   // Subscribe to the refresh observable to trigger reloading the analytics list.
   useRefreshAnalyticsList({

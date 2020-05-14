@@ -19,8 +19,7 @@ import {
   EuiLink,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-// @ts-ignore
-import { getJobIdUrl } from '../../../../../jobs/jobs_list/components/utils';
+import { getJobIdUrl } from '../../../../../util/get_job_id_url';
 
 import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
@@ -138,9 +137,9 @@ export const progressColumn = {
   'data-test-subj': 'mlAnalyticsTableColumnProgress',
 };
 
-export const getDFAnalyticsJobIdLink = (item: DataFrameAnalyticsListRow) => {
-  return <EuiLink href={getJobIdUrl('data_frame_analytics', item.id)}>{item.id}</EuiLink>;
-};
+export const getDFAnalyticsJobIdLink = (item: DataFrameAnalyticsListRow) => (
+  <EuiLink href={getJobIdUrl('data_frame_analytics', item.id)}>{item.id}</EuiLink>
+);
 
 export const getColumns = (
   expandedRowItemIds: DataFrameAnalyticsId[],

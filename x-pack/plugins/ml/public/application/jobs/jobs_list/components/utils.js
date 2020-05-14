@@ -10,7 +10,7 @@ import rison from 'rison-node';
 
 import { mlJobService } from '../../../services/job_service';
 import { ml } from '../../../services/ml_api_service';
-import { getToastNotifications, getBasePath } from '../../../util/dependency_cache';
+import { getToastNotifications } from '../../../util/dependency_cache';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { i18n } from '@kbn/i18n';
@@ -367,18 +367,6 @@ function jobProperty(job, prop) {
   return job[propMap[prop]];
 }
 
-export function getJobIdUrl(tabId, jobId) {
-  // Create url for filtering by job id for kibana management table
-  const settings = {
-    jobId,
-  };
-  const encoded = rison.encode(settings);
-  const url = `?mlManagement=${encoded}`;
-  const basePath = getBasePath();
-
-  return `${basePath.get()}/app/ml#/${tabId}${url}`;
-}
-
 function getUrlVars(url) {
   const vars = {};
   url.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(_, key, value) {
@@ -404,18 +392,6 @@ export function clearSelectedJobIdFromUrl(url) {
     if (url.includes('mlManagement') && url.includes('jobId')) {
       const urlParams = getUrlVars(url);
       const clearedParams = `ml#/jobs?_g=${urlParams._g}`;
-      window.history.replaceState({}, document.title, clearedParams);
-    }
-  }
-}
-
-export function resetMlJobUrl(tabId, url) {
-  // Change current window's url to just the generic tab url without the job ID
-  if (typeof url === 'string') {
-    url = decodeURIComponent(url);
-    if (url.includes('mlManagement') && url.includes('jobId')) {
-      const urlParams = getUrlVars(url);
-      const clearedParams = `ml#/${tabId}?_g=${urlParams._g}`;
       window.history.replaceState({}, document.title, clearedParams);
     }
   }
