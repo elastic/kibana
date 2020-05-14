@@ -358,7 +358,7 @@ export class UrlPanelContent extends Component<Props, State> {
   private renderWithIconTip = (child: React.ReactNode, tipContent: React.ReactNode) => {
     return (
       <EuiFlexGroup gutterSize="none" responsive={false}>
-        <EuiFlexItem>{child}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{child}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiIconTip content={tipContent} position="bottom" />
         </EuiFlexItem>
