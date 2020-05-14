@@ -5,7 +5,11 @@
  */
 
 import expect from '@kbn/expect';
-import { LifecycleNode, ResolverAncestry } from '../../../../plugins/endpoint/common/types';
+import {
+  LifecycleNode,
+  ResolverAncestry,
+  ResolverEvent,
+} from '../../../../plugins/endpoint/common/types';
 import { parentEntityId } from '../../../../plugins/endpoint/common/models/event';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
@@ -15,11 +19,8 @@ import {
   TreeOptions,
   TreeNode,
 } from '../../../../../x-pack/plugins/endpoint/common/generate_data';
-const commonHeaders = {
-  accept: 'application/json',
-  'kbn-xsrf': 'some-xsrf-token',
-};
 
+// TODO move this stuff to a service
 interface Options extends TreeOptions {
   numAlerts?: number;
 }
@@ -42,33 +43,58 @@ async function createResolverTree(
     const tree = generator.generateTree(options);
     const body = tree.allEvents.reduce(
       (array: Array<Record<string, any>>, doc) => (
-        array.push({ index: { _index: eventsIndex } }, doc), array
+        array.push({ create: { _index: eventsIndex } }, doc), array
       ),
       []
     );
-    await client.bulk({ body });
+    await client.bulk({ body, refresh: true });
     allTrees.push(tree);
   }
   return { trees: allTrees, index: eventsIndex };
 }
 
 async function deleteTrees(getService: any, trees: GeneratedTrees) {
-  const client = getService('es');
-  await client.indices.delete({
-    index: trees.index,
-  });
+  const es = getService('es');
+  await es.transport.request({ method: 'DELETE', path: `_data_stream/${trees.index}` });
 }
 
 const expectLifecycleNodeInMap = (node: LifecycleNode, nodeMap: Map<string, TreeNode>) => {
   const genNode = nodeMap.get(node.id);
-  expect(genNode).not.to.be(null);
-  expect(genNode?.lifecycle).to.eql(node.lifecycle);
+  expect(genNode).to.be.ok();
+  compareArrays(genNode!.lifecycle, node.lifecycle, true);
 };
 
-const verifyAncestry = (origin: LifecycleNode, ancestors: LifecycleNode[], tree: Tree) => {
-  expect(origin.lifecycle).to.eql(tree.origin.lifecycle);
+const verifyAncestryFromOrigin = (
+  origin: LifecycleNode,
+  ancestors: LifecycleNode[],
+  tree: Tree
+) => {
+  compareArrays(tree.origin.lifecycle, origin.lifecycle, true);
   ancestors.forEach(node => {
     expectLifecycleNodeInMap(node, tree.ancestry);
+  });
+};
+
+const verifyAncestry = (ancestors: LifecycleNode[], tree: Tree) => {
+  ancestors.forEach(node => {
+    expectLifecycleNodeInMap(node, tree.ancestry);
+  });
+};
+
+const compareArrays = (
+  expected: Event[],
+  toTest: ResolverEvent[],
+  lengthCheck: boolean = false
+) => {
+  if (lengthCheck) {
+    expect(expected.length).to.eql(toTest.length);
+  }
+  toTest.forEach(toTestEvent => {
+    expect(
+      expected.find(arrEvent => {
+        return JSON.stringify(arrEvent) === JSON.stringify(toTestEvent);
+      })
+    ).to.be.ok();
   });
 };
 
@@ -82,7 +108,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
     ancestors: 5,
     relatedEvents: 4,
     children: 3,
-    generations: 3,
+    generations: 2,
     percentTerminated: 100,
     percentWithRelated: 100,
     numAlerts: 1,
@@ -90,11 +116,19 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
   };
 
   describe('Resolver', () => {
+    before(async () => {
+      await esArchiver.load('endpoint/resolver/api_feature');
+      resolverTrees = await createResolverTree(getService, treeOptions);
+      // we only requested a single alert so there's only 1 tree
+      tree = resolverTrees.trees[0];
+    });
+    after(async () => {
+      await deleteTrees(getService, resolverTrees);
+      await esArchiver.unload('endpoint/resolver/api_feature');
+    });
+
     describe('related events route', () => {
       describe('legacy events', () => {
-        before(async () => await esArchiver.load('endpoint/resolver/api_feature'));
-        after(async () => await esArchiver.unload('endpoint/resolver/api_feature'));
-
         const endpointID = '5a0c957f-b8e7-4538-965e-57e8bb86ad3a';
         const entityID = '94042';
         const cursor = 'eyJ0aW1lc3RhbXAiOjE1ODE0NTYyNTUwMDAsImV2ZW50SUQiOiI5NDA0MyJ9';
@@ -140,37 +174,15 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         });
 
         it('should error on invalid pagination values', async () => {
-          await supertest
-            .get(`/api/endpoint/resolver/${entityID}/events?events=0`)
-            .set(commonHeaders)
-            .expect(400);
-          await supertest
-            .get(`/api/endpoint/resolver/${entityID}/events?events=2000`)
-            .set(commonHeaders)
-            .expect(400);
-          await supertest
-            .get(`/api/endpoint/resolver/${entityID}/events?events=-1`)
-            .set(commonHeaders)
-            .expect(400);
+          await supertest.get(`/api/endpoint/resolver/${entityID}/events?events=0`).expect(400);
+          await supertest.get(`/api/endpoint/resolver/${entityID}/events?events=2000`).expect(400);
+          await supertest.get(`/api/endpoint/resolver/${entityID}/events?events=-1`).expect(400);
         });
       });
 
       describe('endpoint events', () => {
-        before(async () => {
-          resolverTrees = await createResolverTree(getService, treeOptions);
-
-          // we only requested a single alert so there's only 1 tree
-          tree = resolverTrees.trees[0];
-        });
-        after(async () => {
-          await deleteTrees(getService, resolverTrees);
-        });
-
         it('should not find any events', async () => {
-          const { body } = await supertest
-            .get(`/api/endpoint/resolver/5555/events`)
-            .set(commonHeaders)
-            .expect(200);
+          const { body } = await supertest.get(`/api/endpoint/resolver/5555/events`).expect(200);
           expect(body.nextEvent).to.eql(null);
           expect(body.events).to.be.empty();
         });
@@ -180,7 +192,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
             .get(`/api/endpoint/resolver/${tree.origin.id}/events`)
             .expect(200);
           expect(body.events.length).to.eql(4);
-          expect(body.events).to.eql(tree.origin.relatedEvents);
+          compareArrays(tree.origin.relatedEvents, body.events, true);
           expect(body.nextEvent).to.eql(null);
         });
 
@@ -189,7 +201,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
             .get(`/api/endpoint/resolver/${tree.origin.id}/events?events=2`)
             .expect(200);
           expect(body.events.length).to.eql(2);
-          expect(body.events).to.eql(tree.origin.relatedEvents.slice(0, 2));
+          compareArrays(tree.origin.relatedEvents, body.events);
           expect(body.nextEvent).not.to.eql(null);
 
           ({ body } = await supertest
@@ -198,7 +210,15 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
             )
             .expect(200));
           expect(body.events.length).to.eql(2);
-          expect(body.events).to.eql(tree.origin.relatedEvents.slice(2));
+          compareArrays(tree.origin.relatedEvents, body.events);
+          expect(body.nextEvent).to.not.eql(null);
+
+          ({ body } = await supertest
+            .get(
+              `/api/endpoint/resolver/${tree.origin.id}/events?events=2&afterEvent=${body.nextEvent}`
+            )
+            .expect(200));
+          expect(body.events).to.be.empty();
           expect(body.nextEvent).to.eql(null);
         });
 
@@ -207,7 +227,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
             .get(`/api/endpoint/resolver/${tree.origin.id}/events?afterEvent=blah`)
             .expect(200);
           expect(body.events.length).to.eql(4);
-          expect(body.events).to.eql(tree.origin.relatedEvents);
+          compareArrays(tree.origin.relatedEvents, body.events, true);
           expect(body.nextEvent).to.eql(null);
         });
       });
@@ -215,8 +235,6 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
 
     describe('ancestry events route', () => {
       describe('legacy events', () => {
-        before(async () => await esArchiver.load('endpoint/resolver/api_feature'));
-        after(async () => await esArchiver.unload('endpoint/resolver/api_feature'));
         const endpointID = '5a0c957f-b8e7-4538-965e-57e8bb86ad3a';
         const entityID = '94042';
 
@@ -226,7 +244,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
               `/api/endpoint/resolver/${entityID}/ancestry?legacyEndpointID=${endpointID}&ancestors=5`
             )
             .expect(200);
-          expect(body.ancestors.lifecycle.length).to.eql(2);
+          expect(body.ancestors[0].lifecycle.length).to.eql(2);
           expect(body.nextAncestor).to.eql(null);
         });
 
@@ -248,7 +266,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
               `/api/endpoint/resolver/${next}/ancestry?legacyEndpointID=${endpointID}&ancestors=1`
             )
             .expect(200));
-          expect(body.lifecycle.length).to.eql(1);
+          expect(body.ancestors[0].lifecycle.length).to.eql(1);
           expect(body.nextAncestor).to.eql(null);
         });
       });
@@ -258,33 +276,23 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           return { root: ancestry.ancestors[0], ancestry: ancestry.ancestors.slice(1) };
         };
 
-        before(async () => {
-          resolverTrees = await createResolverTree(getService, treeOptions);
-          // we only requested a single alert so there's only 1 tree
-          tree = resolverTrees.trees[0];
-        });
-        after(async () => {
-          await deleteTrees(getService, resolverTrees);
-        });
-
         it('should return details for the root node', async () => {
           const { body } = await supertest
             .get(`/api/endpoint/resolver/${tree.origin.id}/ancestry?ancestors=9`)
             .expect(200);
           // the tree we generated had 5 ancestors + 1 origin node
           expect(body.ancestors.length).to.eql(6);
-          const ancestryInfo = getRootAndAncestry(body.ancestors);
-          verifyAncestry(ancestryInfo.root, ancestryInfo.ancestry, tree);
+          const ancestryInfo = getRootAndAncestry(body);
+          verifyAncestryFromOrigin(ancestryInfo.root, ancestryInfo.ancestry, tree);
           expect(body.nextAncestor).to.eql(null);
         });
 
         it('should handle an invalid id', async () => {
           const { body } = await supertest
             .get(`/api/endpoint/resolver/alskdjflasj/ancestry`)
-            .set(commonHeaders)
             .expect(200);
-          expect(body.lifecycle.length).to.eql(0);
-          expect(body.pagination.nextAncestor).to.eql(null);
+          expect(body.ancestors).to.be.empty();
+          expect(body.nextAncestor).to.eql(null);
         });
 
         it('should have a populated next parameter', async () => {
@@ -293,8 +301,8 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
             .expect(200);
           // it should have 2 ancestors + 1 origin
           expect(body.ancestors.length).to.eql(3);
-          const ancestryInfo = getRootAndAncestry(body.ancestors);
-          verifyAncestry(ancestryInfo.root, ancestryInfo.ancestry, tree);
+          const ancestryInfo = getRootAndAncestry(body);
+          verifyAncestryFromOrigin(ancestryInfo.root, ancestryInfo.ancestry, tree);
           expect(body.nextAncestor).to.eql(
             // it should be the parent entity id on the last element of the ancestry array
             parentEntityId(ancestryInfo.ancestry[ancestryInfo.ancestry.length - 1].lifecycle[0])
@@ -305,23 +313,23 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           let { body } = await supertest
             .get(`/api/endpoint/resolver/${tree.origin.id}/ancestry?ancestors=3`)
             .expect(200);
+          expect(body.ancestors.length).to.eql(4);
           const next = body.nextAncestor;
 
           ({ body } = await supertest
             .get(`/api/endpoint/resolver/${next}/ancestry?ancestors=1`)
             .expect(200));
           expect(body.ancestors.length).to.eql(2);
-          const ancestryInfo = getRootAndAncestry(body.ancestors);
-          verifyAncestry(ancestryInfo.root, ancestryInfo.ancestry, tree);
-          expect(body.nextAncestor).to.not.eql(null);
+          verifyAncestry(body.ancestors, tree);
+          // the highest node in the generated tree will not have a parent ID which causes the server to return
+          // without setting the pagination so nextAncestor will be null
+          expect(body.nextAncestor).to.eql(null);
         });
       });
     });
 
     describe('children route', () => {
       describe('legacy events', () => {
-        before(async () => await esArchiver.load('endpoint/resolver/api_feature'));
-        after(async () => await esArchiver.unload('endpoint/resolver/api_feature'));
         const endpointID = '5a0c957f-b8e7-4538-965e-57e8bb86ad3a';
         const entityID = '94041';
         const cursor = 'eyJ0aW1lc3RhbXAiOjE1ODE0NTYyNTUwMDAsImV2ZW50SUQiOiI5NDA0MiJ9';
@@ -338,12 +346,11 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         it('returns multiple levels of child process lifecycle events', async () => {
           const { body } = await supertest
             .get(
-              `/api/endpoint/resolver/93802/children?legacyEndpointID=${endpointID}&generations=3`
+              `/api/endpoint/resolver/93802/children?legacyEndpointID=${endpointID}&generations=1`
             )
             .expect(200);
           expect(body.nextChild).to.be(null);
           expect(body.childNodes[0].nextChild).to.be(null);
-
           expect(body.childNodes.length).to.eql(8);
           // TODO
           // expect(body.childNodes[0].children[0].lifecycle.length).to.eql(2);
@@ -398,8 +405,6 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
     });
 
     describe('tree endpoint', () => {
-      before(async () => await esArchiver.load('endpoint/resolver/api_feature'));
-      after(async () => await esArchiver.unload('endpoint/resolver/api_feature'));
       const endpointID = '5a0c957f-b8e7-4538-965e-57e8bb86ad3a';
 
       it('returns ancestors, events, children, and current process lifecycle', async () => {
