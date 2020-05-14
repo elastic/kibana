@@ -13,7 +13,7 @@ interface RemoveLayerOptions {
   state: EditorFrameState;
   layerId: string;
   activeVisualization: Pick<Visualization, 'getLayerIds' | 'clearLayer' | 'removeLayer'>;
-  datasourceMap: Record<string, Pick<Datasource, 'clearLayer' | 'removeLayer'>>;
+  datasourceMap: Record<string, Pick<Datasource, 'clearLayer' | 'removeLayer' | 'getLayers'>>;
 }
 
 interface AppendLayerOptions {
@@ -36,6 +36,12 @@ export function removeLayer(opts: RemoveLayerOptions): EditorFrameState {
     ...state,
     datasourceStates: _.mapValues(state.datasourceStates, (datasourceState, datasourceId) => {
       const datasource = datasourceMap[datasourceId!];
+      const isOfCurrentDatasource = datasource
+        .getLayers(datasourceState.state)
+        .some(id => id === layerId);
+      if (!isOfCurrentDatasource) {
+        return datasourceState;
+      }
       return {
         ...datasourceState,
         state: isOnlyLayer

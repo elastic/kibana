@@ -182,12 +182,15 @@ export function EditorFrame(props: EditorFrameProps) {
 
   // The frame needs to call onChange every time its internal state changes
   useEffect(() => {
+    const datasourcesFinishedLoading = Object.entries(state.datasourceStates).every(
+      ([, { isLoading }]) => !isLoading
+    );
     const activeDatasource =
       state.activeDatasourceId && !state.datasourceStates[state.activeDatasourceId].isLoading
         ? props.datasourceMap[state.activeDatasourceId]
         : undefined;
 
-    if (!activeDatasource || !activeVisualization) {
+    if (!datasourcesFinishedLoading || !activeDatasource || !activeVisualization) {
       return;
     }
 

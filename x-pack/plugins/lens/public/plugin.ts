@@ -25,6 +25,7 @@ import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 
 import './index.scss';
+import { EsDSLDatasource } from './esdsl_datasource';
 
 export interface LensPluginSetupDependencies {
   kibanaLegacy: KibanaLegacySetup;
@@ -47,6 +48,7 @@ export class LensPlugin {
   private editorFrameService: EditorFrameService;
   private createEditorFrame: EditorFrameStart['createInstance'] | null = null;
   private indexpatternDatasource: IndexPatternDatasource;
+  private dslDatasource: EsDSLDatasource;
   private xyVisualization: XyVisualization;
   private metricVisualization: MetricVisualization;
   private pieVisualization: PieVisualization;
@@ -55,6 +57,7 @@ export class LensPlugin {
     this.datatableVisualization = new DatatableVisualization();
     this.editorFrameService = new EditorFrameService();
     this.indexpatternDatasource = new IndexPatternDatasource();
+    this.dslDatasource = new EsDSLDatasource();
     this.xyVisualization = new XyVisualization();
     this.metricVisualization = new MetricVisualization();
     this.pieVisualization = new PieVisualization();
@@ -78,6 +81,7 @@ export class LensPlugin {
         .then(([_, { data: dataStart }]) => dataStart.fieldFormats.deserialize),
     };
     this.indexpatternDatasource.setup(core, dependencies);
+    this.dslDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);
     this.datatableVisualization.setup(core, dependencies);
     this.metricVisualization.setup(core, dependencies);

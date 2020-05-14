@@ -113,10 +113,12 @@ export const getInitialState = (props: EditorFrameProps): EditorFrameState => {
       datasourceStates[datasourceId] = { isLoading: true, state };
     });
   } else if (props.initialDatasourceId) {
-    datasourceStates[props.initialDatasourceId] = {
-      state: null,
-      isLoading: true,
-    };
+    Object.keys(props.datasourceMap).forEach(datasourceId => {
+      datasourceStates[datasourceId] = {
+        state: null,
+        isLoading: true,
+      };
+    });
   }
 
   return {

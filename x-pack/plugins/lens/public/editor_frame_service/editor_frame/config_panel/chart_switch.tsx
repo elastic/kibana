@@ -80,6 +80,13 @@ export function ChartSwitch(props: Props) {
 
     trackUiEvent(`chart_switch`);
 
+    if (
+      (!selection.datasourceId && !selection.sameDatasources) ||
+      selection.dataLoss === 'everything'
+    ) {
+      props.framePublicAPI.removeLayers(Object.keys(props.framePublicAPI.datasourceLayers));
+    }
+
     switchToSuggestion(
       props.dispatch,
       {
@@ -89,12 +96,6 @@ export function ChartSwitch(props: Props) {
       'SWITCH_VISUALIZATION'
     );
 
-    if (
-      (!selection.datasourceId && !selection.sameDatasources) ||
-      selection.dataLoss === 'everything'
-    ) {
-      props.framePublicAPI.removeLayers(Object.keys(props.framePublicAPI.datasourceLayers));
-    }
   };
 
   function getSelection(
