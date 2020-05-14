@@ -11,6 +11,7 @@ import { IndexManagementHome } from './sections/home';
 import { TemplateCreate } from './sections/template_create';
 import { TemplateClone } from './sections/template_clone';
 import { TemplateEdit } from './sections/template_edit';
+import { FormLibDemo } from './sections/form_lib_demo/form_lib_demo';
 
 import { useServices } from './app_context';
 
@@ -28,6 +29,7 @@ export const App = () => {
 // Export this so we can test it with a different router.
 export const AppWithoutRouter = () => (
   <Switch>
+    <Route exact path={`${BASE_PATH}form-lib-demo`} component={FormLibDemo} />
     <Route exact path={`${BASE_PATH}create_template`} component={TemplateCreate} />
     <Route exact path={`${BASE_PATH}clone_template/:name*`} component={TemplateClone} />
     <Route exact path={`${BASE_PATH}edit_template/:name*`} component={TemplateEdit} />
