@@ -72,7 +72,6 @@ const nodeAssets = {
 const getDisplayName: (schemaName: string) => string = function nameInSchemaToDisplayName(
   schemaName: string
 ) {
-
   const displayNameRecord: Record<string, string> = {
     application: i18n.translate('xpack.endpoint.resolver.applicationEventTypeDisplayName', {
       defaultMessage: 'Application',
