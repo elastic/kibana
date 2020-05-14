@@ -13,48 +13,21 @@ import {
   RangeFieldMeta,
   StyleMetaDescriptor,
 } from '../../../../../../common/descriptor_types';
-import { IField } from '../../../../fields/field';
-import { AbstractVectorSource, IVectorSource } from '../../../../sources/vector_source';
-import { ITooltipProperty, TooltipProperty } from '../../../../tooltips/tooltip_property';
+import { AbstractField, IField } from '../../../../fields/field';
 
-export const mockField: IField = {
-  canValueBeFormatted(): boolean {
-    return true;
-  },
-  async createTooltipProperty(value: string | undefined): Promise<ITooltipProperty> {
-    return new TooltipProperty('foobar', 'foobar', 'foo bar value');
-  },
-  async getCategoricalFieldMetaRequest(size: number): Promise<unknown> {
-    return undefined;
-  },
-  async getDataType(): Promise<string> {
-    return 'string';
-  },
-  async getOrdinalFieldMetaRequest(): Promise<unknown> {
-    return null;
-  },
-  getSource(): IVectorSource {
-    return new AbstractVectorSource({ type: 'TEST' });
-  },
-  isValid(): boolean {
-    return false;
-  },
+class MockField extends AbstractField {
   async getLabel(): Promise<string> {
-    return 'foobar_label';
-  },
-  getName(): string {
-    return 'foobar';
-  },
-  getRootName(): string {
-    return 'foobar';
-  },
-  getOrigin(): FIELD_ORIGIN {
-    return FIELD_ORIGIN.SOURCE;
-  },
+    return this.getName() + '_label';
+  }
   supportsFieldMeta(): boolean {
     return true;
-  },
-};
+  }
+}
+
+export const mockField: IField = new MockField({
+  fieldName: 'foobar',
+  origin: FIELD_ORIGIN.SOURCE,
+});
 
 class MockStyle {
   getStyleMeta(): StyleMeta {
