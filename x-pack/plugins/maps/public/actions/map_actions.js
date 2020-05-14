@@ -125,7 +125,7 @@ async function syncDataForLayer(layer) {
     const dataFilters = getDataFilters(getState());
     if (!layer.isVisible() || !layer.showAtZoomLevel(dataFilters.zoom)) {
       return;
-    })
+    }
 
     await layer.syncData({
       ...getLayerLoadingCallbacks(dispatch, getState, layer.getId()),
