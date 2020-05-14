@@ -27,6 +27,7 @@ import {
   IIndexPattern,
   injectSearchSourceReferences,
 } from '../../../data/public';
+import { FailedImport } from './process_import_response';
 
 type SavedObjectsRawDoc = Record<string, any>;
 
@@ -265,11 +266,6 @@ export async function resolveSavedSearches(
   return importCount;
 }
 
-interface FailedDoc {
-  obj: Record<string, any>;
-  error: Error;
-}
-
 export async function resolveSavedObjects(
   savedObjects: SavedObjectsRawDoc[],
   overwriteAll: boolean,
@@ -282,7 +278,7 @@ export async function resolveSavedObjects(
   // Keep track of how many we actually import because the user
   // can cancel an override
   let importedObjectCount = 0;
-  const failedImports: FailedDoc[] = [];
+  const failedImports: FailedImport[] = [];
   // Start with the index patterns since everything is dependent on them
   await awaitEachItemInParallel(docTypes.indexPatterns, async indexPatternDoc => {
     try {
@@ -296,7 +292,7 @@ export async function resolveSavedObjects(
         importedObjectCount++;
       }
     } catch (error) {
-      failedImports.push({ obj: indexPatternDoc, error });
+      failedImports.push({ obj: indexPatternDoc as any, error });
     }
   });
 

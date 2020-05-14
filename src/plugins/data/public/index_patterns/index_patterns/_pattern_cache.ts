@@ -19,7 +19,7 @@
 
 import { IndexPattern } from './index_pattern';
 
-interface PatternCache {
+export interface PatternCache {
   get: (id: string) => IndexPattern;
   set: (id: string, value: IndexPattern) => IndexPattern;
   clear: (id: string) => void;
