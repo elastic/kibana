@@ -20,6 +20,7 @@ import {
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 import { DynamicSettings } from '../../../common/runtime_types';
 import { SettingsFormProps } from '../../pages/settings';
+import { certificateFormTranslations } from './translations';
 
 export type OnFieldChangeType = (changedValues: Partial<DynamicSettings>) => void;
 
@@ -58,7 +59,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
     >
       <EuiFormRow
         describedByIds={['errorState']}
-        error={fieldErrors?.certificatesThresholds?.expirationThresholdError}
+        error={fieldErrors?.expirationThresholdError}
         fullWidth
         helpText={
           <FormattedMessage
@@ -69,7 +70,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
             }}
           />
         }
-        isInvalid={!!fieldErrors?.certificatesThresholds?.expirationThresholdError}
+        isInvalid={!!fieldErrors?.expirationThresholdError}
         label={
           <FormattedMessage
             id="xpack.uptime.sourceConfiguration.errorStateLabel"
@@ -80,6 +81,8 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={2}>
             <EuiFieldNumber
+              min={1}
+              aria-label={certificateFormTranslations.expirationInputAriaLabel}
               data-test-subj={`expiration-threshold-input-${loading ? 'loading' : 'loaded'}`}
               fullWidth
               disabled={isDisabled}
@@ -104,7 +107,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
       </EuiFormRow>
       <EuiFormRow
         describedByIds={['warningState']}
-        error={fieldErrors?.certificatesThresholds?.ageThresholdError}
+        error={fieldErrors?.ageThresholdError}
         fullWidth
         helpText={
           <FormattedMessage
@@ -115,7 +118,7 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
             }}
           />
         }
-        isInvalid={!!fieldErrors?.certificatesThresholds?.ageThresholdError}
+        isInvalid={!!fieldErrors?.ageThresholdError}
         label={
           <FormattedMessage
             id="xpack.uptime.sourceConfiguration.warningStateLabel"
@@ -126,14 +129,16 @@ export const CertificateExpirationForm: React.FC<SettingsFormProps> = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={2}>
             <EuiFieldNumber
+              min={1}
+              aria-label={certificateFormTranslations.ageInputAriaLabel}
               data-test-subj={`age-threshold-input-${loading ? 'loading' : 'loaded'}`}
               fullWidth
               disabled={isDisabled}
               isLoading={loading}
               value={formFields?.certAgeThreshold ?? ''}
-              onChange={e =>
+              onChange={({ currentTarget: { value } }) =>
                 onChange({
-                  certAgeThreshold: Number(e.currentTarget.value),
+                  certAgeThreshold: Number(value),
                 })
               }
             />

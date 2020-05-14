@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
 import { DEFAULT_INDEX_KEY } from '../../../../../../common/constants';
-import { isMlRule } from '../../../../../../common/detection_engine/ml_helpers';
+import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { IIndexPattern } from '../../../../../../../../../src/plugins/data/public';
 import { useFetchIndexPatterns } from '../../../../../containers/detection_engine/rules';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../../components/timeline/translations';
@@ -38,7 +38,7 @@ import {
 import { schema } from './schema';
 import * as i18n from './translations';
 import { filterRuleFieldsForType, RuleFields } from '../../create/helpers';
-import { hasMlAdminPermissions } from '../../../../../components/ml/permissions/has_ml_admin_permissions';
+import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
 
 const CommonUseField = getUseField({ component: Field });
 

@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
+  const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const pieChart = getService('pieChart');
@@ -25,7 +26,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  describe('sample data dashboard', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/65949
+  describe.skip('sample data dashboard', function describeIndexTests() {
     before(async () => {
       await PageObjects.common.sleep(5000);
       await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
@@ -93,6 +95,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       ]`;
 
       await kibanaServer.uiSettings.update({ 'timepicker:quickRanges': SAMPLE_DATA_RANGE });
+      // refresh page to make sure ui settings update is picked up
+      await browser.refresh();
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await appMenu.clickLink('Discover');
       await PageObjects.discover.selectIndexPattern('kibana_sample_data_flights');
       await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
@@ -104,6 +109,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.home.removeSampleDataSet('flights');
       const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
       expect(isInstalled).to.be(false);

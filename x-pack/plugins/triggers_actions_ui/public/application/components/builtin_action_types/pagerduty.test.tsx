@@ -6,7 +6,6 @@
 import React, { FunctionComponent } from 'react';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { act } from 'react-dom/test-utils';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
 import { ActionTypeModel, ActionParamsProps } from '../../../types';
@@ -16,7 +15,6 @@ import {
   SeverityActionOptions,
   PagerDutyActionConnector,
 } from './types';
-import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 
 const ACTION_TYPE_ID = '.pagerduty';
 let actionTypeModel: ActionTypeModel;
@@ -29,24 +27,7 @@ beforeAll(async () => {
   if (getResult !== null) {
     actionTypeModel = getResult;
   }
-  const mocks = coreMock.createSetup();
-  const [
-    {
-      application: { capabilities },
-    },
-  ] = await mocks.getStartServices();
   deps = {
-    toastNotifications: mocks.notifications.toasts,
-    http: mocks.http,
-    capabilities: {
-      ...capabilities,
-      actions: {
-        delete: true,
-        save: true,
-        show: true,
-      },
-    },
-    actionTypeRegistry: actionTypeRegistry as any,
     docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
   };
 });
@@ -148,25 +129,13 @@ describe('PagerDutyActionConnectorFields renders', () => {
       },
     } as PagerDutyActionConnector;
     const wrapper = mountWithIntl(
-      <ActionsConnectorsContextProvider
-        value={{
-          http: deps!.http,
-          actionTypeRegistry: deps!.actionTypeRegistry,
-          capabilities: deps!.capabilities,
-          toastNotifications: deps!.toastNotifications,
-          reloadConnectors: () => {
-            return new Promise<void>(() => {});
-          },
-          docLinks: deps!.docLinks,
-        }}
-      >
-        <ConnectorFields
-          action={actionConnector}
-          errors={{ index: [], routingKey: [] }}
-          editActionConfig={() => {}}
-          editActionSecrets={() => {}}
-        />
-      </ActionsConnectorsContextProvider>
+      <ConnectorFields
+        action={actionConnector}
+        errors={{ index: [], routingKey: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        docLinks={deps!.docLinks}
+      />
     );
 
     await act(async () => {

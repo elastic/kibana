@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 
 import styled from 'styled-components';
-import { isJobStarted } from '../../../../../../common/detection_engine/ml_helpers';
+import { isJobStarted } from '../../../../../../common/machine_learning/helpers';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../../shared_imports';
 import { useSiemJobs } from '../../../../../components/ml_popover/hooks/use_siem_jobs';
 import { useKibana } from '../../../../../lib/kibana';

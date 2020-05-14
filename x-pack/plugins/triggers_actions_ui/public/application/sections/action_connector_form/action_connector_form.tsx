@@ -15,9 +15,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { HttpSetup, DocLinksStart } from 'kibana/public';
 import { ReducerAction } from './connector_reducer';
-import { ActionConnector, IErrorObject } from '../../../types';
-import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
+import { ActionConnector, IErrorObject, ActionTypeModel } from '../../../types';
+import { TypeRegistry } from '../../type_registry';
 
 export function validateBaseProperties(actionObject: ActionConnector) {
   const validationResult = { errors: {} };
@@ -46,6 +47,9 @@ interface ActionConnectorProps {
     body: { message: string; error: string };
   };
   errors: IErrorObject;
+  http: HttpSetup;
+  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  docLinks: DocLinksStart;
 }
 
 export const ActionConnectorForm = ({
@@ -54,8 +58,10 @@ export const ActionConnectorForm = ({
   actionTypeName,
   serverError,
   errors,
+  http,
+  actionTypeRegistry,
+  docLinks,
 }: ActionConnectorProps) => {
-  const { actionTypeRegistry, docLinks } = useActionsConnectorsContext();
   const setActionProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };
@@ -150,6 +156,8 @@ export const ActionConnectorForm = ({
           errors={errors}
           editActionConfig={setActionConfigProperty}
           editActionSecrets={setActionSecretsProperty}
+          http={http}
+          docLinks={docLinks}
         />
       ) : null}
     </EuiForm>

@@ -11,7 +11,6 @@ import { registerBuiltInActionTypes } from './index';
 import { ActionTypeModel, ActionParamsProps } from '../../../types';
 import { IndexActionParams, EsIndexActionConnector } from './types';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 jest.mock('../../../common/index_controls', () => ({
   firstFieldOption: jest.fn(),
   getFields: jest.fn(),
@@ -165,25 +164,13 @@ describe('IndexActionConnectorFields renders', () => {
       },
     } as EsIndexActionConnector;
     const wrapper = mountWithIntl(
-      <ActionsConnectorsContextProvider
-        value={{
-          http: deps!.http,
-          actionTypeRegistry: deps!.actionTypeRegistry,
-          capabilities: deps!.capabilities,
-          toastNotifications: deps!.toastNotifications,
-          reloadConnectors: () => {
-            return new Promise<void>(() => {});
-          },
-          docLinks: deps!.docLinks,
-        }}
-      >
-        <ConnectorFields
-          action={actionConnector}
-          errors={{ index: [] }}
-          editActionConfig={() => {}}
-          editActionSecrets={() => {}}
-        />
-      </ActionsConnectorsContextProvider>
+      <ConnectorFields
+        action={actionConnector}
+        errors={{ index: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        http={deps!.http}
+      />
     );
 
     await act(async () => {

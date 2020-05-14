@@ -161,18 +161,13 @@ export class AbstractESSource extends AbstractVectorSource {
     let esBounds;
     try {
       const esResp = await searchSource.fetch();
-      esBounds = _.get(esResp, 'aggregations.fitToBounds.bounds');
+      if (!esResp.aggregations.fitToBounds.bounds) {
+        // aggregations.fitToBounds is empty object when there are no matching documents
+        return null;
+      }
+      esBounds = esResp.aggregations.fitToBounds.bounds;
     } catch (error) {
-      esBounds = {
-        top_left: {
-          lat: 90,
-          lon: -180,
-        },
-        bottom_right: {
-          lat: -90,
-          lon: 180,
-        },
-      };
+      return null;
     }
 
     const minLon = esBounds.top_left.lon;

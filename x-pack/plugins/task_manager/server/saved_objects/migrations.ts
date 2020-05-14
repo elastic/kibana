@@ -3,22 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObject } from '../../../../../src/core/server';
+import { SavedObjectMigrationMap } from '../../../../../src/core/server';
 
-export const migrations = {
-  task: {
-    '7.4.0': (doc: SavedObject<Record<string, unknown>>) => ({
-      ...doc,
-      updated_at: new Date().toISOString(),
-    }),
-    '7.6.0': moveIntervalIntoSchedule,
-  },
+export const migrations: SavedObjectMigrationMap = {
+  '7.4.0': doc => ({
+    ...doc,
+    updated_at: new Date().toISOString(),
+  }),
+  '7.6.0': moveIntervalIntoSchedule,
 };
 
-function moveIntervalIntoSchedule({
-  attributes: { interval, ...attributes },
-  ...doc
-}: SavedObject<Record<string, unknown>>) {
+// Type is wrong here and will be fixed by platform in https://github.com/elastic/kibana/issues/64748
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function moveIntervalIntoSchedule({ attributes: { interval, ...attributes }, ...doc }: any): any {
   return {
     ...doc,
     attributes: {

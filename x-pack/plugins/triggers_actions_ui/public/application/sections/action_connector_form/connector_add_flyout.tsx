@@ -52,6 +52,7 @@ export const ConnectorAddFlyout = ({
     capabilities,
     actionTypeRegistry,
     reloadConnectors,
+    docLinks,
   } = useActionsConnectorsContext();
   const [actionType, setActionType] = useState<ActionType | undefined>(undefined);
   const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
@@ -114,6 +115,9 @@ export const ConnectorAddFlyout = ({
         connector={connector}
         dispatch={dispatch}
         errors={errors}
+        actionTypeRegistry={actionTypeRegistry}
+        http={http}
+        docLinks={docLinks}
       />
     );
   }
