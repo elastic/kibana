@@ -25,5 +25,5 @@ export const initTlsAlertType: AlertTypeInitializer = ({ store }): AlertTypeMode
   name,
   validate: () => ({ errors: {} }),
   defaultActionMessage,
-  requiresAppContext: true,
+  requiresAppContext: false,
 });

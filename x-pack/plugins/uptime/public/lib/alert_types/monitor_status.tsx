@@ -76,5 +76,5 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   ),
   validate,
   defaultActionMessage,
-  requiresAppContext: true,
+  requiresAppContext: false,
 });
