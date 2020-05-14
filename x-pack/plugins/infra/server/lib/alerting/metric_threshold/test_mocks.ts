@@ -7,22 +7,33 @@
 const bucketsA = [
   {
     doc_count: 2,
-    aggregatedValue: { value: 0.5 },
+    aggregatedValue: { value: 0.5, values: [{ key: 95.0, value: 0.5 }] },
   },
   {
     doc_count: 3,
-    aggregatedValue: { value: 1.0 },
+    aggregatedValue: { value: 1.0, values: [{ key: 95.0, value: 1.0 }] },
   },
 ];
 
 const bucketsB = [
   {
     doc_count: 4,
-    aggregatedValue: { value: 2.5 },
+    aggregatedValue: { value: 2.5, values: [{ key: 99.0, value: 2.5 }] },
   },
   {
     doc_count: 5,
-    aggregatedValue: { value: 3.5 },
+    aggregatedValue: { value: 3.5, values: [{ key: 99.0, value: 3.5 }] },
+  },
+];
+
+const bucketsC = [
+  {
+    doc_count: 2,
+    aggregatedValue: { value: 0.5 },
+  },
+  {
+    doc_count: 3,
+    aggregatedValue: { value: 16.0 },
   },
 ];
 
@@ -38,6 +49,14 @@ export const alternateMetricResponse = {
   aggregations: {
     aggregatedIntervals: {
       buckets: bucketsB,
+    },
+  },
+};
+
+export const emptyMetricResponse = {
+  aggregations: {
+    aggregatedIntervals: {
+      buckets: [],
     },
   },
 };
@@ -107,4 +126,12 @@ export const alternateCompositeResponse = {
 export const compositeEndResponse = {
   aggregations: {},
   hits: { total: { value: 0 } },
+};
+
+export const changedSourceIdResponse = {
+  aggregations: {
+    aggregatedIntervals: {
+      buckets: bucketsC,
+    },
+  },
 };

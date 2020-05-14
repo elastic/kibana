@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../es_ui_shared/console_lang/mocks';
-
 import { act } from 'react-dom/test-utils';
 import { setupEnvironment, pageHelpers, nextTick, wrapBodyResponse } from './helpers';
 import { WatchCreateJsonTestBed } from './helpers/watch_create_json.helpers';
@@ -108,6 +106,7 @@ describe('<JsonWatchEdit /> create route', () => {
               name: watch.name,
               type: watch.type,
               isNew: true,
+              isActive: true,
               actions: [
                 {
                   id: DEFAULT_LOGGING_ACTION_ID,
@@ -185,6 +184,7 @@ describe('<JsonWatchEdit /> create route', () => {
             id,
             type,
             isNew: true,
+            isActive: true,
             actions: [],
             watch: defaultWatchJson,
           };
@@ -246,6 +246,7 @@ describe('<JsonWatchEdit /> create route', () => {
             id,
             type,
             isNew: true,
+            isActive: true,
             actions: [],
             watch: defaultWatchJson,
           };

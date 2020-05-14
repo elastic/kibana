@@ -6,42 +6,25 @@
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
-import { PluginSetupContract } from '../../../../../alerting/server';
+import { curry } from 'lodash';
+import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api/metrics_explorer';
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
-import { METRIC_THRESHOLD_ALERT_TYPE_ID } from './types';
+import { METRIC_THRESHOLD_ALERT_TYPE_ID, Comparator } from './types';
+import { InfraBackendLibs } from '../../infra_types';
+import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
 
-export async function registerMetricThresholdAlertType(alertingPlugin: PluginSetupContract) {
-  if (!alertingPlugin) {
-    throw new Error(
-      'Cannot register metric threshold alert type.  Both the actions and alerting plugins need to be enabled.'
-    );
-  }
-  const alertUUID = uuid.v4();
-
+export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
-    comparator: schema.oneOf([
-      schema.literal('>'),
-      schema.literal('<'),
-      schema.literal('>='),
-      schema.literal('<='),
-      schema.literal('between'),
-    ]),
+    comparator: oneOfLiterals(Object.values(Comparator)),
     timeUnit: schema.string(),
     timeSize: schema.number(),
-    indexPattern: schema.string(),
   };
 
   const nonCountCriterion = schema.object({
     ...baseCriterion,
     metric: schema.string(),
-    aggType: schema.oneOf([
-      schema.literal('avg'),
-      schema.literal('min'),
-      schema.literal('max'),
-      schema.literal('rate'),
-      schema.literal('cardinality'),
-    ]),
+    aggType: oneOfLiterals(METRIC_EXPLORER_AGGREGATIONS),
   });
 
   const countCriterion = schema.object({
@@ -57,50 +40,50 @@ export async function registerMetricThresholdAlertType(alertingPlugin: PluginSet
     }
   );
 
-  const valueOfActionVariableDescription = i18n.translate(
-    'xpack.infra.metrics.alerting.threshold.alerting.valueOfActionVariableDescription',
+  const alertStateActionVariableDescription = i18n.translate(
+    'xpack.infra.metrics.alerting.threshold.alerting.alertStateActionVariableDescription',
     {
-      defaultMessage:
-        'Record of the current value of the watched metric; grouped by condition, i.e valueOf.condition0, valueOf.condition1, etc.',
+      defaultMessage: 'Current state of the alert',
     }
   );
 
-  const thresholdOfActionVariableDescription = i18n.translate(
-    'xpack.infra.metrics.alerting.threshold.alerting.thresholdOfActionVariableDescription',
+  const reasonActionVariableDescription = i18n.translate(
+    'xpack.infra.metrics.alerting.threshold.alerting.reasonActionVariableDescription',
     {
       defaultMessage:
-        'Record of the alerting threshold; grouped by condition, i.e thresholdOf.condition0, thresholdOf.condition1, etc.',
+        'A description of why the alert is in this state, including which metrics have crossed which thresholds',
     }
   );
 
-  const metricOfActionVariableDescription = i18n.translate(
-    'xpack.infra.metrics.alerting.threshold.alerting.metricOfActionVariableDescription',
-    {
-      defaultMessage:
-        'Record of the watched metric; grouped by condition, i.e metricOf.condition0, metricOf.condition1, etc.',
-    }
-  );
-
-  alertingPlugin.registerType({
+  return {
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
     name: 'Metric threshold',
     validate: {
-      params: schema.object({
-        criteria: schema.arrayOf(schema.oneOf([countCriterion, nonCountCriterion])),
-        groupBy: schema.maybe(schema.string()),
-        filterQuery: schema.maybe(schema.string()),
-      }),
+      params: schema.object(
+        {
+          criteria: schema.arrayOf(schema.oneOf([countCriterion, nonCountCriterion])),
+          groupBy: schema.maybe(schema.string()),
+          filterQuery: schema.maybe(
+            schema.string({
+              validate: validateIsStringElasticsearchJSONFilter,
+            })
+          ),
+          sourceId: schema.string(),
+          alertOnNoData: schema.maybe(schema.boolean()),
+        },
+        { unknowns: 'allow' }
+      ),
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],
-    executor: createMetricThresholdExecutor(alertUUID),
+    executor: curry(createMetricThresholdExecutor)(libs, uuid.v4()),
     actionVariables: {
       context: [
         { name: 'group', description: groupActionVariableDescription },
-        { name: 'valueOf', description: valueOfActionVariableDescription },
-        { name: 'thresholdOf', description: thresholdOfActionVariableDescription },
-        { name: 'metricOf', description: metricOfActionVariableDescription },
+        { name: 'alertState', description: alertStateActionVariableDescription },
+        { name: 'reason', description: reasonActionVariableDescription },
       ],
     },
-  });
+    producer: 'metrics',
+  };
 }

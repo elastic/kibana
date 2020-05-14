@@ -112,7 +112,7 @@ describe('EventLogStart', () => {
         {
           page: 1,
           per_page: 10,
-          sort_field: 'event.start',
+          sort_field: '@timestamp',
           sort_order: 'asc',
         }
       );
@@ -193,7 +193,7 @@ describe('EventLogStart', () => {
         {
           page: 1,
           per_page: 10,
-          sort_field: 'event.start',
+          sort_field: '@timestamp',
           sort_order: 'asc',
           start,
           end,

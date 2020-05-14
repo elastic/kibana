@@ -47,6 +47,19 @@ export {
 } from '../../types';
 
 /**
+ * Meta information about the SavedObjectService's status. Available to plugins via {@link CoreSetup.status}.
+ *
+ * @public
+ */
+export interface SavedObjectStatusMeta {
+  migratedIndices: {
+    [status: string]: number;
+    skipped: number;
+    migrated: number;
+  };
+}
+
+/**
  *
  * @public
  */
@@ -143,21 +156,25 @@ export type MutatingOperationRefreshSetting = boolean | 'wait_for';
  * takes special care to ensure that 404 errors are generic and don't distinguish
  * between index missing or document missing.
  *
- * ### 503s from missing index
- *
- * Unlike all other methods, create requests are supposed to succeed even when
- * the Kibana index does not exist because it will be automatically created by
- * elasticsearch. When that is not the case it is because Elasticsearch's
- * `action.auto_create_index` setting prevents it from being created automatically
- * so we throw a special 503 with the intention of informing the user that their
- * Elasticsearch settings need to be updated.
- *
  * See {@link SavedObjectsClient}
  * See {@link SavedObjectsErrorHelpers}
  *
  * @public
  */
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
+
+/**
+ * The namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive:
+ *  * single (default): this type of saved object is namespace-isolated, e.g., it exists in only one namespace.
+ *  * multiple: this type of saved object is shareable, e.g., it can exist in one or more namespaces.
+ *  * agnostic: this type of saved object is global.
+ *
+ * Note: do not write logic that uses this value directly; instead, use the appropriate accessors in the
+ * {@link SavedObjectTypeRegistry | type registry}.
+ *
+ * @public
+ */
+export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'agnostic';
 
 /**
  * @remarks This is only internal for now, and will only be public when we expose the registerType API
@@ -177,9 +194,9 @@ export interface SavedObjectsType {
    */
   hidden: boolean;
   /**
-   * Is the type global (true), or namespaced (false).
+   * The {@link SavedObjectsNamespaceType | namespace type} for the type.
    */
-  namespaceAgnostic: boolean;
+  namespaceType: SavedObjectsNamespaceType;
   /**
    * If defined, the type instances will be stored in the given index instead of the default one.
    */
@@ -316,6 +333,8 @@ export type SavedObjectLegacyMigrationFn = (
  */
 interface SavedObjectsLegacyTypeSchema {
   isNamespaceAgnostic?: boolean;
+  /** Cannot be used in conjunction with `isNamespaceAgnostic` */
+  multiNamespace?: boolean;
   hidden?: boolean;
   indexPattern?: ((config: LegacyConfig) => string) | string;
   convertToAliasScript?: string;

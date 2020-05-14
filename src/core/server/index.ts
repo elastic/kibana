@@ -47,7 +47,8 @@ import {
 } from './elasticsearch';
 
 import { HttpServiceSetup } from './http';
-import { IScopedRenderingClient } from './rendering';
+import { HttpResources } from './http_resources';
+
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
 import { IUiSettingsClient, UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
@@ -60,6 +61,7 @@ import {
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { UuidServiceSetup } from './uuid';
 import { MetricsServiceSetup } from './metrics';
+import { StatusServiceSetup } from './status';
 
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
@@ -95,6 +97,8 @@ export {
   ElasticsearchErrorHelpers,
   ElasticsearchServiceSetup,
   ElasticsearchServiceStart,
+  ElasticsearchStatusMeta,
+  NodesVersionCompatibility,
   APICaller,
   FakeRequest,
   ScopeableRequest,
@@ -143,6 +147,7 @@ export {
   OnPreResponseInfo,
   RedirectResponseOptions,
   RequestHandler,
+  RequestHandlerWrapper,
   RequestHandlerContextContainer,
   RequestHandlerContextProvider,
   ResponseError,
@@ -172,7 +177,15 @@ export {
   DestructiveRouteMethod,
   SafeRouteMethod,
 } from './http';
-export { RenderingServiceSetup, IRenderOptions } from './rendering';
+
+export {
+  HttpResourcesRenderOptions,
+  HttpResourcesResponseOptions,
+  HttpResourcesServiceToolkit,
+  HttpResourcesRequestHandler,
+} from './http_resources';
+
+export { IRenderOptions } from './rendering';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 
 export {
@@ -217,6 +230,7 @@ export {
   SavedObjectsMigrationLogger,
   SavedObjectsRawDoc,
   SavedObjectSanitizedDoc,
+  SavedObjectUnsanitizedDoc,
   SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsSchema,
@@ -224,8 +238,11 @@ export {
   SavedObjectsLegacyService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsAddToNamespacesOptions,
+  SavedObjectsDeleteFromNamespacesOptions,
   SavedObjectsServiceStart,
   SavedObjectsServiceSetup,
+  SavedObjectStatusMeta,
   SavedObjectsDeleteOptions,
   ISavedObjectsRepository,
   SavedObjectsRepository,
@@ -238,6 +255,7 @@ export {
   SavedObjectsMappingProperties,
   SavedObjectTypeRegistry,
   ISavedObjectTypeRegistry,
+  SavedObjectsNamespaceType,
   SavedObjectsType,
   SavedObjectsTypeManagementDefinition,
   SavedObjectMigrationMap,
@@ -270,7 +288,17 @@ export {
   MetricsServiceSetup,
 } from './metrics';
 
-export { RecursiveReadonly } from '../utils';
+export {
+  RecursiveReadonly,
+  DEFAULT_APP_CATEGORIES,
+  getFlattenedObject,
+  URLMeaningfulParts,
+  modifyUrl,
+  isRelativeUrl,
+  Freezable,
+  deepFreeze,
+  assertNever,
+} from '../utils';
 
 export {
   SavedObject,
@@ -294,12 +322,18 @@ export {
   LegacyInternals,
 } from './legacy';
 
+export {
+  CoreStatus,
+  ServiceStatus,
+  ServiceStatusLevel,
+  ServiceStatusLevels,
+  StatusServiceSetup,
+} from './status';
+
 /**
  * Plugin specific context passed to a route handler.
  *
  * Provides the following clients and services:
- *    - {@link IScopedRenderingClient | rendering} - Rendering client
- *      which uses the data of the incoming request
  *    - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client
  *      which uses the credentials of the incoming request
  *    - {@link ISavedObjectTypeRegistry | savedObjects.typeRegistry} - Type registry containing
@@ -315,7 +349,6 @@ export {
  */
 export interface RequestHandlerContext {
   core: {
-    rendering: IScopedRenderingClient;
     savedObjects: {
       client: SavedObjectsClientContract;
       typeRegistry: ISavedObjectTypeRegistry;
@@ -347,15 +380,20 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   /** {@link ElasticsearchServiceSetup} */
   elasticsearch: ElasticsearchServiceSetup;
   /** {@link HttpServiceSetup} */
-  http: HttpServiceSetup;
+  http: HttpServiceSetup & {
+    /** {@link HttpResources} */
+    resources: HttpResources;
+  };
+  /** {@link MetricsServiceSetup} */
+  metrics: MetricsServiceSetup;
   /** {@link SavedObjectsServiceSetup} */
   savedObjects: SavedObjectsServiceSetup;
+  /** {@link StatusServiceSetup} */
+  status: StatusServiceSetup;
   /** {@link UiSettingsServiceSetup} */
   uiSettings: UiSettingsServiceSetup;
   /** {@link UuidServiceSetup} */
   uuid: UuidServiceSetup;
-  /** {@link MetricsServiceSetup} */
-  metrics: MetricsServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
 }
@@ -393,7 +431,7 @@ export {
   CapabilitiesSetup,
   CapabilitiesStart,
   ContextSetup,
-  IScopedRenderingClient,
+  HttpResources,
   PluginsServiceSetup,
   PluginsServiceStart,
   PluginOpaqueId,

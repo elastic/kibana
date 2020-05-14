@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import { Legacy } from 'kibana';
 import { resolve } from 'path';
 import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
-import { config as reportingConfig } from './config';
 import { legacyInit } from './server/legacy';
 import { ReportingPluginSpecOptions } from './types';
 
@@ -17,10 +16,8 @@ const kbToBase64Length = (kb: number) => Math.floor((kb * 1024 * 8) / 6);
 export const reporting = (kibana: any) => {
   return new kibana.Plugin({
     id: PLUGIN_ID,
-    configPrefix: 'xpack.reporting',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
-    config: reportingConfig,
 
     uiExports: {
       uiSettingDefaults: {
@@ -46,15 +43,6 @@ export const reporting = (kibana: any) => {
 
     async init(server: Legacy.Server) {
       return legacyInit(server, this);
-    },
-
-    deprecations({ unused }: any) {
-      return [
-        unused('capture.concurrency'),
-        unused('capture.timeout'),
-        unused('capture.settleTime'),
-        unused('kibanaApp'),
-      ];
     },
   } as ReportingPluginSpecOptions);
 };

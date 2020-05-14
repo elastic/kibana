@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { PDF_JOB_TYPE } from '../../../../common/constants';
@@ -26,14 +27,16 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
   parentLogger: Logger
 ) {
   const config = reporting.getConfig();
-  const captureConfig = config.get('capture');
   const encryptionKey = config.get('encryptionKey');
 
   const logger = parentLogger.clone([PDF_JOB_TYPE, 'execute']);
 
   return async function executeJob(jobId: string, job: JobDocPayloadPDF, cancellationToken: any) {
-    const browserDriverFactory = await reporting.getBrowserDriverFactory();
-    const generatePdfObservable = generatePdfObservableFactory(captureConfig, browserDriverFactory);
+    const apmTrans = apm.startTransaction('reporting execute_job pdf', 'reporting');
+    const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
+    let apmGeneratePdf: { end: () => void } | null | undefined;
+
+    const generatePdfObservable = await generatePdfObservableFactory(reporting);
 
     const jobLogger = logger.clone([jobId]);
     const process$: Rx.Observable<JobDocOutput> = Rx.of(1).pipe(
@@ -45,6 +48,9 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
         const urls = getFullUrls({ config, job });
 
         const { browserTimezone, layout, title } = job;
+        if (apmGetAssets) apmGetAssets.end();
+
+        apmGeneratePdf = apmTrans?.startSpan('generate_pdf_pipeline', 'execute');
         return generatePdfObservable(
           jobLogger,
           title,
@@ -55,12 +61,20 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
           logo
         );
       }),
-      map(({ buffer, warnings }) => ({
-        content_type: 'application/pdf',
-        content: buffer.toString('base64'),
-        size: buffer.byteLength,
-        warnings,
-      })),
+      map(({ buffer, warnings }) => {
+        if (apmGeneratePdf) apmGeneratePdf.end();
+
+        const apmEncode = apmTrans?.startSpan('encode_pdf', 'output');
+        const content = buffer?.toString('base64') || null;
+        if (apmEncode) apmEncode.end();
+
+        return {
+          content_type: 'application/pdf',
+          content,
+          size: buffer?.byteLength || 0,
+          warnings,
+        };
+      }),
       catchError(err => {
         jobLogger.error(err);
         return Rx.throwError(err);
@@ -68,6 +82,8 @@ export const executeJobFactory: QueuedPdfExecutorFactory = async function execut
     );
 
     const stop$ = Rx.fromEventPattern(cancellationToken.on);
+
+    if (apmTrans) apmTrans.end();
     return process$.pipe(takeUntil(stop$)).toPromise();
   };
 };

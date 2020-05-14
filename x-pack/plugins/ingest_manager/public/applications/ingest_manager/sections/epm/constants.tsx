@@ -21,9 +21,11 @@ export const AssetTitleMap: Record<AssetType, string> = {
   'ingest-pipeline': 'Ingest Pipeline',
   'index-pattern': 'Index Pattern',
   'index-template': 'Index Template',
+  'component-template': 'Component Template',
   search: 'Saved Search',
   visualization: 'Visualization',
   input: 'Agent input',
+  map: 'Map',
 };
 
 export const ServiceTitleMap: Record<ServiceName, string> = {
@@ -36,6 +38,7 @@ export const AssetIcons: Record<KibanaAssetType, IconType> = {
   'index-pattern': 'indexPatternApp',
   search: 'searchProfilerApp',
   visualization: 'visualizeApp',
+  map: 'mapApp',
 };
 
 export const ServiceIcons: Record<ServiceName, IconType> = {

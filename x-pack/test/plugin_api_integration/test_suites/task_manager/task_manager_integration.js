@@ -11,7 +11,7 @@ import supertestAsPromised from 'supertest-as-promised';
 
 const {
   task: { properties: taskManagerIndexMapping },
-} = require('../../../../legacy/plugins/task_manager/server/mappings.json');
+} = require('../../../../plugins/task_manager/server/saved_objects/mappings.json');
 
 const {
   DEFAULT_MAX_WORKERS,
@@ -84,15 +84,6 @@ export default function({ getService }) {
     function scheduleTask(task) {
       return supertest
         .post('/api/sample_tasks/schedule')
-        .set('kbn-xsrf', 'xxx')
-        .send({ task })
-        .expect(200)
-        .then(response => response.body);
-    }
-
-    function scheduleTaskUsingLegacyApi(task) {
-      return supertest
-        .post('/api/sample_tasks/schedule_legacy')
         .set('kbn-xsrf', 'xxx')
         .send({ task })
         .expect(200)
@@ -586,16 +577,6 @@ export default function({ getService }) {
         expect(getTaskById(tasks, fastTask.id).state.count).to.greaterThan(2);
         expect(getTaskById(tasks, longRunningTask.id).state.count).to.eql(1);
       });
-    });
-
-    it('should retain the legacy api until v8.0.0', async () => {
-      const result = await scheduleTaskUsingLegacyApi({
-        id: 'task-with-legacy-api',
-        taskType: 'sampleTask',
-        params: {},
-      });
-
-      expect(result.id).to.be('task-with-legacy-api');
     });
   });
 }

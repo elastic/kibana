@@ -40,8 +40,8 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
   const find = getService('find');
   const testSubjects = getService('testSubjects');
 
-  const navigateTo = (path: string) =>
-    browser.navigateTo(`${PageObjects.common.getHostPort()}${path}`);
+  const navigateTo = async (path: string) =>
+    await browser.navigateTo(`${PageObjects.common.getHostPort()}${path}`);
   const navigateToApp = async (title: string) => {
     await appsMenu.clickLink(title);
     return browser.execute(() => {

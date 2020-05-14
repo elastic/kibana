@@ -26,6 +26,7 @@ export default (kbnServer, server, config) => {
     createProxyBundlesRoute({
       host: config.get('optimize.watchHost'),
       port: config.get('optimize.watchPort'),
+      buildHash: kbnServer.newPlatform.env.packageInfo.buildNum.toString(),
     })
   );
 

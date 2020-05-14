@@ -5,10 +5,10 @@
  */
 
 import { getAlertStateRoute } from './get_alert_state';
-import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
+import { httpServiceMock } from 'src/core/server/mocks';
 import { mockLicenseState } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
-import { SavedObjectsErrorHelpers } from 'src/core/server/saved_objects';
+import { SavedObjectsErrorHelpers } from 'src/core/server';
 import { alertsClientMock } from '../alerts_client.mock';
 
 const alertsClient = alertsClientMock.create();
@@ -41,7 +41,7 @@ describe('getAlertStateRoute', () => {
 
   it('gets alert state', async () => {
     const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     getAlertStateRoute(router, licenseState);
 
@@ -84,7 +84,7 @@ describe('getAlertStateRoute', () => {
 
   it('returns NO-CONTENT when alert exists but has no task state yet', async () => {
     const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     getAlertStateRoute(router, licenseState);
 
@@ -127,7 +127,7 @@ describe('getAlertStateRoute', () => {
 
   it('returns NOT-FOUND when alert is not found', async () => {
     const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     getAlertStateRoute(router, licenseState);
 

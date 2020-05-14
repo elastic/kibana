@@ -15,12 +15,14 @@ import {
   MapRefreshConfig,
   TooltipState,
 } from '../../common/descriptor_types';
+import { INITIAL_LOCATION } from '../../common/constants';
 import { Filter, TimeRange } from '../../../../../src/plugins/data/public';
 
 export type MapContext = {
   zoom?: number;
   center?: MapCenter;
   scrollZoom: boolean;
+  buffer?: MapExtent;
   extent?: MapExtent;
   mouseCoordinates?: {
     lat: number;
@@ -39,6 +41,24 @@ export type MapContext = {
   hideViewControl: boolean;
 };
 
+export type MapSettings = {
+  initialLocation: INITIAL_LOCATION;
+  fixedLocation: {
+    lat: number;
+    lon: number;
+    zoom: number;
+  };
+  browserLocation: {
+    zoom: number;
+  };
+  maxZoom: number;
+  minZoom: number;
+  showSpatialFilters: boolean;
+  spatialFiltersAlpa: number;
+  spatialFiltersFillColor: string;
+  spatialFiltersLineColor: string;
+};
+
 export type MapState = {
   ready: boolean;
   mapInitError?: string | null;
@@ -49,4 +69,6 @@ export type MapState = {
   __transientLayerId: string | null;
   layerList: LayerDescriptor[];
   waitingForMapReadyLayerList: LayerDescriptor[];
+  settings: MapSettings;
+  __rollbackSettings: MapSettings | null;
 };

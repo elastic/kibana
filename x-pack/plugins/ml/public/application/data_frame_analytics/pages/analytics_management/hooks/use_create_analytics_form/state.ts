@@ -6,8 +6,9 @@
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
-import { checkPermission } from '../../../../../privilege/check_privilege';
+import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
+import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 
 import {
   isClassificationAnalysis,
@@ -75,6 +76,7 @@ export interface State {
     numTopFeatureImportanceValuesValid: boolean;
     previousJobType: null | AnalyticsJobType;
     previousSourceIndex: EsIndexName | undefined;
+    requiredFieldsError: string | undefined;
     sourceIndex: EsIndexName;
     sourceIndexNameEmpty: boolean;
     sourceIndexNameValid: boolean;
@@ -132,6 +134,7 @@ export const getInitialState = (): State => ({
     numTopFeatureImportanceValuesValid: true,
     previousJobType: null,
     previousSourceIndex: undefined,
+    requiredFieldsError: undefined,
     sourceIndex: '',
     sourceIndexNameEmpty: true,
     sourceIndexNameValid: false,
@@ -158,6 +161,55 @@ export const getInitialState = (): State => ({
   estimatedModelMemoryLimit: '',
 });
 
+const getExcludesFields = (excluded: string[]) => {
+  const { fields } = newJobCapsService;
+  const updatedExcluded: string[] = [];
+  // Loop through excluded fields to check for multiple types of same field
+  for (let i = 0; i < excluded.length; i++) {
+    const fieldName = excluded[i];
+    let mainField;
+
+    // No dot in fieldName - it is the main field
+    if (fieldName.includes('.') === false) {
+      mainField = fieldName;
+    } else {
+      // Dot in fieldName - check if there's a field whose name equals the fieldName with the last dot suffix removed
+      const regex = /\.[^.]*$/;
+      const suffixRemovedField = fieldName.replace(regex, '');
+      const fieldMatch = newJobCapsService.getFieldById(suffixRemovedField);
+
+      // There's a match - set as the main field
+      if (fieldMatch !== null) {
+        mainField = suffixRemovedField;
+      } else {
+        // No main field to be found - add the fieldName to updatedExcluded array if it's not already there
+        if (updatedExcluded.includes(fieldName) === false) {
+          updatedExcluded.push(fieldName);
+        }
+      }
+    }
+
+    if (mainField !== undefined) {
+      // Add the main field to the updatedExcluded array if it's not already there
+      if (updatedExcluded.includes(mainField) === false) {
+        updatedExcluded.push(mainField);
+      }
+      // Create regex to find all other fields whose names begin with main field followed by a dot
+      const regex = new RegExp(`${mainField}\\..+`);
+
+      // Loop through fields and add fields matching the pattern to updatedExcluded array
+      for (let j = 0; j < fields.length; j++) {
+        const field = fields[j].name;
+        if (updatedExcluded.includes(field) === false && field.match(regex) !== null) {
+          updatedExcluded.push(field);
+        }
+      }
+    }
+  }
+
+  return updatedExcluded;
+};
+
 export const getJobConfigFromFormState = (
   formState: State['form']
 ): DeepPartial<DataFrameAnalyticsConfig> => {
@@ -175,7 +227,7 @@ export const getJobConfigFromFormState = (
       index: formState.destinationIndex,
     },
     analyzed_fields: {
-      excludes: formState.excludes,
+      excludes: getExcludesFields(formState.excludes),
     },
     analysis: {
       outlier_detection: {},

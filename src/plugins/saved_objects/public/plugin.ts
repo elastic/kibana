@@ -39,6 +39,7 @@ export class SavedObjectsPublicPlugin
       SavedObjectClass: createSavedObjectClass({
         indexPatterns: data.indexPatterns,
         savedObjectsClient: core.savedObjects.client,
+        search: data.search,
         chrome: core.chrome,
         overlays: core.overlays,
       }),

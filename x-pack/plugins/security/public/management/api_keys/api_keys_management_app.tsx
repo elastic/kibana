@@ -10,8 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { StartServicesAccessor } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import { PluginStartDependencies } from '../../plugin';
-import { APIKeysGridPage } from './api_keys_grid';
-import { APIKeysAPIClient } from './api_keys_api_client';
 import { DocumentationLinksService } from './documentation_links';
 
 interface CreateParams {
@@ -28,7 +26,6 @@ export const apiKeysManagementApp = Object.freeze({
         defaultMessage: 'API Keys',
       }),
       async mount({ basePath, element, setBreadcrumbs }) {
-        const [{ docLinks, http, notifications, i18n: i18nStart }] = await getStartServices();
         setBreadcrumbs([
           {
             text: i18n.translate('xpack.security.apiKeys.breadcrumb', {
@@ -36,6 +33,16 @@ export const apiKeysManagementApp = Object.freeze({
             }),
             href: `#${basePath}`,
           },
+        ]);
+
+        const [
+          [{ docLinks, http, notifications, i18n: i18nStart }],
+          { APIKeysGridPage },
+          { APIKeysAPIClient },
+        ] = await Promise.all([
+          getStartServices(),
+          import('./api_keys_grid'),
+          import('./api_keys_api_client'),
         ]);
 
         render(

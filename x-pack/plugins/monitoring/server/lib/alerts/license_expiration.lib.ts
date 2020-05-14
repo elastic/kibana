@@ -60,15 +60,9 @@ export function getUiMessage(resolved: boolean = false): AlertCommonPerClusterMe
       }),
     };
   }
-  const linkText = i18n.translate('xpack.monitoring.alerts.licenseExpiration.linkText', {
-    defaultMessage: 'Please update your license',
-  });
   return {
     text: i18n.translate('xpack.monitoring.alerts.licenseExpiration.ui.firingMessage', {
-      defaultMessage: `This cluster's license is going to expire in #relative at #absolute. #start_link{linkText}#end_link`,
-      values: {
-        linkText,
-      },
+      defaultMessage: `This cluster's license is going to expire in #relative at #absolute. #start_linkPlease update your license.#end_link`,
     }),
     tokens: [
       {

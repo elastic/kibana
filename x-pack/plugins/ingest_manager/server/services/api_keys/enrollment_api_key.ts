@@ -5,11 +5,13 @@
  */
 
 import uuid from 'uuid';
+import Boom from 'boom';
 import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
 import { EnrollmentAPIKey, EnrollmentAPIKeySOAttributes } from '../../types';
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { createAPIKey, invalidateAPIKey } from './security';
 import { agentConfigService } from '../agent_config';
+import { appContextService } from '../app_context';
 
 export async function listEnrollmentApiKeys(
   soClient: SavedObjectsClientContract,
@@ -30,7 +32,10 @@ export async function listEnrollmentApiKeys(
     sortOrder: 'DESC',
     filter:
       kuery && kuery !== ''
-        ? kuery.replace(/enrollment_api_keys\./g, 'enrollment_api_keys.attributes.')
+        ? kuery.replace(
+            new RegExp(`${ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE}\.`, 'g'),
+            `${ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE}.attributes.`
+          )
         : undefined,
   });
 
@@ -45,9 +50,13 @@ export async function listEnrollmentApiKeys(
 }
 
 export async function getEnrollmentAPIKey(soClient: SavedObjectsClientContract, id: string) {
-  return savedObjectToEnrollmentApiKey(
-    await soClient.get<EnrollmentAPIKeySOAttributes>(ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE, id)
-  );
+  const so = await appContextService
+    .getEncryptedSavedObjects()
+    .getDecryptedAsInternalUser<EnrollmentAPIKeySOAttributes>(
+      ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+      id
+    );
+  return savedObjectToEnrollmentApiKey(so);
 }
 
 /**
@@ -75,7 +84,7 @@ export async function deleteEnrollmentApiKeyForConfigId(
     const { items } = await listEnrollmentApiKeys(soClient, {
       page: page++,
       perPage: 100,
-      kuery: `enrollment_api_keys.config_id:${configId}`,
+      kuery: `${ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE}.config_id:${configId}`,
     });
 
     if (items.length === 0) {
@@ -98,6 +107,9 @@ export async function generateEnrollmentAPIKey(
 ) {
   const id = uuid.v4();
   const { name: providedKeyName } = data;
+  if (data.configId) {
+    await validateConfigId(soClient, data.configId);
+  }
   const configId = data.configId ?? (await agentConfigService.getDefaultAgentConfigId(soClient));
   const name = providedKeyName ? `${providedKeyName} (${id})` : id;
   const key = await createAPIKey(soClient, name, {
@@ -120,16 +132,30 @@ export async function generateEnrollmentAPIKey(
 
   const apiKey = Buffer.from(`${key.id}:${key.api_key}`).toString('base64');
 
-  return savedObjectToEnrollmentApiKey(
-    await soClient.create<EnrollmentAPIKeySOAttributes>(ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE, {
+  const so = await soClient.create<EnrollmentAPIKeySOAttributes>(
+    ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
+    {
       active: true,
       api_key_id: key.id,
       api_key: apiKey,
       name,
       config_id: configId,
       created_at: new Date().toISOString(),
-    })
+    }
   );
+
+  return getEnrollmentAPIKey(soClient, so.id);
+}
+
+async function validateConfigId(soClient: SavedObjectsClientContract, configId: string) {
+  try {
+    await agentConfigService.get(soClient, configId);
+  } catch (e) {
+    if (e.isBoom && e.output.statusCode === 404) {
+      throw Boom.badRequest(`Agent config ${configId} does not exist`);
+    }
+    throw e;
+  }
 }
 
 function savedObjectToEnrollmentApiKey({

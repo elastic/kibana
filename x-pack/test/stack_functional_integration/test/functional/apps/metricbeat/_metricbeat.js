@@ -18,13 +18,13 @@ export default function({ getService, getPageObjects }) {
       const url = await browser.getCurrentUrl();
       log.debug(url);
       if (!url.includes('kibana')) {
-        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.common.navigateToApp('discover', { insertTimestamp: false });
       } else if (!url.includes('discover')) {
         await appsMenu.clickLink('Discover');
       }
 
       await PageObjects.discover.selectIndexPattern('metricbeat-*');
-      await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_Today');
+      await PageObjects.timePicker.setCommonlyUsedTime('Today');
       await retry.try(async function() {
         const hitCount = parseInt(await PageObjects.discover.getHitCount());
         expect(hitCount).to.be.greaterThan(0);

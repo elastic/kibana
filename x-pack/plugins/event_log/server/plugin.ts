@@ -66,7 +66,9 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       logger: this.systemLogger,
       // TODO: get index prefix from config.get(kibana.index)
       indexNameRoot: kibanaIndex,
-      clusterClient: core.elasticsearch.adminClient,
+      clusterClientPromise: core
+        .getStartServices()
+        .then(([{ elasticsearch }]) => elasticsearch.legacy.client),
     });
 
     this.eventLogService = new EventLogService({
@@ -118,7 +120,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
   }
 
   private createRouteHandlerContext = (): IContextProvider<
-    RequestHandler<any, any, any>,
+    RequestHandler<unknown, unknown, unknown>,
     'eventLog'
   > => {
     return async (context, request) => {

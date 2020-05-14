@@ -9,5 +9,6 @@ export * from './agent';
 export * from './datasource';
 export * from './epm';
 export * from './enrollment_api_key';
-export * from './fleet_setup';
 export * from './install_script';
+export * from './output';
+export * from './settings';

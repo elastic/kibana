@@ -11,12 +11,6 @@ import { has, get } from 'lodash';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
 import {
-  LOGGING_TAG,
-  KIBANA_MONITORING_LOGGING_TAG,
-  KIBANA_ALERTING_ENABLED,
-  KIBANA_STATS_TYPE_MONITORING,
-} from '../common/constants';
-import {
   Logger,
   PluginInitializerContext,
   RequestHandlerContext,
@@ -27,7 +21,15 @@ import {
   CoreStart,
   IRouter,
   IClusterClient,
-} from '../../../../src/core/server';
+  CustomHttpResponseOptions,
+  ResponseError,
+} from 'kibana/server';
+import {
+  LOGGING_TAG,
+  KIBANA_MONITORING_LOGGING_TAG,
+  KIBANA_ALERTING_ENABLED,
+  KIBANA_STATS_TYPE_MONITORING,
+} from '../common/constants';
 import { MonitoringConfig } from './config';
 // @ts-ignore
 import { requireUIRoutes } from './routes';
@@ -91,6 +93,16 @@ interface IBulkUploader {
 
 // This is used to test the version of kibana
 const snapshotRegex = /-snapshot/i;
+
+const wrapError = (error: any): CustomHttpResponseOptions<ResponseError> => {
+  const options = { statusCode: error.statusCode ?? 500 };
+  const boom = Boom.isBoom(error) ? error : Boom.boomify(error, options);
+  return {
+    body: boom,
+    headers: boom.output.headers,
+    statusCode: boom.output.statusCode,
+  };
+};
 
 export class Plugin {
   private readonly initializerContext: PluginInitializerContext;
@@ -177,12 +189,7 @@ export class Plugin {
 
     // Register collector objects for stats to show up in the APIs
     if (plugins.usageCollection) {
-      registerCollectors(
-        plugins.usageCollection,
-        config,
-        core.metrics.getOpsMetrics$(),
-        get(legacyConfig, 'kibana.index')
-      );
+      registerCollectors(plugins.usageCollection, config);
     }
 
     // If collection is enabled, create the bulk uploader
@@ -281,18 +288,23 @@ export class Plugin {
       catalogue: ['monitoring'],
       privileges: null,
       reserved: {
-        privilege: {
-          app: ['monitoring', 'kibana'],
-          catalogue: ['monitoring'],
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: [],
-        },
         description: i18n.translate('xpack.monitoring.feature.reserved.description', {
           defaultMessage: 'To grant users access, you should also assign the monitoring_user role.',
         }),
+        privileges: [
+          {
+            id: 'monitoring',
+            privilege: {
+              app: ['monitoring', 'kibana'],
+              catalogue: ['monitoring'],
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+            },
+          },
+        ],
       },
     });
   }
@@ -369,12 +381,16 @@ export class Plugin {
               },
             },
           };
-
-          const result = await options.handler(legacyRequest);
-          if (Boom.isBoom(result)) {
-            return res.customError({ statusCode: result.output.statusCode, body: result });
+          try {
+            const result = await options.handler(legacyRequest);
+            return res.ok({ body: result });
+          } catch (err) {
+            const statusCode: number = err.output?.statusCode || err.statusCode || err.status;
+            if (Boom.isBoom(err) || statusCode !== 500) {
+              return res.customError({ statusCode, body: err });
+            }
+            return res.internalError(wrapError(err));
           }
-          return res.ok({ body: result });
         };
 
         const validate: any = get(options, 'config.validate', false);

@@ -4,21 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const alwaysImportedTests = [require.resolve('../test/functional/config.js')];
-const onlyNotInCoverageTests = [
-  require.resolve('../test/reporting/configs/chromium_api.js'),
-  require.resolve('../test/reporting/configs/chromium_functional.js'),
-  require.resolve('../test/reporting/configs/generate_api.js'),
+const alwaysImportedTests = [
+  require.resolve('../test/functional/config.js'),
+  require.resolve('../test/functional_endpoint_ingest_failure/config.ts'),
+  require.resolve('../test/functional_endpoint/config.ts'),
   require.resolve('../test/functional_with_es_ssl/config.ts'),
   require.resolve('../test/functional/config_security_basic.js'),
+  require.resolve('../test/plugin_functional/config.ts'),
+];
+const onlyNotInCoverageTests = [
+  require.resolve('../test/reporting/configs/chromium_api.js'),
+  require.resolve('../test/reporting/configs/generate_api.js'),
   require.resolve('../test/api_integration/config_security_basic.js'),
   require.resolve('../test/api_integration/config.js'),
   require.resolve('../test/alerting_api_integration/basic/config.ts'),
   require.resolve('../test/alerting_api_integration/spaces_only/config.ts'),
   require.resolve('../test/alerting_api_integration/security_and_spaces/config.ts'),
   require.resolve('../test/detection_engine_api_integration/security_and_spaces/config.ts'),
+  require.resolve('../test/detection_engine_api_integration/basic/config.ts'),
   require.resolve('../test/plugin_api_integration/config.ts'),
-  require.resolve('../test/plugin_functional/config.ts'),
   require.resolve('../test/kerberos_api_integration/config.ts'),
   require.resolve('../test/kerberos_api_integration/anonymous_access.config.ts'),
   require.resolve('../test/saml_api_integration/config.ts'),
@@ -43,6 +47,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/licensing_plugin/config.ts'),
   require.resolve('../test/licensing_plugin/config.public.ts'),
   require.resolve('../test/licensing_plugin/config.legacy.ts'),
+  require.resolve('../test/endpoint_api_integration_no_ingest/config.ts'),
 ];
 
 require('@kbn/plugin-helpers').babelRegister();

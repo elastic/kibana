@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { screenshotsObservableFactory } from './observable';
+export { screenshotsObservableFactory, ScreenshotsObservableFn } from './observable';

@@ -15,6 +15,8 @@ import { flattenCaseSavedObject, wrapError, escapeHatch } from '../utils';
 import { CaseExternalServiceRequestRt, CaseResponseRt, throwErrors } from '../../../../common/api';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
+import { CASE_DETAILS_URL } from '../../../../common/constants';
+import { getConnectorId } from './helpers';
 
 export function initPushCaseUserActionApi({
   caseConfigureService,
@@ -24,7 +26,7 @@ export function initPushCaseUserActionApi({
 }: RouteDeps) {
   router.post(
     {
-      path: '/api/cases/{case_id}/_push',
+      path: `${CASE_DETAILS_URL}/_push`,
       validate: {
         params: schema.object({
           case_id: schema.string(),
@@ -82,12 +84,18 @@ export function initPushCaseUserActionApi({
           ...query,
         };
 
+        const caseConfigureConnectorId = getConnectorId(myCaseConfigure);
+        // old case may not have new attribute connector_id, so we default to the configured system
+        const updateConnectorId =
+          myCase.attributes.connector_id == null ? { connector_id: caseConfigureConnectorId } : {};
+
         const [updatedCase, updatedComments] = await Promise.all([
           caseService.patchCase({
             client,
             caseId,
             updatedAttributes: {
-              ...(myCaseConfigure.saved_objects[0].attributes.closure_type === 'close-by-pushing'
+              ...(myCaseConfigure.total > 0 &&
+              myCaseConfigure.saved_objects[0].attributes.closure_type === 'close-by-pushing'
                 ? {
                     status: 'closed',
                     closed_at: pushedDate,
@@ -97,6 +105,7 @@ export function initPushCaseUserActionApi({
               external_service: externalService,
               updated_at: pushedDate,
               updated_by: { username, full_name, email },
+              ...updateConnectorId,
             },
             version: myCase.version,
           }),
@@ -116,7 +125,8 @@ export function initPushCaseUserActionApi({
           userActionService.postUserActions({
             client,
             actions: [
-              ...(myCaseConfigure.saved_objects[0].attributes.closure_type === 'close-by-pushing'
+              ...(myCaseConfigure.total > 0 &&
+              myCaseConfigure.saved_objects[0].attributes.closure_type === 'close-by-pushing'
                 ? [
                     buildCaseUserActionItem({
                       action: 'update',
@@ -142,14 +152,14 @@ export function initPushCaseUserActionApi({
         ]);
         return response.ok({
           body: CaseResponseRt.encode(
-            flattenCaseSavedObject(
-              {
+            flattenCaseSavedObject({
+              savedObject: {
                 ...myCase,
                 ...updatedCase,
                 attributes: { ...myCase.attributes, ...updatedCase?.attributes },
                 references: myCase.references,
               },
-              comments.saved_objects.map(origComment => {
+              comments: comments.saved_objects.map(origComment => {
                 const updatedComment = updatedComments.saved_objects.find(
                   c => c.id === origComment.id
                 );
@@ -163,8 +173,8 @@ export function initPushCaseUserActionApi({
                   version: updatedComment?.version ?? origComment.version,
                   references: origComment?.references ?? [],
                 };
-              })
-            )
+              }),
+            })
           ),
         });
       } catch (error) {

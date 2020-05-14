@@ -24,25 +24,28 @@ import { AggConfigs, CreateAggConfigParams } from './agg_configs';
 import { AggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockDataServices, mockAggTypesRegistry } from './test_helpers';
+import { MetricAggType } from './metrics/metric_agg_type';
 import { Field as IndexPatternField, IndexPattern } from '../../index_patterns';
 import { stubIndexPatternWithFields } from '../../../public/stubs';
-import { dataPluginMock } from '../../../public/mocks';
-import { setFieldFormats } from '../../../public/services';
+import { FieldFormatsStart } from '../../field_formats';
+import { fieldFormatsServiceMock } from '../../field_formats/mocks';
 
 describe('AggConfig', () => {
   let indexPattern: IndexPattern;
   let typesRegistry: AggTypesRegistryStart;
+  let fieldFormats: FieldFormatsStart;
 
   beforeEach(() => {
     jest.restoreAllMocks();
     mockDataServices();
+    fieldFormats = fieldFormatsServiceMock.createStartContract();
     indexPattern = stubIndexPatternWithFields as IndexPattern;
     typesRegistry = mockAggTypesRegistry();
   });
 
   describe('#toDsl', () => {
     it('calls #write()', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
       const configStates = {
         enabled: true,
         type: 'date_histogram',
@@ -57,7 +60,7 @@ describe('AggConfig', () => {
     });
 
     it('uses the type name as the agg name', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
       const configStates = {
         enabled: true,
         type: 'date_histogram',
@@ -72,7 +75,7 @@ describe('AggConfig', () => {
     });
 
     it('uses the params from #write() output as the agg params', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
       const configStates = {
         enabled: true,
         type: 'date_histogram',
@@ -102,7 +105,7 @@ describe('AggConfig', () => {
           params: {},
         },
       ];
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, fieldFormats });
 
       const histoConfig = ac.byName('date_histogram')[0];
       const avgConfig = ac.byName('avg')[0];
@@ -212,8 +215,8 @@ describe('AggConfig', () => {
 
     testsIdentical.forEach((configState, index) => {
       it(`identical aggregations (${index})`, () => {
-        const ac1 = new AggConfigs(indexPattern, configState, { typesRegistry });
-        const ac2 = new AggConfigs(indexPattern, configState, { typesRegistry });
+        const ac1 = new AggConfigs(indexPattern, configState, { typesRegistry, fieldFormats });
+        const ac2 = new AggConfigs(indexPattern, configState, { typesRegistry, fieldFormats });
         expect(ac1.jsonDataEquals(ac2.aggs)).toBe(true);
       });
     });
@@ -253,8 +256,8 @@ describe('AggConfig', () => {
 
     testsIdenticalDifferentOrder.forEach((test, index) => {
       it(`identical aggregations (${index}) - init json is in different order`, () => {
-        const ac1 = new AggConfigs(indexPattern, test.config1, { typesRegistry });
-        const ac2 = new AggConfigs(indexPattern, test.config2, { typesRegistry });
+        const ac1 = new AggConfigs(indexPattern, test.config1, { typesRegistry, fieldFormats });
+        const ac2 = new AggConfigs(indexPattern, test.config2, { typesRegistry, fieldFormats });
         expect(ac1.jsonDataEquals(ac2.aggs)).toBe(true);
       });
     });
@@ -318,16 +321,16 @@ describe('AggConfig', () => {
 
     testsDifferent.forEach((test, index) => {
       it(`different aggregations (${index})`, () => {
-        const ac1 = new AggConfigs(indexPattern, test.config1, { typesRegistry });
-        const ac2 = new AggConfigs(indexPattern, test.config2, { typesRegistry });
+        const ac1 = new AggConfigs(indexPattern, test.config1, { typesRegistry, fieldFormats });
+        const ac2 = new AggConfigs(indexPattern, test.config2, { typesRegistry, fieldFormats });
         expect(ac1.jsonDataEquals(ac2.aggs)).toBe(false);
       });
     });
   });
 
-  describe('#toJSON', () => {
+  describe('#serialize', () => {
     it('includes the aggs id, params, type and schema', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
       const configStates = {
         enabled: true,
         type: 'date_histogram',
@@ -342,7 +345,7 @@ describe('AggConfig', () => {
       expect(aggConfig.type).toHaveProperty('name', 'date_histogram');
       expect(typeof aggConfig.schema).toBe('string');
 
-      const state = aggConfig.toJSON();
+      const state = aggConfig.serialize();
       expect(state).toHaveProperty('id', '1');
       expect(typeof state.params).toBe('object');
       expect(state).toHaveProperty('type', 'date_histogram');
@@ -358,8 +361,8 @@ describe('AggConfig', () => {
           params: {},
         },
       ];
-      const ac1 = new AggConfigs(indexPattern, configStates, { typesRegistry });
-      const ac2 = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac1 = new AggConfigs(indexPattern, configStates, { typesRegistry, fieldFormats });
+      const ac2 = new AggConfigs(indexPattern, configStates, { typesRegistry, fieldFormats });
 
       // this relies on the assumption that js-engines consistently loop over properties in insertion order.
       // most likely the case, but strictly speaking not guaranteed by the JS and JSON specifications.
@@ -367,11 +370,206 @@ describe('AggConfig', () => {
     });
   });
 
+  describe('#toExpressionAst', () => {
+    beforeEach(() => {
+      fieldFormats.getDefaultInstance = (() => ({
+        getConverterFor: (t?: string) => t || identity,
+      })) as any;
+      indexPattern.fields.getByName = name =>
+        ({
+          format: {
+            getConverterFor: (t?: string) => t || identity,
+          },
+        } as IndexPatternField);
+    });
+
+    it('works with primitive param types', () => {
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
+      const configStates = {
+        enabled: true,
+        type: 'terms',
+        schema: 'segment',
+        params: {
+          field: 'machine.os.keyword',
+          order: 'asc',
+        },
+      };
+      const aggConfig = ac.createAggConfig(configStates);
+      expect(aggConfig.toExpressionAst()).toMatchInlineSnapshot(`
+        Object {
+          "arguments": Object {
+            "enabled": Array [
+              true,
+            ],
+            "id": Array [
+              "1",
+            ],
+            "missingBucket": Array [
+              false,
+            ],
+            "missingBucketLabel": Array [
+              "Missing",
+            ],
+            "order": Array [
+              "asc",
+            ],
+            "otherBucket": Array [
+              false,
+            ],
+            "otherBucketLabel": Array [
+              "Other",
+            ],
+            "schema": Array [
+              "segment",
+            ],
+            "size": Array [
+              5,
+            ],
+          },
+          "function": "aggTerms",
+          "type": "function",
+        }
+      `);
+    });
+
+    it('creates a subexpression for params of type "agg"', () => {
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
+      const configStates = {
+        type: 'terms',
+        params: {
+          field: 'machine.os.keyword',
+          order: 'asc',
+          orderAgg: {
+            enabled: true,
+            type: 'terms',
+            params: {
+              field: 'bytes',
+              order: 'asc',
+              size: 5,
+            },
+          },
+        },
+      };
+      const aggConfig = ac.createAggConfig(configStates);
+      const aggArg = aggConfig.toExpressionAst()?.arguments.orderAgg;
+      expect(aggArg).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "enabled": Array [
+                    true,
+                  ],
+                  "id": Array [
+                    "1-orderAgg",
+                  ],
+                  "missingBucket": Array [
+                    false,
+                  ],
+                  "missingBucketLabel": Array [
+                    "Missing",
+                  ],
+                  "order": Array [
+                    "asc",
+                  ],
+                  "otherBucket": Array [
+                    false,
+                  ],
+                  "otherBucketLabel": Array [
+                    "Other",
+                  ],
+                  "schema": Array [
+                    "orderAgg",
+                  ],
+                  "size": Array [
+                    5,
+                  ],
+                },
+                "function": "aggTerms",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ]
+      `);
+    });
+
+    it('creates a subexpression for param types other than "agg" which have specified toExpressionAst', () => {
+      // Overwrite the `ranges` param in the `range` agg with a mock toExpressionAst function
+      const range: MetricAggType = typesRegistry.get('range');
+      range.expressionName = 'aggRange';
+      const rangesParam = range.params.find(p => p.name === 'ranges');
+      rangesParam!.toExpressionAst = (val: any) => ({
+        type: 'function',
+        function: 'aggRanges',
+        arguments: {
+          ranges: ['oh hi there!'],
+        },
+      });
+
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
+      const configStates = {
+        type: 'range',
+        params: {
+          field: 'bytes',
+        },
+      };
+
+      const aggConfig = ac.createAggConfig(configStates);
+      const ranges = aggConfig.toExpressionAst()!.arguments.ranges;
+      expect(ranges).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "ranges": Array [
+                    "oh hi there!",
+                  ],
+                },
+                "function": "aggRanges",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ]
+      `);
+    });
+
+    it('stringifies any other params which are an object', () => {
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
+      const configStates = {
+        type: 'terms',
+        params: {
+          field: 'machine.os.keyword',
+          order: 'asc',
+          json: { foo: 'bar' },
+        },
+      };
+      const aggConfig = ac.createAggConfig(configStates);
+      const json = aggConfig.toExpressionAst()?.arguments.json;
+      expect(json).toEqual([JSON.stringify(configStates.params.json)]);
+    });
+
+    it(`returns undefined if an expressionName doesn't exist on the agg type`, () => {
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
+      const configStates = {
+        type: 'unknown type',
+        params: {},
+      };
+      const aggConfig = ac.createAggConfig(configStates);
+      expect(aggConfig.toExpressionAst()).toBe(undefined);
+    });
+  });
+
   describe('#makeLabel', () => {
     let aggConfig: AggConfig;
 
     beforeEach(() => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
       aggConfig = ac.createAggConfig({ type: 'count' } as CreateAggConfigParams);
     });
 
@@ -400,14 +598,7 @@ describe('AggConfig', () => {
 
   describe('#fieldFormatter - custom getFormat handler', () => {
     it('returns formatter from getFormat handler', () => {
-      setFieldFormats({
-        ...dataPluginMock.createStartContract().fieldFormats,
-        getDefaultInstance: jest.fn().mockImplementation(() => ({
-          getConverterFor: jest.fn().mockImplementation(() => (t: string) => t),
-        })) as any,
-      });
-
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, fieldFormats });
       const configStates = {
         enabled: true,
         type: 'count',
@@ -429,12 +620,9 @@ describe('AggConfig', () => {
     let aggConfig: AggConfig;
 
     beforeEach(() => {
-      setFieldFormats({
-        ...dataPluginMock.createStartContract().fieldFormats,
-        getDefaultInstance: jest.fn().mockImplementation(() => ({
-          getConverterFor: (t?: string) => t || identity,
-        })) as any,
-      });
+      fieldFormats.getDefaultInstance = (() => ({
+        getConverterFor: (t?: string) => t || identity,
+      })) as any;
       indexPattern.fields.getByName = name =>
         ({
           format: {
@@ -447,18 +635,19 @@ describe('AggConfig', () => {
         type: 'histogram',
         schema: 'bucket',
         params: {
-          field: {
-            format: {
-              getConverterFor: (t?: string) => t || identity,
-            },
-          },
+          field: 'bytes',
         },
       };
-      const ac = new AggConfigs(indexPattern, [configStates], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [configStates], { typesRegistry, fieldFormats });
       aggConfig = ac.createAggConfig(configStates);
     });
 
     it("returns the field's formatter", () => {
+      aggConfig.params.field = {
+        format: {
+          getConverterFor: (t?: string) => t || identity,
+        },
+      };
       expect(aggConfig.fieldFormatter().toString()).toBe(
         aggConfig
           .getField()

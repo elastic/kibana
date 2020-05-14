@@ -4,19 +4,19 @@
 
 **Elastic Maps** embeds the search bar for real-time search.
 Only layers requesting data from {es} are filtered when you submit a search request.
-Layers narrowed by the search context contain the filter icon image:maps/images/filter_icon.png[] to the right of layer name in the legend.
+Layers narrowed by the search context contain the filter icon image:maps/images/filter_icon.png[] next to the layer name in the legend.
 
 You can create a layer that requests data from {es} from the following:
 
 * <<vector-layer>> with:
 
-** Documents source
+** Documents
 
-** Grid aggregation source
+** Clusters and grid
 
 ** <<terms-join>>
 
-* <<heatmap-layer>> with Grid aggregation source
+* <<heatmap-layer>>
 
 [role="screenshot"]
 image::maps/images/global_search_bar.png[]

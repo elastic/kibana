@@ -19,12 +19,14 @@
 
 import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
 import { createRoutes } from './routes/create_routes';
+import { url } from './saved_objects';
 
 export class SharePlugin implements Plugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public async setup(core: CoreSetup) {
     createRoutes(core, this.initializerContext.logger.get());
+    core.savedObjects.registerType(url);
   }
 
   public start() {

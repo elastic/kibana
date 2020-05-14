@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { sourceQuery } from '../../../../legacy/plugins/siem/public/containers/source/index.gql_query';
-import { SourceQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
+import { sourceQuery } from '../../../../plugins/siem/public/common/containers/source/index.gql_query';
+import { SourceQuery } from '../../../../plugins/siem/public/graphql/types';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -30,7 +30,7 @@ export default function({ getService }: FtrProviderContext) {
         .then(resp => {
           const sourceStatus = resp.data.source.status;
           // test data in x-pack/test/functional/es_archives/auditbeat_test_data/data.json.gz
-          expect(sourceStatus.indexFields.length).to.be(395);
+          expect(sourceStatus.indexFields.length).to.be(397);
           expect(sourceStatus.indicesExist).to.be(true);
         });
     });

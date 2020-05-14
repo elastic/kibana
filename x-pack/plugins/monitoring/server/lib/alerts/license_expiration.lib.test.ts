@@ -42,7 +42,7 @@ describe('licenseExpiration lib', () => {
     it('should return a message when firing', () => {
       const message = getUiMessage(false);
       expect(message.text).toBe(
-        `This cluster's license is going to expire in #relative at #absolute. #start_linkPlease update your license#end_link`
+        `This cluster's license is going to expire in #relative at #absolute. #start_linkPlease update your license.#end_link`
       );
       // LOL How do I avoid this in TS????
       if (!message.tokens) {

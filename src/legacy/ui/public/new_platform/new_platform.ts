@@ -22,6 +22,7 @@ import { IScope } from 'angular';
 import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { createBrowserHistory } from 'history';
+import { VisTypeXyPluginSetup } from 'src/plugins/vis_type_xy/public';
 import { DashboardStart } from '../../../../plugins/dashboard/public';
 import { setSetupServices, setStartServices } from './set_services';
 import {
@@ -38,7 +39,7 @@ import {
   Start as InspectorStart,
 } from '../../../../plugins/inspector/public';
 import { ChartsPluginSetup, ChartsPluginStart } from '../../../../plugins/charts/public';
-import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/public';
+import { DevToolsSetup } from '../../../../plugins/dev_tools/public';
 import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../plugins/kibana_legacy/public';
 import { HomePublicPluginSetup } from '../../../../plugins/home/public';
 import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
@@ -47,6 +48,10 @@ import {
   AdvancedSettingsStart,
 } from '../../../../plugins/advanced_settings/public';
 import { ManagementSetup, ManagementStart } from '../../../../plugins/management/public';
+import {
+  IndexPatternManagementSetup,
+  IndexPatternManagementStart,
+} from '../../../../plugins/index_pattern_management/public';
 import { BfetchPublicSetup, BfetchPublicStart } from '../../../../plugins/bfetch/public';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
 import { TelemetryPluginSetup, TelemetryPluginStart } from '../../../../plugins/telemetry/public';
@@ -54,7 +59,6 @@ import {
   NavigationPublicPluginSetup,
   NavigationPublicPluginStart,
 } from '../../../../plugins/navigation/public';
-import { VisTypeVegaSetup } from '../../../../plugins/vis_type_vega/public';
 import { DiscoverSetup, DiscoverStart } from '../../../../plugins/discover/public';
 import {
   SavedObjectsManagementPluginSetup,
@@ -64,6 +68,8 @@ import {
   VisualizationsSetup,
   VisualizationsStart,
 } from '../../../../plugins/visualizations/public';
+import { VisTypeTimelionPluginStart } from '../../../../plugins/vis_type_timelion/public';
+import { MapsLegacyPluginSetup } from '../../../../plugins/maps_legacy/public';
 
 export interface PluginsSetup {
   bfetch: BfetchPublicSetup;
@@ -81,11 +87,13 @@ export interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
   advancedSettings: AdvancedSettingsSetup;
   management: ManagementSetup;
-  visTypeVega: VisTypeVegaSetup;
   discover: DiscoverSetup;
   visualizations: VisualizationsSetup;
   telemetry?: TelemetryPluginSetup;
   savedObjectsManagement: SavedObjectsManagementPluginSetup;
+  mapsLegacy: MapsLegacyPluginSetup;
+  indexPatternManagement: IndexPatternManagementSetup;
+  visTypeXy?: VisTypeXyPluginSetup;
 }
 
 export interface PluginsStart {
@@ -97,7 +105,6 @@ export interface PluginsStart {
   inspector: InspectorStart;
   uiActions: UiActionsStart;
   navigation: NavigationPublicPluginStart;
-  devTools: DevToolsStart;
   kibanaLegacy: KibanaLegacyStart;
   share: SharePluginStart;
   management: ManagementStart;
@@ -107,6 +114,8 @@ export interface PluginsStart {
   telemetry?: TelemetryPluginStart;
   dashboard: DashboardStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  visTypeTimelion: VisTypeTimelionPluginStart;
+  indexPatternManagement: IndexPatternManagementStart;
 }
 
 export const npSetup = {
@@ -166,7 +175,8 @@ export const legacyAppRegister = (app: App<any>) => {
   legacyAppRegistered = true;
 
   require('ui/chrome').setRootController(app.id, ($scope: IScope, $element: JQLite) => {
-    const element = $element[0];
+    const element = document.createElement('div');
+    $element[0].appendChild(element);
 
     // Root controller cannot return a Promise so use an internal async function and call it immediately
     (async () => {

@@ -42,7 +42,6 @@ export default async function({ readConfigFile }) {
         ...kibanaCommonConfig.get('kbnTestServer.serverArgs'),
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
-        '--telemetry.banner=false',
       ],
     },
     uiSettings: {

@@ -3,12 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Privileges } from '../../../common/types';
+import { Privileges } from '../../../../../../src/plugins/es_ui_shared/public';
+
 import {
   APP_REQUIRED_CLUSTER_PRIVILEGES,
   APP_RESTORE_INDEX_PRIVILEGES,
   APP_SLM_CLUSTER_PRIVILEGES,
-} from '../../../common/constants';
+} from '../../../common';
 import { RouteDependencies } from '../../types';
 import { addBasePath } from '../helpers';
 

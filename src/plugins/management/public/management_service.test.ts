@@ -29,9 +29,8 @@ test('Provides default sections', () => {
     () => {},
     coreMock.createSetup().getStartServices
   );
-  expect(service.getAllSections().length).toEqual(3);
+  expect(service.getAllSections().length).toEqual(2);
   expect(service.getSection('kibana')).not.toBeUndefined();
-  expect(service.getSection('logstash')).not.toBeUndefined();
   expect(service.getSection('elasticsearch')).not.toBeUndefined();
 });
 

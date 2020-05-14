@@ -27,5 +27,23 @@ export function UptimeMonitorProvider({ getService }: FtrProviderContext) {
         await find.descendantExistsByCssSelector('canvas.mapboxgl-canvas', mapPanel);
       });
     },
+    async setPingListLocation(location: string) {
+      await testSubjects.click('xpack.uptime.pingList.locationSelect', 5000);
+      return testSubjects.click(`xpack.uptime.pingList.locationOptions.${location}`, 5000);
+    },
+    async setPingListStatus(status: string) {
+      await testSubjects.click('xpack.uptime.pingList.statusSelect', 5000);
+      return testSubjects.click(`xpack.uptime.pingList.statusOptions.${status}`, 5000);
+    },
+    async checkForPingListTimestamps(timestamps: string[]): Promise<void> {
+      return retry.tryForTime(10000, async () => {
+        await Promise.all(
+          timestamps.map(
+            async timestamp =>
+              await testSubjects.existOrFail(`xpack.uptime.pingList.ping-${timestamp}`)
+          )
+        );
+      });
+    },
   };
 }

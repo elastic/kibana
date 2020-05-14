@@ -24,6 +24,7 @@ export const SearchProfilerTabs = ({ activeTab, activateTab, has }: Props) => {
   return (
     <EuiTabs>
       <EuiTab
+        data-test-subj="queryProfileTab"
         isSelected={activeTab === 'searches'}
         disabled={!has.searches}
         onClick={() => activateTab('searches')}
@@ -33,6 +34,7 @@ export const SearchProfilerTabs = ({ activeTab, activateTab, has }: Props) => {
         })}
       </EuiTab>
       <EuiTab
+        data-test-subj="aggregationProfileTab"
         isSelected={activeTab === 'aggregations'}
         disabled={!has.aggregations}
         onClick={() => activateTab('aggregations')}

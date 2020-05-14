@@ -20,9 +20,11 @@
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
+import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
 
 describe('Terms Agg', () => {
   describe('order agg editor UI', () => {
+    const fieldFormats = fieldFormatsServiceMock.createStartContract();
     const getAggConfigs = (params: Record<string, any> = {}) => {
       const indexPattern = {
         id: '1234',
@@ -47,11 +49,11 @@ describe('Terms Agg', () => {
             type: BUCKET_TYPES.TERMS,
           },
         ],
-        { typesRegistry: mockAggTypesRegistry() }
+        { typesRegistry: mockAggTypesRegistry(), fieldFormats }
       );
     };
 
-    it('converts object to string type', function() {
+    test('converts object to string type', () => {
       const aggConfigs = getAggConfigs({
         include: {
           pattern: '404',
@@ -72,6 +74,66 @@ describe('Terms Agg', () => {
       expect(params.field).toBe('field');
       expect(params.include).toBe('404');
       expect(params.exclude).toBe('400');
+    });
+
+    test('accepts string from string field type and writes this value', () => {
+      const aggConfigs = getAggConfigs({
+        include: 'include value',
+        exclude: 'exclude value',
+        field: {
+          name: 'string_field',
+          type: 'string',
+        },
+        orderAgg: {
+          type: 'count',
+        },
+      });
+
+      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+
+      expect(params.field).toBe('string_field');
+      expect(params.include).toBe('include value');
+      expect(params.exclude).toBe('exclude value');
+    });
+
+    test('accepts empty array from number field type and does not write a value', () => {
+      const aggConfigs = getAggConfigs({
+        include: [],
+        exclude: [],
+        field: {
+          name: 'empty_number_field',
+          type: 'number',
+        },
+        orderAgg: {
+          type: 'count',
+        },
+      });
+
+      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+
+      expect(params.field).toBe('empty_number_field');
+      expect(params.include).toBe(undefined);
+      expect(params.exclude).toBe(undefined);
+    });
+
+    test('filters array with empty strings from number field type and writes only numbers', () => {
+      const aggConfigs = getAggConfigs({
+        include: [1.1, 2, '', 3.33, ''],
+        exclude: ['', 4, 5.555, '', 6],
+        field: {
+          name: 'number_field',
+          type: 'number',
+        },
+        orderAgg: {
+          type: 'count',
+        },
+      });
+
+      const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
+
+      expect(params.field).toBe('number_field');
+      expect(params.include).toStrictEqual([1.1, 2, 3.33]);
+      expect(params.exclude).toStrictEqual([4, 5.555, 6]);
     });
   });
 });

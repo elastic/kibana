@@ -10,7 +10,7 @@ import {
   GetOneAgentConfigRequestSchema,
   CreateAgentConfigRequestSchema,
   UpdateAgentConfigRequestSchema,
-  DeleteAgentConfigsRequestSchema,
+  DeleteAgentConfigRequestSchema,
   GetFullAgentConfigRequestSchema,
 } from '../../types';
 import {
@@ -67,7 +67,7 @@ export const registerRoutes = (router: IRouter) => {
   router.post(
     {
       path: AGENT_CONFIG_API_ROUTES.DELETE_PATTERN,
-      validate: DeleteAgentConfigsRequestSchema,
+      validate: DeleteAgentConfigRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     deleteAgentConfigsHandler

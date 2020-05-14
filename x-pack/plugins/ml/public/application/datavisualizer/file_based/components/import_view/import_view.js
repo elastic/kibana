@@ -94,7 +94,7 @@ export class ImportView extends Component {
 
   // TODO - sort this function out. it's a mess
   async import() {
-    const { fileContents, results, indexPatterns, kibanaConfig, showBottomBar } = this.props;
+    const { data, results, indexPatterns, kibanaConfig, showBottomBar } = this.props;
 
     const { format } = results;
     let { timeFieldName } = this.state;
@@ -217,7 +217,7 @@ export class ImportView extends Component {
                 if (success) {
                   const importer = importerFactory(format, results, indexCreationSettings);
                   if (importer !== undefined) {
-                    const readResp = importer.read(fileContents, this.setReadProgress);
+                    const readResp = importer.read(data, this.setReadProgress);
                     success = readResp.success;
                     this.setState({
                       readStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
@@ -623,7 +623,6 @@ async function createKibanaIndexPattern(
       id,
     };
   } catch (error) {
-    console.error(error);
     return {
       success: false,
       error,

@@ -9,7 +9,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { getMapsTelemetry } from '../maps_telemetry';
 // @ts-ignore
-import { TELEMETRY_TYPE } from '../../../common/constants';
+import { TELEMETRY_TYPE } from '../../../../../../plugins/maps/common/constants';
 
 export function registerMapsUsageCollector(
   usageCollection: UsageCollectionSetup,

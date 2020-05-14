@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiFieldText, EuiComboBox, EuiText, EuiCodeEditor } from '@elastic/eui';
@@ -16,12 +16,20 @@ export const DatasourceInputVarField: React.FunctionComponent<{
   varDef: RegistryVarsEntry;
   value: any;
   onChange: (newValue: any) => void;
-}> = ({ varDef, value, onChange }) => {
+  errors?: string[] | null;
+  forceShowErrors?: boolean;
+}> = ({ varDef, value, onChange, errors: varErrors, forceShowErrors }) => {
+  const [isDirty, setIsDirty] = useState<boolean>(false);
+  const { multi, required, type, title, name, description } = varDef;
+  const isInvalid = (isDirty || forceShowErrors) && !!varErrors;
+  const errors = isInvalid ? varErrors : null;
+
   const renderField = () => {
-    if (varDef.multi) {
+    if (multi) {
       return (
         <EuiComboBox
           noSuggestions
+          isInvalid={isInvalid}
           selectedOptions={value.map((val: string) => ({ label: val }))}
           onCreateOption={(newVal: any) => {
             onChange([...value, newVal]);
@@ -29,10 +37,11 @@ export const DatasourceInputVarField: React.FunctionComponent<{
           onChange={(newVals: any[]) => {
             onChange(newVals.map(val => val.label));
           }}
+          onBlur={() => setIsDirty(true)}
         />
       );
     }
-    if (varDef.type === 'yaml') {
+    if (type === 'yaml') {
       return (
         <EuiCodeEditor
           width="100%"
@@ -46,22 +55,27 @@ export const DatasourceInputVarField: React.FunctionComponent<{
           }}
           value={value}
           onChange={newVal => onChange(newVal)}
+          onBlur={() => setIsDirty(true)}
         />
       );
     }
     return (
       <EuiFieldText
+        isInvalid={isInvalid}
         value={value === undefined ? '' : value}
         onChange={e => onChange(e.target.value)}
+        onBlur={() => setIsDirty(true)}
       />
     );
   };
 
   return (
     <EuiFormRow
-      label={varDef.title || varDef.name}
+      isInvalid={isInvalid}
+      error={errors}
+      label={title || name}
       labelAppend={
-        !varDef.required ? (
+        !required ? (
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.ingestManager.createDatasource.stepConfigure.inputVarFieldOptionalLabel"
@@ -70,7 +84,7 @@ export const DatasourceInputVarField: React.FunctionComponent<{
           </EuiText>
         ) : null
       }
-      helpText={<ReactMarkdown source={varDef.description} />}
+      helpText={<ReactMarkdown source={description} />}
     >
       {renderField()}
     </EuiFormRow>

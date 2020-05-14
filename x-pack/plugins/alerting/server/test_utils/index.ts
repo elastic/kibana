@@ -5,7 +5,7 @@
  */
 
 interface Resolvable<T> {
-  resolve: (arg?: T) => void;
+  resolve: (arg: T) => void;
 }
 
 /**
@@ -13,12 +13,10 @@ interface Resolvable<T> {
  * coordinating async tests.
  */
 export function resolvable<T>(): Promise<T> & Resolvable<T> {
-  let resolve: (arg?: T) => void;
-  const result = new Promise<T>(r => {
-    resolve = r;
-  }) as any;
-
-  result.resolve = (arg: T) => resolve(arg);
-
-  return result;
+  let resolve: (arg: T) => void;
+  return Object.assign(new Promise<T>(r => (resolve = r)), {
+    resolve(arg: T) {
+      return setTimeout(() => resolve(arg), 0);
+    },
+  });
 }

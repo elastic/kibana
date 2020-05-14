@@ -180,6 +180,7 @@ export function SavedQueryManagementComponent({
         }}
         anchorPosition="downLeft"
         panelPaddingSize="none"
+        buffer={-8}
         ownFocus
       >
         <div

@@ -10,6 +10,9 @@ import { RoutingAction } from './routing';
 import { PolicyListAction } from './policy_list';
 import { PolicyDetailsAction } from './policy_details';
 
+/**
+ * The entire set of redux actions recognized by our reducer.
+ */
 export type AppAction =
   | HostAction
   | AlertAction

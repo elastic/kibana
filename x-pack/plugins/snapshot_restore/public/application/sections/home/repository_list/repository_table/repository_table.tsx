@@ -15,15 +15,14 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 
-import { REPOSITORY_TYPES } from '../../../../../../common/constants';
+import { REPOSITORY_TYPES } from '../../../../../../common';
 import { Repository, RepositoryType } from '../../../../../../common/types';
-import { Error } from '../../../../components/section_error';
+import { Error, SendRequestResponse } from '../../../../../shared_imports';
 import { RepositoryDeleteProvider } from '../../../../components';
 import { UIM_REPOSITORY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useServices } from '../../../../app_context';
 import { textService } from '../../../../services/text';
 import { linkToEditRepository, linkToAddRepository } from '../../../../services/navigation';
-import { SendRequestResponse } from '../../../../../shared_imports';
 
 interface Props {
   repositories: Repository[];

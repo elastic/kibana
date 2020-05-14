@@ -41,7 +41,7 @@ export default function({ getService }: FtrProviderContext) {
           },
           global: ['all', 'read'],
           space: ['all', 'read'],
-          reserved: ['ml', 'monitoring'],
+          reserved: ['ml_user', 'ml_admin', 'monitoring'],
         };
 
         await supertest

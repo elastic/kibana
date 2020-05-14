@@ -8,23 +8,13 @@ import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
   describe('check filebeat', function() {
-    const log = getService('log');
     const retry = getService('retry');
-    const browser = getService('browser');
     const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
-    const appsMenu = getService('appsMenu');
 
     it('filebeat- should have hit count GT 0', async function() {
-      const url = await browser.getCurrentUrl();
-      log.debug(url);
-      if (!url.includes('kibana')) {
-        await PageObjects.common.navigateToApp('discover');
-      } else if (!url.includes('discover')) {
-        await appsMenu.clickLink('Discover');
-      }
-
+      await PageObjects.common.navigateToApp('discover', { insertTimestamp: false });
       await PageObjects.discover.selectIndexPattern('filebeat-*');
-      await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_Last_30 days');
+      await PageObjects.timePicker.setCommonlyUsedTime('Last_30 days');
       await retry.try(async () => {
         const hitCount = parseInt(await PageObjects.discover.getHitCount());
         expect(hitCount).to.be.greaterThan(0);

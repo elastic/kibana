@@ -13,7 +13,7 @@ import {
   Logger,
   PluginInitializerContext,
 } from '../../../../src/core/server';
-import { deepFreeze } from '../../../../src/core/utils';
+import { deepFreeze } from '../../../../src/core/server';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { PluginSetupContract as FeaturesSetupContract } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
@@ -48,8 +48,18 @@ export interface LegacyAPI {
  * Describes public Security plugin contract returned at the `setup` stage.
  */
 export interface SecurityPluginSetup {
-  authc: Authentication;
+  authc: Pick<
+    Authentication,
+    | 'isAuthenticated'
+    | 'getCurrentUser'
+    | 'areAPIKeysEnabled'
+    | 'createAPIKey'
+    | 'invalidateAPIKey'
+    | 'grantAPIKeyAsInternalUser'
+    | 'invalidateAPIKeyAsInternalUser'
+  >;
   authz: Pick<Authorization, 'actions' | 'checkPrivilegesWithRequest' | 'mode'>;
+  license: SecurityLicense;
 
   /**
    * If Spaces plugin is available it's supposed to register its SpacesService with Security plugin
@@ -64,7 +74,6 @@ export interface SecurityPluginSetup {
   __legacyCompat: {
     registerLegacyAPI: (legacyAPI: LegacyAPI) => void;
     registerPrivilegesWithCluster: () => void;
-    license: SecurityLicense;
   };
 }
 
@@ -126,7 +135,9 @@ export class Plugin {
       license$: licensing.license$,
     });
 
+    const auditLogger = new SecurityAuditLogger(() => this.getLegacyAPI().auditLogger);
     const authc = await setupAuthentication({
+      auditLogger,
       http: core.http,
       clusterClient: this.clusterClient,
       config,
@@ -146,9 +157,10 @@ export class Plugin {
     });
 
     setupSavedObjects({
-      auditLogger: new SecurityAuditLogger(() => this.getLegacyAPI().auditLogger),
+      auditLogger,
       authz,
       savedObjects: core.savedObjects,
+      getSpacesService: this.getSpacesService,
     });
 
     core.capabilities.registerSwitcher(authz.disableUnauthorizedCapabilities);
@@ -156,23 +168,33 @@ export class Plugin {
     defineRoutes({
       router: core.http.createRouter(),
       basePath: core.http.basePath,
+      httpResources: core.http.resources,
       logger: this.initializerContext.logger.get('routes'),
       clusterClient: this.clusterClient,
       config,
       authc,
       authz,
-      csp: core.http.csp,
       license,
     });
 
     return deepFreeze<SecurityPluginSetup>({
-      authc,
+      authc: {
+        isAuthenticated: authc.isAuthenticated,
+        getCurrentUser: authc.getCurrentUser,
+        areAPIKeysEnabled: authc.areAPIKeysEnabled,
+        createAPIKey: authc.createAPIKey,
+        invalidateAPIKey: authc.invalidateAPIKey,
+        grantAPIKeyAsInternalUser: authc.grantAPIKeyAsInternalUser,
+        invalidateAPIKeyAsInternalUser: authc.invalidateAPIKeyAsInternalUser,
+      },
 
       authz: {
         actions: authz.actions,
         checkPrivilegesWithRequest: authz.checkPrivilegesWithRequest,
         mode: authz.mode,
       },
+
+      license,
 
       registerSpacesService: service => {
         if (this.wasSpacesServiceAccessed()) {
@@ -186,8 +208,6 @@ export class Plugin {
         registerLegacyAPI: (legacyAPI: LegacyAPI) => (this.legacyAPI = legacyAPI),
 
         registerPrivilegesWithCluster: async () => await authz.registerPrivilegesWithCluster(),
-
-        license,
       },
     });
   }

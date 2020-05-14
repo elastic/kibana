@@ -17,7 +17,7 @@ import {
   MetricsExplorerYAxisMode,
   MetricsExplorerChartType,
   MetricsExplorerChartOptions,
-} from './use_metrics_explorer_options';
+} from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
 interface MetricsExplorerUrlState {
   timerange?: MetricsExplorerTimeOptions;

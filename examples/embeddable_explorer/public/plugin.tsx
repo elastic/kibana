@@ -18,6 +18,7 @@
  */
 
 import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
+import { EmbeddableExamplesStart } from 'examples/embeddable_examples/public/plugin';
 import { UiActionsService } from '../../../src/plugins/ui_actions/public';
 import { EmbeddableStart } from '../../../src/plugins/embeddable/public';
 import { Start as InspectorStart } from '../../../src/plugins/inspector/public';
@@ -26,6 +27,7 @@ interface StartDeps {
   uiActions: UiActionsService;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
+  embeddableExamples: EmbeddableExamplesStart;
 }
 
 export class EmbeddableExplorerPlugin implements Plugin<void, void, {}, StartDeps> {
@@ -36,6 +38,7 @@ export class EmbeddableExplorerPlugin implements Plugin<void, void, {}, StartDep
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
+        await depsStart.embeddableExamples.createSampleData();
         return renderApp(
           {
             notifications: coreStart.notifications,

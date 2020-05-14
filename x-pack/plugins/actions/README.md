@@ -28,7 +28,7 @@ Table of Contents
   - [RESTful API](#restful-api)
     - [`POST /api/action`: Create action](#post-apiaction-create-action)
     - [`DELETE /api/action/{id}`: Delete action](#delete-apiactionid-delete-action)
-    - [`GET /api/action/_find`: Find actions](#get-apiactionfind-find-actions)
+    - [`GET /api/action/_getAll`: Get all actions](#get-apiactiongetall-get-all-actions)
     - [`GET /api/action/{id}`: Get action](#get-apiactionid-get-action)
     - [`GET /api/action/types`: List action types](#get-apiactiontypes-list-action-types)
     - [`PUT /api/action/{id}`: Update action](#put-apiactionid-update-action)
@@ -64,6 +64,12 @@ Table of Contents
     - [`config`](#config-6)
     - [`secrets`](#secrets-6)
     - [`params`](#params-6)
+      - [`subActionParams (pushToService)`](#subactionparams-pushtoservice)
+  - [Jira](#jira)
+    - [`config`](#config-7)
+    - [`secrets`](#secrets-7)
+    - [`params`](#params-7)
+      - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-1)
 - [Command Line Utility](#command-line-utility)
 
 ## Terminology
@@ -92,6 +98,7 @@ Built-In-Actions are configured using the _xpack.actions_ namespoace under _kiba
 | _xpack.actions._**enabled**            | Feature toggle which enabled Actions in Kibana.                                                                                                                                                                                                                                                                                                                                                                                                                               | boolean       |
 | _xpack.actions._**whitelistedHosts**   | Which _hostnames_ are whitelisted for the Built-In-Action? This list should contain hostnames of every external service you wish to interact with using Webhooks, Email or any other built in Action. Note that you may use the string "\*" in place of a specific hostname to enable Kibana to target any URL, but keep in mind the potential use of such a feature to execute [SSRF](https://www.owasp.org/index.php/Server_Side_Request_Forgery) attacks from your server. | Array<String> |
 | _xpack.actions._**enabledActionTypes** | A list of _actionTypes_ id's that are enabled. A "\*" may be used as an element to indicate all registered actionTypes should be enabled. The actionTypes registered for Kibana are `.server-log`, `.slack`, `.email`, `.index`, `.pagerduty`, `.webhook`. Default: `["*"]`                                                                                                                                                                                                   | Array<String> |
+| _xpack.actions._**preconfigured**      | A object of action id / preconfigured actions. Default: `{}`                                                                                                                                                                                                                                                                                                                                                                                                                                | Array<Object> |
 
 #### Whitelisting Built-in Action Types
 
@@ -142,7 +149,8 @@ This is the primary function for an action type. Whenever the action needs to ex
 | actionId                                | The action saved object id that the action type is executing for.                                                                                                                                                                                                                                                                               |
 | config                                  | The decrypted configuration given to an action. This comes from the action saved object that is partially or fully encrypted within the data store. If you would like to validate the config before being passed to the executor, define `validate.config` within the action type.                                                              |
 | params                                  | Parameters for the execution. These will be given at execution time by either an alert or manually provided when calling the plugin provided execute function.                                                                                                                                                                                  |
-| services.callCluster(path, opts)        | Use this to do Elasticsearch queries on the cluster Kibana connects to. This function is the same as any other `callCluster` in Kibana.<br><br>**NOTE**: This currently authenticates as the Kibana internal user, but will change in a future PR.                                                                                              |
+| services.callCluster(path, opts)        | Use this to do Elasticsearch queries on the cluster Kibana connects to. This function is the same as any other `callCluster` in Kibana but runs in the context of the user who is calling the action when security is enabled.                                                                                                                  |
+| services.getScopedCallCluster           | This function scopes an instance of CallCluster by returning a `callCluster(path, opts)` function that runs in the context of the user who is calling the action when security is enabled. This must only be called with instances of CallCluster provided by core.                                                                             |
 | services.savedObjectsClient             | This is an instance of the saved objects client. This provides the ability to do CRUD on any saved objects within the same space the alert lives in.<br><br>The scope of the saved objects client is tied to the user in context calling the execute API or the API key provided to the execute plugin function (only when security isenabled). |
 | services.log(tags, [data], [timestamp]) | Use this to create server logs. (This is the same function as server.log)                                                                                                                                                                                                                                                                       |
 
@@ -174,11 +182,13 @@ Params:
 | -------- | --------------------------------------------- | ------ |
 | id       | The id of the action you're trying to delete. | string |
 
-### `GET /api/action/_find`: Find actions
+### `GET /api/action/_getAll`: Get all actions
 
-Params:
+No parameters.
 
-See the [saved objects API documentation for find](https://www.elastic.co/guide/en/kibana/master/saved-objects-api-find.html). All the properties are the same except that you cannot pass in `type`.
+Return all actions from saved objects merged with predefined list.
+Use the [saved objects API for find](https://www.elastic.co/guide/en/kibana/master/saved-objects-api-find.html) with the proprties: `type: 'action'` and `perPage: 10000`.
+List of predefined actions should be set up in Kibana.yaml.
 
 ### `GET /api/action/{id}`: Get action
 
@@ -260,7 +270,7 @@ Kibana ships with a set of built-in action types:
 
 | Type                      | Id            | Description                                                        |
 | ------------------------- | ------------- | ------------------------------------------------------------------ |
-| [Server log](#server-log) | `.log`        | Logs messages to the Kibana log using `server.log()`               |
+| [Server log](#server-log) | `.server-log` | Logs messages to the Kibana log using Kibana's logger              |
 | [Email](#email)           | `.email`      | Sends an email using SMTP                                          |
 | [Slack](#slack)           | `.slack`      | Posts a message to a slack channel                                 |
 | [Index](#index)           | `.index`      | Indexes document(s) into Elasticsearch                             |
@@ -479,13 +489,59 @@ The ServiceNow action uses the [V2 Table API](https://developer.servicenow.com/a
 
 ### `params`
 
+| Property        | Description                                                                          | Type   |
+| --------------- | ------------------------------------------------------------------------------------ | ------ |
+| subAction       | The sub action to perform. It can be `pushToService`, `handshake`, and `getIncident` | string |
+| subActionParams | The parameters of the sub action                                                     | object |
+
+#### `subActionParams (pushToService)`
+
 | Property    | Description                                                                                                                | Type                  |
 | ----------- | -------------------------------------------------------------------------------------------------------------------------- | --------------------- |
 | caseId      | The case id                                                                                                                | string                |
 | title       | The title of the case                                                                                                      | string _(optional)_   |
 | description | The description of the case                                                                                                | string _(optional)_   |
 | comments    | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`               | object[] _(optional)_ |
-| incidentID  | The id of the incident in ServiceNow . If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
+| externalId  | The id of the incident in ServiceNow . If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
+
+---
+
+## Jira
+
+ID: `.jira`
+
+The Jira action uses the [V2 API](https://developer.atlassian.com/cloud/jira/platform/rest/v2/) to create and update Jira incidents.
+
+### `config`
+
+| Property           | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Type   |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| apiUrl             | ServiceNow instance URL.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | string |
+| casesConfiguration | Case configuration object. The object should contain an attribute called `mapping`. A `mapping` is an array of objects. Each mapping object should be of the form `{ source: string, target: string, actionType: string }`. `source` is the Case field. `target` is the Jira field where `source` will be mapped to. `actionType` can be one of `nothing`, `overwrite` or `append`. For example the `{ source: 'title', target: 'summary', actionType: 'overwrite' }` record, inside mapping array, means that the title of a case will be mapped to the short description of an incident in ServiceNow and will be overwrite on each update. | object |
+
+### `secrets`
+
+| Property | Description                             | Type   |
+| -------- | --------------------------------------- | ------ |
+| email    | email for HTTP Basic authentication     | string |
+| apiToken | API token for HTTP Basic authentication | string |
+
+### `params`
+
+| Property        | Description                                                                          | Type   |
+| --------------- | ------------------------------------------------------------------------------------ | ------ |
+| subAction       | The sub action to perform. It can be `pushToService`, `handshake`, and `getIncident` | string |
+| subActionParams | The parameters of the sub action                                                     | object |
+
+#### `subActionParams (pushToService)`
+
+| Property    | Description                                                                                                         | Type                  |
+| ----------- | ------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| caseId      | The case id                                                                                                         | string                |
+| title       | The title of the case                                                                                               | string _(optional)_   |
+| description | The description of the case                                                                                         | string _(optional)_   |
+| comments    | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`        | object[] _(optional)_ |
+| externalId  | The id of the incident in Jira. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
 
 # Command Line Utility
 

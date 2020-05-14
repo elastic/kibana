@@ -8,7 +8,6 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { KibanaRequest, KibanaResponseFactory } from '../../../../../../src/core/server';
 import { OIDCLogin } from '../../authentication';
-import { createCustomResourceResponse } from '.';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import {
@@ -20,7 +19,13 @@ import { RouteDefinitionParams } from '..';
 /**
  * Defines routes required for SAML authentication.
  */
-export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: RouteDefinitionParams) {
+export function defineOIDCRoutes({
+  router,
+  httpResources,
+  logger,
+  authc,
+  basePath,
+}: RouteDefinitionParams) {
   // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
   for (const path of ['/api/security/oidc/implicit', '/api/security/v1/oidc/implicit']) {
     /**
@@ -28,7 +33,7 @@ export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: Route
      * is used, so that we can extract authentication response from URL fragment and send it to
      * the `/api/security/oidc/callback` route.
      */
-    router.get(
+    httpResources.register(
       {
         path,
         validate: false,
@@ -42,18 +47,14 @@ export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: Route
             { tags: ['deprecation'] }
           );
         }
-        return response.custom(
-          createCustomResourceResponse(
-            `
-          <!DOCTYPE html>
-          <title>Kibana OpenID Connect Login</title>
-          <link rel="icon" href="data:,">
-          <script src="${serverBasePath}/internal/security/oidc/implicit.js"></script>
-        `,
-            'text/html',
-            csp.header
-          )
-        );
+        return response.renderHtml({
+          body: `
+            <!DOCTYPE html>
+            <title>Kibana OpenID Connect Login</title>
+            <link rel="icon" href="data:,">
+            <script src="${serverBasePath}/internal/security/oidc/implicit.js"></script>
+          `,
+        });
       }
     );
   }
@@ -63,7 +64,7 @@ export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: Route
    * that extracts fragment part from the URL and send it to the `/api/security/oidc/callback` route.
    * We need this separate endpoint because of default CSP policy that forbids inline scripts.
    */
-  router.get(
+  httpResources.register(
     {
       path: '/internal/security/oidc/implicit.js',
       validate: false,
@@ -71,17 +72,13 @@ export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: Route
     },
     (context, request, response) => {
       const serverBasePath = basePath.serverBasePath;
-      return response.custom(
-        createCustomResourceResponse(
-          `
+      return response.renderJs({
+        body: `
           window.location.replace(
             '${serverBasePath}/api/security/oidc/callback?authenticationResponseURI=' + encodeURIComponent(window.location.href)
           );
         `,
-          'text/javascript',
-          csp.header
-        )
-      );
+      });
     }
   );
 
@@ -155,7 +152,9 @@ export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: Route
         }
 
         if (!loginAttempt) {
-          return response.badRequest({ body: 'Unrecognized login attempt.' });
+          return response.badRequest({
+            body: 'Unrecognized login attempt.',
+          });
         }
 
         return performOIDCLogin(request, response, loginAttempt);

@@ -20,7 +20,7 @@ export const DataSourcesPanel = ({ name, version }: DataSourcesPanelProps) => {
   const packageInstallStatus = getPackageInstallStatus(name);
   // if they arrive at this page and the package is not installed, send them to overview
   // this happens if they arrive with a direct url or they uninstall while on this tab
-  if (packageInstallStatus !== InstallStatus.installed)
+  if (packageInstallStatus.status !== InstallStatus.installed)
     return (
       <Redirect
         to={toDetailView({

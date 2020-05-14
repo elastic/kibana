@@ -48,13 +48,13 @@ export const TimeSeriesQuerySchema = schema.object(
   }
 );
 
-// using direct type not allowed, circular reference, so body is typed to any
-function validateBody(anyParams: any): string | undefined {
+// using direct type not allowed, circular reference, so body is typed to unknown
+function validateBody(anyParams: unknown): string | undefined {
   // validate core query parts, return if it fails validation (returning string)
   const coreQueryValidated = validateCoreQueryBody(anyParams);
   if (coreQueryValidated) return coreQueryValidated;
 
-  const { dateStart, dateEnd, interval }: TimeSeriesQuery = anyParams;
+  const { dateStart, dateEnd, interval } = anyParams as TimeSeriesQuery;
 
   // dates already validated in validateDate(), if provided
   const epochStart = dateStart ? Date.parse(dateStart) : undefined;

@@ -34,6 +34,7 @@ import { FilterUtils } from './lib/filter_utils';
 import {
   DashboardAppState,
   DashboardAppStateDefaults,
+  DashboardAppStateInUrl,
   DashboardAppStateTransitions,
   SavedDashboardPanel,
 } from '../types';
@@ -164,15 +165,13 @@ export class DashboardStateManager {
       this.changeListeners.forEach(listener => listener({ dirty: this.isDirty }));
     });
 
-    // make sure url ('_a') matches initial state
-    this.kbnUrlStateStorage.set(this.STATE_STORAGE_KEY, initialState, { replace: true });
-
     // setup state syncing utils. state container will be synced with url into `this.STATE_STORAGE_KEY` query param
-    this.stateSyncRef = syncState<DashboardAppState>({
+    this.stateSyncRef = syncState<DashboardAppStateInUrl>({
       storageKey: this.STATE_STORAGE_KEY,
       stateContainer: {
         ...this.stateContainer,
-        set: (state: DashboardAppState | null) => {
+        get: () => this.toUrlState(this.stateContainer.get()),
+        set: (state: DashboardAppStateInUrl | null) => {
           // sync state required state container to be able to handle null
           // overriding set() so it could handle null coming from url
           if (state) {
@@ -201,8 +200,10 @@ export class DashboardStateManager {
       },
       stateStorage: this.kbnUrlStateStorage,
     });
+  }
 
-    // actually start syncing state with container
+  public startStateSyncing() {
+    this.saveState({ replace: true });
     this.stateSyncRef.start();
   }
 
@@ -559,9 +560,9 @@ export class DashboardStateManager {
    */
   private saveState({ replace }: { replace: boolean }): boolean {
     // schedules setting current state to url
-    this.kbnUrlStateStorage.set<DashboardAppState>(
+    this.kbnUrlStateStorage.set<DashboardAppStateInUrl>(
       this.STATE_STORAGE_KEY,
-      this.stateContainer.get()
+      this.toUrlState(this.stateContainer.get())
     );
     // immediately forces scheduled updates and changes location
     return this.kbnUrlStateStorage.flush({ replace });
@@ -620,5 +621,14 @@ export class DashboardStateManager {
     const initial = _.omit(this.stateDefaults, propsToIgnore);
     const current = _.omit(this.stateContainer.get(), propsToIgnore);
     return !_.isEqual(initial, current);
+  }
+
+  private toUrlState(state: DashboardAppState): DashboardAppStateInUrl {
+    if (state.viewMode === ViewMode.VIEW) {
+      const { panels, ...stateWithoutPanels } = state;
+      return stateWithoutPanels;
+    }
+
+    return state;
   }
 }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import gws from './graph_client_workspace';
+import { createWorkspace } from './graph_client_workspace';
 
 describe('graphui-workspace', function() {
   describe('createWorkspace()', function() {
@@ -38,7 +38,7 @@ describe('graphui-workspace', function() {
             minDocCount: 1,
           },
         };
-        const workspace = gws.createWorkspace(options);
+        const workspace = createWorkspace(options);
         return {
           workspace,
           //, get to(){}

@@ -19,6 +19,7 @@
 
 import Path from 'path';
 
+import normalizePath from 'normalize-path';
 import { stringifyRequest } from 'loader-utils';
 import webpack from 'webpack';
 // @ts-ignore
@@ -27,14 +28,62 @@ import TerserPlugin from 'terser-webpack-plugin';
 import webpackMerge from 'webpack-merge';
 // @ts-ignore
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
+import CompressionPlugin from 'compression-webpack-plugin';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
 import { Bundle, WorkerConfig, parseDirPath, DisallowedSyntaxPlugin } from '../common';
 
 const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
-const PUBLIC_PATH_PLACEHOLDER = '__REPLACE_WITH_PUBLIC_PATH__';
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
+
+const STATIC_BUNDLE_PLUGINS = [
+  { id: 'data', dirname: 'data' },
+  { id: 'kibanaReact', dirname: 'kibana_react' },
+  { id: 'kibanaUtils', dirname: 'kibana_utils' },
+  { id: 'esUiShared', dirname: 'es_ui_shared' },
+];
+
+/**
+ * Determine externals statements for require/import statements by looking
+ * for requests resolving to the primary public export of the data, kibanaReact,
+ * amd kibanaUtils plugins. If this module is being imported then rewrite
+ * the import to access the global `__kbnBundles__` variables and access
+ * the relavent properties from that global object.
+ *
+ * @param bundle
+ * @param context the directory containing the module which made `request`
+ * @param request the request for a module from a commonjs require() call or import statement
+ */
+function dynamicExternals(bundle: Bundle, context: string, request: string) {
+  // ignore imports that have loaders defined
+  if (request.includes('!')) {
+    return;
+  }
+
+  // ignore requests that don't include a /{dirname}/public for one of our
+  // "static" bundles as a cheap way to avoid doing path resolution
+  // for paths that couldn't possibly resolve to what we're looking for
+  const reqToStaticBundle = STATIC_BUNDLE_PLUGINS.some(p =>
+    request.includes(`/${p.dirname}/public`)
+  );
+  if (!reqToStaticBundle) {
+    return;
+  }
+
+  // determine the most acurate resolution string we can without running full resolution
+  const rootRelative = normalizePath(
+    Path.relative(bundle.sourceRoot, Path.resolve(context, request))
+  );
+  for (const { id, dirname } of STATIC_BUNDLE_PLUGINS) {
+    if (rootRelative === `src/plugins/${dirname}/public`) {
+      return `__kbnBundles__['plugin/${id}']`;
+    }
+  }
+
+  // import doesn't match a root public import
+  return undefined;
+}
 
 export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
   const commonConfig: webpack.Configuration = {
@@ -50,8 +99,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
 
     output: {
       path: bundle.outputDir,
-      filename: '[name].plugin.js',
-      publicPath: PUBLIC_PATH_PLACEHOLDER,
+      filename: `[name].${bundle.type}.js`,
       devtoolModuleFilenameTemplate: info =>
         `/${bundle.type}:${bundle.id}/${Path.relative(
           bundle.sourceRoot,
@@ -63,7 +111,6 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
             // When the entry point is loaded, assign it's exported `plugin`
             // value to a key on the global `__kbnBundles__` object.
             library: ['__kbnBundles__', `plugin/${bundle.id}`],
-            libraryExport: 'plugin',
           }
         : {}),
     },
@@ -72,20 +119,37 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
       noEmitOnErrors: true,
     },
 
-    externals: {
-      ...UiSharedDeps.externals,
-    },
+    externals: [
+      UiSharedDeps.externals,
+      function(context, request, cb) {
+        try {
+          cb(undefined, dynamicExternals(bundle, context, request));
+        } catch (error) {
+          cb(error, undefined);
+        }
+      },
+    ],
 
     plugins: [new CleanWebpackPlugin(), new DisallowedSyntaxPlugin()],
 
     module: {
       // no parse rules for a few known large packages which have no require() statements
+      // or which have require() statements that should be ignored because the file is
+      // already bundled with all its necessary depedencies
       noParse: [
-        /[\///]node_modules[\///]elasticsearch-browser[\///]/,
-        /[\///]node_modules[\///]lodash[\///]index\.js/,
+        /[\/\\]node_modules[\/\\]elasticsearch-browser[\/\\]/,
+        /[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/,
+        /[\/\\]node_modules[\/\\]vega-lib[\/\\]build[\/\\]vega\.js$/,
       ],
 
       rules: [
+        {
+          include: Path.join(bundle.contextDir, bundle.entry),
+          loader: UiSharedDeps.publicPathLoader,
+          options: {
+            key: bundle.id,
+          },
+        },
         {
           test: /\.css$/,
           include: /node_modules/,
@@ -229,6 +293,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
 
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.json'],
+      mainFields: ['browser', 'main'],
       alias: {
         tinymath: require.resolve('tinymath/lib/tinymath.es5.js'),
       },
@@ -254,6 +319,16 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
         'process.env': {
           IS_KIBANA_DISTRIBUTABLE: `"true"`,
         },
+      }),
+      new CompressionPlugin({
+        algorithm: 'brotliCompress',
+        filename: '[path].br',
+        test: /\.(js|css)$/,
+      }),
+      new CompressionPlugin({
+        algorithm: 'gzip',
+        filename: '[path].gz',
+        test: /\.(js|css)$/,
       }),
     ],
 

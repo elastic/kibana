@@ -3,7 +3,7 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load() // load from the Jenkins instance
 
-kibanaPipeline(timeoutMinutes: 180) {
+kibanaPipeline(timeoutMinutes: 240) {
   catchErrors {
     withEnv([
       'CODE_COVERAGE=1', // Needed for multiple ci scripts, such as remote.ts, test/scripts/*.sh, schema.js, etc.

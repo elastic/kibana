@@ -13,10 +13,10 @@ import {
   AlertData,
   AlertResultList,
   AlertHits,
-  EndpointAppConstants,
   ESTotal,
   AlertingIndexGetQueryResult,
 } from '../../../../../common/types';
+import { AlertConstants } from '../../../../../common/alert_constants';
 import { EndpointAppContext } from '../../../../types';
 import { AlertSearchQuery } from '../../types';
 import { AlertListPagination } from './pagination';
@@ -28,8 +28,8 @@ export const getRequestData = async (
   const config = await endpointAppContext.config();
   const reqData: AlertSearchQuery = {
     // Defaults not enforced by schema
-    pageSize: request.query.page_size || EndpointAppConstants.ALERT_LIST_DEFAULT_PAGE_SIZE,
-    sort: request.query.sort || EndpointAppConstants.ALERT_LIST_DEFAULT_SORT,
+    pageSize: request.query.page_size || AlertConstants.ALERT_LIST_DEFAULT_PAGE_SIZE,
+    sort: request.query.sort || AlertConstants.ALERT_LIST_DEFAULT_SORT,
     order: request.query.order || 'desc',
     dateRange: ((request.query.date_range !== undefined
       ? decode(request.query.date_range)
@@ -60,14 +60,12 @@ export const getRequestData = async (
     reqData.fromIndex = reqData.pageIndex * reqData.pageSize;
   }
 
-  // See: https://github.com/elastic/elasticsearch-js/issues/662
-  // and https://github.com/elastic/endpoint-app-team/issues/221
   if (
     reqData.searchBefore !== undefined &&
     reqData.searchBefore[0] === '' &&
     reqData.emptyStringIsUndefined
   ) {
-    reqData.searchBefore[0] = EndpointAppConstants.MAX_LONG_INT;
+    reqData.searchBefore[0] = AlertConstants.MAX_LONG_INT;
   }
 
   if (
@@ -75,7 +73,7 @@ export const getRequestData = async (
     reqData.searchAfter[0] === '' &&
     reqData.emptyStringIsUndefined
   ) {
-    reqData.searchAfter[0] = EndpointAppConstants.MAX_LONG_INT;
+    reqData.searchAfter[0] = AlertConstants.MAX_LONG_INT;
   }
 
   return reqData;

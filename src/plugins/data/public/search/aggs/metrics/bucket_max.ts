@@ -22,6 +22,17 @@ import { MetricAggType } from './metric_agg_type';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
 import { METRIC_TYPES } from './metric_agg_types';
+import { AggConfigSerialized, BaseAggParams } from '../types';
+import { GetInternalStartServicesFn } from '../../../types';
+
+export interface AggParamsBucketMax extends BaseAggParams {
+  customMetric?: AggConfigSerialized;
+  customBucket?: AggConfigSerialized;
+}
+
+export interface BucketMaxMetricAggDependencies {
+  getInternalStartServices: GetInternalStartServicesFn;
+}
 
 const overallMaxLabel = i18n.translate('data.search.aggs.metrics.overallMaxLabel', {
   defaultMessage: 'overall max',
@@ -31,11 +42,20 @@ const maxBucketTitle = i18n.translate('data.search.aggs.metrics.maxBucketTitle',
   defaultMessage: 'Max Bucket',
 });
 
-export const bucketMaxMetricAgg = new MetricAggType({
-  name: METRIC_TYPES.MAX_BUCKET,
-  title: maxBucketTitle,
-  makeLabel: agg => makeNestedLabel(agg, overallMaxLabel),
-  subtype: siblingPipelineAggHelper.subtype,
-  params: [...siblingPipelineAggHelper.params()],
-  getFormat: siblingPipelineAggHelper.getFormat,
-});
+export const getBucketMaxMetricAgg = ({
+  getInternalStartServices,
+}: BucketMaxMetricAggDependencies) => {
+  return new MetricAggType(
+    {
+      name: METRIC_TYPES.MAX_BUCKET,
+      title: maxBucketTitle,
+      makeLabel: agg => makeNestedLabel(agg, overallMaxLabel),
+      subtype: siblingPipelineAggHelper.subtype,
+      params: [...siblingPipelineAggHelper.params()],
+      getFormat: siblingPipelineAggHelper.getFormat,
+    },
+    {
+      getInternalStartServices,
+    }
+  );
+};

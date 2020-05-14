@@ -24,6 +24,10 @@ import { ReportingConfig, ReportingConfigType } from './config';
 import { checkLicenseFactory, getExportTypesRegistry, LevelLogger } from './lib';
 import { registerRoutes } from './routes';
 import { ReportingSetupDeps } from './types';
+import {
+  screenshotsObservableFactory,
+  ScreenshotsObservableFn,
+} from '../export_types/common/lib/screenshots';
 
 interface ReportingInternalSetup {
   browserDriverFactory: HeadlessChromiumDriverFactory;
@@ -95,12 +99,12 @@ export class ReportingCore {
     return (await this.getPluginStartDeps()).enqueueJob;
   }
 
-  public async getBrowserDriverFactory(): Promise<HeadlessChromiumDriverFactory> {
-    return (await this.getPluginSetupDeps()).browserDriverFactory;
-  }
-
   public getConfig(): ReportingConfig {
     return this.config;
+  }
+  public async getScreenshotsObservable(): Promise<ScreenshotsObservableFn> {
+    const { browserDriverFactory } = await this.getPluginSetupDeps();
+    return screenshotsObservableFactory(this.config.get('capture'), browserDriverFactory);
   }
 
   /*

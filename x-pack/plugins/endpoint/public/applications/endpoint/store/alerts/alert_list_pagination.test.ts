@@ -15,9 +15,10 @@ import { DepsStartMock, depsStartMock } from '../../mocks';
 import { createBrowserHistory } from 'history';
 import { uiQueryParams } from './selectors';
 import { urlFromQueryParams } from '../../view/alerts/url_from_query_params';
+import { Immutable } from '../../../../../common/types';
 
 describe('alert list pagination', () => {
-  let store: Store<AlertListState, AppAction>;
+  let store: Store<Immutable<AlertListState>, Immutable<AppAction>>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
   let depsStart: DepsStartMock;
   let history: History<never>;

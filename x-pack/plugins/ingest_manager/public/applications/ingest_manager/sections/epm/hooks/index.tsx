@@ -7,7 +7,7 @@ export { useLinks } from './use_links';
 export { useLocalSearch, searchIdField } from './use_local_search';
 export {
   PackageInstallProvider,
-  useDeletePackage,
+  useUninstallPackage,
   useGetPackageInstallStatus,
   useInstallPackage,
   useSetPackageInstallStatus,

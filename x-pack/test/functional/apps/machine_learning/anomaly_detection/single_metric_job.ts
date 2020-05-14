@@ -60,7 +60,6 @@ export default function({ getService }: FtrProviderContext) {
       job_id: expectedJobId,
       result_type: 'model_size_stats',
       model_bytes_exceeded: '0.0 B',
-      model_bytes_memory_limit: '15.0 MB',
       total_by_field_count: '3',
       total_over_field_count: '0',
       total_partition_field_count: '2',
@@ -70,16 +69,20 @@ export default function({ getService }: FtrProviderContext) {
     };
   }
 
+  const calendarId = `wizard-test-calendar_${Date.now()}`;
+
   describe('single metric', function() {
-    this.tags(['smoke', 'mlqa']);
+    this.tags(['mlqa']);
     before(async () => {
-      await esArchiver.load('ml/farequote');
-      await ml.api.createCalendar('wizard-test-calendar');
+      await esArchiver.loadIfNeeded('ml/farequote');
+      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.setKibanaTimeZoneToUTC();
+
+      await ml.api.createCalendar(calendarId);
       await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
-      await esArchiver.unload('ml/farequote');
       await ml.api.cleanMlIndices();
     });
 
@@ -93,7 +96,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('job creation loads the job type selection page', async () => {
-      await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob('farequote');
+      await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob('ft_farequote');
     });
 
     it('job creation loads the single metric job wizard page', async () => {
@@ -162,7 +165,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('job creation assigns calendars', async () => {
-      await ml.jobWizardCommon.addCalendar('wizard-test-calendar');
+      await ml.jobWizardCommon.addCalendar(calendarId);
     });
 
     it('job creation opens the advanced section', async () => {
@@ -294,7 +297,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('job cloning persists assigned calendars', async () => {
-      await ml.jobWizardCommon.assertCalendarsSelection(['wizard-test-calendar']);
+      await ml.jobWizardCommon.assertCalendarsSelection([calendarId]);
     });
 
     it('job cloning opens the advanced section', async () => {

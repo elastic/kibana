@@ -5,15 +5,12 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
-import { logConfiguration } from '../log_configuration';
 import { createBrowserDriverFactory } from './browsers';
 import { ReportingCore, ReportingConfig } from './core';
 import { createQueueFactory, enqueueJobFactory, LevelLogger, runValidations } from './lib';
 import { setFieldFormats } from './services';
 import { ReportingSetup, ReportingSetupDeps, ReportingStart, ReportingStartDeps } from './types';
 import { registerReportingUsageCollector } from './usage';
-// @ts-ignore no module definition
-import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
 
 export class ReportingPlugin
   implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps> {
@@ -60,8 +57,6 @@ export class ReportingPlugin
     });
 
     setFieldFormats(plugins.data.fieldFormats);
-
-    logConfiguration(this.config.get('capture'), this.logger);
 
     return {};
   }

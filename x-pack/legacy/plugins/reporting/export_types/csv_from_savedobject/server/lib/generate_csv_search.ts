@@ -173,6 +173,7 @@ export async function generateCsvSearch(
       ...uiSettings,
       maxSizeBytes: config.get('csv', 'maxSizeBytes'),
       scroll: config.get('csv', 'scroll'),
+      escapeFormulaValues: config.get('csv', 'escapeFormulaValues'),
       timezone,
     },
   };

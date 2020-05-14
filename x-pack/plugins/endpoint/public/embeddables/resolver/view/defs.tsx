@@ -5,7 +5,7 @@
  */
 
 import React, { memo } from 'react';
-import { saturate, lighten } from 'polished';
+import { saturate } from 'polished';
 
 import {
   htmlIdGenerator,
@@ -54,7 +54,11 @@ type ResolverColorNames =
   | 'activeNoWarning'
   | 'activeWarning'
   | 'fullLabelBackground'
-  | 'inertDescription';
+  | 'inertDescription'
+  | 'labelBackgroundTerminatedProcess'
+  | 'labelBackgroundTerminatedTrigger'
+  | 'labelBackgroundRunningProcess'
+  | 'labelBackgroundRunningTrigger';
 
 export const NamedColors: Record<ResolverColorNames, string> = {
   ok: saturate(0.5, resolverPalette.temperatures[0]),
@@ -70,6 +74,10 @@ export const NamedColors: Record<ResolverColorNames, string> = {
   activeNoWarning: '#0078FF',
   activeWarning: '#C61F38',
   fullLabelBackground: '#3B3C41',
+  labelBackgroundTerminatedProcess: '#8A96A8',
+  labelBackgroundTerminatedTrigger: '#8A96A8',
+  labelBackgroundRunningProcess: '#8A96A8',
+  labelBackgroundRunningTrigger: '#8A96A8',
   inertDescription: '#747474',
 };
 
@@ -79,8 +87,6 @@ const idGenerator = htmlIdGenerator();
  * Ids of paint servers to be referenced by fill and stroke attributes
  */
 export const PaintServerIds = {
-  runningProcess: idGenerator('psRunningProcess'),
-  runningTrigger: idGenerator('psRunningTrigger'),
   runningProcessCube: idGenerator('psRunningProcessCube'),
   runningTriggerCube: idGenerator('psRunningTriggerCube'),
   terminatedProcessCube: idGenerator('psTerminatedProcessCube'),
@@ -93,46 +99,6 @@ export const PaintServerIds = {
  */
 const PaintServers = memo(() => (
   <>
-    <linearGradient
-      id={PaintServerIds.runningProcess}
-      x1="0"
-      y1="0"
-      x2="1"
-      y2="0"
-      spreadMethod="reflect"
-      gradientUnits="objectBoundingBox"
-    >
-      <stop
-        offset="0%"
-        stopColor={saturate(0.7, lighten(0.05, NamedColors.runningProcessStart))}
-        stopOpacity="1"
-      />
-      <stop
-        offset="100%"
-        stopColor={saturate(0.7, lighten(0.05, NamedColors.runningProcessEnd))}
-        stopOpacity="1"
-      />
-    </linearGradient>
-    <linearGradient
-      id={PaintServerIds.runningTrigger}
-      x1="0"
-      y1="0"
-      x2="1"
-      y2="0"
-      spreadMethod="reflect"
-      gradientUnits="objectBoundingBox"
-    >
-      <stop
-        offset="0%"
-        stopColor={saturate(0.7, lighten(0.05, NamedColors.runningTriggerStart))}
-        stopOpacity="1"
-      />
-      <stop
-        offset="100%"
-        stopColor={saturate(0.7, lighten(0.05, NamedColors.runningTriggerEnd))}
-        stopOpacity="1"
-      />
-    </linearGradient>
     <linearGradient
       id={PaintServerIds.terminatedProcessCube}
       x1="-381.23752"

@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
-} from '../../../../common/fixtures/plugins/actions';
+} from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function slackTest({ getService }: FtrProviderContext) {
@@ -47,6 +47,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
       expect(createdAction).to.eql({
         id: createdAction.id,
+        isPreconfigured: false,
         name: 'A slack action',
         actionTypeId: '.slack',
         config: {},
@@ -60,6 +61,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
+        isPreconfigured: false,
         name: 'A slack action',
         actionTypeId: '.slack',
         config: {},

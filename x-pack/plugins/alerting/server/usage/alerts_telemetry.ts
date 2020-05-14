@@ -5,6 +5,7 @@
  */
 
 import { APICaller } from 'kibana/server';
+import { SearchResponse } from 'elasticsearch';
 
 const alertTypeMetric = {
   scripted_metric: {
@@ -246,6 +247,8 @@ export async function getTotalCountAggregations(callCluster: APICaller, kibanaIn
   return {
     count_total: totalAlertsCount,
     count_by_type: Object.keys(results.aggregations.byAlertTypeId.value.types).reduce(
+      // ES DSL aggregations are returned as `any` by callCluster
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (obj: any, key: string) => ({
         ...obj,
         [key.replace('.', '__')]: results.aggregations.byAlertTypeId.value.types[key],
@@ -284,7 +287,7 @@ export async function getTotalCountAggregations(callCluster: APICaller, kibanaIn
 }
 
 export async function getTotalCountInUse(callCluster: APICaller, kibanaInex: string) {
-  const searchResult = await callCluster('search', {
+  const searchResult: SearchResponse<unknown> = await callCluster('search', {
     index: kibanaInex,
     rest_total_hits_as_int: true,
     body: {
@@ -305,6 +308,8 @@ export async function getTotalCountInUse(callCluster: APICaller, kibanaInex: str
       0
     ),
     countByType: Object.keys(searchResult.aggregations.byAlertTypeId.value.types).reduce(
+      // ES DSL aggregations are returned as `any` by callCluster
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (obj: any, key: string) => ({
         ...obj,
         [key.replace('.', '__')]: searchResult.aggregations.byAlertTypeId.value.types[key],

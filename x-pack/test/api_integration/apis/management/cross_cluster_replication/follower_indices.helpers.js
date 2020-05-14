@@ -13,7 +13,45 @@ export const registerHelpers = supertest => {
 
   const loadFollowerIndices = () => supertest.get(`${API_BASE_PATH}/follower_indices`);
 
-  const getFollowerIndex = name => supertest.get(`${API_BASE_PATH}/follower_indices/${name}`);
+  const getFollowerIndex = (name, waitUntilIsActive = false) => {
+    const maxRetries = 10;
+    const delayBetweenRetries = 500;
+    let retryCount = 0;
+
+    const proceed = async () => {
+      const response = await supertest.get(`${API_BASE_PATH}/follower_indices/${name}`);
+
+      if (waitUntilIsActive && response.body.status !== 'active') {
+        retryCount += 1;
+
+        if (retryCount > maxRetries) {
+          throw new Error('Error waiting for follower index to be active.');
+        }
+
+        return new Promise(resolve => setTimeout(resolve, delayBetweenRetries)).then(proceed);
+      }
+
+      return response;
+    };
+
+    return {
+      expect: status =>
+        new Promise((resolve, reject) =>
+          proceed()
+            .then(response => {
+              if (status !== response.status) {
+                reject(new Error(`Expected status ${status} but got ${response.status}`));
+              }
+              return resolve(response);
+            })
+            .catch(reject)
+        ),
+      then: (resolve, reject) =>
+        proceed()
+          .then(resolve)
+          .catch(reject),
+    };
+  };
 
   const createFollowerIndex = (name = getRandomString(), payload = getFollowerIndexPayload()) => {
     followerIndicesCreated.push(name);
@@ -22,6 +60,13 @@ export const registerHelpers = supertest => {
       .post(`${API_BASE_PATH}/follower_indices`)
       .set('kbn-xsrf', 'xxx')
       .send({ ...payload, name });
+  };
+
+  const updateFollowerIndex = (name, payload) => {
+    return supertest
+      .put(`${API_BASE_PATH}/follower_indices/${name}`)
+      .set('kbn-xsrf', 'xxx')
+      .send(payload);
   };
 
   const unfollowLeaderIndex = followerIndex => {
@@ -51,6 +96,7 @@ export const registerHelpers = supertest => {
     loadFollowerIndices,
     getFollowerIndex,
     createFollowerIndex,
+    updateFollowerIndex,
     unfollowAll,
   };
 };

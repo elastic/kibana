@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import { Redirect, useRouteMatch, Switch, Route } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
@@ -13,7 +13,6 @@ import {
   EuiCallOut,
   EuiText,
   EuiSpacer,
-  EuiTitle,
   EuiButtonEmpty,
   EuiI18nNumber,
   EuiDescriptionList,
@@ -26,12 +25,12 @@ import { useGetOneAgentConfig } from '../../../hooks';
 import { Loading } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
 import { ConfigRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
-import { EditConfigFlyout } from './components';
 import { LinkedAgentCount } from '../components';
 import { useAgentConfigLink } from './hooks/use_details_uri';
 import { DETAILS_ROUTER_PATH, DETAILS_ROUTER_SUB_PATH } from './constants';
 import { ConfigDatasourcesView } from './components/datasources';
 import { ConfigYamlView } from './components/yaml';
+import { ConfigSettingsView } from './components/settings';
 
 const Divider = styled.div`
   width: 0;
@@ -70,56 +69,42 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
   const configDetailsYamlLink = useAgentConfigLink('details-yaml', { configId });
   const configDetailsSettingsLink = useAgentConfigLink('details-settings', { configId });
 
-  // Flyout states
-  const [isEditConfigFlyoutOpen, setIsEditConfigFlyoutOpen] = useState<boolean>(false);
-
-  const refreshData = useCallback(() => {
-    refreshAgentConfig();
-    refreshAgentStatus();
-  }, [refreshAgentConfig, refreshAgentStatus]);
-
   const headerLeftContent = useMemo(
     () => (
-      <React.Fragment>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <div>
-                  <EuiButtonEmpty iconType="arrowLeft" href={configListLink} flush="left" size="xs">
-                    <FormattedMessage
-                      id="xpack.ingestManager.configDetails.viewAgentListTitle"
-                      defaultMessage="View all agent configurations"
-                    />
-                  </EuiButtonEmpty>
-                </div>
-                <EuiTitle size="l">
-                  <h1>
-                    {(agentConfig && agentConfig.name) || (
-                      <FormattedMessage
-                        id="xpack.ingestManager.configDetails.configDetailsTitle"
-                        defaultMessage="Config '{id}'"
-                        values={{
-                          id: configId,
-                        }}
-                      />
-                    )}
-                  </h1>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            {agentConfig && agentConfig.description ? (
-              <Fragment>
-                <EuiSpacer size="s" />
-                <EuiText color="subdued" size="s">
-                  {agentConfig.description}
-                </EuiText>
-              </Fragment>
-            ) : null}
+      <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+        <EuiFlexItem>
+          <EuiButtonEmpty iconType="arrowLeft" href={configListLink} flush="left" size="xs">
+            <FormattedMessage
+              id="xpack.ingestManager.configDetails.viewAgentListTitle"
+              defaultMessage="View all agent configurations"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText>
+            <h1>
+              {(agentConfig && agentConfig.name) || (
+                <FormattedMessage
+                  id="xpack.ingestManager.configDetails.configDetailsTitle"
+                  defaultMessage="Config '{id}'"
+                  values={{
+                    id: configId,
+                  }}
+                />
+              )}
+            </h1>
+          </EuiText>
+        </EuiFlexItem>
+
+        {agentConfig && agentConfig.description ? (
+          <EuiFlexItem>
+            <EuiSpacer size="s" />
+            <EuiText color="subdued" size="s">
+              {agentConfig.description}
+            </EuiText>
           </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="l" />
-      </React.Fragment>
+        ) : null}
+      </EuiFlexGroup>
     ),
     [configListLink, agentConfig, configId]
   );
@@ -196,7 +181,7 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
     return [
       {
         id: 'datasources',
-        name: i18n.translate('xpack.ingestManager.configDetails.subTabs.datasouces', {
+        name: i18n.translate('xpack.ingestManager.configDetails.subTabs.datasourcesTabText', {
           defaultMessage: 'Data sources',
         }),
         href: configDetailsLink,
@@ -204,15 +189,15 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
       },
       {
         id: 'yaml',
-        name: i18n.translate('xpack.ingestManager.configDetails.subTabs.yamlFile', {
-          defaultMessage: 'YAML File',
+        name: i18n.translate('xpack.ingestManager.configDetails.subTabs.yamlTabText', {
+          defaultMessage: 'YAML',
         }),
         href: configDetailsYamlLink,
         isSelected: tabId === 'yaml',
       },
       {
         id: 'settings',
-        name: i18n.translate('xpack.ingestManager.configDetails.subTabs.settings', {
+        name: i18n.translate('xpack.ingestManager.configDetails.subTabs.settingsTabText', {
           defaultMessage: 'Settings',
         }),
         href: configDetailsSettingsLink,
@@ -269,16 +254,6 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
           rightColumn={headerRightContent}
           tabs={(headerTabs as unknown) as EuiTabProps[]}
         >
-          {isEditConfigFlyoutOpen ? (
-            <EditConfigFlyout
-              onClose={() => {
-                setIsEditConfigFlyoutOpen(false);
-                refreshData();
-              }}
-              agentConfig={agentConfig}
-            />
-          ) : null}
-
           <Switch>
             <Route
               path={`${DETAILS_ROUTER_PATH}/yaml`}
@@ -289,8 +264,7 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
             <Route
               path={`${DETAILS_ROUTER_PATH}/settings`}
               render={() => {
-                // TODO: Settings implementation tracked via: https://github.com/elastic/kibana/issues/57959
-                return <div>Settings placeholder</div>;
+                return <ConfigSettingsView config={agentConfig} />;
               }}
             />
             <Route

@@ -4,45 +4,63 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import React, { useMemo, useCallback, memo } from 'react';
 import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageContent,
   EuiHorizontalRule,
-  EuiTitle,
   EuiBasicTable,
   EuiText,
   EuiLink,
   EuiHealth,
+  EuiToolTip,
 } from '@elastic/eui';
+import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { createStructuredSelector } from 'reselect';
+import { EuiBasicTableColumn } from '@elastic/eui';
 import { HostDetailsFlyout } from './details';
 import * as selectors from '../../store/hosts/selectors';
-import { HostAction } from '../../store/hosts/action';
-import { useHostListSelector } from './hooks';
+import { useHostSelector } from './hooks';
 import { CreateStructuredSelector } from '../../types';
 import { urlFromQueryParams } from './url_from_query_params';
+import { HostInfo, Immutable } from '../../../../../common/types';
+import { PageView } from '../components/page_view';
+import { useNavigateByRouterEventHandler } from '../hooks/use_navigate_by_router_event_handler';
+import { HOST_STATUS_TO_HEALTH_COLOR } from './host_constants';
+
+const HostLink = memo<{
+  name: string;
+  href: string;
+  route: ReturnType<typeof urlFromQueryParams>;
+}>(({ name, href, route }) => {
+  const clickHandler = useNavigateByRouterEventHandler(route);
+
+  return (
+    // eslint-disable-next-line @elastic/eui/href-or-on-click
+    <EuiLink
+      data-test-subj="hostnameCellLink"
+      className="eui-textTruncate"
+      href={href}
+      onClick={clickHandler}
+    >
+      {name}
+    </EuiLink>
+  );
+});
 
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const HostList = () => {
-  const dispatch = useDispatch<(a: HostAction) => void>();
   const history = useHistory();
   const {
     listData,
     pageIndex,
     pageSize,
     totalHits: totalItemCount,
-    isLoading,
+    listLoading: loading,
+    listError,
     uiQueryParams: queryParams,
     hasSelectedHost,
-  } = useHostListSelector(selector);
+  } = useHostSelector(selector);
 
   const paginationSetup = useMemo(() => {
     return {
@@ -57,34 +75,49 @@ export const HostList = () => {
   const onTableChange = useCallback(
     ({ page }: { page: { index: number; size: number } }) => {
       const { index, size } = page;
-      dispatch({
-        type: 'userPaginatedHostList',
-        payload: { pageIndex: index, pageSize: size },
-      });
+      history.push(
+        urlFromQueryParams({
+          ...queryParams,
+          page_index: JSON.stringify(index),
+          page_size: JSON.stringify(size),
+        })
+      );
     },
-    [dispatch]
+    [history, queryParams]
   );
 
-  const columns = useMemo(() => {
+  const columns: Array<EuiBasicTableColumn<Immutable<HostInfo>>> = useMemo(() => {
     return [
       {
-        field: '',
+        field: 'metadata.host',
         name: i18n.translate('xpack.endpoint.host.list.hostname', {
           defaultMessage: 'Hostname',
         }),
-        render: ({ host: { hostname, id } }: { host: { hostname: string; id: string } }) => {
+        render: ({ hostname, id }: HostInfo['metadata']['host']) => {
+          const newQueryParams = urlFromQueryParams({ ...queryParams, selected_host: id });
           return (
-            // eslint-disable-next-line @elastic/eui/href-or-on-click
-            <EuiLink
-              data-test-subj="hostnameCellLink"
-              href={'?' + urlFromQueryParams({ ...queryParams, selected_host: id }).search}
-              onClick={(ev: React.MouseEvent) => {
-                ev.preventDefault();
-                history.push(urlFromQueryParams({ ...queryParams, selected_host: id }));
-              }}
+            <HostLink name={hostname} href={'?' + newQueryParams.search} route={newQueryParams} />
+          );
+        },
+      },
+      {
+        field: 'host_status',
+        name: i18n.translate('xpack.endpoint.host.list.hostStatus', {
+          defaultMessage: 'Host Status',
+        }),
+        render: (hostStatus: HostInfo['host_status']) => {
+          return (
+            <EuiHealth
+              color={HOST_STATUS_TO_HEALTH_COLOR[hostStatus]}
+              data-test-subj="rowHostStatus"
+              className="eui-textTruncate"
             >
-              {hostname}
-            </EuiLink>
+              <FormattedMessage
+                id="xpack.endpoint.host.list.hostStatusValue"
+                defaultMessage="{hostStatus, select, online {Online} error {Error} other {Offline}}"
+                values={{ hostStatus }}
+              />
+            </EuiHealth>
           );
         },
       },
@@ -93,8 +126,9 @@ export const HostList = () => {
         name: i18n.translate('xpack.endpoint.host.list.policy', {
           defaultMessage: 'Policy',
         }),
+        truncateText: true,
         render: () => {
-          return 'Policy Name';
+          return <span className="eui-textTruncate">Policy Name</span>;
         },
       },
       {
@@ -103,7 +137,14 @@ export const HostList = () => {
           defaultMessage: 'Policy Status',
         }),
         render: () => {
-          return <EuiHealth color="success">Policy Status</EuiHealth>;
+          return (
+            <EuiHealth color="success" className="eui-textTruncate">
+              <FormattedMessage
+                id="xpack.endpoint.host.list.policyStatus"
+                defaultMessage="Policy Status"
+              />
+            </EuiHealth>
+          );
         },
       },
       {
@@ -117,25 +158,34 @@ export const HostList = () => {
         },
       },
       {
-        field: 'host.os.name',
+        field: 'metadata.host.os.name',
         name: i18n.translate('xpack.endpoint.host.list.os', {
           defaultMessage: 'Operating System',
         }),
+        truncateText: true,
       },
       {
-        field: 'host.ip',
+        field: 'metadata.host.ip',
         name: i18n.translate('xpack.endpoint.host.list.ip', {
           defaultMessage: 'IP Address',
         }),
+        render: (ip: string[]) => {
+          return (
+            <EuiToolTip content={ip.toString().replace(',', ', ')} anchorClassName="eui-fullWidth">
+              <EuiText size="s" className="eui-fullWidth">
+                <span className="eui-textTruncate eui-fullWidth">
+                  {ip.toString().replace(',', ', ')}
+                </span>
+              </EuiText>
+            </EuiToolTip>
+          );
+        },
       },
       {
-        field: '',
-        name: i18n.translate('xpack.endpoint.host.list.sensorVersion', {
-          defaultMessage: 'Sensor Version',
+        field: 'metadata.agent.version',
+        name: i18n.translate('xpack.endpoint.host.list.endpointVersion', {
+          defaultMessage: 'Version',
         }),
-        render: () => {
-          return 'version';
-        },
       },
       {
         field: '',
@@ -148,62 +198,32 @@ export const HostList = () => {
         },
       },
     ];
-  }, [queryParams, history]);
+  }, [queryParams]);
 
   return (
-    <HostPage>
+    <PageView
+      viewType="list"
+      data-test-subj="hostPage"
+      headerLeft={i18n.translate('xpack.endpoint.host.hosts', { defaultMessage: 'Hosts' })}
+    >
       {hasSelectedHost && <HostDetailsFlyout />}
-      <EuiPage className="hostPage">
-        <EuiPageBody>
-          <EuiPageHeader className="hostHeader">
-            <EuiTitle size="l">
-              <h1 data-test-subj="hostListTitle">
-                <FormattedMessage id="xpack.endpoint.host.hosts" defaultMessage="Hosts" />
-              </h1>
-            </EuiTitle>
-          </EuiPageHeader>
-
-          <EuiPageContent className="hostPageContent">
-            <EuiText color="subdued" size="xs">
-              <FormattedMessage
-                id="xpack.endpoint.host.list.totalCount"
-                defaultMessage="Showing: {totalItemCount, plural, one {# Host} other {# Hosts}}"
-                values={{ totalItemCount }}
-              />
-            </EuiText>
-            <EuiHorizontalRule margin="xs" />
-            <EuiBasicTable
-              data-test-subj="hostListTable"
-              items={listData}
-              columns={columns}
-              loading={isLoading}
-              pagination={paginationSetup}
-              onChange={onTableChange}
-            />
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
-    </HostPage>
+      <EuiText color="subdued" size="xs" data-test-subj="hostListTableTotal">
+        <FormattedMessage
+          id="xpack.endpoint.host.list.totalCount"
+          defaultMessage="{totalItemCount, plural, one {# Host} other {# Hosts}}"
+          values={{ totalItemCount }}
+        />
+      </EuiText>
+      <EuiHorizontalRule margin="xs" />
+      <EuiBasicTable
+        data-test-subj="hostListTable"
+        items={useMemo(() => [...listData], [listData])}
+        columns={columns}
+        loading={loading}
+        error={listError?.message}
+        pagination={paginationSetup}
+        onChange={onTableChange}
+      />
+    </PageView>
   );
 };
-
-const HostPage = styled.div`
-  .hostPage {
-    padding: 0;
-  }
-  .hostHeader {
-    background-color: ${props => props.theme.eui.euiColorLightestShade};
-    border-bottom: ${props => props.theme.eui.euiBorderThin};
-    padding: ${props =>
-      props.theme.eui.euiSizeXL +
-      ' ' +
-      0 +
-      props.theme.eui.euiSizeXL +
-      ' ' +
-      props.theme.eui.euiSizeL};
-    margin-bottom: 0;
-  }
-  .hostPageContent {
-    border: none;
-  }
-`;

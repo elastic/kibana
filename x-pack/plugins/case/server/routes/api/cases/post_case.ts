@@ -14,11 +14,18 @@ import { flattenCaseSavedObject, transformNewCase, wrapError, escapeHatch } from
 import { CasePostRequestRt, throwErrors, excess, CaseResponseRt } from '../../../../common/api';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
+import { CASES_URL } from '../../../../common/constants';
+import { getConnectorId } from './helpers';
 
-export function initPostCaseApi({ caseService, router, userActionService }: RouteDeps) {
+export function initPostCaseApi({
+  caseService,
+  caseConfigureService,
+  router,
+  userActionService,
+}: RouteDeps) {
   router.post(
     {
-      path: '/api/cases',
+      path: CASES_URL,
       validate: {
         body: escapeHatch,
       },
@@ -33,6 +40,8 @@ export function initPostCaseApi({ caseService, router, userActionService }: Rout
 
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const createdDate = new Date().toISOString();
+        const myCaseConfigure = await caseConfigureService.find({ client });
+        const connectorId = getConnectorId(myCaseConfigure);
         const newCase = await caseService.postNewCase({
           client,
           attributes: transformNewCase({
@@ -41,6 +50,7 @@ export function initPostCaseApi({ caseService, router, userActionService }: Rout
             username,
             full_name,
             email,
+            connectorId,
           }),
         });
 
@@ -58,7 +68,13 @@ export function initPostCaseApi({ caseService, router, userActionService }: Rout
           ],
         });
 
-        return response.ok({ body: CaseResponseRt.encode(flattenCaseSavedObject(newCase, [])) });
+        return response.ok({
+          body: CaseResponseRt.encode(
+            flattenCaseSavedObject({
+              savedObject: newCase,
+            })
+          ),
+        });
       } catch (error) {
         return response.customError(wrapError(error));
       }

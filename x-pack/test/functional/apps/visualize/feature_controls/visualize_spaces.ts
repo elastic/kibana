@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { VisualizeConstants } from '../../../../../../src/legacy/core_plugins/kibana/public/visualize/np_ready/visualize_constants';
+import { VisualizeConstants } from '../../../../../../src/plugins/visualize/public/application/visualize_constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const config = getService('config');
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'visualize', 'security', 'spaceSelector']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'security', 'spaceSelector', 'error']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 
@@ -47,7 +47,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`can view existing Visualization`, async () => {
         await PageObjects.common.navigateToActualUrl(
-          'kibana',
+          'visualize',
           `${VisualizeConstants.EDIT_PATH}/i-exist`,
           {
             basePath: '/s/custom_space',
@@ -86,18 +86,18 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).not.to.contain('Visualize');
       });
 
-      it(`create new visualization redirects to the home page`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', VisualizeConstants.CREATE_PATH, {
+      it(`create new visualization shows 404`, async () => {
+        await PageObjects.common.navigateToActualUrl('visualize', VisualizeConstants.CREATE_PATH, {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
+        await PageObjects.error.expectNotFound();
       });
 
-      it(`edit visualization for object which doesn't exist redirects to the home page`, async () => {
+      it(`edit visualization for object which doesn't exist shows 404`, async () => {
         await PageObjects.common.navigateToActualUrl(
-          'kibana',
+          'visualize',
           `${VisualizeConstants.EDIT_PATH}/i-dont-exist`,
           {
             basePath: '/s/custom_space',
@@ -105,12 +105,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
+        await PageObjects.error.expectNotFound();
       });
 
-      it(`edit visualization for object which exists redirects to the home page`, async () => {
+      it(`edit visualization for object which exists shows 404`, async () => {
         await PageObjects.common.navigateToActualUrl(
-          'kibana',
+          'visualize',
           `${VisualizeConstants.EDIT_PATH}/i-exist`,
           {
             basePath: '/s/custom_space',
@@ -118,7 +118,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
+        await PageObjects.error.expectNotFound();
       });
     });
   });

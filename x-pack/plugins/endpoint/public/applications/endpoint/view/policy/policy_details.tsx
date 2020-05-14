@@ -20,7 +20,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import { usePolicyDetailsSelector } from './policy_hooks';
 import {
   policyDetails,
@@ -29,18 +28,18 @@ import {
   isLoading,
   apiError,
 } from '../../store/policy_details/selectors';
-import { WindowsEventing } from './policy_forms/eventing/windows';
-import { PageView, PageViewHeaderTitle } from '../../components/page_view';
+import { PageView, PageViewHeaderTitle } from '../components/page_view';
 import { AppAction } from '../../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AgentsSummary } from './agents_summary';
 import { VerticalDivider } from './vertical_divider';
+import { WindowsEvents, MacEvents, LinuxEvents } from './policy_forms/events';
 import { MalwareProtections } from './policy_forms/protections/malware';
+import { useNavigateByRouterEventHandler } from '../hooks/use_navigate_by_router_event_handler';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
   const { notifications, services } = useKibana();
-  const history = useHistory();
 
   // Store values
   const policyItem = usePolicyDetailsSelector(policyDetails);
@@ -53,7 +52,7 @@ export const PolicyDetails = React.memo(() => {
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const policyName = policyItem?.name ?? '';
 
-  // Handle showing udpate statuses
+  // Handle showing update statuses
   useEffect(() => {
     if (policyUpdateStatus) {
       if (policyUpdateStatus.success) {
@@ -80,15 +79,9 @@ export const PolicyDetails = React.memo(() => {
         });
       }
     }
-  }, [notifications.toasts, policyItem, policyName, policyUpdateStatus]);
+  }, [notifications.toasts, policyName, policyUpdateStatus]);
 
-  const handleBackToListOnClick = useCallback(
-    ev => {
-      ev.preventDefault();
-      history.push(`/policy`);
-    },
-    [history]
-  );
+  const handleBackToListOnClick = useNavigateByRouterEventHandler('/policy');
 
   const handleSaveOnClick = useCallback(() => {
     setShowConfirm(true);
@@ -149,7 +142,10 @@ export const PolicyDetails = React.memo(() => {
         <VerticalDivider spacing="l" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={handleBackToListOnClick}>
+        <EuiButtonEmpty
+          onClick={handleBackToListOnClick}
+          data-test-subj="policyDetailsCancelButton"
+        >
           <FormattedMessage id="xpack.endpoint.policy.details.cancel" defaultMessage="Cancel" />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -157,7 +153,7 @@ export const PolicyDetails = React.memo(() => {
         <EuiButton
           fill={true}
           iconType="save"
-          // FIXME: need to disable if User has no write permissions to ingest - see: https://github.com/elastic/endpoint-app-team/issues/296
+          data-test-subj="policyDetailsSaveButton"
           onClick={handleSaveOnClick}
           isLoading={isPolicyLoading}
         >
@@ -202,7 +198,11 @@ export const PolicyDetails = React.memo(() => {
           </h4>
         </EuiText>
         <EuiSpacer size="xs" />
-        <WindowsEventing />
+        <WindowsEvents />
+        <EuiSpacer size="l" />
+        <MacEvents />
+        <EuiSpacer size="l" />
+        <LinuxEvents />
       </PageView>
     </>
   );
@@ -216,6 +216,7 @@ const ConfirmUpdate = React.memo<{
   return (
     <EuiOverlayMask>
       <EuiConfirmModal
+        data-test-subj="policyDetailsConfirmModal"
         title={i18n.translate('xpack.endpoint.policy.details.updateConfirm.title', {
           defaultMessage: 'Save and deploy changes',
         })}
@@ -237,6 +238,7 @@ const ConfirmUpdate = React.memo<{
         {hostCount > 0 && (
           <>
             <EuiCallOut
+              data-test-subj="policyDetailsWarningCallout"
               title={i18n.translate('xpack.endpoint.policy.details.updateConfirm.warningTitle', {
                 defaultMessage:
                   'This action will update {hostCount, plural, one {# host} other {# hosts}}',

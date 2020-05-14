@@ -7,27 +7,27 @@
 import expect from '@kbn/expect';
 
 export default ({ getService, getPageObjects }) => {
-  describe('creating and deleting default index', function describeIndexTests() {
+  describe('creating default index', function describeIndexTests() {
     const PageObjects = getPageObjects(['common', 'settings']);
     const retry = getService('retry');
     const log = getService('log');
     const browser = getService('browser');
 
     before(async () => {
+      await PageObjects.common.navigateToApp('management', { insertTimestamp: false });
       await browser.setWindowSize(1200, 800);
     });
 
     it('create makelogs工程 index pattern', async function pageHeader() {
       log.debug('create makelogs工程 index pattern');
-      await PageObjects.settings.createIndexPattern('makelogs工程-');
+      await PageObjects.settings.createIndexPattern('makelogs工程-*');
       const patternName = await PageObjects.settings.getIndexPageHeading();
       expect(patternName).to.be('makelogs工程-*');
     });
 
-    describe('index pattern creation', function indexPatternCreation() {
+    describe('create logstash index pattern', function indexPatternCreation() {
       before(async () => {
         await retry.tryForTime(120000, async () => {
-          await PageObjects.common.navigateToApp('settings', 'power', 'changeme');
           log.debug('create Index Pattern');
           await PageObjects.settings.createIndexPattern();
         });
@@ -48,7 +48,6 @@ export default ({ getService, getPageObjects }) => {
           'Searchable',
           'Aggregatable',
           'Excluded',
-          '',
         ];
 
         expect(headers.length).to.be(expectedHeaders.length);

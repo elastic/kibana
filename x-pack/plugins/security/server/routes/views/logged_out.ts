@@ -16,13 +16,12 @@ import { RouteDefinitionParams } from '..';
  * Defines routes required for the Logged Out view.
  */
 export function defineLoggedOutRoutes({
-  router,
   logger,
   authc,
-  csp,
+  httpResources,
   basePath,
 }: RouteDefinitionParams) {
-  router.get(
+  httpResources.register(
     {
       path: '/security/logged_out',
       validate: false,
@@ -39,10 +38,7 @@ export function defineLoggedOutRoutes({
         });
       }
 
-      return response.ok({
-        body: await context.core.rendering.render({ includeUserSettings: false }),
-        headers: { 'content-security-policy': csp.header },
-      });
+      return response.renderAnonymousCoreApp();
     }
   );
 }

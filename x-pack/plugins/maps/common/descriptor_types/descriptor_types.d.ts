@@ -5,13 +5,20 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { Query } from 'src/plugins/data/public';
 import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS, SORT_ORDER, SCALING_TYPES } from '../constants';
-import { VectorStyleDescriptor } from './style_property_descriptor_types';
+import { StyleDescriptor, VectorStyleDescriptor } from './style_property_descriptor_types';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
+
+export type AttributionDescriptor = {
+  attributionText?: string;
+  attributionUrl?: string;
+};
 
 export type AbstractSourceDescriptor = {
   id?: string;
   type: string;
+  applyGlobalQuery?: boolean;
 };
 
 export type EMSTMSSourceDescriptor = AbstractSourceDescriptor & {
@@ -21,7 +28,7 @@ export type EMSTMSSourceDescriptor = AbstractSourceDescriptor & {
 
 export type EMSFileSourceDescriptor = AbstractSourceDescriptor & {
   // id: EMS file id
-
+  id: string;
   tooltipProperties: string[];
 };
 
@@ -64,19 +71,18 @@ export type ESPewPewSourceDescriptor = AbstractESAggSourceDescriptor & {
 export type ESTermSourceDescriptor = AbstractESAggSourceDescriptor & {
   indexPatternTitle: string;
   term: string; // term field name
+  whereQuery?: Query;
 };
 
-export type KibanaRegionmapSourceDescriptor = {
-  type: string;
+export type KibanaRegionmapSourceDescriptor = AbstractSourceDescriptor & {
   name: string;
 };
 
-export type KibanaTilemapSourceDescriptor = {
-  type: string;
-};
+// This is for symmetry with other sources only.
+// It takes no additional configuration since  all params are in the .yml.
+export type KibanaTilemapSourceDescriptor = AbstractSourceDescriptor;
 
-export type WMSSourceDescriptor = {
-  type: string;
+export type WMSSourceDescriptor = AbstractSourceDescriptor & {
   serviceUrl: string;
   layers: string;
   styles: string;
@@ -84,10 +90,21 @@ export type WMSSourceDescriptor = {
   attributionUrl: string;
 };
 
-export type XYZTMSSourceDescriptor = {
-  id: string;
-  type: string;
+export type XYZTMSSourceDescriptor = AbstractSourceDescriptor &
+  AttributionDescriptor & {
+    urlTemplate: string;
+  };
+
+export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor & {
   urlTemplate: string;
+  layerName: string;
+
+  // These are the min/max zoom levels of the availability of the a particular layerName in the tileset at urlTemplate.
+  // These are _not_ the visible zoom-range of the data on a map.
+  // Tiled data can be displayed at higher levels of zoom than that they are stored in the tileset.
+  // e.g. EMS basemap data from level 14 is at most detailed resolution and can be displayed at higher levels
+  minSourceZoom: number;
+  maxSourceZoom: number;
 };
 
 export type JoinDescriptor = {
@@ -95,18 +112,37 @@ export type JoinDescriptor = {
   right: ESTermSourceDescriptor;
 };
 
+// todo : this union type is incompatible with dynamic extensibility of sources.
+// Reconsider using SourceDescriptor in type signatures for top-level classes
+export type SourceDescriptor =
+  | XYZTMSSourceDescriptor
+  | WMSSourceDescriptor
+  | KibanaTilemapSourceDescriptor
+  | KibanaRegionmapSourceDescriptor
+  | ESTermSourceDescriptor
+  | ESSearchSourceDescriptor
+  | ESGeoGridSourceDescriptor
+  | EMSFileSourceDescriptor
+  | ESPewPewSourceDescriptor
+  | TiledSingleLayerVectorSourceDescriptor
+  | EMSTMSSourceDescriptor
+  | EMSFileSourceDescriptor;
+
 export type LayerDescriptor = {
   __dataRequests?: DataRequestDescriptor[];
   __isInErrorState?: boolean;
   __errorMessage?: string;
+  __trackedLayerDescriptor?: LayerDescriptor;
   alpha?: number;
   id: string;
-  label?: string;
+  label?: string | null;
   minZoom?: number;
   maxZoom?: number;
-  sourceDescriptor: AbstractSourceDescriptor;
+  sourceDescriptor: SourceDescriptor | null;
   type?: string;
   visible?: boolean;
+  style?: StyleDescriptor | null;
+  query?: Query;
 };
 
 export type VectorLayerDescriptor = LayerDescriptor & {

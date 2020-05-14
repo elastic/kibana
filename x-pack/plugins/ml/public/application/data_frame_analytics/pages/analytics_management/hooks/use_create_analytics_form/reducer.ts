@@ -11,7 +11,7 @@ import numeral from '@elastic/numeral';
 import { isEmpty } from 'lodash';
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
-import { collapseLiteralStrings } from '../../../../../../../../../../src/plugins/es_ui_shared/console_lang/lib/json_xjson_translation_tools';
+import { collapseLiteralStrings } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
 
 import { Action, ACTION } from './actions';
 import { getInitialState, getJobConfigFromFormState, State } from './state';
@@ -124,6 +124,7 @@ export const validateAdvancedEditor = (state: State): State => {
     createIndexPattern,
     excludes,
     maxDistinctValuesError,
+    requiredFieldsError,
   } = state.form;
   const { jobConfig } = state;
 
@@ -330,6 +331,7 @@ export const validateAdvancedEditor = (state: State): State => {
 
   state.isValid =
     maxDistinctValuesError === undefined &&
+    requiredFieldsError === undefined &&
     excludesValid &&
     trainingPercentValid &&
     state.form.modelMemoryLimitUnitValid &&
@@ -397,6 +399,7 @@ const validateForm = (state: State): State => {
     maxDistinctValuesError,
     modelMemoryLimit,
     numTopFeatureImportanceValuesValid,
+    requiredFieldsError,
   } = state.form;
   const { estimatedModelMemoryLimit } = state;
 
@@ -412,6 +415,7 @@ const validateForm = (state: State): State => {
 
   state.isValid =
     maxDistinctValuesError === undefined &&
+    requiredFieldsError === undefined &&
     !jobTypeEmpty &&
     !mmlValidationResult &&
     !jobIdEmpty &&

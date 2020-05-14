@@ -34,6 +34,10 @@ export function isLoading(state: DataState) {
   return state.isLoading;
 }
 
+export function hasError(state: DataState) {
+  return state.hasError;
+}
+
 /**
  * An isometric projection is a method for representing three dimensional objects in 2 dimensions.
  * More information about isometric projections can be found here https://en.wikipedia.org/wiki/Isometric_projection.
@@ -293,7 +297,7 @@ function* levelOrderWithWidths(
         metadata.firstChildWidth = width;
       } else {
         const firstChildWidth = widths.get(siblings[0]);
-        const lastChildWidth = widths.get(siblings[0]);
+        const lastChildWidth = widths.get(siblings[siblings.length - 1]);
         if (firstChildWidth === undefined || lastChildWidth === undefined) {
           /**
            * All widths have been precalcluated, so this will not happen.

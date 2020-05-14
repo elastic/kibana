@@ -20,7 +20,7 @@ import { setUiMetricService } from './application/services/api';
 import { IndexMgmtMetricsType } from './types';
 import { ExtensionsService, ExtensionsSetup } from './services';
 
-export interface IndexMgmtSetup {
+export interface IndexManagementPluginSetup {
   extensionsService: ExtensionsSetup;
 }
 
@@ -40,7 +40,7 @@ export class IndexMgmtUIPlugin {
     setUiMetricService(this.uiMetricService);
   }
 
-  public setup(coreSetup: CoreSetup, plugins: PluginsDependencies): IndexMgmtSetup {
+  public setup(coreSetup: CoreSetup, plugins: PluginsDependencies): IndexManagementPluginSetup {
     const { http, notifications } = coreSetup;
     const { usageCollection, management } = plugins;
 
@@ -51,7 +51,7 @@ export class IndexMgmtUIPlugin {
     management.sections.getSection('elasticsearch')!.registerApp({
       id: PLUGIN.id,
       title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
-      order: 1,
+      order: 2,
       mount: async params => {
         const { mountManagementSection } = await import('./application/mount_management_section');
         const services = {

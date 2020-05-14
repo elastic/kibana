@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import './edit_user_page.scss';
+
 import { get } from 'lodash';
 import React, { Component, Fragment, ChangeEvent } from 'react';
 import {
@@ -35,6 +38,7 @@ import { RolesAPIClient } from '../../roles';
 import { ConfirmDeleteUsers, ChangePasswordForm } from '../components';
 import { UserValidator, UserValidationResult } from './validate_user';
 import { RoleComboBox } from '../../role_combo_box';
+import { isUserDeprecated, getExtendedUserDeprecationNotice, isUserReserved } from '../user_utils';
 import { UserAPIClient } from '..';
 
 interface Props {
@@ -241,7 +245,7 @@ export class EditUserPage extends Component<Props, State> {
     return (
       <Fragment>
         <EuiHorizontalRule />
-        {user.username === 'kibana' ? (
+        {user.username === 'kibana' || user.username === 'kibana_system' ? (
           <Fragment>
             <EuiCallOut
               title={i18n.translate(
@@ -254,9 +258,9 @@ export class EditUserPage extends Component<Props, State> {
               <p>
                 <FormattedMessage
                   id="xpack.security.management.users.editUser.changePasswordUpdateKibanaTitle"
-                  defaultMessage="After you change the password for the kibana user, you must update the {kibana}
+                  defaultMessage="After you change the password for the {username} user, you must update the {kibana}
                   file and restart Kibana."
-                  values={{ kibana: 'kibana.yml' }}
+                  values={{ kibana: 'kibana.yml', username: user.username }}
                 />
               </p>
             </EuiCallOut>
@@ -369,7 +373,7 @@ export class EditUserPage extends Component<Props, State> {
       isNewUser,
       showDeleteConfirmation,
     } = this.state;
-    const reserved = user.metadata && user.metadata._reserved;
+    const reserved = isUserReserved(user);
     if (!user || !roles) {
       return null;
     }
@@ -424,15 +428,31 @@ export class EditUserPage extends Component<Props, State> {
           </EuiPageContentHeader>
           <EuiPageContentBody>
             {reserved && (
-              <EuiText size="s" color="subdued">
-                <p>
-                  <FormattedMessage
-                    id="xpack.security.management.users.editUser.modifyingReservedUsersDescription"
-                    defaultMessage="Reserved users are built-in and cannot be removed or modified. Only the password
+              <Fragment>
+                <EuiText size="s" color="subdued">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.security.management.users.editUser.modifyingReservedUsersDescription"
+                      defaultMessage="Reserved users are built-in and cannot be removed or modified. Only the password
                     may be changed."
-                  />
-                </p>
-              </EuiText>
+                    />
+                  </p>
+                </EuiText>
+                <EuiSpacer size="s" />
+              </Fragment>
+            )}
+
+            {isUserDeprecated(user) && (
+              <Fragment>
+                <EuiCallOut
+                  data-test-subj="deprecatedUserWarning"
+                  title={getExtendedUserDeprecationNotice(user)}
+                  color="warning"
+                  iconType="alert"
+                  size="s"
+                />
+                <EuiSpacer size="s" />
+              </Fragment>
             )}
 
             {showDeleteConfirmation ? (

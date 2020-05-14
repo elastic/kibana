@@ -49,7 +49,8 @@ export default async (kbnServer, kibanaHapiServer, config) => {
     config.get('optimize.watchPort'),
     config.get('server.basePath'),
     watchOptimizer,
-    getNpUiPluginPublicDirs(kbnServer)
+    getNpUiPluginPublicDirs(kbnServer),
+    kbnServer.newPlatform.env.packageInfo.buildNum.toString()
   );
 
   watchOptimizer.status$.subscribe({

@@ -29,9 +29,9 @@ export const UpdateAgentConfigRequestSchema = {
   body: NewAgentConfigSchema,
 };
 
-export const DeleteAgentConfigsRequestSchema = {
+export const DeleteAgentConfigRequestSchema = {
   body: schema.object({
-    agentConfigIds: schema.arrayOf(schema.string()),
+    agentConfigId: schema.string(),
   }),
 };
 

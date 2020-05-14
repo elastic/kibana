@@ -19,7 +19,7 @@ export enum InstallStatus {
   uninstalling = 'uninstalling',
 }
 
-export type DetailViewPanelName = 'overview' | 'data-sources';
+export type DetailViewPanelName = 'overview' | 'data-sources' | 'settings';
 export type ServiceName = 'kibana' | 'elasticsearch';
 export type AssetType = KibanaAssetType | ElasticsearchAssetType | AgentAssetType;
 
@@ -28,9 +28,11 @@ export enum KibanaAssetType {
   visualization = 'visualization',
   search = 'search',
   indexPattern = 'index-pattern',
+  map = 'map',
 }
 
 export enum ElasticsearchAssetType {
+  componentTemplate = 'component-template',
   ingestPipeline = 'ingest-pipeline',
   indexTemplate = 'index-template',
   ilmPolicy = 'ilm-policy',
@@ -56,6 +58,7 @@ export interface RegistryPackage {
   icons?: RegistryImage[];
   assets?: string[];
   internal?: boolean;
+  removable?: boolean;
   format_version: string;
   datasets?: Dataset[];
   datasources?: RegistryDatasource[];
@@ -94,6 +97,7 @@ export interface RegistryStream {
   description?: string;
   enabled?: boolean;
   vars?: RegistryVarsEntry[];
+  template?: string;
 }
 
 export type RequirementVersion = string;
@@ -200,6 +204,7 @@ export interface RegistryVarsEntry {
 // internal until we need them
 interface PackageAdditions {
   title: string;
+  latestVersion: string;
   assets: AssetsGroupedByServiceByType;
 }
 
@@ -217,6 +222,7 @@ export type PackageInfo = Installable<
 
 export interface Installation extends SavedObjectAttributes {
   installed: AssetReference[];
+  es_index_patterns: Record<string, string>;
   name: string;
   version: string;
 }
@@ -243,6 +249,7 @@ export enum IngestAssetType {
   DataFrameTransform = 'data-frame-transform',
   IlmPolicy = 'ilm-policy',
   IndexTemplate = 'index-template',
+  ComponentTemplate = 'component-template',
   IngestPipeline = 'ingest-pipeline',
   MlJob = 'ml-job',
   RollupJob = 'rollup-job',
@@ -251,12 +258,27 @@ export enum IngestAssetType {
 export enum DefaultPackages {
   base = 'base',
   system = 'system',
+  endpoint = 'endpoint',
 }
 
+export interface IndexTemplateMappings {
+  properties: any;
+}
+
+// This is an index template v2, see https://github.com/elastic/elasticsearch/issues/53101
+// until "proper" documentation of the new format is available.
+// Ingest Manager does not use nor support the legacy index template v1 format at all
 export interface IndexTemplate {
-  order: number;
+  priority: number;
   index_patterns: string[];
-  settings: any;
-  mappings: object;
-  aliases: object;
+  template: {
+    settings: any;
+    mappings: object;
+    aliases: object;
+  };
+}
+
+export interface TemplateRef {
+  templateName: string;
+  indexTemplate: IndexTemplate;
 }

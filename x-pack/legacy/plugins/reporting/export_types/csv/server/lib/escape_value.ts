@@ -5,15 +5,20 @@
  */
 
 import { RawValue } from './types';
+import { cellHasFormulas } from './cell_has_formula';
 
 const nonAlphaNumRE = /[^a-zA-Z0-9]/;
 const allDoubleQuoteRE = /"/g;
 
-export function createEscapeValue(quoteValues: boolean): (val: RawValue) => string {
+export function createEscapeValue(
+  quoteValues: boolean,
+  escapeFormulas: boolean
+): (val: RawValue) => string {
   return function escapeValue(val: RawValue) {
     if (val && typeof val === 'string') {
-      if (quoteValues && nonAlphaNumRE.test(val)) {
-        return `"${val.replace(allDoubleQuoteRE, '""')}"`;
+      const formulasEscaped = escapeFormulas && cellHasFormulas(val) ? "'" + val : val;
+      if (quoteValues && nonAlphaNumRE.test(formulasEscaped)) {
+        return `"${formulasEscaped.replace(allDoubleQuoteRE, '""')}"`;
       }
     }
 

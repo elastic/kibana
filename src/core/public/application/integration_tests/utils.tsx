@@ -18,6 +18,7 @@
  */
 
 import React, { ReactElement } from 'react';
+import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
 
 import { I18nProvider } from '@kbn/i18n/react';
@@ -34,7 +35,9 @@ export const createRenderer = (element: ReactElement | null): Renderer => {
   return () =>
     new Promise(async resolve => {
       if (dom) {
-        dom.update();
+        await act(async () => {
+          dom.update();
+        });
       }
       setImmediate(() => resolve(dom)); // flushes any pending promises
     });

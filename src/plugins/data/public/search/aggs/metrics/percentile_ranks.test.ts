@@ -17,18 +17,37 @@
  * under the License.
  */
 
-import { IPercentileRanksAggConfig, percentileRanksMetricAgg } from './percentile_ranks';
+import {
+  IPercentileRanksAggConfig,
+  getPercentileRanksMetricAgg,
+  PercentileRanksMetricAggDependencies,
+} from './percentile_ranks';
 import { AggConfigs, IAggConfigs } from '../agg_configs';
-import { mockDataServices, mockAggTypesRegistry } from '../test_helpers';
+import { mockAggTypesRegistry } from '../test_helpers';
 import { METRIC_TYPES } from './metric_agg_types';
+import { FieldFormatsStart } from '../../../field_formats';
+import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
+import { notificationServiceMock } from '../../../../../../../src/core/public/mocks';
+import { InternalStartServices } from '../../../types';
 
 describe('AggTypesMetricsPercentileRanksProvider class', function() {
   let aggConfigs: IAggConfigs;
+  let fieldFormats: FieldFormatsStart;
+  let aggTypesDependencies: PercentileRanksMetricAggDependencies;
 
   beforeEach(() => {
-    mockDataServices();
-
-    const typesRegistry = mockAggTypesRegistry([percentileRanksMetricAgg]);
+    fieldFormats = fieldFormatsServiceMock.createStartContract();
+    fieldFormats.getDefaultInstance = (() => ({
+      convert: (t?: string) => t,
+    })) as any;
+    aggTypesDependencies = {
+      getInternalStartServices: () =>
+        (({
+          fieldFormats,
+          notifications: notificationServiceMock.createStartContract(),
+        } as unknown) as InternalStartServices),
+    };
+    const typesRegistry = mockAggTypesRegistry([getPercentileRanksMetricAgg(aggTypesDependencies)]);
     const field = {
       name: 'bytes',
     };
@@ -49,23 +68,18 @@ describe('AggTypesMetricsPercentileRanksProvider class', function() {
           type: METRIC_TYPES.PERCENTILE_RANKS,
           schema: 'metric',
           params: {
-            field: {
-              displayName: 'bytes',
-              format: {
-                convert: jest.fn(x => x),
-              },
-            },
+            field: 'bytes',
             customLabel: 'my custom field label',
             values: [5000, 10000],
           },
         },
       ],
-      { typesRegistry }
+      { typesRegistry, fieldFormats: aggTypesDependencies.getInternalStartServices().fieldFormats }
     );
   });
 
   it('uses the custom label if it is set', function() {
-    const responseAggs: any = percentileRanksMetricAgg.getResponseAggs(
+    const responseAggs: any = getPercentileRanksMetricAgg(aggTypesDependencies).getResponseAggs(
       aggConfigs.aggs[0] as IPercentileRanksAggConfig
     );
 

@@ -18,7 +18,6 @@ import {
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { getMetricMetadata } from './lib/get_metric_metadata';
 import { pickFeatureName } from './lib/pick_feature_name';
-import { hasAPMData } from './lib/has_apm_data';
 import { getCloudMetricsMetadata } from './lib/get_cloud_metric_metadata';
 import { getNodeInfo } from './lib/get_node_info';
 import { throwErrors } from '../../../common/runtime_types';
@@ -38,13 +37,13 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
     },
     async (requestContext, request, response) => {
       try {
-        const { nodeId, nodeType, sourceId } = pipe(
+        const { nodeId, nodeType, sourceId, timeRange } = pipe(
           InfraMetadataRequestRT.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
 
         const { configuration } = await libs.sources.getSourceConfiguration(
-          requestContext,
+          requestContext.core.savedObjects.client,
           sourceId
         );
         const metricsMetadata = await getMetricMetadata(
@@ -52,7 +51,8 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
           requestContext,
           configuration,
           nodeId,
-          nodeType
+          nodeType,
+          timeRange
         );
         const metricFeatures = pickFeatureName(metricsMetadata.buckets).map(
           nameToFeature('metrics')
@@ -62,21 +62,24 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
         const cloudInstanceId = get<string>(info, 'cloud.instance.id');
 
         const cloudMetricsMetadata = cloudInstanceId
-          ? await getCloudMetricsMetadata(framework, requestContext, configuration, cloudInstanceId)
+          ? await getCloudMetricsMetadata(
+              framework,
+              requestContext,
+              configuration,
+              cloudInstanceId,
+              timeRange
+            )
           : { buckets: [] };
         const cloudMetricsFeatures = pickFeatureName(cloudMetricsMetadata.buckets).map(
           nameToFeature('metrics')
         );
-        const hasAPM = await hasAPMData(framework, requestContext, configuration, nodeId, nodeType);
-        const apmMetricFeatures = hasAPM ? [{ name: 'apm.transaction', source: 'apm' }] : [];
-
         const id = metricsMetadata.id;
         const name = metricsMetadata.name || id;
         return response.ok({
           body: InfraMetadataRT.encode({
             id,
             name,
-            features: [...metricFeatures, ...cloudMetricsFeatures, ...apmMetricFeatures],
+            features: [...metricFeatures, ...cloudMetricsFeatures],
             info,
           }),
         });

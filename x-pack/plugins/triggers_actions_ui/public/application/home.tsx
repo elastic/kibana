@@ -29,8 +29,8 @@ import { hasShowActionsCapability, hasShowAlertsCapability } from './lib/capabil
 
 import { ActionsConnectorsList } from './sections/actions_connectors_list/components/actions_connectors_list';
 import { AlertsList } from './sections/alerts_list/components/alerts_list';
-import { SecurityEnabledCallOut } from './components/security_call_out';
 import { PLUGIN } from './constants/plugin';
+import { HealthCheck } from './components/health_check';
 
 interface MatchParams {
   section: Section;
@@ -88,7 +88,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   return (
     <EuiPageBody>
       <EuiPageContent>
-        <SecurityEnabledCallOut docLinks={docLinks} http={http} />
         <EuiPageContentHeader>
           <EuiPageContentHeaderSection>
             <EuiTitle size="m">
@@ -142,11 +141,32 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 
         <Switch>
           {canShowActions && (
-            <Route exact path={routeToConnectors} component={ActionsConnectorsList} />
+            <Route
+              exact
+              path={routeToConnectors}
+              component={() => (
+                <HealthCheck docLinks={docLinks} http={http}>
+                  <ActionsConnectorsList />
+                </HealthCheck>
+              )}
+            />
           )}
-          {canShowAlerts && <Route exact path={routeToAlerts} component={AlertsList} />}
+          {canShowAlerts && (
+            <Route
+              exact
+              path={routeToAlerts}
+              component={() => (
+                <HealthCheck docLinks={docLinks} http={http}>
+                  <AlertsList />
+                </HealthCheck>
+              )}
+            />
+          )}
         </Switch>
       </EuiPageContent>
     </EuiPageBody>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { TriggersActionsUIHome as default };

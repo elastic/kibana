@@ -33,7 +33,6 @@ export default function({ getService, getPageObjects }) {
 
   // FLAKY: https://github.com/elastic/kibana/issues/62281
   describe.skip('doc link in discover', function contextSize() {
-    this.tags('smoke');
     before(async function() {
       await esArchiver.loadIfNeeded('logstash_functional');
       await PageObjects.common.navigateToApp('discover');

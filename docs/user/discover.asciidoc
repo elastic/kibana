@@ -21,6 +21,7 @@ image::images/Discover-Start.png[Discover]
 
 
 [float]
+[[select-pattern]]
 === Set up your index pattern
 
 The first thing to do in *Discover* is to select an <<index-patterns, index pattern>>, which
@@ -33,7 +34,7 @@ which has a pre-built index pattern.
 
 By default, *Discover* shows data for the last 15 minutes.
 If you have a time-based index, and no data displays,
-you might need to increase the time range. Using the <<set-time-filter, time filter>> in the upper right,
+you might need to increase the time range. Using the <<set-time-filter, time filter>>,
 you can specify a common or recently-used time range, a relative time
 from now, or an absolute time range.
 

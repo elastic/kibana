@@ -67,6 +67,13 @@ export interface AppBase {
   navLinkStatus?: AppNavLinkStatus;
 
   /**
+   * Allow to define the default path a user should be directed to when navigating to the app.
+   * When defined, this value will be used as a default for the `path` option when calling {@link ApplicationStart.navigateToApp | navigateToApp}`,
+   * and will also be appended to the {@link ChromeNavLink | application navLink} in the navigation bar.
+   */
+  defaultPath?: string;
+
+  /**
    * An {@link AppUpdater} observable that can be used to update the application {@link AppUpdatableFields} at runtime.
    *
    * @example
@@ -187,7 +194,10 @@ export enum AppNavLinkStatus {
  * Defines the list of fields that can be updated via an {@link AppUpdater}.
  * @public
  */
-export type AppUpdatableFields = Pick<AppBase, 'status' | 'navLinkStatus' | 'tooltip'>;
+export type AppUpdatableFields = Pick<
+  AppBase,
+  'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath'
+>;
 
 /**
  * Updater for applications.
@@ -642,7 +652,8 @@ export interface ApplicationStart {
    * Navigate to a given app
    *
    * @param appId
-   * @param options.path - optional path inside application to deep link to
+   * @param options.path - optional path inside application to deep link to.
+   *                       If undefined, will use {@link AppBase.defaultPath | the app's default path}` as default.
    * @param options.state - optional state to forward to the application
    */
   navigateToApp(appId: string, options?: { path?: string; state?: any }): Promise<void>;

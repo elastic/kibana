@@ -307,6 +307,7 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
       await element.scrollIntoViewIfNecessary();
     }
 
+    // isChecked always returns false when run on an euiSwitch, because they use the aria-checked attribute
     public async isChecked(selector: string) {
       const checkbox = await this.find(selector);
       return await checkbox.isSelected();
@@ -316,7 +317,22 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
       const isChecked = await this.isChecked(selector);
       const states = { check: true, uncheck: false };
       if (isChecked !== states[state]) {
-        log.debug(`updating checkbox ${selector}`);
+        log.debug(`updating checkbox ${selector} from ${isChecked} to ${states[state]}`);
+        await this.click(selector);
+      }
+    }
+
+    public async isEuiSwitchChecked(selector: string) {
+      const euiSwitch = await this.find(selector);
+      const isChecked = await euiSwitch.getAttribute('aria-checked');
+      return isChecked === 'true';
+    }
+
+    public async setEuiSwitch(selector: string, state: 'check' | 'uncheck') {
+      const isChecked = await this.isEuiSwitchChecked(selector);
+      const states = { check: true, uncheck: false };
+      if (isChecked !== states[state]) {
+        log.debug(`updating checkbox ${selector} from ${isChecked} to ${states[state]}`);
         await this.click(selector);
       }
     }

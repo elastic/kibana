@@ -10,8 +10,10 @@
 import angular from 'angular';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import '../../../../webpackShims/ace';
-// required for i18nIdDirective
+// required for i18nIdDirective and `ngSanitize` angular module
 import 'angular-sanitize';
+// required for ngRoute
+import 'angular-route';
 // type imports
 import {
   AppMountContext,
@@ -31,7 +33,6 @@ import { checkLicense } from '../common/check_license';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import {
-  addAppRedirectMessageToUrl,
   configureAppAngularModule,
   createTopNavDirective,
   createTopNavHelper,
@@ -81,8 +82,13 @@ export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) 
     const licenseAllowsToShowThisPage = info.showAppLink && info.enableAppLink;
 
     if (!licenseAllowsToShowThisPage) {
-      const newUrl = addAppRedirectMessageToUrl(deps.addBasePath('/app/kibana'), info.message);
-      window.location.href = newUrl;
+      deps.coreStart.notifications.toasts.addDanger(info.message);
+      // This has to happen in the next tick because otherwise the original navigation
+      // bringing us to the graph app in the first place
+      // never completes and the browser enters are redirect loop
+      setTimeout(() => {
+        deps.coreStart.application.navigateToApp('home');
+      }, 0);
     }
   });
 
@@ -94,7 +100,7 @@ export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) 
   };
 };
 
-const mainTemplate = (basePath: string) => `<div ng-view class="kbnLocalApplicationWrapper">
+const mainTemplate = (basePath: string) => `<div ng-view class="gphAppWrapper">
   <base href="${basePath}" />
 </div>
 `;
@@ -105,14 +111,14 @@ const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react', 'ui.boo
 
 function mountGraphApp(appBasePath: string, element: HTMLElement) {
   const mountpoint = document.createElement('div');
-  mountpoint.setAttribute('class', 'kbnLocalApplicationWrapper');
+  mountpoint.setAttribute('class', 'gphAppWrapper');
   // eslint-disable-next-line
   mountpoint.innerHTML = mainTemplate(appBasePath);
   // bootstrap angular into detached element and attach it later to
   // make angular-within-angular possible
   const $injector = angular.bootstrap(mountpoint, [moduleName]);
   element.appendChild(mountpoint);
-  element.setAttribute('class', 'kbnLocalApplicationWrapper');
+  element.setAttribute('class', 'gphAppWrapper');
   return $injector;
 }
 

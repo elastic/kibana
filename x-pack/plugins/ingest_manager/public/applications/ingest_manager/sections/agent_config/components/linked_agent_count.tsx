@@ -8,7 +8,7 @@ import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink } from '@elastic/eui';
 import { useLink } from '../../../hooks';
-import { FLEET_AGENTS_PATH } from '../../../constants';
+import { FLEET_AGENTS_PATH, AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
 
 export const LinkedAgentCount = memo<{ count: number; agentConfigId: string }>(
   ({ count, agentConfigId }) => {
@@ -21,7 +21,7 @@ export const LinkedAgentCount = memo<{ count: number; agentConfigId: string }>(
       />
     );
     return count > 0 ? (
-      <EuiLink href={`${FLEET_URI}?kuery=agents.config_id : ${agentConfigId}`}>
+      <EuiLink href={`${FLEET_URI}?kuery=${AGENT_SAVED_OBJECT_TYPE}.config_id : ${agentConfigId}`}>
         {displayValue}
       </EuiLink>
     ) : (

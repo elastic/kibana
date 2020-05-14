@@ -5,11 +5,15 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
-import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../../constants';
+import {
+  INDEX_PATTERN_SAVED_OBJECT_TYPE,
+  INDEX_PATTERN_PLACEHOLDER_SUFFIX,
+} from '../../../../constants';
 import * as Registry from '../../registry';
 import { loadFieldsFromYaml, Fields, Field } from '../../fields/field';
 import { getPackageKeysByStatus } from '../../packages/get';
-import { InstallationStatus, RegistryPackage } from '../../../../types';
+import { InstallationStatus, RegistryPackage, CallESAsCurrentUser } from '../../../../types';
+import { appContextService } from '../../../../services';
 
 interface FieldFormatMap {
   [key: string]: FieldFormatMapItem;
@@ -47,6 +51,7 @@ const typeMap: TypeMap = {
   date: 'date',
   ip: 'ip',
   boolean: 'boolean',
+  constant_keyword: 'string',
 };
 
 export interface IndexPatternField {
@@ -62,31 +67,39 @@ export interface IndexPatternField {
   enabled?: boolean;
   script?: string;
   lang?: string;
+  readFromDocValues: boolean;
 }
 export enum IndexPatternType {
   logs = 'logs',
   metrics = 'metrics',
   events = 'events',
 }
-
+// TODO: use a function overload and make pkgName and pkgVersion required for install/update
+// and not for an update removal.  or separate out the functions
 export async function installIndexPatterns(
   savedObjectsClient: SavedObjectsClientContract,
-  pkgkey?: string
+  pkgName?: string,
+  pkgVersion?: string
 ) {
   // get all user installed packages
   const installedPackages = await getPackageKeysByStatus(
     savedObjectsClient,
     InstallationStatus.installed
   );
-  // add this package to the array if it doesn't already exist
-  // this should not happen because a user can't "reinstall" a package
-  // if it does because the install endpoint is called directly, the install continues
-  if (pkgkey && !installedPackages.includes(pkgkey)) {
-    installedPackages.push(pkgkey);
+  if (pkgName && pkgVersion) {
+    // add this package to the array if it doesn't already exist
+    const foundPkg = installedPackages.find(pkg => pkg.pkgName === pkgName);
+    // this may be removed if we add the packged to saved objects before installing index patterns
+    // otherwise this is a first time install
+    // TODO: handle update case when versions are different
+    if (!foundPkg) {
+      installedPackages.push({ pkgName, pkgVersion });
+    }
   }
-
   // get each package's registry info
-  const installedPackagesFetchInfoPromise = installedPackages.map(pkg => Registry.fetchInfo(pkg));
+  const installedPackagesFetchInfoPromise = installedPackages.map(pkg =>
+    Registry.fetchInfo(pkg.pkgName, pkg.pkgVersion)
+  );
   const installedPackagesInfo = await Promise.all(installedPackagesFetchInfoPromise);
 
   // for each index pattern type, create an index pattern
@@ -97,7 +110,7 @@ export async function installIndexPatterns(
   ];
   indexPatternTypes.forEach(async indexPatternType => {
     // if this is an update because a package is being unisntalled (no pkgkey argument passed) and no other packages are installed, remove the index pattern
-    if (!pkgkey && installedPackages.length === 0) {
+    if (!pkgName && installedPackages.length === 0) {
       try {
         await savedObjectsClient.delete(INDEX_PATTERN_SAVED_OBJECT_TYPE, `${indexPatternType}-*`);
       } catch (err) {
@@ -226,6 +239,7 @@ export const transformField = (field: Field, i: number, fields: Fields): IndexPa
     searchable: field.searchable ?? true,
     aggregatable: field.aggregatable ?? true,
     doc_values: field.doc_values ?? true,
+    readFromDocValues: field.doc_values ?? true,
   };
 
   // if type exists, check if it exists in the map
@@ -243,6 +257,7 @@ export const transformField = (field: Field, i: number, fields: Fields): IndexPa
     newField.aggregatable = false;
     newField.analyzed = false;
     newField.doc_values = field.doc_values ?? false;
+    newField.readFromDocValues = field.doc_values ?? false;
     newField.indexed = false;
     newField.searchable = false;
   }
@@ -254,6 +269,7 @@ export const transformField = (field: Field, i: number, fields: Fields): IndexPa
       newField.aggregatable = false;
       newField.analyzed = false;
       newField.doc_values = false;
+      newField.readFromDocValues = false;
       newField.indexed = false;
       newField.searchable = false;
     }
@@ -268,6 +284,7 @@ export const transformField = (field: Field, i: number, fields: Fields): IndexPa
     newField.script = field.script;
     newField.lang = 'painless';
     newField.doc_values = false;
+    newField.readFromDocValues = false;
   }
 
   return newField;
@@ -348,4 +365,32 @@ const getFieldFormatParams = (field: Field): FieldFormatParams => {
   if (field.url_template) params.urlTemplate = field.url_template;
   if (field.open_link_in_current_tab) params.openLinkInCurrentTab = field.open_link_in_current_tab;
   return params;
+};
+
+export const ensureDefaultIndices = async (callCluster: CallESAsCurrentUser) => {
+  // create placeholder indices to supress errors in the kibana Dashboards app
+  // that no matching indices exist https://github.com/elastic/kibana/issues/62343
+  const logger = appContextService.getLogger();
+  return Promise.all(
+    Object.keys(IndexPatternType).map(async indexPattern => {
+      const defaultIndexPatternName = indexPattern + INDEX_PATTERN_PLACEHOLDER_SUFFIX;
+      const indexExists = await callCluster('indices.exists', { index: defaultIndexPatternName });
+      if (!indexExists) {
+        try {
+          await callCluster('indices.create', {
+            index: defaultIndexPatternName,
+            body: {
+              mappings: {
+                properties: {
+                  '@timestamp': { type: 'date' },
+                },
+              },
+            },
+          });
+        } catch (putErr) {
+          logger.error(`${defaultIndexPatternName} could not be created`);
+        }
+      }
+    })
+  );
 };

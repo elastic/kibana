@@ -11,7 +11,7 @@ import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/
 import { SecurityPluginSetup } from '../../../../plugins/security/server';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import { ReportingPluginSpecOptions } from '../types';
-import { ReportingConfig, ReportingConfigType } from './core';
+import { ReportingConfigType } from './core';
 
 export interface ReportingSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
@@ -30,7 +30,6 @@ export type ReportingSetup = object;
 export type ReportingStart = object;
 
 export interface LegacySetup {
-  config: Legacy.Server['config'];
   plugins: {
     xpack_main: XPackMainPlugin & {
       status?: any;

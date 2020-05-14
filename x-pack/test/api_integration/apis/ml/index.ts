@@ -7,6 +7,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService, loadTestFile }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
   describe('Machine Learning', function() {
@@ -20,13 +21,23 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
     after(async () => {
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
+
+      await ml.testResources.deleteIndexPattern('kibana_sample_data_logs');
+
+      await esArchiver.unload('ml/ecommerce');
+      await esArchiver.unload('ml/categorization');
+      await esArchiver.unload('ml/sample_logs');
+
+      await ml.testResources.resetKibanaTimeZone();
     });
 
-    loadTestFile(require.resolve('./bucket_span_estimator'));
-    loadTestFile(require.resolve('./calculate_model_memory_limit'));
-    loadTestFile(require.resolve('./categorization_field_examples'));
-    loadTestFile(require.resolve('./get_module'));
-    loadTestFile(require.resolve('./recognize_module'));
-    loadTestFile(require.resolve('./setup_module'));
+    loadTestFile(require.resolve('./modules'));
+    loadTestFile(require.resolve('./anomaly_detectors'));
+    loadTestFile(require.resolve('./data_visualizer'));
+    loadTestFile(require.resolve('./fields_service'));
+    loadTestFile(require.resolve('./job_validation'));
+    loadTestFile(require.resolve('./jobs'));
+    loadTestFile(require.resolve('./results'));
+    loadTestFile(require.resolve('./data_frame_analytics'));
   });
 }

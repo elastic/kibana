@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from 'lodash';
+import { get } from 'lodash';
 import {
   APICaller,
-  ElasticsearchServiceSetup,
+  ElasticsearchServiceStart,
   ISavedObjectsRepository,
   SavedObjectsServiceStart,
 } from 'src/core/server';
@@ -51,7 +51,7 @@ async function getDeprecationLoggingStatusValue(callAsCurrentUser: APICaller): P
 }
 
 export async function fetchUpgradeAssistantMetrics(
-  { adminClient }: ElasticsearchServiceSetup,
+  { legacy: { client: esClient } }: ElasticsearchServiceStart,
   savedObjects: SavedObjectsServiceStart
 ): Promise<UpgradeAssistantTelemetry> {
   const savedObjectsRepository = savedObjects.createInternalRepository();
@@ -60,7 +60,7 @@ export async function fetchUpgradeAssistantMetrics(
     UPGRADE_ASSISTANT_TYPE,
     UPGRADE_ASSISTANT_DOC_ID
   );
-  const callAsInternalUser = adminClient.callAsInternalUser.bind(adminClient);
+  const callAsInternalUser = esClient.callAsInternalUser.bind(esClient);
   const deprecationLoggingStatusValue = await getDeprecationLoggingStatusValue(callAsInternalUser);
 
   const getTelemetrySavedObject = (
@@ -84,16 +84,19 @@ export async function fetchUpgradeAssistantMetrics(
       return defaultTelemetrySavedObject;
     }
 
-    const upgradeAssistantTelemetrySOAttrsKeys = Object.keys(
-      upgradeAssistantTelemetrySavedObjectAttrs
-    );
-    const telemetryObj = defaultTelemetrySavedObject;
-
-    upgradeAssistantTelemetrySOAttrsKeys.forEach((key: string) => {
-      set(telemetryObj, key, upgradeAssistantTelemetrySavedObjectAttrs[key]);
-    });
-
-    return telemetryObj as UpgradeAssistantTelemetrySavedObject;
+    return {
+      ui_open: {
+        overview: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.overview', 0),
+        cluster: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.cluster', 0),
+        indices: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_open.indices', 0),
+      },
+      ui_reindex: {
+        close: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_reindex.close', 0),
+        open: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_reindex.open', 0),
+        start: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_reindex.start', 0),
+        stop: get(upgradeAssistantTelemetrySavedObjectAttrs, 'ui_reindex.stop', 0),
+      },
+    } as UpgradeAssistantTelemetrySavedObject;
   };
 
   return {
@@ -107,7 +110,7 @@ export async function fetchUpgradeAssistantMetrics(
 }
 
 interface Dependencies {
-  elasticsearch: ElasticsearchServiceSetup;
+  elasticsearch: ElasticsearchServiceStart;
   savedObjects: SavedObjectsServiceStart;
   usageCollection: UsageCollectionSetup;
 }

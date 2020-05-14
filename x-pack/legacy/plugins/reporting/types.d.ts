@@ -8,6 +8,7 @@ import { EventEmitter } from 'events';
 import { ResponseObject } from 'hapi';
 import { Legacy } from 'kibana';
 import { CallCluster } from '../../../../src/legacy/core_plugins/elasticsearch';
+import { JobStatus } from '../../../plugins/reporting'; // reporting new platform
 import { CancellationToken } from './common/cancellation_token';
 import { ReportingCore } from './server/core';
 import { LevelLogger } from './server/lib/level_logger';
@@ -116,10 +117,6 @@ export interface ConditionalHeadersConditions {
   basePath: string;
 }
 
-export interface CryptoFactory {
-  decrypt: (headers?: string) => any;
-}
-
 export interface IndexPatternSavedObject {
   attributes: {
     fieldFormatMap: string;
@@ -154,7 +151,7 @@ export interface JobSource<JobParamsType> {
     jobtype: string;
     output: JobDocOutput;
     payload: JobDocPayload<JobParamsType>;
-    status: string; // completed, failed, etc
+    status: JobStatus;
   };
 }
 
@@ -190,7 +187,7 @@ export type ESQueueWorkerExecuteFn<JobDocPayloadType> = (
   jobId: string,
   job: JobDocPayloadType,
   cancellationToken?: CancellationToken
-) => void;
+) => Promise<any>;
 
 /*
  * ImmediateExecuteFn receives the job doc payload because the payload was

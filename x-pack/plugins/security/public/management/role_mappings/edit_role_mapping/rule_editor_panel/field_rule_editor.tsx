@@ -151,7 +151,7 @@ export class FieldRuleEditor extends Component<Props, {}> {
                 )}
               />
             ) : (
-              <EuiIcon size="l" type="empty" aria-hidden={true} />
+              <EuiIcon size="l" type="empty" />
             )}
           </EuiFormRow>
         </EuiFlexItem>

@@ -24,8 +24,13 @@ function filterFieldsForAgg(fields, aggType) {
     return getTermsFields(fields);
   }
 
+  const metricAggFieldTypes = ['number'];
+  if (aggType !== AGG_TYPE.SUM) {
+    metricAggFieldTypes.push('date');
+  }
+
   return fields.filter(field => {
-    return field.aggregatable && field.type === 'number';
+    return field.aggregatable && metricAggFieldTypes.includes(field.type);
   });
 }
 

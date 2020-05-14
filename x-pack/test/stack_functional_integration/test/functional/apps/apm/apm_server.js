@@ -10,7 +10,7 @@ describe('check apm-server', ({ getService, getPageObjects }) => {
 
   before(function() {
     log.debug('navigateToApp Visualize');
-    return PageObjects.common.navigateToApp('visualize');
+    return PageObjects.common.navigateToApp('visualize', { insertTimestamp: false });
   });
 
   it('Top Transactions for Time Period [APM]- should have expected test data', async function() {
@@ -25,6 +25,6 @@ describe('check apm-server', ({ getService, getPageObjects }) => {
       PageObjects.common.debug('Data Table = ' + dataTable.trim());
       // we loaded specific test data so we know exactly what this result should be
     });
-    await PageObjects.timePicker.setCommonlyUsedTime('superDatePickerCommonlyUsed_Today');
+    await PageObjects.timePicker.setCommonlyUsedTime('Today');
   });
 });

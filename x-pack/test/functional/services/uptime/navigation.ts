@@ -9,17 +9,31 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header']);
+  const PageObjects = getPageObjects(['common', 'timePicker', 'header']);
 
   const goToUptimeRoot = async () => {
-    await retry.tryForTime(30 * 1000, async () => {
-      await PageObjects.common.navigateToApp('uptime');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('uptimeOverviewPage', { timeout: 2000 });
+    // Check if are already on overview uptime page, we don't need to repeat the step
+    await retry.tryForTime(60 * 1000, async () => {
+      if (await testSubjects.exists('uptimeSettingsToOverviewLink', { timeout: 0 })) {
+        await testSubjects.click('uptimeSettingsToOverviewLink');
+        await testSubjects.existOrFail('uptimeOverviewPage', { timeout: 2000 });
+      } else if (!(await testSubjects.exists('uptimeOverviewPage', { timeout: 0 }))) {
+        await PageObjects.common.navigateToApp('uptime');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await testSubjects.existOrFail('uptimeOverviewPage', { timeout: 2000 });
+      }
     });
   };
 
+  const refreshApp = async () => {
+    await testSubjects.click('superDatePickerApplyTimeButton');
+  };
+
   return {
+    async refreshApp() {
+      await refreshApp();
+    },
+
     async goToUptime() {
       await goToUptimeRoot();
     },
@@ -30,17 +44,36 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
       await testSubjects.existOrFail('uptimeSettingsPage', { timeout: 2000 });
     },
 
-    goToMonitor: async (monitorId: string, monitorName?: string) => {
-      await testSubjects.click(`monitor-page-link-${monitorId}`, 5000);
-      if (
-        monitorName &&
-        (await testSubjects.getVisibleText('monitor-page-title')) !== monitorName
-      ) {
-        throw new Error('Expected monitor name not found');
+    checkIfOnMonitorPage: async (monitorId: string) => {
+      const monitorPage = await testSubjects.exists('uptimeMonitorPage', { timeout: 1000 });
+      if (monitorId && monitorPage) {
+        const thisMonitorPage =
+          (await testSubjects.getVisibleText('monitor-page-title')) === monitorId;
+        return monitorPage && thisMonitorPage;
+      } else {
+        return monitorPage;
       }
-      await testSubjects.existOrFail('uptimeMonitorPage', {
-        timeout: 30000,
+    },
+
+    goToMonitor: async (monitorId: string) => {
+      if (!(await testSubjects.exists('uptimeMonitorPage', { timeout: 0 }))) {
+        await testSubjects.click(`monitor-page-link-${monitorId}`);
+        await testSubjects.existOrFail('uptimeMonitorPage', {
+          timeout: 30000,
+        });
+      }
+    },
+
+    goToCertificates: async () => {
+      await testSubjects.click('uptimeCertificatesLink', 10000);
+      return retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail('uptimeCertificatesPage');
       });
+    },
+
+    async loadDataAndGoToMonitorPage(dateStart: string, dateEnd: string, monitorId: string) {
+      await PageObjects.timePicker.setAbsoluteRange(dateStart, dateEnd);
+      await this.goToMonitor(monitorId);
     },
   };
 }

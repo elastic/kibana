@@ -436,9 +436,14 @@ export default function({ getService }: FtrProviderContext) {
               indexedRecord = searchResult.hits.hits[0];
               expect(indexedRecord._source.state).to.eql({
                 callClusterSuccess: false,
+                callScopedClusterSuccess: false,
                 savedObjectsClientSuccess: false,
                 callClusterError: {
                   ...indexedRecord._source.state.callClusterError,
+                  statusCode: 403,
+                },
+                callScopedClusterError: {
+                  ...indexedRecord._source.state.callScopedClusterError,
                   statusCode: 403,
                 },
                 savedObjectsClientError: {
@@ -457,6 +462,7 @@ export default function({ getService }: FtrProviderContext) {
               indexedRecord = searchResult.hits.hits[0];
               expect(indexedRecord._source.state).to.eql({
                 callClusterSuccess: true,
+                callScopedClusterSuccess: true,
                 savedObjectsClientSuccess: false,
                 savedObjectsClientError: {
                   ...indexedRecord._source.state.savedObjectsClientError,

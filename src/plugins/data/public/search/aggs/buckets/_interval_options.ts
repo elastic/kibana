@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IBucketAggConfig } from './_bucket_agg_type';
+import { IBucketAggConfig } from './bucket_agg_type';
 
 export const intervalOptions = [
   {

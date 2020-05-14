@@ -18,14 +18,19 @@ import {
   EuiLoadingSpinner,
   EuiLink,
 } from '@elastic/eui';
-import { APP_RESTORE_INDEX_PRIVILEGES } from '../../../../../common/constants';
-import { SectionError, SectionLoading, Error } from '../../../components';
+import { APP_RESTORE_INDEX_PRIVILEGES } from '../../../../../common';
+import {
+  WithPrivileges,
+  NotAuthorizedSection,
+  SectionError,
+  Error,
+} from '../../../../shared_imports';
+import { SectionLoading } from '../../../components';
 import { UIM_RESTORE_LIST_LOAD } from '../../../constants';
 import { useLoadRestores } from '../../../services/http';
 import { linkToSnapshots } from '../../../services/navigation';
 import { useServices } from '../../../app_context';
 import { RestoreTable } from './restore_table';
-import { WithPrivileges, NotAuthorizedSection } from '../../../lib/authorization';
 
 const ONE_SECOND_MS = 1000;
 const TEN_SECONDS_MS = 10 * 1000;

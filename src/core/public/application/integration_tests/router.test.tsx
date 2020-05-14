@@ -40,7 +40,7 @@ describe('AppContainer', () => {
   };
   const mockMountersToMounters = () =>
     new Map([...mounters].map(([appId, { mounter }]) => [appId, mounter]));
-  const setAppLeaveHandlerMock = () => undefined;
+  const noop = () => undefined;
 
   const mountersToAppStatus$ = () => {
     return new BehaviorSubject(
@@ -86,7 +86,8 @@ describe('AppContainer', () => {
         history={globalHistory}
         mounters={mockMountersToMounters()}
         appStatuses$={appStatuses$}
-        setAppLeaveHandler={setAppLeaveHandlerMock}
+        setAppLeaveHandler={noop}
+        setIsMounting={noop}
       />
     );
   });
@@ -98,7 +99,7 @@ describe('AppContainer', () => {
 
     expect(app1.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div><div>
+      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingSpinner euiLoadingSpinner--large\\"></span></div><div><div>
       basename: /app/app1
       html: <span>App 1</span>
       </div></div>"
@@ -110,7 +111,7 @@ describe('AppContainer', () => {
     expect(app1Unmount).toHaveBeenCalled();
     expect(app2.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div><div>
+      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingSpinner euiLoadingSpinner--large\\"></span></div><div><div>
       basename: /app/app2
       html: <div>App 2</div>
       </div></div>"
@@ -124,7 +125,7 @@ describe('AppContainer', () => {
 
     expect(standardApp.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div><div>
+      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingSpinner euiLoadingSpinner--large\\"></span></div><div><div>
       basename: /app/app1
       html: <span>App 1</span>
       </div></div>"
@@ -136,7 +137,7 @@ describe('AppContainer', () => {
     expect(standardAppUnmount).toHaveBeenCalled();
     expect(chromelessApp.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div><div>
+      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingSpinner euiLoadingSpinner--large\\"></span></div><div><div>
       basename: /chromeless-a/path
       html: <div>Chromeless A</div>
       </div></div>"
@@ -148,7 +149,7 @@ describe('AppContainer', () => {
     expect(chromelessAppUnmount).toHaveBeenCalled();
     expect(standardApp.mounter.mount).toHaveBeenCalledTimes(2);
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div><div>
+      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingSpinner euiLoadingSpinner--large\\"></span></div><div><div>
       basename: /app/app1
       html: <span>App 1</span>
       </div></div>"
@@ -162,7 +163,7 @@ describe('AppContainer', () => {
 
     expect(chromelessAppA.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div><div>
+      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingSpinner euiLoadingSpinner--large\\"></span></div><div><div>
       basename: /chromeless-a/path
       html: <div>Chromeless A</div>
       </div></div>"
@@ -174,7 +175,7 @@ describe('AppContainer', () => {
     expect(chromelessAppAUnmount).toHaveBeenCalled();
     expect(chromelessAppB.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div><div>
+      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingSpinner euiLoadingSpinner--large\\"></span></div><div><div>
       basename: /chromeless-b/path
       html: <div>Chromeless B</div>
       </div></div>"
@@ -186,7 +187,7 @@ describe('AppContainer', () => {
     expect(chromelessAppBUnmount).toHaveBeenCalled();
     expect(chromelessAppA.mounter.mount).toHaveBeenCalledTimes(2);
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div><div>
+      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingSpinner euiLoadingSpinner--large\\"></span></div><div><div>
       basename: /chromeless-a/path
       html: <div>Chromeless A</div>
       </div></div>"
@@ -214,7 +215,8 @@ describe('AppContainer', () => {
         history={globalHistory}
         mounters={mockMountersToMounters()}
         appStatuses$={mountersToAppStatus$()}
-        setAppLeaveHandler={setAppLeaveHandlerMock}
+        setAppLeaveHandler={noop}
+        setIsMounting={noop}
       />
     );
 
@@ -245,7 +247,8 @@ describe('AppContainer', () => {
         history={globalHistory}
         mounters={mockMountersToMounters()}
         appStatuses$={mountersToAppStatus$()}
-        setAppLeaveHandler={setAppLeaveHandlerMock}
+        setAppLeaveHandler={noop}
+        setIsMounting={noop}
       />
     );
 
@@ -286,7 +289,8 @@ describe('AppContainer', () => {
         history={globalHistory}
         mounters={mockMountersToMounters()}
         appStatuses$={mountersToAppStatus$()}
-        setAppLeaveHandler={setAppLeaveHandlerMock}
+        setAppLeaveHandler={noop}
+        setIsMounting={noop}
       />
     );
 
