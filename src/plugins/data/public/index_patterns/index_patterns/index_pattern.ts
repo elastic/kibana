@@ -298,13 +298,13 @@ export class IndexPattern implements IIndexPattern {
     return this.save();
   }
 
-  /**
-   * This function is just used by Discover and it's high likely to be removed in the near future
-   * It doesn't use the save function to skip the error message that's displayed when
-   * a user adds several columns in a higher frequency that the changes can be persisted to ES
-   * resulting in 409 errors
-   */
   async popularizeField(fieldName: string, unit = 1) {
+    /**
+     * This function is just used by Discover and it's high likely to be removed in the near future
+     * It doesn't use the save function to skip the error message that's displayed when
+     * a user adds several columns in a higher frequency that the changes can be persisted to ES
+     * resulting in 409 errors
+     */
     if (!this.id) return;
     const field = this.fields.getByName(fieldName);
     if (!field) {
