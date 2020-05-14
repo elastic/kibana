@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { MetricsExplorerSeries } from '../../../../../common/http_api';
 
@@ -18,7 +18,7 @@ export const ChartTitle = ({ series }: Props) => {
     return (
       <EuiFlexGroup gutterSize="xs">
         {keys.map((name, i) => (
-          <>
+          <Fragment key={name}>
             <EuiFlexItem grow={false}>
               <EuiText size="m" color={keys.length - 1 > i ? 'subdued' : 'default'}>
                 <strong>{name}</strong>
@@ -31,7 +31,7 @@ export const ChartTitle = ({ series }: Props) => {
                 </EuiText>
               </EuiFlexItem>
             )}
-          </>
+          </Fragment>
         ))}
       </EuiFlexGroup>
     );
