@@ -87,7 +87,7 @@ export const createDashboardUrlGenerator = (
     const startServices = await getStartServices();
     const useHash = state.useHash ?? startServices.useHashedUrl;
     const appBasePath = startServices.appBasePath;
-    const hash = state.dashboardId ? `dashboard/${state.dashboardId}` : `dashboard`;
+    const hash = state.dashboardId ? `view/${state.dashboardId}` : `create`;
 
     const getSavedFiltersFromDestinationDashboardIfNeeded = async (): Promise<Filter[]> => {
       if (state.preserveSavedFilters === false) return [];
