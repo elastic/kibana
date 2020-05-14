@@ -20,15 +20,33 @@
 import { DocLinksService } from './doc_links_service';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 
-describe('DocLinksService#start()', () => {
+describe('DocLinksService#setup()', () => {
   it('templates the doc links with the branch information from injectedMetadata', () => {
     const injectedMetadata = injectedMetadataServiceMock.createStartContract();
     injectedMetadata.getKibanaBranch.mockReturnValue('test-branch');
     const service = new DocLinksService();
-    const start = service.start({ injectedMetadata });
-    expect(start.DOC_LINK_VERSION).toEqual('test-branch');
-    expect(start.links.kibana).toEqual(
+    const setup = service.setup({ injectedMetadata });
+    expect(setup.DOC_LINK_VERSION).toEqual('test-branch');
+    expect(setup.links.kibana).toEqual(
       'https://www.elastic.co/guide/en/kibana/test-branch/index.html'
     );
+  });
+});
+
+describe('DocLinksService#start()', () => {
+  it('returns the same data as setup', () => {
+    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
+    injectedMetadata.getKibanaBranch.mockReturnValue('test-branch');
+    const service = new DocLinksService();
+    const setup = service.setup({ injectedMetadata });
+    const start = service.start();
+    expect(setup).toEqual(start);
+  });
+
+  it('must be called after setup', () => {
+    const service = new DocLinksService();
+    expect(() => {
+      service.start();
+    }).toThrowError();
   });
 });
