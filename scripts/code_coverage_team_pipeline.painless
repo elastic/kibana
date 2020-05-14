@@ -7,6 +7,7 @@ POST kibana_code_coverage/_update_by_query?pipeline=team_assignment_new&timeout=
 
 As the index grows large we may need to trim some old data or use a rollup index since we don't really expect code coverage to change too quickly.
 
+DON'T remove paths even if the code is removed unless we really want them to be marked with team 'unknown'.
 */
 
 PUT _ingest/pipeline/team_assignment_new
@@ -48,7 +49,6 @@ PUT _ingest/pipeline/team_assignment_new
                 else if (path.indexOf('src/legacy/core_plugins/interpreter/') == 0) ctx.team = 'kibana-app-arch';
                 else if (path.indexOf('src/legacy/core_plugins/kibana_react/') == 0) ctx.team = 'kibana-app-arch';
                 else if (path.indexOf('src/legacy/core_plugins/newsfeed') == 0) ctx.team = 'kibana-core-ui';
-                
                 else if (path.indexOf('src/legacy/core_plugins/region_map') == 0) ctx.team = 'maps';
                 else if (path.indexOf('src/legacy/core_plugins/status_page/public') == 0) ctx.team = 'kibana-app-arch';
                 else if (path.indexOf('src/legacy/core_plugins/testbed') == 0) ctx.team = 'kibana-platform';
@@ -79,6 +79,21 @@ PUT _ingest/pipeline/team_assignment_new
                 else if (path.indexOf('src/legacy/server/warnings/') == 0) ctx.team = 'kibana-operations';
                 else ctx.team = 'unknown';
 
+            } else if (path.indexOf('src/legacy/ui') == 0) {
+
+                if (path.indexOf('src/legacy/ui/public/field_editor') == 0) ctx.team = 'kibana-app-arch';
+                else if (path.indexOf('src/legacy/ui/public/timefilter') == 0) ctx.team = 'kibana-app-arch';
+                else if (path.indexOf('src/legacy/ui/public/management') == 0) ctx.team = 'kibana-app-arch';
+                else if (path.indexOf('src/legacy/ui/public/state_management') == 0) ctx.team = 'kibana-app';
+                else if (path.indexOf('src/legacy/ui/public/new_platform') == 0) ctx.team = 'kibana-platform';
+                else if (path.indexOf('src/legacy/ui/public/plugin_discovery') == 0) ctx.team = 'kibana-platform';
+                else if (path.indexOf('src/legacy/ui/public/chrome') == 0) ctx.team = 'kibana-platform';
+                else if (path.indexOf('src/legacy/ui/public/notify') == 0) ctx.team = 'kibana-platform';
+                else if (path.indexOf('src/legacy/ui/public/documentation_links') == 0) ctx.team = 'kibana-platform';
+                else if (path.indexOf('src/legacy/ui/public/autoload') == 0) ctx.team = 'kibana-platform';
+                else if (path.indexOf('src/legacy/ui/public/capabilities') == 0) ctx.team = 'kibana-security';
+                else if (path.indexOf('src/legacy/ui/public/apm') == 0) ctx.team = 'apm-ui';
+
             } else if (path.indexOf('src/plugins/') == 0) {
 
                 if (path.indexOf('src/plugins/advanced_settings/') == 0) ctx.team = 'kibana-app-arch';
@@ -98,6 +113,8 @@ PUT _ingest/pipeline/team_assignment_new
                 else if (path.indexOf('src/plugins/home/server/tutorials') == 0) ctx.team = 'observability';
                 else if (path.indexOf('src/plugins/home/server/services/') == 0) ctx.team = 'kibana-core-ui';
                 else if (path.indexOf('src/plugins/home/server') == 0) ctx.team = 'kibana-core-ui';
+                else if (path.indexOf('src/plugins/index_pattern_management/public/service') == 0) ctx.team = 'kibana-app-arch';
+                else if (path.indexOf('src/plugins/index_pattern_management/public') == 0) ctx.team = 'kibana-app';
                 else if (path.indexOf('src/plugins/input_control_vis/') == 0) ctx.team = 'kibana-app';
                 else if (path.indexOf('src/plugins/inspector/') == 0) ctx.team = 'kibana-app-arch';
                 else if (path.indexOf('src/plugins/kibana_legacy/') == 0) ctx.team = 'kibana-app';
@@ -105,6 +122,11 @@ PUT _ingest/pipeline/team_assignment_new
                 else if (path.indexOf('src/plugins/kibana_react/') == 0) ctx.team = 'kibana-app-arch';
                 else if (path.indexOf('src/plugins/kibana_utils/') == 0) ctx.team = 'kibana-app-arch';
                 else if (path.indexOf('src/plugins/management/') == 0) ctx.team = 'kibana-app-arch';
+                else if (path.indexOf('src/plugins/kibana_usage_collection/') == 0) ctx.team = 'pulse';
+                else if (path.indexOf('src/plugins/maps_legacy/') == 0) ctx.team = 'maps';
+                else if (path.indexOf('src/plugins/region_map/') == 0) ctx.team = 'maps';
+                else if (path.indexOf('src/plugins/tile_map/') == 0) ctx.team = 'maps';
+                else if (path.indexOf('src/plugins/timelion') == 0) ctx.team = 'kibana-app';
                 else if (path.indexOf('src/plugins/navigation/') == 0) ctx.team = 'kibana-app-arch';
                 else if (path.indexOf('src/plugins/newsfeed') == 0) ctx.team = 'kibana-core-ui';
                 else if (path.indexOf('src/plugins/saved_objects_management/') == 0) ctx.team = 'kibana-platform';
@@ -191,6 +213,7 @@ PUT _ingest/pipeline/team_assignment_new
                 else if (path.indexOf('x-pack/plugins/lists/') == 0) ctx.team = 'siem';
                 else if (path.indexOf('x-pack/plugins/logstash') == 0) ctx.team = 'logstash';
                 else if (path.indexOf('x-pack/plugins/maps/') == 0) ctx.team = 'kibana-gis';
+                else if (path.indexOf('x-pack/plugins/maps_legacy_licensing') == 0) ctx.team = 'maps';
                 else if (path.indexOf('x-pack/plugins/ml/') == 0) ctx.team = 'ml-ui';
                 else if (path.indexOf('x-pack/plugins/monitoring') == 0) ctx.team = 'stack-monitoring-ui';
                 else if (path.indexOf('x-pack/plugins/observability/') == 0) ctx.team = 'apm-ui';
