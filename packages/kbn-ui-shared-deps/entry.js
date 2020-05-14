@@ -48,9 +48,8 @@ export const ElasticCharts = require('@elastic/charts');
 export const ElasticEui = require('@elastic/eui');
 export const ElasticEuiLibServices = require('@elastic/eui/lib/services');
 export const ElasticEuiLibServicesFormat = require('@elastic/eui/lib/services/format');
-export const ElasticEuiLightTheme = require('@elastic/eui/dist/eui_theme_light.json');
-export const ElasticEuiDarkTheme = require('@elastic/eui/dist/eui_theme_dark.json');
 export const ElasticEuiChartsTheme = require('@elastic/eui/dist/eui_charts_theme');
+export * from './eui_theme.ts';
 
 // massive deps that we should really get rid of or reduce in size substantially
 export const ElasticsearchBrowser = require('elasticsearch-browser/elasticsearch.js');

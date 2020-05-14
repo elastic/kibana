@@ -23,8 +23,10 @@ exports.distDir = Path.resolve(__dirname, 'target');
 exports.jsDepFilenames = ['kbn-ui-shared-deps.@elastic.js'];
 exports.jsFilename = 'kbn-ui-shared-deps.js';
 exports.baseCssDistFilename = 'kbn-ui-shared-deps.css';
-exports.lightCssDistFilename = 'kbn-ui-shared-deps.light.css';
-exports.darkCssDistFilename = 'kbn-ui-shared-deps.dark.css';
+exports.lightCssDistFilename = 'kbn-ui-shared-deps.v7.light.css';
+exports.lightV8CssDistFilename = 'kbn-ui-shared-deps.v8.light.css';
+exports.darkCssDistFilename = 'kbn-ui-shared-deps.v7.dark.css';
+exports.darkV8CssDistFilename = 'kbn-ui-shared-deps.v8.dark.css';
 exports.externals = {
   // stateful deps
   angular: '__kbnSharedDeps__.Angular',
@@ -54,8 +56,8 @@ exports.externals = {
   '@elastic/eui/lib/services': '__kbnSharedDeps__.ElasticEuiLibServices',
   '@elastic/eui/lib/services/format': '__kbnSharedDeps__.ElasticEuiLibServicesFormat',
   '@elastic/eui/dist/eui_charts_theme': '__kbnSharedDeps__.ElasticEuiChartsTheme',
-  '@elastic/eui/dist/eui_theme_light.json': '__kbnSharedDeps__.ElasticEuiLightTheme',
-  '@elastic/eui/dist/eui_theme_dark.json': '__kbnSharedDeps__.ElasticEuiDarkTheme',
+  '@elastic/eui/dist/eui_theme_light.json': '__kbnSharedDeps__.euiLightTheme',
+  '@elastic/eui/dist/eui_theme_dark.json': '__kbnSharedDeps__.euiDarkTheme',
 
   /**
    * massive deps that we should really get rid of or reduce in size substantially

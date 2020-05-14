@@ -1,6 +1,7 @@
 var kbnCsp = JSON.parse(document.querySelector('kbn-csp').getAttribute('data'));
 window.__kbnStrictCsp__ = kbnCsp.strictCsp;
 window.__kbnDarkMode__ = {{darkMode}};
+window.__kbnThemeVersion__ = "{{themeVersion}}";
 window.__kbnPublicPath__ = {{publicPathMap}};
 
 if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
