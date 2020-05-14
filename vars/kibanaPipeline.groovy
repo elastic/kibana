@@ -178,7 +178,9 @@ def bash(script, label) {
 }
 
 def doSetup() {
-  runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
+  retryWithDelay(2, 15) {
+    runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
+  }
 }
 
 def buildOss() {
