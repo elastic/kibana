@@ -11,14 +11,14 @@ import {
   mockTimelineResult,
   mockTimelineModel,
 } from '../../../common/mock/timeline_results';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { timelineDefaults } from '../../store/timeline/defaults';
 import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../../common/store/inputs/actions';
 import {
   setKqlFilterQueryDraft as dispatchSetKqlFilterQueryDraft,
   applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
   addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
-} from '../../../timelines/store/timeline/actions';
+} from '../../store/timeline/actions';
 import {
   addNotes as dispatchAddNotes,
   updateNote as dispatchUpdateNote,
@@ -39,7 +39,7 @@ import sinon from 'sinon';
 import { TimelineType } from '../../../../common/types/timeline';
 
 jest.mock('../../../common/store/inputs/actions');
-jest.mock('../../../timelines/store/timeline/actions');
+jest.mock('../../store/timeline/actions');
 jest.mock('../../../common/store/app/actions');
 jest.mock('uuid', () => {
   return {
@@ -300,7 +300,7 @@ describe('helpers', () => {
           sortDirection: 'desc',
         },
         title: '',
-        timelineType: TimelineType.default,
+        timelineType: TimelineType.draft,
         templateTimelineId: null,
         templateTimelineVersion: null,
         version: '1',
@@ -397,13 +397,14 @@ describe('helpers', () => {
           sortDirection: 'desc',
         },
         title: '',
-        timelineType: TimelineType.default,
+        timelineType: TimelineType.draft,
         templateTimelineId: null,
         templateTimelineVersion: null,
         version: '1',
         width: 1100,
       });
     });
+
     test('should merge columns when event.action is deleted without two extra column names of user.name', () => {
       const timeline = {
         savedObjectId: 'savedObject-1',
@@ -416,38 +417,80 @@ describe('helpers', () => {
         savedObjectId: 'savedObject-1',
         columns: [
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: '@timestamp',
+            placeholder: undefined,
+            type: undefined,
             width: 190,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'message',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'event.category',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'host.name',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'source.ip',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'destination.ip',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'user.name',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
         ],
@@ -474,7 +517,7 @@ describe('helpers', () => {
         },
         loadingEventIds: [],
         title: '',
-        timelineType: TimelineType.default,
+        timelineType: TimelineType.draft,
         templateTimelineId: null,
         templateTimelineVersion: null,
         noteIds: [],
@@ -642,7 +685,7 @@ describe('helpers', () => {
         },
         loadingEventIds: [],
         title: '',
-        timelineType: TimelineType.default,
+        timelineType: TimelineType.draft,
         templateTimelineId: null,
         templateTimelineVersion: null,
         noteIds: [],
