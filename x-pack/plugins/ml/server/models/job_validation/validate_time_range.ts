@@ -47,7 +47,7 @@ export async function isValidTimeField(callAsCurrentUser: APICaller, job: Combin
 export async function validateTimeRange(
   callAsCurrentUser: APICaller,
   job: CombinedJob,
-  timeRange?: TimeRange
+  timeRange?: Partial<TimeRange>
 ) {
   const messages: ValidateTimeRangeMessage[] = [];
 
