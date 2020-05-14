@@ -51,19 +51,6 @@ export class UptimePlugin implements Plugin<void, void, ClientPluginsSetup, Clie
       });
     }
 
-    alertTypeInitializers.forEach(init => {
-      const alertInitializer = init({
-        autocomplete: plugins.data.autocomplete,
-        store: this._store,
-      });
-      if (
-        plugins.triggers_actions_ui &&
-        !plugins.triggers_actions_ui.alertTypeRegistry.has(alertInitializer.id)
-      ) {
-        plugins.triggers_actions_ui.alertTypeRegistry.register(alertInitializer);
-      }
-    });
-
     const self = this;
     core.application.register({
       appRoute: '/app/uptime#/',
@@ -89,8 +76,22 @@ export class UptimePlugin implements Plugin<void, void, ClientPluginsSetup, Clie
     });
   }
 
-  public start(start: CoreStart, _plugins: {}): void {
+  public start(start: CoreStart, plugins: any): void {
     kibanaService.core = start;
+    alertTypeInitializers.forEach(init => {
+      const alertInitializer = init({
+        autocomplete: plugins.data.autocomplete,
+        store: this._store,
+        core: start,
+        plugins,
+      });
+      if (
+        plugins.triggers_actions_ui &&
+        !plugins.triggers_actions_ui.alertTypeRegistry.has(alertInitializer.id)
+      ) {
+        plugins.triggers_actions_ui.alertTypeRegistry.register(alertInitializer);
+      }
+    });
   }
 
   public stop(): void {}
