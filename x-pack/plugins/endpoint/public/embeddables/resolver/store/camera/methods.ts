@@ -6,6 +6,7 @@
 
 import { translation } from './selectors';
 import { CameraState, Vector2 } from '../../types';
+import { distance } from '../../lib/vector2';
 
 /**
  * Return a new `CameraState` with the `animation` property
@@ -17,6 +18,17 @@ export function animatePanning(
   targetTranslation: Vector2,
   duration: number
 ): CameraState {
+  const initialTranslation = translation(state)(startTime);
+  const translationDistance = distance(targetTranslation, initialTranslation);
+
+  if (translationDistance === 0) {
+    return {
+      ...state,
+      animation: undefined,
+      panning: undefined,
+    };
+  }
+
   const nextState: CameraState = {
     ...state,
     /**
@@ -27,7 +39,7 @@ export function animatePanning(
     animation: {
       startTime,
       targetTranslation,
-      initialTranslation: translation(state)(startTime),
+      initialTranslation,
       duration,
     },
   };
