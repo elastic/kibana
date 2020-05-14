@@ -39,19 +39,7 @@ describe('Features Plugin', () => {
 
     const { getFeatures } = await plugin.start(coreStart);
 
-    const featureNames = getFeatures()
-      .map(f => f.id)
-      .sort();
-    expect(featureNames).toEqual([
-      'advancedSettings',
-      'baz',
-      'dashboard',
-      'dev_tools',
-      'discover',
-      'indexPatterns',
-      'savedObjectsManagement',
-      'visualize',
-    ]);
+    expect(getFeatures()).toMatchSnapshot();
   });
 
   it('returns OSS + registered features with timielion when available', async () => {
@@ -68,20 +56,6 @@ describe('Features Plugin', () => {
 
     const { getFeatures } = await plugin.start(coreStart);
 
-    const featureNames = getFeatures()
-      .map(f => f.id)
-      .sort();
-
-    expect(featureNames).toEqual([
-      'advancedSettings',
-      'baz',
-      'dashboard',
-      'dev_tools',
-      'discover',
-      'indexPatterns',
-      'savedObjectsManagement',
-      'timelion',
-      'visualize',
-    ]);
+    expect(getFeatures()).toMatchSnapshot();
   });
 });

@@ -78,7 +78,11 @@ export class Plugin {
 
   private registerOssFeatures(savedObjects: SavedObjectsServiceStart) {
     const registry = savedObjects.getTypeRegistry();
-    const savedObjectsTypes = registry.getAllTypes().map(t => t.name);
+    const savedObjectsTypes = registry
+      .getAllTypes()
+      .filter(t => !t.hidden)
+      .map(t => t.name);
+
     const features = buildOSSFeatures({
       savedObjectTypes: savedObjectsTypes,
       includeTimelion: this.isTimelionEnabled,
