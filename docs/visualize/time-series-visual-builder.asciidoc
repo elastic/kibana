@@ -217,3 +217,17 @@ syntax uses the Handlebar.js processor which is an extended version of the Musta
 template language.
 
 image:images/tsvb-markdown-tab.png["Markdown Tab"]
+
+[float]
+[[tsvb-style-markdown]]
+==== Style Markdown text
+
+Style your Markdown visualization using http://lesscss.org/features/[less syntax].
+
+. Select *Markdown*.
+
+. Select *Panel options*.
+
+. Enter styling rules in *Custom CSS* section
++
+Less in TSVB does not support custom plugins or inline JavaScript.
