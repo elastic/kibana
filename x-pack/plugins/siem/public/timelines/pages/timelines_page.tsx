@@ -19,7 +19,7 @@ import {
   NEW_TIMELINE,
   NEW_TEMPLATE_TIMELINE,
 } from '../components/timeline/properties/translations';
-import { CreateTimelineBtn } from '../components/timeline/properties/statful_create_timeline_btn';
+import { CreateTimelineBtn } from '../components/timeline/properties/create_timeline_btn';
 import { TimelineType } from '../../../common/types/timeline';
 const TimelinesContainer = styled.div`
   width: 100%;
@@ -54,28 +54,25 @@ export const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => 
                   iconType="indexOpen"
                   onClick={onImportTimelineBtnClick}
                   data-test-subj="open-import-data-modal-btn"
+                  fill
                 >
                   {i18n.ALL_TIMELINES_IMPORT_TIMELINE_TITLE}
                 </EuiButton>
               )}
             </EuiFlexItem>
             <EuiFlexItem>
-              {capabilitiesCanUserCRUD && (
-                <CreateTimelineBtn
-                  outline={true}
-                  timelineType={TimelineType.default}
-                  title={NEW_TIMELINE}
-                />
-              )}
+              <CreateTimelineBtn
+                outline={true}
+                timelineType={TimelineType.default}
+                title={NEW_TIMELINE}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
-              {capabilitiesCanUserCRUD && (
-                <CreateTimelineBtn
-                  outline={true}
-                  timelineType={TimelineType.template}
-                  title={NEW_TEMPLATE_TIMELINE}
-                />
-              )}
+              <CreateTimelineBtn
+                outline={true}
+                timelineType={TimelineType.template}
+                title={NEW_TEMPLATE_TIMELINE}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </HeaderPage>

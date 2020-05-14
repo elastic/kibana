@@ -22,8 +22,9 @@ import { InspectButton, InspectButtonContainer } from '../../../../common/compon
 import * as i18n from './translations';
 import { AssociateNote } from '../../notes/helpers';
 import { Note } from '../../../../common/lib/note';
-import { CreateTimelineBtn } from './statful_create_timeline_btn';
+import { CreateTimelineBtn } from './create_timeline_btn';
 import { TimelineType, TimelineTypeLiteral } from '../../../../../common/types/timeline';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export const PropertiesRightStyle = styled(EuiFlexGroup)`
   margin-right: 5px;
@@ -68,7 +69,7 @@ type CreateTimeline = ({
 type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
 export type UpdateNote = (note: Note) => void;
 
-interface Props {
+export interface PropertiesRightComponentProps {
   onButtonClick: () => void;
   onClosePopover: () => void;
   showActions: boolean;
@@ -93,7 +94,7 @@ interface Props {
   updateNote: UpdateNote;
 }
 
-const PropertiesRightComponent: React.FC<Props> = ({
+const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
   onButtonClick,
   showActions,
   onClosePopover,
@@ -116,116 +117,125 @@ const PropertiesRightComponent: React.FC<Props> = ({
   onCloseTimelineModal,
   onOpenTimelineModal,
   title,
-}) => (
-  <PropertiesRightStyle alignItems="flexStart" data-test-subj="properties-right" gutterSize="s">
-    <EuiFlexItem grow={false}>
-      <InspectButtonContainer>
-        <EuiPopover
-          anchorPosition="downRight"
-          button={
-            <SettingsIcon
-              data-test-subj="settings-gear"
-              type="gear"
-              size="l"
-              onClick={onButtonClick}
-            />
-          }
-          id="timelineSettingsPopover"
-          isOpen={showActions}
-          closePopover={onClosePopover}
-        >
-          <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <CreateTimelineBtn
-                onClosePopover={onClosePopover}
-                timelineId={timelineId}
-                timelineType={TimelineType.default}
-                title={i18n.NEW_TIMELINE}
+}) => {
+  const uiCapabilities = useKibana().services.application.capabilities;
+  const capabilitiesCanUserCRUD: boolean =
+    typeof uiCapabilities.siem.crud === 'boolean' ? uiCapabilities.siem.crud : false;
+  return (
+    <PropertiesRightStyle alignItems="flexStart" data-test-subj="properties-right" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <InspectButtonContainer>
+          <EuiPopover
+            anchorPosition="downRight"
+            button={
+              <SettingsIcon
+                data-test-subj="settings-gear"
+                type="gear"
+                size="l"
+                onClick={onButtonClick}
               />
-            </EuiFlexItem>
+            }
+            id="timelineSettingsPopover"
+            isOpen={showActions}
+            closePopover={onClosePopover}
+          >
+            <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
+              {capabilitiesCanUserCRUD && (
+                <EuiFlexItem grow={false}>
+                  <CreateTimelineBtn
+                    onClosePopover={onClosePopover}
+                    timelineId={timelineId}
+                    timelineType={TimelineType.default}
+                    title={i18n.NEW_TIMELINE}
+                  />
+                </EuiFlexItem>
+              )}
 
-            <EuiFlexItem grow={false}>
-              <CreateTimelineBtn
-                onClosePopover={onClosePopover}
-                timelineId={timelineId}
-                timelineType={TimelineType.template}
-                title={i18n.NEW_TEMPLATE_TIMELINE}
-              />
-            </EuiFlexItem>
+              {capabilitiesCanUserCRUD && (
+                <EuiFlexItem grow={false}>
+                  <CreateTimelineBtn
+                    onClosePopover={onClosePopover}
+                    timelineId={timelineId}
+                    timelineType={TimelineType.template}
+                    title={i18n.NEW_TEMPLATE_TIMELINE}
+                  />
+                </EuiFlexItem>
+              )}
 
-            <EuiFlexItem grow={false}>
-              <OpenTimelineModalButton onClick={onOpenTimelineModal} />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <NewCase
-                onClosePopover={onClosePopover}
-                timelineId={timelineId}
-                timelineTitle={title}
-              />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <InspectButton
-                queryId={timelineId}
-                inputId="timeline"
-                inspectIndex={0}
-                isDisabled={!isDataInTimeline}
-                onCloseInspect={onClosePopover}
-                title={i18n.INSPECT_TIMELINE_TITLE}
-              />
-            </EuiFlexItem>
-
-            {showNotesFromWidth ? (
               <EuiFlexItem grow={false}>
-                <NotesButton
-                  animate={true}
-                  associateNote={associateNote}
-                  getNotesByIds={getNotesByIds}
-                  noteIds={noteIds}
-                  showNotes={showNotes}
-                  size="l"
-                  text={i18n.NOTES}
-                  toggleShowNotes={onToggleShowNotes}
-                  toolTip={i18n.NOTES_TOOL_TIP}
-                  updateNote={updateNote}
+                <OpenTimelineModalButton onClick={onOpenTimelineModal} />
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <NewCase
+                  onClosePopover={onClosePopover}
+                  timelineId={timelineId}
+                  timelineTitle={title}
                 />
               </EuiFlexItem>
-            ) : null}
 
-            {showDescription ? (
               <EuiFlexItem grow={false}>
-                <DescriptionPopoverMenuContainer>
-                  <Description
-                    description={description}
-                    timelineId={timelineId}
-                    updateDescription={updateDescription}
-                  />
-                </DescriptionPopoverMenuContainer>
+                <InspectButton
+                  queryId={timelineId}
+                  inputId="timeline"
+                  inspectIndex={0}
+                  isDisabled={!isDataInTimeline}
+                  onCloseInspect={onClosePopover}
+                  title={i18n.INSPECT_TIMELINE_TITLE}
+                />
               </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
-        </EuiPopover>
-      </InspectButtonContainer>
-    </EuiFlexItem>
 
-    {showUsersView
-      ? usersViewing.map(user => (
-          // Hide the hard-coded elastic user avatar as the 7.2 release does not implement
-          // support for multi-user-collaboration as proposed in elastic/ingest-dev#395
-          <HiddenFlexItem key={user}>
-            <EuiToolTip
-              data-test-subj="timeline-action-pin-tool-tip"
-              content={`${user} ${i18n.IS_VIEWING}`}
-            >
-              <Avatar data-test-subj="avatar" size="s" name={user} />
-            </EuiToolTip>
-          </HiddenFlexItem>
-        ))
-      : null}
+              {showNotesFromWidth ? (
+                <EuiFlexItem grow={false}>
+                  <NotesButton
+                    animate={true}
+                    associateNote={associateNote}
+                    getNotesByIds={getNotesByIds}
+                    noteIds={noteIds}
+                    showNotes={showNotes}
+                    size="l"
+                    text={i18n.NOTES}
+                    toggleShowNotes={onToggleShowNotes}
+                    toolTip={i18n.NOTES_TOOL_TIP}
+                    updateNote={updateNote}
+                  />
+                </EuiFlexItem>
+              ) : null}
 
-    {showTimelineModal ? <OpenTimelineModal onClose={onCloseTimelineModal} /> : null}
-  </PropertiesRightStyle>
-);
+              {showDescription ? (
+                <EuiFlexItem grow={false}>
+                  <DescriptionPopoverMenuContainer>
+                    <Description
+                      description={description}
+                      timelineId={timelineId}
+                      updateDescription={updateDescription}
+                    />
+                  </DescriptionPopoverMenuContainer>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          </EuiPopover>
+        </InspectButtonContainer>
+      </EuiFlexItem>
+
+      {showUsersView
+        ? usersViewing.map(user => (
+            // Hide the hard-coded elastic user avatar as the 7.2 release does not implement
+            // support for multi-user-collaboration as proposed in elastic/ingest-dev#395
+            <HiddenFlexItem key={user}>
+              <EuiToolTip
+                data-test-subj="timeline-action-pin-tool-tip"
+                content={`${user} ${i18n.IS_VIEWING}`}
+              >
+                <Avatar data-test-subj="avatar" size="s" name={user} />
+              </EuiToolTip>
+            </HiddenFlexItem>
+          ))
+        : null}
+
+      {showTimelineModal ? <OpenTimelineModal onClose={onCloseTimelineModal} /> : null}
+    </PropertiesRightStyle>
+  );
+};
 
 export const PropertiesRight = React.memo(PropertiesRightComponent);

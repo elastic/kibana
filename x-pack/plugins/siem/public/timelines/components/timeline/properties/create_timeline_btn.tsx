@@ -10,16 +10,15 @@ import { Dispatch } from 'redux';
 import { noop } from 'lodash/fp';
 
 import { defaultHeaders } from '../body/column_headers/default_headers';
-import { State } from '../../../../common/store';
-import { timelineDefaults } from '../../../store/timeline/defaults';
 
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { timelineActions } from '../../../store/timeline';
 import { NewTimeline } from './helpers';
 import {
   TimelineTypeLiteralWithNull,
   TimelineType,
   TimelineTypeLiteral,
 } from '../../../../../common/types/timeline';
+import { useKibana } from '../../../../common/lib/kibana';
 interface OwnProps {
   title?: string;
   timelineId?: string;
@@ -35,13 +34,14 @@ const createTimelineBtn = React.memo<Props>(
     createTimeline,
     onClosePopover = noop,
     outline,
-    showTimeline = noop,
+    showTimeline,
     title,
     timelineId = 'timeline-1',
     timelineType,
   }) => {
     return (
       <NewTimeline
+        data-test-subj="new-timeline-btn"
         createTimeline={createTimeline}
         onClosePopover={onClosePopover}
         outline={outline}
@@ -56,18 +56,7 @@ const createTimelineBtn = React.memo<Props>(
 
 createTimelineBtn.displayName = 'createTimelineBtn';
 
-const makeMapStateToProps = () => {
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const mapStateToProps = (state: State) => {
-    const timeline = getTimeline(state, 'timeline-1') ?? timelineDefaults;
-    return {
-      timeline,
-    };
-  };
-  return mapStateToProps;
-};
-
-const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
+const mapDispatchToProps = (dispatch: Dispatch, { onClosePopover }: OwnProps) => ({
   showTimeline: timelineActions.showTimeline,
   createTimeline: ({
     id,
@@ -88,7 +77,9 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
     ),
 });
 
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
+const mapStateToProps = () => ({});
+
+const connector = connect(mapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

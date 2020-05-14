@@ -165,7 +165,7 @@ export const NewCase = React.memo<NewCaseProps>(({ onClosePopover, timelineId, t
 });
 NewCase.displayName = 'NewCase';
 
-interface NewTimelineProps {
+export interface NewTimelineProps {
   createTimeline: CreateTimeline;
   onClosePopover: () => void;
   outline?: boolean;
@@ -196,7 +196,7 @@ export const NewTimeline = React.memo<NewTimelineProps>(
     };
     if (outline) {
       return (
-        <EuiButton data-test-subj="timeline-new-with-border" {...props}>
+        <EuiButton data-test-subj="timeline-new-with-border" {...props} fill>
           {title}
         </EuiButton>
       );
