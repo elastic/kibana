@@ -19,9 +19,9 @@ export function getFeatureCollectionBounds(
   }
 
   const visibleFeatures = hasJoins
-    ? featureCollection.features.filter(
-        feature => feature.properties[FEATURE_VISIBLE_PROPERTY_NAME]
-      )
+    ? featureCollection.features.filter(feature => {
+        return feature.properties && feature.properties[FEATURE_VISIBLE_PROPERTY_NAME];
+      })
     : featureCollection.features;
 
   if (visibleFeatures.length === 0) {
