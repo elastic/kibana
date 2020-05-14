@@ -489,4 +489,4 @@ exports[`TelemetryManagementSectionComponent renders null because query does not
 />
 `;
 
-exports[`TelemetryManagementSectionComponent test the wrapper (for coverage purposes) 1`] = `""`;
+exports[`TelemetryManagementSectionComponent test the wrapper (for coverage purposes) 1`] = `null`;

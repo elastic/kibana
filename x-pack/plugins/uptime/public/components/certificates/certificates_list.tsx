@@ -41,7 +41,7 @@ interface Props {
 }
 
 export const CertificateList: React.FC<Props> = ({ page, sort, onChange }) => {
-  const certificates = useSelector(certificatesSelector);
+  const { data: certificates, loading } = useSelector(certificatesSelector);
 
   const onTableChange = (newVal: Partial<Props>) => {
     onChange(newVal.page as Page, newVal.sort as CertSort);
@@ -98,6 +98,7 @@ export const CertificateList: React.FC<Props> = ({ page, sort, onChange }) => {
 
   return (
     <EuiBasicTable
+      loading={loading}
       columns={columns}
       items={certificates?.certs ?? []}
       pagination={pagination}

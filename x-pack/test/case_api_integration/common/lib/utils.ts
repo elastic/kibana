@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Client } from '@elastic/elasticsearch';
 import { CasesConfigureRequest, CasesConfigureResponse } from '../../../../plugins/case/common/api';
 
 export const getConfiguration = (connector_id: string = 'connector-1'): CasesConfigureRequest => {
@@ -29,43 +30,42 @@ export const removeServerGeneratedPropertiesFromConfigure = (
   return rest;
 };
 
-export const deleteConfiguration = async (es: any): Promise<void> => {
+export const deleteCasesUserActions = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
-    q: 'type:cases-configure',
-    waitForCompletion: true,
-    refresh: 'wait_for',
+    q: 'type:cases-user-actions',
+    wait_for_completion: true,
+    refresh: true,
     body: {},
   });
 };
 
-export const getConnector = () => ({
-  name: 'ServiceNow Connector',
-  actionTypeId: '.servicenow',
-  secrets: {
-    username: 'admin',
-    password: 'admin',
-  },
-  config: {
-    apiUrl: 'localhost',
-    casesConfiguration: {
-      mapping: [
-        {
-          source: 'title',
-          target: 'short_description',
-          actionType: 'overwrite',
-        },
-        {
-          source: 'description',
-          target: 'description',
-          actionType: 'overwrite',
-        },
-        {
-          source: 'comments',
-          target: 'comments',
-          actionType: 'append',
-        },
-      ],
-    },
-  },
-});
+export const deleteCases = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: '.kibana',
+    q: 'type:cases',
+    wait_for_completion: true,
+    refresh: true,
+    body: {},
+  });
+};
+
+export const deleteComments = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: '.kibana',
+    q: 'type:cases-comments',
+    wait_for_completion: true,
+    refresh: true,
+    body: {},
+  });
+};
+
+export const deleteConfiguration = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: '.kibana',
+    q: 'type:cases-configure',
+    wait_for_completion: true,
+    refresh: true,
+    body: {},
+  });
+};

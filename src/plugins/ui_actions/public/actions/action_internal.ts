@@ -17,6 +17,8 @@
  * under the License.
  */
 
+// @ts-ignore
+import React from 'react';
 import { Action, ActionContext as Context, ActionDefinition } from './action';
 import { Presentable } from '../util/presentable';
 import { uiToReactComponent } from '../../../kibana_react/public';
@@ -44,6 +46,11 @@ export class ActionInternal<A extends ActionDefinition = ActionDefinition>
   public getDisplayName(context: Context<A>): string {
     if (!this.definition.getDisplayName) return `Action: ${this.id}`;
     return this.definition.getDisplayName(context);
+  }
+
+  public getDisplayNameTooltip(context: Context<A>): string {
+    if (!this.definition.getDisplayNameTooltip) return '';
+    return this.definition.getDisplayNameTooltip(context);
   }
 
   public async isCompatible(context: Context<A>): Promise<boolean> {

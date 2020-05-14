@@ -32,14 +32,18 @@ export function getTermsFields(fields) {
 
 export const AGGREGATABLE_GEO_FIELD_TYPES = [ES_GEO_FIELD_TYPE.GEO_POINT];
 
-export function getAggregatableGeoFields(fields) {
-  return fields.filter(field => {
-    return (
-      field.aggregatable &&
-      !indexPatterns.isNestedField(field) &&
-      AGGREGATABLE_GEO_FIELD_TYPES.includes(field.type)
-    );
-  });
+export function getFieldsWithGeoTileAgg(fields) {
+  return fields.filter(supportsGeoTileAgg);
+}
+
+export function supportsGeoTileAgg(field) {
+  // TODO add geo_shape support with license check
+  return (
+    field &&
+    field.aggregatable &&
+    !indexPatterns.isNestedField(field) &&
+    field.type === ES_GEO_FIELD_TYPE.GEO_POINT
+  );
 }
 
 // Returns filtered fields list containing only fields that exist in _source.

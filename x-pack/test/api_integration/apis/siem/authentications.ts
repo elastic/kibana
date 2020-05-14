@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { authenticationsQuery } from '../../../../plugins/siem/public/containers/authentications/index.gql_query';
+import { authenticationsQuery } from '../../../../plugins/siem/public/hosts/containers/authentications/index.gql_query';
 import { GetAuthenticationsQuery } from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

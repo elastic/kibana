@@ -9,7 +9,7 @@ import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult } from '../../../types';
-import { ConnectorEditFlyout } from './connector_edit_flyout';
+import ConnectorEditFlyout from './connector_edit_flyout';
 import { AppContextProvider } from '../../app_context';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -37,6 +37,7 @@ describe('connector_edit_flyout', () => {
       },
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: {} as any,
+      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
   });
 
@@ -80,6 +81,7 @@ describe('connector_edit_flyout', () => {
             reloadConnectors: () => {
               return new Promise<void>(() => {});
             },
+            docLinks: deps.docLinks,
           }}
         >
           <ConnectorEditFlyout
@@ -136,6 +138,7 @@ describe('connector_edit_flyout', () => {
             reloadConnectors: () => {
               return new Promise<void>(() => {});
             },
+            docLinks: deps.docLinks,
           }}
         >
           <ConnectorEditFlyout

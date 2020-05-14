@@ -35,6 +35,7 @@ import {
   SavedObjectsClient,
   IUiSettingsClient,
   OverlayStart,
+  IBasePath,
 } from '../../../../../../../../core/public';
 import { DataPublicPluginStart } from '../../../../../../../../plugins/data/public';
 import { IndexPatternCreationConfig } from '../../../../../../../../plugins/index_pattern_management/public';
@@ -50,6 +51,7 @@ interface CreateIndexPatternWizardProps {
     uiSettings: IUiSettingsClient;
     changeUrl: (url: string) => void;
     openConfirm: OverlayStart['openConfirm'];
+    prependBasePath: IBasePath['prepend'];
   };
 }
 
@@ -235,7 +237,12 @@ export class CreateIndexPatternWizard extends Component<
 
     const hasDataIndices = allIndices.some(({ name }: MatchedIndex) => !name.startsWith('.'));
     if (!hasDataIndices && !isIncludingSystemIndices && !remoteClustersExist) {
-      return <EmptyState onRefresh={this.fetchData} />;
+      return (
+        <EmptyState
+          onRefresh={this.fetchData}
+          prependBasePath={this.props.services.prependBasePath}
+        />
+      );
     }
 
     if (step === 1) {

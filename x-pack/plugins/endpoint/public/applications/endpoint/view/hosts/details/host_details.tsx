@@ -16,13 +16,14 @@ import {
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { HostMetadata, HostPolicyResponseActionStatus } from '../../../../../../common/types';
+import { HostMetadata } from '../../../../../../common/types';
 import { FormattedDateAndTime } from '../../formatted_date_time';
 import { LinkToApp } from '../../components/link_to_app';
 import { useHostSelector, useHostLogsUrl } from '../hooks';
 import { urlFromQueryParams } from '../url_from_query_params';
 import { policyResponseStatus, uiQueryParams } from '../../../store/hosts/selectors';
 import { useNavigateByRouterEventHandler } from '../../hooks/use_navigate_by_router_event_handler';
+import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;
@@ -30,14 +31,6 @@ const HostIds = styled(EuiListGroupItem)`
     padding: 0;
   }
 `;
-
-const POLICY_STATUS_TO_HEALTH_COLOR = Object.freeze<
-  { [key in keyof typeof HostPolicyResponseActionStatus]: string }
->({
-  success: 'success',
-  warning: 'warning',
-  failure: 'danger',
-});
 
 export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   const { appId, appPath, url } = useHostLogsUrl(details.host.id);

@@ -379,6 +379,34 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
       );
       return values.filter(item => item.length > 0);
     }
+
+    public async getRightValueAxes() {
+      const axes = await find.allByCssSelector('.visAxis__column--right g.axis');
+      return axes.length;
+    }
+
+    public async getHistogramSeries() {
+      const series = await find.allByCssSelector('.series.histogram');
+      return series.length;
+    }
+
+    public async getGridLines(): Promise<Array<{ x: number; y: number }>> {
+      const grid = await find.byCssSelector('g.grid');
+      const $ = await grid.parseDomContent();
+      return $('path')
+        .toArray()
+        .map(line => {
+          const dAttribute = $(line).attr('d');
+          const firstPoint = dAttribute
+            .split('L')[0]
+            .replace('M', '')
+            .split(',');
+          return {
+            x: parseFloat(firstPoint[0]),
+            y: parseFloat(firstPoint[1]),
+          };
+        });
+    }
   }
 
   return new VisualizeChart();

@@ -39,6 +39,7 @@ export const IndexParameter = ({
       href: documentationService.getIndexLink(),
     }}
     formFieldPath="index"
+    data-test-subj="indexParameter"
   >
     {/* index_options */}
     {hasIndexOptions ? (

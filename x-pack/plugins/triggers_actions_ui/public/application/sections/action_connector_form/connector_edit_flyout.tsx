@@ -47,6 +47,7 @@ export const ConnectorEditFlyout = ({
     capabilities,
     actionTypeRegistry,
     reloadConnectors,
+    docLinks,
   } = useActionsConnectorsContext();
   const canSave = hasSaveActionsCapability(capabilities);
   const closeFlyout = useCallback(() => setEditFlyoutVisibility(false), [setEditFlyoutVisibility]);
@@ -183,6 +184,7 @@ export const ConnectorEditFlyout = ({
             dispatch={dispatch}
             actionTypeRegistry={actionTypeRegistry}
             http={http}
+            docLinks={docLinks}
           />
         ) : (
           <Fragment>
@@ -194,7 +196,10 @@ export const ConnectorEditFlyout = ({
                 }
               )}
             </EuiText>
-            <EuiLink href="https://www.elastic.co/guide" target="_blank">
+            <EuiLink
+              href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pre-configured-connectors.html`}
+              target="_blank"
+            >
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.editConnectorForm.preconfiguredHelpLabel"
                 defaultMessage="Learn more about preconfigured connectors."
@@ -249,3 +254,6 @@ export const ConnectorEditFlyout = ({
     </EuiFlyout>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { ConnectorEditFlyout as default };

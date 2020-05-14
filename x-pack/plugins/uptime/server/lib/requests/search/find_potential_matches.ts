@@ -47,7 +47,7 @@ export const findPotentialMatches = async (
   return {
     monitorIds,
     checkGroups,
-    searchAfter: queryResult.aggregations.monitors.after_key,
+    searchAfter: queryResult.aggregations?.monitors?.after_key,
   };
 };
 

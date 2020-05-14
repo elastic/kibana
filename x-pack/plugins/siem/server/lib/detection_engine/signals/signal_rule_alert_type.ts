@@ -5,10 +5,10 @@
  */
 
 import { performance } from 'perf_hooks';
-import { Logger } from 'src/core/server';
+import { Logger, KibanaRequest } from 'src/core/server';
 
 import { SIGNALS_ID, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
-import { isJobStarted, isMlRule } from '../../../../common/detection_engine/ml_helpers';
+import { isJobStarted, isMlRule } from '../../../../common/machine_learning/helpers';
 import { SetupPlugins } from '../../../plugin';
 
 import { buildEventsSearchQuery } from './build_events_query';
@@ -50,6 +50,7 @@ export const signalRulesAlertType = ({
     validate: {
       params: signalParamsSchema(),
     },
+    producer: 'siem',
     async executor({ previousStartedAt, alertId, services, params }) {
       const {
         anomalyThreshold,
@@ -138,8 +139,9 @@ export const signalRulesAlertType = ({
             );
           }
 
+          const scopedMlCallCluster = services.getScopedCallCluster(ml.mlClient);
           const summaryJobs = await ml
-            .jobServiceProvider(ml.mlClient.callAsInternalUser)
+            .jobServiceProvider(scopedMlCallCluster)
             .jobsSummary([machineLearningJobId]);
           const jobSummary = summaryJobs.find(job => job.id === machineLearningJobId);
 
@@ -155,13 +157,18 @@ export const signalRulesAlertType = ({
             await ruleStatusService.error(errorMessage);
           }
 
-          const anomalyResults = await findMlSignals(
-            machineLearningJobId,
+          const anomalyResults = await findMlSignals({
+            ml,
+            callCluster: scopedMlCallCluster,
+            // This is needed to satisfy the ML Services API, but can be empty as it is
+            // currently unused by the mlSearch function.
+            request: ({} as unknown) as KibanaRequest,
+            jobId: machineLearningJobId,
             anomalyThreshold,
             from,
             to,
-            services.callCluster
-          );
+          });
+
           const anomalyCount = anomalyResults.hits.hits.length;
           if (anomalyCount) {
             logger.info(buildRuleMessage(`Found ${anomalyCount} signals from ML anomalies.`));

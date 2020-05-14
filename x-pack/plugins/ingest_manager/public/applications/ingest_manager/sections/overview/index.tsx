@@ -17,7 +17,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { WithHeaderLayout } from '../../layouts';
 import { useGetAgentConfigs } from '../../hooks';
-import { AgentEnrollmentFlyout } from '../fleet/agent_list_page/components';
+import { AgentEnrollmentFlyout } from '../fleet/components';
 import { OverviewAgentSection } from './components/agent_section';
 import { OverviewConfigurationSection } from './components/configuration_section';
 import { OverviewIntegrationSection } from './components/integration_section';

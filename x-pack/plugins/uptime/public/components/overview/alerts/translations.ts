@@ -6,6 +6,119 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const SECONDS_TIME_RANGE = i18n.translate(
+  'xpack.uptime.alerts.timerangeUnitSelectable.secondsOption.ariaLabel',
+  {
+    defaultMessage: '"Seconds" time range select item',
+  }
+);
+
+export const SECONDS = i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.seconds', {
+  defaultMessage: 'seconds',
+});
+
+export const MINUTES_TIME_RANGE = i18n.translate(
+  'xpack.uptime.alerts.timerangeUnitSelectable.minutesOption.ariaLabel',
+  {
+    defaultMessage: '"Minutes" time range select item',
+  }
+);
+
+export const MINUTES = i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.minutes', {
+  defaultMessage: 'minutes',
+});
+
+export const HOURS_TIME_RANGE = i18n.translate(
+  'xpack.uptime.alerts.timerangeUnitSelectable.hoursOption.ariaLabel',
+  {
+    defaultMessage: '"Hours" time range select item',
+  }
+);
+
+export const HOURS = i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.hours', {
+  defaultMessage: 'hours',
+});
+
+export const DAYS_TIME_RANGE = i18n.translate(
+  'xpack.uptime.alerts.timerangeUnitSelectable.daysOption.ariaLabel',
+  {
+    defaultMessage: '"Days" time range select item',
+  }
+);
+
+export const DAYS = i18n.translate('xpack.uptime.alerts.monitorStatus.timerangeOption.days', {
+  defaultMessage: 'days',
+});
+
+export const ALERT_KUERY_BAR_ARIA = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.filterBar.ariaLabel',
+  {
+    defaultMessage: 'Input that allows filtering criteria for the monitor status alert',
+  }
+);
+
+export const OPEN_THE_POPOVER_DOWN_COUNT = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.numTimesExpression.ariaLabel',
+  {
+    defaultMessage: 'Open the popover for down count input',
+  }
+);
+
+export const ENTER_NUMBER_OF_DOWN_COUNTS = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.numTimesField.ariaLabel',
+  {
+    defaultMessage: 'Enter number of down counts required to trigger the alert',
+  }
+);
+
+export const MATCHING_MONITORS_DOWN = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.numTimesExpression.matchingMonitors.description',
+  {
+    defaultMessage: 'matching monitors are down >',
+  }
+);
+
+export const ANY_MONITOR_DOWN = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.numTimesExpression.anyMonitors.description',
+  {
+    defaultMessage: 'any monitor is down >',
+  }
+);
+
+export const OPEN_THE_POPOVER_TIME_RANGE_VALUE = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.timerangeValueExpression.ariaLabel',
+  {
+    defaultMessage: 'Open the popover for time range value field',
+  }
+);
+
+export const ENTER_NUMBER_OF_TIME_UNITS = i18n.translate(
+  'xpack.uptime.alerts.monitorStatus.timerangeValueField.ariaLabel',
+  {
+    defaultMessage: `Enter the number of time units for the alert's range`,
+  }
+);
+
+export const ADD_FILTER = i18n.translate('xpack.uptime.alerts.monitorStatus.addFilter', {
+  defaultMessage: `Add filter`,
+});
+
+export const LOCATION = i18n.translate('xpack.uptime.alerts.monitorStatus.addFilter.location', {
+  defaultMessage: `Location`,
+});
+
+export const TAG = i18n.translate('xpack.uptime.alerts.monitorStatus.addFilter.tag', {
+  defaultMessage: `Tag`,
+});
+
+export const PORT = i18n.translate('xpack.uptime.alerts.monitorStatus.addFilter.port', {
+  defaultMessage: `Port`,
+});
+
+export const TYPE = i18n.translate('xpack.uptime.alerts.monitorStatus.addFilter.type', {
+  defaultMessage: `Type`,
+});
+
 export const TlsTranslations = {
   criteriaAriaLabel: i18n.translate('xpack.uptime.alerts.tls.criteriaExpression.ariaLabel', {
     defaultMessage:

@@ -24,7 +24,7 @@ import { MetricsExplorerAggregationPicker } from './aggregation';
 import { MetricsExplorerChartOptions as MetricsExplorerChartOptionsComponent } from './chart_options';
 import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
 import { MetricExplorerViewState } from '../hooks/use_metric_explorer_state';
-import { metricsExplorerViewSavedObjectType } from '../../../../../common/saved_objects/metrics_explorer_view';
+import { metricsExplorerViewSavedObjectName } from '../../../../../common/saved_objects/metrics_explorer_view';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 import { mapKibanaQuickRangesToDatePickerRanges } from '../../../../utils/map_timepicker_quickranges_to_datepicker_ranges';
 import { ToolbarPanel } from '../../../../components/toolbar_panel';
@@ -129,7 +129,7 @@ export const MetricsExplorerToolbar = ({
               chartOptions,
               currentTimerange: timeRange,
             }}
-            viewType={metricsExplorerViewSavedObjectType}
+            viewType={metricsExplorerViewSavedObjectName}
             onViewChange={onViewStateChange}
           />
         </EuiFlexItem>

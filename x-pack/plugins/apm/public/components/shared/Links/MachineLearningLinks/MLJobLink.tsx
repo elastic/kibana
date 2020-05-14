@@ -8,22 +8,33 @@ import React from 'react';
 import { getMlJobId } from '../../../../../common/ml_job_constants';
 import { MLLink } from './MLLink';
 
-interface Props {
+interface PropsServiceName {
   serviceName: string;
   transactionType?: string;
 }
+interface PropsJobId {
+  jobId: string;
+}
 
-export const MLJobLink: React.FC<Props> = ({
-  serviceName,
-  transactionType,
-  children
-}) => {
-  const jobId = getMlJobId(serviceName, transactionType);
+type Props = (PropsServiceName | PropsJobId) & {
+  external?: boolean;
+};
+
+export const MLJobLink: React.FC<Props> = props => {
+  const jobId =
+    'jobId' in props
+      ? props.jobId
+      : getMlJobId(props.serviceName, props.transactionType);
   const query = {
     ml: { jobIds: [jobId] }
   };
 
   return (
-    <MLLink children={children} query={query} path="/timeseriesexplorer" />
+    <MLLink
+      children={props.children}
+      query={query}
+      path="/timeseriesexplorer"
+      external={props.external}
+    />
   );
 };

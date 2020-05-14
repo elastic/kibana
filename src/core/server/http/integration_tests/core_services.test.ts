@@ -43,7 +43,7 @@ describe('http service', () => {
   describe('auth', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeEach(async () => {
-      root = kbnTestServer.createRoot();
+      root = kbnTestServer.createRoot({ plugins: { initialize: false } });
     }, 30000);
 
     afterEach(async () => {
@@ -192,7 +192,7 @@ describe('http service', () => {
 
       let root: ReturnType<typeof kbnTestServer.createRoot>;
       beforeEach(async () => {
-        root = kbnTestServer.createRoot();
+        root = kbnTestServer.createRoot({ plugins: { initialize: false } });
       }, 30000);
 
       afterEach(async () => {
@@ -326,7 +326,7 @@ describe('http service', () => {
     describe('#basePath()', () => {
       let root: ReturnType<typeof kbnTestServer.createRoot>;
       beforeEach(async () => {
-        root = kbnTestServer.createRoot();
+        root = kbnTestServer.createRoot({ plugins: { initialize: false } });
       }, 30000);
 
       afterEach(async () => await root.shutdown());
@@ -355,7 +355,7 @@ describe('http service', () => {
   describe('elasticsearch', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeEach(async () => {
-      root = kbnTestServer.createRoot();
+      root = kbnTestServer.createRoot({ plugins: { initialize: false } });
     }, 30000);
 
     afterEach(async () => {

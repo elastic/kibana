@@ -8,7 +8,7 @@
     "index.ts",
     "types.ts",
     "public/**/*.ts",
-    "../../../../typings/**/*",
+    "../../../../typings/**/*"
   ],
   "exclude": []
 }

@@ -6,7 +6,35 @@
 
 import { cloneDeep } from 'lodash';
 import { fromExpression, toExpression, Ast, ExpressionFunctionAST } from '@kbn/interpreter/common';
-import { SavedObjectMigrationFn } from 'src/core/server';
+import { SavedObjectMigrationMap, SavedObjectMigrationFn } from 'src/core/server';
+
+interface LensDocShape<VisualizationState = unknown> {
+  id?: string;
+  type?: string;
+  visualizationType: string | null;
+  title: string;
+  expression: string | null;
+  state: {
+    datasourceMetaData: {
+      filterableIndexPatterns: Array<{ id: string; title: string }>;
+    };
+    datasourceStates: {
+      // This is hardcoded as our only datasource
+      indexpattern: {
+        layers: Record<
+          string,
+          {
+            columnOrder: string[];
+            columns: Record<string, unknown>;
+          }
+        >;
+      };
+    };
+    visualization: VisualizationState;
+    query: unknown;
+    filters: unknown[];
+  };
+}
 
 interface XYLayerPre77 {
   layerId: string;
@@ -15,13 +43,23 @@ interface XYLayerPre77 {
   accessors: string[];
 }
 
+interface XYStatePre77 {
+  layers: XYLayerPre77[];
+}
+
+interface XYStatePost77 {
+  layers: Array<Partial<XYLayerPre77>>;
+}
+
 /**
  * Removes the `lens_auto_date` subexpression from a stored expression
  * string. For example: aggConfigs={lens_auto_date aggConfigs="JSON string"}
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const removeLensAutoDate: SavedObjectMigrationFn<any, any> = (doc, context) => {
-  const expression: string = doc.attributes?.expression;
+const removeLensAutoDate: SavedObjectMigrationFn<LensDocShape, LensDocShape> = (doc, context) => {
+  const expression = doc.attributes.expression;
+  if (!expression) {
+    return doc;
+  }
   try {
     const ast = fromExpression(expression);
     const newChain: ExpressionFunctionAST[] = ast.chain.map(topNode => {
@@ -74,9 +112,11 @@ const removeLensAutoDate: SavedObjectMigrationFn<any, any> = (doc, context) => {
 /**
  * Adds missing timeField arguments to esaggs in the Lens expression
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const addTimeFieldToEsaggs: SavedObjectMigrationFn<any, any> = (doc, context) => {
-  const expression: string = doc.attributes?.expression;
+const addTimeFieldToEsaggs: SavedObjectMigrationFn<LensDocShape, LensDocShape> = (doc, context) => {
+  const expression = doc.attributes.expression;
+  if (!expression) {
+    return doc;
+  }
 
   try {
     const ast = fromExpression(expression);
@@ -133,27 +173,32 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn<any, any> = (doc, context) =>
   }
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const migrations: Record<string, SavedObjectMigrationFn<any, any>> = {
-  '7.7.0': doc => {
-    const newDoc = cloneDeep(doc);
-    if (newDoc.attributes?.visualizationType === 'lnsXY') {
-      const datasourceState = newDoc.attributes.state?.datasourceStates?.indexpattern;
-      const datasourceLayers = datasourceState?.layers ?? {};
-      const xyState = newDoc.attributes.state?.visualization;
-      newDoc.attributes.state.visualization.layers = xyState.layers.map((layer: XYLayerPre77) => {
-        const layerId = layer.layerId;
-        const datasource = datasourceLayers[layerId];
-        return {
-          ...layer,
-          xAccessor: datasource?.columns[layer.xAccessor] ? layer.xAccessor : undefined,
-          splitAccessor: datasource?.columns[layer.splitAccessor] ? layer.splitAccessor : undefined,
-          accessors: layer.accessors.filter(accessor => !!datasource?.columns[accessor]),
-        };
-      }) as typeof xyState.layers;
-    }
-    return newDoc;
-  },
+const removeInvalidAccessors: SavedObjectMigrationFn<
+  LensDocShape<XYStatePre77>,
+  LensDocShape<XYStatePost77>
+> = doc => {
+  const newDoc = cloneDeep(doc);
+  if (newDoc.attributes.visualizationType === 'lnsXY') {
+    const datasourceLayers = newDoc.attributes.state.datasourceStates.indexpattern.layers || {};
+    const xyState = newDoc.attributes.state.visualization;
+    (newDoc.attributes as LensDocShape<
+      XYStatePost77
+    >).state.visualization.layers = xyState.layers.map((layer: XYLayerPre77) => {
+      const layerId = layer.layerId;
+      const datasource = datasourceLayers[layerId];
+      return {
+        ...layer,
+        xAccessor: datasource?.columns[layer.xAccessor] ? layer.xAccessor : undefined,
+        splitAccessor: datasource?.columns[layer.splitAccessor] ? layer.splitAccessor : undefined,
+        accessors: layer.accessors.filter(accessor => !!datasource?.columns[accessor]),
+      };
+    });
+  }
+  return newDoc;
+};
+
+export const migrations: SavedObjectMigrationMap = {
+  '7.7.0': removeInvalidAccessors,
   // The order of these migrations matter, since the timefield migration relies on the aggConfigs
   // sitting directly on the esaggs as an argument and not a nested function (which lens_auto_date was).
   '7.8.0': (doc, context) => addTimeFieldToEsaggs(removeLensAutoDate(doc, context), context),

@@ -155,8 +155,8 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
 
   const stepsConfig = [
     {
-      title: i18n.translate('xpack.transform.transformsWizard.stepDefineTitle', {
-        defaultMessage: 'Define pivot',
+      title: i18n.translate('xpack.transform.transformsWizard.stepConfigurationTitle', {
+        defaultMessage: 'Configuration',
       }),
       children: (
         <StepDefine

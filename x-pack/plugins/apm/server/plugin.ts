@@ -12,6 +12,7 @@ import {
 } from 'src/core/server';
 import { Observable, combineLatest } from 'rxjs';
 import { map, take } from 'rxjs/operators';
+import { ObservabilityPluginSetup } from '../../observability/server';
 import { SecurityPluginSetup } from '../../security/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { TaskManagerSetupContract } from '../../task_manager/server';
@@ -49,7 +50,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
   public async setup(
     core: CoreSetup,
     plugins: {
-      apm_oss: APMOSSPluginSetup;
+      apmOss: APMOSSPluginSetup;
       home: HomeServerPluginSetup;
       licensing: LicensingPluginSetup;
       cloud?: CloudSetup;
@@ -57,13 +58,14 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       taskManager?: TaskManagerSetupContract;
       alerting?: AlertingPlugin['setup'];
       actions?: ActionsPlugin['setup'];
+      observability?: ObservabilityPluginSetup;
       features: FeaturesPluginSetup;
       security?: SecurityPluginSetup;
     }
   ) {
     this.logger = this.initContext.logger.get();
     const config$ = this.initContext.config.create<APMXPackConfig>();
-    const mergedConfig$ = combineLatest(plugins.apm_oss.config$, config$).pipe(
+    const mergedConfig$ = combineLatest(plugins.apmOss.config$, config$).pipe(
       map(([apmOssConfig, apmConfig]) => mergeConfigs(apmOssConfig, apmConfig))
     );
 
@@ -114,6 +116,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       config$: mergedConfig$,
       logger: this.logger!,
       plugins: {
+        observability: plugins.observability,
         security: plugins.security
       }
     });

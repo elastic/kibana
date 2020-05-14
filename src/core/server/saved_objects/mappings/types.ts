@@ -137,6 +137,7 @@ export interface SavedObjectsCoreFieldMapping {
   fields?: {
     [subfield: string]: {
       type: string;
+      ignore_above?: number;
     };
   };
 }

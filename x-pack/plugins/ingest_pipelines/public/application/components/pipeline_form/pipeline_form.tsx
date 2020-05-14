@@ -44,7 +44,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
 
   const [isTestingPipeline, setIsTestingPipeline] = useState<boolean>(false);
 
-  const handleSave: FormConfig['onSubmit'] = (formData, isValid) => {
+  const handleSave: FormConfig['onSubmit'] = async (formData, isValid) => {
     if (isValid) {
       onSave(formData as Pipeline);
     }
@@ -126,6 +126,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-test-subj="showRequestLink"
               onClick={() => setIsRequestVisible(prevIsRequestVisible => !prevIsRequestVisible)}
             >
               {isRequestVisible ? (

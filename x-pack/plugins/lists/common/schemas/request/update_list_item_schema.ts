@@ -9,13 +9,17 @@
 import * as t from 'io-ts';
 
 import { id, metaOrUndefined, value } from '../common/schemas';
+import { Identity, RequiredKeepUndefined } from '../../types';
 
-export const updateListItemSchema = t.exact(
-  t.type({
-    id,
-    meta: metaOrUndefined,
-    value,
-  })
-);
+export const updateListItemSchema = t.intersection([
+  t.exact(
+    t.type({
+      id,
+      value,
+    })
+  ),
+  t.exact(t.partial({ meta: metaOrUndefined })),
+]);
 
-export type UpdateListItemSchema = t.TypeOf<typeof updateListItemSchema>;
+export type UpdateListItemSchemaPartial = Identity<t.TypeOf<typeof updateListItemSchema>>;
+export type UpdateListItemSchema = RequiredKeepUndefined<t.TypeOf<typeof updateListItemSchema>>;

@@ -20,6 +20,8 @@ describe('buildMapsTelemetry', () => {
 
     expect(result).toMatchObject({
       indexPatternsWithGeoFieldCount: 0,
+      indexPatternsWithGeoPointFieldCount: 0,
+      indexPatternsWithGeoShapeFieldCount: 0,
       attributesPerMap: {
         dataSourcesCount: {
           avg: 0,
@@ -45,7 +47,9 @@ describe('buildMapsTelemetry', () => {
     const result = buildMapsTelemetry({ mapSavedObjects, indexPatternSavedObjects, settings });
 
     expect(result).toMatchObject({
-      indexPatternsWithGeoFieldCount: 2,
+      indexPatternsWithGeoFieldCount: 3,
+      indexPatternsWithGeoPointFieldCount: 2,
+      indexPatternsWithGeoShapeFieldCount: 1,
       attributesPerMap: {
         dataSourcesCount: {
           avg: 2.6666666666666665,

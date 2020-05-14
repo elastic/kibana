@@ -12,7 +12,7 @@ import {
   Plugin,
   PluginInitializerContext
 } from '../../../../src/core/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 
 import {
   PluginSetupContract as AlertingPluginPublicSetup,
@@ -115,7 +115,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       alertParamsExpression: ErrorRateAlertTrigger,
       validate: () => ({
         errors: []
-      })
+      }),
+      requiresAppContext: true
     });
 
     plugins.triggers_actions_ui.alertTypeRegistry.register({
@@ -127,7 +128,8 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       alertParamsExpression: TransactionDurationAlertTrigger,
       validate: () => ({
         errors: []
-      })
+      }),
+      requiresAppContext: true
     });
   }
 }

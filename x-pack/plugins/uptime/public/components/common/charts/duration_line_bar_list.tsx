@@ -9,11 +9,11 @@ import moment from 'moment';
 import { AnnotationTooltipFormatter, RectAnnotation } from '@elastic/charts';
 import { RectAnnotationDatum } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 import { AnnotationTooltip } from './annotation_tooltip';
-import { ANOMALY_SEVERITY } from '../../../../../../plugins/ml/common/constants/anomalies';
 import {
+  ANOMALY_SEVERITY,
   getSeverityColor,
   getSeverityType,
-} from '../../../../../../plugins/ml/common/util/anomaly_utils';
+} from '../../../../../../plugins/ml/public';
 
 interface Props {
   anomalies: any;

@@ -43,6 +43,12 @@ export function LayerPanel(
   }
 ) {
   const dragDropContext = useContext(DragContext);
+  const [popoverState, setPopoverState] = useState<DimensionPopoverState>({
+    isOpen: false,
+    openId: null,
+    addingToGroupId: null,
+  });
+
   const { framePublicAPI, layerId, activeVisualization, isOnlyLayer, onRemoveLayer } = props;
   const datasourcePublicAPI = framePublicAPI.datasourceLayers[layerId];
   if (!datasourcePublicAPI) {
@@ -73,12 +79,6 @@ export function LayerPanel(
     frame: props.framePublicAPI,
     dateRange: props.framePublicAPI.dateRange,
   };
-
-  const [popoverState, setPopoverState] = useState<DimensionPopoverState>({
-    isOpen: false,
-    openId: null,
-    addingToGroupId: null,
-  });
 
   const { groups } = activeVisualization.getConfiguration(layerVisualizationConfigProps);
   const isEmptyLayer = !groups.some(d => d.accessors.length > 0);

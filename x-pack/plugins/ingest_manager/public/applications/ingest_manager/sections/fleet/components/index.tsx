@@ -6,6 +6,7 @@
 
 export * from './loading';
 export * from './agent_reassign_config_flyout';
+export * from './agent_enrollment_flyout';
 export * from './navigation/child_routes';
 export * from './navigation/connected_link';
 export * from './agent_health';

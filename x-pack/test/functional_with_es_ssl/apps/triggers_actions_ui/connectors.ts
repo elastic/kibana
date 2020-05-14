@@ -56,7 +56,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         {
           name: connectorName,
           actionType: 'Slack',
-          referencedByCount: '0',
         },
       ]);
     });
@@ -100,7 +99,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         {
           name: updatedConnectorName,
           actionType: 'Slack',
-          referencedByCount: '0',
         },
       ]);
     });

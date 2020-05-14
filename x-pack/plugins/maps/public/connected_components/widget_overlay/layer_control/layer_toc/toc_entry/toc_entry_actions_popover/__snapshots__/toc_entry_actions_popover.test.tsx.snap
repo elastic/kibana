@@ -72,7 +72,7 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
               "disabled": false,
               "icon": <EuiIcon
                 size="m"
-                type="search"
+                type="expand"
               />,
               "name": "Fit to data",
               "onClick": [Function],
@@ -200,7 +200,7 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
               "disabled": true,
               "icon": <EuiIcon
                 size="m"
-                type="search"
+                type="expand"
               />,
               "name": "Fit to data",
               "onClick": [Function],
@@ -328,7 +328,7 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
               "disabled": false,
               "icon": <EuiIcon
                 size="m"
-                type="search"
+                type="expand"
               />,
               "name": "Fit to data",
               "onClick": [Function],

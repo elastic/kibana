@@ -111,7 +111,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           await browser.get(appUrl);
         } else {
           log.debug(`navigateToUrl ${appUrl}`);
-          await browser.get(appUrl);
+          await browser.get(appUrl, insertTimestamp);
           // accept alert if it pops up
           const alert = await browser.getAlert();
           await alert?.accept();
@@ -130,7 +130,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     /**
      * Navigates browser using the pathname from the appConfig and subUrl as the hash
      * @param appName As defined in the apps config, e.g. 'home'
-     * @param subUrl The route after the hash (#), e.g. 'tutorial_directory/sampleData'
+     * @param subUrl The route after the hash (#), e.g. '/tutorial_directory/sampleData'
      * @param args additional arguments
      */
     public async navigateToUrl(
@@ -162,7 +162,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
      * Navigates browser using the pathname from the appConfig and subUrl as the extended path.
      * This was added to be able to test an application that uses browser history over hash history.
      * @param appName As defined in the apps config, e.g. 'home'
-     * @param subUrl The route after the appUrl, e.g. 'tutorial_directory/sampleData'
+     * @param subUrl The route after the appUrl, e.g. '/tutorial_directory/sampleData'
      * @param args additional arguments
      */
     public async navigateToUrlWithBrowserHistory(
@@ -242,7 +242,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         let lastUrl = await retry.try(async () => {
           // since we're using hash URLs, always reload first to force re-render
           log.debug('navigate to: ' + appUrl);
-          await browser.get(appUrl);
+          await browser.get(appUrl, insertTimestamp);
           // accept alert if it pops up
           const alert = await browser.getAlert();
           await alert?.accept();

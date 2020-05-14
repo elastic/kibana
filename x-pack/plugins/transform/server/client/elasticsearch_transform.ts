@@ -65,6 +65,21 @@ export const elasticsearchJsPlugin = (Client: any, config: any, components: any)
     method: 'PUT',
   });
 
+  transform.updateTransform = ca({
+    urls: [
+      {
+        fmt: '/_transform/<%=transformId%>/_update',
+        req: {
+          transformId: {
+            type: 'string',
+          },
+        },
+      },
+    ],
+    needBody: true,
+    method: 'POST',
+  });
+
   transform.deleteTransform = ca({
     urls: [
       {

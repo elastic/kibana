@@ -179,6 +179,10 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
               // By default it is randomly generated
               ignore: true,
             },
+            loss_function: {
+              optional: true,
+              defaultValue: 'mse',
+            },
           },
         }
       : {}),

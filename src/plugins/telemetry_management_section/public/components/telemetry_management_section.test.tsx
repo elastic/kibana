@@ -18,10 +18,9 @@
  */
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { TelemetryManagementSection } from './telemetry_management_section';
+import TelemetryManagementSection from './telemetry_management_section';
 import { TelemetryService } from '../../../telemetry/public/services';
 import { coreMock } from '../../../../core/public/mocks';
-import { telemetryManagementSectionWrapper } from './telemetry_management_section_wrapper';
 
 describe('TelemetryManagementSectionComponent', () => {
   const coreStart = coreMock.createStart();
@@ -270,10 +269,12 @@ describe('TelemetryManagementSectionComponent', () => {
       notifications: coreStart.notifications,
       http: coreSetup.http,
     });
-    const Wrapper = telemetryManagementSectionWrapper(telemetryService);
+
     expect(
       shallowWithIntl(
-        <Wrapper
+        <TelemetryManagementSection
+          showAppliesSettingMessage={true}
+          telemetryService={telemetryService}
           onQueryMatchChange={onQueryMatchChange}
           enableSaving={true}
           toasts={coreStart.notifications.toasts}

@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
-import { CUSTOM_ELEMENT_TYPE } from '../../../../legacy/plugins/canvas/common/lib/constants';
+import { CUSTOM_ELEMENT_TYPE } from '../../common/lib/constants';
 
 export const customElementType: SavedObjectsType = {
   name: CUSTOM_ELEMENT_TYPE,

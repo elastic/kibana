@@ -75,7 +75,10 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         <EuiFlexItem>
           <EuiText>
             <h1>
-              {agentData?.item?.local_metadata['host.hostname'] || (
+              {typeof agentData?.item?.local_metadata?.host === 'object' &&
+              typeof agentData?.item?.local_metadata?.host?.hostname === 'string' ? (
+                agentData.item.local_metadata.host.hostname
+              ) : (
                 <FormattedMessage
                   id="xpack.ingestManager.agentDetails.agentDetailsTitle"
                   defaultMessage="Agent '{id}'"

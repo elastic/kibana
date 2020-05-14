@@ -9,9 +9,11 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiTitle,
   EuiLoadingContent,
+  EuiTitle,
+  EuiText,
   EuiSpacer,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -25,6 +27,11 @@ import {
   detailsError,
   showView,
   detailsLoading,
+  policyResponseConfigurations,
+  policyResponseActions,
+  policyResponseFailedOrWarningActionCount,
+  policyResponseError,
+  policyResponseLoading,
 } from '../../../store/hosts/selectors';
 import { HostDetails } from './host_details';
 import { PolicyResponse } from './policy_response';
@@ -101,6 +108,11 @@ const PolicyResponseFlyoutPanel = memo<{
   hostMeta: HostMetadata;
 }>(({ hostMeta }) => {
   const { show, ...queryParams } = useHostSelector(uiQueryParams);
+  const responseConfig = useHostSelector(policyResponseConfigurations);
+  const responseActions = useHostSelector(policyResponseActions);
+  const responseAttentionCount = useHostSelector(policyResponseFailedOrWarningActionCount);
+  const loading = useHostSelector(policyResponseLoading);
+  const error = useHostSelector(policyResponseError);
   const detailsUri = useMemo(
     () =>
       urlFromQueryParams({
@@ -125,18 +137,34 @@ const PolicyResponseFlyoutPanel = memo<{
       <FlyoutSubHeader
         backButton={backButtonProp}
         data-test-subj="hostDetailsPolicyResponseFlyoutHeader"
-      >
-        <EuiTitle size="xxs" data-test-subj="hostDetailsPolicyResponseFlyoutTitle">
-          <h3>
+      />
+      <EuiFlyoutBody data-test-subj="hostDetailsPolicyResponseFlyoutBody">
+        <EuiText data-test-subj="hostDetailsPolicyResponseFlyoutTitle">
+          <h4>
             <FormattedMessage
               id="xpack.endpoint.host.policyResponse.title"
               defaultMessage="Policy Response"
             />
-          </h3>
-        </EuiTitle>
-      </FlyoutSubHeader>
-      <EuiFlyoutBody data-test-subj="hostDetailsPolicyResponseFlyoutBody">
-        <PolicyResponse />
+          </h4>
+        </EuiText>
+        {error && (
+          <EuiEmptyPrompt
+            title={
+              <FormattedMessage
+                id="xpack.endpoint.hostDetails.noPolicyResponse"
+                defaultMessage="No policy response available"
+              />
+            }
+          />
+        )}
+        {loading && <EuiLoadingContent lines={3} />}
+        {responseConfig !== undefined && responseActions !== undefined && (
+          <PolicyResponse
+            responseConfig={responseConfig}
+            responseActions={responseActions}
+            responseAttentionCount={responseAttentionCount}
+          />
+        )}
       </EuiFlyoutBody>
     </>
   );

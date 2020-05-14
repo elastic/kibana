@@ -127,6 +127,7 @@ export const timelineSchema = gql`
 
   enum TimelineType {
     default
+    draft
     template
   }
 
@@ -278,7 +279,7 @@ export const timelineSchema = gql`
 
   extend type Query {
     getOneTimeline(id: ID!): TimelineResult!
-    getAllTimeline(pageInfo: PageInfoTimeline, search: String, sort: SortTimeline, onlyUserFavorite: Boolean): ResponseTimelines!
+    getAllTimeline(pageInfo: PageInfoTimeline, search: String, sort: SortTimeline, onlyUserFavorite: Boolean, timelineType: String): ResponseTimelines!
   }
 
   extend type Mutation {

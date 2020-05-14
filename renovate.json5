@@ -772,6 +772,14 @@
         ],
       },
       {
+        groupSlug: 'pretty-ms',
+        groupName: 'pretty-ms related packages',
+        packageNames: [
+          'pretty-ms',
+          '@types/pretty-ms',
+        ],
+      },
+      {
         groupSlug: 'proper-lockfile',
         groupName: 'proper-lockfile related packages',
         packageNames: [
@@ -862,6 +870,14 @@
         packageNames: [
           'sinon',
           '@types/sinon',
+        ],
+      },
+      {
+        groupSlug: 'stats-lite',
+        groupName: 'stats-lite related packages',
+        packageNames: [
+          'stats-lite',
+          '@types/stats-lite',
         ],
       },
       {

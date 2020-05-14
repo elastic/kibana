@@ -9,8 +9,6 @@ import {
   ruleIdsToNdJsonString,
   rulesToNdJsonString,
   getSimpleRuleWithId,
-  getSimpleRule,
-  getSimpleMlRule,
 } from '../__mocks__/utils';
 import {
   getImportRulesRequest,
@@ -22,9 +20,13 @@ import {
   getNonEmptyIndex,
 } from '../__mocks__/request_responses';
 import { createMockConfig, requestContextMock, serverMock, requestMock } from '../__mocks__';
+import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../machine_learning/mocks';
+import { buildMlAuthz } from '../../../machine_learning/authz';
 import { importRulesRoute } from './import_rules_route';
 import * as createRulesStreamFromNdJson from '../../rules/create_rules_stream_from_ndjson';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
+
+jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
 describe('import_rules_route', () => {
   beforeAll(() => {
@@ -39,25 +41,20 @@ describe('import_rules_route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;
   let { clients, context } = requestContextMock.createTools();
+  let ml: ReturnType<typeof mlServicesMock.create>;
 
   beforeEach(() => {
-    // jest carries state between mocked implementations when using
-    // spyOn. So now we're doing all three of these.
-    // https://github.com/facebook/jest/issues/7136#issuecomment-565976599
-    jest.resetAllMocks();
-    jest.restoreAllMocks();
-    jest.clearAllMocks();
-
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     config = createMockConfig();
     const hapiStream = buildHapiStream(ruleIdsToNdJsonString(['rule-1']));
     request = getImportRulesRequest(hapiStream);
+    ml = mlServicesMock.create();
 
     clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
     clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no extant rules
 
-    importRulesRoute(server.router, config);
+    importRulesRoute(server.router, config, ml);
   });
 
   describe('status codes', () => {
@@ -83,11 +80,12 @@ describe('import_rules_route', () => {
   });
 
   describe('unhappy paths', () => {
-    it('returns an error object if creating an ML rule with an insufficient license', async () => {
-      (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
-      const rules = [getSimpleRule(), getSimpleMlRule('rule-2')];
-      const hapiStreamWithMlRule = buildHapiStream(rulesToNdJsonString(rules));
-      request = getImportRulesRequest(hapiStreamWithMlRule);
+    it('returns a 403 error object if ML Authz fails', async () => {
+      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
+        validateRuleType: jest
+          .fn()
+          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
+      });
 
       const response = await server.inject(request, context);
       expect(response.status).toEqual(200);
@@ -95,20 +93,19 @@ describe('import_rules_route', () => {
         errors: [
           {
             error: {
-              message:
-                'Your license does not support machine learning. Please upgrade your license.',
-              status_code: 400,
+              message: 'mocked validation message',
+              status_code: 403,
             },
-            rule_id: 'rule-2',
+            rule_id: 'rule-1',
           },
         ],
         success: false,
-        success_count: 1,
+        success_count: 0,
       });
     });
 
     test('returns error if createPromiseFromStreams throws error', async () => {
-      jest
+      const transformMock = jest
         .spyOn(createRulesStreamFromNdJson, 'createRulesStreamFromNdJson')
         .mockImplementation(() => {
           throw new Error('Test error');
@@ -116,26 +113,19 @@ describe('import_rules_route', () => {
       const response = await server.inject(request, context);
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({ message: 'Test error', status_code: 500 });
+
+      transformMock.mockRestore();
     });
 
     test('returns an error if the index does not exist', async () => {
       clients.siemClient.getSignalsIndex.mockReturnValue('mockSignalsIndex');
       clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
       const response = await server.inject(request, context);
-      expect(response.status).toEqual(200);
+      expect(response.status).toEqual(400);
       expect(response.body).toEqual({
-        errors: [
-          {
-            error: {
-              message:
-                'To create a rule, the index must exist first. Index mockSignalsIndex does not exist',
-              status_code: 409,
-            },
-            rule_id: 'rule-1',
-          },
-        ],
-        success: false,
-        success_count: 0,
+        message:
+          'To create a rule, the index must exist first. Index mockSignalsIndex does not exist',
+        status_code: 400,
       });
     });
 
@@ -145,19 +135,10 @@ describe('import_rules_route', () => {
       });
 
       const response = await server.inject(request, context);
-      expect(response.status).toEqual(200);
+      expect(response.status).toEqual(500);
       expect(response.body).toEqual({
-        errors: [
-          {
-            error: {
-              message: 'Test error',
-              status_code: 400,
-            },
-            rule_id: 'rule-1',
-          },
-        ],
-        success: false,
-        success_count: 0,
+        message: 'Test error',
+        status_code: 500,
       });
     });
 

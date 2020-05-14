@@ -177,6 +177,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       };
       this.updateInput({
         panels: finalPanels,
+        lastReloadRequestTime: new Date().getTime(),
       });
     });
   }

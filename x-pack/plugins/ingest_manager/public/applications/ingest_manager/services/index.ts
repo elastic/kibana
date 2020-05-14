@@ -17,6 +17,7 @@ export {
   setupRouteService,
   outputRoutesService,
   settingsRoutesService,
+  appRoutesService,
   packageToConfigDatasourceInputs,
   storedDatasourceToAgentDatasource,
   AgentStatusKueryHelper,

@@ -33,6 +33,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await esArchiver.load('infra/metrics_and_logs');
         await pageObjects.common.navigateToApp('infraOps');
+        await pageObjects.infraHome.waitForLoading();
       });
       after(async () => await esArchiver.unload('infra/metrics_and_logs'));
 

@@ -5,7 +5,7 @@
  */
 import { BehaviorSubject, Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { SavedObjectsServiceStart, HttpServerInfo } from 'src/core/server';
+import { SavedObjectsServiceStart, HttpServiceSetup, Logger } from 'src/core/server';
 import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { IngestManagerConfigType } from '../../common';
@@ -18,17 +18,21 @@ class AppContextService {
   private config$?: Observable<IngestManagerConfigType>;
   private configSubject$?: BehaviorSubject<IngestManagerConfigType>;
   private savedObjects: SavedObjectsServiceStart | undefined;
-  private serverInfo: HttpServerInfo | undefined;
   private isProductionMode: boolean = false;
+  private kibanaVersion: string | undefined;
   private cloud?: CloudSetup;
+  private logger: Logger | undefined;
+  private httpSetup?: HttpServiceSetup;
 
   public async start(appContext: IngestManagerAppContext) {
     this.encryptedSavedObjects = appContext.encryptedSavedObjects;
     this.security = appContext.security;
     this.savedObjects = appContext.savedObjects;
-    this.serverInfo = appContext.serverInfo;
     this.isProductionMode = appContext.isProductionMode;
     this.cloud = appContext.cloud;
+    this.logger = appContext.logger;
+    this.kibanaVersion = appContext.kibanaVersion;
+    this.httpSetup = appContext.httpSetup;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -49,13 +53,20 @@ class AppContextService {
 
   public getSecurity() {
     if (!this.security) {
-      throw new Error('Secury service not set.');
+      throw new Error('Security service not set.');
     }
     return this.security;
   }
 
   public getCloud() {
     return this.cloud;
+  }
+
+  public getLogger() {
+    if (!this.logger) {
+      throw new Error('Logger not set.');
+    }
+    return this.logger;
   }
 
   public getConfig() {
@@ -77,11 +88,18 @@ class AppContextService {
     return this.isProductionMode;
   }
 
-  public getServerInfo() {
-    if (!this.serverInfo) {
-      throw new Error('Server info not set.');
+  public getHttpSetup() {
+    if (!this.httpSetup) {
+      throw new Error('HttpServiceSetup not set.');
     }
-    return this.serverInfo;
+    return this.httpSetup;
+  }
+
+  public getKibanaVersion() {
+    if (!this.kibanaVersion) {
+      throw new Error('Kibana version is not set.');
+    }
+    return this.kibanaVersion;
   }
 }
 

@@ -17,7 +17,7 @@ import { setDatasource, IndexpatternDatasource, requestDatasource } from './data
 import { outlinkEncoders } from '../helpers/outlink_encoders';
 import { urlTemplatePlaceholder } from '../helpers/url_template';
 import { matchesOne } from './helpers';
-import { modifyUrl } from '../../../../../src/core/utils';
+import { modifyUrl } from '../../../../../src/core/public';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/urlTemplates');
 
@@ -35,7 +35,7 @@ function generateDefaultTemplate(
   datasource: IndexpatternDatasource,
   addBasePath: (url: string) => string
 ): UrlTemplate {
-  const appPath = modifyUrl('/discover', parsed => {
+  const appPath = modifyUrl('/', parsed => {
     parsed.query._a = rison.encode({
       columns: ['_source'],
       index: datasource.id,
@@ -44,7 +44,7 @@ function generateDefaultTemplate(
       sort: ['_score', 'desc'],
     });
   });
-  const parsedAppPath = parse(`/app/kibana#${appPath}`, true, true);
+  const parsedAppPath = parse(`/app/discover#${appPath}`, true, true);
   const formattedAppPath = format({
     protocol: parsedAppPath.protocol,
     host: parsedAppPath.host,
