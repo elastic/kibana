@@ -33,7 +33,7 @@ export default function({ getService }) {
       const { body } = await getIndexMapping(index).expect(200);
 
       // As, on 7.x we require the mappings with type (include_type_name), the default "_doc" type is returned
-      expect(body.mapping).to.eql({ _doc: mappings });
+      expect(body.mappings).to.eql({ _doc: mappings });
     });
   });
 }
