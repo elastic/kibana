@@ -32,6 +32,14 @@ describe('Mappings editor: text datatype', () => {
    */
   let data: any;
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   afterEach(() => {
     onChangeHandler.mockReset();
   });
@@ -49,37 +57,22 @@ describe('Mappings editor: text datatype', () => {
 
     const updatedMappings = { ...defaultMappings };
 
-    await act(async () => {
-      testBed = await setup({ value: defaultMappings, onChange: onChangeHandler });
-    });
+    testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
 
     const {
-      exists,
-      waitFor,
-      waitForFn,
+      component,
       actions: { startEditField, getToggleValue, updateFieldAndCloseFlyout },
     } = testBed;
 
     // Open the flyout to edit the field
-    await act(async () => {
-      startEditField('myField');
-    });
-
-    await waitFor('mappingsEditorFieldEdit');
+    startEditField('myField');
 
     // It should have searchable ("index" param) active by default
     const indexFieldConfig = getFieldConfig('index');
     expect(getToggleValue('indexParameter.formRowToggle')).toBe(indexFieldConfig.defaultValue);
 
     // Save the field and close the flyout
-    await act(async () => {
-      updateFieldAndCloseFlyout();
-    });
-
-    await waitForFn(
-      async () => exists('mappingsEditorFieldEdit') === false,
-      'Error waiting for the details flyout to close'
-    );
+    await updateFieldAndCloseFlyout();
 
     // It should have the default parameters values added
     updatedMappings.properties.myField = {
@@ -87,9 +80,9 @@ describe('Mappings editor: text datatype', () => {
       ...defaultTextParameters,
     };
 
-    ({ data } = await getMappingsEditorData());
+    ({ data } = await getMappingsEditorData(component));
     expect(data).toEqual(updatedMappings);
-  }, 30000);
+  });
 
   test('analyzer parameter: default values', async () => {
     const defaultMappings = {
@@ -105,13 +98,12 @@ describe('Mappings editor: text datatype', () => {
       },
     };
 
-    testBed = await setup({ value: defaultMappings, onChange: onChangeHandler });
+    testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
 
     const {
+      component,
       find,
       exists,
-      waitFor,
-      waitForFn,
       form: { selectCheckBox, setSelectValue },
       actions: {
         startEditField,
@@ -123,22 +115,13 @@ describe('Mappings editor: text datatype', () => {
     const fieldToEdit = 'myField';
 
     // Start edit and immediately save to have all the default values
-    await act(async () => {
-      startEditField(fieldToEdit);
-    });
-    await waitFor('mappingsEditorFieldEdit');
-    await showAdvancedSettings();
+    startEditField(fieldToEdit);
+    showAdvancedSettings();
+    await updateFieldAndCloseFlyout();
 
-    await act(async () => {
-      updateFieldAndCloseFlyout();
-    });
+    expect(exists('mappingsEditorFieldEdit')).toBe(false);
 
-    await waitForFn(
-      async () => exists('mappingsEditorFieldEdit') === false,
-      'Error waiting for the details flyout to close'
-    );
-
-    ({ data } = await getMappingsEditorData());
+    ({ data } = await getMappingsEditorData(component));
 
     let updatedMappings: any = {
       ...defaultMappings,
@@ -152,11 +135,8 @@ describe('Mappings editor: text datatype', () => {
     expect(data).toEqual(updatedMappings);
 
     // Re-open the edit panel
-    await act(async () => {
-      startEditField('myField');
-    });
-    await waitFor('mappingsEditorFieldEdit');
-    await showAdvancedSettings();
+    startEditField(fieldToEdit);
+    showAdvancedSettings();
 
     // When no analyzer is defined, defaults to "Index default"
     let indexAnalyzerValue = find('indexAnalyzer.select').props().value;
@@ -179,38 +159,27 @@ describe('Mappings editor: text datatype', () => {
     // And the search analyzer select should not exist
     expect(exists('searchAnalyzer')).toBe(false);
 
-    // Uncheck the "Use same analyzer for search" checkbox and wait for the search analyzer select
-    await act(async () => {
-      selectCheckBox('useSameAnalyzerForSearchCheckBox.input', false);
+    // Uncheck the "Use same analyzer for search" checkbox and make sure the dedicated select appears
+    selectCheckBox('useSameAnalyzerForSearchCheckBox.input', false);
+    act(() => {
+      jest.advanceTimersByTime(1000);
     });
+    component.update();
 
-    await waitFor('searchAnalyzer');
+    expect(exists('searchAnalyzer.select')).toBe(true);
 
     let searchAnalyzerValue = find('searchAnalyzer.select').props().value;
     expect(searchAnalyzerValue).toEqual('index_default');
 
+    // Change the value of the 3 analyzers
     await act(async () => {
       // Change the value of the 3 analyzers
-      setSelectValue('indexAnalyzer.select', 'standard');
-      setSelectValue('searchAnalyzer.select', 'simple');
-      setSelectValue(find('searchQuoteAnalyzer.select').at(0), 'whitespace');
+      setSelectValue('indexAnalyzer.select', 'standard', false);
+      setSelectValue('searchAnalyzer.select', 'simple', false);
+      setSelectValue(find('searchQuoteAnalyzer.select').at(0), 'whitespace', false);
     });
 
-    // Make sure the second dropdown select has been removed
-    await waitForFn(
-      async () => find('searchQuoteAnalyzer.select').length === 1,
-      'Error waiting for the second dropdown select of search quote analyzer to be removed'
-    );
-
-    await act(async () => {
-      // Save & close
-      updateFieldAndCloseFlyout();
-    });
-
-    await waitForFn(
-      async () => exists('mappingsEditorFieldEdit') === false,
-      'Error waiting for the details flyout to close'
-    );
+    await updateFieldAndCloseFlyout();
 
     updatedMappings = {
       ...updatedMappings,
@@ -224,15 +193,12 @@ describe('Mappings editor: text datatype', () => {
       },
     };
 
-    ({ data } = await getMappingsEditorData());
+    ({ data } = await getMappingsEditorData(component));
     expect(data).toEqual(updatedMappings);
 
     // Re-open the flyout and make sure the select have the correct updated value
-    await act(async () => {
-      startEditField('myField');
-    });
-    await waitFor('mappingsEditorFieldEdit');
-    await showAdvancedSettings();
+    startEditField('myField');
+    showAdvancedSettings();
 
     isUseSameAnalyzerForSearchChecked = getCheckboxValue('useSameAnalyzerForSearchCheckBox.input');
     expect(isUseSameAnalyzerForSearchChecked).toBe(false);
@@ -244,7 +210,7 @@ describe('Mappings editor: text datatype', () => {
     expect(indexAnalyzerValue).toBe('standard');
     expect(searchAnalyzerValue).toBe('simple');
     expect(searchQuoteAnalyzerValue).toBe('whitespace');
-  }, 30000);
+  }, 10000);
 
   test('analyzer parameter: custom analyzer (external plugin)', async () => {
     const defaultMappings = {
@@ -270,27 +236,19 @@ describe('Mappings editor: text datatype', () => {
       },
     };
 
-    await act(async () => {
-      testBed = await setup({ value: defaultMappings, onChange: onChangeHandler });
-    });
+    testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
 
     const {
       find,
       exists,
-      waitFor,
-      waitForFn,
       component,
       form: { setInputValue, setSelectValue },
       actions: { startEditField, showAdvancedSettings, updateFieldAndCloseFlyout },
     } = testBed;
     const fieldToEdit = 'myField';
 
-    await act(async () => {
-      startEditField(fieldToEdit);
-    });
-
-    await waitFor('mappingsEditorFieldEdit');
-    await showAdvancedSettings();
+    startEditField(fieldToEdit);
+    showAdvancedSettings();
 
     expect(exists('indexAnalyzer-custom')).toBe(true);
     expect(exists('searchAnalyzer-custom')).toBe(true);
@@ -310,36 +268,27 @@ describe('Mappings editor: text datatype', () => {
     await act(async () => {
       // Change the index analyzer to another custom one
       setInputValue('indexAnalyzer-custom.input', updatedIndexAnalyzer);
-
-      // Change the search analyzer to a built-in analyzer
-      find('searchAnalyzer-toggleCustomButton').simulate('click');
-      component.update();
     });
 
-    await waitFor('searchAnalyzer');
+    await act(async () => {
+      // Change the search analyzer to a built-in analyzer
+      find('searchAnalyzer-toggleCustomButton').simulate('click');
+    });
+    component.update();
 
     await act(async () => {
-      setSelectValue('searchAnalyzer.select', updatedSearchAnalyzer);
+      setSelectValue('searchAnalyzer.select', updatedSearchAnalyzer, false);
+    });
 
+    await act(async () => {
       // Change the searchQuote to use built-in analyzer
       // By default it means using the "index default"
       find('searchQuoteAnalyzer-toggleCustomButton').simulate('click');
-      component.update();
     });
 
-    await waitFor('searchQuoteAnalyzer');
+    await updateFieldAndCloseFlyout();
 
-    await act(async () => {
-      // Save & close
-      updateFieldAndCloseFlyout();
-    });
-
-    await waitForFn(
-      async () => exists('mappingsEditorFieldEdit') === false,
-      'Error waiting for the details flyout to close'
-    );
-
-    ({ data } = await getMappingsEditorData());
+    ({ data } = await getMappingsEditorData(component));
 
     updatedMappings = {
       ...updatedMappings,
@@ -354,7 +303,7 @@ describe('Mappings editor: text datatype', () => {
     };
 
     expect(data).toEqual(updatedMappings);
-  }, 30000);
+  });
 
   test('analyzer parameter: custom analyzer (from index settings)', async () => {
     const indexSettings = {
@@ -390,27 +339,22 @@ describe('Mappings editor: text datatype', () => {
       },
     };
 
-    testBed = await setup({
+    testBed = setup({
       value: defaultMappings,
       onChange: onChangeHandler,
       indexSettings,
     });
 
     const {
+      component,
       find,
-      exists,
-      waitFor,
-      waitForFn,
       form: { setSelectValue },
       actions: { startEditField, showAdvancedSettings, updateFieldAndCloseFlyout },
     } = testBed;
     const fieldToEdit = 'myField';
 
-    await act(async () => {
-      startEditField(fieldToEdit);
-    });
-    await waitFor('mappingsEditorFieldEdit');
-    await showAdvancedSettings();
+    startEditField(fieldToEdit);
+    showAdvancedSettings();
 
     // It should have 2 selects
     const indexAnalyzerSelects = find('indexAnalyzer.select');
@@ -431,18 +375,13 @@ describe('Mappings editor: text datatype', () => {
 
     await act(async () => {
       // Change the custom analyzer dropdown to another one from the index settings
-      setSelectValue(find('indexAnalyzer.select').at(1), customAnalyzers[2]);
-
-      // Save & close
-      updateFieldAndCloseFlyout();
+      setSelectValue(find('indexAnalyzer.select').at(1), customAnalyzers[2], false);
     });
+    component.update();
 
-    await waitForFn(
-      async () => exists('mappingsEditorFieldEdit') === false,
-      'Error waiting for the details flyout to close'
-    );
+    await updateFieldAndCloseFlyout();
 
-    ({ data } = await getMappingsEditorData());
+    ({ data } = await getMappingsEditorData(component));
 
     updatedMappings = {
       ...updatedMappings,
@@ -455,5 +394,5 @@ describe('Mappings editor: text datatype', () => {
     };
 
     expect(data).toEqual(updatedMappings);
-  }, 30000);
+  });
 });

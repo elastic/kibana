@@ -138,6 +138,7 @@ export class VisualizeEmbeddableFactory
     const originatingAppParam = await this.getCurrentAppId();
     showNewVisModal({
       editorParams: [`${EMBEDDABLE_ORIGINATING_APP_PARAM}=${originatingAppParam}`],
+      outsideVisualizeApp: true,
     });
     return undefined;
   }

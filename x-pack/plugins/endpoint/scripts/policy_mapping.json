@@ -35,234 +35,66 @@
                 "properties": {
                   "actions": {
                     "properties": {
-                      "configure_elasticsearch_connection": {
+                      "message": {
+                        "ignore_above": 1024,
+                        "type": "keyword"
+                      },
+                      "name": {
+                        "ignore_above": 1024,
+                        "type": "keyword"
+                      },
+                      "status": {
+                        "ignore_above": 1024,
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "nested"
+                  },
+                  "artifacts": {
+                    "properties": {
+                      "global": {
                         "properties": {
-                          "message": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
+                          "identifiers": {
+                            "properties": {
+                              "name": {
+                                "ignore_above": 1024,
+                                "type": "keyword"
+                              },
+                              "sha256": {
+                                "ignore_above": 1024,
+                                "type": "keyword"
+                              }
+                            },
+                            "type": "nested"
                           },
-                          "status": {
+                          "version": {
                             "ignore_above": 1024,
                             "type": "keyword"
                           }
                         },
                         "type": "object"
                       },
-                      "configure_kernel": {
+                      "user": {
                         "properties": {
-                          "message": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
+                          "identifiers": {
+                            "properties": {
+                              "name": {
+                                "ignore_above": 1024,
+                                "type": "keyword"
+                              },
+                              "sha256": {
+                                "ignore_above": 1024,
+                                "type": "keyword"
+                              }
+                            },
+                            "type": "nested"
                           },
-                          "status": {
+                          "version": {
                             "ignore_above": 1024,
                             "type": "keyword"
                           }
                         },
                         "type": "object"
-                      },
-                      "configure_logging": {
-                        "properties": {
-                          "message": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          },
-                          "status": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          }
-                        },
-                        "type": "object"
-                      },
-                      "configure_malware": {
-                        "properties": {
-                          "message": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          },
-                          "status": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          }
-                        },
-                        "type": "object"
-                      },
-                      "connect_kernel": {
-                        "properties": {
-                          "message": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          },
-                          "status": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          }
-                        },
-                        "type": "object"
-                      },
-                      "detect_file_open_events": {
-                        "properties": {
-                          "message": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          },
-                          "status": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          }
-                        },
-                        "type": "object"
-                      },
-                      "detect_file_write_events": {
-                        "properties": {
-                          "message": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          },
-                          "status": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          }
-                        },
-                        "type": "object"
-                      },
-                      "detect_image_load_events": {
-                        "properties": {
-                          "message": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          },
-                          "status": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          }
-                        },
-                        "type": "object"
-                      },
-                      "detect_process_events": {
-                        "properties": {
-                          "message": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          },
-                          "status": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          }
-                        },
-                        "type": "object"
-                      },
-                      "download_global_artifacts": {
-                        "properties": {
-                          "message": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          },
-                          "status": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          }
-                        },
-                        "type": "object"
-                      },
-                      "load_config": {
-                        "properties": {
-                          "message": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          },
-                          "status": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          }
-                        },
-                        "type": "object"
-                      },
-                      "load_malware_model": {
-                        "properties": {
-                          "message": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          },
-                          "status": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          }
-                        },
-                        "type": "object"
-                      },
-                      "read_elasticsearch_config": {
-                        "properties": {
-                          "message": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          },
-                          "status": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          }
-                        },
-                        "type": "object"
-                      },
-                      "read_events_config": {
-                        "properties": {
-                          "message": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          },
-                          "status": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          }
-                        },
-                        "type": "object"
-                      },
-                      "read_kernel_config": {
-                        "properties": {
-                          "message": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          },
-                          "status": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          }
-                        },
-                        "type": "object"
-                      },
-                      "read_logging_config": {
-                        "properties": {
-                          "message": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          },
-                          "status": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          }
-                        },
-                        "type": "object"
-                      },
-                      "read_malware_config": {
-                        "properties": {
-                          "message": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          },
-                          "status": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          }
-                        },
-                        "type": "object"
-                      },
-                      "workflow": {
-                        "properties": {
-                          "status": {
-                            "ignore_above": 1024,
-                            "type": "keyword"
-                          }
-                        }
                       }
                     },
                     "type": "object"
@@ -362,14 +194,34 @@
       },
       "event": {
         "properties": {
+          "action": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "category": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
           "created": {
             "type": "date"
+          },
+          "dataset": {
+            "ignore_above": 1024,
+            "type": "keyword"
           },
           "id": {
             "ignore_above": 1024,
             "type": "keyword"
           },
           "kind": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "module": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "type": {
             "ignore_above": 1024,
             "type": "keyword"
           }
@@ -382,6 +234,10 @@
             "type": "keyword"
           }
         }
+      },
+      "message": {
+        "norms": false,
+        "type": "text"
       }
     }
   },

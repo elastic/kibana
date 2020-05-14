@@ -104,7 +104,12 @@ describe('Lens App', () => {
     storage: Storage;
     docId?: string;
     docStorage: SavedObjectStore;
-    redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
+    redirectTo: (
+      id?: string,
+      returnToOrigin?: boolean,
+      originatingApp?: string | undefined,
+      newlyCreated?: boolean
+    ) => void;
     originatingApp: string | undefined;
   }> {
     return ({
@@ -140,7 +145,14 @@ describe('Lens App', () => {
         load: jest.fn(),
         save: jest.fn(),
       },
-      redirectTo: jest.fn((id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => {}),
+      redirectTo: jest.fn(
+        (
+          id?: string,
+          returnToOrigin?: boolean,
+          originatingApp?: string | undefined,
+          newlyCreated?: boolean
+        ) => {}
+      ),
     } as unknown) as jest.Mocked<{
       navigation: typeof navigationStartMock;
       editorFrame: EditorFrameInstance;
@@ -149,7 +161,12 @@ describe('Lens App', () => {
       storage: Storage;
       docId?: string;
       docStorage: SavedObjectStore;
-      redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
+      redirectTo: (
+        id?: string,
+        returnToOrigin?: boolean,
+        originatingApp?: string | undefined,
+        newlyCreated?: boolean
+      ) => void;
       originatingApp: string | undefined;
     }>;
   }
@@ -215,7 +232,7 @@ describe('Lens App', () => {
     instance = mount(<App {...defaultArgs} />);
 
     expect(core.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-      { text: 'Visualize', href: '/testbasepath/app/kibana#/visualize' },
+      { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
       { text: 'Create' },
     ]);
 
@@ -233,7 +250,7 @@ describe('Lens App', () => {
     });
 
     expect(defaultArgs.core.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-      { text: 'Visualize', href: '/testbasepath/app/kibana#/visualize' },
+      { text: 'Visualize', href: '/testbasepath/app/visualize#/', onClick: expect.anything() },
       { text: 'Daaaaaaadaumching!' },
     ]);
   });
@@ -348,7 +365,12 @@ describe('Lens App', () => {
         storage: Storage;
         docId?: string;
         docStorage: SavedObjectStore;
-        redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
+        redirectTo: (
+          id?: string,
+          returnToOrigin?: boolean,
+          originatingApp?: string | undefined,
+          newlyCreated?: boolean
+        ) => void;
         originatingApp: string | undefined;
       }>;
 
@@ -521,7 +543,7 @@ describe('Lens App', () => {
           expression: 'kibana 3',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, true);
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, undefined, true);
 
         inst.setProps({ docId: 'aaa' });
 
@@ -541,7 +563,7 @@ describe('Lens App', () => {
           expression: 'kibana 3',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, true);
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, undefined, true);
 
         inst.setProps({ docId: 'aaa' });
 
@@ -609,7 +631,7 @@ describe('Lens App', () => {
           title: 'hello there',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa', true, true);
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', true, undefined, true);
       });
 
       it('saves app filters and does not save pinned filters', async () => {
@@ -677,7 +699,12 @@ describe('Lens App', () => {
       storage: Storage;
       docId?: string;
       docStorage: SavedObjectStore;
-      redirectTo: (id?: string, returnToOrigin?: boolean, newlyCreated?: boolean) => void;
+      redirectTo: (
+        id?: string,
+        returnToOrigin?: boolean,
+        originatingApp?: string | undefined,
+        newlyCreated?: boolean
+      ) => void;
     }>;
 
     beforeEach(() => {
