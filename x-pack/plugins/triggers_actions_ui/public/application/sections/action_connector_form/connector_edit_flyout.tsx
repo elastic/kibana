@@ -254,3 +254,6 @@ export const ConnectorEditFlyout = ({
     </EuiFlyout>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { ConnectorEditFlyout as default };

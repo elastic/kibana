@@ -55,6 +55,7 @@ describe('embeddable', () => {
       expressionRenderer,
       getTrigger,
       {
+        editPath: '',
         editUrl: '',
         editable: true,
         savedVis,
@@ -77,6 +78,7 @@ describe('embeddable', () => {
       expressionRenderer,
       getTrigger,
       {
+        editPath: '',
         editUrl: '',
         editable: true,
         savedVis,
@@ -104,6 +106,7 @@ describe('embeddable', () => {
       expressionRenderer,
       getTrigger,
       {
+        editPath: '',
         editUrl: '',
         editable: true,
         savedVis,
@@ -154,6 +157,7 @@ describe('embeddable', () => {
       expressionRenderer,
       getTrigger,
       {
+        editPath: '',
         editUrl: '',
         editable: true,
         savedVis,
@@ -186,6 +190,7 @@ describe('embeddable', () => {
       expressionRenderer,
       getTrigger,
       {
+        editPath: '',
         editUrl: '',
         editable: true,
         savedVis,

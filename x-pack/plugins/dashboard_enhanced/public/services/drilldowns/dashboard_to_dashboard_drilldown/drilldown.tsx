@@ -59,12 +59,7 @@ export class DashboardToDashboardDrilldown
     config: Config,
     context: ActionContext<VisualizeEmbeddableContract>
   ): Promise<string> => {
-    const dashboardPath = await this.getDestinationUrl(config, context);
-    const dashboardHash = dashboardPath.split('#')[1];
-
-    return this.params.start().core.application.getUrlForApp('kibana', {
-      path: `#${dashboardHash}`,
-    });
+    return this.getDestinationUrl(config, context);
   };
 
   public readonly execute = async (
@@ -74,7 +69,7 @@ export class DashboardToDashboardDrilldown
     const dashboardPath = await this.getDestinationUrl(config, context);
     const dashboardHash = dashboardPath.split('#')[1];
 
-    await this.params.start().core.application.navigateToApp('kibana', {
+    await this.params.start().core.application.navigateToApp('dashboards', {
       path: `#${dashboardHash}`,
     });
   };

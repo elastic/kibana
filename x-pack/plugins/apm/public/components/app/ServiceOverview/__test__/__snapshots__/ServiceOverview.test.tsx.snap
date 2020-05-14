@@ -96,7 +96,7 @@ NodeList [
             />
             <a
               class="euiLink euiLink--primary"
-              href="/basepath/app/kibana#/home/tutorial/apm"
+              href="/basepath/app/home#/tutorial/apm"
               rel="noreferrer"
             >
               <button

@@ -106,19 +106,23 @@ export function createTableRowDirective($compile: ng.ICompileService, $httpParam
       };
 
       $scope.getContextAppHref = () => {
-        const path = `#/discover/context/${encodeURIComponent(
-          $scope.indexPattern.id
-        )}/${encodeURIComponent($scope.row._id)}`;
+        const path = `#/context/${encodeURIComponent($scope.indexPattern.id)}/${encodeURIComponent(
+          $scope.row._id
+        )}`;
         const globalFilters: any = getServices().filterManager.getGlobalFilters();
         const appFilters: any = getServices().filterManager.getAppFilters();
         const hash = $httpParamSerializer({
-          _g: rison.encode({
-            filters: globalFilters || [],
-          }),
-          _a: rison.encode({
-            columns: $scope.columns,
-            filters: (appFilters || []).map(esFilters.disableFilter),
-          }),
+          _g: encodeURI(
+            rison.encode({
+              filters: globalFilters || [],
+            })
+          ),
+          _a: encodeURI(
+            rison.encode({
+              columns: $scope.columns,
+              filters: (appFilters || []).map(esFilters.disableFilter),
+            })
+          ),
         });
 
         return `${path}?${hash}`;

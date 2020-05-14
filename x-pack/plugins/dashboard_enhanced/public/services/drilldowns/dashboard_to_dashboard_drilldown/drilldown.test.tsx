@@ -161,7 +161,7 @@ describe('.execute() & getHref', () => {
     }
 
     expect(navigateToApp).toBeCalledTimes(1);
-    expect(navigateToApp.mock.calls[0][0]).toBe('kibana');
+    expect(navigateToApp.mock.calls[0][0]).toBe('dashboards');
 
     const executeNavigatedPath = navigateToApp.mock.calls[0][1]?.path;
     const href = await drilldown.getHref(completeConfig, context);
@@ -184,7 +184,7 @@ describe('.execute() & getHref', () => {
       false
     );
 
-    expect(href).toEqual(expect.stringContaining(`dashboard/${testDashboardId}`));
+    expect(href).toEqual(expect.stringContaining(`view/${testDashboardId}`));
   });
 
   test('query is removed if filters are disabled', async () => {

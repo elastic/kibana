@@ -36,6 +36,7 @@ import { isLensBrushEvent, isLensFilterEvent } from '../../types';
 export interface LensEmbeddableConfiguration {
   savedVis: Document;
   editUrl: string;
+  editPath: string;
   editable: boolean;
   indexPatterns?: IIndexPattern[];
 }
@@ -71,7 +72,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
     timefilter: TimefilterContract,
     expressionRenderer: ReactExpressionRendererType,
     getTrigger: UiActionsStart['getTrigger'] | undefined,
-    { savedVis, editUrl, editable, indexPatterns }: LensEmbeddableConfiguration,
+    { savedVis, editPath, editUrl, editable, indexPatterns }: LensEmbeddableConfiguration,
     initialInput: LensEmbeddableInput,
     parent?: IContainer
   ) {
@@ -84,6 +85,8 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
         // passing edit url and index patterns to the output of this embeddable for
         // the container to pick them up and use them to configure filter bar and
         // config dropdown correctly.
+        editApp: 'lens',
+        editPath,
         editUrl,
         indexPatterns,
       },
