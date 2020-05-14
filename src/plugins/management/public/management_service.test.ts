@@ -38,12 +38,3 @@ test('Provides default sections', () => {
   expect(service.getSection(ManagementSectionId.Kibana)).toBeDefined();
   expect(service.getSection(ManagementSectionId.Stack)).toBeDefined();
 });
-
-test('Throws error when a non-default section is retrieved', () => {
-  const service = new ManagementService().setup(
-    npSetup.plugins.kibanaLegacy,
-    () => {},
-    coreMock.createSetup().getStartServices
-  );
-  expect(() => service.getSection('NOPE!')).toThrow();
-});

@@ -31,7 +31,7 @@ export class ManagementTestPlugin
     testSection.registerApp({
       id: 'test-management',
       title: 'Management Test',
-      mount(params) {
+      mount(params: any) {
         params.setBreadcrumbs([{ text: 'Management Test' }]);
         ReactDOM.render(
           <Router>
