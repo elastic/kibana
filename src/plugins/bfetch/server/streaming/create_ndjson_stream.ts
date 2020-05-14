@@ -17,19 +17,17 @@
  * under the License.
  */
 
+import { Observable } from 'rxjs';
 import { Logger } from 'src/core/server';
 import { Stream, PassThrough } from 'stream';
-import { StreamingResponseHandler } from '../../common/types';
 
 const delimiter = '\n';
 
-export const createNDJSONStream = <Payload, Response>(
-  payload: Payload,
-  handler: StreamingResponseHandler<Payload, Response>,
+export const createNDJSONStream = <Response>(
+  results: Observable<Response>,
   logger: Logger
 ): Stream => {
   const stream = new PassThrough();
-  const results = handler.getResponseStream(payload);
 
   results.subscribe({
     next: (message: Response) => {
