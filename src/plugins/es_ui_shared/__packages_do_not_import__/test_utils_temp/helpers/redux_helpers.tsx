@@ -17,14 +17,11 @@
  * under the License.
  */
 
-import { FieldHook } from './types';
+import React, { ComponentType } from 'react';
+import { Provider } from 'react-redux';
 
-export const getFieldValidityAndErrorMessage = (
-  field: FieldHook<any>
-): { isInvalid: boolean; errorMessage: string | null } => {
-  const isInvalid = !field.isChangingValue && field.errors.length > 0;
-  const errorMessage =
-    !field.isChangingValue && field.errors.length ? field.errors[0].message : null;
-
-  return { isInvalid, errorMessage };
-};
+export const WithStore = (store: any) => (WrappedComponent: ComponentType) => (props: any) => (
+  <Provider store={store}>
+    <WrappedComponent {...props} />
+  </Provider>
+);

@@ -17,14 +17,4 @@
  * under the License.
  */
 
-import { FieldHook } from './types';
-
-export const getFieldValidityAndErrorMessage = (
-  field: FieldHook<any>
-): { isInvalid: boolean; errorMessage: string | null } => {
-  const isInvalid = !field.isChangingValue && field.errors.length > 0;
-  const errorMessage =
-    !field.isChangingValue && field.errors.length ? field.errors[0].message : null;
-
-  return { isInvalid, errorMessage };
-};
+export { nextTick, getRandomString, getRandomNumber } from './utils';

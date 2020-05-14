@@ -1,7 +1,20 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 import { Store } from 'redux';
@@ -41,7 +54,7 @@ export interface TestBed<T = string> {
    *
    * @example
    *
-    ```typescript
+    ```ts
     find('nameInput');
     // or more specific,
     // "nameInput" is a child of "myForm"
@@ -61,7 +74,6 @@ export interface TestBed<T = string> {
    * and we need to wait for the data to be fetched (and bypass any "loading" state).
    */
   waitFor: (testSubject: T, count?: number) => Promise<void>;
-  waitForFn: (predicate: () => Promise<boolean>, errMessage: string) => Promise<void>;
   form: {
     /**
      * Set the value of a form text input.
@@ -80,29 +92,6 @@ export interface TestBed<T = string> {
       value: string,
       isAsync?: boolean
     ) => Promise<void> | void;
-    /**
-     * Set the value of a <EuiSelect /> or a mocked <EuiSuperSelect />
-     * For the <EuiSuperSelect /> you need to mock it like this
-     * 
-     ```typescript
-     jest.mock('@elastic/eui', () => ({
-        ...jest.requireActual('@elastic/eui'),
-        EuiSuperSelect: (props: any) => (
-          <input
-            data-test-subj={props['data-test-subj'] || 'mockSuperSelect'}
-            value={props.valueOfSelected}
-            onChange={e => {
-              props.onChange(e.target.value);
-            }}
-          />
-        ),
-      }));
-     ```
-     * @param select The form select. Can either be a data-test-subj or a reactWrapper (can be a nested path. e.g. "myForm.myInput").
-     * @param value The value to set
-     * @param doUpdateComponent Call component.update() after changing the select value
-     */
-    setSelectValue: (select: T | ReactWrapper, value: string, doUpdateComponent?: boolean) => void;
     /**
      * Select or unselect a form checkbox.
      *
