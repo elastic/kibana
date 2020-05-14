@@ -9,8 +9,8 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./delete_exception_list_by_id.sh ${list_id}
+LIST_ID=${1:-endpoint_list}
+# Example: ./find_exception_list_items.sh {list-id}
 curl -s -k \
- -H 'kbn-xsrf: 123' \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
- -X DELETE ${KIBANA_URL}${SPACE_URL}/api/exception_lists?id="$1" | jq .
+ -X GET ${KIBANA_URL}${SPACE_URL}/api/exception_lists/items/_find?list_id=${LIST_ID} | jq .

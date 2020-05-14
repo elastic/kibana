@@ -7,6 +7,7 @@
 import { IRouter } from 'kibana/server';
 
 import { deleteExceptionListRoute } from './delete_exception_list_route';
+import { deleteExceptionListItemRoute } from './delete_exception_list_item_route';
 
 import {
   createExceptionListItemRoute,
@@ -18,6 +19,7 @@ import {
   deleteListItemRoute,
   deleteListRoute,
   exportListItemRoute,
+  findExceptionListItemRoute,
   importListItemRoute,
   patchListItemRoute,
   patchListRoute,
@@ -64,4 +66,6 @@ export const initRoutes = (router: IRouter): void => {
   createExceptionListItemRoute(router);
   readExceptionListItemRoute(router);
   updateExceptionListItemRoute(router);
+  deleteExceptionListItemRoute(router);
+  findExceptionListItemRoute(router);
 };

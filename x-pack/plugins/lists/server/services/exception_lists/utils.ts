@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject, SavedObjectsUpdateResponse } from 'kibana/server';
+import { SavedObject, SavedObjectsFindResponse, SavedObjectsUpdateResponse } from 'kibana/server';
 
 import {
   ExceptionListItemSchema,
   ExceptionListSchema,
   ExceptionListSoSchema,
+  FoundExceptionListItemSchema,
 } from '../../../common/schemas';
 import {
   SavedObjectType,
@@ -199,5 +200,20 @@ export const transformSavedObjectUpdateToExceptionListItem = ({
     type: type ?? exceptionListItem.type,
     updated_at: updatedAt ?? dateNow,
     updated_by: updatedBy ?? exceptionListItem.updated_by,
+  };
+};
+
+export const transformSavedObjectsToFounExceptionListItem = ({
+  savedObjectsFindResponse,
+}: {
+  savedObjectsFindResponse: SavedObjectsFindResponse<ExceptionListSoSchema>;
+}): FoundExceptionListItemSchema => {
+  return {
+    data: savedObjectsFindResponse.saved_objects.map(savedObject =>
+      transformSavedObjectToExceptionListItem({ savedObject })
+    ),
+    page: savedObjectsFindResponse.page,
+    per_page: savedObjectsFindResponse.per_page,
+    total: savedObjectsFindResponse.total,
   };
 };

@@ -95,3 +95,10 @@ export const item_id = NonEmptyString;
 export type ItemId = t.TypeOf<typeof item_id>;
 export const itemIdOrUndefined = t.union([item_id, t.undefined]);
 export type ItemIdOrUndefined = t.TypeOf<typeof itemIdOrUndefined>;
+
+export const per_page = t.number; // TODO: Change this out for PositiveNumber from siem
+export const total = t.number; // TODO: Change this out for PositiveNumber from siem
+export const page = t.number; // TODO: Change this out for PositiveNumber from siem
+export const sort_field = t.string;
+export const sort_order = t.keyof({ asc: null, desc: null });
+export const filter = t.string;

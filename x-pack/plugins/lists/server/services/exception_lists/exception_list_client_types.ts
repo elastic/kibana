@@ -70,6 +70,12 @@ export interface DeleteExceptionListOptions {
   namespaceType: NamespaceType;
 }
 
+export interface DeleteExceptionListItemOptions {
+  id: IdOrUndefined;
+  itemId: ItemIdOrUndefined;
+  namespaceType: NamespaceType;
+}
+
 export interface GetExceptionListItemOptions {
   itemId: ItemIdOrUndefined;
   id: IdOrUndefined;
@@ -102,4 +108,14 @@ export interface UpdateExceptionListItemOptions {
   meta: MetaOrUndefined;
   tags: TagsOrUndefined;
   type: ExceptionListTypeOrUndefined;
+}
+
+export interface FindExceptionListItemOptions {
+  listId: ListId;
+  namespaceType: NamespaceType;
+  filter: string | undefined;
+  perPage: number | undefined;
+  page: number | undefined;
+  sortField: string | undefined;
+  sortOrder: string | undefined;
 }

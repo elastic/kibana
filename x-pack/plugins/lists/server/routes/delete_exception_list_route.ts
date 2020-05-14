@@ -31,7 +31,7 @@ export const deleteExceptionListRoute = (router: IRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const lists = getExceptionListClient(context);
+        const exceptionLists = getExceptionListClient(context);
         const { list_id: listId, id } = request.query;
         if (listId == null && id == null) {
           return siemResponse.error({
@@ -39,7 +39,12 @@ export const deleteExceptionListRoute = (router: IRouter): void => {
             statusCode: 400,
           });
         } else {
-          const deleted = await lists.deleteExceptionList({ id, listId, namespaceType: 'single' });
+          // TODO: At the moment this will delete the list but we need to delete all the list items before deleting the list
+          const deleted = await exceptionLists.deleteExceptionList({
+            id,
+            listId,
+            namespaceType: 'single',
+          });
           if (deleted == null) {
             return siemResponse.error({
               body: getErrorMessageExceptionList({ id, listId }),

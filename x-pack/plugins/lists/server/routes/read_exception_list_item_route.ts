@@ -34,19 +34,19 @@ export const readExceptionListItemRoute = (router: IRouter): void => {
         const { id, item_id: itemId } = request.query;
         const exceptionLists = getExceptionListClient(context);
         if (id != null || itemId != null) {
-          const list = await exceptionLists.getExceptionListItem({
+          const exceptionListItem = await exceptionLists.getExceptionListItem({
             id,
             itemId,
             // TODO: Bubble this up
             namespaceType: 'single',
           });
-          if (list == null) {
+          if (exceptionListItem == null) {
             return siemResponse.error({
               body: getErrorMessageExceptionListItem({ id, itemId }),
               statusCode: 404,
             });
           } else {
-            const [validated, errors] = validate(list, exceptionListItemSchema);
+            const [validated, errors] = validate(exceptionListItem, exceptionListItemSchema);
             if (errors != null) {
               return siemResponse.error({ body: errors, statusCode: 500 });
             } else {

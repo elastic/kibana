@@ -40,13 +40,13 @@ export const createExceptionListRoute = (router: IRouter): void => {
       try {
         const { name, _tags, tags, meta, description, list_id: listId, type } = request.body;
         const exceptionLists = getExceptionListClient(context);
-        const list = await exceptionLists.getExceptionList({
+        const exceptionList = await exceptionLists.getExceptionList({
           id: undefined,
           listId,
           // TODO: Expose the name space type
           namespaceType: 'single',
         });
-        if (list != null) {
+        if (exceptionList != null) {
           return siemResponse.error({
             body: `exception list id: "${listId}" already exists`,
             statusCode: 409,

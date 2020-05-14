@@ -11,6 +11,7 @@ import { ExceptionListSchema, IdOrUndefined, ListIdOrUndefined } from '../../../
 import { getSavedObjectType } from './utils';
 import { NamespaceType } from './types';
 import { getExceptionList } from './get_exception_list';
+import { deleteExceptionListItemByList } from './delete_exception_list_items_by_list';
 
 interface DeleteExceptionListOptions {
   listId: ListIdOrUndefined;
@@ -30,6 +31,11 @@ export const deleteExceptionList = async ({
   if (exceptionList == null) {
     return null;
   } else {
+    await deleteExceptionListItemByList({
+      listId: exceptionList.list_id,
+      namespaceType,
+      savedObjectsClient,
+    });
     await savedObjectsClient.delete(savedObjectType, exceptionList.id);
     return exceptionList;
   }

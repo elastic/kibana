@@ -51,27 +51,27 @@ export const createExceptionListItemRoute = (router: IRouter): void => {
           type,
         } = request.body;
         const exceptionLists = getExceptionListClient(context);
-        const list = await exceptionLists.getExceptionList({
+        const exceptionList = await exceptionLists.getExceptionList({
           id: undefined,
           listId,
           // TODO: Expose the name space type
           namespaceType: 'single',
         });
-        if (list == null) {
+        if (exceptionList == null) {
           return siemResponse.error({
             body: `list id: "${listId}" does not exist`,
             statusCode: 404,
           });
         } else {
-          const listItem = await exceptionLists.getExceptionListItem({
+          const exceptionListItem = await exceptionLists.getExceptionListItem({
             id: undefined,
             itemId,
             // TODO: Expose the name space type
             namespaceType: 'single',
           });
-          if (listItem != null) {
+          if (exceptionListItem != null) {
             return siemResponse.error({
-              body: `exception list item id: "${listId}" already exists`,
+              body: `exception list item id: "${itemId}" already exists`,
               statusCode: 409,
             });
           } else {

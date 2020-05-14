@@ -9,7 +9,7 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./delete_exception_list_by_id.sh ${list_id}
+# Example: ./delete_exception_list.sh ${list_id}
 curl -s -k \
  -H 'kbn-xsrf: 123' \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \

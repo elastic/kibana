@@ -6,5 +6,10 @@
 
 export * from './create_exception_list_item';
 export * from './create_exception_list';
-export * from './get_exception_list';
+export * from './delete_exception_list_item';
+export * from './delete_exception_list';
+export * from './find_exception_list_item';
 export * from './get_exception_list_item';
+export * from './get_exception_list';
+export * from './update_exception_list_item';
+export * from './update_exception_list';

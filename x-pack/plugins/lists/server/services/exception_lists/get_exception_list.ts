@@ -45,6 +45,7 @@ export const getExceptionList = async ({
     }
   } else if (listId != null) {
     const savedObject = await savedObjectsClient.find<ExceptionListSoSchema>({
+      filter: `${savedObjectType}.attributes.list_type: list`,
       perPage: 1,
       search: listId,
       searchFields: ['list_id'],
