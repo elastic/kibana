@@ -5,6 +5,8 @@
  */
 
 import expect from '@kbn/expect';
+import { parse } from 'url';
+import { USERS_PATH } from '../../../../../plugins/security/public/management/management_urls';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getService, getPageObjects }: FtrProviderContext) {
@@ -39,12 +41,34 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.security.forceLogout();
     });
 
-    it('can login with Login Form', async () => {
+    it('can login with Login Form preserving original URL', async () => {
+      await PageObjects.common.navigateToActualUrl('kibana', USERS_PATH, {
+        ensureCurrentUrl: false,
+        shouldLoginIfPrompted: false,
+      });
+      await PageObjects.common.waitUntilUrlIncludes('next=');
+
       await PageObjects.security.loginSelector.login('basic', 'basic1');
+
+      // We need to make sure that both path and hash are respected.
+      const currentURL = parse(await browser.getCurrentUrl());
+      expect(currentURL.pathname).to.eql('/app/kibana');
+      expect(currentURL.hash).to.eql(`#${USERS_PATH}`);
     });
 
-    it('can login with SSO', async () => {
+    it('can login with SSO preserving original URL', async () => {
+      await PageObjects.common.navigateToActualUrl('kibana', USERS_PATH, {
+        ensureCurrentUrl: false,
+        shouldLoginIfPrompted: false,
+      });
+      await PageObjects.common.waitUntilUrlIncludes('next=');
+
       await PageObjects.security.loginSelector.login('saml', 'saml1');
+
+      // We need to make sure that both path and hash are respected.
+      const currentURL = parse(await browser.getCurrentUrl());
+      expect(currentURL.pathname).to.eql('/app/kibana');
+      expect(currentURL.hash).to.eql(`#${USERS_PATH}`);
     });
 
     it('should show toast with error if SSO fails', async () => {

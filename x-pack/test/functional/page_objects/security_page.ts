@@ -27,11 +27,8 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
   type LoginExpectedResult = 'spaceSelector' | 'error' | 'chrome';
 
   async function waitForLoginPage() {
+    log.debug('Waiting for Login Page to appear.');
     await retry.waitForWithTimeout('login page', config.get('timeouts.waitFor') * 5, async () => {
-      const alert = await browser.getAlert();
-      if (alert && alert.accept) {
-        await alert.accept();
-      }
       return await find.existsByDisplayedByCssSelector('.login-form');
     });
   }
@@ -39,11 +36,6 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
   async function waitForLoginForm() {
     log.debug('Waiting for Login Form to appear.');
     await retry.waitForWithTimeout('login form', config.get('timeouts.waitFor') * 5, async () => {
-      const alert = await browser.getAlert();
-      if (alert && alert.accept) {
-        await alert.accept();
-      }
-
       return await testSubjects.exists('loginForm');
     });
   }
@@ -97,7 +89,10 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     if (expectedResult === 'chrome') {
-      await find.byCssSelector('[data-test-subj="kibanaChrome"] nav:not(.ng-hide) ', 20000);
+      await find.byCssSelector(
+        '[data-test-subj="kibanaChrome"] .app-wrapper:not(.hidden-chrome)',
+        20000
+      );
       log.debug(`Finished login process currentUrl = ${await browser.getCurrentUrl()}`);
     }
   }
