@@ -53,31 +53,13 @@ export function maps(kibana) {
     },
 
     init(server) {
-      // Init saved objects client deps
-      // const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
-      // const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
-      // const internalRepository = getSavedObjectsRepository(callCluster);
-
-      const coreSetup = server.newPlatform.setup.core;
-      const newPlatformPlugins = server.newPlatform.setup.plugins;
-      const pluginsSetup = {
-        featuresPlugin: newPlatformPlugins.features,
-        licensing: newPlatformPlugins.licensing,
-        home: newPlatformPlugins.home,
-        usageCollection: newPlatformPlugins.usageCollection,
-        mapsLegacy: newPlatformPlugins.mapsLegacy,
-      };
-
-      // legacy dependencies
       const __LEGACY = {
-        config: server.config,
-        route: server.route.bind(server),
         injectUiAppVars: server.injectUiAppVars,
         getInjectedUiAppVars: server.getInjectedUiAppVars,
       };
 
       const mapPlugin = new MapPlugin();
-      mapPlugin.setup(coreSetup, pluginsSetup, __LEGACY);
+      mapPlugin.setup(__LEGACY);
     },
   });
 }

@@ -503,16 +503,12 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       const resource = await fetch(url);
       const arrayBuffer = await resource.arrayBuffer();
       const bufferedResponse = Buffer.from(arrayBuffer);
-
-      // let response = h.response(buffer);
-      // response = response.bytes(buffer.length);
       const headers = {
         'Content-Disposition': 'inline',
       };
       if (contentType) {
         headers['Content-type'] = contentType;
       }
-      // response = response.encoding('binary');
 
       return ok({
         body: bufferedResponse,

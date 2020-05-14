@@ -6,7 +6,7 @@
 import { APP_ID } from '../../../../plugins/maps/common/constants';
 
 export class MapPlugin {
-  setup(core, plugins, __LEGACY) {
+  setup(__LEGACY) {
     __LEGACY.injectUiAppVars(APP_ID, async () => {
       return await __LEGACY.getInjectedUiAppVars('kibana');
     });
