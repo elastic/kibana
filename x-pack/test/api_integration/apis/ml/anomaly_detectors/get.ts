@@ -145,7 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.count).to.eql(2);
         expect(body.jobs.length).to.eql(2);
         expect(body.jobs[0].job_id).to.eql(`${jobId}_1`);
-        expect(body.jobs[0]).to.keys(
+        expect(body.jobs[0]).to.have.keys(
           'timing_stats',
           'state',
           'forecasts_stats',
@@ -178,7 +178,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.count).to.eql(1);
         expect(body.jobs.length).to.eql(1);
         expect(body.jobs[0].job_id).to.eql(`${jobId}_1`);
-        expect(body.jobs[0]).to.keys(
+        expect(body.jobs[0]).to.have.keys(
           'timing_stats',
           'state',
           'forecasts_stats',
@@ -197,7 +197,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.count).to.eql(2);
         expect(body.jobs.length).to.eql(2);
         expect(body.jobs[0].job_id).to.eql(`${jobId}_1`);
-        expect(body.jobs[0]).to.keys(
+        expect(body.jobs[0]).to.have.keys(
           'timing_stats',
           'state',
           'forecasts_stats',

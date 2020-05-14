@@ -26,10 +26,13 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  describe('sample data dashboard', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/65949
+  describe.skip('sample data dashboard', function describeIndexTests() {
     before(async () => {
       await PageObjects.common.sleep(5000);
-      await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.home.addSampleDataSet('flights');
       const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
@@ -107,7 +110,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.home.removeSampleDataSet('flights');
       const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
