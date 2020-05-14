@@ -19,6 +19,7 @@ const alertType: AlertType = {
   ],
   defaultActionGroupId: 'default',
   executor: jest.fn(),
+  producer: 'alerting',
 };
 
 const createExecutionHandlerParams = {
