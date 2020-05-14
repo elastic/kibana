@@ -399,7 +399,7 @@ export class ESSearchSource extends AbstractESSource {
     }
 
     const searchService = getSearchService();
-    const searchSource = searchService.searchSource.create();
+    const searchSource = searchService.searchSource.createEmpty();
 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 1);
