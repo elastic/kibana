@@ -22,9 +22,9 @@ import {
 export function Overview(props) {
   const isFromStandaloneCluster = props.cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID;
 
-  const kibanaAlerts = KIBANA_ALERTING_ENABLED ? (
-    <AlertsStatus emailAddress={props.emailAddress} />
-  ) : null;
+  // const kibanaAlerts = KIBANA_ALERTING_ENABLED ? (
+  //   <AlertsStatus emailAddress={props.emailAddress} />
+  // ) : null;
 
   return (
     <EuiPage>
@@ -38,9 +38,9 @@ export function Overview(props) {
           </h1>
         </EuiScreenReaderOnly>
 
-        {kibanaAlerts}
+        {/* {kibanaAlerts} */}
 
-        <AlertsPanel alerts={props.cluster.alerts} changeUrl={props.changeUrl} />
+        {/* <AlertsPanel alerts={props.cluster.alerts} changeUrl={props.changeUrl} /> */}
 
         {!isFromStandaloneCluster ? (
           <Fragment>
@@ -52,6 +52,7 @@ export function Overview(props) {
               license={props.cluster.license}
               setupMode={props.setupMode}
               showLicenseExpiration={props.showLicenseExpiration}
+              alerts={props.cluster.alerts}
             />
             <KibanaPanel
               {...props.cluster.kibana}

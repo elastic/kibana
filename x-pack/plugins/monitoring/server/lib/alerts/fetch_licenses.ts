@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-import { AlertLicense, AlertCommonCluster } from '../../alerts/types';
+import { AlertLicense, AlertCluster } from '../../alerts/types';
 
 export async function fetchLicenses(
   callCluster: any,
-  clusters: AlertCommonCluster[],
+  clusters: AlertCluster[],
   index: string
 ): Promise<AlertLicense[]> {
   const params = {

@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-import { AlertCommonCluster, AlertClusterState } from '../../alerts/types';
+import { AlertCluster, AlertClusterStateState } from '../../alerts/types';
 
 export async function fetchClusterState(
   callCluster: any,
-  clusters: AlertCommonCluster[],
+  clusters: AlertCluster[],
   index: string
-): Promise<AlertClusterState[]> {
+): Promise<AlertClusterStateState[]> {
   const params = {
     index,
     filterPath: ['hits.hits._source.cluster_state.status', 'hits.hits._source.cluster_uuid'],

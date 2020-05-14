@@ -21,8 +21,9 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { MonitoringPluginDependencies, MonitoringConfig } from './types';
 import {
   MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
-  KIBANA_ALERTING_ENABLED,
+  KIBANA_CLUSTER_ALERTS_ENABLED,
 } from '../common/constants';
+import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
 
 export class MonitoringPlugin
   implements Plugin<boolean, void, MonitoringPluginDependencies, MonitoringPluginDependencies> {
@@ -30,7 +31,11 @@ export class MonitoringPlugin
 
   public setup(
     core: CoreSetup<MonitoringPluginDependencies>,
-    plugins: object & { home?: HomePublicPluginSetup; cloud?: { isCloudEnabled: boolean } }
+    plugins: object & {
+      home?: HomePublicPluginSetup;
+      cloud?: { isCloudEnabled: boolean };
+      triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+    }
   ) {
     const { home } = plugins;
     const id = 'monitoring';
@@ -75,6 +80,7 @@ export class MonitoringPlugin
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           pluginInitializerContext: this.initializerContext,
           externalConfig: this.getExternalConfig(),
+          triggersActionsUi: plugins.triggers_actions_ui,
         };
 
         this.setInitialTimefilter(deps);
@@ -118,7 +124,10 @@ export class MonitoringPlugin
 
   private overrideAlertingEmailDefaults({ core: coreContext }: MonitoringPluginDependencies) {
     const { uiSettings } = coreContext;
-    if (KIBANA_ALERTING_ENABLED && !uiSettings.get(MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS)) {
+    if (
+      KIBANA_CLUSTER_ALERTS_ENABLED &&
+      !uiSettings.get(MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS)
+    ) {
       uiSettings.overrideLocalDefault(
         MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
         JSON.stringify({

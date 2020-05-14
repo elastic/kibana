@@ -7,6 +7,7 @@
 import { PluginInitializerContext, CoreStart } from 'kibana/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
 
 export { MonitoringConfig } from '../server';
 
@@ -18,4 +19,5 @@ export interface MonitoringPluginDependencies {
   isCloud: boolean;
   pluginInitializerContext: PluginInitializerContext;
   externalConfig: Array<Array<string | number> | Array<string | boolean>>;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }

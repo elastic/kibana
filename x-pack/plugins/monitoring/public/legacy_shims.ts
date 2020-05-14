@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart } from 'kibana/public';
+import { CoreStart, ApplicationStart, HttpSetup } from 'kibana/public';
 import angular from 'angular';
 import { HttpRequestInit } from '../../../../src/core/public';
 import { MonitoringPluginDependencies } from './types';
+import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
 
 export interface KFetchQuery {
   [key: string]: string | number | boolean | undefined;
@@ -25,7 +26,7 @@ export interface KFetchKibanaOptions {
 
 export interface IShims {
   toastNotifications: CoreStart['notifications']['toasts'];
-  capabilities: { get: () => CoreStart['application']['capabilities'] };
+  capabilities: ApplicationStart['capabilities'];
   getAngularInjector: () => angular.auto.IInjectorService;
   getBasePath: () => string;
   getInjected: (name: string, defaultValue?: unknown) => unknown;
@@ -34,23 +35,25 @@ export interface IShims {
   docLinks: CoreStart['docLinks'];
   docTitle: CoreStart['chrome']['docTitle'];
   timefilter: MonitoringPluginDependencies['data']['query']['timefilter']['timefilter'];
+  http: HttpSetup;
   kfetch: (
     { pathname, ...options }: KFetchOptions,
     kfetchOptions?: KFetchKibanaOptions | undefined
   ) => Promise<any>;
   isCloud: boolean;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export class Legacy {
   private static _shims: IShims;
 
   public static init(
-    { core, data, isCloud }: MonitoringPluginDependencies,
+    { core, data, isCloud, triggersActionsUi }: MonitoringPluginDependencies,
     ngInjector: angular.auto.IInjectorService
   ) {
     this._shims = {
       toastNotifications: core.notifications.toasts,
-      capabilities: { get: () => core.application.capabilities },
+      capabilities: core.application.capabilities,
       getAngularInjector: (): angular.auto.IInjectorService => ngInjector,
       getBasePath: (): string => core.http.basePath.get(),
       getInjected: (name: string, defaultValue?: unknown): string | unknown =>
@@ -62,6 +65,7 @@ export class Legacy {
       docLinks: core.docLinks,
       docTitle: core.chrome.docTitle,
       timefilter: data.query.timefilter.timefilter,
+      http: core.http,
       kfetch: async (
         { pathname, ...options }: KFetchOptions,
         kfetchOptions?: KFetchKibanaOptions
@@ -71,6 +75,7 @@ export class Legacy {
           ...options,
         }),
       isCloud,
+      triggersActionsUi,
     };
   }
 

@@ -109,6 +109,7 @@ export const ConnectorAddModal = ({
         return savedConnector;
       })
       .catch(errorRes => {
+        console.log({ errorRes })
         setServerError(errorRes);
         return undefined;
       });

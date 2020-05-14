@@ -33,7 +33,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Reason } from '../../logs/reason';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
-import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
+import {
+  ELASTICSEARCH_SYSTEM_ID,
+  ALERT_LICENSE_EXPIRATION,
+  ALERT_CLUSTER_STATE,
+} from '../../../../common/constants';
 
 const calculateShards = shards => {
   const total = get(shards, 'total', 0);
@@ -143,6 +147,7 @@ export function ElasticsearchPanel(props) {
   const nodes = clusterStats.nodes;
   const indices = clusterStats.indices;
   const setupMode = props.setupMode;
+  const alerts = props.alerts;
 
   const goToElasticsearch = () => props.changeUrl('elasticsearch');
   const goToNodes = () => props.changeUrl('elasticsearch/nodes');
@@ -150,10 +155,16 @@ export function ElasticsearchPanel(props) {
 
   const { primaries, replicas } = calculateShards(get(props, 'cluster_stats.indices.shards', {}));
 
-  const statusIndicator = <HealthStatusIndicator status={clusterStats.status} />;
+  const statusIndicator = (
+    <HealthStatusIndicator status={clusterStats.status} alert={alerts[ALERT_CLUSTER_STATE]} />
+  );
 
   const licenseText = (
-    <LicenseText license={props.license} showLicenseExpiration={props.showLicenseExpiration} />
+    <LicenseText
+      license={props.license}
+      showLicenseExpiration={props.showLicenseExpiration}
+      alert={alerts[ALERT_LICENSE_EXPIRATION]}
+    />
   );
 
   const setupModeData = get(setupMode.data, 'elasticsearch');

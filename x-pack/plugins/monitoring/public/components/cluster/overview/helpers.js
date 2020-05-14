@@ -19,6 +19,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { AlertPopover } from '../../alert/popover';
+
 export function HealthStatusIndicator(props) {
   const statusColorMap = {
     green: 'success',
@@ -26,16 +28,26 @@ export function HealthStatusIndicator(props) {
     red: 'danger',
   };
 
+  let alertStatus = null;
+  if (props.alert) {
+    alertStatus = <AlertPopover alert={props.alert}/>;
+  }
+
   const statusColor = statusColorMap[props.status] || 'n/a';
 
   return (
-    <EuiHealth color={statusColor} data-test-subj="statusIcon">
-      <FormattedMessage
-        id="xpack.monitoring.cluster.overview.healthStatusDescription"
-        defaultMessage="Health is {status}"
-        values={{ status: props.status || 'n/a' }}
-      />
-    </EuiHealth>
+    <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiHealth color={statusColor} data-test-subj="statusIcon">
+          <FormattedMessage
+            id="xpack.monitoring.cluster.overview.healthStatusDescription"
+            defaultMessage="Health is {status}"
+            values={{ status: props.status || 'n/a' }}
+          />
+        </EuiHealth>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{alertStatus}</EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 
