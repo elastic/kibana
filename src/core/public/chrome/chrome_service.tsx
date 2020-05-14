@@ -18,11 +18,13 @@
  */
 
 import { Breadcrumb as EuiBreadcrumb, IconType } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } from 'rxjs';
 import { flatMap, map, takeUntil } from 'rxjs/operators';
 import { parse } from 'url';
+import { EuiLink } from '@elastic/eui';
+import { mountReactNode } from '../utils/mount';
 import { InternalApplicationStart } from '../application';
 import { DocLinksStart } from '../doc_links';
 import { HttpStart } from '../http';
@@ -165,12 +167,41 @@ export class ChromeService {
     // Can delete
     const getNavType$ = uiSettings.get$('pageNavigation').pipe(takeUntil(this.stop$));
 
+    const isIE = () => {
+      const ua = window.navigator.userAgent;
+      const msie = ua.indexOf('MSIE '); // IE 10 or older
+      const trident = ua.indexOf('Trident/'); // IE 11
+
+      return msie > 0 || trident > 0;
+    };
+
     if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
-      notifications.toasts.addWarning(
-        i18n.translate('core.chrome.legacyBrowserWarning', {
-          defaultMessage: 'Your browser does not meet the security requirements for Kibana.',
-        })
-      );
+      notifications.toasts.addWarning({
+        title: mountReactNode(
+          <FormattedMessage
+            id="core.chrome.legacyBrowserWarning"
+            defaultMessage="Your browser does not meet the security requirements for Kibana."
+          />
+        ),
+      });
+
+      if (isIE()) {
+        notifications.toasts.addWarning({
+          title: mountReactNode(
+            <FormattedMessage
+              id="core.chrome.browserDeprecationWarning"
+              defaultMessage="Support for Internet Explorer will be dropped in future versions of this software, please check {link}."
+              values={{
+                link: (
+                  <EuiLink target="_blank" href="https://www.elastic.co/support/matrix" external>
+                    the support matrix on our website
+                  </EuiLink>
+                ),
+              }}
+            />
+          ),
+        });
+      }
     }
 
     return {
