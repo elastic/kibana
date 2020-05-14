@@ -116,7 +116,6 @@ export const Expressions: React.FC<Props> = props => {
       timeSize: timeSize ?? defaultExpression.timeSize,
       timeUnit: timeUnit ?? defaultExpression.timeUnit,
     });
-    exp.push(defaultExpression);
     setAlertParams('criteria', exp);
   }, [setAlertParams, alertParams.criteria, timeSize, timeUnit]);
 
