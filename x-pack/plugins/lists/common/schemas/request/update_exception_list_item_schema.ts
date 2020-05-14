@@ -9,7 +9,6 @@
 import * as t from 'io-ts';
 
 import {
-  ItemId,
   Tags,
   _Tags,
   _tags,
@@ -22,7 +21,7 @@ import {
   tags,
 } from '../common/schemas';
 import { Identity, RequiredKeepUndefined } from '../../types';
-import { DefaultEntryArray, DefaultUuid } from '../types';
+import { DefaultEntryArray } from '../types';
 import { EntriesArray } from '../types/entries';
 
 export const updateExceptionListItemSchema = t.intersection([
@@ -36,10 +35,10 @@ export const updateExceptionListItemSchema = t.intersection([
   t.exact(
     t.partial({
       _tags, // defaults to empty array if not set during decode
-      comment, // defaults to undefined if not set during decode
+      comment, // defaults to empty array if not set during decode
       entries: DefaultEntryArray, // defaults to empty array if not set during decode
       id, // defaults to undefined if not set during decode
-      item_id: DefaultUuid, // defaults to GUID (uuid v4) if not set during decode
+      item_id: t.union([t.string, t.undefined]),
       meta, // defaults to undefined if not set during decode
       tags, // defaults to empty array if not set during decode
     })
@@ -56,10 +55,9 @@ export type UpdateExceptionListItemSchema = RequiredKeepUndefined<
 // This type is used after a decode since the arrays turn into defaults of empty arrays
 // and if a item_id is not specified it turns into a default GUID
 export type UpdateExceptionListItemSchemaDecoded = Identity<
-  Omit<UpdateExceptionListItemSchema, '_tags' | 'tags' | 'item_id' | 'entries'> & {
+  Omit<UpdateExceptionListItemSchema, '_tags' | 'tags' | 'entries'> & {
     _tags: _Tags;
     tags: Tags;
-    item_id: ItemId;
     entries: EntriesArray;
   }
 >;

@@ -13,7 +13,11 @@ import {
   transformError,
   validate,
 } from '../siem_server_deps';
-import { exceptionListItemSchema, updateExceptionListItemSchema } from '../../common/schemas';
+import {
+  UpdateExceptionListItemSchemaDecoded,
+  exceptionListItemSchema,
+  updateExceptionListItemSchema,
+} from '../../common/schemas';
 
 import { getExceptionListClient } from '.';
 
@@ -25,7 +29,10 @@ export const updateExceptionListItemRoute = (router: IRouter): void => {
       },
       path: EXCEPTION_LIST_ITEM_URL,
       validate: {
-        body: buildRouteValidation(updateExceptionListItemSchema),
+        body: buildRouteValidation<
+          typeof updateExceptionListItemSchema,
+          UpdateExceptionListItemSchemaDecoded
+        >(updateExceptionListItemSchema),
       },
     },
     async (context, request, response) => {

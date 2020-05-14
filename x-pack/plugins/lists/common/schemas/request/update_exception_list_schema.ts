@@ -9,14 +9,11 @@
 import * as t from 'io-ts';
 
 import {
-  ListId,
   Tags,
   _Tags,
   _tags,
   description,
   exceptionListType,
-  id,
-  list_id,
   meta,
   name,
   tags,
@@ -34,8 +31,8 @@ export const updateExceptionListSchema = t.intersection([
   t.exact(
     t.partial({
       _tags, // defaults to empty array if not set during decode
-      id, // defaults to undefined if not set during decode
-      list_id, // defaults to undefined if not set during decode
+      id: t.union([t.string, t.undefined]), // defaults to undefined if not set during decode
+      list_id: t.union([t.string, t.undefined]), // defaults to undefined if not set during decode
       meta, // defaults to undefined if not set during decode
       tags, // defaults to empty array if not set during decode
     })
@@ -49,9 +46,8 @@ export type UpdateExceptionListSchema = RequiredKeepUndefined<
 
 // This type is used after a decode since the arrays turn into defaults of empty arrays.
 export type UpdateExceptionListSchemaDecoded = Identity<
-  UpdateExceptionListSchema & {
+  Omit<UpdateExceptionListSchema, '_tags | tags'> & {
     _tags: _Tags;
     tags: Tags;
-    list_id: ListId;
   }
 >;
