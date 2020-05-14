@@ -20,6 +20,9 @@ export interface FilterPopoverProps {
   onFilterFieldChange: (fieldName: string, values: string[]) => void;
   selectedItems: string[];
   title: string;
+  btnContent?: JSX.Element;
+  forceOpen?: boolean;
+  setForceOpen?: (val: boolean) => void;
 }
 
 const isItemSelected = (selectedItems: string[], item: string): 'on' | undefined =>
@@ -30,15 +33,28 @@ export const FilterPopover = ({
   id,
   disabled,
   loading,
-  items,
+  items: allItems,
   onFilterFieldChange,
   selectedItems,
   title,
+  btnContent,
+  forceOpen,
+  setForceOpen,
 }: FilterPopoverProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [itemsToDisplay, setItemsToDisplay] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [tempSelectedItems, setTempSelectedItems] = useState<string[]>(selectedItems);
+
+  const [items, setItems] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Merge incoming items with selected items, to enable deselection
+
+    const mItems = selectedItems.concat(allItems ?? []);
+    const newItems = mItems.filter((item, index) => mItems.indexOf(item) === index);
+    setItems(newItems);
+  }, [allItems, selectedItems]);
 
   useEffect(() => {
     if (searchQuery !== '') {
@@ -52,28 +68,33 @@ export const FilterPopover = ({
   return (
     <EuiPopover
       button={
-        <UptimeFilterButton
-          isDisabled={disabled}
-          isSelected={tempSelectedItems.length > 0}
-          numFilters={items.length}
-          numActiveFilters={tempSelectedItems.length}
-          onClick={() => {
-            setIsOpen(!isOpen);
-            onFilterFieldChange(fieldName, tempSelectedItems);
-          }}
-          title={title}
-        />
+        btnContent ?? (
+          <UptimeFilterButton
+            isDisabled={disabled && selectedItems.length === 0}
+            isSelected={tempSelectedItems.length > 0}
+            numFilters={items.length}
+            numActiveFilters={tempSelectedItems.length}
+            onClick={() => {
+              setIsOpen(!isOpen);
+              onFilterFieldChange(fieldName, tempSelectedItems);
+            }}
+            title={title}
+          />
+        )
       }
       closePopover={() => {
         setIsOpen(false);
         onFilterFieldChange(fieldName, tempSelectedItems);
+        if (setForceOpen) {
+          setForceOpen(false);
+        }
       }}
       data-test-subj={`filter-popover_${id}`}
       id={id}
-      isOpen={isOpen}
+      isOpen={isOpen || forceOpen}
       ownFocus={true}
       withTitle
-      zIndex={1000}
+      zIndex={10000}
     >
       <EuiPopoverTitle>
         <EuiFieldSearch

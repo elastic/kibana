@@ -23,6 +23,7 @@ import {
   RULES_TABLE,
   SORT_RULES_BTN,
   THREE_HUNDRED_ROWS,
+  EXPORT_ACTION_BTN,
 } from '../screens/signal_detection_rules';
 
 export const activateRule = (rulePosition: number) => {
@@ -46,6 +47,14 @@ export const deleteFirstRule = () => {
 export const deleteSelectedRules = () => {
   cy.get(BULK_ACTIONS_BTN).click({ force: true });
   cy.get(DELETE_RULE_BULK_BTN).click();
+};
+
+export const exportFirstRule = () => {
+  cy.get(COLLAPSED_ACTION_BTN)
+    .first()
+    .click({ force: true });
+  cy.get(EXPORT_ACTION_BTN).click();
+  cy.get(EXPORT_ACTION_BTN).should('not.exist');
 };
 
 export const filterByCustomRules = () => {

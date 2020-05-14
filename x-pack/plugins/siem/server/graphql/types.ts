@@ -344,6 +344,7 @@ export enum TlsFields {
 
 export enum TimelineType {
   default = 'default',
+  draft = 'draft',
   template = 'template',
 }
 
@@ -2237,6 +2238,8 @@ export interface GetAllTimelineQueryArgs {
   sort?: Maybe<SortTimeline>;
 
   onlyUserFavorite?: Maybe<boolean>;
+
+  timelineType?: Maybe<string>;
 }
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
@@ -2693,6 +2696,8 @@ export namespace QueryResolvers {
     sort?: Maybe<SortTimeline>;
 
     onlyUserFavorite?: Maybe<boolean>;
+
+    timelineType?: Maybe<string>;
   }
 }
 

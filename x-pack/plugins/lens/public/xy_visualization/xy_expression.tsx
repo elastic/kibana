@@ -26,8 +26,7 @@ import {
   ExpressionFunctionDefinition,
   ExpressionValueSearchContext,
 } from 'src/plugins/expressions/public';
-import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   ValueClickTriggerContext,
@@ -41,6 +40,7 @@ import { isHorizontalChart } from './state_helpers';
 import { getExecuteTriggerActions } from '../services';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { parseInterval } from '../../../../../src/plugins/data/common';
+import { EmptyPlaceholder } from '../shared_components';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
@@ -181,33 +181,32 @@ export function XYChart({
 }: XYChartRenderProps) {
   const { legend, layers } = args;
 
-  if (Object.values(data.tables).every(table => table.rows.length === 0)) {
-    const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
-    return (
-      <EuiText className="lnsChart__empty" textAlign="center" color="subdued" size="xs">
-        <EuiIcon type={icon} color="subdued" size="l" />
-        <EuiSpacer size="s" />
-        <p>
-          <FormattedMessage
-            id="xpack.lens.xyVisualization.noDataLabel"
-            defaultMessage="No results found"
-          />
-        </p>
-      </EuiText>
+  const filteredLayers = layers.filter(({ layerId, xAccessor, accessors }) => {
+    return !(
+      !xAccessor ||
+      !accessors.length ||
+      !data.tables[layerId] ||
+      data.tables[layerId].rows.length === 0 ||
+      data.tables[layerId].rows.every(row => typeof row[xAccessor] === 'undefined')
     );
+  });
+
+  if (filteredLayers.length === 0) {
+    const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
+    return <EmptyPlaceholder icon={icon} />;
   }
 
   // use formatting hint of first x axis column to format ticks
-  const xAxisColumn = Object.values(data.tables)[0].columns.find(
-    ({ id }) => id === layers[0].xAccessor
+  const xAxisColumn = data.tables[filteredLayers[0].layerId].columns.find(
+    ({ id }) => id === filteredLayers[0].xAccessor
   );
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.formatHint);
 
   // use default number formatter for y axis and use formatting hint if there is just a single y column
   let yAxisFormatter = formatFactory({ id: 'number' });
-  if (layers.length === 1 && layers[0].accessors.length === 1) {
+  if (filteredLayers.length === 1 && filteredLayers[0].accessors.length === 1) {
     const firstYAxisColumn = Object.values(data.tables)[0].columns.find(
-      ({ id }) => id === layers[0].accessors[0]
+      ({ id }) => id === filteredLayers[0].accessors[0]
     );
     if (firstYAxisColumn && firstYAxisColumn.formatHint) {
       yAxisFormatter = formatFactory(firstYAxisColumn.formatHint);
@@ -215,8 +214,10 @@ export function XYChart({
   }
 
   const chartHasMoreThanOneSeries =
-    layers.length > 1 || data.tables[layers[0].layerId].columns.length > 2;
-  const shouldRotate = isHorizontalChart(layers);
+    filteredLayers.length > 1 ||
+    filteredLayers.some(layer => layer.accessors.length > 1) ||
+    filteredLayers.some(layer => layer.splitAccessor);
+  const shouldRotate = isHorizontalChart(filteredLayers);
 
   const xTitle = (xAxisColumn && xAxisColumn.name) || args.xTitle;
 
@@ -224,17 +225,9 @@ export function XYChart({
     // check all the tables to see if all of the rows have the same timestamp
     // that would mean that chart will draw a single bar
     const isSingleTimestampInXDomain = () => {
-      const nonEmptyLayers = layers.filter(
-        layer => data.tables[layer.layerId].rows.length && layer.xAccessor
-      );
-
-      if (!nonEmptyLayers.length) {
-        return;
-      }
-
       const firstRowValue =
-        data.tables[nonEmptyLayers[0].layerId].rows[0][nonEmptyLayers[0].xAccessor!];
-      for (const layer of nonEmptyLayers) {
+        data.tables[filteredLayers[0].layerId].rows[0][filteredLayers[0].xAccessor!];
+      for (const layer of filteredLayers) {
         if (
           layer.xAccessor &&
           data.tables[layer.layerId].rows.some(row => row[layer.xAccessor!] !== firstRowValue)
@@ -258,7 +251,7 @@ export function XYChart({
     return undefined;
   }
 
-  const isTimeViz = data.dateRange && layers.every(l => l.xScaleType === 'time');
+  const isTimeViz = data.dateRange && filteredLayers.every(l => l.xScaleType === 'time');
 
   const xDomain = isTimeViz
     ? {
@@ -277,18 +270,20 @@ export function XYChart({
         theme={chartTheme}
         rotation={shouldRotate ? 90 : 0}
         xDomain={xDomain}
-        onBrushEnd={(min: number, max: number) => {
+        onBrushEnd={({ x }) => {
+          if (!x) {
+            return;
+          }
+          const [min, max] = x;
           // in the future we want to make it also for histogram
           if (!xAxisColumn || !isTimeViz) {
             return;
           }
 
-          const firstLayerWithData =
-            layers[layers.findIndex(layer => data.tables[layer.layerId].rows.length)];
-          const table = data.tables[firstLayerWithData.layerId];
+          const table = data.tables[filteredLayers[0].layerId];
 
           const xAxisColumnIndex = table.columns.findIndex(
-            el => el.id === firstLayerWithData.xAccessor
+            el => el.id === filteredLayers[0].xAccessor
           );
           const timeFieldName = table.columns[xAxisColumnIndex]?.meta?.aggConfigParams?.field;
 
@@ -307,7 +302,7 @@ export function XYChart({
           const xySeries = series as XYChartSeriesIdentifier;
           const xyGeometry = geometry as GeometryValue;
 
-          const layer = layers.find(l =>
+          const layer = filteredLayers.find(l =>
             xySeries.seriesKeys.some((key: string | number) => l.accessors.includes(key.toString()))
           );
           if (!layer) {
@@ -362,7 +357,7 @@ export function XYChart({
         position={shouldRotate ? Position.Left : Position.Bottom}
         title={xTitle}
         showGridLines={false}
-        hide={layers[0].hide}
+        hide={filteredLayers[0].hide}
         tickFormat={d => xAxisFormatter.convert(d)}
       />
 
@@ -371,11 +366,11 @@ export function XYChart({
         position={shouldRotate ? Position.Bottom : Position.Left}
         title={args.yTitle}
         showGridLines={false}
-        hide={layers[0].hide}
+        hide={filteredLayers[0].hide}
         tickFormat={d => yAxisFormatter.convert(d)}
       />
 
-      {layers.map(
+      {filteredLayers.map(
         (
           {
             splitAccessor,
@@ -390,16 +385,6 @@ export function XYChart({
           },
           index
         ) => {
-          if (
-            !xAccessor ||
-            !accessors.length ||
-            !data.tables[layerId] ||
-            data.tables[layerId].rows.length === 0 ||
-            data.tables[layerId].rows.every(row => typeof row[xAccessor] === 'undefined')
-          ) {
-            return;
-          }
-
           const columnToLabelMap: Record<string, string> = columnToLabel
             ? JSON.parse(columnToLabel)
             : {};
@@ -410,12 +395,14 @@ export function XYChart({
           // To not display them in the legend, they need to be filtered out.
           const rows = table.rows.filter(
             row =>
+              xAccessor &&
+              row[xAccessor] &&
               !(splitAccessor && !row[splitAccessor] && accessors.every(accessor => !row[accessor]))
           );
 
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
-            stackAccessors: seriesType.includes('stacked') ? [xAccessor] : [],
+            stackAccessors: seriesType.includes('stacked') ? [xAccessor as string] : [],
             id: splitAccessor || accessors.join(','),
             xAccessor,
             yAccessors: accessors,

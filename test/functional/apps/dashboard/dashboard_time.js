@@ -22,7 +22,7 @@ import expect from '@kbn/expect';
 const dashboardName = 'Dashboard Test Time';
 
 export default function({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['dashboard', 'header', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'timePicker']);
   const browser = getService('browser');
 
   describe('dashboard time', () => {
@@ -32,7 +32,7 @@ export default function({ getPageObjects, getService }) {
     });
 
     after(async function() {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.common.navigateToApp('dashboard');
     });
 
     describe('dashboard without stored timed', () => {
@@ -85,7 +85,7 @@ export default function({ getPageObjects, getService }) {
 
         await PageObjects.dashboard.gotoDashboardLandingPage();
 
-        const urlWithGlobalTime = `${kibanaBaseUrl}#/dashboard/${id}?_g=(time:(from:now-1h,to:now))`;
+        const urlWithGlobalTime = `${kibanaBaseUrl}#/view/${id}?_g=(time:(from:now-1h,to:now))`;
         await browser.get(urlWithGlobalTime, false);
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.equal('~ an hour ago');
@@ -99,7 +99,7 @@ export default function({ getPageObjects, getService }) {
 
         await PageObjects.dashboard.gotoDashboardLandingPage();
 
-        const urlWithGlobalTime = `${kibanaBaseUrl}#/dashboard/${id}?_g=(filters:!())`;
+        const urlWithGlobalTime = `${kibanaBaseUrl}#/view/${id}?_g=(filters:!())`;
         await browser.get(urlWithGlobalTime, false);
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.equal(PageObjects.timePicker.defaultStartTime);

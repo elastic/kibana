@@ -19,7 +19,14 @@
 
 import { SavedObjectsPublicPlugin } from './plugin';
 
-export { OnSaveProps, SavedObjectSaveModal, SaveResult, showSaveModal } from './save_modal';
+export {
+  OnSaveProps,
+  SavedObjectSaveModal,
+  SavedObjectSaveModalOrigin,
+  SaveModalState,
+  SaveResult,
+  showSaveModal,
+} from './save_modal';
 export { getSavedObjectFinder, SavedObjectFinderUi, SavedObjectMetaData } from './finder';
 export {
   SavedObjectLoader,

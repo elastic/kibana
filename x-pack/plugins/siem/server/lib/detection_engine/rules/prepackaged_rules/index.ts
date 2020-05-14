@@ -53,90 +53,105 @@ import rule43 from './linux_anomalous_network_service.json';
 import rule44 from './linux_anomalous_network_url_activity.json';
 import rule45 from './linux_anomalous_process_all_hosts.json';
 import rule46 from './linux_anomalous_user_name.json';
-import rule47 from './linux_hping_activity.json';
-import rule48 from './linux_iodine_activity.json';
-import rule49 from './linux_kernel_module_activity.json';
-import rule50 from './linux_mknod_activity.json';
-import rule51 from './linux_netcat_network_connection.json';
-import rule52 from './linux_nmap_activity.json';
-import rule53 from './linux_nping_activity.json';
-import rule54 from './linux_process_started_in_temp_directory.json';
-import rule55 from './linux_shell_activity_by_web_server.json';
-import rule56 from './linux_socat_activity.json';
-import rule57 from './linux_strace_activity.json';
-import rule58 from './linux_tcpdump_activity.json';
-import rule59 from './linux_whoami_commmand.json';
-import rule60 from './network_dns_directly_to_the_internet.json';
-import rule61 from './network_ftp_file_transfer_protocol_activity_to_the_internet.json';
-import rule62 from './network_irc_internet_relay_chat_protocol_activity_to_the_internet.json';
-import rule63 from './network_nat_traversal_port_activity.json';
-import rule64 from './network_port_26_activity.json';
-import rule65 from './network_port_8000_activity_to_the_internet.json';
-import rule66 from './network_pptp_point_to_point_tunneling_protocol_activity.json';
-import rule67 from './network_proxy_port_activity_to_the_internet.json';
-import rule68 from './network_rdp_remote_desktop_protocol_from_the_internet.json';
-import rule69 from './network_rdp_remote_desktop_protocol_to_the_internet.json';
-import rule70 from './network_rpc_remote_procedure_call_from_the_internet.json';
-import rule71 from './network_rpc_remote_procedure_call_to_the_internet.json';
-import rule72 from './network_smb_windows_file_sharing_activity_to_the_internet.json';
-import rule73 from './network_smtp_to_the_internet.json';
-import rule74 from './network_sql_server_port_activity_to_the_internet.json';
-import rule75 from './network_ssh_secure_shell_from_the_internet.json';
-import rule76 from './network_ssh_secure_shell_to_the_internet.json';
-import rule77 from './network_telnet_port_activity.json';
-import rule78 from './network_tor_activity_to_the_internet.json';
-import rule79 from './network_vnc_virtual_network_computing_from_the_internet.json';
-import rule80 from './network_vnc_virtual_network_computing_to_the_internet.json';
-import rule81 from './null_user_agent.json';
-import rule82 from './packetbeat_dns_tunneling.json';
-import rule83 from './packetbeat_rare_dns_question.json';
-import rule84 from './packetbeat_rare_server_domain.json';
-import rule85 from './packetbeat_rare_urls.json';
-import rule86 from './packetbeat_rare_user_agent.json';
-import rule87 from './rare_process_by_host_linux.json';
-import rule88 from './rare_process_by_host_windows.json';
-import rule89 from './sqlmap_user_agent.json';
-import rule90 from './suspicious_login_activity.json';
-import rule91 from './windows_anomalous_network_activity.json';
-import rule92 from './windows_anomalous_path_activity.json';
-import rule93 from './windows_anomalous_process_all_hosts.json';
-import rule94 from './windows_anomalous_process_creation.json';
-import rule95 from './windows_anomalous_script.json';
-import rule96 from './windows_anomalous_service.json';
-import rule97 from './windows_anomalous_user_name.json';
-import rule98 from './windows_certutil_network_connection.json';
-import rule99 from './windows_command_prompt_connecting_to_the_internet.json';
-import rule100 from './windows_command_shell_started_by_powershell.json';
-import rule101 from './windows_command_shell_started_by_svchost.json';
-import rule102 from './windows_credential_dumping_msbuild.json';
-import rule103 from './windows_cve_2020_0601.json';
-import rule104 from './windows_defense_evasion_via_filter_manager.json';
-import rule105 from './windows_execution_msbuild_started_by_office_app.json';
-import rule106 from './windows_execution_msbuild_started_by_script.json';
-import rule107 from './windows_execution_msbuild_started_by_system_process.json';
-import rule108 from './windows_execution_msbuild_started_renamed.json';
-import rule109 from './windows_execution_msbuild_started_unusal_process.json';
-import rule110 from './windows_execution_via_compiled_html_file.json';
-import rule111 from './windows_execution_via_net_com_assemblies.json';
-import rule112 from './windows_execution_via_regsvr32.json';
-import rule113 from './windows_execution_via_trusted_developer_utilities.json';
-import rule114 from './windows_html_help_executable_program_connecting_to_the_internet.json';
-import rule115 from './windows_injection_msbuild.json';
-import rule116 from './windows_misc_lolbin_connecting_to_the_internet.json';
-import rule117 from './windows_modification_of_boot_config.json';
-import rule118 from './windows_msxsl_network.json';
-import rule119 from './windows_net_command_system_account.json';
-import rule120 from './windows_persistence_via_application_shimming.json';
-import rule121 from './windows_priv_escalation_via_accessibility_features.json';
-import rule122 from './windows_process_discovery_via_tasklist_command.json';
-import rule123 from './windows_rare_user_runas_event.json';
-import rule124 from './windows_rare_user_type10_remote_login.json';
-import rule125 from './windows_register_server_program_connecting_to_the_internet.json';
-import rule126 from './windows_signed_binary_proxy_execution.json';
-import rule127 from './windows_suspicious_pdf_reader.json';
-import rule128 from './windows_suspicious_process_started_by_a_script.json';
-import rule129 from './windows_uac_bypass_event_viewer.json';
-import rule130 from './windows_whoami_command_activity.json';
+import rule47 from './linux_attempt_to_disable_iptables_or_firewall.json';
+import rule48 from './linux_attempt_to_disable_syslog_service.json';
+import rule49 from './linux_base16_or_base32_encoding_or_decoding_activity.json';
+import rule50 from './linux_base64_encoding_or_decoding_activity.json';
+import rule51 from './linux_disable_selinux_attempt.json';
+import rule52 from './linux_file_deletion_via_shred.json';
+import rule53 from './linux_file_mod_writable_dir.json';
+import rule54 from './linux_hex_encoding_or_decoding_activity.json';
+import rule55 from './linux_hping_activity.json';
+import rule56 from './linux_iodine_activity.json';
+import rule57 from './linux_kernel_module_activity.json';
+import rule58 from './linux_kernel_module_enumeration.json';
+import rule59 from './linux_kernel_module_removal.json';
+import rule60 from './linux_mknod_activity.json';
+import rule61 from './linux_netcat_network_connection.json';
+import rule62 from './linux_nmap_activity.json';
+import rule63 from './linux_nping_activity.json';
+import rule64 from './linux_perl_tty_shell.json';
+import rule65 from './linux_process_started_in_temp_directory.json';
+import rule66 from './linux_python_tty_shell.json';
+import rule67 from './linux_setgid_bit_set_via_chmod.json';
+import rule68 from './linux_setuid_bit_set_via_chmod.json';
+import rule69 from './linux_shell_activity_by_web_server.json';
+import rule70 from './linux_socat_activity.json';
+import rule71 from './linux_strace_activity.json';
+import rule72 from './linux_sudoers_file_mod.json';
+import rule73 from './linux_tcpdump_activity.json';
+import rule74 from './linux_telnet_network_activity_external.json';
+import rule75 from './linux_telnet_network_activity_internal.json';
+import rule76 from './linux_virtual_machine_fingerprinting.json';
+import rule77 from './linux_whoami_commmand.json';
+import rule78 from './network_dns_directly_to_the_internet.json';
+import rule79 from './network_ftp_file_transfer_protocol_activity_to_the_internet.json';
+import rule80 from './network_irc_internet_relay_chat_protocol_activity_to_the_internet.json';
+import rule81 from './network_nat_traversal_port_activity.json';
+import rule82 from './network_port_26_activity.json';
+import rule83 from './network_port_8000_activity_to_the_internet.json';
+import rule84 from './network_pptp_point_to_point_tunneling_protocol_activity.json';
+import rule85 from './network_proxy_port_activity_to_the_internet.json';
+import rule86 from './network_rdp_remote_desktop_protocol_from_the_internet.json';
+import rule87 from './network_rdp_remote_desktop_protocol_to_the_internet.json';
+import rule88 from './network_rpc_remote_procedure_call_from_the_internet.json';
+import rule89 from './network_rpc_remote_procedure_call_to_the_internet.json';
+import rule90 from './network_smb_windows_file_sharing_activity_to_the_internet.json';
+import rule91 from './network_smtp_to_the_internet.json';
+import rule92 from './network_sql_server_port_activity_to_the_internet.json';
+import rule93 from './network_ssh_secure_shell_from_the_internet.json';
+import rule94 from './network_ssh_secure_shell_to_the_internet.json';
+import rule95 from './network_telnet_port_activity.json';
+import rule96 from './network_tor_activity_to_the_internet.json';
+import rule97 from './network_vnc_virtual_network_computing_from_the_internet.json';
+import rule98 from './network_vnc_virtual_network_computing_to_the_internet.json';
+import rule99 from './null_user_agent.json';
+import rule100 from './packetbeat_dns_tunneling.json';
+import rule101 from './packetbeat_rare_dns_question.json';
+import rule102 from './packetbeat_rare_server_domain.json';
+import rule103 from './packetbeat_rare_urls.json';
+import rule104 from './packetbeat_rare_user_agent.json';
+import rule105 from './rare_process_by_host_linux.json';
+import rule106 from './rare_process_by_host_windows.json';
+import rule107 from './sqlmap_user_agent.json';
+import rule108 from './suspicious_login_activity.json';
+import rule109 from './windows_anomalous_network_activity.json';
+import rule110 from './windows_anomalous_path_activity.json';
+import rule111 from './windows_anomalous_process_all_hosts.json';
+import rule112 from './windows_anomalous_process_creation.json';
+import rule113 from './windows_anomalous_script.json';
+import rule114 from './windows_anomalous_service.json';
+import rule115 from './windows_anomalous_user_name.json';
+import rule116 from './windows_certutil_network_connection.json';
+import rule117 from './windows_command_prompt_connecting_to_the_internet.json';
+import rule118 from './windows_command_shell_started_by_powershell.json';
+import rule119 from './windows_command_shell_started_by_svchost.json';
+import rule120 from './windows_credential_dumping_msbuild.json';
+import rule121 from './windows_cve_2020_0601.json';
+import rule122 from './windows_defense_evasion_via_filter_manager.json';
+import rule123 from './windows_execution_msbuild_started_by_office_app.json';
+import rule124 from './windows_execution_msbuild_started_by_script.json';
+import rule125 from './windows_execution_msbuild_started_by_system_process.json';
+import rule126 from './windows_execution_msbuild_started_renamed.json';
+import rule127 from './windows_execution_msbuild_started_unusal_process.json';
+import rule128 from './windows_execution_via_compiled_html_file.json';
+import rule129 from './windows_execution_via_net_com_assemblies.json';
+import rule130 from './windows_execution_via_trusted_developer_utilities.json';
+import rule131 from './windows_html_help_executable_program_connecting_to_the_internet.json';
+import rule132 from './windows_injection_msbuild.json';
+import rule133 from './windows_misc_lolbin_connecting_to_the_internet.json';
+import rule134 from './windows_modification_of_boot_config.json';
+import rule135 from './windows_msxsl_network.json';
+import rule136 from './windows_net_command_system_account.json';
+import rule137 from './windows_persistence_via_application_shimming.json';
+import rule138 from './windows_priv_escalation_via_accessibility_features.json';
+import rule139 from './windows_process_discovery_via_tasklist_command.json';
+import rule140 from './windows_rare_user_runas_event.json';
+import rule141 from './windows_rare_user_type10_remote_login.json';
+import rule142 from './windows_register_server_program_connecting_to_the_internet.json';
+import rule143 from './windows_suspicious_pdf_reader.json';
+import rule144 from './windows_uac_bypass_event_viewer.json';
+import rule145 from './windows_whoami_command_activity.json';
 export const rawRules = [
   rule1,
   rule2,
@@ -268,4 +283,19 @@ export const rawRules = [
   rule128,
   rule129,
   rule130,
+  rule131,
+  rule132,
+  rule133,
+  rule134,
+  rule135,
+  rule136,
+  rule137,
+  rule138,
+  rule139,
+  rule140,
+  rule141,
+  rule142,
+  rule143,
+  rule144,
+  rule145,
 ];

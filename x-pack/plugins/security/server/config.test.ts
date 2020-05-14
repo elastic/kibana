@@ -407,7 +407,7 @@ describe('config schema', () => {
               "basic1": Object {
                 "description": "Log in with Elasticsearch",
                 "enabled": true,
-                "icon": "logoElastic",
+                "icon": "logoElasticsearch",
                 "order": 0,
                 "showInSelector": true,
               },
@@ -467,7 +467,7 @@ describe('config schema', () => {
               "token1": Object {
                 "description": "Log in with Elasticsearch",
                 "enabled": true,
-                "icon": "logoElastic",
+                "icon": "logoElasticsearch",
                 "order": 0,
                 "showInSelector": true,
               },
@@ -746,14 +746,14 @@ describe('config schema', () => {
             "basic1": Object {
               "description": "Log in with Elasticsearch",
               "enabled": true,
-              "icon": "logoElastic",
+              "icon": "logoElasticsearch",
               "order": 0,
               "showInSelector": true,
             },
             "basic2": Object {
               "description": "Log in with Elasticsearch",
               "enabled": false,
-              "icon": "logoElastic",
+              "icon": "logoElasticsearch",
               "order": 1,
               "showInSelector": true,
             },

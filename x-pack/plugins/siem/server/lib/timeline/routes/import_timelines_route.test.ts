@@ -12,6 +12,7 @@ import {
   createMockConfig,
 } from '../../detection_engine/routes/__mocks__';
 import { TIMELINE_EXPORT_URL } from '../../../../common/constants';
+import { TimelineType } from '../../../../common/types/timeline';
 import { SecurityPluginSetup } from '../../../../../../plugins/security/server';
 
 import {
@@ -29,9 +30,11 @@ describe('import timelines', () => {
   let securitySetup: SecurityPluginSetup;
   let { context } = requestContextMock.createTools();
   let mockGetTimeline: jest.Mock;
+  let mockGetTemplateTimeline: jest.Mock;
   let mockPersistTimeline: jest.Mock;
   let mockPersistPinnedEventOnTimeline: jest.Mock;
   let mockPersistNote: jest.Mock;
+  let mockGetTupleDuplicateErrorsAndUniqueTimeline: jest.Mock;
   const newTimelineSavedObjectId = '79deb4c0-6bc1-11ea-9999-f5341fb7a189';
   const newTimelineVersion = '9999';
   beforeEach(() => {
@@ -51,9 +54,11 @@ describe('import timelines', () => {
     } as unknown) as SecurityPluginSetup;
 
     mockGetTimeline = jest.fn();
+    mockGetTemplateTimeline = jest.fn();
     mockPersistTimeline = jest.fn();
     mockPersistPinnedEventOnTimeline = jest.fn();
     mockPersistNote = jest.fn();
+    mockGetTupleDuplicateErrorsAndUniqueTimeline = jest.fn();
 
     jest.doMock('../create_timelines_stream_from_ndjson', () => {
       return {
@@ -71,9 +76,9 @@ describe('import timelines', () => {
       const originalModule = jest.requireActual('./utils/import_timelines');
       return {
         ...originalModule,
-        getTupleDuplicateErrorsAndUniqueTimeline: jest
-          .fn()
-          .mockReturnValue([mockDuplicateIdErrors, mockUniqueParsedObjects]),
+        getTupleDuplicateErrorsAndUniqueTimeline: mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue(
+          [mockDuplicateIdErrors, mockUniqueParsedObjects]
+        ),
       };
     });
   });
@@ -83,6 +88,7 @@ describe('import timelines', () => {
       jest.doMock('../saved_object', () => {
         return {
           getTimeline: mockGetTimeline.mockReturnValue(null),
+          getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue(null),
           persistTimeline: mockPersistTimeline.mockReturnValue({
             timeline: { savedObjectId: newTimelineSavedObjectId, version: newTimelineVersion },
           }),
@@ -130,10 +136,23 @@ describe('import timelines', () => {
       expect(mockPersistTimeline.mock.calls[0][2]).toBeNull();
     });
 
-    test('should Create a new timeline savedObject witn given timeline', async () => {
+    test('should Create a new timeline savedObject with given timeline', async () => {
       const mockRequest = getImportTimelinesRequest();
       await server.inject(mockRequest, context);
       expect(mockPersistTimeline.mock.calls[0][3]).toEqual(mockParsedTimelineObject);
+    });
+
+    test('should Create a new timeline savedObject with given draft timeline', async () => {
+      mockGetTupleDuplicateErrorsAndUniqueTimeline.mockReturnValue([
+        mockDuplicateIdErrors,
+        [{ ...mockUniqueParsedObjects[0], timelineType: TimelineType.draft }],
+      ]);
+      const mockRequest = getImportTimelinesRequest();
+      await server.inject(mockRequest, context);
+      expect(mockPersistTimeline.mock.calls[0][3]).toEqual({
+        ...mockParsedTimelineObject,
+        timelineType: TimelineType.default,
+      });
     });
 
     test('should Create new pinned events', async () => {
@@ -212,11 +231,12 @@ describe('import timelines', () => {
     });
   });
 
-  describe('Import a timeline already exist but overwrite is not allowed', () => {
+  describe('Import a timeline already exist', () => {
     beforeEach(() => {
       jest.doMock('../saved_object', () => {
         return {
           getTimeline: mockGetTimeline.mockReturnValue(mockGetTimelineValue),
+          getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue(null),
           persistTimeline: mockPersistTimeline,
         };
       });

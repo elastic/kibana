@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../plugins/ml/common/constants/states';
+import { Job } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 import { USER } from '../../../../functional/services/machine_learning/security_common';
 
 const COMMON_HEADERS = {
@@ -23,7 +24,8 @@ export default ({ getService }: FtrProviderContext) => {
 
   const testDataListPositive = [
     {
-      testTitleSuffix: 'for sample logs dataset with prefix and startDatafeed false',
+      testTitleSuffix:
+        'for sample logs dataset with prefix, startDatafeed false and estimateModelMemory false',
       sourceDataArchive: 'ml/sample_logs',
       indexPattern: { name: 'kibana_sample_data_logs', timeField: '@timestamp' },
       module: 'sample_data_weblogs',
@@ -32,6 +34,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf1_',
         indexPatternName: 'kibana_sample_data_logs',
         startDatafeed: false,
+        estimateModelMemory: false,
       },
       expected: {
         responseCode: 200,
@@ -40,16 +43,55 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf1_low_request_rate',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '10mb',
           },
           {
             jobId: 'pf1_response_code_rates',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '10mb',
           },
           {
             jobId: 'pf1_url_scanning',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '10mb',
+          },
+        ],
+      },
+    },
+    {
+      testTitleSuffix:
+        'for sample logs dataset with prefix, startDatafeed false and estimateModelMemory true',
+      sourceDataArchive: 'ml/sample_logs',
+      indexPattern: { name: 'kibana_sample_data_logs', timeField: '@timestamp' },
+      module: 'sample_data_weblogs',
+      user: USER.ML_POWERUSER,
+      requestBody: {
+        prefix: 'pf2_',
+        indexPatternName: 'kibana_sample_data_logs',
+        startDatafeed: false,
+      },
+      expected: {
+        responseCode: 200,
+        jobs: [
+          {
+            jobId: 'pf2_low_request_rate',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf2_response_code_rates',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf2_url_scanning',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '16mb',
           },
         ],
       },
@@ -197,6 +239,36 @@ export default ({ getService }: FtrProviderContext) => {
             await ml.api.waitForJobState(job.jobId, job.jobState);
             await ml.api.waitForDatafeedState(datafeedId, job.datafeedState);
           }
+
+          // compare model memory limits for created jobs
+          const expectedModelMemoryLimits = testData.expected.jobs
+            .map(j => ({
+              id: j.jobId,
+              modelMemoryLimit: j.modelMemoryLimit,
+            }))
+            .sort(compareById);
+
+          const {
+            body: { jobs },
+          }: {
+            body: {
+              jobs: Job[];
+            };
+          } = await ml.api.getAnomalyDetectionJob(testData.expected.jobs.map(j => j.jobId).join());
+
+          const actualModelMemoryLimits = jobs
+            .map(j => ({
+              id: j.job_id,
+              modelMemoryLimit: j.analysis_limits!.model_memory_limit,
+            }))
+            .sort(compareById);
+
+          expect(actualModelMemoryLimits).to.eql(
+            expectedModelMemoryLimits,
+            `Expected job model memory limits '${JSON.stringify(
+              expectedModelMemoryLimits
+            )}' (got '${JSON.stringify(actualModelMemoryLimits)}')`
+          );
         });
 
         // TODO in future updates: add creation validations for created saved objects

@@ -14,7 +14,7 @@ import {
   TableSuggestion,
   TableChangeType,
 } from '../types';
-import { State, SeriesType, XYState } from './types';
+import { State, SeriesType, XYState, visualizationTypes } from './types';
 import { getIconForSeries } from './state_helpers';
 
 const columnSortOrder = {
@@ -180,14 +180,14 @@ function getSuggestionsForLayer({
 
   // handles the simplest cases, acting as a chart switcher
   if (!currentState && changeType === 'unchanged') {
-    return [
-      {
-        ...buildSuggestion(options),
-        title: i18n.translate('xpack.lens.xySuggestions.barChartTitle', {
-          defaultMessage: 'Bar chart',
-        }),
-      },
-    ];
+    // Chart switcher needs to include every chart type
+    return visualizationTypes
+      .map(visType => ({
+        ...buildSuggestion({ ...options, seriesType: visType.id as SeriesType }),
+        title: visType.label,
+        hide: visType.id !== 'bar_stacked',
+      }))
+      .sort((a, b) => (a.state.preferredSeriesType === 'bar_stacked' ? -1 : 1));
   }
 
   const isSameState = currentState && changeType === 'unchanged';
@@ -248,7 +248,21 @@ function getSuggestionsForLayer({
     );
   }
 
-  return sameStateSuggestions;
+  // Combine all pre-built suggestions with hidden suggestions for remaining chart types
+  return sameStateSuggestions.concat(
+    visualizationTypes
+      .filter(visType => {
+        return !sameStateSuggestions.find(
+          suggestion => suggestion.state.preferredSeriesType === visType.id
+        );
+      })
+      .map(visType => {
+        return {
+          ...buildSuggestion({ ...options, seriesType: visType.id as SeriesType }),
+          hide: true,
+        };
+      })
+  );
 }
 
 function toggleStackSeriesType(oldSeriesType: SeriesType) {

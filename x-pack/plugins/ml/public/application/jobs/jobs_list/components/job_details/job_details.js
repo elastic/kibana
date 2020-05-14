@@ -60,6 +60,7 @@ export class JobDetails extends Component {
         datafeed,
         counts,
         modelSizeStats,
+        jobTimingStats,
         datafeedTimingStats,
       } = extractJobDetails(job);
 
@@ -102,7 +103,7 @@ export class JobDetails extends Component {
           content: (
             <JobDetailsPane
               data-test-subj="mlJobDetails-counts"
-              sections={[counts, modelSizeStats]}
+              sections={[counts, modelSizeStats, jobTimingStats]}
             />
           ),
         },

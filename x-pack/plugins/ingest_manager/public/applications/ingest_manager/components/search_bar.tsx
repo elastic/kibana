@@ -8,6 +8,7 @@ import React, { useState, useEffect } from 'react';
 import { IFieldType } from 'src/plugins/data/public';
 // @ts-ignore
 import { EuiSuggest, EuiSuggestItemProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useDebounce, useStartDeps } from '../hooks';
 import { INDEX_NAME, AGENT_SAVED_OBJECT_TYPE } from '../constants';
 
@@ -30,9 +31,15 @@ interface Props {
   value: string;
   fieldPrefix: string;
   onChange: (newValue: string) => void;
+  placeholder?: string;
 }
 
-export const SearchBar: React.FunctionComponent<Props> = ({ value, fieldPrefix, onChange }) => {
+export const SearchBar: React.FunctionComponent<Props> = ({
+  value,
+  fieldPrefix,
+  onChange,
+  placeholder,
+}) => {
   const { suggestions } = useSuggestions(fieldPrefix, value);
 
   // TODO fix type when correctly typed in EUI
@@ -52,7 +59,12 @@ export const SearchBar: React.FunctionComponent<Props> = ({ value, fieldPrefix, 
       // @ts-ignore
       value={value}
       icon={'search'}
-      placeholder={'Search'}
+      placeholder={
+        placeholder ||
+        i18n.translate('xpack.ingestManager.defaultSearchPlaceholderText', {
+          defaultMessage: 'Search',
+        })
+      }
       onInputChange={onChangeSearch}
       onItemClick={onAutocompleteClick}
       suggestions={suggestions.map(suggestion => {

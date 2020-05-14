@@ -100,9 +100,9 @@ export default function({ getService, getPageObjects }) {
         const data = await PageObjects.visChart.getTableVisData();
         expect(data.trim().split('\n')).to.be.eql([
           '≥ 0B and < 1,000B',
-          '1,351 64.7%',
+          '1,351 64.703%',
           '≥ 1,000B and < 1.953KB',
-          '737 35.3%',
+          '737 35.297%',
         ]);
       }
 

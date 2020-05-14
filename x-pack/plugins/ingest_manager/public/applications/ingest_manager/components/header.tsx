@@ -64,6 +64,7 @@ export const Header: React.FC<HeaderProps> = ({
       <EuiFlexGroup>
         {tabs ? (
           <EuiFlexItem>
+            <EuiSpacer size="s" />
             <Tabs>
               {tabs.map(props => (
                 <EuiTab {...props} key={props.id}>

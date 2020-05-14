@@ -274,10 +274,15 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await this.assertAggregationEntryExists(index, expectedLabel);
     },
 
-    async assertAdvancedPivotEditorContent(expectedValue: Record<string, any>) {
+    async assertAdvancedPivotEditorContent(expectedValue: string[]) {
       const advancedEditorString = await aceEditor.getValue('transformAdvancedPivotEditor');
-      const advancedEditorValue = JSON.parse(advancedEditorString);
-      expect(advancedEditorValue).to.eql(expectedValue);
+      // Not all lines may be visible in the editor and thus aceEditor may not return all lines.
+      // This means we might not get back valid JSON so we only test against the first few lines
+      // and see if the string matches.
+
+      // const advancedEditorValue = JSON.parse(advancedEditorString);
+      // expect(advancedEditorValue).to.eql(expectedValue);
+      expect(advancedEditorString.split('\n').splice(0, 3)).to.eql(expectedValue);
     },
 
     async assertAdvancedPivotEditorSwitchExists() {

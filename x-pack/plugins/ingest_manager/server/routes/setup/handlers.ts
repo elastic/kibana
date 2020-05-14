@@ -4,38 +4,61 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { RequestHandler } from 'src/core/server';
-import { outputService } from '../../services';
-import { CreateFleetSetupResponse } from '../../../common';
+import { TypeOf } from '@kbn/config-schema';
+import { outputService, appContextService } from '../../services';
+import { GetFleetStatusResponse } from '../../../common';
 import { setupIngestManager, setupFleet } from '../../services/setup';
+import { PostFleetSetupRequestSchema } from '../../types';
 
-export const getFleetSetupHandler: RequestHandler = async (context, request, response) => {
+export const getFleetStatusHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
-  const successBody: CreateFleetSetupResponse = { isInitialized: true };
-  const failureBody: CreateFleetSetupResponse = { isInitialized: false };
   try {
-    const adminUser = await outputService.getAdminUser(soClient);
-    if (adminUser) {
-      return response.ok({
-        body: successBody,
-      });
-    } else {
-      return response.ok({
-        body: failureBody,
-      });
+    const isAdminUserSetup = (await outputService.getAdminUser(soClient)) !== null;
+    const isApiKeysEnabled = await appContextService.getSecurity().authc.areAPIKeysEnabled();
+    const isTLSEnabled = appContextService.getHttpSetup().getServerInfo().protocol === 'https';
+    const isProductionMode = appContextService.getIsProductionMode();
+    const isCloud = appContextService.getCloud()?.isCloudEnabled ?? false;
+    const isTLSCheckDisabled = appContextService.getConfig()?.fleet?.tlsCheckDisabled ?? false;
+
+    const missingRequirements: GetFleetStatusResponse['missing_requirements'] = [];
+    if (!isAdminUserSetup) {
+      missingRequirements.push('fleet_admin_user');
     }
-  } catch (e) {
+    if (!isApiKeysEnabled) {
+      missingRequirements.push('api_keys');
+    }
+    if (!isTLSCheckDisabled && !isCloud && isProductionMode && !isTLSEnabled) {
+      missingRequirements.push('tls_required');
+    }
+
+    const body: GetFleetStatusResponse = {
+      isReady: missingRequirements.length === 0,
+      missing_requirements: missingRequirements,
+    };
+
     return response.ok({
-      body: failureBody,
+      body,
+    });
+  } catch (e) {
+    return response.customError({
+      statusCode: 500,
+      body: { message: e.message },
     });
   }
 };
 
-export const createFleetSetupHandler: RequestHandler = async (context, request, response) => {
+export const createFleetSetupHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof PostFleetSetupRequestSchema.body>
+> = async (context, request, response) => {
   try {
     const soClient = context.core.savedObjects.client;
     const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
     await setupIngestManager(soClient, callCluster);
-    await setupFleet(soClient, callCluster);
+    await setupFleet(soClient, callCluster, {
+      forceRecreate: request.body?.forceRecreate ?? false,
+    });
 
     return response.ok({
       body: { isInitialized: true },

@@ -41,6 +41,12 @@ export const MetricsExplorerAggregationPicker = ({ options, onChange }: Props) =
     ['rate']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.rate', {
       defaultMessage: 'Rate',
     }),
+    ['p95']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.p95', {
+      defaultMessage: '95th Percentile',
+    }),
+    ['p99']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.p99', {
+      defaultMessage: '99th Percentile',
+    }),
     ['count']: i18n.translate('xpack.infra.metricsExplorer.aggregationLables.count', {
       defaultMessage: 'Document count',
     }),

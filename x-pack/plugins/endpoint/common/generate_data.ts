@@ -12,9 +12,9 @@ import {
   Host,
   HostMetadata,
   HostOS,
-  PolicyData,
   HostPolicyResponse,
   HostPolicyResponseActionStatus,
+  PolicyData,
 } from './types';
 import { factory as policyFactory } from './models/policy_config';
 
@@ -134,6 +134,13 @@ export class EndpointDocGenerator {
    */
   public updateHostData() {
     this.commonInfo.host.ip = this.randomArray(3, () => this.randomIP());
+  }
+
+  /**
+   * Creates new random policy id for the host to simulate new policy application
+   */
+  public updatePolicyId() {
+    this.commonInfo.endpoint.policy.id = this.randomChoice(POLICIES).id;
   }
 
   private createHostData(): HostInfo {
@@ -331,13 +338,17 @@ export class EndpointDocGenerator {
     percentNodesWithRelated?: number,
     percentChildrenTerminated?: number
   ) {
-    const ancestry = this.createAlertEventAncestry(alertAncestors);
+    const ancestry = this.createAlertEventAncestry(
+      alertAncestors,
+      relatedEventsPerNode,
+      percentNodesWithRelated
+    );
     for (let i = 0; i < ancestry.length; i++) {
       yield ancestry[i];
     }
-    // ancestry will always have at least 2 elements, and the second to last element will be the process associated with the alert
+    // ancestry will always have at least 2 elements, and the last element will be the alert
     yield* this.descendantsTreeGenerator(
-      ancestry[ancestry.length - 2],
+      ancestry[ancestry.length - 1],
       childGenerations,
       maxChildrenPerNode,
       relatedEventsPerNode,
@@ -350,18 +361,44 @@ export class EndpointDocGenerator {
    * Creates an alert event and associated process ancestry. The alert event will always be the last event in the return array.
    * @param alertAncestors - number of ancestor generations to create
    */
-  public createAlertEventAncestry(alertAncestors = 3): Event[] {
+  public createAlertEventAncestry(
+    alertAncestors = 3,
+    relatedEventsPerNode = 5,
+    pctWithRelated = 30
+  ): Event[] {
     const events = [];
     const startDate = new Date().getTime();
     const root = this.generateEvent({ timestamp: startDate + 1000 });
     events.push(root);
     let ancestor = root;
+    // generate related alerts for root
+    const processDuration: number = 6 * 3600;
+    if (this.randomN(100) < pctWithRelated) {
+      for (const relatedEvent of this.relatedEventsGenerator(
+        ancestor,
+        relatedEventsPerNode,
+        processDuration
+      )) {
+        events.push(relatedEvent);
+      }
+    }
     for (let i = 0; i < alertAncestors; i++) {
       ancestor = this.generateEvent({
         timestamp: startDate + 1000 * (i + 1),
         parentEntityID: ancestor.process.entity_id,
       });
       events.push(ancestor);
+
+      // generate related alerts for ancestor
+      if (this.randomN(100) < pctWithRelated) {
+        for (const relatedEvent of this.relatedEventsGenerator(
+          ancestor,
+          relatedEventsPerNode,
+          processDuration
+        )) {
+          events.push(relatedEvent);
+        }
+      }
     }
     events.push(
       this.generateAlert(
@@ -466,10 +503,15 @@ export class EndpointDocGenerator {
    * Generates an Ingest `datasource` that includes the Endpoint Policy data
    */
   public generatePolicyDatasource(): PolicyData {
+    const created = new Date(Date.now() - 8.64e7).toISOString(); // 24h ago
     return {
       id: this.seededUUIDv4(),
       name: 'Endpoint Policy',
       description: 'Policy to protect the worlds data',
+      created_at: created,
+      created_by: 'elastic',
+      updated_at: new Date().toISOString(),
+      updated_by: 'elastic',
       config_id: this.seededUUIDv4(),
       enabled: true,
       output_id: '',
@@ -498,105 +540,195 @@ export class EndpointDocGenerator {
   /**
    * Generates a Host Policy response message
    */
-  generatePolicyResponse(): HostPolicyResponse {
+  public generatePolicyResponse(
+    ts = new Date().getTime(),
+    allStatus?: HostPolicyResponseActionStatus
+  ): HostPolicyResponse {
+    const policyVersion = this.seededUUIDv4();
+    const status = () => {
+      return allStatus || this.randomHostPolicyResponseActionStatus();
+    };
     return {
-      '@timestamp': new Date().toISOString(),
+      '@timestamp': ts,
+      agent: {
+        id: this.commonInfo.agent.id,
+        version: '1.0.0-local.20200416.0',
+      },
       elastic: {
         agent: {
-          id: 'c2a9093e-e289-4c0a-aa44-8c32a414fa7a',
+          id: this.commonInfo.elastic.agent.id,
         },
       },
       ecs: {
-        version: '1.0.0',
+        version: '1.4.0',
       },
-      event: {
-        created: '2015-01-01T12:10:30Z',
-        kind: 'policy_response',
-      },
-      agent: {
-        version: '6.0.0-rc2',
-        id: '8a4f500d',
+      host: {
+        id: this.commonInfo.host.id,
       },
       endpoint: {
-        artifacts: {
-          'global-manifest': {
-            version: '1.2.3',
-            sha256: 'abcdef',
-          },
-          'endpointpe-v4-windows': {
-            version: '1.2.3',
-            sha256: 'abcdef',
-          },
-          'user-whitelist-windows': {
-            version: '1.2.3',
-            sha256: 'abcdef',
-          },
-          'global-whitelist-windows': {
-            version: '1.2.3',
-            sha256: 'abcdef',
-          },
-        },
         policy: {
           applied: {
-            version: '1.0.0',
-            id: '17d4b81d-9940-4b64-9de5-3e03ef1fb5cf',
-            status: HostPolicyResponseActionStatus.success,
+            actions: [
+              {
+                name: 'configure_elasticsearch_connection',
+                message: 'elasticsearch comes configured successfully',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              {
+                name: 'configure_kernel',
+                message: 'Failed to configure kernel',
+                status: HostPolicyResponseActionStatus.failure,
+              },
+              {
+                name: 'configure_logging',
+                message: 'Successfully configured logging',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              {
+                name: 'configure_malware',
+                message: 'Unexpected error configuring malware',
+                status: HostPolicyResponseActionStatus.failure,
+              },
+              {
+                name: 'connect_kernel',
+                message: 'Successfully initialized minifilter',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              {
+                name: 'detect_file_open_events',
+                message: 'Successfully stopped file open event reporting',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              {
+                name: 'detect_file_write_events',
+                message: 'Failed to stop file write event reporting',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              {
+                name: 'detect_image_load_events',
+                message: 'Successfully started image load event reporting',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              {
+                name: 'detect_process_events',
+                message: 'Successfully started process event reporting',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              {
+                name: 'download_global_artifacts',
+                message: 'Failed to download EXE model',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              {
+                name: 'load_config',
+                message: 'Successfully parsed configuration',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              {
+                name: 'load_malware_mode',
+                message: 'Error deserializing EXE model; no valid malware model installed',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              {
+                name: 'read_elasticsearch_config',
+                message: 'Successfully read Elasticsearch configuration',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              {
+                name: 'read_events_config',
+                message: 'Successfully read events configuration',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              {
+                name: 'read_kernel_config',
+                message: 'Succesfully read kernel configuration',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              {
+                name: 'read_logging_config',
+                message: 'Field (logging.debugview) not found in config',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              {
+                name: 'read_malware_config',
+                message: 'Successfully read malware detect configuration',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              {
+                name: 'workflow',
+                message: 'Failed to apply a portion of the configuration (kernel)',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              {
+                name: 'download_model',
+                message: 'Failed to apply a portion of the configuration (kernel)',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              {
+                name: 'ingest_events_config',
+                message: 'Failed to apply a portion of the configuration (kernel)',
+                status: HostPolicyResponseActionStatus.success,
+              },
+            ],
+            id: this.commonInfo.endpoint.policy.id,
+            policy: {
+              id: this.commonInfo.endpoint.policy.id,
+              version: policyVersion,
+            },
             response: {
               configurations: {
-                malware: {
-                  status: HostPolicyResponseActionStatus.success,
-                  concerned_actions: ['download_model', 'workflow', 'a_custom_future_action'],
-                },
                 events: {
-                  status: HostPolicyResponseActionStatus.success,
-                  concerned_actions: ['ingest_events_config', 'workflow'],
+                  concerned_actions: ['download_model'],
+                  status: status(),
                 },
                 logging: {
-                  status: HostPolicyResponseActionStatus.success,
-                  concerned_actions: ['configure_elasticsearch_connection'],
+                  concerned_actions: this.randomHostPolicyResponseActionNames(),
+                  status: status(),
+                },
+                malware: {
+                  concerned_actions: this.randomHostPolicyResponseActionNames(),
+                  status: status(),
                 },
                 streaming: {
-                  status: HostPolicyResponseActionStatus.success,
-                  concerned_actions: [
-                    'detect_file_open_events',
-                    'download_global_artifacts',
-                    'a_custom_future_action',
-                  ],
-                },
-              },
-              actions: {
-                download_model: {
-                  status: HostPolicyResponseActionStatus.success,
-                  message: 'model downloaded',
-                },
-                ingest_events_config: {
-                  status: HostPolicyResponseActionStatus.success,
-                  message: 'no action taken',
-                },
-                workflow: {
-                  status: HostPolicyResponseActionStatus.success,
-                  message: 'the flow worked well',
-                },
-                a_custom_future_action: {
-                  status: HostPolicyResponseActionStatus.success,
-                  message: 'future message',
-                },
-                configure_elasticsearch_connection: {
-                  status: HostPolicyResponseActionStatus.success,
-                  message: 'some message',
-                },
-                detect_file_open_events: {
-                  status: HostPolicyResponseActionStatus.success,
-                  message: 'some message',
-                },
-                download_global_artifacts: {
-                  status: HostPolicyResponseActionStatus.success,
-                  message: 'some message',
+                  concerned_actions: this.randomHostPolicyResponseActionNames(),
+                  status: status(),
                 },
               },
             },
+            artifacts: {
+              global: {
+                version: '1.4.0',
+                identifiers: [
+                  {
+                    name: 'endpointpe-model',
+                    sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+                  },
+                ],
+              },
+              user: {
+                version: '1.4.0',
+                identifiers: [
+                  {
+                    name: 'user-model',
+                    sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+                  },
+                ],
+              },
+            },
+            status: this.randomHostPolicyResponseActionStatus(),
+            version: policyVersion,
           },
         },
+      },
+      event: {
+        created: ts,
+        id: this.seededUUIDv4(),
+        kind: 'state',
+        category: 'host',
+        type: 'change',
+        module: 'endpoint',
+        action: 'endpoint_policy_response',
+        dataset: 'endpoint.policy',
       },
     };
   }
@@ -643,6 +775,34 @@ export class EndpointDocGenerator {
 
   private seededUUIDv4(): string {
     return uuid.v4({ random: [...this.randomNGenerator(255, 16)] });
+  }
+
+  private randomHostPolicyResponseActionNames(): string[] {
+    return this.randomArray(this.randomN(8), () =>
+      this.randomChoice([
+        'load_config',
+        'workflow',
+        'download_global_artifacts',
+        'configure_malware',
+        'read_malware_config',
+        'load_malware_model',
+        'read_kernel_config',
+        'configure_kernel',
+        'detect_process_events',
+        'detect_file_write_events',
+        'detect_file_open_events',
+        'detect_image_load_events',
+        'connect_kernel',
+      ])
+    );
+  }
+
+  private randomHostPolicyResponseActionStatus(): HostPolicyResponseActionStatus {
+    return this.randomChoice([
+      HostPolicyResponseActionStatus.failure,
+      HostPolicyResponseActionStatus.success,
+      HostPolicyResponseActionStatus.warning,
+    ]);
   }
 }
 

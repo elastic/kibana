@@ -60,7 +60,7 @@ class AgentConfigService {
     await soClient.update<AgentConfig>(SAVED_OBJECT_TYPE, id, {
       ...agentConfig,
       revision: oldAgentConfig.revision + 1,
-      updated_on: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
       updated_by: user ? user.username : 'system',
     });
 
@@ -99,7 +99,7 @@ class AgentConfigService {
       {
         ...agentConfig,
         revision: 1,
-        updated_on: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
         updated_by: options?.user?.username || 'system',
       } as AgentConfig,
       options
@@ -314,10 +314,12 @@ class AgentConfigService {
     if (!config) {
       return null;
     }
-    const defaultOutput = await outputService.get(
-      soClient,
-      await outputService.getDefaultOutputId(soClient)
-    );
+
+    const defaultOutputId = await outputService.getDefaultOutputId(soClient);
+    if (!defaultOutputId) {
+      throw new Error('Default output is not setup');
+    }
+    const defaultOutput = await outputService.get(soClient, defaultOutputId);
 
     const agentConfig: FullAgentConfig = {
       id: config.id,

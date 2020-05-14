@@ -10,7 +10,59 @@ import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE
 } from '../../../../common/elasticsearch_fieldnames';
+import { severity } from '../../../../common/ml_job_constants';
 import { defaultIcon, iconForNode } from './icons';
+
+export const getSeverityColor = (nodeSeverity: string) => {
+  switch (nodeSeverity) {
+    case severity.warning:
+      return theme.euiColorVis0;
+    case severity.minor:
+    case severity.major:
+      return theme.euiColorVis5;
+    case severity.critical:
+      return theme.euiColorVis9;
+    default:
+      return;
+  }
+};
+
+const getBorderColor = (el: cytoscape.NodeSingular) => {
+  const nodeSeverity = el.data('severity');
+  const severityColor = getSeverityColor(nodeSeverity);
+  if (severityColor) {
+    return severityColor;
+  }
+  if (el.hasClass('primary') || el.selected()) {
+    return theme.euiColorPrimary;
+  } else {
+    return theme.euiColorMediumShade;
+  }
+};
+
+const getBorderStyle: cytoscape.Css.MapperFunction<
+  cytoscape.NodeSingular,
+  cytoscape.Css.LineStyle
+> = (el: cytoscape.NodeSingular) => {
+  const nodeSeverity = el.data('severity');
+  if (nodeSeverity === severity.critical) {
+    return 'double';
+  } else {
+    return 'solid';
+  }
+};
+
+const getBorderWidth = (el: cytoscape.NodeSingular) => {
+  const nodeSeverity = el.data('severity');
+
+  if (nodeSeverity === severity.minor || nodeSeverity === severity.major) {
+    return 4;
+  } else if (nodeSeverity === severity.critical) {
+    return 12;
+  } else {
+    return 2;
+  }
+};
 
 // IE 11 does not properly load some SVGs or draw certain shapes. This causes
 // a runtime error and the map fails work at all. We would prefer to do some
@@ -55,11 +107,9 @@ const style: cytoscape.Stylesheet[] = [
         isService(el) ? '60%' : '40%',
       'background-width': (el: cytoscape.NodeSingular) =>
         isService(el) ? '60%' : '40%',
-      'border-color': (el: cytoscape.NodeSingular) =>
-        el.hasClass('primary') || el.selected()
-          ? theme.euiColorPrimary
-          : theme.euiColorMediumShade,
-      'border-width': 2,
+      'border-color': getBorderColor,
+      'border-style': getBorderStyle,
+      'border-width': getBorderWidth,
       color: (el: cytoscape.NodeSingular) =>
         el.hasClass('primary') || el.selected()
           ? theme.euiColorPrimaryText
@@ -149,7 +199,7 @@ const style: cytoscape.Stylesheet[] = [
   {
     selector: 'node.hover',
     style: {
-      'border-width': 2
+      'border-width': getBorderWidth
     }
   },
   {

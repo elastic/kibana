@@ -16,7 +16,7 @@ import moment from 'moment-timezone';
 import { isTimeSeriesViewJob } from '../../../../common/util/job_utils';
 import { parseInterval } from '../../../../common/util/parse_interval';
 
-import { TimeBuckets, getBoundsRoundedToInterval } from '../../util/time_buckets';
+import { getBoundsRoundedToInterval, getTimeBucketsFromCache } from '../../util/time_buckets';
 
 import { CHARTS_POINT_TARGET, TIME_FIELD_NAME } from '../timeseriesexplorer_constants';
 
@@ -154,6 +154,12 @@ export function processDataForFocusAnomalies(
         chartPoint.function = record.function;
 
         if (_.has(record, 'actual')) {
+          // If cannot match chart point for anomaly time
+          // substitute the value with the record's actual so it won't plot as null/0
+          if (chartPoint.value === null) {
+            chartPoint.value = record.actual;
+          }
+
           chartPoint.actual = record.actual;
           chartPoint.typical = record.typical;
         } else {
@@ -166,6 +172,10 @@ export function processDataForFocusAnomalies(
               const cause = _.first(record.causes);
               chartPoint.actual = cause.actual;
               chartPoint.typical = cause.typical;
+              // substitute the value with the record's actual so it won't plot as null/0
+              if (chartPoint.value === null) {
+                chartPoint.value = cause.actual;
+              }
             }
           }
         }
@@ -283,7 +293,7 @@ export function calculateAggregationInterval(bounds, bucketsTarget, jobs, select
   const barTarget = bucketsTarget !== undefined ? bucketsTarget : 100;
   // Use a maxBars of 10% greater than the target.
   const maxBars = Math.floor(1.1 * barTarget);
-  const buckets = new TimeBuckets();
+  const buckets = getTimeBucketsFromCache();
   buckets.setInterval('auto');
   buckets.setBounds(bounds);
   buckets.setBarTarget(Math.floor(barTarget));
@@ -378,7 +388,7 @@ export function getAutoZoomDuration(jobs, selectedJob) {
 
   // Use a maxBars of 10% greater than the target.
   const maxBars = Math.floor(1.1 * CHARTS_POINT_TARGET);
-  const buckets = new TimeBuckets();
+  const buckets = getTimeBucketsFromCache();
   buckets.setInterval('auto');
   buckets.setBarTarget(Math.floor(CHARTS_POINT_TARGET));
   buckets.setMaxBars(maxBars);

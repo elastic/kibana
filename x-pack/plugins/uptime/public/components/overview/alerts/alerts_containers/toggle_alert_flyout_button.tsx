@@ -6,14 +6,26 @@
 
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { setAlertFlyoutVisible } from '../../../../state/actions';
+import { setAlertFlyoutType, setAlertFlyoutVisible } from '../../../../state/actions';
 import { ToggleAlertFlyoutButtonComponent } from '../index';
 
-export const ToggleAlertFlyoutButton = () => {
+export interface ToggleAlertFlyoutButtonProps {
+  alertOptions?: string[];
+}
+
+export const ToggleAlertFlyoutButton: React.FC<ToggleAlertFlyoutButtonProps> = props => {
   const dispatch = useDispatch();
   return (
     <ToggleAlertFlyoutButtonComponent
-      setAlertFlyoutVisible={(value: boolean) => dispatch(setAlertFlyoutVisible(value))}
+      {...props}
+      setAlertFlyoutVisible={(value: boolean | string) => {
+        if (typeof value === 'string') {
+          dispatch(setAlertFlyoutType(value));
+          dispatch(setAlertFlyoutVisible(true));
+        } else {
+          dispatch(setAlertFlyoutVisible(value));
+        }
+      }}
     />
   );
 };

@@ -5,9 +5,25 @@
  */
 import React from 'react';
 import { LinkPreview } from '../CustomLinkFlyout/LinkPreview';
-import { render, getNodeText, getByTestId, act } from '@testing-library/react';
+import {
+  render,
+  getNodeText,
+  getByTestId,
+  act,
+  wait
+} from '@testing-library/react';
+import * as apmApi from '../../../../../../services/rest/createCallApmApi';
 
 describe('LinkPreview', () => {
+  let callApmApiSpy: jasmine.Spy;
+  beforeAll(() => {
+    callApmApiSpy = spyOn(apmApi, 'callApmApi').and.returnValue({
+      transaction: { id: 'foo' }
+    });
+  });
+  afterAll(() => {
+    jest.clearAllMocks();
+  });
   const getElementValue = (container: HTMLElement, id: string) =>
     getNodeText(
       ((getByTestId(container, id) as HTMLDivElement)
@@ -42,7 +58,7 @@ describe('LinkPreview', () => {
     });
   });
 
-  it('shows warning when couldnt replace context variables', () => {
+  it("shows warning when couldn't replace context variables", () => {
     act(() => {
       const { container } = render(
         <LinkPreview
@@ -57,5 +73,19 @@ describe('LinkPreview', () => {
       ).toEqual('https://baz.co?service.name={{invalid}');
       expect(getByTestId(container, 'preview-warning')).toBeInTheDocument();
     });
+  });
+  it('replaces url with transaction id', async () => {
+    const { container } = render(
+      <LinkPreview
+        label="foo"
+        url="https://baz.co?transaction={{transaction.id}}"
+        filters={[{ key: '', value: '' }]}
+      />
+    );
+    await wait(() => expect(callApmApiSpy).toHaveBeenCalled());
+    expect(getElementValue(container, 'preview-label')).toEqual('foo');
+    expect(
+      (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
+    ).toEqual('https://baz.co?transaction=foo');
   });
 });

@@ -11,7 +11,7 @@ import {
   httpServerMock,
   loggingServiceMock,
 } from 'src/core/server/mocks';
-import { CANVAS_TYPE } from '../../../../../legacy/plugins/canvas/common/lib/constants';
+import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeCreateWorkpadRoute } from './create';
 import {
   IRouter,

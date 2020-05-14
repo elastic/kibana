@@ -8,8 +8,6 @@
 /x-pack/plugins/graph/ @elastic/kibana-app
 /src/legacy/server/url_shortening/ @elastic/kibana-app
 /src/legacy/server/sample_data/ @elastic/kibana-app
-/src/legacy/core_plugins/kibana/public/dashboard/ @elastic/kibana-app
-/src/legacy/core_plugins/kibana/public/discover/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/local_application_service/ @elastic/kibana-app
 /src/legacy/core_plugins/kibana/public/dev_tools/ @elastic/kibana-app
 /src/plugins/dashboard/ @elastic/kibana-app
@@ -68,7 +66,7 @@
 /x-pack/plugins/drilldowns/ @elastic/kibana-app-arch
 
 # APM
-/x-pack/legacy/plugins/apm/  @elastic/apm-ui
+/x-pack/plugins/apm/  @elastic/apm-ui
 /x-pack/plugins/apm/  @elastic/apm-ui
 /x-pack/test/functional/apps/apm/  @elastic/apm-ui
 /src/legacy/core_plugins/apm_oss/  @elastic/apm-ui
@@ -79,7 +77,7 @@
 /x-pack/legacy/plugins/beats_management/  @elastic/beats
 
 # Canvas
-/x-pack/legacy/plugins/canvas/  @elastic/kibana-canvas
+/x-pack/plugins/canvas/  @elastic/kibana-canvas
 
 # Observability UIs
 /x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui
@@ -130,6 +128,9 @@
 /src/legacy/server/utils/ @elastic/kibana-operations
 /src/legacy/server/warnings/ @elastic/kibana-operations
 
+# Quality Assurance
+/src/dev/code_coverage @elastic/kibana-qa
+
 # Platform
 /src/core/  @elastic/kibana-platform
 /config/kibana.yml @elastic/kibana-platform
@@ -163,7 +164,8 @@
 
 # Pulse
 /packages/kbn-analytics/ @elastic/pulse
-/src/legacy/core_plugins/ui_metric/ @elastic/pulse
+/src/plugins/kibana_usage_collection/ @elastic/pulse
+/src/plugins/newsfeed/ @elastic/pulse
 /src/plugins/telemetry/ @elastic/pulse
 /src/plugins/telemetry_collection_manager/ @elastic/pulse
 /src/plugins/telemetry_management_section/ @elastic/pulse

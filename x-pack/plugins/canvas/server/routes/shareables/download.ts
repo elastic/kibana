@@ -5,9 +5,9 @@
  */
 
 import { readFileSync } from 'fs';
-import { SHAREABLE_RUNTIME_FILE } from '../../../../../legacy/plugins/canvas/shareable_runtime/constants';
+import { SHAREABLE_RUNTIME_FILE } from '../../../shareable_runtime/constants';
 import { RouteInitializerDeps } from '../';
-import { API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD } from '../../../../../legacy/plugins/canvas/common/lib/constants';
+import { API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD } from '../../../common/lib/constants';
 
 export function initializeDownloadShareableWorkpadRoute(deps: RouteInitializerDeps) {
   const { router } = deps;

@@ -12,6 +12,7 @@ export {
   AgentSOAttributes,
   AgentStatus,
   AgentType,
+  NewAgentEvent,
   AgentEvent,
   AgentEventSOAttributes,
   AgentAction,

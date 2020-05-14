@@ -25,7 +25,7 @@ export type Immutable<T> = T extends undefined | null | boolean | string | numbe
   ? ImmutableSet<M>
   : ImmutableObject<T>;
 
-type ImmutableArray<T> = ReadonlyArray<Immutable<T>>;
+export type ImmutableArray<T> = ReadonlyArray<Immutable<T>>;
 type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
 type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
 type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
@@ -611,52 +611,60 @@ export enum HostPolicyResponseActionStatus {
 }
 
 /**
- * The details of a given action
+ * The name of actions that can be applied during the processing of a policy
  */
-interface HostPolicyResponseActionDetails {
+type HostPolicyActionName =
+  | 'download_model'
+  | 'ingest_events_config'
+  | 'workflow'
+  | 'configure_elasticsearch_connection'
+  | 'configure_kernel'
+  | 'configure_logging'
+  | 'configure_malware'
+  | 'connect_kernel'
+  | 'detect_file_open_events'
+  | 'detect_file_write_events'
+  | 'detect_image_load_events'
+  | 'detect_process_events'
+  | 'download_global_artifacts'
+  | 'load_config'
+  | 'load_malware_model'
+  | 'read_elasticsearch_config'
+  | 'read_events_config'
+  | 'read_kernel_config'
+  | 'read_logging_config'
+  | 'read_malware_config'
+  | string;
+
+/**
+ * Host Policy Response Applied Action
+ */
+export interface HostPolicyResponseAppliedAction {
+  name: HostPolicyActionName;
   status: HostPolicyResponseActionStatus;
   message: string;
 }
 
-/**
- * A known list of possible Endpoint actions
- */
-interface HostPolicyResponseActions {
-  download_model: HostPolicyResponseActionDetails;
-  ingest_events_config: HostPolicyResponseActionDetails;
-  workflow: HostPolicyResponseActionDetails;
-  configure_elasticsearch_connection: HostPolicyResponseActionDetails;
-  configure_kernel: HostPolicyResponseActionDetails;
-  configure_logging: HostPolicyResponseActionDetails;
-  configure_malware: HostPolicyResponseActionDetails;
-  connect_kernel: HostPolicyResponseActionDetails;
-  detect_file_open_events: HostPolicyResponseActionDetails;
-  detect_file_write_events: HostPolicyResponseActionDetails;
-  detect_image_load_events: HostPolicyResponseActionDetails;
-  detect_process_events: HostPolicyResponseActionDetails;
-  download_global_artifacts: HostPolicyResponseActionDetails;
-  load_config: HostPolicyResponseActionDetails;
-  load_malware_model: HostPolicyResponseActionDetails;
-  read_elasticsearch_config: HostPolicyResponseActionDetails;
-  read_events_config: HostPolicyResponseActionDetails;
-  read_kernel_config: HostPolicyResponseActionDetails;
-  read_logging_config: HostPolicyResponseActionDetails;
-  read_malware_config: HostPolicyResponseActionDetails;
-  // The list of possible Actions will change rapidly, so the below entry will allow
-  // them without us defining them here statically
-  [key: string]: HostPolicyResponseActionDetails;
-}
+export type HostPolicyResponseConfiguration = HostPolicyResponse['endpoint']['policy']['applied']['response']['configurations'];
 
 interface HostPolicyResponseConfigurationStatus {
   status: HostPolicyResponseActionStatus;
-  concerned_actions: Array<keyof HostPolicyResponseActions>;
+  concerned_actions: HostPolicyActionName[];
+}
+
+/**
+ * Host Policy Response Applied Artifact
+ */
+interface HostPolicyResponseAppliedArtifact {
+  name: string;
+  sha256: string;
 }
 
 /**
  * Information about the applying of a policy to a given host
  */
 export interface HostPolicyResponse {
-  '@timestamp': string;
+  '@timestamp': number;
   elastic: {
     agent: {
       id: string;
@@ -665,21 +673,34 @@ export interface HostPolicyResponse {
   ecs: {
     version: string;
   };
+  host: {
+    id: string;
+  };
   event: {
-    created: string;
+    created: number;
     kind: string;
+    id: string;
+    category: string;
+    type: string;
+    module: string;
+    action: string;
+    dataset: string;
   };
   agent: {
     version: string;
     id: string;
   };
   endpoint: {
-    artifacts: {};
     policy: {
       applied: {
         version: string;
         id: string;
         status: HostPolicyResponseActionStatus;
+        actions: HostPolicyResponseAppliedAction[];
+        policy: {
+          id: string;
+          version: string;
+        };
         response: {
           configurations: {
             malware: HostPolicyResponseConfigurationStatus;
@@ -687,7 +708,16 @@ export interface HostPolicyResponse {
             logging: HostPolicyResponseConfigurationStatus;
             streaming: HostPolicyResponseConfigurationStatus;
           };
-          actions: Partial<HostPolicyResponseActions>;
+        };
+        artifacts: {
+          global: {
+            version: string;
+            identifiers: HostPolicyResponseAppliedArtifact[];
+          };
+          user: {
+            version: string;
+            identifiers: HostPolicyResponseAppliedArtifact[];
+          };
         };
       };
     };

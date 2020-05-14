@@ -80,23 +80,6 @@ export default function({ getService }: FtrProviderContext) {
 
               expectFixtureEql(apiResponse.body, 'snapshot');
             });
-
-            it('will fetch a monitor snapshot filtered by down status', async () => {
-              const statusFilter = 'down';
-              const apiResponse = await supertest.get(
-                `/api/uptime/snapshot/count?dateRangeStart=${dateRange.start}&dateRangeEnd=${dateRange.end}&statusFilter=${statusFilter}`
-              );
-
-              expectFixtureEql(apiResponse.body, 'snapshot_filtered_by_down');
-            });
-
-            it('will fetch a monitor snapshot filtered by up status', async () => {
-              const statusFilter = 'up';
-              const apiResponse = await supertest.get(
-                `/api/uptime/snapshot/count?dateRangeStart=${dateRange.start}&dateRangeEnd=${dateRange.end}&statusFilter=${statusFilter}`
-              );
-              expectFixtureEql(apiResponse.body, 'snapshot_filtered_by_up');
-            });
           });
         });
       });

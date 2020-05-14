@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
 import { ColumnarPage } from '../../../components/page';
@@ -15,11 +16,13 @@ export const StreamPage = () => {
   useTrackPageview({ app: 'infra_logs', path: 'stream' });
   useTrackPageview({ app: 'infra_logs', path: 'stream', delay: 15000 });
   return (
-    <LogsPageProviders>
-      <ColumnarPage data-test-subj="infraLogsPage">
-        <StreamPageHeader />
-        <StreamPageContent />
-      </ColumnarPage>
-    </LogsPageProviders>
+    <EuiErrorBoundary>
+      <LogsPageProviders>
+        <ColumnarPage data-test-subj="infraLogsPage">
+          <StreamPageHeader />
+          <StreamPageContent />
+        </ColumnarPage>
+      </LogsPageProviders>
+    </EuiErrorBoundary>
   );
 };

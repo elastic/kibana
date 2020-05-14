@@ -5,8 +5,31 @@
  */
 
 import Handlebars from 'handlebars';
-import { safeLoad } from 'js-yaml';
+import { safeLoad, safeDump } from 'js-yaml';
 import { DatasourceConfigRecord } from '../../../../common';
+
+export function createStream(variables: DatasourceConfigRecord, streamTemplate: string) {
+  const { vars, yamlValues } = buildTemplateVariables(variables, streamTemplate);
+
+  const template = Handlebars.compile(streamTemplate, { noEscape: true });
+  let stream = template(vars);
+  stream = replaceRootLevelYamlVariables(yamlValues, stream);
+
+  const yamlFromStream = safeLoad(stream, {});
+
+  // Hack to keep empty string ('') values around in the end yaml because
+  // `safeLoad` replaces empty strings with null
+  const patchedYamlFromStream = Object.entries(yamlFromStream).reduce((acc, [key, value]) => {
+    if (value === null && typeof vars[key] === 'string' && vars[key].trim() === '') {
+      acc[key] = '';
+    } else {
+      acc[key] = value;
+    }
+    return acc;
+  }, {} as { [k: string]: any });
+
+  return replaceVariablesInYaml(yamlValues, patchedYamlFromStream);
+}
 
 function isValidKey(key: string) {
   return key !== '__proto__' && key !== 'constructor' && key !== 'prototype';
@@ -29,7 +52,7 @@ function replaceVariablesInYaml(yamlVariables: { [k: string]: any }, yaml: any) 
   return yaml;
 }
 
-function buildTemplateVariables(variables: DatasourceConfigRecord) {
+function buildTemplateVariables(variables: DatasourceConfigRecord, streamTemplate: string) {
   const yamlValues: { [k: string]: any } = {};
   const vars = Object.entries(variables).reduce((acc, [key, recordEntry]) => {
     // support variables with . like key.patterns
@@ -64,12 +87,15 @@ function buildTemplateVariables(variables: DatasourceConfigRecord) {
   return { vars, yamlValues };
 }
 
-export function createStream(variables: DatasourceConfigRecord, streamTemplate: string) {
-  const { vars, yamlValues } = buildTemplateVariables(variables);
+function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yamlTemplate: string) {
+  if (Object.keys(yamlVariables).length === 0 || !yamlTemplate) {
+    return yamlTemplate;
+  }
 
-  const template = Handlebars.compile(streamTemplate, { noEscape: true });
-  const stream = template(vars);
-  const yamlFromStream = safeLoad(stream, {});
+  let patchedTemplate = yamlTemplate;
+  Object.entries(yamlVariables).forEach(([key, val]) => {
+    patchedTemplate = patchedTemplate.replace(new RegExp(`^"${key}"`, 'gm'), safeDump(val));
+  });
 
-  return replaceVariablesInYaml(yamlValues, yamlFromStream);
+  return patchedTemplate;
 }

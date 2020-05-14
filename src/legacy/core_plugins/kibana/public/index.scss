@@ -7,15 +7,9 @@
 // Public UI styles
 @import 'src/legacy/ui/public/index';
 
-// Discover styles
-@import 'discover/index';
-
 // Has to come after visualize because of some
 // bad cascading in the Editor layout
 @import '../../../../plugins/maps_legacy/public/index';
-
-// Home styles
-@import '../../../../plugins/home/public/application/index';
 
 // Management styles
 @import './management/index';

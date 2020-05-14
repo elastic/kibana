@@ -9,6 +9,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext) => {
   const uptime = getService('uptime');
   const log = getService('log');
+  const esArchiver = getService('esArchiver');
+  const archive = 'uptime/full_heartbeat';
 
   describe('uptime ml anomaly', function() {
     this.tags(['skipFirefox']);
@@ -17,6 +19,7 @@ export default ({ getService }: FtrProviderContext) => {
     const monitorId = '0000-intermittent';
 
     before(async () => {
+      await esArchiver.loadIfNeeded(archive);
       if (!(await uptime.navigation.checkIfOnMonitorPage(monitorId))) {
         await uptime.navigation.loadDataAndGoToMonitorPage(dateStart, dateEnd, monitorId);
       }

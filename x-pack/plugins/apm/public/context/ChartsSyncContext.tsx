@@ -28,7 +28,7 @@ const ChartsSyncContextProvider: React.FC = ({ children }) => {
     callApmApi => {
       if (start && end && serviceName) {
         return callApmApi({
-          pathname: '/api/apm/services/{serviceName}/annotations',
+          pathname: '/api/apm/services/{serviceName}/annotation/search',
           params: {
             path: {
               serviceName

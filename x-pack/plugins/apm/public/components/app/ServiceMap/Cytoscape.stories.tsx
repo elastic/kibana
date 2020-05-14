@@ -304,3 +304,44 @@ storiesOf('app/ServiceMap/Cytoscape', module)
     }
   )
   .addParameters({ options: { showPanel: false } });
+
+storiesOf('app/ServiceMap/Cytoscape', module).add(
+  'node severity',
+  () => {
+    const elements = [
+      { data: { id: 'undefined', 'service.name': 'severity: undefined' } },
+      {
+        data: {
+          id: 'warning',
+          'service.name': 'severity: warning',
+          severity: 'warning'
+        }
+      },
+      {
+        data: {
+          id: 'minor',
+          'service.name': 'severity: minor',
+          severity: 'minor'
+        }
+      },
+      {
+        data: {
+          id: 'major',
+          'service.name': 'severity: major',
+          severity: 'major'
+        }
+      },
+      {
+        data: {
+          id: 'critical',
+          'service.name': 'severity: critical',
+          severity: 'critical'
+        }
+      }
+    ];
+    return <Cytoscape elements={elements} height={300} width={1340} />;
+  },
+  {
+    info: { propTables: false, source: false }
+  }
+);

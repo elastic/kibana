@@ -25,7 +25,7 @@ describe('when on the hosts page', () => {
   let coreStart: AppContextTestRender['coreStart'];
   let middlewareSpy: AppContextTestRender['middlewareSpy'];
 
-  beforeEach(async () => {
+  beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
     ({ history, store, coreStart, middlewareSpy } = mockedContext);
     render = () => mockedContext.render(<HostList />);
@@ -127,6 +127,25 @@ describe('when on the hosts page', () => {
     ) => {
       const policyResponse = docGenerator.generatePolicyResponse();
       policyResponse.endpoint.policy.applied.status = overallStatus;
+      policyResponse.endpoint.policy.applied.response.configurations.malware.status = overallStatus;
+      let downloadModelAction = policyResponse.endpoint.policy.applied.actions.find(
+        action => action.name === 'download_model'
+      );
+
+      if (!downloadModelAction) {
+        downloadModelAction = {
+          name: 'download_model',
+          message: 'Failed to apply a portion of the configuration (kernel)',
+          status: overallStatus,
+        };
+        policyResponse.endpoint.policy.applied.actions.push(downloadModelAction);
+      }
+      if (
+        overallStatus === HostPolicyResponseActionStatus.failure ||
+        overallStatus === HostPolicyResponseActionStatus.warning
+      ) {
+        downloadModelAction.message = 'no action taken';
+      }
       store.dispatch({
         type: 'serverReturnedHostPolicyResponse',
         payload: {
@@ -281,6 +300,9 @@ describe('when on the hosts page', () => {
           fireEvent.click(policyStatusLink);
         });
         await userChangedUrlChecker;
+        reactTestingLibrary.act(() => {
+          dispatchServerReturnedHostPolicyResponse();
+        });
       });
       it('should hide the host details panel', async () => {
         const hostDetailsFlyout = await renderResult.queryByTestId('hostDetailsFlyoutBody');
@@ -298,6 +320,59 @@ describe('when on the hosts page', () => {
         expect(
           (await renderResult.findByTestId('hostDetailsPolicyResponseFlyoutTitle')).textContent
         ).toBe('Policy Response');
+      });
+      it('should show a configuration section for each protection', async () => {
+        const configAccordions = await renderResult.findAllByTestId(
+          'hostDetailsPolicyResponseConfigAccordion'
+        );
+        expect(configAccordions).not.toBeNull();
+      });
+      it('should show an actions section for each configuration', async () => {
+        const actionAccordions = await renderResult.findAllByTestId(
+          'hostDetailsPolicyResponseActionsAccordion'
+        );
+        const action = await renderResult.findAllByTestId('policyResponseAction');
+        const statusHealth = await renderResult.findAllByTestId('policyResponseStatusHealth');
+        const message = await renderResult.findAllByTestId('policyResponseMessage');
+        expect(actionAccordions).not.toBeNull();
+        expect(action).not.toBeNull();
+        expect(statusHealth).not.toBeNull();
+        expect(message).not.toBeNull();
+      });
+      it('should not show any numbered badges if all actions are successful', () => {
+        const policyResponse = docGenerator.generatePolicyResponse(
+          new Date().getTime(),
+          HostPolicyResponseActionStatus.success
+        );
+        reactTestingLibrary.act(() => {
+          store.dispatch({
+            type: 'serverReturnedHostPolicyResponse',
+            payload: {
+              policy_response: policyResponse,
+            },
+          });
+        });
+        return renderResult.findAllByTestId('hostDetailsPolicyResponseAttentionBadge').catch(e => {
+          expect(e).not.toBeNull();
+        });
+      });
+      it('should show a numbered badge if at least one action failed', () => {
+        reactTestingLibrary.act(() => {
+          dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.failure);
+        });
+        const attentionBadge = renderResult.findAllByTestId(
+          'hostDetailsPolicyResponseAttentionBadge'
+        );
+        expect(attentionBadge).not.toBeNull();
+      });
+      it('should show a numbered badge if at least one action has a warning', () => {
+        reactTestingLibrary.act(() => {
+          dispatchServerReturnedHostPolicyResponse(HostPolicyResponseActionStatus.warning);
+        });
+        const attentionBadge = renderResult.findAllByTestId(
+          'hostDetailsPolicyResponseAttentionBadge'
+        );
+        expect(attentionBadge).not.toBeNull();
       });
       it('should include the back to details link', async () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');

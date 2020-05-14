@@ -9,9 +9,15 @@ import { Plugin, CoreStart, CoreSetup, PluginInitializerContext } from 'kibana/p
 import { first } from 'rxjs/operators';
 
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
+import { ILicense } from '../../licensing/common/types';
 
 import { PLUGIN } from '../common';
 import { AppPublicPluginDependencies } from './types';
+
+const checkLicenseStatus = (license: ILicense) => {
+  const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);
+  return state === 'valid' ? { valid: true } : { valid: false, message };
+};
 
 export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPluginDependencies> {
   constructor(ctx: PluginInitializerContext) {}
@@ -29,12 +35,12 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
         defaultMessage: 'Quickly check the performance of any Elasticsearch query.',
       }),
       icon: 'searchProfilerApp',
-      path: '/app/kibana#/dev_tools/searchprofiler',
+      path: '/app/dev_tools#/searchprofiler',
       showOnHomePage: false,
       category: FeatureCatalogueCategory.ADMIN,
     });
 
-    devTools.register({
+    const devTool = devTools.register({
       id: 'searchprofiler',
       title: i18n.translate('xpack.searchProfiler.pageDisplayName', {
         defaultMessage: 'Search Profiler',
@@ -47,9 +53,7 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
         const { boot } = await import('./application/boot');
 
         const license = await licensing.license$.pipe(first()).toPromise();
-        const { state, message } = license.check(PLUGIN.id, PLUGIN.minimumLicenseType);
-        const initialLicenseStatus =
-          state === 'valid' ? { valid: true } : { valid: false, message };
+        const initialLicenseStatus = checkLicenseStatus(license);
 
         return boot({
           http,
@@ -59,6 +63,14 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
           notifications: notifications.toasts,
         });
       },
+    });
+
+    licensing.license$.subscribe(license => {
+      if (!checkLicenseStatus(license).valid && !devTool.isDisabled()) {
+        devTool.disable();
+      } else if (devTool.isDisabled()) {
+        devTool.enable();
+      }
     });
   }
 

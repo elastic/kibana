@@ -5,6 +5,7 @@
  */
 
 import { isEqual } from 'lodash';
+// @ts-ignore
 import numeral from '@elastic/numeral';
 import { ml } from '../../../../services/ml_api_service';
 import { AnalysisResult, InputOverrides } from '../../../../../../common/types/file_datavisualizer';

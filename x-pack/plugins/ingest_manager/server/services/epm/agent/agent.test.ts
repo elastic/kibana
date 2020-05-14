@@ -9,17 +9,22 @@ import { createStream } from './agent';
 describe('createStream', () => {
   it('should work', () => {
     const streamTemplate = `
-    input: log
-    paths:
-    {{#each paths}}
-      - {{this}}
-    {{/each}}
-    exclude_files: [".gz$"]
-    processors:
-      - add_locale: ~
+input: log
+paths:
+{{#each paths}}
+  - {{this}}
+{{/each}}
+exclude_files: [".gz$"]
+processors:
+  - add_locale: ~
+password: {{password}}
+{{#if password}}
+hidden_password: {{password}}
+{{/if}}
       `;
     const vars = {
       paths: { value: ['/usr/local/var/log/nginx/access.log'] },
+      password: { type: 'password', value: '' },
     };
 
     const output = createStream(vars, streamTemplate);
@@ -28,17 +33,22 @@ describe('createStream', () => {
       paths: ['/usr/local/var/log/nginx/access.log'],
       exclude_files: ['.gz$'],
       processors: [{ add_locale: null }],
+      password: '',
     });
   });
 
   it('should support yaml values', () => {
     const streamTemplate = `
-    input: redis/metrics
-    metricsets: ["key"]
-    test: null
-    {{#if key.patterns}}
-    key.patterns: {{key.patterns}}
-    {{/if}}
+input: redis/metrics
+metricsets: ["key"]
+test: null
+password: {{password}}
+{{custom}}
+custom: {{ custom }}
+{{#if key.patterns}}
+key.patterns: {{key.patterns}}
+{{/if}}
+{{ testEmpty }}
       `;
     const vars = {
       'key.patterns': {
@@ -48,6 +58,13 @@ describe('createStream', () => {
           pattern: '*'
         `,
       },
+      custom: {
+        type: 'yaml',
+        value: `
+foo: bar
+        `,
+      },
+      password: { type: 'password', value: '' },
     };
 
     const output = createStream(vars, streamTemplate);
@@ -61,6 +78,9 @@ describe('createStream', () => {
           pattern: '*',
         },
       ],
+      password: '',
+      foo: 'bar',
+      custom: { foo: 'bar' },
     });
   });
 });

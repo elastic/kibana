@@ -6,7 +6,7 @@
 
 import { getAllEnvironments } from './get_all_environments';
 import { Setup } from '../../../helpers/setup_request';
-import { PromiseReturnType } from '../../../../../typings/common';
+import { PromiseReturnType } from '../../../../../../observability/typings/common';
 import { getExistingEnvironmentsForService } from './get_existing_environments_for_service';
 
 export type AgentConfigurationEnvironmentsAPIResponse = PromiseReturnType<

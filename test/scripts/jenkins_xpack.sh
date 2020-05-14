@@ -21,13 +21,6 @@ if [[ -z "$CODE_COVERAGE" ]] ; then
   echo ""
   echo ""
 
-  # FAILING: https://github.com/elastic/kibana/issues/44250
-  # echo " -> Running jest contracts tests"
-  # cd "$XPACK_DIR"
-  # SLAPSHOT_ONLINE=true CONTRACT_ONLINE=true node scripts/jest_contract.js --ci --verbose
-  # echo ""
-  # echo ""
-
   # echo " -> Running jest integration tests"
   # cd "$XPACK_DIR"
   # node scripts/jest_integration --ci --verbose
@@ -38,7 +31,7 @@ else
   cd "$XPACK_DIR"
   # build runtime for canvas
   echo "NODE_ENV=$NODE_ENV"
-  node ./legacy/plugins/canvas/scripts/shareable_runtime
+  node ./plugins/canvas/scripts/shareable_runtime
   node --max-old-space-size=6144 scripts/jest --ci --verbose --detectOpenHandles --coverage
   # rename file in order to be unique one
   test -f ../target/kibana-coverage/jest/coverage-final.json \

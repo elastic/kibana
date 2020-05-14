@@ -29,7 +29,7 @@ export const CreateDatasourcePageLayout: React.FunctionComponent<{
   const leftColumn = (
     <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
       <EuiFlexItem>
-        <EuiButtonEmpty size="s" iconType="arrowLeft" flush="left" href={cancelUrl}>
+        <EuiButtonEmpty size="xs" iconType="arrowLeft" flush="left" href={cancelUrl}>
           <FormattedMessage
             id="xpack.ingestManager.createDatasource.cancelLinkText"
             defaultMessage="Cancel"

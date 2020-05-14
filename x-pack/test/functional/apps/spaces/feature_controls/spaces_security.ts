@@ -56,7 +56,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows management navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.contain('Management');
+        expect(navLinks).to.contain('Stack Management');
       });
 
       it(`displays Spaces management section`, async () => {
@@ -134,7 +134,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows management navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.contain('Management');
+        expect(navLinks).to.contain('Stack Management');
       });
 
       it(`doesn't display Spaces management section`, async () => {

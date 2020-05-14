@@ -16,8 +16,11 @@ import {
   JobTypes,
   KeyCountBucket,
   RangeStats,
+  ReportingUsageType,
   SearchResponse,
   StatusByAppBucket,
+  AppCounts,
+  LayoutCounts,
 } from './types';
 
 type XPackInfo = XPackMainPlugin['info'];
@@ -36,8 +39,11 @@ const DEFAULT_TERMS_SIZE = 10;
 const PRINTABLE_PDF_JOBTYPE = 'printable_pdf';
 
 // indexes some key/count buckets by the "key" property
-const getKeyCount = (buckets: KeyCountBucket[]): { [key: string]: number } =>
-  buckets.reduce((accum, { key, doc_count: count }) => ({ ...accum, [key]: count }), {});
+const getKeyCount = <BucketType>(buckets: KeyCountBucket[]): BucketType =>
+  buckets.reduce(
+    (accum, { key, doc_count: count }) => ({ ...accum, [key]: count }),
+    {} as BucketType
+  );
 
 // indexes some key/count buckets by statusType > jobType > appName: statusCount
 const getAppStatuses = (buckets: StatusByAppBucket[]) =>
@@ -58,7 +64,7 @@ const getAppStatuses = (buckets: StatusByAppBucket[]) =>
     };
   }, {});
 
-function getAggStats(aggs: AggregationResultBuckets): RangeStats {
+function getAggStats(aggs: AggregationResultBuckets): Partial<RangeStats> {
   const { buckets: jobBuckets } = aggs[JOB_TYPES_KEY];
   const jobTypes = jobBuckets.reduce(
     (accum: JobTypes, { key, doc_count: count }: { key: string; doc_count: number }) => {
@@ -72,17 +78,11 @@ function getAggStats(aggs: AggregationResultBuckets): RangeStats {
   if (pdfJobs) {
     const pdfAppBuckets = get<KeyCountBucket[]>(aggs[OBJECT_TYPES_KEY], '.pdf.buckets', []);
     const pdfLayoutBuckets = get<KeyCountBucket[]>(aggs[LAYOUT_TYPES_KEY], '.pdf.buckets', []);
-    pdfJobs.app = getKeyCount(pdfAppBuckets) as {
-      visualization: number;
-      dashboard: number;
-    };
-    pdfJobs.layout = getKeyCount(pdfLayoutBuckets) as {
-      print: number;
-      preserve_layout: number;
-    };
+    pdfJobs.app = getKeyCount<AppCounts>(pdfAppBuckets);
+    pdfJobs.layout = getKeyCount<LayoutCounts>(pdfLayoutBuckets);
   }
 
-  const all = aggs.doc_count as number;
+  const all = aggs.doc_count;
   let statusTypes = {};
   const statusBuckets = get<KeyCountBucket[]>(aggs[STATUS_TYPES_KEY], 'buckets', []);
   if (statusBuckets) {
@@ -100,27 +100,22 @@ function getAggStats(aggs: AggregationResultBuckets): RangeStats {
 
 type SearchAggregation = SearchResponse['aggregations']['ranges']['buckets'];
 
-type RangeStatSets = Partial<
-  RangeStats & {
-    lastDay: RangeStats;
-    last7Days: RangeStats;
-  }
->;
+type RangeStatSets = Partial<RangeStats> & {
+  last7Days: Partial<RangeStats>;
+};
 
-async function handleResponse(response: SearchResponse): Promise<RangeStatSets> {
+async function handleResponse(response: SearchResponse): Promise<Partial<RangeStatSets>> {
   const buckets = get<SearchAggregation>(response, 'aggregations.ranges.buckets');
   if (!buckets) {
     return {};
   }
-  const { lastDay, last7Days, all } = buckets;
+  const { last7Days, all } = buckets;
 
-  const lastDayUsage = lastDay ? getAggStats(lastDay) : ({} as RangeStats);
-  const last7DaysUsage = last7Days ? getAggStats(last7Days) : ({} as RangeStats);
-  const allUsage = all ? getAggStats(all) : ({} as RangeStats);
+  const last7DaysUsage = last7Days ? getAggStats(last7Days) : {};
+  const allUsage = all ? getAggStats(all) : {};
 
   return {
     last7Days: last7DaysUsage,
-    lastDay: lastDayUsage,
     ...allUsage,
   };
 }
@@ -143,7 +138,6 @@ export async function getReportingUsage(
           filters: {
             filters: {
               all: { match_all: {} },
-              lastDay: { range: { created_at: { gte: 'now-1d/d' } } },
               last7Days: { range: { created_at: { gte: 'now-7d/d' } } },
             },
           },
@@ -177,25 +171,26 @@ export async function getReportingUsage(
 
   return callCluster('search', params)
     .then((response: SearchResponse) => handleResponse(response))
-    .then((usage: RangeStatSets) => {
-      // Allow this to explicitly throw an exception if/when this config is deprecated,
-      // because we shouldn't collect browserType in that case!
-      const browserType = config.get('capture', 'browser', 'type');
+    .then(
+      (usage: Partial<RangeStatSets>): ReportingUsageType => {
+        // Allow this to explicitly throw an exception if/when this config is deprecated,
+        // because we shouldn't collect browserType in that case!
+        const browserType = config.get('capture', 'browser', 'type');
 
-      const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
-      const availability = exportTypesHandler.getAvailability(
-        xpackMainInfo
-      ) as FeatureAvailabilityMap;
+        const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
+        const availability = exportTypesHandler.getAvailability(
+          xpackMainInfo
+        ) as FeatureAvailabilityMap;
 
-      const { lastDay, last7Days, ...all } = usage;
+        const { last7Days, ...all } = usage;
 
-      return {
-        available: true,
-        browser_type: browserType,
-        enabled: true,
-        lastDay: decorateRangeStats(lastDay, availability),
-        last7Days: decorateRangeStats(last7Days, availability),
-        ...decorateRangeStats(all, availability),
-      };
-    });
+        return {
+          available: true,
+          browser_type: browserType,
+          enabled: true,
+          last7Days: decorateRangeStats(last7Days, availability),
+          ...decorateRangeStats(all, availability),
+        };
+      }
+    );
 }

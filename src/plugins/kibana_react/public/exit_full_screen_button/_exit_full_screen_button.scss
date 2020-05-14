@@ -10,12 +10,11 @@
   bottom: $euiSizeS;
   position: fixed;
   display: block;
-  padding: 0;
+  padding: $euiSizeXS $euiSizeS;
   border: none;
   background: none;
   z-index: 5;
   background: $euiColorFullShade;
-  padding: $euiSizeXS;
   border-radius: $euiBorderRadius;
   text-align: left;
 
@@ -26,11 +25,6 @@
       color: $euiColorEmptyShade;
     }
   }
-}
-
-.dshExitFullScreenButton__title {
-  line-height: 1.2;
-  color: $euiColorEmptyShade;
 }
 
 .dshExitFullScreenButton__text {

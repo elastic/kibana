@@ -5,11 +5,11 @@
  */
 
 import { IClusterClient, Logger } from 'src/core/server';
-import { APMConfig } from '../../..';
 import {
   createOrUpdateIndex,
-  Mappings
-} from '../../helpers/create_or_update_index';
+  MappingsDefinition
+} from '../../../../../observability/server';
+import { APMConfig } from '../../..';
 import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
 export const createApmCustomLinkIndex = async ({
@@ -22,10 +22,15 @@ export const createApmCustomLinkIndex = async ({
   logger: Logger;
 }) => {
   const index = getApmIndicesConfig(config).apmCustomLinkIndex;
-  return createOrUpdateIndex({ index, esClient, logger, mappings });
+  return createOrUpdateIndex({
+    index,
+    apiCaller: esClient.callAsInternalUser,
+    logger,
+    mappings
+  });
 };
 
-const mappings: Mappings = {
+const mappings: MappingsDefinition = {
   dynamic: 'strict',
   properties: {
     '@timestamp': {

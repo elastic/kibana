@@ -49,8 +49,9 @@ export class LogstashPlugin implements Plugin<void, void, SetupDeps> {
       mount: async params => {
         const [coreStart] = await core.getStartServices();
         const { renderApp } = await import('./application');
+        const isMonitoringEnabled = 'monitoring' in plugins;
 
-        return renderApp(coreStart, params, logstashLicense$);
+        return renderApp(coreStart, params, isMonitoringEnabled, logstashLicense$);
       },
     });
 

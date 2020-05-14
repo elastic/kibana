@@ -23,16 +23,36 @@ import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 import { createFilterIpRange } from './create_filter/ip_range';
-import { IpRangeKey, convertIPRangeToString } from './lib/ip_range';
+import {
+  convertIPRangeToString,
+  IpRangeKey,
+  RangeIpRangeAggKey,
+  CidrMaskIpRangeAggKey,
+} from './lib/ip_range';
 import { KBN_FIELD_TYPES, FieldFormat, TEXT_CONTEXT_TYPE } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
 const ipRangeTitle = i18n.translate('data.search.aggs.buckets.ipRangeTitle', {
   defaultMessage: 'IPv4 Range',
 });
 
+export enum IP_RANGE_TYPES {
+  FROM_TO = 'fromTo',
+  MASK = 'mask',
+}
+
 export interface IpRangeBucketAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
+}
+
+export interface AggParamsIpRange extends BaseAggParams {
+  field: string;
+  ipRangeType?: IP_RANGE_TYPES;
+  ranges?: Partial<{
+    [IP_RANGE_TYPES.FROM_TO]: RangeIpRangeAggKey[];
+    [IP_RANGE_TYPES.MASK]: CidrMaskIpRangeAggKey[];
+  }>;
 }
 
 export const getIpRangeBucketAgg = ({ getInternalStartServices }: IpRangeBucketAggDependencies) =>
@@ -42,7 +62,7 @@ export const getIpRangeBucketAgg = ({ getInternalStartServices }: IpRangeBucketA
       title: ipRangeTitle,
       createFilter: createFilterIpRange,
       getKey(bucket, key, agg): IpRangeKey {
-        if (agg.params.ipRangeType === 'mask') {
+        if (agg.params.ipRangeType === IP_RANGE_TYPES.MASK) {
           return { type: 'mask', mask: key };
         }
         return { type: 'range', from: bucket.from, to: bucket.to };
@@ -74,7 +94,7 @@ export const getIpRangeBucketAgg = ({ getInternalStartServices }: IpRangeBucketA
         },
         {
           name: 'ipRangeType',
-          default: 'fromTo',
+          default: IP_RANGE_TYPES.FROM_TO,
           write: noop,
         },
         {
@@ -90,7 +110,7 @@ export const getIpRangeBucketAgg = ({ getInternalStartServices }: IpRangeBucketA
             const ipRangeType = aggConfig.params.ipRangeType;
             let ranges = aggConfig.params.ranges[ipRangeType];
 
-            if (ipRangeType === 'fromTo') {
+            if (ipRangeType === IP_RANGE_TYPES.FROM_TO) {
               ranges = map(ranges, (range: any) => omit(range, isNull));
             }
 

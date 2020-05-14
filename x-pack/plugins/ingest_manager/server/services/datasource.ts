@@ -31,11 +31,16 @@ class DatasourceService {
     datasource: NewDatasource,
     options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<Datasource> {
+    const isoDate = new Date().toISOString();
     const newSo = await soClient.create<Omit<Datasource, 'id'>>(
       SAVED_OBJECT_TYPE,
       {
         ...datasource,
         revision: 1,
+        created_at: isoDate,
+        created_by: options?.user?.username ?? 'system',
+        updated_at: isoDate,
+        updated_by: options?.user?.username ?? 'system',
       },
       options
     );
@@ -134,6 +139,8 @@ class DatasourceService {
     await soClient.update<Datasource>(SAVED_OBJECT_TYPE, id, {
       ...datasource,
       revision: oldDatasource.revision + 1,
+      updated_at: new Date().toISOString(),
+      updated_by: options?.user?.username ?? 'system',
     });
 
     // Bump revision of associated agent config
@@ -196,6 +203,9 @@ class DatasourceService {
         outputService.getDefaultOutputId(soClient),
       ]);
       if (pkgInfo) {
+        if (!defaultOutputId) {
+          throw new Error('Default output is not set');
+        }
         return packageToConfigDatasource(pkgInfo, '', defaultOutputId);
       }
     }

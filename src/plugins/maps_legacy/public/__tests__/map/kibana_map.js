@@ -20,7 +20,6 @@
 import expect from '@kbn/expect';
 import { KibanaMap } from '../../map/kibana_map';
 import { KibanaMapLayer } from '../../map/kibana_map_layer';
-import L from 'leaflet';
 
 describe('kibana_map tests', function() {
   let domNode;
@@ -218,6 +217,7 @@ describe('kibana_map tests', function() {
     function makeMockLayer(attribution) {
       const layer = new KibanaMapLayer();
       layer._attribution = attribution;
+      // eslint-disable-next-line no-undef
       layer._leafletLayer = L.geoJson(null);
       return layer;
     }

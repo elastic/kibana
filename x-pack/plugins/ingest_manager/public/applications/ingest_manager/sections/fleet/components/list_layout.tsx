@@ -23,7 +23,7 @@ import { WithHeaderLayout } from '../../../layouts';
 import { FLEET_ENROLLMENT_TOKENS_PATH, FLEET_AGENTS_PATH } from '../../../constants';
 import { useCapabilities, useLink, useGetAgentConfigs } from '../../../hooks';
 import { useGetAgentStatus } from '../../agent_config/details_page/hooks';
-import { AgentEnrollmentFlyout } from '../agent_list_page/components';
+import { AgentEnrollmentFlyout } from '../components';
 import { DonutChart } from './donut_chart';
 
 const REFRESH_INTERVAL_MS = 5000;

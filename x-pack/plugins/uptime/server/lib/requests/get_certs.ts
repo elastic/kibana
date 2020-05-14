@@ -20,8 +20,10 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
   index,
   from,
   to,
-  search,
   size,
+  search,
+  notValidBefore,
+  notValidAfter,
   sortBy,
   direction,
 }) => {
@@ -49,7 +51,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
             },
             {
               range: {
-                '@timestamp': {
+                'monitor.timespan': {
                   gte: from,
                   lte: to,
                 },
@@ -91,6 +93,10 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
     },
   };
 
+  if (!params.body.query.bool.should) {
+    params.body.query.bool.should = [];
+  }
+
   if (search) {
     params.body.query.bool.minimum_should_match = 1;
     params.body.query.bool.should = [
@@ -110,6 +116,35 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
     ];
   }
 
+  if (notValidBefore || notValidAfter) {
+    const validityFilters: any = {
+      bool: {
+        should: [],
+      },
+    };
+    if (notValidBefore) {
+      validityFilters.bool.should.push({
+        range: {
+          'tls.certificate_not_valid_before': {
+            lte: notValidBefore,
+          },
+        },
+      });
+    }
+    if (notValidAfter) {
+      validityFilters.bool.should.push({
+        range: {
+          'tls.certificate_not_valid_after': {
+            lte: notValidAfter,
+          },
+        },
+      });
+    }
+
+    params.body.query.bool.filter.push(validityFilters);
+  }
+
+  // console.log(JSON.stringify(params, null, 2));
   const result = await callES('search', params);
 
   const certs = (result?.hits?.hits ?? []).map((hit: any) => {

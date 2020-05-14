@@ -4,4 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type InstallTemplateFunction = (variables: { kibanaUrl: string }) => string;
+export type InstallTemplateFunction = (variables: {
+  kibanaUrl: string;
+  kibanaVersion: string;
+}) => string;

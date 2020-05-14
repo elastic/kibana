@@ -34,10 +34,9 @@ export const deleteRulesBulkRoute = (router: IRouter) => {
     const siemResponse = buildSiemResponse(response);
 
     const alertsClient = context.alerting?.getAlertsClient();
-    const actionsClient = context.actions?.getActionsClient();
     const savedObjectsClient = context.core.savedObjects.client;
 
-    if (!actionsClient || !alertsClient) {
+    if (!alertsClient) {
       return siemResponse.error({ statusCode: 404 });
     }
 
@@ -49,7 +48,6 @@ export const deleteRulesBulkRoute = (router: IRouter) => {
         const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
         try {
           const rule = await deleteRules({
-            actionsClient,
             alertsClient,
             id,
             ruleId,

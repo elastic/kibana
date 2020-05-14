@@ -26,6 +26,8 @@ import {
   EmbeddableFactoryDefinition,
 } from './lib/embeddables';
 
+export const EMBEDDABLE_ORIGINATING_APP_PARAM = 'embeddableOriginatingApp';
+
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableFactory>;
 
 export type EmbeddableFactoryProvider = <

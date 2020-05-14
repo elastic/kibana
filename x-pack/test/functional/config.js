@@ -123,12 +123,12 @@ export default async function({ readConfigFile }) {
         pathname: '/app/graph',
       },
       grokDebugger: {
-        pathname: '/app/kibana',
-        hash: '/dev_tools/grokdebugger',
+        pathname: '/app/dev_tools',
+        hash: '/grokdebugger',
       },
       searchProfiler: {
-        pathname: '/app/kibana',
-        hash: '/dev_tools/searchprofiler',
+        pathname: '/app/dev_tools',
+        hash: '/searchprofiler',
       },
       spaceSelector: {
         pathname: '/',
@@ -145,9 +145,6 @@ export default async function({ readConfigFile }) {
       },
       uptime: {
         pathname: '/app/uptime',
-      },
-      apm: {
-        pathname: '/app/apm',
       },
       ml: {
         pathname: '/app/ml',

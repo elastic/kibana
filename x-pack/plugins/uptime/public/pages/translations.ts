@@ -36,3 +36,7 @@ export const settings = {
     defaultMessage: 'Return to overview',
   }),
 };
+
+export const BLANK_STR = i18n.translate('xpack.uptime.settings.blank.error', {
+  defaultMessage: 'May not be blank.',
+});

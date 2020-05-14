@@ -55,11 +55,11 @@ export class FollowerIndicesTable extends PureComponent {
 
     if (queryText) {
       return followerIndices.filter(followerIndex => {
-        const { name, shards } = followerIndex;
+        const { name, remoteCluster, leaderIndex } = followerIndex;
 
         const inName = name.toLowerCase().includes(queryText);
-        const inRemoteCluster = shards[0].remoteCluster.toLowerCase().includes(queryText);
-        const inLeaderIndex = shards[0].leaderIndex.toLowerCase().includes(queryText);
+        const inRemoteCluster = remoteCluster.toLowerCase().includes(queryText);
+        const inLeaderIndex = leaderIndex.toLowerCase().includes(queryText);
 
         return inName || inRemoteCluster || inLeaderIndex;
       });
@@ -273,7 +273,7 @@ export class FollowerIndicesTable extends PureComponent {
     };
 
     const selection = {
-      onSelectionChange: selectedItems => this.setState({ selectedItems }),
+      onSelectionChange: newSelectedItems => this.setState({ selectedItems: newSelectedItems }),
     };
 
     const search = {

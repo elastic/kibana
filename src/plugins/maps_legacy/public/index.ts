@@ -17,12 +17,15 @@
  * under the License.
  */
 
-import { CoreSetup } from 'kibana/public';
+// @ts-ignore
+import { CoreSetup, PluginInitializerContext } from 'kibana/public';
+// @ts-ignore
+import { L } from './leaflet';
+// @ts-ignore
+import { KibanaMap } from './map/kibana_map';
 import { bindSetupCoreAndPlugins, MapsLegacyPlugin } from './plugin';
 // @ts-ignore
 import * as colorUtil from './map/color_util';
-// @ts-ignore
-import { KibanaMap } from './map/kibana_map';
 // @ts-ignore
 import { KibanaMapLayer } from './map/kibana_map_layer';
 // @ts-ignore
@@ -41,8 +44,16 @@ import {
 // @ts-ignore
 import { mapTooltipProvider } from './tooltip_provider';
 
-export function plugin() {
-  return new MapsLegacyPlugin();
+export interface MapsLegacyConfigType {
+  regionmap: any;
+  emsTileLayerId: string;
+  includeElasticMapsService: boolean;
+  proxyElasticMapsServiceInMaps: boolean;
+  tilemap: any;
+}
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new MapsLegacyPlugin(initializerContext);
 }
 
 /** @public */
@@ -59,6 +70,7 @@ export {
   FileLayer,
   TmsLayer,
   mapTooltipProvider,
+  L,
 };
 
 // Due to a leaflet/leaflet-draw bug, it's not possible to consume leaflet maps w/ draw control

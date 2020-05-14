@@ -4,9 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  StatusCheckAlertStateType,
-  StatusCheckAlertState,
-  StatusCheckExecutorParamsType,
-  StatusCheckExecutorParams,
-} from './status_check';
+export * from './common';
+export * from './status_check';

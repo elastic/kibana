@@ -235,6 +235,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
         const rolesElement = await user.findByTestSubject('userRowRoles');
         // findAll is substantially faster than `find.descendantExistsByCssSelector for negative cases
         const isUserReserved = (await user.findAllByTestSubject('userReserved', 1)).length > 0;
+        const isUserDeprecated = (await user.findAllByTestSubject('userDeprecated', 1)).length > 0;
 
         return {
           username: await usernameElement.getVisibleText(),
@@ -242,6 +243,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
           email: await emailElement.getVisibleText(),
           roles: (await rolesElement.getVisibleText()).split('\n').map(role => role.trim()),
           reserved: isUserReserved,
+          deprecated: isUserDeprecated,
         };
       });
     }
@@ -392,9 +394,9 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
                 });
             }
           }) //clicking save button
-          .then(function() {
+          .then(async () => {
             log.debug('click save button');
-            testSubjects.click('roleFormSaveButton');
+            await testSubjects.click('roleFormSaveButton');
           })
           .then(function() {
             return PageObjects.common.sleep(5000);

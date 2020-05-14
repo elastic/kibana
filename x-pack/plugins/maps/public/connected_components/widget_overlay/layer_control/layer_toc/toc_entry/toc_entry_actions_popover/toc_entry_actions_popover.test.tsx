@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { AbstractLayer, ILayer } from '../../../../../../layers/layer';
-import { AbstractSource, ISource } from '../../../../../../layers/sources/source';
-import { AbstractStyle, IStyle } from '../../../../../../layers/styles/style';
+import { AbstractLayer, ILayer } from '../../../../../../classes/layers/layer';
+import { AbstractSource, ISource } from '../../../../../../classes/sources/source';
+import { AbstractStyle, IStyle } from '../../../../../../classes/styles/style';
 
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 

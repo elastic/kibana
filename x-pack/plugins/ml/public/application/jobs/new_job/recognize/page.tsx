@@ -172,7 +172,6 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         startDatafeed: startDatafeedAfterSave,
         ...(jobOverridesPayload !== null ? { jobOverrides: jobOverridesPayload } : {}),
         ...resultTimeRange,
-        estimateModelMemory: false,
       });
       const { datafeeds: datafeedsResponse, jobs: jobsResponse, kibana: kibanaResponse } = response;
 

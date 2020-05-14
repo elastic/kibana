@@ -39,7 +39,8 @@ const getCoreMock = () => {
       config$: new BehaviorSubject({} as APMConfig),
       logger: ({
         error: jest.fn()
-      } as unknown) as Logger
+      } as unknown) as Logger,
+      plugins: {}
     }
   };
 };

@@ -14,6 +14,8 @@ export const METRIC_EXPLORER_AGGREGATIONS = [
   'rate',
   'count',
   'sum',
+  'p95',
+  'p99',
 ] as const;
 
 type MetricExplorerAggregations = typeof METRIC_EXPLORER_AGGREGATIONS[number];
@@ -56,6 +58,7 @@ export const metricsExplorerRequestBodyOptionalFieldsRT = rt.partial({
   limit: rt.union([rt.number, rt.null, rt.undefined]),
   filterQuery: rt.union([rt.string, rt.null, rt.undefined]),
   forceInterval: rt.boolean,
+  dropLastBucket: rt.boolean,
 });
 
 export const metricsExplorerRequestBodyRT = rt.intersection([

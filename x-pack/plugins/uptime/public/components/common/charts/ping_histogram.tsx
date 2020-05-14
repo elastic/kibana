@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Axis, BarSeries, Chart, Position, Settings, timeFormatter } from '@elastic/charts';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  Position,
+  Settings,
+  timeFormatter,
+  BrushEndListener,
+} from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
@@ -79,7 +87,11 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
       defaultMessage: 'Up',
     });
 
-    const onBrushEnd = (min: number, max: number) => {
+    const onBrushEnd: BrushEndListener = ({ x }) => {
+      if (!x) {
+        return;
+      }
+      const [min, max] = x;
       updateUrlParams({
         dateRangeStart: moment(min).toISOString(),
         dateRangeEnd: moment(max).toISOString(),

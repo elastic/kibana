@@ -91,7 +91,6 @@ import { IngestGetPipelineParams } from 'elasticsearch';
 import { IngestPutPipelineParams } from 'elasticsearch';
 import { IngestSimulateParams } from 'elasticsearch';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
-import { Logger as Logger_2 } from 'src/core/server/logging';
 import { MGetParams } from 'elasticsearch';
 import { MGetResponse } from 'elasticsearch';
 import { MSearchParams } from 'elasticsearch';
@@ -103,6 +102,7 @@ import { NodesInfoParams } from 'elasticsearch';
 import { NodesStatsParams } from 'elasticsearch';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
+import { ParsedQuery } from 'query-string';
 import { PeerCertificate } from 'tls';
 import { PingParams } from 'elasticsearch';
 import { PutScriptParams } from 'elasticsearch';
@@ -387,6 +387,9 @@ export interface APICaller {
     // (undocumented)
     <T = any>(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<T>;
 }
+
+// @public
+export function assertNever(x: never): never;
 
 // @public (undocumented)
 export interface AssistanceAPIResponse {
@@ -691,6 +694,36 @@ export interface CustomHttpResponseOptions<T extends HttpResponsePayload | Respo
     statusCode: number;
 }
 
+// @public
+export function deepFreeze<T extends Freezable>(object: T): RecursiveReadonly<T>;
+
+// @internal (undocumented)
+export const DEFAULT_APP_CATEGORIES: Readonly<{
+    kibana: {
+        id: string;
+        label: string;
+        euiIconType: string;
+        order: number;
+    };
+    observability: {
+        id: string;
+        label: string;
+        euiIconType: string;
+        order: number;
+    };
+    security: {
+        id: string;
+        label: string;
+        order: number;
+        euiIconType: string;
+    };
+    management: {
+        id: string;
+        label: string;
+        order: number;
+    };
+}>;
+
 // @public (undocumented)
 export interface DeprecationAPIClientParams extends GenericParams {
     // (undocumented)
@@ -838,6 +871,11 @@ export interface FakeRequest {
     headers: Headers;
 }
 
+// @public (undocumented)
+export type Freezable = {
+    [k: string]: any;
+} | any[];
+
 // @public
 export type GetAuthHeaders = (request: KibanaRequest | LegacyRequest) => AuthHeaders | undefined;
 
@@ -845,6 +883,11 @@ export type GetAuthHeaders = (request: KibanaRequest | LegacyRequest) => AuthHea
 export type GetAuthState = <T = unknown>(request: KibanaRequest | LegacyRequest) => {
     status: AuthStatus;
     state: T;
+};
+
+// @public
+export function getFlattenedObject(rootValue: Record<string, any>): {
+    [key: string]: any;
 };
 
 // @public
@@ -1033,6 +1076,9 @@ export type ISavedObjectTypeRegistry = Omit<SavedObjectTypeRegistry, 'registerTy
 
 // @public
 export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
+
+// @public
+export function isRelativeUrl(candidatePath: string): boolean;
 
 // @public
 export interface IUiSettingsClient {
@@ -1288,6 +1334,9 @@ export type MIGRATION_ASSISTANCE_INDEX_ACTION = 'upgrade' | 'reindex';
 
 // @public (undocumented)
 export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
+
+// @public
+export function modifyUrl(url: string, urlModifier: (urlParts: URLMeaningfulParts) => Partial<URLMeaningfulParts> | void): string;
 
 // @public
 export type MutatingOperationRefreshSetting = boolean | 'wait_for';
@@ -1685,7 +1734,7 @@ export type SavedObjectMigrationFn<InputAttributes = unknown, MigratedAttributes
 // @public
 export interface SavedObjectMigrationMap {
     // (undocumented)
-    [version: string]: SavedObjectMigrationFn;
+    [version: string]: SavedObjectMigrationFn<any, any>;
 }
 
 // @public
@@ -1835,6 +1884,7 @@ export interface SavedObjectsCoreFieldMapping {
     fields?: {
         [subfield: string]: {
             type: string;
+            ignore_above?: number;
         };
     };
     // (undocumented)
@@ -2118,6 +2168,8 @@ export interface SavedObjectsMappingProperties {
 export interface SavedObjectsMigrationLogger {
     // (undocumented)
     debug: (msg: string) => void;
+    // (undocumented)
+    error: (msg: string, meta: LogMeta) => void;
     // (undocumented)
     info: (msg: string) => void;
     // (undocumented)
@@ -2446,6 +2498,26 @@ export interface UiSettingsServiceStart {
 
 // @public
 export type UiSettingsType = 'undefined' | 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string' | 'array' | 'image';
+
+// @public
+export interface URLMeaningfulParts {
+    // (undocumented)
+    auth?: string | null;
+    // (undocumented)
+    hash?: string | null;
+    // (undocumented)
+    hostname?: string | null;
+    // (undocumented)
+    pathname?: string | null;
+    // (undocumented)
+    port?: string | null;
+    // (undocumented)
+    protocol?: string | null;
+    // (undocumented)
+    query: ParsedQuery;
+    // (undocumented)
+    slashes?: boolean | null;
+}
 
 // @public
 export interface UserProvidedValues<T = any> {

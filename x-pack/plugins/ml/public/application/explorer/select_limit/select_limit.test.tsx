@@ -9,8 +9,6 @@ import { act } from 'react-dom/test-utils';
 import { shallow } from 'enzyme';
 import { SelectLimit } from './select_limit';
 
-jest.useFakeTimers();
-
 describe('SelectLimit', () => {
   test('creates correct initial selected value', () => {
     const wrapper = shallow(<SelectLimit />);

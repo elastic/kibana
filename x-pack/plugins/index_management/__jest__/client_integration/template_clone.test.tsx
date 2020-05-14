@@ -42,7 +42,8 @@ jest.mock('@elastic/eui', () => ({
   ),
 }));
 
-describe('<TemplateClone />', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/59849
+describe.skip('<TemplateClone />', () => {
   let testBed: TemplateFormTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();

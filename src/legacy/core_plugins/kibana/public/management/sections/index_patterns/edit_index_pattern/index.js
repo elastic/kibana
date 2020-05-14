@@ -112,6 +112,7 @@ const renderCreateEditField = ($scope, $route, getConfig, fieldFormatEditors) =>
             fieldFormatEditors={fieldFormatEditors}
             getConfig={getConfig}
             services={{
+              dataStart: npStart.plugins.data,
               getHttpStart: () => npStart.core.http,
               notifications: npStart.core.notifications,
               docTitle: npStart.core.chrome.docTitle,

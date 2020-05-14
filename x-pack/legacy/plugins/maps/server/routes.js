@@ -31,9 +31,8 @@ import Boom from 'boom';
 
 const ROOT = `/${GIS_API_PATH}`;
 
-export function initRoutes(server, licenseUid) {
+export function initRoutes(server, licenseUid, mapConfig) {
   const serverConfig = server.config();
-  const mapConfig = serverConfig.get('map');
 
   let emsClient;
   if (mapConfig.includeElasticMapsService) {

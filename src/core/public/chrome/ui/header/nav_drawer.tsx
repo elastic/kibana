@@ -22,22 +22,18 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { EuiNavDrawer, EuiHorizontalRule, EuiNavDrawerGroup } from '@elastic/eui';
 import { OnIsLockedUpdate } from './';
-import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../../..';
-import { HttpStart } from '../../../http';
-import { NavLink } from './nav_link';
+import { NavLink, RecentNavLink } from './nav_link';
 import { RecentLinks } from './recent_links';
 
 export interface Props {
   isLocked?: boolean;
   onIsLockedUpdate?: OnIsLockedUpdate;
   navLinks: NavLink[];
-  chromeNavLinks: ChromeNavLink[];
-  recentlyAccessedItems: ChromeRecentlyAccessedHistoryItem[];
-  basePath: HttpStart['basePath'];
+  recentNavLinks: RecentNavLink[];
 }
 
 function navDrawerRenderer(
-  { isLocked, onIsLockedUpdate, navLinks, chromeNavLinks, recentlyAccessedItems, basePath }: Props,
+  { isLocked, onIsLockedUpdate, navLinks, recentNavLinks }: Props,
   ref: React.Ref<HTMLElement>
 ) {
   return (
@@ -50,11 +46,7 @@ function navDrawerRenderer(
         defaultMessage: 'Primary',
       })}
     >
-      {RecentLinks({
-        recentlyAccessedItems,
-        navLinks: chromeNavLinks,
-        basePath,
-      })}
+      {RecentLinks({ recentNavLinks })}
       <EuiHorizontalRule margin="none" />
       <EuiNavDrawerGroup
         data-test-subj="navDrawerAppsMenu"

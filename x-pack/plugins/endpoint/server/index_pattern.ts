@@ -11,6 +11,7 @@ export interface IndexPatternRetriever {
   getIndexPattern(ctx: RequestHandlerContext, datasetPath: string): Promise<string>;
   getEventIndexPattern(ctx: RequestHandlerContext): Promise<string>;
   getMetadataIndexPattern(ctx: RequestHandlerContext): Promise<string>;
+  getPolicyResponseIndexPattern(ctx: RequestHandlerContext): Promise<string>;
 }
 
 /**
@@ -73,5 +74,9 @@ export class IngestIndexPatternRetriever implements IndexPatternRetriever {
       this.log.warn(errMsg);
       throw new Error(errMsg);
     }
+  }
+
+  getPolicyResponseIndexPattern(ctx: RequestHandlerContext): Promise<string> {
+    return Promise.resolve('metrics-endpoint.policy-default-1');
   }
 }

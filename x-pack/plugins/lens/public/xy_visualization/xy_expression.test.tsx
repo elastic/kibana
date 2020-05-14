@@ -609,7 +609,7 @@ describe('xy_expression', () => {
       wrapper
         .find(Settings)
         .first()
-        .prop('onBrushEnd')!(1585757732783, 1585758880838);
+        .prop('onBrushEnd')!({ x: [1585757732783, 1585758880838] });
 
       expect(executeTriggerActions).toHaveBeenCalledWith('SELECT_RANGE_TRIGGER', {
         data: {
@@ -1177,6 +1177,136 @@ describe('xy_expression', () => {
       tickFormatter('I');
 
       expect(convertSpy).toHaveBeenCalledWith('I');
+    });
+
+    test('it should remove invalid rows', () => {
+      const data: LensMultiTable = {
+        type: 'lens_multitable',
+        tables: {
+          first: {
+            type: 'kibana_datatable',
+            columns: [
+              { id: 'a', name: 'a' },
+              { id: 'b', name: 'b' },
+              { id: 'c', name: 'c' },
+            ],
+            rows: [
+              { a: undefined, b: 2, c: 'I', d: 'Row 1' },
+              { a: 1, b: 5, c: 'J', d: 'Row 2' },
+            ],
+          },
+          second: {
+            type: 'kibana_datatable',
+            columns: [
+              { id: 'a', name: 'a' },
+              { id: 'b', name: 'b' },
+              { id: 'c', name: 'c' },
+            ],
+            rows: [
+              { a: undefined, b: undefined, c: undefined },
+              { a: undefined, b: undefined, c: undefined },
+            ],
+          },
+        },
+      };
+
+      const args: XYArgs = {
+        xTitle: '',
+        yTitle: '',
+        legend: { type: 'lens_xy_legendConfig', isVisible: false, position: Position.Top },
+        layers: [
+          {
+            layerId: 'first',
+            seriesType: 'line',
+            xAccessor: 'a',
+            accessors: ['c'],
+            splitAccessor: 'b',
+            columnToLabel: '',
+            xScaleType: 'ordinal',
+            yScaleType: 'linear',
+            isHistogram: false,
+          },
+          {
+            layerId: 'second',
+            seriesType: 'line',
+            xAccessor: 'a',
+            accessors: ['c'],
+            splitAccessor: 'b',
+            columnToLabel: '',
+            xScaleType: 'ordinal',
+            yScaleType: 'linear',
+            isHistogram: false,
+          },
+        ],
+      };
+
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={args}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartTheme={{}}
+          histogramBarTarget={50}
+          executeTriggerActions={executeTriggerActions}
+        />
+      );
+
+      const series = component.find(LineSeries);
+
+      // Only one series should be rendered, even though 2 are configured
+      // This one series should only have one row, even though 2 are sent
+      expect(series.prop('data')).toEqual([{ a: 1, b: 5, c: 'J', d: 'Row 2' }]);
+    });
+
+    test('it should show legend for split series, even with one row', () => {
+      const data: LensMultiTable = {
+        type: 'lens_multitable',
+        tables: {
+          first: {
+            type: 'kibana_datatable',
+            columns: [
+              { id: 'a', name: 'a' },
+              { id: 'b', name: 'b' },
+              { id: 'c', name: 'c' },
+            ],
+            rows: [{ a: 1, b: 5, c: 'J' }],
+          },
+        },
+      };
+
+      const args: XYArgs = {
+        xTitle: '',
+        yTitle: '',
+        legend: { type: 'lens_xy_legendConfig', isVisible: true, position: Position.Top },
+        layers: [
+          {
+            layerId: 'first',
+            seriesType: 'line',
+            xAccessor: 'a',
+            accessors: ['c'],
+            splitAccessor: 'b',
+            columnToLabel: '',
+            xScaleType: 'ordinal',
+            yScaleType: 'linear',
+            isHistogram: false,
+          },
+        ],
+      };
+
+      const component = shallow(
+        <XYChart
+          data={data}
+          args={args}
+          formatFactory={getFormatSpy}
+          timeZone="UTC"
+          chartTheme={{}}
+          histogramBarTarget={50}
+          executeTriggerActions={executeTriggerActions}
+        />
+      );
+
+      expect(component.find(Settings).prop('showLegend')).toEqual(true);
     });
   });
 });

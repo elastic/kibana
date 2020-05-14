@@ -12,9 +12,9 @@ import { CERT_STATUS } from '../../common/constants';
 export const useCertStatus = (expiryDate?: string, issueDate?: string) => {
   const dss = useSelector(selectDynamicSettings);
 
-  const expiryThreshold = dss.settings?.certThresholds?.expiration;
+  const expiryThreshold = dss.settings?.certExpirationThreshold;
 
-  const ageThreshold = dss.settings?.certThresholds?.age;
+  const ageThreshold = dss.settings?.certAgeThreshold;
 
   const certValidityDate = new Date(expiryDate ?? '');
 

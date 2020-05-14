@@ -52,9 +52,10 @@ export const ConnectorAddFlyout = ({
     capabilities,
     actionTypeRegistry,
     reloadConnectors,
+    docLinks,
   } = useActionsConnectorsContext();
   const [actionType, setActionType] = useState<ActionType | undefined>(undefined);
-  const [hasActionsDisabledByLicense, setHasActionsDisabledByLicense] = useState<boolean>(false);
+  const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
 
   // hooks
   const initialConnector = {
@@ -96,7 +97,7 @@ export const ConnectorAddFlyout = ({
       <ActionTypeMenu
         onActionTypeChange={onActionTypeChange}
         actionTypes={actionTypes}
-        setHasActionsDisabledByLicense={setHasActionsDisabledByLicense}
+        setHasActionsUpgradeableByTrial={setHasActionsUpgradeableByTrial}
       />
     );
   } else {
@@ -116,6 +117,7 @@ export const ConnectorAddFlyout = ({
         errors={errors}
         actionTypeRegistry={actionTypeRegistry}
         http={http}
+        docLinks={docLinks}
       />
     );
   }
@@ -219,7 +221,7 @@ export const ConnectorAddFlyout = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody
         banner={
-          !actionType && hasActionsDisabledByLicense ? (
+          !actionType && hasActionsUpgradeableByTrial ? (
             <UpgradeYourLicenseCallOut http={http} />
           ) : (
             <Fragment />
@@ -317,3 +319,6 @@ const UpgradeYourLicenseCallOut = ({ http }: { http: HttpSetup }) => (
     </EuiFlexGroup>
   </EuiCallOut>
 );
+
+// eslint-disable-next-line import/no-default-export
+export { ConnectorAddFlyout as default };

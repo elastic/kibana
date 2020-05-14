@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, memo, useMemo, useState } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import { Redirect, useRouteMatch, Switch, Route } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
@@ -13,7 +13,6 @@ import {
   EuiCallOut,
   EuiText,
   EuiSpacer,
-  EuiTitle,
   EuiButtonEmpty,
   EuiI18nNumber,
   EuiDescriptionList,
@@ -72,46 +71,40 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
 
   const headerLeftContent = useMemo(
     () => (
-      <React.Fragment>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <div>
-                  <EuiButtonEmpty iconType="arrowLeft" href={configListLink} flush="left" size="xs">
-                    <FormattedMessage
-                      id="xpack.ingestManager.configDetails.viewAgentListTitle"
-                      defaultMessage="View all agent configurations"
-                    />
-                  </EuiButtonEmpty>
-                </div>
-                <EuiTitle size="l">
-                  <h1>
-                    {(agentConfig && agentConfig.name) || (
-                      <FormattedMessage
-                        id="xpack.ingestManager.configDetails.configDetailsTitle"
-                        defaultMessage="Config '{id}'"
-                        values={{
-                          id: configId,
-                        }}
-                      />
-                    )}
-                  </h1>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            {agentConfig && agentConfig.description ? (
-              <Fragment>
-                <EuiSpacer size="s" />
-                <EuiText color="subdued" size="s">
-                  {agentConfig.description}
-                </EuiText>
-              </Fragment>
-            ) : null}
+      <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+        <EuiFlexItem>
+          <EuiButtonEmpty iconType="arrowLeft" href={configListLink} flush="left" size="xs">
+            <FormattedMessage
+              id="xpack.ingestManager.configDetails.viewAgentListTitle"
+              defaultMessage="View all agent configurations"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText>
+            <h1>
+              {(agentConfig && agentConfig.name) || (
+                <FormattedMessage
+                  id="xpack.ingestManager.configDetails.configDetailsTitle"
+                  defaultMessage="Config '{id}'"
+                  values={{
+                    id: configId,
+                  }}
+                />
+              )}
+            </h1>
+          </EuiText>
+        </EuiFlexItem>
+
+        {agentConfig && agentConfig.description ? (
+          <EuiFlexItem>
+            <EuiSpacer size="s" />
+            <EuiText color="subdued" size="s">
+              {agentConfig.description}
+            </EuiText>
           </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="l" />
-      </React.Fragment>
+        ) : null}
+      </EuiFlexGroup>
     ),
     [configListLink, agentConfig, configId]
   );
@@ -159,7 +152,7 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
             content:
               (agentConfig && (
                 <FormattedDate
-                  value={agentConfig?.updated_on}
+                  value={agentConfig?.updated_at}
                   year="numeric"
                   month="short"
                   day="2-digit"

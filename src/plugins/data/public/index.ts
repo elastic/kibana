@@ -230,7 +230,6 @@ import {
   validateIndexPattern,
   getFromSavedObject,
   flattenHitWrapper,
-  getRoutes,
   formatHitProvider,
 } from './index_patterns';
 
@@ -246,20 +245,18 @@ export const indexPatterns = {
   validate: validateIndexPattern,
   getFromSavedObject,
   flattenHitWrapper,
-  // TODO: exported only in stub_index_pattern test. Move into data plugin and remove export.
-  getRoutes,
   formatHitProvider,
 };
 
 export {
   IndexPatternsContract,
   IndexPattern,
+  IIndexPatternFieldList,
   Field as IndexPatternField,
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
   // TODO: exported only in stub_index_pattern test. Move into data plugin and remove export.
-  FieldList as IndexPatternFieldList,
-  Field,
+  getIndexPatternFieldListCreator,
 } from './index_patterns';
 
 export {
@@ -361,6 +358,9 @@ export {
   SearchResponse,
   SearchError,
   ISearchSource,
+  parseSearchSourceJSON,
+  injectSearchSourceReferences,
+  extractSearchSourceReferences,
   SearchSourceFields,
   EsQuerySortValue,
   SortDirection,

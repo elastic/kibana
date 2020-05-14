@@ -6,17 +6,14 @@
 
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import { alertsClientMock } from '../../../../../alerting/server/mocks';
-import { actionsClientMock } from '../../../../../actions/server/mocks';
 import { getResult, getMlResult } from '../routes/__mocks__/request_responses';
 import { updateRules } from './update_rules';
 
 describe('updateRules', () => {
-  let actionsClient: ReturnType<typeof actionsClientMock.create>;
   let alertsClient: ReturnType<typeof alertsClientMock.create>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(() => {
-    actionsClient = actionsClientMock.create();
     alertsClient = alertsClientMock.create();
     savedObjectsClient = savedObjectsClientMock.create();
   });
@@ -27,7 +24,6 @@ describe('updateRules', () => {
 
     await updateRules({
       alertsClient,
-      actionsClient,
       savedObjectsClient,
       id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
       ...rule.params,
@@ -54,7 +50,6 @@ describe('updateRules', () => {
 
     await updateRules({
       alertsClient,
-      actionsClient,
       savedObjectsClient,
       id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
       ...rule.params,
@@ -83,7 +78,6 @@ describe('updateRules', () => {
 
     await updateRules({
       alertsClient,
-      actionsClient,
       savedObjectsClient,
       id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
       ...params,

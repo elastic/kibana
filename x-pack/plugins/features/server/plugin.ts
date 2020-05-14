@@ -11,7 +11,7 @@ import {
   RecursiveReadonly,
 } from '../../../../src/core/server';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
-import { deepFreeze } from '../../../../src/core/utils';
+import { deepFreeze } from '../../../../src/core/server';
 import { XPackInfo } from '../../../legacy/plugins/xpack_main/server/lib/xpack_info';
 import { PluginSetupContract as TimelionSetupContract } from '../../../../src/plugins/vis_type_timelion/server';
 import { FeatureRegistry } from './feature_registry';

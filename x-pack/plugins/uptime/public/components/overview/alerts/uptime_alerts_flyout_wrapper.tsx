@@ -10,14 +10,12 @@ import { AlertAdd } from '../../../../../../plugins/triggers_actions_ui/public';
 interface Props {
   alertFlyoutVisible: boolean;
   alertTypeId?: string;
-  canChangeTrigger?: boolean;
   setAlertFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const UptimeAlertsFlyoutWrapperComponent = ({
   alertFlyoutVisible,
   alertTypeId,
-  canChangeTrigger,
   setAlertFlyoutVisibility,
 }: Props) => (
   <AlertAdd
@@ -25,6 +23,8 @@ export const UptimeAlertsFlyoutWrapperComponent = ({
     consumer="uptime"
     setAddFlyoutVisibility={setAlertFlyoutVisibility}
     alertTypeId={alertTypeId}
-    canChangeTrigger={canChangeTrigger}
+    // if we don't have an alert type pre-specified, we need to
+    // let the user choose
+    canChangeTrigger={!alertTypeId}
   />
 );

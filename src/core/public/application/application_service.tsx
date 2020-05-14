@@ -26,6 +26,7 @@ import { InjectedMetadataSetup } from '../injected_metadata';
 import { HttpSetup, HttpStart } from '../http';
 import { OverlayStart } from '../overlays';
 import { ContextSetup, IContextContainer } from '../context';
+import { PluginOpaqueId } from '../plugins';
 import { AppRouter } from './ui';
 import { Capabilities, CapabilitiesService } from './capabilities';
 import {
@@ -34,7 +35,6 @@ import {
   AppLeaveHandler,
   AppMount,
   AppMountDeprecated,
-  AppMounter,
   AppNavLinkStatus,
   AppStatus,
   AppUpdatableFields,
@@ -114,7 +114,9 @@ export class ApplicationService {
     context,
     http: { basePath },
     injectedMetadata,
-    redirectTo = (path: string) => (window.location.href = path),
+    redirectTo = (path: string) => {
+      window.location.assign(path);
+    },
     history,
   }: SetupDeps): InternalApplicationSetup {
     const basename = basePath.get();
@@ -145,6 +147,25 @@ export class ApplicationService {
       this.subscriptions.push(subscription);
     };
 
+    const wrapMount = (plugin: PluginOpaqueId, app: App<any>): AppMount => {
+      let handler: AppMount;
+      if (isAppMountDeprecated(app.mount)) {
+        handler = this.mountContext!.createHandler(plugin, app.mount);
+        if (process.env.NODE_ENV === 'development') {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `App [${app.id}] is using deprecated mount context. Use core.getStartServices() instead.`
+          );
+        }
+      } else {
+        handler = app.mount;
+      }
+      return async params => {
+        this.currentAppId$.next(app.id);
+        return handler(params);
+      };
+    };
+
     return {
       registerMountContext: this.mountContext!.registerContext,
       register: (plugin, app: App<any>) => {
@@ -162,24 +183,6 @@ export class ApplicationService {
           throw new Error('Cannot register an application route that includes HTTP base path');
         }
 
-        let handler: AppMount;
-
-        if (isAppMountDeprecated(app.mount)) {
-          handler = this.mountContext!.createHandler(plugin, app.mount);
-          // eslint-disable-next-line no-console
-          console.warn(
-            `App [${app.id}] is using deprecated mount context. Use core.getStartServices() instead.`
-          );
-        } else {
-          handler = app.mount;
-        }
-
-        const mount: AppMounter = async params => {
-          const unmount = await handler(params);
-          this.currentAppId$.next(app.id);
-          return unmount;
-        };
-
         const { updater$, ...appProps } = app;
         this.apps.set(app.id, {
           ...appProps,
@@ -193,8 +196,9 @@ export class ApplicationService {
         this.mounters.set(app.id, {
           appRoute: app.appRoute!,
           appBasePath: basePath.prepend(app.appRoute!),
-          mount,
+          mount: wrapMount(plugin, app),
           unmountBeforeMounting: false,
+          legacy: false,
         });
       },
       registerLegacyApp: app => {
@@ -209,7 +213,10 @@ export class ApplicationService {
         }
 
         const appBasePath = basePath.prepend(appRoute);
-        const mount: LegacyAppMounter = () => redirectTo(appBasePath);
+        const mount: LegacyAppMounter = ({ history: appHistory }) => {
+          redirectTo(appHistory.createHref(appHistory.location));
+          window.location.reload();
+        };
 
         const { updater$, ...appProps } = app;
         this.apps.set(app.id, {
@@ -226,6 +233,7 @@ export class ApplicationService {
           appBasePath,
           mount,
           unmountBeforeMounting: true,
+          legacy: true,
         });
       },
       registerAppUpdater: (appUpdater$: Observable<AppUpdater>) =>
@@ -237,6 +245,9 @@ export class ApplicationService {
     if (!this.mountContext) {
       throw new Error('ApplicationService#setup() must be invoked before start.');
     }
+
+    const httpLoadingCount$ = new BehaviorSubject(0);
+    http.addLoadingCountSource(httpLoadingCount$);
 
     this.registrationClosed = true;
     window.addEventListener('beforeunload', this.onBeforeUnload);
@@ -303,6 +314,7 @@ export class ApplicationService {
             mounters={availableMounters}
             appStatuses$={applicationStatuses$}
             setAppLeaveHandler={this.setAppLeaveHandler}
+            setIsMounting={isMounting => httpLoadingCount$.next(isMounting ? 1 : 0)}
           />
         );
       },

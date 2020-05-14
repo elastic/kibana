@@ -272,7 +272,10 @@ function getTopSuggestion(
   }).filter(suggestion => {
     // don't use extended versions of current data table on switching between visualizations
     // to avoid confusing the user.
-    return suggestion.changeType !== 'extended';
+    return (
+      suggestion.changeType !== 'extended' &&
+      newVisualization.getVisualizationTypeId(suggestion.visualizationState) === subVisualizationId
+    );
   });
 
   // We prefer unchanged or reduced suggestions when switching

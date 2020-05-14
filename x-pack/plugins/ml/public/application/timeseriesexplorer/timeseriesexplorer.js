@@ -36,6 +36,7 @@ import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import {
   isModelPlotEnabled,
+  isModelPlotChartableForDetector,
   isSourceDataChartableForDetector,
   isTimeSeriesViewDetector,
   mlFunctionToESAggregation,
@@ -44,7 +45,7 @@ import {
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 import { AnnotationsTable } from '../components/annotations/annotations_table';
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
-import { ChartTooltip } from '../components/chart_tooltip';
+import { MlTooltipComponent } from '../components/chart_tooltip';
 import { EntityControl } from './components/entity_control';
 import { ForecastingModal } from './components/forecasting_modal/forecasting_modal';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
@@ -506,11 +507,9 @@ export class TimeSeriesExplorer extends React.Component {
               contextForecastData: undefined,
               focusChartData: undefined,
               focusForecastData: undefined,
-              modelPlotEnabled: isModelPlotEnabled(
-                currentSelectedJob,
-                selectedDetectorIndex,
-                entityControls
-              ),
+              modelPlotEnabled:
+                isModelPlotChartableForDetector(currentSelectedJob, selectedDetectorIndex) &&
+                isModelPlotEnabled(currentSelectedJob, selectedDetectorIndex, entityControls),
               hasResults: false,
               dataNotChartable: false,
             }
@@ -1181,6 +1180,8 @@ export class TimeSeriesExplorer extends React.Component {
           </EuiFlexGroup>
         </div>
 
+        <EuiSpacer size="m" />
+
         {fullRefresh && loading === true && (
           <LoadingIndicator
             label={i18n.translate('xpack.ml.timeSeriesExplorer.loadingLabel', {
@@ -1204,9 +1205,6 @@ export class TimeSeriesExplorer extends React.Component {
           (fullRefresh === false || loading === false) &&
           hasResults === true && (
             <div>
-              {/* Make sure ChartTooltip is inside this plain wrapping element without padding so positioning can be inferred correctly. */}
-              <ChartTooltip />
-
               <div className="results-container">
                 <EuiTitle className="panel-title">
                   <h2 style={{ display: 'inline' }}>
@@ -1301,16 +1299,21 @@ export class TimeSeriesExplorer extends React.Component {
                   )}
                 </EuiFlexGroup>
                 <div className="ml-timeseries-chart" data-test-subj="mlSingleMetricViewerChart">
-                  <TimeseriesChart
-                    {...chartProps}
-                    bounds={bounds}
-                    detectorIndex={selectedDetectorIndex}
-                    renderFocusChartOnly={renderFocusChartOnly}
-                    selectedJob={selectedJob}
-                    showAnnotations={showAnnotations}
-                    showForecast={showForecast}
-                    showModelBounds={showModelBounds}
-                  />
+                  <MlTooltipComponent>
+                    {tooltipService => (
+                      <TimeseriesChart
+                        {...chartProps}
+                        bounds={bounds}
+                        detectorIndex={selectedDetectorIndex}
+                        renderFocusChartOnly={renderFocusChartOnly}
+                        selectedJob={selectedJob}
+                        showAnnotations={showAnnotations}
+                        showForecast={showForecast}
+                        showModelBounds={showModelBounds}
+                        tooltipService={tooltipService}
+                      />
+                    )}
+                  </MlTooltipComponent>
                 </div>
                 {showAnnotations && focusAnnotationData.length > 0 && (
                   <div>
