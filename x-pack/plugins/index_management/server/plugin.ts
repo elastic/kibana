@@ -3,14 +3,32 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+declare module 'kibana/server' {
+  interface RequestHandlerContext {
+    dataManagement?: DataManagementContext;
+  }
+}
+
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin, Logger, PluginInitializerContext } from 'src/core/server';
+import {
+  CoreSetup,
+  Plugin,
+  Logger,
+  PluginInitializerContext,
+  IScopedClusterClient,
+} from 'src/core/server';
 
 import { PLUGIN } from '../common';
 import { Dependencies } from './types';
 import { ApiRoutes } from './routes';
 import { License, IndexDataEnricher } from './services';
 import { isEsError } from './lib/is_es_error';
+import { elasticsearchJsPlugin } from './client/elasticsearch';
+
+export interface DataManagementContext {
+  client: IScopedClusterClient;
+}
 
 export interface IndexManagementPluginSetup {
   indexDataEnricher: {
@@ -31,7 +49,10 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
     this.indexDataEnricher = new IndexDataEnricher();
   }
 
-  setup({ http }: CoreSetup, { licensing }: Dependencies): IndexManagementPluginSetup {
+  setup(
+    { http, elasticsearch }: CoreSetup,
+    { licensing }: Dependencies
+  ): IndexManagementPluginSetup {
     const router = http.createRouter();
 
     this.license.setup(
@@ -47,6 +68,14 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
         logger: this.logger,
       }
     );
+
+    const esClientConfig = { plugins: [elasticsearchJsPlugin] };
+    const dataManagementESClient = elasticsearch.createClient('dataManagement', esClientConfig);
+    http.registerRouteHandlerContext('dataManagement', (ctx, request) => {
+      return {
+        client: dataManagementESClient.asScoped(request),
+      };
+    });
 
     this.apiRoutes.setup({
       router,
