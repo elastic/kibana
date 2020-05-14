@@ -72,6 +72,12 @@ export const ingestManagerSetupHandler: RequestHandler = async (context, request
       body: { isInitialized: true },
     });
   } catch (e) {
+    if (e.isBoom) {
+      return response.customError({
+        statusCode: e.output.statusCode,
+        body: { message: e.output.payload.message },
+      });
+    }
     return response.customError({
       statusCode: 500,
       body: { message: e.message },
