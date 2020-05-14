@@ -12,8 +12,11 @@ import { takeInArray } from '../../common/operators';
 import { processProviderResult } from '../../common/process_result';
 import { GlobalSearchConfigType } from '../config';
 import { getContextFactory, GlobalSearchContextFactory } from './context';
-import { GlobalSearchResultProvider } from '../types';
-import { GlobalSearchBatchedResults, GlobalSearchFindOptions } from './types';
+import {
+  GlobalSearchResultProvider,
+  GlobalSearchBatchedResults,
+  GlobalSearchFindOptions,
+} from '../types';
 
 /** @public */
 export interface SearchServiceSetup {

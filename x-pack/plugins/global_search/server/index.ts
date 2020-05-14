@@ -22,9 +22,10 @@ export {
   GlobalSearchResult,
 } from '../common/types';
 export {
+  GlobalSearchBatchedResults,
+  GlobalSearchFindOptions,
   GlobalSearchProviderContext,
   GlobalSearchPluginStart,
   GlobalSearchPluginSetup,
   GlobalSearchResultProvider,
 } from './types';
-export { GlobalSearchFindOptions, GlobalSearchBatchedResults } from './services/types';

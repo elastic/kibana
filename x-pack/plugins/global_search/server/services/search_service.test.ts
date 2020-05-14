@@ -7,11 +7,12 @@
 import { Observable, of } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { TestScheduler } from 'rxjs/testing';
-import { httpServiceMock, httpServerMock, coreMock } from '../../../../../src/core/server/mocks';
-import { SearchService } from './search_service';
 import { duration } from 'moment';
+import { httpServiceMock, httpServerMock, coreMock } from '../../../../../src/core/server/mocks';
+import { GlobalSearchProviderResult } from '../../common/types';
 import { GlobalSearchConfigType } from '../config';
-import { GlobalSearchResultProvider, GlobalSearchProviderResult } from '../result_provider';
+import { GlobalSearchResultProvider } from '../types';
+import { SearchService } from './search_service';
 
 const getTestScheduler = () =>
   new TestScheduler((actual, expected) => {
