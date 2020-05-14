@@ -23,7 +23,7 @@ const del = require('del');
 
 const PLUGIN_FIXTURE = resolve(__dirname, '__fixtures__/build_action_test_plugin');
 const PLUGIN_BUILD_DIR = resolve(PLUGIN_FIXTURE, 'build');
-const PLUGIN = require('../../../lib/plugin_config')(PLUGIN_FIXTURE);
+const PLUGIN = require('../../../lib/plugin_config').pluginConfig(PLUGIN_FIXTURE);
 const noop = () => {};
 
 describe('creating build zip', () => {
