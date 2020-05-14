@@ -58,7 +58,6 @@ export default function({ getPageObjects, getService }) {
       const layerTOCDetails = await PageObjects.maps.getLayerTOCDetails('geo_shapes*');
       const split = layerTOCDetails.trim().split('\n');
 
-      console.log(split);
       //field display name
       expect(split[0]).to.equal('max prop1');
 
