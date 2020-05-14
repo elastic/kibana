@@ -179,8 +179,17 @@ def bash(script, label) {
 
 def doSetup() {
   retryWithDelay(2, 15) {
-    runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
-    error "I am error"
+    try {
+      runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
+      error "I am error"
+    } catch (ex) {
+      try {
+        // Setup expects this directory to be missing, so we need to remove it before we do a retry
+        bash("rm -rf ../elasticsearch", "Remove elasticsearch sibling directory, if it exists")
+      } fnally {
+        throw ex
+      }
+    }
   }
 }
 
