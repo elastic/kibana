@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import supertest from 'supertest';
-import { JOB_PARAMS_RISON } from './fixtures';
+import { JOB_PARAMS_RISON } from '../fixtures';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService }: { getService: any }) {

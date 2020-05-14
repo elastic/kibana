@@ -6,8 +6,9 @@
 
 import expect from '@kbn/expect';
 // @ts-ignore no module definition
-import { indexTimestamp } from '../../../legacy/plugins/reporting/server/lib/esqueue/helpers/index_timestamp';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { indexTimestamp } from '../../legacy/plugins/reporting/server/lib/esqueue/helpers/index_timestamp';
+import { FtrProviderContext } from './ftr_provider_context';
+import { services as xpackServices } from '../functional/services';
 
 interface PDFAppCounts {
   app: {
@@ -158,3 +159,10 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
     },
   };
 }
+
+export const services = {
+  ...xpackServices,
+  reportingAPI: ReportingAPIProvider,
+};
+
+export { ReportingAPIProvider };

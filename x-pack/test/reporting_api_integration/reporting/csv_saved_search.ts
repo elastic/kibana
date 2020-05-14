@@ -15,7 +15,7 @@ import {
   CSV_RESULT_TIMELESS,
   CSV_RESULT_NANOS,
   CSV_RESULT_DOCVALUE,
-} from './fixtures';
+} from '../fixtures';
 
 interface GenerateOpts {
   timerange?: {

@@ -6,8 +6,8 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { ReportingUsageStats } from '../services/reporting_api';
-import * as GenerationUrls from './generation_urls';
+import { ReportingUsageStats } from '../services';
+import * as GenerationUrls from '../generation_urls';
 
 interface UsageStats {
   reporting: ReportingUsageStats;

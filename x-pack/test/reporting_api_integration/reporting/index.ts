@@ -5,6 +5,7 @@
  */
 
 import { OSS_DATA_ARCHIVE_PATH, OSS_KIBANA_ARCHIVE_PATH } from './constants';
+import { ReportingUsageStats } from '../services';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -12,7 +13,7 @@ export default function({ loadTestFile, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('chromium', function() {
+  describe('Reporting APIs', function() {
     this.tags('ciGroup2');
 
     before(async () => {
@@ -29,6 +30,8 @@ export default function({ loadTestFile, getService }: FtrProviderContext) {
       await esArchiver.unload(OSS_DATA_ARCHIVE_PATH);
     });
 
+    loadTestFile(require.resolve('./csv_job_params'));
+    loadTestFile(require.resolve('./csv_saved_search'));
     loadTestFile(require.resolve('./usage'));
   });
 }
