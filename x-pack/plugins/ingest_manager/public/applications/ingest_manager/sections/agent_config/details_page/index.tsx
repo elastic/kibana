@@ -152,7 +152,7 @@ export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
             content:
               (agentConfig && (
                 <FormattedDate
-                  value={agentConfig?.updated_on}
+                  value={agentConfig?.updated_at}
                   year="numeric"
                   month="short"
                   day="2-digit"

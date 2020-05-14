@@ -36,6 +36,7 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
     const {
       notifications,
       chrome: { getIsNavDrawerLocked$ },
+      uiSettings,
     } = useCore();
     const {
       fleet: { enabled: isFleetEnabled },
@@ -149,13 +150,15 @@ export const ConfigSettingsView = memo<{ config: AgentConfig }>(
             history.push(AGENT_CONFIG_PATH);
           }}
         />
+        {/* TODO #64541 - Remove classes */}
         {hasChanges ? (
           <EuiBottomBar
-            css={{ zIndex: 5 }}
             className={
-              isNavDrawerLocked
-                ? 'ingestManager__bottomBar-isNavDrawerLocked'
-                : 'ingestManager__bottomBar'
+              uiSettings.get('pageNavigation') === 'legacy'
+                ? isNavDrawerLocked
+                  ? 'ingestManager__bottomBar-isNavDrawerLocked'
+                  : 'ingestManager__bottomBar'
+                : undefined
             }
           >
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
