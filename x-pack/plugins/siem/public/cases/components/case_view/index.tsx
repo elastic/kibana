@@ -28,7 +28,7 @@ import { UserList } from '../user_list';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
 import { getTypedPayload } from '../../containers/utils';
-import { WhitePageWrapper } from '../wrappers';
+import { WhitePageWrapper, HeaderWrapper } from '../wrappers';
 import { useBasePath } from '../../../common/lib/kibana';
 import { CaseStatus } from '../case_status';
 import { navTabs } from '../../../app/home/home_navigations';
@@ -47,11 +47,6 @@ const MyWrapper = styled.div`
   padding: ${({
     theme,
   }) => `${theme.eui.paddingSizes.l} ${gutterTimeline} ${theme.eui.paddingSizes.l}
-  ${theme.eui.paddingSizes.l}`};
-`;
-
-const MyHeaderWrapper = styled.div`
-  padding: ${({ theme }) => `0 ${gutterTimeline} ${theme.eui.paddingSizes.l}
   ${theme.eui.paddingSizes.l}`};
 `;
 
@@ -261,7 +256,7 @@ export const CaseComponent = React.memo<CaseProps>(
 
     return (
       <>
-        <MyHeaderWrapper>
+        <HeaderWrapper>
           <HeaderPage
             backOptions={backOptions}
             data-test-subj="case-view-title"
@@ -285,7 +280,7 @@ export const CaseComponent = React.memo<CaseProps>(
               {...caseStatusData}
             />
           </HeaderPage>
-        </MyHeaderWrapper>
+        </HeaderWrapper>
         <WhitePageWrapper>
           <MyWrapper>
             {!initLoadingData && pushCallouts != null && pushCallouts}

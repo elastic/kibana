@@ -15,14 +15,8 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { navTabs } from '../../app/home/home_navigations';
 import { CaseHeaderPage } from '../components/case_header_page';
 import { ConfigureCases } from '../components/configure_cases';
-import { WhitePageWrapper, SectionWrapper } from '../components/wrappers';
+import { WhitePageWrapper, SectionWrapper, HeaderWrapper } from '../components/wrappers';
 import * as i18n from './translations';
-
-const wrapperPageStyle: Record<string, string> = {
-  paddingLeft: '0',
-  paddingRight: '0',
-  paddingBottom: '0',
-};
 
 const ConfigureCasesPageComponent: React.FC = () => {
   const userPermissions = useGetUserSavedObjectPermissions();
@@ -42,9 +36,11 @@ const ConfigureCasesPageComponent: React.FC = () => {
 
   return (
     <>
-      <WrapperPage style={wrapperPageStyle}>
+      <WrapperPage noPadding>
         <SectionWrapper>
-          <CaseHeaderPage title={i18n.CONFIGURE_CASES_PAGE_TITLE} backOptions={backOptions} />
+          <HeaderWrapper>
+            <CaseHeaderPage title={i18n.CONFIGURE_CASES_PAGE_TITLE} backOptions={backOptions} />
+          </HeaderWrapper>
         </SectionWrapper>
         <WhitePageWrapper>
           <ConfigureCases userCanCrud={userPermissions?.crud ?? false} />
