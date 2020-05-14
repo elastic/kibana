@@ -104,6 +104,7 @@ export function TimechartHeader({
                 return {
                   text: display,
                   value: val,
+                  label: display,
                 };
               })}
             value={interval}
