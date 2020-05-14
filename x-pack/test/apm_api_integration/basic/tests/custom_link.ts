@@ -3,13 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// import querystring from 'querystring';
-// import {isEmpty} from 'lodash'
 import URL from 'url';
 import expect from '@kbn/expect';
 import { CustomLink } from '../../../../plugins/apm/common/custom_link/custom_link_types';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
+// eslint-disable-next-line import/no-default-export
 export default function customLinksTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
