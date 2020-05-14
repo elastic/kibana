@@ -6736,7 +6736,6 @@
     "xpack.idxMgmt.indexTable.serverErrorTitle": "インデックスの読み込み中にエラーが発生",
     "xpack.idxMgmt.indexTable.systemIndicesSearchIndicesAriaLabel": "インデックスの検索",
     "xpack.idxMgmt.indexTable.systemIndicesSearchInputPlaceholder": "検索",
-    "xpack.idxMgmt.indexTable.systemIndicesSwitchLabel": "システムインデックスを含める",
     "xpack.idxMgmt.indexTemplatesList.emptyPrompt.noIndexTemplatesTitle": "まだテンプレートがありません",
     "xpack.idxMgmt.indexTemplatesList.loadingIndexTemplatesDescription": "テンプレートを読み込み中…",
     "xpack.idxMgmt.indexTemplatesList.loadingIndexTemplatesErrorMessage": "テンプレートの読み込み中にエラーが発生",

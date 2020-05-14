@@ -38,9 +38,17 @@ async function fetchIndicesCall(
   callAsCurrentUser: CallAsCurrentUser,
   indexNames?: string[]
 ): Promise<Index[]> {
+  let indexNamesCSV: string;
+  if (indexNames && indexNames.length) {
+    indexNamesCSV = indexNames.join(',');
+  } else {
+    indexNamesCSV = '*';
+  }
+
+  // This call retrieves alias and settings (incl. hidden status) information about indices
   const indices: GetIndicesResponse = await callAsCurrentUser('transport.request', {
     method: 'GET',
-    path: `/${indexNames ? indexNames : '*'}`,
+    path: `/${indexNamesCSV}`,
     query: {
       expand_wildcards: 'hidden,all',
     },
@@ -57,18 +65,17 @@ async function fetchIndicesCall(
     format: 'json',
     h: 'health,status,index,uuid,pri,rep,docs.count,sth,store.size',
     expand_wildcards: 'hidden,all',
+    index: indexNamesCSV,
   };
 
-  if (indexNames) {
-    catQuery.index = indexNames.join(',');
-  }
-
+  // This call retrieves health and other high-level information about indices.
   const catHits: Hit[] = await callAsCurrentUser('transport.request', {
     method: 'GET',
     path: '/_cat/indices',
     query: catQuery,
   });
 
+  // The two responses should be equal in the number of indices returned
   return catHits.map(hit => {
     const index = indices[hit.index];
     const aliases = Object.keys(index.aliases);
@@ -94,6 +101,6 @@ export const fetchIndices = async (
   indexDataEnricher: IndexDataEnricher,
   indexNames?: string[]
 ) => {
-  const response = await fetchIndicesCall(callAsCurrentUser, indexNames);
-  return await indexDataEnricher.enrichIndices(response, callAsCurrentUser);
+  const indices = await fetchIndicesCall(callAsCurrentUser, indexNames);
+  return await indexDataEnricher.enrichIndices(indices, callAsCurrentUser);
 };

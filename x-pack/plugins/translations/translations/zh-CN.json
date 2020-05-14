@@ -6741,7 +6741,6 @@
     "xpack.idxMgmt.indexTable.serverErrorTitle": "加载索引时出错",
     "xpack.idxMgmt.indexTable.systemIndicesSearchIndicesAriaLabel": "搜索索引",
     "xpack.idxMgmt.indexTable.systemIndicesSearchInputPlaceholder": "搜索",
-    "xpack.idxMgmt.indexTable.systemIndicesSwitchLabel": "包括系统索引",
     "xpack.idxMgmt.indexTemplatesList.emptyPrompt.noIndexTemplatesTitle": "您尚未有任何模板",
     "xpack.idxMgmt.indexTemplatesList.loadingIndexTemplatesDescription": "正在加载模板……",
     "xpack.idxMgmt.indexTemplatesList.loadingIndexTemplatesErrorMessage": "加载模板时出错",
