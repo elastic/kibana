@@ -46,7 +46,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       expect(noItemsFoundMessage).to.equal('No items found');
     });
 
-    describe('and policies exists', () => {
+    describe.skip('and policies exists', () => {
       let policyInfo: PolicyTestResourceInfo;
 
       before(async () => {
