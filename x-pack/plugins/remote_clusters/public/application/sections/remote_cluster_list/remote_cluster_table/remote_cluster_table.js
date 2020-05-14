@@ -333,6 +333,7 @@ export class RemoteClusterTable extends Component {
       onChange: this.onSearch,
       box: {
         incremental: true,
+        'data-test-subj': 'remoteClusterSearch',
       },
     };
 

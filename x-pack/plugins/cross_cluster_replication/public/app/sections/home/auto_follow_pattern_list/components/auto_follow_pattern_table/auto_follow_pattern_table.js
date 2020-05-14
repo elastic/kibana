@@ -336,6 +336,7 @@ export class AutoFollowPatternTable extends PureComponent {
       onChange: this.onSearch,
       box: {
         incremental: true,
+        'data-test-subj': 'autoFollowPatternSearch',
       },
     };
 

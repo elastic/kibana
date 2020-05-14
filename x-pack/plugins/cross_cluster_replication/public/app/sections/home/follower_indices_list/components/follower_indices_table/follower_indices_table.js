@@ -318,6 +318,7 @@ export class FollowerIndicesTable extends PureComponent {
       onChange: this.onSearch,
       box: {
         incremental: true,
+        'data-test-subj': 'followerIndexSearch',
       },
     };
 

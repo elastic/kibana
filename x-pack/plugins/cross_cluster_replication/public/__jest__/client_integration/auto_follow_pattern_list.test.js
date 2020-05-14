@@ -62,6 +62,7 @@ describe('<AutoFollowPatternList />', () => {
   });
 
   describe('when there are multiple pages of auto-follow patterns', () => {
+    let find;
     let component;
     let table;
     let actions;
@@ -81,7 +82,7 @@ describe('<AutoFollowPatternList />', () => {
       httpRequestsMockHelpers.setLoadAutoFollowPatternsResponse({ patterns: autoFollowPatterns });
 
       // Mount the component
-      ({ component, table, actions, form } = setup());
+      ({ find, component, table, actions, form } = setup());
 
       await nextTick(); // Make sure that the http request is fulfilled
       component.update();
@@ -97,7 +98,7 @@ describe('<AutoFollowPatternList />', () => {
     });
 
     test('search works', () => {
-      form.setInputValue(component.find('input[type="search"]'), 'unique');
+      form.setInputValue(find('autoFollowPatternSearch'), 'unique');
       const { tableCellsValues } = table.getMetaData('autoFollowPatternListTable');
       expect(tableCellsValues.length).toBe(1);
     });
