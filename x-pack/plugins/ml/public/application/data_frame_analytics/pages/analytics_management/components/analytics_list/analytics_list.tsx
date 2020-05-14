@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FC, useState } from 'react';
+import React, { Fragment, FC, useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiSearchBar,
 } from '@elastic/eui';
 
 import { DataFrameAnalyticsId, useRefreshAnalyticsList } from '../../../../common';
@@ -46,6 +47,7 @@ import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';
 import { CreateAnalyticsButton } from '../create_analytics_button';
 import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
 import { CreateAnalyticsFlyoutWrapper } from '../create_analytics_flyout_wrapper';
+import { getSelectedJobIdFromUrl } from '../../../../../jobs/jobs_list/components/utils';
 
 function getItemIdToExpandedRowMap(
   itemIds: DataFrameAnalyticsId[],
@@ -86,6 +88,8 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [filterActive, setFilterActive] = useState(false);
 
+  const [queryText, setQueryText] = useState('');
+
   const [analytics, setAnalytics] = useState<DataFrameAnalyticsListRow[]>([]);
   const [analyticsStats, setAnalyticsStats] = useState<AnalyticStatsBarStats | undefined>(
     undefined
@@ -102,6 +106,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const [sortField, setSortField] = useState<string>(DataFrameAnalyticsListColumn.id);
   const [sortDirection, setSortDirection] = useState<SortDirection>(SORT_DIRECTION.ASC);
 
+  const [urlFilterIdCleared, setUrlFilterIdCleared] = useState<boolean>(false);
   const disabled =
     !checkPermission('canCreateDataFrameAnalytics') ||
     !checkPermission('canStartStopDataFrameAnalytics');
@@ -113,6 +118,18 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     setIsInitialized,
     blockRefresh
   );
+
+  const selectedId = getSelectedJobIdFromUrl(window.location.href);
+  useEffect(() => {
+    if (urlFilterIdCleared === false && analytics.length > 0) {
+      if (selectedId !== undefined) {
+        setUrlFilterIdCleared(true);
+        setQueryText(selectedId);
+        const selectedIdQuery: Query = EuiSearchBar.Query.parse(selectedId);
+        onQueryChange({ query: selectedIdQuery, error: undefined });
+      }
+    }
+  }, [urlFilterIdCleared, analytics]);
 
   // Subscribe to the refresh observable to trigger reloading the analytics list.
   useRefreshAnalyticsList({
@@ -129,6 +146,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         clauses = query.ast.clauses;
       }
       if (clauses.length > 0) {
+        setQueryText(query.text);
         setFilterActive(true);
         filterAnalytics(clauses as Array<TermClause | FieldClause>);
       } else {
@@ -286,6 +304,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   };
 
   const search = {
+    query: queryText,
     onChange: onQueryChange,
     box: {
       incremental: true,
