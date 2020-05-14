@@ -114,11 +114,33 @@ function getLayerById(layerId, state) {
 async function syncDataForAllLayers(dispatch, getState, dataFilters) {
   const state = getState();
   const layerList = getLayerList(state);
-  const syncs = layerList.map(layer => {
-    const loadingFunctions = getLayerLoadingCallbacks(dispatch, getState, layer.getId());
-    return layer.syncData({ ...loadingFunctions, dataFilters });
+  const syncPromises = layerList.map(async (layer) => {
+    return syncDataForLayer(layer);
   });
-  await Promise.all(syncs);
+  await Promise.all(syncPromises);
+}
+
+async function syncDataForLayer(layer) {
+  return async (dispatch, getState) => {
+    const dataFilters = getDataFilters(getState());
+    if (!layer.isVisible() || !layer.showAtZoomLevel(dataFilters.zoom)) {
+      return;
+    })
+
+    await layer.syncData({
+      ...getLayerLoadingCallbacks(dispatch, getState, layer.getId()),
+      dataFilters: getDataFilters(getState()),
+    });
+  };
+}
+
+function syncDataForLayerId(layerId) {
+  return async (dispatch, getState) => {
+    const layer = getLayerById(layerId, getState());
+    if (layer) {
+      dispatch(syncDataForLayer(layer));
+    }
+  };
 }
 
 export function cancelAllInFlightRequests() {
@@ -192,7 +214,7 @@ export function rollbackToTrackedLayerStateForSelectedLayer() {
     // syncDataForLayer may not trigger endDataLoad if no re-fetch is required
     dispatch(updateStyleMeta(layerId));
 
-    dispatch(syncDataForLayer(layerId));
+    dispatch(syncDataForLayerId(layerId));
   };
 }
 
@@ -252,7 +274,7 @@ export function addLayer(layerDescriptor) {
       type: ADD_LAYER,
       layer: layerDescriptor,
     });
-    dispatch(syncDataForLayer(layerDescriptor.id));
+    dispatch(syncDataForLayerId(layerDescriptor.id));
   };
 }
 
@@ -333,7 +355,7 @@ export function setLayerVisibility(layerId, makeVisible) {
       visibility: makeVisible,
     });
     if (makeVisible) {
-      dispatch(syncDataForLayer(layerId));
+      dispatch(syncDataForLayer(layer));
     }
   };
 }
@@ -751,7 +773,7 @@ export function updateSourceProp(layerId, propName, value, newLayerType) {
       dispatch(updateLayerType(layerId, newLayerType));
     }
     await dispatch(clearMissingStyleProperties(layerId));
-    dispatch(syncDataForLayer(layerId));
+    dispatch(syncDataForLayerId(layerId));
   };
 }
 
@@ -768,20 +790,6 @@ function updateLayerType(layerId, newLayerType) {
       propName: 'type',
       newValue: newLayerType,
     });
-  };
-}
-
-export function syncDataForLayer(layerId) {
-  return async (dispatch, getState) => {
-    const targetLayer = getLayerById(layerId, getState());
-    if (targetLayer) {
-      const dataFilters = getDataFilters(getState());
-      const loadingFunctions = getLayerLoadingCallbacks(dispatch, getState, layerId);
-      await targetLayer.syncData({
-        ...loadingFunctions,
-        dataFilters,
-      });
-    }
   };
 }
 
@@ -830,7 +838,7 @@ export function setLayerQuery(id, query) {
       newValue: query,
     });
 
-    dispatch(syncDataForLayer(id));
+    dispatch(syncDataForLayerId(id));
   };
 }
 
@@ -956,7 +964,7 @@ export function updateLayerStyle(layerId, styleDescriptor) {
     dispatch(updateStyleMeta(layerId));
 
     // Style update may require re-fetch, for example ES search may need to retrieve field used for dynamic styling
-    dispatch(syncDataForLayer(layerId));
+    dispatch(syncDataForLayerId(layerId));
   };
 }
 
@@ -999,7 +1007,7 @@ export function setJoinsForLayer(layer, joins) {
     });
 
     await dispatch(clearMissingStyleProperties(layer.getId()));
-    dispatch(syncDataForLayer(layer.getId()));
+    dispatch(syncDataForLayerId(layer.getId()));
   };
 }
 
