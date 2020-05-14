@@ -440,18 +440,17 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = props => {
               />
             </StyledExpression>
             {metric && (
-              <StyledExpression>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    height: '100%',
-                    paddingTop: '4px',
-                  }}
-                >
-                  <div>{metricUnit[metric]?.label || ''}</div>
-                </div>
-              </StyledExpression>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  height: '100%',
+                  paddingTop: '4px',
+                  paddingBottom: '4px',
+                }}
+              >
+                <EuiText size={'s'}>{metricUnit[metric]?.label || ''}</EuiText>
+              </div>
             )}
           </StyledExpressionRow>
         </EuiFlexItem>
@@ -524,4 +523,5 @@ const metricUnit: Record<string, { label: string }> = {
   s3UploadBytes: { label: 'bytes' },
   s3DownloadBytes: { label: 'bytes' },
   sqsOldestMessage: { label: 'seconds' },
+  rdsLatency: { label: 'ms' },
 };
