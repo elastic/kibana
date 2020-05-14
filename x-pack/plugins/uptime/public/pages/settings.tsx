@@ -25,7 +25,6 @@ import { DynamicSettings } from '../../common/runtime_types';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { OVERVIEW_ROUTE } from '../../common/constants';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { UptimePage, useUptimeTelemetry } from '../hooks';
 import { IndicesForm } from '../components/settings/indices_form';
 import {
   CertificateExpirationForm,
@@ -75,12 +74,10 @@ const getFieldErrors = (formFields: DynamicSettings | null): SettingsPageFieldEr
   return null;
 };
 
-export const SettingsPage = () => {
+export const SettingsPage: React.FC = () => {
   const dss = useSelector(selectDynamicSettings);
 
   useBreadcrumbs([{ text: Translations.settings.breadcrumbText }]);
-
-  useUptimeTelemetry(UptimePage.Settings);
 
   const dispatch = useDispatch();
 

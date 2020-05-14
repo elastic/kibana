@@ -23,6 +23,7 @@
 
 import { SavedObjectsRawDoc, SavedObjectsSerializer } from '../../serialization';
 import { TransformFn } from './document_migrator';
+import { SavedObjectsMigrationLogger } from '.';
 
 /**
  * Applies the specified migration function to every saved object document in the list
@@ -35,7 +36,8 @@ import { TransformFn } from './document_migrator';
 export function migrateRawDocs(
   serializer: SavedObjectsSerializer,
   migrateDoc: TransformFn,
-  rawDocs: SavedObjectsRawDoc[]
+  rawDocs: SavedObjectsRawDoc[],
+  log: SavedObjectsMigrationLogger
 ): SavedObjectsRawDoc[] {
   return rawDocs.map(raw => {
     if (serializer.isRawSavedObject(raw)) {
@@ -47,6 +49,10 @@ export function migrateRawDocs(
       });
     }
 
+    log.error(
+      `Error: Unable to migrate the corrupt Saved Object document ${raw._id}. To prevent Kibana from performing a migration on every restart, please delete or fix this document by ensuring that the namespace and type in the document's id matches the values in the namespace and type fields.`,
+      { rawDocument: raw }
+    );
     return raw;
   });
 }

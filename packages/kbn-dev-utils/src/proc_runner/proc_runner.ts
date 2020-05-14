@@ -18,17 +18,22 @@
  */
 
 import moment from 'moment';
-import { filter, first, catchError } from 'rxjs/operators';
+import * as Rx from 'rxjs';
+import { filter, first, catchError, map } from 'rxjs/operators';
 import exitHook from 'exit-hook';
 
 import { ToolingLog } from '../tooling_log';
 import { createCliError } from './errors';
 import { Proc, ProcOptions, startProc } from './proc';
 
+const SECOND = 1000;
+const MINUTE = 60 * SECOND;
+
 const noop = () => {};
 
 interface RunOptions extends ProcOptions {
   wait: true | RegExp;
+  waitTimeout?: number | false;
 }
 
 /**
@@ -71,6 +76,7 @@ export class ProcRunner {
       cwd = process.cwd(),
       stdin = undefined,
       wait = false,
+      waitTimeout = 15 * MINUTE,
       env = process.env,
     } = options;
 
@@ -97,8 +103,8 @@ export class ProcRunner {
     try {
       if (wait instanceof RegExp) {
         // wait for process to log matching line
-        await proc.lines$
-          .pipe(
+        await Rx.race(
+          proc.lines$.pipe(
             filter(line => wait.test(line)),
             first(),
             catchError(err => {
@@ -108,8 +114,18 @@ export class ProcRunner {
                 throw err;
               }
             })
-          )
-          .toPromise();
+          ),
+          waitTimeout === false
+            ? Rx.NEVER
+            : Rx.timer(waitTimeout).pipe(
+                map(() => {
+                  const sec = waitTimeout / SECOND;
+                  throw createCliError(
+                    `[${name}] failed to match pattern within ${sec} seconds [pattern=${wait}]`
+                  );
+                })
+              )
+        ).toPromise();
       }
 
       if (wait === true) {

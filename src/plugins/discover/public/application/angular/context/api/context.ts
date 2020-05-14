@@ -113,8 +113,8 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract) {
   async function createSearchSource(indexPattern: IndexPattern, filters: Filter[]) {
     const { data } = getServices();
 
-    return data.search.searchSource
-      .create()
+    const searchSource = await data.search.searchSource.create();
+    return searchSource
       .setParent(undefined)
       .setField('index', indexPattern)
       .setField('filter', filters);
