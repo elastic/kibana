@@ -166,7 +166,21 @@ export const AlertForm = ({
     ? alertTypeModel.alertParamsExpression
     : null;
 
-  const alertTypeNodes = alertTypeRegistry.list().map(function(item, index) {
+  const alertTypeRegistryList =
+    alert.consumer === 'alerting'
+      ? alertTypeRegistry
+          .list()
+          .filter(
+            (alertTypeRegistryItem: AlertTypeModel) => !alertTypeRegistryItem.requiresAppContext
+          )
+      : alertTypeRegistry
+          .list()
+          .filter(
+            (alertTypeRegistryItem: AlertTypeModel) =>
+              alertTypesIndex &&
+              alertTypesIndex[alertTypeRegistryItem.id].producer === alert.consumer
+          );
+  const alertTypeNodes = alertTypeRegistryList.map(function(item, index) {
     return (
       <EuiKeyPadMenuItem
         key={index}
