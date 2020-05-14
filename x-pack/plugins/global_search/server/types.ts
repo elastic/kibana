@@ -16,12 +16,7 @@ import {
   GlobalSearchProviderFindOptions,
   GlobalSearchProviderResult,
 } from '../common/types';
-import {
-  GlobalSearchBatchedResults,
-  GlobalSearchFindOptions,
-  SearchServiceSetup,
-  SearchServiceStart,
-} from './services';
+import { SearchServiceSetup, SearchServiceStart } from './services';
 
 export type GlobalSearchPluginSetup = Pick<SearchServiceSetup, 'registerResultProvider'>;
 export type GlobalSearchPluginStart = Pick<SearchServiceStart, 'find'>;
