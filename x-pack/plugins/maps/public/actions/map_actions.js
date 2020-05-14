@@ -113,9 +113,7 @@ function getLayerById(layerId, state) {
 
 function syncDataForAllLayers() {
   return async (dispatch, getState) => {
-    const state = getState();
-    const layerList = getLayerList(state);
-    const syncPromises = layerList.map(async layer => {
+    const syncPromises = getLayerList(getState()).map(async layer => {
       return dispatch(syncDataForLayer(layer));
     });
     await Promise.all(syncPromises);
