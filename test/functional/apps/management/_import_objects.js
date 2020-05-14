@@ -356,7 +356,6 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.settings.importFile(
           path.join(__dirname, 'exports', '_import_objects_with_index_patterns.json')
         );
-        await PageObjects.settings.checkImportFailedWarning();
         await PageObjects.settings.clickImportDone();
 
         const objects = await PageObjects.settings.getSavedObjectsInTable();
