@@ -30,51 +30,60 @@ export async function navigateToKibana(
 ) {
   const browser = await puppeteer.launch({ headless: false });
   const results: Array<{ url: any; time: any; size: string; eventSize: string }> = [];
-  const page = await browser.newPage();
-
-  const client = await page.target().createCDPSession();
-  await client.send('Network.enable');
-  await client.send('Performance.enable');
-  await page.tracing.start({ path: resolve(statsPath, 'trace.json') });
   const devToolsResponses = new Map();
 
-  client.on('Network.responseReceived', event => {
-    devToolsResponses.set(event.requestId, event.response);
-  });
+  for (const url of ['/login', '/app/kibana', '/app/graph']) {
+    const page = await browser.newPage();
+    page.setDefaultNavigationTimeout(0);
+    const frameResponses = new Map();
+    devToolsResponses.set(url, frameResponses);
 
-  client.on('Network.loadingFinished', event => {
-    const response = devToolsResponses.get(event.requestId);
+    const client = await page.target().createCDPSession();
+    await client.send('Network.enable');
 
-    if (/^.*.[js|css]$/.test(response.url)) {
-      const encodedBodyLength = event.encodedDataLength - response.encodedDataLength;
-      results.push({
-        url: response.url,
-        time: response.timing ? response.timing.requestTime : 0,
-        size: (encodedBodyLength / 1024).toFixed(1),
-        eventSize: (event.encodedDataLength / 1024).toFixed(1),
-      });
+    client.on('Network.responseReceived', event => {
+      frameResponses.set(event.requestId, { responseRecieved: event });
+    });
+
+    client.on('Network.loadingFinished', event => {
+      frameResponses.get(event.requestId).loadingFinished = event;
+
+      // if (/^.*.[js|css]$/.test(response.url)) {
+      // const encodedBodyLength = event.encodedDataLength - response.encodedDataLength;
+      // results.push({
+      //   url: response.url,
+      //   time: response.timing ? response.timing.requestTime : 0,
+      //   size: (encodedBodyLength / 1024).toFixed(1),
+      //   eventSize: (event.encodedDataLength / 1024).toFixed(1),
+      // });
+      // }
+    });
+
+    client.on(
+      'Network.responseReceived',
+      async ({ requestId, loaderId, timestamp, type, response, frameId }: any) => {
+        log.debug(response.url);
+      }
+    );
+
+    const fullURL = appConfig.url + url;
+    log.debug(`goto ${fullURL}`);
+    await page.goto(fullURL, {
+      waitUntil: 'networkidle0',
+    });
+
+    if (url === '/login') {
+      log.debug(`log in to the app..`);
+      await page.type('[data-test-subj="loginUsername"]', appConfig.login);
+      await page.type('[data-test-subj="loginPassword"]', appConfig.password);
+      await page.click('[data-test-subj="loginSubmit"]');
+      await page.waitForNavigation({ waitUntil: 'networkidle0' });
     }
-  });
 
-  client.on(
-    'Network.responseReceived',
-    async ({ requestId, loaderId, timestamp, type, response, frameId }: any) => {
-      log.debug(response.url);
-    }
-  );
+    await page.close();
+    // clear dev tools responses
+  }
 
-  page.setDefaultNavigationTimeout(0);
-  log.debug(`goto ${appConfig.url}`);
-  await page.goto(appConfig.url, {
-    waitUntil: 'networkidle0',
-  });
-  log.debug(`log in to the app..`);
-  await page.type('[data-test-subj="loginUsername"]', appConfig.login);
-  await page.type('[data-test-subj="loginPassword"]', appConfig.password);
-  await page.click('[data-test-subj="loginSubmit"]');
-  await page.waitForNavigation({ waitUntil: 'networkidle0' });
-
-  await page.tracing.stop();
   await browser.close();
 
   return results;
