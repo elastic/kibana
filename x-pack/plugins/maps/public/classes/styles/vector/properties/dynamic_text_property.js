@@ -9,7 +9,6 @@ import { getComputedFieldName } from '../style_util';
 
 export class DynamicTextProperty extends DynamicStyleProperty {
   syncTextFieldWithMb(mbLayerId, mbMap) {
-    console.log('synctextfieldwithmb');
     if (this._field && this._field.isValid()) {
       // Fields that don't support auto-domain, are not normalized with a field-formatter and stored into a computed-field
       const targetName = this._field.supportsAutoDomain()
