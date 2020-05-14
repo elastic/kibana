@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { IndexPattern } from '../../../data/public';
 
 export function getListBreadcrumbs() {
   return [
