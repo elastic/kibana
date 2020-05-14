@@ -180,6 +180,7 @@ def bash(script, label) {
 def doSetup() {
   retryWithDelay(2, 15) {
     runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
+    error "I am error"
   }
 }
 
