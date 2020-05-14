@@ -13,11 +13,12 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 import * as i18n from './translations';
 import { Case } from '../../containers/types';
 import { getCaseUrl } from '../../../common/components/link_to';
+import { gutterTimeline } from '../../../common/lib/helpers';
 import { HeaderPage } from '../../../common/components/header_page';
 import { EditableTitle } from '../../../common/components/header_page/editable_title';
 import { TagList } from '../tag_list';
@@ -48,6 +49,10 @@ const MyWrapper = styled.div`
   }) => `${theme.eui.paddingSizes.l} ${gutterTimeline} ${theme.eui.paddingSizes.l}
   ${theme.eui.paddingSizes.l}`};
 `;
+
+const MyHeaderWrapper = styled.div`
+  padding: ${({ theme }) => `0 ${gutterTimeline} ${theme.eui.paddingSizes.l}
+  ${theme.eui.paddingSizes.l}`};
 `;
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
@@ -256,29 +261,31 @@ export const CaseComponent = React.memo<CaseProps>(
 
     return (
       <>
-        <HeaderPage
-          backOptions={backOptions}
-          data-test-subj="case-view-title"
-          titleNode={
-            <EditableTitle
+        <MyHeaderWrapper>
+          <HeaderPage
+            backOptions={backOptions}
+            data-test-subj="case-view-title"
+            titleNode={
+              <EditableTitle
+                disabled={!userCanCrud}
+                isLoading={isLoading && updateKey === 'title'}
+                title={caseData.title}
+                onSubmit={onSubmitTitle}
+              />
+            }
+            title={caseData.title}
+          >
+            <CaseStatus
+              currentExternalIncident={currentExternalIncident}
+              caseData={caseData}
               disabled={!userCanCrud}
-              isLoading={isLoading && updateKey === 'title'}
-              title={caseData.title}
-              onSubmit={onSubmitTitle}
+              isLoading={isLoading && updateKey === 'status'}
+              onRefresh={handleRefresh}
+              toggleStatusCase={toggleStatusCase}
+              {...caseStatusData}
             />
-          }
-          title={caseData.title}
-        >
-          <CaseStatus
-            currentExternalIncident={currentExternalIncident}
-            caseData={caseData}
-            disabled={!userCanCrud}
-            isLoading={isLoading && updateKey === 'status'}
-            onRefresh={handleRefresh}
-            toggleStatusCase={toggleStatusCase}
-            {...caseStatusData}
-          />
-        </HeaderPage>
+          </HeaderPage>
+        </MyHeaderWrapper>
         <WhitePageWrapper>
           <MyWrapper>
             {!initLoadingData && pushCallouts != null && pushCallouts}

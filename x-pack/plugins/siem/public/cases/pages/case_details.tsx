@@ -21,13 +21,19 @@ export const CaseDetailsPage = React.memo(() => {
   const { detailName: caseId } = useParams();
   const search = useGetUrlSearch(navTabs.case);
 
+  const wrapperPageStyle: Record<string, string> = {
+    paddingLeft: '0',
+    paddingRight: '0',
+    paddingBottom: '0',
+  };
+
   if (userPermissions != null && !userPermissions.read) {
     return <Redirect to={getCaseUrl(search)} />;
   }
 
   return caseId != null ? (
     <>
-      <WrapperPage>
+      <WrapperPage style={wrapperPageStyle}>
         {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (
           <CaseCallOut
             title={savedObjectReadOnly.title}
