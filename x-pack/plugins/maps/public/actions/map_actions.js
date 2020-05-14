@@ -999,12 +999,12 @@ export function setJoinsForLayer(layer, joins) {
   return async dispatch => {
     await dispatch({
       type: SET_JOINS,
-      layer: layer,
-      joins: joins,
+      layer,
+      joins,
     });
 
     await dispatch(clearMissingStyleProperties(layer.getId()));
-    dispatch(syncDataForLayer(layer));
+    dispatch(syncDataForLayerId(layer.getId()));
   };
 }
 
