@@ -128,6 +128,7 @@ describe('embeddable', () => {
       expressionRenderer,
       getTrigger,
       {
+        editPath: '',
         editUrl: '',
         editable: true,
         savedVis,
