@@ -9,7 +9,18 @@ import { shallow } from 'enzyme';
 
 import { StepRuleActions } from './index';
 
-jest.mock('../../../../../lib/kibana');
+jest.mock('../../../../../lib/kibana', () => ({
+  useKibana: jest.fn().mockReturnValue({
+    services: {
+      application: {
+        getUrlForApp: jest.fn(),
+      },
+      triggers_actions_ui: {
+        actionTypeRegistry: jest.fn(),
+      },
+    },
+  }),
+}));
 
 describe('StepRuleActions', () => {
   it('renders correctly', () => {
