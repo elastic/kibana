@@ -65,7 +65,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     /**
      * Logins to Kibana as default user and navigates to provided app
      * @param appUrl Kibana URL
-     * @param insertTimestamp pass 'false' to skip inserting timestamp in URL
      */
     private async loginIfPrompted(appUrl: string, insertTimestamp: boolean) {
       let currentUrl = await browser.getCurrentUrl();
@@ -109,7 +108,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       await retry.try(async () => {
         if (useActualUrl) {
           log.debug(`navigateToActualUrl ${appUrl}`);
-          await browser.get(appUrl, insertTimestamp);
+          await browser.get(appUrl);
         } else {
           log.debug(`navigateToUrl ${appUrl}`);
           await browser.get(appUrl, insertTimestamp);
@@ -131,7 +130,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     /**
      * Navigates browser using the pathname from the appConfig and subUrl as the hash
      * @param appName As defined in the apps config, e.g. 'home'
-     * @param subUrl The route after the hash (#), e.g. '/tutorial_directory/sampleData'
+     * @param subUrl The route after the hash (#), e.g. 'tutorial_directory/sampleData'
      * @param args additional arguments
      */
     public async navigateToUrl(
@@ -163,7 +162,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
      * Navigates browser using the pathname from the appConfig and subUrl as the extended path.
      * This was added to be able to test an application that uses browser history over hash history.
      * @param appName As defined in the apps config, e.g. 'home'
-     * @param subUrl The route after the appUrl, e.g. '/tutorial_directory/sampleData'
+     * @param subUrl The route after the appUrl, e.g. 'tutorial_directory/sampleData'
      * @param args additional arguments
      */
     public async navigateToUrlWithBrowserHistory(
@@ -222,7 +221,6 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       appName: string,
       { basePath = '', shouldLoginIfPrompted = true, hash = '', insertTimestamp = true } = {}
     ) {
-      log.debug(`++++++++++++ insertTimestamp = ${insertTimestamp}`);
       let appUrl: string;
       if (config.has(['apps', appName])) {
         // Legacy applications
