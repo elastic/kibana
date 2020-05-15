@@ -163,10 +163,11 @@ export const CaseComponent = React.memo<CaseProps>(
     );
 
     const { loading: isLoadingConnectors, connectors } = useConnectors();
-    const caseConnectorName = useMemo(
-      () => connectors.find(c => c.id === caseData.connectorId)?.name ?? 'none',
-      [connectors, caseData.connectorId]
-    );
+
+    const [caseConnectorName, isValidConnector] = useMemo(() => {
+      const connector = connectors.find(c => c.id === caseData.connectorId);
+      return [connector?.name ?? 'none', !!connector];
+    }, [connectors, caseData.connectorId]);
 
     const currentExternalIncident = useMemo(
       () =>
@@ -185,6 +186,7 @@ export const CaseComponent = React.memo<CaseProps>(
       connectors,
       updateCase: handleUpdateCase,
       userCanCrud,
+      isValidConnector,
     });
 
     const onSubmitConnector = useCallback(
