@@ -126,7 +126,7 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
       await esSupertest
         .post('/.reporting*/_delete_by_query')
         .send({ query: { match_all: {} } })
-        .expect(200);
+        .expect(({ status }) => status === 200 || status === 404);
     },
 
     expectRecentPdfAppStats(stats: UsageStats, app: string, count: number) {
