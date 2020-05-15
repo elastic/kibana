@@ -56,7 +56,7 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
           };
         });
     },
-    async changeTabs(tab: 'indicesTab' | 'templatesTab') {
+    async changeTabs(tab: 'indicesTab' | 'indexTemplatesTab') {
       await testSubjects.click(tab);
     },
   };
