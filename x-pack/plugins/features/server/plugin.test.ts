@@ -53,7 +53,7 @@ describe('Features Plugin', () => {
     `);
   });
 
-  it('returns OSS + registered features with timielion when available', async () => {
+  it('returns OSS + registered features with timelion when available', async () => {
     const plugin = new Plugin(initContext);
     const { registerFeature } = await plugin.setup(coreSetup, {
       visTypeTimelion: { uiEnabled: true },
