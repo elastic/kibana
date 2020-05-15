@@ -34,7 +34,7 @@ export function extractColorFromStyleProperty(colorStyleProperty, defaultColor) 
     }
 
     const palette = getColorPalette(colorStyleProperty.options.colorCategory);
-    return palette[0];
+    return palette ? palette[0] : null;
   } else {
     // return middle of gradient for dynamic style property
     if (colorStyleProperty.options.useCustomColorRamp) {

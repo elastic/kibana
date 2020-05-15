@@ -15,8 +15,13 @@ import {
   HEATMAP_COLOR_RAMP_LABEL,
 } from './heatmap_constants';
 
-export function HeatmapStyleEditor({ colorRampName, onHeatmapColorChange }) {
-  const onColorRampChange = selectedColorRampName => {
+interface Props {
+  colorRampName: string;
+  onHeatmapColorChange: ({ colorRampName }: { colorRampName: string }) => void;
+}
+
+export function HeatmapStyleEditor({ colorRampName, onHeatmapColorChange }: Props) {
+  const onColorRampChange = (selectedColorRampName: string) => {
     onHeatmapColorChange({
       colorRampName: selectedColorRampName,
     });
