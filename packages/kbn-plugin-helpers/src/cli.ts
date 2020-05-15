@@ -26,7 +26,7 @@ import { createCommanderAction } from './lib/commander_action';
 import { docs } from './lib/docs';
 import { enableCollectingUnknownOptions } from './lib/enable_collecting_unknown_options';
 
-const pkg = JSON.parse(Fs.readFileSync(Path.resolve(__dirname, 'package.json'), 'utf8'));
+const pkg = JSON.parse(Fs.readFileSync(Path.resolve(__dirname, '../package.json'), 'utf8'));
 program.version(pkg.version);
 
 enableCollectingUnknownOptions(
