@@ -5,13 +5,16 @@
  */
 
 import { Store } from 'redux';
+import { CoreStart } from 'kibana/public';
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 import { initMonitorStatusAlertType } from './monitor_status';
 import { initTlsAlertType } from './tls';
+import { ClientPluginsStart } from '../../apps/plugin';
 
 export type AlertTypeInitializer = (dependenies: {
-  autocomplete: any;
   store: Store<any>;
+  core: CoreStart;
+  plugins: ClientPluginsStart;
 }) => AlertTypeModel;
 
 export const alertTypeInitializers: AlertTypeInitializer[] = [

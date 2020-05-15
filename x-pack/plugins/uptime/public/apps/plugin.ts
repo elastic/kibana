@@ -12,8 +12,14 @@ import { PLUGIN } from '../../common/constants';
 import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
 import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
-import { DataPublicPluginSetup } from '../../../../../src/plugins/data/public';
+import {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '../../../triggers_actions_ui/public';
+import {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+} from '../../../../../src/plugins/data/public';
 import { alertTypeInitializers } from '../lib/alert_types';
 import { initializeStore } from '../state';
 import { kibanaService } from '../state/kibana_service';
@@ -26,6 +32,8 @@ export interface ClientPluginsSetup {
 
 export interface ClientPluginsStart {
   embeddable: EmbeddableStart;
+  data: DataPublicPluginStart;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
 }
 
 export class UptimePlugin implements Plugin<void, void, ClientPluginsSetup, ClientPluginsStart> {
@@ -76,11 +84,10 @@ export class UptimePlugin implements Plugin<void, void, ClientPluginsSetup, Clie
     });
   }
 
-  public start(start: CoreStart, plugins: any): void {
+  public start(start: CoreStart, plugins: ClientPluginsStart): void {
     kibanaService.core = start;
     alertTypeInitializers.forEach(init => {
       const alertInitializer = init({
-        autocomplete: plugins.data.autocomplete,
         store: this._store,
         core: start,
         plugins,

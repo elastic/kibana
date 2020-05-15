@@ -16,6 +16,7 @@ import { AlertMonitorStatus } from '../../components/overview/alerts/alerts_cont
 import { MonitorStatusTitle } from './monitor_status_title';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants';
 import { MonitorStatusTranslations } from './translations';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 
 export const validate = (alertParams: any) => {
   const errors: Record<string, any> = {};
@@ -59,8 +60,9 @@ export const validate = (alertParams: any) => {
 const { defaultActionMessage } = MonitorStatusTranslations;
 
 export const initMonitorStatusAlertType: AlertTypeInitializer = ({
-  autocomplete,
   store,
+  core,
+  plugins,
 }): AlertTypeModel => ({
   id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
   name: (
@@ -69,11 +71,15 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
     </ReduxProvider>
   ),
   iconClass: 'uptimeApp',
-  alertParamsExpression: (params: any) => (
-    <ReduxProvider store={store}>
-      <AlertMonitorStatus {...params} autocomplete={autocomplete} />
-    </ReduxProvider>
-  ),
+  alertParamsExpression: (params: any) => {
+    return (
+      <ReduxProvider store={store}>
+        <KibanaContextProvider services={{ ...core, ...plugins }}>
+          <AlertMonitorStatus {...params} autocomplete={plugins.data.autocomplete} />
+        </KibanaContextProvider>
+      </ReduxProvider>
+    );
+  },
   validate,
   defaultActionMessage,
   requiresAppContext: false,
