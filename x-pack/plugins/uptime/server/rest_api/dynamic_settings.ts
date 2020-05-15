@@ -11,7 +11,7 @@ import { UMServerLibs } from '../lib/lib';
 import { DynamicSettings, DynamicSettingsType } from '../../common/runtime_types';
 import { UMRestApiRouteFactory } from '.';
 import { savedObjectsAdapter } from '../lib/saved_objects';
-import { VALUE_MUST_BE_GREATER_THEN_ZEO } from '../../common/translations';
+import { VALUE_MUST_BE_GREATER_THAN_ZERO } from '../../common/translations';
 
 export const createGetDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
@@ -27,10 +27,10 @@ export const createGetDynamicSettingsRoute: UMRestApiRouteFactory = (libs: UMSer
 const validateCertsValues = (settings: DynamicSettings) => {
   const errors: any = {};
   if (settings.certAgeThreshold <= 0) {
-    errors.certAgeThreshold = VALUE_MUST_BE_GREATER_THEN_ZEO;
+    errors.certAgeThreshold = VALUE_MUST_BE_GREATER_THAN_ZERO;
   }
   if (settings.certExpirationThreshold <= 0) {
-    errors.certExpirationThreshold = VALUE_MUST_BE_GREATER_THEN_ZEO;
+    errors.certExpirationThreshold = VALUE_MUST_BE_GREATER_THAN_ZERO;
   }
   if (errors.certAgeThreshold || errors.certExpirationThreshold) {
     return errors;

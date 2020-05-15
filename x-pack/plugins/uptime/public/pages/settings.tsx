@@ -31,7 +31,10 @@ import {
   OnFieldChangeType,
 } from '../components/settings/certificate_form';
 import * as Translations from './translations';
-import { VALUE_MUST_BE_GREATER_THEN_ZEO } from '../../common/translations';
+import {
+  VALUE_MUST_BE_GREATER_THAN_ZERO,
+  VALUE_MUST_BE_AN_INTEGER,
+} from '../../common/translations';
 
 interface SettingsPageFieldErrors {
   heartbeatIndices: string | '';
@@ -47,12 +50,16 @@ export interface SettingsFormProps {
   isDisabled: boolean;
 }
 
-const isValidCertVal = (val: string | number) => {
+export const isValidCertVal = (val: string | number) => {
   if (val === '') {
     return Translations.BLANK_STR;
   }
-  if (val === 0) {
-    return VALUE_MUST_BE_GREATER_THEN_ZEO;
+  if (val <= 0) {
+    return VALUE_MUST_BE_GREATER_THAN_ZERO;
+  }
+  const number = Number(val);
+  if (!number || number % 1) {
+    return VALUE_MUST_BE_AN_INTEGER;
   }
 };
 
