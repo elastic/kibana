@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -19,10 +17,21 @@
  * under the License.
  */
 
-const nodeMajorVersion = parseFloat(process.version.replace(/^v(\d+)\..+/, '$1'));
-if (nodeMajorVersion < 6) {
-  console.error('FATAL: kibana-plugin-helpers requires node 6+');
-  process.exit(1);
+import { pluginConfig, PluginConfig } from './plugin_config';
+import { tasks, Tasks } from './tasks';
+
+export interface TaskContext {
+  plugin: PluginConfig;
+  run: typeof run;
+  options?: any;
 }
 
-require('../target/cli');
+export function run(name: keyof Tasks, options?: any) {
+  const action = tasks[name];
+  if (!action) {
+    throw new Error('Invalid task: "' + name + '"');
+  }
+
+  const plugin = pluginConfig();
+  return action({ plugin, run, options });
+}
