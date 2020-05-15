@@ -15,12 +15,12 @@ export class FileUploadPlugin {
 
   setup(core, plugins) {
     core.savedObjects.registerType(fileUploadTelemetryMappingsType);
+    setElasticsearchClientServices(core.elasticsearch);
     this.router = core.http.createRouter();
     registerFileUploadUsageCollector(plugins.usageCollection);
   }
 
   start(core) {
-    setElasticsearchClientServices(core.elasticsearch);
     initRoutes(this.router, core.savedObjects.getSavedObjectsRepository);
     setInternalRepository(core.savedObjects.createInternalRepository);
   }
