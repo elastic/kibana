@@ -9,13 +9,18 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
   EuiFieldText,
-  EuiSelectable,
   EuiProgress,
   EuiDragDropContext,
   EuiDraggable,
   EuiDroppable,
   EuiComboBox,
   EuiButton,
+  EuiIcon,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiLink,
   euiDragDropReorder,
 } from '@elastic/eui';
 import { NodeDefinition, RenderNode } from '../types';
@@ -30,66 +35,6 @@ interface TableConvertState {
   columns: ColumnDef[];
   autoColumns: boolean;
 }
-
-// function flattenKeys(input: any, prefix?: string): string[] {
-//   if (!input) {
-//     return [];
-//   }
-
-//   const outputKeys = new Set<string>();
-
-//   if (Array.isArray(input)) {
-//     input.forEach(o => {
-//       if (o && typeof o === 'object') {
-//         flattenKeys(o).forEach(k => outputKeys.add(k));
-//       }
-//     });
-//     return Array.from(outputKeys);
-//   }
-
-//   if (typeof input === 'object') {
-//     Object.keys(input).forEach(key => {
-//       outputKeys.add(key);
-//       flattenKeys(input[key])
-//         .map(k => key + '.' + k)
-//         .forEach(k => outputKeys.add(k));
-//     });
-//   }
-
-//   return Array.from(outputKeys);
-// }
-
-// function findArray(input: any, columns: ColumnDef[]) {
-//   if (!input) {
-//     return { prefix, value: [] };
-//   }
-
-//   if (Array.isArray(input)) {
-//     if (input.every(o => o && typeof o === 'object')) {
-//       return { prefix, value: input };
-//     }
-//     if (input.length > 0) {
-//       const match = input.find(o => findArray(o, prefix));
-//       if (match) {
-//         return { prefix, value: match };
-//       }
-//     }
-//     return { prefix, value: [] };
-//   }
-
-//   if (typeof input === 'object') {
-//     const matches = Object.keys(input)
-//       .map(key => {
-//         return findArray(input[key], prefix ? prefix + '.' + key : key);
-//       })
-//       .filter(m => m.value.length);
-//     if (matches.length) {
-//       return matches[0];
-//     }
-//   }
-
-//   return { prefix, value: [] };
-// }
 
 // Recursive function to determine if the _source of a document
 // contains a known path.
@@ -287,18 +232,13 @@ function TableConvert({ node, dispatch }: RenderNode<TableConvertState>) {
     loader.lastData[node.inputNodeIds[0]] &&
     loader.lastData[node.inputNodeIds[0]].value;
 
-  const paths =
-    node.state.columns.length && inputData
-      ? node.state.columns.map(({ path }) => path)
-      : getFlattenedArrayPaths(inputData);
-
+  const paths = getFlattenedArrayPaths(inputData);
   const converted = !node.state.columns.length && inputData ? collectRows(inputData, paths) : null;
 
   const columns: ColumnDef[] = node.state.columns.length
     ? node.state.columns
-    : converted?.columns?.map(({ id, label }) => ({
-        path: id,
-        label,
+    : paths.map(path => ({
+        path,
       })) || [];
 
   return (
@@ -319,75 +259,83 @@ function TableConvert({ node, dispatch }: RenderNode<TableConvertState>) {
       }}
     >
       {converted && !node.state.columns.length ? (
-        <EuiButton
-          size="s"
+        <EuiText>Automatically detecting columns from input...</EuiText>
+      ) : (
+        <EuiLink
           onClick={() => {
             dispatch({
               type: 'SET_NODE',
               nodeId: node.id,
-              newState: { ...node.state, columns },
+              newState: { ...node.state, columns: [] },
             });
           }}
         >
-          Confirm automatically generated columns
-        </EuiButton>
-      ) : null}
+          <EuiIcon type="refresh" />
+          Reset columns to all detected
+        </EuiLink>
+      )}
 
       <EuiDroppable droppableId={'a'}>
         {columns.map((col, index) => (
-          <EuiDraggable index={index} key={col.path} draggableId={col.path}>
-            <div className="pipelineBuilder__tableConvert__column">
-              <EuiFormRow
-                label={i18n.translate('xpack.pipeline_builder.tableConvert.columnPathLabel', {
-                  defaultMessage: 'Dotted path to column',
-                })}
-                display="rowCompressed"
-              >
-                <EuiFieldText onChange={() => {}} value={col.path} />
-              </EuiFormRow>
-              <EuiFormRow
-                label={i18n.translate('xpack.pipeline_builder.tableConvert.columnLabel', {
-                  defaultMessage: 'Column label',
-                })}
-                display="rowCompressed"
-              >
-                <EuiFieldText onChange={() => {}} value={col.label} />
-              </EuiFormRow>
-            </div>
+          <EuiDraggable index={index} key={col.path} draggableId={col.path || `draggable${index}`}>
+            <EuiFlexGroup className="pipelineBuilder__tableConvert__column">
+              <EuiFlexItem grow={true}>
+                <EuiText>{col.path}</EuiText>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  size="s"
+                  color="danger"
+                  iconType="trash"
+                  onClick={() => {
+                    dispatch({
+                      type: 'SET_NODE',
+                      nodeId: node.id,
+                      newState: {
+                        ...node.state,
+                        columns: columns.filter(c => c.path !== col.path),
+                      },
+                    });
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiDraggable>
         ))}
       </EuiDroppable>
 
-      <EuiComboBox
-        options={(paths || []).map(key => ({
-          label: key,
-          key,
-          value: key,
-        }))}
-        onChange={([choice]) => {
-          dispatch({
-            type: 'SET_NODE',
-            nodeId: node.id,
-            newState: {
-              ...node.state,
-              columns: [...node.state.columns, { path: choice.id }],
-            },
-          });
-        }}
-        fullWidth
-        singleSelection={{ asPlainText: true }}
-        onCreateOption={value => {
-          dispatch({
-            type: 'SET_NODE',
-            nodeId: node.id,
-            newState: {
-              ...node.state,
-              columns: [...node.state.columns, { path: value }],
-            },
-          });
-        }}
-        noSuggestions={!converted}
-      />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiComboBox
+            placeholder="Add column"
+            options={(paths || []).map(path => ({ label: path }))}
+            onChange={([choice]) => {
+              dispatch({
+                type: 'SET_NODE',
+                nodeId: node.id,
+                newState: {
+                  ...node.state,
+                  columns: [...columns, { path: choice.label }],
+                },
+              });
+            }}
+            fullWidth
+            singleSelection={{ asPlainText: true }}
+            onCreateOption={value => {
+              dispatch({
+                type: 'SET_NODE',
+                nodeId: node.id,
+                newState: {
+                  ...node.state,
+                  columns: [...node.state.columns, { path: value }],
+                },
+              });
+            }}
+            noSuggestions={!converted}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiDragDropContext>
   );
 }
@@ -416,7 +364,6 @@ export const definition: NodeDefinition<TableConvertState> = {
       ? state.columns.map(({ path }) => path)
       : getFlattenedArrayPaths(inputData);
 
-    console.log('collecting', inputData, paths);
     const rows = collectRows(inputData, paths);
 
     return {

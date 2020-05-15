@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useRef } from 'react';
 import { Observable, Subject, Subscription } from 'rxjs';
 import { CoreStart } from 'kibana/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
@@ -16,7 +15,7 @@ type LoadedData = Record<
   string,
   {
     loading: boolean;
-    error?: boolean;
+    error?: unknown;
     value?: unknown;
   }
 >;
@@ -70,13 +69,11 @@ export class Loader {
             n.inputNodeIds.every(i => this.lastData[i] && this.lastData[i].value)
           );
         });
-        console.log('loaded', id, 'next node', nextNode);
         if (nextNode) {
           this.runNode(state, nextNode, deps);
         }
 
         if (Object.entries(this.lastData).every(([id, data]) => data.value)) {
-          console.log('COMPLETION');
           this.completionSubject.next(this.lastData);
         }
       })
@@ -107,6 +104,7 @@ export class Loader {
           // TODO: Check that this request should be running
           this.lastData[node.id] = { loading: false, error: e.message };
           // this.checkForCompletion();
+          this.completionSubject.next(this.lastData);
         }
       );
   }
@@ -120,10 +118,5 @@ export class Loader {
 
 const loader = new Loader();
 export function useLoader() {
-  // const loaderRef = useRef<Loader | null>(null);
-  // if (!loaderRef.current) {
-  //   loaderRef.current = new Loader();
-  // }
-  // return loaderRef.current;
   return loader;
 }

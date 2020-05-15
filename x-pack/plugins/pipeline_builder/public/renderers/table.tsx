@@ -30,7 +30,7 @@ export function TableRenderer(props: { state: State }) {
           <EuiBasicTable
             columns={value.columns.map(col => ({
               field: col.id,
-              name: col.label,
+              name: col.label || col.id,
             }))}
             items={value.rows}
             tableLayout="auto"

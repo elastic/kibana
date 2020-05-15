@@ -18,7 +18,6 @@ import {
   EuiListGroupItem,
   EuiIcon,
   EuiSpacer,
-  EuiCommentList,
   EuiTabs,
   EuiTab,
   EuiTabbedContent,
@@ -101,14 +100,21 @@ export function Layout({ state, dispatch }: { state: State; dispatch: DispatchFn
         <EuiFlexGroup direction="row">
           {startChains.length > 1 && !otherChains.length ? (
             <EuiFlexItem grow={true} className="pipelineBuilder__createJoinButton">
-              <CreateNodeButton
-                state={state}
-                dispatch={dispatch}
-                inputNodeIds={startChains.map(c => c[c.length - 1].id)}
-                title={i18n.translate('xpack.pipeline_builder.joinNodesButtonLabel', {
+              <EuiButton
+                onClick={() => {
+                  dispatch({
+                    type: 'CREATE_NODE',
+                    nodeType: 'join',
+                    inputNodeIds: startChains.map(c => c[c.length - 1].id),
+                  });
+                }}
+                fullWidth
+              >
+                <EuiIcon type="plusInCircle" />
+                {i18n.translate('xpack.pipeline_builder.joinNodesButtonLabel', {
                   defaultMessage: 'Join all queries',
                 })}
-              />
+              </EuiButton>
             </EuiFlexItem>
           ) : null}
 
@@ -136,51 +142,13 @@ export function Layout({ state, dispatch }: { state: State; dispatch: DispatchFn
           ))}
         </EuiFlexGroup>
 
-        {/* <EuiFlexGroup direction="column" wrap={true}>
-          {startNodes.map(({ id, node }) => (
-              <EuiFlexItem key={id} className="pipeline__startNode">
-                <RenderNode id={id} node={node} dispatch={dispatch} />
-              </EuiFlexItem>
-            ))}
-        </EuiFlexGroup> */}
-
-        <div className="euiCommentList">
-          {/* {analyzed
-            .filter(a => !a.isStartNode)
-            .map(({ id, node }) => (
-              <RenderNode key={id} id={id} node={node} dispatch={dispatch} />
-            ))} */}
-
-          <div className="euiComment">
-            <div className="euiCommentTimeline">
-              <div className="euiCommentTimeline__content">
-                <EuiIcon type="plusInCircle" />
-              </div>
-            </div>
-
-            {/* {terminalNode ? (
-              <CreateNodeButton
-                state={state}
-                dispatch={dispatch}
-                inputNodeIds={[terminalNode.id]}
-                title={i18n.translate('xpack.pipeline_builder.transformationNodeButtonLabel', {
-                  defaultMessage: 'Add transformation node',
-                })}
-              />
-            ) : null} */}
-          </div>
-
-          <div className="euiComment">
-            <div className="euiCommentTimeline">
-              <div className="euiCommentTimeline__content">
-                <EuiIcon type="dot" />
-              </div>
-            </div>
+        <EuiFlexItem>
+          <div>
             {i18n.translate('xpack.pipeline_builder.renderVisualizationLabel', {
               defaultMessage: 'Render visualization',
             })}
           </div>
-        </div>
+        </EuiFlexItem>
       </div>
       <div className="pipelineFrameLayout__sidebar">
         <EuiFlexGroup direction="column">
@@ -191,6 +159,7 @@ export function Layout({ state, dispatch }: { state: State; dispatch: DispatchFn
               }}
               color="primary"
               size="s"
+              fill
             >
               <EuiIcon type="play" />
               {i18n.translate('xpack.pipeline_builder.runButtonLabel', {
@@ -219,6 +188,9 @@ export function Layout({ state, dispatch }: { state: State; dispatch: DispatchFn
 function RenderNode({ node, id, dispatch }: { id: string; node: Node; dispatch: DispatchFn }) {
   const loader = useLoader();
 
+  const data = loader.lastData[id]?.value;
+  const error = loader.lastData[id]?.error;
+
   const tabs = [
     {
       id: 'main',
@@ -230,16 +202,25 @@ function RenderNode({ node, id, dispatch }: { id: string; node: Node; dispatch: 
     },
   ];
 
-  const data = loader.lastData[id]?.value;
+  if (error) {
+    tabs.push({
+      id: 'error',
+      name: 'Error message',
+      content: (
+        <div className="pipelineBuilder__nodeOutput">
+          <EuiCodeBlock language="json">{JSON.stringify(error, null, 2)}</EuiCodeBlock>
+        </div>
+      ),
+    });
+  }
+
   if (data) {
     tabs.push({
       id: 'output',
       name: 'JSON Output',
       content: (
         <div className="pipelineBuilder__nodeOutput">
-          <EuiCodeBlock language="json">
-            {JSON.stringify(loader.lastData[id]?.value, null, 2)}
-          </EuiCodeBlock>
+          <EuiCodeBlock language="json">{JSON.stringify(data, null, 2)}</EuiCodeBlock>
         </div>
       ),
     });
@@ -247,7 +228,7 @@ function RenderNode({ node, id, dispatch }: { id: string; node: Node; dispatch: 
 
   return (
     <div>
-      <EuiPanel className="pipelineBuilder__node euiCommentEvent">
+      <EuiPanel className="pipelineBuilder__node">
         <span>
           <strong>{id}</strong>: {nodeRegistry[node.type].title}
         </span>
@@ -296,6 +277,7 @@ function CreateNodeButton({
           }}
           size="s"
           fullWidth
+          fill
         >
           <EuiIcon type="plusInCircle" /> {title}
         </EuiButton>

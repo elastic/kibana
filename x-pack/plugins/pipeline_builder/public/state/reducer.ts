@@ -7,13 +7,16 @@
 import { State, Action } from '../types';
 import { nodeRegistry } from '../nodes';
 
-let nextNodeId = 1;
-
 export function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'CREATE_NODE':
-      const nodeId = String(nextNodeId);
-      nextNodeId++;
+      const highestNodeId = Object.values(state.nodes)
+        .map(n => n.id)
+        .reduce((prev, current) => {
+          return Math.max(prev, parseInt(current, 10));
+        }, 1);
+      const nodeId = String(highestNodeId + 1);
+
       return {
         ...state,
         nodes: {

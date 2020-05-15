@@ -14,6 +14,9 @@ import {
   EuiSelect,
   EuiPopover,
   EuiButton,
+  EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { CodeEditor } from '../../../../../src/plugins/kibana_react/public';
 import { NodeDefinition, RenderNode } from '../types';
@@ -32,80 +35,29 @@ function SearchNode({ node, dispatch }: RenderNode<SearchNodeState>) {
     <div>
       {loader.lastData[node.id]?.loading ? <EuiProgress /> : null}
 
-      <EuiPopover
-        isOpen={isOpen}
-        closePopover={() => {
-          setState(false);
-        }}
-        button={
-          <EuiButton
-            onClick={() => {
-              setState(true);
-            }}
-          >
-            Examples
-          </EuiButton>
-        }
-      >
-        <EuiButton
-          onClick={() => {
-            dispatch({
-              type: 'SET_NODE',
-              nodeId: node.id,
-              newState: getStateForLogs(),
-            });
-            setState(false);
-          }}
-        >
-          Logs example
-        </EuiButton>
-        <EuiButton
-          onClick={() => {
-            dispatch({
-              type: 'SET_NODE',
-              nodeId: node.id,
-              newState: getStateForHistogram(),
-            });
-            setState(false);
-          }}
-        >
-          Histogram example
-        </EuiButton>
-        <EuiButton
-          onClick={() => {
-            dispatch({
-              type: 'SET_NODE',
-              nodeId: node.id,
-              newState: getStateForSql(),
-            });
-            setState(false);
-          }}
-        >
-          SQL example
-        </EuiButton>
-      </EuiPopover>
-
       <EuiFormRow
         label={i18n.translate('xpack.pipeline_builder.searchNode.requestMethodLabel', {
           defaultMessage: 'Request',
         })}
       >
-        <div>
-          POST
-          <EuiFieldText
-            value={node.state.path}
-            placeholder={i18n.translate('xpack.pipeline_builder.searchNode.requestPathLabel', {
-              defaultMessage: 'Request path, like /kibana_sample_data_logs/_search',
-            })}
-            onChange={e => {
-              dispatch({
-                type: 'SET_NODE',
-                nodeId: node.id,
-                newState: { ...node.state, path: e.target.value },
-              });
-            }}
-          />
-        </div>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}> POST</EuiFlexItem>
+          <EuiFlexItem grow={true}>
+            <EuiFieldText
+              value={node.state.path}
+              placeholder={i18n.translate('xpack.pipeline_builder.searchNode.requestPathLabel', {
+                defaultMessage: 'Request path, like /kibana_sample_data_logs/_search',
+              })}
+              onChange={e => {
+                dispatch({
+                  type: 'SET_NODE',
+                  nodeId: node.id,
+                  newState: { ...node.state, path: e.target.value },
+                });
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFormRow>
 
       <CodeEditor
@@ -150,6 +102,59 @@ function SearchNode({ node, dispatch }: RenderNode<SearchNodeState>) {
           }
         }}
       />
+
+      <EuiPopover
+        isOpen={isOpen}
+        closePopover={() => {
+          setState(false);
+        }}
+        button={
+          <EuiLink
+            onClick={() => {
+              setState(true);
+            }}
+          >
+            Switch to example requests
+          </EuiLink>
+        }
+      >
+        <EuiButton
+          onClick={() => {
+            dispatch({
+              type: 'SET_NODE',
+              nodeId: node.id,
+              newState: getStateForLogs(),
+            });
+            setState(false);
+          }}
+        >
+          Logs example
+        </EuiButton>
+        <EuiButton
+          onClick={() => {
+            dispatch({
+              type: 'SET_NODE',
+              nodeId: node.id,
+              newState: getStateForHistogram(),
+            });
+            setState(false);
+          }}
+        >
+          Histogram example
+        </EuiButton>
+        <EuiButton
+          onClick={() => {
+            dispatch({
+              type: 'SET_NODE',
+              nodeId: node.id,
+              newState: getStateForSql(),
+            });
+            setState(false);
+          }}
+        >
+          SQL example
+        </EuiButton>
+      </EuiPopover>
     </div>
   );
 }
@@ -237,7 +242,7 @@ function getStateForSql(): SearchNodeState {
     path: '/_sql?format=json',
     body: JSON.stringify(
       {
-        query: 'SELECT * FROM kibana_sample_data_logs ORDER BY @timestamp DESC',
+        query: 'SELECT "@timestamp", geo.src, bytes FROM kibana_sample_data_logs',
         fetch_size: 10,
       },
       null,
