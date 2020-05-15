@@ -25,7 +25,7 @@ import {
   EuiSelect,
   EuiIconTip,
 } from '@elastic/eui';
-import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 export interface TimechartHeaderProps {
@@ -86,20 +86,30 @@ export function TimechartHeader({
 
   return (
     <I18nProvider>
-      <EuiFlexGroup gutterSize="xs" responsive justifyContent="center" alignItems="center">
+      <EuiFlexGroup gutterSize="s" responsive justifyContent="center" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('discover.howToChangeTheTimeTooltip', {
-              defaultMessage: 'To change the time, click the calendar icon in the navigation bar',
+              defaultMessage: 'To change the time, use the global time filter above',
             })}
+            delay="long"
           >
             <EuiText data-test-subj="discoverIntervalDateRange" size="s">
-              {`${from} - ${to} `}&mdash;
+              {`${from} - ${to} ${
+                interval !== 'auto'
+                  ? i18n.translate('discover.timechartHeader.timeIntervalSelect.per', {
+                      defaultMessage: 'per',
+                    })
+                  : ''
+              }`}
             </EuiText>
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSelect
+            aria-label={i18n.translate('discover.timechartHeader.timeIntervalSelect.ariaLabel', {
+              defaultMessage: 'Time interval',
+            })}
             compressed
             id="dscResultsIntervalSelector"
             data-test-subj="discoverIntervalSelect"
@@ -114,43 +124,34 @@ export function TimechartHeader({
               })}
             value={interval}
             onChange={handleIntervalChange}
+            append={
+              showScaledInfo ? (
+                <EuiIconTip
+                  content={i18n.translate('discover.bucketIntervalTooltip', {
+                    defaultMessage:
+                      'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}.',
+                    values: {
+                      bucketsDescription:
+                        bucketIntervalScale && bucketIntervalScale > 1
+                          ? i18n.translate('discover.bucketIntervalTooltip.tooLargeBucketsText', {
+                              defaultMessage: 'buckets that are too large',
+                            })
+                          : i18n.translate('discover.bucketIntervalTooltip.tooManyBucketsText', {
+                              defaultMessage: 'too many buckets',
+                            }),
+                      bucketIntervalDescription,
+                    },
+                  })}
+                  color="warning"
+                  size="s"
+                  type="alert"
+                />
+              ) : (
+                undefined
+              )
+            }
           />
         </EuiFlexItem>
-        {showScaledInfo && (
-          <>
-            <EuiIconTip
-              content={i18n.translate('discover.bucketIntervalTooltip', {
-                defaultMessage:
-                  'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}',
-                values: {
-                  bucketsDescription:
-                    bucketIntervalScale && bucketIntervalScale > 1
-                      ? i18n.translate('discover.bucketIntervalTooltip.tooLargeBucketsText', {
-                          defaultMessage: 'buckets that are too large',
-                        })
-                      : i18n.translate('discover.bucketIntervalTooltip.tooManyBucketsText', {
-                          defaultMessage: 'too many buckets',
-                        }),
-                  bucketIntervalDescription,
-                },
-              })}
-              color="warning"
-              size="s"
-              type="alert"
-            />
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" data-test-subj="discoverIntervalSelectScaledToDesc">
-                <FormattedMessage
-                  id="discover.scaledToDescription"
-                  defaultMessage="Scaled to {bucketIntervalDescription}"
-                  values={{
-                    bucketIntervalDescription,
-                  }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-          </>
-        )}
       </EuiFlexGroup>
     </I18nProvider>
   );
