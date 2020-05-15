@@ -18,6 +18,7 @@ import {
 } from '../../../../plugins/maps/public/kibana_services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getMapsSavedObjectLoader } from '../../../../plugins/maps/public/angular/services/gis_map_saved_object_loader';
+import { LISTING_LIMIT_SETTING } from '../../../../../src/plugins/saved_objects/common';
 
 routes.enable();
 
@@ -43,7 +44,7 @@ routes
     template: listingTemplate,
     controller($scope, config) {
       const gisMapSavedObjectLoader = getMapsSavedObjectLoader();
-      $scope.listingLimit = config.get('savedObjects:listingLimit');
+      $scope.listingLimit = config.get(LISTING_LIMIT_SETTING);
       $scope.find = search => {
         return gisMapSavedObjectLoader.find(search, $scope.listingLimit);
       };
