@@ -238,6 +238,9 @@ exports[`SavedObjectsTable import should show the flyout 1`] = `
   indexPatterns={
     Object {
       "clearCache": [MockFunction],
+      "createField": [MockFunction],
+      "createFieldList": [MockFunction],
+      "ensureDefaultIndexPattern": [MockFunction],
       "get": [MockFunction],
       "make": [Function],
     }
@@ -254,6 +257,32 @@ exports[`SavedObjectsTable import should show the flyout 1`] = `
       "openConfirm": [MockFunction],
       "openFlyout": [MockFunction],
       "openModal": [MockFunction],
+    }
+  }
+  search={
+    Object {
+      "__LEGACY": Object {
+        "esClient": Object {
+          "msearch": [MockFunction],
+          "search": [MockFunction],
+        },
+      },
+      "aggs": Object {
+        "calculateAutoTimeExpression": [Function],
+        "createAggConfigs": [MockFunction],
+        "types": Object {
+          "get": [Function],
+          "getAll": [Function],
+          "getBuckets": [Function],
+          "getMetrics": [Function],
+        },
+      },
+      "search": [MockFunction],
+      "searchSource": Object {
+        "create": [MockFunction],
+        "createEmpty": [MockFunction],
+      },
+      "setInterceptor": [MockFunction],
     }
   }
   serviceRegistry={
@@ -404,7 +433,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
             "editUrl": "#/management/kibana/objects/savedVisualizations/4",
             "icon": "visualizeApp",
             "inAppUrl": Object {
-              "path": "/visualize/edit/4",
+              "path": "/edit/4",
               "uiCapabilitiesPath": "visualize.show",
             },
             "title": "MyViz",

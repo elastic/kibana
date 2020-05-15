@@ -17,18 +17,12 @@ import {
   geoPointToGeometry,
   geoShapeToGeometry,
   createExtentFilter,
-  convertMapExtentToPolygon,
   roundCoordinates,
+  extractFeaturesFromFilters,
 } from './elasticsearch_geo_utils';
 import { indexPatterns } from '../../../../src/plugins/data/public';
 
 const geoFieldName = 'location';
-const mapExtent = {
-  maxLat: 39,
-  maxLon: -83,
-  minLat: 35,
-  minLon: -89,
-};
 
 const flattenHitMock = hit => {
   const properties = {};
@@ -66,7 +60,7 @@ describe('hitsToGeoJson', () => {
         },
       },
     ];
-    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point');
+    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point', []);
     expect(geojson.type).toBe('FeatureCollection');
     expect(geojson.features.length).toBe(2);
     expect(geojson.features[0]).toEqual({
@@ -94,7 +88,7 @@ describe('hitsToGeoJson', () => {
         _source: {},
       },
     ];
-    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point');
+    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point', []);
     expect(geojson.type).toBe('FeatureCollection');
     expect(geojson.features.length).toBe(1);
   });
@@ -111,7 +105,7 @@ describe('hitsToGeoJson', () => {
         },
       },
     ];
-    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point');
+    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point', []);
     expect(geojson.features.length).toBe(1);
     const feature = geojson.features[0];
     expect(feature.properties.myField).toBe(8);
@@ -128,7 +122,7 @@ describe('hitsToGeoJson', () => {
         },
       },
     ];
-    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point');
+    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point', []);
     expect(geojson.type).toBe('FeatureCollection');
     expect(geojson.features.length).toBe(2);
     expect(geojson.features[0]).toEqual({
@@ -159,6 +153,23 @@ describe('hitsToGeoJson', () => {
     });
   });
 
+  it('Should convert epoch_millis value from string to integer', () => {
+    const hits = [
+      {
+        _id: 'doc1',
+        _index: 'index1',
+        _source: {
+          [geoFieldName]: '20,100',
+          myDateField: '1587156257081',
+        },
+      },
+    ];
+    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point', ['myDateField']);
+    expect(geojson.type).toBe('FeatureCollection');
+    expect(geojson.features.length).toBe(1);
+    expect(geojson.features[0].properties.myDateField).toBe(1587156257081);
+  });
+
   describe('dot in geoFieldName', () => {
     const indexPatternMock = {
       fields: {
@@ -184,7 +195,7 @@ describe('hitsToGeoJson', () => {
           },
         },
       ];
-      const geojson = hitsToGeoJson(hits, indexPatternFlattenHit, 'my.location', 'geo_point');
+      const geojson = hitsToGeoJson(hits, indexPatternFlattenHit, 'my.location', 'geo_point', []);
       expect(geojson.features[0].geometry).toEqual({
         coordinates: [100, 20],
         type: 'Point',
@@ -199,7 +210,7 @@ describe('hitsToGeoJson', () => {
           },
         },
       ];
-      const geojson = hitsToGeoJson(hits, indexPatternFlattenHit, 'my.location', 'geo_point');
+      const geojson = hitsToGeoJson(hits, indexPatternFlattenHit, 'my.location', 'geo_point', []);
       expect(geojson.features[0].geometry).toEqual({
         coordinates: [100, 20],
         type: 'Point',
@@ -299,174 +310,143 @@ describe('geoShapeToGeometry', () => {
 });
 
 describe('createExtentFilter', () => {
-  it('should return elasticsearch geo_bounding_box filter for geo_point field', () => {
-    const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_point');
-    expect(filter).toEqual({
-      geo_bounding_box: {
-        location: {
-          bottom_right: [-83, 35],
-          top_left: [-89, 39],
-        },
-      },
-    });
-  });
-
-  it('should return elasticsearch geo_shape filter for geo_shape field', () => {
-    const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_shape');
-    expect(filter).toEqual({
-      geo_shape: {
-        location: {
-          relation: 'INTERSECTS',
-          shape: {
-            coordinates: [
-              [
-                [-89, 39],
-                [-89, 35],
-                [-83, 35],
-                [-83, 39],
-                [-89, 39],
-              ],
-            ],
-            type: 'Polygon',
+  describe('geo_point field', () => {
+    it('should return elasticsearch geo_bounding_box filter for geo_point field', () => {
+      const mapExtent = {
+        maxLat: 39,
+        maxLon: -83,
+        minLat: 35,
+        minLon: -89,
+      };
+      const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_point');
+      expect(filter).toEqual({
+        geo_bounding_box: {
+          location: {
+            top_left: [-89, 39],
+            bottom_right: [-83, 35],
           },
         },
-      },
+      });
     });
-  });
 
-  it('should clamp longitudes to -180 to 180', () => {
-    const mapExtent = {
-      maxLat: 39,
-      maxLon: 209,
-      minLat: 35,
-      minLon: -191,
-    };
-    const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_shape');
-    expect(filter).toEqual({
-      geo_shape: {
-        location: {
-          relation: 'INTERSECTS',
-          shape: {
-            coordinates: [
-              [
-                [-180, 39],
-                [-180, 35],
-                [180, 35],
-                [180, 39],
-                [-180, 39],
-              ],
-            ],
-            type: 'Polygon',
+    it('should clamp longitudes to -180 to 180 and latitudes to -90 to 90', () => {
+      const mapExtent = {
+        maxLat: 120,
+        maxLon: 200,
+        minLat: -100,
+        minLon: -190,
+      };
+      const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_point');
+      expect(filter).toEqual({
+        geo_bounding_box: {
+          location: {
+            top_left: [-180, 89],
+            bottom_right: [180, -89],
           },
         },
-      },
+      });
     });
-  });
-});
 
-describe('convertMapExtentToPolygon', () => {
-  it('should convert bounds to envelope', () => {
-    const bounds = {
-      maxLat: 10,
-      maxLon: 100,
-      minLat: -10,
-      minLon: 90,
-    };
-    expect(convertMapExtentToPolygon(bounds)).toEqual({
-      type: 'Polygon',
-      coordinates: [
-        [
-          [90, 10],
-          [90, -10],
-          [100, -10],
-          [100, 10],
-          [90, 10],
-        ],
-      ],
+    it('should make left longitude greater then right longitude when area crosses 180 meridian east to west', () => {
+      const mapExtent = {
+        maxLat: 39,
+        maxLon: 200,
+        minLat: 35,
+        minLon: 100,
+      };
+      const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_point');
+      const leftLon = filter.geo_bounding_box.location.top_left[0];
+      const rightLon = filter.geo_bounding_box.location.bottom_right[0];
+      expect(leftLon).toBeGreaterThan(rightLon);
+      expect(filter).toEqual({
+        geo_bounding_box: {
+          location: {
+            top_left: [100, 39],
+            bottom_right: [-160, 35],
+          },
+        },
+      });
     });
-  });
 
-  it('should clamp longitudes to -180 to 180', () => {
-    const bounds = {
-      maxLat: 10,
-      maxLon: 200,
-      minLat: -10,
-      minLon: -400,
-    };
-    expect(convertMapExtentToPolygon(bounds)).toEqual({
-      type: 'Polygon',
-      coordinates: [
-        [
-          [-180, 10],
-          [-180, -10],
-          [180, -10],
-          [180, 10],
-          [-180, 10],
-        ],
-      ],
-    });
-  });
-
-  it('should clamp longitudes to -180 to 180 when bounds span entire globe (360)', () => {
-    const bounds = {
-      maxLat: 10,
-      maxLon: 170,
-      minLat: -10,
-      minLon: -400,
-    };
-    expect(convertMapExtentToPolygon(bounds)).toEqual({
-      type: 'Polygon',
-      coordinates: [
-        [
-          [-180, 10],
-          [-180, -10],
-          [180, -10],
-          [180, 10],
-          [-180, 10],
-        ],
-      ],
+    it('should make left longitude greater then right longitude when area crosses 180 meridian west to east', () => {
+      const mapExtent = {
+        maxLat: 39,
+        maxLon: -100,
+        minLat: 35,
+        minLon: -200,
+      };
+      const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_point');
+      const leftLon = filter.geo_bounding_box.location.top_left[0];
+      const rightLon = filter.geo_bounding_box.location.bottom_right[0];
+      expect(leftLon).toBeGreaterThan(rightLon);
+      expect(filter).toEqual({
+        geo_bounding_box: {
+          location: {
+            top_left: [160, 39],
+            bottom_right: [-100, 35],
+          },
+        },
+      });
     });
   });
 
-  it('should handle bounds that cross dateline(east to west)', () => {
-    const bounds = {
-      maxLat: 10,
-      maxLon: 190,
-      minLat: -10,
-      minLon: 170,
-    };
-    expect(convertMapExtentToPolygon(bounds)).toEqual({
-      type: 'Polygon',
-      coordinates: [
-        [
-          [170, 10],
-          [170, -10],
-          [-170, -10],
-          [-170, 10],
-          [170, 10],
-        ],
-      ],
+  describe('geo_shape field', () => {
+    it('should return elasticsearch geo_shape filter', () => {
+      const mapExtent = {
+        maxLat: 39,
+        maxLon: -83,
+        minLat: 35,
+        minLon: -89,
+      };
+      const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_shape');
+      expect(filter).toEqual({
+        geo_shape: {
+          location: {
+            relation: 'INTERSECTS',
+            shape: {
+              coordinates: [
+                [
+                  [-89, 39],
+                  [-89, 35],
+                  [-83, 35],
+                  [-83, 39],
+                  [-89, 39],
+                ],
+              ],
+              type: 'Polygon',
+            },
+          },
+        },
+      });
     });
-  });
 
-  it('should handle bounds that cross dateline(west to east)', () => {
-    const bounds = {
-      maxLat: 10,
-      maxLon: -170,
-      minLat: -10,
-      minLon: -190,
-    };
-    expect(convertMapExtentToPolygon(bounds)).toEqual({
-      type: 'Polygon',
-      coordinates: [
-        [
-          [170, 10],
-          [170, -10],
-          [-170, -10],
-          [-170, 10],
-          [170, 10],
-        ],
-      ],
+    it('should not clamp longitudes to -180 to 180', () => {
+      const mapExtent = {
+        maxLat: 39,
+        maxLon: 209,
+        minLat: 35,
+        minLon: -191,
+      };
+      const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_shape');
+      expect(filter).toEqual({
+        geo_shape: {
+          location: {
+            relation: 'INTERSECTS',
+            shape: {
+              coordinates: [
+                [
+                  [-191, 39],
+                  [-191, 35],
+                  [209, 35],
+                  [209, 39],
+                  [-191, 39],
+                ],
+              ],
+              type: 'Polygon',
+            },
+          },
+        },
+      });
     });
   });
 });
@@ -484,5 +464,133 @@ describe('roundCoordinates', () => {
       [-105.3062, 40.23193],
       [-105.3062, 30.64713],
     ]);
+  });
+});
+
+describe('extractFeaturesFromFilters', () => {
+  it('should ignore non-spatial filers', () => {
+    const phraseFilter = {
+      meta: {
+        alias: null,
+        disabled: false,
+        index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        key: 'machine.os',
+        negate: false,
+        params: {
+          query: 'ios',
+        },
+        type: 'phrase',
+      },
+      query: {
+        match_phrase: {
+          'machine.os': 'ios',
+        },
+      },
+    };
+    expect(extractFeaturesFromFilters([phraseFilter])).toEqual([]);
+  });
+
+  it('should convert geo_distance filter to feature', () => {
+    const spatialFilter = {
+      geo_distance: {
+        distance: '1096km',
+        'geo.coordinates': [-89.87125, 53.49454],
+      },
+      meta: {
+        alias: 'geo.coordinates within 1096km of -89.87125,53.49454',
+        disabled: false,
+        index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        key: 'geo.coordinates',
+        negate: false,
+        type: 'spatial_filter',
+        value: '',
+      },
+    };
+
+    const features = extractFeaturesFromFilters([spatialFilter]);
+    expect(features[0].geometry.coordinates[0][0]).toEqual([-89.87125, 63.35109118642093]);
+    expect(features[0].properties).toEqual({
+      filter: 'geo.coordinates within 1096km of -89.87125,53.49454',
+    });
+  });
+
+  it('should convert geo_shape filter to feature', () => {
+    const spatialFilter = {
+      geo_shape: {
+        'geo.coordinates': {
+          relation: 'INTERSECTS',
+          shape: {
+            coordinates: [
+              [
+                [-101.21639, 48.1413],
+                [-101.21639, 41.84905],
+                [-90.95149, 41.84905],
+                [-90.95149, 48.1413],
+                [-101.21639, 48.1413],
+              ],
+            ],
+            type: 'Polygon',
+          },
+        },
+        ignore_unmapped: true,
+      },
+      meta: {
+        alias: 'geo.coordinates in bounds',
+        disabled: false,
+        index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        key: 'geo.coordinates',
+        negate: false,
+        type: 'spatial_filter',
+        value: '',
+      },
+    };
+
+    expect(extractFeaturesFromFilters([spatialFilter])).toEqual([
+      {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [-101.21639, 48.1413],
+              [-101.21639, 41.84905],
+              [-90.95149, 41.84905],
+              [-90.95149, 48.1413],
+              [-101.21639, 48.1413],
+            ],
+          ],
+        },
+        properties: {
+          filter: 'geo.coordinates in bounds',
+        },
+      },
+    ]);
+  });
+
+  it('should ignore geo_shape filter with pre-index shape', () => {
+    const spatialFilter = {
+      geo_shape: {
+        'geo.coordinates': {
+          indexed_shape: {
+            id: 's5gldXEBkTB2HMwpC8y0',
+            index: 'world_countries_v1',
+            path: 'coordinates',
+          },
+          relation: 'INTERSECTS',
+        },
+        ignore_unmapped: true,
+      },
+      meta: {
+        alias: 'geo.coordinates in multipolygon',
+        disabled: false,
+        index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        key: 'geo.coordinates',
+        negate: false,
+        type: 'spatial_filter',
+        value: '',
+      },
+    };
+
+    expect(extractFeaturesFromFilters([spatialFilter])).toEqual([]);
   });
 });

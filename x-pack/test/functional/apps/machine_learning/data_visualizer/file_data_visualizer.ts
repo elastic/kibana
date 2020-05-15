@@ -34,8 +34,10 @@ export default function({ getService }: FtrProviderContext) {
   ];
 
   describe('file based', function() {
-    this.tags(['smoke', 'mlqa']);
+    this.tags(['mlqa']);
     before(async () => {
+      await ml.testResources.setKibanaTimeZoneToUTC();
+
       await ml.securityUI.loginAsMlPowerUser();
       await ml.navigation.navigateToMl();
     });

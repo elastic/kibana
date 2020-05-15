@@ -21,6 +21,7 @@ import { render } from 'enzyme';
 import PropTypes from 'prop-types';
 import React from 'react';
 
+jest.mock('angular-sanitize', () => {});
 jest.mock('ui/new_platform', () => ({
   npStart: {
     core: {

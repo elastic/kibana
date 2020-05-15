@@ -29,6 +29,7 @@ import { Storage } from '../../../../../../plugins/kibana_utils/public';
 import { getEsQueryConfig, buildEsQuery, Query } from '../../../../common';
 import { getQueryLog } from '../../../query';
 import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
 const filtersTitle = i18n.translate('data.search.aggs.buckets.filtersTitle', {
   defaultMessage: 'Filters',
@@ -45,6 +46,13 @@ interface FilterValue {
 export interface FiltersBucketAggDependencies {
   uiSettings: IUiSettingsClient;
   getInternalStartServices: GetInternalStartServicesFn;
+}
+
+export interface AggParamsFilters extends Omit<BaseAggParams, 'customLabel'> {
+  filters?: Array<{
+    input: Query;
+    label: string;
+  }>;
 }
 
 export const getFiltersBucketAgg = ({
@@ -107,7 +115,7 @@ export const getFiltersBucketAgg = ({
                   (typeof filter.input.query === 'string'
                     ? filter.input.query
                     : toAngularJSON(filter.input.query));
-                filters[label] = { query };
+                filters[label] = query;
               },
               {}
             );

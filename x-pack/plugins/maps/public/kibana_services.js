@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { esFilters, search } from '../../../../src/plugins/data/public';
-
-export { SearchSource } from '../../../../src/plugins/data/public';
+import _ from 'lodash';
 
 export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;
 const { getRequestInspectorStats, getResponseInspectorStats } = search;
@@ -38,7 +37,9 @@ export const getFileUploadComponent = () => {
 };
 
 let getInjectedVar;
-export const setInjectedVarFunc = getInjectedVarFunc => (getInjectedVar = getInjectedVarFunc);
+export const setInjectedVarFunc = getInjectedVarFunc => {
+  getInjectedVar = getInjectedVarFunc;
+};
 export const getInjectedVarFunc = () => getInjectedVar;
 
 let uiSettings;
@@ -135,3 +136,20 @@ export const getNavigation = () => navigation;
 let coreI18n;
 export const setCoreI18n = kibanaCoreI18n => (coreI18n = kibanaCoreI18n);
 export const getCoreI18n = () => coreI18n;
+
+let dataSearchService;
+export const setSearchService = searchService => (dataSearchService = searchService);
+export const getSearchService = () => dataSearchService;
+
+let mapConfig;
+export const setMapConfig = config => (mapConfig = config);
+export const getMapConfig = () => mapConfig;
+
+export const getIsEmsEnabled = () => getMapConfig().includeElasticMapsService;
+export const getEmsFontLibraryUrl = () => getMapConfig().emsFontLibraryUrl;
+export const getEmsTileLayerId = () => getMapConfig().emsTileLayerId;
+export const getEmsFileApiUrl = () => getMapConfig().emsFileApiUrl;
+export const getEmsTileApiUrl = () => getMapConfig().emsTileApiUrl;
+export const getEmsLandingPageUrl = () => getMapConfig().emsLandingPageUrl;
+export const getRegionmapLayers = () => _.get(getMapConfig(), 'regionmap.layers', []);
+export const getTilemap = () => _.get(getMapConfig(), 'tilemap', []);

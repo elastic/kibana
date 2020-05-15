@@ -230,6 +230,7 @@ export {
   SavedObjectsMigrationLogger,
   SavedObjectsRawDoc,
   SavedObjectSanitizedDoc,
+  SavedObjectUnsanitizedDoc,
   SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsSchema,
@@ -287,7 +288,17 @@ export {
   MetricsServiceSetup,
 } from './metrics';
 
-export { RecursiveReadonly } from '../utils';
+export {
+  RecursiveReadonly,
+  DEFAULT_APP_CATEGORIES,
+  getFlattenedObject,
+  URLMeaningfulParts,
+  modifyUrl,
+  isRelativeUrl,
+  Freezable,
+  deepFreeze,
+  assertNever,
+} from '../utils';
 
 export {
   SavedObject,

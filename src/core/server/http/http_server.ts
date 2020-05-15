@@ -74,6 +74,7 @@ export class HttpServer {
   private registeredRouters = new Set<IRouter>();
   private authRegistered = false;
   private cookieSessionStorageCreated = false;
+  private stopped = false;
 
   private readonly log: Logger;
   private readonly authState: AuthStateStorage;
@@ -144,6 +145,10 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Http server is not setup up yet');
     }
+    if (this.stopped) {
+      this.log.warn(`start called after stop`);
+      return;
+    }
     this.log.debug('starting http server');
 
     for (const router of this.registeredRouters) {
@@ -189,13 +194,13 @@ export class HttpServer {
   }
 
   public async stop() {
+    this.stopped = true;
     if (this.server === undefined) {
       return;
     }
 
     this.log.debug('stopping http server');
     await this.server.stop();
-    this.server = undefined;
   }
 
   private getAuthOption(
@@ -234,6 +239,9 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
+    if (this.stopped) {
+      this.log.warn(`setupConditionalCompression called after stop`);
+    }
 
     const { enabled, referrerWhitelist: list } = config.compression;
     if (!enabled) {
@@ -261,6 +269,9 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
+    if (this.stopped) {
+      this.log.warn(`registerOnPostAuth called after stop`);
+    }
 
     this.server.ext('onPostAuth', adoptToHapiOnPostAuthFormat(fn, this.log));
   }
@@ -269,6 +280,9 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
+    if (this.stopped) {
+      this.log.warn(`registerOnPreAuth called after stop`);
+    }
 
     this.server.ext('onRequest', adoptToHapiOnPreAuthFormat(fn, this.log));
   }
@@ -276,6 +290,9 @@ export class HttpServer {
   private registerOnPreResponse(fn: OnPreResponseHandler) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
+    }
+    if (this.stopped) {
+      this.log.warn(`registerOnPreResponse called after stop`);
     }
 
     this.server.ext('onPreResponse', adoptToHapiOnPreResponseFormat(fn, this.log));
@@ -287,6 +304,9 @@ export class HttpServer {
   ) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
+    }
+    if (this.stopped) {
+      this.log.warn(`createCookieSessionStorageFactory called after stop`);
     }
     if (this.cookieSessionStorageCreated) {
       throw new Error('A cookieSessionStorageFactory was already created');
@@ -304,6 +324,9 @@ export class HttpServer {
   private registerAuth<T>(fn: AuthenticationHandler) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
+    }
+    if (this.stopped) {
+      this.log.warn(`registerAuth called after stop`);
     }
     if (this.authRegistered) {
       throw new Error('Auth interceptor was already registered');
@@ -347,6 +370,9 @@ export class HttpServer {
   private registerStaticDir(path: string, dirPath: string) {
     if (this.server === undefined) {
       throw new Error('Http server is not setup up yet');
+    }
+    if (this.stopped) {
+      this.log.warn(`registerStaticDir called after stop`);
     }
 
     this.server.route({

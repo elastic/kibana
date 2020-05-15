@@ -23,6 +23,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { RefreshInterval, TimeRange, Query, Filter } from 'src/plugins/data/public';
 import { CoreStart } from 'src/core/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import uuid from 'uuid';
 import { UiActionsStart } from '../../ui_actions_plugin';
 import {
   Container,
@@ -32,6 +33,7 @@ import {
   EmbeddableFactory,
   IEmbeddable,
   EmbeddableStart,
+  PanelState,
 } from '../../embeddable_plugin';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
@@ -42,6 +44,8 @@ import {
   KibanaReactContext,
   KibanaReactContextValue,
 } from '../../../../kibana_react/public';
+import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
+import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
 
 export interface DashboardContainerInput extends ContainerInput {
   viewMode: ViewMode;
@@ -120,7 +124,62 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     partial: Partial<TEmbeddableInput> = {}
   ): DashboardPanelState<TEmbeddableInput> {
     const panelState = super.createNewPanelState(factory, partial);
-    return createPanelState(panelState, Object.values(this.input.panels));
+    return createPanelState(panelState, this.input.panels);
+  }
+
+  public showPlaceholderUntil<TPlacementMethodArgs extends IPanelPlacementArgs>(
+    newStateComplete: Promise<Partial<PanelState>>,
+    placementMethod?: PanelPlacementMethod<TPlacementMethodArgs>,
+    placementArgs?: TPlacementMethodArgs
+  ): void {
+    const originalPanelState = {
+      type: PLACEHOLDER_EMBEDDABLE,
+      explicitInput: {
+        id: uuid.v4(),
+        disabledActions: [
+          'ACTION_CUSTOMIZE_PANEL',
+          'CUSTOM_TIME_RANGE',
+          'clonePanel',
+          'replacePanel',
+          'togglePanel',
+        ],
+      },
+    } as PanelState<EmbeddableInput>;
+    const placeholderPanelState = createPanelState(
+      originalPanelState,
+      this.input.panels,
+      placementMethod,
+      placementArgs
+    );
+    this.updateInput({
+      panels: {
+        ...this.input.panels,
+        [placeholderPanelState.explicitInput.id]: placeholderPanelState,
+      },
+    });
+    newStateComplete.then((newPanelState: Partial<PanelState>) => {
+      const finalPanels = { ...this.input.panels };
+      delete finalPanels[placeholderPanelState.explicitInput.id];
+      const newPanelId = newPanelState.explicitInput?.id
+        ? newPanelState.explicitInput.id
+        : uuid.v4();
+      finalPanels[newPanelId] = {
+        ...placeholderPanelState,
+        ...newPanelState,
+        gridData: {
+          ...placeholderPanelState.gridData,
+          i: newPanelId,
+        },
+        explicitInput: {
+          ...newPanelState.explicitInput,
+          id: newPanelId,
+        },
+      };
+      this.updateInput({
+        panels: finalPanels,
+        lastReloadRequestTime: new Date().getTime(),
+      });
+    });
   }
 
   public render(dom: HTMLElement) {

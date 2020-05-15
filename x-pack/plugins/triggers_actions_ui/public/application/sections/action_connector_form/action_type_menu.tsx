@@ -16,13 +16,13 @@ import { checkActionTypeEnabled } from '../../lib/check_action_type_enabled';
 interface Props {
   onActionTypeChange: (actionType: ActionType) => void;
   actionTypes?: ActionType[];
-  setHasActionsDisabledByLicense?: (value: boolean) => void;
+  setHasActionsUpgradeableByTrial?: (value: boolean) => void;
 }
 
 export const ActionTypeMenu = ({
   onActionTypeChange,
   actionTypes,
-  setHasActionsDisabledByLicense,
+  setHasActionsUpgradeableByTrial,
 }: Props) => {
   const { http, toastNotifications, actionTypeRegistry } = useActionsConnectorsContext();
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
@@ -36,11 +36,15 @@ export const ActionTypeMenu = ({
           index[actionTypeItem.id] = actionTypeItem;
         }
         setActionTypesIndex(index);
-        if (setHasActionsDisabledByLicense) {
-          const hasActionsDisabledByLicense = availableActionTypes.some(
-            action => !index[action.id].enabledInLicense
+        // determine if there are actions disabled by license that that
+        // would be enabled by upgrading to gold or trial
+        if (setHasActionsUpgradeableByTrial) {
+          const hasActionsUpgradeableByTrial = availableActionTypes.some(
+            action =>
+              !index[action.id].enabledInLicense &&
+              index[action.id].minimumLicenseRequired === 'gold'
           );
-          setHasActionsDisabledByLicense(hasActionsDisabledByLicense);
+          setHasActionsUpgradeableByTrial(hasActionsUpgradeableByTrial);
         }
       } catch (e) {
         if (toastNotifications) {

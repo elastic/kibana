@@ -54,7 +54,11 @@ type ResolverColorNames =
   | 'activeNoWarning'
   | 'activeWarning'
   | 'fullLabelBackground'
-  | 'inertDescription';
+  | 'inertDescription'
+  | 'labelBackgroundTerminatedProcess'
+  | 'labelBackgroundTerminatedTrigger'
+  | 'labelBackgroundRunningProcess'
+  | 'labelBackgroundRunningTrigger';
 
 export const NamedColors: Record<ResolverColorNames, string> = {
   ok: saturate(0.5, resolverPalette.temperatures[0]),
@@ -70,6 +74,10 @@ export const NamedColors: Record<ResolverColorNames, string> = {
   activeNoWarning: '#0078FF',
   activeWarning: '#C61F38',
   fullLabelBackground: '#3B3C41',
+  labelBackgroundTerminatedProcess: '#8A96A8',
+  labelBackgroundTerminatedTrigger: '#8A96A8',
+  labelBackgroundRunningProcess: '#8A96A8',
+  labelBackgroundRunningTrigger: '#8A96A8',
   inertDescription: '#747474',
 };
 

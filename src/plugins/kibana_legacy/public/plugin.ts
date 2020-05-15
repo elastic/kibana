@@ -23,15 +23,25 @@ import {
   PluginInitializerContext,
   AppUpdatableFields,
   CoreStart,
+  CoreSetup,
 } from 'kibana/public';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { ConfigSchema } from '../config';
 import { getDashboardConfig } from './dashboard_config';
+import { navigateToDefaultApp } from './navigate_to_default_app';
+import { createLegacyUrlForwardApp } from './forward_app';
+import { injectHeaderStyle } from './utils/inject_header_style';
 
-interface ForwardDefinition {
+interface LegacyAppAliasDefinition {
   legacyAppId: string;
   newAppId: string;
   keepPrefix: boolean;
+}
+
+export interface ForwardDefinition {
+  legacyAppId: string;
+  newAppId: string;
+  rewritePath: (legacyPath: string) => string;
 }
 
 export type AngularRenderedAppUpdater = (
@@ -54,11 +64,15 @@ export interface AngularRenderedApp extends App {
 
 export class KibanaLegacyPlugin {
   private apps: AngularRenderedApp[] = [];
-  private forwards: ForwardDefinition[] = [];
+  private legacyAppAliases: LegacyAppAliasDefinition[] = [];
+  private forwardDefinitions: ForwardDefinition[] = [];
+  private currentAppId: string | undefined;
+  private currentAppIdSubscription: Subscription | undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
-  public setup() {
+  public setup(core: CoreSetup<{}, KibanaLegacyStart>) {
+    core.application.register(createLegacyUrlForwardApp(core));
     return {
       /**
        * @deprecated
@@ -94,17 +108,61 @@ export class KibanaLegacyPlugin {
        * renaming or nesting plugins. For route changes after the prefix, please
        * use the routing mechanism of your app.
        *
+       * This method just redirects URLs within the legacy `kibana` app.
+       *
        * @param legacyAppId The name of the old app to forward URLs from
        * @param newAppId The name of the new app that handles the URLs now
        * @param options Whether the prefix of the old app is kept to nest the legacy
        * path into the new path
        */
-      forwardApp: (
+      registerLegacyAppAlias: (
         legacyAppId: string,
         newAppId: string,
         options: { keepPrefix: boolean } = { keepPrefix: false }
       ) => {
-        this.forwards.push({ legacyAppId, newAppId, ...options });
+        this.legacyAppAliases.push({ legacyAppId, newAppId, ...options });
+      },
+
+      /**
+       * Forwards URLs within the legacy `kibana` app to a new platform application.
+       *
+       * @param legacyAppId The name of the old app to forward URLs from
+       * @param newAppId The name of the new app that handles the URLs now
+       * @param rewritePath Function to rewrite the legacy sub path of the app to the new path in the core app.
+       *        If none is provided, it will just strip the prefix of the legacyAppId away
+       *
+       * path into the new path
+       *
+       * Example usage:
+       * ```
+       * kibanaLegacy.forwardApp(
+       *   'old',
+       *   'new',
+       *   path => {
+       *     const [, id] = /old/item\/(.*)$/.exec(path) || [];
+       *     if (!id) {
+       *       return '#/home';
+       *     }
+       *     return '#/items/${id}';
+       *  }
+       * );
+       * ```
+       * This will cause the following redirects:
+       *
+       * * app/kibana#/old/ -> app/new#/home
+       * * app/kibana#/old/item/123 -> app/new#/items/123
+       *
+       */
+      forwardApp: (
+        legacyAppId: string,
+        newAppId: string,
+        rewritePath?: (legacyPath: string) => string
+      ) => {
+        this.forwardDefinitions.push({
+          legacyAppId,
+          newAppId,
+          rewritePath: rewritePath || (path => `#${path.replace(`/${legacyAppId}`, '') || '/'}`),
+        });
       },
 
       /**
@@ -121,7 +179,11 @@ export class KibanaLegacyPlugin {
     };
   }
 
-  public start({ application }: CoreStart) {
+  public start({ application, http: { basePath }, uiSettings }: CoreStart) {
+    this.currentAppIdSubscription = application.currentAppId$.subscribe(currentAppId => {
+      this.currentAppId = currentAppId;
+    });
+    injectHeaderStyle(uiSettings);
     return {
       /**
        * @deprecated
@@ -132,10 +194,37 @@ export class KibanaLegacyPlugin {
        * @deprecated
        * Just exported for wiring up with legacy platform, should not be used.
        */
-      getForwards: () => this.forwards,
+      getLegacyAppAliases: () => this.legacyAppAliases,
+      /**
+       * @deprecated
+       * Just exported for wiring up with legacy platform, should not be used.
+       */
+      getForwards: () => this.forwardDefinitions,
       config: this.initializerContext.config.get(),
       dashboardConfig: getDashboardConfig(!application.capabilities.dashboard.showWriteControls),
+      /**
+       * Navigates to the app defined as kibana.defaultAppId.
+       * This takes redirects into account and uses the right mechanism to navigate.
+       */
+      navigateToDefaultApp: (
+        { overwriteHash }: { overwriteHash: boolean } = { overwriteHash: true }
+      ) => {
+        navigateToDefaultApp(
+          this.initializerContext.config.get().defaultAppId,
+          this.forwardDefinitions,
+          application,
+          basePath,
+          this.currentAppId,
+          overwriteHash
+        );
+      },
     };
+  }
+
+  public stop() {
+    if (this.currentAppIdSubscription) {
+      this.currentAppIdSubscription.unsubscribe();
+    }
   }
 }
 

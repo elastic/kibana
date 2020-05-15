@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import './core.css';
-
 import { CoreId } from '../server';
 import { PackageInfo, EnvironmentMode } from '../server/types';
 import { CoreSetup, CoreStart } from '.';
@@ -50,8 +48,9 @@ interface Params {
   rootDomElement: HTMLElement;
   browserSupportsCsp: boolean;
   injectedMetadata: InjectedMetadataParams['injectedMetadata'];
-  requireLegacyFiles: LegacyPlatformParams['requireLegacyFiles'];
-  useLegacyTestHarness?: LegacyPlatformParams['useLegacyTestHarness'];
+  requireLegacyFiles?: LegacyPlatformParams['requireLegacyFiles'];
+  requireLegacyBootstrapModule?: LegacyPlatformParams['requireLegacyBootstrapModule'];
+  requireNewPlatformShimModule?: LegacyPlatformParams['requireNewPlatformShimModule'];
 }
 
 /** @internal */
@@ -111,7 +110,8 @@ export class CoreSystem {
       browserSupportsCsp,
       injectedMetadata,
       requireLegacyFiles,
-      useLegacyTestHarness,
+      requireLegacyBootstrapModule,
+      requireNewPlatformShimModule,
     } = params;
 
     this.rootDomElement = rootDomElement;
@@ -145,7 +145,8 @@ export class CoreSystem {
 
     this.legacy = new LegacyPlatformService({
       requireLegacyFiles,
-      useLegacyTestHarness,
+      requireLegacyBootstrapModule,
+      requireNewPlatformShimModule,
     });
   }
 

@@ -32,19 +32,12 @@ import {
   SavedObjectsClient,
   Plugin,
   Logger,
-  SharedGlobalConfig,
-  MetricsServiceSetup,
 } from '../../../core/server';
 import { registerRoutes } from './routes';
 import { registerCollection } from './telemetry_collection';
 import {
-  registerUiMetricUsageCollector,
   registerTelemetryUsageCollector,
   registerTelemetryPluginUsageCollector,
-  registerManagementUsageCollector,
-  registerApplicationUsageCollector,
-  registerKibanaUsageCollector,
-  registerOpsStatsCollector,
 } from './collectors';
 import { TelemetryConfigType } from './config';
 import { FetcherTask } from './fetcher';
@@ -65,7 +58,6 @@ export class TelemetryPlugin implements Plugin {
   private readonly logger: Logger;
   private readonly currentKibanaVersion: string;
   private readonly config$: Observable<TelemetryConfigType>;
-  private readonly legacyConfig$: Observable<SharedGlobalConfig>;
   private readonly isDev: boolean;
   private readonly fetcherTask: FetcherTask;
   private savedObjectsClient?: ISavedObjectsRepository;
@@ -76,7 +68,6 @@ export class TelemetryPlugin implements Plugin {
     this.isDev = initializerContext.env.mode.dev;
     this.currentKibanaVersion = initializerContext.env.packageInfo.version;
     this.config$ = initializerContext.config.create();
-    this.legacyConfig$ = initializerContext.config.legacy.globalConfig$;
     this.fetcherTask = new FetcherTask({
       ...initializerContext,
       logger: this.logger,
@@ -103,7 +94,7 @@ export class TelemetryPlugin implements Plugin {
     });
 
     this.registerMappings(opts => savedObjects.registerType(opts));
-    this.registerUsageCollectors(usageCollection, metrics, opts => savedObjects.registerType(opts));
+    this.registerUsageCollectors(usageCollection);
   }
 
   public async start(core: CoreStart, { telemetryCollectionManager }: TelemetryPluginsStart) {
@@ -125,7 +116,7 @@ export class TelemetryPlugin implements Plugin {
     registerType({
       name: 'telemetry',
       hidden: false,
-      namespaceAgnostic: true,
+      namespaceType: 'agnostic',
       mappings: {
         properties: {
           enabled: {
@@ -157,24 +148,14 @@ export class TelemetryPlugin implements Plugin {
     });
   }
 
-  private registerUsageCollectors(
-    usageCollection: UsageCollectionSetup,
-    metrics: MetricsServiceSetup,
-    registerType: SavedObjectsRegisterType
-  ) {
+  private registerUsageCollectors(usageCollection: UsageCollectionSetup) {
     const getSavedObjectsClient = () => this.savedObjectsClient;
-    const getUiSettingsClient = () => this.uiSettingsClient;
 
-    registerOpsStatsCollector(usageCollection, metrics.getOpsMetrics$());
-    registerKibanaUsageCollector(usageCollection, this.legacyConfig$);
     registerTelemetryPluginUsageCollector(usageCollection, {
       currentKibanaVersion: this.currentKibanaVersion,
       config$: this.config$,
       getSavedObjectsClient,
     });
     registerTelemetryUsageCollector(usageCollection, this.config$);
-    registerManagementUsageCollector(usageCollection, getUiSettingsClient);
-    registerUiMetricUsageCollector(usageCollection, registerType, getSavedObjectsClient);
-    registerApplicationUsageCollector(usageCollection, registerType, getSavedObjectsClient);
   }
 }

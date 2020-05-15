@@ -34,9 +34,9 @@ export const unmuteAlertInstanceRoute = (router: IRouter, licenseState: LicenseS
     },
     router.handleLegacyErrors(async function(
       context: RequestHandlerContext,
-      req: KibanaRequest<TypeOf<typeof paramSchema>, any, any, any>,
+      req: KibanaRequest<TypeOf<typeof paramSchema>, unknown, unknown>,
       res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
+    ): Promise<IKibanaResponse> {
       verifyApiAccess(licenseState);
       if (!context.alerting) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });

@@ -28,8 +28,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker', 'visChart']);
 
-  describe('visual builder', function describeIndexTests() {
-    this.tags('smoke');
+  // FLAKY: https://github.com/elastic/kibana/issues/43150
+  describe.skip('visual builder', function describeIndexTests() {
+    this.tags('includeFirefox');
     beforeEach(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await PageObjects.visualize.navigateToNewVisualization();

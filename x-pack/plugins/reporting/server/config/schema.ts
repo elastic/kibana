@@ -114,6 +114,7 @@ const CaptureSchema = schema.object({
 
 const CsvSchema = schema.object({
   checkForFormulas: schema.boolean({ defaultValue: true }),
+  escapeFormulaValues: schema.boolean({ defaultValue: false }),
   enablePanelActionDownload: schema.boolean({ defaultValue: true }),
   maxSizeBytes: schema.number({
     defaultValue: 1024 * 1024 * 10, // 10MB

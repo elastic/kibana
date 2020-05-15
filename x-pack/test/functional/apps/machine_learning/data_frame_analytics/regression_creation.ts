@@ -12,15 +12,16 @@ export default function({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('regression creation', function() {
-    this.tags(['smoke']);
     before(async () => {
-      await esArchiver.load('ml/egs_regression');
+      await esArchiver.loadIfNeeded('ml/egs_regression');
+      await ml.testResources.createIndexPatternIfNeeded('ft_egs_regression', '@timestamp');
+      await ml.testResources.setKibanaTimeZoneToUTC();
+
       await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await esArchiver.unload('ml/egs_regression');
     });
 
     const testDataList = [
@@ -29,7 +30,7 @@ export default function({ getService }: FtrProviderContext) {
         jobType: 'regression',
         jobId: `egs_1_${Date.now()}`,
         jobDescription: 'This is the job description',
-        source: 'egs_regression',
+        source: 'ft_egs_regression',
         get destinationIndex(): string {
           return `user-${this.jobId}`;
         },
@@ -51,6 +52,7 @@ export default function({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function() {
         after(async () => {
           await ml.api.deleteIndices(testData.destinationIndex);
+          await ml.testResources.deleteIndexPattern(testData.destinationIndex);
         });
 
         it('loads the data frame analytics page', async () => {

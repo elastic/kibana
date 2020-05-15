@@ -87,6 +87,7 @@ export interface SavedSearchGeneratorResult {
   size: number;
   maxSizeReached: boolean;
   csvContainsFormulas?: boolean;
+  warnings: string[];
 }
 
 export interface CsvResultFromSearch {
@@ -109,5 +110,6 @@ export interface GenerateCsvParams {
     maxSizeBytes: number;
     scroll: ScrollConfig;
     checkForFormulas?: boolean;
+    escapeFormulaValues: boolean;
   };
 }

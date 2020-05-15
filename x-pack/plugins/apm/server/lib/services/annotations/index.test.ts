@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { getServiceAnnotations } from '.';
+import { getDerivedServiceAnnotations } from './get_derived_service_annotations';
 import {
   SearchParamsMock,
   inspectSearchParams
-} from '../../../../../../legacy/plugins/apm/public/utils/testHelpers';
+} from '../../../../public/utils/testHelpers';
 import noVersions from './__fixtures__/no_versions.json';
 import oneVersion from './__fixtures__/one_version.json';
 import multipleVersions from './__fixtures__/multiple_versions.json';
@@ -24,7 +24,7 @@ describe('getServiceAnnotations', () => {
     it('returns no annotations', async () => {
       mock = await inspectSearchParams(
         setup =>
-          getServiceAnnotations({
+          getDerivedServiceAnnotations({
             setup,
             serviceName: 'foo',
             environment: 'bar'
@@ -34,7 +34,7 @@ describe('getServiceAnnotations', () => {
         }
       );
 
-      expect(mock.response).toEqual({ annotations: [] });
+      expect(mock.response).toEqual([]);
     });
   });
 
@@ -42,7 +42,7 @@ describe('getServiceAnnotations', () => {
     it('returns no annotations', async () => {
       mock = await inspectSearchParams(
         setup =>
-          getServiceAnnotations({
+          getDerivedServiceAnnotations({
             setup,
             serviceName: 'foo',
             environment: 'bar'
@@ -52,7 +52,7 @@ describe('getServiceAnnotations', () => {
         }
       );
 
-      expect(mock.response).toEqual({ annotations: [] });
+      expect(mock.response).toEqual([]);
     });
   });
 
@@ -65,7 +65,7 @@ describe('getServiceAnnotations', () => {
       ];
       mock = await inspectSearchParams(
         setup =>
-          getServiceAnnotations({
+          getDerivedServiceAnnotations({
             setup,
             serviceName: 'foo',
             environment: 'bar'
@@ -77,22 +77,20 @@ describe('getServiceAnnotations', () => {
 
       expect(mock.spy.mock.calls.length).toBe(3);
 
-      expect(mock.response).toEqual({
-        annotations: [
-          {
-            id: '8.0.0',
-            text: '8.0.0',
-            time: 1.5281138e12,
-            type: 'version'
-          },
-          {
-            id: '7.5.0',
-            text: '7.5.0',
-            time: 1.5281138e12,
-            type: 'version'
-          }
-        ]
-      });
+      expect(mock.response).toEqual([
+        {
+          id: '8.0.0',
+          text: '8.0.0',
+          '@timestamp': 1.5281138e12,
+          type: 'version'
+        },
+        {
+          id: '7.5.0',
+          text: '7.5.0',
+          '@timestamp': 1.5281138e12,
+          type: 'version'
+        }
+      ]);
     });
   });
 });

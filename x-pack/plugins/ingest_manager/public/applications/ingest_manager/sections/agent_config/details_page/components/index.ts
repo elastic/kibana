@@ -4,5 +4,3 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export { DatasourcesTable } from './datasources/datasources_table';
-export { DonutChart } from './donut_chart';
-export { EditConfigFlyout } from './edit_config';

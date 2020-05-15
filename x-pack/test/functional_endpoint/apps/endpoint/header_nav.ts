@@ -31,7 +31,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('renders the hosts page when the Hosts tab is selected', async () => {
       await (await testSubjects.find('hostsEndpointTab')).click();
-      await testSubjects.existOrFail('hostListTitle');
+      await testSubjects.existOrFail('hostPage');
     });
 
     it('renders the alerts page when the Alerts tab is selected', async () => {
@@ -46,7 +46,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('renders the home page when Home tab is selected after selecting another tab', async () => {
       await (await testSubjects.find('hostsEndpointTab')).click();
-      await testSubjects.existOrFail('hostListTitle');
+      await testSubjects.existOrFail('hostPage');
 
       await (await testSubjects.find('homeEndpointTab')).click();
       await testSubjects.existOrFail('welcomeTitle');

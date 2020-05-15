@@ -10,7 +10,8 @@ import { RouteComponentProps } from 'react-router-dom';
 
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { Repository } from '../../../../../common/types';
-import { SectionError, SectionLoading, Error } from '../../../components';
+import { SectionError, Error } from '../../../../shared_imports';
+import { SectionLoading } from '../../../components';
 import { BASE_PATH, UIM_REPOSITORY_LIST_LOAD } from '../../../constants';
 import { useServices } from '../../../app_context';
 import { useLoadRepositories } from '../../../services/http';

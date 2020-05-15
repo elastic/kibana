@@ -15,7 +15,7 @@ export function LogStreamPageProvider({ getPageObjects, getService }: FtrProvide
 
   return {
     async navigateTo(params?: TabsParams['stream']) {
-      pageObjects.infraLogs.navigateToTab('stream', params);
+      await pageObjects.infraLogs.navigateToTab('stream', params);
     },
 
     async getColumnHeaderLabels(): Promise<string[]> {

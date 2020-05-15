@@ -20,7 +20,6 @@
 import { get, isEmpty } from 'lodash';
 
 import {
-  AggTypeFieldFilters,
   IAggConfig,
   AggParam,
   IFieldParamType,
@@ -28,13 +27,13 @@ import {
   IndexPattern,
   IndexPatternField,
 } from 'src/plugins/data/public';
+import { filterAggTypes, filterAggTypeFields } from '../agg_filters';
 import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
 import { AggTypeState, AggParamsState } from './agg_params_state';
 import { AggParamEditorProps } from './agg_param_props';
 import { aggParamsMap } from './agg_params_map';
 import { EditorConfig } from './utils';
 import { Schema, getSchemaByName } from '../schemas';
-import { search } from '../../../data/public';
 import { EditorVisState } from './sidebar/state/reducers';
 
 interface ParamInstanceBase {
@@ -53,10 +52,14 @@ export interface ParamInstance extends ParamInstanceBase {
   value: unknown;
 }
 
-function getAggParamsToRender(
-  { agg, editorConfig, metricAggs, state, schemas, hideCustomLabel }: ParamInstanceBase,
-  aggTypeFieldFilters: AggTypeFieldFilters
-) {
+function getAggParamsToRender({
+  agg,
+  editorConfig,
+  metricAggs,
+  state,
+  schemas,
+  hideCustomLabel,
+}: ParamInstanceBase) {
   const params = {
     basic: [] as ParamInstance[],
     advanced: [] as ParamInstance[],
@@ -89,7 +92,7 @@ function getAggParamsToRender(
           availableFields = availableFields.filter(field => field.type === 'number');
         }
       }
-      fields = aggTypeFieldFilters.filter(availableFields, agg);
+      fields = filterAggTypeFields(availableFields, agg);
       indexedFields = groupAndSortBy(fields, 'type', 'name');
 
       if (fields && !indexedFields.length && index > 0) {
@@ -138,12 +141,7 @@ function getAggTypeOptions(
   groupName: string,
   allowedAggs: string[]
 ): ComboBoxGroupedOptions<IAggType> {
-  const aggTypeOptions = search.aggs.aggTypeFilters.filter(
-    aggTypes[groupName],
-    indexPattern,
-    agg,
-    allowedAggs
-  );
+  const aggTypeOptions = filterAggTypes(aggTypes[groupName], indexPattern, agg, allowedAggs);
   return groupAndSortBy(aggTypeOptions as any[], 'subtype', 'title');
 }
 

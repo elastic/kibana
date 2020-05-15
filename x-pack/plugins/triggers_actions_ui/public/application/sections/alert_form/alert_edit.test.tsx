@@ -12,7 +12,7 @@ import { ValidationResult } from '../../../types';
 import { AlertsContextProvider } from '../../context/alerts_context';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
-import { AlertEdit } from './alert_edit';
+import AlertEdit from './alert_edit';
 import { AppContextProvider } from '../../app_context';
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -27,6 +27,11 @@ describe('alert_edit', () => {
   });
 
   async function setup() {
+    const [
+      {
+        application: { capabilities },
+      },
+    ] = await mockedCoreSetup.getStartServices();
     deps = {
       toastNotifications: mockedCoreSetup.notifications.toasts,
       http: mockedCoreSetup.http,
@@ -34,6 +39,7 @@ describe('alert_edit', () => {
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: alertTypeRegistry as any,
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
+      capabilities,
     };
 
     mockedCoreSetup.http.get.mockResolvedValue({
@@ -49,6 +55,7 @@ describe('alert_edit', () => {
         return { errors: {} };
       },
       alertParamsExpression: () => <React.Fragment />,
+      requiresAppContext: false,
     };
 
     const actionTypeModel = {
@@ -122,13 +129,10 @@ describe('alert_edit', () => {
             toastNotifications: deps!.toastNotifications,
             uiSettings: deps!.uiSettings,
             docLinks: deps.docLinks,
+            capabilities: deps!.capabilities,
           }}
         >
-          <AlertEdit
-            editFlyoutVisible={true}
-            setEditFlyoutVisibility={() => {}}
-            initialAlert={alert}
-          />
+          <AlertEdit onClose={() => {}} initialAlert={alert} />
         </AlertsContextProvider>
       </AppContextProvider>
     );

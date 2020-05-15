@@ -41,6 +41,7 @@ export function registerTasks({
       createTaskRunner({ taskInstance }: { taskInstance: TaskInstance }) {
         return {
           run: visualizationsTaskRunner(taskInstance, config, esClientPromise),
+          cancel: async () => {},
         };
       },
     },

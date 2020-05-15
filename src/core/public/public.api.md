@@ -16,6 +16,7 @@ import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { MaybePromise } from '@kbn/utility-types';
 import { Observable } from 'rxjs';
+import { ParsedQuery } from 'query-string';
 import { PublicUiSettingsParams as PublicUiSettingsParams_2 } from 'src/core/server/types';
 import React from 'react';
 import * as Rx from 'rxjs';
@@ -36,6 +37,7 @@ export interface AppBase {
     capabilities?: Partial<Capabilities>;
     category?: AppCategory;
     chromeless?: boolean;
+    defaultPath?: string;
     euiIconType?: string;
     icon?: string;
     id: string;
@@ -53,6 +55,7 @@ export interface AppBase {
 export interface AppCategory {
     ariaLabel?: string;
     euiIconType?: string;
+    id: string;
     label: string;
     order?: number;
 }
@@ -168,10 +171,13 @@ export enum AppStatus {
 export type AppUnmount = () => void;
 
 // @public
-export type AppUpdatableFields = Pick<AppBase, 'status' | 'navLinkStatus' | 'tooltip'>;
+export type AppUpdatableFields = Pick<AppBase, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath'>;
 
 // @public
 export type AppUpdater = (app: AppBase) => Partial<AppUpdatableFields> | undefined;
+
+// @public
+export function assertNever(x: never): never;
 
 // @public
 export interface Capabilities {
@@ -290,7 +296,6 @@ export interface ChromeNavLink {
     readonly subUrlBase?: string;
     readonly title: string;
     readonly tooltip?: string;
-    // @deprecated
     readonly url?: string;
 }
 
@@ -339,6 +344,7 @@ export interface ChromeStart {
     getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
     getIsNavDrawerLocked$(): Observable<boolean>;
     getIsVisible$(): Observable<boolean>;
+    getNavType$(): Observable<NavType>;
     navControls: ChromeNavControls;
     navLinks: ChromeNavLinks;
     recentlyAccessed: ChromeRecentlyAccessed;
@@ -434,25 +440,33 @@ export class CoreSystem {
     stop(): void;
     }
 
+// @public
+export function deepFreeze<T extends Freezable>(object: T): RecursiveReadonly<T>;
+
 // @internal (undocumented)
 export const DEFAULT_APP_CATEGORIES: Readonly<{
-    analyze: {
+    kibana: {
+        id: string;
         label: string;
+        euiIconType: string;
         order: number;
     };
     observability: {
+        id: string;
         label: string;
         euiIconType: string;
         order: number;
     };
     security: {
+        id: string;
         label: string;
         order: number;
         euiIconType: string;
     };
     management: {
+        id: string;
         label: string;
-        euiIconType: string;
+        order: number;
     };
 }>;
 
@@ -584,6 +598,16 @@ export interface FatalErrorsSetup {
 // @public
 export type FatalErrorsStart = FatalErrorsSetup;
 
+// @public (undocumented)
+export type Freezable = {
+    [k: string]: any;
+} | any[];
+
+// @public
+export function getFlattenedObject(rootValue: Record<string, any>): {
+    [key: string]: any;
+};
+
 // @public
 export type HandlerContextType<T extends HandlerFunction<any>> = T extends HandlerFunction<infer U> ? U : never;
 
@@ -592,6 +616,23 @@ export type HandlerFunction<T extends object> = (context: T, ...args: any[]) => 
 
 // @public
 export type HandlerParameters<T extends HandlerFunction<any>> = T extends (context: any, ...args: infer U) => any ? U : never;
+
+// @internal (undocumented)
+export class HttpFetchError extends Error implements IHttpFetchError {
+    constructor(message: string, name: string, request: Request, response?: Response | undefined, body?: any);
+    // (undocumented)
+    readonly body?: any;
+    // (undocumented)
+    readonly name: string;
+    // (undocumented)
+    readonly req: Request;
+    // (undocumented)
+    readonly request: Request;
+    // (undocumented)
+    readonly res?: Response;
+    // (undocumented)
+    readonly response?: Response | undefined;
+}
 
 // @public
 export interface HttpFetchOptions extends HttpRequestInit {
@@ -779,6 +820,9 @@ export interface ImageValidation {
 }
 
 // @public
+export function isRelativeUrl(candidatePath: string): boolean;
+
+// @public
 export type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError' | 'addInfo'>;
 
 // @public
@@ -841,7 +885,15 @@ export interface LegacyNavLink {
 }
 
 // @public
+export function modifyUrl(url: string, urlModifier: (urlParts: URLMeaningfulParts) => Partial<URLMeaningfulParts> | void): string;
+
+// @public
 export type MountPoint<T extends HTMLElement = HTMLElement> = (element: T) => UnmountCallback;
+
+// Warning: (ae-missing-release-tag) "NavType" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type NavType = 'modern' | 'legacy';
 
 // @public (undocumented)
 export interface NotificationsSetup {
@@ -1338,6 +1390,26 @@ export type UiSettingsType = 'undefined' | 'json' | 'markdown' | 'number' | 'sel
 
 // @public
 export type UnmountCallback = () => void;
+
+// @public
+export interface URLMeaningfulParts {
+    // (undocumented)
+    auth?: string | null;
+    // (undocumented)
+    hash?: string | null;
+    // (undocumented)
+    hostname?: string | null;
+    // (undocumented)
+    pathname?: string | null;
+    // (undocumented)
+    port?: string | null;
+    // (undocumented)
+    protocol?: string | null;
+    // (undocumented)
+    query: ParsedQuery;
+    // (undocumented)
+    slashes?: boolean | null;
+}
 
 // @public
 export interface UserProvidedValues<T = any> {

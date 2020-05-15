@@ -20,7 +20,7 @@
 import { get, isPlainObject, keys, findKey } from 'lodash';
 import moment from 'moment';
 import { IAggConfig } from '../aggs';
-import { AggResponseBucket, TabbedRangeFilterParams } from './types';
+import { AggResponseBucket, TabbedRangeFilterParams, TimeRangeInformation } from './types';
 
 type AggParams = IAggConfig['params'] & {
   drop_partials: boolean;
@@ -36,7 +36,7 @@ export class TabifyBuckets {
   buckets: any;
   _keys: any[] = [];
 
-  constructor(aggResp: any, aggParams?: AggParams, timeRange?: TabbedRangeFilterParams) {
+  constructor(aggResp: any, aggParams?: AggParams, timeRange?: TimeRangeInformation) {
     if (aggResp && aggResp.buckets) {
       this.buckets = aggResp.buckets;
     } else if (aggResp) {
@@ -107,12 +107,12 @@ export class TabifyBuckets {
 
   // dropPartials should only be called if the aggParam setting is enabled,
   // and the agg field is the same as the Time Range.
-  private dropPartials(params: AggParams, timeRange?: TabbedRangeFilterParams) {
+  private dropPartials(params: AggParams, timeRange?: TimeRangeInformation) {
     if (
       !timeRange ||
       this.buckets.length <= 1 ||
       this.objectMode ||
-      params.field.name !== timeRange.name
+      !timeRange.timeFields.includes(params.field.name)
     ) {
       return;
     }
@@ -120,10 +120,10 @@ export class TabifyBuckets {
     const interval = this.buckets[1].key - this.buckets[0].key;
 
     this.buckets = this.buckets.filter((bucket: AggResponseBucket) => {
-      if (moment(bucket.key).isBefore(timeRange.gte)) {
+      if (moment(bucket.key).isBefore(timeRange.from)) {
         return false;
       }
-      if (moment(bucket.key + interval).isAfter(timeRange.lte)) {
+      if (moment(bucket.key + interval).isAfter(timeRange.to)) {
         return false;
       }
       return true;

@@ -14,7 +14,7 @@ export declare class Field implements IFieldType
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(indexPattern, spec, shortDotsEnable)](./kibana-plugin-plugins-data-public.indexpatternfield._constructor_.md) |  | Constructs a new instance of the <code>Field</code> class |
+|  [(constructor)(indexPattern, spec, shortDotsEnable, { fieldFormats, toastNotifications })](./kibana-plugin-plugins-data-public.indexpatternfield._constructor_.md) |  | Constructs a new instance of the <code>Field</code> class |
 
 ## Properties
 
@@ -22,6 +22,7 @@ export declare class Field implements IFieldType
 |  --- | --- | --- | --- |
 |  [$$spec](./kibana-plugin-plugins-data-public.indexpatternfield.__spec.md) |  | <code>FieldSpec</code> |  |
 |  [aggregatable](./kibana-plugin-plugins-data-public.indexpatternfield.aggregatable.md) |  | <code>boolean</code> |  |
+|  [conflictDescriptions](./kibana-plugin-plugins-data-public.indexpatternfield.conflictdescriptions.md) |  | <code>Record&lt;string, string[]&gt;</code> |  |
 |  [count](./kibana-plugin-plugins-data-public.indexpatternfield.count.md) |  | <code>number</code> |  |
 |  [displayName](./kibana-plugin-plugins-data-public.indexpatternfield.displayname.md) |  | <code>string</code> |  |
 |  [esTypes](./kibana-plugin-plugins-data-public.indexpatternfield.estypes.md) |  | <code>string[]</code> |  |

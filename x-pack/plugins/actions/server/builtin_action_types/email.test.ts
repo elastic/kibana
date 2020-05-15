@@ -9,13 +9,13 @@ jest.mock('./lib/send_email', () => ({
 }));
 
 import { Logger } from '../../../../../src/core/server';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 
 import { ActionType, ActionTypeExecutorOptions } from '../types';
 import { actionsConfigMock } from '../actions_config.mock';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
 import { createActionTypeRegistry } from './index.test';
 import { sendEmail } from './lib/send_email';
+import { actionsMock } from '../mocks';
 import {
   ActionParamsType,
   ActionTypeConfigType,
@@ -26,13 +26,8 @@ import {
 const sendEmailMock = sendEmail as jest.Mock;
 
 const ACTION_TYPE_ID = '.email';
-const NO_OP_FN = () => {};
 
-const services = {
-  log: NO_OP_FN,
-  callCluster: async (path: string, opts: any) => {},
-  savedObjectsClient: savedObjectsClientMock.create(),
-};
+const services = actionsMock.createServices();
 
 let actionType: ActionType;
 let mockedLogger: jest.Mocked<Logger>;
@@ -52,7 +47,7 @@ describe('actionTypeRegistry.get() works', () => {
 
 describe('config validation', () => {
   test('config validation succeeds when config is valid', () => {
-    const config: Record<string, any> = {
+    const config: Record<string, unknown> = {
       service: 'gmail',
       from: 'bob@example.com',
     };
@@ -74,7 +69,7 @@ describe('config validation', () => {
   });
 
   test('config validation fails when config is not valid', () => {
-    const baseConfig: Record<string, any> = {
+    const baseConfig: Record<string, unknown> = {
       from: 'bob@example.com',
     };
 
@@ -177,7 +172,7 @@ describe('config validation', () => {
 
 describe('secrets validation', () => {
   test('secrets validation succeeds when secrets is valid', () => {
-    const secrets: Record<string, any> = {
+    const secrets: Record<string, unknown> = {
       user: 'bob',
       password: 'supersecret',
     };
@@ -185,7 +180,7 @@ describe('secrets validation', () => {
   });
 
   test('secrets validation succeeds when secrets props are null/undefined', () => {
-    const secrets: Record<string, any> = {
+    const secrets: Record<string, unknown> = {
       user: null,
       password: null,
     };
@@ -197,7 +192,7 @@ describe('secrets validation', () => {
 
 describe('params validation', () => {
   test('params validation succeeds when params is valid', () => {
-    const params: Record<string, any> = {
+    const params: Record<string, unknown> = {
       to: ['bob@example.com'],
       subject: 'this is a test',
       message: 'this is the message',

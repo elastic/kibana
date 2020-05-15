@@ -57,6 +57,9 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
       validate: {
         body: estimateBucketSpanSchema,
       },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -106,6 +109,9 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
       validate: {
         body: modelMemoryLimitSchema,
       },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -134,6 +140,9 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
       path: '/api/ml/validate/cardinality',
       validate: {
         body: validateCardinalitySchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateJob'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -166,6 +175,9 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
       path: '/api/ml/validate/job',
       validate: {
         body: validateJobSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateJob'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

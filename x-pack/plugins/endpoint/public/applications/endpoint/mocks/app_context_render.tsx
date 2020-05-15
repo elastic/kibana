@@ -12,6 +12,7 @@ import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { EndpointPluginStartDependencies } from '../../../plugin';
 import { depsStartMock } from './dependencies_start_mock';
 import { AppRootProvider } from '../view/app_root_provider';
+import { createSpyMiddleware, MiddlewareActionSpyHelper } from '../store/test_utils';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
@@ -23,6 +24,7 @@ export interface AppContextTestRender {
   history: ReturnType<typeof createMemoryHistory>;
   coreStart: ReturnType<typeof coreMock.createStart>;
   depsStart: EndpointPluginStartDependencies;
+  middlewareSpy: MiddlewareActionSpyHelper;
   /**
    * A wrapper around `AppRootContext` component. Uses the mocked modules as input to the
    * `AppRootContext`
@@ -45,7 +47,12 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const history = createMemoryHistory<never>();
   const coreStart = coreMock.createStart({ basePath: '/mock' });
   const depsStart = depsStartMock();
-  const store = appStoreFactory({ coreStart, depsStart });
+  const middlewareSpy = createSpyMiddleware();
+  const store = appStoreFactory({
+    coreStart,
+    depsStart,
+    additionalMiddleware: [middlewareSpy.actionSpyMiddleware],
+  });
   const AppWrapper: React.FunctionComponent<{ children: React.ReactElement }> = ({ children }) => (
     <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
       {children}
@@ -64,6 +71,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     history,
     coreStart,
     depsStart,
+    middlewareSpy,
     AppWrapper,
     render,
   };

@@ -6,6 +6,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService, loadTestFile }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
   describe('machine learning', function() {
@@ -19,6 +20,26 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
     after(async () => {
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
+
+      await ml.testResources.deleteSavedSearches();
+
+      await ml.testResources.deleteIndexPattern('ft_farequote');
+      await ml.testResources.deleteIndexPattern('ft_ecommerce');
+      await ml.testResources.deleteIndexPattern('ft_categorization');
+      await ml.testResources.deleteIndexPattern('ft_event_rate_gen_trend_nanos');
+      await ml.testResources.deleteIndexPattern('ft_bank_marketing');
+      await ml.testResources.deleteIndexPattern('ft_ihp_outlier');
+      await ml.testResources.deleteIndexPattern('ft_egs_regression');
+
+      await esArchiver.unload('ml/farequote');
+      await esArchiver.unload('ml/ecommerce');
+      await esArchiver.unload('ml/categorization');
+      await esArchiver.unload('ml/event_rate_nanos');
+      await esArchiver.unload('ml/bm_classification');
+      await esArchiver.unload('ml/ihp_outlier');
+      await esArchiver.unload('ml/egs_regression');
+
+      await ml.testResources.resetKibanaTimeZone();
     });
 
     loadTestFile(require.resolve('./feature_controls'));

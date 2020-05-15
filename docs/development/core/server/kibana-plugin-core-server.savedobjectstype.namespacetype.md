@@ -9,5 +9,5 @@ The [namespace type](./kibana-plugin-core-server.savedobjectsnamespacetype.md) f
 <b>Signature:</b>
 
 ```typescript
-namespaceType?: SavedObjectsNamespaceType;
+namespaceType: SavedObjectsNamespaceType;
 ```

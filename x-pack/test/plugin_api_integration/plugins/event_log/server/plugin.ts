@@ -4,24 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Plugin, CoreSetup, Logger, PluginInitializerContext } from 'kibana/server';
+import { IEventLogService, IEventLogClientService } from '../../../../../plugins/event_log/server';
 import {
-  Plugin,
-  CoreSetup,
-  RequestHandlerContext,
-  KibanaRequest,
-  KibanaResponseFactory,
-  IKibanaResponse,
-  IRouter,
-  Logger,
-  PluginInitializerContext,
-  RouteValidationResultFactory,
-} from 'kibana/server';
-import {
-  IEventLogService,
-  IEventLogClientService,
-  IEventLogger,
-} from '../../../../../plugins/event_log/server';
-import { IValidatedEvent } from '../../../../../plugins/event_log/server/types';
+  logEventRoute,
+  registerProviderActionsRoute,
+  isProviderActionRegisteredRoute,
+  getProviderActionsRoute,
+  getLoggerRoute,
+  isIndexingEntriesRoute,
+  isEventLogServiceLoggingEntriesRoute,
+  isEventLogServiceEnabledRoute,
+} from './init_routes';
 
 // this plugin's dependendencies
 export interface EventLogFixtureSetupDeps {
@@ -50,49 +44,24 @@ export class EventLogFixturePlugin
     core.savedObjects.registerType({
       name: 'event_log_test',
       hidden: false,
-      namespaceAgnostic: true,
+      namespaceType: 'agnostic',
       mappings: {
         properties: {},
       },
     });
 
     logEventRoute(router, eventLogger, this.logger);
+
+    // event log service api routes
+    registerProviderActionsRoute(router, eventLog, this.logger);
+    isProviderActionRegisteredRoute(router, eventLog, this.logger);
+    getProviderActionsRoute(router, eventLog, this.logger);
+    getLoggerRoute(router, eventLog, this.logger);
+    isIndexingEntriesRoute(router, eventLog, this.logger);
+    isEventLogServiceLoggingEntriesRoute(router, eventLog, this.logger);
+    isEventLogServiceEnabledRoute(router, eventLog, this.logger);
   }
 
   public start() {}
   public stop() {}
 }
-
-const logEventRoute = (router: IRouter, eventLogger: IEventLogger, logger: Logger) => {
-  router.post(
-    {
-      path: `/api/log_event_fixture/{id}/_log`,
-      validate: {
-        // removed validation as schema is currently broken in tests
-        // blocked by: https://github.com/elastic/kibana/issues/61652
-        params: (value: any, { ok }: RouteValidationResultFactory) => ok(value),
-        body: (value: any, { ok }: RouteValidationResultFactory) => ok(value),
-      },
-    },
-    async function(
-      context: RequestHandlerContext,
-      req: KibanaRequest<any, any, any, any>,
-      res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
-      const { id } = req.params as { id: string };
-      const event: IValidatedEvent = req.body;
-      logger.info(`test fixture: log event: ${id} ${JSON.stringify(event)}`);
-      try {
-        await context.core.savedObjects.client.get('event_log_test', id);
-        logger.info(`found existing saved object`);
-      } catch (ex) {
-        logger.info(`log event error: ${ex}`);
-        await context.core.savedObjects.client.create('event_log_test', {}, { id });
-        logger.info(`created saved object`);
-      }
-      eventLogger.logEvent(event);
-      logger.info(`logged`);
-      return res.ok({});
-    }
-  );
-};

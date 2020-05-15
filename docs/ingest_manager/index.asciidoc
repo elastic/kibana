@@ -199,3 +199,10 @@ The new ingest pipeline is expected to still work with the data coming from olde
 In case of a breaking change in the data structure, the new ingest pipeline is also expected to deal with this change. In case there are breaking changes which cannot be dealt with in an ingest pipeline, a new package has to be created.
 
 Each package lists its minimal required agent version. In case there are agents enrolled with an older version, the user is notified to upgrade these agents as otherwise the new configs cannot be rolled out.
+
+=== Generated assets
+
+When a package is installed or upgraded, certain Kibana and Elasticsearch assets are generated from . These follow the naming conventions explained above (see "indexing strategy") and contain configuration for the elastic stack that makes ingesting and displaying data work with as little user interaction as possible.
+
+* link:index-templates.asciidoc[Elasticsearch Index Templates]
+* Kibana Index Patterns

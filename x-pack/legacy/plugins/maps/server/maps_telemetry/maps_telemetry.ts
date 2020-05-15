@@ -16,8 +16,8 @@ import {
   ES_GEO_FIELD_TYPE,
   MAP_SAVED_OBJECT_TYPE,
   TELEMETRY_TYPE,
-} from '../../common/constants';
-import { LayerDescriptor } from '../../common/descriptor_types';
+} from '../../../../../plugins/maps/common/constants';
+import { LayerDescriptor } from '../../../../../plugins/maps/common/descriptor_types';
 import { MapSavedObject } from '../../../../../plugins/maps/common/map_saved_object_type';
 
 interface IStats {
@@ -61,13 +61,27 @@ function getIndexPatternsWithGeoFieldCount(indexPatterns: IIndexPattern[]) {
       ? JSON.parse(indexPattern.attributes.fields)
       : []
   );
+
   const fieldListsWithGeoFields = fieldLists.filter(fields =>
     fields.some(
       (field: IFieldType) =>
         field.type === ES_GEO_FIELD_TYPE.GEO_POINT || field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
     )
   );
-  return fieldListsWithGeoFields.length;
+
+  const fieldListsWithGeoPointFields = fieldLists.filter(fields =>
+    fields.some((field: IFieldType) => field.type === ES_GEO_FIELD_TYPE.GEO_POINT)
+  );
+
+  const fieldListsWithGeoShapeFields = fieldLists.filter(fields =>
+    fields.some((field: IFieldType) => field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE)
+  );
+
+  return {
+    indexPatternsWithGeoFieldCount: fieldListsWithGeoFields.length,
+    indexPatternsWithGeoPointFieldCount: fieldListsWithGeoPointFields.length,
+    indexPatternsWithGeoShapeFieldCount: fieldListsWithGeoShapeFields.length,
+  };
 }
 
 export function buildMapsTelemetry({
@@ -110,12 +124,16 @@ export function buildMapsTelemetry({
   const dataSourcesCountSum = _.sum(dataSourcesCount);
   const layersCountSum = _.sum(layersCount);
 
-  const indexPatternsWithGeoFieldCount = getIndexPatternsWithGeoFieldCount(
-    indexPatternSavedObjects
-  );
+  const {
+    indexPatternsWithGeoFieldCount,
+    indexPatternsWithGeoPointFieldCount,
+    indexPatternsWithGeoShapeFieldCount,
+  } = getIndexPatternsWithGeoFieldCount(indexPatternSavedObjects);
   return {
     settings,
     indexPatternsWithGeoFieldCount,
+    indexPatternsWithGeoPointFieldCount,
+    indexPatternsWithGeoShapeFieldCount,
     // Total count of maps
     mapsTotalCount: mapsCount,
     // Time of capture

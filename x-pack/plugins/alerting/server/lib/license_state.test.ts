@@ -9,10 +9,10 @@ import { LicenseState } from './license_state';
 import { licensingMock } from '../../../../plugins/licensing/server/mocks';
 
 describe('license_state', () => {
-  let getRawLicense: any;
+  const getRawLicense = jest.fn();
 
   beforeEach(() => {
-    getRawLicense = jest.fn();
+    jest.resetAllMocks();
   });
 
   describe('status is LICENSE_STATUS_INVALID', () => {

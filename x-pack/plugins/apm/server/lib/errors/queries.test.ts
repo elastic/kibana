@@ -9,7 +9,7 @@ import { getErrorGroups } from './get_error_groups';
 import {
   SearchParamsMock,
   inspectSearchParams
-} from '../../../../../legacy/plugins/apm/public/utils/testHelpers';
+} from '../../../public/utils/testHelpers';
 
 describe('error queries', () => {
   let mock: SearchParamsMock;

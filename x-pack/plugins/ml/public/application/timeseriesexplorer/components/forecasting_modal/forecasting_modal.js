@@ -15,8 +15,6 @@ import React, { Component } from 'react';
 
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 
-// don't use something like plugins/ml/../common
-// because it won't work with the jest tests
 import { FORECAST_REQUEST_STATE, JOB_STATE } from '../../../../../common/constants/states';
 import { MESSAGE_LEVEL } from '../../../../../common/constants/message_levels';
 import { isJobVersionGte } from '../../../../../common/util/job_utils';

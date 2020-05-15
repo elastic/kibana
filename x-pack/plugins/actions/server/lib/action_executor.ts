@@ -17,7 +17,7 @@ import {
 import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
 import { SpacesServiceSetup } from '../../../spaces/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
-import { IEvent, IEventLogger } from '../../../event_log/server';
+import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 
 export interface ActionExecutorContext {
   logger: Logger;
@@ -32,7 +32,7 @@ export interface ActionExecutorContext {
 export interface ExecuteOptions {
   actionId: string;
   request: KibanaRequest;
-  params: Record<string, any>;
+  params: Record<string, unknown>;
 }
 
 export type ActionExecutorContract = PublicMethodsOf<ActionExecutor>;
@@ -90,12 +90,14 @@ export class ActionExecutor {
       namespace.namespace
     );
 
-    actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    if (!actionTypeRegistry.isActionExecutable(actionId, actionTypeId)) {
+      actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+    }
     const actionType = actionTypeRegistry.get(actionTypeId);
 
-    let validatedParams: Record<string, any>;
-    let validatedConfig: Record<string, any>;
-    let validatedSecrets: Record<string, any>;
+    let validatedParams: Record<string, unknown>;
+    let validatedConfig: Record<string, unknown>;
+    let validatedSecrets: Record<string, unknown>;
 
     try {
       validatedParams = validateParams(actionType, params);
@@ -108,7 +110,16 @@ export class ActionExecutor {
     const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
     const event: IEvent = {
       event: { action: EVENT_LOG_ACTIONS.execute },
-      kibana: { saved_objects: [{ type: 'action', id: actionId, ...namespace }] },
+      kibana: {
+        saved_objects: [
+          {
+            rel: SAVED_OBJECT_REL_PRIMARY,
+            type: 'action',
+            id: actionId,
+            ...namespace,
+          },
+        ],
+      },
     };
 
     eventLogger.startTiming(event);
@@ -138,13 +149,18 @@ export class ActionExecutor {
       status: 'ok',
     };
 
+    event.event = event.event || {};
+
     if (result.status === 'ok') {
+      event.event.outcome = 'success';
       event.message = `action executed: ${actionLabel}`;
     } else if (result.status === 'error') {
+      event.event.outcome = 'failure';
       event.message = `action execution failure: ${actionLabel}`;
       event.error = event.error || {};
       event.error.message = actionErrorToMessage(result);
     } else {
+      event.event.outcome = 'failure';
       event.message = `action execution returned unexpected result: ${actionLabel}`;
       event.error = event.error || {};
       event.error.message = 'action execution returned unexpected result';
@@ -174,8 +190,8 @@ function actionErrorToMessage(result: ActionTypeExecutorResult): string {
 interface ActionInfo {
   actionTypeId: string;
   name: string;
-  config: any;
-  secrets: any;
+  config: unknown;
+  secrets: unknown;
 }
 
 async function getActionInfo(

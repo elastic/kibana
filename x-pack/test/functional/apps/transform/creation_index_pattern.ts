@@ -18,21 +18,22 @@ export default function({ getService }: FtrProviderContext) {
   const transform = getService('transform');
 
   describe('creation_index_pattern', function() {
-    this.tags(['smoke']);
     before(async () => {
-      await esArchiver.load('ml/ecommerce');
+      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+      await transform.testResources.setKibanaTimeZoneToUTC();
+
       await transform.securityUI.loginAsTransformPowerUser();
     });
 
     after(async () => {
-      await esArchiver.unload('ml/ecommerce');
       await transform.api.cleanTransformIndices();
     });
 
     const testDataList = [
       {
         suiteTitle: 'batch transform with terms+date_histogram groups and avg agg',
-        source: 'ecommerce',
+        source: 'ft_ecommerce',
         groupByEntries: [
           {
             identifier: 'terms(category.keyword)',
@@ -57,6 +58,7 @@ export default function({ getService }: FtrProviderContext) {
           return `user-${this.transformId}`;
         },
         expected: {
+          pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "category.keyword": {'],
           pivotAdvancedEditorValue: {
             group_by: {
               'category.keyword': {
@@ -88,7 +90,7 @@ export default function({ getService }: FtrProviderContext) {
             mode: 'batch',
             progress: '100',
           },
-          sourcePreview: {
+          indexPreview: {
             columns: 20,
             rows: 5,
           },
@@ -96,7 +98,7 @@ export default function({ getService }: FtrProviderContext) {
       },
       {
         suiteTitle: 'batch transform with terms group and percentiles agg',
-        source: 'ecommerce',
+        source: 'ft_ecommerce',
         groupByEntries: [
           {
             identifier: 'terms(geoip.country_iso_code)',
@@ -116,6 +118,7 @@ export default function({ getService }: FtrProviderContext) {
           return `user-${this.transformId}`;
         },
         expected: {
+          pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "geoip.country_iso_code": {'],
           pivotAdvancedEditorValue: {
             group_by: {
               'geoip.country_iso_code': {
@@ -142,7 +145,7 @@ export default function({ getService }: FtrProviderContext) {
             mode: 'batch',
             progress: '100',
           },
-          sourcePreview: {
+          indexPreview: {
             columns: 20,
             rows: 5,
           },
@@ -154,6 +157,7 @@ export default function({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function() {
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
+          await transform.testResources.deleteIndexPattern(testData.destinationIndex);
         });
 
         it('loads the home page', async () => {
@@ -177,14 +181,14 @@ export default function({ getService }: FtrProviderContext) {
           await transform.wizard.assertDefineStepActive();
         });
 
-        it('loads the source index preview', async () => {
-          await transform.wizard.assertSourceIndexPreviewLoaded();
+        it('loads the index preview', async () => {
+          await transform.wizard.assertIndexPreviewLoaded();
         });
 
-        it('shows the source index preview', async () => {
-          await transform.wizard.assertSourceIndexPreview(
-            testData.expected.sourcePreview.columns,
-            testData.expected.sourcePreview.rows
+        it('shows the index preview', async () => {
+          await transform.wizard.assertIndexPreview(
+            testData.expected.indexPreview.columns,
+            testData.expected.indexPreview.rows
           );
         });
 
@@ -231,7 +235,7 @@ export default function({ getService }: FtrProviderContext) {
         it('displays the advanced configuration', async () => {
           await transform.wizard.enabledAdvancedPivotEditor();
           await transform.wizard.assertAdvancedPivotEditorContent(
-            testData.expected.pivotAdvancedEditorValue
+            testData.expected.pivotAdvancedEditorValueArr
           );
         });
 

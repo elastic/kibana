@@ -1,0 +1,1159 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
+<div
+  onMouseDown={[Function]}
+  onMouseUp={[Function]}
+  onTouchEnd={[Function]}
+  onTouchStart={[Function]}
+>
+  <div
+    data-focus-guard={true}
+    style={
+      Object {
+        "height": "0px",
+        "left": "1px",
+        "overflow": "hidden",
+        "padding": 0,
+        "position": "fixed",
+        "top": "1px",
+        "width": "1px",
+      }
+    }
+    tabIndex={0}
+  />
+  <div
+    data-focus-guard={true}
+    style={
+      Object {
+        "height": "0px",
+        "left": "1px",
+        "overflow": "hidden",
+        "padding": 0,
+        "position": "fixed",
+        "top": "1px",
+        "width": "1px",
+      }
+    }
+    tabIndex={1}
+  />
+  <div
+    data-focus-lock-disabled={false}
+    onBlur={[Function]}
+    onFocus={[Function]}
+  >
+    <div
+      className="euiFlyout euiFlyout--small"
+      role="dialog"
+      tabIndex={0}
+    >
+      <button
+        aria-label="Closes keyboard shortcuts reference"
+        className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+        data-test-subj="euiFlyoutCloseButton"
+        onClick={[Function]}
+        type="button"
+      >
+        <div
+          aria-hidden="true"
+          className="euiButtonIcon__icon"
+          data-euiicon-type="cross"
+          size="m"
+        />
+      </button>
+      <div
+        className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+      >
+        <h2
+          className="euiTitle euiTitle--small"
+        >
+          Keyboard shortcuts
+        </h2>
+      </div>
+      <div
+        className="euiFlyoutBody"
+      >
+        <div
+          className="euiFlyoutBody__overflow"
+        >
+          <div
+            className="euiFlyoutBody__overflowContent"
+          >
+            <div
+              className="canvasKeyboardShortcut"
+            >
+              <h4
+                className="euiTitle euiTitle--xsmall"
+              >
+                Element controls
+              </h4>
+              <hr
+                className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+              />
+              <dl
+                className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Cut
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        CTRL
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        X
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Copy
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        CTRL
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        C
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Paste
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        CTRL
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        V
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Clone
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        CTRL
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        D
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Delete
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        DEL
+                      </code>
+                    </span>
+                  </span>
+                  <span>
+                     
+                    or
+                     
+                  </span>
+                  <span>
+                    <span>
+                      <code>
+                        BACKSPACE
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Bring to front
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        CTRL
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        ↑
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Bring forward
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        CTRL
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        SHIFT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        ↑
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Send backward
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        CTRL
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        ↓
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Send to back
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        CTRL
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        SHIFT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        ↓
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Group
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        G
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Ungroup
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        U
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Shift up by 10px
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        ↑
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Shift down by 10px
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        ↓
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Shift left by 10px
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        ←
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Shift right by 10px
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        →
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Shift up by 1px
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        SHIFT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        ↑
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Shift down by 1px
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        SHIFT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        ↓
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Shift left by 1px
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        SHIFT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        ←
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Shift right by 1px
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        SHIFT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        →
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+              </dl>
+              <div
+                className="euiSpacer euiSpacer--l"
+              />
+            </div>
+            <div
+              className="canvasKeyboardShortcut"
+            >
+              <h4
+                className="euiTitle euiTitle--xsmall"
+              >
+                Expression controls
+              </h4>
+              <hr
+                className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+              />
+              <dl
+                className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Run whole expression
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        CTRL
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        ENTER
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+              </dl>
+              <div
+                className="euiSpacer euiSpacer--l"
+              />
+            </div>
+            <div
+              className="canvasKeyboardShortcut"
+            >
+              <h4
+                className="euiTitle euiTitle--xsmall"
+              >
+                Editor controls
+              </h4>
+              <hr
+                className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+              />
+              <dl
+                className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Select multiple elements
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        SHIFT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        CLICK
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Resize from center
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        ALT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        DRAG
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Move, resize, and rotate without snapping
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        CTRL
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        DRAG
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Select element below
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        CTRL
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        CLICK
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Undo last action
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        CTRL
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        Z
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Redo last action
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        CTRL
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        SHIFT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        Z
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Go to previous page
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        ALT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        [
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Go to next page
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        ALT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        ]
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Toggle edit mode
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        ALT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        E
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Show grid
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        ALT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        G
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Refresh workpad
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        ALT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        R
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Zoom in
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        CTRL
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        ALT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        +
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Zoom out
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        CTRL
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        ALT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        -
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Reset zoom to 100%
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        CTRL
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        ALT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        [
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Enter presentation mode
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        ALT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        F
+                      </code>
+                    </span>
+                  </span>
+                  <span>
+                     
+                    or
+                     
+                  </span>
+                  <span>
+                    <span>
+                      <code>
+                        ALT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        P
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+              </dl>
+              <div
+                className="euiSpacer euiSpacer--l"
+              />
+            </div>
+            <div
+              className="canvasKeyboardShortcut"
+            >
+              <h4
+                className="euiTitle euiTitle--xsmall"
+              >
+                Presentation controls
+              </h4>
+              <hr
+                className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginSmall"
+              />
+              <dl
+                className="euiDescriptionList euiDescriptionList--column euiDescriptionList--reverse euiDescriptionList--compressed"
+              >
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Enter presentation mode
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        ALT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        F
+                      </code>
+                    </span>
+                  </span>
+                  <span>
+                     
+                    or
+                     
+                  </span>
+                  <span>
+                    <span>
+                      <code>
+                        ALT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        P
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Exit presentation mode
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        ESC
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Go to previous page
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        ALT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        [
+                      </code>
+                    </span>
+                  </span>
+                  <span>
+                     
+                    or
+                     
+                  </span>
+                  <span>
+                    <span>
+                      <code>
+                        BACKSPACE
+                      </code>
+                    </span>
+                  </span>
+                  <span>
+                     
+                    or
+                     
+                  </span>
+                  <span>
+                    <span>
+                      <code>
+                        ←
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Go to next page
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        ALT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        ]
+                      </code>
+                    </span>
+                  </span>
+                  <span>
+                     
+                    or
+                     
+                  </span>
+                  <span>
+                    <span>
+                      <code>
+                        SPACE
+                      </code>
+                    </span>
+                  </span>
+                  <span>
+                     
+                    or
+                     
+                  </span>
+                  <span>
+                    <span>
+                      <code>
+                        →
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Refresh workpad
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        ALT
+                      </code>
+                    </span>
+                     
+                    <span>
+                      <code>
+                        R
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+                <dt
+                  className="euiDescriptionList__title"
+                >
+                  Toggle page cycling
+                </dt>
+                <dd
+                  className="euiDescriptionList__description"
+                >
+                  <span>
+                    <span>
+                      <code>
+                        P
+                      </code>
+                    </span>
+                  </span>
+                </dd>
+              </dl>
+              <div
+                className="euiSpacer euiSpacer--l"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    data-focus-guard={true}
+    style={
+      Object {
+        "height": "0px",
+        "left": "1px",
+        "overflow": "hidden",
+        "padding": 0,
+        "position": "fixed",
+        "top": "1px",
+        "width": "1px",
+      }
+    }
+    tabIndex={0}
+  />
+</div>
+`;

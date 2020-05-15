@@ -7,11 +7,21 @@
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
-import { KibanaDatatable, SerializedFieldFormat } from '../../../../src/plugins/expressions/public';
+import {
+  ExpressionRendererEvent,
+  IInterpreterRenderHandlers,
+  KibanaDatatable,
+  SerializedFieldFormat,
+} from '../../../../src/plugins/expressions/public';
 import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';
 import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
+import {
+  SELECT_RANGE_TRIGGER,
+  TriggerContext,
+  VALUE_CLICK_TRIGGER,
+} from '../../../../src/plugins/ui_actions/public';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -103,9 +113,16 @@ export interface TableSuggestion {
  * * `unchanged` means the table is the same in the currently active configuration
  * * `reduced` means the table is a reduced version of the currently active table (some columns dropped, but not all of them)
  * * `extended` means the table is an extended version of the currently active table (added one or multiple additional columns)
+ * * `reorder` means the table columns have changed order, which change the data as well
  * * `layers` means the change is a change to the layer structure, not to the table
  */
-export type TableChangeType = 'initial' | 'unchanged' | 'reduced' | 'extended' | 'layers';
+export type TableChangeType =
+  | 'initial'
+  | 'unchanged'
+  | 'reduced'
+  | 'extended'
+  | 'reorder'
+  | 'layers';
 
 export interface DatasourceSuggestion<T = unknown> {
   state: T;
@@ -273,7 +290,7 @@ export type VisualizationLayerWidgetProps<T = unknown> = VisualizationConfigProp
   setState: (newState: T) => void;
 };
 
-type VisualizationDimensionGroupConfig = SharedDimensionProps & {
+export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   groupLabel: string;
 
   /** ID is passed back to visualization. For example, `x` */
@@ -312,6 +329,10 @@ export interface SuggestionRequest<T = unknown> {
    * The visualization needs to know which table is being suggested
    */
   keptLayerIds: string[];
+  /**
+   * Different suggestions can be generated for each subtype of the visualization
+   */
+  subVisualizationId?: string;
 }
 
 /**
@@ -368,55 +389,117 @@ export interface VisualizationType {
 }
 
 export interface Visualization<T = unknown, P = unknown> {
+  /** Plugin ID, such as "lnsXY" */
   id: string;
 
-  visualizationTypes: VisualizationType[];
+  /**
+   * Initialize is allowed to modify the state stored in memory. The initialize function
+   * is called with a previous state in two cases:
+   * - Loadingn from a saved visualization
+   * - When using suggestions, the suggested state is passed in
+   */
+  initialize: (frame: FramePublicAPI, state?: P) => T;
+  /**
+   * Can remove any state that should not be persisted to saved object, such as UI state
+   */
+  getPersistableState: (state: T) => P;
 
+  /**
+   * Visualizations must provide at least one type for the chart switcher,
+   * but can register multiple subtypes
+   */
+  visualizationTypes: VisualizationType[];
+  /**
+   * Return the ID of the current visualization. Used to highlight
+   * the active subtype of the visualization.
+   */
+  getVisualizationTypeId: (state: T) => string;
+  /**
+   * If the visualization has subtypes, update the subtype in state.
+   */
+  switchVisualizationType?: (visualizationTypeId: string, state: T) => T;
+  /** Description is displayed as the clickable text in the chart switcher */
+  getDescription: (state: T) => { icon?: IconType; label: string };
+
+  /** Frame needs to know which layers the visualization is currently using */
   getLayerIds: (state: T) => string[];
+  /** Reset button on each layer triggers this */
   clearLayer: (state: T, layerId: string) => T;
+  /** Optional, if the visualization supports multiple layers */
   removeLayer?: (state: T, layerId: string) => T;
+  /** Track added layers in internal state */
   appendLayer?: (state: T, layerId: string) => T;
 
-  // Layer context menu is used by visualizations for styling the entire layer
-  // For example, the XY visualization uses this to have multiple chart types
-  getLayerContextMenuIcon?: (opts: { state: T; layerId: string }) => IconType | undefined;
-  renderLayerContextMenu?: (domElement: Element, props: VisualizationLayerWidgetProps<T>) => void;
-
+  /**
+   * For consistency across different visualizations, the dimension configuration UI is standardized
+   */
   getConfiguration: (
     props: VisualizationConfigProps<T>
   ) => { groups: VisualizationDimensionGroupConfig[] };
 
-  getDescription: (
-    state: T
-  ) => {
-    icon?: IconType;
-    label: string;
-  };
-
-  switchVisualizationType?: (visualizationTypeId: string, state: T) => T;
-
-  // For initializing from saved object
-  initialize: (frame: FramePublicAPI, state?: P) => T;
-
-  getPersistableState: (state: T) => P;
-
-  // Actions triggered by the frame which tell the datasource that a dimension is being changed
-  setDimension: (
-    props: VisualizationDimensionChangeProps<T> & {
-      groupId: string;
-    }
-  ) => T;
-  removeDimension: (props: VisualizationDimensionChangeProps<T>) => T;
-
-  toExpression: (state: T, frame: FramePublicAPI) => Ast | string | null;
+  /**
+   * Popover contents that open when the user clicks the contextMenuIcon. This can be used
+   * for extra configurability, such as for styling the legend or axis
+   */
+  renderLayerContextMenu?: (domElement: Element, props: VisualizationLayerWidgetProps<T>) => void;
+  /**
+   * Visualizations can provide a custom icon which will open a layer-specific popover
+   * If no icon is provided, gear icon is default
+   */
+  getLayerContextMenuIcon?: (opts: { state: T; layerId: string }) => IconType | undefined;
 
   /**
-   * Epression to render a preview version of the chart in very constraint space.
+   * The frame is telling the visualization to update or set a dimension based on user interaction
+   * groupId is coming from the groupId provided in getConfiguration
+   */
+  setDimension: (props: VisualizationDimensionChangeProps<T> & { groupId: string }) => T;
+  /**
+   * The frame is telling the visualization to remove a dimension. The visualization needs to
+   * look at its internal state to determine which dimension is being affected.
+   */
+  removeDimension: (props: VisualizationDimensionChangeProps<T>) => T;
+
+  /**
+   * The frame will call this function on all visualizations at different times. The
+   * main use cases where visualization suggestions are requested are:
+   * - When dragging a field
+   * - When opening the chart switcher
+   * If the state is provided when requesting suggestions, the visualization is active.
+   * Most visualizations will apply stricter filtering to suggestions when they are active,
+   * because suggestions have the potential to remove the users's work in progress.
+   */
+  getSuggestions: (context: SuggestionRequest<T>) => Array<VisualizationSuggestion<T>>;
+
+  toExpression: (state: T, frame: FramePublicAPI) => Ast | string | null;
+  /**
+   * Expression to render a preview version of the chart in very constrained space.
    * If there is no expression provided, the preview icon is used.
    */
   toPreviewExpression?: (state: T, frame: FramePublicAPI) => Ast | string | null;
+}
 
-  // The frame will call this function on all visualizations when the table changes, or when
-  // rendering additional ways of using the data
-  getSuggestions: (context: SuggestionRequest<T>) => Array<VisualizationSuggestion<T>>;
+export interface LensFilterEvent {
+  name: 'filter';
+  data: TriggerContext<typeof VALUE_CLICK_TRIGGER>['data'];
+}
+export interface LensBrushEvent {
+  name: 'brush';
+  data: TriggerContext<typeof SELECT_RANGE_TRIGGER>['data'];
+}
+
+export function isLensFilterEvent(event: ExpressionRendererEvent): event is LensFilterEvent {
+  return event.name === 'filter';
+}
+
+export function isLensBrushEvent(event: ExpressionRendererEvent): event is LensBrushEvent {
+  return event.name === 'brush';
+}
+
+/**
+ * Expression renderer handlers specifically for lens renderers. This is a narrowed down
+ * version of the general render handlers, specifying supported event types. If this type is
+ * used, dispatched events will be handled correctly.
+ */
+export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandlers {
+  event: (event: LensFilterEvent | LensBrushEvent) => void;
 }

@@ -10,7 +10,7 @@ import { Request } from 'hapi';
 import { RequestHandlerContext } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { mlLog } from '../client/log';
-import { privilegesProvider } from '../lib/check_privileges';
+import { capabilitiesProvider } from '../lib/capabilities';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
 import { RouteInitialization, SystemRouteDeps } from '../types';
 
@@ -19,7 +19,7 @@ import { RouteInitialization, SystemRouteDeps } from '../types';
  */
 export function systemRoutes(
   { router, mlLicense }: RouteInitialization,
-  { spaces, cloud }: SystemRouteDeps
+  { spaces, cloud, resolveMlCapabilities }: SystemRouteDeps
 ) {
   async function getNodeCount(context: RequestHandlerContext) {
     const filterPath = 'nodes.*.attributes';
@@ -53,6 +53,9 @@ export function systemRoutes(
       path: '/api/ml/_has_privileges',
       validate: {
         body: schema.maybe(schema.any()),
+      },
+      options: {
+        tags: ['access:ml:canAccessML'],
       },
     },
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
@@ -103,35 +106,38 @@ export function systemRoutes(
    * @apiGroup SystemRoutes
    *
    * @api {get} /api/ml/ml_capabilities Check ML capabilities
-   * @apiName MlCapabilities
+   * @apiName MlCapabilitiesResponse
    * @apiDescription Checks ML capabilities
    */
   router.get(
     {
       path: '/api/ml/ml_capabilities',
-      validate: {
-        query: schema.object({
-          ignoreSpaces: schema.maybe(schema.string()),
-        }),
+      validate: false,
+      options: {
+        tags: ['access:ml:canAccessML'],
       },
     },
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
-        const ignoreSpaces = request.query && request.query.ignoreSpaces === 'true';
         // if spaces is disabled force isMlEnabledInSpace to be true
         const { isMlEnabledInSpace } =
           spaces !== undefined
             ? spacesUtilsProvider(spaces, (request as unknown) as Request)
             : { isMlEnabledInSpace: async () => true };
 
-        const { getPrivileges } = privilegesProvider(
+        const mlCapabilities = await resolveMlCapabilities(request);
+        if (mlCapabilities === null) {
+          return response.customError(wrapError(new Error('resolveMlCapabilities is not defined')));
+        }
+
+        const { getCapabilities } = capabilitiesProvider(
           context.ml!.mlClient.callAsCurrentUser,
+          mlCapabilities,
           mlLicense,
-          isMlEnabledInSpace,
-          ignoreSpaces
+          isMlEnabledInSpace
         );
         return response.ok({
-          body: await getPrivileges(),
+          body: await getCapabilities(),
         });
       } catch (error) {
         return response.customError(wrapError(error));
@@ -150,7 +156,11 @@ export function systemRoutes(
     {
       path: '/api/ml/ml_node_count',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
     },
+
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
         // check for basic license first for consistency with other
@@ -201,6 +211,9 @@ export function systemRoutes(
     {
       path: '/api/ml/info',
       validate: false,
+      options: {
+        tags: ['access:ml:canAccessML'],
+      },
     },
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -228,6 +241,9 @@ export function systemRoutes(
       path: '/api/ml/es_search',
       validate: {
         body: schema.maybe(schema.any()),
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

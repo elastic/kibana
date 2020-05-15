@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { MouseEvent, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiTabs, EuiTab } from '@elastic/eui';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { Immutable } from '../../../../../common/types';
+import { useNavigateByRouterEventHandler } from '../hooks/use_navigate_by_router_event_handler';
 
 interface NavTabs {
   name: string;
@@ -48,33 +49,30 @@ const navTabs: Immutable<NavTabs[]> = [
   },
 ];
 
-export const HeaderNavigation: React.FunctionComponent = React.memo(() => {
-  const history = useHistory();
-  const location = useLocation();
+const NavTab = memo<{ tab: NavTabs }>(({ tab }) => {
+  const { pathname } = useLocation();
   const { services } = useKibana();
+  const onClickHandler = useNavigateByRouterEventHandler(tab.href);
   const BASE_PATH = services.application.getUrlForApp('endpoint');
 
+  return (
+    <EuiTab
+      data-test-subj={`${tab.id}EndpointTab`}
+      href={`${BASE_PATH}${tab.href}`}
+      onClick={onClickHandler}
+      isSelected={tab.href === pathname || (tab.href !== '/' && pathname.startsWith(tab.href))}
+    >
+      {tab.name}
+    </EuiTab>
+  );
+});
+
+export const HeaderNavigation: React.FunctionComponent = React.memo(() => {
   const tabList = useMemo(() => {
     return navTabs.map((tab, index) => {
-      return (
-        <EuiTab
-          data-test-subj={`${tab.id}EndpointTab`}
-          key={index}
-          href={`${BASE_PATH}${tab.href}`}
-          onClick={(event: MouseEvent) => {
-            event.preventDefault();
-            history.push(tab.href);
-          }}
-          isSelected={
-            tab.href === location.pathname ||
-            (tab.href !== '/' && location.pathname.startsWith(tab.href))
-          }
-        >
-          {tab.name}
-        </EuiTab>
-      );
+      return <NavTab tab={tab} key={index} />;
     });
-  }, [BASE_PATH, history, location.pathname]);
+  }, []);
 
   return <EuiTabs>{tabList}</EuiTabs>;
 });

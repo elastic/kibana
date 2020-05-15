@@ -22,8 +22,11 @@ import { i18n } from '@kbn/i18n';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterTerms } from './create_filter/terms';
-import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
-import { IAggConfigs } from '../agg_configs';
+import {
+  isStringOrNumberType,
+  migrateIncludeExcludeFormat,
+} from './migrate_include_exclude_format';
+import { AggConfigSerialized, BaseAggParams, IAggConfigs } from '../types';
 
 import { Adapters } from '../../../../../inspector/public';
 import { ISearchSource } from '../../search_source';
@@ -60,10 +63,26 @@ export interface TermsBucketAggDependencies {
   getInternalStartServices: GetInternalStartServicesFn;
 }
 
+export interface AggParamsTerms extends BaseAggParams {
+  field: string;
+  orderBy: string;
+  orderAgg?: AggConfigSerialized;
+  order?: 'asc' | 'desc';
+  size?: number;
+  missingBucket?: boolean;
+  missingBucketLabel?: string;
+  otherBucket?: boolean;
+  otherBucketLabel?: string;
+  // advanced
+  exclude?: string;
+  include?: string;
+}
+
 export const getTermsBucketAgg = ({ getInternalStartServices }: TermsBucketAggDependencies) =>
   new BucketAggType(
     {
       name: BUCKET_TYPES.TERMS,
+      expressionName: 'aggTerms',
       title: termsTitle,
       makeLabel(agg) {
         const params = agg.params;
@@ -151,8 +170,7 @@ export const getTermsBucketAgg = ({ getInternalStartServices }: TermsBucketAggDe
           type: 'agg',
           allowedAggs: termsAggFilter,
           default: null,
-          makeAgg(termsAgg, state) {
-            state = state || {};
+          makeAgg(termsAgg, state = { type: 'count' }) {
             state.schema = 'orderAgg';
             const orderAgg = termsAgg.aggConfigs.createAggConfig<IBucketAggConfig>(state, {
               addToAggConfigs: false,
@@ -266,7 +284,7 @@ export const getTermsBucketAgg = ({ getInternalStartServices }: TermsBucketAggDe
           }),
           type: 'string',
           advanced: true,
-          shouldShow: isStringType,
+          shouldShow: isStringOrNumberType,
           ...migrateIncludeExcludeFormat,
         },
         {
@@ -276,7 +294,7 @@ export const getTermsBucketAgg = ({ getInternalStartServices }: TermsBucketAggDe
           }),
           type: 'string',
           advanced: true,
-          shouldShow: isStringType,
+          shouldShow: isStringOrNumberType,
           ...migrateIncludeExcludeFormat,
         },
       ],

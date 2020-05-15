@@ -31,12 +31,12 @@ type ESGeoGridSourceSyncMeta = {
   requestType: RENDER_AS;
 };
 
-export type VectorSourceSyncMeta = ESSearchSourceSyncMeta | ESGeoGridSourceSyncMeta;
+export type VectorSourceSyncMeta = ESSearchSourceSyncMeta | ESGeoGridSourceSyncMeta | null;
 
 export type VectorSourceRequestMeta = MapFilters & {
   applyGlobalQuery: boolean;
   fieldNames: string[];
-  geogridPrecision: number;
+  geogridPrecision?: number;
   sourceQuery: MapQuery;
   sourceMeta: VectorSourceSyncMeta;
 };

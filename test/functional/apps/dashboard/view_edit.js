@@ -136,7 +136,10 @@ export default function({ getService, getPageObjects }) {
           await dashboardAddPanel.clickAddNewEmbeddableLink('visualization');
           await PageObjects.visualize.clickAreaChart();
           await PageObjects.visualize.clickNewSearch();
-          await PageObjects.visualize.saveVisualizationExpectSuccess('new viz panel');
+          await PageObjects.visualize.saveVisualizationExpectSuccess('new viz panel', {
+            saveAsNew: false,
+            redirectToOrigin: true,
+          });
 
           await PageObjects.dashboard.clickCancelOutOfEditMode();
           // for this sleep see https://github.com/elastic/kibana/issues/22299

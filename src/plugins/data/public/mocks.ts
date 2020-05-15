@@ -45,7 +45,8 @@ const createStartContract = (): Start => {
   const queryStartMock = queryServiceMock.createStartContract();
   return {
     actions: {
-      createFiltersFromEvent: jest.fn().mockResolvedValue(['yes']),
+      createFiltersFromValueClickAction: jest.fn().mockResolvedValue(['yes']),
+      createFiltersFromRangeSelectAction: jest.fn(),
     },
     autocomplete: autocompleteMock,
     search: searchStartMock,
@@ -56,6 +57,9 @@ const createStartContract = (): Start => {
       SearchBar: jest.fn(),
     },
     indexPatterns: ({
+      createField: jest.fn(() => {}),
+      createFieldList: jest.fn(() => []),
+      ensureDefaultIndexPattern: jest.fn(),
       make: () => ({
         fieldsFetcher: {
           fetchForWildcard: jest.fn(),
@@ -67,7 +71,7 @@ const createStartContract = (): Start => {
   };
 };
 
-export { searchSourceMock } from './search/mocks';
+export { createSearchSourceMock } from './search/mocks';
 export { getCalculateAutoTimeExpression } from './search/aggs';
 
 export const dataPluginMock = {

@@ -44,6 +44,7 @@ beforeEach(() => {
     ),
     actionsConfigUtils: actionsConfigMock.create(),
     licenseState: mockedLicenseState,
+    preconfiguredActions: [],
   };
   actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
   actionsClient = new ActionsClient({
@@ -221,6 +222,7 @@ describe('create()', () => {
       ),
       actionsConfigUtils: localConfigUtils,
       licenseState: licenseStateMock.create(),
+      preconfiguredActions: [],
     };
 
     actionTypeRegistry = new ActionTypeRegistry(localActionTypeRegistryParams);
@@ -348,9 +350,6 @@ describe('get()', () => {
       actionTypeId: '.slack',
       isPreconfigured: true,
       name: 'test',
-      config: {
-        foo: 'bar',
-      },
     });
     expect(savedObjectsClient.get).not.toHaveBeenCalled();
   });
@@ -418,9 +417,6 @@ describe('getAll()', () => {
         actionTypeId: '.slack',
         isPreconfigured: true,
         name: 'test',
-        config: {
-          foo: 'bar',
-        },
         referencedByCount: 2,
       },
     ]);

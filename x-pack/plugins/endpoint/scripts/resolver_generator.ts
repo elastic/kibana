@@ -10,6 +10,7 @@ import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { EndpointDocGenerator, Event } from '../common/generate_data';
 import { default as eventMapping } from './event_mapping.json';
 import { default as alertMapping } from './alert_mapping.json';
+import { default as policyMapping } from './policy_mapping.json';
 
 main();
 
@@ -29,7 +30,7 @@ async function main() {
     alertIndex: {
       alias: 'ai',
       describe: 'index to store alerts in',
-      default: '.alerts-endpoint-000001',
+      default: 'events-endpoint-1',
       type: 'string',
     },
     eventIndex: {
@@ -41,7 +42,13 @@ async function main() {
     metadataIndex: {
       alias: 'mi',
       describe: 'index to store host metadata in',
-      default: 'endpoint-agent-1',
+      default: 'metrics-endpoint-default-1',
+      type: 'string',
+    },
+    policyIndex: {
+      alias: 'pi',
+      describe: 'index to store host policy in',
+      default: 'metrics-endpoint.policy-default-1',
       type: 'string',
     },
     auth: {
@@ -90,6 +97,12 @@ async function main() {
       type: 'number',
       default: 1,
     },
+    numDocs: {
+      alias: 'nd',
+      describe: 'number of metadata and policy response doc to generate per host',
+      type: 'number',
+      default: 5,
+    },
     alertsPerHost: {
       alias: 'ape',
       describe: 'number of resolver trees to make for each host',
@@ -123,7 +136,7 @@ async function main() {
   if (argv.delete) {
     try {
       await client.indices.delete({
-        index: [argv.eventIndex, argv.metadataIndex, argv.alertIndex],
+        index: [argv.eventIndex, argv.metadataIndex, argv.alertIndex, argv.policyIndex],
       });
     } catch (err) {
       if (err instanceof ResponseError && err.statusCode !== 404) {
@@ -165,6 +178,7 @@ async function main() {
 
   await createIndex(client, argv.alertIndex, alertMapping);
   await createIndex(client, argv.eventIndex, eventMapping);
+  await createIndex(client, argv.policyIndex, policyMapping);
   if (argv.setupOnly) {
     process.exit(0);
   }
@@ -179,14 +193,19 @@ async function main() {
   for (let i = 0; i < argv.numHosts; i++) {
     const generator = new EndpointDocGenerator(random);
     const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
-    const numMetadataDocs = 5;
+
     const timestamp = new Date().getTime();
-    for (let j = 0; j < numMetadataDocs; j++) {
+    for (let j = 0; j < argv.numDocs; j++) {
       generator.updateHostData();
+      generator.updatePolicyId();
       await client.index({
         index: argv.metadataIndex,
-        body: generator.generateHostMetadata(
-          timestamp - timeBetweenDocs * (numMetadataDocs - j - 1)
+        body: generator.generateHostMetadata(timestamp - timeBetweenDocs * (argv.numDocs - j - 1)),
+      });
+      await client.index({
+        index: argv.policyIndex,
+        body: generator.generatePolicyResponse(
+          timestamp - timeBetweenDocs * (argv.numDocs - j - 1)
         ),
       });
     }

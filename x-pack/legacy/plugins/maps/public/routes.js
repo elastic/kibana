@@ -6,15 +6,19 @@
 
 import { i18n } from '@kbn/i18n';
 import routes from 'ui/routes';
-import listingTemplate from './angular/listing_ng_wrapper.html';
-import mapTemplate from './angular/map.html';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import listingTemplate from '../../../../plugins/maps/public/angular/listing_ng_wrapper.html';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import mapTemplate from '../../../../plugins/maps/public/angular/map.html';
 import {
   getSavedObjectsClient,
   getCoreChrome,
   getMapsCapabilities,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../plugins/maps/public/kibana_services';
-import { getMapsSavedObjectLoader } from './angular/services/gis_map_saved_object_loader';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getMapsSavedObjectLoader } from '../../../../plugins/maps/public/angular/services/gis_map_saved_object_loader';
+import { LISTING_LIMIT_SETTING } from '../../../../../src/plugins/saved_objects/common';
 
 routes.enable();
 
@@ -40,7 +44,7 @@ routes
     template: listingTemplate,
     controller($scope, config) {
       const gisMapSavedObjectLoader = getMapsSavedObjectLoader();
-      $scope.listingLimit = config.get('savedObjects:listingLimit');
+      $scope.listingLimit = config.get(LISTING_LIMIT_SETTING);
       $scope.find = search => {
         return gisMapSavedObjectLoader.find(search, $scope.listingLimit);
       };

@@ -26,6 +26,7 @@ import {
 
 import { SlmPolicy } from '../../../../../../common/types';
 import { useServices } from '../../../../app_context';
+import { SectionError, Error } from '../../../../../shared_imports';
 import {
   UIM_POLICY_DETAIL_PANEL_SUMMARY_TAB,
   UIM_POLICY_DETAIL_PANEL_HISTORY_TAB,
@@ -34,11 +35,9 @@ import { useLoadPolicy } from '../../../../services/http';
 import { linkToEditPolicy, linkToSnapshot } from '../../../../services/navigation';
 
 import {
-  SectionError,
   SectionLoading,
   PolicyExecuteProvider,
   PolicyDeleteProvider,
-  Error,
 } from '../../../../components';
 import { TabSummary, TabHistory } from './tabs';
 

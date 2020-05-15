@@ -88,6 +88,7 @@ describe('SavedObjectsTable', () => {
   let overlays: ReturnType<typeof overlayServiceMock.createStartContract>;
   let notifications: ReturnType<typeof notificationServiceMock.createStartContract>;
   let savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
+  let search: ReturnType<typeof dataPluginMock.createStartContract>['search'];
 
   const shallowRender = (overrides: Partial<SavedObjectsTableProps> = {}) => {
     return (shallowWithI18nProvider(
@@ -106,6 +107,7 @@ describe('SavedObjectsTable', () => {
     overlays = overlayServiceMock.createStartContract();
     notifications = notificationServiceMock.createStartContract();
     savedObjects = savedObjectsServiceMock.createStartContract();
+    search = dataPluginMock.createStartContract().search;
 
     const applications = applicationServiceMock.createStartContract();
     applications.capabilities = {
@@ -141,6 +143,7 @@ describe('SavedObjectsTable', () => {
       perPageConfig: 15,
       goInspectObject: () => {},
       canGoInApp: () => true,
+      search,
     };
 
     findObjectsMock.mockImplementation(() => ({
@@ -193,7 +196,7 @@ describe('SavedObjectsTable', () => {
             icon: 'visualizeApp',
             editUrl: '#/management/kibana/objects/savedVisualizations/4',
             inAppUrl: {
-              path: '/visualize/edit/4',
+              path: '/edit/4',
               uiCapabilitiesPath: 'visualize.show',
             },
           },

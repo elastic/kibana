@@ -19,6 +19,7 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import classNames from 'classnames';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -325,10 +326,18 @@ export class Form extends PureComponent<FormProps> {
 
   renderBottomBar = () => {
     const areChangesInvalid = this.areChangesInvalid();
-    const bottomBarClasses = classNames('mgtAdvancedSettingsForm__bottomBar', {
-      'mgtAdvancedSettingsForm__bottomBar--pushForNav':
-        localStorage.getItem(NAV_IS_LOCKED_KEY) === 'true',
-    });
+
+    // TODO #64541
+    // Delete these classes
+    let bottomBarClasses = '';
+    const pageNav = this.props.settings.general.find(setting => setting.name === 'pageNavigation');
+
+    if (pageNav?.value === 'legacy') {
+      bottomBarClasses = classNames('mgtAdvancedSettingsForm__bottomBar', {
+        'mgtAdvancedSettingsForm__bottomBar--pushForNav':
+          localStorage.getItem(NAV_IS_LOCKED_KEY) === 'true',
+      });
+    }
     return (
       <EuiBottomBar className={bottomBarClasses} data-test-subj="advancedSetting-bottomBar">
         <EuiFlexGroup

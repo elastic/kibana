@@ -29,7 +29,7 @@ import {
 } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { Server } from 'hapi';
-import { VisTypeTimeseriesConfig } from '.';
+import { VisTypeTimeseriesConfig } from './config';
 import { getVisData, GetVisData, GetVisDataOptions } from './lib/get_vis_data';
 import { ValidationTelemetryService } from './validation_telemetry';
 import { UsageCollectionSetup } from '../../usage_collection/server';
@@ -37,6 +37,7 @@ import { visDataRoutes } from './routes/vis';
 // @ts-ignore
 import { fieldsRoutes } from './routes/fields';
 import { SearchStrategyRegistry } from './lib/search_strategies';
+import { uiSettings } from './ui_settings';
 
 export interface LegacySetup {
   server: Server;
@@ -75,6 +76,7 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
 
   public setup(core: CoreSetup, plugins: VisTypeTimeseriesPluginSetupDependencies) {
     const logger = this.initializerContext.logger.get('visTypeTimeseries');
+    core.uiSettings.register(uiSettings);
     const config$ = this.initializerContext.config.create<VisTypeTimeseriesConfig>();
     // Global config contains things like the ES shard timeout
     const globalConfig$ = this.initializerContext.config.legacy.globalConfig$;

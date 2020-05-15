@@ -210,6 +210,7 @@ export function telemetryTaskRunner(
           })
           .catch(errMsg => logger.warn(`Error executing lens telemetry task: ${errMsg}`));
       },
+      async cancel() {},
     };
   };
 }

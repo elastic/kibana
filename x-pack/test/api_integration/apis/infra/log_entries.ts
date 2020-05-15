@@ -126,7 +126,7 @@ export default function({ getService }: FtrProviderContext) {
           expect(messageColumn.message.length).to.be.greaterThan(0);
         });
 
-        it('Returns the context fields', async () => {
+        it('Does not build context if entry does not have all fields', async () => {
           const { body } = await supertest
             .post(LOG_ENTRIES_PATH)
             .set(COMMON_HEADERS)
@@ -147,9 +147,7 @@ export default function({ getService }: FtrProviderContext) {
 
           const entries = logEntriesResponse.data.entries;
           const entry = entries[0];
-
-          expect(entry.context).to.have.property('host.name');
-          expect(entry.context['host.name']).to.be('demo-stack-nginx-01');
+          expect(entry.context).to.eql({});
         });
 
         it('Paginates correctly with `after`', async () => {

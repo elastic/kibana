@@ -37,6 +37,7 @@ import { getDerivativeMetricAgg } from './metrics/derivative';
 import { getCumulativeSumMetricAgg } from './metrics/cumulative_sum';
 import { getMovingAvgMetricAgg } from './metrics/moving_avg';
 import { getSerialDiffMetricAgg } from './metrics/serial_diff';
+
 import { getDateHistogramBucketAgg } from './buckets/date_histogram';
 import { getHistogramBucketAgg } from './buckets/histogram';
 import { getRangeBucketAgg } from './buckets/range';
@@ -103,3 +104,74 @@ export const getAggTypes = ({
     getGeoTitleBucketAgg({ getInternalStartServices }),
   ],
 });
+
+/** Buckets: **/
+import { aggFilter } from './buckets/filter_fn';
+import { aggFilters } from './buckets/filters_fn';
+import { aggSignificantTerms } from './buckets/significant_terms_fn';
+import { aggIpRange } from './buckets/ip_range_fn';
+import { aggDateRange } from './buckets/date_range_fn';
+import { aggRange } from './buckets/range_fn';
+import { aggGeoTile } from './buckets/geo_tile_fn';
+import { aggGeoHash } from './buckets/geo_hash_fn';
+import { aggHistogram } from './buckets/histogram_fn';
+import { aggDateHistogram } from './buckets/date_histogram_fn';
+import { aggTerms } from './buckets/terms_fn';
+
+/** Metrics: **/
+import { aggAvg } from './metrics/avg_fn';
+import { aggBucketAvg } from './metrics/bucket_avg_fn';
+import { aggBucketMax } from './metrics/bucket_max_fn';
+import { aggBucketMin } from './metrics/bucket_min_fn';
+import { aggBucketSum } from './metrics/bucket_sum_fn';
+import { aggCardinality } from './metrics/cardinality_fn';
+import { aggCount } from './metrics/count_fn';
+import { aggCumulativeSum } from './metrics/cumulative_sum_fn';
+import { aggDerivative } from './metrics/derivative_fn';
+import { aggGeoBounds } from './metrics/geo_bounds_fn';
+import { aggGeoCentroid } from './metrics/geo_centroid_fn';
+import { aggMax } from './metrics/max_fn';
+import { aggMedian } from './metrics/median_fn';
+import { aggMin } from './metrics/min_fn';
+import { aggMovingAvg } from './metrics/moving_avg_fn';
+import { aggPercentileRanks } from './metrics/percentile_ranks_fn';
+import { aggPercentiles } from './metrics/percentiles_fn';
+import { aggSerialDiff } from './metrics/serial_diff_fn';
+import { aggStdDeviation } from './metrics/std_deviation_fn';
+import { aggSum } from './metrics/sum_fn';
+import { aggTopHit } from './metrics/top_hit_fn';
+
+export const getAggTypesFunctions = () => [
+  aggAvg,
+  aggBucketAvg,
+  aggBucketMax,
+  aggBucketMin,
+  aggBucketSum,
+  aggCardinality,
+  aggCount,
+  aggCumulativeSum,
+  aggDerivative,
+  aggGeoBounds,
+  aggGeoCentroid,
+  aggMax,
+  aggMedian,
+  aggMin,
+  aggMovingAvg,
+  aggPercentileRanks,
+  aggPercentiles,
+  aggSerialDiff,
+  aggStdDeviation,
+  aggSum,
+  aggTopHit,
+  aggFilter,
+  aggFilters,
+  aggSignificantTerms,
+  aggIpRange,
+  aggDateRange,
+  aggRange,
+  aggGeoTile,
+  aggGeoHash,
+  aggDateHistogram,
+  aggHistogram,
+  aggTerms,
+];

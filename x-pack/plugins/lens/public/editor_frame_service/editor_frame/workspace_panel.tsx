@@ -17,14 +17,25 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
-import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
+import {
+  ExpressionRendererEvent,
+  ReactExpressionRendererType,
+} from '../../../../../../src/plugins/expressions/public';
 import { Action } from './state_management';
-import { Datasource, Visualization, FramePublicAPI } from '../../types';
+import {
+  Datasource,
+  Visualization,
+  FramePublicAPI,
+  isLensBrushEvent,
+  isLensFilterEvent,
+} from '../../types';
 import { DragDrop, DragContext } from '../../drag_drop';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { buildExpression } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
 import { trackUiEvent } from '../../lens_ui_telemetry';
+import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -43,6 +54,7 @@ export interface WorkspacePanelProps {
   dispatch: (action: Action) => void;
   ExpressionRenderer: ReactExpressionRendererType;
   core: CoreStart | CoreSetup;
+  plugins: { uiActions?: UiActionsStart };
 }
 
 export const WorkspacePanel = debouncedComponent(InnerWorkspacePanel);
@@ -58,6 +70,7 @@ export function InnerWorkspacePanel({
   framePublicAPI,
   dispatch,
   core,
+  plugins,
   ExpressionRenderer: ExpressionRendererComponent,
 }: WorkspacePanelProps) {
   const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
@@ -122,6 +135,16 @@ export function InnerWorkspacePanel({
     framePublicAPI.filters,
   ]);
 
+  useEffect(() => {
+    // reset expression error if component attempts to run it again
+    if (expression && localState.expressionBuildError) {
+      setLocalState(s => ({
+        ...s,
+        expressionBuildError: undefined,
+      }));
+    }
+  }, [expression]);
+
   function onDrop() {
     if (suggestionForDraggedField) {
       trackUiEvent('drop_onto_workspace');
@@ -174,16 +197,6 @@ export function InnerWorkspacePanel({
   }
 
   function renderVisualization() {
-    useEffect(() => {
-      // reset expression error if component attempts to run it again
-      if (expression && localState.expressionBuildError) {
-        setLocalState(s => ({
-          ...s,
-          expressionBuildError: undefined,
-        }));
-      }
-    }, [expression]);
-
     if (expression === null) {
       return renderEmptyWorkspace();
     }
@@ -211,6 +224,22 @@ export function InnerWorkspacePanel({
           className="lnsExpressionRenderer__component"
           padding="m"
           expression={expression!}
+          onEvent={(event: ExpressionRendererEvent) => {
+            if (!plugins.uiActions) {
+              // ui actions not available, not handling event...
+              return;
+            }
+            if (isLensBrushEvent(event)) {
+              plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+                data: event.data,
+              });
+            }
+            if (isLensFilterEvent(event)) {
+              plugins.uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+                data: event.data,
+              });
+            }
+          }}
           renderError={(errorMessage?: string | null) => {
             return (
               <EuiFlexGroup direction="column" alignItems="center">

@@ -22,7 +22,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { EventEmitter } from 'events';
 
-import { EditorRenderProps } from 'src/legacy/core_plugins/kibana/public/visualize/np_ready/types';
+import { EditorRenderProps } from 'src/plugins/visualize/public';
 import { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
 import { Storage } from '../../kibana_utils/public';
 import { KibanaContextProvider } from '../../kibana_react/public';

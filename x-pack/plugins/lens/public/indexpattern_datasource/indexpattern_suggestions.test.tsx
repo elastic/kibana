@@ -184,6 +184,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     id2: expect.objectContaining({
                       operationType: 'terms',
                       sourceField: 'source',
+                      params: expect.objectContaining({ size: 5 }),
                     }),
                     id3: expect.objectContaining({
                       operationType: 'count',
@@ -388,6 +389,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     id1: expect.objectContaining({
                       operationType: 'terms',
                       sourceField: 'source',
+                      params: expect.objectContaining({ size: 5 }),
                     }),
                     id2: expect.objectContaining({
                       operationType: 'count',
@@ -779,7 +781,7 @@ describe('IndexPattern Data Source suggestions', () => {
         expect(suggestions[0].table.columns[0].operation.isBucketed).toBeFalsy();
       });
 
-      it('appends a terms column on string field', () => {
+      it('appends a terms column with default size on string field', () => {
         const initialState = stateWithNonEmptyTables();
         const suggestions = getDatasourceSuggestionsForField(initialState, '1', {
           name: 'dest',
@@ -800,6 +802,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     id1: expect.objectContaining({
                       operationType: 'terms',
                       sourceField: 'dest',
+                      params: expect.objectContaining({ size: 3 }),
                     }),
                   },
                 }),
@@ -1548,6 +1551,62 @@ describe('IndexPattern Data Source suggestions', () => {
       const suggestions = getDatasourceSuggestionsFromCurrentState(state);
       expect(suggestions[0].table.columns.length).toBe(1);
       expect(suggestions[0].table.columns[0].operation.label).toBe('Sum of field1');
+    });
+
+    it('contains a reordering suggestion when there are exactly 2 buckets', () => {
+      const initialState = testInitialState();
+      const state: IndexPatternPrivateState = {
+        indexPatternRefs: [],
+        existingFields: {},
+        currentIndexPatternId: '1',
+        indexPatterns: expectedIndexPatterns,
+        showEmptyFields: true,
+        layers: {
+          first: {
+            ...initialState.layers.first,
+            columns: {
+              id1: {
+                label: 'Date histogram',
+                dataType: 'date',
+                isBucketed: true,
+
+                operationType: 'date_histogram',
+                sourceField: 'field2',
+                params: {
+                  interval: 'd',
+                },
+              },
+              id2: {
+                label: 'Top 5',
+                dataType: 'string',
+                isBucketed: true,
+
+                operationType: 'terms',
+                sourceField: 'field1',
+                params: { size: 5, orderBy: { type: 'alphabetical' }, orderDirection: 'asc' },
+              },
+              id3: {
+                label: 'Average of field1',
+                dataType: 'number',
+                isBucketed: false,
+
+                operationType: 'avg',
+                sourceField: 'field1',
+              },
+            },
+            columnOrder: ['id1', 'id2', 'id3'],
+          },
+        },
+      };
+
+      const suggestions = getDatasourceSuggestionsFromCurrentState(state);
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          table: expect.objectContaining({
+            changeType: 'reorder',
+          }),
+        })
+      );
     });
   });
 });

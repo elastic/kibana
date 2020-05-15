@@ -81,7 +81,7 @@ function dataRecognizerJobsExist(context: RequestHandlerContext, moduleId: strin
  */
 export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
   /**
-   * @apiGroup DataRecognizer
+   * @apiGroup Modules
    *
    * @api {get} /api/ml/modules/recognize/:indexPatternTitle Recognize index pattern
    * @apiName RecognizeIndex
@@ -97,6 +97,9 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
           indexPatternTitle: schema.string(),
         }),
       },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -111,7 +114,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
   );
 
   /**
-   * @apiGroup DataRecognizer
+   * @apiGroup Modules
    *
    * @api {get} /api/ml/modules/get_module/:moduleId Get module
    * @apiName GetModule
@@ -126,6 +129,9 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
         params: schema.object({
           ...getModuleIdParamSchema(true),
         }),
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -146,7 +152,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
   );
 
   /**
-   * @apiGroup DataRecognizer
+   * @apiGroup Modules
    *
    * @api {post} /api/ml/modules/setup/:moduleId Setup module
    * @apiName SetupModule
@@ -160,6 +166,9 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
       validate: {
         params: schema.object(getModuleIdParamSchema()),
         body: setupModuleBodySchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateJob'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -204,7 +213,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
   );
 
   /**
-   * @apiGroup DataRecognizer
+   * @apiGroup Modules
    *
    * @api {post} /api/ml/modules/jobs_exist/:moduleId Check if module jobs exist
    * @apiName CheckExistingModuleJobs
@@ -217,6 +226,9 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
       path: '/api/ml/modules/jobs_exist/{moduleId}',
       validate: {
         params: schema.object(getModuleIdParamSchema()),
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

@@ -18,6 +18,7 @@ import {
 } from '../common/constants';
 import { getEsSpatialRelationLabel } from '../common/i18n_getters';
 import { SPATIAL_FILTER_TYPE } from './kibana_services';
+import turfCircle from '@turf/circle';
 
 function ensureGeoField(type) {
   const expectedTypes = [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE];
@@ -64,7 +65,7 @@ function ensureGeometryType(type, expectedTypes) {
  * @param {string} geoFieldType Geometry field type ["geo_point", "geo_shape"]
  * @returns {number}
  */
-export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
+export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType, epochMillisFields) {
   const features = [];
   const tmpGeometriesAccumulator = [];
 
@@ -78,6 +79,16 @@ export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
       geoPointToGeometry(properties[geoFieldName], tmpGeometriesAccumulator);
     } else {
       geoShapeToGeometry(properties[geoFieldName], tmpGeometriesAccumulator);
+    }
+
+    // There is a bug in Elasticsearch API where epoch_millis are returned as a string instead of a number
+    // https://github.com/elastic/elasticsearch/issues/50622
+    // Convert these field values to integers.
+    for (let i = 0; i < epochMillisFields.length; i++) {
+      const fieldName = epochMillisFields[i];
+      if (typeof properties[fieldName] === 'string') {
+        properties[fieldName] = parseInt(properties[fieldName]);
+      }
     }
 
     // don't include geometry field value in properties
@@ -214,27 +225,48 @@ export function geoShapeToGeometry(value, accumulator) {
   accumulator.push(geoJson);
 }
 
-function createGeoBoundBoxFilter(geometry, geoFieldName, filterProps = {}) {
-  ensureGeometryType(geometry.type, [GEO_JSON_TYPE.POLYGON]);
+function createGeoBoundBoxFilter({ maxLat, maxLon, minLat, minLon }, geoFieldName) {
+  const top = clampToLatBounds(maxLat);
+  const bottom = clampToLatBounds(minLat);
 
-  const TOP_LEFT_INDEX = 0;
-  const BOTTOM_RIGHT_INDEX = 2;
-  const verticies = geometry.coordinates[POLYGON_COORDINATES_EXTERIOR_INDEX];
+  // geo_bounding_box does not support ranges outside of -180 and 180
+  // When the area crosses the 180° meridian,
+  // the value of the lower left longitude will be greater than the value of the upper right longitude.
+  // http://docs.opengeospatial.org/is/12-063r5/12-063r5.html#30
+  let boundingBox;
+  if (maxLon - minLon >= 360) {
+    boundingBox = {
+      top_left: [-180, top],
+      bottom_right: [180, bottom],
+    };
+  } else if (maxLon > 180) {
+    const overflow = maxLon - 180;
+    boundingBox = {
+      top_left: [minLon, top],
+      bottom_right: [-180 + overflow, bottom],
+    };
+  } else if (minLon < -180) {
+    const overflow = Math.abs(minLon) - 180;
+    boundingBox = {
+      top_left: [180 - overflow, top],
+      bottom_right: [maxLon, bottom],
+    };
+  } else {
+    boundingBox = {
+      top_left: [minLon, top],
+      bottom_right: [maxLon, bottom],
+    };
+  }
+
   return {
     geo_bounding_box: {
-      [geoFieldName]: {
-        top_left: verticies[TOP_LEFT_INDEX],
-        bottom_right: verticies[BOTTOM_RIGHT_INDEX],
-      },
+      [geoFieldName]: boundingBox,
     },
-    ...filterProps,
   };
 }
 
 export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
   ensureGeoField(geoFieldType);
-
-  const safePolygon = convertMapExtentToPolygon(mapExtent);
 
   // Extent filters are used to dynamically filter data for the current map view port.
   // Continue to use geo_bounding_box queries for extent filters
@@ -242,13 +274,13 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
   // 2) geo_shape benefits of pre-indexed shapes and
   // compatability across multi-indices with geo_point and geo_shape do not apply to this use case.
   if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
-    return createGeoBoundBoxFilter(safePolygon, geoFieldName);
+    return createGeoBoundBoxFilter(mapExtent, geoFieldName);
   }
 
   return {
     geo_shape: {
       [geoFieldName]: {
-        shape: safePolygon,
+        shape: formatEnvelopeAsPolygon(mapExtent),
         relation: ES_SPATIAL_RELATIONS.INTERSECTS,
       },
     },
@@ -320,7 +352,7 @@ export function createDistanceFilterWithMeta({
           values: {
             distanceKm,
             geoFieldName,
-            pointLabel: point.join(','),
+            pointLabel: point.join(', '),
           },
         }),
   };
@@ -365,16 +397,16 @@ export function getBoundingBoxGeometry(geometry) {
     extent.maxLat = Math.max(exterior[i][LAT_INDEX], extent.maxLat);
   }
 
-  return convertMapExtentToPolygon(extent);
+  return formatEnvelopeAsPolygon(extent);
 }
 
-function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
+export function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
   // GeoJSON mandates that the outer polygon must be counterclockwise to avoid ambiguous polygons
   // when the shape crosses the dateline
   const left = minLon;
   const right = maxLon;
-  const top = maxLat > 90 ? 90 : maxLat;
-  const bottom = minLat < -90 ? -90 : minLat;
+  const top = clampToLatBounds(maxLat);
+  const bottom = clampToLatBounds(minLat);
   const topLeft = [left, top];
   const bottomLeft = [left, bottom];
   const bottomRight = [right, bottom];
@@ -383,45 +415,6 @@ function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
     type: GEO_JSON_TYPE.POLYGON,
     coordinates: [[topLeft, bottomLeft, bottomRight, topRight, topLeft]],
   };
-}
-
-/*
- * Convert map bounds to polygon
- */
-export function convertMapExtentToPolygon({ maxLat, maxLon, minLat, minLon }) {
-  const lonDelta = maxLon - minLon;
-  if (lonDelta >= 360) {
-    return formatEnvelopeAsPolygon({
-      maxLat,
-      maxLon: 180,
-      minLat,
-      minLon: -180,
-    });
-  }
-
-  if (maxLon > 180) {
-    // bounds cross dateline east to west
-    const overlapWestOfDateLine = maxLon - 180;
-    return formatEnvelopeAsPolygon({
-      maxLat,
-      maxLon: -180 + overlapWestOfDateLine,
-      minLat,
-      minLon,
-    });
-  }
-
-  if (minLon < -180) {
-    // bounds cross dateline west to east
-    const overlapEastOfDateLine = Math.abs(minLon) - 180;
-    return formatEnvelopeAsPolygon({
-      maxLat,
-      maxLon,
-      minLat,
-      minLon: 180 - overlapEastOfDateLine,
-    });
-  }
-
-  return formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon });
 }
 
 export function clampToLatBounds(lat) {
@@ -440,4 +433,41 @@ export function clamp(val, min, max) {
   } else {
     return val;
   }
+}
+
+export function extractFeaturesFromFilters(filters) {
+  const features = [];
+  filters
+    .filter(filter => {
+      return filter.meta.key && filter.meta.type === SPATIAL_FILTER_TYPE;
+    })
+    .forEach(filter => {
+      let geometry;
+      if (filter.geo_distance && filter.geo_distance[filter.meta.key]) {
+        const distanceSplit = filter.geo_distance.distance.split('km');
+        const distance = parseFloat(distanceSplit[0]);
+        const circleFeature = turfCircle(filter.geo_distance[filter.meta.key], distance);
+        geometry = circleFeature.geometry;
+      } else if (
+        filter.geo_shape &&
+        filter.geo_shape[filter.meta.key] &&
+        filter.geo_shape[filter.meta.key].shape
+      ) {
+        geometry = filter.geo_shape[filter.meta.key].shape;
+      } else {
+        // do not know how to convert spatial filter to geometry
+        // this includes pre-indexed shapes
+        return;
+      }
+
+      features.push({
+        type: 'Feature',
+        geometry,
+        properties: {
+          filter: filter.meta.alias,
+        },
+      });
+    });
+
+  return features;
 }

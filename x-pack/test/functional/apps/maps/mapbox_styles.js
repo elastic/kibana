@@ -27,7 +27,7 @@ export const MAPBOX_STYLES = {
             'case',
             [
               '==',
-              ['feature-state', '__kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name'],
+              ['feature-state', '__kbnjoin__max_of_prop1__855ccb86-fe42-11e8-8eb2-f2801f1b9fd1'],
               null,
             ],
             2,
@@ -39,7 +39,7 @@ export const MAPBOX_STYLES = {
                   'to-number',
                   [
                     'feature-state',
-                    '__kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name',
+                    '__kbnjoin__max_of_prop1__855ccb86-fe42-11e8-8eb2-f2801f1b9fd1',
                   ],
                 ],
                 12,
@@ -97,7 +97,7 @@ export const MAPBOX_STYLES = {
             'case',
             [
               '==',
-              ['feature-state', '__kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name'],
+              ['feature-state', '__kbnjoin__max_of_prop1__855ccb86-fe42-11e8-8eb2-f2801f1b9fd1'],
               null,
             ],
             2,
@@ -109,7 +109,7 @@ export const MAPBOX_STYLES = {
                   'to-number',
                   [
                     'feature-state',
-                    '__kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name',
+                    '__kbnjoin__max_of_prop1__855ccb86-fe42-11e8-8eb2-f2801f1b9fd1',
                   ],
                 ],
                 12,

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Component } from 'react';
+import React from 'react';
 import { debounce } from 'lodash';
 
 import { withKibana, KibanaReactContextValue } from '../../../../../kibana_react/public';
@@ -39,7 +39,7 @@ export interface PhraseSuggestorState {
  * aggregatable), we pull out the common logic for requesting suggestions into this component
  * which both of them extend.
  */
-export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends Component<
+export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Component<
   T,
   PhraseSuggestorState
 > {

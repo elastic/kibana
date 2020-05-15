@@ -55,9 +55,11 @@ export const FilebeatConfigFlyout: FC<Props> = ({
   } = useMlKibana();
 
   useEffect(() => {
-    security.authc.getCurrentUser().then(user => {
-      setUsername(user.username === undefined ? null : user.username);
-    });
+    if (security !== undefined) {
+      security.authc.getCurrentUser().then(user => {
+        setUsername(user.username === undefined ? null : user.username);
+      });
+    }
   }, []);
 
   useEffect(() => {

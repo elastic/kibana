@@ -33,8 +33,6 @@ export const EmptyPrompt = ({ onCTAClicked }: { onCTAClicked: () => void }) => (
         data-test-subj="createFirstAlertButton"
         key="create-action"
         fill
-        iconType="plusInCircle"
-        iconSide="left"
         onClick={onCTAClicked}
       >
         <FormattedMessage

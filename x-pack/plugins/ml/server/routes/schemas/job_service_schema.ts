@@ -40,6 +40,7 @@ export const forceStartDatafeedSchema = schema.object({
 });
 
 export const jobIdsSchema = schema.object({
+  /** Optional list of job ID(s). */
   jobIds: schema.maybe(
     schema.oneOf([schema.string(), schema.arrayOf(schema.maybe(schema.string()))])
   ),

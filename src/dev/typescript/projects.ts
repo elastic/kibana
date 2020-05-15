@@ -27,10 +27,10 @@ export const PROJECTS = [
   new Project(resolve(REPO_ROOT, 'test/tsconfig.json'), { name: 'kibana/test' }),
   new Project(resolve(REPO_ROOT, 'x-pack/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'x-pack/test/tsconfig.json'), { name: 'x-pack/test' }),
-  new Project(resolve(REPO_ROOT, 'x-pack/legacy/plugins/siem/cypress/tsconfig.json'), {
+  new Project(resolve(REPO_ROOT, 'x-pack/plugins/siem/cypress/tsconfig.json'), {
     name: 'siem/cypress',
   }),
-  new Project(resolve(REPO_ROOT, 'x-pack/legacy/plugins/apm/e2e/tsconfig.json'), {
+  new Project(resolve(REPO_ROOT, 'x-pack/plugins/apm/e2e/tsconfig.json'), {
     name: 'apm/cypress',
     disableTypeCheck: true,
   }),
@@ -45,7 +45,13 @@ export const PROJECTS = [
     .sync('examples/*/tsconfig.json', { cwd: REPO_ROOT })
     .map(path => new Project(resolve(REPO_ROOT, path))),
   ...glob
+    .sync('x-pack/examples/*/tsconfig.json', { cwd: REPO_ROOT })
+    .map(path => new Project(resolve(REPO_ROOT, path))),
+  ...glob
     .sync('test/plugin_functional/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
+    .map(path => new Project(resolve(REPO_ROOT, path))),
+  ...glob
+    .sync('test/interpreter_functional/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
     .map(path => new Project(resolve(REPO_ROOT, path))),
 ];
 

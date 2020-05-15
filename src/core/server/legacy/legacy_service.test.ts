@@ -22,7 +22,10 @@ jest.mock('../../../cli/cluster/cluster_manager');
 jest.mock('./config/legacy_deprecation_adapters', () => ({
   convertLegacyDeprecationProvider: (provider: any) => Promise.resolve(provider),
 }));
-import { findLegacyPluginSpecsMock } from './legacy_service.test.mocks';
+import {
+  findLegacyPluginSpecsMock,
+  logLegacyThirdPartyPluginDeprecationWarningMock,
+} from './legacy_service.test.mocks';
 
 import { BehaviorSubject, throwError } from 'rxjs';
 
@@ -475,6 +478,38 @@ describe('#discoverPlugins()', () => {
     expect(configService.addDeprecationProvider).toHaveBeenCalledTimes(2);
     expect(configService.addDeprecationProvider).toHaveBeenCalledWith('', 'providerA');
     expect(configService.addDeprecationProvider).toHaveBeenCalledWith('', 'providerB');
+  });
+
+  it(`logs deprecations for legacy third party plugins`, async () => {
+    const pluginSpecs = [
+      { getId: () => 'pluginA', getDeprecationsProvider: () => undefined },
+      { getId: () => 'pluginB', getDeprecationsProvider: () => undefined },
+    ];
+    findLegacyPluginSpecsMock.mockImplementation(
+      settings =>
+        Promise.resolve({
+          pluginSpecs,
+          pluginExtendedConfig: settings,
+          disabledPluginSpecs: [],
+          uiExports: {},
+          navLinks: [],
+        }) as any
+    );
+
+    const legacyService = new LegacyService({
+      coreId,
+      env,
+      logger,
+      configService: configService as any,
+    });
+
+    await legacyService.discoverPlugins();
+
+    expect(logLegacyThirdPartyPluginDeprecationWarningMock).toHaveBeenCalledTimes(1);
+    expect(logLegacyThirdPartyPluginDeprecationWarningMock).toHaveBeenCalledWith({
+      specs: pluginSpecs,
+      log: expect.any(Object),
+    });
   });
 });
 

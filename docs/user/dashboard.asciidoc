@@ -99,6 +99,24 @@ to the new dimensions.
 dashboard does *not* delete the saved visualization or search.
 
 [float]
+[[cloning-a-panel]]
+=== Clone dashboard elements
+
+In *Edit* mode, you can clone any panel on a dashboard.
+
+To clone an existing panel, open the panel menu of the element you wish to clone, then select *Clone panel*.
+
+* Cloned panels appear beside the original, and will move other panels down to make room if necessary.
+
+* Clones support all of the original panel's functionality, including renaming, editing, and cloning.
+
+* All cloned visualizations will appear in the visualization list.
+
+[role="screenshot"]
+image:images/clone_panel.gif[clone panel]
+
+
+[float]
 [[viewing-detailed-information]]
 === Inspect and edit elements
 
@@ -156,7 +174,7 @@ to view an embedded dashboard.
 * Generate a PNG report
 
 TIP: To create a link to a dashboard by title, use: +
-`${domain}/${basepath?}/app/kibana#/dashboards?title=${yourdashboardtitle}`
+`${domain}/${basepath?}/app/dashboards#/list?title=${yourdashboardtitle}`
 
 TIP: When sharing a link to a dashboard snapshot, use the *Short URL*. Snapshot
 URLs are long and can be problematic for Internet Explorer and other

@@ -19,12 +19,12 @@ import {
 } from '@elastic/eui';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { useRouteMatch } from 'react-router-dom';
-import { DonutChart } from '../agent_list_page/components/donut_chart';
-import { useGetAgentStatus } from '../../agent_config/details_page/hooks';
-import { useCapabilities, useLink, useGetAgentConfigs } from '../../../hooks';
+import { PAGE_ROUTING_PATHS } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
-import { FLEET_ENROLLMENT_TOKENS_PATH, FLEET_AGENTS_PATH } from '../../../constants';
-import { AgentEnrollmentFlyout } from '../agent_list_page/components';
+import { useCapabilities, useLink, useGetAgentConfigs } from '../../../hooks';
+import { useGetAgentStatus } from '../../agent_config/details_page/hooks';
+import { AgentEnrollmentFlyout } from '../components';
+import { DonutChart } from './donut_chart';
 
 const REFRESH_INTERVAL_MS = 5000;
 
@@ -36,6 +36,7 @@ const Divider = styled.div`
 `;
 
 export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
+  const { getHref } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
   const agentStatusRequest = useGetAgentStatus(undefined, {
     pollIntervalMs: REFRESH_INTERVAL_MS,
@@ -163,8 +164,8 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
                 defaultMessage="Agents"
               />
             ),
-            isSelected: routeMatch.path === FLEET_AGENTS_PATH,
-            href: useLink(FLEET_AGENTS_PATH),
+            isSelected: routeMatch.path === PAGE_ROUTING_PATHS.fleet_agent_list,
+            href: getHref('fleet_agent_list'),
           },
           {
             name: (
@@ -173,8 +174,8 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
                 defaultMessage="Enrollment tokens"
               />
             ),
-            isSelected: routeMatch.path === FLEET_ENROLLMENT_TOKENS_PATH,
-            href: useLink(FLEET_ENROLLMENT_TOKENS_PATH),
+            isSelected: routeMatch.path === PAGE_ROUTING_PATHS.fleet_enrollment_tokens,
+            href: getHref('fleet_enrollment_tokens'),
           },
         ] as unknown) as EuiTabProps[]
       }

@@ -31,17 +31,30 @@ import {
   setUiActions,
   setUiSettings,
   setVisualizations,
-  // @ts-ignore
+  setSearchService,
+  setMapConfig,
 } from './kibana_services';
+import { featureCatalogueEntry } from './feature_catalogue_entry';
+// @ts-ignore
+import { getMapsVisTypeAlias } from './maps_vis_type_alias';
+import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
+import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
+import { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
+  home: HomePublicPluginSetup;
+  visualizations: VisualizationsSetup;
+  embeddable: EmbeddableSetup;
+  mapsLegacy: { config: unknown };
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsPluginStartDependencies {}
 
 export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
-  const { licensing } = plugins;
+  const { licensing, mapsLegacy } = plugins;
   const { injectedMetadata, uiSettings, http, notifications } = core;
   if (licensing) {
     licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
@@ -52,6 +65,7 @@ export const bindSetupCoreAndPlugins = (core: CoreSetup, plugins: any) => {
   setInjectedVarFunc(injectedMetadata.getInjectedVar);
   setVisualizations(plugins.visualizations);
   setUiSettings(uiSettings);
+  setMapConfig(mapsLegacy.config);
 };
 
 export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
@@ -60,6 +74,7 @@ export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
   setFileUpload(fileUpload);
   setIndexPatternSelect(data.ui.IndexPatternSelect);
   setTimeFilter(data.query.timefilter.timefilter);
+  setSearchService(data.search);
   setIndexPatternService(data.indexPatterns);
   setAutocompleteService(data.autocomplete);
   setCore(core);
@@ -92,8 +107,16 @@ export class MapsPlugin
       MapsPluginStartDependencies
     > {
   public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies) {
-    plugins.inspector.registerView(MapView);
+    const { inspector, home, visualizations, embeddable } = plugins;
+    bindSetupCoreAndPlugins(core, plugins);
+
+    inspector.registerView(MapView);
+    home.featureCatalogue.register(featureCatalogueEntry);
+    visualizations.registerAlias(getMapsVisTypeAlias());
+    embeddable.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
   }
 
-  public start(core: CoreStart, plugins: any) {}
+  public start(core: CoreStart, plugins: any) {
+    bindStartCoreAndPlugins(core, plugins);
+  }
 }

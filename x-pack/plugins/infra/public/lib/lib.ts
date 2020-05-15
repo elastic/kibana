@@ -186,12 +186,6 @@ export enum InfraFormatterType {
   percent = 'percent',
 }
 
-export enum InfraWaffleMapDataFormat {
-  bytesDecimal = 'bytesDecimal',
-  bitsDecimal = 'bitsDecimal',
-  abbreviatedNumber = 'abbreviatedNumber',
-}
-
 export interface InfraGroupByOptions {
   text: string;
   field: string;

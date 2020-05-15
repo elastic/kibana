@@ -5,16 +5,16 @@
  */
 
 import { ActionType } from '../types';
-import { BehaviorSubject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { LicenseState, ILicenseState } from './license_state';
 import { licensingMock } from '../../../licensing/server/mocks';
 import { ILicense } from '../../../licensing/server';
 
 describe('checkLicense()', () => {
-  let getRawLicense: any;
+  const getRawLicense = jest.fn();
 
   beforeEach(() => {
-    getRawLicense = jest.fn();
+    jest.resetAllMocks();
   });
 
   describe('status is LICENSE_STATUS_INVALID', () => {
@@ -53,7 +53,7 @@ describe('checkLicense()', () => {
 });
 
 describe('isLicenseValidForActionType', () => {
-  let license: BehaviorSubject<ILicense>;
+  let license: Subject<ILicense>;
   let licenseState: ILicenseState;
   const fooActionType: ActionType = {
     id: 'foo',
@@ -63,7 +63,7 @@ describe('isLicenseValidForActionType', () => {
   };
 
   beforeEach(() => {
-    license = new BehaviorSubject(null as any);
+    license = new Subject();
     licenseState = new LicenseState(license);
   });
 
@@ -75,7 +75,7 @@ describe('isLicenseValidForActionType', () => {
   });
 
   test('should return false when license not available', () => {
-    license.next({ isAvailable: false } as any);
+    license.next(createUnavailableLicense());
     expect(licenseState.isLicenseValidForActionType(fooActionType)).toEqual({
       isValid: false,
       reason: 'unavailable',
@@ -114,7 +114,7 @@ describe('isLicenseValidForActionType', () => {
 });
 
 describe('ensureLicenseForActionType()', () => {
-  let license: BehaviorSubject<ILicense>;
+  let license: Subject<ILicense>;
   let licenseState: ILicenseState;
   const fooActionType: ActionType = {
     id: 'foo',
@@ -124,7 +124,7 @@ describe('ensureLicenseForActionType()', () => {
   };
 
   beforeEach(() => {
-    license = new BehaviorSubject(null as any);
+    license = new Subject();
     licenseState = new LicenseState(license);
   });
 
@@ -137,7 +137,7 @@ describe('ensureLicenseForActionType()', () => {
   });
 
   test('should throw when license not available', () => {
-    license.next({ isAvailable: false } as any);
+    license.next(createUnavailableLicense());
     expect(() =>
       licenseState.ensureLicenseForActionType(fooActionType)
     ).toThrowErrorMatchingInlineSnapshot(
@@ -175,3 +175,9 @@ describe('ensureLicenseForActionType()', () => {
     licenseState.ensureLicenseForActionType(fooActionType);
   });
 });
+
+function createUnavailableLicense() {
+  const unavailableLicense = licensingMock.createLicenseMock();
+  unavailableLicense.isAvailable = false;
+  return unavailableLicense;
+}

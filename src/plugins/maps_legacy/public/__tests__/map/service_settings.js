@@ -26,7 +26,7 @@ import EMS_TILES from './ems_mocks/sample_tiles.json';
 import EMS_STYLE_ROAD_MAP_BRIGHT from './ems_mocks/sample_style_bright';
 import EMS_STYLE_ROAD_MAP_DESATURATED from './ems_mocks/sample_style_desaturated';
 import EMS_STYLE_DARK_MAP from './ems_mocks/sample_style_dark';
-import { ORIGIN } from '../../common/origin';
+import { ORIGIN } from '../../common/constants/origin';
 
 describe('service_settings (FKA tilemaptest)', function() {
   let serviceSettings;
@@ -143,24 +143,24 @@ describe('service_settings (FKA tilemaptest)', function() {
       }
 
       it('accepts an object', async () => {
-        serviceSettings.addQueryParams({ foo: 'bar' });
+        serviceSettings.setQueryParams({ foo: 'bar' });
         tilemapServices = await serviceSettings.getTMSServices();
         await assertQuery({ foo: 'bar' });
       });
 
       it('merged additions with previous values', async () => {
         // ensure that changes are always additive
-        serviceSettings.addQueryParams({ foo: 'bar' });
-        serviceSettings.addQueryParams({ bar: 'stool' });
+        serviceSettings.setQueryParams({ foo: 'bar' });
+        serviceSettings.setQueryParams({ bar: 'stool' });
         tilemapServices = await serviceSettings.getTMSServices();
         await assertQuery({ foo: 'bar', bar: 'stool' });
       });
 
       it('overwrites conflicting previous values', async () => {
         // ensure that conflicts are overwritten
-        serviceSettings.addQueryParams({ foo: 'bar' });
-        serviceSettings.addQueryParams({ bar: 'stool' });
-        serviceSettings.addQueryParams({ foo: 'tstool' });
+        serviceSettings.setQueryParams({ foo: 'bar' });
+        serviceSettings.setQueryParams({ bar: 'stool' });
+        serviceSettings.setQueryParams({ foo: 'tstool' });
         tilemapServices = await serviceSettings.getTMSServices();
         await assertQuery({ foo: 'tstool', bar: 'stool' });
       });
@@ -168,7 +168,7 @@ describe('service_settings (FKA tilemaptest)', function() {
       it('when overridden, should continue to work', async () => {
         mapConfig.emsFileApiUrl = emsFileApiUrl2;
         mapConfig.emsTileApiUrl = emsTileApiUrl2;
-        serviceSettings.addQueryParams({ foo: 'bar' });
+        serviceSettings.setQueryParams({ foo: 'bar' });
         tilemapServices = await serviceSettings.getTMSServices();
         await assertQuery({ foo: 'bar' });
       });
@@ -292,7 +292,7 @@ describe('service_settings (FKA tilemaptest)', function() {
 
   describe('File layers', function() {
     it('should load manifest (all props)', async function() {
-      serviceSettings.addQueryParams({ foo: 'bar' });
+      serviceSettings.setQueryParams({ foo: 'bar' });
       const fileLayers = await serviceSettings.getFileLayers();
       expect(fileLayers.length).to.be(18);
       const assertions = fileLayers.map(async function(fileLayer) {

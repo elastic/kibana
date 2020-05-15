@@ -50,12 +50,12 @@ export class TelemetryCollectionManagerPlugin
   private readonly collections: Array<Collection<any>> = [];
   private usageGetterMethodPriority = -1;
   private usageCollection?: UsageCollectionSetup;
-  private readonly isDev: boolean;
+  private readonly isDistributable: boolean;
   private readonly version: string;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.isDev = initializerContext.env.mode.dev;
+    this.isDistributable = initializerContext.env.packageInfo.dist;
     this.version = initializerContext.env.packageInfo.version;
   }
 
@@ -158,7 +158,7 @@ export class TelemetryCollectionManagerPlugin
           if (config.unencrypted) {
             return optInStats;
           }
-          return encryptTelemetry(optInStats, { isProd: !this.isDev });
+          return encryptTelemetry(optInStats, { useProdKey: this.isDistributable });
         }
       } catch (err) {
         this.logger.debug(`Failed to collect any opt in stats with registered collections.`);
@@ -176,7 +176,6 @@ export class TelemetryCollectionManagerPlugin
   ) => {
     const context: StatsCollectionContext = {
       logger: this.logger.get(collection.title),
-      isDev: this.isDev,
       version: this.version,
       ...collection.customContext,
     };
@@ -206,7 +205,7 @@ export class TelemetryCollectionManagerPlugin
             return usageData;
           }
 
-          return encryptTelemetry(usageData, { isProd: !this.isDev });
+          return encryptTelemetry(usageData, { useProdKey: this.isDistributable });
         }
       } catch (err) {
         this.logger.debug(
@@ -225,7 +224,6 @@ export class TelemetryCollectionManagerPlugin
   ): Promise<UsageStatsPayload[]> {
     const context: StatsCollectionContext = {
       logger: this.logger.get(collection.title),
-      isDev: this.isDev,
       version: this.version,
       ...collection.customContext,
     };

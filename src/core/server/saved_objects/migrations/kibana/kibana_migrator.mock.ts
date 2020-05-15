@@ -27,7 +27,7 @@ const defaultSavedObjectTypes: SavedObjectsType[] = [
   {
     name: 'testtype',
     hidden: false,
-    namespaceAgnostic: false,
+    namespaceType: 'single',
     mappings: {
       properties: {
         name: { type: 'keyword' },

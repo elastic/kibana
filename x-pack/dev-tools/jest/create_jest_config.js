@@ -8,12 +8,7 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
   const fileMockPath = `${kibanaDirectory}/src/dev/jest/mocks/file_mock.js`;
   return {
     rootDir: xPackKibanaDirectory,
-    roots: [
-      '<rootDir>/plugins',
-      '<rootDir>/legacy/plugins',
-      '<rootDir>/legacy/server',
-      '<rootDir>/test_utils/jest/contract_tests',
-    ],
+    roots: ['<rootDir>/plugins', '<rootDir>/legacy/plugins', '<rootDir>/legacy/server'],
     moduleFileExtensions: ['js', 'json', 'ts', 'tsx'],
     moduleNameMapper: {
       '@elastic/eui$': `${kibanaDirectory}/node_modules/@elastic/eui/test-env`,
@@ -32,7 +27,22 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       '^test_utils/enzyme_helpers': `${xPackKibanaDirectory}/test_utils/enzyme_helpers.tsx`,
       '^test_utils/find_test_subject': `${xPackKibanaDirectory}/test_utils/find_test_subject.ts`,
       '^test_utils/stub_web_worker': `${xPackKibanaDirectory}/test_utils/stub_web_worker.ts`,
+      '^(!!)?file-loader!': fileMockPath,
     },
+    collectCoverageFrom: [
+      'legacy/plugins/**/*.{js,jsx,ts,tsx}',
+      'legacy/server/**/*.{js,jsx,ts,tsx}',
+      'plugins/**/*.{js,jsx,ts,tsx}',
+      '!**/{__test__,__snapshots__,__examples__,integration_tests,tests}/**',
+      '!**/*.test.{js,ts,tsx}',
+      '!**/flot-charts/**',
+      '!**/test/**',
+      '!**/build/**',
+      '!**/scripts/**',
+      '!**/mocks/**',
+      '!**/plugins/apm/e2e/**',
+    ],
+    coveragePathIgnorePatterns: ['.*\\.d\\.ts'],
     coverageDirectory: '<rootDir>/../target/kibana-coverage/jest',
     coverageReporters: !!process.env.CODE_COVERAGE ? ['json'] : ['html'],
     setupFiles: [

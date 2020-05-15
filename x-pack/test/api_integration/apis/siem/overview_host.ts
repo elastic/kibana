@@ -5,10 +5,11 @@
  */
 
 import expect from '@kbn/expect';
-import { overviewHostQuery } from '../../../../legacy/plugins/siem/public/containers/overview/overview_host/index.gql_query';
-import { GetOverviewHostQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
+
+import { DEFAULT_INDEX_PATTERN } from '../../../../plugins/siem/common/constants';
+import { overviewHostQuery } from '../../../../plugins/siem/public/overview/containers//overview_host/index.gql_query';
+import { GetOverviewHostQuery } from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { defaultIndexPattern } from '../../../../legacy/plugins/siem/default_index_pattern';
 
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -51,7 +52,7 @@ export default function({ getService }: FtrProviderContext) {
                 to: TO,
                 from: FROM,
               },
-              defaultIndex: defaultIndexPattern,
+              defaultIndex: DEFAULT_INDEX_PATTERN,
               inspect: false,
             },
           })

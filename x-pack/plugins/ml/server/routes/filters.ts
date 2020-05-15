@@ -57,6 +57,9 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/filters',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetFilters'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -89,6 +92,9 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         params: filterIdSchema,
       },
+      options: {
+        tags: ['access:ml:canGetFilters'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -119,6 +125,9 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
       path: '/api/ml/filters',
       validate: {
         body: createFilterSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateFilter'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -155,6 +164,9 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
         params: filterIdSchema,
         body: updateFilterSchema,
       },
+      options: {
+        tags: ['access:ml:canCreateFilter'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -186,6 +198,9 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
       validate: {
         params: filterIdSchema,
       },
+      options: {
+        tags: ['access:ml:canDeleteFilter'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
@@ -216,6 +231,9 @@ export function filtersRoutes({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/filters/_stats',
       validate: false,
+      options: {
+        tags: ['access:ml:canGetFilters'],
+      },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {

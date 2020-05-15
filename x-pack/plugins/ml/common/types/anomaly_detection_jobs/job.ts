@@ -26,6 +26,7 @@ export interface Job {
   groups: string[];
   model_plot_config?: ModelPlotConfig;
   model_snapshot_retention_days?: number;
+  daily_model_snapshot_retention_after_days?: number;
   renormalization_window_days?: number;
   results_index_name?: string;
   results_retention_days?: number;

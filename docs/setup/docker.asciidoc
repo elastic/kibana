@@ -94,7 +94,7 @@ Some example translations are shown here:
 **Environment Variable**:: **Kibana Setting**
 `SERVER_NAME`:: `server.name`
 `KIBANA_DEFAULTAPPID`:: `kibana.defaultAppId`
-`XPACK_MONITORING_ENABLED`:: `xpack.monitoring.enabled`
+`MONITORING_ENABLED`:: `monitoring.enabled`
 
 In general, any setting listed in <<settings>> can be
 configured with this technique.
@@ -125,9 +125,9 @@ images:
 `server.name`:: `kibana`
 `server.host`:: `"0"`
 `elasticsearch.hosts`:: `http://elasticsearch:9200`
-`xpack.monitoring.ui.container.elasticsearch.enabled`:: `true`
+`monitoring.ui.container.elasticsearch.enabled`:: `true`
 
-NOTE: The setting `xpack.monitoring.ui.container.elasticsearch.enabled` is not
+NOTE: The setting `monitoring.ui.container.elasticsearch.enabled` is not
 defined in the `-oss` image.
 
 These settings are defined in the default `kibana.yml`. They can be overridden

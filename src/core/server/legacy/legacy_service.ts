@@ -28,7 +28,7 @@ import { DevConfig, DevConfigType, config as devConfig } from '../dev';
 import { BasePathProxyServer, HttpConfig, HttpConfigType, config as httpConfig } from '../http';
 import { Logger } from '../logging';
 import { PathConfigType } from '../path';
-import { findLegacyPluginSpecs } from './plugins';
+import { findLegacyPluginSpecs, logLegacyThirdPartyPluginDeprecationWarning } from './plugins';
 import { convertLegacyDeprecationProvider } from './config';
 import {
   ILegacyInternals,
@@ -132,6 +132,11 @@ export class LegacyService implements CoreService {
       this.coreContext.logger,
       this.coreContext.env.packageInfo
     );
+
+    logLegacyThirdPartyPluginDeprecationWarning({
+      specs: pluginSpecs,
+      log: this.log,
+    });
 
     this.legacyPlugins = {
       pluginSpecs,

@@ -18,14 +18,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ToastsStart } from 'kibana/public';
 // @ts-ignore
 import { ObjDefine } from './obj_define';
 import { IndexPattern } from '../index_patterns';
-import { getNotifications, getFieldFormats } from '../../services';
-import { IFieldType, getKbnFieldType, IFieldSubType, FieldFormat } from '../../../common';
-import { shortenDottedString } from '../../../common/utils';
+import {
+  IFieldType,
+  getKbnFieldType,
+  IFieldSubType,
+  FieldFormat,
+  shortenDottedString,
+} from '../../../common';
+import { FieldFormatsStart } from '../../field_formats';
 
 export type FieldSpec = Record<string, any>;
+
+interface FieldDependencies {
+  fieldFormats: FieldFormatsStart;
+  toastNotifications: ToastsStart;
+}
 
 export class Field implements IFieldType {
   name: string;
@@ -47,11 +58,13 @@ export class Field implements IFieldType {
   indexPattern?: IndexPattern;
   format: any;
   $$spec: FieldSpec;
+  conflictDescriptions?: Record<string, string[]>;
 
   constructor(
     indexPattern: IndexPattern,
     spec: FieldSpec | Field,
-    shortDotsEnable: boolean = false
+    shortDotsEnable: boolean,
+    { fieldFormats, toastNotifications }: FieldDependencies
   ) {
     // unwrap old instances of Field
     if (spec instanceof Field) spec = spec.$$spec;
@@ -76,9 +89,8 @@ export class Field implements IFieldType {
         values: { name: spec.name, title: indexPattern.title },
         defaultMessage: 'Field {name} in indexPattern {title} is using an unknown field type.',
       });
-      const { toasts } = getNotifications();
 
-      toasts.addDanger({
+      toastNotifications.addDanger({
         title,
         text,
       });
@@ -89,11 +101,9 @@ export class Field implements IFieldType {
     let format = spec.format;
 
     if (!FieldFormat.isInstanceOfFieldFormat(format)) {
-      const fieldFormatsService = getFieldFormats();
-
       format =
         indexPattern.fieldFormatMap[spec.name] ||
-        fieldFormatsService.getDefaultInstance(spec.type, spec.esTypes);
+        fieldFormats.getDefaultInstance(spec.type, spec.esTypes);
     }
 
     const indexed = !!spec.indexed;

@@ -6,7 +6,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/server';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import { Installation, InstallationStatus, PackageInfo } from '../../../types';
+import { Installation, InstallationStatus, PackageInfo, KibanaAssetType } from '../../../types';
 import * as Registry from '../registry';
 import { createInstallableFrom } from './index';
 
@@ -32,11 +32,10 @@ export async function getPackages(
     );
   });
   // get the installed packages
-  const results = await savedObjectsClient.find<Installation>({
-    type: PACKAGES_SAVED_OBJECT_TYPE,
-  });
+  const packageSavedObjects = await getPackageSavedObjects(savedObjectsClient);
+
   // filter out any internal packages
-  const savedObjectsVisible = results.saved_objects.filter(o => !o.attributes.internal);
+  const savedObjectsVisible = packageSavedObjects.saved_objects.filter(o => !o.attributes.internal);
   const packageList = registryItems
     .map(item =>
       createInstallableFrom(
@@ -46,6 +45,12 @@ export async function getPackages(
     )
     .sort(sortByName);
   return packageList;
+}
+
+export async function getPackageSavedObjects(savedObjectsClient: SavedObjectsClientContract) {
+  return savedObjectsClient.find<Installation>({
+    type: PACKAGES_SAVED_OBJECT_TYPE,
+  });
 }
 
 export async function getPackageKeysByStatus(
@@ -67,9 +72,10 @@ export async function getPackageInfo(options: {
   pkgVersion: string;
 }): Promise<PackageInfo> {
   const { savedObjectsClient, pkgName, pkgVersion } = options;
-  const [item, savedObject, assets] = await Promise.all([
+  const [item, savedObject, latestPackage, assets] = await Promise.all([
     Registry.fetchInfo(pkgName, pkgVersion),
     getInstallationObject({ savedObjectsClient, pkgName }),
+    Registry.fetchFindLatestPackage(pkgName),
     Registry.getArchiveInfo(pkgName, pkgVersion),
   ] as const);
   // adding `as const` due to regression in TS 3.7.2
@@ -79,6 +85,7 @@ export async function getPackageInfo(options: {
   // add properties that aren't (or aren't yet) on Registry response
   const updated = {
     ...item,
+    latestVersion: latestPackage.version,
     title: item.title || nameAsTitle(item.name),
     assets: Registry.groupPathsByService(assets || []),
   };
@@ -111,4 +118,12 @@ function sortByName(a: { name: string }, b: { name: string }) {
   } else {
     return 0;
   }
+}
+
+export async function getKibanaSavedObject(
+  savedObjectsClient: SavedObjectsClientContract,
+  type: KibanaAssetType,
+  id: string
+) {
+  return savedObjectsClient.get(type, id);
 }

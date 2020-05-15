@@ -300,7 +300,7 @@ describe('CSV Execute Job', function() {
     });
   });
 
-  describe('Cells with formula values', () => {
+  describe('Warning when cells have formulas', () => {
     it('returns `csv_contains_formulas` when cells contain formulas', async function() {
       configGetStub.withArgs('csv', 'checkForFormulas').returns(true);
       callAsCurrentUserStub.onFirstCall().returns({
@@ -353,6 +353,7 @@ describe('CSV Execute Job', function() {
 
     it('returns no warnings when cells have no formulas', async function() {
       configGetStub.withArgs('csv', 'checkForFormulas').returns(true);
+      configGetStub.withArgs('csv', 'escapeFormulaValues').returns(false);
       callAsCurrentUserStub.onFirstCall().returns({
         hits: {
           hits: [{ _source: { one: 'foo', two: 'bar' } }],
@@ -367,6 +368,33 @@ describe('CSV Execute Job', function() {
         conflictedTypesFields: [],
         searchRequest: { index: null, body: null },
       });
+      const { csv_contains_formulas: csvContainsFormulas } = await executeJob(
+        'job123',
+        jobParams,
+        cancellationToken
+      );
+
+      expect(csvContainsFormulas).toEqual(false);
+    });
+
+    it('returns no warnings when cells have formulas but are escaped', async function() {
+      configGetStub.withArgs('csv', 'checkForFormulas').returns(true);
+      configGetStub.withArgs('csv', 'escapeFormulaValues').returns(true);
+      callAsCurrentUserStub.onFirstCall().returns({
+        hits: {
+          hits: [{ _source: { '=SUM(A1:A2)': 'foo', two: 'bar' } }],
+        },
+        _scroll_id: 'scrollId',
+      });
+
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
+      const jobParams = getJobDocPayload({
+        headers: encryptedHeaders,
+        fields: ['=SUM(A1:A2)', 'two'],
+        conflictedTypesFields: [],
+        searchRequest: { index: null, body: null },
+      });
+
       const { csv_contains_formulas: csvContainsFormulas } = await executeJob(
         'job123',
         jobParams,
@@ -443,6 +471,50 @@ describe('CSV Execute Job', function() {
       const { content } = await executeJob('job123', jobParams, cancellationToken);
 
       expect(content).toEqual('one,two\none,bar\n');
+    });
+  });
+
+  describe('Escaping cells with formulas', () => {
+    it('escapes values with formulas', async () => {
+      configGetStub.withArgs('csv', 'escapeFormulaValues').returns(true);
+      callAsCurrentUserStub.onFirstCall().returns({
+        hits: {
+          hits: [{ _source: { one: `=cmd|' /C calc'!A0`, two: 'bar' } }],
+        },
+        _scroll_id: 'scrollId',
+      });
+
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
+      const jobParams = getJobDocPayload({
+        headers: encryptedHeaders,
+        fields: ['one', 'two'],
+        conflictedTypesFields: [],
+        searchRequest: { index: null, body: null },
+      });
+      const { content } = await executeJob('job123', jobParams, cancellationToken);
+
+      expect(content).toEqual("one,two\n\"'=cmd|' /C calc'!A0\",bar\n");
+    });
+
+    it('does not escapes values with formulas', async () => {
+      configGetStub.withArgs('csv', 'escapeFormulaValues').returns(false);
+      callAsCurrentUserStub.onFirstCall().returns({
+        hits: {
+          hits: [{ _source: { one: `=cmd|' /C calc'!A0`, two: 'bar' } }],
+        },
+        _scroll_id: 'scrollId',
+      });
+
+      const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
+      const jobParams = getJobDocPayload({
+        headers: encryptedHeaders,
+        fields: ['one', 'two'],
+        conflictedTypesFields: [],
+        searchRequest: { index: null, body: null },
+      });
+      const { content } = await executeJob('job123', jobParams, cancellationToken);
+
+      expect(content).toEqual('one,two\n"=cmd|\' /C calc\'!A0",bar\n');
     });
   });
 

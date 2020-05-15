@@ -30,7 +30,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AggGroupNames, search, IAggConfig, TimeRange } from '../../../data/public';
+import { AggGroupNames, AggGroupLabels, IAggConfig, TimeRange } from '../../../data/public';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
 import { AddSchema, ReorderAggs, DefaultEditorAggCommonProps } from './agg_common_props';
@@ -70,7 +70,7 @@ function DefaultEditorAggGroup({
   setValidity,
   timeRange,
 }: DefaultEditorAggGroupProps) {
-  const groupNameLabel = (search.aggs.aggGroupNamesMap() as any)[groupName];
+  const groupNameLabel = AggGroupLabels[groupName];
   // e.g. buckets can have no aggs
   const schemaNames = schemas.map(s => s.name);
   const group: IAggConfig[] = useMemo(
@@ -170,7 +170,7 @@ function DefaultEditorAggGroup({
                     agg={agg}
                     aggIndex={index}
                     aggIsTooLow={calcAggIsTooLow(agg, index, group, schemas)}
-                    dragHandleProps={provided.dragHandleProps}
+                    dragHandleProps={provided.dragHandleProps || null}
                     formIsTouched={aggsState[agg.id] ? aggsState[agg.id].touched : false}
                     groupName={groupName}
                     isDraggable={stats.count > 1}

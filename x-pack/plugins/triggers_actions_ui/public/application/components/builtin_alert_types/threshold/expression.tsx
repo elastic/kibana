@@ -42,6 +42,7 @@ import {
 } from '../../../../common';
 import { builtInAggregationTypes } from '../../../../common/constants';
 import { IndexThresholdAlertParams } from './types';
+import { AlertTypeParamsExpressionProps } from '../../../../types';
 import { AlertsContextValue } from '../../../context/alerts_context';
 import './expression.scss';
 
@@ -66,23 +67,10 @@ const expressionFieldsWithValidation = [
   'timeWindowSize',
 ];
 
-interface IndexThresholdProps {
-  alertParams: IndexThresholdAlertParams;
-  alertInterval: string;
-  setAlertParams: (property: string, value: any) => void;
-  setAlertProperty: (key: string, value: any) => void;
-  errors: { [key: string]: string[] };
-  alertsContext: AlertsContextValue;
-}
-
-export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThresholdProps> = ({
-  alertParams,
-  alertInterval,
-  setAlertParams,
-  setAlertProperty,
-  errors,
-  alertsContext,
-}) => {
+export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeParamsExpressionProps<
+  IndexThresholdAlertParams,
+  AlertsContextValue
+>> = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, alertsContext }) => {
   const {
     index,
     timeField,
@@ -283,7 +271,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
   const firstSetOfSteps = [
     {
       title: i18n.translate('xpack.triggersActionsUI.sections.alertAdd.selectIndex', {
-        defaultMessage: 'Select an index.',
+        defaultMessage: 'Select an index',
       }),
       children: (
         <>
@@ -396,7 +384,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
     },
     {
       title: i18n.translate('xpack.triggersActionsUI.sections.alertAdd.conditionPrompt', {
-        defaultMessage: 'Define the condition.',
+        defaultMessage: 'Define the condition',
       }),
       children: (
         <>
@@ -445,12 +433,10 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
         </Fragment>
       ) : null}
       <EuiSpacer size="l" />
-      <EuiSteps steps={firstSetOfSteps} />
-      <EuiSpacer size="l" />
+      <EuiSteps className="actAddAlertSteps" steps={firstSetOfSteps} />
       <div className="actAlertVisualization__chart">
         {canShowVizualization ? (
           <Fragment>
-            <EuiSpacer size="xl" />
             <EuiEmptyPrompt
               iconType="visBarVertical"
               body={
@@ -478,3 +464,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
     </Fragment>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { IndexThresholdAlertTypeExpression as default };

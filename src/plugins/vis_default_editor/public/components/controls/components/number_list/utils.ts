@@ -119,7 +119,7 @@ function getNextModel(list: NumberRowModel[], range: NumberListRange): NumberRow
   };
 }
 
-function getInitModelList(list: Array<number | undefined>): NumberRowModel[] {
+function getInitModelList(list: Array<number | undefined | ''>): NumberRowModel[] {
   return list.length
     ? list.map(num => ({
         value: (num === undefined ? EMPTY_STRING : num) as NumberRowModel['value'],

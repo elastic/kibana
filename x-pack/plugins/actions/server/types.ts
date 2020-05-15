@@ -4,21 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, SavedObjectAttributes } from '../../../../src/core/server';
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
 import { LicenseType } from '../../licensing/common/types';
+import {
+  IClusterClient,
+  IScopedClusterClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+  SavedObjectAttributes,
+} from '../../../../src/core/server';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
-export type GetServicesFunction = (request: any) => Services;
+export type GetServicesFunction = (request: KibanaRequest) => Services;
 export type ActionTypeRegistryContract = PublicMethodsOf<ActionTypeRegistry>;
 export type GetBasePathFunction = (spaceId?: string) => string;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
 export interface Services {
-  callCluster(path: string, opts: any): Promise<any>;
+  callCluster: IScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
+  getScopedCallCluster(clusterClient: IClusterClient): IScopedClusterClient['callAsCurrentUser'];
 }
 
 declare module 'src/core/server' {
@@ -45,8 +52,12 @@ export interface ActionsConfigType {
 export interface ActionTypeExecutorOptions {
   actionId: string;
   services: Services;
+  // This will have to remain `any` until we can extend Action Executors with generics
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config: Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   secrets: Record<string, any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: Record<string, any>;
 }
 
@@ -54,11 +65,15 @@ export interface ActionResult {
   id: string;
   actionTypeId: string;
   name: string;
-  config: Record<string, any>;
+  // This will have to remain `any` until we can extend Action Executors with generics
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  config?: Record<string, any>;
   isPreconfigured: boolean;
 }
 
 export interface PreConfiguredAction extends ActionResult {
+  // This will have to remain `any` until we can extend Action Executors with generics
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   secrets: Record<string, any>;
 }
 
@@ -72,6 +87,8 @@ export interface ActionTypeExecutorResult {
   status: 'ok' | 'error';
   message?: string;
   serviceMessage?: string;
+  // This will have to remain `any` until we can extend Action Executors with generics
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data?: any;
   retry?: null | boolean | Date;
 }
@@ -82,7 +99,7 @@ export type ExecutorType = (
 ) => Promise<ActionTypeExecutorResult | null | undefined | void>;
 
 interface ValidatorType {
-  validate<T>(value: any): any;
+  validate(value: unknown): Record<string, unknown>;
 }
 
 export type ActionTypeCreator = (config?: ActionsConfigType) => ActionType;
@@ -108,6 +125,13 @@ export interface RawAction extends SavedObjectAttributes {
 
 export interface ActionTaskParams extends SavedObjectAttributes {
   actionId: string;
+  // Saved Objects won't allow us to enforce unknown rather than any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: Record<string, any>;
   apiKey?: string;
+}
+
+export interface ActionTaskExecutorParams {
+  spaceId: string;
+  actionTaskParamsId: string;
 }

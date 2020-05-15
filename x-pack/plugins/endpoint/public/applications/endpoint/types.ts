@@ -4,18 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dispatch, MiddlewareAPI, Action as ReduxAction, AnyAction as ReduxAnyAction } from 'redux';
+import {
+  Dispatch,
+  Action as ReduxAction,
+  AnyAction as ReduxAnyAction,
+  Action,
+  Middleware,
+} from 'redux';
 import { IIndexPattern } from 'src/plugins/data/public';
 import {
   HostMetadata,
   AlertData,
   AlertResultList,
   Immutable,
-  ImmutableArray,
   AlertDetails,
   MalwareFields,
   UIPolicyConfig,
   PolicyData,
+  HostPolicyResponse,
+  HostInfo,
 } from '../../../common/types';
 import { EndpointPluginStartDependencies } from '../../plugin';
 import { AppAction } from './store/action';
@@ -28,30 +35,101 @@ import {
 } from '../../../../ingest_manager/common';
 
 export { AppAction };
-export type MiddlewareFactory<S = GlobalState> = (
+
+/**
+ * like redux's `MiddlewareAPI` but `getState` returns an `Immutable` version of
+ * state and `dispatch` accepts `Immutable` versions of actions.
+ */
+export interface ImmutableMiddlewareAPI<S, A extends Action> {
+  dispatch: Dispatch<A | Immutable<A>>;
+  getState(): Immutable<S>;
+}
+
+/**
+ * Like redux's `Middleware` but without the ability to mutate actions or state.
+ * Differences:
+ *   * `getState` returns an `Immutable` version of state
+ *   * `dispatch` accepts `Immutable` versions of actions
+ *   * `action`s received will be `Immutable`
+ */
+export type ImmutableMiddleware<S, A extends Action> = (
+  api: ImmutableMiddlewareAPI<S, A>
+) => (next: Dispatch<A | Immutable<A>>) => (action: Immutable<A>) => unknown;
+
+/**
+ * Takes application-standard middleware dependencies
+ * and returns a redux middleware.
+ * Middleware will be of the `ImmutableMiddleware` variety. Not able to directly
+ * change actions or state.
+ */
+export type ImmutableMiddlewareFactory<S = GlobalState> = (
   coreStart: CoreStart,
   depsStart: EndpointPluginStartDependencies
-) => (
-  api: MiddlewareAPI<Dispatch<AppAction>, S>
-) => (next: Dispatch<AppAction>) => (action: AppAction) => unknown;
+) => ImmutableMiddleware<S, AppAction>;
 
-export interface HostListState {
-  hosts: HostMetadata[];
+/**
+ * Simple type for a redux selector.
+ */
+type Selector<S, R> = (state: S) => R;
+
+/**
+ * Takes a selector and an `ImmutableMiddleware`. The
+ * middleware's version of `getState` will receive
+ * the result of the selector instead of the global state.
+ *
+ * This allows middleware to have knowledge of only a subsection of state.
+ *
+ * `selector` returns an `Immutable` version of the substate.
+ * `middleware` must be an `ImmutableMiddleware`.
+ *
+ * Returns a regular middleware, meant to be used with `applyMiddleware`.
+ */
+export type SubstateMiddlewareFactory = <Substate>(
+  selector: Selector<GlobalState, Immutable<Substate>>,
+  middleware: ImmutableMiddleware<Substate, AppAction>
+) => Middleware<{}, GlobalState, Dispatch<AppAction | Immutable<AppAction>>>;
+
+export interface HostState {
+  /** list of host **/
+  hosts: HostInfo[];
+  /** number of items per page */
   pageSize: number;
+  /** which page to show */
   pageIndex: number;
+  /** total number of hosts returned */
   total: number;
+  /** list page is retrieving data */
   loading: boolean;
-  detailsError?: ServerApiError;
+  /** api error from retrieving host list */
+  error?: ServerApiError;
+  /** details data for a specific host */
   details?: Immutable<HostMetadata>;
+  /** details page is retrieving data */
+  detailsLoading: boolean;
+  /** api error from retrieving host details */
+  detailsError?: ServerApiError;
+  /** Holds the Policy Response for the Host currently being displayed in the details */
+  policyResponse?: HostPolicyResponse;
+  /** policyResponse is being retrieved */
+  policyResponseLoading: boolean;
+  /** api error from retrieving the policy response */
+  policyResponseError?: ServerApiError;
+  /** current location info */
   location?: Immutable<EndpointAppLocation>;
 }
 
-export interface HostListPagination {
-  pageIndex: number;
-  pageSize: number;
-}
+/**
+ * Query params on the host page parsed from the URL
+ */
 export interface HostIndexUIQueryParams {
+  /** Selected host id shows host details flyout */
   selected_host?: string;
+  /** How many items to show in list */
+  page_size?: string;
+  /** Which page to show */
+  page_index?: string;
+  /** show the policy response or host details */
+  show?: string;
 }
 
 export interface ServerApiError {
@@ -203,7 +281,7 @@ export type KeysByValueCriteria<O, Criteria> = {
 export type MalwareProtectionOSes = KeysByValueCriteria<UIPolicyConfig, { malware: MalwareFields }>;
 
 export interface GlobalState {
-  readonly hostList: HostListState;
+  readonly hostList: HostState;
   readonly alertList: AlertListState;
   readonly policyList: PolicyListState;
   readonly policyDetails: PolicyDetailsState;
@@ -237,7 +315,7 @@ export type AlertListData = AlertResultList;
 
 export interface AlertListState {
   /** Array of alert items. */
-  readonly alerts: ImmutableArray<AlertData>;
+  readonly alerts: Immutable<AlertData[]>;
 
   /** The total number of alerts on the page. */
   readonly total: number;

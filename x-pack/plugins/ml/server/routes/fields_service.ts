@@ -37,6 +37,8 @@ export function fieldsService({ router, mlLicense }: RouteInitialization) {
    * @apiDescription Returns the cardinality of one or more fields. Returns an Object whose keys are the names of the fields, with values equal to the cardinality of the field
    *
    * @apiSchema (body) getCardinalityOfFieldsSchema
+   *
+   * @apiSuccess {number} fieldName cardinality of the field.
    */
   router.post(
     {
@@ -44,8 +46,10 @@ export function fieldsService({ router, mlLicense }: RouteInitialization) {
       validate: {
         body: getCardinalityOfFieldsSchema,
       },
+      options: {
+        tags: ['access:ml:canAccessML'],
+      },
     },
-
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const resp = await getCardinalityOfFields(context, request.body);
@@ -64,15 +68,21 @@ export function fieldsService({ router, mlLicense }: RouteInitialization) {
    *
    * @api {post} /api/ml/fields_service/time_field_range Get time field range
    * @apiName GetTimeFieldRange
-   * @apiDescription Returns the timefield range for the given index
+   * @apiDescription Returns the time range for the given index and query using the specified time range.
    *
    * @apiSchema (body) getTimeFieldRangeSchema
+   *
+   * @apiSuccess {Object} start start of time range with epoch and string properties.
+   * @apiSuccess {Object} end end of time range with epoch and string properties.
    */
   router.post(
     {
       path: '/api/ml/fields_service/time_field_range',
       validate: {
         body: getTimeFieldRangeSchema,
+      },
+      options: {
+        tags: ['access:ml:canAccessML'],
       },
     },
     mlLicense.basicLicenseAPIGuard(async (context, request, response) => {

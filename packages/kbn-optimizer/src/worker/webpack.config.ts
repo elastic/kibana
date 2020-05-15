@@ -28,17 +28,17 @@ import TerserPlugin from 'terser-webpack-plugin';
 import webpackMerge from 'webpack-merge';
 // @ts-ignore
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
+import CompressionPlugin from 'compression-webpack-plugin';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
 import { Bundle, WorkerConfig, parseDirPath, DisallowedSyntaxPlugin } from '../common';
 
 const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
-const PUBLIC_PATH_PLACEHOLDER = '__REPLACE_WITH_PUBLIC_PATH__';
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 
 const STATIC_BUNDLE_PLUGINS = [
-  // { id: 'data', dirname: 'data' },
+  { id: 'data', dirname: 'data' },
   { id: 'kibanaReact', dirname: 'kibana_react' },
   { id: 'kibanaUtils', dirname: 'kibana_utils' },
   { id: 'esUiShared', dirname: 'es_ui_shared' },
@@ -61,13 +61,8 @@ function dynamicExternals(bundle: Bundle, context: string, request: string) {
     return;
   }
 
-  // don't allow any static bundle to rely on other static bundles
-  if (STATIC_BUNDLE_PLUGINS.some(p => bundle.id === p.id)) {
-    return;
-  }
-
-  // ignore requests that don't include a /data/public, /kibana_react/public, or
-  // /kibana_utils/public segment as a cheap way to avoid doing path resolution
+  // ignore requests that don't include a /{dirname}/public for one of our
+  // "static" bundles as a cheap way to avoid doing path resolution
   // for paths that couldn't possibly resolve to what we're looking for
   const reqToStaticBundle = STATIC_BUNDLE_PLUGINS.some(p =>
     request.includes(`/${p.dirname}/public`)
@@ -104,8 +99,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
 
     output: {
       path: bundle.outputDir,
-      filename: '[name].plugin.js',
-      publicPath: PUBLIC_PATH_PLACEHOLDER,
+      filename: `[name].${bundle.type}.js`,
       devtoolModuleFilenameTemplate: info =>
         `/${bundle.type}:${bundle.id}/${Path.relative(
           bundle.sourceRoot,
@@ -140,12 +134,22 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
 
     module: {
       // no parse rules for a few known large packages which have no require() statements
+      // or which have require() statements that should be ignored because the file is
+      // already bundled with all its necessary depedencies
       noParse: [
-        /[\///]node_modules[\///]elasticsearch-browser[\///]/,
-        /[\///]node_modules[\///]lodash[\///]index\.js/,
+        /[\/\\]node_modules[\/\\]elasticsearch-browser[\/\\]/,
+        /[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/,
+        /[\/\\]node_modules[\/\\]vega-lib[\/\\]build[\/\\]vega\.js$/,
       ],
 
       rules: [
+        {
+          include: Path.join(bundle.contextDir, bundle.entry),
+          loader: UiSharedDeps.publicPathLoader,
+          options: {
+            key: bundle.id,
+          },
+        },
         {
           test: /\.css$/,
           include: /node_modules/,
@@ -289,6 +293,7 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
 
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.json'],
+      mainFields: ['browser', 'main'],
       alias: {
         tinymath: require.resolve('tinymath/lib/tinymath.es5.js'),
       },
@@ -314,6 +319,16 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
         'process.env': {
           IS_KIBANA_DISTRIBUTABLE: `"true"`,
         },
+      }),
+      new CompressionPlugin({
+        algorithm: 'brotliCompress',
+        filename: '[path].br',
+        test: /\.(js|css)$/,
+      }),
+      new CompressionPlugin({
+        algorithm: 'gzip',
+        filename: '[path].gz',
+        test: /\.(js|css)$/,
       }),
     ],
 
