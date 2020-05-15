@@ -12,7 +12,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
 
-  describe('When on the Endpoint Policy List', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/66579
+  describe.skip('When on the Endpoint Policy List', function() {
     this.tags(['ciGroup7']);
     before(async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy');

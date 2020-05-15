@@ -180,7 +180,7 @@ function buildDashboardUrlFromSettings(settings) {
           .then(urlValue => {
             const urlToAdd = {
               url_name: settings.label,
-              url_value: decodeURIComponent(`kibana${url.parse(urlValue).hash}`),
+              url_value: decodeURIComponent(`dashboards${url.parse(urlValue).hash}`),
               time_range: TIME_RANGE_TYPE.AUTO,
             };
 
@@ -233,7 +233,7 @@ function buildDiscoverUrlFromSettings(settings) {
 
   const _a = rison.encode(appState);
 
-  const urlValue = `kibana#/discover?_g=${_g}&_a=${_a}`;
+  const urlValue = `discover#/?_g=${_g}&_a=${_a}`;
 
   const urlToAdd = {
     url_name: settings.label,

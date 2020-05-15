@@ -52,6 +52,9 @@ export function HomePageProvider({ getService, getPageObjects }: FtrProviderCont
     }
 
     async removeSampleDataSet(id: string) {
+      // looks like overkill but we're hitting flaky cases where we click but it doesn't remove
+      await testSubjects.isDisplayed(`removeSampleDataSet${id}`);
+      await testSubjects.isEnabled(`removeSampleDataSet${id}`);
       await testSubjects.click(`removeSampleDataSet${id}`);
       await this._waitForSampleDataLoadingAction(id);
     }

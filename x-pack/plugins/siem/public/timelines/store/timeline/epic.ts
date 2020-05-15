@@ -148,8 +148,10 @@ export const createTimelineEpic = <State>(): Epic<
           return true;
         }
         if (action.type === createTimeline.type && isItAtimelineAction(timelineId)) {
-          myEpicTimelineId.setTimelineId(null);
-          myEpicTimelineId.setTimelineVersion(null);
+          if (timelineObj.timelineType !== 'draft') {
+            myEpicTimelineId.setTimelineVersion(null);
+            myEpicTimelineId.setTimelineId(null);
+          }
         } else if (action.type === addTimeline.type && isItAtimelineAction(timelineId)) {
           const addNewTimeline: TimelineModel = get('payload.timeline', action);
           myEpicTimelineId.setTimelineId(addNewTimeline.savedObjectId);
