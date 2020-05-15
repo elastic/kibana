@@ -25,7 +25,7 @@ export function JsonRenderer(props: { state: State }) {
         <EuiAccordion
           id={a.id}
           key={a.id}
-          buttonContent={nodeRegistry[a.node.type].title}
+          buttonContent={a.id + ': ' + nodeRegistry[a.node.type].title}
           initialIsOpen={a.isTerminalNode}
         >
           <EuiCodeBlock language="json">

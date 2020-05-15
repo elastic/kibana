@@ -21,7 +21,7 @@ export function ChartRenderer(props: { state: State }) {
   const terminalData = terminals
     .map(a => loader.lastData[a.id]?.value)
     .filter(data => {
-      return data && data.columns.length > 1 && data.columns.length <= 3;
+      return data && data.columns?.length > 1 && data.columns?.length <= 3;
     });
 
   if (!terminalData.length) {

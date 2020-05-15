@@ -17,7 +17,7 @@ export function TableRenderer(props: { state: State }) {
     a => a.isTerminalNode && nodeRegistry[a.node.type].outputType === 'table'
   );
   return (
-    <>
+    <div className="pipelineBuilder__tableRenderer">
       {finalTableNodes.map(a => {
         const table = loader.lastData[a.id];
         if (!table?.value) {
@@ -35,6 +35,6 @@ export function TableRenderer(props: { state: State }) {
           />
         );
       })}
-    </>
+    </div>
   );
 }

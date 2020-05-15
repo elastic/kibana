@@ -12,8 +12,8 @@ let nextNodeId = 1;
 export function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'CREATE_NODE':
+      const nodeId = String(nextNodeId);
       nextNodeId++;
-      const nodeId = nextNodeId;
       return {
         ...state,
         nodes: {
@@ -34,6 +34,15 @@ export function reducer(state: State, action: Action): State {
           ...state.nodes,
           [action.nodeId]: { ...node, state: action.newState },
         },
+      };
+    case 'DELETE_NODES':
+      const nodeCopy = { ...state.nodes };
+      action.nodeIds.forEach(id => {
+        delete nodeCopy[id];
+      });
+      return {
+        ...state,
+        nodes: nodeCopy,
       };
     case 'LOADING_START':
       return {

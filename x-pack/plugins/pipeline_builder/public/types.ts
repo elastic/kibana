@@ -102,4 +102,15 @@ interface LoadingFailure {
   type: 'LOADING_FAILURE';
 }
 
-export type Action = SetNode | CreateNode | LoadingStart | LoadingSuccess | LoadingFailure;
+interface DeleteNodes {
+  type: 'DELETE_NODES';
+  nodeIds: string[];
+}
+
+export type Action =
+  | SetNode
+  | CreateNode
+  | LoadingStart
+  | LoadingSuccess
+  | LoadingFailure
+  | DeleteNodes;

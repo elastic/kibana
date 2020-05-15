@@ -28,7 +28,7 @@
 
 .pipelineFrameLayout__sidebar {
   margin: 0;
-  flex: 1 0 30%;
+  flex: 0 0 30%;
   min-width: $euiSize * 24 + $euiSize;
   display: flex;
   flex-direction: column;
@@ -41,6 +41,30 @@
   margin-top: $euiSize;
 }
 
+.pipelineBuilder__nodeOutput {
+  max-height: 200px;
+  overflow: auto;
+}
+
 .pipelineBuilder__startNode {
+  flex: 0 0 50%;
   max-width: 50%;
+}
+
+.pipelineBuilder__chain {
+  background: $euiColorLightShade;
+}
+
+.pipelineBuilder__createJoinButton {
+  border-top: 1px solid $euiColorLightShade;
+  padding: $euiSize;
+  margin-top: $euiSize;
+}
+
+.pipelineBuilder__tableRenderer {
+  overflow: auto;
+}
+
+.pipelineBuilder__tableConvert__column {
+  border-bottom: 1px solid $euiColorLightShade;
 }

@@ -5,13 +5,13 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiFieldText, EuiProgress } from '@elastic/eui';
+import { EuiFormRow, EuiFieldText, EuiProgress, EuiSelect } from '@elastic/eui';
 import { NodeDefinition, RenderNode } from '../types';
 import { useLoader } from '../state';
 
 interface JoinNodeState {
   joinColumn?: string;
-  joinType?: 'inner';
+  joinType: 'outer' | 'inner';
 }
 
 function JoinNode({ node, dispatch }: RenderNode<JoinNodeState>) {
@@ -20,22 +20,23 @@ function JoinNode({ node, dispatch }: RenderNode<JoinNodeState>) {
     <div>
       {loader.lastData[node.id]?.loading ? <EuiProgress /> : null}
 
-      {/* <EuiFormRow
+      <EuiFormRow
         label={i18n.translate('xpack.pipeline_builder.joinNode.endpointLabel', {
           defaultMessage: 'Endpoint path',
         })}
       >
-        <EuiFieldText
-          value={node.state.endpoint}
+        <EuiSelect
+          value={node.state.joinType}
+          options={[{ text: 'outer' }, { text: 'inner' }]}
           onChange={e => {
             dispatch({
               type: 'SET_NODE',
               nodeId: node.id,
-              newState: { ...node.state, endpoint: e.target.value },
+              newState: { ...node.state, joinType: e.target.value },
             });
           }}
         />
-      </EuiFormRow> */}
+      </EuiFormRow>
     </div>
   );
 }
@@ -50,25 +51,18 @@ export const definition: NodeDefinition<JoinNodeState> = {
   icon: 'aggregate',
 
   initialize(): JoinNodeState {
-    return {};
+    return {
+      joinType: 'outer',
+    };
   },
 
   renderReact: JoinNode,
 
   async run(state, inputs, deps) {
+    const values = Object.values(inputs);
     return {
-      aggregations: {
-        buckets: [
-          {
-            key: 'A',
-            value: 100,
-          },
-          {
-            key: 'B',
-            value: 200,
-          },
-        ],
-      },
+      rows: values.flatMap(i => i.rows),
+      columns: values.flatMap(i => i.columns),
     };
   },
 };
