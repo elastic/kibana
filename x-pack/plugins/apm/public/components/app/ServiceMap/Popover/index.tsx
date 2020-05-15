@@ -87,14 +87,18 @@ export function Popover({ focusedServiceName }: PopoverProps) {
     }
   }, [popoverRef, x, y]);
 
-  const centerSelectedNode = useCallback(() => {
-    if (cy) {
-      cy.animate({
-        ...animationOptions,
-        center: { eles: cy.getElementById(selectedNodeServiceName) }
-      });
-    }
-  }, [cy, selectedNodeServiceName]);
+  const centerSelectedNode = useCallback(
+    (event: MouseEvent<HTMLAnchorElement>) => {
+      event.preventDefault();
+      if (cy) {
+        cy.animate({
+          ...animationOptions,
+          center: { eles: cy.getElementById(selectedNodeServiceName) }
+        });
+      }
+    },
+    [cy, selectedNodeServiceName]
+  );
 
   const isAlreadyFocused = focusedServiceName === selectedNodeServiceName;
 
