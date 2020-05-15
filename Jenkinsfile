@@ -3,7 +3,7 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
-kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
+kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true) {
   ciStats.trackBuild {
     githubPr.withDefaultPrComments {
       catchError {
