@@ -243,8 +243,7 @@ export const ALERT_CPU_USAGE_THROTTLE_CONFIG = `monitoring:alert:cpuUsage:thrott
 /**
  * A listing of all alert types
  */
-// export const ALERTS = [ALERT_LICENSE_EXPIRATION, ALERT_CLUSTER_STATE, ALERT_CPU_USAGE];
-export const ALERTS = [ALERT_CLUSTER_STATE];
+export const ALERTS = [ALERT_LICENSE_EXPIRATION, ALERT_CLUSTER_STATE, ALERT_CPU_USAGE];
 
 /**
  * Matches the id for the built-in in email action type

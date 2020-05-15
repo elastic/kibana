@@ -14,8 +14,8 @@ import { AlertsClient } from '../../../alerting/server';
 
 const BY_TYPE = {
   [ALERT_CLUSTER_STATE]: ClusterStateAlert,
-  // [ALERT_LICENSE_EXPIRATION]: LicenseExpirationAlert,
-  // [ALERT_CPU_USAGE]: CpuUsageAlert,
+  [ALERT_LICENSE_EXPIRATION]: LicenseExpirationAlert,
+  [ALERT_CPU_USAGE]: CpuUsageAlert,
 };
 
 export class AlertsFactory {

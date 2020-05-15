@@ -21,25 +21,12 @@ import {
   INDEX_PATTERN_ELASTICSEARCH,
   ALERT_CPU_USAGE_THRESHOLD_CONFIG,
   ALERT_CPU_USAGE,
+  ALERT_ACTION_TYPE_EMAIL,
+  ALERT_ACTION_TYPE_LOG,
 } from '../../common/constants';
 import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from './enums';
-
-// const RESOLVED_SUBJECT_TEXT = i18n.translate(
-//   'xpack.monitoring.alerts.cpuUsage.email.subject.resolved',
-//   {
-//     defaultMessage: 'RESOLVED',
-//   }
-// );
-
-// const NEW_SUBJECT_TEXT = i18n.translate('xpack.monitoring.alerts.cpuUsage.email.subject.new', {
-//   defaultMessage: 'NEW',
-// });
-
-// const SUBJECT = i18n.translate('xpack.monitoring.alerts.cpuUsage.email.subject', {
-//   defaultMessage: 'X-Pack Monitoring: CPU Usage exceeded threshold',
-// });
 
 const RESOLVED_MESSAGE_TEXT = i18n.translate(
   'xpack.monitoring.alerts.cpuUsage.email.message.resolved',
@@ -47,6 +34,15 @@ const RESOLVED_MESSAGE_TEXT = i18n.translate(
     defaultMessage: 'This cluster alert has been resolved: ',
   }
 );
+
+const RESOLVED = i18n.translate('xpack.monitoring.alerts.cpuUsage.resolved', {
+  defaultMessage: 'resolved',
+});
+const FIRING = i18n.translate('xpack.monitoring.alerts.cpuUsage.firing', {
+  defaultMessage: 'firing',
+});
+
+const DEFAULT_THRESHOLD = 85;
 
 export class CpuUsageAlert extends BaseAlert {
   public type = ALERT_CPU_USAGE;
@@ -63,7 +59,9 @@ export class CpuUsageAlert extends BaseAlert {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
     const stats = await fetchCpuUsageNodeStats(callCluster, clusters, esIndexPattern);
-    const threshold = parseInt(await uiSettings.get<string>(ALERT_CPU_USAGE_THRESHOLD_CONFIG), 10);
+    const threshold =
+      parseInt(await uiSettings.get<string>(ALERT_CPU_USAGE_THRESHOLD_CONFIG), 10) ||
+      DEFAULT_THRESHOLD;
     // TODO: ignore single spikes? look for consistency?
     return stats.map(stat => {
       let cpuUsage = 0;
@@ -157,37 +155,58 @@ export class CpuUsageAlert extends BaseAlert {
     cluster: AlertCluster
   ) {
     const stat = item.meta as AlertCpuUsageNodeStats;
-    // const subject = `${
-    //   !alertState.ui.isFiring ? RESOLVED_SUBJECT_TEXT : NEW_SUBJECT_TEXT
-    // } ${SUBJECT}`;
-    const url = `${this.kibanaUrl}/app/monitoring#/alert/${this.type}`;
-    const defaults: Record<string, any> = {
-      clusterName: cluster.clusterName,
-      cpuUsage: stat.cpuUsage,
-      nodeName: stat.nodeName,
-      url,
-    };
-    // const message = `${alertState.ui.isFiring ? '' : RESOLVED_MESSAGE_TEXT} ${i18n.translate(
-    //   'xpack.monitoring.alerts.cpuUsage.email.message',
-    //   {
-    //     defaultMessage: `We detected that **{nodeName}** in **{clusterName}** is reporting cpu usage of **{cpuUsage}%**. [Click to view more]({url})`,
-    //     values: defaults,
-    //   }
-    // )}`;
+    if (!alertState.ui.isFiring) {
+      instance.scheduleActions('default', {
+        state: RESOLVED,
+        cpuUsage: stat.cpuUsage,
+        nodeName: stat.nodeName,
+        clusterName: cluster.clusterName,
+      });
+    } else {
+      const url = `${this.kibanaUrl}/app/monitoring#/alert/${this.type}`;
+      instance.scheduleActions('default', {
+        state: FIRING,
+        cpuUsage: stat.cpuUsage,
+        nodeName: stat.nodeName,
+        clusterName: cluster.clusterName,
+        action: `<a href="${url}">Investigate</a.`,
+      });
+    }
+  }
 
-    const logMessage = `${alertState.ui.isFiring ? '' : RESOLVED_MESSAGE_TEXT} ${i18n.translate(
-      'xpack.monitoring.alerts.cpuUsage.log.message',
-      {
-        defaultMessage: `We detected that {nodeName} in {clusterName} is reporting cpu usage of {cpuUsage}%. Want to get emails too? Visit the Stack Monitoring UI in Kibana to find out more.`,
-        values: defaults,
-      }
-    )}`;
-
-    instance.scheduleActions('default', {
-      // email_subject: subject,
-      // email_message: message,
-      // email_to: emailAddress,
-      log_message: logMessage,
-    });
+  public getDefaultActionParams(actionTypeId: string) {
+    switch (actionTypeId) {
+      case ALERT_ACTION_TYPE_EMAIL:
+        return {
+          subject: i18n.translate('xpack.monitoring.alerts.cpuUsage.emailSubject', {
+            defaultMessage: `CPU usage alert is {state} for {nodeName} in {clusterName}. CPU usage is {cpuUsage}`,
+            values: {
+              state: '{{context.state}}',
+              clusterName: '{{context.clusterName}}',
+              nodeName: '{{context.nodeName}}',
+              cpuUsage: '{{context.cpuUsage}}',
+            },
+          }),
+          message: i18n.translate('xpack.monitoring.alerts.cpuUsage.emailMessage', {
+            defaultMessage: `{action}`,
+            values: {
+              action: '{{context.action}}',
+            },
+          }),
+        };
+      case ALERT_ACTION_TYPE_LOG:
+        return {
+          message: i18n.translate('xpack.monitoring.alerts.cpuUsage.serverLog', {
+            defaultMessage: `CPU usage alert is {state} for {nodeName} in {clusterName}. CPU usage is {cpuUsage}. Want to get other notifiations for this kind of issue? Visit the Stack Monitoring UI in Kibana to find out more.`,
+            values: {
+              state: '{{context.state}}',
+              clusterName: '{{context.clusterName}}',
+              nodeName: '{{context.nodeName}}',
+              cpuUsage: '{{context.cpuUsage}}',
+            },
+          }),
+        };
+    }
+    return null;
   }
 }

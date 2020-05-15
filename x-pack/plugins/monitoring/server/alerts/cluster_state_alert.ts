@@ -154,20 +154,17 @@ export class ClusterStateAlert extends BaseAlert {
     cluster: AlertCluster
   ) {
     const clusterState = item.meta as AlertClusterStateState;
-    // const message =
-    //   clusterState.state === AlertClusterStateType.Red ? RED_STATUS_MESSAGE : YELLOW_STATUS_MESSAGE;
-
-    // console.log({ message })
-
     if (!alertState.ui.isFiring) {
       instance.scheduleActions('default', {
         state: 'resolved',
         clusterState: clusterState.state,
+        clusterName: cluster.clusterName,
       });
     } else {
       instance.scheduleActions('default', {
         state: 'firing',
         clusterState: clusterState.state,
+        clusterName: cluster.clusterName,
         action: 'Allocate missing primary and replica shards.',
       });
     }
@@ -178,9 +175,10 @@ export class ClusterStateAlert extends BaseAlert {
       case ALERT_ACTION_TYPE_EMAIL:
         return {
           subject: i18n.translate('xpack.monitoring.alerts.clusterStatus.emailSubject', {
-            defaultMessage: `Cluster status alert is {state}. Current state is {clusterState}.`,
+            defaultMessage: `Cluster status alert is {state} for {clusterName}. Current state is {clusterState}.`,
             values: {
               state: '{{context.state}}',
+              clusterName: '{{context.clusterName}}',
               clusterState: '{{context.clusterState}}',
             },
           }),
@@ -194,10 +192,11 @@ export class ClusterStateAlert extends BaseAlert {
       case ALERT_ACTION_TYPE_LOG:
         return {
           message: i18n.translate('xpack.monitoring.alerts.clusterStatus.serverLog', {
-            defaultMessage: `Cluster status alert is {state}. Current state is {clusterState}. {action}`,
+            defaultMessage: `Cluster status alert is {state} for {clusterName}. Current state is {clusterState}. {action}`,
             values: {
               state: '{{context.state}}',
               clusterState: '{{context.clusterState}}',
+              clusterName: '{{context.clusterName}}',
               action: '{{context.action}}',
             },
           }),

@@ -31,6 +31,7 @@ import {
   EuiFieldNumber,
   EuiSelect,
   EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import {
@@ -381,7 +382,13 @@ const AlertPopoverAddAction: React.FC<AlertPopoverAddActionProps> = (
       </EuiFormRow>
       {actionTypeId ? (
         <Fragment>
-          <AlertPopoverSelectExistingAction actionTypeId={actionTypeId} done={done} />
+          <AlertPopoverSelectExistingAction
+            actionTypeId={actionTypeId}
+            done={alert => {
+              setActionTypeId('');
+              done(alert);
+            }}
+          />
         </Fragment>
       ) : null}
       <EuiButton size="s" onClick={cancel}>
@@ -445,11 +452,16 @@ const AlertPopoverTriggeredActions: React.FC<AlertPopoverTriggeredActionsProps> 
     switch (action.actionTypeId) {
       case ALERT_ACTION_TYPE_LOG:
         icon = 'logsApp';
-        message = 'Wrote to Kibana server log';
+        message = <EuiText size="s">Wrote to Kibana server log</EuiText>;
         break;
       case ALERT_ACTION_TYPE_EMAIL:
+        const to = action.params && action.params.to ? action.params.to : 'n/a';
         icon = 'email';
-        message = 'Sent an email';
+        message = (
+          <EuiToolTip position="top" content={`Sent to ${to}`}>
+            <EuiText size="s">Sent an email</EuiText>
+          </EuiToolTip>
+        );
         break;
     }
 
@@ -459,11 +471,7 @@ const AlertPopoverTriggeredActions: React.FC<AlertPopoverTriggeredActionsProps> 
           <EuiFlexItem grow={false}>
             <EuiIcon type={icon} size="s" />
           </EuiFlexItem>
-          <EuiFlexItem grow={5}>
-            <EuiText size="s">
-              <p>{message}</p>
-            </EuiText>
-          </EuiFlexItem>
+          <EuiFlexItem grow={5}>{message}</EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiLink onClick={() => setCurrentConfigureActionTypeId(action.actionTypeId)}>
               <EuiText size="s">Configure</EuiText>
@@ -507,6 +515,7 @@ const AlertPopoverTriggeredActions: React.FC<AlertPopoverTriggeredActionsProps> 
                 cancel={() => setShowAddAction(false)}
                 done={alert => {
                   setActions(alert.rawAlert.actions);
+                  setShowAddAction(false);
                 }}
               />
             </Fragment>
@@ -793,7 +802,7 @@ export const AlertPopover: React.FC<AlertPopoverProps> = (props: AlertPopoverPro
           anchorPosition="rightCenter"
           closePopover={() => setShowAlert(false)}
         >
-          <div style={{ minWidth: '400px' }}>
+          <div style={{ maxWidth: '400px' }}>
             <EuiTitle size="xs">
               <h2>{alert.label} alert</h2>
             </EuiTitle>
