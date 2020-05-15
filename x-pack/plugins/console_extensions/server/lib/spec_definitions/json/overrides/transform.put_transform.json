@@ -24,6 +24,10 @@
           "__scope_link": "GLOBAL.aggregations"
         }
       },
+      "settings": {
+        "docs_per_second": null,
+        "max_page_search_size": 500
+      },
       "source": {
         "__template": {
           "index": "SOURCE_INDEX_NAME"
