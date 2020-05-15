@@ -57,7 +57,13 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
             .get(downloadReportPath)
             .responseType('blob')
             .set('kbn-xsrf', 'xxx')) as any;
-          log.debug(`Report at path ${downloadReportPath} returned code ${response.statusCode}`);
+          if (response.statusCode === 503) {
+            log.debug(`Report at path ${downloadReportPath} is pending`);
+          } else if (response.statusCode === 200) {
+            log.debug(`Report at path ${downloadReportPath} is complete`);
+          } else {
+            log.debug(`Report at path ${downloadReportPath} returned code ${response.statusCode}`);
+          }
           if (response.statusCode !== JOB_IS_PENDING_CODE) {
             clearInterval(intervalId);
             resolve(response.statusCode);
