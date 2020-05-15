@@ -4,8 +4,11 @@ library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
 catchError {
-  node('flyweight') {
-    sh 'exit 1'
+  kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true, email: true) {
+    error "Test Error"
+    // node('flyweight') {
+    //   sh 'exit 1'
+    // }
   }
 }
 

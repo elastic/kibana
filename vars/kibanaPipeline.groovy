@@ -198,7 +198,12 @@ def runErrorReporter() {
 }
 
 def call(Map params = [:], Closure closure) {
-  def config = [timeoutMinutes: 135, checkPrChanges: false] + params
+  def config = [
+    timeoutMinutes: 135,
+    checkPrChanges: false,
+    slack: null,
+    email: null,
+  ] + params
 
   stage("Kibana Pipeline") {
     timeout(time: config.timeoutMinutes, unit: 'MINUTES') {
@@ -212,7 +217,19 @@ def call(Map params = [:], Closure closure) {
               return
             }
           }
-          closure()
+          catchError {
+            closure()
+          }
+
+          if(true || params.NOTIFY_ON_FAILURE) {
+            if (config.slack) {
+              slackNotifications.onFailure(config.slack instanceof Map ? config.slack : [:])
+            }
+
+            if (config.email) {
+              kibanaPipeline.sendMail(config.email instanceof Map ? config.email : [:])
+            }
+          }
         }
       }
     }

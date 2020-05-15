@@ -38,7 +38,7 @@ def getHeader() {
   def info = [
     ["Job", env.JOB_NAME],
     ["Status", buildUtils.getBuildStatus()],
-    ["Duration", currentBuild.durationString.replace(' and counting', '')],
+    ["Duration", buildInfo.getDuration()],
     ["Build URL", "<a href=\"${env.BUILD_URL}\">${env.BUILD_URL}</a>"],
     ["Pipelines UI", "<a href=\"${pipelinesUrl}\">${pipelinesUrl}</a>"],
     ["Build Cause", currentBuild.getBuildCauses().collect { "<div>${it.shortDescription}</div>" }.join("\n") ],
@@ -49,29 +49,14 @@ def getHeader() {
   return """<table><tbody>
     ${rows.join("\n")}
   </tbody></table>"""
-
-  // return """<p>
-  //   <div><strong>Job</strong>: ${env.JOB_NAME}</div>
-  //   <div><strong>Status</strong>: ${buildUtils.getBuildStatus()}</div>
-  //   <div><strong>Duration</strong>: ${currentBuild.durationString.replace(' and counting', '')}</div>
-  //   <div><strong>Build URL</strong>: <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></div>
-  //   <div><strong>Pipelines UI</strong>: <a href="${pipelinesUrl}">${pipelinesUrl}</a></div>
-  // </p>"""
 }
 
 def getFailedSteps() {
-  try {
-    def steps = jenkinsApi.getFailedSteps()?.findAll { step ->
-      step.displayName != 'Check out from version control'
-    }
+  def steps = buildInfo.getFailedSteps()
 
-    if (steps?.size() > 0) {
-      def list = steps.collect { """<li><a href="${it.logs}">${it.displayName}</a></li>""" }.join("\n")
-      return "<p><strong>Failed Steps</strong></p><ul>${list}</ul>"
-    }
-  } catch (ex) {
-    buildUtils.printStacktrace(ex)
-    print "Error retrieving failed pipeline steps for message, will skip this section"
+  if (steps.size() > 0) {
+    def list = steps.collect { """<li><a href="${it.logs}">${it.displayName}</a></li>""" }.join("\n")
+    return "<p><strong>Failed Steps</strong></p><ul>${list}</ul>"
   }
 
   return ""

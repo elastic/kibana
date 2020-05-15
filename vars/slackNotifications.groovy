@@ -36,18 +36,11 @@ def contextBlock(message) {
 }
 
 def getFailedSteps() {
-  try {
-    def steps = jenkinsApi.getFailedSteps()?.findAll { step ->
-      step.displayName != 'Check out from version control'
-    }
+  def steps = buildInfo.getFailedSteps()
 
-    if (steps?.size() > 0) {
-      def list = steps.collect { "• <${it.logs}|${it.displayName}>" }.join("\n")
-      return "*Failed Steps*\n${list}"
-    }
-  } catch (ex) {
-    buildUtils.printStacktrace(ex)
-    print "Error retrieving failed pipeline steps for PR comment, will skip this section"
+  if (steps?.size() > 0) {
+    def list = steps.collect { "• <${it.logs}|${it.displayName}>" }.join("\n")
+    return "*Failed Steps*\n${list}"
   }
 
   return ""
@@ -71,10 +64,8 @@ def getDefaultDisplayName() {
 }
 
 def getDefaultContext() {
-  def duration = currentBuild.durationString.replace(' and counting', '')
-
   return contextBlock([
-    "${buildUtils.getBuildStatus().toLowerCase().capitalize()} after ${duration}",
+    "${buildUtils.getBuildStatus().toLowerCase().capitalize()} after ${buildInfo.getDuration()}",
     "<https://ci.kibana.dev/${env.JOB_BASE_NAME}/${env.BUILD_NUMBER}|ci.kibana.dev>",
   ].join(' · '))
 }

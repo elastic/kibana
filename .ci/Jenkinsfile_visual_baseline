@@ -3,7 +3,7 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
-kibanaPipeline(timeoutMinutes: 120) {
+kibanaPipeline(timeoutMinutes: 120, email: true) {
   ciStats.trackBuild {
     catchError {
       parallel([
@@ -19,7 +19,5 @@ kibanaPipeline(timeoutMinutes: 120) {
         },
       ])
     }
-
-    kibanaPipeline.sendMail()
   }
 }
