@@ -43,6 +43,12 @@ import { mergeCapabilitiesWithFields } from './lib/merge_capabilities_with_field
 interface RollupContext {
   client: IScopedClusterClient;
 }
+async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
+  const [core] = await getStartServices();
+  // Extend the elasticsearchJs client with additional endpoints.
+  const esClientConfig = { plugins: [elasticsearchJsPlugin] };
+  return core.elasticsearch.legacy.createClient('rollup', esClientConfig);
+}
 
 export class RollupPlugin implements Plugin<void, void, any, any> {
   private readonly logger: Logger;
@@ -54,16 +60,6 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
     this.logger = initializerContext.logger.get();
     this.globalConfig$ = initializerContext.config.legacy.globalConfig$;
     this.license = new License();
-  }
-
-  private async getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
-    if (!this.rollupEsClient) {
-      const [core] = await getStartServices();
-      // Extend the elasticsearchJs client with additional endpoints.
-      const esClientConfig = { plugins: [elasticsearchJsPlugin] };
-      this.rollupEsClient = core.elasticsearch.legacy.createClient('rollup', esClientConfig);
-    }
-    return this.rollupEsClient;
   }
 
   public setup(
@@ -85,9 +81,9 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
     );
 
     http.registerRouteHandlerContext('rollup', async (context, request) => {
-      const client = await this.getCustomEsClient(getStartServices);
+      this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
       return {
-        client: client.asScoped(request),
+        client: this.rollupEsClient.asScoped(request),
       };
     });
 
@@ -128,8 +124,8 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
         request: KibanaRequest
       ): APICaller => {
         return async (...args: Parameters<APICaller>) => {
-          const client = await this.getCustomEsClient(getStartServices);
-          return await client.asScoped(request).callAsCurrentUser(...args);
+          this.rollupEsClient = this.rollupEsClient ?? (await getCustomEsClient(getStartServices));
+          return await this.rollupEsClient.asScoped(request).callAsCurrentUser(...args);
         };
       };
 

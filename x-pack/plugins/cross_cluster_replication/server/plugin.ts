@@ -37,6 +37,13 @@ interface CrossClusterReplicationContext {
   client: IScopedClusterClient;
 }
 
+async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
+  const [core] = await getStartServices();
+  // Extend the elasticsearchJs client with additional endpoints.
+  const esClientConfig = { plugins: [elasticsearchJsPlugin] };
+  return core.elasticsearch.legacy.createClient('crossClusterReplication', esClientConfig);
+}
+
 const ccrDataEnricher = async (indicesList: Index[], callWithRequest: APICaller) => {
   if (!indicesList?.length) {
     return indicesList;
@@ -76,19 +83,6 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
     this.logger = initializerContext.logger.get();
     this.config$ = initializerContext.config.create();
     this.license = new License();
-  }
-
-  private async getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
-    if (!this.ccrEsClient) {
-      const [core] = await getStartServices();
-      // Extend the elasticsearchJs client with additional endpoints.
-      const esClientConfig = { plugins: [elasticsearchJsPlugin] };
-      this.ccrEsClient = core.elasticsearch.legacy.createClient(
-        'crossClusterReplication',
-        esClientConfig
-      );
-    }
-    return this.ccrEsClient;
   }
 
   setup(
@@ -131,9 +125,9 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
     );
 
     http.registerRouteHandlerContext('crossClusterReplication', async (ctx, request) => {
-      const client = await this.getCustomEsClient(getStartServices);
+      this.ccrEsClient = this.ccrEsClient ?? (await getCustomEsClient(getStartServices));
       return {
-        client: client.asScoped(request),
+        client: this.ccrEsClient.asScoped(request),
       };
     });
 

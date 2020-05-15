@@ -39,6 +39,13 @@ const PLUGIN = {
     }),
 };
 
+async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
+  const [core] = await getStartServices();
+  return core.elasticsearch.legacy.createClient('transform', {
+    plugins: [elasticsearchJsPlugin],
+  });
+}
+
 export class TransformServerPlugin implements Plugin<{}, void, any, any> {
   private readonly apiRoutes: ApiRoutes;
   private readonly license: License;
@@ -49,16 +56,6 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
     this.logger = initContext.logger.get();
     this.apiRoutes = new ApiRoutes();
     this.license = new License();
-  }
-
-  private async getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
-    if (!this.transformESClient) {
-      const [core] = await getStartServices();
-      this.transformESClient = core.elasticsearch.legacy.createClient('transform', {
-        plugins: [elasticsearchJsPlugin],
-      });
-    }
-    return this.transformESClient;
   }
 
   setup({ http, getStartServices }: CoreSetup, { licensing }: Dependencies): {} {
@@ -85,9 +82,10 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
 
     // Can access via new platform router's handler function 'context' parameter - context.transform.client
     http.registerRouteHandlerContext('transform', async (context, request) => {
-      const client = await this.getCustomEsClient(getStartServices);
+      this.transformESClient =
+        this.transformESClient ?? (await getCustomEsClient(getStartServices));
       return {
-        dataClient: client.asScoped(request),
+        dataClient: this.transformESClient.asScoped(request),
       };
     });
 

@@ -34,6 +34,12 @@ export interface WatcherContext {
   client: IScopedClusterClient;
 }
 
+async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
+  const [core] = await getStartServices();
+  const esConfig = { plugins: [elasticsearchJsPlugin] };
+  return core.elasticsearch.legacy.createClient('watcher', esConfig);
+}
+
 export class WatcherServerPlugin implements Plugin<void, void, any, any> {
   private readonly log: Logger;
   private watcherESClient?: ICustomClusterClient;
@@ -46,15 +52,6 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
     this.log = ctx.logger.get();
   }
 
-  private async getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
-    if (!this.watcherESClient) {
-      const [core] = await getStartServices();
-      const esConfig = { plugins: [elasticsearchJsPlugin] };
-      this.watcherESClient = core.elasticsearch.legacy.createClient('watcher', esConfig);
-    }
-    return this.watcherESClient;
-  }
-
   async setup({ http, getStartServices }: CoreSetup, { licensing }: Dependencies) {
     const router = http.createRouter();
     const routeDependencies: RouteDependencies = {
@@ -63,9 +60,9 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
     };
 
     http.registerRouteHandlerContext('watcher', async (ctx, request) => {
-      const client = await this.getCustomEsClient(getStartServices);
+      this.watcherESClient = this.watcherESClient ?? (await getCustomEsClient(getStartServices));
       return {
-        client: client.asScoped(request),
+        client: this.watcherESClient.asScoped(request),
       };
     });
 
