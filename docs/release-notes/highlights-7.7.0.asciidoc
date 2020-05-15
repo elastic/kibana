@@ -6,8 +6,6 @@
 
 Explore the new features in Kibana 7.7.
 
-coming::[7.7.0]
-
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
 
@@ -94,9 +92,9 @@ image:release-notes/images/7-7-maps-distance-filter.png[Distance filters in Elas
 [[file-uploader-highlights]]
 === {data-viz} now recommends {filebeat} config
 
-experimental[] When you upload a file to the *{data-viz}*, a {filebeat} 
-configuration is recommended for you to use. You can then use {filebeat} to add 
-more data of the same structure to the same index that was created during an 
+experimental[] When you upload a file to the *{data-viz}*, a {filebeat}
+configuration is recommended for you to use. You can then use {filebeat} to add
+more data of the same structure to the same index that was created during an
 initial upload.
 
 [role="screenshot"]
@@ -106,7 +104,8 @@ For more information about *{data-viz}*, refer to <<xpack-ml>>.
 [float]
 === Learn more
 
-Get details on these release highlights and more in the {kib} 7.7 release blog.
+Get details on these release highlights and more in the
+https://www.elastic.co/blog/kibana-7-7-0-released[{kib} 7.7 release blog].
 For a complete list of enhancements and other changes, check out the
 {kibana-ref}/release-notes-7.7.0.html[{kib} 7.7 release notes].
 

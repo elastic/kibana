@@ -17,28 +17,9 @@
  * under the License.
  */
 
-const resolve = require('path').resolve;
-const statSync = require('fs').statSync;
-
-module.exports = function(plugin) {
-  if (
-    fileExists(resolve(plugin.root, '../kibana/package.json')) &&
-    !fileExists(resolve(plugin.root, '../../kibana/package.json'))
-  ) {
-    process.stdout.write(
-      '\nWARNING: Kibana now requires that plugins must be located in ' +
-        '`../kibana-extra/{pluginName}` relative to the Kibana folder ' +
-        'during development. We found a Kibana in `../kibana`, but not in ' +
-        '`../../kibana`.\n'
-    );
-  }
-};
-
-function fileExists(path) {
-  try {
-    const stat = statSync(path);
-    return stat.isFile();
-  } catch (e) {
-    return false;
-  }
-}
+export { BrowserProvider, Browser } from './browser';
+export { FailureDebuggingProvider } from './failure_debugging';
+export { FindProvider } from './find';
+export { ScreenshotsProvider } from './screenshots';
+export { SnapshotsProvider } from './snapshots';
+export { TestSubjectsProvider, TestSubjects } from './test_subjects';

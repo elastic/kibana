@@ -17,19 +17,15 @@
  * under the License.
  */
 
-import { WebDriver, WebElement, By } from 'selenium-webdriver';
-import { FtrProviderContext } from '../ftr_provider_context';
-import { WebElementWrapper } from './lib/web_element_wrapper';
+import { WebDriver, WebElement, By, until } from 'selenium-webdriver';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { WebElementWrapper } from '../lib/web_element_wrapper';
 
 export async function FindProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
-  const webdriver = await getService('__webdriver__').init();
+  const { driver, browserType } = await getService('__webdriver__').init();
   const retry = getService('retry');
-
-  const driver = webdriver.driver;
-  const until = webdriver.until;
-  const browserType = webdriver.browserType;
 
   const WAIT_FOR_EXISTS_TIME = config.get('timeouts.waitForExists');
   const POLLING_TIME = 500;
@@ -40,7 +36,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
     WebElementWrapper.create(
       webElement,
       locator,
-      webdriver,
+      driver,
       defaultFindTimeout,
       fixedHeaderHeight,
       log,

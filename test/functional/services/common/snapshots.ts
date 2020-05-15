@@ -23,7 +23,7 @@ import { promisify } from 'util';
 
 import expect from '@kbn/expect';
 import del from 'del';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const mkdirAsync = promisify(mkdir);
 const writeFileAsync = promisify(writeFile);

@@ -36,7 +36,7 @@ export default function spaceSelectorFunctonalTests({
       it('allows user to navigate to different spaces', async () => {
         const spaceId = 'another-space';
 
-        await PageObjects.security.login(null, null, {
+        await PageObjects.security.login(undefined, undefined, {
           expectSpaceSelector: true,
         });
 
@@ -67,7 +67,7 @@ export default function spaceSelectorFunctonalTests({
 
       before(async () => {
         await esArchiver.load('spaces/selector');
-        await PageObjects.security.login(null, null, {
+        await PageObjects.security.login(undefined, undefined, {
           expectSpaceSelector: true,
         });
         await PageObjects.spaceSelector.clickSpaceCard('default');

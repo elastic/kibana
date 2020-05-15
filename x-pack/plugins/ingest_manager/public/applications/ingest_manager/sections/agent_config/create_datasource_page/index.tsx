@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -40,6 +40,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   const {
     notifications,
     chrome: { getIsNavDrawerLocked$ },
+    uiSettings,
   } = useCore();
   const {
     fleet: { enabled: isFleetEnabled },
@@ -94,32 +95,46 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   // Datasource validation state
   const [validationResults, setValidationResults] = useState<DatasourceValidationResults>();
 
-  // Update package info method
-  const updatePackageInfo = (updatedPackageInfo: PackageInfo | undefined) => {
-    if (updatedPackageInfo) {
-      setPackageInfo(updatedPackageInfo);
-      setFormState('VALID');
-    } else {
-      setFormState('INVALID');
-      setPackageInfo(undefined);
-    }
+  // Form state
+  const [formState, setFormState] = useState<DatasourceFormState>('INVALID');
 
-    // eslint-disable-next-line no-console
-    console.debug('Package info updated', updatedPackageInfo);
-  };
+  // Update package info method
+  const updatePackageInfo = useCallback(
+    (updatedPackageInfo: PackageInfo | undefined) => {
+      if (updatedPackageInfo) {
+        setPackageInfo(updatedPackageInfo);
+        if (agentConfig) {
+          setFormState('VALID');
+        }
+      } else {
+        setFormState('INVALID');
+        setPackageInfo(undefined);
+      }
+
+      // eslint-disable-next-line no-console
+      console.debug('Package info updated', updatedPackageInfo);
+    },
+    [agentConfig, setPackageInfo, setFormState]
+  );
 
   // Update agent config method
-  const updateAgentConfig = (updatedAgentConfig: AgentConfig | undefined) => {
-    if (updatedAgentConfig) {
-      setAgentConfig(updatedAgentConfig);
-    } else {
-      setFormState('INVALID');
-      setAgentConfig(undefined);
-    }
+  const updateAgentConfig = useCallback(
+    (updatedAgentConfig: AgentConfig | undefined) => {
+      if (updatedAgentConfig) {
+        setAgentConfig(updatedAgentConfig);
+        if (packageInfo) {
+          setFormState('VALID');
+        }
+      } else {
+        setFormState('INVALID');
+        setAgentConfig(undefined);
+      }
 
-    // eslint-disable-next-line no-console
-    console.debug('Agent config updated', updatedAgentConfig);
-  };
+      // eslint-disable-next-line no-console
+      console.debug('Agent config updated', updatedAgentConfig);
+    },
+    [packageInfo, setAgentConfig, setFormState]
+  );
 
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
@@ -166,7 +181,6 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   const cancelUrl = from === 'config' ? CONFIG_URL : PACKAGE_URL;
 
   // Save datasource
-  const [formState, setFormState] = useState<DatasourceFormState>('INVALID');
   const saveDatasource = async () => {
     setFormState('LOADING');
     const result = await sendCreateDatasource(datasource);
@@ -218,33 +232,43 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
     packageInfo,
   };
 
+  const stepSelectConfig = useMemo(
+    () => (
+      <StepSelectConfig
+        pkgkey={pkgkey}
+        updatePackageInfo={updatePackageInfo}
+        agentConfig={agentConfig}
+        updateAgentConfig={updateAgentConfig}
+      />
+    ),
+    [pkgkey, updatePackageInfo, agentConfig, updateAgentConfig]
+  );
+
+  const stepSelectPackage = useMemo(
+    () => (
+      <StepSelectPackage
+        agentConfigId={configId}
+        updateAgentConfig={updateAgentConfig}
+        packageInfo={packageInfo}
+        updatePackageInfo={updatePackageInfo}
+      />
+    ),
+    [configId, updateAgentConfig, packageInfo, updatePackageInfo]
+  );
+
   const steps: EuiStepProps[] = [
     from === 'package'
       ? {
           title: i18n.translate('xpack.ingestManager.createDatasource.stepSelectAgentConfigTitle', {
             defaultMessage: 'Select an agent configuration',
           }),
-          children: (
-            <StepSelectConfig
-              pkgkey={pkgkey}
-              updatePackageInfo={updatePackageInfo}
-              agentConfig={agentConfig}
-              updateAgentConfig={updateAgentConfig}
-            />
-          ),
+          children: stepSelectConfig,
         }
       : {
           title: i18n.translate('xpack.ingestManager.createDatasource.stepSelectPackageTitle', {
             defaultMessage: 'Select an integration',
           }),
-          children: (
-            <StepSelectPackage
-              agentConfigId={configId}
-              updateAgentConfig={updateAgentConfig}
-              packageInfo={packageInfo}
-              updatePackageInfo={updatePackageInfo}
-            />
-          ),
+          children: stepSelectPackage,
         },
     {
       title: i18n.translate('xpack.ingestManager.createDatasource.stepDefineDatasourceTitle', {
@@ -291,12 +315,14 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
       )}
       <EuiSteps steps={steps} />
       <EuiSpacer size="l" />
+      {/* TODO #64541 - Remove classes */}
       <EuiBottomBar
-        css={{ zIndex: 5 }}
         className={
-          isNavDrawerLocked
-            ? 'ingestManager__bottomBar-isNavDrawerLocked'
-            : 'ingestManager__bottomBar'
+          uiSettings.get('pageNavigation') === 'legacy'
+            ? isNavDrawerLocked
+              ? 'ingestManager__bottomBar-isNavDrawerLocked'
+              : 'ingestManager__bottomBar'
+            : undefined
         }
       >
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
