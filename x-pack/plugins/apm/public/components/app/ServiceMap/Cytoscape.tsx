@@ -81,9 +81,6 @@ function getLayoutOptions(
     fit: true,
     padding: nodeHeight,
     spacingFactor: 0.85,
-    animate: true,
-    animationEasing: animationOptions.easing,
-    animationDuration: animationOptions.duration,
     // @ts-ignore
     // Rotate nodes counter-clockwise to transform layout from top→bottom to left→right.
     // The extra 5° achieves the effect of separating overlapping taxi-styled edges.

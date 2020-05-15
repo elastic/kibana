@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { CONTEXT_DEFAULT_SIZE_SETTING } from '../../../common';
 import { getAngularModule, getServices } from '../../kibana_services';
 import './context_app';
 import { getState } from './context_state';
@@ -78,7 +79,7 @@ function ContextAppRouteController($routeParams, $scope, $route) {
     setAppState,
     flushToUrl,
   } = getState({
-    defaultStepSize: getServices().uiSettings.get('context:defaultSize'),
+    defaultStepSize: getServices().uiSettings.get(CONTEXT_DEFAULT_SIZE_SETTING),
     timeFieldName: indexPattern.timeFieldName,
     storeInSessionStorage: getServices().uiSettings.get('state:storeInSessionStorage'),
     history: getServices().history(),

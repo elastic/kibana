@@ -15,7 +15,7 @@ import {
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import styled from 'styled-components';
 import { fontSize, px } from '../../../../style/variables';
 import { Buttons } from './Buttons';
@@ -31,7 +31,7 @@ const popoverMinWidth = 280;
 interface ContentsProps {
   isService: boolean;
   label: string;
-  onFocusClick: () => void;
+  onFocusClick: (event: MouseEvent<HTMLAnchorElement>) => void;
   selectedNodeData: cytoscape.NodeDataDefinition;
   selectedNodeServiceName: string;
 }
