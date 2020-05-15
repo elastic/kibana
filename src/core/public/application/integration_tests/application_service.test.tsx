@@ -128,44 +128,57 @@ describe('ApplicationService', () => {
     });
   });
 
-  it('redirects to full path when navigating to legacy app', async () => {
-    const redirectTo = jest.fn();
-    const reloadSpy = jest.spyOn(window.location, 'reload').mockImplementation(() => {});
+  describe('redirects', () => {
+    // https://remarkablemark.org/blog/2018/11/17/mock-window-location/
+    const { location } = window;
+    const reloadSpy = jest.fn();
 
-    // In the real application, we use a BrowserHistory instance configured with `basename`. However, in tests we must
-    // use MemoryHistory which does not support `basename`. In order to emulate this behavior, we will wrap this
-    // instance with a ScopedHistory configured with a basepath.
-    history.push(setupDeps.http.basePath.get()); // ScopedHistory constructor will fail if underlying history is not currently at basePath.
-    const { register, registerLegacyApp } = service.setup({
-      ...setupDeps,
-      redirectTo,
-      history: new ScopedHistory(history, setupDeps.http.basePath.get()),
+    beforeAll(() => {
+      delete window.location;
+      (window as any).location = { reload: reloadSpy };
     });
 
-    register(Symbol(), {
-      id: 'app1',
-      title: 'App1',
-      mount: ({ onAppLeave }: AppMountParameters) => {
-        onAppLeave(actions => actions.default());
-        return () => undefined;
-      },
-    });
-    registerLegacyApp({
-      id: 'myLegacyTestApp',
-      appUrl: '/app/myLegacyTestApp',
-      title: 'My Legacy Test App',
+    afterAll(() => {
+      window.location = location;
     });
 
-    const { navigateToApp, getComponent } = await service.start(startDeps);
+    it('to full path when navigating to legacy app', async () => {
+      const redirectTo = jest.fn();
 
-    update = createRenderer(getComponent());
+      // In the real application, we use a BrowserHistory instance configured with `basename`. However, in tests we must
+      // use MemoryHistory which does not support `basename`. In order to emulate this behavior, we will wrap this
+      // instance with a ScopedHistory configured with a basepath.
+      history.push(setupDeps.http.basePath.get()); // ScopedHistory constructor will fail if underlying history is not currently at basePath.
+      const { register, registerLegacyApp } = service.setup({
+        ...setupDeps,
+        redirectTo,
+        history: new ScopedHistory(history, setupDeps.http.basePath.get()),
+      });
 
-    await navigate('/test/app/app1');
-    await act(() => navigateToApp('myLegacyTestApp', { path: '#/some-path' }));
+      register(Symbol(), {
+        id: 'app1',
+        title: 'App1',
+        mount: ({ onAppLeave }: AppMountParameters) => {
+          onAppLeave(actions => actions.default());
+          return () => undefined;
+        },
+      });
+      registerLegacyApp({
+        id: 'myLegacyTestApp',
+        appUrl: '/app/myLegacyTestApp',
+        title: 'My Legacy Test App',
+      });
 
-    expect(redirectTo).toHaveBeenCalledWith('/test/app/myLegacyTestApp#/some-path');
-    expect(reloadSpy).toHaveBeenCalled();
-    reloadSpy.mockRestore();
+      const { navigateToApp, getComponent } = await service.start(startDeps);
+
+      update = createRenderer(getComponent());
+
+      await navigate('/test/app/app1');
+      await act(() => navigateToApp('myLegacyTestApp', { path: '#/some-path' }));
+
+      expect(redirectTo).toHaveBeenCalledWith('/test/app/myLegacyTestApp#/some-path');
+      expect(reloadSpy).toHaveBeenCalled();
+    });
   });
 
   describe('leaving an application that registered an app leave handler', () => {
