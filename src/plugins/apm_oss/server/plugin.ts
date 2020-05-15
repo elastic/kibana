@@ -20,7 +20,7 @@ import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { APMOSSConfig } from './';
-import { HomeServerPluginSetup } from '../../home/server';
+import { HomeServerPluginSetup, TutorialProvider } from '../../home/server';
 import { tutorialProvider } from './tutorial';
 
 export class APMOSSPlugin implements Plugin<APMOSSPluginSetup> {
@@ -53,6 +53,8 @@ export class APMOSSPlugin implements Plugin<APMOSSPluginSetup> {
   start() {}
   stop() {}
 }
+
 export interface APMOSSPluginSetup {
   config$: Observable<APMOSSConfig>;
+  getRegisteredTutorialProvider(): TutorialProvider;
 }

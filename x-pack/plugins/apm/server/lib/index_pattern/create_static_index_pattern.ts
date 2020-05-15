@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SavedObjectsErrorHelpers } from 'kibana/server';
-import apmIndexPattern from '../../../../../../src/plugins/apm_oss/server';
+import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import { apmIndexPattern } from '../../../../../../src/plugins/apm_oss/server';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../../src/plugins/apm_oss/common/index_pattern_constants';
 import { hasHistoricalAgentData } from '../services/get_services/has_historical_agent_data';
 import { Setup } from '../helpers/setup_request';
