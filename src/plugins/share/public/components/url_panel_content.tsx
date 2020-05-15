@@ -181,7 +181,7 @@ export class UrlPanelContent extends Component<Props, State> {
       }),
     });
     if (this.props.isEmbedded) {
-      formattedUrl = this.makeUrlEmbeddable(url);
+      formattedUrl = this.makeUrlEmbeddable(formattedUrl);
     }
 
     return formattedUrl;
