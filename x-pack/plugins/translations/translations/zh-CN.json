@@ -6807,6 +6807,7 @@
     "xpack.idxMgmt.mappingsEditor.createField.addFieldButtonLabel": "添加字段",
     "xpack.idxMgmt.mappingsEditor.createField.addMultiFieldButtonLabel": "添加多字段",
     "xpack.idxMgmt.mappingsEditor.createField.cancelButtonLabel": "取消",
+    "xpack.idxMgmt.mappingsEditor.createField.typePlaceholderLabel": "选择类型",
     "xpack.idxMgmt.mappingsEditor.customButtonLabel": "使用定制分析器",
     "xpack.idxMgmt.mappingsEditor.dataType.aliasDescription": "别名",
     "xpack.idxMgmt.mappingsEditor.dataType.aliasLongDescription": "别名字段接受字段的备用名称，您可以在搜索请求中使用该备用名称。",

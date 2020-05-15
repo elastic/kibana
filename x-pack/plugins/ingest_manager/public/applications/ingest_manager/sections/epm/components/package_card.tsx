@@ -7,7 +7,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiCard } from '@elastic/eui';
 import { PackageInfo, PackageListItem } from '../../../types';
-import { useLink } from '../../../hooks';
+import { useLinks } from '../hooks';
 import { PackageIcon } from '../../../components/package_icon';
 
 export interface BadgeProps {
@@ -32,12 +32,13 @@ export function PackageCard({
   icons,
   ...restProps
 }: PackageCardProps) {
-  const { getHref } = useLink();
+  const { toDetailView } = useLinks();
   let urlVersion = version;
   // if this is an installed package, link to the version installed
   if ('savedObject' in restProps) {
     urlVersion = restProps.savedObject.attributes.version || version;
   }
+  const url = toDetailView({ name, version: urlVersion });
 
   return (
     <Card
@@ -46,7 +47,7 @@ export function PackageCard({
       title={title || ''}
       description={description}
       icon={<PackageIcon icons={icons} packageName={name} version={version} size="xl" />}
-      href={getHref('integration_details', { pkgkey: `${name}-${urlVersion}` })}
+      href={url}
     />
   );
 }

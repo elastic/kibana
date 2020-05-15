@@ -14,20 +14,13 @@ export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   const SAVED_OBJECT_WITH_SECRET_TYPE = 'saved-object-with-secret';
-  const SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE =
-    'saved-object-with-secret-and-multiple-spaces';
-  const SAVED_OBJECT_WITHOUT_SECRET_TYPE = 'saved-object-without-secret';
 
-  function runTests(
-    encryptedSavedObjectType: string,
-    getURLAPIBaseURL: () => string,
-    generateRawID: (id: string, type: string) => string
-  ) {
-    async function getRawSavedObjectAttributes({ id, type }: SavedObject) {
+  function runTests(getURLAPIBaseURL: () => string, generateRawID: (id: string) => string) {
+    async function getRawSavedObjectAttributes(id: string) {
       const {
-        _source: { [type]: savedObject },
+        _source: { [SAVED_OBJECT_WITH_SECRET_TYPE]: savedObject },
       } = await es.get({
-        id: generateRawID(id, type),
+        id: generateRawID(id),
         index: '.kibana',
       });
 
@@ -36,22 +29,20 @@ export default function({ getService }: FtrProviderContext) {
 
     let savedObjectOriginalAttributes: {
       publicProperty: string;
-      publicPropertyStoredEncrypted: string;
-      privateProperty: string;
       publicPropertyExcludedFromAAD: string;
+      privateProperty: string;
     };
 
     let savedObject: SavedObject;
     beforeEach(async () => {
       savedObjectOriginalAttributes = {
         publicProperty: randomness.string(),
-        publicPropertyStoredEncrypted: randomness.string(),
-        privateProperty: randomness.string(),
         publicPropertyExcludedFromAAD: randomness.string(),
+        privateProperty: randomness.string(),
       };
 
       const { body } = await supertest
-        .post(`${getURLAPIBaseURL()}${encryptedSavedObjectType}`)
+        .post(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}`)
         .set('kbn-xsrf', 'xxx')
         .send({ attributes: savedObjectOriginalAttributes })
         .expect(200);
@@ -63,19 +54,14 @@ export default function({ getService }: FtrProviderContext) {
       expect(savedObject.attributes).to.eql({
         publicProperty: savedObjectOriginalAttributes.publicProperty,
         publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
-        publicPropertyStoredEncrypted: savedObjectOriginalAttributes.publicPropertyStoredEncrypted,
       });
 
-      const rawAttributes = await getRawSavedObjectAttributes(savedObject);
+      const rawAttributes = await getRawSavedObjectAttributes(savedObject.id);
       expect(rawAttributes.publicProperty).to.be(savedObjectOriginalAttributes.publicProperty);
       expect(rawAttributes.publicPropertyExcludedFromAAD).to.be(
         savedObjectOriginalAttributes.publicPropertyExcludedFromAAD
       );
 
-      expect(rawAttributes.publicPropertyStoredEncrypted).to.not.be.empty();
-      expect(rawAttributes.publicPropertyStoredEncrypted).to.not.be(
-        savedObjectOriginalAttributes.publicPropertyStoredEncrypted
-      );
       expect(rawAttributes.privateProperty).to.not.be.empty();
       expect(rawAttributes.privateProperty).to.not.be(
         savedObjectOriginalAttributes.privateProperty
@@ -85,20 +71,18 @@ export default function({ getService }: FtrProviderContext) {
     it('#bulkCreate encrypts attributes and strips them from response', async () => {
       const bulkCreateParams = [
         {
-          type: encryptedSavedObjectType,
+          type: SAVED_OBJECT_WITH_SECRET_TYPE,
           attributes: {
             publicProperty: randomness.string(),
             publicPropertyExcludedFromAAD: randomness.string(),
-            publicPropertyStoredEncrypted: randomness.string(),
             privateProperty: randomness.string(),
           },
         },
         {
-          type: encryptedSavedObjectType,
+          type: SAVED_OBJECT_WITH_SECRET_TYPE,
           attributes: {
             publicProperty: randomness.string(),
             publicPropertyExcludedFromAAD: randomness.string(),
-            publicPropertyStoredEncrypted: randomness.string(),
             privateProperty: randomness.string(),
           },
         },
@@ -116,120 +100,30 @@ export default function({ getService }: FtrProviderContext) {
       for (let index = 0; index < savedObjects.length; index++) {
         const attributesFromResponse = savedObjects[index].attributes;
         const attributesFromRequest = bulkCreateParams[index].attributes;
-        const rawAttributes = await getRawSavedObjectAttributes(savedObjects[index]);
+        const rawAttributes = await getRawSavedObjectAttributes(savedObjects[index].id);
 
         expect(attributesFromResponse).to.eql({
           publicProperty: attributesFromRequest.publicProperty,
           publicPropertyExcludedFromAAD: attributesFromRequest.publicPropertyExcludedFromAAD,
-          publicPropertyStoredEncrypted: attributesFromRequest.publicPropertyStoredEncrypted,
         });
 
         expect(rawAttributes.publicProperty).to.be(attributesFromRequest.publicProperty);
         expect(rawAttributes.publicPropertyExcludedFromAAD).to.be(
           attributesFromRequest.publicPropertyExcludedFromAAD
         );
-        expect(rawAttributes.publicPropertyStoredEncrypted).to.not.be.empty();
-        expect(rawAttributes.publicPropertyStoredEncrypted).to.not.be(
-          attributesFromRequest.publicPropertyStoredEncrypted
-        );
         expect(rawAttributes.privateProperty).to.not.be.empty();
         expect(rawAttributes.privateProperty).to.not.be(attributesFromRequest.privateProperty);
       }
     });
 
-    it('#bulkCreate with different types encrypts attributes and strips them from response when necessary', async () => {
-      const bulkCreateParams = [
-        {
-          type: encryptedSavedObjectType,
-          attributes: {
-            publicProperty: randomness.string(),
-            publicPropertyExcludedFromAAD: randomness.string(),
-            publicPropertyStoredEncrypted: randomness.string(),
-            privateProperty: randomness.string(),
-          },
-        },
-        {
-          type: SAVED_OBJECT_WITHOUT_SECRET_TYPE,
-          attributes: {
-            publicProperty: randomness.string(),
-          },
-        },
-      ];
-
-      const {
-        body: { saved_objects: savedObjects },
-      } = await supertest
-        .post(`${getURLAPIBaseURL()}_bulk_create`)
-        .set('kbn-xsrf', 'xxx')
-        .send(bulkCreateParams)
-        .expect(200);
-
-      expect(savedObjects).to.have.length(bulkCreateParams.length);
-      for (let index = 0; index < savedObjects.length; index++) {
-        const attributesFromResponse = savedObjects[index].attributes;
-        const attributesFromRequest = bulkCreateParams[index].attributes;
-
-        const type = savedObjects[index].type;
-        expect(type).to.be.eql(bulkCreateParams[index].type);
-
-        const rawAttributes = await getRawSavedObjectAttributes(savedObjects[index]);
-        if (type === SAVED_OBJECT_WITHOUT_SECRET_TYPE) {
-          expect(attributesFromResponse).to.eql(attributesFromRequest);
-          expect(attributesFromRequest).to.eql(rawAttributes);
-        } else {
-          expect(attributesFromResponse).to.eql({
-            publicProperty: attributesFromRequest.publicProperty,
-            publicPropertyExcludedFromAAD: attributesFromRequest.publicPropertyExcludedFromAAD,
-            publicPropertyStoredEncrypted: attributesFromRequest.publicPropertyStoredEncrypted,
-          });
-
-          expect(rawAttributes.publicProperty).to.be(attributesFromRequest.publicProperty);
-          expect(rawAttributes.publicPropertyExcludedFromAAD).to.be(
-            attributesFromRequest.publicPropertyExcludedFromAAD
-          );
-          expect(rawAttributes.publicPropertyStoredEncrypted).to.not.be.empty();
-          expect(rawAttributes.publicPropertyStoredEncrypted).to.not.be(
-            attributesFromRequest.publicPropertyStoredEncrypted
-          );
-          expect(rawAttributes.privateProperty).to.not.be.empty();
-          expect(rawAttributes.privateProperty).to.not.be(attributesFromRequest.privateProperty);
-        }
-      }
-    });
-
     it('#get strips encrypted attributes from response', async () => {
       const { body: response } = await supertest
-        .get(`${getURLAPIBaseURL()}${encryptedSavedObjectType}/${savedObject.id}`)
+        .get(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
         .expect(200);
 
       expect(response.attributes).to.eql({
         publicProperty: savedObjectOriginalAttributes.publicProperty,
         publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
-        publicPropertyStoredEncrypted: savedObjectOriginalAttributes.publicPropertyStoredEncrypted,
-      });
-      expect(response.error).to.be(undefined);
-    });
-
-    it('#get strips all encrypted attributes from response if decryption fails', async () => {
-      // Update non-encrypted property that is included into AAD to make it impossible to decrypt
-      // encrypted attributes.
-      const updatedPublicProperty = randomness.string();
-      await supertest
-        .put(`${getURLAPIBaseURL()}${encryptedSavedObjectType}/${savedObject.id}`)
-        .set('kbn-xsrf', 'xxx')
-        .send({ attributes: { publicProperty: updatedPublicProperty } })
-        .expect(200);
-
-      const { body: response } = await supertest
-        .get(`${getURLAPIBaseURL()}${encryptedSavedObjectType}/${savedObject.id}`)
-        .expect(200);
-
-      expect(response.attributes).to.eql({
-        publicProperty: updatedPublicProperty,
-        publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
-      });
-      expect(response.error).to.eql({
-        message: 'Unable to decrypt attribute "publicPropertyStoredEncrypted"',
       });
     });
 
@@ -237,7 +131,7 @@ export default function({ getService }: FtrProviderContext) {
       const {
         body: { saved_objects: savedObjects },
       } = await supertest
-        .get(`${getURLAPIBaseURL()}_find?type=${encryptedSavedObjectType}`)
+        .get(`${getURLAPIBaseURL()}_find?type=${SAVED_OBJECT_WITH_SECRET_TYPE}`)
         .expect(200);
 
       expect(savedObjects).to.have.length(1);
@@ -245,35 +139,6 @@ export default function({ getService }: FtrProviderContext) {
       expect(savedObjects[0].attributes).to.eql({
         publicProperty: savedObjectOriginalAttributes.publicProperty,
         publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
-        publicPropertyStoredEncrypted: savedObjectOriginalAttributes.publicPropertyStoredEncrypted,
-      });
-      expect(savedObjects[0].error).to.be(undefined);
-    });
-
-    it('#find strips all encrypted attributes from response if decryption fails', async () => {
-      // Update non-encrypted property that is included into AAD to make it impossible to decrypt
-      // encrypted attributes.
-      const updatedPublicProperty = randomness.string();
-      await supertest
-        .put(`${getURLAPIBaseURL()}${encryptedSavedObjectType}/${savedObject.id}`)
-        .set('kbn-xsrf', 'xxx')
-        .send({ attributes: { publicProperty: updatedPublicProperty } })
-        .expect(200);
-
-      const {
-        body: { saved_objects: savedObjects },
-      } = await supertest
-        .get(`${getURLAPIBaseURL()}_find?type=${encryptedSavedObjectType}`)
-        .expect(200);
-
-      expect(savedObjects).to.have.length(1);
-      expect(savedObjects[0].id).to.be(savedObject.id);
-      expect(savedObjects[0].attributes).to.eql({
-        publicProperty: updatedPublicProperty,
-        publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
-      });
-      expect(savedObjects[0].error).to.eql({
-        message: 'Unable to decrypt attribute "publicPropertyStoredEncrypted"',
       });
     });
 
@@ -291,37 +156,6 @@ export default function({ getService }: FtrProviderContext) {
       expect(savedObjects[0].attributes).to.eql({
         publicProperty: savedObjectOriginalAttributes.publicProperty,
         publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
-        publicPropertyStoredEncrypted: savedObjectOriginalAttributes.publicPropertyStoredEncrypted,
-      });
-      expect(savedObjects[0].error).to.be(undefined);
-    });
-
-    it('#bulkGet strips all encrypted attributes from response if decryption fails', async () => {
-      // Update non-encrypted property that is included into AAD to make it impossible to decrypt
-      // encrypted attributes.
-      const updatedPublicProperty = randomness.string();
-      await supertest
-        .put(`${getURLAPIBaseURL()}${encryptedSavedObjectType}/${savedObject.id}`)
-        .set('kbn-xsrf', 'xxx')
-        .send({ attributes: { publicProperty: updatedPublicProperty } })
-        .expect(200);
-
-      const {
-        body: { saved_objects: savedObjects },
-      } = await supertest
-        .post(`${getURLAPIBaseURL()}_bulk_get`)
-        .set('kbn-xsrf', 'xxx')
-        .send([{ type: savedObject.type, id: savedObject.id }])
-        .expect(200);
-
-      expect(savedObjects).to.have.length(1);
-      expect(savedObjects[0].id).to.be(savedObject.id);
-      expect(savedObjects[0].attributes).to.eql({
-        publicProperty: updatedPublicProperty,
-        publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
-      });
-      expect(savedObjects[0].error).to.eql({
-        message: 'Unable to decrypt attribute "publicPropertyStoredEncrypted"',
       });
     });
 
@@ -329,12 +163,11 @@ export default function({ getService }: FtrProviderContext) {
       const updatedAttributes = {
         publicProperty: randomness.string(),
         publicPropertyExcludedFromAAD: randomness.string(),
-        publicPropertyStoredEncrypted: randomness.string(),
         privateProperty: randomness.string(),
       };
 
       const { body: response } = await supertest
-        .put(`${getURLAPIBaseURL()}${encryptedSavedObjectType}/${savedObject.id}`)
+        .put(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
         .set('kbn-xsrf', 'xxx')
         .send({ attributes: updatedAttributes })
         .expect(200);
@@ -342,17 +175,12 @@ export default function({ getService }: FtrProviderContext) {
       expect(response.attributes).to.eql({
         publicProperty: updatedAttributes.publicProperty,
         publicPropertyExcludedFromAAD: updatedAttributes.publicPropertyExcludedFromAAD,
-        publicPropertyStoredEncrypted: updatedAttributes.publicPropertyStoredEncrypted,
       });
 
-      const rawAttributes = await getRawSavedObjectAttributes(savedObject);
+      const rawAttributes = await getRawSavedObjectAttributes(savedObject.id);
       expect(rawAttributes.publicProperty).to.be(updatedAttributes.publicProperty);
       expect(rawAttributes.publicPropertyExcludedFromAAD).to.be(
         updatedAttributes.publicPropertyExcludedFromAAD
-      );
-      expect(rawAttributes.publicPropertyStoredEncrypted).to.not.be.empty();
-      expect(rawAttributes.publicPropertyStoredEncrypted).to.not.be(
-        updatedAttributes.publicPropertyStoredEncrypted
       );
 
       expect(rawAttributes.privateProperty).to.not.be.empty();
@@ -361,11 +189,7 @@ export default function({ getService }: FtrProviderContext) {
 
     it('#getDecryptedAsInternalUser decrypts and returns all attributes', async () => {
       const { body: decryptedResponse } = await supertest
-        .get(
-          `${getURLAPIBaseURL()}get-decrypted-as-internal-user/${encryptedSavedObjectType}/${
-            savedObject.id
-          }`
-        )
+        .get(`${getURLAPIBaseURL()}get-decrypted-as-internal-user/${savedObject.id}`)
         .expect(200);
 
       expect(decryptedResponse.attributes).to.eql(savedObjectOriginalAttributes);
@@ -375,7 +199,7 @@ export default function({ getService }: FtrProviderContext) {
       const updatedAttributes = { publicPropertyExcludedFromAAD: randomness.string() };
 
       const { body: response } = await supertest
-        .put(`${getURLAPIBaseURL()}${encryptedSavedObjectType}/${savedObject.id}`)
+        .put(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
         .set('kbn-xsrf', 'xxx')
         .send({ attributes: updatedAttributes })
         .expect(200);
@@ -385,11 +209,7 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       const { body: decryptedResponse } = await supertest
-        .get(
-          `${getURLAPIBaseURL()}get-decrypted-as-internal-user/${encryptedSavedObjectType}/${
-            savedObject.id
-          }`
-        )
+        .get(`${getURLAPIBaseURL()}get-decrypted-as-internal-user/${savedObject.id}`)
         .expect(200);
 
       expect(decryptedResponse.attributes).to.eql({
@@ -402,7 +222,7 @@ export default function({ getService }: FtrProviderContext) {
       const updatedAttributes = { publicProperty: randomness.string() };
 
       const { body: response } = await supertest
-        .put(`${getURLAPIBaseURL()}${encryptedSavedObjectType}/${savedObject.id}`)
+        .put(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
         .set('kbn-xsrf', 'xxx')
         .send({ attributes: updatedAttributes })
         .expect(200);
@@ -413,11 +233,7 @@ export default function({ getService }: FtrProviderContext) {
 
       // Bad request means that we successfully detected "EncryptionError" (not unexpected one).
       await supertest
-        .get(
-          `${getURLAPIBaseURL()}get-decrypted-as-internal-user/${encryptedSavedObjectType}/${
-            savedObject.id
-          }`
-        )
+        .get(`${getURLAPIBaseURL()}get-decrypted-as-internal-user/${savedObject.id}`)
         .expect(400, {
           statusCode: 400,
           error: 'Bad Request',
@@ -427,38 +243,19 @@ export default function({ getService }: FtrProviderContext) {
   }
 
   describe('encrypted saved objects API', () => {
-    function generateRawId(id: string, type: string, spaceId?: string) {
-      return `${
-        spaceId && type !== SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE
-          ? `${spaceId}:${type}`
-          : type
-      }:${id}`;
-    }
-
     afterEach(async () => {
       await es.deleteByQuery({
         index: '.kibana',
-        q: `type:${SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE} OR type:${SAVED_OBJECT_WITHOUT_SECRET_TYPE}`,
+        q: `type:${SAVED_OBJECT_WITH_SECRET_TYPE}`,
         refresh: true,
       });
     });
 
     describe('within a default space', () => {
-      describe('with `single` namespace saved object', () => {
-        runTests(
-          SAVED_OBJECT_WITH_SECRET_TYPE,
-          () => '/api/saved_objects/',
-          (id, type) => generateRawId(id, type)
-        );
-      });
-
-      describe('with `multiple` namespace saved object', () => {
-        runTests(
-          SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE,
-          () => '/api/saved_objects/',
-          (id, type) => generateRawId(id, type)
-        );
-      });
+      runTests(
+        () => '/api/saved_objects/',
+        id => `${SAVED_OBJECT_WITH_SECRET_TYPE}:${id}`
+      );
     });
 
     describe('within a custom space', () => {
@@ -479,21 +276,10 @@ export default function({ getService }: FtrProviderContext) {
           .expect(204);
       });
 
-      describe('with `single` namespace saved object', () => {
-        runTests(
-          SAVED_OBJECT_WITH_SECRET_TYPE,
-          () => `/s/${SPACE_ID}/api/saved_objects/`,
-          (id, type) => generateRawId(id, type, SPACE_ID)
-        );
-      });
-
-      describe('with `multiple` namespace saved object', () => {
-        runTests(
-          SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE,
-          () => `/s/${SPACE_ID}/api/saved_objects/`,
-          (id, type) => generateRawId(id, type, SPACE_ID)
-        );
-      });
+      runTests(
+        () => `/s/${SPACE_ID}/api/saved_objects/`,
+        id => `${SPACE_ID}:${SAVED_OBJECT_WITH_SECRET_TYPE}:${id}`
+      );
     });
   });
 }

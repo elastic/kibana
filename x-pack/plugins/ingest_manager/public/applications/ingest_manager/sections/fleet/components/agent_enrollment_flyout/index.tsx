@@ -23,14 +23,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AgentConfig } from '../../../../types';
 import { EnrollmentStepAgentConfig } from './config_selection';
-import {
-  useGetOneEnrollmentAPIKey,
-  useCore,
-  useGetSettings,
-  useLink,
-  useFleetStatus,
-} from '../../../../hooks';
+import { useGetOneEnrollmentAPIKey, useCore, useGetSettings, useLink } from '../../../../hooks';
 import { ManualInstructions } from '../../../../components/enrollment_instructions';
+import { FLEET_PATH } from '../../../../constants';
+import { useFleetStatus } from '../../../../hooks/use_fleet_status';
 
 interface Props {
   onClose: () => void;
@@ -41,9 +37,9 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
   onClose,
   agentConfigs = [],
 }) => {
-  const { getHref } = useLink();
   const core = useCore();
   const fleetStatus = useFleetStatus();
+  const fleetLink = useLink(FLEET_PATH);
 
   const [selectedAPIKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
 
@@ -124,7 +120,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
               defaultMessage="Fleet needs to be set up before agents can be enrolled. {link}"
               values={{
                 link: (
-                  <EuiLink href={getHref('fleet')}>
+                  <EuiLink href={fleetLink}>
                     <FormattedMessage
                       id="xpack.ingestManager.agentEnrollment.goToFleetButton"
                       defaultMessage="Go to Fleet."

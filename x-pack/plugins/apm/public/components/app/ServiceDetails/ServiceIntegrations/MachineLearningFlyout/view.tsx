@@ -53,19 +53,15 @@ export function MachineLearningFlyoutView({
 
   const { http } = useApmPluginContext().core;
 
-  const { data: hasMLJob, status } = useFetcher(
-    () => {
-      if (serviceName && selectedTransactionType) {
-        return getHasMLJob({
-          serviceName,
-          transactionType: selectedTransactionType,
-          http
-        });
-      }
-    },
-    [serviceName, selectedTransactionType, http],
-    { showToastOnError: false }
-  );
+  const { data: hasMLJob = false, status } = useFetcher(() => {
+    if (serviceName && selectedTransactionType) {
+      return getHasMLJob({
+        serviceName,
+        transactionType: selectedTransactionType,
+        http
+      });
+    }
+  }, [serviceName, selectedTransactionType, http]);
 
   // update selectedTransactionType when list of transaction types has loaded
   useEffect(() => {
@@ -77,7 +73,6 @@ export function MachineLearningFlyoutView({
   }
 
   const isLoadingMLJob = status === FETCH_STATUS.LOADING;
-  const isMlAvailable = status !== FETCH_STATUS.FAILURE;
 
   return (
     <EuiFlyout onClose={onClose} size="s">
@@ -95,31 +90,6 @@ export function MachineLearningFlyoutView({
         <EuiSpacer size="s" />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {!isMlAvailable && (
-          <div>
-            <EuiCallOut
-              title={i18n.translate(
-                'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.mlNotAvailable',
-                {
-                  defaultMessage: 'Machine learning not available'
-                }
-              )}
-              color="warning"
-              iconType="alert"
-            >
-              <p>
-                {i18n.translate(
-                  'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.mlNotAvailableDescription',
-                  {
-                    defaultMessage:
-                      'Unable to connect to Machine learning. Make sure it is enabled in Kibana to use anomaly detection.'
-                  }
-                )}
-              </p>
-            </EuiCallOut>
-            <EuiSpacer size="m" />
-          </div>
-        )}
         {hasMLJob && (
           <div>
             <EuiCallOut

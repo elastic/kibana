@@ -55,7 +55,7 @@ export const mountComponentAsync = async (config: Config): Promise<ReactWrapper>
   });
 
   // @ts-ignore
-  return component.update();
+  return component;
 };
 
 export const getJSXComponentWithProps = (Component: ComponentType, props: any) => (

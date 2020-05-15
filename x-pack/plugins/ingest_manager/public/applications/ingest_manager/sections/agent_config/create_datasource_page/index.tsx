@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -17,15 +17,16 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
+import { AGENT_CONFIG_DETAILS_PATH } from '../../../constants';
 import { AgentConfig, PackageInfo, NewDatasource } from '../../../types';
 import {
   useLink,
-  useBreadcrumbs,
   sendCreateDatasource,
   useCore,
   useConfig,
   sendGetAgentStatus,
 } from '../../../hooks';
+import { useLinks as useEPMLinks } from '../../epm/hooks';
 import { ConfirmDeployConfigModal } from '../components';
 import { CreateDatasourcePageLayout } from './components';
 import { CreateDatasourceFrom, DatasourceFormState } from './types';
@@ -47,7 +48,6 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   const {
     params: { configId, pkgkey },
   } = useRouteMatch();
-  const { getHref, getPath } = useLink();
   const history = useHistory();
   const from: CreateDatasourceFrom = configId ? 'config' : 'package';
   const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
@@ -95,46 +95,32 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
   // Datasource validation state
   const [validationResults, setValidationResults] = useState<DatasourceValidationResults>();
 
-  // Form state
-  const [formState, setFormState] = useState<DatasourceFormState>('INVALID');
-
   // Update package info method
-  const updatePackageInfo = useCallback(
-    (updatedPackageInfo: PackageInfo | undefined) => {
-      if (updatedPackageInfo) {
-        setPackageInfo(updatedPackageInfo);
-        if (agentConfig) {
-          setFormState('VALID');
-        }
-      } else {
-        setFormState('INVALID');
-        setPackageInfo(undefined);
-      }
+  const updatePackageInfo = (updatedPackageInfo: PackageInfo | undefined) => {
+    if (updatedPackageInfo) {
+      setPackageInfo(updatedPackageInfo);
+      setFormState('VALID');
+    } else {
+      setFormState('INVALID');
+      setPackageInfo(undefined);
+    }
 
-      // eslint-disable-next-line no-console
-      console.debug('Package info updated', updatedPackageInfo);
-    },
-    [agentConfig, setPackageInfo, setFormState]
-  );
+    // eslint-disable-next-line no-console
+    console.debug('Package info updated', updatedPackageInfo);
+  };
 
   // Update agent config method
-  const updateAgentConfig = useCallback(
-    (updatedAgentConfig: AgentConfig | undefined) => {
-      if (updatedAgentConfig) {
-        setAgentConfig(updatedAgentConfig);
-        if (packageInfo) {
-          setFormState('VALID');
-        }
-      } else {
-        setFormState('INVALID');
-        setAgentConfig(undefined);
-      }
+  const updateAgentConfig = (updatedAgentConfig: AgentConfig | undefined) => {
+    if (updatedAgentConfig) {
+      setAgentConfig(updatedAgentConfig);
+    } else {
+      setFormState('INVALID');
+      setAgentConfig(undefined);
+    }
 
-      // eslint-disable-next-line no-console
-      console.debug('Agent config updated', updatedAgentConfig);
-    },
-    [packageInfo, setAgentConfig, setFormState]
-  );
+    // eslint-disable-next-line no-console
+    console.debug('Agent config updated', updatedAgentConfig);
+  };
 
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
@@ -170,13 +156,18 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
     }
   };
 
-  // Cancel path
-  const cancelUrl =
-    from === 'config'
-      ? getHref('configuration_details', { configId: agentConfig?.id || configId })
-      : getHref('integration_details', { pkgkey });
+  // Cancel url
+  const CONFIG_URL = useLink(
+    `${AGENT_CONFIG_DETAILS_PATH}${agentConfig ? agentConfig.id : configId}`
+  );
+  const PACKAGE_URL = useEPMLinks().toDetailView({
+    name: (pkgkey || '-').split('-')[0],
+    version: (pkgkey || '-').split('-')[1],
+  });
+  const cancelUrl = from === 'config' ? CONFIG_URL : PACKAGE_URL;
 
   // Save datasource
+  const [formState, setFormState] = useState<DatasourceFormState>('INVALID');
   const saveDatasource = async () => {
     setFormState('LOADING');
     const result = await sendCreateDatasource(datasource);
@@ -195,7 +186,7 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
     }
     const { error } = await saveDatasource();
     if (!error) {
-      history.push(getPath('configuration_details', { configId: agentConfig?.id || configId }));
+      history.push(`${AGENT_CONFIG_DETAILS_PATH}${agentConfig ? agentConfig.id : configId}`);
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.ingestManager.createDatasource.addedNotificationTitle', {
           defaultMessage: `Successfully added '{datasourceName}'`,
@@ -228,43 +219,33 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
     packageInfo,
   };
 
-  const stepSelectConfig = useMemo(
-    () => (
-      <StepSelectConfig
-        pkgkey={pkgkey}
-        updatePackageInfo={updatePackageInfo}
-        agentConfig={agentConfig}
-        updateAgentConfig={updateAgentConfig}
-      />
-    ),
-    [pkgkey, updatePackageInfo, agentConfig, updateAgentConfig]
-  );
-
-  const stepSelectPackage = useMemo(
-    () => (
-      <StepSelectPackage
-        agentConfigId={configId}
-        updateAgentConfig={updateAgentConfig}
-        packageInfo={packageInfo}
-        updatePackageInfo={updatePackageInfo}
-      />
-    ),
-    [configId, updateAgentConfig, packageInfo, updatePackageInfo]
-  );
-
   const steps: EuiStepProps[] = [
     from === 'package'
       ? {
           title: i18n.translate('xpack.ingestManager.createDatasource.stepSelectAgentConfigTitle', {
             defaultMessage: 'Select an agent configuration',
           }),
-          children: stepSelectConfig,
+          children: (
+            <StepSelectConfig
+              pkgkey={pkgkey}
+              updatePackageInfo={updatePackageInfo}
+              agentConfig={agentConfig}
+              updateAgentConfig={updateAgentConfig}
+            />
+          ),
         }
       : {
           title: i18n.translate('xpack.ingestManager.createDatasource.stepSelectPackageTitle', {
             defaultMessage: 'Select an integration',
           }),
-          children: stepSelectPackage,
+          children: (
+            <StepSelectPackage
+              agentConfigId={configId}
+              updateAgentConfig={updateAgentConfig}
+              packageInfo={packageInfo}
+              updatePackageInfo={updatePackageInfo}
+            />
+          ),
         },
     {
       title: i18n.translate('xpack.ingestManager.createDatasource.stepDefineDatasourceTitle', {
@@ -299,7 +280,6 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
         ) : null,
     },
   ];
-
   return (
     <CreateDatasourcePageLayout {...layoutProps}>
       {formState === 'CONFIRM' && agentConfig && (
@@ -310,16 +290,6 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
           onCancel={() => setFormState('VALID')}
         />
       )}
-      {from === 'package'
-        ? packageInfo && (
-            <IntegrationBreadcrumb
-              pkgTitle={packageInfo.title}
-              pkgkey={`${packageInfo.name}-${packageInfo.version}`}
-            />
-          )
-        : agentConfig && (
-            <ConfigurationBreadcrumb configName={agentConfig.name} configId={agentConfig.id} />
-          )}
       <EuiSteps steps={steps} />
       <EuiSpacer size="l" />
       {/* TODO #64541 - Remove classes */}
@@ -360,20 +330,4 @@ export const CreateDatasourcePage: React.FunctionComponent = () => {
       </EuiBottomBar>
     </CreateDatasourcePageLayout>
   );
-};
-
-const ConfigurationBreadcrumb: React.FunctionComponent<{
-  configName: string;
-  configId: string;
-}> = ({ configName, configId }) => {
-  useBreadcrumbs('add_datasource_from_configuration', { configName, configId });
-  return null;
-};
-
-const IntegrationBreadcrumb: React.FunctionComponent<{
-  pkgTitle: string;
-  pkgkey: string;
-}> = ({ pkgTitle, pkgkey }) => {
-  useBreadcrumbs('add_datasource_from_integration', { pkgTitle, pkgkey });
-  return null;
 };

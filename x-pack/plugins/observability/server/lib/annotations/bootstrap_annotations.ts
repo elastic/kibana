@@ -3,12 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  CoreSetup,
-  PluginInitializerContext,
-  KibanaRequest,
-  RequestHandlerContext,
-} from 'kibana/server';
+import { CoreSetup, PluginInitializerContext, KibanaRequest } from 'kibana/server';
 import { PromiseReturnType } from '../../../typings/common';
 import { createAnnotationsClient } from './create_annotations_client';
 import { registerAnnotationAPIs } from './register_annotation_apis';
@@ -36,12 +31,11 @@ export async function bootstrapAnnotations({ index, core, context }: Params) {
   });
 
   return {
-    getScopedAnnotationsClient: (requestContext: RequestHandlerContext, request: KibanaRequest) => {
+    getScopedAnnotationsClient: (request: KibanaRequest) => {
       return createAnnotationsClient({
         index,
         apiCaller: core.elasticsearch.dataClient.asScoped(request).callAsCurrentUser,
         logger,
-        license: requestContext.licensing?.license,
       });
     },
   };

@@ -64,13 +64,8 @@ export class IngestManagerPlugin
           IngestManagerStartDeps,
           IngestManagerStart
         ];
-        const { renderApp, teardownIngestManager } = await import('./applications/ingest_manager');
-        const unmount = renderApp(coreStart, params, deps, startDeps, config);
-
-        return () => {
-          unmount();
-          teardownIngestManager(coreStart);
-        };
+        const { renderApp } = await import('./applications/ingest_manager');
+        return renderApp(coreStart, params, deps, startDeps, config);
       },
     });
   }

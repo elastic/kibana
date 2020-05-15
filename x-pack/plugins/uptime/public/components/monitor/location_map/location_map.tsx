@@ -30,9 +30,7 @@ const MapPanel = styled.div`
 
 const EuiFlexItemTags = styled(EuiFlexItem)`
   padding-top: 5px;
-  @media (max-width: 1042px) {
-    flex-basis: 80% !important;
-    flex-grow: 0 !important;
+  @media (max-width: 850px) {
     order: 1;
   }
 `;
@@ -77,7 +75,7 @@ export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
 
   return (
     <EuiErrorBoundary>
-      <FlexGroup wrap={true} gutterSize="none" justifyContent="flexEnd">
+      <FlexGroup wrap={true} gutterSize="none">
         <EuiFlexItemTags>
           <LocationStatusTags locations={monitorLocations?.locations || []} />
         </EuiFlexItemTags>

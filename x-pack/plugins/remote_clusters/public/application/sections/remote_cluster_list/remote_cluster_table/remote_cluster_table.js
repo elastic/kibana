@@ -25,24 +25,6 @@ import { PROXY_MODE } from '../../../../../common/constants';
 import { getRouterLinkProps, trackUiMetric, METRIC_TYPE } from '../../../services';
 import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';
 
-const getFilteredClusters = (clusters, queryText) => {
-  if (queryText) {
-    const normalizedSearchText = queryText.toLowerCase();
-
-    return clusters.filter(cluster => {
-      const { name, seeds } = cluster;
-      const normalizedName = name.toLowerCase();
-      if (normalizedName.toLowerCase().includes(normalizedSearchText)) {
-        return true;
-      }
-
-      return seeds.some(seed => seed.includes(normalizedSearchText));
-    });
-  } else {
-    return clusters;
-  }
-};
-
 export class RemoteClusterTable extends Component {
   static propTypes = {
     clusters: PropTypes.array,
@@ -53,47 +35,46 @@ export class RemoteClusterTable extends Component {
     clusters: [],
   };
 
-  static getDerivedStateFromProps(props, state) {
-    const { clusters } = props;
-    const { prevClusters, queryText } = state;
-
-    // If a remote cluster gets deleted, we need to recreate the cached filtered clusters.
-    if (prevClusters !== clusters) {
-      return {
-        prevClusters: clusters,
-        filteredClusters: getFilteredClusters(clusters, queryText),
-      };
-    }
-
-    return null;
-  }
-
   constructor(props) {
     super(props);
 
     this.state = {
-      prevClusters: props.clusters,
+      queryText: undefined,
       selectedItems: [],
-      filteredClusters: props.clusters,
-      queryText: '',
     };
   }
 
   onSearch = ({ query }) => {
-    const { clusters } = this.props;
     const { text } = query;
-
-    // We cache the filtered indices instead of calculating them inside render() because
-    // of https://github.com/elastic/eui/issues/3445.
+    const normalizedSearchText = text.toLowerCase();
     this.setState({
-      queryText: text,
-      filteredClusters: getFilteredClusters(clusters, text),
+      queryText: normalizedSearchText,
     });
+  };
+
+  getFilteredClusters = () => {
+    const { clusters } = this.props;
+    const { queryText } = this.state;
+
+    if (queryText) {
+      return clusters.filter(cluster => {
+        const { name, seeds } = cluster;
+        const normalizedName = name.toLowerCase();
+        if (normalizedName.toLowerCase().includes(queryText)) {
+          return true;
+        }
+
+        return seeds.some(seed => seed.includes(queryText));
+      });
+    } else {
+      return clusters.slice(0);
+    }
   };
 
   render() {
     const { openDetailPanel } = this.props;
-    const { selectedItems, filteredClusters } = this.state;
+
+    const { selectedItems } = this.state;
 
     const columns = [
       {
@@ -333,7 +314,6 @@ export class RemoteClusterTable extends Component {
       onChange: this.onSearch,
       box: {
         incremental: true,
-        'data-test-subj': 'remoteClusterSearch',
       },
     };
 
@@ -346,6 +326,8 @@ export class RemoteClusterTable extends Component {
       onSelectionChange: selectedItems => this.setState({ selectedItems }),
       selectable: ({ isConfiguredByNode }) => !isConfiguredByNode,
     };
+
+    const filteredClusters = this.getFilteredClusters();
 
     return (
       <EuiInMemoryTable

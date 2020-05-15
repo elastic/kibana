@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo, useState } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import { Redirect, useRouteMatch, Switch, Route } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
@@ -21,13 +21,13 @@ import {
 } from '@elastic/eui';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import styled from 'styled-components';
-import { AgentConfig } from '../../../types';
-import { PAGE_ROUTING_PATHS } from '../../../constants';
-import { useGetOneAgentConfig, useLink, useBreadcrumbs } from '../../../hooks';
+import { useGetOneAgentConfig } from '../../../hooks';
 import { Loading } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
 import { ConfigRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
 import { LinkedAgentCount } from '../components';
+import { useAgentConfigLink } from './hooks/use_details_uri';
+import { DETAILS_ROUTER_PATH, DETAILS_ROUTER_SUB_PATH } from './constants';
 import { ConfigDatasourcesView } from './components/datasources';
 import { ConfigYamlView } from './components/yaml';
 import { ConfigSettingsView } from './components/settings';
@@ -38,11 +38,23 @@ const Divider = styled.div`
   border-left: ${props => props.theme.eui.euiBorderThin};
 `;
 
-export const AgentConfigDetailsPage: React.FunctionComponent = () => {
+export const AgentConfigDetailsPage = memo(() => {
+  return (
+    <Switch>
+      <Route path={DETAILS_ROUTER_SUB_PATH}>
+        <AgentConfigDetailsLayout />
+      </Route>
+      <Route path={DETAILS_ROUTER_PATH}>
+        <AgentConfigDetailsLayout />
+      </Route>
+    </Switch>
+  );
+});
+
+export const AgentConfigDetailsLayout: React.FunctionComponent = () => {
   const {
     params: { configId, tabId = '' },
   } = useRouteMatch<{ configId: string; tabId?: string }>();
-  const { getHref } = useLink();
   const agentConfigRequest = useGetOneAgentConfig(configId);
   const agentConfig = agentConfigRequest.data ? agentConfigRequest.data.item : null;
   const { isLoading, error, sendRequest: refreshAgentConfig } = agentConfigRequest;
@@ -51,16 +63,17 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
   const { refreshAgentStatus } = agentStatusRequest;
   const agentStatus = agentStatusRequest.data?.results;
 
+  // Links
+  const configListLink = useAgentConfigLink('list');
+  const configDetailsLink = useAgentConfigLink('details', { configId });
+  const configDetailsYamlLink = useAgentConfigLink('details-yaml', { configId });
+  const configDetailsSettingsLink = useAgentConfigLink('details-settings', { configId });
+
   const headerLeftContent = useMemo(
     () => (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
         <EuiFlexItem>
-          <EuiButtonEmpty
-            iconType="arrowLeft"
-            href={getHref('configurations_list')}
-            flush="left"
-            size="xs"
-          >
+          <EuiButtonEmpty iconType="arrowLeft" href={configListLink} flush="left" size="xs">
             <FormattedMessage
               id="xpack.ingestManager.configDetails.viewAgentListTitle"
               defaultMessage="View all agent configurations"
@@ -93,7 +106,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
         ) : null}
       </EuiFlexGroup>
     ),
-    [getHref, agentConfig, configId]
+    [configListLink, agentConfig, configId]
   );
 
   const headerRightContent = useMemo(
@@ -171,7 +184,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
         name: i18n.translate('xpack.ingestManager.configDetails.subTabs.datasourcesTabText', {
           defaultMessage: 'Data sources',
         }),
-        href: getHref('configuration_details', { configId, tabId: 'datasources' }),
+        href: configDetailsLink,
         isSelected: tabId === '' || tabId === 'datasources',
       },
       {
@@ -179,7 +192,7 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
         name: i18n.translate('xpack.ingestManager.configDetails.subTabs.yamlTabText', {
           defaultMessage: 'YAML',
         }),
-        href: getHref('configuration_details', { configId, tabId: 'yaml' }),
+        href: configDetailsYamlLink,
         isSelected: tabId === 'yaml',
       },
       {
@@ -187,11 +200,11 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
         name: i18n.translate('xpack.ingestManager.configDetails.subTabs.settingsTabText', {
           defaultMessage: 'Settings',
         }),
-        href: getHref('configuration_details', { configId, tabId: 'settings' }),
+        href: configDetailsSettingsLink,
         isSelected: tabId === 'settings',
       },
     ];
-  }, [getHref, configId, tabId]);
+  }, [configDetailsLink, configDetailsSettingsLink, configDetailsYamlLink, tabId]);
 
   if (redirectToAgentConfigList) {
     return <Redirect to="/" />;
@@ -241,37 +254,28 @@ export const AgentConfigDetailsPage: React.FunctionComponent = () => {
           rightColumn={headerRightContent}
           tabs={(headerTabs as unknown) as EuiTabProps[]}
         >
-          <AgentConfigDetailsContent agentConfig={agentConfig} />
+          <Switch>
+            <Route
+              path={`${DETAILS_ROUTER_PATH}/yaml`}
+              render={() => {
+                return <ConfigYamlView config={agentConfig} />;
+              }}
+            />
+            <Route
+              path={`${DETAILS_ROUTER_PATH}/settings`}
+              render={() => {
+                return <ConfigSettingsView config={agentConfig} />;
+              }}
+            />
+            <Route
+              path={`${DETAILS_ROUTER_PATH}`}
+              render={() => {
+                return <ConfigDatasourcesView config={agentConfig} />;
+              }}
+            />
+          </Switch>
         </WithHeaderLayout>
       </AgentStatusRefreshContext.Provider>
     </ConfigRefreshContext.Provider>
-  );
-};
-
-const AgentConfigDetailsContent: React.FunctionComponent<{ agentConfig: AgentConfig }> = ({
-  agentConfig,
-}) => {
-  useBreadcrumbs('configuration_details', { configName: agentConfig.name });
-  return (
-    <Switch>
-      <Route
-        path={PAGE_ROUTING_PATHS.configuration_details_yaml}
-        render={() => {
-          return <ConfigYamlView config={agentConfig} />;
-        }}
-      />
-      <Route
-        path={PAGE_ROUTING_PATHS.configuration_details_settings}
-        render={() => {
-          return <ConfigSettingsView config={agentConfig} />;
-        }}
-      />
-      <Route
-        path={PAGE_ROUTING_PATHS.configuration_details}
-        render={() => {
-          return <ConfigDatasourcesView config={agentConfig} />;
-        }}
-      />
-    </Switch>
   );
 };

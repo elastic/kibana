@@ -13,9 +13,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { FixedDatePicker } from '../../../fixed_datepicker';
-import { TimeRangeValidationError } from './validation';
 
 const startTimeLabel = i18n.translate('xpack.infra.analysisSetup.startTimeLabel', {
   defaultMessage: 'Start time',
@@ -49,35 +48,15 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
   setEndTime: (endTime: number | undefined) => void;
   startTime: number | undefined;
   endTime: number | undefined;
-  validationErrors?: TimeRangeValidationError[];
-}> = ({
-  disabled = false,
-  setStartTime,
-  setEndTime,
-  startTime,
-  endTime,
-  validationErrors = [],
-}) => {
-  const [now] = useState(() => moment());
+}> = ({ disabled = false, setStartTime, setEndTime, startTime, endTime }) => {
+  const now = useMemo(() => moment(), []);
   const selectedEndTimeIsToday = !endTime || moment(endTime).isSame(now, 'day');
-
   const startTimeValue = useMemo(() => {
     return startTime ? moment(startTime) : undefined;
   }, [startTime]);
   const endTimeValue = useMemo(() => {
     return endTime ? moment(endTime) : undefined;
   }, [endTime]);
-
-  const startTimeValidationErrorMessages = useMemo(
-    () => getStartTimeValidationErrorMessages(validationErrors),
-    [validationErrors]
-  );
-
-  const endTimeValidationErrorMessages = useMemo(
-    () => getEndTimeValidationErrorMessages(validationErrors),
-    [validationErrors]
-  );
-
   return (
     <EuiDescribedFormGroup
       title={
@@ -95,12 +74,7 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
         />
       }
     >
-      <EuiFormRow
-        error={startTimeValidationErrorMessages}
-        fullWidth
-        isInvalid={startTimeValidationErrorMessages.length > 0}
-        label={startTimeLabel}
-      >
+      <EuiFormRow error={false} fullWidth isInvalid={false} label={startTimeLabel}>
         <EuiFlexGroup gutterSize="s">
           <EuiFormControlLayout
             clear={startTime && !disabled ? { onClick: () => setStartTime(undefined) } : undefined}
@@ -117,12 +91,7 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
           </EuiFormControlLayout>
         </EuiFlexGroup>
       </EuiFormRow>
-      <EuiFormRow
-        error={endTimeValidationErrorMessages}
-        fullWidth
-        isInvalid={endTimeValidationErrorMessages.length > 0}
-        label={endTimeLabel}
-      >
+      <EuiFormRow error={false} fullWidth isInvalid={false} label={endTimeLabel}>
         <EuiFlexGroup gutterSize="s">
           <EuiFormControlLayout
             clear={endTime && !disabled ? { onClick: () => setEndTime(undefined) } : undefined}
@@ -153,31 +122,3 @@ export const AnalysisSetupTimerangeForm: React.FunctionComponent<{
     </EuiDescribedFormGroup>
   );
 };
-
-const getStartTimeValidationErrorMessages = (validationErrors: TimeRangeValidationError[]) =>
-  validationErrors.flatMap(validationError => {
-    switch (validationError.error) {
-      case 'INVALID_TIME_RANGE':
-        return [
-          i18n.translate('xpack.infra.analysisSetup.startTimeBeforeEndTimeErrorMessage', {
-            defaultMessage: 'The start time must be before the end time.',
-          }),
-        ];
-      default:
-        return [];
-    }
-  });
-
-const getEndTimeValidationErrorMessages = (validationErrors: TimeRangeValidationError[]) =>
-  validationErrors.flatMap(validationError => {
-    switch (validationError.error) {
-      case 'INVALID_TIME_RANGE':
-        return [
-          i18n.translate('xpack.infra.analysisSetup.endTimeAfterStartTimeErrorMessage', {
-            defaultMessage: 'The end time must be after the start time.',
-          }),
-        ];
-      default:
-        return [];
-    }
-  });

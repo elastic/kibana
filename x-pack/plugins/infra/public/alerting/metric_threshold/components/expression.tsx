@@ -103,13 +103,9 @@ export const Expressions: React.FC<Props> = props => {
 
   const addExpression = useCallback(() => {
     const exp = alertParams.criteria?.slice() || [];
-    exp.push({
-      ...defaultExpression,
-      timeSize: timeSize ?? defaultExpression.timeSize,
-      timeUnit: timeUnit ?? defaultExpression.timeUnit,
-    });
+    exp.push(defaultExpression);
     setAlertParams('criteria', exp);
-  }, [setAlertParams, alertParams.criteria, timeSize, timeUnit]);
+  }, [setAlertParams, alertParams.criteria]);
 
   const removeExpression = useCallback(
     (id: number) => {

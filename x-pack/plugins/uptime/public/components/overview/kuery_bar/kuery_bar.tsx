@@ -19,7 +19,7 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 
 const Container = styled.div`
-  margin-bottom: 4px;
+  margin-bottom: 10px;
 `;
 
 interface State {

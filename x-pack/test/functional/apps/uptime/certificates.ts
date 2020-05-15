@@ -14,9 +14,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const es = getService('es');
 
-  describe('certificates', function() {
-    beforeEach(async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/65010
+  describe.skip('certificate page', function() {
+    before(async () => {
       await uptime.goToRoot(true);
+    });
+
+    beforeEach(async () => {
       await makeCheck({ es, tls: true });
       await uptimeService.navigation.refreshApp();
     });
@@ -26,39 +30,33 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await uptimeService.navigation.goToCertificates();
     });
 
-    describe('page', () => {
-      beforeEach(async () => {
-        await uptimeService.navigation.goToCertificates();
+    it('displays certificates', async () => {
+      await uptimeService.cert.hasCertificates();
+    });
+
+    it('displays specific certificates', async () => {
+      const certId = getSha256();
+      const { monitorId } = await makeCheck({
+        es,
+        tls: {
+          sha256: certId,
+        },
       });
 
-      it('displays certificates', async () => {
-        await uptimeService.cert.hasCertificates();
-      });
+      await uptimeService.navigation.refreshApp();
+      await uptimeService.cert.certificateExists({ certId, monitorId });
+    });
 
-      it('displays specific certificates', async () => {
-        const certId = getSha256();
-        const { monitorId } = await makeCheck({
-          es,
-          tls: {
-            sha256: certId,
-          },
-        });
-
-        await uptimeService.navigation.refreshApp();
-        await uptimeService.cert.certificateExists({ certId, monitorId });
+    it('performs search against monitor id', async () => {
+      const certId = getSha256();
+      const { monitorId } = await makeCheck({
+        es,
+        tls: {
+          sha256: certId,
+        },
       });
-
-      it('performs search against monitor id', async () => {
-        const certId = getSha256();
-        const { monitorId } = await makeCheck({
-          es,
-          tls: {
-            sha256: certId,
-          },
-        });
-        await uptimeService.navigation.refreshApp();
-        await uptimeService.cert.searchIsWorking(monitorId);
-      });
+      await uptimeService.navigation.refreshApp();
+      await uptimeService.cert.searchIsWorking(monitorId);
     });
   });
 };

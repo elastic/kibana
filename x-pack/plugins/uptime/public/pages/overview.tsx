@@ -28,9 +28,6 @@ interface Props {
 const EuiFlexItemStyled = styled(EuiFlexItem)`
   && {
     min-width: 598px;
-    @media only screen and (max-width: 1128px) {
-      min-width: 500px;
-    }
     @media only screen and (max-width: 630px) {
       min-width: initial;
     }
@@ -69,8 +66,8 @@ export const OverviewPageComponent = React.memo(({ indexPattern, setEsKueryFilte
     <>
       <PageHeader headingText={heading} extraLinks={true} datePicker={true} />
       <EmptyState>
-        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-          <EuiFlexItem grow={1} style={{ flexBasis: 485 }}>
+        <EuiFlexGroup gutterSize="xs" wrap responsive>
+          <EuiFlexItem grow={1} style={{ flexBasis: 500 }}>
             <KueryBar
               aria-label={i18n.translate('xpack.uptime.filterBar.ariaLabel', {
                 defaultMessage: 'Input filter criteria for the overview page',

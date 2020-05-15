@@ -299,13 +299,6 @@ export class IndexPattern implements IIndexPattern {
   }
 
   async popularizeField(fieldName: string, unit = 1) {
-    /**
-     * This function is just used by Discover and it's high likely to be removed in the near future
-     * It doesn't use the save function to skip the error message that's displayed when
-     * a user adds several columns in a higher frequency that the changes can be persisted to ES
-     * resulting in 409 errors
-     */
-    if (!this.id) return;
     const field = this.fields.getByName(fieldName);
     if (!field) {
       return;
@@ -315,15 +308,7 @@ export class IndexPattern implements IIndexPattern {
       return;
     }
     field.count = count;
-
-    try {
-      const res = await this.savedObjectsClient.update(type, this.id, this.prepBody(), {
-        version: this.version,
-      });
-      this.version = res._version;
-    } catch (e) {
-      // no need for an error message here
-    }
+    await this.save();
   }
 
   getNonScriptedFields() {

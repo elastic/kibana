@@ -276,9 +276,6 @@ export interface IndexTemplate {
     mappings: object;
     aliases: object;
   };
-  data_stream: {
-    timestamp_field: string;
-  };
 }
 
 export interface TemplateRef {

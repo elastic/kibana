@@ -22,11 +22,11 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { FormHook, FieldHook, FieldConfig, FieldValidateResponse, ValidationError } from '../types';
 import { FIELD_TYPES, VALIDATION_TYPES } from '../constants';
 
-export const useField = <T>(
+export const useField = (
   form: FormHook,
   path: string,
-  config: FieldConfig<any, T> = {},
-  valueChangeListener?: (value: T) => void
+  config: FieldConfig = {},
+  valueChangeListener?: (value: unknown) => void
 ) => {
   const {
     type = FIELD_TYPES.TEXT,
@@ -48,9 +48,9 @@ export const useField = <T>(
         ? deserializer(defaultValue())
         : deserializer(defaultValue),
     [defaultValue]
-  ) as T;
+  );
 
-  const [value, setStateValue] = useState<T>(initialValue);
+  const [value, setStateValue] = useState(initialValue);
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const [isPristine, setPristine] = useState(true);
   const [isValidating, setValidating] = useState(false);
@@ -84,16 +84,16 @@ export const useField = <T>(
     );
   };
 
-  const formatInputValue = <T>(inputValue: unknown): T => {
+  const formatInputValue = (inputValue: unknown): unknown => {
     const isEmptyString = typeof inputValue === 'string' && inputValue.trim() === '';
 
     if (isEmptyString) {
-      return inputValue as T;
+      return inputValue;
     }
 
     const formData = form.getFormData({ unflatten: false });
 
-    return formatters.reduce((output, formatter) => formatter(output, formData), inputValue) as T;
+    return formatters.reduce((output, formatter) => formatter(output, formData), inputValue);
   };
 
   const onValueChange = async () => {
@@ -112,7 +112,7 @@ export const useField = <T>(
 
     // Notify listener
     if (valueChangeListener) {
-      valueChangeListener(newValue as T);
+      valueChangeListener(newValue);
     }
 
     // Update the form data observable
@@ -283,7 +283,7 @@ export const useField = <T>(
    * If a validationType is provided then only that validation will be executed,
    * skipping the other type of validation that might exist.
    */
-  const validate: FieldHook<T>['validate'] = (validationData = {}) => {
+  const validate: FieldHook['validate'] = (validationData = {}) => {
     const {
       formData = form.getFormData({ unflatten: false }),
       value: valueToValidate = value,
@@ -331,16 +331,16 @@ export const useField = <T>(
    *
    * @param newValue The new value to assign to the field
    */
-  const setValue: FieldHook<T>['setValue'] = newValue => {
+  const setValue: FieldHook['setValue'] = newValue => {
     if (isPristine) {
       setPristine(false);
     }
 
-    const formattedValue = formatInputValue<T>(newValue);
+    const formattedValue = formatInputValue(newValue);
     setStateValue(formattedValue);
   };
 
-  const _setErrors: FieldHook<T>['setErrors'] = _errors => {
+  const _setErrors: FieldHook['setErrors'] = _errors => {
     setErrors(_errors.map(error => ({ validationType: VALIDATION_TYPES.FIELD, ...error })));
   };
 
@@ -349,12 +349,12 @@ export const useField = <T>(
    *
    * @param event Form input change event
    */
-  const onChange: FieldHook<T>['onChange'] = event => {
+  const onChange: FieldHook['onChange'] = event => {
     const newValue = {}.hasOwnProperty.call(event!.target, 'checked')
       ? event.target.checked
       : event.target.value;
 
-    setValue((newValue as unknown) as T);
+    setValue(newValue);
   };
 
   /**
@@ -367,7 +367,7 @@ export const useField = <T>(
    *
    * @param validationType The validation type to return error messages from
    */
-  const getErrorsMessages: FieldHook<T>['getErrorsMessages'] = (args = {}) => {
+  const getErrorsMessages: FieldHook['getErrorsMessages'] = (args = {}) => {
     const { errorCode, validationType = VALIDATION_TYPES.FIELD } = args;
     const errorMessages = errors.reduce((messages, error) => {
       const isSameErrorCode = errorCode && error.code === errorCode;
@@ -385,7 +385,7 @@ export const useField = <T>(
     return errorMessages ? errorMessages : null;
   };
 
-  const reset: FieldHook<T>['reset'] = (resetOptions = { resetValue: true }) => {
+  const reset: FieldHook['reset'] = (resetOptions = { resetValue: true }) => {
     const { resetValue = true } = resetOptions;
 
     setPristine(true);
@@ -396,18 +396,12 @@ export const useField = <T>(
 
     if (resetValue) {
       setValue(initialValue);
-      /**
-       * Having to call serializeOutput() is a current bug of the lib and will be fixed
-       * in a future PR. The serializer function should only be called when outputting
-       * the form data. If we need to continuously format the data while it changes,
-       * we need to use the field `formatter` config.
-       */
-      return serializeOutput(initialValue);
+      return initialValue;
     }
     return value;
   };
 
-  const serializeOutput: FieldHook<T>['__serializeOutput'] = (rawValue = value) =>
+  const serializeOutput: FieldHook['__serializeOutput'] = (rawValue = value) =>
     serializer(rawValue);
 
   // -- EFFECTS
@@ -427,7 +421,7 @@ export const useField = <T>(
     };
   }, [value]);
 
-  const field: FieldHook<T> = {
+  const field: FieldHook = {
     path,
     type,
     label,
@@ -451,7 +445,7 @@ export const useField = <T>(
     __serializeOutput: serializeOutput,
   };
 
-  form.__addField(field as FieldHook<any>); // Executed first (1)
+  form.__addField(field); // Executed first (1)
 
   useEffect(() => {
     /**
@@ -465,7 +459,7 @@ export const useField = <T>(
      * TODO: See how we could refactor "use_field" & "use_form" to avoid having the
      * `form.__addField(field)` call outside the effect.
      */
-    form.__addField(field as FieldHook<any>); // Executed third (3)
+    form.__addField(field); // Executed third (3)
 
     return () => {
       // Remove field from the form when it is unmounted or if its path changes.

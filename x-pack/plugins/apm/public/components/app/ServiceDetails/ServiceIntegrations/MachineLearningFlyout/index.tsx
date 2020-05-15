@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { startMLJob, MLError } from '../../../../../services/rest/ml';
+import { startMLJob } from '../../../../../services/rest/ml';
 import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
 import { MLJobLink } from '../../../../shared/Links/MachineLearningLinks/MLJobLink';
 import { MachineLearningFlyoutView } from './view';
@@ -49,14 +49,14 @@ export class MachineLearningFlyout extends Component<Props, State> {
       }
       this.addSuccessToast({ transactionType });
     } catch (e) {
-      this.addErrorToast(e as MLError);
+      this.addErrorToast();
     }
 
     this.setState({ isCreatingJob: false });
     this.props.onClose();
   };
 
-  public addErrorToast = (error: MLError) => {
+  public addErrorToast = () => {
     const { core } = this.context;
 
     const { urlParams } = this.props;
@@ -66,11 +66,6 @@ export class MachineLearningFlyout extends Component<Props, State> {
       return;
     }
 
-    const errorDescription = error?.body?.message;
-    const errorText = errorDescription
-      ? `${error.message}: ${errorDescription}`
-      : error.message;
-
     core.notifications.toasts.addWarning({
       title: i18n.translate(
         'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationTitle',
@@ -79,18 +74,15 @@ export class MachineLearningFlyout extends Component<Props, State> {
         }
       ),
       text: toMountPoint(
-        <>
-          <p>{errorText}</p>
-          <p>
-            {i18n.translate(
-              'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationText',
-              {
-                defaultMessage:
-                  'Your current license may not allow for creating machine learning jobs, or this job may already exist.'
-              }
-            )}
-          </p>
-        </>
+        <p>
+          {i18n.translate(
+            'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationText',
+            {
+              defaultMessage:
+                'Your current license may not allow for creating machine learning jobs, or this job may already exist.'
+            }
+          )}
+        </p>
       )
     });
   };

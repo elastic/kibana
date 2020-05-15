@@ -8,8 +8,7 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiButtonEmptyProps } from '@elastic/eui';
 import { PackageInfo, entries, DetailViewPanelName, InstallStatus } from '../../../../types';
-import { useLink } from '../../../../hooks';
-import { useGetPackageInstallStatus } from '../../hooks';
+import { useLinks, useGetPackageInstallStatus } from '../../hooks';
 
 export type NavLinkProps = Pick<PackageInfo, 'name' | 'version'> & {
   active: DetailViewPanelName;
@@ -28,7 +27,7 @@ const PanelDisplayNames: Record<DetailViewPanelName, string> = {
 };
 
 export function SideNavLinks({ name, version, active }: NavLinkProps) {
-  const { getHref } = useLink();
+  const { toDetailView } = useLinks();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
 
@@ -36,7 +35,7 @@ export function SideNavLinks({ name, version, active }: NavLinkProps) {
     <Fragment>
       {entries(PanelDisplayNames).map(([panel, display]) => {
         const Link = styled(EuiButtonEmpty).attrs<EuiButtonEmptyProps>({
-          href: getHref('integration_details', { pkgkey: `${name}-${version}`, panel }),
+          href: toDetailView({ name, version, panel }),
         })`
           font-weight: ${p =>
             active === panel

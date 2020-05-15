@@ -88,14 +88,13 @@ const formDeserializer = (formData: GenericObject) => {
 };
 
 export const ConfigurationForm = React.memo(({ value }: Props) => {
-  const isMounted = useRef<boolean | undefined>(undefined);
+  const didMountRef = useRef(false);
 
   const { form } = useForm<MappingsConfiguration>({
     schema: configurationFormSchema,
     serializer: formSerializer,
     deserializer: formDeserializer,
     defaultValue: value,
-    id: 'configurationForm',
   });
   const dispatch = useDispatch();
 
@@ -111,36 +110,26 @@ export const ConfigurationForm = React.memo(({ value }: Props) => {
         },
       });
     });
-
     return subscription.unsubscribe;
   }, [form, dispatch]);
 
   useEffect(() => {
-    if (isMounted.current === undefined) {
-      // On mount: don't reset the form
-      isMounted.current = true;
-      return;
-    } else if (isMounted.current === false) {
-      // When we save the snapshot on unMount we update the "defaultValue" in our state
-      // wich updates the "value" prop here on the component.
-      // To avoid resetting the form at this stage, we exit early.
-      return;
+    if (didMountRef.current) {
+      // If the value has changed (it probably means that we have loaded a new JSON)
+      // we need to reset the form to update the fields values.
+      form.reset({ resetValues: true });
+    } else {
+      // Avoid reseting the form on component mount.
+      didMountRef.current = true;
     }
-
-    // If the value has changed (it probably means that we have loaded a new JSON)
-    // we need to reset the form to update the fields values.
-    form.reset({ resetValues: true });
   }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     return () => {
-      isMounted.current = false;
-
-      // Save a snapshot of the form state so we can get back to it when navigating back to the tab
-      const configurationData = form.getFormData();
-      dispatch({ type: 'configuration.save', value: configurationData });
+      // On unmount => save in the state a snapshot of the current form data.
+      dispatch({ type: 'configuration.save' });
     };
-  }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dispatch]);
 
   return (
     <Form

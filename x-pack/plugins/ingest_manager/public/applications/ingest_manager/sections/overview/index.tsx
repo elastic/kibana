@@ -16,7 +16,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { WithHeaderLayout } from '../../layouts';
-import { useGetAgentConfigs, useBreadcrumbs } from '../../hooks';
+import { useGetAgentConfigs } from '../../hooks';
 import { AgentEnrollmentFlyout } from '../fleet/components';
 import { OverviewAgentSection } from './components/agent_section';
 import { OverviewConfigurationSection } from './components/configuration_section';
@@ -29,8 +29,6 @@ const AlphaBadge = styled(EuiBetaBadge)`
 `;
 
 export const IngestManagerOverview: React.FunctionComponent = () => {
-  useBreadcrumbs('overview');
-
   // Agent enrollment flyout state
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(false);
 

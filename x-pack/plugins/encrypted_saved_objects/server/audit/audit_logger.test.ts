@@ -5,9 +5,8 @@
  */
 
 import { EncryptedSavedObjectsAuditLogger } from './audit_logger';
-import { mockAuthenticatedUser } from '../../../security/common/model/authenticated_user.mock';
 
-it('properly logs audit events', () => {
+test('properly logs audit events', () => {
   const mockInternalAuditLogger = { log: jest.fn() };
   const audit = new EncryptedSavedObjectsAuditLogger(() => mockInternalAuditLogger);
 
@@ -20,11 +19,6 @@ it('properly logs audit events', () => {
     id: 'object-id-ns',
     namespace: 'object-ns',
   });
-  audit.encryptAttributesSuccess(
-    ['one', 'two'],
-    { type: 'known-type-ns', id: 'object-id-ns', namespace: 'object-ns' },
-    mockAuthenticatedUser()
-  );
 
   audit.decryptAttributesSuccess(['three', 'four'], {
     type: 'known-type-1',
@@ -35,11 +29,6 @@ it('properly logs audit events', () => {
     id: 'object-id-1-ns',
     namespace: 'object-ns',
   });
-  audit.decryptAttributesSuccess(
-    ['three', 'four'],
-    { type: 'known-type-1-ns', id: 'object-id-1-ns', namespace: 'object-ns' },
-    mockAuthenticatedUser()
-  );
 
   audit.encryptAttributeFailure('five', {
     type: 'known-type-2',
@@ -50,11 +39,6 @@ it('properly logs audit events', () => {
     id: 'object-id-2-ns',
     namespace: 'object-ns',
   });
-  audit.encryptAttributeFailure(
-    'five',
-    { type: 'known-type-2-ns', id: 'object-id-2-ns', namespace: 'object-ns' },
-    mockAuthenticatedUser()
-  );
 
   audit.decryptAttributeFailure('six', {
     type: 'known-type-3',
@@ -65,13 +49,8 @@ it('properly logs audit events', () => {
     id: 'object-id-3-ns',
     namespace: 'object-ns',
   });
-  audit.decryptAttributeFailure(
-    'six',
-    { type: 'known-type-3-ns', id: 'object-id-3-ns', namespace: 'object-ns' },
-    mockAuthenticatedUser()
-  );
 
-  expect(mockInternalAuditLogger.log).toHaveBeenCalledTimes(12);
+  expect(mockInternalAuditLogger.log).toHaveBeenCalledTimes(8);
   expect(mockInternalAuditLogger.log).toHaveBeenCalledWith(
     'encrypt_success',
     'Successfully encrypted attributes "[one,two]" for saved object "[known-type,object-id]".',
@@ -85,17 +64,6 @@ it('properly logs audit events', () => {
       type: 'known-type-ns',
       namespace: 'object-ns',
       attributesNames: ['one', 'two'],
-    }
-  );
-  expect(mockInternalAuditLogger.log).toHaveBeenCalledWith(
-    'encrypt_success',
-    'Successfully encrypted attributes "[one,two]" for saved object "[object-ns,known-type-ns,object-id-ns]".',
-    {
-      id: 'object-id-ns',
-      type: 'known-type-ns',
-      namespace: 'object-ns',
-      attributesNames: ['one', 'two'],
-      username: 'user',
     }
   );
 
@@ -114,17 +82,6 @@ it('properly logs audit events', () => {
       attributesNames: ['three', 'four'],
     }
   );
-  expect(mockInternalAuditLogger.log).toHaveBeenCalledWith(
-    'decrypt_success',
-    'Successfully decrypted attributes "[three,four]" for saved object "[object-ns,known-type-1-ns,object-id-1-ns]".',
-    {
-      id: 'object-id-1-ns',
-      type: 'known-type-1-ns',
-      namespace: 'object-ns',
-      attributesNames: ['three', 'four'],
-      username: 'user',
-    }
-  );
 
   expect(mockInternalAuditLogger.log).toHaveBeenCalledWith(
     'encrypt_failure',
@@ -136,17 +93,6 @@ it('properly logs audit events', () => {
     'Failed to encrypt attribute "five" for saved object "[object-ns,known-type-2-ns,object-id-2-ns]".',
     { id: 'object-id-2-ns', type: 'known-type-2-ns', namespace: 'object-ns', attributeName: 'five' }
   );
-  expect(mockInternalAuditLogger.log).toHaveBeenCalledWith(
-    'encrypt_failure',
-    'Failed to encrypt attribute "five" for saved object "[object-ns,known-type-2-ns,object-id-2-ns]".',
-    {
-      id: 'object-id-2-ns',
-      type: 'known-type-2-ns',
-      namespace: 'object-ns',
-      attributeName: 'five',
-      username: 'user',
-    }
-  );
 
   expect(mockInternalAuditLogger.log).toHaveBeenCalledWith(
     'decrypt_failure',
@@ -157,16 +103,5 @@ it('properly logs audit events', () => {
     'decrypt_failure',
     'Failed to decrypt attribute "six" for saved object "[object-ns,known-type-3-ns,object-id-3-ns]".',
     { id: 'object-id-3-ns', type: 'known-type-3-ns', namespace: 'object-ns', attributeName: 'six' }
-  );
-  expect(mockInternalAuditLogger.log).toHaveBeenCalledWith(
-    'decrypt_failure',
-    'Failed to decrypt attribute "six" for saved object "[object-ns,known-type-3-ns,object-id-3-ns]".',
-    {
-      id: 'object-id-3-ns',
-      type: 'known-type-3-ns',
-      namespace: 'object-ns',
-      attributeName: 'six',
-      username: 'user',
-    }
   );
 });

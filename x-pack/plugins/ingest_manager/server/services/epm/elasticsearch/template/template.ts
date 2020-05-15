@@ -294,9 +294,6 @@ function getBaseTemplate(
       // To be filled with the aliases that we need
       aliases: {},
     },
-    data_stream: {
-      timestamp_field: '@timestamp',
-    },
   };
 }
 

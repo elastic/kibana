@@ -17,12 +17,12 @@ import { OverviewPanel } from './overview_panel';
 import { OverviewStats } from './overview_stats';
 import { useLink, useGetDatasources } from '../../../hooks';
 import { AgentConfig } from '../../../types';
+import { AGENT_CONFIG_PATH } from '../../../constants';
 import { Loading } from '../../fleet/components';
 
 export const OverviewConfigurationSection: React.FC<{ agentConfigs: AgentConfig[] }> = ({
   agentConfigs,
 }) => {
-  const { getHref } = useLink();
   const datasourcesRequest = useGetDatasources({
     page: 1,
     perPage: 10000,
@@ -40,7 +40,7 @@ export const OverviewConfigurationSection: React.FC<{ agentConfigs: AgentConfig[
               />
             </h2>
           </EuiTitle>
-          <EuiButtonEmpty size="xs" flush="right" href={getHref('configurations_list')}>
+          <EuiButtonEmpty size="xs" flush="right" href={useLink(AGENT_CONFIG_PATH)}>
             <FormattedMessage
               id="xpack.ingestManager.overviewPageConfigurationsPanelAction"
               defaultMessage="View configs"

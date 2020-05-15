@@ -133,7 +133,7 @@ module.exports = {
      * Licence headers
      */
     {
-      files: ['**/*.{js,ts,tsx}', '!plugins/**/*'],
+      files: ['**/*.{js,ts,tsx}'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',

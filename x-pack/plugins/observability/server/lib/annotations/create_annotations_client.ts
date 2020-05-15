@@ -7,8 +7,6 @@
 import { APICaller, Logger } from 'kibana/server';
 import * as t from 'io-ts';
 import { Client } from 'elasticsearch';
-import Boom from 'boom';
-import { ILicense } from '../../../../licensing/server';
 import {
   createAnnotationRt,
   deleteAnnotationRt,
@@ -42,9 +40,8 @@ export function createAnnotationsClient(params: {
   index: string;
   apiCaller: APICaller;
   logger: Logger;
-  license?: ILicense;
 }) {
-  const { index, apiCaller, logger, license } = params;
+  const { index, apiCaller, logger } = params;
 
   const initIndex = () =>
     createOrUpdateIndex({
@@ -54,59 +51,48 @@ export function createAnnotationsClient(params: {
       logger,
     });
 
-  function ensureGoldLicense<T extends (...args: any[]) => any>(fn: T): T {
-    return ((...args) => {
-      if (!license?.hasAtLeast('gold')) {
-        throw Boom.forbidden('Annotations require at least a gold license or a trial license.');
-      }
-      return fn(...args);
-    }) as T;
-  }
-
   return {
     get index() {
       return index;
     },
-    create: ensureGoldLicense(
-      async (
-        createParams: CreateParams
-      ): Promise<{ _id: string; _index: string; _source: Annotation }> => {
-        const indexExists = await apiCaller('indices.exists', {
-          index,
-        });
+    create: async (
+      createParams: CreateParams
+    ): Promise<{ _id: string; _index: string; _source: Annotation }> => {
+      const indexExists = await apiCaller('indices.exists', {
+        index,
+      });
 
-        if (!indexExists) {
-          await initIndex();
-        }
-
-        const annotation = {
-          ...createParams,
-          event: {
-            created: new Date().toISOString(),
-          },
-        };
-
-        const response = (await apiCaller('index', {
-          index,
-          body: annotation,
-          refresh: 'wait_for',
-        })) as IndexDocumentResponse;
-
-        return apiCaller('get', {
-          index,
-          id: response._id,
-        });
+      if (!indexExists) {
+        await initIndex();
       }
-    ),
-    getById: ensureGoldLicense(async (getByIdParams: GetByIdParams) => {
+
+      const annotation = {
+        ...createParams,
+        event: {
+          created: new Date().toISOString(),
+        },
+      };
+
+      const response = (await apiCaller('index', {
+        index,
+        body: annotation,
+        refresh: 'wait_for',
+      })) as IndexDocumentResponse;
+
+      return apiCaller('get', {
+        index,
+        id: response._id,
+      });
+    },
+    getById: async (getByIdParams: GetByIdParams) => {
       const { id } = getByIdParams;
 
       return apiCaller('get', {
         id,
         index,
       });
-    }),
-    delete: ensureGoldLicense(async (deleteParams: DeleteParams) => {
+    },
+    delete: async (deleteParams: DeleteParams) => {
       const { id } = deleteParams;
 
       const response = (await apiCaller('delete', {
@@ -115,6 +101,6 @@ export function createAnnotationsClient(params: {
         refresh: 'wait_for',
       })) as PromiseReturnType<Client['delete']>;
       return response;
-    }),
+    },
   };
 }

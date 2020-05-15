@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ReactNode, ChangeEvent, FormEvent, MouseEvent } from 'react';
+import { ReactNode, ChangeEvent, FormEvent, MouseEvent, MutableRefObject } from 'react';
 import { Subject, Subscription } from './lib';
 
 // This type will convert all optional property to required ones
@@ -28,7 +28,6 @@ export interface FormHook<T extends FormData = FormData> {
   readonly isSubmitted: boolean;
   readonly isSubmitting: boolean;
   readonly isValid: boolean | undefined;
-  readonly id: string;
   submit: (e?: FormEvent<HTMLFormElement> | MouseEvent) => Promise<{ data: T; isValid: boolean }>;
   subscribe: (handler: OnUpdateHandler<T>) => Subscription;
   setFieldValue: (fieldName: string, value: FieldValue) => void;
@@ -40,7 +39,7 @@ export interface FormHook<T extends FormData = FormData> {
   getErrors: () => string[];
   reset: (options?: { resetValues?: boolean }) => void;
   readonly __options: Required<FormOptions>;
-  __getFormData$: () => Subject<T>;
+  readonly __formData$: MutableRefObject<Subject<T>>;
   __addField: (field: FieldHook) => void;
   __removeField: (fieldNames: string | string[]) => void;
   __validateFields: (
@@ -60,13 +59,12 @@ type FormSchemaEntry<T extends FormData> =
   | { [key: string]: FieldConfig<T> | Array<FieldConfig<T>> | FormSchemaEntry<T> };
 
 export interface FormConfig<T extends FormData = FormData> {
-  onSubmit?: FormSubmitHandler<T>;
+  onSubmit?: (data: T, isFormValid: boolean) => void;
   schema?: FormSchema<T>;
   defaultValue?: Partial<T>;
   serializer?: SerializerFunc<T>;
   deserializer?: SerializerFunc;
   options?: FormOptions;
-  id?: string;
 }
 
 export interface OnFormUpdateArg<T extends FormData> {
@@ -78,7 +76,7 @@ export interface OnFormUpdateArg<T extends FormData> {
   isValid?: boolean;
 }
 
-export type OnUpdateHandler<T extends FormData = FormData> = (arg: OnFormUpdateArg<T>) => void;
+export type OnUpdateHandler<T extends FormData> = (arg: OnFormUpdateArg<T>) => void;
 
 export interface FormOptions {
   errorDisplayDelay?: number;
@@ -88,13 +86,13 @@ export interface FormOptions {
   stripEmptyFields?: boolean;
 }
 
-export interface FieldHook<T = unknown> {
+export interface FieldHook {
   readonly path: string;
   readonly label?: string;
   readonly labelAppend?: string | ReactNode;
   readonly helpText?: string | ReactNode;
   readonly type: string;
-  readonly value: T;
+  readonly value: unknown;
   readonly errors: ValidationError[];
   readonly isValid: boolean;
   readonly isPristine: boolean;
@@ -107,7 +105,7 @@ export interface FieldHook<T = unknown> {
     errorCode?: string;
   }) => string | null;
   onChange: (event: ChangeEvent<{ name?: string; value: string; checked?: boolean }>) => void;
-  setValue: (value: T) => void;
+  setValue: (value: FieldValue) => void;
   setErrors: (errors: ValidationError[]) => void;
   clearErrors: (type?: string | string[]) => void;
   validate: (validateData?: {
@@ -138,10 +136,7 @@ export interface FieldsMap {
   [key: string]: FieldHook;
 }
 
-export type FormSubmitHandler<T extends FormData = FormData> = (
-  formData: T,
-  isValid: boolean
-) => Promise<void>;
+export type FormSubmitHandler<T> = (formData: T, isValid: boolean) => Promise<void>;
 
 export interface ValidationError<T = string> {
   message: string;
@@ -167,7 +162,7 @@ export interface FieldValidateResponse {
   errors: ValidationError[];
 }
 
-export type SerializerFunc<O = unknown, I = any> = (value: I) => O;
+export type SerializerFunc<T = unknown> = (value: any) => T;
 
 export interface FormData {
   [key: string]: any;

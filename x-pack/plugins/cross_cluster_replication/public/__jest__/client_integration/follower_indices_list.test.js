@@ -4,14 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/**
- * The below import is required to avoid a console error warn from brace package
- * console.warn ../node_modules/brace/index.js:3999
-      Could not load worker ReferenceError: Worker is not defined
-          at createWorker (/<path-to-repo>/node_modules/brace/index.js:17992:5)
- */
-import * as stubWebWorker from '../../../../../test_utils/stub_web_worker'; // eslint-disable-line no-unused-vars
-
 import { getFollowerIndexMock } from './fixtures/follower_index';
 import './mocks';
 import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
@@ -64,54 +56,6 @@ describe('<FollowerIndicesList />', () => {
 
     test('should have a button to create a follower index', async () => {
       expect(exists('emptyPrompt.createFollowerIndexButton')).toBe(true);
-    });
-  });
-
-  describe('when there are multiple pages of follower indices', () => {
-    let find;
-    let component;
-    let table;
-    let actions;
-    let form;
-
-    const followerIndices = [
-      {
-        name: 'unique',
-        seeds: [],
-      },
-    ];
-
-    for (let i = 0; i < 29; i++) {
-      followerIndices.push({
-        name: `name${i}`,
-        seeds: [],
-      });
-    }
-
-    beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadFollowerIndicesResponse({ indices: followerIndices });
-
-      // Mount the component
-      ({ find, component, table, actions, form } = setup());
-
-      await nextTick(); // Make sure that the http request is fulfilled
-      component.update();
-    });
-
-    test('pagination works', () => {
-      actions.clickPaginationNextButton();
-      const { tableCellsValues } = table.getMetaData('followerIndexListTable');
-
-      // Pagination defaults to 20 follower indices per page. We loaded 30 follower indices,
-      // so the second page should have 10.
-      expect(tableCellsValues.length).toBe(10);
-    });
-
-    // Skipped until we can figure out how to get this test to work.
-    test.skip('search works', () => {
-      form.setInputValue(find('followerIndexSearch'), 'unique');
-      const { tableCellsValues } = table.getMetaData('followerIndexListTable');
-      expect(tableCellsValues.length).toBe(1);
     });
   });
 

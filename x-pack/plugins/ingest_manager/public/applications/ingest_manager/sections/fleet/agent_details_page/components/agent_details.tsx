@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Agent, AgentConfig } from '../../../../types';
+import { AGENT_CONFIG_DETAILS_PATH } from '../../../../constants';
 import { useLink } from '../../../../hooks';
 import { AgentHealth } from '../../components';
 
@@ -21,7 +22,7 @@ export const AgentDetailsContent: React.FunctionComponent<{
   agent: Agent;
   agentConfig?: AgentConfig;
 }> = memo(({ agent, agentConfig }) => {
-  const { getHref } = useLink();
+  const agentConfigUrl = useLink(AGENT_CONFIG_DETAILS_PATH);
   return (
     <EuiDescriptionList>
       {[
@@ -52,7 +53,7 @@ export const AgentDetailsContent: React.FunctionComponent<{
             defaultMessage: 'Agent configuration',
           }),
           description: agentConfig ? (
-            <EuiLink href={getHref('configuration_details', { configId: agent.config_id! })}>
+            <EuiLink href={`${agentConfigUrl}${agent.config_id}`}>
               {agentConfig.name || agent.config_id}
             </EuiLink>
           ) : (

@@ -93,9 +93,9 @@ export interface State {
 export type Action =
   | { type: 'editor.replaceMappings'; value: { [key: string]: any } }
   | { type: 'configuration.update'; value: Partial<ConfigurationFormState> }
-  | { type: 'configuration.save'; value: MappingsConfiguration }
+  | { type: 'configuration.save' }
   | { type: 'templates.update'; value: Partial<State['templates']> }
-  | { type: 'templates.save'; value: MappingsTemplates }
+  | { type: 'templates.save' }
   | { type: 'fieldForm.update'; value: OnFormUpdateArg<any> }
   | { type: 'field.add'; value: Field }
   | { type: 'field.remove'; value: string }
@@ -298,14 +298,19 @@ export const reducer = (state: State, action: Action): State => {
       return nextState;
     }
     case 'configuration.save': {
+      const {
+        data: { raw, format },
+      } = state.configuration;
+      const configurationData = format();
+
       return {
         ...state,
         configuration: {
           isValid: true,
-          defaultValue: action.value,
+          defaultValue: configurationData,
           data: {
-            raw: action.value,
-            format: () => action.value,
+            raw,
+            format: () => configurationData,
           },
           validate: async () => true,
         },
@@ -323,14 +328,19 @@ export const reducer = (state: State, action: Action): State => {
       return nextState;
     }
     case 'templates.save': {
+      const {
+        data: { raw, format },
+      } = state.templates;
+      const templatesData = format();
+
       return {
         ...state,
         templates: {
           isValid: true,
-          defaultValue: action.value,
+          defaultValue: templatesData,
           data: {
-            raw: action.value,
-            format: () => action.value,
+            raw,
+            format: () => templatesData,
           },
           validate: async () => true,
         },

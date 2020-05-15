@@ -5,18 +5,17 @@
  */
 import React from 'react';
 import { HashRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
-import { PAGE_ROUTING_PATHS } from '../../constants';
 import { Loading } from '../../components';
-import { useConfig, useCore, useFleetStatus, useBreadcrumbs } from '../../hooks';
+import { useConfig, useCore } from '../../hooks';
 import { AgentListPage } from './agent_list_page';
 import { SetupPage } from './setup_page';
 import { AgentDetailsPage } from './agent_details_page';
 import { NoAccessPage } from './error_pages/no_access';
 import { EnrollmentTokenListPage } from './enrollment_token_list_page';
 import { ListLayout } from './components/list_layout';
+import { useFleetStatus } from '../../hooks/use_fleet_status';
 
 export const FleetApp: React.FunctionComponent = () => {
-  useBreadcrumbs('fleet');
   const core = useCore();
   const { fleet } = useConfig();
 
@@ -42,20 +41,16 @@ export const FleetApp: React.FunctionComponent = () => {
   return (
     <Router>
       <Switch>
-        <Route
-          path={PAGE_ROUTING_PATHS.fleet}
-          exact={true}
-          render={() => <Redirect to={PAGE_ROUTING_PATHS.fleet_agent_list} />}
-        />
-        <Route path={PAGE_ROUTING_PATHS.fleet_agent_details}>
+        <Route path="/fleet" exact={true} render={() => <Redirect to="/fleet/agents" />} />
+        <Route path="/fleet/agents/:agentId/:tabId?">
           <AgentDetailsPage />
         </Route>
-        <Route path={PAGE_ROUTING_PATHS.fleet_agent_list}>
+        <Route path="/fleet/agents">
           <ListLayout>
             <AgentListPage />
           </ListLayout>
         </Route>
-        <Route path={PAGE_ROUTING_PATHS.fleet_enrollment_tokens}>
+        <Route path="/fleet/enrollment-tokens">
           <ListLayout>
             <EnrollmentTokenListPage />
           </ListLayout>

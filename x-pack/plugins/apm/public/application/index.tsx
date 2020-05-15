@@ -24,7 +24,7 @@ import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
 import { APMIndicesPermission } from '../components/app/APMIndicesPermission';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
 import { routes } from '../components/app/Main/route_config';
-import { history, resetHistory } from '../utils/history';
+import { history } from '../utils/history';
 import { ConfigSchema } from '..';
 import 'react-vis/dist/style.css';
 
@@ -111,7 +111,6 @@ export const renderApp = (
   { element }: AppMountParameters,
   config: ConfigSchema
 ) => {
-  resetHistory();
   ReactDOM.render(
     <ApmAppRoot
       core={core}
@@ -121,7 +120,5 @@ export const renderApp = (
     />,
     element
   );
-  return () => {
-    ReactDOM.unmountComponentAtNode(element);
-  };
+  return () => ReactDOM.unmountComponentAtNode(element);
 };

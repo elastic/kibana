@@ -5,22 +5,64 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiComboBox } from '@elastic/eui';
 
-import { FormDataProvider } from '../../../../shared_imports';
-import { MainType, SubType, Field } from '../../../../types';
+import { UseField, useFormContext, FormDataProvider } from '../../../../shared_imports';
+import { MainType, SubType, Field, ComboBoxOption } from '../../../../types';
+import {
+  getFieldConfig,
+  filterTypesForMultiField,
+  filterTypesForNonRootFields,
+} from '../../../../lib';
 import { TYPE_DEFINITION } from '../../../../constants';
-import { NameParameter, TypeParameter, SubTypeParameter } from '../../field_parameters';
+
+import { NameParameter, TypeParameter, OtherTypeNameParameter } from '../../field_parameters';
 import { FieldDescriptionSection } from './field_description_section';
 
 interface Props {
+  type: MainType;
   defaultValue: Field;
   isRootLevelField: boolean;
   isMultiField: boolean;
 }
 
 export const EditFieldHeaderForm = React.memo(
-  ({ defaultValue, isRootLevelField, isMultiField }: Props) => {
+  ({ type, defaultValue, isRootLevelField, isMultiField }: Props) => {
+    const typeDefinition = TYPE_DEFINITION[type];
+    const hasSubType = typeDefinition.subTypes !== undefined;
+    const form = useFormContext();
+
+    const subTypeOptions = hasSubType
+      ? typeDefinition
+          .subTypes!.types.map(_subType => TYPE_DEFINITION[_subType])
+          .map(_subType => ({ value: _subType.value, label: _subType.label }))
+      : undefined;
+
+    const defaultValueSubType = hasSubType
+      ? typeDefinition.subTypes!.types.includes(defaultValue.type as SubType)
+        ? defaultValue.type // we use the default value provided
+        : typeDefinition.subTypes!.types[0] // we set the first item from the subType array
+      : undefined;
+
+    const onTypeChange = (value: ComboBoxOption[]) => {
+      if (value.length) {
+        form.setFieldValue('type', value);
+
+        const nextTypeDefinition = TYPE_DEFINITION[value[0].value as MainType];
+
+        if (nextTypeDefinition.subTypes !== undefined) {
+          /**
+           * We need to manually set the subType field value because if we edit a field type that already has a subtype
+           * (e.g. "numeric" with subType "float"), and we change the type to another one that also has subTypes (e.g. "range"),
+           * the old value would be kept on the subType.
+           */
+          const subTypeValue = nextTypeDefinition.subTypes!.types[0];
+          form.setFieldValue('subType', [TYPE_DEFINITION[subTypeValue]]);
+        }
+      }
+    };
+
     return (
       <>
         <EuiFlexGroup gutterSize="s">
@@ -31,41 +73,75 @@ export const EditFieldHeaderForm = React.memo(
 
           {/* Field type */}
           <EuiFlexItem>
-            <TypeParameter isRootLevelField={isRootLevelField} isMultiField={isMultiField} />
+            <TypeParameter
+              isRootLevelField={isRootLevelField}
+              isMultiField={isMultiField}
+              onTypeChange={onTypeChange}
+            />
           </EuiFlexItem>
 
-          {/* Field subType (if any) */}
-          <FormDataProvider pathsToWatch="type">
-            {({ type }) => (
-              <SubTypeParameter
-                key={type}
-                type={type}
-                defaultValueType={defaultValue.type}
-                isMultiField={isMultiField}
-                isRootLevelField={isRootLevelField}
-              />
-            )}
-          </FormDataProvider>
+          {/* Other type */}
+          {type === 'other' && (
+            <EuiFlexItem>
+              <OtherTypeNameParameter />
+            </EuiFlexItem>
+          )}
+
+          {/* Field sub type (if any) - will never be the case if we have an "other" type */}
+          {hasSubType && (
+            <EuiFlexItem>
+              <UseField
+                path="subType"
+                config={{
+                  ...getFieldConfig('type'),
+                  label: typeDefinition.subTypes!.label,
+                  defaultValue: defaultValueSubType,
+                }}
+              >
+                {subTypeField => {
+                  return (
+                    <EuiFormRow label={subTypeField.label}>
+                      <EuiComboBox
+                        placeholder={i18n.translate(
+                          'xpack.idxMgmt.mappingsEditor.subTypeField.placeholderLabel',
+                          {
+                            defaultMessage: 'Select a type',
+                          }
+                        )}
+                        singleSelection={{ asPlainText: true }}
+                        options={
+                          isMultiField
+                            ? filterTypesForMultiField(subTypeOptions!)
+                            : isRootLevelField
+                            ? subTypeOptions
+                            : filterTypesForNonRootFields(subTypeOptions!)
+                        }
+                        selectedOptions={subTypeField.value as ComboBoxOption[]}
+                        onChange={subType => subTypeField.setValue(subType)}
+                        isClearable={false}
+                      />
+                    </EuiFormRow>
+                  );
+                }}
+              </UseField>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
 
-        {/* Field description */}
         <FieldDescriptionSection isMultiField={isMultiField}>
-          <FormDataProvider pathsToWatch={['type', 'subType']}>
-            {({ type, subType }) => {
-              const typeDefinition = TYPE_DEFINITION[type as MainType];
-              const hasSubType = typeDefinition.subTypes !== undefined;
-
-              if (hasSubType) {
-                if (subType) {
-                  const subTypeDefinition = TYPE_DEFINITION[subType as SubType];
+          {hasSubType ? (
+            <FormDataProvider pathsToWatch="subType">
+              {formData => {
+                if (formData.subType) {
+                  const subTypeDefinition = TYPE_DEFINITION[formData.subType as SubType];
                   return (subTypeDefinition?.description?.() as JSX.Element) ?? null;
                 }
                 return null;
-              }
-
-              return typeDefinition.description?.() as JSX.Element;
-            }}
-          </FormDataProvider>
+              }}
+            </FormDataProvider>
+          ) : (
+            typeDefinition.description?.()
+          )}
         </FieldDescriptionSection>
       </>
     );

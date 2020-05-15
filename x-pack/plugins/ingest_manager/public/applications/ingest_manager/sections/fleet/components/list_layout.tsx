@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { useRouteMatch } from 'react-router-dom';
-import { PAGE_ROUTING_PATHS } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
+import { FLEET_ENROLLMENT_TOKENS_PATH, FLEET_AGENTS_PATH } from '../../../constants';
 import { useCapabilities, useLink, useGetAgentConfigs } from '../../../hooks';
 import { useGetAgentStatus } from '../../agent_config/details_page/hooks';
 import { AgentEnrollmentFlyout } from '../components';
@@ -36,7 +36,6 @@ const Divider = styled.div`
 `;
 
 export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
-  const { getHref } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
   const agentStatusRequest = useGetAgentStatus(undefined, {
     pollIntervalMs: REFRESH_INTERVAL_MS,
@@ -164,8 +163,8 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
                 defaultMessage="Agents"
               />
             ),
-            isSelected: routeMatch.path === PAGE_ROUTING_PATHS.fleet_agent_list,
-            href: getHref('fleet_agent_list'),
+            isSelected: routeMatch.path === FLEET_AGENTS_PATH,
+            href: useLink(FLEET_AGENTS_PATH),
           },
           {
             name: (
@@ -174,8 +173,8 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
                 defaultMessage="Enrollment tokens"
               />
             ),
-            isSelected: routeMatch.path === PAGE_ROUTING_PATHS.fleet_enrollment_tokens,
-            href: getHref('fleet_enrollment_tokens'),
+            isSelected: routeMatch.path === FLEET_ENROLLMENT_TOKENS_PATH,
+            href: useLink(FLEET_ENROLLMENT_TOKENS_PATH),
           },
         ] as unknown) as EuiTabProps[]
       }

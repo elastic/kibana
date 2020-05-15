@@ -6802,6 +6802,7 @@
     "xpack.idxMgmt.mappingsEditor.createField.addFieldButtonLabel": "フィールドの追加",
     "xpack.idxMgmt.mappingsEditor.createField.addMultiFieldButtonLabel": "マルチフィールドの追加",
     "xpack.idxMgmt.mappingsEditor.createField.cancelButtonLabel": "キャンセル",
+    "xpack.idxMgmt.mappingsEditor.createField.typePlaceholderLabel": "タイプを選択",
     "xpack.idxMgmt.mappingsEditor.customButtonLabel": "カスタムアナライザーの使用",
     "xpack.idxMgmt.mappingsEditor.dataType.aliasDescription": "エイリアス",
     "xpack.idxMgmt.mappingsEditor.dataType.aliasLongDescription": "エイリアスフィールドは、検索リクエストで使用可能なフィールドの代替名を受け入れます。",

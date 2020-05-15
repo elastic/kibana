@@ -6,7 +6,6 @@
 
 import { SavedObjectDescriptor, descriptorToArray } from '../crypto';
 import { LegacyAPI } from '../plugin';
-import { AuthenticatedUser } from '../../../security/common/model';
 
 /**
  * Represents all audit events the plugin can log.
@@ -14,59 +13,49 @@ import { AuthenticatedUser } from '../../../security/common/model';
 export class EncryptedSavedObjectsAuditLogger {
   constructor(private readonly getAuditLogger: () => LegacyAPI['auditLogger']) {}
 
-  public encryptAttributeFailure(
-    attributeName: string,
-    descriptor: SavedObjectDescriptor,
-    user?: AuthenticatedUser
-  ) {
+  public encryptAttributeFailure(attributeName: string, descriptor: SavedObjectDescriptor) {
     this.getAuditLogger().log(
       'encrypt_failure',
       `Failed to encrypt attribute "${attributeName}" for saved object "[${descriptorToArray(
         descriptor
       )}]".`,
-      { ...descriptor, attributeName, username: user?.username }
+      { ...descriptor, attributeName }
     );
   }
 
-  public decryptAttributeFailure(
-    attributeName: string,
-    descriptor: SavedObjectDescriptor,
-    user?: AuthenticatedUser
-  ) {
+  public decryptAttributeFailure(attributeName: string, descriptor: SavedObjectDescriptor) {
     this.getAuditLogger().log(
       'decrypt_failure',
       `Failed to decrypt attribute "${attributeName}" for saved object "[${descriptorToArray(
         descriptor
       )}]".`,
-      { ...descriptor, attributeName, username: user?.username }
+      { ...descriptor, attributeName }
     );
   }
 
   public encryptAttributesSuccess(
     attributesNames: readonly string[],
-    descriptor: SavedObjectDescriptor,
-    user?: AuthenticatedUser
+    descriptor: SavedObjectDescriptor
   ) {
     this.getAuditLogger().log(
       'encrypt_success',
       `Successfully encrypted attributes "[${attributesNames}]" for saved object "[${descriptorToArray(
         descriptor
       )}]".`,
-      { ...descriptor, attributesNames, username: user?.username }
+      { ...descriptor, attributesNames }
     );
   }
 
   public decryptAttributesSuccess(
     attributesNames: readonly string[],
-    descriptor: SavedObjectDescriptor,
-    user?: AuthenticatedUser
+    descriptor: SavedObjectDescriptor
   ) {
     this.getAuditLogger().log(
       'decrypt_success',
       `Successfully decrypted attributes "[${attributesNames}]" for saved object "[${descriptorToArray(
         descriptor
       )}]".`,
-      { ...descriptor, attributesNames, username: user?.username }
+      { ...descriptor, attributesNames }
     );
   }
 }

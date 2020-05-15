@@ -10,21 +10,15 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback } from 'react';
 import { LoadingOverlayWrapper } from '../../../loading_overlay_wrapper';
 import { IndexSetupRow } from './index_setup_row';
-import { AvailableIndex, ValidationIndicesError } from './validation';
+import { AvailableIndex } from './validation';
 
 export const AnalysisSetupIndicesForm: React.FunctionComponent<{
   disabled?: boolean;
   indices: AvailableIndex[];
   isValidating: boolean;
   onChangeSelectedIndices: (selectedIndices: AvailableIndex[]) => void;
-  validationErrors?: ValidationIndicesError[];
-}> = ({
-  disabled = false,
-  indices,
-  isValidating,
-  onChangeSelectedIndices,
-  validationErrors = [],
-}) => {
+  valid: boolean;
+}> = ({ disabled = false, indices, isValidating, onChangeSelectedIndices, valid }) => {
   const changeIsIndexSelected = useCallback(
     (indexName: string, isSelected: boolean) => {
       onChangeSelectedIndices(
@@ -47,8 +41,6 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
     [indices, onChangeSelectedIndices]
   );
 
-  const isInvalid = validationErrors.length > 0;
-
   return (
     <EuiDescribedFormGroup
       title={
@@ -67,12 +59,7 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
       }
     >
       <LoadingOverlayWrapper isLoading={isValidating}>
-        <EuiFormRow
-          fullWidth
-          isInvalid={isInvalid}
-          label={indicesSelectionLabel}
-          labelType="legend"
-        >
+        <EuiFormRow fullWidth isInvalid={!valid} label={indicesSelectionLabel} labelType="legend">
           <>
             {indices.map(index => (
               <IndexSetupRow

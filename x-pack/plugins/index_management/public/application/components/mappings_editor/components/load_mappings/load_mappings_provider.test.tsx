@@ -19,12 +19,7 @@ jest.mock('@elastic/eui', () => ({
   ),
 }));
 
-jest.mock('lodash', () => ({
-  ...jest.requireActual('lodash'),
-  debounce: (fn: any) => fn,
-}));
-
-import { registerTestBed, TestBed } from '../../../../../../../../test_utils';
+import { registerTestBed, nextTick, TestBed } from '../../../../../../../../test_utils';
 import { LoadMappingsProvider } from './load_mappings_provider';
 
 const ComponentToTest = ({ onJson }: { onJson: () => void }) => (
@@ -43,23 +38,22 @@ const setup = (props: any) =>
     defaultProps: props,
   })();
 
-const openModalWithJsonContent = ({ component, find }: TestBed) => (json: any) => {
-  act(() => {
+const openModalWithJsonContent = ({ find, waitFor }: TestBed) => async (json: any) => {
+  // Set the mappings to load
+  await act(async () => {
     find('load-json-button').simulate('click');
-  });
+    await waitFor('mockCodeEditor');
 
-  component.update();
-
-  act(() => {
-    // Set the mappings to load
     find('mockCodeEditor').simulate('change', {
       jsonString: JSON.stringify(json),
     });
+    await nextTick(500); // There is a debounce in the JsonEditor that we need to wait for
   });
 };
 
-describe('<LoadMappingsProvider />', () => {
-  test('it should forward valid mapping definition', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/59030
+describe.skip('<LoadMappingsProvider />', () => {
+  test('it should forward valid mapping definition', async () => {
     const mappingsToLoad = {
       properties: {
         title: {
@@ -69,10 +63,10 @@ describe('<LoadMappingsProvider />', () => {
     };
 
     const onJson = jest.fn();
-    const testBed = setup({ onJson }) as TestBed;
+    const testBed = await setup({ onJson });
 
     // Open the modal and add the JSON
-    openModalWithJsonContent(testBed)(mappingsToLoad);
+    await openModalWithJsonContent(testBed)(mappingsToLoad);
 
     // Confirm
     testBed.find('confirmModalConfirmButton').simulate('click');

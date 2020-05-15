@@ -37,8 +37,12 @@ export class Subject<T> {
     /**
      * We immediately call the function inside the subscribe so the consumer
      * receives the value immediately, withouth the need to wait for a change.
+     * We wrap it inside a setTimeout so that is is executed asynchronously
+     * and does not interfer with any logic right after the subscribe() call.
      */
-    fn(this.value);
+    setTimeout(() => {
+      fn(this.value);
+    });
 
     const unsubscribe = () => this.callbacks.delete(fn);
     return {

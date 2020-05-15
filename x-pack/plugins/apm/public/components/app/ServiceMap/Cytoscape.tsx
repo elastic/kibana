@@ -146,7 +146,7 @@ export function Cytoscape({
     };
 
     const dataHandler: cytoscape.EventHandler = event => {
-      if (cy && cy.elements().length > 0) {
+      if (cy) {
         if (serviceName) {
           resetConnectedEdgeStyle(cy.getElementById(serviceName));
           // Add the "primary" class to the node if its id matches the serviceName.

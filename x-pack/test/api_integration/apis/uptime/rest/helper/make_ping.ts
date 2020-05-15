@@ -18,7 +18,6 @@ export const makePing = async (
   refresh: boolean = true,
   tls: boolean | TlsProps = false
 ) => {
-  const timestamp = new Date();
   const baseDoc: any = {
     tcp: {
       rtt: {
@@ -41,7 +40,7 @@ export const makePing = async (
       ephemeral_id: '0d9a8dc6-f604-49e3-86a0-d8f9d6f2cbad',
       version: '8.0.0',
     },
-    '@timestamp': timestamp.toISOString(),
+    '@timestamp': new Date().toISOString(),
     resolve: {
       rtt: {
         us: 350,
@@ -89,10 +88,6 @@ export const makePing = async (
       check_group: uuid.v4(),
       type: 'http',
       status: 'up',
-      timespan: {
-        gte: timestamp.toISOString(),
-        lt: new Date(timestamp.getTime() + 5000).toISOString,
-      },
     },
     event: {
       dataset: 'uptime',

@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Section } from '../sections';
 import { AlphaMessaging, SettingFlyout } from '../components';
 import { useLink, useConfig } from '../hooks';
+import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH, DATA_STREAM_PATH } from '../constants';
 
 interface Props {
   showSettings?: boolean;
@@ -38,8 +39,8 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
   section,
   children,
 }) => {
-  const { getHref } = useLink();
   const { epm, fleet } = useConfig();
+
   const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
 
   return (
@@ -59,7 +60,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTabs display="condensed">
-                <EuiTab isSelected={section === 'overview'} href={getHref('overview')}>
+                <EuiTab isSelected={section === 'overview'} href={useLink()}>
                   <FormattedMessage
                     id="xpack.ingestManager.appNavigation.overviewLinkText"
                     defaultMessage="Overview"
@@ -67,7 +68,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                 </EuiTab>
                 <EuiTab
                   isSelected={section === 'epm'}
-                  href={getHref('integrations_all')}
+                  href={useLink(EPM_PATH)}
                   disabled={!epm?.enabled}
                 >
                   <FormattedMessage
@@ -75,10 +76,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                     defaultMessage="Integrations"
                   />
                 </EuiTab>
-                <EuiTab
-                  isSelected={section === 'agent_config'}
-                  href={getHref('configurations_list')}
-                >
+                <EuiTab isSelected={section === 'agent_config'} href={useLink(AGENT_CONFIG_PATH)}>
                   <FormattedMessage
                     id="xpack.ingestManager.appNavigation.configurationsLinkText"
                     defaultMessage="Configurations"
@@ -86,7 +84,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                 </EuiTab>
                 <EuiTab
                   isSelected={section === 'fleet'}
-                  href={getHref('fleet')}
+                  href={useLink(FLEET_PATH)}
                   disabled={!fleet?.enabled}
                 >
                   <FormattedMessage
@@ -94,7 +92,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                     defaultMessage="Fleet"
                   />
                 </EuiTab>
-                <EuiTab isSelected={section === 'data_stream'} href={getHref('data_streams')}>
+                <EuiTab isSelected={section === 'data_stream'} href={useLink(DATA_STREAM_PATH)}>
                   <FormattedMessage
                     id="xpack.ingestManager.appNavigation.dataStreamsLinkText"
                     defaultMessage="Data streams"

@@ -32,7 +32,7 @@ export function registerAnnotationAPIs({
     handler: (params: { data: t.TypeOf<TType>; client: ScopedAnnotationsClient }) => Promise<any>
   ): RequestHandler {
     return async (...args: Parameters<RequestHandler>) => {
-      const [context, request, response] = args;
+      const [, request, response] = args;
 
       const rt = types;
 
@@ -56,26 +56,16 @@ export function registerAnnotationAPIs({
         index,
         apiCaller,
         logger,
-        license: context.licensing?.license,
       });
 
-      try {
-        const res = await handler({
-          data: validation.right,
-          client,
-        });
+      const res = await handler({
+        data: validation.right,
+        client,
+      });
 
-        return response.ok({
-          body: res,
-        });
-      } catch (err) {
-        return response.custom({
-          statusCode: err.output?.statusCode ?? 500,
-          body: {
-            message: err.output?.payload?.message ?? 'An internal server error occured',
-          },
-        });
-      }
+      return response.ok({
+        body: res,
+      });
     };
   }
 

@@ -76,6 +76,10 @@ exports.NativeRealm = class NativeRealm {
     }
 
     const reservedUsers = await this.getReservedUsers();
+    if (!reservedUsers || reservedUsers.length < 1) {
+      throw new Error('no reserved users found, unable to set native realm passwords');
+    }
+
     await Promise.all(
       reservedUsers.map(async user => {
         await this.setPassword(user, options[`password.${user}`]);
@@ -84,18 +88,16 @@ exports.NativeRealm = class NativeRealm {
   }
 
   async getReservedUsers() {
-    return await this._autoRetry(async () => {
-      const resp = await this._client.security.getUser();
-      const usernames = Object.keys(resp.body).filter(
-        user => resp.body[user].metadata._reserved === true
-      );
-
-      if (!usernames?.length) {
-        throw new Error('no reserved users found, unable to set native realm passwords');
-      }
-
-      return usernames;
+    const users = await this._autoRetry(async () => {
+      return await this._client.security.getUser();
     });
+
+    return Object.keys(users.body).reduce((acc, user) => {
+      if (users.body[user].metadata._reserved === true) {
+        acc.push(user);
+      }
+      return acc;
+    }, []);
   }
 
   async isSecurityEnabled() {
@@ -123,9 +125,10 @@ exports.NativeRealm = class NativeRealm {
         throw error;
       }
 
-      const sec = 1.5 * attempt;
-      this._log.warning(`assuming ES isn't initialized completely, trying again in ${sec} seconds`);
-      await new Promise(resolve => setTimeout(resolve, sec * 1000));
+      this._log.warning(
+        'assuming [elastic] user not available yet, waiting 1.5 seconds and trying again'
+      );
+      await new Promise(resolve => setTimeout(resolve, 1500));
       return await this._autoRetry(fn, attempt + 1);
     }
   }

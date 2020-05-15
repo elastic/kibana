@@ -89,8 +89,6 @@ export interface MLJobApiResponse {
   }>;
 }
 
-export type MLError = Error & { body?: { message?: string } };
-
 export async function getHasMLJob({
   serviceName,
   transactionType,
@@ -109,14 +107,7 @@ export async function getHasMLJob({
       )}`
     });
     return true;
-  } catch (error) {
-    if (
-      error?.body?.statusCode === 404 &&
-      error?.body?.attributes?.body?.error?.type ===
-        'resource_not_found_exception'
-    ) {
-      return false; // false only if ML api responds with resource_not_found_exception
-    }
-    throw error;
+  } catch (e) {
+    return false;
   }
 }

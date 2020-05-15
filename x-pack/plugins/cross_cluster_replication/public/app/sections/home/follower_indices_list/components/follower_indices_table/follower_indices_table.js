@@ -26,79 +26,46 @@ import { routing } from '../../../../../services/routing';
 import { trackUiMetric } from '../../../../../services/track_ui_metric';
 import { ContextMenu } from '../context_menu';
 
-const getFilteredIndices = (followerIndices, queryText) => {
-  if (queryText) {
-    const normalizedSearchText = queryText.toLowerCase();
-
-    return followerIndices.filter(followerIndex => {
-      const { name, remoteCluster, leaderIndex } = followerIndex;
-
-      if (name.toLowerCase().includes(normalizedSearchText)) {
-        return true;
-      }
-
-      if (leaderIndex.toLowerCase().includes(normalizedSearchText)) {
-        return true;
-      }
-
-      if (remoteCluster.toLowerCase().includes(normalizedSearchText)) {
-        return true;
-      }
-
-      return false;
-    });
-  }
-
-  return followerIndices;
-};
-
 export class FollowerIndicesTable extends PureComponent {
   static propTypes = {
     followerIndices: PropTypes.array,
     selectFollowerIndex: PropTypes.func.isRequired,
   };
 
-  static getDerivedStateFromProps(props, state) {
-    const { followerIndices } = props;
-    const { prevFollowerIndices, queryText } = state;
-
-    // If a follower index gets deleted, we need to recreate the cached filtered follower indices.
-    if (prevFollowerIndices !== followerIndices) {
-      return {
-        prevFollowerIndices: followerIndices,
-        filteredClusters: getFilteredIndices(followerIndices, queryText),
-      };
-    }
-
-    return null;
-  }
-
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      prevFollowerIndices: props.followerIndices,
-      selectedItems: [],
-      filteredIndices: props.followerIndices,
-      queryText: '',
-    };
-  }
+  state = {
+    selectedItems: [],
+  };
 
   onSearch = ({ query }) => {
-    const { followerIndices } = this.props;
     const { text } = query;
-
-    // We cache the filtered indices instead of calculating them inside render() because
-    // of https://github.com/elastic/eui/issues/3445.
+    const normalizedSearchText = text.toLowerCase();
     this.setState({
-      queryText: text,
-      filteredIndices: getFilteredIndices(followerIndices, text),
+      queryText: normalizedSearchText,
     });
   };
 
   editFollowerIndex = id => {
     const uri = routing.getFollowerIndexPath(id, '/edit', false);
     routing.navigate(uri);
+  };
+
+  getFilteredIndices = () => {
+    const { followerIndices } = this.props;
+    const { queryText } = this.state;
+
+    if (queryText) {
+      return followerIndices.filter(followerIndex => {
+        const { name, remoteCluster, leaderIndex } = followerIndex;
+
+        const inName = name.toLowerCase().includes(queryText);
+        const inRemoteCluster = remoteCluster.toLowerCase().includes(queryText);
+        const inLeaderIndex = leaderIndex.toLowerCase().includes(queryText);
+
+        return inName || inRemoteCluster || inLeaderIndex;
+      });
+    }
+
+    return followerIndices.slice(0);
   };
 
   getTableColumns() {
@@ -291,7 +258,7 @@ export class FollowerIndicesTable extends PureComponent {
   };
 
   render() {
-    const { selectedItems, filteredIndices } = this.state;
+    const { selectedItems } = this.state;
 
     const sorting = {
       sort: {
@@ -318,14 +285,13 @@ export class FollowerIndicesTable extends PureComponent {
       onChange: this.onSearch,
       box: {
         incremental: true,
-        'data-test-subj': 'followerIndexSearch',
       },
     };
 
     return (
       <Fragment>
         <EuiInMemoryTable
-          items={filteredIndices}
+          items={this.getFilteredIndices()}
           itemId="name"
           columns={this.getTableColumns()}
           search={search}

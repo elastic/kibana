@@ -34,14 +34,17 @@ import {
   useGetAgents,
   useUrlParams,
   useLink,
-  useBreadcrumbs,
 } from '../../../hooks';
-import { AgentReassignConfigFlyout } from '../components';
+import { ConnectedLink, AgentReassignConfigFlyout } from '../components';
 import { SearchBar } from '../../../components/search_bar';
 import { AgentHealth } from '../components/agent_health';
 import { AgentUnenrollProvider } from '../components/agent_unenroll_provider';
 import { AgentStatusKueryHelper } from '../../../services';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
+import {
+  FLEET_AGENT_DETAIL_PATH,
+  AGENT_CONFIG_DETAILS_PATH,
+  AGENT_SAVED_OBJECT_TYPE,
+} from '../../../constants';
 
 const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
   overflow: 'hidden',
@@ -74,8 +77,8 @@ const statusFilters = [
 
 const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refresh: () => void }>(
   ({ agent, refresh, onReassignClick }) => {
-    const { getHref } = useLink();
     const hasWriteCapabilites = useCapabilities().write;
+    const DETAILS_URI = useLink(FLEET_AGENT_DETAIL_PATH);
     const [isOpen, setIsOpen] = useState(false);
     const handleCloseMenu = useCallback(() => setIsOpen(false), [setIsOpen]);
     const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
@@ -98,11 +101,7 @@ const RowActions = React.memo<{ agent: Agent; onReassignClick: () => void; refre
       >
         <EuiContextMenuPanel
           items={[
-            <EuiContextMenuItem
-              icon="inspect"
-              href={getHref('fleet_agent_details', { agentId: agent.id })}
-              key="viewConfig"
-            >
+            <EuiContextMenuItem icon="inspect" href={`${DETAILS_URI}${agent.id}`} key="viewConfig">
               <FormattedMessage
                 id="xpack.ingestManager.agentList.viewActionText"
                 defaultMessage="View agent"
@@ -155,11 +154,8 @@ function safeMetadata(val: any) {
 }
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
-  useBreadcrumbs('fleet_agent_list');
-  const { getHref } = useLink();
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
   const hasWriteCapabilites = useCapabilities().write;
-
   // Agent data states
   const [showInactive, setShowInactive] = useState<boolean>(false);
 
@@ -245,6 +241,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const agentConfigs = agentConfigsRequest.data ? agentConfigsRequest.data.items : [];
   const { isLoading: isAgentConfigsLoading } = agentConfigsRequest;
 
+  const CONFIG_DETAILS_URI = useLink(AGENT_CONFIG_DETAILS_PATH);
+
   const columns = [
     {
       field: 'local_metadata.host.hostname',
@@ -252,9 +250,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Host',
       }),
       render: (host: string, agent: Agent) => (
-        <EuiLink href={getHref('fleet_agent_details', { agentId: agent.id })}>
+        <ConnectedLink color="primary" path={`${FLEET_AGENT_DETAIL_PATH}${agent.id}`}>
           {safeMetadata(host)}
-        </EuiLink>
+        </ConnectedLink>
       ),
     },
     {
@@ -276,7 +274,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
             <EuiFlexItem grow={false} style={NO_WRAP_TRUNCATE_STYLE}>
               <EuiLink
-                href={getHref('configuration_details', { configId })}
+                href={`${CONFIG_DETAILS_URI}${configId}`}
                 style={NO_WRAP_TRUNCATE_STYLE}
                 title={configName || configId}
               >

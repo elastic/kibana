@@ -69,10 +69,6 @@ export const setup = props => {
     remoteClusterLink.simulate('click');
   };
 
-  const clickPaginationNextButton = () => {
-    testBed.find('remoteClusterListTable.pagination-button-next').simulate('click');
-  };
-
   return {
     ...testBed,
     actions: {
@@ -81,7 +77,6 @@ export const setup = props => {
       clickRowActionButtonAt,
       clickConfirmModalDeleteRemoteCluster,
       clickRemoteClusterAt,
-      clickPaginationNextButton,
     },
   };
 };

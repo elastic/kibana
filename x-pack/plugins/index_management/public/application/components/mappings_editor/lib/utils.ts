@@ -27,7 +27,6 @@ import {
   TYPE_NOT_ALLOWED_MULTIFIELD,
   TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL,
   TYPE_DEFINITION,
-  MAIN_DATA_TYPE_DEFINITION,
 } from '../constants';
 
 import { State } from '../reducer';
@@ -75,10 +74,7 @@ export const getFieldMeta = (field: Field, isMultiField?: boolean): FieldMeta =>
 export const getTypeLabelFromType = (type: DataType) =>
   TYPE_DEFINITION[type] ? TYPE_DEFINITION[type].label : `${TYPE_DEFINITION.other.label}: ${type}`;
 
-export const getFieldConfig = <T = unknown>(
-  param: ParameterName,
-  prop?: string
-): FieldConfig<any, T> => {
+export const getFieldConfig = (param: ParameterName, prop?: string): FieldConfig => {
   if (prop !== undefined) {
     if (
       !(PARAMETERS_DEFINITION[param] as any).props ||
@@ -128,31 +124,8 @@ const replaceAliasPathByAliasId = (
   return { aliases, byId };
 };
 
-const getMainTypeFromSubType = (subType: SubType): MainType =>
+export const getMainTypeFromSubType = (subType: SubType): MainType =>
   (SUB_TYPE_MAP_TO_MAIN[subType] ?? 'other') as MainType;
-
-/**
- * Read the field source type and decide if it is a SubType of a MainType
- * A SubType is for example the "float" datatype. It is the SubType of the "numeric" MainType
- *
- * @param sourceType The type declared on the mappings field
- */
-export const getTypeMetaFromSource = (
-  sourceType: string
-): { mainType: MainType; subType?: SubType } => {
-  if (!MAIN_DATA_TYPE_DEFINITION[sourceType as MainType]) {
-    // If the sourceType provided if **not** one of the MainType, it is probably a SubType type
-    const mainType = getMainTypeFromSubType(sourceType as SubType);
-    if (!mainType) {
-      throw new Error(
-        `Property type "${sourceType}" not recognized and no subType was found for it.`
-      );
-    }
-    return { mainType, subType: sourceType as SubType };
-  }
-
-  return { mainType: sourceType as MainType };
-};
 
 /**
  * In order to better work with the recursive pattern of the mappings `properties`, this method flatten the fields

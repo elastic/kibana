@@ -64,10 +64,6 @@ export const setup = props => {
     followerIndexLink.simulate('click');
   };
 
-  const clickPaginationNextButton = () => {
-    testBed.find('followerIndexListTable.pagination-button-next').simulate('click');
-  };
-
   return {
     ...testBed,
     actions: {
@@ -76,7 +72,6 @@ export const setup = props => {
       clickContextMenuButtonAt,
       openTableRowContextMenuAt,
       clickFollowerIndexAt,
-      clickPaginationNextButton,
     },
   };
 };

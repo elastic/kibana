@@ -41,11 +41,10 @@ export function useFetcher<TReturn>(
   fnDeps: any[],
   options: {
     preservePreviousData?: boolean;
-    showToastOnError?: boolean;
   } = {}
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
   const { notifications } = useApmPluginContext().core;
-  const { preservePreviousData = true, showToastOnError = true } = options;
+  const { preservePreviousData = true } = options;
   const { setIsLoading } = useLoadingIndicator();
 
   const { dispatchStatus } = useContext(LoadingIndicatorContext);
@@ -106,24 +105,22 @@ export function useFetcher<TReturn>(
               err.message
             );
 
-          if (showToastOnError) {
-            notifications.toasts.addWarning({
-              title: i18n.translate('xpack.apm.fetcher.error.title', {
-                defaultMessage: `Error while fetching resource`
-              }),
-              text: toMountPoint(
-                <div>
-                  <h5>
-                    {i18n.translate('xpack.apm.fetcher.error.status', {
-                      defaultMessage: `Error`
-                    })}
-                  </h5>
+          notifications.toasts.addWarning({
+            title: i18n.translate('xpack.apm.fetcher.error.title', {
+              defaultMessage: `Error while fetching resource`
+            }),
+            text: toMountPoint(
+              <div>
+                <h5>
+                  {i18n.translate('xpack.apm.fetcher.error.status', {
+                    defaultMessage: `Error`
+                  })}
+                </h5>
 
-                  {errorDetails}
-                </div>
-              )
-            });
-          }
+                {errorDetails}
+              </div>
+            )
+          });
           setIsLoading(false);
           setResult({
             data: undefined,
@@ -144,7 +141,6 @@ export function useFetcher<TReturn>(
   }, [
     counter,
     preservePreviousData,
-    showToastOnError,
     dispatchStatus,
     setIsLoading,
     ...fnDeps

@@ -23,7 +23,7 @@ import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
-  field: FieldHook<boolean>;
+  field: FieldHook;
   euiFieldProps?: Record<string, any>;
   idAria?: string;
   [key: string]: any;

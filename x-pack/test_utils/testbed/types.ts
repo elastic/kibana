@@ -100,9 +100,8 @@ export interface TestBed<T = string> {
      ```
      * @param select The form select. Can either be a data-test-subj or a reactWrapper (can be a nested path. e.g. "myForm.myInput").
      * @param value The value to set
-     * @param doUpdateComponent Call component.update() after changing the select value
      */
-    setSelectValue: (select: T | ReactWrapper, value: string, doUpdateComponent?: boolean) => void;
+    setSelectValue: (select: T | ReactWrapper, value: string) => void;
     /**
      * Select or unselect a form checkbox.
      *

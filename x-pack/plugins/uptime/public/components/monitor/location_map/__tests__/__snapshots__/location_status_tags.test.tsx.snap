@@ -98,7 +98,7 @@ exports[`LocationStatusTags component renders when all locations are down 1`] = 
   margin-top: auto;
 }
 
-@media (max-width:1042px) {
+@media (max-width:830px) {
   .c1 {
     display: inline-block;
     margin-right: 16px;
@@ -213,7 +213,7 @@ exports[`LocationStatusTags component renders when all locations are up 1`] = `
   margin-top: auto;
 }
 
-@media (max-width:1042px) {
+@media (max-width:830px) {
   .c1 {
     display: inline-block;
     margin-right: 16px;
@@ -329,7 +329,7 @@ Array [
   margin-top: auto;
 }
 
-@media (max-width:1042px) {
+@media (max-width:830px) {
   .c1 {
     display: inline-block;
     margin-right: 16px;
@@ -659,7 +659,7 @@ Array [
   padding-left: 18px;
 }
 
-@media (max-width:1042px) {
+@media (max-width:830px) {
 
 }
 

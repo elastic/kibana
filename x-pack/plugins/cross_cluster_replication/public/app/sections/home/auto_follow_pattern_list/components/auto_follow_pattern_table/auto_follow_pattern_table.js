@@ -23,30 +23,6 @@ import {
 import { routing } from '../../../../../services/routing';
 import { trackUiMetric } from '../../../../../services/track_ui_metric';
 
-const getFilteredPatterns = (autoFollowPatterns, queryText) => {
-  if (queryText) {
-    const normalizedSearchText = queryText.toLowerCase();
-
-    return autoFollowPatterns.filter(autoFollowPattern => {
-      const {
-        name,
-        remoteCluster,
-        followIndexPatternPrefix,
-        followIndexPatternSuffix,
-      } = autoFollowPattern;
-
-      const inName = name.toLowerCase().includes(normalizedSearchText);
-      const inRemoteCluster = remoteCluster.toLowerCase().includes(normalizedSearchText);
-      const inPrefix = followIndexPatternPrefix.toLowerCase().includes(normalizedSearchText);
-      const inSuffix = followIndexPatternSuffix.toLowerCase().includes(normalizedSearchText);
-
-      return inName || inRemoteCluster || inPrefix || inSuffix;
-    });
-  }
-
-  return autoFollowPatterns;
-};
-
 export class AutoFollowPatternTable extends PureComponent {
   static propTypes = {
     autoFollowPatterns: PropTypes.array,
@@ -55,42 +31,41 @@ export class AutoFollowPatternTable extends PureComponent {
     resumeAutoFollowPattern: PropTypes.func.isRequired,
   };
 
-  static getDerivedStateFromProps(props, state) {
-    const { autoFollowPatterns } = props;
-    const { prevAutoFollowPatterns, queryText } = state;
-
-    // If an auto-follow pattern gets deleted, we need to recreate the cached filtered auto-follow patterns.
-    if (prevAutoFollowPatterns !== autoFollowPatterns) {
-      return {
-        prevAutoFollowPatterns: autoFollowPatterns,
-        filteredAutoFollowPatterns: getFilteredPatterns(autoFollowPatterns, queryText),
-      };
-    }
-
-    return null;
-  }
-
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      prevAutoFollowPatterns: props.autoFollowPatterns,
-      selectedItems: [],
-      filteredAutoFollowPatterns: props.autoFollowPatterns,
-      queryText: '',
-    };
-  }
+  state = {
+    selectedItems: [],
+  };
 
   onSearch = ({ query }) => {
-    const { autoFollowPatterns } = this.props;
     const { text } = query;
-
-    // We cache the filtered indices instead of calculating them inside render() because
-    // of https://github.com/elastic/eui/issues/3445.
+    const normalizedSearchText = text.toLowerCase();
     this.setState({
-      queryText: text,
-      filteredAutoFollowPatterns: getFilteredPatterns(autoFollowPatterns, text),
+      queryText: normalizedSearchText,
     });
+  };
+
+  getFilteredPatterns = () => {
+    const { autoFollowPatterns } = this.props;
+    const { queryText } = this.state;
+
+    if (queryText) {
+      return autoFollowPatterns.filter(autoFollowPattern => {
+        const {
+          name,
+          remoteCluster,
+          followIndexPatternPrefix,
+          followIndexPatternSuffix,
+        } = autoFollowPattern;
+
+        const inName = name.toLowerCase().includes(queryText);
+        const inRemoteCluster = remoteCluster.toLowerCase().includes(queryText);
+        const inPrefix = followIndexPatternPrefix.toLowerCase().includes(queryText);
+        const inSuffix = followIndexPatternSuffix.toLowerCase().includes(queryText);
+
+        return inName || inRemoteCluster || inPrefix || inSuffix;
+      });
+    }
+
+    return autoFollowPatterns.slice(0);
   };
 
   getTableColumns() {
@@ -169,7 +144,7 @@ export class AutoFollowPatternTable extends PureComponent {
             defaultMessage: 'Leader patterns',
           }
         ),
-        render: leaderIndexPatterns => leaderIndexPatterns.join(', '),
+        render: leaderPatterns => leaderPatterns.join(', '),
       },
       {
         field: 'followIndexPatternPrefix',
@@ -303,7 +278,7 @@ export class AutoFollowPatternTable extends PureComponent {
   };
 
   render() {
-    const { selectedItems, filteredAutoFollowPatterns } = this.state;
+    const { selectedItems } = this.state;
 
     const sorting = {
       sort: {
@@ -322,13 +297,13 @@ export class AutoFollowPatternTable extends PureComponent {
         this.setState({ selectedItems: selectedItems.map(({ name }) => name) }),
     };
 
+    const items = this.getFilteredPatterns();
+
     const search = {
       toolsLeft: selectedItems.length ? (
         <AutoFollowPatternActionMenu
           arrowDirection="down"
-          patterns={this.state.selectedItems.map(name =>
-            filteredAutoFollowPatterns.find(item => item.name === name)
-          )}
+          patterns={this.state.selectedItems.map(name => items.find(item => item.name === name))}
         />
       ) : (
         undefined
@@ -336,14 +311,13 @@ export class AutoFollowPatternTable extends PureComponent {
       onChange: this.onSearch,
       box: {
         incremental: true,
-        'data-test-subj': 'autoFollowPatternSearch',
       },
     };
 
     return (
       <Fragment>
         <EuiInMemoryTable
-          items={filteredAutoFollowPatterns}
+          items={items}
           itemId="name"
           columns={this.getTableColumns()}
           search={search}

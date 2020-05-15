@@ -5,20 +5,13 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import { componentHelpers, MappingsEditorTestBed, DomFields } from './helpers';
+import { componentHelpers, MappingsEditorTestBed, DomFields, nextTick } from './helpers';
 
 const { setup } = componentHelpers.mappingsEditor;
 const onChangeHandler = jest.fn();
 
-describe('Mappings editor: mapped fields', () => {
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
+// FLAKY: https://github.com/elastic/kibana/issues/65741
+describe.skip('Mappings editor: mapped fields', () => {
   afterEach(() => {
     onChangeHandler.mockReset();
   });
@@ -58,24 +51,31 @@ describe('Mappings editor: mapped fields', () => {
     };
 
     test('should correctly represent the fields in the DOM tree', async () => {
-      testBed = setup({
-        value: defaultMappings,
-        onChange: onChangeHandler,
+      await act(async () => {
+        testBed = await setup({
+          value: defaultMappings,
+          onChange: onChangeHandler,
+        });
       });
 
       const {
         actions: { expandAllFieldsAndReturnMetadata },
       } = testBed;
 
-      const domTreeMetadata = await expandAllFieldsAndReturnMetadata();
+      let domTreeMetadata: DomFields = {};
+      await act(async () => {
+        domTreeMetadata = await expandAllFieldsAndReturnMetadata();
+      });
 
       expect(domTreeMetadata).toEqual(defaultMappings.properties);
     });
 
     test('should allow to be controlled by parent component and update on prop change', async () => {
-      testBed = setup({
-        value: defaultMappings,
-        onChange: onChangeHandler,
+      await act(async () => {
+        testBed = await setup({
+          value: defaultMappings,
+          onChange: onChangeHandler,
+        });
       });
 
       const {
@@ -90,10 +90,14 @@ describe('Mappings editor: mapped fields', () => {
       await act(async () => {
         // Change the `value` prop of our <MappingsEditor />
         setProps({ value: newMappings });
-      });
-      component.update();
 
-      domTreeMetadata = await expandAllFieldsAndReturnMetadata();
+        // Don't ask me why but the 3 following lines are all required
+        component.update();
+        await nextTick();
+        component.update();
+
+        domTreeMetadata = await expandAllFieldsAndReturnMetadata();
+      });
 
       expect(domTreeMetadata).toEqual(newMappings.properties);
     });

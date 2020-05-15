@@ -18,7 +18,7 @@ import {
   IngestManagerConfigType,
   IngestManagerStartDeps,
 } from '../../plugin';
-import { PAGE_ROUTING_PATHS } from './constants';
+import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH, DATA_STREAM_PATH } from './constants';
 import { DefaultLayout, WithoutHeaderLayout } from './layouts';
 import { Loading, Error } from './components';
 import { IngestManagerOverview, EPMApp, AgentConfigApp, FleetApp, DataStreamApp } from './sections';
@@ -174,42 +174,42 @@ const IngestManagerRoutes = ({ ...rest }) => {
   }
 
   return (
-    <EuiErrorBoundary>
+    <PackageInstallProvider notifications={notifications}>
       <FleetStatusProvider>
-        <Router {...rest}>
-          <PackageInstallProvider notifications={notifications}>
+        <EuiErrorBoundary>
+          <Router {...rest}>
             <Switch>
-              <ProtectedRoute path={PAGE_ROUTING_PATHS.integrations} isAllowed={epm.enabled}>
+              <ProtectedRoute path={EPM_PATH} isAllowed={epm.enabled}>
                 <DefaultLayout section="epm">
                   <EPMApp />
                 </DefaultLayout>
               </ProtectedRoute>
-              <Route path={PAGE_ROUTING_PATHS.configurations}>
+              <Route path={AGENT_CONFIG_PATH}>
                 <DefaultLayout section="agent_config">
                   <AgentConfigApp />
                 </DefaultLayout>
               </Route>
-              <Route path={PAGE_ROUTING_PATHS.data_streams}>
+              <Route path={DATA_STREAM_PATH}>
                 <DefaultLayout section="data_stream">
                   <DataStreamApp />
                 </DefaultLayout>
               </Route>
-              <ProtectedRoute path={PAGE_ROUTING_PATHS.fleet} isAllowed={fleet.enabled}>
+              <ProtectedRoute path={FLEET_PATH} isAllowed={fleet.enabled}>
                 <DefaultLayout section="fleet">
                   <FleetApp />
                 </DefaultLayout>
               </ProtectedRoute>
-              <Route exact path={PAGE_ROUTING_PATHS.overview}>
+              <Route exact path="/">
                 <DefaultLayout section="overview">
                   <IngestManagerOverview />
                 </DefaultLayout>
               </Route>
               <Redirect to="/" />
             </Switch>
-          </PackageInstallProvider>
-        </Router>
+          </Router>
+        </EuiErrorBoundary>
       </FleetStatusProvider>
-    </EuiErrorBoundary>
+    </PackageInstallProvider>
   );
 };
 
@@ -265,8 +265,3 @@ export function renderApp(
     ReactDOM.unmountComponentAtNode(element);
   };
 }
-
-export const teardownIngestManager = (coreStart: CoreStart) => {
-  coreStart.chrome.docTitle.reset();
-  coreStart.chrome.setBreadcrumbs([]);
-};

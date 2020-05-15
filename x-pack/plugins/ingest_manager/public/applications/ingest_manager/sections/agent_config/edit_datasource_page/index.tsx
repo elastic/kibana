@@ -16,10 +16,10 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
+import { AGENT_CONFIG_DETAILS_PATH } from '../../../constants';
 import { AgentConfig, PackageInfo, NewDatasource } from '../../../types';
 import {
   useLink,
-  useBreadcrumbs,
   useCore,
   useConfig,
   sendUpdateDatasource,
@@ -53,7 +53,6 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
     params: { configId, datasourceId },
   } = useRouteMatch();
   const history = useHistory();
-  const { getHref, getPath } = useLink();
   const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
 
   useEffect(() => {
@@ -186,7 +185,8 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
   };
 
   // Cancel url
-  const cancelUrl = getHref('configuration_details', { configId });
+  const CONFIG_URL = useLink(`${AGENT_CONFIG_DETAILS_PATH}${configId}`);
+  const cancelUrl = CONFIG_URL;
 
   // Save datasource
   const [formState, setFormState] = useState<DatasourceFormState>('INVALID');
@@ -208,7 +208,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
     }
     const { error } = await saveDatasource();
     if (!error) {
-      history.push(getPath('configuration_details', { configId }));
+      history.push(`${AGENT_CONFIG_DETAILS_PATH}${configId}`);
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.ingestManager.editDatasource.updatedNotificationTitle', {
           defaultMessage: `Successfully updated '{datasourceName}'`,
@@ -262,7 +262,6 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
         />
       ) : (
         <>
-          <Breadcrumb configName={agentConfig.name} configId={configId} />
           {formState === 'CONFIRM' && (
             <ConfirmDeployConfigModal
               agentCount={agentCount}
@@ -350,12 +349,4 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
       )}
     </CreateDatasourcePageLayout>
   );
-};
-
-const Breadcrumb: React.FunctionComponent<{ configName: string; configId: string }> = ({
-  configName,
-  configId,
-}) => {
-  useBreadcrumbs('edit_datasource', { configName, configId });
-  return null;
 };

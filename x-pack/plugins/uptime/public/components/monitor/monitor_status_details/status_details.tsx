@@ -18,13 +18,8 @@ interface MonitorStatusDetailsProps {
 }
 
 const WrapFlexItem = styled(EuiFlexItem)`
-  &&& {
-    @media (max-width: 768px) {
-      width: 100%;
-    }
-    @media (max-width: 1042px) {
-      flex-basis: 520px;
-    }
+  @media (max-width: 1150px) {
+    width: 100%;
   }
 `;
 

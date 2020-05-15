@@ -20,7 +20,6 @@ import {
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import { ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
-  useBreadcrumbs,
   usePagination,
   useGetEnrollmentAPIKeys,
   useGetAgentConfigs,
@@ -126,7 +125,6 @@ const DeleteButton: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh:
 };
 
 export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
-  useBreadcrumbs('fleet_enrollment_tokens');
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [search, setSearch] = useState('');
   const { pagination, setPagination, pageSizeOptions } = usePagination();

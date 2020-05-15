@@ -8,8 +8,11 @@ import React, { useState } from 'react';
 import { useRouteMatch, Switch, Route } from 'react-router-dom';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { i18n } from '@kbn/i18n';
-import { PAGE_ROUTING_PATHS } from '../../../../constants';
-import { useLink, useGetCategories, useGetPackages, useBreadcrumbs } from '../../../../hooks';
+import {
+  EPM_LIST_ALL_PACKAGES_PATH,
+  EPM_LIST_INSTALLED_PACKAGES_PATH,
+} from '../../../../constants';
+import { useLink, useGetCategories, useGetPackages } from '../../../../hooks';
 import { WithHeaderLayout } from '../../../../layouts';
 import { CategorySummaryItem } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
@@ -20,7 +23,9 @@ export function EPMHomePage() {
   const {
     params: { tabId },
   } = useRouteMatch<{ tabId?: string }>();
-  const { getHref } = useLink();
+
+  const ALL_PACKAGES_URI = useLink(EPM_LIST_ALL_PACKAGES_PATH);
+  const INSTALLED_PACKAGES_URI = useLink(EPM_LIST_INSTALLED_PACKAGES_PATH);
 
   return (
     <WithHeaderLayout
@@ -33,7 +38,7 @@ export function EPMHomePage() {
             name: i18n.translate('xpack.ingestManager.epmList.allTabText', {
               defaultMessage: 'All integrations',
             }),
-            href: getHref('integrations_all'),
+            href: ALL_PACKAGES_URI,
             isSelected: tabId !== 'installed',
           },
           {
@@ -41,17 +46,17 @@ export function EPMHomePage() {
             name: i18n.translate('xpack.ingestManager.epmList.installedTabText', {
               defaultMessage: 'Installed integrations',
             }),
-            href: getHref('integrations_installed'),
+            href: INSTALLED_PACKAGES_URI,
             isSelected: tabId === 'installed',
           },
         ] as unknown) as EuiTabProps[]
       }
     >
       <Switch>
-        <Route path={PAGE_ROUTING_PATHS.integrations_installed}>
+        <Route path={EPM_LIST_INSTALLED_PACKAGES_PATH}>
           <InstalledPackages />
         </Route>
-        <Route path={PAGE_ROUTING_PATHS.integrations_all}>
+        <Route path={EPM_LIST_ALL_PACKAGES_PATH}>
           <AvailablePackages />
         </Route>
       </Switch>
@@ -60,7 +65,6 @@ export function EPMHomePage() {
 }
 
 function InstalledPackages() {
-  useBreadcrumbs('integrations_installed');
   const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages();
   const [selectedCategory, setSelectedCategory] = useState('');
 
@@ -113,7 +117,6 @@ function InstalledPackages() {
 }
 
 function AvailablePackages() {
-  useBreadcrumbs('integrations_all');
   const [selectedCategory, setSelectedCategory] = useState('');
   const { data: categoryPackagesRes, isLoading: isLoadingPackages } = useGetPackages({
     category: selectedCategory,
