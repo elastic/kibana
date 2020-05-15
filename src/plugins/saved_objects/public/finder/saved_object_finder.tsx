@@ -49,6 +49,8 @@ import {
   SavedObjectsStart,
 } from 'src/core/public';
 
+import { LISTING_LIMIT_SETTING } from '../../common';
+
 export interface SavedObjectMetaData<T = unknown> {
   type: string;
   name: string;
@@ -131,7 +133,7 @@ class SavedObjectFinderUi extends React.Component<
       .map(metaData => metaData.includeFields || [])
       .reduce((allFields, currentFields) => allFields.concat(currentFields), ['title']);
 
-    const perPage = this.props.uiSettings.get('savedObjects:listingLimit');
+    const perPage = this.props.uiSettings.get(LISTING_LIMIT_SETTING);
     const resp = await this.props.savedObjects.client.find<FinderAttributes>({
       type: Object.keys(metaDataMap),
       fields: [...new Set(fields)],
