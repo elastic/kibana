@@ -139,7 +139,7 @@ module.exports = {
      * Licence headers
      */
     {
-      files: ['**/*.{js,ts,tsx}'],
+      files: ['**/*.{js,ts,tsx}', '!plugins/**/*'],
       rules: {
         '@kbn/eslint/require-license-header': [
           'error',
@@ -225,6 +225,8 @@ module.exports = {
                   // for absolute imports until fixed in
                   // https://github.com/elastic/kibana/issues/36096
                   '!src/core/server/*.test.mocks{,.ts}',
+
+                  'target/types/**',
                 ],
                 allowSameFolder: true,
                 errorMessage:
