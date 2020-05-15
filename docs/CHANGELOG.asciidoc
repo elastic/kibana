@@ -45,7 +45,7 @@ See <<breaking-changes-7.6,breaking changes in 7.6>>.
 === Known issue
 
 Configuration::
-* The `http.customResponseHeaders` will prevent {kib} to start if any headers are set using other types than string.
+* The `server.customResponseHeaders` option will prevent {kib} to start if any headers are set using other types than string.
 You can convert your boolean or number headers to strings to fix this. (`my-header: "true"` instead of `my-header: true`).
 {issue}66146[#66146]
 
@@ -96,7 +96,7 @@ See <<breaking-changes-7.6,breaking changes in 7.6>>.
 === Known issue
 
 Configuration::
-* The `http.customResponseHeaders` will prevent {kib} to start if any headers are set using other types than string.
+* The `server.customResponseHeaders` option will prevent {kib} to start if any headers are set using other types than string.
 You can convert your boolean or number headers to strings to fix this. (`my-header: "true"` instead of `my-header: true`).
 {issue}66146[#66146]
 
@@ -182,7 +182,7 @@ See also <<breaking-changes-7.6,breaking changes in 7.6>>.
 === Known issue
 
 * When you use the default `dateFormat:tz: browser` setting, the timestamps appear in UTC instead of the local time of the user browser. To use the local time of the user browser, set `dateFormat:tz:` to the timezone of the user. {issue}57457[#57457]
-* The `http.customResponseHeaders` will prevent {kib} to start if any headers are set using other types than string.
+* The `server.customResponseHeaders` option will prevent {kib} to start if any headers are set using other types than string.
 You can convert your boolean or number headers to strings to fix this. (`my-header: "true"` instead of `my-header: true`).
 {issue}66146[#66146]
 
