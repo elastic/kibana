@@ -11,7 +11,7 @@ import {
   getPager,
   getFilter,
   isDetailPanelOpen,
-  showSystemIndices,
+  showHiddenIndices,
   getSortField,
   isSortAscending,
   getIndicesAsArray,
@@ -26,7 +26,7 @@ import {
   pageChanged,
   pageSizeChanged,
   sortChanged,
-  showSystemIndicesChanged,
+  showHiddenIndicesChanged,
   loadIndices,
   reloadIndices,
   toggleChanged,
@@ -42,7 +42,7 @@ const mapStateToProps = state => {
     indices: getPageOfIndices(state),
     pager: getPager(state),
     filter: getFilter(state),
-    showSystemIndices: showSystemIndices(state),
+    showHiddenIndices: showHiddenIndices(state),
     sortField: getSortField(state),
     isSortAscending: isSortAscending(state),
     indicesLoading: indicesLoading(state),
@@ -65,8 +65,8 @@ const mapDispatchToProps = dispatch => {
     sortChanged: (sortField, isSortAscending) => {
       dispatch(sortChanged({ sortField, isSortAscending }));
     },
-    showSystemIndicesChanged: showSystemIndices => {
-      dispatch(showSystemIndicesChanged({ showSystemIndices }));
+    showHiddenIndicesChanged: showHiddenIndices => {
+      dispatch(showHiddenIndicesChanged({ showHiddenIndices }));
     },
     toggleChanged: (toggleName, toggleValue) => {
       dispatch(toggleChanged({ toggleName, toggleValue }));
