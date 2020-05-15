@@ -32,10 +32,12 @@ export default function({ getService }: FtrProviderContext) {
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
     });
-    afterEach(async () => {
-      await reportingAPI.deleteAllReportingIndexes();
+    after(async () => {
       await esArchiver.unload(OSS_KIBANA_ARCHIVE_PATH);
       await esArchiver.unload(OSS_DATA_ARCHIVE_PATH);
+    });
+    afterEach(async () => {
+      await reportingAPI.deleteAllReportingIndexes();
     });
 
     describe('initial state', () => {

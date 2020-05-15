@@ -5,30 +5,11 @@
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
-import { OSS_DATA_ARCHIVE_PATH, OSS_KIBANA_ARCHIVE_PATH } from './constants';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ loadTestFile, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
-
+export default function({ loadTestFile }: FtrProviderContext) {
   describe('Reporting APIs', function() {
     this.tags('ciGroup2');
-
-    before(async () => {
-      await esArchiver.load(OSS_KIBANA_ARCHIVE_PATH);
-      await esArchiver.load(OSS_DATA_ARCHIVE_PATH);
-
-      await kibanaServer.uiSettings.update({
-        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
-      });
-    });
-
-    after(async () => {
-      await esArchiver.unload(OSS_KIBANA_ARCHIVE_PATH);
-      await esArchiver.unload(OSS_DATA_ARCHIVE_PATH);
-    });
-
     loadTestFile(require.resolve('./csv_job_params'));
     loadTestFile(require.resolve('./csv_saved_search'));
     loadTestFile(require.resolve('./usage'));
