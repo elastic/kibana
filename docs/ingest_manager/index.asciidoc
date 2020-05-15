@@ -1,6 +1,5 @@
-[[ingest-manager]]
 [role="xpack"]
-
+[[epm]]
 == Ingest Manager
 
 These are the docs for the Ingest Manager.
@@ -68,8 +67,6 @@ More details about the registry can be found [here](https://github.com/elastic/p
 
 Fleet is the part of the Ingest Manager UI in Kibana that handles the part of enrolling Elastic Agents,
 managing agents and sending configurations to the Elastic Agent.
-
-<<ingest-manager-fleet>>
 
 ==== Indexing Strategy
 
@@ -209,5 +206,3 @@ When a package is installed or upgraded, certain Kibana and Elasticsearch assets
 
 * link:index-templates.asciidoc[Elasticsearch Index Templates]
 * Kibana Index Patterns
-
-include::fleet.asciidoc[]

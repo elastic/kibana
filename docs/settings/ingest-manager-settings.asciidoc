@@ -1,0 +1,56 @@
+[role="xpack"]
+[[ingest-manager-settings-kb]]
+=== Ingest Manager settings in Kibana
+++++
+<titleabbrev>Ingest Manager settings</titleabbrev>
+++++
+
+You can configure `xpack.ingestManager` settings in your `kibana.yml`
+
+[[general-ingest-manager-settings-kb]]
+==== General Ingest Manager settings
+
+[cols="2*<"]
+|===
+| `xpack.ingestManager.enabled`
+  | Set to `true` to enable {kib} Ingest Manager. 
+|===
+
+[cols="2*<"]
+|===
+| `xpack.ingestManager.epm.enabled`
+  | Set to `true` (default) to enable {kib} EPM. 
+|===
+
+[cols="2*<"]
+|===
+| `xpack.ingestManager.fleet.enabled`
+  | Set to `true` (default) to enable {kib} Fleet. 
+|===
+
+[[ingest-manager-data-visualizer-settings]]
+
+==== Fleet settings
+
+[cols="2*<"]
+|===
+| `xpack.ingestManager.fleet.kibana.host`
+  | The hostname used by Elastic Agent for accessing Kibana
+|===
+
+[cols="2*<"]
+|===
+| `xpack.ingestManager.fleet.elasticsearch.host`
+  | The hostname used by Elastic Agent for accessing ElasticSearch
+|===
+
+[cols="2*<"]
+|===
+| `xpack.ingestManager.fleet.tlsCheckDisabled`
+  | Set to `true` to allow to run Fleet on a Kibana instance without TLS enabled.
+|===
+
+[NOTE]
+====
+In Elastic Cloud, Fleet flags are already configured.
+====
