@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -75,6 +75,10 @@ export function TimechartHeader({
 }: TimechartHeaderProps) {
   const [interval, setInterval] = useState(stateInterval);
 
+  useEffect(() => {
+    setInterval(stateInterval);
+  }, [stateInterval]);
+
   const handleIntervalChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setInterval(e.target.value);
     onChangeInterval(e.target.value);
@@ -96,6 +100,7 @@ export function TimechartHeader({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSelect
+            compressed
             id="dscResultsIntervalSelector"
             data-test-subj="discoverIntervalSelect"
             options={options
