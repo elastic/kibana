@@ -23,9 +23,9 @@ import { promisify } from 'util';
 
 import del from 'del';
 
-import { comparePngs } from './lib/compare_pngs';
-import { FtrProviderContext } from '../ftr_provider_context';
-import { WebElementWrapper } from './lib/web_element_wrapper';
+import { comparePngs } from '../lib/compare_pngs';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { WebElementWrapper } from '../lib/web_element_wrapper';
 
 const mkdirAsync = promisify(mkdir);
 const writeFileAsync = promisify(writeFile);
