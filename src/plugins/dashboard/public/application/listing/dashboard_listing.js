@@ -50,6 +50,7 @@ export class DashboardListing extends React.Component {
           tableColumns={this.getTableColumns()}
           listingLimit={this.props.listingLimit}
           initialFilter={this.props.initialFilter}
+          initialPageSize={this.props.initialPageSize}
           noItemsFragment={this.getNoItemsMessage()}
           entityName={i18n.translate('dashboard.listing.table.entityName', {
             defaultMessage: 'dashboard',
@@ -187,6 +188,7 @@ DashboardListing.propTypes = {
   listingLimit: PropTypes.number.isRequired,
   hideWriteControls: PropTypes.bool.isRequired,
   initialFilter: PropTypes.string,
+  initialPageSize: PropTypes.number.isRequired,
 };
 
 DashboardListing.defaultProps = {
