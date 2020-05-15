@@ -24,3 +24,6 @@ export const AlertTls = () => {
     />
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { AlertTls as default };
