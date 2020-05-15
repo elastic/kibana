@@ -51,8 +51,12 @@ import { Filter, TimeRange } from '../../../../../src/plugins/data/public';
 import { ISource } from '../classes/sources/source';
 import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
+import { ILayer } from '../classes/layers/layer';
 
-function createLayerInstance(layerDescriptor: LayerDescriptor, inspectorAdapters: Adapters) {
+function createLayerInstance(
+  layerDescriptor: LayerDescriptor,
+  inspectorAdapters: Adapters
+): ILayer {
   const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
 
   switch (layerDescriptor.type) {
@@ -295,6 +299,12 @@ export const getLayerList = createSelector(
     );
   }
 );
+
+export function getLayerById(state: MapStoreState, layerId: string): ILayer | undefined {
+  return getLayerList(state).find(layer => {
+    return layerId === layer.getId();
+  });
+}
 
 export const getFittableLayers = createSelector(getLayerList, layerList => {
   return layerList.filter(layer => {
