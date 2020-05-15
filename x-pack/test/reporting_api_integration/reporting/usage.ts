@@ -101,7 +101,7 @@ export default function({ getService }: FtrProviderContext) {
       it('should handle csv', async () => {
         await reportingAPI.expectAllJobsToFinishSuccessfully(
           await Promise.all([
-            await reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3), // depends on loaded archive
+            reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3),
           ])
         );
 

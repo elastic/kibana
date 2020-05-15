@@ -19,7 +19,7 @@ interface PDFAppCounts {
   };
 }
 
-interface ReportingUsageStats {
+export interface ReportingUsageStats {
   available: boolean;
   enabled: boolean;
   total: number;
@@ -41,7 +41,7 @@ function removeWhitespace(str: string) {
   return str.replace(/\s/g, '');
 }
 
-function ReportingAPIProvider({ getService }: FtrProviderContext) {
+export function ReportingAPIProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
@@ -167,5 +167,3 @@ export const services = {
   ...xpackServices,
   reportingAPI: ReportingAPIProvider,
 };
-
-export { ReportingUsageStats, ReportingAPIProvider };
