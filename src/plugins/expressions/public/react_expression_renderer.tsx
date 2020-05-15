@@ -141,13 +141,12 @@ export const ReactExpressionRenderer = ({
   }, [hasCustomRenderErrorHandler, onEvent]);
 
   useEffect(() => {
-    if (!reload$) return;
     const subscription = reload$?.subscribe(() => {
       if (expressionLoaderRef.current) {
         expressionLoaderRef.current.update(expression, expressionLoaderOptions);
       }
     });
-    return () => subscription.unsubscribe();
+    return () => subscription?.unsubscribe();
   }, [reload$]);
 
   // Re-fetch data automatically when the inputs change
