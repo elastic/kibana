@@ -10,20 +10,13 @@ import { getRenderedFieldValue, PointToolTipContentComponent } from './point_too
 import { TestProviders } from '../../../../common/mock';
 import { getEmptyStringTag } from '../../../../common/components/empty_value';
 import { HostDetailsLink, IPDetailsLink } from '../../../../common/components/links';
-import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { FlowTarget } from '../../../../graphql/types';
 import { ITooltipProperty } from '../../../../../../maps/public';
 import { TooltipProperty } from '../../../../../../maps/public/classes/tooltips/tooltip_property';
 
 describe('PointToolTipContent', () => {
-  const mount = useMountAppended();
-
   const mockFeatureProps: ITooltipProperty[] = [
     new TooltipProperty('host.name', 'host.name', 'testPropValue'),
-  ];
-
-  const mockFeaturePropsArrayValue: ITooltipProperty[] = [
-    new TooltipProperty('host.name', 'host.name', ['testPropValue1', 'testPropValue2']),
   ];
 
   test('renders correctly against snapshot', () => {
