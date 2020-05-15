@@ -5,7 +5,7 @@
  */
 
 import { ResolverEvent, AggBucket } from '../../../../common/types';
-import { entityId } from '../../../../common/models/event';
+import { eventId } from '../../../../common/models/event';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
 
 interface TotalsAggregation {
@@ -85,7 +85,7 @@ export class PaginationBuilder {
       const lastResult = results[results.length - 1];
       const cursor = {
         timestamp: lastResult['@timestamp'],
-        eventID: entityId(lastResult),
+        eventID: eventId(lastResult),
       };
       return PaginationBuilder.urlEncodeCursor(cursor);
     }

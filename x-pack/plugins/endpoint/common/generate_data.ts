@@ -150,7 +150,7 @@ export interface Tree {
 
 export interface TreeOptions {
   /**
-   * This does not include the origin/root node
+   * The value in ancestors does not include the origin/root node
    */
   ancestors?: number;
   generations?: number;
@@ -392,7 +392,8 @@ export class EndpointDocGenerator {
     const ancestry = this.createAlertEventAncestry(
       options.ancestors,
       options.relatedEvents,
-      options.percentWithRelated
+      options.percentWithRelated,
+      options.percentTerminated
     );
 
     const ancestryNodes: Map<string, TreeNode> = new Map();
@@ -447,7 +448,7 @@ export class EndpointDocGenerator {
    * @param maxChildrenPerNode - maximum number of children for any given node in the tree
    * @param relatedEventsPerNode - number of related events (file, registry, etc) to create for each process event in the tree
    * @param percentNodesWithRelated - percent of nodes which should have related events
-   * @param percentChildrenTerminated - percent of nodes which will have process termination events
+   * @param percentTerminated - percent of nodes which will have process termination events
    * @param alwaysGenMaxChildrenPerNode - flag to always return the max children per node instead of it being a random number of children
    */
   public *fullResolverTreeGenerator(
@@ -456,13 +457,14 @@ export class EndpointDocGenerator {
     maxChildrenPerNode?: number,
     relatedEventsPerNode?: number,
     percentNodesWithRelated?: number,
-    percentChildrenTerminated?: number,
+    percentTerminated?: number,
     alwaysGenMaxChildrenPerNode?: boolean
   ) {
     const ancestry = this.createAlertEventAncestry(
       alertAncestors,
       relatedEventsPerNode,
-      percentNodesWithRelated
+      percentNodesWithRelated,
+      percentTerminated
     );
     for (let i = 0; i < ancestry.length; i++) {
       yield ancestry[i];
@@ -474,7 +476,7 @@ export class EndpointDocGenerator {
       maxChildrenPerNode,
       relatedEventsPerNode,
       percentNodesWithRelated,
-      percentChildrenTerminated,
+      percentTerminated,
       alwaysGenMaxChildrenPerNode
     );
     // return the origin/alert event
@@ -488,13 +490,16 @@ export class EndpointDocGenerator {
   public createAlertEventAncestry(
     alertAncestors = 3,
     relatedEventsPerNode = 5,
-    pctWithRelated = 30
+    pctWithRelated = 30,
+    pctWithTerminated = 100
   ): Event[] {
     const events = [];
     const startDate = new Date().getTime();
     const root = this.generateEvent({ timestamp: startDate + 1000 });
     events.push(root);
     let ancestor = root;
+    let timestamp = root['@timestamp'] + 1000;
+
     // generate related alerts for root
     const processDuration: number = 6 * 3600;
     if (this.randomN(100) < pctWithRelated) {
@@ -506,12 +511,41 @@ export class EndpointDocGenerator {
         events.push(relatedEvent);
       }
     }
+
+    // generate the termination event for the root
+    if (this.randomN(100) < pctWithTerminated) {
+      const termProcessDuration = this.randomN(1000000); // This lets termination events be up to 1 million seconds after the creation event (~11 days)
+      events.push(
+        this.generateEvent({
+          timestamp: timestamp + termProcessDuration * 1000,
+          entityID: root.process.entity_id,
+          parentEntityID: root.process.parent?.entity_id,
+          eventCategory: 'process',
+          eventType: 'end',
+        })
+      );
+    }
+
     for (let i = 0; i < alertAncestors; i++) {
       ancestor = this.generateEvent({
-        timestamp: startDate + 1000 * (i + 1),
+        timestamp,
         parentEntityID: ancestor.process.entity_id,
       });
       events.push(ancestor);
+      timestamp = timestamp + 1000;
+
+      if (this.randomN(100) < pctWithTerminated) {
+        const termProcessDuration = this.randomN(1000000); // This lets termination events be up to 1 million seconds after the creation event (~11 days)
+        events.push(
+          this.generateEvent({
+            timestamp: timestamp + termProcessDuration * 1000,
+            entityID: ancestor.process.entity_id,
+            parentEntityID: ancestor.process.parent?.entity_id,
+            eventCategory: 'process',
+            eventType: 'end',
+          })
+        );
+      }
 
       // generate related alerts for ancestor
       if (this.randomN(100) < pctWithRelated) {
@@ -525,11 +559,7 @@ export class EndpointDocGenerator {
       }
     }
     events.push(
-      this.generateAlert(
-        startDate + 1000 * alertAncestors,
-        ancestor.process.entity_id,
-        ancestor.process.parent?.entity_id
-      )
+      this.generateAlert(timestamp, ancestor.process.entity_id, ancestor.process.parent?.entity_id)
     );
     return events;
   }

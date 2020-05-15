@@ -166,7 +166,7 @@ export class Fetcher {
 
     cache.addChildren(totals, children);
 
-    await this.doChildren(cache, childIDs, limit * limit, levels - 1);
+    await this.doChildren(cache, childIDs, limit, levels - 1);
   }
 
   private async doStats(tree: Tree) {

@@ -12,7 +12,7 @@ describe('Pagination', () => {
 
   const getSearchAfterInfo = (events: EndpointEvent[]) => {
     const lastEvent = events[events.length - 1];
-    return [lastEvent['@timestamp'], lastEvent.process.entity_id];
+    return [lastEvent['@timestamp'], lastEvent.event.id];
   };
   describe('cursor', () => {
     const root = generator.generateEvent();

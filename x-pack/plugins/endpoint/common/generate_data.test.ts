@@ -119,6 +119,18 @@ describe('data generator', () => {
       return (inRelated || inLifecycle) && event.process.entity_id === node.id;
     };
 
+    it('has 2 lifecycle events for ancestors, children, and the origin', () => {
+      Array.from(tree.ancestry.values()).forEach(node => {
+        expect(node.lifecycle.length).toEqual(2);
+      });
+
+      Array.from(tree.children.values()).forEach(node => {
+        expect(node.lifecycle.length).toEqual(2);
+      });
+
+      expect(tree.origin.lifecycle.length).toEqual(2);
+    });
+
     it('has all events in one of the tree fields', () => {
       tree.allEvents.forEach(event => {
         if (event.event.kind === 'alert') {
@@ -166,7 +178,7 @@ describe('data generator', () => {
     let events: Event[];
 
     beforeEach(() => {
-      events = generator.createAlertEventAncestry(3);
+      events = generator.createAlertEventAncestry(3, 0, 0, 0);
     });
 
     it('with n-1 process events', () => {

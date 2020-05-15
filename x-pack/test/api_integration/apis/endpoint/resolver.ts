@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import _ from 'lodash';
 import expect from '@kbn/expect';
 import {
+  ChildNode,
   LifecycleNode,
   ResolverAncestry,
   ResolverEvent,
@@ -58,29 +59,106 @@ async function deleteTrees(getService: any, trees: GeneratedTrees) {
   await es.transport.request({ method: 'DELETE', path: `_data_stream/${trees.index}` });
 }
 
+/**
+ * Check that the given lifecycle is in the resolver tree's corresponding map
+ *
+ * @param node a lifecycle node containing the start and end events for a node
+ * @param nodeMap a map of entity_ids to nodes to look for the passed in `node`
+ */
 const expectLifecycleNodeInMap = (node: LifecycleNode, nodeMap: Map<string, TreeNode>) => {
   const genNode = nodeMap.get(node.id);
   expect(genNode).to.be.ok();
   compareArrays(genNode!.lifecycle, node.lifecycle, true);
 };
 
+/**
+ * Verify that all the ancestor nodes including the origin are valid.
+ *
+ * @param origin the origin node for the tree
+ * @param ancestors an array of ancestors
+ * @param tree the generated resolver tree as the source of truth
+ * @param verifyLastParent a boolean indicating whether to check the last ancestor. If the ancestors array intentionally
+ *  does not contain all the ancestors, the last one will not have the parent
+ */
 const verifyAncestryFromOrigin = (
   origin: LifecycleNode,
   ancestors: LifecycleNode[],
-  tree: Tree
+  tree: Tree,
+  verifyLastParent: boolean
 ) => {
   compareArrays(tree.origin.lifecycle, origin.lifecycle, true);
+  verifyAncestry(ancestors, tree, verifyLastParent);
+};
+
+/**
+ * Verify that all the ancestor nodes are valid and optionally have parents.
+ *
+ * @param ancestors an array of ancestors
+ * @param tree the generated resolver tree as the source of truth
+ * @param verifyLastParent a boolean indicating whether to check the last ancestor. If the ancestors array intentionally
+ *  does not contain all the ancestors, the last one will not have the parent
+ */
+const verifyAncestry = (ancestors: LifecycleNode[], tree: Tree, verifyLastParent: boolean) => {
+  // group the ancestors by their entity_id mapped to a lifecycle node
+  const groupedAncestors = _.groupBy(ancestors, ancestor => ancestor.id);
+  // group by parent entity_id
+  const groupedAncestorsParent = _.groupBy(ancestors, ancestor =>
+    parentEntityId(ancestor.lifecycle[0])
+  );
+  // make sure there aren't any nodes with the same entity_id
+  expect(Object.keys(groupedAncestors).length).to.eql(ancestors.length);
+  // make sure there aren't any nodes with the same parent entity_id
+  expect(Object.keys(groupedAncestorsParent).length).to.eql(ancestors.length);
   ancestors.forEach(node => {
+    const parentID = parentEntityId(node.lifecycle[0]);
+    // the last node generated will have `undefined` as the parent entity_id
+    if (parentID !== undefined && verifyLastParent) {
+      expect(groupedAncestors[parentID]).to.be.ok();
+    }
     expectLifecycleNodeInMap(node, tree.ancestry);
   });
 };
 
-const verifyAncestry = (ancestors: LifecycleNode[], tree: Tree) => {
-  ancestors.forEach(node => {
-    expectLifecycleNodeInMap(node, tree.ancestry);
+/**
+ * Verify that the children nodes are correct
+ *
+ * @param children the children nodes
+ * @param tree the generated resolver tree as the source of truth
+ * @param numberOfParents an optional number to compare that are a certain number of parents in the children array
+ * @param childrenPerParent an optional number to compare that there are a certain number of children for each parent
+ */
+const verifyChildren = (
+  children: ChildNode[],
+  tree: Tree,
+  numberOfParents?: number,
+  childrenPerParent?: number
+) => {
+  // group the children by their entity_id mapped to a child node
+  const groupedChildren = _.groupBy(children, child => child.id);
+  // make sure each child is unique
+  expect(Object.keys(groupedChildren).length).to.eql(children.length);
+  if (numberOfParents !== undefined) {
+    const groupParent = _.groupBy(children, child => parentEntityId(child.lifecycle[0]));
+    expect(Object.keys(groupParent).length).to.eql(numberOfParents);
+    if (childrenPerParent !== undefined) {
+      Object.values(groupParent).forEach(childNodes =>
+        expect(childNodes.length).to.be(childrenPerParent)
+      );
+    }
+  }
+
+  children.forEach(child => {
+    expectLifecycleNodeInMap(child, tree.children);
   });
 };
 
+/**
+ * Compare an array of events returned from an API with an array of events generated
+ *
+ * @param expected an array to use as the source of truth
+ * @param toTest the array to test against the source of truth
+ * @param lengthCheck an optional flag to check that the arrays are the same length
+ */
 const compareArrays = (
   expected: Event[],
   toTest: ResolverEvent[],
@@ -283,7 +361,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           // the tree we generated had 5 ancestors + 1 origin node
           expect(body.ancestors.length).to.eql(6);
           const ancestryInfo = getRootAndAncestry(body);
-          verifyAncestryFromOrigin(ancestryInfo.root, ancestryInfo.ancestry, tree);
+          verifyAncestryFromOrigin(ancestryInfo.root, ancestryInfo.ancestry, tree, true);
           expect(body.nextAncestor).to.eql(null);
         });
 
@@ -302,7 +380,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           // it should have 2 ancestors + 1 origin
           expect(body.ancestors.length).to.eql(3);
           const ancestryInfo = getRootAndAncestry(body);
-          verifyAncestryFromOrigin(ancestryInfo.root, ancestryInfo.ancestry, tree);
+          verifyAncestryFromOrigin(ancestryInfo.root, ancestryInfo.ancestry, tree, false);
           expect(body.nextAncestor).to.eql(
             // it should be the parent entity id on the last element of the ancestry array
             parentEntityId(ancestryInfo.ancestry[ancestryInfo.ancestry.length - 1].lifecycle[0])
@@ -320,7 +398,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
             .get(`/api/endpoint/resolver/${next}/ancestry?ancestors=1`)
             .expect(200));
           expect(body.ancestors.length).to.eql(2);
-          verifyAncestry(body.ancestors, tree);
+          verifyAncestry(body.ancestors, tree, true);
           // the highest node in the generated tree will not have a parent ID which causes the server to return
           // without setting the pagination so nextAncestor will be null
           expect(body.nextAncestor).to.eql(null);
@@ -352,8 +430,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           expect(body.nextChild).to.be(null);
           expect(body.childNodes[0].nextChild).to.be(null);
           expect(body.childNodes.length).to.eql(8);
-          // TODO
-          // expect(body.childNodes[0].children[0].lifecycle.length).to.eql(2);
+          expect(body.childNodes[0].lifecycle.length).to.eql(1);
           expect(body.childNodes[0].lifecycle[0].endgame.unique_pid).to.eql(93932);
         });
 
@@ -402,21 +479,121 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           expect(body.childNodes).to.be.empty();
         });
       });
+
+      describe('endpoint events', () => {
+        it('returns all children for the origin', async () => {
+          const { body } = await supertest
+            .get(`/api/endpoint/resolver/${tree.origin.id}/children?children=100`)
+            .expect(200);
+          // there are 2 levels in the children part of the tree and 3 nodes for each =
+          // 3 children for the origin + 3 children for each of the origin's children = 12
+          expect(body.childNodes.length).to.eql(12);
+          // there will be 4 parents, the origin of the tree, and it's 3 children
+          verifyChildren(body.childNodes, tree, 4, 3);
+        });
+
+        it('returns a single generation of children', async () => {
+          const { body } = await supertest
+            .get(`/api/endpoint/resolver/${tree.origin.id}/children?generations=1`)
+            .expect(200);
+          expect(body.childNodes.length).to.eql(3);
+          verifyChildren(body.childNodes, tree, 1, 3);
+        });
+
+        it('paginates the children of the origin node', async () => {
+          let { body } = await supertest
+            .get(`/api/endpoint/resolver/${tree.origin.id}/children?generations=1&children=1`)
+            .expect(200);
+          expect(body.childNodes.length).to.eql(1);
+          verifyChildren(body.childNodes, tree, 1, 1);
+          expect(body.nextChild).to.not.be(null);
+
+          ({ body } = await supertest
+            .get(
+              `/api/endpoint/resolver/${tree.origin.id}/children?generations=1&afterChild=${body.nextChild}`
+            )
+            .expect(200));
+          expect(body.childNodes.length).to.eql(2);
+          verifyChildren(body.childNodes, tree, 1, 2);
+          expect(body.childNodes[0].nextChild).to.be(null);
+          expect(body.childNodes[1].nextChild).to.be(null);
+        });
+
+        it('paginates the children of different nodes', async () => {
+          let { body } = await supertest
+            .get(`/api/endpoint/resolver/${tree.origin.id}/children?generations=2&children=2`)
+            .expect(200);
+          // it should return 4 nodes total, 2 for each level
+          expect(body.childNodes.length).to.eql(4);
+          verifyChildren(body.childNodes, tree, 2);
+          expect(body.nextChild).to.not.be(null);
+          expect(body.childNodes[0].nextChild).to.not.be(null);
+          // the second child will not have any results returned for it so it should not have pagination set (the first)
+          // request to get it's children should start at the beginning aka not passing any pagination parameter
+          expect(body.childNodes[1].nextChild).to.be(null);
+
+          const firstChild = body.childNodes[0];
+
+          // get the 3rd child of the origin of the tree
+          ({ body } = await supertest
+            .get(
+              `/api/endpoint/resolver/${tree.origin.id}/children?generations=1&children=10&afterChild=${body.nextChild}`
+            )
+            .expect(200));
+          expect(body.childNodes.length).to.be(1);
+          verifyChildren(body.childNodes, tree, 1, 1);
+          expect(body.childNodes[0].nextChild).to.be(null);
+
+          // get the 1 child of the origin of the tree's last child
+          ({ body } = await supertest
+            .get(
+              `/api/endpoint/resolver/${firstChild.id}/children?generations=1&children=10&afterChild=${firstChild.nextChild}`
+            )
+            .expect(200));
+          expect(body.childNodes.length).to.be(1);
+          verifyChildren(body.childNodes, tree, 1, 1);
+          expect(body.childNodes[0].nextChild).to.be(null);
+        });
+      });
     });
 
-    describe('tree endpoint', () => {
-      const endpointID = '5a0c957f-b8e7-4538-965e-57e8bb86ad3a';
+    describe('tree api', () => {
+      describe('legacy events', () => {
+        const endpointID = '5a0c957f-b8e7-4538-965e-57e8bb86ad3a';
 
-      it('returns ancestors, events, children, and current process lifecycle', async () => {
-        const { body } = await supertest
-          .get(`/api/endpoint/resolver/93933?legacyEndpointID=${endpointID}`)
-          .expect(200);
-        expect(body.ancestry.nextAncestor).to.equal(null);
-        expect(body.relatedEvents.nextEvent).to.equal(null);
-        expect(body.children.nextChild).to.equal(null);
-        expect(body.children.childNodes.length).to.equal(0);
-        expect(body.relatedEvents.events.length).to.equal(0);
-        expect(body.lifecycle.length).to.equal(2);
+        it('returns ancestors, events, children, and current process lifecycle', async () => {
+          const { body } = await supertest
+            .get(`/api/endpoint/resolver/93933?legacyEndpointID=${endpointID}`)
+            .expect(200);
+          expect(body.ancestry.nextAncestor).to.equal(null);
+          expect(body.relatedEvents.nextEvent).to.equal(null);
+          expect(body.children.nextChild).to.equal(null);
+          expect(body.children.childNodes.length).to.equal(0);
+          expect(body.relatedEvents.events.length).to.equal(0);
+          expect(body.lifecycle.length).to.equal(2);
+        });
+      });
+
+      describe('endpoint events', () => {
+        it('returns a tree', async () => {
+          const { body } = await supertest
+            .get(
+              `/api/endpoint/resolver/${tree.origin.id}?children=100&generations=3&ancestors=5&events=4`
+            )
+            .expect(200);
+
+          expect(body.children.nextChild).to.equal(null);
+          expect(body.children.childNodes.length).to.equal(12);
+          verifyChildren(body.children.childNodes, tree, 4, 3);
+
+          expect(body.ancestry.nextAncestor).to.equal(null);
+          verifyAncestry(body.ancestry.ancestors, tree, true);
+
+          expect(body.relatedEvents.nextEvent).to.equal(null);
+          compareArrays(tree.origin.relatedEvents, body.relatedEvents.events, true);
+
+          compareArrays(tree.origin.lifecycle, body.lifecycle, true);
+        });
       });
     });
   });
