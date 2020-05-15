@@ -68,7 +68,11 @@ export const createTimeline = actionCreator<{
   sort?: Sort;
   showCheckboxes?: boolean;
   showRowRenderers?: boolean;
-  timelineType?: TimelineTypeLiteral;
+  /**
+   * CreateTemplateTimelineBtn
+   * Remove the comment here to enable saving as expected type
+   * timelineType?: TimelineTypeLiteral;
+   */
 }>('CREATE_TIMELINE');
 
 export const pinEvent = actionCreator<{ id: string; eventId: string }>('PIN_EVENT');

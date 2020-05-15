@@ -13,8 +13,15 @@ import {
   SUB_PLUGINS_REDUCER,
 } from '../../../../common/mock';
 import { createStore, State } from '../../../../common/store';
-
+import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineType } from '../../../../../common/types/timeline';
+import { CreateTimelineBtn } from './create_timeline_btn';
+
+jest.mock('../../../../common/lib/kibana', () => {
+  return {
+    useKibana: jest.fn(),
+  };
+});
 
 describe('CreateTimelineBtn', () => {
   const state: State = mockGlobalState;
@@ -25,7 +32,21 @@ describe('CreateTimelineBtn', () => {
 
   describe('render if CRUD', () => {
     beforeAll(() => {
-      const { CreateTimelineBtn } = jest.requireActual('./create_timeline_btn');
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          application: {
+            capabilities: {
+              siem: {
+                crud: true,
+              },
+            },
+          },
+        },
+      });
+
+      afterAll(() => {
+        (useKibana as jest.Mock).mockReset();
+      });
 
       wrapper = mount(
         <ReduxStoreProvider store={store}>
@@ -36,10 +57,6 @@ describe('CreateTimelineBtn', () => {
           />
         </ReduxStoreProvider>
       );
-    });
-
-    afterAll(() => {
-      jest.resetModules();
     });
 
     test('render with onClosePopover', () => {
@@ -72,6 +89,40 @@ describe('CreateTimelineBtn', () => {
 
     test('render with title', () => {
       expect(wrapper.find('[data-test-subj="new-timeline-btn"]').prop('title')).toEqual(mockTitle);
+    });
+  });
+
+  describe('If no CRUD', () => {
+    beforeAll(() => {
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          application: {
+            capabilities: {
+              siem: {
+                crud: false,
+              },
+            },
+          },
+        },
+      });
+
+      wrapper = mount(
+        <ReduxStoreProvider store={store}>
+          <CreateTimelineBtn
+            onClosePopover={mockClosePopover}
+            timelineType={TimelineType.default}
+            title={mockTitle}
+          />
+        </ReduxStoreProvider>
+      );
+    });
+
+    afterAll(() => {
+      (useKibana as jest.Mock).mockReset();
+    });
+
+    test('no render', () => {
+      expect(wrapper.find('[data-test-subj="new-timeline-btn"]').exists()).not.toBeTruthy();
     });
   });
 });

@@ -67,13 +67,17 @@ export const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => 
                 title={NEW_TIMELINE}
               />
             </EuiFlexItem>
-            <EuiFlexItem>
-              <CreateTimelineBtn
-                outline={true}
-                timelineType={TimelineType.template}
-                title={NEW_TEMPLATE_TIMELINE}
-              />
-            </EuiFlexItem>
+            {/**
+             * CreateTemplateTimelineBtn
+             * Remove the comment here to enable CreateTemplateTimelineBtn
+             * <EuiFlexItem>
+             *   <CreateTimelineBtn
+             *     outline={true}
+             *     timelineType={TimelineType.template}
+             *     title={NEW_TEMPLATE_TIMELINE}
+             *   />
+             * </EuiFlexItem>
+             */}
           </EuiFlexGroup>
         </HeaderPage>
 

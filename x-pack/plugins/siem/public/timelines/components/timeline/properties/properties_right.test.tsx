@@ -96,7 +96,11 @@ describe('Properties Right', () => {
         expect(wrapper.find('[data-test-subj="create-default-btn"]').exists()).toBeTruthy();
       });
 
-      test('it renders create template timelin btn', () => {
+      /**
+       * CreateTemplateTimelineBtn
+       * Remove the SKIP here to enable checking for CreateTemplateTimelineBtn
+       */
+      test.skip('it renders create template timelin btn', () => {
         expect(wrapper.find('[data-test-subj="create-template-btn"]').exists()).toBeTruthy();
       });
 

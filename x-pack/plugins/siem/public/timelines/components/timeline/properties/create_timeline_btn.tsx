@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import React, { useCallback } from 'react';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { noop } from 'lodash/fp';
 
@@ -19,68 +19,60 @@ import {
   TimelineTypeLiteral,
 } from '../../../../../common/types/timeline';
 import { useKibana } from '../../../../common/lib/kibana';
+
 interface OwnProps {
-  title?: string;
-  timelineId?: string;
   onClosePopover?: () => void;
   outline?: boolean;
+  title?: string;
+  timelineId?: string;
   timelineType: TimelineTypeLiteral;
 }
 
-type Props = OwnProps & PropsFromRedux;
+type Props = OwnProps;
 
-const createTimelineBtn = React.memo<Props>(
-  ({
-    createTimeline,
-    onClosePopover = noop,
-    outline,
-    showTimeline,
-    title,
-    timelineId = 'timeline-1',
-    timelineType,
-  }) => {
-    return (
-      <NewTimeline
-        data-test-subj="new-timeline-btn"
-        createTimeline={createTimeline}
-        onClosePopover={onClosePopover}
-        outline={outline}
-        showTimeline={showTimeline}
-        timelineId={timelineId}
-        timelineType={timelineType}
-        title={title}
-      />
-    );
-  }
-);
+export const CreateTimelineBtnComponent: React.FC<Props> = ({
+  onClosePopover = noop,
+  outline,
+  title,
+  timelineId = 'timeline-1',
+  timelineType,
+}) => {
+  const uiCapabilities = useKibana().services.application.capabilities;
+  const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.siem.crud;
+  const dispatch = useDispatch();
+  const showTimeline = useCallback(() => timelineActions.showTimeline, []);
+  const createTimeline = useCallback(
+    ({ id, show }) => {
+      return dispatch(
+        timelineActions.createTimeline({
+          id,
+          columns: defaultHeaders,
+          show,
+          /**
+           * CreateTemplateTimelineBtn
+           * Remove the comment here to enable saving as expected type
+           * timelineType: timelineType ?? TimelineType.template,
+           */
+        })
+      );
+    },
+    [dispatch]
+  );
+  return capabilitiesCanUserCRUD ? (
+    <NewTimeline
+      createTimeline={createTimeline}
+      data-test-subj="new-timeline-btn"
+      onClosePopover={onClosePopover}
+      outline={outline}
+      showTimeline={showTimeline}
+      timelineId={timelineId}
+      timelineType={timelineType}
+      title={title}
+    />
+  ) : (
+    false
+  );
+};
 
-createTimelineBtn.displayName = 'createTimelineBtn';
-
-const mapDispatchToProps = (dispatch: Dispatch, { onClosePopover }: OwnProps) => ({
-  showTimeline: timelineActions.showTimeline,
-  createTimeline: ({
-    id,
-    show,
-    timelineType,
-  }: {
-    id: string;
-    show?: boolean;
-    timelineType?: TimelineTypeLiteralWithNull;
-  }) =>
-    dispatch(
-      timelineActions.createTimeline({
-        id,
-        columns: defaultHeaders,
-        show,
-        timelineType: timelineType ?? TimelineType.template,
-      })
-    ),
-});
-
-const mapStateToProps = () => ({});
-
-const connector = connect(mapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const CreateTimelineBtn = connector(createTimelineBtn);
+export const CreateTimelineBtn = React.memo(CreateTimelineBtnComponent);
+CreateTimelineBtn.displayName = 'CreateTimelineBtn';

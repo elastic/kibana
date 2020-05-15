@@ -57,15 +57,6 @@ const Avatar = styled(EuiAvatar)`
 
 Avatar.displayName = 'Avatar';
 
-type CreateTimeline = ({
-  id,
-  show,
-  timelineType,
-}: {
-  id: string;
-  show?: boolean;
-  timelineType?: TimelineTypeLiteral;
-}) => void;
 type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
 export type UpdateNote = (note: Note) => void;
 
@@ -73,7 +64,6 @@ export interface PropertiesRightComponentProps {
   onButtonClick: () => void;
   onClosePopover: () => void;
   showActions: boolean;
-  createTimeline: CreateTimeline;
   timelineId: string;
   isDataInTimeline: boolean;
   showNotes: boolean;
@@ -98,7 +88,6 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
   onButtonClick,
   showActions,
   onClosePopover,
-  createTimeline,
   timelineId,
   isDataInTimeline,
   showNotesFromWidth,
@@ -119,8 +108,7 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
   title,
 }) => {
   const uiCapabilities = useKibana().services.application.capabilities;
-  const capabilitiesCanUserCRUD: boolean =
-    typeof uiCapabilities.siem.crud === 'boolean' ? uiCapabilities.siem.crud : false;
+  const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.siem.crud;
   return (
     <PropertiesRightStyle alignItems="flexStart" data-test-subj="properties-right" gutterSize="s">
       <EuiFlexItem grow={false}>
@@ -151,16 +139,20 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
                 </EuiFlexItem>
               )}
 
-              {capabilitiesCanUserCRUD && (
-                <EuiFlexItem grow={false}>
-                  <CreateTimelineBtn
-                    onClosePopover={onClosePopover}
-                    timelineId={timelineId}
-                    timelineType={TimelineType.template}
-                    title={i18n.NEW_TEMPLATE_TIMELINE}
-                  />
-                </EuiFlexItem>
-              )}
+              {/*
+                 * CreateTemplateTimelineBtn
+                 * Remove the comment here to enable CreateTemplateTimelineBtn
+                 {capabilitiesCanUserCRUD && (
+                    <EuiFlexItem grow={false}>
+                      <CreateTimelineBtn
+                        onClosePopover={onClosePopover}
+                        timelineId={timelineId}
+                        timelineType={TimelineType.template}
+                        title={i18n.NEW_TEMPLATE_TIMELINE}
+                      />
+                    </EuiFlexItem>
+                  )}
+                 */}
 
               <EuiFlexItem grow={false}>
                 <OpenTimelineModalButton onClick={onOpenTimelineModal} />

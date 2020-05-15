@@ -130,7 +130,11 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         sort,
         showCheckboxes,
         showRowRenderers,
-        timelineType = TimelineType.default,
+        /**
+         * CreateTemplateTimelineBtn
+         * Remove the comment here to enable saving as expected type
+         * timelineType = TimelineType.default,
+         */
         filters,
       }
     ) => ({
@@ -148,7 +152,11 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         showCheckboxes,
         showRowRenderers,
         timelineById: state.timelineById,
-        timelineType,
+        /**
+         * CreateTemplateTimelineBtn
+         * Remove the comment here to enable saving as expected type
+         * timelineType,
+         */
       }),
     })
   )

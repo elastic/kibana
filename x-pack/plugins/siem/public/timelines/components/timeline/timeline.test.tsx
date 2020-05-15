@@ -26,9 +26,10 @@ import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
 jest.mock('../../../common/lib/kibana');
-
+jest.mock('./properties/properties_right');
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
+
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 describe('Timeline', () => {
