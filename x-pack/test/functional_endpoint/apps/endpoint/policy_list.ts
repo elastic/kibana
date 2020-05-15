@@ -12,8 +12,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/66579
-  describe.skip('When on the Endpoint Policy List', function() {
+  describe('When on the Endpoint Policy List', function() {
     this.tags(['ciGroup7']);
     before(async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('endpoint', '/policy');
@@ -47,7 +46,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       expect(noItemsFoundMessage).to.equal('No items found');
     });
 
-    xdescribe('and policies exists', () => {
+    describe('and policies exists', () => {
       let policyInfo: PolicyTestResourceInfo;
 
       before(async () => {
@@ -67,7 +66,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(policyRow).to.eql([
           'Protect East Coast',
           '1',
-          'Elastic Endpoint v1.0.0',
+          `${policyInfo.datasource.package?.title} v${policyInfo.datasource.package?.version}`,
           'Protect the worlds data - but in the East Coast',
           policyInfo.agentConfig.id,
         ]);
