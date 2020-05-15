@@ -148,5 +148,72 @@ export default function({ getService }: FtrProviderContext) {
         });
       });
     });
+
+    describe('Update', () => {
+      const COMPONENT_NAME = 'test_component_template';
+      const COMPONENT = {
+        template: {
+          settings: {
+            index: {
+              number_of_shards: 1,
+            },
+          },
+          mappings: {
+            _source: {
+              enabled: false,
+            },
+            properties: {
+              host_name: {
+                type: 'keyword',
+              },
+              created_at: {
+                type: 'date',
+                format: 'EEE MMM dd HH:mm:ss Z yyyy',
+              },
+            },
+          },
+        },
+      };
+
+      before(() => createComponentTemplate({ body: COMPONENT, name: COMPONENT_NAME }));
+      after(() => deleteComponentTemplate(COMPONENT_NAME));
+
+      it('should allow an existing component template to be updated', async () => {
+        const uri = `${API_BASE_PATH}/component_templates/${COMPONENT_NAME}`;
+
+        const { body } = await supertest
+          .put(uri)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            ...COMPONENT,
+            version: 1,
+          })
+          .expect(200);
+
+        expect(body).to.eql({
+          acknowledged: true,
+        });
+      });
+
+      it('should not allow a non-existing component template to be updated', async () => {
+        const uri = `${API_BASE_PATH}/component_templates/component_does_not_exist`;
+
+        const { body } = await supertest
+          .put(uri)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            ...COMPONENT,
+            version: 1,
+          })
+          .expect(404);
+
+        expect(body).to.eql({
+          statusCode: 404,
+          error: 'Not Found',
+          message:
+            '[resource_not_found_exception] component template matching [component_does_not_exist] not found',
+        });
+      });
+    });
   });
 }
