@@ -57,7 +57,7 @@ export function KbnAggTable(config, RecursionHelper) {
       };
 
       self.toCsv = function(formatted) {
-        const rows = $scope.table.rows;
+        const rows = formatted ? $scope.rows : $scope.table.rows;
         const columns = formatted ? $scope.formattedColumns : $scope.table.columns;
         const nonAlphaNumRE = /[^a-zA-Z0-9]/;
         const allDoubleQuoteRE = /"/g;
@@ -258,8 +258,8 @@ function addPercentageCol(columns, title, rows, insertAtIndex) {
     formatter,
   });
   const newRows = rows.map(row => ({
-    [newId]: row[id] / sumTotal,
     ...row,
+    [newId]: row[id] / sumTotal,
   }));
 
   return { cols: newCols, rows: newRows };
