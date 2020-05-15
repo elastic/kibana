@@ -153,7 +153,7 @@ export class HttpConfig {
     this.host = rawHttpConfig.host;
     this.port = rawHttpConfig.port;
     this.cors = rawHttpConfig.cors;
-    this.customResponseHeaders = Object.entries(rawHttpConfig.customResponseHeaders).reduce(
+    this.customResponseHeaders = Object.entries(rawHttpConfig.customResponseHeaders ?? {}).reduce(
       (headers, [key, value]) => {
         return {
           ...headers,
