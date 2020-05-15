@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
+import React, { Fragment, Suspense } from 'react';
 import {
   EuiSpacer,
   EuiFlexItem,
@@ -12,15 +12,12 @@ import {
   EuiIcon,
   EuiText,
   EuiLink,
-  EuiButtonIcon,
   EuiPopover,
   EuiButtonEmpty,
-  EuiCard,
   EuiButton,
   EuiListGroup,
   EuiListGroupItem,
   EuiCallOut,
-  EuiDescriptionList,
   EuiBadge,
   EuiHorizontalRule,
   EuiModal,
@@ -29,11 +26,9 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiOverlayMask,
-  EuiAccordion,
-  EuiSwitch,
-  EuiTextArea,
   EuiSuperSelect,
   EuiFormRow,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import {
@@ -47,9 +42,9 @@ import { AlertMessage } from '../../../server/alerts/types';
 import { Legacy } from '../../legacy_shims';
 import { AlertAction } from '../../../../alerting/common';
 import { ActionType, ActionResult } from '../../../../actions/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ConnectorAddModal } from '../../../../triggers_actions_ui/public/application/sections/action_connector_form/connector_add_modal';
-import { TriggerActionsContext } from '../../../../infra/public/utils/triggers_actions_context';
-import { HttpSetup } from 'kibana/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionConnector, IErrorObject } from '../../../../triggers_actions_ui/public/types';
 
 interface AlertPopoverContextProps {
@@ -57,6 +52,7 @@ interface AlertPopoverContextProps {
   configuredActions: ActionResult[];
   validConnectorTypes: ActionType[];
   defaultParametersByAlertType: CommonActionDefaultParameters;
+  addAction: (action: ActionResult) => void;
 }
 const AlertPopoverContext = React.createContext<AlertPopoverContextProps>({} as any);
 
@@ -104,6 +100,9 @@ const AlertPopoverConfigureAction: React.FC<AlertPopoverConfigureActionProps> = 
   }
 
   const ParamsFieldsComponent = getParamsFieldsComponent(action.actionTypeId);
+  if (!ParamsFieldsComponent) {
+    return null;
+  }
   const actionErrors: {
     errors: IErrorObject;
   } = Legacy.shims.triggersActionsUi.actionTypeRegistry
@@ -111,34 +110,41 @@ const AlertPopoverConfigureAction: React.FC<AlertPopoverConfigureActionProps> = 
     ?.validateParams(action.params);
 
   return (
-    <Fragment>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem grow={false}>
-          <ParamsFieldsComponent
-            actionParams={action.params as any}
-            errors={actionErrors.errors}
-            editAction={editAction}
-            // messageVariables={messageVariables}
-            // defaultMessage={defaultActionMessage ?? undefined}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="s" onClick={cancel}>
-                Cancel
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton size="s" onClick={saveAction} fill isDisabled={isSaving}>
-                {isSaving ? 'Saving...' : 'Save'}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </Fragment>
+    <EuiOverlayMask>
+      <EuiModal onClose={cancel} initialFocus="[name=popswitch]">
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>Configure {action.actionTypeId}</EuiModalHeaderTitle>
+        </EuiModalHeader>
+
+        <EuiModalBody>
+          <Suspense
+            fallback={
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          >
+            <ParamsFieldsComponent
+              index={0}
+              actionParams={action.params as any}
+              errors={actionErrors.errors}
+              editAction={editAction}
+              messageVariables={[]}
+              defaultMessage={undefined}
+            />
+          </Suspense>
+        </EuiModalBody>
+
+        <EuiModalFooter>
+          <EuiButtonEmpty onClick={cancel}>Cancel</EuiButtonEmpty>
+          <EuiButton size="s" onClick={saveAction} fill isDisabled={isSaving}>
+            {isSaving ? 'Saving...' : 'Save'}
+          </EuiButton>
+        </EuiModalFooter>
+      </EuiModal>
+    </EuiOverlayMask>
   );
 };
 
@@ -186,6 +192,9 @@ const AlertPopoverConfigureNewAction: React.FC<AlertPopoverConfigureNewActionPro
   }
 
   const ParamsFieldsComponent = getParamsFieldsComponent(actionTypeId);
+  if (!ParamsFieldsComponent) {
+    return null;
+  }
   const actionErrors: {
     errors: IErrorObject;
   } = Legacy.shims.triggersActionsUi.actionTypeRegistry.get(actionTypeId)?.validateParams(params);
@@ -201,51 +210,57 @@ const AlertPopoverConfigureNewAction: React.FC<AlertPopoverConfigureNewActionPro
   }
 
   return (
-    <Fragment>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem grow={false}>
-          <ParamsFieldsComponent
-            actionParams={params as any}
-            errors={actionErrors.errors}
-            editAction={(field: string, value: string) =>
-              setParams({
-                ...params,
-                [field]: value,
-              })
+    <EuiOverlayMask>
+      <EuiModal onClose={cancel} initialFocus="[name=popswitch]">
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>Add {actionTypeId}</EuiModalHeaderTitle>
+        </EuiModalHeader>
+
+        <EuiModalBody>
+          <Suspense
+            fallback={
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             }
-            // messageVariables={messageVariables}
-            // defaultMessage={defaultActionMessage ?? undefined}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="s" onClick={cancel}>
-                Cancel
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton size="s" onClick={addAction} fill isDisabled={disableButton}>
-                {isAdding ? 'Adding...' : 'Add'}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </Fragment>
+          >
+            <ParamsFieldsComponent
+              index={0}
+              actionParams={params as any}
+              errors={actionErrors.errors}
+              editAction={(field: string, value: string) =>
+                setParams({
+                  ...params,
+                  [field]: value,
+                })
+              }
+              messageVariables={[]}
+              defaultMessage={undefined}
+            />
+          </Suspense>
+        </EuiModalBody>
+
+        <EuiModalFooter>
+          <EuiButtonEmpty onClick={cancel}>Cancel</EuiButtonEmpty>
+          <EuiButton onClick={addAction} fill isDisabled={disableButton}>
+            {isAdding ? 'Saving...' : 'Save'}
+          </EuiButton>
+        </EuiModalFooter>
+      </EuiModal>
+    </EuiOverlayMask>
   );
 };
 
 interface AlertPopoverSelectExistingActionProps {
   actionTypeId: string;
-  cancel: () => void;
   done: (alert: CommonBaseAlert) => void;
 }
 const AlertPopoverSelectExistingAction: React.FC<AlertPopoverSelectExistingActionProps> = (
   props: AlertPopoverSelectExistingActionProps
 ) => {
-  const { actionTypeId, cancel, done } = props;
+  const { actionTypeId, done } = props;
   const [showModal, setShowModal] = React.useState(false);
   const [existingActionId, setExistingActionId] = React.useState('');
   const context = React.useContext(AlertPopoverContext);
@@ -259,21 +274,18 @@ const AlertPopoverSelectExistingAction: React.FC<AlertPopoverSelectExistingActio
         addModalVisible={true}
         setAddModalVisibility={() => setShowModal(false)}
         postSaveEventHandler={(savedAction: ActionConnector) => {
-          console.log('post save', { savedAction });
-          // configuredActions.push(savedAction);
-          // connectors.push(savedAction);
-          // setActionIdByIndex(savedAction.id, activeActionItem.index);
+          context.addAction(savedAction as ActionResult);
         }}
         actionTypeRegistry={Legacy.shims.triggersActionsUi.actionTypeRegistry}
         http={Legacy.shims.http}
         toastNotifications={Legacy.shims.toastNotifications}
-        // docLinks={docLinks}
+        docLinks={Legacy.shims.docLinks}
         capabilities={Legacy.shims.capabilities}
       />
     );
   }
 
-  const configuredActionsOptions = context.configuredActions.reduce((list, action) => {
+  const configuredActionsOptions = context.configuredActions.reduce((list: any[], action) => {
     if (action.actionTypeId !== actionTypeId) {
       return list;
     }
@@ -307,18 +319,14 @@ const AlertPopoverSelectExistingAction: React.FC<AlertPopoverSelectExistingActio
         />
       </EuiFormRow>
       {existingActionId ? (
-        <Fragment>
-          <EuiSpacer size="s" />
-          <AlertPopoverConfigureNewAction
-            actionId={existingActionId}
-            actionTypeId={actionTypeId}
-            cancel={() => {
-              setExistingActionId('');
-              cancel();
-            }}
-            done={done}
-          />
-        </Fragment>
+        <AlertPopoverConfigureNewAction
+          actionId={existingActionId}
+          actionTypeId={actionTypeId}
+          cancel={() => {
+            setExistingActionId('');
+          }}
+          done={done}
+        />
       ) : null}
     </Fragment>
   );
@@ -369,27 +377,26 @@ const AlertPopoverAddAction: React.FC<AlertPopoverAddActionProps> = (
       </EuiFormRow>
       {actionTypeId ? (
         <Fragment>
-          <AlertPopoverSelectExistingAction
-            actionTypeId={actionTypeId}
-            cancel={cancel}
-            done={done}
-          />
+          <AlertPopoverSelectExistingAction actionTypeId={actionTypeId} done={done} />
         </Fragment>
       ) : null}
+      <EuiButton size="s" onClick={cancel}>
+        Cancel
+      </EuiButton>
     </Fragment>
   );
 };
 
-interface AlertPopoverTriggeredActionsProps {
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface AlertPopoverTriggeredActionsProps {}
 const AlertPopoverTriggeredActions: React.FC<AlertPopoverTriggeredActionsProps> = (
   props: AlertPopoverTriggeredActionsProps
 ) => {
   const context = React.useContext(AlertPopoverContext);
   const [actions, setActions] = React.useState(context.alert.rawAlert.actions);
-  const [currentConfigureActionTypeId, setCurrentConfigureActionId] = React.useState<string | null>(
-    null
-  );
+  const [currentConfigureActionTypeId, setCurrentConfigureActionTypeId] = React.useState<
+    string | null
+  >(null);
   const [showAddAction, setShowAddAction] = React.useState(false);
 
   function editAction(action: AlertAction, field: string, value: string) {
@@ -454,7 +461,7 @@ const AlertPopoverTriggeredActions: React.FC<AlertPopoverTriggeredActionsProps> 
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink onClick={() => setCurrentConfigureActionId(action.actionTypeId)}>
+            <EuiLink onClick={() => setCurrentConfigureActionTypeId(action.actionTypeId)}>
               <EuiText size="s">Configure</EuiText>
             </EuiLink>
           </EuiFlexItem>
@@ -464,17 +471,6 @@ const AlertPopoverTriggeredActions: React.FC<AlertPopoverTriggeredActionsProps> 
             </EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {currentConfigureActionTypeId === action.actionTypeId ? (
-          <AlertPopoverConfigureAction
-            action={action}
-            editAction={(field: string, value: string) => editAction(action, field, value)}
-            cancel={() => setCurrentConfigureActionId(null)}
-            done={alert => {
-              setCurrentConfigureActionId(null);
-              setActions(alert.rawAlert.actions);
-            }}
-          />
-        ) : null}
       </Fragment>
     );
 
@@ -504,9 +500,8 @@ const AlertPopoverTriggeredActions: React.FC<AlertPopoverTriggeredActionsProps> 
             <Fragment>
               <EuiSpacer size="s" />
               <AlertPopoverAddAction
-                cancel={() => {}}
+                cancel={() => setShowAddAction(false)}
                 done={alert => {
-                  console.log({ alert });
                   setActions(alert.rawAlert.actions);
                 }}
               />
@@ -518,6 +513,24 @@ const AlertPopoverTriggeredActions: React.FC<AlertPopoverTriggeredActionsProps> 
     />
   );
 
+  let configureUi = null;
+  if (currentConfigureActionTypeId) {
+    const action = actions.find(_action => _action.actionTypeId === currentConfigureActionTypeId);
+    if (action) {
+      configureUi = (
+        <AlertPopoverConfigureAction
+          action={action}
+          editAction={(field: string, value: string) => editAction(action, field, value)}
+          cancel={() => setCurrentConfigureActionTypeId(null)}
+          done={alert => {
+            setCurrentConfigureActionTypeId(null);
+            setActions(alert.rawAlert.actions);
+          }}
+        />
+      );
+    }
+  }
+
   return (
     <Fragment>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
@@ -528,6 +541,7 @@ const AlertPopoverTriggeredActions: React.FC<AlertPopoverTriggeredActionsProps> 
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
+      {configureUi}
       <EuiListGroup gutterSize="none" size="xs">
         {actionList}
       </EuiListGroup>
@@ -540,7 +554,7 @@ interface AlertPopoverProps {
 }
 export const AlertPopover: React.FC<AlertPopoverProps> = (props: AlertPopoverProps) => {
   const {
-    alert: { alert, enabled, exists, states },
+    alert: { alert, states },
   } = props;
 
   const [showAlert, setShowAlert] = React.useState(false);
@@ -568,6 +582,10 @@ export const AlertPopover: React.FC<AlertPopoverProps> = (props: AlertPopoverPro
 
   if (!alert.rawAlert) {
     return null;
+  }
+
+  function addAction(action: ActionResult) {
+    setConfiguredActions([...configuredActions, action]);
   }
 
   const firingStates = states.filter(state => state.firing);
@@ -608,13 +626,20 @@ export const AlertPopover: React.FC<AlertPopoverProps> = (props: AlertPopoverPro
   return (
     <Fragment>
       <AlertPopoverContext.Provider
-        value={{ alert, validConnectorTypes, configuredActions, defaultParametersByAlertType }}
+        value={{
+          alert,
+          validConnectorTypes,
+          configuredActions,
+          defaultParametersByAlertType,
+          addAction,
+        }}
       >
         <EuiPopover
           button={
             <EuiBadge
               color={firingState.state.ui.severity}
               iconType="alert"
+              onClickAriaLabel="Show alert"
               iconOnClickAriaLabel="Show alert"
               iconOnClick={() => setShowAlert(true)}
               onClick={() => setShowAlert(true)}
