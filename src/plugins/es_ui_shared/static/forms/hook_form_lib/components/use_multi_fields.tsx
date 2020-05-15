@@ -22,10 +22,10 @@ import React from 'react';
 import { UseField, Props as UseFieldProps } from './use_field';
 import { FieldHook } from '../types';
 
-type FieldsArray = Array<{ id: string } & Omit<UseFieldProps, 'children'>>;
+type FieldsArray = Array<{ id: string } & Omit<UseFieldProps<unknown>, 'children'>>;
 
 interface Props {
-  fields: { [key: string]: Omit<UseFieldProps, 'children'> };
+  fields: { [key: string]: Exclude<UseFieldProps<unknown>, 'children'> };
   children: (fields: { [key: string]: FieldHook }) => JSX.Element;
 }
 
