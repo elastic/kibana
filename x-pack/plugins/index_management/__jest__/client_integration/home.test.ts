@@ -8,7 +8,7 @@ import { act } from 'react-dom/test-utils';
 import * as fixtures from '../../test/fixtures';
 import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
 import { IdxMgmtHomeTestBed } from './helpers/home.helpers';
-import { API_BASE_PATH, BASE_PATH } from '../../common/constants';
+import { API_BASE_PATH } from '../../common/constants';
 
 const { setup } = pageHelpers.home;
 
