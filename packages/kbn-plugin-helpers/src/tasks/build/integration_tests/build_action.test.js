@@ -17,34 +17,34 @@
  * under the License.
  */
 
-const resolve = require('path').resolve;
-const fs = require('fs');
-const del = require('del');
+import { resolve } from 'path';
+import fs from 'fs';
+import del from 'del';
+import { pluginConfig } from '../../../lib';
 
 const PLUGIN_FIXTURE = resolve(__dirname, '__fixtures__/build_action_test_plugin');
 const PLUGIN_BUILD_DIR = resolve(PLUGIN_FIXTURE, 'build');
-const PLUGIN = require('../../../lib/plugin_config').pluginConfig(PLUGIN_FIXTURE);
-const noop = () => {};
+const plugin = pluginConfig(PLUGIN_FIXTURE);
 
 describe('creating build zip', () => {
-  const buildAction = require('../build_task');
+  const { buildTask } = require('../build_task');
 
   beforeEach(() => del(PLUGIN_BUILD_DIR));
   afterEach(() => del(PLUGIN_BUILD_DIR));
 
   it('creates a zip in the build directory', async () => {
-    await buildAction(PLUGIN);
+    await buildTask({ plugin });
 
-    const buildFile = resolve(PLUGIN_BUILD_DIR, PLUGIN.id + '-' + PLUGIN.version + '.zip');
+    const buildFile = resolve(PLUGIN_BUILD_DIR, plugin.id + '-' + plugin.version + '.zip');
     if (!fs.existsSync(buildFile)) {
       throw new Error('Build file not found: ' + buildFile);
     }
   });
 
   it('skips zip creation based on flag', async () => {
-    await buildAction(PLUGIN, noop, { skipArchive: true });
+    await buildTask({ plugin, options: { skipArchive: true } });
 
-    const buildFile = resolve(PLUGIN_BUILD_DIR, PLUGIN.id + '-' + PLUGIN.version + '.zip');
+    const buildFile = resolve(PLUGIN_BUILD_DIR, plugin.id + '-' + plugin.version + '.zip');
     if (fs.existsSync(buildFile)) {
       throw new Error('Build file not found: ' + buildFile);
     }
@@ -53,13 +53,13 @@ describe('creating build zip', () => {
 
 describe('calling create_build', () => {
   let mockBuild;
-  let buildAction;
+  let buildTask;
 
   beforeEach(() => {
     jest.resetModules();
-    mockBuild = jest.fn(() => Promise.resolve());
-    jest.mock('../create_build', () => mockBuild);
-    buildAction = require('../build_task');
+    jest.mock('../create_build');
+    ({ createBuild: mockBuild } = require('../create_build'));
+    ({ buildTask } = require('../build_task'));
   });
 
   const nameArgs = ([plugin, buildTarget, buildVersion, kibanaVersion, files]) => ({
@@ -76,7 +76,7 @@ describe('calling create_build', () => {
       kibanaVersion: '4.5.6',
     };
 
-    await buildAction(PLUGIN, noop, options);
+    await buildTask({ plugin, options });
 
     expect(mockBuild.mock.calls).toHaveLength(1);
 
@@ -86,12 +86,12 @@ describe('calling create_build', () => {
   });
 
   it('uses default file list without files option', async () => {
-    await buildAction(PLUGIN);
+    await buildTask({ plugin });
 
     expect(mockBuild.mock.calls).toHaveLength(1);
 
     const { files } = nameArgs(mockBuild.mock.calls[0]);
-    PLUGIN.buildSourcePatterns.forEach(file => expect(files).toContain(file));
+    plugin.buildSourcePatterns.forEach(file => expect(files).toContain(file));
   });
 
   it('uses only files passed in', async () => {
@@ -99,7 +99,7 @@ describe('calling create_build', () => {
       files: ['index.js', 'LICENSE.txt', 'plugins/**/*', '{server,public}/**/*'],
     };
 
-    await buildAction(PLUGIN, noop, options);
+    await buildTask({ plugin, options });
 
     expect(mockBuild.mock.calls).toHaveLength(1);
 
@@ -112,6 +112,6 @@ describe('calling create_build', () => {
       throw new Error('foo bar');
     });
 
-    await expect(buildAction(PLUGIN, noop)).rejects.toThrowErrorMatchingSnapshot();
+    await expect(buildTask({ plugin })).rejects.toThrowErrorMatchingSnapshot();
   });
 });

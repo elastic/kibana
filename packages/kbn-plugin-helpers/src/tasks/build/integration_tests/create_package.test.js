@@ -17,14 +17,15 @@
  * under the License.
  */
 
-const { resolve } = require('path');
-const { statSync } = require('fs');
-const del = require('del');
-const createBuild = require('../create_build');
-const createPackage = require('../create_package');
+import { resolve } from 'path';
+import { statSync } from 'fs';
+import del from 'del';
+import { createBuild } from '../create_build';
+import { createPackage } from '../create_package';
+import { pluginConfig } from '../../../lib';
 
 const PLUGIN_FIXTURE = resolve(__dirname, '__fixtures__/create_package_test_plugin');
-const PLUGIN = require('../../../lib/plugin_config').pluginConfig(PLUGIN_FIXTURE);
+const PLUGIN = pluginConfig(PLUGIN_FIXTURE);
 const PLUGIN_BUILD_DIR = resolve(PLUGIN_FIXTURE, 'build-custom');
 
 const buildVersion = PLUGIN.version;

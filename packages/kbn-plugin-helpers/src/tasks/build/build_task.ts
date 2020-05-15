@@ -24,7 +24,7 @@ import { TaskContext } from '../../lib';
 import { createBuild } from './create_build';
 import { createPackage } from './create_package';
 
-export function buildTask({ plugin, options = {} }: TaskContext) {
+export async function buildTask({ plugin, options = {} }: TaskContext) {
   let buildVersion = plugin.version;
   let kibanaVersion = (plugin.pkg.kibana && plugin.pkg.kibana.version) || plugin.pkg.version;
   let buildFiles = plugin.buildSourcePatterns;
@@ -40,31 +40,24 @@ export function buildTask({ plugin, options = {} }: TaskContext) {
   if (options.buildVersion) buildVersion = options.buildVersion;
   if (options.kibanaVersion) kibanaVersion = options.kibanaVersion;
 
-  let buildStep;
-  if (kibanaVersion === 'kibana') {
-    buildStep = askForKibanaVersion().then(function(customKibanaVersion) {
-      return createBuild(plugin, buildTarget, buildVersion, customKibanaVersion, buildFiles);
-    });
-  } else {
-    buildStep = createBuild(plugin, buildTarget, buildVersion, kibanaVersion, buildFiles);
-  }
+  const chosenKibanaVersion =
+    kibanaVersion === 'kibana' ? await askForKibanaVersion() : kibanaVersion;
 
-  return buildStep.then(function() {
-    if (options.skipArchive) return;
-    return createPackage(plugin, buildTarget, buildVersion);
-  });
+  await createBuild(plugin, buildTarget, buildVersion, chosenKibanaVersion, buildFiles);
+
+  if (!options.skipArchive) {
+    await createPackage(plugin, buildTarget, buildVersion);
+  }
 }
 
-function askForKibanaVersion() {
-  return inquirer
-    .prompt([
-      {
-        type: 'input',
-        name: 'kibanaVersion',
-        message: 'What version of Kibana are you building for?',
-      },
-    ])
-    .then(function(answers) {
-      return answers.kibanaVersion;
-    });
+async function askForKibanaVersion() {
+  const answers = await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'kibanaVersion',
+      message: 'What version of Kibana are you building for?',
+    },
+  ]);
+
+  return answers.kibanaVersion;
 }
