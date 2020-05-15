@@ -215,5 +215,103 @@ export default function({ getService }: FtrProviderContext) {
         });
       });
     });
+
+    describe('Delete', () => {
+      const COMPONENT = {
+        template: {
+          settings: {
+            index: {
+              number_of_shards: 1,
+            },
+          },
+        },
+      };
+
+      it('should delete a component template', async () => {
+        // Create component template to be deleted
+        const COMPONENT_NAME = 'test_delete_component_template';
+        createComponentTemplate({ body: COMPONENT, name: COMPONENT_NAME });
+
+        const uri = `${API_BASE_PATH}/component_templates/${COMPONENT_NAME}`;
+
+        const { body } = await supertest
+          .delete(uri)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        expect(body).to.eql({
+          itemsDeleted: [COMPONENT_NAME],
+          errors: [],
+        });
+      });
+
+      it('should delete multiple component templates', async () => {
+        // Create component templates to be deleted
+        const COMPONENT_ONE_NAME = 'test_delete_component_1';
+        const COMPONENT_TWO_NAME = 'test_delete_component_2';
+        createComponentTemplate({ body: COMPONENT, name: COMPONENT_ONE_NAME });
+        createComponentTemplate({ body: COMPONENT, name: COMPONENT_TWO_NAME });
+
+        const uri = `${API_BASE_PATH}/component_templates/${COMPONENT_ONE_NAME},${COMPONENT_TWO_NAME}`;
+
+        const {
+          body: { itemsDeleted, errors },
+        } = await supertest
+          .delete(uri)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        expect(errors).to.eql([]);
+
+        // The itemsDeleted array order isn't guaranteed, so we assert against each name instead
+        [COMPONENT_ONE_NAME, COMPONENT_TWO_NAME].forEach(componentName => {
+          expect(itemsDeleted.includes(componentName)).to.be(true);
+        });
+      });
+
+      it('should return an error for any component templates not sucessfully deleted', async () => {
+        const COMPONENT_DOES_NOT_EXIST = 'component_does_not_exist';
+
+        // Create component template to be deleted
+        const COMPONENT_ONE_NAME = 'test_delete_component_1';
+        createComponentTemplate({ body: COMPONENT, name: COMPONENT_ONE_NAME });
+
+        const uri = `${API_BASE_PATH}/component_templates/${COMPONENT_ONE_NAME},${COMPONENT_DOES_NOT_EXIST}`;
+
+        const { body } = await supertest
+          .delete(uri)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        expect(body).to.eql({
+          itemsDeleted: [COMPONENT_ONE_NAME],
+          errors: [
+            {
+              name: COMPONENT_DOES_NOT_EXIST,
+              error: {
+                msg:
+                  '[index_template_missing_exception] index_template [component_does_not_exist] missing',
+                path: '/_component_template/component_does_not_exist',
+                query: {},
+                statusCode: 404,
+                response: JSON.stringify({
+                  error: {
+                    root_cause: [
+                      {
+                        type: 'index_template_missing_exception',
+                        reason: 'index_template [component_does_not_exist] missing',
+                      },
+                    ],
+                    type: 'index_template_missing_exception',
+                    reason: 'index_template [component_does_not_exist] missing',
+                  },
+                  status: 404,
+                }),
+              },
+            },
+          ],
+        });
+      });
+    });
   });
 }

@@ -9,9 +9,11 @@ import { RouteDependencies } from '../../../types';
 import { registerGetAllRoute } from './get';
 import { registerCreateRoute } from './create';
 import { registerUpdateRoute } from './update';
+import { registerDeleteRoute } from './delete';
 
 export function registerComponentTemplateRoutes(dependencies: RouteDependencies) {
   registerGetAllRoute(dependencies);
   registerCreateRoute(dependencies);
   registerUpdateRoute(dependencies);
+  registerDeleteRoute(dependencies);
 }
