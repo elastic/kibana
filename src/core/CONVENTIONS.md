@@ -201,6 +201,36 @@ export class MyPlugin implements Plugin {
 }
 ```
 
+Prefer the pattern shown above, using `core.getStartServices()`, rather than store local references retrieved from `start`. 
+
+**Bad:**
+```ts
+export class MyPlugin implements Plugin {
+ // Anti pattern
+  private coreStart?: CoreStart;
+  private depsStart?: DepsStart;  
+
+  public setup(core) {
+    core.application.register({
+      id: 'my-app',
+      async mount(params) {
+        const { renderApp } = await import('./application/my_app');
+        // Anti pattern - use `core.getStartServices()` instead!
+        return renderApp(this.coreStart, this.depsStart, params);
+      }
+    });
+  }  
+
+  public start(core, deps) {
+    // Anti pattern
+    this.coreStart = core;
+    this.depsStart = deps;
+  }
+}
+```
+
+The main reason to prefer the provided async accessor, is that it doesn't requires the developer to understand and reason about when that function can be called. Having an API that fails sometimes isn't a good API design, and it makes accurately testing this difficult.
+
 #### Services
 
 Service structure should mirror the plugin lifecycle to make reasoning about how the service is executed more clear.

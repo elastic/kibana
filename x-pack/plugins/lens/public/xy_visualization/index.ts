@@ -53,5 +53,4 @@ export class XyVisualization {
 
     editorFrame.registerVisualization(xyVisualization);
   }
-  start() {}
 }

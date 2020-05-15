@@ -25,8 +25,7 @@ import {
   ExpressionRenderDefinition,
   ExpressionValueSearchContext,
 } from 'src/plugins/expressions/public';
-import { EuiIcon, EuiText, IconType, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   LensMultiTable,
@@ -39,6 +38,7 @@ import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
 import { parseInterval } from '../../../../../src/plugins/data/common';
+import { EmptyPlaceholder } from '../shared_components';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
@@ -203,18 +203,7 @@ export function XYChart({
 
   if (filteredLayers.length === 0) {
     const icon: IconType = layers.length > 0 ? getIconForSeriesType(layers[0].seriesType) : 'bar';
-    return (
-      <EuiText className="lnsChart__empty" textAlign="center" color="subdued" size="xs">
-        <EuiIcon type={icon} color="subdued" size="l" />
-        <EuiSpacer size="s" />
-        <p>
-          <FormattedMessage
-            id="xpack.lens.xyVisualization.noDataLabel"
-            defaultMessage="No results found"
-          />
-        </p>
-      </EuiText>
-    );
+    return <EmptyPlaceholder icon={icon} />;
   }
 
   // use formatting hint of first x axis column to format ticks
@@ -246,17 +235,9 @@ export function XYChart({
     // check all the tables to see if all of the rows have the same timestamp
     // that would mean that chart will draw a single bar
     const isSingleTimestampInXDomain = () => {
-      const nonEmptyLayers = layers.filter(
-        layer => data.tables[layer.layerId].rows.length && layer.xAccessor
-      );
-
-      if (!nonEmptyLayers.length) {
-        return;
-      }
-
       const firstRowValue =
-        data.tables[nonEmptyLayers[0].layerId].rows[0][nonEmptyLayers[0].xAccessor!];
-      for (const layer of nonEmptyLayers) {
+        data.tables[filteredLayers[0].layerId].rows[0][filteredLayers[0].xAccessor!];
+      for (const layer of filteredLayers) {
         if (
           layer.xAccessor &&
           data.tables[layer.layerId].rows.some(row => row[layer.xAccessor!] !== firstRowValue)
@@ -280,7 +261,7 @@ export function XYChart({
     return undefined;
   }
 
-  const isTimeViz = data.dateRange && layers.every(l => l.xScaleType === 'time');
+  const isTimeViz = data.dateRange && filteredLayers.every(l => l.xScaleType === 'time');
 
   const xDomain = isTimeViz
     ? {
@@ -309,12 +290,10 @@ export function XYChart({
             return;
           }
 
-          const firstLayerWithData =
-            layers[layers.findIndex(layer => data.tables[layer.layerId].rows.length)];
-          const table = data.tables[firstLayerWithData.layerId];
+          const table = data.tables[filteredLayers[0].layerId];
 
           const xAxisColumnIndex = table.columns.findIndex(
-            el => el.id === firstLayerWithData.xAccessor
+            el => el.id === filteredLayers[0].xAccessor
           );
           const timeFieldName = table.columns[xAxisColumnIndex]?.meta?.aggConfigParams?.field;
 

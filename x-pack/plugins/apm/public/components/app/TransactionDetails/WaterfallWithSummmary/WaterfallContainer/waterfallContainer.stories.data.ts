@@ -2027,7 +2027,7 @@ export const inferredSpans = {
           id: '41226ae63af4f235',
           type: 'unknown'
         },
-        child: { ids: ['8d80de06aa11a6fc'] }
+        child: { id: ['8d80de06aa11a6fc'] }
       },
       {
         container: {

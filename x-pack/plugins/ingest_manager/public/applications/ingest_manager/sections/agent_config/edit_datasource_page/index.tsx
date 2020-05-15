@@ -41,7 +41,11 @@ import { StepConfigureDatasource } from '../create_datasource_page/step_configur
 import { StepDefineDatasource } from '../create_datasource_page/step_define_datasource';
 
 export const EditDatasourcePage: React.FunctionComponent = () => {
-  const { notifications } = useCore();
+  const {
+    notifications,
+    chrome: { getIsNavDrawerLocked$ },
+    uiSettings,
+  } = useCore();
   const {
     fleet: { enabled: isFleetEnabled },
   } = useConfig();
@@ -49,6 +53,15 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
     params: { configId, datasourceId },
   } = useRouteMatch();
   const history = useHistory();
+  const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
+
+  useEffect(() => {
+    const subscription = getIsNavDrawerLocked$().subscribe((newIsNavDrawerLocked: boolean) => {
+      setIsNavDrawerLocked(newIsNavDrawerLocked);
+    });
+
+    return () => subscription.unsubscribe();
+  });
 
   // Agent config, package info, and datasource states
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
@@ -78,7 +91,16 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
           setAgentConfig(agentConfigData.item);
         }
         if (datasourceData?.item) {
-          const { id, revision, inputs, ...restOfDatasource } = datasourceData.item;
+          const {
+            id,
+            revision,
+            inputs,
+            created_by,
+            created_at,
+            updated_by,
+            updated_at,
+            ...restOfDatasource
+          } = datasourceData.item;
           // Remove `agent_stream` from all stream info, we assign this after saving
           const newDatasource = {
             ...restOfDatasource,
@@ -287,7 +309,16 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
             ]}
           />
           <EuiSpacer size="l" />
-          <EuiBottomBar css={{ zIndex: 5 }} paddingSize="s">
+          {/* TODO #64541 - Remove classes */}
+          <EuiBottomBar
+            className={
+              uiSettings.get('pageNavigation') === 'legacy'
+                ? isNavDrawerLocked
+                  ? 'ingestManager__bottomBar-isNavDrawerLocked'
+                  : 'ingestManager__bottomBar'
+                : undefined
+            }
+          >
             <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty color="ghost" href={cancelUrl}>

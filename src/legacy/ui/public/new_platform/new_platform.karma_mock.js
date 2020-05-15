@@ -357,9 +357,6 @@ export const npStart = {
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
     },
-    devTools: {
-      getSortedDevTools: () => [],
-    },
     kibanaLegacy: {
       getApps: () => [],
       getForwards: () => [],
@@ -515,6 +512,7 @@ export const npStart = {
       docViews: {
         DocViewer: () => null,
       },
+      savedSearchLoader: {},
     },
   },
 };

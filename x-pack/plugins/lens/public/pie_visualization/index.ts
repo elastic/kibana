@@ -43,8 +43,4 @@ export class PieVisualization {
 
     editorFrame.registerVisualization(pieVisualization);
   }
-
-  start() {}
-
-  stop() {}
 }

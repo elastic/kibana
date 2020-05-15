@@ -9,7 +9,8 @@
     "expressions",
     "navigation",
     "kibanaLegacy",
-    "visualizations"
+    "visualizations",
+    "dashboard"
   ],
   "optionalPlugins": ["embeddable", "usageCollection", "taskManager", "uiActions"],
   "configPath": ["xpack", "lens"]

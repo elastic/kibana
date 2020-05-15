@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Logger } from 'src/core/server/logging';
+import { Logger, LogMeta } from '../../../logging';
 
 /*
  * This file provides a helper class for ensuring that all logging
@@ -35,6 +35,7 @@ export interface SavedObjectsMigrationLogger {
    */
   warning: (msg: string) => void;
   warn: (msg: string) => void;
+  error: (msg: string, meta: LogMeta) => void;
 }
 
 export class MigrationLogger implements SavedObjectsMigrationLogger {
@@ -48,4 +49,5 @@ export class MigrationLogger implements SavedObjectsMigrationLogger {
   public debug = (msg: string) => this.logger.debug(msg);
   public warning = (msg: string) => this.logger.warn(msg);
   public warn = (msg: string) => this.logger.warn(msg);
+  public error = (msg: string, meta: LogMeta) => this.logger.error(msg, meta);
 }

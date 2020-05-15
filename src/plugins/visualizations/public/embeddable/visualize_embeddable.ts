@@ -48,6 +48,7 @@ const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
   indexPatterns?: IIndexPattern[];
+  editPath: string;
   editUrl: string;
   editable: boolean;
   deps: VisualizeEmbeddableFactoryDeps;
@@ -64,12 +65,16 @@ export interface VisualizeInput extends EmbeddableInput {
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
+  editPath: string;
+  editApp: string;
   editUrl: string;
   indexPatterns?: IIndexPattern[];
   visTypeName: string;
 }
 
 type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
+
+const visTypesWithoutInspector = ['markdown', 'input_control_vis', 'metrics', 'vega', 'timelion'];
 
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private handler?: ExpressionLoader;
@@ -90,7 +95,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
   constructor(
     timefilter: TimefilterContract,
-    { vis, editUrl, indexPatterns, editable, deps }: VisualizeEmbeddableConfiguration,
+    { vis, editPath, editUrl, indexPatterns, editable, deps }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
     parent?: IContainer
   ) {
@@ -98,6 +103,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       initialInput,
       {
         defaultTitle: vis.title,
+        editPath,
+        editApp: 'visualize',
         editUrl,
         indexPatterns,
         editable,
@@ -126,7 +133,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   }
 
   public getInspectorAdapters = () => {
-    if (!this.handler) {
+    if (!this.handler || visTypesWithoutInspector.includes(this.vis.type.name)) {
       return undefined;
     }
     return this.handler.inspect();
@@ -215,19 +222,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
   // this is a hack to make editor still work, will be removed once we clean up editor
   // @ts-ignore
-  hasInspector = () => {
-    const visTypesWithoutInspector = [
-      'markdown',
-      'input_control_vis',
-      'metrics',
-      'vega',
-      'timelion',
-    ];
-    if (visTypesWithoutInspector.includes(this.vis.type.name)) {
-      return false;
-    }
-    return this.getInspectorAdapters();
-  };
+  hasInspector = () => Boolean(this.getInspectorAdapters());
 
   /**
    *

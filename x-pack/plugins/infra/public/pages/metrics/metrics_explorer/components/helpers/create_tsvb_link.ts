@@ -46,6 +46,24 @@ export const metricsExplorerMetricToTSVBMetric = (metric: MetricsExplorerOptions
         field: derivativeId,
       },
     ];
+  } else if (metric.aggregation === 'p95' || metric.aggregation === 'p99') {
+    const percentileValue = metric.aggregation === 'p95' ? '95' : '99';
+    return [
+      {
+        id: uuid.v1(),
+        type: 'percentile',
+        field: metric.field,
+        percentiles: [
+          {
+            id: uuid.v1(),
+            value: percentileValue,
+            mode: 'line',
+            percentile: '',
+            shade: 0.2,
+          },
+        ],
+      },
+    ];
   } else {
     return [
       {
@@ -140,8 +158,8 @@ export const createTSVBLink = (
   };
 
   return {
-    app: 'kibana',
-    hash: '/visualize/create',
+    app: 'visualize',
+    hash: '/create',
     search: {
       type: 'metrics',
       _g: encode(globalState),

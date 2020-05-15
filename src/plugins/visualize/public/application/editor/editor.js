@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { EventEmitter } from 'events';
 
 import React from 'react';
-import { makeStateful, useVisualizeAppState, addEmbeddableToDashboardUrl } from './lib';
+import { makeStateful, useVisualizeAppState } from './lib';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
@@ -46,6 +46,7 @@ import { initVisEditorDirective } from './visualization_editor';
 import { initVisualizationDirective } from './visualization';
 
 import { getServices } from '../../kibana_services';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../visualizations/public';
 
 export function initEditorDirective(app, deps) {
   app.directive('visualizeApp', function() {
@@ -68,10 +69,11 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     data: { query: queryService, indexPatterns },
     toastNotifications,
     chrome,
-    core: { docLinks, fatalErrors, uiSettings },
+    core: { docLinks, fatalErrors, uiSettings, application },
     I18nContext,
     setActiveUrl,
     visualizations,
+    dashboard,
   } = getServices();
 
   const {
@@ -645,8 +647,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
       title: savedVis.title,
       type: savedVis.type || stateContainer.getState().vis.type,
     });
-    savedVis.searchSource.setField('query', stateContainer.getState().query);
-    savedVis.searchSource.setField('filter', stateContainer.getState().filters);
+    savedVis.searchSourceFields = searchSource.getSerializedFields();
     savedVis.visState = stateContainer.getState().vis;
     savedVis.uiStateJSON = angular.toJson($scope.uiState.toJSON());
     $appStatus.dirty = false;
@@ -675,15 +676,15 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
               history.replace(appPath);
               setActiveUrl(appPath);
               const lastAppType = $scope.getOriginatingApp();
-              let href = chrome.navLinks.get(lastAppType).url;
 
-              // TODO: Remove this and use application.redirectTo after https://github.com/elastic/kibana/pull/63443
-              if (lastAppType === 'kibana:dashboard') {
+              if (lastAppType === 'dashboards') {
                 const savedVisId = firstSave || savedVis.copyOnSave ? savedVis.id : '';
-                href = addEmbeddableToDashboardUrl(href, savedVisId);
-                history.push(href);
+                dashboard.addEmbeddableToDashboard({
+                  embeddableId: savedVisId,
+                  embeddableType: VISUALIZE_EMBEDDABLE_TYPE,
+                });
               } else {
-                window.location.href = href;
+                application.navigateToApp(lastAppType);
               }
             } else if (savedVis.id === $route.current.params.id) {
               chrome.docTitle.change(savedVis.lastSavedTitle);

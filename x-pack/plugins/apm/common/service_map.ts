@@ -5,22 +5,23 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import cytoscape from 'cytoscape';
 import { ILicense } from '../../licensing/public';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_SUBTYPE,
-  SPAN_TYPE,
-  SPAN_DESTINATION_SERVICE_RESOURCE
+  SPAN_TYPE
 } from './elasticsearch_fieldnames';
 
-export interface ServiceConnectionNode {
+export interface ServiceConnectionNode extends cytoscape.NodeDataDefinition {
   [SERVICE_NAME]: string;
   [SERVICE_ENVIRONMENT]: string | null;
   [AGENT_NAME]: string;
 }
-export interface ExternalConnectionNode {
+export interface ExternalConnectionNode extends cytoscape.NodeDataDefinition {
   [SPAN_DESTINATION_SERVICE_RESOURCE]: string;
   [SPAN_TYPE]: string;
   [SPAN_SUBTYPE]: string;

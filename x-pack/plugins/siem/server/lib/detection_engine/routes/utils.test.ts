@@ -19,11 +19,9 @@ import {
   transformImportError,
   convertToSnakeCase,
   SiemResponseFactory,
-  validateLicenseForRuleType,
 } from './utils';
 import { responseMock } from './__mocks__';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../feature_flags';
-import { licensingMock } from '../../../../../licensing/server/mocks';
 
 describe('utils', () => {
   beforeAll(() => {
@@ -359,38 +357,6 @@ describe('utils', () => {
           status_code: 400,
         })
       );
-    });
-  });
-
-  describe('validateLicenseForRuleType', () => {
-    let licenseMock: ReturnType<typeof licensingMock.createLicenseMock>;
-
-    beforeEach(() => {
-      licenseMock = licensingMock.createLicenseMock();
-    });
-
-    it('throws a BadRequestError if operating on an ML Rule with an insufficient license', () => {
-      licenseMock.hasAtLeast.mockReturnValue(false);
-
-      expect(() =>
-        validateLicenseForRuleType({ license: licenseMock, ruleType: 'machine_learning' })
-      ).toThrowError(BadRequestError);
-    });
-
-    it('does not throw if operating on an ML Rule with a sufficient license', () => {
-      licenseMock.hasAtLeast.mockReturnValue(true);
-
-      expect(() =>
-        validateLicenseForRuleType({ license: licenseMock, ruleType: 'machine_learning' })
-      ).not.toThrowError(BadRequestError);
-    });
-
-    it('does not throw if operating on a query rule', () => {
-      licenseMock.hasAtLeast.mockReturnValue(false);
-
-      expect(() =>
-        validateLicenseForRuleType({ license: licenseMock, ruleType: 'query' })
-      ).not.toThrowError(BadRequestError);
     });
   });
 });

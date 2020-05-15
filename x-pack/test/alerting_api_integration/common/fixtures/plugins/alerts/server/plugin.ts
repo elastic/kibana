@@ -245,6 +245,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         { id: 'default', name: 'Default' },
         { id: 'other', name: 'Other' },
       ],
+      producer: 'alerting',
       defaultActionGroupId: 'default',
       actionVariables: {
         state: [{ name: 'instanceStateValue', description: 'the instance state value' }],
@@ -304,6 +305,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         { id: 'default', name: 'Default' },
         { id: 'other', name: 'Other' },
       ],
+      producer: 'alerting',
       defaultActionGroupId: 'default',
       async executor(alertExecutorOptions: AlertExecutorOptions) {
         const { services, state } = alertExecutorOptions;
@@ -332,6 +334,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           name: 'Default',
         },
       ],
+      producer: 'alerting',
       defaultActionGroupId: 'default',
       async executor({ services, params, state }: AlertExecutorOptions) {
         await services.callCluster('index', {
@@ -358,6 +361,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           name: 'Default',
         },
       ],
+      producer: 'alerting',
       defaultActionGroupId: 'default',
       async executor({ services, params, state }: AlertExecutorOptions) {
         await services.callCluster('index', {
@@ -383,6 +387,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         },
       ],
       defaultActionGroupId: 'default',
+      producer: 'alerting',
       validate: {
         params: schema.object({
           callClusterAuthorizationIndex: schema.string(),
@@ -465,6 +470,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           name: 'Default',
         },
       ],
+      producer: 'alerting',
       defaultActionGroupId: 'default',
       validate: {
         params: schema.object({
@@ -477,6 +483,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       id: 'test.noop',
       name: 'Test: Noop',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      producer: 'alerting',
       defaultActionGroupId: 'default',
       async executor({ services, params, state }: AlertExecutorOptions) {},
     };
@@ -484,6 +491,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       id: 'test.onlyContextVariables',
       name: 'Test: Only Context Variables',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      producer: 'alerting',
       defaultActionGroupId: 'default',
       actionVariables: {
         context: [{ name: 'aContextVariable', description: 'this is a context variable' }],
@@ -494,6 +502,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       id: 'test.onlyStateVariables',
       name: 'Test: Only State Variables',
       actionGroups: [{ id: 'default', name: 'Default' }],
+      producer: 'alerting',
       defaultActionGroupId: 'default',
       actionVariables: {
         state: [{ name: 'aStateVariable', description: 'this is a state variable' }],

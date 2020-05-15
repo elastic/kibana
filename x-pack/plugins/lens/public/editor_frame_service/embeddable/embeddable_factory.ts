@@ -105,7 +105,8 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
       uiActions?.getTrigger,
       {
         savedVis,
-        editUrl: coreHttp.basePath.prepend(getEditPath(savedObjectId)),
+        editPath: getEditPath(savedObjectId),
+        editUrl: coreHttp.basePath.prepend(`app/lens${getEditPath(savedObjectId)}`),
         editable: await this.isEditable(),
         indexPatterns,
       },
