@@ -409,7 +409,9 @@ Advantages:
   requirement to support > 10k or > 100k documents.
 - We can check the health of an existing index before starting the migration,
   but we cannot detect what kind of failures might occur while creating a new
-  index.
+  index. Whereas retrying migrations will eventually recover from the errors
+  in (3.3), re-using an index allows us to detect these problems before trying
+  and avoid errors like (3.3.1) altogether.
 - Single index to backup instead of “index pattern” that matches any
   `.kibana_n`.
 - Simplifies Kibana system index Elasticsearch plugin since it needs to work
