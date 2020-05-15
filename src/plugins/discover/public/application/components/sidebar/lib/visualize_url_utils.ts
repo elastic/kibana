@@ -28,6 +28,7 @@ import {
 import { AppState } from '../../../angular/discover_state';
 import { DiscoverServices } from '../../../../build_services';
 import { VisualizationsStart, VisTypeAlias } from '../../../../../../visualizations/public';
+import { AGGS_TERMS_SIZE_SETTING } from '../../../../../common';
 
 export function isMapsAppRegistered(visualizations: VisualizationsStart) {
   return visualizations.getAliases().some(({ name }: VisTypeAlias) => {
@@ -114,7 +115,7 @@ export function getVisualizeUrl(
   columns: string[],
   services: DiscoverServices
 ) {
-  const aggsTermSize = services.uiSettings.get('discover:aggs:terms:size');
+  const aggsTermSize = services.uiSettings.get(AGGS_TERMS_SIZE_SETTING);
   const urlParams = parse(services.history().location.search) as Record<string, string>;
 
   if (
