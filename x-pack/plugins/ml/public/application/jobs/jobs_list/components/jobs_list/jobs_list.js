@@ -14,7 +14,7 @@ import { toLocaleString } from '../../../../util/string_utils';
 import { ResultLinks, actionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
 import { JobIcon } from '../../../../components/job_message_icon';
-import { getJobIdUrl } from '../utils';
+import { getJobIdUrl } from '../../../../util/get_job_id_url';
 
 import { EuiBadge, EuiBasicTable, EuiButtonIcon, EuiLink, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -71,7 +71,7 @@ export class JobsList extends Component {
       return id;
     }
 
-    return <EuiLink href={getJobIdUrl(id)}>{id}</EuiLink>;
+    return <EuiLink href={getJobIdUrl('jobs', id)}>{id}</EuiLink>;
   }
 
   getPageOfJobs(index, size, sortField, sortDirection) {
