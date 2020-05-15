@@ -148,6 +148,7 @@
     "hapi": "^17.5.3",
     "hoist-non-react-statics": "^3.3.2",
     "jest": "^25.5.4",
+    "jest-circus": "^25.5.4",
     "jest-cli": "^25.5.4",
     "jest-styled-components": "^7.0.2",
     "jsdom": "^15.2.1",

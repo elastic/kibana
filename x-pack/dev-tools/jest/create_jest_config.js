@@ -56,6 +56,7 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       `${kibanaDirectory}/src/dev/jest/setup/react_testing_library.js`,
     ],
     testMatch: ['**/*.test.{js,ts,tsx}'],
+    testRunner: 'jest-circus/runner',
     transform: {
       '^.+\\.(js|tsx?)$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
       '^.+\\.html?$': 'jest-raw-loader',

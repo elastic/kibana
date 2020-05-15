@@ -452,6 +452,7 @@
     "is-path-inside": "^2.1.0",
     "istanbul-instrumenter-loader": "3.0.1",
     "jest": "^25.5.4",
+    "jest-circus": "^25.5.4",
     "jest-cli": "^25.5.4",
     "jest-raw-loader": "^1.0.1",
     "jimp": "^0.9.6",
