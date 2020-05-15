@@ -33,37 +33,29 @@ import {
   AppUpdater,
   ScopedHistory,
 } from 'src/core/public';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import {
-  CONTEXT_MENU_TRIGGER,
-  EmbeddableSetup,
-  EmbeddableStart,
-} from '../../../plugins/embeddable/public';
-import {
-  DataPublicPluginStart,
-  DataPublicPluginSetup,
-  esFilters,
-} from '../../../plugins/data/public';
-import {
-  SharePluginSetup,
-  SharePluginStart,
-  UrlGeneratorContract,
-} from '../../../plugins/share/public';
-import { UiActionsSetup, UiActionsStart } from '../../../plugins/ui_actions/public';
+import { UsageCollectionSetup } from '../../usage_collection/public';
+import { CONTEXT_MENU_TRIGGER, EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
+import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
+import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from '../../share/public';
+import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 
-import { Start as InspectorStartContract } from '../../../plugins/inspector/public';
-import { NavigationPublicPluginStart as NavigationStart } from '../../../plugins/navigation/public';
-import { getSavedObjectFinder, SavedObjectLoader } from '../../../plugins/saved_objects/public';
+import { Start as InspectorStartContract } from '../../inspector/public';
+import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
+import {
+  getSavedObjectFinder,
+  SavedObjectLoader,
+  SavedObjectsStart,
+} from '../../saved_objects/public';
 import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
-} from '../../../plugins/kibana_react/public';
-import { createKbnUrlTracker, Storage } from '../../../plugins/kibana_utils/public';
+} from '../../kibana_react/public';
+import { createKbnUrlTracker, Storage } from '../../kibana_utils/public';
 import {
   KibanaLegacySetup,
   KibanaLegacyStart,
   initAngularBootstrap,
-} from '../../../plugins/kibana_legacy/public';
+} from '../../kibana_legacy/public';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../../plugins/home/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
@@ -117,6 +109,7 @@ interface StartDependencies {
   savedObjectsClient: SavedObjectsClientContract;
   share?: SharePluginStart;
   uiActions: UiActionsStart;
+  savedObjects: SavedObjectsStart;
 }
 
 export type Setup = void;
@@ -250,6 +243,7 @@ export class DashboardPlugin
           share: shareStart,
           data: dataStart,
           kibanaLegacy: { dashboardConfig, navigateToDefaultApp },
+          savedObjects,
         } = pluginsStart;
 
         const deps: RenderDeps = {
@@ -276,6 +270,7 @@ export class DashboardPlugin
           localStorage: new Storage(localStorage),
           usageCollection,
           scopedHistory: () => this.currentHistory!,
+          savedObjects,
         };
         // make sure the index pattern list is up to date
         await dataStart.indexPatterns.clearCache();
