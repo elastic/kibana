@@ -8,29 +8,31 @@ import React from 'react';
 import { EuiBasicTable } from '@elastic/eui';
 import { State } from '../types';
 import { nodeRegistry } from '../nodes';
-import { useLoader, analyzeDag } from '../state';
+import { useLoader, getChainInformation } from '../state';
 
 export function TableRenderer(props: { state: State }) {
   const loader = useLoader();
-  const analyzed = analyzeDag(props.state);
-  const finalTableNodes = analyzed.filter(
-    a => a.isTerminalNode && nodeRegistry[a.node.type].outputType === 'table'
-  );
+  const { startChains, otherChains } = getChainInformation(props.state.nodes);
+
+  const terminals = otherChains.length
+    ? otherChains.map(c => c[c.length - 1])
+    : startChains.map(c => c[c.length - 1]);
+  const terminalData = terminals
+    .map(a => loader.lastData[a.id]?.value)
+    .filter(data => {
+      return data && data.columns && data.rows;
+    });
+
   return (
     <div className="pipelineBuilder__tableRenderer">
-      {finalTableNodes.map(a => {
-        const table = loader.lastData[a.id];
-        if (!table?.value) {
-          return null;
-        }
-
+      {terminalData.map(value => {
         return (
           <EuiBasicTable
-            columns={table.value.columns.map(col => ({
+            columns={value.columns.map(col => ({
               field: col.id,
               name: col.label,
             }))}
-            items={table.value.rows}
+            items={value.rows}
             tableLayout="auto"
           />
         );

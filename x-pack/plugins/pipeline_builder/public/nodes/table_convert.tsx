@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
@@ -19,7 +18,6 @@ import {
   EuiButton,
   euiDragDropReorder,
 } from '@elastic/eui';
-import jsonata from 'jsonata';
 import { NodeDefinition, RenderNode } from '../types';
 import { useLoader } from '../state';
 
@@ -208,7 +206,7 @@ export function getPath(obj: unknown, path: Array<string | number>, i = 0): unkn
 //   return input;
 // }
 
-export function collectColumns(obj: unknown, paths: string[]) {
+export function collectRows(obj: unknown, paths: string[]) {
   const rows: Array<Record<string, unknown>> = [];
 
   paths.forEach(path => {
@@ -246,83 +244,6 @@ export function collectColumns(obj: unknown, paths: string[]) {
     }
   });
   return rows;
-
-  //   if (obj == null) {
-  //     return [];
-  //   }
-
-  //   const newPath = path.map(p => (Number.isInteger(parseInt(p, 10)) ? parseInt(p, 10) : p));
-
-  //   if (i === path.length) {
-  //     return Array.isArray(obj) ? obj : [obj];
-  //   }
-
-  //   if (Array.isArray(obj)) {
-  //     if (Number.isInteger(newPath[i])) {
-  //       return obj.flatMap(child => collectColumns(child[newPath[i]], newPath, i + 1));
-  //     }
-  //     return obj.flatMap(child => collectColumns(child, newPath, i));
-  //   }
-
-  //   if (typeof obj === 'object') {
-  //     // Because Elasticsearch flattens paths, dots in the field name are allowed
-  //     // as JSON keys. For example, { 'a.b': 10 }
-  //     const partialKeyMatches = Object.getOwnPropertyNames(obj)
-  //       .map(key => key.split('.'))
-  //       .filter(keyPaths => keyPaths.every((key, keyIndex) => key === newPath[keyIndex + i]));
-
-  //     if (partialKeyMatches.length) {
-  //       return partialKeyMatches.flatMap(keyPaths => {
-  //         return collectColumns(
-  //           (obj as Record<string, unknown>)[keyPaths.join('.')],
-  //           newPath,
-  //           i + keyPaths.length
-  //         );
-  //       });
-  //     }
-
-  //     return collectColumns((obj as Record<string, unknown>)[newPath[i]], newPath, i + 1);
-  //   }
-
-  //   return [];
-  // }
-}
-
-export function convertToTable(columns: ColumnDef[], input: object) {
-  if (!input) {
-    return { rows: [], columns };
-  }
-
-  // const { prefix, value } = findArray(input.value, '');
-  // let rewrittenValue: unknown[] = [];
-
-  // const columnIds = new Set<string>();
-  // value.forEach(val => {
-  //   if (val && typeof val === 'object') {
-  //     Object.entries(val).forEach(([key, v]) => {
-  //       columnIds.add(prefix ? prefix + '.' + key : key);
-  //     });
-  //     rewrittenValue = rewrittenValue.concat(
-  //       Object.fromEntries(
-  //         Object.entries(val).map(([key, v]) => {
-  //           return [prefix ? prefix + '.' + key : key, v];
-  //         })
-  //       )
-  //     );
-  //   } else if (Array.isArray(val)) {
-  //     val.forEach((_, i) => {
-  //       columnIds.add(prefix ? prefix + '.' + i : String(i));
-  //     });
-  //   }
-  // });
-
-  // return {
-  //   columns: Array.from(columnIds).map(id => ({
-  //     id,
-  //     label: id,
-  //   })),
-  //   rows: rewrittenValue,
-  // };
 }
 
 export function getFlattenedArrayPaths(input: any, prefix: string = ''): string[] {
@@ -361,16 +282,17 @@ export function getFlattenedArrayPaths(input: any, prefix: string = ''): string[
 function TableConvert({ node, dispatch }: RenderNode<TableConvertState>) {
   const loader = useLoader();
 
-  const previousNode = node.inputNodeIds[0];
-  const inputData = loader.lastData[previousNode];
+  const inputData =
+    loader.lastData &&
+    loader.lastData[node.inputNodeIds[0]] &&
+    loader.lastData[node.inputNodeIds[0]].value;
 
-  // const flattenedTable = inputData?.value ? flattenTable(inputData.value) : null;
-  // const flattened = inputData?.value ? flattenKeys(inputData.value) : [];
-  const flattened = inputData?.value ? getFlattenedArrayPaths(inputData.value, '') : null;
-  // const converted = inputData?.value ? convertToTable(node.state, inputData) : null;
-  const converted = inputData?.value
-    ? convertToTable(node.state.columns || flattened?.map(k => ({ id: k })), inputData!.value)
-    : null;
+  const paths =
+    node.state.columns.length && inputData
+      ? node.state.columns.map(({ path }) => path)
+      : getFlattenedArrayPaths(inputData);
+
+  const converted = !node.state.columns.length && inputData ? collectRows(inputData, paths) : null;
 
   const columns: ColumnDef[] = node.state.columns.length
     ? node.state.columns
@@ -437,7 +359,7 @@ function TableConvert({ node, dispatch }: RenderNode<TableConvertState>) {
       </EuiDroppable>
 
       <EuiComboBox
-        options={(flattened || []).map(key => ({
+        options={(paths || []).map(key => ({
           label: key,
           key,
           value: key,
@@ -464,7 +386,7 @@ function TableConvert({ node, dispatch }: RenderNode<TableConvertState>) {
             },
           });
         }}
-        noSuggestions={!flattened}
+        noSuggestions={!converted}
       />
     </EuiDragDropContext>
   );
@@ -488,7 +410,20 @@ export const definition: NodeDefinition<TableConvertState> = {
 
   renderReact: TableConvert,
 
-  async run(state, inputs, deps) {
-    return convertToTable(state, Object.values(inputs)[0]);
+  async run(state, inputs, inputNodeIds, deps) {
+    const inputData = inputs[inputNodeIds[0]]?.value;
+    const paths = state.columns.length
+      ? state.columns.map(({ path }) => path)
+      : getFlattenedArrayPaths(inputData);
+
+    console.log('collecting', inputData, paths);
+    const rows = collectRows(inputData, paths);
+
+    return {
+      columns: state.columns.length
+        ? state.columns.map(({ path, label }) => ({ id: path, label }))
+        : paths.map(p => ({ id: p, label: p })),
+      rows,
+    };
   },
 };

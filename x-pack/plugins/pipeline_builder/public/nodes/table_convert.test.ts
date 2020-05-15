@@ -5,7 +5,7 @@
  */
 
 // import { getFlattenedArrayPaths, convertToTable, recursiveFlatten, getPath } from './table_convert';
-import { getFlattenedArrayPaths, convertToTable, getPath, collectColumns } from './table_convert';
+import { getFlattenedArrayPaths, convertToTable, getPath, collectRows } from './table_convert';
 
 describe('flatten', () => {
   const jsonInput = {
@@ -780,7 +780,7 @@ describe('flatten', () => {
 
   describe('collectColumns', () => {
     it('should return one row for simple object', () => {
-      expect(collectColumns({ a: 1, b: 2 }, ['a', 'b'])).toEqual([{ a: 1, b: 2 }]);
+      expect(collectRows({ a: 1, b: 2 }, ['a', 'b'])).toEqual([{ a: 1, b: 2 }]);
     });
 
     // it('should reduce single-item arrays', () => {
@@ -793,7 +793,7 @@ describe('flatten', () => {
 
     it('should expand different length arrays', () => {
       expect(
-        collectColumns({ count: 10, buckets: [{ a: { b: 3 } }, { a: { b: [4, 2] } }] }, [
+        collectRows({ count: 10, buckets: [{ a: { b: 3 } }, { a: { b: [4, 2] } }] }, [
           'count',
           'buckets.a.b',
         ])
@@ -806,7 +806,7 @@ describe('flatten', () => {
 
     it('should create partial objects if lengths are not equal', () => {
       expect(
-        collectColumns({ count: 10, buckets: [{ a: { b: 3 } }, { a: { b: [4, 2] } }] }, [
+        collectRows({ count: 10, buckets: [{ a: { b: 3 } }, { a: { b: [4, 2] } }] }, [
           'count',
           'buckets.a.b',
         ])

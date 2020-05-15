@@ -28,50 +28,7 @@ import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { State, DispatchFn, PipelineAppDeps, NodeDefinition, Node } from '../types';
 import { nodeRegistry } from '../nodes';
 import { renderersRegistry } from '../renderers';
-import { useLoader, analyzeDag } from '../state';
-
-function getChain(a: Record<string, Node>, startAt: string): Node[] {
-  const nodes: Node[] = [];
-
-  nodes.push(a[startAt]);
-
-  const compareAgainst = Object.values(a);
-  let previousId = startAt;
-  compareAgainst.forEach(n => {
-    if (n.inputNodeIds.includes(previousId)) {
-      if (n.inputNodeIds.length === 1) {
-        nodes.push(n);
-        previousId = n.id;
-      }
-    }
-  });
-
-  return nodes;
-}
-
-function getChainInformation(a: Record<string, Node>) {
-  const copy = { ...a };
-
-  const entries = Object.entries(copy);
-
-  const startEntries = entries.filter(([id, node]) => node.inputNodeIds.length === 0);
-
-  const startChains = startEntries.map(([i]) => {
-    const chain = getChain(copy, i);
-    chain.forEach(({ id }) => {
-      delete copy[id];
-    });
-    return chain;
-  });
-  const lastChainIds = startChains.map(c => c[c.length - 1].id);
-  const otherChains = Object.entries(copy)
-    .filter(([id, n]) => lastChainIds.some(i => n.inputNodeIds.includes(i)))
-    .map(([id, n]) => getChain(copy, id));
-  return {
-    startChains,
-    otherChains,
-  };
-}
+import { useLoader, getChainInformation } from '../state';
 
 export function Layout({ state, dispatch }: { state: State; dispatch: DispatchFn }) {
   const { services } = useKibana<PipelineAppDeps>();
@@ -79,7 +36,6 @@ export function Layout({ state, dispatch }: { state: State; dispatch: DispatchFn
   const loader = useLoader();
 
   const { startChains, otherChains } = getChainInformation(state.nodes);
-  console.log(state.nodes, startChains, otherChains);
 
   return (
     <div className="pipelineFrameLayout">
@@ -254,12 +210,6 @@ export function Layout({ state, dispatch }: { state: State; dispatch: DispatchFn
               {renderersRegistry.table({ state })}
             </EuiAccordion>
           </EuiFlexItem>
-
-          {/* <EuiFlexItem>
-            <EuiAccordion id={'json'} buttonContent={'JSON inspector'} initialIsOpen={true}>
-              {renderersRegistry.json({ state })}
-            </EuiAccordion>
-          </EuiFlexItem> */}
         </EuiFlexGroup>
       </div>
     </div>

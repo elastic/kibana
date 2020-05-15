@@ -169,7 +169,7 @@ export const definition: NodeDefinition<SearchNodeState> = {
 
   renderReact: SearchNode,
 
-  async run(state, inputs, deps) {
+  async run(state, inputs, inputNodeIds, deps) {
     const fn = deps.http.post;
     const result = await fn('/api/console/proxy', {
       query: { path: state.path, method: state.method },

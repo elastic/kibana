@@ -58,8 +58,8 @@ export const definition: NodeDefinition<JoinNodeState> = {
 
   renderReact: JoinNode,
 
-  async run(state, inputs, deps) {
-    const values = Object.values(inputs);
+  async run(state, inputs, inputNodeIds, deps) {
+    const values = inputNodeIds.map(i => inputs[i]?.value);
     return {
       rows: values.flatMap(i => i.rows),
       columns: values.flatMap(i => i.columns),

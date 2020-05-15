@@ -9,15 +9,15 @@ import { EuiCodeBlock, EuiAccordion } from '@elastic/eui';
 import { Chart, Settings, BarSeries } from '@elastic/charts';
 import { State } from '../types';
 import { nodeRegistry } from '../nodes';
-import { useLoader, analyzeDag } from '../state';
+import { useLoader, getChainInformation } from '../state';
 
 export function ChartRenderer(props: { state: State }) {
   const loader = useLoader();
-  const analyzed = analyzeDag(props.state);
+  const { startChains, otherChains } = getChainInformation(props.state.nodes);
 
-  const terminals = analyzed.filter(
-    a => a.isTerminalNode && nodeRegistry[a.node.type].outputType === 'table'
-  );
+  const terminals = otherChains.length
+    ? otherChains.map(c => c[c.length - 1])
+    : startChains.map(c => c[c.length - 1]);
   const terminalData = terminals
     .map(a => loader.lastData[a.id]?.value)
     .filter(data => {

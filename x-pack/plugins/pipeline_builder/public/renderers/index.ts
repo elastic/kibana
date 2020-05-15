@@ -5,11 +5,11 @@
  */
 
 import { TableRenderer } from './table';
-import { JsonRenderer } from './json';
+// import { JsonRenderer } from './json';
 import { ChartRenderer } from './chart';
 
 export const renderersRegistry = {
   table: TableRenderer,
-  json: JsonRenderer,
+  // json: JsonRenderer,
   chart: ChartRenderer,
 };

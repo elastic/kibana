@@ -64,6 +64,7 @@ export interface NodeDefinition<T = unknown> {
   run: (
     state: T,
     inputs: Inputs,
+    inputNodeIds: string[],
     deps: {
       data: DataPublicPluginStart;
       http: CoreStart['http'];

@@ -5,11 +5,12 @@
  */
 
 import { useRef } from 'react';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 import { CoreStart } from 'kibana/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { State, Node } from '../types';
 import { nodeRegistry } from '../nodes';
+import { getChainInformation } from './helpers';
 
 type LoadedData = Record<
   string,
@@ -23,13 +24,16 @@ type LoadedData = Record<
 export class Loader {
   private abortController?: AbortController;
   private loadingSubject: Subject<string>;
+  private dataSubject: Subject<string>;
   private completionSubject: Subject<LoadedData>;
   public completion$: Observable<LoadedData>;
+  private subscriptions: Subscription[] = [];
 
   public lastData: LoadedData = {};
 
   constructor() {
     this.loadingSubject = new Subject();
+    this.dataSubject = new Subject();
     this.completionSubject = new Subject();
     this.completion$ = this.completionSubject.asObservable();
 
@@ -41,6 +45,9 @@ export class Loader {
       this.abortController.abort();
     }
 
+    this.subscriptions.forEach(s => s.unsubscribe());
+    this.subscriptions = [];
+
     this.abortController = new AbortController();
 
     this.lastData = {};
@@ -49,58 +56,59 @@ export class Loader {
       this.lastData[id] = { loading: true };
     });
 
-    const entries = Object.entries(state.nodes);
-    const entriesWithNoDependency = entries.filter(([id, node]) => node.inputNodeIds.length === 0);
-    const entriesWithDependencies = entries.filter(([, node]) => node.inputNodeIds.length > 0);
+    const { startChains, otherChains } = getChainInformation(state.nodes);
 
-    // Find all no-input nodes
-    entriesWithNoDependency.forEach(([id, node]) => {
-      this.runNode(state, id, node, deps);
+    startChains.forEach(chain => {
+      this.runNode(state, chain[0], deps);
     });
+
+    this.subscriptions.push(
+      this.dataSubject.asObservable().subscribe(id => {
+        const nextNode = Object.values(state.nodes).find(n => {
+          return (
+            n.inputNodeIds.includes(id) &&
+            n.inputNodeIds.every(i => this.lastData[i] && this.lastData[i].value)
+          );
+        });
+        console.log('loaded', id, 'next node', nextNode);
+        if (nextNode) {
+          this.runNode(state, nextNode, deps);
+        }
+
+        if (Object.entries(this.lastData).every(([id, data]) => data.value)) {
+          console.log('COMPLETION');
+          this.completionSubject.next(this.lastData);
+        }
+      })
+    );
   }
 
   private runNode(
     state: State,
-    id: string,
     node: Node,
     deps: { data: DataPublicPluginStart; http: CoreStart['http'] }
   ) {
-    this.loadingSubject.next(id);
-
-    const dependentNodes = Object.entries(state.nodes).filter(([otherId, otherNode]) => {
-      return otherNode.inputNodeIds.includes(id);
-    });
+    this.loadingSubject.next(node.id);
 
     nodeRegistry[node.type]
-      .run(node.state, this.lastData, {
+      .run(node.state, this.lastData, node.inputNodeIds, {
         ...deps,
         signal: this.abortController!.signal,
       })
       .then(
         value => {
           // TODO: Check that this request should be running
-          this.lastData[id] = { loading: false, value };
+          this.lastData[node.id] = { loading: false, value };
 
-          if (dependentNodes.length) {
-            dependentNodes.forEach(([otherId, otherNode]) => {
-              this.runNode(state, otherId, otherNode, deps);
-            });
-          } else {
-            this.checkForCompletion();
-          }
+          this.dataSubject.next(node.id);
         },
         e => {
+          console.log(e);
           // TODO: Check that this request should be running
-          this.lastData[id] = { loading: false, error: e.message };
-          this.checkForCompletion();
+          this.lastData[node.id] = { loading: false, error: e.message };
+          // this.checkForCompletion();
         }
       );
-  }
-
-  private checkForCompletion() {
-    if (Object.entries(this.lastData).every(([id, data]) => !data.loading)) {
-      this.completionSubject.next(this.lastData);
-    }
   }
 
   cancel() {
