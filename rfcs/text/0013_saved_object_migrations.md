@@ -7,6 +7,7 @@
 - [2. Motivation](#2-motivation)
 - [3. Saved Object Migration Errors](#3-saved-object-migration-errors)
 - [4. Design](#4-design)
+  - [4.0 Assumptions and tradeoffs](#40-assumptions-and-tradeoffs)
   - [4.1 Discover and remedy potential failures before any downtime](#41-discover-and-remedy-potential-failures-before-any-downtime)
   - [4.2 Tag objects as “invalid” if their transformation fails](#42-tag-objects-as-invalid-if-their-transformation-fails)
   - [4.3 Automatically retry failed migrations until they succeed](#43-automatically-retry-failed-migrations-until-they-succeed)
@@ -19,10 +20,10 @@
     - [4.3.2.4 Checking for "weak lease" expiry](#4324-checking-for-weak-lease-expiry)
   - [4.4 Minimize data loss with mixed Kibana versions](#44-minimize-data-loss-with-mixed-kibana-versions)
   - [4.5 Changes in 8.0](#45-changes-in-80)
-    - [Migration algorithm (8.0):](#migration-algorithm-80)
-    - [Minimizing data loss (8.0)](#minimizing-data-loss-80)
-- [Alternatives](#alternatives)
-- [How we teach this](#how-we-teach-this)
+    - [4.5.1 Migration algorithm (8.0):](#451-migration-algorithm-80)
+    - [4.5.2 Minimizing data loss (8.0)](#452-minimizing-data-loss-80)
+- [5. Alternatives](#5-alternatives)
+- [6. How we teach this](#6-how-we-teach-this)
 - [Unresolved questions](#unresolved-questions)
 
 # 1. Summary
@@ -37,6 +38,8 @@ this, users should be able to rely on:
 
 1. A predictable downtime window.
 2. A small downtime window.
+   1. (future) provide a small downtime window on indices with 10k or even
+      a 100k documents. 
 3. The ability to discover and remedy potential failures before initiating the
    downtime window.
 4. Quick roll-back in case of failure.
@@ -86,6 +89,34 @@ migration failure which requires manual intervention to resolve:
 4. The Kibana process is killed while migrations are in progress.
 
 # 4. Design
+## 4.0 Assumptions and tradeoffs
+The proposed design makes several important assumptions and tradeoffs.
+
+**Background:**
+
+The 7.x upgrade documentation lists taking an Elacsearch snapshot as a
+required step, but we instruct users to retry migrations and perform rollbacks
+by deleting the failed `.kibana_n` index and pointing the `.kibana` alias to
+`.kibana_n-1`:
+ - [Handling errors during saved object
+migrations.](https://github.com/elastic/kibana/blob/75444a9f1879c5702f9f2b8ad4a70a3a0e75871d/docs/setup/upgrade/upgrade-migrations.asciidoc#handling-errors-during-saved-object-migrations)
+ - [Rolling back to a previous version of Kibana.](https://github.com/elastic/kibana/blob/75444a9f1879c5702f9f2b8ad4a70a3a0e75871d/docs/setup/upgrade/upgrade-migrations.asciidoc#rolling-back-to-a-previous-version-of-kib) 
+ - Server logs from failed migrations.
+
+**Assumptions and tradeoffs:**
+1. The simplicity of idempotent, coordination-free migrations outweighs the
+   restrictions this will impose on the kinds of migrations we're able to
+   support in the future. See (4.3.1)
+2. Maintaining the upgrade behaviour and rollback procedures of previous
+   Kibana 7.x releases is more important than introducing enhancements like:
+   1. (2.6) _mixed Kibana versions shouldn't cause data loss_.
+   2. In-place migrations to support > 10k saved objects, reduce the downtime
+      window, and slightly improve the reliability. See (4.5.1)
+3. For 8.x, in-place migrations to support > 10k saved objects, reduce the
+   downtime window, and slightly improve the reliability is more important
+   than (2.7) _maintain read-only functionality during the downtime
+   window_. See (4.5.1).
+
 ## 4.1 Discover and remedy potential failures before any downtime
 
 > Achieves goals: (2.3)
@@ -144,10 +175,15 @@ recover automatically once these external conditions are resolved. There are
 two broad approaches to solving this problem based on whether or not
 migrations are idempotent: 
 
-| Idempotent migrations | Description                                                                                                                                                                                                                              |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Yes                   | [3.3.1 Idempotent migrations performed without coordination](https://paper.dropbox.com/doc/Saved-Object-Migrations-AyyAIDBs0MBPLP0m1g_eEXbAg-eoNoItoN5MQbq7onpCVD7#:uid=241540780175978059504212&h2=3.3.1-Idempotent-migrations-pe)      |
-| No                    | [3.3.2 Single node migrations coordinated through a lease / lock](https://paper.dropbox.com/doc/Saved-Object-Migrations-AyyAIDBs0MBPLP0m1g_eEXbAg-eoNoItoN5MQbq7onpCVD7#:uid=517337129814114019346698&h2=3.3.2-Single-node-migrations-c) |
+| Idempotent migrations |Description                                                      |
+| --------------------- | --------------------------------------------------------------- |
+| Yes                   | 3.3.1 Idempotent migrations performed without coordination      |
+| No                    | 3.3.2 Single node migrations coordinated through a lease / lock |
+
+Because idempotent migrations don't require coordination, solution (3.3.1) is
+significantly less complex and it will never require manual intervention to
+retry. We, therefore, prefer this solution, even though it introduces new
+restrictions on migrations (4.3.1.1).
 
 ## 4.3.1 Idempotent migrations performed without coordination
 
@@ -182,8 +218,9 @@ matter which node’s writes win.
 > Note: This algorithm doesn't support mixed Kibana versions attempting to
 > perform a migration at the same time. E.g. if a v7.8.0 and a v7.9.0 node
 > attempts to simultaneously migrate a 7.6.0 index the result will be an
-> inconsistent state. In 8.x we can ensure that only the latest node completes
-> the migration.
+> inconsistent state. This is an unlikely scenario in practise and therefore
+> an acceptable limitation. In 8.x we can ensure that only the latest node
+> completes the migration.
 
 ## 4.3.2 Single node migrations coordinated through a lease/lock
 
@@ -384,12 +421,12 @@ problems than what it solves.
 </details>
 
 ## 4.5 Changes in 8.0
-1. Re-use the same index for minor upgrades.
+1. Migrations will be in-place and re-use the same index for minor upgrades.
 2. Only allow breaking field mapping changes (which requires creating a new
    index) in a major.
 3. All update operations should use optimistic concurrency control.
 
-### Migration algorithm (8.0):
+### 4.5.1 Migration algorithm (8.0):
 
 1. On startup, find the index to which the `.kibana` alias points,
    `.kibana_n`, and check if any documents have an outdated `migrationVersion`
@@ -436,20 +473,21 @@ Drawbacks:
 - It’s impossible to provide read-only functionality for outdated nodes which
   means we can't achieve goal (2.7).
 
-### Minimizing data loss (8.0)
+### 4.5.2 Minimizing data loss (8.0)
 See [4.4 Minimize data loss with mixed Kibana
 versions](#44-minimize-data-loss-with-mixed-kibana-versions) for a background
 discussion around minimizing data loss.
 
 1. Disable `action.auto_create_index` for the Kibana system indices.
-2. If a node detects that the `.kibana` index requires a migration it does the following:
+2. If a node detects that the `.kibana` index requires a migration it does the
+   following:
    1. Create a version-specific read and write alias for sending commands
        (.e.g `.kibana_8.0.1_read` & `.kibana_8.0.1_write`.
    2. Remove the write alias(es) for all previous versions.
 3. All saved object reads and writes use the version-specific read and write
    alias.
 
-# Alternatives
+# 5. Alternatives
 We considered implementing rolling upgrades to provide zero downtime
 migrations. However, this would introduce significant complexity for plugins:
 they will need to maintain up and down migration transformations and ensure
@@ -461,11 +499,11 @@ downtime window is sufficient for our users, we decided against trying to
 achieve zero downtime with rolling upgrades. See "Rolling upgrades" in
 https://github.com/elastic/kibana/issues/52202 for more information.
 
-# How we teach this
+# 6. How we teach this
 1. Update documentation and server logs to start educating users to depend on
    snapshots for Kibana rollbacks.
 2. Update developer documentation and educate developers with best practices
-   for writing migration functions.
+   for writing migration functions. 
 
 # Unresolved questions
 - What does major version migrations look like? If we need to re-index we
