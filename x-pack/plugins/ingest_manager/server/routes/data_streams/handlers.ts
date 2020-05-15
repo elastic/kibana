@@ -136,12 +136,13 @@ export const getListHandler: RequestHandler = async (context, request, response)
           dashboards: enhancedDashboards,
         };
       }
+
       return {
         index: indexName,
         dataset: datasetBuckets.length ? datasetBuckets[0].key : '',
         namespace: namespaceBuckets.length ? namespaceBuckets[0].key : '',
         type: typeBuckets.length ? typeBuckets[0].key : '',
-        package: pkg,
+        package: pkgSavedObject.length ? pkg : '',
         package_version: packageMetadata[pkg] ? packageMetadata[pkg].version : '',
         last_activity: lastActivity,
         size_in_bytes: indexStats[indexName] ? indexStats[indexName].total.store.size_in_bytes : 0,
