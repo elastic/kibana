@@ -100,7 +100,9 @@ export default function({ getService }: FtrProviderContext) {
     describe('from new jobs posted', () => {
       it('csv', async () => {
         await reportingAPI.expectAllJobsToFinishSuccessfully(
-          await reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3)
+          await Promise.all([
+            await reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3),
+          ])
         );
 
         const usage = await usageAPI.getUsageStats();
