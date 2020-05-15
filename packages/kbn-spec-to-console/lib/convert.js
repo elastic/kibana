@@ -37,13 +37,16 @@ module.exports = spec => {
   Object.keys(spec).forEach(api => {
     const source = spec[api];
 
-    if (source.url.paths.every(path => Boolean(path.deprecated))) {
-      return;
-    }
-
     if (!source.url) {
       return result;
     }
+
+    if (source.url.path) {
+      if (source.url.paths.every(path => Boolean(path.deprecated))) {
+        return;
+      }
+    }
+
     const convertedSpec = (result[api] = {});
     if (source.params) {
       const urlParams = convertParams(source.params);
