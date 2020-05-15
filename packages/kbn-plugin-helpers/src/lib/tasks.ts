@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -19,10 +17,25 @@
  * under the License.
  */
 
-const nodeMajorVersion = parseFloat(process.version.replace(/^v(\d+)\..+/, '$1'));
-if (nodeMajorVersion < 6) {
-  console.error('FATAL: kibana-plugin-helpers requires node 6+');
-  process.exit(1);
+import { buildTask } from '../tasks/build';
+import { startTask } from '../tasks/start';
+import { testAllTask } from '../tasks/test/all';
+import { testKarmaTask } from '../tasks/test/karma';
+import { testMochaTask } from '../tasks/test/mocha';
+
+// define a tasks interface that we can extend in the tests
+export interface Tasks {
+  build: typeof buildTask;
+  start: typeof startTask;
+  testAll: typeof testAllTask;
+  testKarma: typeof testKarmaTask;
+  testMocha: typeof testMochaTask;
 }
 
-require('../target/cli');
+export const tasks: Tasks = {
+  build: buildTask,
+  start: startTask,
+  testAll: testAllTask,
+  testKarma: testKarmaTask,
+  testMocha: testMochaTask,
+};

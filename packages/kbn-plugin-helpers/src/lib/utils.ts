@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -19,10 +17,26 @@
  * under the License.
  */
 
-const nodeMajorVersion = parseFloat(process.version.replace(/^v(\d+)\..+/, '$1'));
-if (nodeMajorVersion < 6) {
-  console.error('FATAL: kibana-plugin-helpers requires node 6+');
-  process.exit(1);
+import { resolve } from 'path';
+
+import { pluginConfig } from './plugin_config';
+
+export function babelRegister() {
+  const plugin = pluginConfig();
+
+  try {
+    // add support for moved @babel/register source: https://github.com/elastic/kibana/pull/13973
+    require(resolve(plugin.kibanaRoot, 'src/setup_node_env/babel_register')); // eslint-disable-line import/no-dynamic-require
+  } catch (error) {
+    if (error.code === 'MODULE_NOT_FOUND') {
+      require(resolve(plugin.kibanaRoot, 'src/optimize/babel/register')); // eslint-disable-line import/no-dynamic-require
+    } else {
+      throw error;
+    }
+  }
 }
 
-require('../target/cli');
+export function resolveKibanaPath(path: string) {
+  const plugin = pluginConfig();
+  return resolve(plugin.kibanaRoot, path);
+}

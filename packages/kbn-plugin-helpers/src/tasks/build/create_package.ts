@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -19,10 +17,30 @@
  * under the License.
  */
 
-const nodeMajorVersion = parseFloat(process.version.replace(/^v(\d+)\..+/, '$1'));
-if (nodeMajorVersion < 6) {
-  console.error('FATAL: kibana-plugin-helpers requires node 6+');
-  process.exit(1);
-}
+import { relative, join } from 'path';
 
-require('../target/cli');
+import del from 'del';
+import vfs from 'vinyl-fs';
+import zip from 'gulp-zip';
+
+import { pipeline, PluginConfig } from '../../lib';
+
+export async function createPackage(
+  plugin: PluginConfig,
+  buildTarget: string,
+  buildVersion: string
+) {
+  const buildId = `${plugin.id}-${buildVersion}`;
+  const buildRoot = join(buildTarget, 'kibana', plugin.id);
+  const buildFiles = [relative(buildTarget, buildRoot) + '/**/*'];
+
+  // zip up the package
+  await pipeline(
+    vfs.src(buildFiles, { cwd: buildTarget, base: buildTarget }),
+    zip(`${buildId}.zip`),
+    vfs.dest(buildTarget)
+  );
+
+  // clean up the build path
+  await del(join(buildTarget, 'kibana'));
+}

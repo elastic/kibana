@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -19,10 +17,19 @@
  * under the License.
  */
 
-const nodeMajorVersion = parseFloat(process.version.replace(/^v(\d+)\..+/, '$1'));
-if (nodeMajorVersion < 6) {
-  console.error('FATAL: kibana-plugin-helpers requires node 6+');
-  process.exit(1);
+import { resolve } from 'path';
+import { readFileSync } from 'fs';
+
+function indent(txt: string, n: number) {
+  const space = new Array(n + 1).join(' ');
+  return space + txt.split('\n').join('\n' + space);
 }
 
-require('../target/cli');
+export function docs(name: string) {
+  const md = readFileSync(resolve(__dirname, '../../src/tasks', name, 'README.md'), 'utf8');
+
+  return function() {
+    /* eslint-disable-next-line no-console */
+    console.log(`\n  Docs:\n\n${indent(md, 4)}\n\n`);
+  };
+}
