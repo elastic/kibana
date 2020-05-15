@@ -24,6 +24,7 @@ const enabledActionTypes = [
   '.pagerduty',
   '.server-log',
   '.servicenow',
+  '.jira',
   '.slack',
   '.webhook',
   'test.authorization',
