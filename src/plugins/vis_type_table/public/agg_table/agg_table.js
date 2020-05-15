@@ -56,8 +56,8 @@ export function KbnAggTable(config, RecursionHelper) {
         self._saveAs(csv, self.csv.filename);
       };
 
-      self.toCsv = function (formatted) {
-        const rows = $scope.table.rows;
+      self.toCsv = function(formatted) {
+        const rows = formatted ? $scope.rows : $scope.table.rows;
         const columns = formatted ? $scope.formattedColumns : $scope.table.columns;
         const nonAlphaNumRE = /[^a-zA-Z0-9]/;
         const allDoubleQuoteRE = /"/g;
@@ -71,15 +71,17 @@ export function KbnAggTable(config, RecursionHelper) {
           return val;
         }
 
-        // escape each cell in each row
-        const csvRows = rows.map(function (row) {
-          return Object.entries(row).map(([k, v]) => {
-            const column = columns.find((c) => c.id === k);
-            if (formatted && column) {
-              return escape(column.formatter.convert(v));
-            }
-            return escape(v);
+        let csvRows = [];
+        rows.map(row => {
+          const rowArray = [];
+          Object.entries(row).map(([k, v]) => {
+            const column = columns.find(c => c.id === k);
+            const columnIdx = columns.findIndex(c => c.id === k);
+            const formattedValue =
+              formatted && column ? escape(column.formatter.convert(v)) : escape(v);
+            rowArray.splice(columnIdx, 0, formattedValue);
           });
+          csvRows = [...csvRows, rowArray];
         });
 
         // add the columns to the rows
@@ -251,9 +253,9 @@ function addPercentageCol(columns, title, rows, insertAtIndex) {
     id: newId,
     formatter,
   });
-  const newRows = rows.map((row) => ({
-    [newId]: row[id] / sumTotal,
+  const newRows = rows.map(row => ({
     ...row,
+    [newId]: row[id] / sumTotal,
   }));
 
   return { cols: newCols, rows: newRows };
