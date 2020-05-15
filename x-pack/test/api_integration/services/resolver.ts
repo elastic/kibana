@@ -9,7 +9,6 @@ import {
   EndpointDocGenerator,
 } from '../../../plugins/endpoint/common/generate_data';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { setupRouteService, fleetSetupRouteService } from '../../../plugins/ingest_manager/common';
 
 /**
  * Options for build a resolver tree
@@ -30,7 +29,6 @@ export interface GeneratedTrees {
 }
 
 export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const client = getService('es');
 
   return {
@@ -49,7 +47,7 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
           ),
           []
         );
-        await client.bulk({ body, refresh: true });
+        await client.bulk({ body, refresh: 'true' });
         allTrees.push(tree);
       }
       return { trees: allTrees, index: eventsIndex };
