@@ -50,6 +50,11 @@ SIEM::
 * When you deactivate an action within a rule, the rule fails {issue}64870[#64870]
 * When you add a timestamp to the PagerDuty action, the rule fails {issue}64871[#64871]
 
+Configuration::
+* The `http.customResponseHeaders` will prevent {kib} to start if any headers are set using other types than string.
+You can convert your boolean or number headers to strings to fix this. (`my-header: "true"` instead of `my-header: true`).
+{issue}66146[#66146]
+
 [float]
 [[enhancement-7.7.0]]
 === Enhancements
