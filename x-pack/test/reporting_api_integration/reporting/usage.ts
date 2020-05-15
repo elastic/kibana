@@ -16,11 +16,17 @@ interface UsageStats {
 // eslint-disable-next-line import/no-default-export
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('reportingAPI');
   const usageAPI = getService('usageAPI' as any); // NOTE Usage API service is not Typescript
 
   describe('reporting usage', () => {
-    before(() => reportingAPI.deleteAllReportingIndexes());
+    before(async () => {
+      await kibanaServer.uiSettings.update({
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await reportingAPI.deleteAllReportingIndexes();
+    });
     afterEach(() => reportingAPI.deleteAllReportingIndexes());
 
     describe('initial state', () => {
