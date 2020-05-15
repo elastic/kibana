@@ -13,13 +13,8 @@ import {
 } from '../../../../plugins/endpoint/common/types';
 import { parentEntityId } from '../../../../plugins/endpoint/common/models/event';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import {
-  EndpointDocGenerator,
-  Event,
-  Tree,
-  TreeOptions,
-  TreeNode,
-} from '../../../../../x-pack/plugins/endpoint/common/generate_data';
+import { Event, Tree, TreeNode } from '../../../../../x-pack/plugins/endpoint/common/generate_data';
+import { Options, GeneratedTrees } from '../../services/resolver';
 
 /**
  * Check that the given lifecycle is in the resolver tree's corresponding map
@@ -152,7 +147,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
     generations: 2,
     percentTerminated: 100,
     percentWithRelated: 100,
-    numAlerts: 1,
+    numTrees: 1,
     alwaysGenMaxChildrenPerNode: true,
   };
 
