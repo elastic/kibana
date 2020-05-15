@@ -17,6 +17,7 @@ import {
   Logger,
   PluginInitializerContext,
   IScopedClusterClient,
+  ICustomClusterClient,
 } from 'src/core/server';
 
 import { PLUGIN } from '../common';
@@ -36,11 +37,18 @@ export interface IndexManagementPluginSetup {
   };
 }
 
+async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
+  const [core] = await getStartServices();
+  const esClientConfig = { plugins: [elasticsearchJsPlugin] };
+  return core.elasticsearch.legacy.createClient('dataManagement', esClientConfig);
+}
+
 export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup, void, any, any> {
   private readonly apiRoutes: ApiRoutes;
   private readonly license: License;
   private readonly logger: Logger;
   private readonly indexDataEnricher: IndexDataEnricher;
+  private dataManagementESClient?: ICustomClusterClient;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -50,7 +58,7 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
   }
 
   setup(
-    { http, elasticsearch }: CoreSetup,
+    { http, getStartServices }: CoreSetup,
     { licensing }: Dependencies
   ): IndexManagementPluginSetup {
     const router = http.createRouter();
@@ -69,11 +77,12 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
       }
     );
 
-    const esClientConfig = { plugins: [elasticsearchJsPlugin] };
-    const dataManagementESClient = elasticsearch.createClient('dataManagement', esClientConfig);
-    http.registerRouteHandlerContext('dataManagement', (ctx, request) => {
+    http.registerRouteHandlerContext('dataManagement', async (ctx, request) => {
+      this.dataManagementESClient =
+        this.dataManagementESClient ?? (await getCustomEsClient(getStartServices));
+
       return {
-        client: dataManagementESClient.asScoped(request),
+        client: this.dataManagementESClient.asScoped(request),
       };
     });
 
@@ -94,5 +103,10 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
   }
 
   start() {}
-  stop() {}
+
+  stop() {
+    if (this.dataManagementESClient) {
+      this.dataManagementESClient.close();
+    }
+  }
 }
