@@ -7,7 +7,7 @@
     "xpack.alerting": "plugins/alerting",
     "xpack.alertingBuiltins": "plugins/alerting_builtins",
     "xpack.apm": ["legacy/plugins/apm", "plugins/apm"],
-    "xpack.beatsManagement": "legacy/plugins/beats_management",
+    "xpack.beatsManagement": ["legacy/plugins/beats_management", "plugins/beats_management"],
     "xpack.canvas": "plugins/canvas",
     "xpack.dashboard": "plugins/dashboard_enhanced",
     "xpack.crossClusterReplication": "plugins/cross_cluster_replication",

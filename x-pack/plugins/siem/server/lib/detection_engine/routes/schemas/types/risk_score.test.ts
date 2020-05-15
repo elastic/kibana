@@ -7,7 +7,7 @@
 import { RiskScore } from './risk_score';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import { foldLeftRight, getPaths } from '../../../../../utils/build_validation/__mocks__/utils';
+import { foldLeftRight, getPaths } from '../../../../../../common/test_utils';
 
 describe('risk_score', () => {
   test('it should validate a positive number', () => {

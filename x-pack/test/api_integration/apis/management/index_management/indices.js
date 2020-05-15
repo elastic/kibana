@@ -184,6 +184,7 @@ export default function({ getService }) {
         const { body } = await list().expect(200);
         const expectedKeys = [
           'health',
+          'hidden',
           'status',
           'name',
           'uuid',
@@ -214,6 +215,7 @@ export default function({ getService }) {
           const { body } = await reload().expect(200);
           const expectedKeys = [
             'health',
+            'hidden',
             'status',
             'name',
             'uuid',
