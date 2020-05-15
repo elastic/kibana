@@ -23,7 +23,14 @@ import * as i18n from './translations';
 import { AssociateNote } from '../../notes/helpers';
 import { Note } from '../../../../common/lib/note';
 import { CreateTimelineBtn } from './create_timeline_btn';
-import { TimelineType, TimelineTypeLiteral } from '../../../../../common/types/timeline';
+import {
+  TimelineType,
+  /**
+   * CreateTemplateTimelineBtn
+   * Remove the comment here to enable saving as expected type
+   * TimelineTypeLiteral
+   */
+} from '../../../../../common/types/timeline';
 import { useKibana } from '../../../../common/lib/kibana';
 
 export const PropertiesRightStyle = styled(EuiFlexGroup)`

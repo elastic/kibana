@@ -17,7 +17,9 @@ import { StatefulOpenTimeline } from '../components/open_timeline';
 import * as i18n from './translations';
 import {
   NEW_TIMELINE,
-  NEW_TEMPLATE_TIMELINE,
+  // CreateTemplateTimelineBtn
+  // Remove the comment here to enable CreateTemplateTimelineBtn
+  // NEW_TEMPLATE_TIMELINE,
 } from '../components/timeline/properties/translations';
 import { CreateTimelineBtn } from '../components/timeline/properties/create_timeline_btn';
 import { TimelineType } from '../../../common/types/timeline';

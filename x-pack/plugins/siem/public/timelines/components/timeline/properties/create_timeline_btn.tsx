@@ -5,8 +5,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { connect, ConnectedProps, useDispatch } from 'react-redux';
-import { Dispatch } from 'redux';
+import { useDispatch } from 'react-redux';
 import { noop } from 'lodash/fp';
 
 import { defaultHeaders } from '../body/column_headers/default_headers';
@@ -14,8 +13,10 @@ import { defaultHeaders } from '../body/column_headers/default_headers';
 import { timelineActions } from '../../../store/timeline';
 import { NewTimeline } from './helpers';
 import {
-  TimelineTypeLiteralWithNull,
-  TimelineType,
+  // CreateTemplateTimelineBtn
+  // Remove the comment here to enable saving as expected type
+  // TimelineTypeLiteralWithNull,
+  // TimelineType,
   TimelineTypeLiteral,
 } from '../../../../../common/types/timeline';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -28,9 +29,7 @@ interface OwnProps {
   timelineType: TimelineTypeLiteral;
 }
 
-type Props = OwnProps;
-
-export const CreateTimelineBtnComponent: React.FC<Props> = ({
+export const CreateTimelineBtnComponent: React.FC<OwnProps> = ({
   onClosePopover = noop,
   outline,
   title,
@@ -69,9 +68,7 @@ export const CreateTimelineBtnComponent: React.FC<Props> = ({
       timelineType={timelineType}
       title={title}
     />
-  ) : (
-    false
-  );
+  ) : null;
 };
 
 export const CreateTimelineBtn = React.memo(CreateTimelineBtnComponent);

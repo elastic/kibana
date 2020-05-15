@@ -20,7 +20,11 @@ import { timelineDefaults } from './defaults';
 import { ColumnHeaderOptions, KqlMode, TimelineModel, EventType } from './model';
 import { TimelineById, TimelineState } from './types';
 import { TimelineNonEcsData } from '../../../graphql/types';
-import { TimelineTypeLiteral } from '../../../../common/types/timeline';
+/**
+ * CreateTemplateTimelineBtn
+ * Remove the comment here to enable saving as expected type
+ * import { TimelineTypeLiteral } from '../../../../common/types/timeline';
+ */
 
 const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
 
@@ -148,7 +152,11 @@ interface AddNewTimelineParams {
   showCheckboxes?: boolean;
   showRowRenderers?: boolean;
   timelineById: TimelineById;
-  timelineType: TimelineTypeLiteral;
+  /**
+   * CreateTemplateTimelineBtn
+   * Remove the comment here to enable saving as expected type
+   * timelineType: TimelineTypeLiteral;
+   */
 }
 
 /** Adds a new `Timeline` to the provided collection of `TimelineById` */
@@ -165,8 +173,12 @@ export const addNewTimeline = ({
   showCheckboxes = false,
   showRowRenderers = true,
   timelineById,
-  timelineType,
-}: AddNewTimelineParams): TimelineById => ({
+}: /**
+ * CreateTemplateTimelineBtn
+ * Remove the comment here to enable saving as expected type
+ * timelineType,
+ */
+AddNewTimelineParams): TimelineById => ({
   ...timelineById,
   [id]: {
     id,
@@ -185,7 +197,11 @@ export const addNewTimeline = ({
     isLoading: false,
     showCheckboxes,
     showRowRenderers,
-    timelineType,
+    /**
+     * CreateTemplateTimelineBtn
+     * Remove the comment here to enable saving as expected type
+     * timelineType,
+     */
   },
 });
 

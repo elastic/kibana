@@ -16,8 +16,11 @@ import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/t
 
 import { EventType, KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
 import { TimelineNonEcsData } from '../../../graphql/types';
-import { TimelineTypeLiteral } from '../../../../common/types/timeline';
-
+/**
+ * CreateTemplateTimelineBtn
+ * Remove the comment here to enable saving as expected type
+ * import { TimelineTypeLiteral } from '../../../../common/types/timeline';
+ */
 const actionCreator = actionCreatorFactory('x-pack/siem/local/timeline');
 
 export const addHistory = actionCreator<{ id: string; historyId: string }>('ADD_HISTORY');

@@ -98,7 +98,11 @@ import {
 } from './helpers';
 
 import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
-import { TimelineType } from '../../../../common/types/timeline';
+/**
+ * CreateTemplateTimelineBtn
+ * Remove the comment here to enable saving as expected type
+ * import { TimelineType } from '../../../../common/types/timeline';
+ */
 
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,

@@ -134,7 +134,6 @@ export const Properties = React.memo<Props>(
         />
         <PropertiesRight
           associateNote={associateNote}
-          createTimeline={createTimeline}
           description={description}
           getNotesByIds={getNotesByIds}
           isDataInTimeline={isDataInTimeline}
