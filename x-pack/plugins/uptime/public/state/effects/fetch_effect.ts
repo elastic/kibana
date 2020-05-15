@@ -6,7 +6,7 @@
 
 import { call, put } from 'redux-saga/effects';
 import { Action } from 'redux-actions';
-import { IHttpFetchError } from '../../../../../../target/types/core/public/http';
+import { IHttpFetchError } from 'src/core/public';
 
 /**
  * Factory function for a fetch effect. It expects three action creators,
