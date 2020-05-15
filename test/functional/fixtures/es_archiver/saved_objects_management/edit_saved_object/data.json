@@ -41,7 +41,7 @@
     },
     "references" : [
       {
-        "name" : "control_0_index_pattern",
+        "name" : "kibanaSavedObjectMeta.searchSourceJSON.index",
         "type" : "index-pattern",
         "id" : "logstash-*"
       }

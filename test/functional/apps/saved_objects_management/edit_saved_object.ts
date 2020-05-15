@@ -125,6 +125,13 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     it('preserves the object references when saving', async () => {
       const testVisualizationUrl =
         '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed';
+      const visualizationRefs = [
+        {
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          type: 'index-pattern',
+          id: 'logstash-*',
+        },
+      ];
 
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
@@ -136,7 +143,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       await testSubjects.existOrFail('savedObjectEditSave');
 
-      let referencesValue = await getAceEditorFieldValue('references');
+      let displayedReferencesValue = await getAceEditorFieldValue('references');
+
+      expect(JSON.parse(displayedReferencesValue)).to.eql(visualizationRefs);
 
       await focusAndClickButton('savedObjectEditSave');
 
@@ -145,9 +154,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.common.navigateToActualUrl('kibana', testVisualizationUrl);
 
       // Parsing to avoid random keys ordering issues in raw string comparison
-      expect(JSON.parse(await getAceEditorFieldValue('references'))).to.eql(
-        JSON.parse(referencesValue)
-      );
+      expect(JSON.parse(await getAceEditorFieldValue('references'))).to.eql(visualizationRefs);
 
       await setAceEditorFieldValue('references', JSON.stringify([], undefined, 2));
 
@@ -157,9 +164,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       await PageObjects.common.navigateToActualUrl('kibana', testVisualizationUrl);
 
-      referencesValue = await getAceEditorFieldValue('references');
+      displayedReferencesValue = await getAceEditorFieldValue('references');
 
-      expect(JSON.parse(referencesValue)).to.eql([]);
+      expect(JSON.parse(displayedReferencesValue)).to.eql([]);
     });
   });
 }
