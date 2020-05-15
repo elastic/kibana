@@ -10,7 +10,7 @@ import { uniq, startCase, flattenDeep, isArray, isString } from 'lodash/fp';
 import {
   AlertAction,
   ActionTypeRegistryContract,
-} from '../../../../../../triggers_actions_ui/public';
+} from '../../../../../../../triggers_actions_ui/public';
 import * as I18n from './translations';
 
 const UUID_V4_REGEX = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;

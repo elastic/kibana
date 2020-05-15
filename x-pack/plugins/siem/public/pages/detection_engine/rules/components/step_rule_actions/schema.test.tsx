@@ -6,8 +6,8 @@
 
 import { validateSingleAction, validateRuleActionsField } from './schema';
 import { isUuidv4, getActionTypeName, validateMustache, validateActionParams } from './utils';
-import { actionTypeRegistryMock } from '../../../../../../triggers_actions_ui/public/application/action_type_registry.mock';
-import { FormHook } from '../../../../shared_imports';
+import { actionTypeRegistryMock } from '../../../../../../../triggers_actions_ui/public/application/action_type_registry.mock';
+import { FormHook } from '../../../../../shared_imports';
 jest.mock('./utils');
 
 describe('stepRuleActions schema', () => {

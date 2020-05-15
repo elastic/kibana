@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { actionTypeRegistryMock } from '../../../../../../triggers_actions_ui/public/application/action_type_registry.mock';
+import { actionTypeRegistryMock } from '../../../../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 import { isUuidv4, getActionTypeName, validateMustache, validateActionParams } from './utils';
 
 describe('stepRuleActions utils', () => {
