@@ -22,11 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import { useHistory } from 'react-router-dom';
 import { AgentConfig } from '../../../types';
-import {
-  AGENT_CONFIG_DETAILS_PATH,
-  AGENT_CONFIG_SAVED_OBJECT_TYPE,
-  AGENT_CONFIG_PATH,
-} from '../../../constants';
+import { AGENT_CONFIG_SAVED_OBJECT_TYPE } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
 import {
   useCapabilities,
@@ -35,11 +31,11 @@ import {
   useLink,
   useConfig,
   useUrlParams,
+  useBreadcrumbs,
 } from '../../../hooks';
 import { CreateAgentConfigFlyout } from './components';
 import { SearchBar } from '../../../components/search_bar';
 import { LinkedAgentCount } from '../components';
-import { useAgentConfigLink } from '../details_page/hooks/use_details_uri';
 import { TableRowActions } from '../components/table_row_actions';
 
 const NO_WRAP_TRUNCATE_STYLE: CSSProperties = Object.freeze({
@@ -81,14 +77,17 @@ const AgentConfigListPageLayout: React.FunctionComponent = ({ children }) => (
 
 const ConfigRowActions = memo<{ config: AgentConfig; onDelete: () => void }>(
   ({ config, onDelete }) => {
+    const { getHref } = useLink();
     const hasWriteCapabilities = useCapabilities().write;
-    const detailsLink = useAgentConfigLink('details', { configId: config.id });
-    const addDatasourceLink = useAgentConfigLink('add-datasource', { configId: config.id });
 
     return (
       <TableRowActions
         items={[
-          <EuiContextMenuItem icon="inspect" href={detailsLink} key="viewConfig">
+          <EuiContextMenuItem
+            icon="inspect"
+            href={getHref('configuration_details', { configId: config.id })}
+            key="viewConfig"
+          >
             <FormattedMessage
               id="xpack.ingestManager.agentConfigList.viewConfigActionText"
               defaultMessage="View configuration"
@@ -98,7 +97,7 @@ const ConfigRowActions = memo<{ config: AgentConfig; onDelete: () => void }>(
           <EuiContextMenuItem
             disabled={!hasWriteCapabilities}
             icon="plusInCircle"
-            href={addDatasourceLink}
+            href={getHref('add_datasource_from_configuration', { configId: config.id })}
             key="createDataSource"
           >
             <FormattedMessage
@@ -119,14 +118,13 @@ const ConfigRowActions = memo<{ config: AgentConfig; onDelete: () => void }>(
 );
 
 export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
+  useBreadcrumbs('configurations_list');
+  const { getHref, getPath } = useLink();
   // Config information
   const hasWriteCapabilites = useCapabilities().write;
   const {
     fleet: { enabled: isFleetEnabled },
   } = useConfig();
-
-  // Base URL paths
-  const DETAILS_URI = useLink(AGENT_CONFIG_DETAILS_PATH);
 
   // Table and search states
   const { urlParams, toUrlParams } = useUrlParams();
@@ -142,14 +140,16 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
     (isOpen: boolean) => {
       if (isOpen !== isCreateAgentConfigFlyoutOpen) {
         if (isOpen) {
-          history.push(`${AGENT_CONFIG_PATH}?${toUrlParams({ ...urlParams, create: null })}`);
+          history.push(
+            `${getPath('configurations_list')}?${toUrlParams({ ...urlParams, create: null })}`
+          );
         } else {
           const { create, ...params } = urlParams;
-          history.push(`${AGENT_CONFIG_PATH}?${toUrlParams(params)}`);
+          history.push(`${getPath('configurations_list')}?${toUrlParams(params)}`);
         }
       }
     },
-    [history, isCreateAgentConfigFlyoutOpen, toUrlParams, urlParams]
+    [getPath, history, isCreateAgentConfigFlyoutOpen, toUrlParams, urlParams]
   );
 
   // Fetch agent configs
@@ -174,7 +174,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
           <EuiFlexGroup gutterSize="s" alignItems="baseline" style={{ minWidth: 0 }}>
             <EuiFlexItem grow={false} style={NO_WRAP_TRUNCATE_STYLE}>
               <EuiLink
-                href={`${DETAILS_URI}${agentConfig.id}`}
+                href={getHref('configuration_details', { configId: agentConfig.id })}
                 style={NO_WRAP_TRUNCATE_STYLE}
                 title={name || agentConfig.id}
               >
@@ -253,7 +253,7 @@ export const AgentConfigListPage: React.FunctionComponent<{}> = () => {
     }
 
     return cols;
-  }, [DETAILS_URI, isFleetEnabled, sendRequest]);
+  }, [getHref, isFleetEnabled, sendRequest]);
 
   const createAgentConfigButton = useMemo(
     () => (
