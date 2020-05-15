@@ -6,9 +6,11 @@
 
 import * as t from 'io-ts';
 
-export const listItemIndexExistSchema = t.type({
-  list_index: t.boolean,
-  list_item_index: t.boolean,
-});
+export const listItemIndexExistSchema = t.exact(
+  t.type({
+    list_index: t.boolean,
+    list_item_index: t.boolean,
+  })
+);
 
 export type ListItemIndexExistSchema = t.TypeOf<typeof listItemIndexExistSchema>;

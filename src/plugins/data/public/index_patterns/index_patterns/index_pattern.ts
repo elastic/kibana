@@ -30,7 +30,7 @@ import {
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
 
-import { findByTitle, getRoutes } from '../utils';
+import { findByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
 import { Field, IIndexPatternFieldList, getIndexPatternFieldListCreator } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
@@ -190,10 +190,6 @@ export class IndexPattern implements IIndexPattern {
     return this.indexFields(forceFieldRefresh);
   }
 
-  public get routes() {
-    return getRoutes();
-  }
-
   getComputedFields() {
     const scriptFields: any = {};
     if (!this.fields) {
@@ -303,6 +299,13 @@ export class IndexPattern implements IIndexPattern {
   }
 
   async popularizeField(fieldName: string, unit = 1) {
+    /**
+     * This function is just used by Discover and it's high likely to be removed in the near future
+     * It doesn't use the save function to skip the error message that's displayed when
+     * a user adds several columns in a higher frequency that the changes can be persisted to ES
+     * resulting in 409 errors
+     */
+    if (!this.id) return;
     const field = this.fields.getByName(fieldName);
     if (!field) {
       return;
@@ -312,7 +315,15 @@ export class IndexPattern implements IIndexPattern {
       return;
     }
     field.count = count;
-    await this.save();
+
+    try {
+      const res = await this.savedObjectsClient.update(type, this.id, this.prepBody(), {
+        version: this.version,
+      });
+      this.version = res._version;
+    } catch (e) {
+      // no need for an error message here
+    }
   }
 
   getNonScriptedFields() {

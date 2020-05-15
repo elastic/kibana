@@ -5,6 +5,7 @@
  */
 
 import { ComponentType, ReactWrapper } from 'enzyme';
+
 import { findTestSubject } from '../find_test_subject';
 import { reactRouterMock } from '../router_helpers';
 import {
@@ -138,33 +139,23 @@ export const registerTestBed = <T extends string = string>(
         });
       };
 
-      const waitFor: TestBed<T>['waitFor'] = async (testSubject: T, count = 1) => {
+      const waitForFn: TestBed<T>['waitForFn'] = async (predicate, errMessage) => {
         const triggeredAt = Date.now();
 
-        /**
-         * The way jest run tests in parallel + the not deterministic DOM update from React "hooks"
-         * add flakiness to the tests. This is especially true for component integration tests that
-         * make many update to the DOM.
-         *
-         * For this reason, when we _know_ that an element should be there after we updated some state,
-         * we will give it 30 seconds to appear in the DOM, checking every 100 ms for its presence.
-         */
         const MAX_WAIT_TIME = 30000;
-        const WAIT_INTERVAL = 100;
+        const WAIT_INTERVAL = 50;
 
         const process = async (): Promise<void> => {
-          const elemFound = exists(testSubject, count);
+          const isOK = await predicate();
 
-          if (elemFound) {
+          if (isOK) {
             // Great! nothing else to do here.
             return;
           }
 
           const timeElapsed = Date.now() - triggeredAt;
           if (timeElapsed > MAX_WAIT_TIME) {
-            throw new Error(
-              `I waited patiently for the "${testSubject}" test subject to appear with no luck. It is nowhere to be found!`
-            );
+            throw new Error(errMessage);
           }
 
           return new Promise(resolve => setTimeout(resolve, WAIT_INTERVAL)).then(() => {
@@ -174,6 +165,13 @@ export const registerTestBed = <T extends string = string>(
         };
 
         return process();
+      };
+
+      const waitFor: TestBed<T>['waitFor'] = (testSubject: T, count = 1) => {
+        return waitForFn(
+          () => Promise.resolve(exists(testSubject, count)),
+          `I waited patiently for the "${testSubject}" test subject to appear with no luck. It is nowhere to be found!`
+        );
       };
 
       /**
@@ -199,6 +197,24 @@ export const registerTestBed = <T extends string = string>(
           return;
         }
         return new Promise(resolve => setTimeout(resolve));
+      };
+
+      const setSelectValue: TestBed<T>['form']['setSelectValue'] = (
+        select,
+        value,
+        doUpdateComponent = true
+      ) => {
+        const formSelect = typeof select === 'string' ? find(select) : (select as ReactWrapper);
+
+        if (!formSelect.length) {
+          throw new Error(`Select "${select}" was not found.`);
+        }
+
+        formSelect.simulate('change', { target: { value } });
+
+        if (doUpdateComponent) {
+          component.update();
+        }
       };
 
       const selectCheckBox: TestBed<T>['form']['selectCheckBox'] = (
@@ -293,11 +309,13 @@ export const registerTestBed = <T extends string = string>(
         find,
         setProps,
         waitFor,
+        waitForFn,
         table: {
           getMetaData,
         },
         form: {
           setInputValue,
+          setSelectValue,
           selectCheckBox,
           toggleEuiSwitch,
           setComboBoxValue,

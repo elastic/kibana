@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  LIST_ID,
-  LIST_INDEX,
-  getCallClusterMock,
-  getListResponseMock,
-  getSearchListMock,
-} from '../mocks';
+import { getSearchListMock } from '../../../common/schemas/elastic_response/search_es_list_schema.mock';
+import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
+import { getCallClusterMock } from '../../../common/get_call_cluster.mock';
+import { LIST_ID, LIST_INDEX } from '../../../common/constants.mock';
 
 import { getList } from './get_list';
 

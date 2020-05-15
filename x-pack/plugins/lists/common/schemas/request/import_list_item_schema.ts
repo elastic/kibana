@@ -18,6 +18,8 @@ export const importListItemSchema = t.exact(
   })
 );
 
+export type ImportListItemSchema = t.TypeOf<typeof importListItemSchema>;
+
 export interface HapiReadableStream extends Readable {
   hapi: {
     filename: string;
@@ -27,6 +29,6 @@ export interface HapiReadableStream extends Readable {
 /**
  * Special interface since we are streaming in a file through a reader
  */
-export interface ImportListItemSchema {
+export interface ImportListItemHapiFileSchema {
   file: HapiReadableStream;
 }

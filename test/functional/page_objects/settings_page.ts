@@ -33,7 +33,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
   class SettingsPage {
     async clickNavigation() {
-      find.clickDisplayedByCssSelector('.app-link:nth-child(5) a');
+      await find.clickDisplayedByCssSelector('.app-link:nth-child(5) a');
     }
 
     async clickLinkText(text: string) {
@@ -110,7 +110,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async toggleAdvancedSettingCheckbox(propertyName: string) {
-      testSubjects.click(`advancedSetting-editField-${propertyName}`);
+      await testSubjects.click(`advancedSetting-editField-${propertyName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click(`advancedSetting-saveButton`);
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -206,17 +206,15 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getFieldsTabCount() {
       return retry.try(async () => {
-        const indexedFieldsTab = await find.byCssSelector('#indexedFields .euiTab__content');
-        const text = await indexedFieldsTab.getVisibleText();
-        return text.split(/[()]/)[1];
+        const text = await testSubjects.getVisibleText('tab-indexedFields');
+        return text.split(' ')[1].replace(/\((.*)\)/, '$1');
       });
     }
 
     async getScriptedFieldsTabCount() {
       return await retry.try(async () => {
-        const scriptedFieldsTab = await find.byCssSelector('#scriptedFields .euiTab__content');
-        const text = await scriptedFieldsTab.getVisibleText();
-        return text.split(/[()]/)[1];
+        const text = await testSubjects.getVisibleText('tab-scriptedFields');
+        return text.split(' ')[2].replace(/\((.*)\)/, '$1');
       });
     }
 
@@ -324,7 +322,6 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       isStandardIndexPattern = true
     ) {
       await retry.try(async () => {
-        await this.navigateTo();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickKibanaIndexPatterns();
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -432,17 +429,17 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async clickFieldsTab() {
       log.debug('click Fields tab');
-      await find.clickByCssSelector('#indexedFields');
+      await testSubjects.click('tab-indexedFields');
     }
 
     async clickScriptedFieldsTab() {
       log.debug('click Scripted Fields tab');
-      await find.clickByCssSelector('#scriptedFields');
+      await testSubjects.click('tab-scriptedFields');
     }
 
     async clickSourceFiltersTab() {
       log.debug('click Source Filters tab');
-      await find.clickByCssSelector('#sourceFilters');
+      await testSubjects.click('tab-sourceFilters');
     }
 
     async editScriptedField(name: string) {

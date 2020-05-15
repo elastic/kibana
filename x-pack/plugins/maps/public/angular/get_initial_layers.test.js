@@ -65,6 +65,7 @@ describe('EMS is enabled', () => {
     require('../meta').getKibanaTileMap = () => {
       return null;
     };
+    require('../kibana_services').getIsEmsEnabled = () => true;
     require('../kibana_services').getInjectedVarFunc = () => key => {
       switch (key) {
         case 'emsTileLayerId':
@@ -73,8 +74,6 @@ describe('EMS is enabled', () => {
             desaturated: 'road_map_desaturated',
             dark: 'dark_map',
           };
-        case 'isEmsEnabled':
-          return true;
         default:
           throw new Error(`Unexpected call to getInjectedVarFunc with key ${key}`);
       }
@@ -109,15 +108,7 @@ describe('EMS is not enabled', () => {
     require('../meta').getKibanaTileMap = () => {
       return null;
     };
-
-    require('../kibana_services').getInjectedVarFunc = () => key => {
-      switch (key) {
-        case 'isEmsEnabled':
-          return false;
-        default:
-          throw new Error(`Unexpected call to getInjectedVarFunc with key ${key}`);
-      }
-    };
+    require('../kibana_services').getIsEmsEnabled = () => false;
   });
 
   it('Should return empty layer list since there are no configured tile layers', () => {
