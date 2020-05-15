@@ -28,8 +28,13 @@ import {
   MappingObject,
 } from '../../../../kibana_utils/public';
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
-
+import {
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  IIndexPattern,
+  IFieldType,
+  META_FIELDS_SETTING,
+} from '../../../common';
 import { findByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
 import { Field, IIndexPatternFieldList, getIndexPatternFieldListCreator } from '../fields';
@@ -104,7 +109,7 @@ export class IndexPattern implements IIndexPattern {
     this.getConfig = getConfig;
 
     this.shortDotsEnable = this.getConfig('shortDots:enable');
-    this.metaFields = this.getConfig('metaFields');
+    this.metaFields = this.getConfig(META_FIELDS_SETTING);
 
     this.createFieldList = getIndexPatternFieldListCreator({
       fieldFormats: getFieldFormats(),
@@ -112,8 +117,8 @@ export class IndexPattern implements IIndexPattern {
     });
 
     this.fields = this.createFieldList(this, [], this.shortDotsEnable);
-    this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig('metaFields'));
-    this.flattenHit = flattenHitWrapper(this, this.getConfig('metaFields'));
+    this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig(META_FIELDS_SETTING));
+    this.flattenHit = flattenHitWrapper(this, this.getConfig(META_FIELDS_SETTING));
     this.formatHit = formatHitProvider(
       this,
       getFieldFormats().getDefaultInstance(KBN_FIELD_TYPES.STRING)

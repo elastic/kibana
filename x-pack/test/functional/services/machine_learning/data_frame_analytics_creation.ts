@@ -287,10 +287,16 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async setModelMemory(modelMemory: string) {
-      await mlCommon.setValueWithChecks('mlAnalyticsCreateJobFlyoutModelMemoryInput', modelMemory, {
-        clearWithKeyboard: true,
+      await retry.tryForTime(15 * 1000, async () => {
+        await mlCommon.setValueWithChecks(
+          'mlAnalyticsCreateJobFlyoutModelMemoryInput',
+          modelMemory,
+          {
+            clearWithKeyboard: true,
+          }
+        );
+        await this.assertModelMemoryValue(modelMemory);
       });
-      await this.assertModelMemoryValue(modelMemory);
     },
 
     async assertCreateIndexPatternSwitchExists() {
