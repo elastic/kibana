@@ -10,7 +10,8 @@ export const CASE_DETAILS_DESCRIPTION = '[data-test-subj="markdown-root"]';
 
 export const CASE_DETAILS_PAGE_TITLE = '[data-test-subj="header-page-title"]';
 
-export const CASE_DETAILS_PUSH_AS_SERVICE_NOW_BTN = '[data-test-subj="push-to-external-service"]';
+export const CASE_DETAILS_PUSH_TO_EXTERNAL_SERVICE_BTN =
+  '[data-test-subj="push-to-external-service"]';
 
 export const CASE_DETAILS_STATUS = '[data-test-subj="case-view-status"]';
 

@@ -475,7 +475,6 @@ export class IndexTable extends Component {
                       <EuiFlexItem grow={false}>
                         <EuiSwitch
                           id="checkboxShowHiddenIndices"
-                          data-test-subj="indexTableIncludeHiddenIndicesToggle"
                           checked={showHiddenIndices}
                           onChange={event => showHiddenIndicesChanged(event.target.checked)}
                           label={
