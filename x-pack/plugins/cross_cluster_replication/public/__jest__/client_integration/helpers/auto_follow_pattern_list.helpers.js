@@ -84,6 +84,10 @@ export const setup = props => {
     autoFollowPatternLink.simulate('click');
   };
 
+  const clickPaginationNextButton = () => {
+    testBed.find('autoFollowPatternListTable.pagination-button-next').simulate('click');
+  };
+
   return {
     ...testBed,
     actions: {
@@ -94,6 +98,7 @@ export const setup = props => {
       clickAutoFollowPatternAt,
       getPatternsActionMenuItemText,
       clickPatternsActionMenuItem,
+      clickPaginationNextButton,
     },
   };
 };
