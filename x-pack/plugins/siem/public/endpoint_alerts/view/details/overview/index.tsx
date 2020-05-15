@@ -5,6 +5,7 @@
  */
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
+import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -22,9 +23,13 @@ import { FormattedDate } from '../../formatted_date';
 import { AlertDetailResolver } from '../../resolver';
 import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { TakeActionDropdown } from './take_action_dropdown';
+import { urlFromQueryParams } from '../../url_from_query_params';
 
 const AlertDetailsOverviewComponent = memo(() => {
+  const history = useHistory();
   const alertDetailsData = useAlertListSelector(selectors.selectedAlertDetailsData);
+  const alertDetailsTabId = useAlertListSelector(selectors.selectedAlertDetailsTabId);
+  const queryParams = useAlertListSelector(selectors.uiQueryParams);
   if (alertDetailsData === undefined) {
     return null;
   }
@@ -65,6 +70,17 @@ const AlertDetailsOverviewComponent = memo(() => {
       },
     ];
   }, [alertDetailsData]);
+
+  const activeTab = useMemo(
+    () => tabs.find(({ id }) => (alertDetailsTabId ? id === alertDetailsTabId : true)),
+    [alertDetailsTabId, tabs]
+  );
+
+  const handleTabClick = (clickedTab: EuiTabbedContentTab): void => {
+    if (clickedTab.id !== alertDetailsTabId) {
+      history.push(urlFromQueryParams({ ...queryParams, active_details_tab: clickedTab.id }));
+    }
+  };
 
   return (
     <>
@@ -110,7 +126,7 @@ const AlertDetailsOverviewComponent = memo(() => {
         <TakeActionDropdown />
         <EuiSpacer />
       </section>
-      <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
+      <EuiTabbedContent onTabClick={handleTabClick} tabs={tabs} initialSelectedTab={activeTab} />
     </>
   );
 });

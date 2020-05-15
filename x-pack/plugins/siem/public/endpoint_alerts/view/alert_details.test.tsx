@@ -59,6 +59,20 @@ describe('when the alert details flyout is open', () => {
           await renderResult.findByTestId('alertDetailTakeActionWhitelistButton');
         });
       });
+      describe('when the user navigates to the resolver tab', () => {
+        beforeEach(() => {
+          reactTestingLibrary.act(() => {
+            history.push({
+              ...history.location,
+              search: '?active_details_tab=overviewResolver&&selected_alert=1',
+            });
+          });
+        });
+        it('should show the resolver view', async () => {
+          const resolver = await render().findByTestId('alertResolver');
+          expect(resolver).toBeInTheDocument();
+        });
+      });
       describe('when the user navigates to the overview tab', () => {
         let renderResult: reactTestingLibrary.RenderResult;
         beforeEach(async () => {
