@@ -6,25 +6,22 @@
 
 import { i18n } from '@kbn/i18n';
 import { ElasticsearchServiceSetup } from 'kibana/server';
-import { Logger, ServerFacade } from '../../../types';
+import { Logger } from '../../../types';
 import { HeadlessChromiumDriverFactory } from '../../browsers/chromium/driver_factory';
+import { ReportingConfig } from '../../types';
 import { validateBrowser } from './validate_browser';
-import { validateEncryptionKey } from './validate_encryption_key';
 import { validateMaxContentLength } from './validate_max_content_length';
-import { validateServerHost } from './validate_server_host';
 
 export async function runValidations(
-  server: ServerFacade,
+  config: ReportingConfig,
   elasticsearch: ElasticsearchServiceSetup,
   browserFactory: HeadlessChromiumDriverFactory,
   logger: Logger
 ) {
   try {
     await Promise.all([
-      validateBrowser(server, browserFactory, logger),
-      validateEncryptionKey(server, logger),
-      validateMaxContentLength(server, elasticsearch, logger),
-      validateServerHost(server),
+      validateBrowser(browserFactory, logger),
+      validateMaxContentLength(config, elasticsearch, logger),
     ]);
     logger.debug(
       i18n.translate('xpack.reporting.selfCheck.ok', {

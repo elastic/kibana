@@ -91,17 +91,20 @@ const TodoApp: React.FC<TodoAppProps> = ({ filter }) => {
   return (
     <>
       <div>
-        <Link to={{ ...location, pathname: '/' }}>
+        <Link to={{ ...location, pathname: '/' }} data-test-subj={'filterLinkAll'}>
           <EuiButton size={'s'} color={!filter ? 'primary' : 'secondary'}>
             All
           </EuiButton>
         </Link>
-        <Link to={{ ...location, pathname: '/completed' }}>
+        <Link to={{ ...location, pathname: '/completed' }} data-test-subj={'filterLinkCompleted'}>
           <EuiButton size={'s'} color={filter === 'completed' ? 'primary' : 'secondary'}>
             Completed
           </EuiButton>
         </Link>
-        <Link to={{ ...location, pathname: '/not-completed' }}>
+        <Link
+          to={{ ...location, pathname: '/not-completed' }}
+          data-test-subj={'filterLinkNotCompleted'}
+        >
           <EuiButton size={'s'} color={filter === 'not-completed' ? 'primary' : 'secondary'}>
             Not Completed
           </EuiButton>
@@ -121,6 +124,7 @@ const TodoApp: React.FC<TodoAppProps> = ({ filter }) => {
                 });
               }}
               label={todo.text}
+              data-test-subj={`todoCheckbox-${todo.id}`}
             />
             <EuiButton
               style={{ marginLeft: '8px' }}

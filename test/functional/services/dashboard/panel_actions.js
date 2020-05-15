@@ -20,6 +20,7 @@
 const REMOVE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-deletePanel';
 const EDIT_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-editPanel';
 const REPLACE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-replacePanel';
+const CLONE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-clonePanel';
 const TOGGLE_EXPAND_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-togglePanel';
 const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-ACTION_CUSTOMIZE_PANEL';
 const OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ = 'embeddablePanelToggleMenuIcon';
@@ -97,6 +98,16 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
       await testSubjects.click(REPLACE_PANEL_DATA_TEST_SUBJ);
     }
 
+    async clonePanelByTitle(title) {
+      log.debug(`clonePanel(${title})`);
+      let panelOptions = null;
+      if (title) {
+        panelOptions = await this.getPanelHeading(title);
+      }
+      await this.openContextMenu(panelOptions);
+      await testSubjects.click(CLONE_PANEL_DATA_TEST_SUBJ);
+    }
+
     async openInspectorByTitle(title) {
       const header = await this.getPanelHeading(title);
       await this.openInspector(header);
@@ -123,7 +134,12 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
     }
 
     async expectExistsReplacePanelAction() {
-      log.debug('expectExistsEditPanelAction');
+      log.debug('expectExistsReplacePanelAction');
+      await testSubjects.existOrFail(REPLACE_PANEL_DATA_TEST_SUBJ);
+    }
+
+    async expectExistsDuplicatePanelAction() {
+      log.debug('expectExistsDuplicatePanelAction');
       await testSubjects.existOrFail(REPLACE_PANEL_DATA_TEST_SUBJ);
     }
 
@@ -133,7 +149,12 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
     }
 
     async expectMissingReplacePanelAction() {
-      log.debug('expectMissingEditPanelAction');
+      log.debug('expectMissingReplacePanelAction');
+      await testSubjects.missingOrFail(REPLACE_PANEL_DATA_TEST_SUBJ);
+    }
+
+    async expectMissingDuplicatePanelAction() {
+      log.debug('expectMissingDuplicatePanelAction');
       await testSubjects.missingOrFail(REPLACE_PANEL_DATA_TEST_SUBJ);
     }
 

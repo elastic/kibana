@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import _ from 'lodash';
 
 import { SavedObjectsRepository } from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';
@@ -24,187 +23,42 @@ import { SavedObjectsErrorHelpers } from './errors';
 import { SavedObjectsSerializer } from '../../serialization';
 import { encodeHitVersion } from '../../version';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { DocumentMigrator } from '../../migrations/core/document_migrator';
 
 jest.mock('./search_dsl/search_dsl', () => ({ getSearchDsl: jest.fn() }));
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
 
+const createBadRequestError = (...args) =>
+  SavedObjectsErrorHelpers.createBadRequestError(...args).output.payload;
+const createConflictError = (...args) =>
+  SavedObjectsErrorHelpers.createConflictError(...args).output.payload;
+const createGenericNotFoundError = (...args) =>
+  SavedObjectsErrorHelpers.createGenericNotFoundError(...args).output.payload;
+const createUnsupportedTypeError = (...args) =>
+  SavedObjectsErrorHelpers.createUnsupportedTypeError(...args).output.payload;
+
 describe('SavedObjectsRepository', () => {
   let callAdminCluster;
   let savedObjectsRepository;
   let migrator;
 
+  let serializer;
   const mockTimestamp = '2017-08-14T15:49:14.886Z';
   const mockTimestampFields = { updated_at: mockTimestamp };
   const mockVersionProps = { _seq_no: 1, _primary_term: 1 };
   const mockVersion = encodeHitVersion(mockVersionProps);
-  const noNamespaceSearchResults = {
-    hits: {
-      total: 4,
-      hits: [
-        {
-          _index: '.kibana',
-          _id: 'index-pattern:logstash-*',
-          _score: 1,
-          ...mockVersionProps,
-          _source: {
-            type: 'index-pattern',
-            ...mockTimestampFields,
-            'index-pattern': {
-              title: 'logstash-*',
-              timeFieldName: '@timestamp',
-              notExpandable: true,
-            },
-          },
-        },
-        {
-          _index: '.kibana',
-          _id: 'config:6.0.0-alpha1',
-          _score: 1,
-          ...mockVersionProps,
-          _source: {
-            type: 'config',
-            ...mockTimestampFields,
-            config: {
-              buildNum: 8467,
-              defaultIndex: 'logstash-*',
-            },
-          },
-        },
-        {
-          _index: '.kibana',
-          _id: 'index-pattern:stocks-*',
-          _score: 1,
-          ...mockVersionProps,
-          _source: {
-            type: 'index-pattern',
-            ...mockTimestampFields,
-            'index-pattern': {
-              title: 'stocks-*',
-              timeFieldName: '@timestamp',
-              notExpandable: true,
-            },
-          },
-        },
-        {
-          _index: '.kibana',
-          _id: 'globaltype:something',
-          _score: 1,
-          ...mockVersionProps,
-          _source: {
-            type: 'globaltype',
-            ...mockTimestampFields,
-            globaltype: {
-              name: 'bar',
-            },
-          },
-        },
-      ],
-    },
-  };
 
-  const namespacedSearchResults = {
-    hits: {
-      total: 4,
-      hits: [
-        {
-          _index: '.kibana',
-          _id: 'foo-namespace:index-pattern:logstash-*',
-          _score: 1,
-          ...mockVersionProps,
-          _source: {
-            namespace: 'foo-namespace',
-            type: 'index-pattern',
-            ...mockTimestampFields,
-            'index-pattern': {
-              title: 'logstash-*',
-              timeFieldName: '@timestamp',
-              notExpandable: true,
-            },
-          },
-        },
-        {
-          _index: '.kibana',
-          _id: 'foo-namespace:config:6.0.0-alpha1',
-          _score: 1,
-          ...mockVersionProps,
-          _source: {
-            namespace: 'foo-namespace',
-            type: 'config',
-            ...mockTimestampFields,
-            config: {
-              buildNum: 8467,
-              defaultIndex: 'logstash-*',
-            },
-          },
-        },
-        {
-          _index: '.kibana',
-          _id: 'foo-namespace:index-pattern:stocks-*',
-          _score: 1,
-          ...mockVersionProps,
-          _source: {
-            namespace: 'foo-namespace',
-            type: 'index-pattern',
-            ...mockTimestampFields,
-            'index-pattern': {
-              title: 'stocks-*',
-              timeFieldName: '@timestamp',
-              notExpandable: true,
-            },
-          },
-        },
-        {
-          _index: '.kibana',
-          _id: 'globaltype:something',
-          _score: 1,
-          ...mockVersionProps,
-          _source: {
-            type: 'globaltype',
-            ...mockTimestampFields,
-            globaltype: {
-              name: 'bar',
-            },
-          },
-        },
-      ],
-    },
-  };
-
-  const deleteByQueryResults = {
-    took: 27,
-    timed_out: false,
-    total: 23,
-    deleted: 23,
-    batches: 1,
-    version_conflicts: 0,
-    noops: 0,
-    retries: { bulk: 0, search: 0 },
-    throttled_millis: 0,
-    requests_per_second: -1,
-    throttled_until_millis: 0,
-    failures: [],
-  };
+  const CUSTOM_INDEX_TYPE = 'customIndex';
+  const NAMESPACE_AGNOSTIC_TYPE = 'globalType';
+  const MULTI_NAMESPACE_TYPE = 'shareableType';
+  const MULTI_NAMESPACE_CUSTOM_INDEX_TYPE = 'shareableTypeCustomIndex';
+  const HIDDEN_TYPE = 'hiddenType';
 
   const mappings = {
     properties: {
       config: {
-        properties: {
-          type: 'keyword',
-        },
-      },
-      foo: {
-        properties: {
-          type: 'keyword',
-        },
-      },
-      bar: {
-        properties: {
-          type: 'keyword',
-        },
-      },
-      baz: {
         properties: {
           type: 'keyword',
         },
@@ -223,14 +77,33 @@ describe('SavedObjectsRepository', () => {
           },
         },
       },
-      globaltype: {
+      [CUSTOM_INDEX_TYPE]: {
+        properties: {
+          type: 'keyword',
+        },
+      },
+      [NAMESPACE_AGNOSTIC_TYPE]: {
         properties: {
           yetAnotherField: {
             type: 'keyword',
           },
         },
       },
-      hiddenType: {
+      [MULTI_NAMESPACE_TYPE]: {
+        properties: {
+          evenYetAnotherField: {
+            type: 'keyword',
+          },
+        },
+      },
+      [MULTI_NAMESPACE_CUSTOM_INDEX_TYPE]: {
+        properties: {
+          evenYetAnotherField: {
+            type: 'keyword',
+          },
+        },
+      },
+      [HIDDEN_TYPE]: {
         properties: {
           someField: {
             type: 'keyword',
@@ -240,120 +113,1292 @@ describe('SavedObjectsRepository', () => {
     },
   };
 
-  const typeRegistry = new SavedObjectTypeRegistry();
-  typeRegistry.registerType({
-    name: 'config',
-    hidden: false,
-    namespaceAgnostic: false,
-    mappings: {
-      properties: {
-        type: 'keyword',
-      },
-    },
+  const createType = type => ({
+    name: type,
+    mappings: { properties: mappings.properties[type].properties },
+    migrations: { '1.1.1': doc => doc },
   });
-  typeRegistry.registerType({
-    name: 'index-pattern',
-    hidden: false,
-    namespaceAgnostic: false,
-    mappings: {
-      properties: {
-        someField: {
-          type: 'keyword',
-        },
-      },
-    },
+
+  const registry = new SavedObjectTypeRegistry();
+  registry.registerType(createType('config'));
+  registry.registerType(createType('index-pattern'));
+  registry.registerType(createType('dashboard'));
+  registry.registerType({
+    ...createType(CUSTOM_INDEX_TYPE),
+    indexPattern: 'custom',
   });
-  typeRegistry.registerType({
-    name: 'dashboard',
-    hidden: false,
-    namespaceAgnostic: false,
-    mappings: {
-      properties: {
-        otherField: {
-          type: 'keyword',
-        },
-      },
-    },
+  registry.registerType({
+    ...createType(NAMESPACE_AGNOSTIC_TYPE),
+    namespaceType: 'agnostic',
   });
-  typeRegistry.registerType({
-    name: 'globaltype',
-    hidden: false,
-    namespaceAgnostic: true,
-    mappings: {
-      properties: {
-        yetAnotherField: {
-          type: 'keyword',
-        },
-      },
-    },
+  registry.registerType({
+    ...createType(MULTI_NAMESPACE_TYPE),
+    namespaceType: 'multiple',
   });
-  typeRegistry.registerType({
-    name: 'foo',
-    hidden: false,
-    namespaceAgnostic: true,
-    mappings: {
-      properties: {
-        type: 'keyword',
-      },
-    },
+  registry.registerType({
+    ...createType(MULTI_NAMESPACE_CUSTOM_INDEX_TYPE),
+    namespaceType: 'multiple',
+    indexPattern: 'custom',
   });
-  typeRegistry.registerType({
-    name: 'bar',
-    hidden: false,
-    namespaceAgnostic: true,
-    mappings: {
-      properties: {
-        type: 'keyword',
-      },
-    },
-  });
-  typeRegistry.registerType({
-    name: 'baz',
-    hidden: false,
-    namespaceAgnostic: false,
-    indexPattern: 'beats',
-    mappings: {
-      properties: {
-        type: 'keyword',
-      },
-    },
-  });
-  typeRegistry.registerType({
-    name: 'hiddenType',
+  registry.registerType({
+    ...createType(HIDDEN_TYPE),
     hidden: true,
-    namespaceAgnostic: true,
-    mappings: {
-      properties: {
-        someField: {
-          type: 'keyword',
-        },
-      },
+    namespaceType: 'agnostic',
+  });
+
+  const documentMigrator = new DocumentMigrator({
+    typeRegistry: registry,
+    kibanaVersion: '2.0.0',
+    log: {},
+    validateDoc: jest.fn(),
+  });
+
+  const getMockGetResponse = ({ type, id, references, namespace }) => ({
+    // NOTE: Elasticsearch returns more fields (_index, _type) but the SavedObjectsRepository method ignores these
+    found: true,
+    _id: `${registry.isSingleNamespace(type) && namespace ? `${namespace}:` : ''}${type}:${id}`,
+    ...mockVersionProps,
+    _source: {
+      ...(registry.isSingleNamespace(type) && { namespace }),
+      ...(registry.isMultiNamespace(type) && { namespaces: [namespace ?? 'default'] }),
+      type,
+      [type]: { title: 'Testing' },
+      references,
+      specialProperty: 'specialValue',
+      ...mockTimestampFields,
     },
   });
+
+  const getMockMgetResponse = (objects, namespace) => ({
+    status: 200,
+    docs: objects.map(obj =>
+      obj.found === false ? obj : getMockGetResponse({ ...obj, namespace })
+    ),
+  });
+
+  const expectClusterCalls = (...actions) => {
+    for (let i = 0; i < actions.length; i++) {
+      expect(callAdminCluster).toHaveBeenNthCalledWith(i + 1, actions[i], expect.any(Object));
+    }
+    expect(callAdminCluster).toHaveBeenCalledTimes(actions.length);
+  };
+  const expectClusterCallArgs = (args, n = 1) => {
+    expect(callAdminCluster).toHaveBeenNthCalledWith(
+      n,
+      expect.any(String),
+      expect.objectContaining(args)
+    );
+  };
+
+  expect.extend({
+    toBeDocumentWithoutError(received, type, id) {
+      if (received.type === type && received.id === id && !received.error) {
+        return { message: () => `expected type and id not to match without error`, pass: true };
+      } else {
+        return { message: () => `expected type and id to match without error`, pass: false };
+      }
+    },
+  });
+  const expectSuccess = ({ type, id }) => expect.toBeDocumentWithoutError(type, id);
+  const expectError = ({ type, id }) => ({ type, id, error: expect.any(Object) });
+  const expectErrorResult = ({ type, id }, error) => ({ type, id, error });
+  const expectErrorNotFound = obj =>
+    expectErrorResult(obj, createGenericNotFoundError(obj.type, obj.id));
+  const expectErrorConflict = obj => expectErrorResult(obj, createConflictError(obj.type, obj.id));
+  const expectErrorInvalidType = obj =>
+    expectErrorResult(obj, createUnsupportedTypeError(obj.type, obj.id));
+
+  const expectMigrationArgs = (args, contains = true, n = 1) => {
+    const obj = contains ? expect.objectContaining(args) : expect.not.objectContaining(args);
+    expect(migrator.migrateDocument).toHaveBeenNthCalledWith(n, obj);
+  };
 
   beforeEach(() => {
     callAdminCluster = jest.fn();
     migrator = {
-      migrateDocument: jest.fn(doc => doc),
+      migrateDocument: jest.fn().mockImplementation(documentMigrator.migrate),
       runMigrations: async () => ({ status: 'skipped' }),
     };
 
-    const serializer = new SavedObjectsSerializer(typeRegistry);
-    const allTypes = typeRegistry.getAllTypes().map(type => type.name);
-    const allowedTypes = [...new Set(allTypes.filter(type => !typeRegistry.isHidden(type)))];
+    // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
+    serializer = {
+      isRawSavedObject: jest.fn(),
+      rawToSavedObject: jest.fn(),
+      savedObjectToRaw: jest.fn(),
+      generateRawId: jest.fn(),
+      trimIdPrefix: jest.fn(),
+    };
+    const _serializer = new SavedObjectsSerializer(registry);
+    Object.keys(serializer).forEach(key => {
+      serializer[key].mockImplementation((...args) => _serializer[key](...args));
+    });
+
+    const allTypes = registry.getAllTypes().map(type => type.name);
+    const allowedTypes = [...new Set(allTypes.filter(type => !registry.isHidden(type)))];
 
     savedObjectsRepository = new SavedObjectsRepository({
       index: '.kibana-test',
       mappings,
       callCluster: callAdminCluster,
       migrator,
-      typeRegistry,
+      typeRegistry: registry,
       serializer,
       allowedTypes,
     });
 
     savedObjectsRepository._getCurrentTime = jest.fn(() => mockTimestamp);
     getSearchDslNS.getSearchDsl.mockReset();
+  });
+
+  const mockMigrationVersion = { foo: '2.3.4' };
+  const mockMigrateDocument = doc => ({
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      ...(doc.attributes?.title && { title: `${doc.attributes.title}!!` }),
+    },
+    migrationVersion: mockMigrationVersion,
+    references: [{ name: 'search_0', type: 'search', id: '123' }],
+  });
+
+  describe('#addToNamespaces', () => {
+    const id = 'some-id';
+    const type = MULTI_NAMESPACE_TYPE;
+    const currentNs1 = 'default';
+    const currentNs2 = 'foo-namespace';
+    const newNs1 = 'bar-namespace';
+    const newNs2 = 'baz-namespace';
+
+    const mockGetResponse = (type, id) => {
+      // mock a document that exists in two namespaces
+      const mockResponse = getMockGetResponse({ type, id });
+      mockResponse._source.namespaces = [currentNs1, currentNs2];
+      callAdminCluster.mockResolvedValueOnce(mockResponse); // this._callCluster('get', ...)
+    };
+
+    const addToNamespacesSuccess = async (type, id, namespaces, options) => {
+      mockGetResponse(type, id); // this._callCluster('get', ...)
+      callAdminCluster.mockResolvedValue({
+        _id: `${type}:${id}`,
+        ...mockVersionProps,
+        result: 'updated',
+      }); // this._writeToCluster('update', ...)
+      const result = await savedObjectsRepository.addToNamespaces(type, id, namespaces, options);
+      expect(callAdminCluster).toHaveBeenCalledTimes(2);
+      return result;
+    };
+
+    describe('cluster calls', () => {
+      it(`should use ES get action then update action`, async () => {
+        await addToNamespacesSuccess(type, id, [newNs1, newNs2]);
+        expectClusterCalls('get', 'update');
+      });
+
+      it(`defaults to the version of the existing document`, async () => {
+        await addToNamespacesSuccess(type, id, [newNs1, newNs2]);
+        const versionProperties = {
+          if_seq_no: mockVersionProps._seq_no,
+          if_primary_term: mockVersionProps._primary_term,
+        };
+        expectClusterCallArgs(versionProperties, 2);
+      });
+
+      it(`accepts version`, async () => {
+        await addToNamespacesSuccess(type, id, [newNs1, newNs2], {
+          version: encodeHitVersion({ _seq_no: 100, _primary_term: 200 }),
+        });
+        expectClusterCallArgs({ if_seq_no: 100, if_primary_term: 200 }, 2);
+      });
+
+      it(`defaults to a refresh setting of wait_for`, async () => {
+        await addToNamespacesSuccess(type, id, [newNs1, newNs2]);
+        expectClusterCallArgs({ refresh: 'wait_for' }, 2);
+      });
+
+      it(`accepts a custom refresh setting`, async () => {
+        const refresh = 'foo';
+        await addToNamespacesSuccess(type, id, [newNs1, newNs2], { refresh });
+        expectClusterCallArgs({ refresh }, 2);
+      });
+    });
+
+    describe('errors', () => {
+      const expectNotFoundError = async (type, id, namespaces, options) => {
+        await expect(
+          savedObjectsRepository.addToNamespaces(type, id, namespaces, options)
+        ).rejects.toThrowError(createGenericNotFoundError(type, id));
+      };
+      const expectBadRequestError = async (type, id, namespaces, message) => {
+        await expect(
+          savedObjectsRepository.addToNamespaces(type, id, namespaces)
+        ).rejects.toThrowError(createBadRequestError(message));
+      };
+
+      it(`throws when type is invalid`, async () => {
+        await expectNotFoundError('unknownType', id, [newNs1, newNs2]);
+        expect(callAdminCluster).not.toHaveBeenCalled();
+      });
+
+      it(`throws when type is hidden`, async () => {
+        await expectNotFoundError(HIDDEN_TYPE, id, [newNs1, newNs2]);
+        expect(callAdminCluster).not.toHaveBeenCalled();
+      });
+
+      it(`throws when type is not multi-namespace`, async () => {
+        const test = async type => {
+          const message = `${type} doesn't support multiple namespaces`;
+          await expectBadRequestError(type, id, [newNs1, newNs2], message);
+          expect(callAdminCluster).not.toHaveBeenCalled();
+        };
+        await test('index-pattern');
+        await test(NAMESPACE_AGNOSTIC_TYPE);
+      });
+
+      it(`throws when namespaces is an empty array`, async () => {
+        const test = async namespaces => {
+          const message = 'namespaces must be a non-empty array of strings';
+          await expectBadRequestError(type, id, namespaces, message);
+          expect(callAdminCluster).not.toHaveBeenCalled();
+        };
+        await test([]);
+      });
+
+      it(`throws when ES is unable to find the document during get`, async () => {
+        callAdminCluster.mockResolvedValue({ found: false }); // this._callCluster('get', ...)
+        await expectNotFoundError(type, id, [newNs1, newNs2]);
+        expectClusterCalls('get');
+      });
+
+      it(`throws when ES is unable to find the index during get`, async () => {
+        callAdminCluster.mockResolvedValue({ status: 404 }); // this._callCluster('get', ...)
+        await expectNotFoundError(type, id, [newNs1, newNs2]);
+        expectClusterCalls('get');
+      });
+
+      it(`throws when the document exists, but not in this namespace`, async () => {
+        mockGetResponse(type, id); // this._callCluster('get', ...)
+        await expectNotFoundError(type, id, [newNs1, newNs2], {
+          namespace: 'some-other-namespace',
+        });
+        expectClusterCalls('get');
+      });
+
+      it(`throws when ES is unable to find the document during update`, async () => {
+        mockGetResponse(type, id); // this._callCluster('get', ...)
+        callAdminCluster.mockResolvedValue({ status: 404 }); // this._writeToCluster('update', ...)
+        await expectNotFoundError(type, id, [newNs1, newNs2]);
+        expectClusterCalls('get', 'update');
+      });
+    });
+
+    describe('migration', () => {
+      it(`waits until migrations are complete before proceeding`, async () => {
+        let callAdminClusterCount = 0;
+        migrator.runMigrations = jest.fn(async () =>
+          // runMigrations should resolve before callAdminCluster is initiated
+          expect(callAdminCluster).toHaveBeenCalledTimes(callAdminClusterCount++)
+        );
+        await expect(addToNamespacesSuccess(type, id, [newNs1, newNs2])).resolves.toBeDefined();
+        expect(migrator.runMigrations).toHaveReturnedTimes(2);
+      });
+    });
+
+    describe('returns', () => {
+      it(`returns an empty object on success`, async () => {
+        const result = await addToNamespacesSuccess(type, id, [newNs1, newNs2]);
+        expect(result).toEqual({});
+      });
+
+      it(`succeeds when adding existing namespaces`, async () => {
+        const result = await addToNamespacesSuccess(type, id, [currentNs1]);
+        expect(result).toEqual({});
+      });
+    });
+  });
+
+  describe('#bulkCreate', () => {
+    const obj1 = {
+      type: 'config',
+      id: '6.0.0-alpha1',
+      attributes: { title: 'Test One' },
+      references: [{ name: 'ref_0', type: 'test', id: '1' }],
+    };
+    const obj2 = {
+      type: 'index-pattern',
+      id: 'logstash-*',
+      attributes: { title: 'Test Two' },
+      references: [{ name: 'ref_0', type: 'test', id: '2' }],
+    };
+    const namespace = 'foo-namespace';
+
+    const getMockBulkCreateResponse = (objects, namespace) => {
+      return {
+        items: objects.map(({ type, id, attributes, references, migrationVersion }) => ({
+          create: {
+            _id: `${namespace ? `${namespace}:` : ''}${type}:${id}`,
+            _source: {
+              [type]: attributes,
+              type,
+              namespace,
+              references,
+              ...mockTimestampFields,
+              migrationVersion: migrationVersion || { [type]: '1.1.1' },
+            },
+            ...mockVersionProps,
+          },
+        })),
+      };
+    };
+
+    const bulkCreateSuccess = async (objects, options) => {
+      const multiNamespaceObjects =
+        options?.overwrite &&
+        objects.filter(({ type, id }) => registry.isMultiNamespace(type) && id);
+      if (multiNamespaceObjects?.length) {
+        const response = getMockMgetResponse(multiNamespaceObjects, options?.namespace);
+        callAdminCluster.mockResolvedValueOnce(response); // this._callCluster('mget', ...)
+      }
+      const response = getMockBulkCreateResponse(objects, options?.namespace);
+      callAdminCluster.mockResolvedValue(response); // this._writeToCluster('bulk', ...)
+      const result = await savedObjectsRepository.bulkCreate(objects, options);
+      expect(callAdminCluster).toHaveBeenCalledTimes(multiNamespaceObjects?.length ? 2 : 1);
+      return result;
+    };
+
+    // bulk create calls have two objects for each source -- the action, and the source
+    const expectClusterCallArgsAction = (
+      objects,
+      { method, _index = expect.any(String), getId = () => expect.any(String) }
+    ) => {
+      const body = [];
+      for (const { type, id } of objects) {
+        body.push({ [method]: { _index, _id: getId(type, id) } });
+        body.push(expect.any(Object));
+      }
+      expectClusterCallArgs({ body });
+    };
+
+    const expectObjArgs = ({ type, attributes, references }, overrides) => [
+      expect.any(Object),
+      expect.objectContaining({
+        [type]: attributes,
+        references,
+        type,
+        ...overrides,
+        ...mockTimestampFields,
+      }),
+    ];
+
+    const expectSuccessResult = obj => ({
+      ...obj,
+      migrationVersion: { [obj.type]: '1.1.1' },
+      version: mockVersion,
+      ...mockTimestampFields,
+    });
+
+    describe('cluster calls', () => {
+      it(`should use the ES bulk action by default`, async () => {
+        await bulkCreateSuccess([obj1, obj2]);
+        expectClusterCalls('bulk');
+      });
+
+      it(`should use the ES mget action before bulk action for any types that are multi-namespace, when overwrite=true`, async () => {
+        const objects = [obj1, { ...obj2, type: MULTI_NAMESPACE_TYPE }];
+        await bulkCreateSuccess(objects, { overwrite: true });
+        expectClusterCalls('mget', 'bulk');
+        const docs = [expect.objectContaining({ _id: `${MULTI_NAMESPACE_TYPE}:${obj2.id}` })];
+        expectClusterCallArgs({ body: { docs } }, 1);
+      });
+
+      it(`should use the ES create method if ID is undefined and overwrite=true`, async () => {
+        const objects = [obj1, obj2].map(obj => ({ ...obj, id: undefined }));
+        await bulkCreateSuccess(objects, { overwrite: true });
+        expectClusterCallArgsAction(objects, { method: 'create' });
+      });
+
+      it(`should use the ES create method if ID is undefined and overwrite=false`, async () => {
+        const objects = [obj1, obj2].map(obj => ({ ...obj, id: undefined }));
+        await bulkCreateSuccess(objects);
+        expectClusterCallArgsAction(objects, { method: 'create' });
+      });
+
+      it(`should use the ES index method if ID is defined and overwrite=true`, async () => {
+        await bulkCreateSuccess([obj1, obj2], { overwrite: true });
+        expectClusterCallArgsAction([obj1, obj2], { method: 'index' });
+      });
+
+      it(`should use the ES create method if ID is defined and overwrite=false`, async () => {
+        await bulkCreateSuccess([obj1, obj2]);
+        expectClusterCallArgsAction([obj1, obj2], { method: 'create' });
+      });
+
+      it(`formats the ES request`, async () => {
+        await bulkCreateSuccess([obj1, obj2]);
+        const body = [...expectObjArgs(obj1), ...expectObjArgs(obj2)];
+        expectClusterCallArgs({ body });
+      });
+
+      it(`adds namespace to request body for any types that are single-namespace`, async () => {
+        await bulkCreateSuccess([obj1, obj2], { namespace });
+        const expected = expect.objectContaining({ namespace });
+        const body = [expect.any(Object), expected, expect.any(Object), expected];
+        expectClusterCallArgs({ body });
+      });
+
+      it(`doesn't add namespace to request body for any types that are not single-namespace`, async () => {
+        const objects = [
+          { ...obj1, type: NAMESPACE_AGNOSTIC_TYPE },
+          { ...obj2, type: MULTI_NAMESPACE_TYPE },
+        ];
+        await bulkCreateSuccess(objects, { namespace });
+        const expected = expect.not.objectContaining({ namespace: expect.anything() });
+        const body = [expect.any(Object), expected, expect.any(Object), expected];
+        expectClusterCallArgs({ body });
+      });
+
+      it(`adds namespaces to request body for any types that are multi-namespace`, async () => {
+        const test = async namespace => {
+          const objects = [obj1, obj2].map(x => ({ ...x, type: MULTI_NAMESPACE_TYPE }));
+          const namespaces = [namespace ?? 'default'];
+          await bulkCreateSuccess(objects, { namespace, overwrite: true });
+          const expected = expect.objectContaining({ namespaces });
+          const body = [expect.any(Object), expected, expect.any(Object), expected];
+          expectClusterCallArgs({ body }, 2);
+          callAdminCluster.mockReset();
+        };
+        await test(undefined);
+        await test(namespace);
+      });
+
+      it(`doesn't add namespaces to request body for any types that are not multi-namespace`, async () => {
+        const test = async namespace => {
+          const objects = [obj1, { ...obj2, type: NAMESPACE_AGNOSTIC_TYPE }];
+          await bulkCreateSuccess(objects, { namespace, overwrite: true });
+          const expected = expect.not.objectContaining({ namespaces: expect.anything() });
+          const body = [expect.any(Object), expected, expect.any(Object), expected];
+          expectClusterCallArgs({ body });
+          callAdminCluster.mockReset();
+        };
+        await test(undefined);
+        await test(namespace);
+      });
+
+      it(`defaults to a refresh setting of wait_for`, async () => {
+        await bulkCreateSuccess([obj1, obj2]);
+        expectClusterCallArgs({ refresh: 'wait_for' });
+      });
+
+      it(`accepts a custom refresh setting`, async () => {
+        const refresh = 'foo';
+        await bulkCreateSuccess([obj1, obj2], { refresh });
+        expectClusterCallArgs({ refresh });
+      });
+
+      it(`should use default index`, async () => {
+        await bulkCreateSuccess([obj1, obj2]);
+        expectClusterCallArgsAction([obj1, obj2], { method: 'create', _index: '.kibana-test' });
+      });
+
+      it(`should use custom index`, async () => {
+        await bulkCreateSuccess([obj1, obj2].map(x => ({ ...x, type: CUSTOM_INDEX_TYPE })));
+        expectClusterCallArgsAction([obj1, obj2], { method: 'create', _index: 'custom' });
+      });
+
+      it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
+        const getId = (type, id) => `${namespace}:${type}:${id}`;
+        await bulkCreateSuccess([obj1, obj2], { namespace });
+        expectClusterCallArgsAction([obj1, obj2], { method: 'create', getId });
+      });
+
+      it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
+        const getId = (type, id) => `${type}:${id}`;
+        await bulkCreateSuccess([obj1, obj2]);
+        expectClusterCallArgsAction([obj1, obj2], { method: 'create', getId });
+      });
+
+      it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
+        const getId = (type, id) => `${type}:${id}`;
+        const objects = [
+          { ...obj1, type: NAMESPACE_AGNOSTIC_TYPE },
+          { ...obj2, type: MULTI_NAMESPACE_TYPE },
+        ];
+        await bulkCreateSuccess(objects, { namespace });
+        expectClusterCallArgsAction(objects, { method: 'create', getId });
+      });
+    });
+
+    describe('errors', () => {
+      const obj3 = {
+        type: 'dashboard',
+        id: 'three',
+        attributes: { title: 'Test Three' },
+        references: [{ name: 'ref_0', type: 'test', id: '2' }],
+      };
+
+      const bulkCreateError = async (obj, esError, expectedError) => {
+        let response;
+        if (esError) {
+          response = getMockBulkCreateResponse([obj1, obj, obj2]);
+          response.items[1].create = { error: esError };
+        } else {
+          response = getMockBulkCreateResponse([obj1, obj2]);
+        }
+        callAdminCluster.mockResolvedValue(response); // this._writeToCluster('bulk', ...)
+
+        const objects = [obj1, obj, obj2];
+        const result = await savedObjectsRepository.bulkCreate(objects);
+        expectClusterCalls('bulk');
+        const objCall = esError ? expectObjArgs(obj) : [];
+        const body = [...expectObjArgs(obj1), ...objCall, ...expectObjArgs(obj2)];
+        expectClusterCallArgs({ body });
+        expect(result).toEqual({
+          saved_objects: [expectSuccess(obj1), expectedError, expectSuccess(obj2)],
+        });
+      };
+
+      it(`returns error when type is invalid`, async () => {
+        const obj = { ...obj3, type: 'unknownType' };
+        await bulkCreateError(obj, undefined, expectErrorInvalidType(obj));
+      });
+
+      it(`returns error when type is hidden`, async () => {
+        const obj = { ...obj3, type: HIDDEN_TYPE };
+        await bulkCreateError(obj, undefined, expectErrorInvalidType(obj));
+      });
+
+      it(`returns error when there is a conflict with an existing multi-namespace saved object (get)`, async () => {
+        const obj = { ...obj3, type: MULTI_NAMESPACE_TYPE };
+        const response1 = {
+          status: 200,
+          docs: [
+            {
+              found: true,
+              _source: {
+                type: obj.type,
+                namespaces: ['bar-namespace'],
+              },
+            },
+          ],
+        };
+        callAdminCluster.mockResolvedValueOnce(response1); // this._callCluster('mget', ...)
+        const response2 = getMockBulkCreateResponse([obj1, obj2]);
+        callAdminCluster.mockResolvedValue(response2); // this._writeToCluster('bulk', ...)
+
+        const options = { overwrite: true };
+        const result = await savedObjectsRepository.bulkCreate([obj1, obj, obj2], options);
+        expectClusterCalls('mget', 'bulk');
+        const body1 = { docs: [expect.objectContaining({ _id: `${obj.type}:${obj.id}` })] };
+        expectClusterCallArgs({ body: body1 }, 1);
+        const body2 = [...expectObjArgs(obj1), ...expectObjArgs(obj2)];
+        expectClusterCallArgs({ body: body2 }, 2);
+        expect(result).toEqual({
+          saved_objects: [expectSuccess(obj1), expectErrorConflict(obj), expectSuccess(obj2)],
+        });
+      });
+
+      it(`returns error when there is a version conflict (bulk)`, async () => {
+        const esError = { type: 'version_conflict_engine_exception' };
+        await bulkCreateError(obj3, esError, expectErrorConflict(obj3));
+      });
+
+      it(`returns error when document is missing`, async () => {
+        const esError = { type: 'document_missing_exception' };
+        await bulkCreateError(obj3, esError, expectErrorNotFound(obj3));
+      });
+
+      it(`returns error reason for other errors`, async () => {
+        const esError = { reason: 'some_other_error' };
+        await bulkCreateError(obj3, esError, expectErrorResult(obj3, { message: esError.reason }));
+      });
+
+      it(`returns error string for other errors if no reason is defined`, async () => {
+        const esError = { foo: 'some_other_error' };
+        const expectedError = expectErrorResult(obj3, { message: JSON.stringify(esError) });
+        await bulkCreateError(obj3, esError, expectedError);
+      });
+    });
+
+    describe('migration', () => {
+      it(`waits until migrations are complete before proceeding`, async () => {
+        migrator.runMigrations = jest.fn(async () =>
+          expect(callAdminCluster).not.toHaveBeenCalled()
+        );
+        await expect(bulkCreateSuccess([obj1, obj2])).resolves.toBeDefined();
+        expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
+      });
+
+      it(`migrates the docs and serializes the migrated docs`, async () => {
+        migrator.migrateDocument.mockImplementation(mockMigrateDocument);
+        await bulkCreateSuccess([obj1, obj2]);
+        const docs = [obj1, obj2].map(x => ({ ...x, ...mockTimestampFields }));
+        expectMigrationArgs(docs[0], true, 1);
+        expectMigrationArgs(docs[1], true, 2);
+
+        const migratedDocs = docs.map(x => migrator.migrateDocument(x));
+        expect(serializer.savedObjectToRaw).toHaveBeenNthCalledWith(1, migratedDocs[0]);
+        expect(serializer.savedObjectToRaw).toHaveBeenNthCalledWith(2, migratedDocs[1]);
+      });
+
+      it(`adds namespace to body when providing namespace for single-namespace type`, async () => {
+        await bulkCreateSuccess([obj1, obj2], { namespace });
+        expectMigrationArgs({ namespace }, true, 1);
+        expectMigrationArgs({ namespace }, true, 2);
+      });
+
+      it(`doesn't add namespace to body when providing no namespace for single-namespace type`, async () => {
+        await bulkCreateSuccess([obj1, obj2]);
+        expectMigrationArgs({ namespace: expect.anything() }, false, 1);
+        expectMigrationArgs({ namespace: expect.anything() }, false, 2);
+      });
+
+      it(`doesn't add namespace to body when not using single-namespace type`, async () => {
+        const objects = [
+          { ...obj1, type: NAMESPACE_AGNOSTIC_TYPE },
+          { ...obj2, type: MULTI_NAMESPACE_TYPE },
+        ];
+        await bulkCreateSuccess(objects, { namespace });
+        expectMigrationArgs({ namespace: expect.anything() }, false, 1);
+        expectMigrationArgs({ namespace: expect.anything() }, false, 2);
+      });
+
+      it(`adds namespaces to body when providing namespace for multi-namespace type`, async () => {
+        const objects = [obj1, obj2].map(obj => ({ ...obj, type: MULTI_NAMESPACE_TYPE }));
+        await bulkCreateSuccess(objects, { namespace });
+        expectMigrationArgs({ namespaces: [namespace] }, true, 1);
+        expectMigrationArgs({ namespaces: [namespace] }, true, 2);
+      });
+
+      it(`adds default namespaces to body when providing no namespace for multi-namespace type`, async () => {
+        const objects = [obj1, obj2].map(obj => ({ ...obj, type: MULTI_NAMESPACE_TYPE }));
+        await bulkCreateSuccess(objects);
+        expectMigrationArgs({ namespaces: ['default'] }, true, 1);
+        expectMigrationArgs({ namespaces: ['default'] }, true, 2);
+      });
+
+      it(`doesn't add namespaces to body when not using multi-namespace type`, async () => {
+        const objects = [obj1, { ...obj2, type: NAMESPACE_AGNOSTIC_TYPE }];
+        await bulkCreateSuccess(objects);
+        expectMigrationArgs({ namespaces: expect.anything() }, false, 1);
+        expectMigrationArgs({ namespaces: expect.anything() }, false, 2);
+      });
+    });
+
+    describe('returns', () => {
+      it(`formats the ES response`, async () => {
+        const result = await bulkCreateSuccess([obj1, obj2]);
+        expect(result).toEqual({
+          saved_objects: [obj1, obj2].map(x => expectSuccessResult(x)),
+        });
+      });
+
+      it(`should return objects in the same order regardless of type`, async () => {
+        // TODO
+      });
+
+      it(`handles a mix of successful creates and errors`, async () => {
+        const obj = {
+          type: 'unknownType',
+          id: 'three',
+        };
+        const objects = [obj1, obj, obj2];
+        const response = getMockBulkCreateResponse([obj1, obj2]);
+        callAdminCluster.mockResolvedValue(response); // this._writeToCluster('bulk', ...)
+        const result = await savedObjectsRepository.bulkCreate(objects);
+        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expect(result).toEqual({
+          saved_objects: [expectSuccessResult(obj1), expectError(obj), expectSuccessResult(obj2)],
+        });
+      });
+
+      it(`a deserialized saved object`, async () => {
+        // Test for fix to https://github.com/elastic/kibana/issues/65088 where
+        // we returned raw ID's when an object without an id was created.
+        const namespace = 'myspace';
+        const response = getMockBulkCreateResponse([obj1, obj2], namespace);
+        callAdminCluster.mockResolvedValueOnce(response); // this._writeToCluster('bulk', ...)
+
+        // Bulk create one object with id unspecified, and one with id specified
+        const result = await savedObjectsRepository.bulkCreate([{ ...obj1, id: undefined }, obj2], {
+          namespace,
+        });
+
+        // Assert that both raw docs from the ES response are deserialized
+        expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(1, {
+          ...response.items[0].create,
+          _id: expect.stringMatching(/^myspace:config:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/),
+        });
+        expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(2, response.items[1].create);
+
+        // Assert that ID's are deserialized to remove the type and namespace
+        expect(result.saved_objects[0].id).toEqual(
+          expect.stringMatching(/^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/)
+        );
+        expect(result.saved_objects[1].id).toEqual(obj2.id);
+      });
+    });
+  });
+
+  describe('#bulkGet', () => {
+    const obj1 = {
+      type: 'config',
+      id: '6.0.0-alpha1',
+      attributes: { title: 'Testing' },
+      references: [
+        {
+          name: 'ref_0',
+          type: 'test',
+          id: '1',
+        },
+      ],
+    };
+    const obj2 = {
+      type: 'index-pattern',
+      id: 'logstash-*',
+      attributes: { title: 'Testing' },
+      references: [
+        {
+          name: 'ref_0',
+          type: 'test',
+          id: '2',
+        },
+      ],
+    };
+    const namespace = 'foo-namespace';
+
+    const bulkGet = async (objects, options) =>
+      savedObjectsRepository.bulkGet(
+        objects.map(({ type, id }) => ({ type, id })), // bulkGet only uses type and id
+        options
+      );
+    const bulkGetSuccess = async (objects, options) => {
+      const response = getMockMgetResponse(objects, options?.namespace);
+      callAdminCluster.mockReturnValue(response);
+      const result = await bulkGet(objects, options);
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      return result;
+    };
+
+    const _expectClusterCallArgs = (
+      objects,
+      { _index = expect.any(String), getId = () => expect.any(String) }
+    ) => {
+      expectClusterCallArgs({
+        body: {
+          docs: objects.map(({ type, id }) =>
+            expect.objectContaining({
+              _index,
+              _id: getId(type, id),
+            })
+          ),
+        },
+      });
+    };
+
+    describe('cluster calls', () => {
+      it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
+        const getId = (type, id) => `${namespace}:${type}:${id}`;
+        await bulkGetSuccess([obj1, obj2], { namespace });
+        _expectClusterCallArgs([obj1, obj2], { getId });
+      });
+
+      it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
+        const getId = (type, id) => `${type}:${id}`;
+        await bulkGetSuccess([obj1, obj2]);
+        _expectClusterCallArgs([obj1, obj2], { getId });
+      });
+
+      it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
+        const getId = (type, id) => `${type}:${id}`;
+        let objects = [obj1, obj2].map(obj => ({ ...obj, type: NAMESPACE_AGNOSTIC_TYPE }));
+        await bulkGetSuccess(objects, { namespace });
+        _expectClusterCallArgs(objects, { getId });
+
+        callAdminCluster.mockReset();
+        objects = [obj1, obj2].map(obj => ({ ...obj, type: MULTI_NAMESPACE_TYPE }));
+        await bulkGetSuccess(objects, { namespace });
+        _expectClusterCallArgs(objects, { getId });
+      });
+    });
+
+    describe('errors', () => {
+      const bulkGetErrorInvalidType = async ([obj1, obj, obj2]) => {
+        const response = getMockMgetResponse([obj1, obj2]);
+        callAdminCluster.mockResolvedValue(response);
+        const result = await bulkGet([obj1, obj, obj2]);
+        expectClusterCalls('mget');
+        expect(result).toEqual({
+          saved_objects: [expectSuccess(obj1), expectErrorInvalidType(obj), expectSuccess(obj2)],
+        });
+      };
+
+      const bulkGetErrorNotFound = async ([obj1, obj, obj2], options, response) => {
+        callAdminCluster.mockResolvedValue(response);
+        const result = await bulkGet([obj1, obj, obj2], options);
+        expectClusterCalls('mget');
+        expect(result).toEqual({
+          saved_objects: [expectSuccess(obj1), expectErrorNotFound(obj), expectSuccess(obj2)],
+        });
+      };
+
+      it(`returns error when type is invalid`, async () => {
+        const obj = { type: 'unknownType', id: 'three' };
+        await bulkGetErrorInvalidType([obj1, obj, obj2]);
+      });
+
+      it(`returns error when type is hidden`, async () => {
+        const obj = { type: HIDDEN_TYPE, id: 'three' };
+        await bulkGetErrorInvalidType([obj1, obj, obj2]);
+      });
+
+      it(`returns error when document is not found`, async () => {
+        const obj = { type: 'dashboard', id: 'three', found: false };
+        const response = getMockMgetResponse([obj1, obj, obj2]);
+        await bulkGetErrorNotFound([obj1, obj, obj2], undefined, response);
+      });
+
+      it(`handles missing ids gracefully`, async () => {
+        const obj = { type: 'dashboard', id: undefined, found: false };
+        const response = getMockMgetResponse([obj1, obj, obj2]);
+        await bulkGetErrorNotFound([obj1, obj, obj2], undefined, response);
+      });
+
+      it(`returns error when type is multi-namespace and the document exists, but not in this namespace`, async () => {
+        const obj = { type: MULTI_NAMESPACE_TYPE, id: 'three' };
+        const response = getMockMgetResponse([obj1, obj, obj2]);
+        response.docs[1].namespaces = ['bar-namespace'];
+        await bulkGetErrorNotFound([obj1, obj, obj2], { namespace }, response);
+      });
+    });
+
+    describe('migration', () => {
+      it(`waits until migrations are complete before proceeding`, async () => {
+        migrator.runMigrations = jest.fn(async () =>
+          expect(callAdminCluster).not.toHaveBeenCalled()
+        );
+        await expect(bulkGetSuccess([obj1, obj2])).resolves.toBeDefined();
+        expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('returns', () => {
+      const expectSuccessResult = ({ type, id }, doc) => ({
+        type,
+        id,
+        ...(doc._source.namespaces && { namespaces: doc._source.namespaces }),
+        ...(doc._source.updated_at && { updated_at: doc._source.updated_at }),
+        version: encodeHitVersion(doc),
+        attributes: doc._source[type],
+        references: doc._source.references || [],
+        migrationVersion: doc._source.migrationVersion,
+      });
+
+      it(`returns early for empty objects argument`, async () => {
+        const result = await bulkGet([]);
+        expect(result).toEqual({ saved_objects: [] });
+        expect(callAdminCluster).not.toHaveBeenCalled();
+      });
+
+      it(`formats the ES response`, async () => {
+        const response = getMockMgetResponse([obj1, obj2]);
+        callAdminCluster.mockResolvedValue(response);
+        const result = await bulkGet([obj1, obj2]);
+        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expect(result).toEqual({
+          saved_objects: [
+            expectSuccessResult(obj1, response.docs[0]),
+            expectSuccessResult(obj2, response.docs[1]),
+          ],
+        });
+      });
+
+      it(`handles a mix of successful gets and errors`, async () => {
+        const response = getMockMgetResponse([obj1, obj2]);
+        callAdminCluster.mockResolvedValue(response);
+        const obj = { type: 'unknownType', id: 'three' };
+        const result = await bulkGet([obj1, obj, obj2]);
+        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expect(result).toEqual({
+          saved_objects: [
+            expectSuccessResult(obj1, response.docs[0]),
+            expectError(obj),
+            expectSuccessResult(obj2, response.docs[1]),
+          ],
+        });
+      });
+
+      it(`includes namespaces property for multi-namespace documents`, async () => {
+        const obj = { type: MULTI_NAMESPACE_TYPE, id: 'three' };
+        const result = await bulkGetSuccess([obj1, obj]);
+        expect(result).toEqual({
+          saved_objects: [
+            expect.not.objectContaining({ namespaces: expect.anything() }),
+            expect.objectContaining({ namespaces: expect.any(Array) }),
+          ],
+        });
+      });
+    });
+  });
+
+  describe('#bulkUpdate', () => {
+    const obj1 = {
+      type: 'config',
+      id: '6.0.0-alpha1',
+      attributes: { title: 'Test One' },
+    };
+    const obj2 = {
+      type: 'index-pattern',
+      id: 'logstash-*',
+      attributes: { title: 'Test Two' },
+    };
+    const references = [{ name: 'ref_0', type: 'test', id: '1' }];
+    const namespace = 'foo-namespace';
+
+    const getMockBulkUpdateResponse = (objects, options) => ({
+      items: objects.map(({ type, id }) => ({
+        update: {
+          _id: `${
+            registry.isSingleNamespace(type) && options?.namespace ? `${options?.namespace}:` : ''
+          }${type}:${id}`,
+          ...mockVersionProps,
+          result: 'updated',
+        },
+      })),
+    });
+
+    const bulkUpdateSuccess = async (objects, options) => {
+      const multiNamespaceObjects = objects.filter(({ type }) => registry.isMultiNamespace(type));
+      if (multiNamespaceObjects?.length) {
+        const response = getMockMgetResponse(multiNamespaceObjects, options?.namespace);
+        callAdminCluster.mockResolvedValueOnce(response); // this._callCluster('mget', ...)
+      }
+      const response = getMockBulkUpdateResponse(objects, options?.namespace);
+      callAdminCluster.mockResolvedValue(response); // this._writeToCluster('bulk', ...)
+      const result = await savedObjectsRepository.bulkUpdate(objects, options);
+      expect(callAdminCluster).toHaveBeenCalledTimes(multiNamespaceObjects?.length ? 2 : 1);
+      return result;
+    };
+
+    // bulk create calls have two objects for each source -- the action, and the source
+    const expectClusterCallArgsAction = (
+      objects,
+      { method, _index = expect.any(String), getId = () => expect.any(String), overrides },
+      n
+    ) => {
+      const body = [];
+      for (const { type, id } of objects) {
+        body.push({
+          [method]: {
+            _index,
+            _id: getId(type, id),
+            ...overrides,
+          },
+        });
+        body.push(expect.any(Object));
+      }
+      expectClusterCallArgs({ body }, n);
+    };
+
+    const expectObjArgs = ({ type, attributes }) => [
+      expect.any(Object),
+      {
+        doc: expect.objectContaining({
+          [type]: attributes,
+          ...mockTimestampFields,
+        }),
+      },
+    ];
+
+    describe('cluster calls', () => {
+      it(`should use the ES bulk action by default`, async () => {
+        await bulkUpdateSuccess([obj1, obj2]);
+        expectClusterCalls('bulk');
+      });
+
+      it(`should use the ES mget action before bulk action for any types that are multi-namespace`, async () => {
+        const objects = [obj1, { ...obj2, type: MULTI_NAMESPACE_TYPE }];
+        await bulkUpdateSuccess(objects);
+        expectClusterCalls('mget', 'bulk');
+        const docs = [expect.objectContaining({ _id: `${MULTI_NAMESPACE_TYPE}:${obj2.id}` })];
+        expectClusterCallArgs({ body: { docs } }, 1);
+      });
+
+      it(`formats the ES request`, async () => {
+        await bulkUpdateSuccess([obj1, obj2]);
+        const body = [...expectObjArgs(obj1), ...expectObjArgs(obj2)];
+        expectClusterCallArgs({ body });
+      });
+
+      it(`formats the ES request for any types that are multi-namespace`, async () => {
+        const _obj2 = { ...obj2, type: MULTI_NAMESPACE_TYPE };
+        await bulkUpdateSuccess([obj1, _obj2]);
+        const body = [...expectObjArgs(obj1), ...expectObjArgs(_obj2)];
+        expectClusterCallArgs({ body }, 2);
+      });
+
+      it(`doesnt call Elasticsearch if there are no valid objects to update`, async () => {
+        const objects = [obj1, obj2].map(x => ({ ...x, type: 'unknownType' }));
+        await savedObjectsRepository.bulkUpdate(objects);
+        expect(callAdminCluster).toHaveBeenCalledTimes(0);
+      });
+
+      it(`defaults to no references`, async () => {
+        await bulkUpdateSuccess([obj1, obj2]);
+        const expected = { doc: expect.not.objectContaining({ references: expect.anything() }) };
+        const body = [expect.any(Object), expected, expect.any(Object), expected];
+        expectClusterCallArgs({ body });
+      });
+
+      it(`accepts custom references array`, async () => {
+        const test = async references => {
+          const objects = [obj1, obj2].map(obj => ({ ...obj, references }));
+          await bulkUpdateSuccess(objects);
+          const expected = { doc: expect.objectContaining({ references }) };
+          const body = [expect.any(Object), expected, expect.any(Object), expected];
+          expectClusterCallArgs({ body });
+          callAdminCluster.mockReset();
+        };
+        await test(references);
+        await test(['string']);
+        await test([]);
+      });
+
+      it(`doesn't accept custom references if not an array`, async () => {
+        const test = async references => {
+          const objects = [obj1, obj2].map(obj => ({ ...obj, references }));
+          await bulkUpdateSuccess(objects);
+          const expected = { doc: expect.not.objectContaining({ references: expect.anything() }) };
+          const body = [expect.any(Object), expected, expect.any(Object), expected];
+          expectClusterCallArgs({ body });
+          callAdminCluster.mockReset();
+        };
+        await test('string');
+        await test(123);
+        await test(true);
+        await test(null);
+      });
+
+      it(`defaults to a refresh setting of wait_for`, async () => {
+        await bulkUpdateSuccess([obj1, obj2]);
+        expectClusterCallArgs({ refresh: 'wait_for' });
+      });
+
+      it(`accepts a custom refresh setting`, async () => {
+        const refresh = 'foo';
+        await bulkUpdateSuccess([obj1, obj2], { refresh });
+        expectClusterCallArgs({ refresh });
+      });
+
+      it(`defaults to the version of the existing document for multi-namespace types`, async () => {
+        // only multi-namespace documents are obtained using a pre-flight mget request
+        const objects = [
+          { ...obj1, type: MULTI_NAMESPACE_TYPE },
+          { ...obj2, type: MULTI_NAMESPACE_TYPE },
+        ];
+        await bulkUpdateSuccess(objects);
+        const overrides = {
+          if_seq_no: mockVersionProps._seq_no,
+          if_primary_term: mockVersionProps._primary_term,
+        };
+        expectClusterCallArgsAction(objects, { method: 'update', overrides }, 2);
+      });
+
+      it(`defaults to no version for types that are not multi-namespace`, async () => {
+        const objects = [obj1, { ...obj2, type: NAMESPACE_AGNOSTIC_TYPE }];
+        await bulkUpdateSuccess(objects);
+        expectClusterCallArgsAction(objects, { method: 'update' });
+      });
+
+      it(`accepts version`, async () => {
+        const version = encodeHitVersion({ _seq_no: 100, _primary_term: 200 });
+        // test with both non-multi-namespace and multi-namespace types
+        const objects = [
+          { ...obj1, version },
+          { ...obj2, type: MULTI_NAMESPACE_TYPE, version },
+        ];
+        await bulkUpdateSuccess(objects);
+        const overrides = { if_seq_no: 100, if_primary_term: 200 };
+        expectClusterCallArgsAction(objects, { method: 'update', overrides }, 2);
+      });
+
+      it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
+        const getId = (type, id) => `${namespace}:${type}:${id}`;
+        await bulkUpdateSuccess([obj1, obj2], { namespace });
+        expectClusterCallArgsAction([obj1, obj2], { method: 'update', getId });
+      });
+
+      it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
+        const getId = (type, id) => `${type}:${id}`;
+        await bulkUpdateSuccess([obj1, obj2]);
+        expectClusterCallArgsAction([obj1, obj2], { method: 'update', getId });
+      });
+
+      it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
+        const getId = (type, id) => `${type}:${id}`;
+        const objects1 = [{ ...obj1, type: NAMESPACE_AGNOSTIC_TYPE }];
+        await bulkUpdateSuccess(objects1, { namespace });
+        expectClusterCallArgsAction(objects1, { method: 'update', getId });
+        callAdminCluster.mockReset();
+        const overrides = {
+          // bulkUpdate uses a preflight `get` request for multi-namespace saved objects, and specifies that version on `update`
+          // we aren't testing for this here, but we need to include Jest assertions so this test doesn't fail
+          if_primary_term: expect.any(Number),
+          if_seq_no: expect.any(Number),
+        };
+        const objects2 = [{ ...obj2, type: MULTI_NAMESPACE_TYPE }];
+        await bulkUpdateSuccess(objects2, { namespace });
+        expectClusterCallArgsAction(objects2, { method: 'update', getId, overrides }, 2);
+      });
+    });
+
+    describe('errors', () => {
+      const obj = {
+        type: 'dashboard',
+        id: 'three',
+      };
+
+      const bulkUpdateError = async (obj, esError, expectedError) => {
+        const objects = [obj1, obj, obj2];
+        const mockResponse = getMockBulkUpdateResponse(objects);
+        if (esError) {
+          mockResponse.items[1].update = { error: esError };
+        }
+        callAdminCluster.mockResolvedValue(mockResponse); // this._writeToCluster('bulk', ...)
+
+        const result = await savedObjectsRepository.bulkUpdate(objects);
+        expectClusterCalls('bulk');
+        const objCall = esError ? expectObjArgs(obj) : [];
+        const body = [...expectObjArgs(obj1), ...objCall, ...expectObjArgs(obj2)];
+        expectClusterCallArgs({ body });
+        expect(result).toEqual({
+          saved_objects: [expectSuccess(obj1), expectedError, expectSuccess(obj2)],
+        });
+      };
+
+      const bulkUpdateMultiError = async ([obj1, _obj, obj2], options, mgetResponse) => {
+        callAdminCluster.mockResolvedValueOnce(mgetResponse); // this._callCluster('mget', ...)
+        const bulkResponse = getMockBulkUpdateResponse([obj1, obj2], namespace);
+        callAdminCluster.mockResolvedValue(bulkResponse); // this._writeToCluster('bulk', ...)
+
+        const result = await savedObjectsRepository.bulkUpdate([obj1, _obj, obj2], options);
+        expectClusterCalls('mget', 'bulk');
+        const body = [...expectObjArgs(obj1), ...expectObjArgs(obj2)];
+        expectClusterCallArgs({ body }, 2);
+        expect(result).toEqual({
+          saved_objects: [expectSuccess(obj1), expectErrorNotFound(_obj), expectSuccess(obj2)],
+        });
+      };
+
+      it(`returns error when type is invalid`, async () => {
+        const _obj = { ...obj, type: 'unknownType' };
+        await bulkUpdateError(_obj, undefined, expectErrorNotFound(_obj));
+      });
+
+      it(`returns error when type is hidden`, async () => {
+        const _obj = { ...obj, type: HIDDEN_TYPE };
+        await bulkUpdateError(_obj, undefined, expectErrorNotFound(_obj));
+      });
+
+      it(`returns error when ES is unable to find the document (mget)`, async () => {
+        const _obj = { ...obj, type: MULTI_NAMESPACE_TYPE, found: false };
+        const mgetResponse = getMockMgetResponse([_obj]);
+        await bulkUpdateMultiError([obj1, _obj, obj2], undefined, mgetResponse);
+      });
+
+      it(`returns error when ES is unable to find the index (mget)`, async () => {
+        const _obj = { ...obj, type: MULTI_NAMESPACE_TYPE };
+        const mgetResponse = { status: 404 };
+        await bulkUpdateMultiError([obj1, _obj, obj2], { namespace }, mgetResponse);
+      });
+
+      it(`returns error when there is a conflict with an existing multi-namespace saved object (mget)`, async () => {
+        const _obj = { ...obj, type: MULTI_NAMESPACE_TYPE };
+        const mgetResponse = getMockMgetResponse([_obj], 'bar-namespace');
+        await bulkUpdateMultiError([obj1, _obj, obj2], { namespace }, mgetResponse);
+      });
+
+      it(`returns error when there is a version conflict (bulk)`, async () => {
+        const esError = { type: 'version_conflict_engine_exception' };
+        await bulkUpdateError(obj, esError, expectErrorConflict(obj));
+      });
+
+      it(`returns error when document is missing (bulk)`, async () => {
+        const esError = { type: 'document_missing_exception' };
+        await bulkUpdateError(obj, esError, expectErrorNotFound(obj));
+      });
+
+      it(`returns error reason for other errors (bulk)`, async () => {
+        const esError = { reason: 'some_other_error' };
+        await bulkUpdateError(obj, esError, expectErrorResult(obj, { message: esError.reason }));
+      });
+
+      it(`returns error string for other errors if no reason is defined (bulk)`, async () => {
+        const esError = { foo: 'some_other_error' };
+        const expectedError = expectErrorResult(obj, { message: JSON.stringify(esError) });
+        await bulkUpdateError(obj, esError, expectedError);
+      });
+    });
+
+    describe('migration', () => {
+      it(`waits until migrations are complete before proceeding`, async () => {
+        migrator.runMigrations = jest.fn(async () =>
+          expect(callAdminCluster).not.toHaveBeenCalled()
+        );
+        await expect(bulkUpdateSuccess([obj1, obj2])).resolves.toBeDefined();
+        expect(migrator.runMigrations).toHaveReturnedTimes(1);
+      });
+    });
+
+    describe('returns', () => {
+      const expectSuccessResult = ({ type, id, attributes, references }) => ({
+        type,
+        id,
+        attributes,
+        references,
+        version: mockVersion,
+        ...mockTimestampFields,
+      });
+
+      it(`formats the ES response`, async () => {
+        const response = await bulkUpdateSuccess([obj1, obj2]);
+        expect(response).toEqual({
+          saved_objects: [obj1, obj2].map(expectSuccessResult),
+        });
+      });
+
+      it(`includes references`, async () => {
+        const objects = [obj1, obj2].map(obj => ({ ...obj, references }));
+        const response = await bulkUpdateSuccess(objects);
+        expect(response).toEqual({
+          saved_objects: objects.map(expectSuccessResult),
+        });
+      });
+
+      it(`handles a mix of successful updates and errors`, async () => {
+        const obj = {
+          type: 'unknownType',
+          id: 'three',
+        };
+        const objects = [obj1, obj, obj2];
+        const mockResponse = getMockBulkUpdateResponse(objects);
+        callAdminCluster.mockResolvedValue(mockResponse); // this._writeToCluster('bulk', ...)
+        const result = await savedObjectsRepository.bulkUpdate(objects);
+        expect(callAdminCluster).toHaveBeenCalledTimes(1);
+        expect(result).toEqual({
+          saved_objects: [expectSuccessResult(obj1), expectError(obj), expectSuccessResult(obj2)],
+        });
+      });
+
+      it(`includes namespaces property for multi-namespace documents`, async () => {
+        const obj = { type: MULTI_NAMESPACE_TYPE, id: 'three' };
+        const result = await bulkUpdateSuccess([obj1, obj]);
+        expect(result).toEqual({
+          saved_objects: [
+            expect.not.objectContaining({ namespaces: expect.anything() }),
+            expect.objectContaining({ namespaces: expect.any(Array) }),
+          ],
+        });
+      });
+    });
   });
 
   describe('#create', () => {
@@ -364,1501 +1409,1472 @@ describe('SavedObjectsRepository', () => {
       }));
     });
 
-    it('waits until migrations are complete before proceeding', async () => {
-      migrator.runMigrations = jest.fn(async () => expect(callAdminCluster).not.toHaveBeenCalled());
+    const type = 'index-pattern';
+    const attributes = { title: 'Logstash' };
+    const id = 'logstash-*';
+    const namespace = 'foo-namespace';
+    const references = [
+      {
+        name: 'ref_0',
+        type: 'test',
+        id: '123',
+      },
+    ];
 
-      await expect(
-        savedObjectsRepository.create(
-          'index-pattern',
-          {
-            title: 'Logstash',
-          },
-          {
-            id: 'logstash-*',
-            namespace: 'foo-namespace',
-          }
-        )
-      ).resolves.toBeDefined();
-      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
-    });
-
-    it('formats Elasticsearch response', async () => {
-      const response = await savedObjectsRepository.create(
-        'index-pattern',
-        {
-          title: 'Logstash',
-        },
-        {
-          id: 'logstash-*',
-          namespace: 'foo-namespace',
-          references: [
-            {
-              name: 'ref_0',
-              type: 'test',
-              id: '123',
-            },
-          ],
-        }
+    const createSuccess = async (type, attributes, options) => {
+      const result = await savedObjectsRepository.create(type, attributes, options);
+      expect(callAdminCluster).toHaveBeenCalledTimes(
+        registry.isMultiNamespace(type) && options.overwrite ? 2 : 1
       );
+      return result;
+    };
 
-      expect(response).toEqual({
-        type: 'index-pattern',
-        id: 'logstash-*',
-        ...mockTimestampFields,
-        version: mockVersion,
-        attributes: {
-          title: 'Logstash',
-        },
-        references: [
-          {
-            name: 'ref_0',
-            type: 'test',
-            id: '123',
-          },
-        ],
-      });
-    });
-
-    it('should use ES index action', async () => {
-      await savedObjectsRepository.create('index-pattern', {
-        id: 'logstash-*',
-        title: 'Logstash',
+    describe('cluster calls', () => {
+      it(`should use the ES create action if ID is undefined and overwrite=true`, async () => {
+        await createSuccess(type, attributes, { overwrite: true });
+        expectClusterCalls('create');
       });
 
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith('index', expect.any(Object));
-    });
-
-    it('should use default index', async () => {
-      await savedObjectsRepository.create('index-pattern', {
-        id: 'logstash-*',
-        title: 'Logstash',
+      it(`should use the ES create action if ID is undefined and overwrite=false`, async () => {
+        await createSuccess(type, attributes);
+        expectClusterCalls('create');
       });
 
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        'index',
-        expect.objectContaining({
-          index: '.kibana-test',
-        })
-      );
-    });
-
-    it('should use custom index', async () => {
-      await savedObjectsRepository.create('baz', {
-        id: 'logstash-*',
-        title: 'Logstash',
+      it(`should use the ES index action if ID is defined and overwrite=true`, async () => {
+        await createSuccess(type, attributes, { id, overwrite: true });
+        expectClusterCalls('index');
       });
 
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        'index',
-        expect.objectContaining({
-          index: 'beats',
-        })
-      );
-    });
-
-    it('migrates the doc', async () => {
-      migrator.migrateDocument = doc => {
-        doc.attributes.title = doc.attributes.title + '!!';
-        doc.migrationVersion = { foo: '2.3.4' };
-        doc.references = [{ name: 'search_0', type: 'search', id: '123' }];
-        return doc;
-      };
-
-      await savedObjectsRepository.create('index-pattern', {
-        id: 'logstash-*',
-        title: 'Logstash',
+      it(`should use the ES create action if ID is defined and overwrite=false`, async () => {
+        await createSuccess(type, attributes, { id });
+        expectClusterCalls('create');
       });
 
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
-        body: {
-          'index-pattern': { id: 'logstash-*', title: 'Logstash!!' },
-          migrationVersion: { foo: '2.3.4' },
-          type: 'index-pattern',
-          updated_at: '2017-08-14T15:49:14.886Z',
-          references: [{ name: 'search_0', type: 'search', id: '123' }],
-        },
-      });
-    });
-
-    it('defaults to a refresh setting of `wait_for`', async () => {
-      await savedObjectsRepository.create('index-pattern', {
-        id: 'logstash-*',
-        title: 'Logstash',
+      it(`should use the ES get action then index action if type is multi-namespace, ID is defined, and overwrite=true`, async () => {
+        await createSuccess(MULTI_NAMESPACE_TYPE, attributes, { id, overwrite: true });
+        expectClusterCalls('get', 'index');
       });
 
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
-        refresh: 'wait_for',
-      });
-    });
-
-    it('accepts custom refresh settings', async () => {
-      await savedObjectsRepository.create(
-        'index-pattern',
-        {
-          id: 'logstash-*',
-          title: 'Logstash',
-        },
-        {
-          refresh: true,
-        }
-      );
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
-        refresh: true,
-      });
-    });
-
-    it('should use create action if ID defined and overwrite=false', async () => {
-      await savedObjectsRepository.create(
-        'index-pattern',
-        {
-          title: 'Logstash',
-        },
-        {
-          id: 'logstash-*',
-        }
-      );
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith('create', expect.any(Object));
-    });
-
-    it('allows for id to be provided', async () => {
-      await savedObjectsRepository.create(
-        'index-pattern',
-        {
-          title: 'Logstash',
-        },
-        { id: 'logstash-*' }
-      );
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          id: 'index-pattern:logstash-*',
-        })
-      );
-    });
-
-    it('self-generates an ID', async () => {
-      await savedObjectsRepository.create('index-pattern', {
-        title: 'Logstash',
+      it(`defaults to empty references array`, async () => {
+        await createSuccess(type, attributes, { id });
+        expectClusterCallArgs({
+          body: expect.objectContaining({ references: [] }),
+        });
       });
 
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
+      it(`accepts custom references array`, async () => {
+        const test = async references => {
+          await createSuccess(type, attributes, { id, references });
+          expectClusterCallArgs({
+            body: expect.objectContaining({ references }),
+          });
+          callAdminCluster.mockReset();
+        };
+        await test(references);
+        await test(['string']);
+        await test([]);
+      });
+
+      it(`doesn't accept custom references if not an array`, async () => {
+        const test = async references => {
+          await createSuccess(type, attributes, { id, references });
+          expectClusterCallArgs({
+            body: expect.not.objectContaining({ references: expect.anything() }),
+          });
+          callAdminCluster.mockReset();
+        };
+        await test('string');
+        await test(123);
+        await test(true);
+        await test(null);
+      });
+
+      it(`defaults to a refresh setting of wait_for`, async () => {
+        await createSuccess(type, attributes);
+        expectClusterCallArgs({ refresh: 'wait_for' });
+      });
+
+      it(`accepts a custom refresh setting`, async () => {
+        const refresh = 'foo';
+        await createSuccess(type, attributes, { refresh });
+        expectClusterCallArgs({ refresh });
+      });
+
+      it(`should use default index`, async () => {
+        await createSuccess(type, attributes, { id });
+        expectClusterCallArgs({ index: '.kibana-test' });
+      });
+
+      it(`should use custom index`, async () => {
+        await createSuccess(CUSTOM_INDEX_TYPE, attributes, { id });
+        expectClusterCallArgs({ index: 'custom' });
+      });
+
+      it(`self-generates an id if none is provided`, async () => {
+        await createSuccess(type, attributes);
+        expectClusterCallArgs({
           id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
-        })
-      );
-    });
-
-    it('prepends namespace to the id and adds namespace to body when providing namespace for namespaced type', async () => {
-      await savedObjectsRepository.create(
-        'index-pattern',
-        {
-          title: 'Logstash',
-        },
-        {
-          id: 'foo-id',
-          namespace: 'foo-namespace',
-        }
-      );
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          id: `foo-namespace:index-pattern:foo-id`,
-          body: expect.objectContaining({
-            [`index-pattern`]: { title: 'Logstash' },
-            namespace: 'foo-namespace',
-            type: 'index-pattern',
-            updated_at: '2017-08-14T15:49:14.886Z',
-          }),
-        })
-      );
-    });
-
-    it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
-      await savedObjectsRepository.create(
-        'index-pattern',
-        {
-          title: 'Logstash',
-        },
-        {
-          id: 'foo-id',
-        }
-      );
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          id: `index-pattern:foo-id`,
-          body: expect.objectContaining({
-            [`index-pattern`]: { title: 'Logstash' },
-            type: 'index-pattern',
-            updated_at: '2017-08-14T15:49:14.886Z',
-          }),
-        })
-      );
-    });
-
-    it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
-      await savedObjectsRepository.create(
-        'globaltype',
-        {
-          title: 'Logstash',
-        },
-        {
-          id: 'foo-id',
-          namespace: 'foo-namespace',
-        }
-      );
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          id: `globaltype:foo-id`,
-          body: expect.objectContaining({
-            [`globaltype`]: { title: 'Logstash' },
-            type: 'globaltype',
-            updated_at: '2017-08-14T15:49:14.886Z',
-          }),
-        })
-      );
-    });
-
-    it('defaults to empty references array if none are provided', async () => {
-      await savedObjectsRepository.create(
-        'index-pattern',
-        {
-          title: 'Logstash',
-        },
-        {
-          id: 'logstash-*',
-        }
-      );
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          body: expect.objectContaining({
-            references: [],
-          }),
-        })
-      );
-    });
-  });
-
-  describe('#bulkCreate', () => {
-    it('waits until migrations are complete before proceeding', async () => {
-      migrator.runMigrations = jest.fn(async () => expect(callAdminCluster).not.toHaveBeenCalled());
-      callAdminCluster.mockReturnValue({
-        items: [
-          { create: { type: 'config', id: 'config:one', _primary_term: 1, _seq_no: 1 } },
-          {
-            create: {
-              type: 'index-pattern',
-              id: 'index-pattern:two',
-              _primary_term: 1,
-              _seq_no: 1,
-            },
-          },
-        ],
+        });
       });
 
-      await expect(
-        savedObjectsRepository.bulkCreate([
-          { type: 'config', id: 'one', attributes: { title: 'Test One' } },
-          { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } },
-        ])
-      ).resolves.toBeDefined();
-
-      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
-    });
-
-    it('formats Elasticsearch request', async () => {
-      callAdminCluster.mockReturnValue({
-        items: [
-          { create: { type: 'config', id: 'config:one', _primary_term: 1, _seq_no: 1 } },
-          { create: { type: 'index-pattern', id: 'config:two', _primary_term: 1, _seq_no: 1 } },
-        ],
+      it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
+        await createSuccess(type, attributes, { id, namespace });
+        expectClusterCallArgs({ id: `${namespace}:${type}:${id}` });
       });
 
-      await savedObjectsRepository.bulkCreate([
-        {
-          type: 'config',
-          id: 'one',
-          attributes: { title: 'Test One' },
-          references: [{ name: 'ref_0', type: 'test', id: '1' }],
-        },
-        {
-          type: 'index-pattern',
-          id: 'two',
-          attributes: { title: 'Test Two' },
-          references: [{ name: 'ref_0', type: 'test', id: '2' }],
-        },
-      ]);
+      it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
+        await createSuccess(type, attributes, { id });
+        expectClusterCallArgs({ id: `${type}:${id}` });
+      });
 
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      const bulkCalls = callAdminCluster.mock.calls.filter(([path]) => path === 'bulk');
+      it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
+        await createSuccess(NAMESPACE_AGNOSTIC_TYPE, attributes, { id, namespace });
+        expectClusterCallArgs({ id: `${NAMESPACE_AGNOSTIC_TYPE}:${id}` });
+        callAdminCluster.mockReset();
 
-      expect(bulkCalls.length).toEqual(1);
+        await createSuccess(MULTI_NAMESPACE_TYPE, attributes, { id, namespace });
+        expectClusterCallArgs({ id: `${MULTI_NAMESPACE_TYPE}:${id}` });
+      });
+    });
 
-      expect(bulkCalls[0][1].body).toEqual([
-        { create: { _index: '.kibana-test', _id: 'config:one' } },
-        {
-          type: 'config',
+    describe('errors', () => {
+      it(`throws when type is invalid`, async () => {
+        await expect(savedObjectsRepository.create('unknownType', attributes)).rejects.toThrowError(
+          createUnsupportedTypeError('unknownType')
+        );
+        expect(callAdminCluster).not.toHaveBeenCalled();
+      });
+
+      it(`throws when type is hidden`, async () => {
+        await expect(savedObjectsRepository.create(HIDDEN_TYPE, attributes)).rejects.toThrowError(
+          createUnsupportedTypeError(HIDDEN_TYPE)
+        );
+        expect(callAdminCluster).not.toHaveBeenCalled();
+      });
+
+      it(`throws when there is a conflict with an existing multi-namespace saved object (get)`, async () => {
+        const response = getMockGetResponse({
+          type: MULTI_NAMESPACE_TYPE,
+          id,
+          namespace: 'bar-namespace',
+        });
+        callAdminCluster.mockResolvedValue(response); // this._callCluster('get', ...)
+        await expect(
+          savedObjectsRepository.create(MULTI_NAMESPACE_TYPE, attributes, {
+            id,
+            overwrite: true,
+            namespace,
+          })
+        ).rejects.toThrowError(createConflictError(MULTI_NAMESPACE_TYPE, id));
+        expectClusterCalls('get');
+      });
+
+      it(`throws when automatic index creation fails`, async () => {
+        // TODO
+      });
+
+      it(`throws when an unexpected failure occurs`, async () => {
+        // TODO
+      });
+    });
+
+    describe('migration', () => {
+      beforeEach(() => {
+        migrator.migrateDocument.mockImplementation(mockMigrateDocument);
+      });
+
+      it(`waits until migrations are complete before proceeding`, async () => {
+        migrator.runMigrations = jest.fn(async () =>
+          expect(callAdminCluster).not.toHaveBeenCalled()
+        );
+        await expect(createSuccess(type, attributes, { id, namespace })).resolves.toBeDefined();
+        expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
+      });
+
+      it(`migrates a document and serializes the migrated doc`, async () => {
+        const migrationVersion = mockMigrationVersion;
+        await createSuccess(type, attributes, { id, references, migrationVersion });
+        const doc = { type, id, attributes, references, migrationVersion, ...mockTimestampFields };
+        expectMigrationArgs(doc);
+
+        const migratedDoc = migrator.migrateDocument(doc);
+        expect(serializer.savedObjectToRaw).toHaveBeenLastCalledWith(migratedDoc);
+      });
+
+      it(`adds namespace to body when providing namespace for single-namespace type`, async () => {
+        await createSuccess(type, attributes, { id, namespace });
+        expectMigrationArgs({ namespace });
+      });
+
+      it(`doesn't add namespace to body when providing no namespace for single-namespace type`, async () => {
+        await createSuccess(type, attributes, { id });
+        expectMigrationArgs({ namespace: expect.anything() }, false);
+      });
+
+      it(`doesn't add namespace to body when not using single-namespace type`, async () => {
+        await createSuccess(NAMESPACE_AGNOSTIC_TYPE, attributes, { id, namespace });
+        expectMigrationArgs({ namespace: expect.anything() }, false, 1);
+
+        callAdminCluster.mockReset();
+        await createSuccess(MULTI_NAMESPACE_TYPE, attributes, { id });
+        expectMigrationArgs({ namespace: expect.anything() }, false, 2);
+      });
+
+      it(`adds namespaces to body when providing namespace for multi-namespace type`, async () => {
+        await createSuccess(MULTI_NAMESPACE_TYPE, attributes, { id, namespace });
+        expectMigrationArgs({ namespaces: [namespace] });
+      });
+
+      it(`adds default namespaces to body when providing no namespace for multi-namespace type`, async () => {
+        await createSuccess(MULTI_NAMESPACE_TYPE, attributes, { id });
+        expectMigrationArgs({ namespaces: ['default'] });
+      });
+
+      it(`doesn't add namespaces to body when not using multi-namespace type`, async () => {
+        await createSuccess(type, attributes, { id });
+        expectMigrationArgs({ namespaces: expect.anything() }, false, 1);
+
+        callAdminCluster.mockReset();
+        await createSuccess(NAMESPACE_AGNOSTIC_TYPE, attributes, { id });
+        expectMigrationArgs({ namespaces: expect.anything() }, false, 2);
+      });
+    });
+
+    describe('returns', () => {
+      it(`formats the ES response`, async () => {
+        const result = await createSuccess(type, attributes, { id, namespace, references });
+        expect(result).toEqual({
+          type,
+          id,
           ...mockTimestampFields,
-          config: { title: 'Test One' },
-          references: [{ name: 'ref_0', type: 'test', id: '1' }],
-        },
-        { create: { _index: '.kibana-test', _id: 'index-pattern:two' } },
-        {
-          type: 'index-pattern',
-          ...mockTimestampFields,
-          'index-pattern': { title: 'Test Two' },
-          references: [{ name: 'ref_0', type: 'test', id: '2' }],
-        },
-      ]);
-    });
-
-    it('defaults to a refresh setting of `wait_for`', async () => {
-      callAdminCluster.mockReturnValue({
-        items: [{ create: { type: 'config', id: 'config:one', _primary_term: 1, _seq_no: 1 } }],
-      });
-
-      await savedObjectsRepository.bulkCreate([
-        {
-          type: 'config',
-          id: 'one',
-          attributes: { title: 'Test One' },
-          references: [{ name: 'ref_0', type: 'test', id: '1' }],
-        },
-      ]);
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-
-      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
-        refresh: 'wait_for',
+          version: mockVersion,
+          attributes,
+          references,
+          migrationVersion: { [type]: '1.1.1' },
+        });
       });
     });
-
-    it('accepts a custom refresh setting', async () => {
-      callAdminCluster.mockReturnValue({
-        items: [
-          { create: { type: 'config', id: 'config:one', _primary_term: 1, _seq_no: 1 } },
-          { create: { type: 'index-pattern', id: 'config:two', _primary_term: 1, _seq_no: 1 } },
-        ],
-      });
-
-      await savedObjectsRepository.bulkCreate(
-        [
-          {
-            type: 'config',
-            id: 'one',
-            attributes: { title: 'Test One' },
-            references: [{ name: 'ref_0', type: 'test', id: '1' }],
-          },
-          {
-            type: 'index-pattern',
-            id: 'two',
-            attributes: { title: 'Test Two' },
-            references: [{ name: 'ref_0', type: 'test', id: '2' }],
-          },
-        ],
-        {
-          refresh: true,
-        }
-      );
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-
-      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
-        refresh: true,
-      });
-    });
-
-    it('migrates the docs', async () => {
-      callAdminCluster.mockReturnValue({
-        items: [
-          {
-            create: {
-              error: false,
-              _id: '1',
-              _seq_no: 1,
-              _primary_term: 1,
-            },
-          },
-          {
-            create: {
-              error: false,
-              _id: '2',
-              _seq_no: 1,
-              _primary_term: 1,
-            },
-          },
-        ],
-      });
-
-      migrator.migrateDocument = doc => {
-        doc.attributes.title = doc.attributes.title + '!!';
-        doc.migrationVersion = { foo: '2.3.4' };
-        doc.references = [{ name: 'search_0', type: 'search', id: '123' }];
-        return doc;
-      };
-
-      const bulkCreateResp = await savedObjectsRepository.bulkCreate([
-        { type: 'config', id: 'one', attributes: { title: 'Test One' } },
-        { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } },
-      ]);
-
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        'bulk',
-        expect.objectContaining({
-          body: [
-            { create: { _index: '.kibana-test', _id: 'config:one' } },
-            {
-              type: 'config',
-              ...mockTimestampFields,
-              config: { title: 'Test One!!' },
-              migrationVersion: { foo: '2.3.4' },
-              references: [{ name: 'search_0', type: 'search', id: '123' }],
-            },
-            { create: { _index: '.kibana-test', _id: 'index-pattern:two' } },
-            {
-              type: 'index-pattern',
-              ...mockTimestampFields,
-              'index-pattern': { title: 'Test Two!!' },
-              migrationVersion: { foo: '2.3.4' },
-              references: [{ name: 'search_0', type: 'search', id: '123' }],
-            },
-          ],
-        })
-      );
-
-      expect(bulkCreateResp).toEqual({
-        saved_objects: [
-          {
-            id: 'one',
-            type: 'config',
-            version: mockVersion,
-            updated_at: mockTimestamp,
-            attributes: {
-              title: 'Test One!!',
-            },
-            references: [{ name: 'search_0', type: 'search', id: '123' }],
-          },
-          {
-            id: 'two',
-            type: 'index-pattern',
-            version: mockVersion,
-            updated_at: mockTimestamp,
-            attributes: {
-              title: 'Test Two!!',
-            },
-            references: [{ name: 'search_0', type: 'search', id: '123' }],
-          },
-        ],
-      });
-    });
-
-    it('should overwrite objects if overwrite is truthy', async () => {
-      callAdminCluster.mockReturnValue({
-        items: [{ create: { type: 'foo', id: 'bar', _primary_term: 1, _seq_no: 1 } }],
-      });
-
-      await savedObjectsRepository.bulkCreate([{ type: 'foo', id: 'bar', attributes: {} }], {
-        overwrite: false,
-      });
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        'bulk',
-        expect.objectContaining({
-          body: [
-            // uses create because overwriting is not allowed
-            { create: { _index: '.kibana-test', _id: 'foo:bar' } },
-            { type: 'foo', ...mockTimestampFields, foo: {}, references: [] },
-          ],
-        })
-      );
-
-      callAdminCluster.mockReset();
-
-      callAdminCluster.mockReturnValue({
-        items: [{ create: { type: 'foo', id: 'bar', _primary_term: 1, _seq_no: 1 } }],
-      });
-
-      await savedObjectsRepository.bulkCreate([{ type: 'foo', id: 'bar', attributes: {} }], {
-        overwrite: true,
-      });
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        'bulk',
-        expect.objectContaining({
-          body: [
-            // uses index because overwriting is allowed
-            { index: { _index: '.kibana-test', _id: 'foo:bar' } },
-            { type: 'foo', ...mockTimestampFields, foo: {}, references: [] },
-          ],
-        })
-      );
-    });
-
-    it('mockReturnValue document errors', async () => {
-      callAdminCluster.mockResolvedValue({
-        errors: false,
-        items: [
-          {
-            create: {
-              _id: 'config:one',
-              error: {
-                reason: 'type[config] missing',
-              },
-            },
-          },
-          {
-            create: {
-              _id: 'index-pattern:two',
-              ...mockVersionProps,
-            },
-          },
-        ],
-      });
-
-      const response = await savedObjectsRepository.bulkCreate([
-        { type: 'config', id: 'one', attributes: { title: 'Test One' } },
-        { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } },
-      ]);
-
-      expect(response).toEqual({
-        saved_objects: [
-          {
-            id: 'one',
-            type: 'config',
-            error: { message: 'type[config] missing' },
-          },
-          {
-            id: 'two',
-            type: 'index-pattern',
-            version: mockVersion,
-            ...mockTimestampFields,
-            attributes: { title: 'Test Two' },
-            references: [],
-          },
-        ],
-      });
-    });
-
-    it('formats Elasticsearch response', async () => {
-      callAdminCluster.mockResolvedValue({
-        errors: false,
-        items: [
-          {
-            create: {
-              _id: 'config:one',
-              ...mockVersionProps,
-            },
-          },
-          {
-            create: {
-              _id: 'index-pattern:two',
-              ...mockVersionProps,
-            },
-          },
-        ],
-      });
-
-      const response = await savedObjectsRepository.bulkCreate(
-        [
-          { type: 'config', id: 'one', attributes: { title: 'Test One' } },
-          { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } },
-        ],
-        {
-          namespace: 'foo-namespace',
-        }
-      );
-
-      expect(response).toEqual({
-        saved_objects: [
-          {
-            id: 'one',
-            type: 'config',
-            version: mockVersion,
-            ...mockTimestampFields,
-            attributes: { title: 'Test One' },
-            references: [],
-          },
-          {
-            id: 'two',
-            type: 'index-pattern',
-            version: mockVersion,
-            ...mockTimestampFields,
-            attributes: { title: 'Test Two' },
-            references: [],
-          },
-        ],
-      });
-    });
-
-    it('prepends namespace to the id and adds namespace to body when providing namespace for namespaced type', async () => {
-      callAdminCluster.mockReturnValue({
-        items: [
-          {
-            create: {
-              _id: 'foo-namespace:config:one',
-              _index: '.kibana-test',
-              _primary_term: 1,
-              _seq_no: 2,
-            },
-          },
-          {
-            create: {
-              _id: 'foo-namespace:index-pattern:two',
-              _primary_term: 1,
-              _seq_no: 2,
-            },
-          },
-        ],
-      });
-      await savedObjectsRepository.bulkCreate(
-        [
-          { type: 'config', id: 'one', attributes: { title: 'Test One' } },
-          { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } },
-        ],
-        {
-          namespace: 'foo-namespace',
-        }
-      );
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        'bulk',
-        expect.objectContaining({
-          body: [
-            { create: { _index: '.kibana-test', _id: 'foo-namespace:config:one' } },
-            {
-              namespace: 'foo-namespace',
-              type: 'config',
-              ...mockTimestampFields,
-              config: { title: 'Test One' },
-              references: [],
-            },
-            { create: { _index: '.kibana-test', _id: 'foo-namespace:index-pattern:two' } },
-            {
-              namespace: 'foo-namespace',
-              type: 'index-pattern',
-              ...mockTimestampFields,
-              'index-pattern': { title: 'Test Two' },
-              references: [],
-            },
-          ],
-        })
-      );
-    });
-
-    it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
-      callAdminCluster.mockResolvedValue({
-        errors: false,
-        items: [
-          {
-            create: {
-              _id: 'config:one',
-              ...mockVersionProps,
-            },
-          },
-          {
-            create: {
-              _id: 'index-pattern:two',
-              ...mockVersionProps,
-            },
-          },
-        ],
-      });
-      await savedObjectsRepository.bulkCreate([
-        { type: 'config', id: 'one', attributes: { title: 'Test One' } },
-        { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } },
-      ]);
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        'bulk',
-        expect.objectContaining({
-          body: [
-            { create: { _id: 'config:one', _index: '.kibana-test' } },
-            {
-              type: 'config',
-              ...mockTimestampFields,
-              config: { title: 'Test One' },
-              references: [],
-            },
-            { create: { _id: 'index-pattern:two', _index: '.kibana-test' } },
-            {
-              type: 'index-pattern',
-              ...mockTimestampFields,
-              'index-pattern': { title: 'Test Two' },
-              references: [],
-            },
-          ],
-        })
-      );
-    });
-
-    it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
-      callAdminCluster.mockReturnValue({
-        items: [{ create: { _type: '_doc', _id: 'globaltype:one', _primary_term: 1, _seq_no: 2 } }],
-      });
-      await savedObjectsRepository.bulkCreate(
-        [{ type: 'globaltype', id: 'one', attributes: { title: 'Test One' } }],
-        {
-          namespace: 'foo-namespace',
-        }
-      );
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        'bulk',
-        expect.objectContaining({
-          body: [
-            { create: { _id: 'globaltype:one', _index: '.kibana-test' } },
-            {
-              type: 'globaltype',
-              ...mockTimestampFields,
-              globaltype: { title: 'Test One' },
-              references: [],
-            },
-          ],
-        })
-      );
-    });
-
-    it('should return objects in the same order regardless of type', () => {});
   });
 
   describe('#delete', () => {
-    it('waits until migrations are complete before proceeding', async () => {
-      migrator.runMigrations = jest.fn(async () => expect(callAdminCluster).not.toHaveBeenCalled());
-      callAdminCluster.mockReturnValue({ result: 'deleted' });
-      await expect(
-        savedObjectsRepository.delete('index-pattern', 'logstash-*', {
-          namespace: 'foo-namespace',
-        })
-      ).resolves.toBeDefined();
+    const type = 'index-pattern';
+    const id = 'logstash-*';
+    const namespace = 'foo-namespace';
 
-      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
-    });
-
-    it('throws notFound when ES is unable to find the document', async () => {
-      expect.assertions(1);
-
-      callAdminCluster.mockResolvedValue({ result: 'not_found' });
-
-      try {
-        await savedObjectsRepository.delete('index-pattern', 'logstash-*');
-      } catch (e) {
-        expect(e.output.statusCode).toEqual(404);
+    const deleteSuccess = async (type, id, options) => {
+      if (registry.isMultiNamespace(type)) {
+        const mockGetResponse = getMockGetResponse({ type, id, namespace: options?.namespace });
+        callAdminCluster.mockResolvedValueOnce(mockGetResponse); // this._callCluster('get', ...)
       }
+      callAdminCluster.mockResolvedValue({ result: 'deleted' }); // this._writeToCluster('delete', ...)
+      const result = await savedObjectsRepository.delete(type, id, options);
+      expect(callAdminCluster).toHaveBeenCalledTimes(registry.isMultiNamespace(type) ? 2 : 1);
+      return result;
+    };
+
+    describe('cluster calls', () => {
+      it(`should use the ES delete action when not using a multi-namespace type`, async () => {
+        await deleteSuccess(type, id);
+        expectClusterCalls('delete');
+      });
+
+      it(`should use ES get action then delete action when using a multi-namespace type with no namespaces remaining`, async () => {
+        await deleteSuccess(MULTI_NAMESPACE_TYPE, id);
+        expectClusterCalls('get', 'delete');
+      });
+
+      it(`should use ES get action then update action when using a multi-namespace type with one or more namespaces remaining`, async () => {
+        const mockResponse = getMockGetResponse({ type: MULTI_NAMESPACE_TYPE, id });
+        mockResponse._source.namespaces = ['default', 'some-other-nameespace'];
+        callAdminCluster
+          .mockResolvedValueOnce(mockResponse) // this._callCluster('get', ...)
+          .mockResolvedValue({ result: 'updated' }); // this._writeToCluster('update', ...)
+        await savedObjectsRepository.delete(MULTI_NAMESPACE_TYPE, id);
+        expectClusterCalls('get', 'update');
+      });
+
+      it(`includes the version of the existing document when type is multi-namespace`, async () => {
+        await deleteSuccess(MULTI_NAMESPACE_TYPE, id);
+        const versionProperties = {
+          if_seq_no: mockVersionProps._seq_no,
+          if_primary_term: mockVersionProps._primary_term,
+        };
+        expectClusterCallArgs(versionProperties, 2);
+      });
+
+      it(`defaults to a refresh setting of wait_for`, async () => {
+        await deleteSuccess(type, id);
+        expectClusterCallArgs({ refresh: 'wait_for' });
+      });
+
+      it(`accepts a custom refresh setting`, async () => {
+        const refresh = 'foo';
+        await deleteSuccess(type, id, { refresh });
+        expectClusterCallArgs({ refresh });
+      });
+
+      it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
+        await deleteSuccess(type, id, { namespace });
+        expectClusterCallArgs({ id: `${namespace}:${type}:${id}` });
+      });
+
+      it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
+        await deleteSuccess(type, id);
+        expectClusterCallArgs({ id: `${type}:${id}` });
+      });
+
+      it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
+        await deleteSuccess(NAMESPACE_AGNOSTIC_TYPE, id, { namespace });
+        expectClusterCallArgs({ id: `${NAMESPACE_AGNOSTIC_TYPE}:${id}` });
+
+        callAdminCluster.mockReset();
+        await deleteSuccess(MULTI_NAMESPACE_TYPE, id, { namespace });
+        expectClusterCallArgs({ id: `${MULTI_NAMESPACE_TYPE}:${id}` });
+      });
     });
 
-    it(`prepends namespace to the id when providing namespace for namespaced type`, async () => {
-      callAdminCluster.mockReturnValue({ result: 'deleted' });
-      await savedObjectsRepository.delete('index-pattern', 'logstash-*', {
-        namespace: 'foo-namespace',
+    describe('errors', () => {
+      const expectNotFoundError = async (type, id, options) => {
+        await expect(savedObjectsRepository.delete(type, id, options)).rejects.toThrowError(
+          createGenericNotFoundError(type, id)
+        );
+      };
+
+      it(`throws when type is invalid`, async () => {
+        await expectNotFoundError('unknownType', id);
+        expect(callAdminCluster).not.toHaveBeenCalled();
       });
 
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith('delete', {
-        id: 'foo-namespace:index-pattern:logstash-*',
-        refresh: 'wait_for',
-        index: '.kibana-test',
-        ignore: [404],
+      it(`throws when type is hidden`, async () => {
+        await expectNotFoundError(HIDDEN_TYPE, id);
+        expect(callAdminCluster).not.toHaveBeenCalled();
+      });
+
+      it(`throws when ES is unable to find the document during get`, async () => {
+        callAdminCluster.mockResolvedValue({ found: false }); // this._callCluster('get', ...)
+        await expectNotFoundError(MULTI_NAMESPACE_TYPE, id);
+        expectClusterCalls('get');
+      });
+
+      it(`throws when ES is unable to find the index during get`, async () => {
+        callAdminCluster.mockResolvedValue({ status: 404 }); // this._callCluster('get', ...)
+        await expectNotFoundError(MULTI_NAMESPACE_TYPE, id);
+        expectClusterCalls('get');
+      });
+
+      it(`throws when the type is multi-namespace and the document exists, but not in this namespace`, async () => {
+        const response = getMockGetResponse({ type: MULTI_NAMESPACE_TYPE, id, namespace });
+        callAdminCluster.mockResolvedValue(response); // this._callCluster('get', ...)
+        await expectNotFoundError(MULTI_NAMESPACE_TYPE, id, { namespace: 'bar-namespace' });
+        expectClusterCalls('get');
+      });
+
+      it(`throws when ES is unable to find the document during update`, async () => {
+        const mockResponse = getMockGetResponse({ type: MULTI_NAMESPACE_TYPE, id });
+        mockResponse._source.namespaces = ['default', 'some-other-nameespace'];
+        callAdminCluster
+          .mockResolvedValueOnce(mockResponse) // this._callCluster('get', ...)
+          .mockResolvedValue({ status: 404 }); // this._writeToCluster('update', ...)
+        await expectNotFoundError(MULTI_NAMESPACE_TYPE, id);
+        expectClusterCalls('get', 'update');
+      });
+
+      it(`throws when ES is unable to find the document during delete`, async () => {
+        callAdminCluster.mockResolvedValue({ result: 'not_found' }); // this._writeToCluster('delete', ...)
+        await expectNotFoundError(type, id);
+        expectClusterCalls('delete');
+      });
+
+      it(`throws when ES is unable to find the index during delete`, async () => {
+        callAdminCluster.mockResolvedValue({ error: { type: 'index_not_found_exception' } }); // this._writeToCluster('delete', ...)
+        await expectNotFoundError(type, id);
+        expectClusterCalls('delete');
+      });
+
+      it(`throws when ES returns an unexpected response`, async () => {
+        callAdminCluster.mockResolvedValue({ result: 'something unexpected' }); // this._writeToCluster('delete', ...)
+        await expect(savedObjectsRepository.delete(type, id)).rejects.toThrowError(
+          'Unexpected Elasticsearch DELETE response'
+        );
+        expectClusterCalls('delete');
       });
     });
 
-    it(`doesn't prepend namespace to the id when providing no namespace for namespaced type`, async () => {
-      callAdminCluster.mockReturnValue({ result: 'deleted' });
-      await savedObjectsRepository.delete('index-pattern', 'logstash-*');
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith('delete', {
-        id: 'index-pattern:logstash-*',
-        refresh: 'wait_for',
-        index: '.kibana-test',
-        ignore: [404],
+    describe('migration', () => {
+      it(`waits until migrations are complete before proceeding`, async () => {
+        let callAdminClusterCount = 0;
+        migrator.runMigrations = jest.fn(async () =>
+          // runMigrations should resolve before callAdminCluster is initiated
+          expect(callAdminCluster).toHaveBeenCalledTimes(callAdminClusterCount++)
+        );
+        await expect(deleteSuccess(type, id)).resolves.toBeDefined();
+        expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
       });
     });
 
-    it(`doesn't prepend namespace to the id when providing namespace for namespace agnostic type`, async () => {
-      callAdminCluster.mockReturnValue({ result: 'deleted' });
-      await savedObjectsRepository.delete('globaltype', 'logstash-*', {
-        namespace: 'foo-namespace',
-      });
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith('delete', {
-        id: 'globaltype:logstash-*',
-        refresh: 'wait_for',
-        index: '.kibana-test',
-        ignore: [404],
-      });
-    });
-
-    it('defaults to a refresh setting of `wait_for`', async () => {
-      callAdminCluster.mockReturnValue({ result: 'deleted' });
-      await savedObjectsRepository.delete('globaltype', 'logstash-*');
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
-        refresh: 'wait_for',
-      });
-    });
-
-    it(`accepts a custom refresh setting`, async () => {
-      callAdminCluster.mockReturnValue({ result: 'deleted' });
-      await savedObjectsRepository.delete('globaltype', 'logstash-*', {
-        refresh: false,
-      });
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
-        refresh: false,
+    describe('returns', () => {
+      it(`returns an empty object on success`, async () => {
+        const result = await deleteSuccess(type, id);
+        expect(result).toEqual({});
       });
     });
   });
 
   describe('#deleteByNamespace', () => {
-    it('requires namespace to be defined', async () => {
-      callAdminCluster.mockReturnValue(deleteByQueryResults);
-      expect(savedObjectsRepository.deleteByNamespace()).rejects.toThrowErrorMatchingSnapshot();
-      expect(callAdminCluster).not.toHaveBeenCalled();
-    });
+    const namespace = 'foo-namespace';
+    const mockUpdateResults = {
+      took: 15,
+      timed_out: false,
+      total: 3,
+      updated: 2,
+      deleted: 1,
+      batches: 1,
+      version_conflicts: 0,
+      noops: 0,
+      retries: { bulk: 0, search: 0 },
+      throttled_millis: 0,
+      requests_per_second: -1.0,
+      throttled_until_millis: 0,
+      failures: [],
+    };
 
-    it('requires namespace to be a string', async () => {
-      callAdminCluster.mockReturnValue(deleteByQueryResults);
-      expect(
-        savedObjectsRepository.deleteByNamespace(['namespace-1', 'namespace-2'])
-      ).rejects.toThrowErrorMatchingSnapshot();
-      expect(callAdminCluster).not.toHaveBeenCalled();
-    });
-
-    it('constructs a deleteByQuery call using all types that are namespace aware', async () => {
-      callAdminCluster.mockReturnValue(deleteByQueryResults);
-      const result = await savedObjectsRepository.deleteByNamespace('my-namespace');
-
-      expect(result).toEqual(deleteByQueryResults);
+    const deleteByNamespaceSuccess = async (namespace, options) => {
+      callAdminCluster.mockResolvedValue(mockUpdateResults);
+      const result = await savedObjectsRepository.deleteByNamespace(namespace, options);
+      expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      return result;
+    };
 
-      expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, typeRegistry, {
-        namespace: 'my-namespace',
-        type: ['config', 'baz', 'index-pattern', 'dashboard'],
+    describe('cluster calls', () => {
+      it(`should use the ES updateByQuery action`, async () => {
+        await deleteByNamespaceSuccess(namespace);
+        expectClusterCalls('updateByQuery');
       });
 
-      expect(callAdminCluster).toHaveBeenCalledWith('deleteByQuery', {
-        body: { conflicts: 'proceed' },
-        ignore: [404],
-        index: ['.kibana-test', 'beats'],
-        refresh: 'wait_for',
+      it(`defaults to a refresh setting of wait_for`, async () => {
+        await deleteByNamespaceSuccess(namespace);
+        expectClusterCallArgs({ refresh: 'wait_for' });
+      });
+
+      it(`accepts a custom refresh setting`, async () => {
+        const refresh = 'foo';
+        await deleteByNamespaceSuccess(namespace, { refresh });
+        expectClusterCallArgs({ refresh });
+      });
+
+      it(`should use all indices for types that are not namespace-agnostic`, async () => {
+        await deleteByNamespaceSuccess(namespace);
+        expectClusterCallArgs({ index: ['.kibana-test', 'custom'] }, 1);
       });
     });
 
-    it('defaults to a refresh setting of `wait_for`', async () => {
-      callAdminCluster.mockReturnValue(deleteByQueryResults);
-      await savedObjectsRepository.deleteByNamespace('my-namespace');
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
-        refresh: 'wait_for',
+    describe('errors', () => {
+      it(`throws when namespace is not a string`, async () => {
+        const test = async namespace => {
+          await expect(savedObjectsRepository.deleteByNamespace(namespace)).rejects.toThrowError(
+            `namespace is required, and must be a string`
+          );
+          expect(callAdminCluster).not.toHaveBeenCalled();
+        };
+        await test(undefined);
+        await test(['namespace']);
+        await test(123);
+        await test(true);
       });
     });
 
-    it('accepts a custom refresh setting', async () => {
-      callAdminCluster.mockReturnValue(deleteByQueryResults);
-      await savedObjectsRepository.deleteByNamespace('my-namespace', { refresh: true });
+    describe('migration', () => {
+      it(`waits until migrations are complete before proceeding`, async () => {
+        migrator.runMigrations = jest.fn(async () =>
+          expect(callAdminCluster).not.toHaveBeenCalled()
+        );
+        await expect(deleteByNamespaceSuccess(namespace)).resolves.toBeDefined();
+        expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
+      });
+    });
 
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
-        refresh: true,
+    describe('returns', () => {
+      it(`returns the query results on success`, async () => {
+        const result = await deleteByNamespaceSuccess(namespace);
+        expect(result).toEqual(mockUpdateResults);
+      });
+    });
+
+    describe('search dsl', () => {
+      it(`constructs a query using all multi-namespace types, and another using all single-namespace types`, async () => {
+        await deleteByNamespaceSuccess(namespace);
+        const allTypes = registry.getAllTypes().map(type => type.name);
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, {
+          namespace,
+          type: allTypes.filter(type => !registry.isNamespaceAgnostic(type)),
+        });
       });
     });
   });
 
   describe('#find', () => {
-    it('waits until migrations are complete before proceeding', async () => {
-      migrator.runMigrations = jest.fn(async () => expect(callAdminCluster).not.toHaveBeenCalled());
-
-      callAdminCluster.mockReturnValue(noNamespaceSearchResults);
-      await expect(savedObjectsRepository.find({ type: 'foo' })).resolves.toBeDefined();
-
-      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
-    });
-
-    it('requires type to be defined', async () => {
-      await expect(savedObjectsRepository.find({})).rejects.toThrow(/options\.type must be/);
-      expect(callAdminCluster).not.toHaveBeenCalled();
-    });
-
-    it('requires searchFields be an array if defined', async () => {
-      callAdminCluster.mockReturnValue(noNamespaceSearchResults);
-      try {
-        await savedObjectsRepository.find({ type: 'foo', searchFields: 'string' });
-        throw new Error('expected find() to reject');
-      } catch (error) {
-        expect(callAdminCluster).not.toHaveBeenCalled();
-        expect(error.message).toMatch('must be an array');
-      }
-    });
-
-    it('requires fields be an array if defined', async () => {
-      callAdminCluster.mockReturnValue(noNamespaceSearchResults);
-      try {
-        await savedObjectsRepository.find({ type: 'foo', fields: 'string' });
-        throw new Error('expected find() to reject');
-      } catch (error) {
-        expect(callAdminCluster).not.toHaveBeenCalled();
-        expect(error.message).toMatch('must be an array');
-      }
-    });
-
-    it('passes mappings, schema, search, defaultSearchOperator, searchFields, type, sortField, sortOrder and hasReference to getSearchDsl', async () => {
-      callAdminCluster.mockReturnValue(namespacedSearchResults);
-      const relevantOpts = {
-        namespace: 'foo-namespace',
-        search: 'foo*',
-        searchFields: ['foo'],
-        type: ['bar'],
-        sortField: 'name',
-        sortOrder: 'desc',
-        defaultSearchOperator: 'AND',
-        hasReference: {
-          type: 'foo',
-          id: '1',
-        },
-        kueryNode: undefined,
-      };
-
-      await savedObjectsRepository.find(relevantOpts);
-      expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledTimes(1);
-      expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(
-        mappings,
-        typeRegistry,
-        relevantOpts
-      );
-    });
-
-    it('accepts KQL filter and passes keuryNode to getSearchDsl', async () => {
-      callAdminCluster.mockReturnValue(namespacedSearchResults);
-      const findOpts = {
-        namespace: 'foo-namespace',
-        search: 'foo*',
-        searchFields: ['foo'],
-        type: ['dashboard'],
-        sortField: 'name',
-        sortOrder: 'desc',
-        defaultSearchOperator: 'AND',
-        hasReference: {
-          type: 'foo',
-          id: '1',
-        },
-        indexPattern: undefined,
-        filter: 'dashboard.attributes.otherField: *',
-      };
-
-      await savedObjectsRepository.find(findOpts);
-      expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledTimes(1);
-      const { kueryNode } = getSearchDslNS.getSearchDsl.mock.calls[0][2];
-      expect(kueryNode).toMatchInlineSnapshot(`
-        Object {
-          "arguments": Array [
-            Object {
-              "type": "literal",
-              "value": "dashboard.otherField",
+    const generateSearchResults = namespace => {
+      return {
+        hits: {
+          total: 4,
+          hits: [
+            {
+              _index: '.kibana',
+              _id: `${namespace ? `${namespace}:` : ''}index-pattern:logstash-*`,
+              _score: 1,
+              ...mockVersionProps,
+              _source: {
+                namespace,
+                type: 'index-pattern',
+                ...mockTimestampFields,
+                'index-pattern': {
+                  title: 'logstash-*',
+                  timeFieldName: '@timestamp',
+                  notExpandable: true,
+                },
+              },
             },
-            Object {
-              "type": "wildcard",
-              "value": "@kuery-wildcard@",
+            {
+              _index: '.kibana',
+              _id: `${namespace ? `${namespace}:` : ''}config:6.0.0-alpha1`,
+              _score: 1,
+              ...mockVersionProps,
+              _source: {
+                namespace,
+                type: 'config',
+                ...mockTimestampFields,
+                config: {
+                  buildNum: 8467,
+                  defaultIndex: 'logstash-*',
+                },
+              },
             },
-            Object {
-              "type": "literal",
-              "value": false,
+            {
+              _index: '.kibana',
+              _id: `${namespace ? `${namespace}:` : ''}index-pattern:stocks-*`,
+              _score: 1,
+              ...mockVersionProps,
+              _source: {
+                namespace,
+                type: 'index-pattern',
+                ...mockTimestampFields,
+                'index-pattern': {
+                  title: 'stocks-*',
+                  timeFieldName: '@timestamp',
+                  notExpandable: true,
+                },
+              },
+            },
+            {
+              _index: '.kibana',
+              _id: `${NAMESPACE_AGNOSTIC_TYPE}:something`,
+              _score: 1,
+              ...mockVersionProps,
+              _source: {
+                type: NAMESPACE_AGNOSTIC_TYPE,
+                ...mockTimestampFields,
+                [NAMESPACE_AGNOSTIC_TYPE]: {
+                  name: 'bar',
+                },
+              },
             },
           ],
-          "function": "is",
-          "type": "function",
-        }
-      `);
-    });
-
-    it('KQL filter syntax errors rejects with bad request', async () => {
-      callAdminCluster.mockReturnValue(namespacedSearchResults);
-      const findOpts = {
-        namespace: 'foo-namespace',
-        search: 'foo*',
-        searchFields: ['foo'],
-        type: ['dashboard'],
-        sortField: 'name',
-        sortOrder: 'desc',
-        defaultSearchOperator: 'AND',
-        hasReference: {
-          type: 'foo',
-          id: '1',
         },
-        indexPattern: undefined,
-        filter: 'dashboard.attributes.otherField:<',
       };
+    };
 
-      await expect(savedObjectsRepository.find(findOpts)).rejects.toMatchInlineSnapshot(`
-        [Error: KQLSyntaxError: Expected "(", "{", value, whitespace but "<" found.
-        dashboard.attributes.otherField:<
-        --------------------------------^: Bad Request]
-      `);
-      expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledTimes(0);
-    });
+    const type = 'index-pattern';
+    const namespace = 'foo-namespace';
 
-    it('merges output of getSearchDsl into es request body', async () => {
-      callAdminCluster.mockReturnValue(noNamespaceSearchResults);
-      getSearchDslNS.getSearchDsl.mockReturnValue({ query: 1, aggregations: 2 });
-      await savedObjectsRepository.find({ type: 'foo' });
+    const findSuccess = async (options, namespace) => {
+      callAdminCluster.mockResolvedValue(generateSearchResults(namespace));
+      const result = await savedObjectsRepository.find(options);
+      expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        'search',
-        expect.objectContaining({
-          body: expect.objectContaining({
-            query: 1,
-            aggregations: 2,
-          }),
-        })
-      );
-    });
+      return result;
+    };
 
-    it('formats Elasticsearch response when there is no namespace', async () => {
-      callAdminCluster.mockReturnValue(noNamespaceSearchResults);
-      const count = noNamespaceSearchResults.hits.hits.length;
-
-      const response = await savedObjectsRepository.find({ type: 'foo' });
-
-      expect(response.total).toBe(count);
-      expect(response.saved_objects).toHaveLength(count);
-
-      noNamespaceSearchResults.hits.hits.forEach((doc, i) => {
-        expect(response.saved_objects[i]).toEqual({
-          id: doc._id.replace(/(index-pattern|config|globaltype)\:/, ''),
-          type: doc._source.type,
-          ...mockTimestampFields,
-          version: mockVersion,
-          attributes: doc._source[doc._source.type],
-          references: [],
-        });
-      });
-    });
-
-    it('formats Elasticsearch response when there is a namespace', async () => {
-      callAdminCluster.mockReturnValue(namespacedSearchResults);
-      const count = namespacedSearchResults.hits.hits.length;
-
-      const response = await savedObjectsRepository.find({
-        type: 'foo',
-        namespace: 'foo-namespace',
+    describe('cluster calls', () => {
+      it(`should use the ES search action`, async () => {
+        await findSuccess({ type });
+        expectClusterCalls('search');
       });
 
-      expect(response.total).toBe(count);
-      expect(response.saved_objects).toHaveLength(count);
-
-      namespacedSearchResults.hits.hits.forEach((doc, i) => {
-        expect(response.saved_objects[i]).toEqual({
-          id: doc._id.replace(/(foo-namespace\:)?(index-pattern|config|globaltype)\:/, ''),
-          type: doc._source.type,
-          ...mockTimestampFields,
-          version: mockVersion,
-          attributes: doc._source[doc._source.type],
-          references: [],
-        });
+      it(`merges output of getSearchDsl into es request body`, async () => {
+        const query = { query: 1, aggregations: 2 };
+        getSearchDslNS.getSearchDsl.mockReturnValue(query);
+        await findSuccess({ type });
+        expectClusterCallArgs({ body: expect.objectContaining({ ...query }) });
       });
-    });
 
-    it('accepts per_page/page', async () => {
-      callAdminCluster.mockReturnValue(noNamespaceSearchResults);
-      await savedObjectsRepository.find({ type: 'foo', perPage: 10, page: 6 });
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
+      it(`accepts per_page/page`, async () => {
+        await findSuccess({ type, perPage: 10, page: 6 });
+        expectClusterCallArgs({
           size: 10,
           from: 50,
-        })
-      );
-    });
+        });
+      });
 
-    it('can filter by fields', async () => {
-      callAdminCluster.mockReturnValue(noNamespaceSearchResults);
-      await savedObjectsRepository.find({ type: 'foo', fields: ['title'] });
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
+      it(`can filter by fields`, async () => {
+        await findSuccess({ type, fields: ['title'] });
+        expectClusterCallArgs({
           _source: [
-            'foo.title',
+            `${type}.title`,
             'namespace',
+            'namespaces',
             'type',
             'references',
             'migrationVersion',
             'updated_at',
             'title',
           ],
-        })
-      );
+        });
+      });
+
+      it(`should set rest_total_hits_as_int to true on a request`, async () => {
+        await findSuccess({ type });
+        expectClusterCallArgs({ rest_total_hits_as_int: true });
+      });
+
+      it(`should not make a cluster call when attempting to find only invalid or hidden types`, async () => {
+        const test = async types => {
+          await savedObjectsRepository.find({ type: types });
+          expect(callAdminCluster).not.toHaveBeenCalled();
+        };
+
+        await test('unknownType');
+        await test(HIDDEN_TYPE);
+        await test(['unknownType', HIDDEN_TYPE]);
+      });
     });
 
-    it('should set rest_total_hits_as_int to true on a request', async () => {
-      callAdminCluster.mockReturnValue(noNamespaceSearchResults);
-      await savedObjectsRepository.find({ type: 'foo' });
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster.mock.calls[0][1]).toHaveProperty('rest_total_hits_as_int', true);
+    describe('errors', () => {
+      it(`throws when type is not defined`, async () => {
+        await expect(savedObjectsRepository.find({})).rejects.toThrowError(
+          'options.type must be a string or an array of strings'
+        );
+        expect(callAdminCluster).not.toHaveBeenCalled();
+      });
+
+      it(`throws when searchFields is defined but not an array`, async () => {
+        await expect(
+          savedObjectsRepository.find({ type, searchFields: 'string' })
+        ).rejects.toThrowError('options.searchFields must be an array');
+        expect(callAdminCluster).not.toHaveBeenCalled();
+      });
+
+      it(`throws when fields is defined but not an array`, async () => {
+        await expect(savedObjectsRepository.find({ type, fields: 'string' })).rejects.toThrowError(
+          'options.fields must be an array'
+        );
+        expect(callAdminCluster).not.toHaveBeenCalled();
+      });
+
+      it(`throws when KQL filter syntax is invalid`, async () => {
+        const findOpts = {
+          namespace,
+          search: 'foo*',
+          searchFields: ['foo'],
+          type: ['dashboard'],
+          sortField: 'name',
+          sortOrder: 'desc',
+          defaultSearchOperator: 'AND',
+          hasReference: {
+            type: 'foo',
+            id: '1',
+          },
+          indexPattern: undefined,
+          filter: 'dashboard.attributes.otherField:<',
+        };
+
+        await expect(savedObjectsRepository.find(findOpts)).rejects.toMatchInlineSnapshot(`
+                          [Error: KQLSyntaxError: Expected "(", "{", value, whitespace but "<" found.
+                          dashboard.attributes.otherField:<
+                          --------------------------------^: Bad Request]
+                      `);
+        expect(getSearchDslNS.getSearchDsl).not.toHaveBeenCalled();
+        expect(callAdminCluster).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('migration', () => {
+      it(`waits until migrations are complete before proceeding`, async () => {
+        migrator.runMigrations = jest.fn(async () =>
+          expect(callAdminCluster).not.toHaveBeenCalled()
+        );
+        await expect(findSuccess({ type })).resolves.toBeDefined();
+        expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('returns', () => {
+      it(`formats the ES response when there is no namespace`, async () => {
+        const noNamespaceSearchResults = generateSearchResults();
+        callAdminCluster.mockReturnValue(noNamespaceSearchResults);
+        const count = noNamespaceSearchResults.hits.hits.length;
+
+        const response = await savedObjectsRepository.find({ type });
+
+        expect(response.total).toBe(count);
+        expect(response.saved_objects).toHaveLength(count);
+
+        noNamespaceSearchResults.hits.hits.forEach((doc, i) => {
+          expect(response.saved_objects[i]).toEqual({
+            id: doc._id.replace(/(index-pattern|config|globalType)\:/, ''),
+            type: doc._source.type,
+            ...mockTimestampFields,
+            version: mockVersion,
+            attributes: doc._source[doc._source.type],
+            references: [],
+          });
+        });
+      });
+
+      it(`formats the ES response when there is a namespace`, async () => {
+        const namespacedSearchResults = generateSearchResults(namespace);
+        callAdminCluster.mockReturnValue(namespacedSearchResults);
+        const count = namespacedSearchResults.hits.hits.length;
+
+        const response = await savedObjectsRepository.find({ type, namespace });
+
+        expect(response.total).toBe(count);
+        expect(response.saved_objects).toHaveLength(count);
+
+        namespacedSearchResults.hits.hits.forEach((doc, i) => {
+          expect(response.saved_objects[i]).toEqual({
+            id: doc._id.replace(/(foo-namespace\:)?(index-pattern|config|globalType)\:/, ''),
+            type: doc._source.type,
+            ...mockTimestampFields,
+            version: mockVersion,
+            attributes: doc._source[doc._source.type],
+            references: [],
+          });
+        });
+      });
+
+      it(`should return empty results when attempting to find only invalid or hidden types`, async () => {
+        const test = async types => {
+          const result = await savedObjectsRepository.find({ type: types });
+          expect(result).toEqual(expect.objectContaining({ saved_objects: [] }));
+        };
+
+        await test('unknownType');
+        await test(HIDDEN_TYPE);
+        await test(['unknownType', HIDDEN_TYPE]);
+      });
+    });
+
+    describe('search dsl', () => {
+      it(`passes mappings, registry, search, defaultSearchOperator, searchFields, type, sortField, sortOrder and hasReference to getSearchDsl`, async () => {
+        const relevantOpts = {
+          namespace,
+          search: 'foo*',
+          searchFields: ['foo'],
+          type: [type],
+          sortField: 'name',
+          sortOrder: 'desc',
+          defaultSearchOperator: 'AND',
+          hasReference: {
+            type: 'foo',
+            id: '1',
+          },
+          kueryNode: undefined,
+        };
+
+        await findSuccess(relevantOpts, namespace);
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, registry, relevantOpts);
+      });
+
+      it(`accepts KQL filter and passes kueryNode to getSearchDsl`, async () => {
+        const findOpts = {
+          namespace,
+          search: 'foo*',
+          searchFields: ['foo'],
+          type: ['dashboard'],
+          sortField: 'name',
+          sortOrder: 'desc',
+          defaultSearchOperator: 'AND',
+          hasReference: {
+            type: 'foo',
+            id: '1',
+          },
+          indexPattern: undefined,
+          filter: 'dashboard.attributes.otherField: *',
+        };
+
+        await findSuccess(findOpts, namespace);
+        const { kueryNode } = getSearchDslNS.getSearchDsl.mock.calls[0][2];
+        expect(kueryNode).toMatchInlineSnapshot(`
+          Object {
+            "arguments": Array [
+              Object {
+                "type": "literal",
+                "value": "dashboard.otherField",
+              },
+              Object {
+                "type": "wildcard",
+                "value": "@kuery-wildcard@",
+              },
+              Object {
+                "type": "literal",
+                "value": false,
+              },
+            ],
+            "function": "is",
+            "type": "function",
+          }
+        `);
+      });
+
+      it(`supports multiple types`, async () => {
+        const types = ['config', 'index-pattern'];
+        await findSuccess({ type: types });
+
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(
+          mappings,
+          registry,
+          expect.objectContaining({
+            type: types,
+          })
+        );
+      });
+
+      it(`filters out invalid types`, async () => {
+        const types = ['config', 'unknownType', 'index-pattern'];
+        await findSuccess({ type: types });
+
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(
+          mappings,
+          registry,
+          expect.objectContaining({
+            type: ['config', 'index-pattern'],
+          })
+        );
+      });
+
+      it(`filters out hidden types`, async () => {
+        const types = ['config', HIDDEN_TYPE, 'index-pattern'];
+        await findSuccess({ type: types });
+
+        expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(
+          mappings,
+          registry,
+          expect.objectContaining({
+            type: ['config', 'index-pattern'],
+          })
+        );
+      });
     });
   });
 
   describe('#get', () => {
-    const noNamespaceResult = {
-      _id: 'index-pattern:logstash-*',
-      ...mockVersionProps,
-      _source: {
-        type: 'index-pattern',
-        specialProperty: 'specialValue',
-        ...mockTimestampFields,
-        'index-pattern': {
-          title: 'Testing',
-        },
-      },
-    };
-    const namespacedResult = {
-      _id: 'foo-namespace:index-pattern:logstash-*',
-      ...mockVersionProps,
-      _source: {
-        namespace: 'foo-namespace',
-        type: 'index-pattern',
-        specialProperty: 'specialValue',
-        ...mockTimestampFields,
-        'index-pattern': {
-          title: 'Testing',
-        },
-      },
+    const type = 'index-pattern';
+    const id = 'logstash-*';
+    const namespace = 'foo-namespace';
+
+    const getSuccess = async (type, id, options) => {
+      const response = getMockGetResponse({ type, id, namespace: options?.namespace });
+      callAdminCluster.mockResolvedValue(response);
+      const result = await savedObjectsRepository.get(type, id, options);
+      expect(callAdminCluster).toHaveBeenCalledTimes(1);
+      return result;
     };
 
-    it('waits until migrations are complete before proceeding', async () => {
-      migrator.runMigrations = jest.fn(async () => expect(callAdminCluster).not.toHaveBeenCalled());
+    describe('cluster calls', () => {
+      it(`should use the ES get action`, async () => {
+        await getSuccess(type, id);
+        expectClusterCalls('get');
+      });
 
-      callAdminCluster.mockResolvedValue(noNamespaceResult);
-      await expect(
-        savedObjectsRepository.get('index-pattern', 'logstash-*')
-      ).resolves.toBeDefined();
+      it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
+        await getSuccess(type, id, { namespace });
+        expectClusterCallArgs({ id: `${namespace}:${type}:${id}` });
+      });
 
-      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
-    });
+      it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
+        await getSuccess(type, id);
+        expectClusterCallArgs({ id: `${type}:${id}` });
+      });
 
-    it('formats Elasticsearch response when there is no namespace', async () => {
-      callAdminCluster.mockResolvedValue(noNamespaceResult);
-      const response = await savedObjectsRepository.get('index-pattern', 'logstash-*');
-      expect(response).toEqual({
-        id: 'logstash-*',
-        type: 'index-pattern',
-        updated_at: mockTimestamp,
-        version: mockVersion,
-        attributes: {
-          title: 'Testing',
-        },
-        references: [],
+      it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
+        await getSuccess(NAMESPACE_AGNOSTIC_TYPE, id, { namespace });
+        expectClusterCallArgs({ id: `${NAMESPACE_AGNOSTIC_TYPE}:${id}` });
+
+        callAdminCluster.mockReset();
+        await getSuccess(MULTI_NAMESPACE_TYPE, id, { namespace });
+        expectClusterCallArgs({ id: `${MULTI_NAMESPACE_TYPE}:${id}` });
       });
     });
 
-    it('formats Elasticsearch response when there are namespaces', async () => {
-      callAdminCluster.mockResolvedValue(namespacedResult);
-      const response = await savedObjectsRepository.get('index-pattern', 'logstash-*');
-      expect(response).toEqual({
-        id: 'logstash-*',
-        type: 'index-pattern',
-        updated_at: mockTimestamp,
-        version: mockVersion,
-        attributes: {
-          title: 'Testing',
-        },
-        references: [],
+    describe('errors', () => {
+      const expectNotFoundError = async (type, id, options) => {
+        await expect(savedObjectsRepository.get(type, id, options)).rejects.toThrowError(
+          createGenericNotFoundError(type, id)
+        );
+      };
+
+      it(`throws when type is invalid`, async () => {
+        await expectNotFoundError('unknownType', id);
+        expect(callAdminCluster).not.toHaveBeenCalled();
+      });
+
+      it(`throws when type is hidden`, async () => {
+        await expectNotFoundError(HIDDEN_TYPE, id);
+        expect(callAdminCluster).not.toHaveBeenCalled();
+      });
+
+      it(`throws when ES is unable to find the document during get`, async () => {
+        callAdminCluster.mockResolvedValue({ found: false });
+        await expectNotFoundError(type, id);
+        expectClusterCalls('get');
+      });
+
+      it(`throws when ES is unable to find the index during get`, async () => {
+        callAdminCluster.mockResolvedValue({ status: 404 });
+        await expectNotFoundError(type, id);
+        expectClusterCalls('get');
+      });
+
+      it(`throws when type is multi-namespace and the document exists, but not in this namespace`, async () => {
+        const response = getMockGetResponse({ type: MULTI_NAMESPACE_TYPE, id, namespace });
+        callAdminCluster.mockResolvedValue(response);
+        await expectNotFoundError(MULTI_NAMESPACE_TYPE, id, { namespace: 'bar-namespace' });
+        expectClusterCalls('get');
       });
     });
 
-    it('prepends namespace and type to the id when providing namespace for namespaced type', async () => {
-      callAdminCluster.mockResolvedValue(namespacedResult);
-      await savedObjectsRepository.get('index-pattern', 'logstash-*', {
-        namespace: 'foo-namespace',
+    describe('migration', () => {
+      it(`waits until migrations are complete before proceeding`, async () => {
+        migrator.runMigrations = jest.fn(async () =>
+          expect(callAdminCluster).not.toHaveBeenCalled()
+        );
+        await expect(getSuccess(type, id)).resolves.toBeDefined();
+        expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
       });
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          id: 'foo-namespace:index-pattern:logstash-*',
-        })
-      );
     });
 
-    it(`only prepends type to the id when providing no namespace for namespaced type`, async () => {
-      callAdminCluster.mockResolvedValue(noNamespaceResult);
-      await savedObjectsRepository.get('index-pattern', 'logstash-*');
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          id: 'index-pattern:logstash-*',
-        })
-      );
-    });
-
-    it(`doesn't prepend namespace to the id when providing namespace for namespace agnostic type`, async () => {
-      callAdminCluster.mockResolvedValue(namespacedResult);
-      await savedObjectsRepository.get('globaltype', 'logstash-*', {
-        namespace: 'foo-namespace',
+    describe('returns', () => {
+      it(`formats the ES response`, async () => {
+        const result = await getSuccess(type, id);
+        expect(result).toEqual({
+          id,
+          type,
+          updated_at: mockTimestamp,
+          version: mockVersion,
+          attributes: {
+            title: 'Testing',
+          },
+          references: [],
+        });
       });
 
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          id: 'globaltype:logstash-*',
-        })
-      );
+      it(`includes namespaces if type is multi-namespace`, async () => {
+        const result = await getSuccess(MULTI_NAMESPACE_TYPE, id);
+        expect(result).toMatchObject({
+          namespaces: expect.any(Array),
+        });
+      });
+
+      it(`doesn't include namespaces if type is not multi-namespace`, async () => {
+        const result = await getSuccess(type, id);
+        expect(result).not.toMatchObject({
+          namespaces: expect.anything(),
+        });
+      });
     });
   });
 
-  describe('#bulkGet', () => {
-    it('waits until migrations are complete before proceeding', async () => {
-      migrator.runMigrations = jest.fn(async () => expect(callAdminCluster).not.toHaveBeenCalled());
+  describe('#incrementCounter', () => {
+    const type = 'config';
+    const id = 'one';
+    const field = 'buildNum';
+    const namespace = 'foo-namespace';
 
-      callAdminCluster.mockReturnValue({ docs: [] });
-      await expect(
-        savedObjectsRepository.bulkGet([
-          { id: 'one', type: 'config' },
-          { id: 'two', type: 'index-pattern' },
-          { id: 'three', type: 'globaltype' },
-        ])
-      ).resolves.toBeDefined();
-
-      expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
-    });
-
-    it('prepends type to id when getting objects when there is no namespace', async () => {
-      callAdminCluster.mockReturnValue({ docs: [] });
-
-      await savedObjectsRepository.bulkGet([
-        { id: 'one', type: 'config' },
-        { id: 'two', type: 'index-pattern' },
-        { id: 'three', type: 'globaltype' },
-      ]);
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          body: {
-            docs: [
-              { _id: 'config:one', _index: '.kibana-test' },
-              { _id: 'index-pattern:two', _index: '.kibana-test' },
-              { _id: 'globaltype:three', _index: '.kibana-test' },
-            ],
+    const incrementCounterSuccess = async (type, id, field, options) => {
+      const isMultiNamespace = registry.isMultiNamespace(type);
+      if (isMultiNamespace) {
+        const response = getMockGetResponse({ type, id, namespace: options?.namespace });
+        callAdminCluster.mockResolvedValueOnce(response); // this._callCluster('get', ...)
+      }
+      callAdminCluster.mockImplementation((method, params) => ({
+        _id: params.id,
+        ...mockVersionProps,
+        _index: '.kibana',
+        get: {
+          found: true,
+          _source: {
+            type,
+            ...mockTimestampFields,
+            [type]: {
+              [field]: 8468,
+              defaultIndex: 'logstash-*',
+            },
           },
-        })
-      );
+        },
+      }));
+      const result = await savedObjectsRepository.incrementCounter(type, id, field, options);
+      expect(callAdminCluster).toHaveBeenCalledTimes(isMultiNamespace ? 2 : 1);
+      return result;
+    };
+
+    describe('cluster calls', () => {
+      it(`should use the ES update action if type is not multi-namespace`, async () => {
+        await incrementCounterSuccess(type, id, field, { namespace });
+        expectClusterCalls('update');
+      });
+
+      it(`should use the ES get action then update action if type is multi-namespace, ID is defined, and overwrite=true`, async () => {
+        await incrementCounterSuccess(MULTI_NAMESPACE_TYPE, id, field, { namespace });
+        expectClusterCalls('get', 'update');
+      });
+
+      it(`defaults to a refresh setting of wait_for`, async () => {
+        await incrementCounterSuccess(type, id, field, { namespace });
+        expectClusterCallArgs({ refresh: 'wait_for' });
+      });
+
+      it(`accepts a custom refresh setting`, async () => {
+        const refresh = 'foo';
+        await incrementCounterSuccess(type, id, field, { namespace, refresh });
+        expectClusterCallArgs({ refresh });
+      });
+
+      it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
+        await incrementCounterSuccess(type, id, field, { namespace });
+        expectClusterCallArgs({ id: `${namespace}:${type}:${id}` });
+      });
+
+      it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
+        await incrementCounterSuccess(type, id, field);
+        expectClusterCallArgs({ id: `${type}:${id}` });
+      });
+
+      it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
+        await incrementCounterSuccess(NAMESPACE_AGNOSTIC_TYPE, id, field, { namespace });
+        expectClusterCallArgs({ id: `${NAMESPACE_AGNOSTIC_TYPE}:${id}` });
+
+        callAdminCluster.mockReset();
+        await incrementCounterSuccess(MULTI_NAMESPACE_TYPE, id, field, { namespace });
+        expectClusterCallArgs({ id: `${MULTI_NAMESPACE_TYPE}:${id}` });
+      });
     });
 
-    it('prepends namespace and type appropriately to id when getting objects when there is a namespace', async () => {
-      callAdminCluster.mockReturnValue({ docs: [] });
+    describe('errors', () => {
+      const expectUnsupportedTypeError = async (type, id, field) => {
+        await expect(savedObjectsRepository.incrementCounter(type, id, field)).rejects.toThrowError(
+          createUnsupportedTypeError(type)
+        );
+      };
 
-      await savedObjectsRepository.bulkGet(
-        [
-          { id: 'one', type: 'config' },
-          { id: 'two', type: 'index-pattern' },
-          { id: 'three', type: 'globaltype' },
-        ],
-        {
-          namespace: 'foo-namespace',
-        }
-      );
+      it(`throws when type is not a string`, async () => {
+        const test = async type => {
+          await expect(
+            savedObjectsRepository.incrementCounter(type, id, field)
+          ).rejects.toThrowError(`"type" argument must be a string`);
+          expect(callAdminCluster).not.toHaveBeenCalled();
+        };
 
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          body: {
-            docs: [
-              { _id: 'foo-namespace:config:one', _index: '.kibana-test' },
-              { _id: 'foo-namespace:index-pattern:two', _index: '.kibana-test' },
-              { _id: 'globaltype:three', _index: '.kibana-test' },
-            ],
-          },
-        })
-      );
+        await test(null);
+        await test(42);
+        await test(false);
+        await test({});
+      });
+
+      it(`throws when counterFieldName is not a string`, async () => {
+        const test = async field => {
+          await expect(
+            savedObjectsRepository.incrementCounter(type, id, field)
+          ).rejects.toThrowError(`"counterFieldName" argument must be a string`);
+          expect(callAdminCluster).not.toHaveBeenCalled();
+        };
+
+        await test(null);
+        await test(42);
+        await test(false);
+        await test({});
+      });
+
+      it(`throws when type is invalid`, async () => {
+        await expectUnsupportedTypeError('unknownType', id, field);
+        expect(callAdminCluster).not.toHaveBeenCalled();
+      });
+
+      it(`throws when type is hidden`, async () => {
+        await expectUnsupportedTypeError(HIDDEN_TYPE, id, field);
+        expect(callAdminCluster).not.toHaveBeenCalled();
+      });
+
+      it(`throws when there is a conflict with an existing multi-namespace saved object (get)`, async () => {
+        const response = getMockGetResponse({
+          type: MULTI_NAMESPACE_TYPE,
+          id,
+          namespace: 'bar-namespace',
+        });
+        callAdminCluster.mockResolvedValue(response); // this._callCluster('get', ...)
+        await expect(
+          savedObjectsRepository.incrementCounter(MULTI_NAMESPACE_TYPE, id, field, { namespace })
+        ).rejects.toThrowError(createConflictError(MULTI_NAMESPACE_TYPE, id));
+        expectClusterCalls('get');
+      });
     });
 
-    it('mockReturnValue early for empty objects argument', async () => {
-      callAdminCluster.mockReturnValue({ docs: [] });
+    describe('migration', () => {
+      beforeEach(() => {
+        migrator.migrateDocument.mockImplementation(mockMigrateDocument);
+      });
 
-      const response = await savedObjectsRepository.bulkGet([]);
+      it(`waits until migrations are complete before proceeding`, async () => {
+        migrator.runMigrations = jest.fn(async () =>
+          expect(callAdminCluster).not.toHaveBeenCalled()
+        );
+        await expect(
+          incrementCounterSuccess(type, id, field, { namespace })
+        ).resolves.toBeDefined();
+        expect(migrator.runMigrations).toHaveBeenCalledTimes(1);
+      });
 
-      expect(response.saved_objects).toHaveLength(0);
-      expect(callAdminCluster).not.toHaveBeenCalled();
+      it(`migrates a document and serializes the migrated doc`, async () => {
+        const migrationVersion = mockMigrationVersion;
+        await incrementCounterSuccess(type, id, field, { migrationVersion });
+        const attributes = { buildNum: 1 }; // this is added by the incrementCounter function
+        const doc = { type, id, attributes, migrationVersion, ...mockTimestampFields };
+        expectMigrationArgs(doc);
+
+        const migratedDoc = migrator.migrateDocument(doc);
+        expect(serializer.savedObjectToRaw).toHaveBeenLastCalledWith(migratedDoc);
+      });
     });
 
-    it('handles missing ids gracefully', async () => {
-      callAdminCluster.mockResolvedValue({
-        docs: [
-          {
-            _id: 'config:good',
+    describe('returns', () => {
+      it(`formats the ES response`, async () => {
+        callAdminCluster.mockImplementation((method, params) => ({
+          _id: params.id,
+          ...mockVersionProps,
+          _index: '.kibana',
+          get: {
             found: true,
-            ...mockVersionProps,
-            _source: { ...mockTimestampFields, config: { title: 'Test' } },
+            _source: {
+              type: 'config',
+              ...mockTimestampFields,
+              config: {
+                buildNum: 8468,
+                defaultIndex: 'logstash-*',
+              },
+            },
           },
+        }));
+
+        const response = await savedObjectsRepository.incrementCounter(
+          'config',
+          '6.0.0-alpha1',
+          'buildNum',
           {
-            _id: 'config:bad',
-            found: false,
-          },
-        ],
-      });
+            namespace: 'foo-namespace',
+          }
+        );
 
-      const { saved_objects: savedObjects } = await savedObjectsRepository.bulkGet([
-        { id: 'good', type: 'config' },
-        { type: 'config' },
-      ]);
-
-      expect(savedObjects[1]).toEqual({
-        type: 'config',
-        error: { statusCode: 404, message: 'Not found' },
-      });
-    });
-
-    it('reports error on missed objects', async () => {
-      callAdminCluster.mockResolvedValue({
-        docs: [
-          {
-            _id: 'config:good',
-            found: true,
-            ...mockVersionProps,
-            _source: { ...mockTimestampFields, config: { title: 'Test' } },
-          },
-          {
-            _id: 'config:bad',
-            found: false,
-          },
-        ],
-      });
-
-      const { saved_objects: savedObjects } = await savedObjectsRepository.bulkGet([
-        { id: 'good', type: 'config' },
-        { id: 'bad', type: 'config' },
-      ]);
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-
-      expect(savedObjects).toHaveLength(2);
-      expect(savedObjects[0]).toEqual({
-        id: 'good',
-        type: 'config',
-        ...mockTimestampFields,
-        version: mockVersion,
-        attributes: { title: 'Test' },
-        references: [],
-      });
-      expect(savedObjects[1]).toEqual({
-        id: 'bad',
-        type: 'config',
-        error: { statusCode: 404, message: 'Not found' },
-      });
-    });
-
-    it('returns errors when requesting unsupported types', async () => {
-      callAdminCluster.mockResolvedValue({
-        docs: [
-          {
-            _id: 'one',
-            found: true,
-            ...mockVersionProps,
-            _source: { ...mockTimestampFields, config: { title: 'Test1' } },
-          },
-          {
-            _id: 'three',
-            found: true,
-            ...mockVersionProps,
-            _source: { ...mockTimestampFields, config: { title: 'Test3' } },
-          },
-          {
-            _id: 'five',
-            found: true,
-            ...mockVersionProps,
-            _source: { ...mockTimestampFields, config: { title: 'Test5' } },
-          },
-        ],
-      });
-
-      const { saved_objects: savedObjects } = await savedObjectsRepository.bulkGet([
-        { id: 'one', type: 'config' },
-        { id: 'two', type: 'invalidtype' },
-        { id: 'three', type: 'config' },
-        { id: 'four', type: 'invalidtype' },
-        { id: 'five', type: 'config' },
-      ]);
-
-      expect(savedObjects).toEqual([
-        {
-          attributes: { title: 'Test1' },
-          id: 'one',
-          ...mockTimestampFields,
-          references: [],
+        expect(response).toEqual({
           type: 'config',
-          version: mockVersion,
-          migrationVersion: undefined,
-        },
-        {
-          attributes: { title: 'Test3' },
-          id: 'three',
+          id: '6.0.0-alpha1',
           ...mockTimestampFields,
-          references: [],
-          type: 'config',
           version: mockVersion,
-          migrationVersion: undefined,
-        },
-        {
-          attributes: { title: 'Test5' },
-          id: 'five',
-          ...mockTimestampFields,
-          references: [],
-          type: 'config',
-          version: mockVersion,
-          migrationVersion: undefined,
-        },
-        {
-          error: {
-            error: 'Bad Request',
-            message: "Unsupported saved object type: 'invalidtype': Bad Request",
-            statusCode: 400,
+          attributes: {
+            buildNum: 8468,
+            defaultIndex: 'logstash-*',
           },
-          id: 'two',
-          type: 'invalidtype',
-        },
-        {
-          error: {
-            error: 'Bad Request',
-            message: "Unsupported saved object type: 'invalidtype': Bad Request",
-            statusCode: 400,
-          },
-          id: 'four',
-          type: 'invalidtype',
-        },
-      ]);
+        });
+      });
+    });
+  });
+
+  describe('#deleteFromNamespaces', () => {
+    const id = 'some-id';
+    const type = MULTI_NAMESPACE_TYPE;
+    const namespace1 = 'default';
+    const namespace2 = 'foo-namespace';
+    const namespace3 = 'bar-namespace';
+
+    const mockGetResponse = (type, id, namespaces) => {
+      // mock a document that exists in two namespaces
+      const mockResponse = getMockGetResponse({ type, id });
+      mockResponse._source.namespaces = namespaces;
+      callAdminCluster.mockResolvedValueOnce(mockResponse); // this._callCluster('get', ...)
+    };
+
+    const deleteFromNamespacesSuccess = async (
+      type,
+      id,
+      namespaces,
+      currentNamespaces,
+      options
+    ) => {
+      mockGetResponse(type, id, currentNamespaces); // this._callCluster('get', ...)
+      const isDelete = currentNamespaces.every(namespace => namespaces.includes(namespace));
+      callAdminCluster.mockResolvedValue({
+        _id: `${type}:${id}`,
+        ...mockVersionProps,
+        result: isDelete ? 'deleted' : 'updated',
+      }); // this._writeToCluster('delete', ...) *or* this._writeToCluster('update', ...)
+      const result = await savedObjectsRepository.deleteFromNamespaces(
+        type,
+        id,
+        namespaces,
+        options
+      );
+      expect(callAdminCluster).toHaveBeenCalledTimes(2);
+      return result;
+    };
+
+    describe('cluster calls', () => {
+      describe('delete action', () => {
+        const deleteFromNamespacesSuccessDelete = async (expectFn, options, _type = type) => {
+          const test = async namespaces => {
+            await deleteFromNamespacesSuccess(_type, id, namespaces, namespaces, options);
+            expectFn();
+            callAdminCluster.mockReset();
+          };
+          await test([namespace1]);
+          await test([namespace1, namespace2]);
+        };
+
+        it(`should use ES get action then delete action if the object has no namespaces remaining`, async () => {
+          const expectFn = () => expectClusterCalls('get', 'delete');
+          await deleteFromNamespacesSuccessDelete(expectFn);
+        });
+
+        it(`formats the ES requests`, async () => {
+          const expectFn = () => {
+            expectClusterCallArgs({ id: `${type}:${id}` }, 1);
+            const versionProperties = {
+              if_seq_no: mockVersionProps._seq_no,
+              if_primary_term: mockVersionProps._primary_term,
+            };
+            expectClusterCallArgs({ id: `${type}:${id}`, ...versionProperties }, 2);
+          };
+          await deleteFromNamespacesSuccessDelete(expectFn);
+        });
+
+        it(`defaults to a refresh setting of wait_for`, async () => {
+          await deleteFromNamespacesSuccessDelete(() =>
+            expectClusterCallArgs({ refresh: 'wait_for' }, 2)
+          );
+        });
+
+        it(`accepts a custom refresh setting`, async () => {
+          const refresh = 'foo';
+          const expectFn = () => expectClusterCallArgs({ refresh }, 2);
+          await deleteFromNamespacesSuccessDelete(expectFn, { refresh });
+        });
+
+        it(`should use default index`, async () => {
+          const expectFn = () => expectClusterCallArgs({ index: '.kibana-test' }, 2);
+          await deleteFromNamespacesSuccessDelete(expectFn);
+        });
+
+        it(`should use custom index`, async () => {
+          const expectFn = () => expectClusterCallArgs({ index: 'custom' }, 2);
+          await deleteFromNamespacesSuccessDelete(expectFn, {}, MULTI_NAMESPACE_CUSTOM_INDEX_TYPE);
+        });
+      });
+
+      describe('update action', () => {
+        const deleteFromNamespacesSuccessUpdate = async (expectFn, options, _type = type) => {
+          const test = async remaining => {
+            const currentNamespaces = [namespace1].concat(remaining);
+            await deleteFromNamespacesSuccess(_type, id, [namespace1], currentNamespaces, options);
+            expectFn();
+            callAdminCluster.mockReset();
+          };
+          await test([namespace2]);
+          await test([namespace2, namespace3]);
+        };
+
+        it(`should use ES get action then update action if the object has one or more namespaces remaining`, async () => {
+          await deleteFromNamespacesSuccessUpdate(() => expectClusterCalls('get', 'update'));
+        });
+
+        it(`formats the ES requests`, async () => {
+          let ctr = 0;
+          const expectFn = () => {
+            expectClusterCallArgs({ id: `${type}:${id}` }, 1);
+            const namespaces = ctr++ === 0 ? [namespace2] : [namespace2, namespace3];
+            const versionProperties = {
+              if_seq_no: mockVersionProps._seq_no,
+              if_primary_term: mockVersionProps._primary_term,
+            };
+            expectClusterCallArgs(
+              {
+                id: `${type}:${id}`,
+                ...versionProperties,
+                body: { doc: { ...mockTimestampFields, namespaces } },
+              },
+              2
+            );
+          };
+          await deleteFromNamespacesSuccessUpdate(expectFn);
+        });
+
+        it(`defaults to a refresh setting of wait_for`, async () => {
+          const expectFn = () => expectClusterCallArgs({ refresh: 'wait_for' }, 2);
+          await deleteFromNamespacesSuccessUpdate(expectFn);
+        });
+
+        it(`accepts a custom refresh setting`, async () => {
+          const refresh = 'foo';
+          const expectFn = () => expectClusterCallArgs({ refresh }, 2);
+          await deleteFromNamespacesSuccessUpdate(expectFn, { refresh });
+        });
+
+        it(`should use default index`, async () => {
+          const expectFn = () => expectClusterCallArgs({ index: '.kibana-test' }, 2);
+          await deleteFromNamespacesSuccessUpdate(expectFn);
+        });
+
+        it(`should use custom index`, async () => {
+          const expectFn = () => expectClusterCallArgs({ index: 'custom' }, 2);
+          await deleteFromNamespacesSuccessUpdate(expectFn, {}, MULTI_NAMESPACE_CUSTOM_INDEX_TYPE);
+        });
+      });
+    });
+
+    describe('errors', () => {
+      const expectNotFoundError = async (type, id, namespaces, options) => {
+        await expect(
+          savedObjectsRepository.deleteFromNamespaces(type, id, namespaces, options)
+        ).rejects.toThrowError(createGenericNotFoundError(type, id));
+      };
+      const expectBadRequestError = async (type, id, namespaces, message) => {
+        await expect(
+          savedObjectsRepository.deleteFromNamespaces(type, id, namespaces)
+        ).rejects.toThrowError(createBadRequestError(message));
+      };
+
+      it(`throws when type is invalid`, async () => {
+        await expectNotFoundError('unknownType', id, [namespace1, namespace2]);
+        expect(callAdminCluster).not.toHaveBeenCalled();
+      });
+
+      it(`throws when type is hidden`, async () => {
+        await expectNotFoundError(HIDDEN_TYPE, id, [namespace1, namespace2]);
+        expect(callAdminCluster).not.toHaveBeenCalled();
+      });
+
+      it(`throws when type is not namespace-agnostic`, async () => {
+        const test = async type => {
+          const message = `${type} doesn't support multiple namespaces`;
+          await expectBadRequestError(type, id, [namespace1, namespace2], message);
+          expect(callAdminCluster).not.toHaveBeenCalled();
+        };
+        await test('index-pattern');
+        await test(NAMESPACE_AGNOSTIC_TYPE);
+      });
+
+      it(`throws when namespaces is an empty array`, async () => {
+        const test = async namespaces => {
+          const message = 'namespaces must be a non-empty array of strings';
+          await expectBadRequestError(type, id, namespaces, message);
+          expect(callAdminCluster).not.toHaveBeenCalled();
+        };
+        await test([]);
+      });
+
+      it(`throws when ES is unable to find the document during get`, async () => {
+        callAdminCluster.mockResolvedValue({ found: false }); // this._callCluster('get', ...)
+        await expectNotFoundError(type, id, [namespace1, namespace2]);
+        expectClusterCalls('get');
+      });
+
+      it(`throws when ES is unable to find the index during get`, async () => {
+        callAdminCluster.mockResolvedValue({ status: 404 }); // this._callCluster('get', ...)
+        await expectNotFoundError(type, id, [namespace1, namespace2]);
+        expectClusterCalls('get');
+      });
+
+      it(`throws when the document exists, but not in this namespace`, async () => {
+        mockGetResponse(type, id, [namespace1]); // this._callCluster('get', ...)
+        await expectNotFoundError(type, id, [namespace1], { namespace: 'some-other-namespace' });
+        expectClusterCalls('get');
+      });
+
+      it(`throws when ES is unable to find the document during delete`, async () => {
+        mockGetResponse(type, id, [namespace1]); // this._callCluster('get', ...)
+        callAdminCluster.mockResolvedValue({ result: 'not_found' }); // this._writeToCluster('delete', ...)
+        await expectNotFoundError(type, id, [namespace1]);
+        expectClusterCalls('get', 'delete');
+      });
+
+      it(`throws when ES is unable to find the index during delete`, async () => {
+        mockGetResponse(type, id, [namespace1]); // this._callCluster('get', ...)
+        callAdminCluster.mockResolvedValue({ error: { type: 'index_not_found_exception' } }); // this._writeToCluster('delete', ...)
+        await expectNotFoundError(type, id, [namespace1]);
+        expectClusterCalls('get', 'delete');
+      });
+
+      it(`throws when ES returns an unexpected response`, async () => {
+        mockGetResponse(type, id, [namespace1]); // this._callCluster('get', ...)
+        callAdminCluster.mockResolvedValue({ result: 'something unexpected' }); // this._writeToCluster('delete', ...)
+        await expect(
+          savedObjectsRepository.deleteFromNamespaces(type, id, [namespace1])
+        ).rejects.toThrowError('Unexpected Elasticsearch DELETE response');
+        expectClusterCalls('get', 'delete');
+      });
+
+      it(`throws when ES is unable to find the document during update`, async () => {
+        mockGetResponse(type, id, [namespace1, namespace2]); // this._callCluster('get', ...)
+        callAdminCluster.mockResolvedValue({ status: 404 }); // this._writeToCluster('update', ...)
+        await expectNotFoundError(type, id, [namespace1]);
+        expectClusterCalls('get', 'update');
+      });
+    });
+
+    describe('migration', () => {
+      it(`waits until migrations are complete before proceeding`, async () => {
+        let callAdminClusterCount = 0;
+        migrator.runMigrations = jest.fn(async () =>
+          // runMigrations should resolve before callAdminCluster is initiated
+          expect(callAdminCluster).toHaveBeenCalledTimes(callAdminClusterCount++)
+        );
+        await expect(
+          deleteFromNamespacesSuccess(type, id, [namespace1], [namespace1])
+        ).resolves.toBeDefined();
+        expect(migrator.runMigrations).toHaveReturnedTimes(2);
+      });
+    });
+
+    describe('returns', () => {
+      it(`returns an empty object on success (delete)`, async () => {
+        const test = async namespaces => {
+          const result = await deleteFromNamespacesSuccess(type, id, namespaces, namespaces);
+          expect(result).toEqual({});
+          callAdminCluster.mockReset();
+        };
+        await test([namespace1]);
+        await test([namespace1, namespace2]);
+      });
+
+      it(`returns an empty object on success (update)`, async () => {
+        const test = async remaining => {
+          const currentNamespaces = [namespace1].concat(remaining);
+          const result = await deleteFromNamespacesSuccess(
+            type,
+            id,
+            [namespace1],
+            currentNamespaces
+          );
+          expect(result).toEqual({});
+          callAdminCluster.mockReset();
+        };
+        await test([namespace2]);
+        await test([namespace2, namespace3]);
+      });
+
+      it(`succeeds when the document doesn't exist in all of the targeted namespaces`, async () => {
+        const namespaces = [namespace2];
+        const currentNamespaces = [namespace1];
+        const result = await deleteFromNamespacesSuccess(type, id, namespaces, currentNamespaces);
+        expect(result).toEqual({});
+      });
     });
   });
 
@@ -1866,1134 +2882,225 @@ describe('SavedObjectsRepository', () => {
     const id = 'logstash-*';
     const type = 'index-pattern';
     const attributes = { title: 'Testing' };
+    const namespace = 'foo-namespace';
+    const references = [
+      {
+        name: 'ref_0',
+        type: 'test',
+        id: '1',
+      },
+    ];
 
-    beforeEach(() => {
+    const updateSuccess = async (type, id, attributes, options) => {
+      if (registry.isMultiNamespace(type)) {
+        const mockGetResponse = getMockGetResponse({ type, id, namespace: options?.namespace });
+        callAdminCluster.mockResolvedValueOnce(mockGetResponse); // this._callCluster('get', ...)
+      }
       callAdminCluster.mockResolvedValue({
         _id: `${type}:${id}`,
         ...mockVersionProps,
         result: 'updated',
-      });
-    });
-
-    it('waits until migrations are complete before proceeding', async () => {
-      migrator.runMigrations = jest.fn(async () => expect(callAdminCluster).not.toHaveBeenCalled());
-
-      await expect(
-        savedObjectsRepository.update('index-pattern', 'logstash-*', attributes, {
-          namespace: 'foo-namespace',
-        })
-      ).resolves.toBeDefined();
-
-      expect(migrator.runMigrations).toHaveReturnedTimes(1);
-    });
-
-    it('mockReturnValue current ES document _seq_no and _primary_term encoded as version', async () => {
-      const response = await savedObjectsRepository.update(
-        'index-pattern',
-        'logstash-*',
-        attributes,
-        {
-          namespace: 'foo-namespace',
-          references: [
-            {
-              name: 'ref_0',
-              type: 'test',
-              id: '1',
-            },
-          ],
-        }
-      );
-      expect(response).toEqual({
-        id,
-        type,
-        ...mockTimestampFields,
-        version: mockVersion,
-        attributes,
-        references: [
-          {
-            name: 'ref_0',
-            type: 'test',
-            id: '1',
-          },
-        ],
-      });
-    });
-
-    it('accepts version', async () => {
-      await savedObjectsRepository.update(
-        type,
-        id,
-        { title: 'Testing' },
-        {
-          version: encodeHitVersion({
-            _seq_no: 100,
-            _primary_term: 200,
-          }),
-        }
-      );
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          if_seq_no: 100,
-          if_primary_term: 200,
-        })
-      );
-    });
-
-    it('does not pass references if omitted', async () => {
-      await savedObjectsRepository.update(type, id, { title: 'Testing' });
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).not.toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          body: {
-            doc: expect.objectContaining({
-              references: [],
-            }),
-          },
-        })
-      );
-    });
-
-    it('passes references if they are provided', async () => {
-      await savedObjectsRepository.update(type, id, { title: 'Testing' }, { references: ['foo'] });
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          body: {
-            doc: expect.objectContaining({
-              references: ['foo'],
-            }),
-          },
-        })
-      );
-    });
-
-    it('passes empty references array if empty references array is provided', async () => {
-      await savedObjectsRepository.update(type, id, { title: 'Testing' }, { references: [] });
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          body: {
-            doc: expect.objectContaining({
-              references: [],
-            }),
-          },
-        })
-      );
-    });
-
-    it(`prepends namespace to the id but doesn't add namespace to body when providing namespace for namespaced type`, async () => {
-      await savedObjectsRepository.update(
-        'index-pattern',
-        'logstash-*',
-        {
-          title: 'Testing',
-        },
-        {
-          namespace: 'foo-namespace',
-          references: [
-            {
-              name: 'ref_0',
-              type: 'test',
-              id: '1',
-            },
-          ],
-        }
-      );
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith('update', {
-        id: 'foo-namespace:index-pattern:logstash-*',
-        body: {
-          doc: {
-            updated_at: mockTimestamp,
-            'index-pattern': { title: 'Testing' },
-            references: [
-              {
-                name: 'ref_0',
-                type: 'test',
-                id: '1',
-              },
-            ],
-          },
-        },
-        ignore: [404],
-        refresh: 'wait_for',
-        index: '.kibana-test',
-      });
-    });
-
-    it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
-      await savedObjectsRepository.update(
-        'index-pattern',
-        'logstash-*',
-        {
-          title: 'Testing',
-        },
-        {
-          references: [
-            {
-              name: 'ref_0',
-              type: 'test',
-              id: '1',
-            },
-          ],
-        }
-      );
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith('update', {
-        id: 'index-pattern:logstash-*',
-        body: {
-          doc: {
-            updated_at: mockTimestamp,
-            'index-pattern': { title: 'Testing' },
-            references: [
-              {
-                name: 'ref_0',
-                type: 'test',
-                id: '1',
-              },
-            ],
-          },
-        },
-        ignore: [404],
-        refresh: 'wait_for',
-        index: '.kibana-test',
-      });
-    });
-
-    it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
-      await savedObjectsRepository.update(
-        'globaltype',
-        'foo',
-        {
-          name: 'bar',
-        },
-        {
-          namespace: 'foo-namespace',
-          references: [
-            {
-              name: 'ref_0',
-              type: 'test',
-              id: '1',
-            },
-          ],
-        }
-      );
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith('update', {
-        id: 'globaltype:foo',
-        body: {
-          doc: {
-            updated_at: mockTimestamp,
-            globaltype: { name: 'bar' },
-            references: [
-              {
-                name: 'ref_0',
-                type: 'test',
-                id: '1',
-              },
-            ],
-          },
-        },
-        ignore: [404],
-        refresh: 'wait_for',
-        index: '.kibana-test',
-      });
-    });
-
-    it('defaults to a refresh setting of `wait_for`', async () => {
-      await savedObjectsRepository.update('globaltype', 'foo', {
-        name: 'bar',
-      });
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
-        refresh: 'wait_for',
-      });
-    });
-
-    it('accepts a custom refresh setting', async () => {
-      await savedObjectsRepository.update(
-        'globaltype',
-        'foo',
-        {
-          name: 'bar',
-        },
-        {
-          refresh: true,
-          namespace: 'foo-namespace',
-        }
-      );
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
-        refresh: true,
-      });
-    });
-  });
-
-  describe('#bulkUpdate', () => {
-    const { generateSavedObject, reset } = (() => {
-      let count = 0;
-      return {
-        generateSavedObject(overrides) {
-          count++;
-          return _.merge(
-            {
-              type: 'index-pattern',
-              id: `logstash-${count}`,
-              attributes: { title: `Testing ${count}` },
-              references: [
-                {
-                  name: 'ref_0',
-                  type: 'test',
-                  id: '1',
-                },
-              ],
-            },
-            overrides
-          );
-        },
-        reset() {
-          count = 0;
-        },
-      };
-    })();
-
-    beforeEach(() => {
-      reset();
-    });
-
-    const mockValidResponse = objects =>
-      callAdminCluster.mockReturnValue({
-        items: objects.map(items => ({
-          update: {
-            _id: `${items.type}:${items.id}`,
-            ...mockVersionProps,
-            result: 'updated',
-          },
-        })),
-      });
-
-    it('waits until migrations are complete before proceeding', async () => {
-      const objects = [generateSavedObject(), generateSavedObject()];
-
-      migrator.runMigrations = jest.fn(async () => expect(callAdminCluster).not.toHaveBeenCalled());
-
-      mockValidResponse(objects);
-
-      await expect(
-        savedObjectsRepository.bulkUpdate([generateSavedObject()])
-      ).resolves.toBeDefined();
-
-      expect(migrator.runMigrations).toHaveReturnedTimes(1);
-    });
-
-    it('returns current ES document, _seq_no and _primary_term encoded as version', async () => {
-      const objects = [generateSavedObject(), generateSavedObject()];
-
-      mockValidResponse(objects);
-
-      const response = await savedObjectsRepository.bulkUpdate(objects);
-
-      expect(response.saved_objects[0]).toMatchObject({
-        ..._.pick(objects[0], 'id', 'type', 'attributes'),
-        version: mockVersion,
-        references: objects[0].references,
-      });
-      expect(response.saved_objects[1]).toMatchObject({
-        ..._.pick(objects[1], 'id', 'type', 'attributes'),
-        version: mockVersion,
-        references: objects[1].references,
-      });
-    });
-
-    it('handles a mix of succesfull updates and errors', async () => {
-      const objects = [
-        generateSavedObject(),
-        {
-          type: 'invalid-type',
-          id: 'invalid',
-          attributes: { title: 'invalid' },
-        },
-        generateSavedObject(),
-        generateSavedObject({
-          id: 'version_clash',
+        ...(registry.isMultiNamespace(type) && {
+          // don't need the rest of the source for test purposes, just the namespaces attribute
+          get: { _source: { namespaces: [options?.namespace ?? 'default'] } },
         }),
-      ];
+      }); // this._writeToCluster('update', ...)
+      const result = await savedObjectsRepository.update(type, id, attributes, options);
+      expect(callAdminCluster).toHaveBeenCalledTimes(registry.isMultiNamespace(type) ? 2 : 1);
+      return result;
+    };
 
-      callAdminCluster.mockReturnValue({
-        items: objects
-          // remove invalid from mocks
-          .filter(item => item.id !== 'invalid')
-          .map(items => {
-            switch (items.id) {
-              case 'version_clash':
-                return {
-                  update: {
-                    _id: `${items.type}:${items.id}`,
-                    error: {
-                      type: 'version_conflict_engine_exception',
-                    },
-                  },
-                };
-              default:
-                return {
-                  update: {
-                    _id: `${items.type}:${items.id}`,
-                    ...mockVersionProps,
-                    result: 'updated',
-                  },
-                };
-            }
-          }),
+    describe('cluster calls', () => {
+      it(`should use the ES get action then update action when type is multi-namespace`, async () => {
+        await updateSuccess(MULTI_NAMESPACE_TYPE, id, attributes);
+        expectClusterCalls('get', 'update');
       });
 
-      const {
-        saved_objects: [firstUpdatedObject, invalidType, secondUpdatedObject, versionClashObject],
-      } = await savedObjectsRepository.bulkUpdate(objects);
-
-      expect(firstUpdatedObject).toMatchObject({
-        ..._.pick(objects[0], 'id', 'type', 'attributes', 'references'),
-        version: mockVersion,
+      it(`should use the ES update action when type is not multi-namespace`, async () => {
+        await updateSuccess(type, id, attributes);
+        expectClusterCalls('update');
       });
 
-      expect(invalidType).toMatchObject({
-        ..._.pick(objects[1], 'id', 'type'),
-        error: SavedObjectsErrorHelpers.createGenericNotFoundError('invalid-type', 'invalid').output
-          .payload,
+      it(`defaults to no references array`, async () => {
+        await updateSuccess(type, id, attributes);
+        expectClusterCallArgs({
+          body: { doc: expect.not.objectContaining({ references: expect.anything() }) },
+        });
       });
 
-      expect(secondUpdatedObject).toMatchObject({
-        ..._.pick(objects[2], 'id', 'type', 'attributes', 'references'),
-        version: mockVersion,
+      it(`accepts custom references array`, async () => {
+        const test = async references => {
+          await updateSuccess(type, id, attributes, { references });
+          expectClusterCallArgs({
+            body: { doc: expect.objectContaining({ references }) },
+          });
+          callAdminCluster.mockReset();
+        };
+        await test(references);
+        await test(['string']);
+        await test([]);
       });
 
-      expect(versionClashObject).toMatchObject({
-        ..._.pick(objects[3], 'id', 'type'),
-        error: { statusCode: 409, message: 'version conflict, document already exists' },
-      });
-    });
-
-    it('doesnt call Elasticsearch if there are no valid objects to update', async () => {
-      const objects = [
-        {
-          type: 'invalid-type',
-          id: 'invalid',
-          attributes: { title: 'invalid' },
-        },
-        {
-          type: 'invalid-type',
-          id: 'invalid 2',
-          attributes: { title: 'invalid' },
-        },
-      ];
-
-      const {
-        saved_objects: [invalidType, invalidType2],
-      } = await savedObjectsRepository.bulkUpdate(objects);
-
-      expect(callAdminCluster).not.toHaveBeenCalled();
-
-      expect(invalidType).toMatchObject({
-        ..._.pick(objects[0], 'id', 'type'),
-        error: SavedObjectsErrorHelpers.createGenericNotFoundError('invalid-type', 'invalid').output
-          .payload,
+      it(`doesn't accept custom references if not an array`, async () => {
+        const test = async references => {
+          await updateSuccess(type, id, attributes, { references });
+          expectClusterCallArgs({
+            body: { doc: expect.not.objectContaining({ references: expect.anything() }) },
+          });
+          callAdminCluster.mockReset();
+        };
+        await test('string');
+        await test(123);
+        await test(true);
+        await test(null);
       });
 
-      expect(invalidType2).toMatchObject({
-        ..._.pick(objects[1], 'id', 'type'),
-        error: SavedObjectsErrorHelpers.createGenericNotFoundError('invalid-type', 'invalid 2')
-          .output.payload,
-      });
-    });
-
-    it('accepts version', async () => {
-      const objects = [
-        generateSavedObject({
-          version: encodeHitVersion({
-            _seq_no: 100,
-            _primary_term: 200,
-          }),
-        }),
-        generateSavedObject({
-          version: encodeHitVersion({
-            _seq_no: 300,
-            _primary_term: 400,
-          }),
-        }),
-      ];
-
-      mockValidResponse(objects);
-
-      await savedObjectsRepository.bulkUpdate(objects);
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-
-      const [
-        ,
-        {
-          body: [{ update: firstUpdate }, , { update: secondUpdate }],
-        },
-      ] = callAdminCluster.mock.calls[0];
-
-      expect(firstUpdate).toMatchObject({
-        if_seq_no: 100,
-        if_primary_term: 200,
+      it(`defaults to a refresh setting of wait_for`, async () => {
+        await updateSuccess(type, id, { foo: 'bar' });
+        expectClusterCallArgs({ refresh: 'wait_for' });
       });
 
-      expect(secondUpdate).toMatchObject({
-        if_seq_no: 300,
-        if_primary_term: 400,
+      it(`accepts a custom refresh setting`, async () => {
+        const refresh = 'foo';
+        await updateSuccess(type, id, { foo: 'bar' }, { refresh });
+        expectClusterCallArgs({ refresh });
+      });
+
+      it(`defaults to the version of the existing document when type is multi-namespace`, async () => {
+        await updateSuccess(MULTI_NAMESPACE_TYPE, id, attributes, { references });
+        const versionProperties = {
+          if_seq_no: mockVersionProps._seq_no,
+          if_primary_term: mockVersionProps._primary_term,
+        };
+        expectClusterCallArgs(versionProperties, 2);
+      });
+
+      it(`accepts version`, async () => {
+        await updateSuccess(type, id, attributes, {
+          version: encodeHitVersion({ _seq_no: 100, _primary_term: 200 }),
+        });
+        expectClusterCallArgs({ if_seq_no: 100, if_primary_term: 200 });
+      });
+
+      it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
+        await updateSuccess(type, id, attributes, { namespace });
+        expectClusterCallArgs({ id: expect.stringMatching(`${namespace}:${type}:${id}`) });
+      });
+
+      it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
+        await updateSuccess(type, id, attributes, { references });
+        expectClusterCallArgs({ id: expect.stringMatching(`${type}:${id}`) });
+      });
+
+      it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
+        await updateSuccess(NAMESPACE_AGNOSTIC_TYPE, id, attributes, { namespace });
+        expectClusterCallArgs({ id: expect.stringMatching(`${NAMESPACE_AGNOSTIC_TYPE}:${id}`) });
+
+        callAdminCluster.mockReset();
+        await updateSuccess(MULTI_NAMESPACE_TYPE, id, attributes, { namespace });
+        expectClusterCallArgs({ id: expect.stringMatching(`${MULTI_NAMESPACE_TYPE}:${id}`) }, 2);
+      });
+
+      it(`includes _sourceIncludes when type is multi-namespace`, async () => {
+        await updateSuccess(MULTI_NAMESPACE_TYPE, id, attributes);
+        expectClusterCallArgs({ _sourceIncludes: ['namespaces'] }, 2);
+      });
+
+      it(`doesn't include _sourceIncludes when type is not multi-namespace`, async () => {
+        await updateSuccess(type, id, attributes);
+        expect(callAdminCluster).toHaveBeenLastCalledWith(
+          expect.any(String),
+          expect.not.objectContaining({
+            _sourceIncludes: expect.anything(),
+          })
+        );
       });
     });
 
-    it('does not pass references if omitted', async () => {
-      const objects = [
-        {
-          type: 'index-pattern',
-          id: `logstash-no-ref`,
-          attributes: { title: `Testing no-ref` },
-        },
-      ];
-
-      mockValidResponse(objects);
-
-      await savedObjectsRepository.bulkUpdate(objects);
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-
-      const [
-        ,
-        {
-          body: [, { doc: firstDoc }],
-        },
-      ] = callAdminCluster.mock.calls[0];
-
-      expect(firstDoc).not.toMatchObject({
-        references: [],
-      });
-    });
-
-    it('passes references if they are provided', async () => {
-      const objects = [
-        generateSavedObject({
-          references: [
-            {
-              name: 'ref_0',
-              type: 'test',
-              id: '1',
-            },
-          ],
-        }),
-      ];
-
-      mockValidResponse(objects);
-
-      await savedObjectsRepository.bulkUpdate(objects);
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-
-      const [
-        ,
-        {
-          body: [, { doc }],
-        },
-      ] = callAdminCluster.mock.calls[0];
-
-      expect(doc).toMatchObject({
-        references: [
-          {
-            name: 'ref_0',
-            type: 'test',
-            id: '1',
-          },
-        ],
-      });
-    });
-
-    it('passes empty references array if empty references array is provided', async () => {
-      const objects = [
-        {
-          type: 'index-pattern',
-          id: `logstash-no-ref`,
-          attributes: { title: `Testing no-ref` },
-          references: [],
-        },
-      ];
-
-      mockValidResponse(objects);
-
-      await savedObjectsRepository.bulkUpdate(objects);
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-
-      const [
-        ,
-        {
-          body: [, { doc }],
-        },
-      ] = callAdminCluster.mock.calls[0];
-
-      expect(doc).toMatchObject({
-        references: [],
-      });
-    });
-
-    it('defaults to a refresh setting of `wait_for`', async () => {
-      const objects = [
-        {
-          type: 'index-pattern',
-          id: `logstash-no-ref`,
-          attributes: { title: `Testing no-ref` },
-          references: [],
-        },
-      ];
-
-      mockValidResponse(objects);
-
-      await savedObjectsRepository.bulkUpdate(objects);
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-
-      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({ refresh: 'wait_for' });
-    });
-
-    it('accepts a custom refresh setting', async () => {
-      const objects = [
-        {
-          type: 'index-pattern',
-          id: `logstash-no-ref`,
-          attributes: { title: `Testing no-ref` },
-          references: [],
-        },
-      ];
-
-      mockValidResponse(objects);
-
-      await savedObjectsRepository.bulkUpdate(objects, { refresh: true });
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-
-      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({ refresh: true });
-    });
-
-    it(`prepends namespace to the id but doesn't add namespace to body when providing namespace for namespaced type`, async () => {
-      const objects = [generateSavedObject(), generateSavedObject()];
-
-      mockValidResponse(objects);
-
-      await savedObjectsRepository.bulkUpdate(objects, {
-        namespace: 'foo-namespace',
-      });
-
-      const [
-        ,
-        {
-          body: [
-            { update: firstUpdate },
-            { doc: firstUpdateDoc },
-            { update: secondUpdate },
-            { doc: secondUpdateDoc },
-          ],
-        },
-      ] = callAdminCluster.mock.calls[0];
-
-      expect(firstUpdate).toMatchObject({
-        _id: 'foo-namespace:index-pattern:logstash-1',
-        _index: '.kibana-test',
-      });
-
-      expect(firstUpdateDoc).toMatchObject({
-        updated_at: mockTimestamp,
-        'index-pattern': { title: 'Testing 1' },
-        references: [
-          {
-            name: 'ref_0',
-            type: 'test',
-            id: '1',
-          },
-        ],
-      });
-
-      expect(secondUpdate).toMatchObject({
-        _id: 'foo-namespace:index-pattern:logstash-2',
-        _index: '.kibana-test',
-      });
-
-      expect(secondUpdateDoc).toMatchObject({
-        updated_at: mockTimestamp,
-        'index-pattern': { title: 'Testing 2' },
-        references: [
-          {
-            name: 'ref_0',
-            type: 'test',
-            id: '1',
-          },
-        ],
-      });
-    });
-
-    it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
-      const objects = [generateSavedObject(), generateSavedObject()];
-
-      mockValidResponse(objects);
-
-      await savedObjectsRepository.bulkUpdate(objects);
-
-      const [
-        ,
-        {
-          body: [
-            { update: firstUpdate },
-            { doc: firstUpdateDoc },
-            { update: secondUpdate },
-            { doc: secondUpdateDoc },
-          ],
-        },
-      ] = callAdminCluster.mock.calls[0];
-
-      expect(firstUpdate).toMatchObject({
-        _id: 'index-pattern:logstash-1',
-        _index: '.kibana-test',
-      });
-
-      expect(firstUpdateDoc).toMatchObject({
-        updated_at: mockTimestamp,
-        'index-pattern': { title: 'Testing 1' },
-        references: [
-          {
-            name: 'ref_0',
-            type: 'test',
-            id: '1',
-          },
-        ],
-      });
-
-      expect(secondUpdate).toMatchObject({
-        _id: 'index-pattern:logstash-2',
-        _index: '.kibana-test',
-      });
-
-      expect(secondUpdateDoc).toMatchObject({
-        updated_at: mockTimestamp,
-        'index-pattern': { title: 'Testing 2' },
-        references: [
-          {
-            name: 'ref_0',
-            type: 'test',
-            id: '1',
-          },
-        ],
-      });
-    });
-
-    it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
-      const objects = [
-        generateSavedObject({
-          type: 'globaltype',
-          id: 'foo',
-          namespace: 'foo-namespace',
-        }),
-      ];
-
-      mockValidResponse(objects);
-
-      await savedObjectsRepository.bulkUpdate(objects);
-
-      const [
-        ,
-        {
-          body: [{ update }, { doc }],
-        },
-      ] = callAdminCluster.mock.calls[0];
-
-      expect(update).toMatchObject({
-        _id: 'globaltype:foo',
-        _index: '.kibana-test',
-      });
-
-      expect(doc).toMatchObject({
-        updated_at: mockTimestamp,
-        globaltype: { title: 'Testing 1' },
-        references: [
-          {
-            name: 'ref_0',
-            type: 'test',
-            id: '1',
-          },
-        ],
-      });
-    });
-  });
-
-  describe('#incrementCounter', () => {
-    beforeEach(() => {
-      callAdminCluster.mockImplementation((method, params) => ({
-        _id: params.id,
-        ...mockVersionProps,
-        _index: '.kibana',
-        get: {
-          found: true,
-          _source: {
-            type: 'config',
-            ...mockTimestampFields,
-            config: {
-              buildNum: 8468,
-              defaultIndex: 'logstash-*',
-            },
-          },
-        },
-      }));
-    });
-
-    it('formats Elasticsearch response', async () => {
-      callAdminCluster.mockImplementation((method, params) => ({
-        _id: params.id,
-        ...mockVersionProps,
-        _index: '.kibana',
-        get: {
-          found: true,
-          _source: {
-            type: 'config',
-            ...mockTimestampFields,
-            config: {
-              buildNum: 8468,
-              defaultIndex: 'logstash-*',
-            },
-          },
-        },
-      }));
-
-      const response = await savedObjectsRepository.incrementCounter(
-        'config',
-        '6.0.0-alpha1',
-        'buildNum',
-        {
-          namespace: 'foo-namespace',
-        }
-      );
-
-      expect(response).toEqual({
-        type: 'config',
-        id: '6.0.0-alpha1',
-        ...mockTimestampFields,
-        version: mockVersion,
-        attributes: {
-          buildNum: 8468,
-          defaultIndex: 'logstash-*',
-        },
-      });
-    });
-
-    it('migrates the doc if an upsert is required', async () => {
-      migrator.migrateDocument = doc => {
-        doc.attributes.buildNum = 42;
-        doc.migrationVersion = { foo: '2.3.4' };
-        doc.references = [{ name: 'search_0', type: 'search', id: '123' }];
-        return doc;
+    describe('errors', () => {
+      const expectNotFoundError = async (type, id) => {
+        await expect(savedObjectsRepository.update(type, id)).rejects.toThrowError(
+          createGenericNotFoundError(type, id)
+        );
       };
 
-      await savedObjectsRepository.incrementCounter('config', 'doesnotexist', 'buildNum', {
-        namespace: 'foo-namespace',
+      it(`throws when type is invalid`, async () => {
+        await expectNotFoundError('unknownType', id);
+        expect(callAdminCluster).not.toHaveBeenCalled();
       });
 
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
-        body: {
-          upsert: {
-            config: { buildNum: 42 },
-            migrationVersion: { foo: '2.3.4' },
-            type: 'config',
-            ...mockTimestampFields,
-            references: [{ name: 'search_0', type: 'search', id: '123' }],
-          },
-        },
-      });
-    });
-
-    it('defaults to a refresh setting of `wait_for`', async () => {
-      await savedObjectsRepository.incrementCounter('config', 'doesnotexist', 'buildNum', {
-        namespace: 'foo-namespace',
+      it(`throws when type is hidden`, async () => {
+        await expectNotFoundError(HIDDEN_TYPE, id);
+        expect(callAdminCluster).not.toHaveBeenCalled();
       });
 
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
-        refresh: 'wait_for',
-      });
-    });
-
-    it('accepts a custom refresh setting', async () => {
-      await savedObjectsRepository.incrementCounter('config', 'doesnotexist', 'buildNum', {
-        namespace: 'foo-namespace',
-        refresh: true,
+      it(`throws when ES is unable to find the document during get`, async () => {
+        callAdminCluster.mockResolvedValue({ found: false }); // this._callCluster('get', ...)
+        await expectNotFoundError(MULTI_NAMESPACE_TYPE, id);
+        expectClusterCalls('get');
       });
 
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster.mock.calls[0][1]).toMatchObject({
-        refresh: true,
+      it(`throws when ES is unable to find the index during get`, async () => {
+        callAdminCluster.mockResolvedValue({ status: 404 }); // this._callCluster('get', ...)
+        await expectNotFoundError(MULTI_NAMESPACE_TYPE, id);
+        expectClusterCalls('get');
+      });
+
+      it(`throws when type is multi-namespace and the document exists, but not in this namespace`, async () => {
+        const response = getMockGetResponse({ type: MULTI_NAMESPACE_TYPE, id, namespace });
+        callAdminCluster.mockResolvedValue(response); // this._callCluster('get', ...)
+        await expectNotFoundError(MULTI_NAMESPACE_TYPE, id, { namespace: 'bar-namespace' });
+        expectClusterCalls('get');
+      });
+
+      it(`throws when ES is unable to find the document during update`, async () => {
+        callAdminCluster.mockResolvedValue({ status: 404 }); // this._writeToCluster('update', ...)
+        await expectNotFoundError(type, id);
+        expectClusterCalls('update');
       });
     });
 
-    it(`prepends namespace to the id but doesn't add namespace to body when providing namespace for namespaced type`, async () => {
-      await savedObjectsRepository.incrementCounter('config', '6.0.0-alpha1', 'buildNum', {
-        namespace: 'foo-namespace',
-      });
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-
-      const requestDoc = callAdminCluster.mock.calls[0][1];
-      expect(requestDoc.id).toBe('foo-namespace:config:6.0.0-alpha1');
-      expect(requestDoc.body.script.params.type).toBe('config');
-      expect(requestDoc.body.upsert.type).toBe('config');
-      expect(requestDoc).toHaveProperty('body.upsert.config');
-    });
-
-    it(`doesn't prepend namespace to the id or add namespace property when providing no namespace for namespaced type`, async () => {
-      await savedObjectsRepository.incrementCounter('config', '6.0.0-alpha1', 'buildNum');
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-
-      const requestDoc = callAdminCluster.mock.calls[0][1];
-      expect(requestDoc.id).toBe('config:6.0.0-alpha1');
-      expect(requestDoc.body.script.params.type).toBe('config');
-      expect(requestDoc.body.upsert.type).toBe('config');
-      expect(requestDoc).toHaveProperty('body.upsert.config');
-    });
-
-    it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
-      callAdminCluster.mockImplementation((method, params) => ({
-        _id: params.id,
-        ...mockVersionProps,
-        _index: '.kibana',
-        get: {
-          found: true,
-          _source: {
-            type: 'globaltype',
-            ...mockTimestampFields,
-            globaltype: {
-              counter: 1,
-            },
-          },
-        },
-      }));
-
-      await savedObjectsRepository.incrementCounter('globaltype', 'foo', 'counter', {
-        namespace: 'foo-namespace',
-      });
-
-      expect(callAdminCluster).toHaveBeenCalledTimes(1);
-
-      const requestDoc = callAdminCluster.mock.calls[0][1];
-      expect(requestDoc.id).toBe('globaltype:foo');
-      expect(requestDoc.body.script.params.type).toBe('globaltype');
-      expect(requestDoc.body.upsert.type).toBe('globaltype');
-      expect(requestDoc).toHaveProperty('body.upsert.globaltype');
-    });
-
-    it('should assert that the "type" and "counterFieldName" arguments are strings', () => {
-      expect.assertions(6);
-
-      expect(
-        savedObjectsRepository.incrementCounter(null, '6.0.0-alpha1', 'buildNum', {
-          namespace: 'foo-namespace',
-        })
-      ).rejects.toEqual(new Error('"type" argument must be a string'));
-
-      expect(
-        savedObjectsRepository.incrementCounter(42, '6.0.0-alpha1', 'buildNum', {
-          namespace: 'foo-namespace',
-        })
-      ).rejects.toEqual(new Error('"type" argument must be a string'));
-
-      expect(
-        savedObjectsRepository.incrementCounter({}, '6.0.0-alpha1', 'buildNum', {
-          namespace: 'foo-namespace',
-        })
-      ).rejects.toEqual(new Error('"type" argument must be a string'));
-
-      expect(
-        savedObjectsRepository.incrementCounter('config', '6.0.0-alpha1', null, {
-          namespace: 'foo-namespace',
-        })
-      ).rejects.toEqual(new Error('"counterFieldName" argument must be a string'));
-
-      expect(
-        savedObjectsRepository.incrementCounter('config', '6.0.0-alpha1', 42, {
-          namespace: 'foo-namespace',
-        })
-      ).rejects.toEqual(new Error('"counterFieldName" argument must be a string'));
-
-      expect(
-        savedObjectsRepository.incrementCounter(
-          'config',
-          '6.0.0-alpha1',
-          {},
-          {
-            namespace: 'foo-namespace',
-          }
-        )
-      ).rejects.toEqual(new Error('"counterFieldName" argument must be a string'));
-    });
-  });
-
-  describe('types on custom index', () => {
-    it("should error when attempting to 'update' an unsupported type", async () => {
-      await expect(
-        savedObjectsRepository.update('hiddenType', 'bogus', { title: 'some title' })
-      ).rejects.toEqual(new Error('Saved object [hiddenType/bogus] not found'));
-    });
-  });
-
-  describe('unsupported types', () => {
-    it("should error when attempting to 'update' an unsupported type", async () => {
-      await expect(
-        savedObjectsRepository.update('hiddenType', 'bogus', { title: 'some title' })
-      ).rejects.toEqual(new Error('Saved object [hiddenType/bogus] not found'));
-    });
-
-    it("should error when attempting to 'get' an unsupported type", async () => {
-      await expect(savedObjectsRepository.get('hiddenType')).rejects.toEqual(
-        new Error('Not Found')
-      );
-    });
-
-    it("should return an error object when attempting to 'create' an unsupported type", async () => {
-      await expect(
-        savedObjectsRepository.create('hiddenType', { title: 'some title' })
-      ).rejects.toEqual(new Error("Unsupported saved object type: 'hiddenType': Bad Request"));
-    });
-
-    it("should not return hidden saved ojects when attempting to 'find' support and unsupported types", async () => {
-      callAdminCluster.mockReturnValue({
-        hits: {
-          total: 1,
-          hits: [
-            {
-              _id: 'one',
-              _source: {
-                updated_at: mockTimestamp,
-                type: 'config',
-              },
-              references: [],
-            },
-          ],
-        },
-      });
-      const results = await savedObjectsRepository.find({ type: ['hiddenType', 'config'] });
-      expect(results).toEqual({
-        total: 1,
-        saved_objects: [
-          {
-            id: 'one',
-            references: [],
-            type: 'config',
-            updated_at: mockTimestamp,
-          },
-        ],
-        page: 1,
-        per_page: 20,
+    describe('migration', () => {
+      it(`waits until migrations are complete before proceeding`, async () => {
+        let callAdminClusterCount = 0;
+        migrator.runMigrations = jest.fn(async () =>
+          // runMigrations should resolve before callAdminCluster is initiated
+          expect(callAdminCluster).toHaveBeenCalledTimes(callAdminClusterCount++)
+        );
+        await expect(updateSuccess(type, id, attributes)).resolves.toBeDefined();
+        expect(migrator.runMigrations).toHaveReturnedTimes(1);
       });
     });
 
-    it("should return empty results when attempting to 'find' an unsupported type", async () => {
-      callAdminCluster.mockReturnValue({
-        hits: {
-          total: 0,
-          hits: [],
-        },
+    describe('returns', () => {
+      it(`returns _seq_no and _primary_term encoded as version`, async () => {
+        const result = await updateSuccess(type, id, attributes, {
+          namespace,
+          references,
+        });
+        expect(result).toEqual({
+          id,
+          type,
+          ...mockTimestampFields,
+          version: mockVersion,
+          attributes,
+          references,
+        });
       });
-      const results = await savedObjectsRepository.find({ type: 'hiddenType' });
-      expect(results).toEqual({
-        total: 0,
-        saved_objects: [],
-        page: 1,
-        per_page: 20,
-      });
-    });
 
-    it("should return empty results when attempting to 'find' more than one unsupported types", async () => {
-      const findParams = { type: ['hiddenType', 'hiddenType2'] };
-      callAdminCluster.mockReturnValue({
-        status: 200,
-        hits: {
-          total: 0,
-          hits: [],
-        },
+      it(`includes namespaces if type is multi-namespace`, async () => {
+        const result = await updateSuccess(MULTI_NAMESPACE_TYPE, id, attributes);
+        expect(result).toMatchObject({
+          namespaces: expect.any(Array),
+        });
       });
-      const results = await savedObjectsRepository.find(findParams);
-      expect(results).toEqual({
-        total: 0,
-        saved_objects: [],
-        page: 1,
-        per_page: 20,
-      });
-    });
 
-    it("should error when attempting to 'delete' hidden types", async () => {
-      await expect(savedObjectsRepository.delete('hiddenType')).rejects.toEqual(
-        new Error('Not Found')
-      );
-    });
-
-    it("should error when attempting to 'bulkCreate' an unsupported type", async () => {
-      callAdminCluster.mockReturnValue({
-        items: [
-          {
-            index: {
-              _id: 'one',
-              _seq_no: 1,
-              _primary_term: 1,
-              _type: 'config',
-              attributes: {
-                title: 'Test One',
-              },
-            },
-          },
-        ],
+      it(`doesn't include namespaces if type is not multi-namespace`, async () => {
+        const result = await updateSuccess(type, id, attributes);
+        expect(result).not.toMatchObject({
+          namespaces: expect.anything(),
+        });
       });
-      const results = await savedObjectsRepository.bulkCreate([
-        { type: 'config', id: 'one', attributes: { title: 'Test One' } },
-        { type: 'hiddenType', id: 'two', attributes: { title: 'Test Two' } },
-      ]);
-      expect(results).toEqual({
-        saved_objects: [
-          {
-            type: 'config',
-            id: 'one',
-            attributes: { title: 'Test One' },
-            references: [],
-            version: 'WzEsMV0=',
-            updated_at: mockTimestamp,
-          },
-          {
-            error: {
-              error: 'Bad Request',
-              message: "Unsupported saved object type: 'hiddenType': Bad Request",
-              statusCode: 400,
-            },
-            id: 'two',
-            type: 'hiddenType',
-          },
-        ],
-      });
-    });
-
-    it("should error when attempting to 'incrementCounter' for an unsupported type", async () => {
-      await expect(
-        savedObjectsRepository.incrementCounter('hiddenType', 'doesntmatter', 'fieldArg')
-      ).rejects.toEqual(new Error("Unsupported saved object type: 'hiddenType': Bad Request"));
     });
   });
 });

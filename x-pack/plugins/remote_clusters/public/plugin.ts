@@ -14,7 +14,12 @@ import { init as initNotification } from './application/services/notification';
 import { init as initRedirect } from './application/services/redirect';
 import { Dependencies, ClientConfigType } from './types';
 
-export class RemoteClustersUIPlugin implements Plugin<void, void, Dependencies, any> {
+export interface RemoteClustersPluginSetup {
+  isUiEnabled: boolean;
+}
+
+export class RemoteClustersUIPlugin
+  implements Plugin<RemoteClustersPluginSetup, void, Dependencies, any> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   setup(
@@ -55,6 +60,10 @@ export class RemoteClustersUIPlugin implements Plugin<void, void, Dependencies, 
         },
       });
     }
+
+    return {
+      isUiEnabled: isRemoteClustersUiEnabled,
+    };
   }
 
   start({ application }: CoreStart) {

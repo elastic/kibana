@@ -9,8 +9,7 @@ import { EuiBasicTable, EuiText, EuiTableFieldDataColumnType, EuiLink } from '@e
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
-import { usePageId } from '../use_page_id';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
   selectApiError,
   selectIsLoading,
@@ -21,38 +20,34 @@ import {
 } from '../../store/policy_list/selectors';
 import { usePolicyListSelector } from './policy_hooks';
 import { PolicyListAction } from '../../store/policy_list';
-import { PolicyData } from '../../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { PageView } from '../../components/page_view';
-import { LinkToApp } from '../../components/link_to_app';
+import { PageView } from '../components/page_view';
+import { LinkToApp } from '../components/link_to_app';
+import { Immutable, PolicyData } from '../../../../../common/types';
+import { useNavigateByRouterEventHandler } from '../hooks/use_navigate_by_router_event_handler';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
 }
 
-const PolicyLink: React.FC<{ name: string; route: string }> = ({ name, route }) => {
-  const history = useHistory();
-
+const PolicyLink: React.FC<{ name: string; route: string; href: string }> = ({
+  name,
+  route,
+  href,
+}) => {
+  const clickHandler = useNavigateByRouterEventHandler(route);
   return (
-    <EuiLink
-      onClick={(event: React.MouseEvent) => {
-        event.preventDefault();
-        history.push(route);
-      }}
-    >
+    // eslint-disable-next-line @elastic/eui/href-or-on-click
+    <EuiLink href={href} onClick={clickHandler} data-test-subj="policyNameLink">
       {name}
     </EuiLink>
   );
 };
 
-const renderPolicyNameLink = (value: string, _item: PolicyData) => {
-  return <PolicyLink name={value} route={`/policy/${_item.id}`} />;
-};
-
 export const PolicyList = React.memo(() => {
-  usePageId('policyListPage');
-
   const { services, notifications } = useKibana();
+  const history = useHistory();
+  const location = useLocation();
 
   const dispatch = useDispatch<(action: PolicyListAction) => void>();
   const policyItems = usePolicyListSelector(selectPolicyItems);
@@ -84,25 +79,28 @@ export const PolicyList = React.memo(() => {
 
   const handleTableChange = useCallback(
     ({ page: { index, size } }: TableChangeCallbackArguments) => {
-      dispatch({
-        type: 'userPaginatedPolicyListTable',
-        payload: {
-          pageIndex: index,
-          pageSize: size,
-        },
-      });
+      history.push(`${location.pathname}?page_index=${index}&page_size=${size}`);
     },
-    [dispatch]
+    [history, location.pathname]
   );
 
-  const columns: Array<EuiTableFieldDataColumnType<PolicyData>> = useMemo(
+  const columns: Array<EuiTableFieldDataColumnType<Immutable<PolicyData>>> = useMemo(
     () => [
       {
         field: 'name',
         name: i18n.translate('xpack.endpoint.policyList.nameField', {
           defaultMessage: 'Policy Name',
         }),
-        render: renderPolicyNameLink,
+        render: (value: string, item: Immutable<PolicyData>) => {
+          const routeUri = `/policy/${item.id}`;
+          return (
+            <PolicyLink
+              name={value}
+              route={routeUri}
+              href={services.application.getUrlForApp('endpoint') + routeUri}
+            />
+          );
+        },
         truncateText: true,
       },
       {
@@ -136,6 +134,7 @@ export const PolicyList = React.memo(() => {
         render(version: string) {
           return (
             <LinkToApp
+              data-test-subj="agentConfigLink"
               appId="ingestManager"
               appPath={`#/configs/${version}`}
               href={`${services.application.getUrlForApp('ingestManager')}#/configs/${version}`}
@@ -151,6 +150,7 @@ export const PolicyList = React.memo(() => {
 
   return (
     <PageView
+      viewType="list"
       data-test-subj="policyListPage"
       headerLeft={i18n.translate('xpack.endpoint.policyList.viewTitle', {
         defaultMessage: 'Policies',
@@ -166,7 +166,7 @@ export const PolicyList = React.memo(() => {
       }
     >
       <EuiBasicTable
-        items={policyItems}
+        items={useMemo(() => [...policyItems], [policyItems])}
         columns={columns}
         loading={loading}
         pagination={paginationSetup}

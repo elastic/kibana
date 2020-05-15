@@ -8,35 +8,39 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['uptime']);
+  const { uptime } = getPageObjects(['uptime']);
   const retry = getService('retry');
+  const esArchiver = getService('esArchiver');
 
   describe('overview page', function() {
     const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
     const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
+
+    before(async () => {
+      await esArchiver.loadIfNeeded('uptime/full_heartbeat');
+    });
+
+    beforeEach(async () => {
+      await uptime.goToRoot();
+      await uptime.setDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
+      await uptime.resetFilters();
+    });
+
     it('loads and displays uptime data based on date range', async () => {
-      await pageObjects.uptime.goToUptimeOverviewAndLoadData(
+      await uptime.goToUptimeOverviewAndLoadData(
         DEFAULT_DATE_START,
         DEFAULT_DATE_END,
         'monitor-page-link-0000-intermittent'
       );
     });
 
-    it('runs filter query without issues', async () => {
-      await pageObjects.uptime.inputFilterQuery(
-        'monitor.status:up and monitor.id:"0000-intermittent"'
-      );
-      await pageObjects.uptime.pageHasExpectedIds(['0000-intermittent']);
-    });
-
     it('applies filters for multiple fields', async () => {
-      await pageObjects.uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
-      await pageObjects.uptime.selectFilterItems({
+      await uptime.selectFilterItems({
         location: ['mpls'],
         port: ['5678'],
         scheme: ['http'],
       });
-      await pageObjects.uptime.pageHasExpectedIds([
+      await uptime.pageHasExpectedIds([
         '0000-intermittent',
         '0001-up',
         '0002-up',
@@ -51,9 +55,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('pagination is cleared when filter criteria changes', async () => {
-      await pageObjects.uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
-      await pageObjects.uptime.changePage('next');
-      await pageObjects.uptime.pageHasExpectedIds([
+      await uptime.changePage('next');
+      await uptime.pageHasExpectedIds([
         '0010-down',
         '0011-up',
         '0012-up',
@@ -66,9 +69,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         '0019-up',
       ]);
       // there should now be pagination data in the URL
-      await pageObjects.uptime.pageUrlContains('pagination');
-      await pageObjects.uptime.setStatusFilter('up');
-      await pageObjects.uptime.pageHasExpectedIds([
+      await uptime.pageUrlContains('pagination');
+      await uptime.setStatusFilter('up');
+      await uptime.pageHasExpectedIds([
         '0000-intermittent',
         '0001-up',
         '0002-up',
@@ -81,21 +84,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         '0009-up',
       ]);
       // ensure that pagination is removed from the URL
-      await pageObjects.uptime.pageUrlContains('pagination', false);
+      await uptime.pageUrlContains('pagination', false);
     });
 
     it('clears pagination parameters when size changes', async () => {
-      await pageObjects.uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
-      await pageObjects.uptime.changePage('next');
-      await pageObjects.uptime.pageUrlContains('pagination');
-      await pageObjects.uptime.setMonitorListPageSize(50);
+      await uptime.changePage('next');
+      await uptime.pageUrlContains('pagination');
+      await uptime.setMonitorListPageSize(50);
       // the pagination parameter should be cleared after a size change
-      await pageObjects.uptime.pageUrlContains('pagination', false);
+      await uptime.pageUrlContains('pagination', false);
     });
 
     it('pagination size updates to reflect current selection', async () => {
-      await pageObjects.uptime.goToUptimePageAndSetDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
-      await pageObjects.uptime.pageHasExpectedIds([
+      await uptime.pageHasExpectedIds([
         '0000-intermittent',
         '0001-up',
         '0002-up',
@@ -107,8 +108,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         '0008-up',
         '0009-up',
       ]);
-      await pageObjects.uptime.setMonitorListPageSize(50);
-      await pageObjects.uptime.pageHasExpectedIds([
+      await uptime.setMonitorListPageSize(50);
+      await uptime.pageHasExpectedIds([
         '0000-intermittent',
         '0001-up',
         '0002-up',
@@ -163,29 +164,27 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('snapshot counts', () => {
-      it('updates the snapshot count when status filter is set to down', async () => {
-        await pageObjects.uptime.goToUptimePageAndSetDateRange(
-          DEFAULT_DATE_START,
-          DEFAULT_DATE_END
-        );
-        await pageObjects.uptime.setStatusFilter('down');
+      it('should not update  when status filter is set to down', async () => {
+        await uptime.setStatusFilter('down');
 
         await retry.tryForTime(12000, async () => {
-          const counts = await pageObjects.uptime.getSnapshotCount();
-          expect(counts).to.eql({ up: '0', down: '7' });
+          const counts = await uptime.getSnapshotCount();
+          expect(counts).to.eql({ up: '93', down: '7' });
         });
       });
 
-      it('updates the snapshot count when status filter is set to up', async () => {
-        await pageObjects.uptime.goToUptimePageAndSetDateRange(
-          DEFAULT_DATE_START,
-          DEFAULT_DATE_END
-        );
-        await pageObjects.uptime.setStatusFilter('up');
+      it('should not update when status filter is set to up', async () => {
+        await uptime.setStatusFilter('up');
         await retry.tryForTime(12000, async () => {
-          const counts = await pageObjects.uptime.getSnapshotCount();
-          expect(counts).to.eql({ up: '93', down: '0' });
+          const counts = await uptime.getSnapshotCount();
+          expect(counts).to.eql({ up: '93', down: '7' });
         });
+      });
+
+      it('runs filter query without issues', async () => {
+        await uptime.inputFilterQuery('monitor.status:up and monitor.id:"0000-intermittent"');
+        await uptime.pageHasExpectedIds(['0000-intermittent']);
+        await uptime.resetFilters();
       });
     });
   });

@@ -7,6 +7,7 @@
 import * as Rx from 'rxjs';
 import { first, mapTo } from 'rxjs/operators';
 import {
+  ElasticsearchServiceSetup,
   IUiSettingsClient,
   KibanaRequest,
   SavedObjectsClient,
@@ -19,19 +20,27 @@ import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
 import { PLUGIN_ID } from '../common/constants';
 import { EnqueueJobFn, ESQueueInstance, ReportingPluginSpecOptions, ServerFacade } from '../types';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
+import { ReportingConfig, ReportingConfigType } from './config';
 import { checkLicenseFactory, getExportTypesRegistry, LevelLogger } from './lib';
 import { registerRoutes } from './routes';
 import { ReportingSetupDeps } from './types';
+import {
+  screenshotsObservableFactory,
+  ScreenshotsObservableFn,
+} from '../export_types/common/lib/screenshots';
 
 interface ReportingInternalSetup {
   browserDriverFactory: HeadlessChromiumDriverFactory;
+  elasticsearch: ElasticsearchServiceSetup;
 }
 interface ReportingInternalStart {
+  enqueueJob: EnqueueJobFn;
+  esqueue: ESQueueInstance;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
-  esqueue: ESQueueInstance;
-  enqueueJob: EnqueueJobFn;
 }
+
+export { ReportingConfig, ReportingConfigType };
 
 export class ReportingCore {
   private pluginSetupDeps?: ReportingInternalSetup;
@@ -40,7 +49,7 @@ export class ReportingCore {
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>();
   private exportTypesRegistry = getExportTypesRegistry();
 
-  constructor(private logger: LevelLogger) {}
+  constructor(private logger: LevelLogger, private config: ReportingConfig) {}
 
   legacySetup(
     xpackMainPlugin: XPackMainPlugin,
@@ -48,14 +57,18 @@ export class ReportingCore {
     __LEGACY: ServerFacade,
     plugins: ReportingSetupDeps
   ) {
+    // legacy plugin status
     mirrorPluginStatus(xpackMainPlugin, reporting);
+
+    // legacy license check
     const checkLicense = checkLicenseFactory(this.exportTypesRegistry);
     (xpackMainPlugin as any).status.once('green', () => {
       // Register a function that is called whenever the xpack info changes,
       // to re-compute the license check results for this plugin
       xpackMainPlugin.info.feature(PLUGIN_ID).registerLicenseCheckResultsGenerator(checkLicense);
     });
-    // Reporting routes
+
+    // legacy routes
     registerRoutes(this, __LEGACY, plugins, this.logger);
   }
 
@@ -86,25 +99,33 @@ export class ReportingCore {
     return (await this.getPluginStartDeps()).enqueueJob;
   }
 
-  public async getBrowserDriverFactory(): Promise<HeadlessChromiumDriverFactory> {
-    return (await this.getPluginSetupDeps()).browserDriverFactory;
+  public getConfig(): ReportingConfig {
+    return this.config;
+  }
+  public async getScreenshotsObservable(): Promise<ScreenshotsObservableFn> {
+    const { browserDriverFactory } = await this.getPluginSetupDeps();
+    return screenshotsObservableFactory(this.config.get('capture'), browserDriverFactory);
   }
 
   /*
-   * Kibana core module dependencies
+   * Outside dependencies
    */
-  private async getPluginSetupDeps() {
+  private async getPluginSetupDeps(): Promise<ReportingInternalSetup> {
     if (this.pluginSetupDeps) {
       return this.pluginSetupDeps;
     }
     return await this.pluginSetup$.pipe(first()).toPromise();
   }
 
-  private async getPluginStartDeps() {
+  private async getPluginStartDeps(): Promise<ReportingInternalStart> {
     if (this.pluginStartDeps) {
       return this.pluginStartDeps;
     }
     return await this.pluginStart$.pipe(first()).toPromise();
+  }
+
+  public async getElasticsearchService(): Promise<ElasticsearchServiceSetup> {
+    return (await this.getPluginSetupDeps()).elasticsearch;
   }
 
   public async getSavedObjectsClient(fakeRequest: KibanaRequest): Promise<SavedObjectsClient> {

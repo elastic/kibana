@@ -27,6 +27,9 @@ export interface Field {
   ignore_above?: number;
   object_type?: string;
   scaling_factor?: number;
+  dynamic?: 'strict' | boolean;
+  include_in_parent?: boolean;
+  include_in_root?: boolean;
 
   // Kibana specific
   analyzed?: boolean;
@@ -52,13 +55,12 @@ export type Fields = Field[];
  * expandFields takes the given fields read from yaml and expands them.
  * There are dotted fields in the field.yml like `foo.bar`. These should
  * be stored as an field within a 'group' field.
- *
- * Note: This function modifies the passed fields array.
  */
-export function expandFields(fields: Fields) {
+export function expandFields(fields: Fields): Fields {
+  const newFields: Fields = [];
+
   fields.forEach((field, key) => {
     const fieldName = field.name;
-
     // If the field name contains a dot, it means we need to
     // - take the first part of the name
     // - create a field of type 'group' with this first part
@@ -71,30 +73,29 @@ export function expandFields(fields: Fields) {
       const groupFieldName = nameParts[0];
 
       // Put back together the parts again for the new field name
-      const restFieldName = nameParts.slice(1).join('.');
+      const nestedFieldName = nameParts.slice(1).join('.');
 
       // keep all properties of the original field, but give it the shortened name
-      field.name = restFieldName;
+      const nestedField = { ...field, name: nestedFieldName };
 
       // create a new field of type group with the original field in the fields array
       const groupField: Field = {
         name: groupFieldName,
         type: 'group',
-        fields: [field],
+        fields: expandFields([nestedField]),
       };
-      // check child fields further down the tree
-      if (groupField.fields) {
-        expandFields(groupField.fields);
-      }
       // Replace the original field in the array with the new one
-      fields[key] = groupField;
+      newFields.push(groupField);
     } else {
       // even if this field doesn't have dots to expand, its child fields further down the tree might
-      if (field.fields) {
-        expandFields(field.fields);
+      const newField = { ...field };
+      if (newField.fields) {
+        newField.fields = expandFields(newField.fields);
       }
+      newFields.push(newField);
     }
   });
+  return newFields;
 }
 /**
  * dedupFields takes the given fields and merges sibling fields with the
@@ -109,10 +110,54 @@ function dedupFields(fields: Fields): Fields {
       return f.name === field.name;
     });
     if (found) {
-      if (found.type === 'group' && field.type === 'group' && found.fields && field.fields) {
-        found.fields = dedupFields(found.fields.concat(field.fields));
+      // remove name, type, and fields from `field` variable so we avoid merging them into `found`
+      const { name, type, fields: nestedFields, ...importantFieldProps } = field;
+      /**
+       * There are a couple scenarios this if is trying to account for:
+       * Example 1
+       *  - name: a.b
+       *  - name: a
+       *  In this scenario found will be `group` and field could be either `object` or `nested`
+       * Example 2
+       *  - name: a
+       *  - name: a.b
+       *  In this scenario found could be `object` or `nested` and field will be group
+       */
+      if (
+        // only merge if found is a group and field is object, nested, or group.
+        // Or if found is object, or nested, and field is a group.
+        // This is to avoid merging two objects, or nested, or object with a nested.
+        (found.type === 'group' &&
+          (field.type === 'object' || field.type === 'nested' || field.type === 'group')) ||
+        ((found.type === 'object' || found.type === 'nested') && field.type === 'group')
+      ) {
+        // if the new field has properties let's dedup and concat them with the already existing found variable in
+        // the array
+        if (field.fields) {
+          // if the found type was object or nested it won't have a fields array so let's initialize it
+          if (!found.fields) {
+            found.fields = [];
+          }
+          found.fields = dedupFields(found.fields.concat(field.fields));
+        }
+
+        // if found already had fields or got new ones from the new field coming in we need to assign the right
+        // type to it
+        if (found.fields) {
+          // If this field is supposed to be `nested` and we have fields, we need to preserve the fact that it is
+          // supposed to be `nested` for when the template is actually generated
+          if (found.type === 'nested' || field.type === 'nested') {
+            found.type = 'group-nested';
+          } else {
+            // found was either `group` already or `object` so just set it to `group`
+            found.type = 'group';
+          }
+        }
+        // we need to merge in other properties (like `dynamic`) that might exist
+        Object.assign(found, importantFieldProps);
+        // if `field.type` wasn't group object or nested, then there's a conflict in types, so lets ignore it
       } else {
-        // only 'group' fields can be merged in this way
+        // only `group`, `object`, and `nested` fields can be merged in this way
         // XXX: don't abort on error for now
         // see discussion in https://github.com/elastic/kibana/pull/59894
         // throw new Error(
@@ -180,8 +225,8 @@ export const getField = (fields: Fields, pathNames: string[]): Field | undefined
 };
 
 export function processFields(fields: Fields): Fields {
-  expandFields(fields);
-  const dedupedFields = dedupFields(fields);
+  const expandedFields = expandFields(fields);
+  const dedupedFields = dedupFields(expandedFields);
   return validateFields(dedupedFields, dedupedFields);
 }
 

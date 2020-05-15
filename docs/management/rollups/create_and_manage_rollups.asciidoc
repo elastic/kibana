@@ -42,8 +42,8 @@ image::images/management_create_rollup_job.png[][Wizard that walks you through c
 === Start, stop, and delete rollup jobs
 
 Once you’ve saved a rollup job, you’ll see it the *Rollup Jobs* overview page,
-where you can drill down for further investigation. The *Manage* menu in
-the lower right enables you to start, stop, and delete the rollup job.
+where you can drill down for further investigation. The *Manage* menu enables
+you to start, stop, and delete the rollup job.
 You must first stop a rollup job before deleting it.
 
 [role="screenshot"]

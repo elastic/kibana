@@ -14,11 +14,13 @@ import {
   SpaceIdToNamespaceFunction,
 } from '../types';
 import { TaskRunner } from './task_runner';
+import { IEventLogger } from '../../../event_log/server';
 
 export interface TaskRunnerContext {
   logger: Logger;
   getServices: GetServicesFunction;
   actionsPlugin: ActionsPluginStartContract;
+  eventLogger: IEventLogger;
   encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;

@@ -7,8 +7,8 @@
 import Boom from 'boom';
 import { i18n } from '@kbn/i18n';
 import { Observable, Subscription } from 'rxjs';
-import { ILicense, LICENSE_CHECK_STATE } from '../../../../plugins/licensing/common/types';
-import { assertNever } from '../../../../../src/core/utils';
+import { ILicense } from '../../../../plugins/licensing/common/types';
+import { assertNever } from '../../../../../src/core/server';
 import { PLUGIN } from '../constants/plugin';
 
 export interface AlertingLicenseInformation {
@@ -55,20 +55,20 @@ export class LicenseState {
     const check = license.check(PLUGIN.ID, PLUGIN.MINIMUM_LICENSE_REQUIRED);
 
     switch (check.state) {
-      case LICENSE_CHECK_STATE.Expired:
+      case 'expired':
         return {
           showAppLink: true,
           enableAppLink: false,
           message: check.message || '',
         };
-      case LICENSE_CHECK_STATE.Invalid:
-      case LICENSE_CHECK_STATE.Unavailable:
+      case 'invalid':
+      case 'unavailable':
         return {
           showAppLink: false,
           enableAppLink: false,
           message: check.message || '',
         };
-      case LICENSE_CHECK_STATE.Valid:
+      case 'valid':
         return {
           showAppLink: true,
           enableAppLink: true,

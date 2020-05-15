@@ -69,31 +69,47 @@
  *    `appSearchSource`.
  */
 
-import _ from 'lodash';
+import { uniqueId, uniq, extend, pick, difference, omit, set, keys, isFunction } from 'lodash';
+import { map } from 'rxjs/operators';
+import { CoreStart } from 'kibana/public';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/public';
-import { IIndexPattern, SearchRequest } from '../..';
+import { META_FIELDS_SETTING, DOC_HIGHLIGHT_SETTING } from '../../../common';
+import { IIndexPattern, ISearchGeneric, SearchRequest } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
-import { fetchSoon, FetchOptions, RequestFailure } from '../fetch';
+import { FetchOptions, RequestFailure, getSearchParams, handleResponse } from '../fetch';
 
-import { getSearchService, getUiSettings, getInjectedMetadata } from '../../services';
 import { getEsQueryConfig, buildEsQuery, Filter } from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
+import { fetchSoon } from '../legacy';
+import { extractReferences } from './extract_references';
+import { ISearchStartLegacy } from '../types';
 
-export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
+export interface SearchSourceDependencies {
+  uiSettings: CoreStart['uiSettings'];
+  search: ISearchGeneric;
+  legacySearch: ISearchStartLegacy;
+  injectedMetadata: CoreStart['injectedMetadata'];
+}
 
+/** @public **/
 export class SearchSource {
-  private id: string = _.uniqueId('data_source');
+  private id: string = uniqueId('data_source');
   private searchStrategyId?: string;
   private parent?: SearchSource;
   private requestStartHandlers: Array<
-    (searchSource: ISearchSource, options?: FetchOptions) => Promise<unknown>
+    (searchSource: SearchSource, options?: FetchOptions) => Promise<unknown>
   > = [];
   private inheritOptions: SearchSourceOptions = {};
   public history: SearchRequest[] = [];
+  private fields: SearchSourceFields;
+  private readonly dependencies: SearchSourceDependencies;
 
-  constructor(private fields: SearchSourceFields = {}) {}
+  constructor(fields: SearchSourceFields = {}, dependencies: SearchSourceDependencies) {
+    this.fields = fields;
+    this.dependencies = dependencies;
+  }
 
   /** ***
    * PUBLIC API
@@ -144,11 +160,11 @@ export class SearchSource {
   }
 
   create() {
-    return new SearchSource();
+    return new SearchSource({}, this.dependencies);
   }
 
   createCopy() {
-    const newSearchSource = new SearchSource();
+    const newSearchSource = new SearchSource({}, this.dependencies);
     newSearchSource.setFields({ ...this.fields });
     // when serializing the internal fields we lose the internal classes used in the index
     // pattern, so we have to set it again to workaround this behavior
@@ -158,7 +174,7 @@ export class SearchSource {
   }
 
   createChild(options = {}) {
-    const childSearchSource = new SearchSource();
+    const childSearchSource = new SearchSource({}, this.dependencies);
     childSearchSource.setParent(this, options);
     return childSearchSource;
   }
@@ -184,29 +200,62 @@ export class SearchSource {
   }
 
   /**
-   * Fetch this source and reject the returned Promise on error
-   *
-   * @async
+   * Run a search using the search service
+   * @return {Observable<SearchResponse<unknown>>}
    */
-  async fetch(options: FetchOptions = {}) {
-    await this.requestIsStarting(options);
+  private fetch$(searchRequest: SearchRequest, signal?: AbortSignal) {
+    const { search, injectedMetadata, uiSettings } = this.dependencies;
+    const esShardTimeout = injectedMetadata.getInjectedVar('esShardTimeout') as number;
+    const searchParams = getSearchParams(uiSettings, esShardTimeout);
+    const params = {
+      index: searchRequest.index.title || searchRequest.index,
+      body: searchRequest.body,
+      ...searchParams,
+    };
+    return search({ params, indexType: searchRequest.indexType }, { signal }).pipe(
+      map(({ rawResponse }) => handleResponse(searchRequest, rawResponse))
+    );
+  }
 
-    const searchRequest = await this.flatten();
-    this.history = [searchRequest];
+  /**
+   * Run a search using the search service
+   * @return {Promise<SearchResponse<unknown>>}
+   */
+  private async legacyFetch(searchRequest: SearchRequest, options: FetchOptions) {
+    const { injectedMetadata, legacySearch, uiSettings } = this.dependencies;
+    const esShardTimeout = injectedMetadata.getInjectedVar('esShardTimeout') as number;
 
-    const esShardTimeout = getInjectedMetadata().getInjectedVar('esShardTimeout') as number;
-    const response = await fetchSoon(
+    return await fetchSoon(
       searchRequest,
       {
         ...(this.searchStrategyId && { searchStrategyId: this.searchStrategyId }),
         ...options,
       },
       {
-        searchService: getSearchService(),
-        config: getUiSettings(),
+        legacySearchService: legacySearch,
+        config: uiSettings,
         esShardTimeout,
       }
     );
+  }
+  /**
+   * Fetch this source and reject the returned Promise on error
+   *
+   * @async
+   */
+  async fetch(options: FetchOptions = {}) {
+    const { uiSettings } = this.dependencies;
+    await this.requestIsStarting(options);
+
+    const searchRequest = await this.flatten();
+    this.history = [searchRequest];
+
+    let response;
+    if (uiSettings.get('courier:batchSearches')) {
+      response = await this.legacyFetch(searchRequest, options);
+    } else {
+      response = this.fetch$(searchRequest, options.abortSignal).toPromise();
+    }
 
     if (response.error) {
       throw new RequestFailure(null, response);
@@ -221,7 +270,7 @@ export class SearchSource {
    *  @return {undefined}
    */
   onRequestStart(
-    handler: (searchSource: ISearchSource, options?: FetchOptions) => Promise<unknown>
+    handler: (searchSource: SearchSource, options?: FetchOptions) => Promise<unknown>
   ) {
     this.requestStartHandlers.push(handler);
   }
@@ -245,7 +294,6 @@ export class SearchSource {
 
   /**
    *  Called by requests of this search source when they are started
-   *  @param  {Courier.Request} request
    *  @param options
    *  @return {Promise<undefined>}
    */
@@ -295,13 +343,15 @@ export class SearchSource {
       }
     };
 
+    const { uiSettings } = this.dependencies;
+
     switch (key) {
       case 'filter':
         return addToRoot('filters', (data.filters || []).concat(val));
       case 'query':
         return addToRoot(key, (data[key] || []).concat(val));
       case 'fields':
-        const fields = _.uniq((data[key] || []).concat(val));
+        const fields = uniq((data[key] || []).concat(val));
         return addToRoot(key, fields);
       case 'index':
       case 'type':
@@ -315,7 +365,7 @@ export class SearchSource {
         const sort = normalizeSortRequest(
           val,
           this.getField('index'),
-          getUiSettings().get('sort:options')
+          uiSettings.get('sort:options')
         );
         return addToBody(key, sort);
       default:
@@ -358,7 +408,7 @@ export class SearchSource {
 
     body.stored_fields = computedFields.storedFields;
     body.script_fields = body.script_fields || {};
-    _.extend(body.script_fields, computedFields.scriptFields);
+    extend(body.script_fields, computedFields.scriptFields);
 
     const defaultDocValueFields = computedFields.docvalueFields
       ? computedFields.docvalueFields
@@ -369,9 +419,14 @@ export class SearchSource {
       body._source = index.getSourceFiltering();
     }
 
+    const { uiSettings } = this.dependencies;
+
     if (body._source) {
       // exclude source fields for this index pattern specified by the user
-      const filter = fieldWildcardFilter(body._source.excludes, getUiSettings().get('metaFields'));
+      const filter = fieldWildcardFilter(
+        body._source.excludes,
+        uiSettings.get(META_FIELDS_SETTING)
+      );
       body.docvalue_fields = body.docvalue_fields.filter((docvalueField: any) =>
         filter(docvalueField.field)
       );
@@ -381,42 +436,75 @@ export class SearchSource {
     if (fields) {
       // filter out the docvalue_fields, and script_fields to only include those that we are concerned with
       body.docvalue_fields = filterDocvalueFields(body.docvalue_fields, fields);
-      body.script_fields = _.pick(body.script_fields, fields);
+      body.script_fields = pick(body.script_fields, fields);
 
       // request the remaining fields from both stored_fields and _source
-      const remainingFields = _.difference(fields, _.keys(body.script_fields));
+      const remainingFields = difference(fields, keys(body.script_fields));
       body.stored_fields = remainingFields;
-      _.set(body, '_source.includes', remainingFields);
+      set(body, '_source.includes', remainingFields);
     }
 
-    const esQueryConfigs = getEsQueryConfig(getUiSettings());
+    const esQueryConfigs = getEsQueryConfig(uiSettings);
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
     if (highlightAll && body.query) {
-      body.highlight = getHighlightRequest(body.query, getUiSettings().get('doc_table:highlight'));
+      body.highlight = getHighlightRequest(body.query, uiSettings.get(DOC_HIGHLIGHT_SETTING));
       delete searchRequest.highlightAll;
     }
 
-    const translateToQuery = (filter: Filter) => filter && (filter.query || filter);
-
-    // re-write filters within filter aggregations
-    (function recurse(aggBranch) {
-      if (!aggBranch) return;
-      Object.keys(aggBranch).forEach(function(id) {
-        const agg = aggBranch[id];
-
-        if (agg.filters) {
-          // translate filters aggregations
-          const { filters: aggFilters } = agg.filters;
-          Object.keys(aggFilters).forEach(filterId => {
-            aggFilters[filterId] = translateToQuery(aggFilters[filterId]);
-          });
-        }
-
-        recurse(agg.aggs || agg.aggregations);
-      });
-    })(body.aggs || body.aggregations);
-
     return searchRequest;
   }
+
+  public getSerializedFields() {
+    const { filter: originalFilters, ...searchSourceFields } = omit(this.getFields(), [
+      'sort',
+      'size',
+    ]);
+    let serializedSearchSourceFields: SearchSourceFields = {
+      ...searchSourceFields,
+      index: searchSourceFields.index ? searchSourceFields.index.id : undefined,
+    };
+    if (originalFilters) {
+      const filters = this.getFilters(originalFilters);
+      serializedSearchSourceFields = {
+        ...serializedSearchSourceFields,
+        filter: filters,
+      };
+    }
+    return serializedSearchSourceFields;
+  }
+
+  /**
+   * Serializes the instance to a JSON string and a set of referenced objects.
+   * Use this method to get a representation of the search source which can be stored in a saved object.
+   *
+   * The references returned by this function can be mixed with other references in the same object,
+   * however make sure there are no name-collisions. The references will be named `kibanaSavedObjectMeta.searchSourceJSON.index`
+   * and `kibanaSavedObjectMeta.searchSourceJSON.filter[<number>].meta.index`.
+   *
+   * Using `createSearchSource`, the instance can be re-created.
+   * @public */
+  public serialize() {
+    const [searchSourceFields, references] = extractReferences(this.getSerializedFields());
+    return { searchSourceJSON: JSON.stringify(searchSourceFields), references };
+  }
+
+  private getFilters(filterField: SearchSourceFields['filter']): Filter[] {
+    if (!filterField) {
+      return [];
+    }
+
+    if (Array.isArray(filterField)) {
+      return filterField;
+    }
+
+    if (isFunction(filterField)) {
+      return this.getFilters(filterField());
+    }
+
+    return [filterField];
+  }
 }
+
+/** @public **/
+export type ISearchSource = Pick<SearchSource, keyof SearchSource>;

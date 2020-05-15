@@ -31,6 +31,7 @@ import {
   runTests,
   DockerServersService,
   Config,
+  SuiteTracker,
 } from './lib';
 
 export class FunctionalTestRunner {
@@ -53,6 +54,8 @@ export class FunctionalTestRunner {
 
   async run() {
     return await this._run(async (config, coreProviders) => {
+      SuiteTracker.startTracking(this.lifecycle, this.configFile);
+
       const providers = new ProviderCollection(this.log, [
         ...coreProviders,
         ...readProviderSpec('Service', config.get('services')),

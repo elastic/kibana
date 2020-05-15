@@ -118,6 +118,9 @@ export class CategorizationJobCreator extends JobCreator {
     this._categoryFieldExamples = examples;
     this._validationChecks = validationChecks;
     this._overallValidStatus = overallValidStatus;
+
+    this._wizardInitialized$.next(true);
+
     return { examples, sampleSize, overallValidStatus, validationChecks };
   }
 

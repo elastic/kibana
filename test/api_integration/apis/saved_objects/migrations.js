@@ -383,7 +383,7 @@ function migrationsToTypes(migrations) {
   return Object.entries(migrations).map(([type, migrations]) => ({
     name: type,
     hidden: false,
-    namespaceAgnostic: false,
+    namespaceType: 'single',
     mappings: { properties: {} },
     migrations: { ...migrations },
   }));

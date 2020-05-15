@@ -175,10 +175,9 @@ export const createHandler = ({
 
       break;
     } catch (e) {
+      // If we reached here it means we hit a lower level network issue than just, for e.g., a 500.
+      // We try contacting another node in that case.
       log.error(e);
-      if (e.code !== 'ECONNREFUSED') {
-        return response.internalError(e);
-      }
       if (idx === hosts.length - 1) {
         log.warn(`Could not connect to any configured ES node [${hosts.join(', ')}]`);
         return response.customError({

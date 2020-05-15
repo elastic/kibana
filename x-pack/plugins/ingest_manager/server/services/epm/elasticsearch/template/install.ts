@@ -4,13 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  AssetReference,
-  Dataset,
-  RegistryPackage,
-  IngestAssetType,
-  ElasticsearchAssetType,
-} from '../../../../types';
+import { Dataset, RegistryPackage, ElasticsearchAssetType, TemplateRef } from '../../../../types';
 import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
 import { getPipelineNameForInstallation } from '../ingest_pipeline/install';
@@ -20,16 +14,19 @@ import * as Registry from '../../registry';
 export const installTemplates = async (
   registryPackage: RegistryPackage,
   callCluster: CallESAsCurrentUser,
-  pkgkey: string
-) => {
+  pkgName: string,
+  pkgVersion: string
+): Promise<TemplateRef[]> => {
   // install any pre-built index template assets,
-  // atm, this is only the base package's global template
-  installPreBuiltTemplates(pkgkey, callCluster);
+  // atm, this is only the base package's global index templates
+  // Install component templates first, as they are used by the index templates
+  installPreBuiltComponentTemplates(pkgName, pkgVersion, callCluster);
+  installPreBuiltTemplates(pkgName, pkgVersion, callCluster);
 
   // build templates per dataset from yml files
   const datasets = registryPackage.datasets;
   if (datasets) {
-    const templates = datasets.reduce<Array<Promise<AssetReference>>>((acc, dataset) => {
+    const installTemplatePromises = datasets.reduce<Array<Promise<TemplateRef>>>((acc, dataset) => {
       acc.push(
         installTemplateForDataset({
           pkg: registryPackage,
@@ -39,30 +36,108 @@ export const installTemplates = async (
       );
       return acc;
     }, []);
-    return Promise.all(templates).then(results => results.flat());
+
+    const res = await Promise.all(installTemplatePromises);
+    return res.flat();
   }
   return [];
 };
 
-// this is temporary until we update the registry to use index templates v2 structure
-const installPreBuiltTemplates = async (pkgkey: string, callCluster: CallESAsCurrentUser) => {
-  const templatePaths = await Registry.getArchiveInfo(pkgkey, (entry: Registry.ArchiveEntry) =>
-    isTemplate(entry)
+const installPreBuiltTemplates = async (
+  pkgName: string,
+  pkgVersion: string,
+  callCluster: CallESAsCurrentUser
+) => {
+  const templatePaths = await Registry.getArchiveInfo(
+    pkgName,
+    pkgVersion,
+    (entry: Registry.ArchiveEntry) => isTemplate(entry)
+  );
+  // templatePaths.forEach(async path => {
+  //   const { file } = Registry.pathParts(path);
+  //   const templateName = file.substr(0, file.lastIndexOf('.'));
+  //   const content = JSON.parse(Registry.getAsset(path).toString('utf8'));
+  //   await callCluster('indices.putTemplate', {
+  //     name: templateName,
+  //     body: content,
+  //   });
+  // });
+  templatePaths.forEach(async path => {
+    const { file } = Registry.pathParts(path);
+    const templateName = file.substr(0, file.lastIndexOf('.'));
+    const content = JSON.parse(Registry.getAsset(path).toString('utf8'));
+    let templateAPIPath = '_template';
+
+    // v2 index templates need to be installed through the new API endpoint.
+    // Checking for 'template' and 'composed_of' should catch them all.
+    // For the new v2 format, see https://github.com/elastic/elasticsearch/issues/53101
+    if (content.hasOwnProperty('template') || content.hasOwnProperty('composed_of')) {
+      templateAPIPath = '_index_template';
+    }
+
+    const callClusterParams: {
+      method: string;
+      path: string;
+      ignore: number[];
+      body: any;
+    } = {
+      method: 'PUT',
+      path: `/${templateAPIPath}/${templateName}`,
+      ignore: [404],
+      body: content,
+    };
+    // This uses the catch-all endpoint 'transport.request' because there is no
+    // convenience endpoint using the new _index_template API yet.
+    // The existing convenience endpoint `indices.putTemplate` only sends to _template,
+    // which does not support v2 templates.
+    // See src/core/server/elasticsearch/api_types.ts for available endpoints.
+    await callCluster('transport.request', callClusterParams);
+  });
+};
+
+const installPreBuiltComponentTemplates = async (
+  pkgName: string,
+  pkgVersion: string,
+  callCluster: CallESAsCurrentUser
+) => {
+  const templatePaths = await Registry.getArchiveInfo(
+    pkgName,
+    pkgVersion,
+    (entry: Registry.ArchiveEntry) => isComponentTemplate(entry)
   );
   templatePaths.forEach(async path => {
     const { file } = Registry.pathParts(path);
     const templateName = file.substr(0, file.lastIndexOf('.'));
     const content = JSON.parse(Registry.getAsset(path).toString('utf8'));
-    await callCluster('indices.putTemplate', {
-      name: templateName,
+
+    const callClusterParams: {
+      method: string;
+      path: string;
+      ignore: number[];
+      body: any;
+    } = {
+      method: 'PUT',
+      path: `/_component_template/${templateName}`,
+      ignore: [404],
       body: content,
-    });
+    };
+    // This uses the catch-all endpoint 'transport.request' because there is no
+    // convenience endpoint for component templates yet.
+    // See src/core/server/elasticsearch/api_types.ts for available endpoints.
+    await callCluster('transport.request', callClusterParams);
   });
 };
+
 const isTemplate = ({ path }: Registry.ArchiveEntry) => {
   const pathParts = Registry.pathParts(path);
   return pathParts.type === ElasticsearchAssetType.indexTemplate;
 };
+
+const isComponentTemplate = ({ path }: Registry.ArchiveEntry) => {
+  const pathParts = Registry.pathParts(path);
+  return pathParts.type === ElasticsearchAssetType.componentTemplate;
+};
+
 /**
  * installTemplatesForDataset installs one template for each dataset
  *
@@ -77,7 +152,7 @@ export async function installTemplateForDataset({
   pkg: RegistryPackage;
   callCluster: CallESAsCurrentUser;
   dataset: Dataset;
-}): Promise<AssetReference> {
+}): Promise<TemplateRef> {
   const fields = await loadFieldsFromYaml(pkg, dataset.path);
   return installTemplate({
     callCluster,
@@ -97,7 +172,7 @@ export async function installTemplate({
   fields: Field[];
   dataset: Dataset;
   packageVersion: string;
-}): Promise<AssetReference> {
+}): Promise<TemplateRef> {
   const mappings = generateMappings(processFields(fields));
   const templateName = generateTemplateName(dataset);
   let pipelineName;
@@ -110,11 +185,26 @@ export async function installTemplate({
   }
   const template = getTemplate(dataset.type, templateName, mappings, pipelineName);
   // TODO: Check return values for errors
-  await callCluster('indices.putTemplate', {
-    name: templateName,
+  const callClusterParams: {
+    method: string;
+    path: string;
+    ignore: number[];
+    body: any;
+  } = {
+    method: 'PUT',
+    path: `/_index_template/${templateName}`,
+    ignore: [404],
     body: template,
-  });
+  };
+  // This uses the catch-all endpoint 'transport.request' because there is no
+  // convenience endpoint using the new _index_template API yet.
+  // The existing convenience endpoint `indices.putTemplate` only sends to _template,
+  // which does not support v2 templates.
+  // See src/core/server/elasticsearch/api_types.ts for available endpoints.
+  await callCluster('transport.request', callClusterParams);
 
-  // The id of a template is its name
-  return { id: templateName, type: IngestAssetType.IndexTemplate };
+  return {
+    templateName,
+    indexTemplate: template,
+  };
 }

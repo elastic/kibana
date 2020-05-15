@@ -140,7 +140,7 @@ export class NavControlPopover extends Component<Props, State> {
     }
 
     return this.getButton(
-      <SpaceAvatar space={activeSpace} size={'s'} className={'spaceNavGraphic'} />,
+      <SpaceAvatar space={activeSpace} size={'s'} />,
       (activeSpace as Space).name
     );
   };

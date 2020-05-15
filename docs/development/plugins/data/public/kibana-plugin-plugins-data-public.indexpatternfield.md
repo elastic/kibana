@@ -14,7 +14,7 @@ export declare class Field implements IFieldType
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(indexPattern, spec, shortDotsEnable)](./kibana-plugin-plugins-data-public.indexpatternfield._constructor_.md) |  | Constructs a new instance of the <code>Field</code> class |
+|  [(constructor)(indexPattern, spec, shortDotsEnable, { fieldFormats, toastNotifications })](./kibana-plugin-plugins-data-public.indexpatternfield._constructor_.md) |  | Constructs a new instance of the <code>Field</code> class |
 
 ## Properties
 
@@ -22,14 +22,15 @@ export declare class Field implements IFieldType
 |  --- | --- | --- | --- |
 |  [$$spec](./kibana-plugin-plugins-data-public.indexpatternfield.__spec.md) |  | <code>FieldSpec</code> |  |
 |  [aggregatable](./kibana-plugin-plugins-data-public.indexpatternfield.aggregatable.md) |  | <code>boolean</code> |  |
+|  [conflictDescriptions](./kibana-plugin-plugins-data-public.indexpatternfield.conflictdescriptions.md) |  | <code>Record&lt;string, string[]&gt;</code> |  |
 |  [count](./kibana-plugin-plugins-data-public.indexpatternfield.count.md) |  | <code>number</code> |  |
 |  [displayName](./kibana-plugin-plugins-data-public.indexpatternfield.displayname.md) |  | <code>string</code> |  |
 |  [esTypes](./kibana-plugin-plugins-data-public.indexpatternfield.estypes.md) |  | <code>string[]</code> |  |
 |  [filterable](./kibana-plugin-plugins-data-public.indexpatternfield.filterable.md) |  | <code>boolean</code> |  |
 |  [format](./kibana-plugin-plugins-data-public.indexpatternfield.format.md) |  | <code>any</code> |  |
+|  [indexPattern](./kibana-plugin-plugins-data-public.indexpatternfield.indexpattern.md) |  | <code>IndexPattern</code> |  |
 |  [lang](./kibana-plugin-plugins-data-public.indexpatternfield.lang.md) |  | <code>string</code> |  |
 |  [name](./kibana-plugin-plugins-data-public.indexpatternfield.name.md) |  | <code>string</code> |  |
-|  [routes](./kibana-plugin-plugins-data-public.indexpatternfield.routes.md) |  | <code>Record&lt;string, string&gt;</code> |  |
 |  [script](./kibana-plugin-plugins-data-public.indexpatternfield.script.md) |  | <code>string</code> |  |
 |  [scripted](./kibana-plugin-plugins-data-public.indexpatternfield.scripted.md) |  | <code>boolean</code> |  |
 |  [searchable](./kibana-plugin-plugins-data-public.indexpatternfield.searchable.md) |  | <code>boolean</code> |  |

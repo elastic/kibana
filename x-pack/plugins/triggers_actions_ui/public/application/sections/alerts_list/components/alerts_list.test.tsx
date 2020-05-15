@@ -44,6 +44,7 @@ const alertType = {
     return { errors: {} };
   },
   alertParamsExpression: () => null,
+  requiresAppContext: false,
 };
 alertTypeRegistry.list.mockReturnValue([alertType]);
 actionTypeRegistry.list.mockReturnValue([]);
@@ -72,12 +73,7 @@ describe('alerts_list component empty', () => {
       },
     ]);
     loadAlertTypes.mockResolvedValue([{ id: 'test_alert_type', name: 'some alert type' }]);
-    loadAllActions.mockResolvedValue({
-      page: 1,
-      perPage: 10000,
-      total: 0,
-      data: [],
-    });
+    loadAllActions.mockResolvedValue([]);
 
     const mockes = coreMock.createSetup();
     const [
@@ -196,12 +192,7 @@ describe('alerts_list component with items', () => {
       },
     ]);
     loadAlertTypes.mockResolvedValue([{ id: 'test_alert_type', name: 'some alert type' }]);
-    loadAllActions.mockResolvedValue({
-      page: 1,
-      perPage: 10000,
-      total: 0,
-      data: [],
-    });
+    loadAllActions.mockResolvedValue([]);
     const mockes = coreMock.createSetup();
     const [
       {
@@ -255,10 +246,6 @@ describe('alerts_list component with items', () => {
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
   });
-  it('renders edit button for registered alert types', async () => {
-    await setup();
-    expect(wrapper.find('[data-test-subj="alertsTableCell-editLink"]').length).toBeGreaterThan(0);
-  });
 });
 
 describe('alerts_list component empty with show only capability', () => {
@@ -286,12 +273,7 @@ describe('alerts_list component empty with show only capability', () => {
       },
     ]);
     loadAlertTypes.mockResolvedValue([{ id: 'test_alert_type', name: 'some alert type' }]);
-    loadAllActions.mockResolvedValue({
-      page: 1,
-      perPage: 10000,
-      total: 0,
-      data: [],
-    });
+    loadAllActions.mockResolvedValue([]);
     const mockes = coreMock.createSetup();
     const [
       {
@@ -405,12 +387,7 @@ describe('alerts_list with show only capability', () => {
       },
     ]);
     loadAlertTypes.mockResolvedValue([{ id: 'test_alert_type', name: 'some alert type' }]);
-    loadAllActions.mockResolvedValue({
-      page: 1,
-      perPage: 10000,
-      total: 0,
-      data: [],
-    });
+    loadAllActions.mockResolvedValue([]);
     const mockes = coreMock.createSetup();
     const [
       {
@@ -461,9 +438,5 @@ describe('alerts_list with show only capability', () => {
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
     // TODO: check delete button
-  });
-  it('not renders edit button for non registered alert types', async () => {
-    await setup();
-    expect(wrapper.find('[data-test-subj="alertsTableCell-editLink"]').length).toBe(0);
   });
 });

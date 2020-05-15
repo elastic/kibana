@@ -27,6 +27,8 @@ const createRegistryMock = (): jest.Mocked<ISavedObjectTypeRegistry &
     getAllTypes: jest.fn(),
     getImportableAndExportableTypes: jest.fn(),
     isNamespaceAgnostic: jest.fn(),
+    isSingleNamespace: jest.fn(),
+    isMultiNamespace: jest.fn(),
     isHidden: jest.fn(),
     getIndex: jest.fn(),
     isImportableAndExportable: jest.fn(),
@@ -38,6 +40,10 @@ const createRegistryMock = (): jest.Mocked<ISavedObjectTypeRegistry &
   mock.getIndex.mockReturnValue('.kibana-test');
   mock.isHidden.mockReturnValue(false);
   mock.isNamespaceAgnostic.mockImplementation((type: string) => type === 'global');
+  mock.isSingleNamespace.mockImplementation(
+    (type: string) => type !== 'global' && type !== 'shared'
+  );
+  mock.isMultiNamespace.mockImplementation((type: string) => type === 'shared');
   mock.isImportableAndExportable.mockReturnValue(true);
 
   return mock;

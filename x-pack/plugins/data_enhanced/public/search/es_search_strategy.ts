@@ -33,7 +33,7 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
     };
     request.params = params;
 
-    const asyncOptions: IAsyncSearchOptions = { pollInterval: 1000, ...options };
+    const asyncOptions: IAsyncSearchOptions = { pollInterval: 0, ...options };
 
     return asyncSearch(
       { ...request, serverStrategy: ES_SEARCH_STRATEGY },

@@ -37,20 +37,25 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     describe('with generated data', () => {
-      before('load heartbeat data', async () => await esArchiver.load('uptime/blank'));
+      beforeEach('load heartbeat data', async () => await esArchiver.loadIfNeeded('uptime/blank'));
       after('unload', async () => await esArchiver.unload('uptime/blank'));
 
-      loadTestFile(require.resolve('./snapshot'));
+      loadTestFile(require.resolve('./certs'));
       loadTestFile(require.resolve('./dynamic_settings'));
+      loadTestFile(require.resolve('./snapshot'));
+      loadTestFile(require.resolve('./monitor_states_generated'));
+      loadTestFile(require.resolve('./telemetry_collectors'));
     });
+
     describe('with real-world data', () => {
-      before('load heartbeat data', async () => await esArchiver.load('uptime/full_heartbeat'));
-      after('unload', async () => await esArchiver.unload('uptime/full_heartbeat'));
+      beforeEach('load heartbeat data', async () => await esArchiver.load('uptime/full_heartbeat'));
+      afterEach('unload', async () => await esArchiver.unload('uptime/full_heartbeat'));
       loadTestFile(require.resolve('./monitor_latest_status'));
-      loadTestFile(require.resolve('./selected_monitor'));
       loadTestFile(require.resolve('./ping_histogram'));
+      loadTestFile(require.resolve('./ping_list'));
       loadTestFile(require.resolve('./monitor_duration'));
       loadTestFile(require.resolve('./doc_count'));
+      loadTestFile(require.resolve('./monitor_states_real_data'));
     });
   });
 }

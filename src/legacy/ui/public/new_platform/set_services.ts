@@ -57,12 +57,14 @@ export function setStartServices(npStart: NpStart) {
   dataServices.setIndexPatterns(npStart.plugins.data.indexPatterns);
   dataServices.setQueryService(npStart.plugins.data.query);
   dataServices.setSearchService(npStart.plugins.data.search);
+
   visualizationsServices.setI18n(npStart.core.i18n);
   visualizationsServices.setTypes(
     pick(npStart.plugins.visualizations, ['get', 'all', 'getAliases'])
   );
   visualizationsServices.setCapabilities(npStart.core.application.capabilities);
   visualizationsServices.setHttp(npStart.core.http);
+  visualizationsServices.setApplication(npStart.core.application);
   visualizationsServices.setSavedObjects(npStart.core.savedObjects);
   visualizationsServices.setIndexPatterns(npStart.plugins.data.indexPatterns);
   visualizationsServices.setFilterManager(npStart.plugins.data.query.filterManager);
@@ -72,12 +74,15 @@ export function setStartServices(npStart: NpStart) {
   visualizationsServices.setAggs(npStart.plugins.data.search.aggs);
   visualizationsServices.setOverlays(npStart.core.overlays);
   visualizationsServices.setChrome(npStart.core.chrome);
+  visualizationsServices.setSearch(npStart.plugins.data.search);
   const savedVisualizationsLoader = createSavedVisLoader({
     savedObjectsClient: npStart.core.savedObjects.client,
     indexPatterns: npStart.plugins.data.indexPatterns,
+    search: npStart.plugins.data.search,
     chrome: npStart.core.chrome,
     overlays: npStart.core.overlays,
     visualizationTypes: visualizationsServices.getTypes(),
   });
   visualizationsServices.setSavedVisualizationsLoader(savedVisualizationsLoader);
+  visualizationsServices.setSavedSearchLoader(npStart.plugins.discover.savedSearchLoader);
 }

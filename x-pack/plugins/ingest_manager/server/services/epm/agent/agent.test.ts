@@ -4,29 +4,83 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import fs from 'fs';
-import * as yaml from 'js-yaml';
-import path from 'path';
-import { createInput } from './agent';
+import { createStream } from './agent';
 
-test('test converting input and manifest into template', () => {
-  const manifest = yaml.safeLoad(
-    fs.readFileSync(path.join(__dirname, 'tests/manifest.yml'), 'utf8')
-  );
+describe('createStream', () => {
+  it('should work', () => {
+    const streamTemplate = `
+input: log
+paths:
+{{#each paths}}
+  - {{this}}
+{{/each}}
+exclude_files: [".gz$"]
+processors:
+  - add_locale: ~
+password: {{password}}
+{{#if password}}
+hidden_password: {{password}}
+{{/if}}
+      `;
+    const vars = {
+      paths: { value: ['/usr/local/var/log/nginx/access.log'] },
+      password: { type: 'password', value: '' },
+    };
 
-  const inputTemplate = fs.readFileSync(path.join(__dirname, 'tests/input.yml'), 'utf8');
-  const output = createInput(manifest.vars, inputTemplate);
+    const output = createStream(vars, streamTemplate);
+    expect(output).toEqual({
+      input: 'log',
+      paths: ['/usr/local/var/log/nginx/access.log'],
+      exclude_files: ['.gz$'],
+      processors: [{ add_locale: null }],
+      password: '',
+    });
+  });
 
-  // Golden file path
-  const generatedFile = path.join(__dirname, './tests/input.generated.yaml');
+  it('should support yaml values', () => {
+    const streamTemplate = `
+input: redis/metrics
+metricsets: ["key"]
+test: null
+password: {{password}}
+{{custom}}
+custom: {{ custom }}
+{{#if key.patterns}}
+key.patterns: {{key.patterns}}
+{{/if}}
+{{ testEmpty }}
+      `;
+    const vars = {
+      'key.patterns': {
+        type: 'yaml',
+        value: `
+        - limit: 20
+          pattern: '*'
+        `,
+      },
+      custom: {
+        type: 'yaml',
+        value: `
+foo: bar
+        `,
+      },
+      password: { type: 'password', value: '' },
+    };
 
-  // Regenerate the file if `-generate` flag is used
-  if (process.argv.includes('-generate')) {
-    fs.writeFileSync(generatedFile, output);
-  }
-
-  const outputData = fs.readFileSync(generatedFile, 'utf-8');
-
-  // Check that content file and generated file are equal
-  expect(outputData).toBe(output);
+    const output = createStream(vars, streamTemplate);
+    expect(output).toEqual({
+      input: 'redis/metrics',
+      metricsets: ['key'],
+      test: null,
+      'key.patterns': [
+        {
+          limit: 20,
+          pattern: '*',
+        },
+      ],
+      password: '',
+      foo: 'bar',
+      custom: { foo: 'bar' },
+    });
+  });
 });

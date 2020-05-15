@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type BrowserType = 'chromium';
-
 export interface BrowserDownload {
   paths: {
     archivesPath: string;

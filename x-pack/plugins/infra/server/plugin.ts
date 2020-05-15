@@ -26,8 +26,11 @@ import { InfraSources } from './lib/sources';
 import { InfraServerPluginDeps } from './lib/adapters/framework';
 import { METRICS_FEATURE, LOGS_FEATURE } from './features';
 import { UsageCollector } from './usage/usage_collector';
-import { InfraStaticSourceConfiguration } from './lib/sources/types';
+import { InfraStaticSourceConfiguration } from '../common/http_api/source_api';
 import { registerAlertTypes } from './lib/alerting';
+import { infraSourceConfigurationSavedObjectType } from './lib/sources';
+import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
+import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
 
 export const config = {
   schema: schema.object({
@@ -85,13 +88,6 @@ export class InfraServerPlugin {
     this.config$ = context.config.create<InfraConfig>();
   }
 
-  getLibs() {
-    if (!this.libs) {
-      throw new Error('libs not set up yet');
-    }
-    return this.libs;
-  }
-
   async setup(core: CoreSetup, plugins: InfraServerPluginDeps) {
     await new Promise(resolve => {
       this.config$.subscribe(configValue => {
@@ -109,9 +105,14 @@ export class InfraServerPlugin {
         sources,
       }
     );
-    const snapshot = new InfraSnapshot({ sources, framework });
+    const snapshot = new InfraSnapshot();
     const logEntryCategoriesAnalysis = new LogEntryCategoriesAnalysis({ framework });
     const logEntryRateAnalysis = new LogEntryRateAnalysis({ framework });
+
+    // register saved object types
+    core.savedObjects.registerType(infraSourceConfigurationSavedObjectType);
+    core.savedObjects.registerType(metricsExplorerViewSavedObjectType);
+    core.savedObjects.registerType(inventoryViewSavedObjectType);
 
     // TODO: separate these out individually and do away with "domains" as a temporary group
     const domainLibs: InfraDomainLibs = {
@@ -119,6 +120,7 @@ export class InfraServerPlugin {
         sources,
       }),
       logEntries: new InfraLogEntriesDomain(new InfraKibanaLogEntriesAdapter(framework), {
+        framework,
         sources,
       }),
       metrics: new InfraMetricsDomain(new KibanaMetricsAdapter(framework)),
@@ -147,7 +149,7 @@ export class InfraServerPlugin {
     ]);
 
     initInfraServer(this.libs);
-    registerAlertTypes(plugins.alerting);
+    registerAlertTypes(plugins.alerting, this.libs);
 
     // Telemetry
     UsageCollector.registerUsageCollector(plugins.usageCollection);

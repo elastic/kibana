@@ -16,11 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { EmbeddableStart, EmbeddableSetup } from '.';
+import {
+  EmbeddableStart,
+  EmbeddableSetup,
+  EmbeddableSetupDependencies,
+  EmbeddableStartDependencies,
+} from '.';
 import { EmbeddablePublicPlugin } from './plugin';
 import { coreMock } from '../../../core/public/mocks';
 
+// eslint-disable-next-line
+import { inspectorPluginMock } from '../../inspector/public/mocks';
 // eslint-disable-next-line
 import { uiActionsPluginMock } from '../../ui_actions/public/mocks';
 
@@ -30,6 +36,7 @@ export type Start = jest.Mocked<EmbeddableStart>;
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     registerEmbeddableFactory: jest.fn(),
+    setCustomEmbeddableFactoryProvider: jest.fn(),
   };
   return setupContract;
 };
@@ -38,16 +45,21 @@ const createStartContract = (): Start => {
   const startContract: Start = {
     getEmbeddableFactories: jest.fn(),
     getEmbeddableFactory: jest.fn(),
+    EmbeddablePanel: jest.fn(),
   };
   return startContract;
 };
 
-const createInstance = () => {
+const createInstance = (setupPlugins: Partial<EmbeddableSetupDependencies> = {}) => {
   const plugin = new EmbeddablePublicPlugin({} as any);
   const setup = plugin.setup(coreMock.createSetup(), {
-    uiActions: uiActionsPluginMock.createSetupContract(),
+    uiActions: setupPlugins.uiActions || uiActionsPluginMock.createSetupContract(),
   });
-  const doStart = () => plugin.start(coreMock.createStart());
+  const doStart = (startPlugins: Partial<EmbeddableStartDependencies> = {}) =>
+    plugin.start(coreMock.createStart(), {
+      uiActions: startPlugins.uiActions || uiActionsPluginMock.createStartContract(),
+      inspector: inspectorPluginMock.createStartContract(),
+    });
   return {
     plugin,
     setup,

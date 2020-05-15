@@ -33,7 +33,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
   class SettingsPage {
     async clickNavigation() {
-      find.clickDisplayedByCssSelector('.app-link:nth-child(5) a');
+      await find.clickDisplayedByCssSelector('.app-link:nth-child(5) a');
     }
 
     async clickLinkText(text: string) {
@@ -110,7 +110,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async toggleAdvancedSettingCheckbox(propertyName: string) {
-      testSubjects.click(`advancedSetting-editField-${propertyName}`);
+      await testSubjects.click(`advancedSetting-editField-${propertyName}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click(`advancedSetting-saveButton`);
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -206,15 +206,15 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getFieldsTabCount() {
       return retry.try(async () => {
-        const text = await testSubjects.getVisibleText('tab-count-indexedFields');
-        return text.replace(/\((.*)\)/, '$1');
+        const text = await testSubjects.getVisibleText('tab-indexedFields');
+        return text.split(' ')[1].replace(/\((.*)\)/, '$1');
       });
     }
 
     async getScriptedFieldsTabCount() {
       return await retry.try(async () => {
-        const theText = await testSubjects.getVisibleText('tab-count-scriptedFields');
-        return theText.replace(/\((.*)\)/, '$1');
+        const text = await testSubjects.getVisibleText('tab-scriptedFields');
+        return text.split(' ')[2].replace(/\((.*)\)/, '$1');
       });
     }
 
@@ -241,13 +241,13 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async setFieldTypeFilter(type: string) {
       await find.clickByCssSelector(
-        'select[data-test-subj="indexedFieldTypeFilterDropdown"] > option[label="' + type + '"]'
+        'select[data-test-subj="indexedFieldTypeFilterDropdown"] > option[value="' + type + '"]'
       );
     }
 
     async setScriptedFieldLanguageFilter(language: string) {
       await find.clickByCssSelector(
-        'select[data-test-subj="scriptedFieldLanguageFilterDropdown"] > option[label="' +
+        'select[data-test-subj="scriptedFieldLanguageFilterDropdown"] > option[value="' +
           language +
           '"]'
       );
@@ -322,17 +322,16 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       isStandardIndexPattern = true
     ) {
       await retry.try(async () => {
-        await this.navigateTo();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickKibanaIndexPatterns();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await this.clickOptionalAddNewButton();
+        await this.clickAddNewIndexPatternButton();
         if (!isStandardIndexPattern) {
           await this.clickCreateNewRollupButton();
         }
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async () => {
-          await this.setIndexPatternField({ indexPatternName });
+          await this.setIndexPatternField(indexPatternName);
         });
         await PageObjects.common.sleep(2000);
         await (await this.getCreateIndexPatternGoToStep2Button()).click();
@@ -356,11 +355,8 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       return await this.getIndexPatternIdFromUrl();
     }
 
-    // adding a method to check if the create index pattern button is visible when more than 1 index pattern is present
-    async clickOptionalAddNewButton() {
-      if (await testSubjects.isDisplayed('createIndexPatternButton')) {
-        await testSubjects.click('createIndexPatternButton');
-      }
+    async clickAddNewIndexPatternButton() {
+      await testSubjects.click('createIndexPatternButton');
     }
 
     async clickCreateNewRollupButton() {
@@ -376,14 +372,32 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       return indexPatternId;
     }
 
-    async setIndexPatternField({ indexPatternName = 'logstash-', expectWildcard = true } = {}) {
+    async setIndexPatternField(indexPatternName = 'logstash-*') {
       log.debug(`setIndexPatternField(${indexPatternName})`);
       const field = await this.getIndexPatternField();
       await field.clearValue();
-      await field.type(indexPatternName, { charByChar: true });
+      if (
+        indexPatternName.charAt(0) === '*' &&
+        indexPatternName.charAt(indexPatternName.length - 1) === '*'
+      ) {
+        // this is a special case when the index pattern name starts with '*'
+        // like '*:makelogs-*' where the UI will not append *
+        await field.type(indexPatternName, { charByChar: true });
+      } else if (indexPatternName.charAt(indexPatternName.length - 1) === '*') {
+        // the common case where the UI will append '*' automatically so we won't type it
+        const tempName = indexPatternName.slice(0, -1);
+        await field.type(tempName, { charByChar: true });
+      } else {
+        // case where we don't want the * appended so we'll remove it if it was added
+        await field.type(indexPatternName, { charByChar: true });
+        const tempName = await field.getAttribute('value');
+        if (tempName.length > indexPatternName.length) {
+          await field.type(browser.keys.DELETE, { charByChar: true });
+        }
+      }
       const currentName = await field.getAttribute('value');
       log.debug(`setIndexPatternField set to ${currentName}`);
-      expect(currentName).to.eql(`${indexPatternName}${expectWildcard ? '*' : ''}`);
+      expect(currentName).to.eql(indexPatternName);
     }
 
     async getCreateIndexPatternGoToStep2Button() {
@@ -415,7 +429,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async clickFieldsTab() {
       log.debug('click Fields tab');
-      await testSubjects.click('tab-indexFields');
+      await testSubjects.click('tab-indexedFields');
     }
 
     async clickScriptedFieldsTab() {

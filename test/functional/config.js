@@ -28,11 +28,12 @@ export default async function({ readConfigFile }) {
 
   return {
     testFiles: [
+      require.resolve('./apps/bundles'),
       require.resolve('./apps/console'),
-      require.resolve('./apps/getting_started'),
       require.resolve('./apps/context'),
       require.resolve('./apps/dashboard'),
       require.resolve('./apps/discover'),
+      require.resolve('./apps/getting_started'),
       require.resolve('./apps/home'),
       require.resolve('./apps/management'),
       require.resolve('./apps/saved_objects_management'),
@@ -95,20 +96,20 @@ export default async function({ readConfigFile }) {
         pathname: '/status',
       },
       discover: {
-        pathname: '/app/kibana',
-        hash: '/discover',
+        pathname: '/app/discover',
+        hash: '/',
       },
       context: {
-        pathname: '/app/kibana',
+        pathname: '/app/discover',
         hash: '/context',
       },
       visualize: {
-        pathname: '/app/kibana',
-        hash: '/visualize',
+        pathname: '/app/visualize',
+        hash: '/',
       },
       dashboard: {
-        pathname: '/app/kibana',
-        hash: '/dashboards',
+        pathname: '/app/dashboards',
+        hash: '/list',
       },
       settings: {
         pathname: '/app/kibana',
@@ -118,12 +119,12 @@ export default async function({ readConfigFile }) {
         pathname: '/app/timelion',
       },
       console: {
-        pathname: '/app/kibana',
-        hash: '/dev_tools/console',
+        pathname: '/app/dev_tools',
+        hash: '/console',
       },
       home: {
-        pathname: '/app/kibana',
-        hash: '/home',
+        pathname: '/app/home',
+        hash: '/',
       },
     },
     junit: {

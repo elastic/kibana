@@ -2,181 +2,56 @@
 [[action-types]]
 == Action and connector types
 
-{kib} provides the following types of actions:
+Actions are Kibana services or integrations with third-party systems that run as background tasks on the Kibana server when alert conditions are met. {kib} provides the following types of actions:
 
-* <<email-action-type, Email>>
-* <<index-action-type, Index>>
-* <<pagerduty-action-type, PagerDuty>>
-* <<server-log-action-type, ServerLog>>
-* <<slack-action-type, Slack>>
-* <<webhook-action-type, Webhook>>
+[cols="2"]
+|===
 
-This section describes how to configure connectors and actions for each type. 
+a| <<email-action-type, Email>>
+
+| Send email from your server.
+
+a| <<index-action-type, Index>>
+
+| Index data into Elasticsearch.
+
+a| <<pagerduty-action-type, PagerDuty>>
+
+| Send an event in PagerDuty.
+
+a| <<server-log-action-type, ServerLog>>
+
+| Add a message to a Kibana log.
+
+a| <<slack-action-type, Slack>>
+
+| Send a message to a Slack channel or user.
+
+a| <<webhook-action-type, Webhook>>
+
+| Send a request to a web service.
+|===
 
 [NOTE]
 ==============================================
-Some action types are paid commercial features, while others are free. 
-For a comparison of the Elastic license levels, 
-see https://www.elastic.co/subscriptions[the subscription page]. 
+Some action types are paid commercial features, while others are free.
+For a comparison of the Elastic subscription levels,
+see https://www.elastic.co/subscriptions[the subscription page].
 ==============================================
 
 [float]
-[[email-action-type]]
-=== Email
+[[create-connectors]]
+=== Preconfigured actions and connectors
 
-The email action type uses the SMTP protocol to send mail message, using an integration of https://nodemailer.com/[Nodemailer]. Email message text is sent as both plain text and html text.
+For out-of-the-box and standardized connectors, you can <<preconfigured-connector-example, preconfigure the connector>>
+before {kib} starts.
 
-[float]
-[[email-connector-configuration]]
-==== Connector configuration
+If you preconfigure a connector, you can also <<preconfigured-action-type-example, preconfigure its action type>>.
 
-Email connectors have the following configuration properties:
-
-Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action. 
-Sender::    The from address for all emails sent with this connector, specified in `user@host-name` format.
-Host::      Host name of the service provider. If you are using the <<action-settings, `xpack.actions.whitelistedHosts`>> setting, make sure this hostname is whitelisted. 
-Port::      The port to connect to on the service provider.
-Secure::    If true the connection will use TLS when connecting to the service provider. See https://nodemailer.com/smtp/#tls-options[nodemailer TLS documentation] for more information.  
-Username::  username for 'login' type authentication.
-Password::  password for 'login' type authentication.
-
-[float]
-[[email-action-configuration]]
-==== Action configuration
-
-Email actions have the following configuration properties:
-
-To, CC, BCC::    Each is a list of addresses. Addresses can be specified in `user@host-name` format, or in `name <user@host-name>` format. One of To, CC, or BCC must contain an entry.
-Subject::       The subject line of the email.
-Message::       The message text of the email. Markdown format is supported.
-
-[float]
-[[index-action-type]]
-=== Index
-
-The index action type will index a document into {es}.
-
-[float]
-[[index-connector-configuration]]
-==== Connector configuration
-
-Index connectors have the following configuration properties:
-
-Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
-Index::     The {es} index to be written to.
-Refresh::   Setting for the {ref}/docs-refresh.html[refresh] policy for the write request.
-Execution time field::  This field will be automatically set to the time the alert condition was detected.
-
-[float]
-[[index-action-configuration]]
-==== Action configuration
-
-Index actions have the following properties:
-
-Document::  The document to index in json format.
-
-[float]
-[[pagerduty-action-type]]
-=== PagerDuty
-
-The PagerDuty action type uses the https://v2.developer.pagerduty.com/docs/events-api-v2[v2 Events API] to trigger, acknowledge, and resolve PagerDuty alerts.
-
-[float]
-[[pagerduty-connector-configuration]]
-==== Connector configuration
-
-PagerDuty connectors have the following configuration properties:
-
-Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
-API URL::   An optional PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`. If you are using the <<action-settings, `xpack.actions.whitelistedHosts`>> setting, make sure the hostname is whitelisted. 
-Routing Key::   A 32 character PagerDuty Integration Key for an integration on a service or on a global ruleset.
-
-[float]
-[[pagerduty-action-configuration]]
-==== Action configuration
-
-PagerDuty actions have the following properties:
-
-Severity::      The perceived severity of on the affected system. This can be one of `Critical`, `Error`, `Warning` or `Info`(default).
-Event action::  One of `Trigger` (default), `Resolve`, or `Acknowledge`. See https://v2.developer.pagerduty.com/docs/events-api-v2#event-action[event action] for more details.
-Dedup Key::     All actions sharing this key will be associated with the same PagerDuty alert. This value is used to correlate trigger and resolution. This value is *optional*, and if unset defaults to `action:<action saved object id>`. The maximum length is *255* characters. See https://v2.developer.pagerduty.com/docs/events-api-v2#alert-de-duplication[alert deduplication] for details.
-Timestamp::     An *optional* https://v2.developer.pagerduty.com/v2/docs/types#datetime[ISO-8601 format date-time], indicating the time the event was detected or generated.
-Component::     An *optional* value indicating the component of the source machine that is responsible for the event, for example `mysql` or `eth0`.
-Group::         An *optional* value indicating the logical grouping of components of a service, for example `app-stack`.
-Source::        An *optional* value indicating the affected system, preferably a hostname or fully qualified domain name. Defaults to the {kib} saved object id of the action. 
-Summary::       An *optional* text summary of the event, defaults to `No summary provided`. The maximum length is 1024 characters.
-Class::         An *optional* value indicating the class/type of the event, for example `ping failure` or `cpu load`.
-
-For more details on these properties, see https://v2.developer.pagerduty.com/v2/docs/send-an-event-events-api-v2[PagerDuty v2 event parameters].
-
-[float]
-[[server-log-action-type]]
-=== Server log
-
-This action type writes and entry to the {kib} server log.
-
-[float]
-[[server-log-connector-configuration]]
-==== Connector configuration
-
-Server log connectors have the following configuration properties:
-
-Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
-
-[float]
-[[server-log-action-configuration]]
-==== Action configuration
-
-Server log actions have the following properties:
-
-Message::   The message to log. 
-
-[float]
-[[slack-action-type]]
-=== Slack
-
-The Slack action type uses https://api.slack.com/incoming-webhooks[Slack Incoming Webhooks]. 
-
-[float]
-[[slack-connector-configuration]]
-==== Connector configuration
-
-Slack connectors have the following configuration properties:
-
-Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
-Webhook URL::   The URL of the incoming webhook. See https://api.slack.com/messaging/webhooks#getting_started[Slack Incoming Webhooks] for instructions on generating this URL. If you are using the <<action-settings, `xpack.actions.whitelistedHosts`>> setting, make sure the hostname is whitelisted. 
-
-[float]
-[[slack-action-configuration]]
-==== Action configuration
-
-Slack actions have the following properties:
-
-Message::   The message	text, converted to the `text` field in the Webhook JSON payload. Currently only the text field is supported. Markdown, images, and other advanced formatting are not yet supported.
-
-[float]
-[[webhook-action-type]]
-=== Webhook
-
-The Webhook action type uses https://github.com/axios/axios[axios] to send a POST or PUT request to a web service.
-
-[float]
-[[webhook-connector-configuration]]
-==== Connector configuration
-
-Webhook connectors have the following configuration properties:
-
-Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
-URL::       The request URL. If you are using the <<action-settings, `xpack.actions.whitelistedHosts`>> setting, make sure the hostname is whitelisted. 
-Method::    HTTP request method, either `post`(default) or `put`.
-Headers::   A set of key-value pairs sent as headers with the request
-User::      An optional username. If set, HTTP basic authentication is used. Currently only basic authentication is supported.
-Password::  An optional password. If set, HTTP basic authentication is used. Currently only basic authentication is supported.
-
-[float]
-[[webhook-action-configuration]]
-==== Action configuration
-
-Webhook actions have the following properties:
-
-Body::      A json payload sent to the request URL.
+include::action-types/email.asciidoc[]
+include::action-types/index.asciidoc[]
+include::action-types/pagerduty.asciidoc[]
+include::action-types/server-log.asciidoc[]
+include::action-types/slack.asciidoc[]
+include::action-types/webhook.asciidoc[]
+include::action-types/pre-configured-connectors.asciidoc[]

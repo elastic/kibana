@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
-import { IndexPatternCreationConfig } from '../../../../../../../../management/public';
+import { IndexPatternCreationConfig } from '../../../../../../../../../../plugins/index_pattern_management/public';
 import { IFieldType } from '../../../../../../../../../../plugins/data/public';
 
 import { StepTimeField } from '../step_time_field';

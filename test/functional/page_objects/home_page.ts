@@ -52,6 +52,9 @@ export function HomePageProvider({ getService, getPageObjects }: FtrProviderCont
     }
 
     async removeSampleDataSet(id: string) {
+      // looks like overkill but we're hitting flaky cases where we click but it doesn't remove
+      await testSubjects.isDisplayed(`removeSampleDataSet${id}`);
+      await testSubjects.isEnabled(`removeSampleDataSet${id}`);
       await testSubjects.click(`removeSampleDataSet${id}`);
       await this._waitForSampleDataLoadingAction(id);
     }
@@ -77,6 +80,39 @@ export function HomePageProvider({ getService, getPageObjects }: FtrProviderCont
     async launchSampleDataSet(id: string) {
       await this.addSampleDataSet(id);
       await testSubjects.click(`launchSampleDataSet${id}`);
+    }
+
+    async clickAllKibanaPlugins() {
+      await testSubjects.click('allPlugins');
+    }
+
+    async clickVisualizeExplorePlugins() {
+      await testSubjects.click('tab-data');
+    }
+
+    async clickAdminPlugin() {
+      await testSubjects.click('tab-admin');
+    }
+
+    async clickOnConsole() {
+      await testSubjects.click('homeSynopsisLinkconsole');
+    }
+    async clickOnLogo() {
+      await testSubjects.click('logo');
+    }
+
+    async ClickOnLogsData() {
+      await testSubjects.click('logsData');
+    }
+
+    // clicks on Active MQ logs
+    async clickOnLogsTutorial() {
+      await testSubjects.click('homeSynopsisLinkactivemq logs');
+    }
+
+    // clicks on cloud tutorial link
+    async clickOnCloudTutorial() {
+      await testSubjects.click('onCloudTutorial');
     }
 
     async loadSavedObjects() {

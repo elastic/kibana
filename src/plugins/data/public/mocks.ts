@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Plugin, DataPublicPluginSetup, DataPublicPluginStart, IndexPatternsContract } from '.';
-import { fieldFormatsMock } from '../common/field_formats/mocks';
+import { Plugin, IndexPatternsContract } from '.';
+import { fieldFormatsServiceMock } from './field_formats/mocks';
 import { searchSetupMock, searchStartMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 
@@ -36,7 +36,7 @@ const createSetupContract = (): Setup => {
   return {
     autocomplete: autocompleteMock,
     search: searchSetupMock,
-    fieldFormats: fieldFormatsMock as DataPublicPluginSetup['fieldFormats'],
+    fieldFormats: fieldFormatsServiceMock.createSetupContract(),
     query: querySetupMock,
   };
 };
@@ -45,28 +45,33 @@ const createStartContract = (): Start => {
   const queryStartMock = queryServiceMock.createStartContract();
   return {
     actions: {
-      createFiltersFromEvent: jest.fn().mockResolvedValue(['yes']),
+      createFiltersFromValueClickAction: jest.fn().mockResolvedValue(['yes']),
+      createFiltersFromRangeSelectAction: jest.fn(),
     },
     autocomplete: autocompleteMock,
     search: searchStartMock,
-    fieldFormats: fieldFormatsMock as DataPublicPluginStart['fieldFormats'],
+    fieldFormats: fieldFormatsServiceMock.createStartContract(),
     query: queryStartMock,
     ui: {
       IndexPatternSelect: jest.fn(),
       SearchBar: jest.fn(),
     },
     indexPatterns: ({
+      createField: jest.fn(() => {}),
+      createFieldList: jest.fn(() => []),
+      ensureDefaultIndexPattern: jest.fn(),
       make: () => ({
         fieldsFetcher: {
           fetchForWildcard: jest.fn(),
         },
       }),
       get: jest.fn().mockReturnValue(Promise.resolve({})),
+      clearCache: jest.fn(),
     } as unknown) as IndexPatternsContract,
   };
 };
 
-export { searchSourceMock } from './search/mocks';
+export { createSearchSourceMock } from './search/mocks';
 export { getCalculateAutoTimeExpression } from './search/aggs';
 
 export const dataPluginMock = {

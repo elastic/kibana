@@ -61,6 +61,7 @@ const actionExecutorInitializerParams = {
   actionTypeRegistry,
   encryptedSavedObjectsPlugin: mockedEncryptedSavedObjectsPlugin,
   eventLogger: eventLoggerMock.create(),
+  preconfiguredActions: [],
 };
 const taskRunnerFactoryInitializerParams = {
   spaceIdToNamespace,

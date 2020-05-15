@@ -53,11 +53,13 @@ export default async function({ readConfigFile }) {
       resolve(__dirname, './apps/index_patterns'),
       resolve(__dirname, './apps/index_management'),
       resolve(__dirname, './apps/index_lifecycle_management'),
+      resolve(__dirname, './apps/ingest_pipelines'),
       resolve(__dirname, './apps/snapshot_restore'),
       resolve(__dirname, './apps/cross_cluster_replication'),
       resolve(__dirname, './apps/remote_clusters'),
       resolve(__dirname, './apps/transform'),
-      resolve(__dirname, './apps/endpoint'),
+      resolve(__dirname, './apps/reporting_management'),
+
       // This license_management file must be last because it is destructive.
       resolve(__dirname, './apps/license_management'),
     ],
@@ -86,9 +88,7 @@ export default async function({ readConfigFile }) {
         '--stats.maximumWaitTimeForAllCollectorsInS=1',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
-        '--telemetry.banner=false',
         '--timelion.ui.enabled=true',
-        '--xpack.endpoint.enabled=true',
       ],
     },
     uiSettings: {
@@ -123,12 +123,12 @@ export default async function({ readConfigFile }) {
         pathname: '/app/graph',
       },
       grokDebugger: {
-        pathname: '/app/kibana',
-        hash: '/dev_tools/grokdebugger',
+        pathname: '/app/dev_tools',
+        hash: '/grokdebugger',
       },
       searchProfiler: {
-        pathname: '/app/kibana',
-        hash: '/dev_tools/searchprofiler',
+        pathname: '/app/dev_tools',
+        hash: '/searchprofiler',
       },
       spaceSelector: {
         pathname: '/',
@@ -145,9 +145,6 @@ export default async function({ readConfigFile }) {
       },
       uptime: {
         pathname: '/app/uptime',
-      },
-      apm: {
-        pathname: '/app/apm',
       },
       ml: {
         pathname: '/app/ml',
@@ -176,6 +173,10 @@ export default async function({ readConfigFile }) {
         pathname: '/app/kibana',
         hash: '/management/elasticsearch/index_lifecycle_management',
       },
+      ingestPipelines: {
+        pathname: '/app/kibana',
+        hash: '/management/elasticsearch/ingest_pipelines',
+      },
       snapshotRestore: {
         pathname: '/app/kibana',
         hash: '/management/elasticsearch/snapshot_restore',
@@ -199,8 +200,9 @@ export default async function({ readConfigFile }) {
         pathname: '/app/kibana/',
         hash: '/management/elasticsearch/transform',
       },
-      endpoint: {
-        pathname: '/app/endpoint',
+      reporting: {
+        pathname: '/app/kibana/',
+        hash: '/management/kibana/reporting',
       },
     },
 
@@ -232,6 +234,17 @@ export default async function({ readConfigFile }) {
             run_as: [],
           },
           kibana: [],
+        },
+
+        global_discover_read: {
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
         },
 
         //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965

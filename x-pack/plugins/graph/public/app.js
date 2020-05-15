@@ -23,7 +23,7 @@ import { Listing } from './components/listing';
 import { Settings } from './components/settings';
 import { GraphVisualization } from './components/graph_visualization';
 
-import gws from './angular/graph_client_workspace.js';
+import { createWorkspace } from './angular/graph_client_workspace.js';
 import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs } from './services/url';
 import { createCachedIndexPatternProvider } from './services/index_pattern_cache';
 import { urlTemplateRegex } from './helpers/url_template';
@@ -46,13 +46,13 @@ export function initGraphApp(angularModule, deps) {
     addBasePath,
     getBasePath,
     data,
-    config,
     capabilities,
     coreStart,
     storage,
     canEditDrillDownUrls,
     graphSavePolicy,
     overlays,
+    savedObjects,
   } = deps;
 
   const app = angularModule;
@@ -77,6 +77,7 @@ export function initGraphApp(angularModule, deps) {
       ['hideWriteControls', { watchDepth: 'reference' }],
       ['capabilities', { watchDepth: 'reference' }],
       ['initialFilter', { watchDepth: 'reference' }],
+      ['initialPageSize', { watchDepth: 'reference' }],
     ]);
   });
 
@@ -111,7 +112,8 @@ export function initGraphApp(angularModule, deps) {
         template: listingTemplate,
         badge: getReadonlyBadge,
         controller: function($location, $scope) {
-          $scope.listingLimit = config.get('savedObjects:listingLimit');
+          $scope.listingLimit = savedObjects.settings.getListingLimit();
+          $scope.initialPageSize = savedObjects.settings.getPerPage();
           $scope.create = () => {
             $location.url(getNewPath());
           };
@@ -277,7 +279,7 @@ export function initGraphApp(angularModule, deps) {
           searchProxy: callSearchNodeProxy,
           exploreControls,
         };
-        $scope.workspace = gws.createWorkspace(options);
+        $scope.workspace = createWorkspace(options);
       },
       setLiveResponseFields: fields => {
         $scope.liveResponseFields = fields;

@@ -10,11 +10,13 @@ import seriesConfig from './__mocks__/mock_series_config_rare.json';
 // Mock TimeBuckets and mlFieldFormatService, they don't play well
 // with the jest based test setup yet.
 jest.mock('../../util/time_buckets', () => ({
-  TimeBuckets: function() {
-    this.setBounds = jest.fn();
-    this.setInterval = jest.fn();
-    this.getScaledDateFormat = jest.fn();
-  },
+  getTimeBucketsFromCache: jest.fn(() => {
+    return {
+      setBounds: jest.fn(),
+      setInterval: jest.fn(),
+      getScaledDateFormat: jest.fn(),
+    };
+  }),
 }));
 jest.mock('../../services/field_format_service', () => ({
   mlFieldFormatService: {
@@ -43,8 +45,16 @@ describe('ExplorerChart', () => {
   afterEach(() => (SVGElement.prototype.getBBox = originalGetBBox));
 
   test('Initialize', () => {
+    const mockTooltipService = {
+      show: jest.fn(),
+      hide: jest.fn(),
+    };
+
     const wrapper = mountWithIntl(
-      <ExplorerChartDistribution mlSelectSeverityService={mlSelectSeverityServiceMock} />
+      <ExplorerChartDistribution
+        mlSelectSeverityService={mlSelectSeverityServiceMock}
+        tooltipService={mockTooltipService}
+      />
     );
 
     // without setting any attributes and corresponding data
@@ -59,10 +69,16 @@ describe('ExplorerChart', () => {
       loading: true,
     };
 
+    const mockTooltipService = {
+      show: jest.fn(),
+      hide: jest.fn(),
+    };
+
     const wrapper = mountWithIntl(
       <ExplorerChartDistribution
         seriesConfig={config}
         mlSelectSeverityService={mlSelectSeverityServiceMock}
+        tooltipService={mockTooltipService}
       />
     );
 
@@ -83,12 +99,18 @@ describe('ExplorerChart', () => {
       chartLimits: chartLimits(chartData),
     };
 
+    const mockTooltipService = {
+      show: jest.fn(),
+      hide: jest.fn(),
+    };
+
     // We create the element including a wrapper which sets the width:
     return mountWithIntl(
       <div style={{ width: '500px' }}>
         <ExplorerChartDistribution
           seriesConfig={config}
           mlSelectSeverityService={mlSelectSeverityServiceMock}
+          tooltipService={mockTooltipService}
         />
       </div>
     );

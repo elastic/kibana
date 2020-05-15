@@ -4,33 +4,53 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiText, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { EuiText, EuiSpacer, EuiCode, EuiCodeBlock, EuiCopy, EuiButton } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EnrollmentAPIKey } from '../../../types';
 
-export const ManualInstructions: React.FunctionComponent = () => {
+interface Props {
+  kibanaUrl: string;
+  apiKey: EnrollmentAPIKey;
+  kibanaCASha256?: string;
+}
+
+export const ManualInstructions: React.FunctionComponent<Props> = ({
+  kibanaUrl,
+  apiKey,
+  kibanaCASha256,
+}) => {
+  const command = `
+./elastic-agent enroll ${kibanaUrl} ${apiKey.api_key}${
+    kibanaCASha256 ? ` --ca_sha256=${kibanaCASha256}` : ''
+  }
+./elastic-agent run`;
   return (
     <>
       <EuiText>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam vestibulum ullamcorper
-        turpis vitae interdum. Maecenas orci magna, auctor volutpat pellentesque eu, consectetur id
-        est. Nunc orci lacus, condimentum vel congue ac, fringilla eget tortor. Aliquam blandit,
-        nisi et congue euismod, leo lectus blandit risus, eu blandit erat metus sit amet leo. Nam
-        dictum lobortis condimentum.
+        <FormattedMessage
+          id="xpack.ingestManager.enrollmentInstructions.descriptionText"
+          defaultMessage="From the agent’s directory, run these commands to enroll and start the Elastic Agent. {enrollCommand} will write to your agent’s configuration file so that it has the correct settings. You can use this command to setup agents on more than one host."
+          values={{
+            enrollCommand: <EuiCode>agent enroll</EuiCode>,
+          }}
+        />
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiText>
-        Vivamus sem sapien, dictum eu tellus vel, rutrum aliquam purus. Cras quis cursus nibh.
-        Aliquam fermentum ipsum nec turpis luctus lobortis. Nulla facilisi. Etiam nec fringilla
-        urna, sed vehicula ipsum. Quisque vel pellentesque lorem, at egestas enim. Nunc semper elit
-        lectus, in sollicitudin erat fermentum in. Pellentesque tempus massa eget purus pharetra
-        blandit.
-      </EuiText>
+      <EuiCodeBlock fontSize="m">
+        <pre>{command}</pre>
+      </EuiCodeBlock>
       <EuiSpacer size="m" />
-      <EuiText>
-        Mauris congue enim nulla, nec semper est posuere non. Donec et eros eu nisi gravida
-        malesuada eget in velit. Morbi placerat semper euismod. Suspendisse potenti. Morbi quis
-        porta erat, quis cursus nulla. Aenean mauris lorem, mollis in mattis et, lobortis a lectus.
-      </EuiText>
+      <EuiCopy textToCopy={command}>
+        {copy => (
+          <EuiButton iconType="copy" fill onClick={copy}>
+            <FormattedMessage
+              id="xpack.ingestManager.enrollmentInstructions.copyButton"
+              defaultMessage="Copy command"
+            />
+          </EuiButton>
+        )}
+      </EuiCopy>
     </>
   );
 };

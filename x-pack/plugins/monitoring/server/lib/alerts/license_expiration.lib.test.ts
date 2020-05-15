@@ -39,17 +39,26 @@ describe('licenseExpiration lib', () => {
   });
 
   describe('getUiMessage', () => {
-    const timezone = 'Europe/London';
-    const license: any = { expiryDateMS: moment.tz('2020-01-20 08:00:00', timezone).utc() };
-
     it('should return a message when firing', () => {
-      const message = getUiMessage(license, timezone, false);
-      expect(message).toBe(`This cluster's license is going to expire in #relative at #absolute.`);
+      const message = getUiMessage(false);
+      expect(message.text).toBe(
+        `This cluster's license is going to expire in #relative at #absolute. #start_linkPlease update your license.#end_link`
+      );
+      // LOL How do I avoid this in TS????
+      if (!message.tokens) {
+        return expect(false).toBe(true);
+      }
+      expect(message.tokens.length).toBe(3);
+      expect(message.tokens[0].startToken).toBe('#relative');
+      expect(message.tokens[1].startToken).toBe('#absolute');
+      expect(message.tokens[2].startToken).toBe('#start_link');
+      expect(message.tokens[2].endToken).toBe('#end_link');
     });
 
     it('should return a message when resolved', () => {
-      const message = getUiMessage(license, timezone, true);
-      expect(message).toBe(`This cluster's license is active.`);
+      const message = getUiMessage(true);
+      expect(message.text).toBe(`This cluster's license is active.`);
+      expect(message.tokens).not.toBeDefined();
     });
   });
 });

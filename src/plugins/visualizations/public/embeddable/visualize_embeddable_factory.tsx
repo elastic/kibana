@@ -18,70 +18,78 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { SavedObjectMetaData } from 'src/plugins/saved_objects/public';
+import { first } from 'rxjs/operators';
 import { SavedObjectAttributes } from '../../../../core/public';
 import {
-  Container,
-  EmbeddableFactory,
+  EmbeddableFactoryDefinition,
   EmbeddableOutput,
   ErrorEmbeddable,
-} from '../../../../plugins/embeddable/public';
+  IContainer,
+  EMBEDDABLE_ORIGINATING_APP_PARAM,
+} from '../../../embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualize_embeddable';
-import { Vis } from '../types';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+import { Vis } from '../vis';
 import {
   getCapabilities,
-  getHttp,
   getTypes,
   getUISettings,
   getSavedVisualizationsLoader,
-  getTimeFilter,
 } from '../services';
 import { showNewVisModal } from '../wizard';
 import { convertToSerializedVis } from '../saved_visualizations/_saved_vis';
+import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
+import { StartServicesGetter } from '../../../kibana_utils/public';
+import { VisualizationsStartDeps } from '../plugin';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
 }
 
-export class VisualizeEmbeddableFactory extends EmbeddableFactory<
-  VisualizeInput,
-  VisualizeOutput | EmbeddableOutput,
-  VisualizeEmbeddable | DisabledLabEmbeddable,
-  VisualizationAttributes
-> {
+export interface VisualizeEmbeddableFactoryDeps {
+  start: StartServicesGetter<Pick<VisualizationsStartDeps, 'inspector'>>;
+}
+
+export class VisualizeEmbeddableFactory
+  implements
+    EmbeddableFactoryDefinition<
+      VisualizeInput,
+      VisualizeOutput | EmbeddableOutput,
+      VisualizeEmbeddable | DisabledLabEmbeddable,
+      VisualizationAttributes
+    > {
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
 
-  constructor() {
-    super({
-      savedObjectMetaData: {
-        name: i18n.translate('visualizations.savedObjectName', { defaultMessage: 'Visualization' }),
-        includeFields: ['visState'],
-        type: 'visualization',
-        getIconForSavedObject: savedObject => {
-          return (
-            getTypes().get(JSON.parse(savedObject.attributes.visState).type).icon || 'visualizeApp'
-          );
-        },
-        getTooltipForSavedObject: savedObject => {
-          return `${savedObject.attributes.title} (${
-            getTypes().get(JSON.parse(savedObject.attributes.visState).type).title
-          })`;
-        },
-        showSavedObject: savedObject => {
-          const typeName: string = JSON.parse(savedObject.attributes.visState).type;
-          const visType = getTypes().get(typeName);
-          if (!visType) {
-            return false;
-          }
-          if (getUISettings().get('visualize:enableLabs')) {
-            return true;
-          }
-          return visType.stage !== 'experimental';
-        },
-      },
-    });
-  }
+  public readonly savedObjectMetaData: SavedObjectMetaData<VisualizationAttributes> = {
+    name: i18n.translate('visualizations.savedObjectName', { defaultMessage: 'Visualization' }),
+    includeFields: ['visState'],
+    type: 'visualization',
+    getIconForSavedObject: savedObject => {
+      return (
+        getTypes().get(JSON.parse(savedObject.attributes.visState).type).icon || 'visualizeApp'
+      );
+    },
+    getTooltipForSavedObject: savedObject => {
+      return `${savedObject.attributes.title} (${
+        getTypes().get(JSON.parse(savedObject.attributes.visState).type).title
+      })`;
+    },
+    showSavedObject: savedObject => {
+      const typeName: string = JSON.parse(savedObject.attributes.visState).type;
+      const visType = getTypes().get(typeName);
+      if (!visType) {
+        return false;
+      }
+      if (getUISettings().get('visualize:enableLabs')) {
+        return true;
+      }
+      return visType.stage !== 'experimental';
+    },
+  };
+
+  constructor(private readonly deps: VisualizeEmbeddableFactoryDeps) {}
 
   public async isEditable() {
     return getCapabilities().visualize.save as boolean;
@@ -93,56 +101,31 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
     });
   }
 
-  public async createFromObject(
-    vis: Vis,
-    input: Partial<VisualizeInput> & { id: string },
-    parent?: Container
-  ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
-    const savedVisualizations = getSavedVisualizationsLoader();
-
-    try {
-      const visId = vis.id as string;
-
-      const editUrl = visId
-        ? getHttp().basePath.prepend(`/app/kibana${savedVisualizations.urlFor(visId)}`)
-        : '';
-      const isLabsEnabled = getUISettings().get<boolean>('visualize:enableLabs');
-
-      if (!isLabsEnabled && vis.type.stage === 'experimental') {
-        return new DisabledLabEmbeddable(vis.title, input);
-      }
-
-      const indexPattern = vis.data.indexPattern;
-      const indexPatterns = indexPattern ? [indexPattern] : [];
-      const editable = await this.isEditable();
-      return new VisualizeEmbeddable(
-        getTimeFilter(),
-        {
-          vis,
-          indexPatterns,
-          editUrl,
-          editable,
-        },
-        input,
-        parent
-      );
-    } catch (e) {
-      console.error(e); // eslint-disable-line no-console
-      return new ErrorEmbeddable(e, input, parent);
+  public async getCurrentAppId() {
+    let currentAppId = await this.deps
+      .start()
+      .core.application.currentAppId$.pipe(first())
+      .toPromise();
+    // TODO: Remove this after https://github.com/elastic/kibana/pull/63443
+    if (currentAppId === 'kibana') {
+      currentAppId += `:${window.location.hash.split(/[\/\?]/)[1]}`;
     }
+    return currentAppId;
   }
 
   public async createFromSavedObject(
     savedObjectId: string,
     input: Partial<VisualizeInput> & { id: string },
-    parent?: Container
+    parent?: IContainer
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
     const savedVisualizations = getSavedVisualizationsLoader();
 
     try {
       const savedObject = await savedVisualizations.get(savedObjectId);
-      const vis = new Vis(savedObject.visState.type, await convertToSerializedVis(savedObject));
-      return this.createFromObject(vis, input, parent);
+      const visState = convertToSerializedVis(savedObject);
+      const vis = new Vis(savedObject.visState.type, visState);
+      await vis.setState(visState);
+      return createVisEmbeddableFromObject(this.deps)(vis, input, parent);
     } catch (e) {
       console.error(e); // eslint-disable-line no-console
       return new ErrorEmbeddable(e, input, parent);
@@ -152,8 +135,10 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   public async create() {
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
+    const originatingAppParam = await this.getCurrentAppId();
     showNewVisModal({
-      editorParams: ['addToDashboard'],
+      editorParams: [`${EMBEDDABLE_ORIGINATING_APP_PARAM}=${originatingAppParam}`],
+      outsideVisualizeApp: true,
     });
     return undefined;
   }

@@ -12,15 +12,16 @@ export default function({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('classification creation', function() {
-    this.tags(['smoke']);
     before(async () => {
-      await esArchiver.load('ml/bm_classification');
+      await esArchiver.loadIfNeeded('ml/bm_classification');
+      await ml.testResources.createIndexPatternIfNeeded('ft_bank_marketing', '@timestamp');
+      await ml.testResources.setKibanaTimeZoneToUTC();
+
       await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await esArchiver.unload('ml/bm_classification');
     });
 
     const testDataList = [
@@ -29,8 +30,8 @@ export default function({ getService }: FtrProviderContext) {
         jobType: 'classification',
         jobId: `bm_1_${Date.now()}`,
         jobDescription:
-          "Classification job based on 'bank-marketing' dataset with dependentVariable 'y' and trainingPercent '20'",
-        source: 'bank-marketing*',
+          "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '20'",
+        source: 'ft_bank_marketing',
         get destinationIndex(): string {
           return `user-${this.jobId}`;
         },
@@ -51,6 +52,7 @@ export default function({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function() {
         after(async () => {
           await ml.api.deleteIndices(testData.destinationIndex);
+          await ml.testResources.deleteIndexPattern(testData.destinationIndex);
         });
 
         it('loads the data frame analytics page', async () => {

@@ -10,6 +10,7 @@ import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { validateJobObject } from './validate_job_object';
 import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_limit';
 import { ALLOWED_DATA_UNITS } from '../../../common/constants/validation';
+import { MlInfoResponse } from '../../../common/types/ml_server_info';
 
 // The minimum value the backend expects is 1MByte
 const MODEL_MEMORY_LIMIT_MINIMUM_BYTES = 1048576;
@@ -46,13 +47,13 @@ export async function validateModelMemoryLimit(
 
   // if there is no duration, do not run the estimate test
   const runCalcModelMemoryTest =
-    duration && typeof duration?.start !== undefined && duration?.end !== undefined;
+    duration && duration?.start !== undefined && duration?.end !== undefined;
 
   // retrieve the max_model_memory_limit value from the server
   // this will be unset unless the user has set this on their cluster
-  const maxModelMemoryLimit: string | undefined = (
-    await callWithRequest('ml.info')
-  )?.limits?.max_model_memory_limit?.toUpperCase();
+  const info = await callWithRequest<MlInfoResponse>('ml.info');
+  const maxModelMemoryLimit = info.limits.max_model_memory_limit?.toUpperCase();
+  const effectiveMaxModelMemoryLimit = info.limits.effective_max_model_memory_limit?.toUpperCase();
 
   if (runCalcModelMemoryTest) {
     const { modelMemoryLimit } = await calculateModelMemoryLimitProvider(callWithRequest)(
@@ -113,17 +114,35 @@ export async function validateModelMemoryLimit(
 
   // if max_model_memory_limit has been set,
   // make sure the user defined MML is not greater than it
-  if (maxModelMemoryLimit !== undefined && mml !== null) {
-    // @ts-ignore
-    const maxMmlBytes = numeral(maxModelMemoryLimit).value();
+  if (mml !== null) {
+    let maxMmlExceeded = false;
     // @ts-ignore
     const mmlBytes = numeral(mml).value();
-    if (mmlBytes > maxMmlBytes) {
-      messages.push({
-        id: 'mml_greater_than_max_mml',
-        maxModelMemoryLimit,
-        mml,
-      });
+
+    if (maxModelMemoryLimit !== undefined) {
+      // @ts-ignore
+      const maxMmlBytes = numeral(maxModelMemoryLimit).value();
+      if (mmlBytes > maxMmlBytes) {
+        maxMmlExceeded = true;
+        messages.push({
+          id: 'mml_greater_than_max_mml',
+          maxModelMemoryLimit,
+          mml,
+        });
+      }
+    }
+
+    if (effectiveMaxModelMemoryLimit !== undefined && maxMmlExceeded === false) {
+      // @ts-ignore
+      const effectiveMaxMmlBytes = numeral(effectiveMaxModelMemoryLimit).value();
+      if (mmlBytes > effectiveMaxMmlBytes) {
+        messages.push({
+          id: 'mml_greater_than_effective_max_mml',
+          maxModelMemoryLimit,
+          mml,
+          effectiveMaxModelMemoryLimit,
+        });
+      }
     }
   }
 

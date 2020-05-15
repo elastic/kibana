@@ -31,14 +31,14 @@ file:
 
 [source,yaml]
 -----------------------------------------------
-elasticsearch.username: "kibana"
+elasticsearch.username: "kibana_system"
 elasticsearch.password: "kibanapassword"
 -----------------------------------------------
 
 The {kib} server submits requests as this user to access the cluster monitoring
 APIs and the `.kibana` index. The server does _not_ need access to user indices.
 
-The password for the built-in `kibana` user is typically set as part of the
+The password for the built-in `kibana_system` user is typically set as part of the
 {security} configuration process on {es}. For more information, see
 {ref}/built-in-users.html[Built-in users].
 --

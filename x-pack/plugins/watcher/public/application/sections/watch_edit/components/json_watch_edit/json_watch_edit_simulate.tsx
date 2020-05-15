@@ -40,7 +40,7 @@ import { JsonWatchEditSimulateResults } from './json_watch_edit_simulate_results
 import { getTimeUnitLabel } from '../../../../lib/get_time_unit_label';
 import { useAppContext } from '../../../../app_context';
 
-import { useXJsonMode } from './use_x_json_mode';
+import { useXJsonMode } from '../../../../shared_imports';
 
 const actionModeOptions = Object.keys(ACTION_MODES).map(mode => ({
   text: ACTION_MODES[mode],

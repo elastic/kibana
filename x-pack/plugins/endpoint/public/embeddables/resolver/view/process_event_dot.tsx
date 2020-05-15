@@ -7,19 +7,27 @@
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { htmlIdGenerator, EuiKeyboardAccessible } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiKeyboardAccessible,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+import { useSelector } from 'react-redux';
 import { applyMatrix3 } from '../lib/vector2';
 import { Vector2, Matrix3, AdjacentProcessMap, ResolverProcessType } from '../types';
-import { SymbolIds, NamedColors, PaintServerIds } from './defs';
+import { SymbolIds, NamedColors } from './defs';
 import { ResolverEvent } from '../../../../common/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import * as eventModel from '../../../../common/models/event';
 import * as processModel from '../models/process_event';
+import * as selectors from '../store/selectors';
 
 const nodeAssets = {
   runningProcessCube: {
     cubeSymbol: `#${SymbolIds.runningProcessCube}`,
-    labelFill: `url(#${PaintServerIds.runningProcess})`,
+    labelBackground: NamedColors.labelBackgroundRunningProcess,
     descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.runningProcess', {
       defaultMessage: 'Running Process',
@@ -27,7 +35,7 @@ const nodeAssets = {
   },
   runningTriggerCube: {
     cubeSymbol: `#${SymbolIds.runningTriggerCube}`,
-    labelFill: `url(#${PaintServerIds.runningTrigger})`,
+    labelBackground: NamedColors.labelBackgroundRunningTrigger,
     descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.runningTrigger', {
       defaultMessage: 'Running Trigger',
@@ -35,7 +43,7 @@ const nodeAssets = {
   },
   terminatedProcessCube: {
     cubeSymbol: `#${SymbolIds.terminatedProcessCube}`,
-    labelFill: NamedColors.fullLabelBackground,
+    labelBackground: NamedColors.labelBackgroundTerminatedProcess,
     descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.terminatedProcess', {
       defaultMessage: 'Terminated Process',
@@ -43,7 +51,7 @@ const nodeAssets = {
   },
   terminatedTriggerCube: {
     cubeSymbol: `#${SymbolIds.terminatedTriggerCube}`,
-    labelFill: NamedColors.fullLabelBackground,
+    labelBackground: NamedColors.labelBackgroundTerminatedTrigger,
     descriptionFill: NamedColors.empty,
     descriptionText: i18n.translate('xpack.endpoint.resolver.terminatedTrigger', {
       defaultMessage: 'Terminated Trigger',
@@ -51,8 +59,46 @@ const nodeAssets = {
   },
 };
 
+const ChildEventsButton = React.memo(() => {
+  return (
+    <EuiButton
+      onClick={useCallback((clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        clickEvent.preventDefault();
+        clickEvent.stopPropagation();
+      }, [])}
+      color="ghost"
+      size="s"
+      iconType="arrowDown"
+      iconSide="right"
+      tabIndex={-1}
+    >
+      {i18n.translate('xpack.endpoint.resolver.relatedEvents', {
+        defaultMessage: 'Events',
+      })}
+    </EuiButton>
+  );
+});
+
+const RelatedAlertsButton = React.memo(() => {
+  return (
+    <EuiButton
+      onClick={useCallback((clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        clickEvent.preventDefault();
+        clickEvent.stopPropagation();
+      }, [])}
+      color="ghost"
+      size="s"
+      tabIndex={-1}
+    >
+      {i18n.translate('xpack.endpoint.resolver.relatedAlerts', {
+        defaultMessage: 'Related Alerts',
+      })}
+    </EuiButton>
+  );
+});
+
 /**
- * A placeholder view for a process node.
+ * An artefact that represents a process node.
  */
 export const ProcessEventDot = styled(
   React.memo(
@@ -93,29 +139,46 @@ export const ProcessEventDot = styled(
 
       const selfId = adjacentNodeMap.self;
 
+      const activeDescendantId = useSelector(selectors.uiActiveDescendantId);
+      const selectedDescendantId = useSelector(selectors.uiSelectedDescendantId);
+
+      const logicalProcessNodeViewWidth = 360;
+      const logicalProcessNodeViewHeight = 120;
+      /**
+       * The `left` and `top` values represent the 'center' point of the process node.
+       * Since the view has content to the left and above the 'center' point, offset the
+       * position to accomodate for that. This aligns the logical center of the process node
+       * with the correct position on the map.
+       */
+      const processNodeViewXOffset = -0.172413 * logicalProcessNodeViewWidth * magFactorX;
+      const processNodeViewYOffset = -0.73684 * logicalProcessNodeViewHeight * magFactorX;
+
       const nodeViewportStyle = useMemo(
         () => ({
-          left: `${left}px`,
-          top: `${top}px`,
+          left: `${left + processNodeViewXOffset}px`,
+          top: `${top + processNodeViewYOffset}px`,
           // Width of symbol viewport scaled to fit
-          width: `${360 * magFactorX}px`,
+          width: `${logicalProcessNodeViewWidth * magFactorX}px`,
           // Height according to symbol viewbox AR
-          height: `${120 * magFactorX}px`,
-          // Adjusted to position/scale with camera
-          transform: `translateX(-${0.172413 * 360 * magFactorX + 10}px) translateY(-${0.73684 *
-            120 *
-            magFactorX}px)`,
+          height: `${logicalProcessNodeViewHeight * magFactorX}px`,
         }),
-        [left, magFactorX, top]
+        [left, magFactorX, processNodeViewXOffset, processNodeViewYOffset, top]
       );
+
+      /**
+       * Type in non-SVG components scales as follows:
+       *  (These values were adjusted to match the proportions in the comps provided by UX/Design)
+       *  18.75 : The smallest readable font size at which labels/descriptions can be read. Font size will not scale below this.
+       *  12.5 : A 'slope' at which the font size will scale w.r.t. to zoom level otherwise
+       */
+      const minimumFontSize = 18.75;
+      const slopeOfFontScale = 12.5;
+      const fontSizeAdjustmentForScale = magFactorX > 1 ? slopeOfFontScale * (magFactorX - 1) : 0;
+      const scaledTypeSize = minimumFontSize + fontSizeAdjustmentForScale;
 
       const markerBaseSize = 15;
       const markerSize = markerBaseSize;
       const markerPositionOffset = -markerBaseSize / 2;
-
-      const labelYOffset = markerPositionOffset + 0.25 * markerSize - 0.5;
-
-      const labelYHeight = markerSize / 1.7647;
 
       /**
        * An element that should be animated when the node is clicked.
@@ -131,9 +194,7 @@ export const ProcessEventDot = styled(
             })
           | null;
       } = React.createRef();
-      const { cubeSymbol, labelFill, descriptionFill, descriptionText } = nodeAssets[
-        nodeType(event)
-      ];
+      const { cubeSymbol, labelBackground, descriptionText } = nodeAssets[nodeType(event)];
       const resolverNodeIdGenerator = useMemo(() => htmlIdGenerator('resolverNode'), []);
 
       const nodeId = useMemo(() => resolverNodeIdGenerator(selfId), [
@@ -143,34 +204,41 @@ export const ProcessEventDot = styled(
       const labelId = useMemo(() => resolverNodeIdGenerator(), [resolverNodeIdGenerator]);
       const descriptionId = useMemo(() => resolverNodeIdGenerator(), [resolverNodeIdGenerator]);
 
+      const isActiveDescendant = nodeId === activeDescendantId;
+      const isSelectedDescendant = nodeId === selectedDescendantId;
+
       const dispatch = useResolverDispatch();
 
-      const handleFocus = useCallback(
-        (focusEvent: React.FocusEvent<SVGSVGElement>) => {
-          dispatch({
-            type: 'userFocusedOnResolverNode',
-            payload: {
-              nodeId,
-            },
-          });
-          focusEvent.currentTarget.setAttribute('aria-current', 'true');
-        },
-        [dispatch, nodeId]
-      );
+      const handleFocus = useCallback(() => {
+        dispatch({
+          type: 'userFocusedOnResolverNode',
+          payload: {
+            nodeId,
+          },
+        });
+      }, [dispatch, nodeId]);
 
       const handleClick = useCallback(() => {
         if (animationTarget.current !== null) {
-          animationTarget.current.beginElement();
+          (animationTarget.current as any).beginElement();
         }
-      }, [animationTarget]);
+        dispatch({
+          type: 'userSelectedResolverNode',
+          payload: {
+            nodeId,
+          },
+        });
+      }, [animationTarget, dispatch, nodeId]);
 
+      /* eslint-disable jsx-a11y/click-events-have-key-events */
+      /**
+       * Key event handling (e.g. 'Enter'/'Space') is provisioned by the `EuiKeyboardAccessible` component
+       */
       return (
         <EuiKeyboardAccessible>
-          <svg
+          <div
             data-test-subj={'resolverNode'}
             className={className + ' kbn-resetFocusState'}
-            viewBox="-15 -15 90 30"
-            preserveAspectRatio="xMidYMid meet"
             role="treeitem"
             aria-level={adjacentNodeMap.level}
             aria-flowto={
@@ -179,92 +247,159 @@ export const ProcessEventDot = styled(
             aria-labelledby={labelId}
             aria-describedby={descriptionId}
             aria-haspopup={'true'}
+            aria-current={isActiveDescendant ? 'true' : undefined}
+            aria-selected={isSelectedDescendant ? 'true' : undefined}
             style={nodeViewportStyle}
             id={nodeId}
             onClick={handleClick}
             onFocus={handleFocus}
             tabIndex={-1}
           >
-            <g>
-              <use
-                role="presentation"
-                xlinkHref={cubeSymbol}
-                x={markerPositionOffset}
-                y={markerPositionOffset}
-                width={markerSize}
-                height={markerSize}
-                opacity="1"
-                className="cube"
-              >
-                <animateTransform
-                  attributeType="XML"
-                  attributeName="transform"
-                  type="scale"
-                  values="1 1; 1 .83; 1 .8; 1 .83; 1 1"
-                  dur="0.2s"
-                  begin="click"
-                  repeatCount="1"
-                  className="squish"
-                  ref={animationTarget}
+            <svg
+              viewBox="-15 -15 90 30"
+              preserveAspectRatio="xMidYMid meet"
+              style={{
+                display: 'block',
+                width: '100%',
+                height: '100%',
+                position: 'absolute',
+                top: '0',
+                left: '0',
+              }}
+            >
+              <g>
+                <use
+                  xlinkHref={`#${SymbolIds.processCubeActiveBacking}`}
+                  x={-11.35}
+                  y={-11.35}
+                  width={markerSize * 1.5}
+                  height={markerSize * 1.5}
+                  className="backing"
                 />
-              </use>
-              <use
-                role="presentation"
-                xlinkHref={`#${SymbolIds.processNodeLabel}`}
-                x={markerPositionOffset + markerSize - 0.5}
-                y={labelYOffset}
-                width={(markerSize / 1.7647) * 5}
-                height={markerSize / 1.7647}
-                opacity="1"
-                fill={labelFill}
-              />
-              <text
-                x={markerPositionOffset + 0.7 * markerSize + 50 / 2}
-                y={labelYOffset + labelYHeight / 2}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fontSize="3.75"
-                fontWeight="bold"
-                fill={NamedColors.empty}
-                paintOrder="stroke"
-                tabIndex={-1}
-                style={{ letterSpacing: '-0.02px' }}
-                id={labelId}
-              >
-                {eventModel.eventName(event)}
-              </text>
-              <text
-                x={markerPositionOffset + markerSize}
-                y={labelYOffset - 1}
-                textAnchor="start"
-                dominantBaseline="middle"
-                fontSize="2.67"
-                fill={descriptionFill}
+                <use
+                  role="presentation"
+                  xlinkHref={cubeSymbol}
+                  x={markerPositionOffset}
+                  y={markerPositionOffset}
+                  width={markerSize}
+                  height={markerSize}
+                  opacity="1"
+                  className="cube"
+                >
+                  <animateTransform
+                    attributeType="XML"
+                    attributeName="transform"
+                    type="scale"
+                    values="1 1; 1 .83; 1 .8; 1 .83; 1 1"
+                    dur="0.2s"
+                    begin="click"
+                    repeatCount="1"
+                    className="squish"
+                    ref={animationTarget}
+                  />
+                </use>
+              </g>
+            </svg>
+            <div
+              style={{
+                display: 'flex',
+                flexFlow: 'column',
+                left: '25%',
+                top: '30%',
+                position: 'absolute',
+                width: '50%',
+                color: NamedColors.full,
+                fontSize: `${scaledTypeSize}px`,
+                lineHeight: '140%',
+                backgroundColor: NamedColors.resolverBackground,
+                padding: '.25rem',
+              }}
+            >
+              <div
                 id={descriptionId}
-                paintOrder="stroke"
-                fontWeight="bold"
-                style={{ textTransform: 'uppercase', letterSpacing: '-0.01px' }}
+                style={{
+                  textTransform: 'uppercase',
+                  letterSpacing: '-0.01px',
+                  backgroundColor: NamedColors.resolverBackground,
+                  lineHeight: '1',
+                  fontWeight: 'bold',
+                  fontSize: '0.8rem',
+                  width: '100%',
+                  margin: '0',
+                  textAlign: 'left',
+                  padding: '0',
+                  color: NamedColors.empty,
+                }}
               >
                 {descriptionText}
-              </text>
-            </g>
-          </svg>
+              </div>
+              <div
+                className={magFactorX >= 2 ? 'euiButton' : 'euiButton euiButton--small'}
+                data-test-subject="nodeLabel"
+                id={labelId}
+                style={{
+                  backgroundColor: labelBackground,
+                  padding: '.15rem 0',
+                  textAlign: 'center',
+                  maxWidth: '20rem',
+                  minWidth: '12rem',
+                  width: '60%',
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis',
+                  contain: 'content',
+                  margin: '.25rem 0 .35rem 0',
+                }}
+              >
+                <span className="euiButton__content">
+                  <span className="euiButton__text" data-test-subj={'euiButton__text'}>
+                    {eventModel.eventName(event)}
+                  </span>
+                </span>
+              </div>
+              {magFactorX >= 2 && (
+                <EuiFlexGroup justifyContent="flexStart" gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <RelatedAlertsButton />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <ChildEventsButton />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+            </div>
+          </div>
         </EuiKeyboardAccessible>
       );
+      /* eslint-enable jsx-a11y/click-events-have-key-events */
     }
   )
 )`
   position: absolute;
-  display: block;
   text-align: left;
   font-size: 10px;
   user-select: none;
   box-sizing: border-box;
   border-radius: 10%;
-  padding: 4px;
   white-space: nowrap;
   will-change: left, top, width, height;
   contain: strict;
+  min-width: 280px;
+  min-height: 90px;
+
+  //dasharray & dashoffset should be equal to "pull" the stroke back
+  //when it is transitioned.
+  //The value is tuned to look good when animated, but to preserve
+  //the effect, it should always be _at least_ the length of the stroke
+  & .backing {
+    stroke-dasharray: 500;
+    stroke-dashoffset: 500;
+  }
+  &[aria-current] .backing {
+    transition-property: stroke-dashoffset;
+    transition-duration: 1s;
+    stroke-dashoffset: 0;
+  }
 `;
 
 const processTypeToCube: Record<ResolverProcessType, keyof typeof nodeAssets> = {

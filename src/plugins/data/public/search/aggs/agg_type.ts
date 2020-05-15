@@ -28,7 +28,7 @@ import { BaseParamType } from './param_types/base';
 import { AggParamType } from './param_types/agg';
 import { KBN_FIELD_TYPES, IFieldFormat } from '../../../common';
 import { ISearchSource } from '../search_source';
-import { getFieldFormats } from '../../../public/services';
+import { GetInternalStartServicesFn } from '../../types';
 
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,
@@ -39,6 +39,7 @@ export interface AggTypeConfig<
   createFilter?: (aggConfig: TAggConfig, key: any, params?: any) => any;
   type?: string;
   dslName?: string;
+  expressionName?: string;
   makeLabel?: ((aggConfig: TAggConfig) => string) | (() => string);
   ordered?: any;
   hasNoDsl?: boolean;
@@ -60,15 +61,12 @@ export interface AggTypeConfig<
   getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
 }
 
-const getFormat = (agg: AggConfig) => {
-  const field = agg.getField();
-  const fieldFormatsService = getFieldFormats();
-
-  return field ? field.format : fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.STRING);
-};
-
 // TODO need to make a more explicit interface for this
 export type IAggType = AggType;
+
+export interface AggTypeDependencies {
+  getInternalStartServices: GetInternalStartServicesFn;
+}
 
 export class AggType<
   TAggConfig extends AggConfig = AggConfig,
@@ -91,6 +89,14 @@ export class AggType<
    * @type {string}
    */
   dslName: string;
+  /**
+   * the name of the expression function that this aggType represents.
+   * TODO: this should probably be a required field.
+   *
+   * @property name
+   * @type {string}
+   */
+  expressionName?: string;
   /**
    * the user friendly name that will be shown in the ui for this aggType
    *
@@ -215,10 +221,14 @@ export class AggType<
    * @private
    * @param {object} config - used to set the properties of the AggType
    */
-  constructor(config: AggTypeConfig<TAggConfig>) {
+  constructor(
+    config: AggTypeConfig<TAggConfig>,
+    { getInternalStartServices }: AggTypeDependencies
+  ) {
     this.name = config.name;
     this.type = config.type || 'metrics';
     this.dslName = config.dslName || config.name;
+    this.expressionName = config.expressionName;
     this.title = config.title;
     this.makeLabel = config.makeLabel || constant(this.name);
     this.ordered = config.ordered;
@@ -251,14 +261,22 @@ export class AggType<
         });
       }
 
-      this.params = initParams(params);
+      this.params = initParams(params, { getInternalStartServices });
     }
 
     this.getRequestAggs = config.getRequestAggs || noop;
     this.getResponseAggs = config.getResponseAggs || (() => {});
     this.decorateAggConfig = config.decorateAggConfig || (() => ({}));
     this.postFlightRequest = config.postFlightRequest || identity;
-    this.getFormat = config.getFormat || getFormat;
+
+    this.getFormat =
+      config.getFormat ||
+      ((agg: TAggConfig) => {
+        const field = agg.getField();
+        const { fieldFormats } = getInternalStartServices();
+
+        return field ? field.format : fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING);
+      });
     this.getValue = config.getValue || ((agg: TAggConfig, bucket: any) => {});
   }
 }

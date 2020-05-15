@@ -29,11 +29,9 @@ import {
   ExpressionsServiceStart,
   ExecutionContext,
 } from '../common';
-import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
 import { BfetchPublicSetup, BfetchPublicStart } from '../../bfetch/public';
 import {
   setCoreStart,
-  setInspector,
   setInterpreter,
   setRenderersRegistry,
   setNotifications,
@@ -45,12 +43,10 @@ import { render, ExpressionRenderHandler } from './render';
 
 export interface ExpressionsSetupDeps {
   bfetch: BfetchPublicSetup;
-  inspector: InspectorSetup;
 }
 
 export interface ExpressionsStartDeps {
   bfetch: BfetchPublicStart;
-  inspector: InspectorStart;
 }
 
 export interface ExpressionsSetup extends ExpressionsServiceSetup {
@@ -120,7 +116,7 @@ export class ExpressionsPublicPlugin
     });
   }
 
-  public setup(core: CoreSetup, { inspector, bfetch }: ExpressionsSetupDeps): ExpressionsSetup {
+  public setup(core: CoreSetup, { bfetch }: ExpressionsSetupDeps): ExpressionsSetup {
     this.configureExecutor(core);
 
     const { expressions } = this;
@@ -180,9 +176,8 @@ export class ExpressionsPublicPlugin
     return Object.freeze(setup);
   }
 
-  public start(core: CoreStart, { inspector, bfetch }: ExpressionsStartDeps): ExpressionsStart {
+  public start(core: CoreStart, { bfetch }: ExpressionsStartDeps): ExpressionsStart {
     setCoreStart(core);
-    setInspector(inspector);
     setNotifications(core.notifications);
 
     const { expressions } = this;

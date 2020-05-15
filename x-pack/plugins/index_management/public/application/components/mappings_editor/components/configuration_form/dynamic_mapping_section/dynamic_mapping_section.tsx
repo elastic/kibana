@@ -43,7 +43,11 @@ export const DynamicMappingSection = () => (
           }}
         />
         <EuiSpacer size="m" />
-        <UseField path="dynamicMapping.enabled" component={ToggleField} />
+        <UseField
+          path="dynamicMapping.enabled"
+          component={ToggleField}
+          componentProps={{ 'data-test-subj': 'dynamicMappingsToggle' }}
+        />
       </>
     }
   >
@@ -62,7 +66,11 @@ export const DynamicMappingSection = () => (
         if (enabled) {
           return (
             <>
-              <UseField path="dynamicMapping.numeric_detection" />
+              <UseField
+                key="numericDetectionToggle"
+                path="dynamicMapping.numeric_detection"
+                componentProps={{ 'data-test-subj': 'numericDetection' }}
+              />
               <UseField path="dynamicMapping.date_detection" />
               {dateDetection && (
                 <UseField
@@ -80,6 +88,7 @@ export const DynamicMappingSection = () => (
         } else {
           return (
             <UseField
+              key="throwErrorsCheckBox"
               path="dynamicMapping.throwErrorsForUnmappedFields"
               component={CheckBoxField}
             />

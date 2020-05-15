@@ -45,6 +45,9 @@ function getCapabilitiesFromFeature(feature: Feature): FeatureCapabilities {
       ...feature.subFeatures.map(sf => sf.privilegeGroups.map(pg => pg.privileges)).flat(2)
     );
   }
+  if (feature.reserved?.privileges) {
+    featurePrivileges.push(...feature.reserved.privileges.map(rp => rp.privilege));
+  }
 
   featurePrivileges.forEach(privilege => {
     UIFeatureCapabilities[feature.id] = {

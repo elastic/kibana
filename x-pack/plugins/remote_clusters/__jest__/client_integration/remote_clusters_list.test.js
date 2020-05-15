@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { act } from 'react-dom/test-utils';
 
 import {
   pageHelpers,
@@ -16,8 +17,6 @@ import { getRouter } from '../../public/application/services';
 import { getRemoteClusterMock } from '../../fixtures/remote_cluster';
 
 import { PROXY_MODE } from '../../common/constants';
-
-jest.mock('ui/new_platform');
 
 const { setup } = pageHelpers.remoteClustersList;
 
@@ -70,6 +69,53 @@ describe('<RemoteClusterList />', () => {
     });
   });
 
+  describe('when there are multiple pages of remote clusters', () => {
+    let find;
+    let table;
+    let actions;
+    let waitFor;
+    let form;
+
+    const remoteClusters = [
+      {
+        name: 'unique',
+        seeds: [],
+      },
+    ];
+
+    for (let i = 0; i < 29; i++) {
+      remoteClusters.push({
+        name: `name${i}`,
+        seeds: [],
+      });
+    }
+
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
+
+      await act(async () => {
+        ({ find, table, actions, waitFor, form } = setup());
+        await waitFor('remoteClusterListTable');
+      });
+    });
+
+    test('pagination works', () => {
+      actions.clickPaginationNextButton();
+      const { tableCellsValues } = table.getMetaData('remoteClusterListTable');
+
+      // Pagination defaults to 20 remote clusters per page. We loaded 30 remote clusters,
+      // so the second page should have 10.
+      expect(tableCellsValues.length).toBe(10);
+    });
+
+    // Skipped until we can figure out how to get this test to work.
+    test.skip('search works', () => {
+      form.setInputValue(find('remoteClusterSearch'), 'unique');
+      const { tableCellsValues } = table.getMetaData('remoteClusterListTable');
+      expect(tableCellsValues.length).toBe(1);
+    });
+  });
+
   describe('when there are remote clusters', () => {
     let find;
     let exists;
@@ -78,6 +124,7 @@ describe('<RemoteClusterList />', () => {
     let actions;
     let tableCellsValues;
     let rows;
+    let waitFor;
 
     // For deterministic tests, we need to make sure that remoteCluster1 comes before remoteCluster2
     // in the table list that is rendered. As the table orders alphabetically by index name
@@ -110,11 +157,11 @@ describe('<RemoteClusterList />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
 
-      // Mount the component
-      ({ component, find, exists, table, actions } = setup());
+      await act(async () => {
+        ({ component, find, exists, table, actions, waitFor } = setup());
 
-      await nextTick(100); // Make sure that the Http request is fulfilled
-      component.update();
+        await waitFor('remoteClusterListTable');
+      });
 
       // Read the remote clusters list table
       ({ rows, tableCellsValues } = table.getMetaData('remoteClusterListTable'));
@@ -241,8 +288,10 @@ describe('<RemoteClusterList />', () => {
         actions.clickBulkDeleteButton();
         actions.clickConfirmModalDeleteRemoteCluster();
 
-        await nextTick(600); // there is a 500ms timeout in the api action
-        component.update();
+        await act(async () => {
+          await nextTick(600); // there is a 500ms timeout in the api action
+          component.update();
+        });
 
         ({ rows } = table.getMetaData('remoteClusterListTable'));
 

@@ -58,7 +58,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     Fs.writeFileSync(path, JSON.stringify(JSON.parse(coverageJson), null, 2));
   };
 
-  const { driver, By, until, consoleLog$ } = await initWebDriver(
+  const { driver, consoleLog$ } = await initWebDriver(
     log,
     browserType,
     lifecycle,
@@ -69,13 +69,15 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   const caps = await driver.getCapabilities();
   const browserVersion = caps.get(isW3CEnabled ? 'browserVersion' : 'version');
 
-  log.info(`Remote initialized: ${caps.get('browserName')} ${browserVersion}`);
+  log.info(
+    `Remote initialized: ${caps.get(
+      'browserName'
+    )} ${browserVersion}, w3c compliance=${isW3CEnabled}, collectingCoverage=${collectCoverage}`
+  );
 
-  if (browserType === Browsers.Chrome) {
+  if ([Browsers.Chrome, Browsers.ChromiumEdge].includes(browserType)) {
     log.info(
-      `Chromedriver version: ${
-        caps.get('chrome').chromedriverVersion
-      }, w3c=${isW3CEnabled}, codeCoverage=${collectCoverage}`
+      `${browserType}driver version: ${caps.get(browserType)[`${browserType}driverVersion`]}`
     );
   }
 
@@ -151,5 +153,5 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     await driver.quit();
   });
 
-  return { driver, By, until, browserType, consoleLog$ };
+  return { driver, browserType, consoleLog$ };
 }

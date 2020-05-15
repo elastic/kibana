@@ -13,7 +13,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ProcessedImportResponse } from '../../../../../../src/legacy/core_plugins/management/public';
+import { ProcessedImportResponse } from '../../../../../../src/legacy/core_plugins/kibana/public';
 import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
 import { Space } from '../../../common/model/space';
 import { CopyOptions, ImportRetry } from '../types';

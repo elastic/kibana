@@ -9,7 +9,7 @@ import { DefaultOperator } from 'elasticsearch';
 import { dictionaryToArray } from '../../../common/types/common';
 import { SavedSearchQuery } from '../hooks/use_search_items';
 
-import { StepDefineExposedState } from '../sections/create_transform/components/step_define/step_define_form';
+import { StepDefineExposedState } from '../sections/create_transform/components/step_define';
 import { StepDetailsExposedState } from '../sections/create_transform/components/step_details/step_details_form';
 
 import { IndexPattern } from '../../../../../../src/plugins/data/public';
@@ -81,7 +81,7 @@ export function getPreviewRequestBody(
     },
   };
 
-  if (!isDefaultQuery(query)) {
+  if (!isDefaultQuery(query) && !isMatchAllQuery(query)) {
     request.source.query = query;
   }
 

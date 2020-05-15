@@ -5,22 +5,33 @@
  */
 
 import _ from 'lodash';
-import chrome from 'ui/chrome';
 import rison from 'rison-node';
 import 'ui/directives/listen';
 import 'ui/directives/storage';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { capabilities } from 'ui/capabilities';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
-import { getTimeFilter, getIndexPatternService, getInspector } from '../kibana_services';
-import { Provider } from 'react-redux';
+import {
+  getTimeFilter,
+  getIndexPatternService,
+  getInspector,
+  getNavigation,
+  getData,
+  getCoreI18n,
+  getCoreChrome,
+  getMapsCapabilities,
+  getToasts,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps/public/kibana_services';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createMapStore } from '../../../../../plugins/maps/public/reducers/store';
-import { GisMap } from '../connected_components/gis_map';
-import { addHelpMenuToAppChrome } from '../help_menu_util';
+import { Provider } from 'react-redux';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { GisMap } from '../../../../../plugins/maps/public/connected_components/gis_map';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { addHelpMenuToAppChrome } from '../../../../../plugins/maps/public/help_menu_util';
 import {
   setSelectedLayer,
   setRefreshConfig,
@@ -28,7 +39,9 @@ import {
   replaceLayerList,
   setQuery,
   clearTransientLayerStateAndCloseFlyout,
-} from '../actions/map_actions';
+  setMapSettings,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps/public/actions/map_actions';
 import {
   DEFAULT_IS_LAYER_TOC_OPEN,
   FLYOUT_STATE,
@@ -40,39 +53,54 @@ import {
   setReadOnly,
   setIsLayerTOCOpen,
   setOpenTOCDetails,
-} from '../actions/ui_actions';
-import { getIsFullScreen } from '../selectors/ui_selectors';
+  openMapSettings,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps/public/actions/ui_actions';
+import {
+  getIsFullScreen,
+  getFlyoutDisplay,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps/public/selectors/ui_selectors';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { copyPersistentState } from '../../../../../plugins/maps/public/reducers/util';
 import {
   getQueryableUniqueIndexPatternIds,
   hasDirtyState,
   getLayerListRaw,
-} from '../selectors/map_selectors';
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps/public/selectors/map_selectors';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getInspectorAdapters } from '../../../../../plugins/maps/public/reducers/non_serializable_instances';
-import { docTitle } from 'ui/doc_title';
-
-import { toastNotifications } from 'ui/notify';
-import { getInitialLayers } from './get_initial_layers';
-import { getInitialQuery } from './get_initial_query';
-import { getInitialTimeFilters } from './get_initial_time_filters';
-import { getInitialRefreshConfig } from './get_initial_refresh_config';
-import { MAP_SAVED_OBJECT_TYPE, MAP_APP_PATH } from '../../common/constants';
-import { npStart } from 'ui/new_platform';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getInitialLayers } from '../../../../../plugins/maps/public/angular/get_initial_layers';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getInitialQuery } from '../../../../../plugins/maps/public/angular/get_initial_query';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getInitialTimeFilters } from '../../../../../plugins/maps/public/angular/get_initial_time_filters';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getInitialRefreshConfig } from '../../../../../plugins/maps/public/angular/get_initial_refresh_config';
+import { MAP_SAVED_OBJECT_TYPE, MAP_APP_PATH } from '../../../../../plugins/maps/common/constants';
+import { npSetup, npStart } from 'ui/new_platform';
 import { esFilters } from '../../../../../../src/plugins/data/public';
 import {
   SavedObjectSaveModal,
   showSaveModal,
 } from '../../../../../../src/plugins/saved_objects/public';
 import { loadKbnTopNavDirectives } from '../../../../../../src/plugins/kibana_legacy/public';
-loadKbnTopNavDirectives(npStart.plugins.navigation.ui);
-
-const savedQueryService = npStart.plugins.data.query.savedQueries;
+import {
+  bindSetupCoreAndPlugins as bindNpSetupCoreAndPlugins,
+  bindStartCoreAndPlugins as bindNpStartCoreAndPlugins,
+} from '../../../../../plugins/maps/public/plugin'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
 const app = uiModules.get(MAP_APP_PATH, []);
+
+// Init required services. Necessary while in legacy
+bindNpSetupCoreAndPlugins(npSetup.core, npSetup.plugins);
+bindNpStartCoreAndPlugins(npStart.core, npStart.plugins);
+
+loadKbnTopNavDirectives(getNavigation().ui);
 
 function getInitialLayersFromUrlParam() {
   const locationSplit = window.location.href.split('?');
@@ -87,7 +115,7 @@ function getInitialLayersFromUrlParam() {
   try {
     return rison.decode_array(mapAppParams.get('initialLayers'));
   } catch (e) {
-    toastNotifications.addWarning({
+    getToasts().addWarning({
       title: i18n.translate('xpack.maps.initialLayers.unableToParseTitle', {
         defaultMessage: `Inital layers not added to map`,
       }),
@@ -103,7 +131,8 @@ function getInitialLayersFromUrlParam() {
 app.controller(
   'GisMapController',
   ($scope, $route, kbnUrl, localStorage, AppState, globalState) => {
-    const { filterManager } = npStart.plugins.data.query;
+    const savedQueryService = getData().query.savedQueries;
+    const { filterManager } = getData().query;
     const savedMap = $route.current.locals.map;
     $scope.screenTitle = savedMap.title;
     let unsubscribe;
@@ -114,6 +143,14 @@ app.controller(
     function getAppStateFilters() {
       return _.get($state, 'filters', []);
     }
+
+    const visibleSubscription = getCoreChrome()
+      .getIsVisible$()
+      .subscribe(isVisible => {
+        $scope.$evalAsync(() => {
+          $scope.isVisible = isVisible;
+        });
+      });
 
     $scope.$listen(globalState, 'fetch_with_changes', diff => {
       if (diff.includes('time') || diff.includes('filters')) {
@@ -169,10 +206,10 @@ app.controller(
     });
 
     /* Saved Queries */
-    $scope.showSaveQuery = capabilities.get().maps.saveQuery;
+    $scope.showSaveQuery = getMapsCapabilities().saveQuery;
 
     $scope.$watch(
-      () => capabilities.get().maps.saveQuery,
+      () => getMapsCapabilities().saveQuery,
       newCapability => {
         $scope.showSaveQuery = newCapability;
       }
@@ -299,7 +336,7 @@ app.controller(
 
     function addFilters(newFilters) {
       newFilters.forEach(filter => {
-        filter.$state = esFilters.FilterStateStore.APP_STATE;
+        filter.$state = { store: esFilters.FilterStateStore.APP_STATE };
       });
       $scope.updateFiltersAndDispatch([...$scope.filters, ...newFilters]);
     }
@@ -342,7 +379,7 @@ app.controller(
       // clear old UI state
       store.dispatch(setSelectedLayer(null));
       store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
-      store.dispatch(setReadOnly(!capabilities.get().maps.save));
+      store.dispatch(setReadOnly(!getMapsCapabilities().save));
 
       handleStoreChanges(store);
       unsubscribe = store.subscribe(() => {
@@ -362,6 +399,9 @@ app.controller(
         );
         if (mapState.filters) {
           savedObjectFilters = mapState.filters;
+        }
+        if (mapState.settings) {
+          store.dispatch(setMapSettings(mapState.settings));
         }
       }
 
@@ -421,6 +461,7 @@ app.controller(
 
     $scope.isFullScreen = false;
     $scope.isSaveDisabled = false;
+    $scope.isOpenSettingsDisabled = false;
     function handleStoreChanges(store) {
       const nextIsFullScreen = getIsFullScreen(store.getState());
       if (nextIsFullScreen !== $scope.isFullScreen) {
@@ -442,10 +483,20 @@ app.controller(
           $scope.isSaveDisabled = nextIsSaveDisabled;
         });
       }
+
+      const flyoutDisplay = getFlyoutDisplay(store.getState());
+      const nextIsOpenSettingsDisabled = flyoutDisplay !== FLYOUT_STATE.NONE;
+      if (nextIsOpenSettingsDisabled !== $scope.isOpenSettingsDisabled) {
+        $scope.$evalAsync(() => {
+          $scope.isOpenSettingsDisabled = nextIsOpenSettingsDisabled;
+        });
+      }
     }
 
     $scope.$on('$destroy', () => {
       window.removeEventListener('beforeunload', beforeUnload);
+      visibleSubscription.unsubscribe();
+      getCoreChrome().setIsVisible(true);
 
       if (unsubscribe) {
         unsubscribe();
@@ -457,7 +508,7 @@ app.controller(
     });
 
     const updateBreadcrumbs = () => {
-      chrome.breadcrumbs.set([
+      getCoreChrome().setBreadcrumbs([
         {
           text: i18n.translate('xpack.maps.mapController.mapsBreadcrumbLabel', {
             defaultMessage: 'Maps',
@@ -482,7 +533,7 @@ app.controller(
     };
     updateBreadcrumbs();
 
-    addHelpMenuToAppChrome(chrome);
+    addHelpMenuToAppChrome();
 
     async function doSave(saveOptions) {
       await store.dispatch(clearTransientLayerStateAndCloseFlyout());
@@ -491,9 +542,9 @@ app.controller(
 
       try {
         id = await savedMap.save(saveOptions);
-        docTitle.change(savedMap.title);
+        getCoreChrome().docTitle.change(savedMap.title);
       } catch (err) {
-        toastNotifications.addDanger({
+        getToasts().addDanger({
           title: i18n.translate('xpack.maps.mapController.saveErrorMessage', {
             defaultMessage: `Error on saving '{title}'`,
             values: { title: savedMap.title },
@@ -505,7 +556,7 @@ app.controller(
       }
 
       if (id) {
-        toastNotifications.addSuccess({
+        getToasts().addSuccess({
           title: i18n.translate('xpack.maps.mapController.saveSuccessMessage', {
             defaultMessage: `Saved '{title}'`,
             values: { title: savedMap.title },
@@ -539,6 +590,7 @@ app.controller(
         }),
         testId: 'mapsFullScreenMode',
         run() {
+          getCoreChrome().setIsVisible(false);
           store.dispatch(enableFullScreen());
         },
       },
@@ -556,7 +608,23 @@ app.controller(
           getInspector().open(inspectorAdapters, {});
         },
       },
-      ...(capabilities.get().maps.save
+      {
+        id: 'mapSettings',
+        label: i18n.translate('xpack.maps.mapController.openSettingsButtonLabel', {
+          defaultMessage: `Map settings`,
+        }),
+        description: i18n.translate('xpack.maps.mapController.openSettingsDescription', {
+          defaultMessage: `Open map settings`,
+        }),
+        testId: 'openSettingsButton',
+        disableButton() {
+          return $scope.isOpenSettingsDisabled;
+        },
+        run() {
+          store.dispatch(openMapSettings());
+        },
+      },
+      ...(getMapsCapabilities().save
         ? [
             {
               id: 'save',
@@ -611,7 +679,7 @@ app.controller(
                     showDescription={false}
                   />
                 );
-                showSaveModal(saveModal, npStart.core.i18n.Context);
+                showSaveModal(saveModal, getCoreI18n().Context);
               },
             },
           ]

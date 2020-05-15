@@ -33,7 +33,7 @@ export const hoveredContentStyle = css`
 `;
 
 export const highlightedContentStyle = css`
-  background-color: ${props => props.theme.eui.euiFocusBackgroundColor};
+  background-color: ${props => props.theme.eui.euiColorHighlight};
 `;
 
 export const longWrappedContentStyle = css`

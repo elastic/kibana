@@ -17,14 +17,15 @@
  * under the License.
  */
 
-import { ActionByType } from './actions/action';
+import { ActionInternal } from './actions/action_internal';
 import { TriggerInternal } from './triggers/trigger_internal';
-import { EmbeddableVisTriggerContext, IEmbeddable } from '../../embeddable/public';
 import { Filter } from '../../data/public';
 import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER, APPLY_FILTER_TRIGGER } from './triggers';
+import { IEmbeddable } from '../../embeddable/public';
+import { RangeSelectTriggerContext, ValueClickTriggerContext } from '../../embeddable/public';
 
 export type TriggerRegistry = Map<TriggerId, TriggerInternal<any>>;
-export type ActionRegistry = Map<string, ActionByType<any>>;
+export type ActionRegistry = Map<string, ActionInternal>;
 export type TriggerToActionsRegistry = Map<TriggerId, string[]>;
 
 const DEFAULT_TRIGGER = '';
@@ -36,8 +37,8 @@ export type TriggerContext = BaseContext;
 
 export interface TriggerContextMapping {
   [DEFAULT_TRIGGER]: TriggerContext;
-  [SELECT_RANGE_TRIGGER]: EmbeddableVisTriggerContext;
-  [VALUE_CLICK_TRIGGER]: EmbeddableVisTriggerContext;
+  [SELECT_RANGE_TRIGGER]: RangeSelectTriggerContext;
+  [VALUE_CLICK_TRIGGER]: ValueClickTriggerContext;
   [APPLY_FILTER_TRIGGER]: {
     embeddable: IEmbeddable;
     filters: Filter[];

@@ -11,9 +11,14 @@ import { i18n } from '@kbn/i18n';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { DataFrameAnalyticsConfig, isOutlierAnalysis } from '../../../../common';
 import { isClassificationAnalysis, isRegressionAnalysis } from '../../../../common/analytics';
-import { CreateAnalyticsFormProps } from '../../hooks/use_create_analytics_form';
+import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants';
+import {
+  CreateAnalyticsFormProps,
+  DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES,
+} from '../../hooks/use_create_analytics_form';
 import { State } from '../../hooks/use_create_analytics_form/state';
 import { DataFrameAnalyticsListRow } from './common';
+import { checkPermission } from '../../../../../capabilities/check_capabilities';
 
 interface PropDefinition {
   /**
@@ -97,6 +102,8 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
             },
             num_top_feature_importance_values: {
               optional: true,
+              defaultValue: DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES,
+              formKey: 'numTopFeatureImportanceValues',
             },
             class_assignment_objective: {
               optional: true,
@@ -164,11 +171,17 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
             },
             num_top_feature_importance_values: {
               optional: true,
+              defaultValue: DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES,
+              formKey: 'numTopFeatureImportanceValues',
             },
             randomize_seed: {
               optional: true,
               // By default it is randomly generated
               ignore: true,
+            },
+            loss_function: {
+              optional: true,
+              defaultValue: 'mse',
             },
           },
         }
@@ -207,7 +220,7 @@ const getAnalyticsJobMeta = (config: CloneDataFrameAnalyticsConfig): AnalyticsJo
     },
     results_field: {
       optional: true,
-      defaultValue: 'ml',
+      defaultValue: DEFAULT_RESULTS_FIELD,
     },
   },
   model_memory_limit: {
@@ -314,6 +327,8 @@ interface CloneActionProps {
  * to support EuiContext with a valid DOM structure without nested buttons.
  */
 export const CloneAction: FC<CloneActionProps> = ({ createAnalyticsForm, item }) => {
+  const canCreateDataFrameAnalytics: boolean = checkPermission('canCreateDataFrameAnalytics');
+
   const buttonText = i18n.translate('xpack.ml.dataframe.analyticsList.cloneJobButtonLabel', {
     defaultMessage: 'Clone job',
   });
@@ -330,6 +345,7 @@ export const CloneAction: FC<CloneActionProps> = ({ createAnalyticsForm, item })
       iconType="copy"
       onClick={onClick}
       aria-label={buttonText}
+      disabled={canCreateDataFrameAnalytics === false}
     >
       {buttonText}
     </EuiButtonEmpty>

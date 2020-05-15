@@ -182,7 +182,11 @@ export type VectorStylePropertiesDescriptor = {
   [VECTOR_STYLES.LABEL_BORDER_SIZE]?: LabelBorderSizeStylePropertyDescriptor;
 };
 
-export type VectorStyleDescriptor = {
+export type StyleDescriptor = {
+  type: string;
+};
+
+export type VectorStyleDescriptor = StyleDescriptor & {
   type: LAYER_STYLE_TYPE.VECTOR;
   properties: VectorStylePropertiesDescriptor;
 };

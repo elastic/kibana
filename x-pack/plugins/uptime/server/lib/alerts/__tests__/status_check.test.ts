@@ -7,7 +7,6 @@
 import {
   contextMessage,
   uniqueMonitorIds,
-  updateState,
   statusCheckAlertFactory,
   fullListByIdAndLocation,
 } from '../status_check';
@@ -16,7 +15,8 @@ import { AlertType } from '../../../../../alerting/server';
 import { IRouter } from 'kibana/server';
 import { UMServerLibs } from '../../lib';
 import { UptimeCoreSetup } from '../../adapters';
-import { defaultDynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
+import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 
 /**
  * The alert takes some dependencies as parameters; these are things like
@@ -26,10 +26,10 @@ import { defaultDynamicSettings } from '../../../../../../legacy/plugins/uptime/
  * so we don't have to mock them all for each test.
  */
 const bootstrapDependencies = (customRequests?: any) => {
-  const route: IRouter = {} as IRouter;
+  const router: IRouter = {} as IRouter;
   // these server/libs parameters don't have any functionality, which is fine
   // because we aren't testing them here
-  const server: UptimeCoreSetup = { route };
+  const server: UptimeCoreSetup = { router };
   const libs: UMServerLibs = { requests: {} } as UMServerLibs;
   libs.requests = { ...libs.requests, ...customRequests };
   return { server, libs };
@@ -44,18 +44,31 @@ const bootstrapDependencies = (customRequests?: any) => {
  */
 const mockOptions = (
   params = { numTimes: 5, locations: [], timerange: { from: 'now-15m', to: 'now' } },
-  services = { callCluster: 'mockESFunction', savedObjectsClient: mockSavedObjectsClient },
+  services = alertsMock.createAlertServices(),
   state = {}
-): any => ({
-  params,
-  services,
-  state,
-});
-
-const mockSavedObjectsClient = { get: jest.fn() };
-mockSavedObjectsClient.get.mockReturnValue(defaultDynamicSettings);
+): any => {
+  services.savedObjectsClient.get.mockResolvedValue({
+    id: '',
+    type: '',
+    references: [],
+    attributes: DYNAMIC_SETTINGS_DEFAULTS,
+  });
+  return {
+    params,
+    services,
+    state,
+  };
+};
 
 describe('status check alert', () => {
+  let toISOStringSpy: jest.SpyInstance<string, []>;
+  beforeEach(() => {
+    toISOStringSpy = jest.spyOn(Date.prototype, 'toISOString');
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
   describe('executor', () => {
     it('does not trigger when there are no monitors down', async () => {
       expect.assertions(4);
@@ -72,8 +85,12 @@ describe('status check alert', () => {
       expect(mockGetter.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": "mockESFunction",
-            "dynamicSettings": undefined,
+            "callES": [MockFunction],
+            "dynamicSettings": Object {
+              "certAgeThreshold": 730,
+              "certExpirationThreshold": 30,
+              "heartbeatIndices": "heartbeat-8*",
+            },
             "locations": Array [],
             "numTimes": 5,
             "timerange": Object {
@@ -86,6 +103,7 @@ describe('status check alert', () => {
     });
 
     it('triggers when monitors are down and provides expected state', async () => {
+      toISOStringSpy.mockImplementation(() => 'foo date string');
       const mockGetter = jest.fn();
       mockGetter.mockReturnValue([
         {
@@ -103,27 +121,21 @@ describe('status check alert', () => {
       ]);
       const { server, libs } = bootstrapDependencies({ getMonitorStatus: mockGetter });
       const alert = statusCheckAlertFactory(server, libs);
-      const mockInstanceFactory = jest.fn();
-      const mockReplaceState = jest.fn();
-      const mockScheduleActions = jest.fn();
-      mockInstanceFactory.mockReturnValue({
-        replaceState: mockReplaceState,
-        scheduleActions: mockScheduleActions,
-      });
       const options = mockOptions();
-      options.services = {
-        ...options.services,
-        alertInstanceFactory: mockInstanceFactory,
-      };
+      const alertServices: AlertServicesMock = options.services;
       // @ts-ignore the executor can return `void`, but ours never does
       const state: Record<string, any> = await alert.executor(options);
       expect(mockGetter).toHaveBeenCalledTimes(1);
-      expect(mockInstanceFactory).toHaveBeenCalledTimes(1);
+      expect(alertServices.alertInstanceFactory).toHaveBeenCalledTimes(1);
       expect(mockGetter.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "callES": "mockESFunction",
-            "dynamicSettings": undefined,
+            "callES": [MockFunction],
+            "dynamicSettings": Object {
+              "certAgeThreshold": 730,
+              "certExpirationThreshold": 30,
+              "heartbeatIndices": "heartbeat-8*",
+            },
             "locations": Array [],
             "numTimes": 5,
             "timerange": Object {
@@ -133,10 +145,18 @@ describe('status check alert', () => {
           },
         ]
       `);
-      expect(mockReplaceState).toHaveBeenCalledTimes(1);
-      expect(mockReplaceState.mock.calls[0]).toMatchInlineSnapshot(`
+      const [{ value: alertInstanceMock }] = alertServices.alertInstanceFactory.mock.results;
+      expect(alertInstanceMock.replaceState).toHaveBeenCalledTimes(1);
+      expect(alertInstanceMock.replaceState.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
+            "currentTriggerStarted": "foo date string",
+            "firstCheckedAt": "foo date string",
+            "firstTriggeredAt": "foo date string",
+            "isTriggered": true,
+            "lastCheckedAt": "foo date string",
+            "lastResolvedAt": undefined,
+            "lastTriggeredAt": "foo date string",
             "monitors": Array [
               Object {
                 "count": 234,
@@ -154,16 +174,13 @@ describe('status check alert', () => {
           },
         ]
       `);
-      expect(mockScheduleActions).toHaveBeenCalledTimes(1);
-      expect(mockScheduleActions.mock.calls[0]).toMatchInlineSnapshot(`
+      expect(alertInstanceMock.scheduleActions).toHaveBeenCalledTimes(1);
+      expect(alertInstanceMock.scheduleActions.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           "xpack.uptime.alerts.actionGroups.monitorStatus",
           Object {
-            "completeIdList": "first from fairbanks; first from harrisburg; ",
+            "downMonitorsWithGeo": "first from fairbanks; first from harrisburg; ",
             "message": "Down monitor: first",
-            "server": Object {
-              "route": Object {},
-            },
           },
         ]
       `);
@@ -302,7 +319,7 @@ describe('status check alert', () => {
 
     it('contains the expected static fields like id, name, etc.', () => {
       expect(alert.id).toBe('xpack.uptime.alerts.monitorStatus');
-      expect(alert.name).toBe('Uptime Monitor Status');
+      expect(alert.name).toBe('Uptime monitor status');
       expect(alert.defaultActionGroupId).toBe('xpack.uptime.alerts.actionGroups.monitorStatus');
       expect(alert.actionGroups).toMatchInlineSnapshot(`
         Array [
@@ -311,179 +328,6 @@ describe('status check alert', () => {
             "name": "Uptime Down Monitor",
           },
         ]
-      `);
-    });
-  });
-
-  describe('updateState', () => {
-    let spy: jest.SpyInstance<string, []>;
-    beforeEach(() => {
-      spy = jest.spyOn(Date.prototype, 'toISOString');
-    });
-
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('sets initial state values', () => {
-      spy.mockImplementation(() => 'foo date string');
-      const result = updateState({}, false);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(result).toMatchInlineSnapshot(`
-        Object {
-          "currentTriggerStarted": undefined,
-          "firstCheckedAt": "foo date string",
-          "firstTriggeredAt": undefined,
-          "isTriggered": false,
-          "lastCheckedAt": "foo date string",
-          "lastResolvedAt": undefined,
-          "lastTriggeredAt": undefined,
-        }
-      `);
-    });
-
-    it('updates the correct field in subsequent calls', () => {
-      spy
-        .mockImplementationOnce(() => 'first date string')
-        .mockImplementationOnce(() => 'second date string');
-      const firstState = updateState({}, false);
-      const secondState = updateState(firstState, true);
-      expect(spy).toHaveBeenCalledTimes(2);
-      expect(firstState).toMatchInlineSnapshot(`
-        Object {
-          "currentTriggerStarted": undefined,
-          "firstCheckedAt": "first date string",
-          "firstTriggeredAt": undefined,
-          "isTriggered": false,
-          "lastCheckedAt": "first date string",
-          "lastResolvedAt": undefined,
-          "lastTriggeredAt": undefined,
-        }
-      `);
-      expect(secondState).toMatchInlineSnapshot(`
-        Object {
-          "currentTriggerStarted": "second date string",
-          "firstCheckedAt": "first date string",
-          "firstTriggeredAt": "second date string",
-          "isTriggered": true,
-          "lastCheckedAt": "second date string",
-          "lastResolvedAt": undefined,
-          "lastTriggeredAt": "second date string",
-        }
-      `);
-    });
-
-    it('correctly marks resolution times', () => {
-      spy
-        .mockImplementationOnce(() => 'first date string')
-        .mockImplementationOnce(() => 'second date string')
-        .mockImplementationOnce(() => 'third date string');
-      const firstState = updateState({}, true);
-      const secondState = updateState(firstState, true);
-      const thirdState = updateState(secondState, false);
-      expect(spy).toHaveBeenCalledTimes(3);
-      expect(firstState).toMatchInlineSnapshot(`
-        Object {
-          "currentTriggerStarted": "first date string",
-          "firstCheckedAt": "first date string",
-          "firstTriggeredAt": "first date string",
-          "isTriggered": true,
-          "lastCheckedAt": "first date string",
-          "lastResolvedAt": undefined,
-          "lastTriggeredAt": "first date string",
-        }
-      `);
-      expect(secondState).toMatchInlineSnapshot(`
-        Object {
-          "currentTriggerStarted": "first date string",
-          "firstCheckedAt": "first date string",
-          "firstTriggeredAt": "first date string",
-          "isTriggered": true,
-          "lastCheckedAt": "second date string",
-          "lastResolvedAt": undefined,
-          "lastTriggeredAt": "second date string",
-        }
-      `);
-      expect(thirdState).toMatchInlineSnapshot(`
-        Object {
-          "currentTriggerStarted": undefined,
-          "firstCheckedAt": "first date string",
-          "firstTriggeredAt": "first date string",
-          "isTriggered": false,
-          "lastCheckedAt": "third date string",
-          "lastResolvedAt": "third date string",
-          "lastTriggeredAt": "second date string",
-        }
-      `);
-    });
-
-    it('correctly marks state fields across multiple triggers/resolutions', () => {
-      spy
-        .mockImplementationOnce(() => 'first date string')
-        .mockImplementationOnce(() => 'second date string')
-        .mockImplementationOnce(() => 'third date string')
-        .mockImplementationOnce(() => 'fourth date string')
-        .mockImplementationOnce(() => 'fifth date string');
-      const firstState = updateState({}, false);
-      const secondState = updateState(firstState, true);
-      const thirdState = updateState(secondState, false);
-      const fourthState = updateState(thirdState, true);
-      const fifthState = updateState(fourthState, false);
-      expect(spy).toHaveBeenCalledTimes(5);
-      expect(firstState).toMatchInlineSnapshot(`
-        Object {
-          "currentTriggerStarted": undefined,
-          "firstCheckedAt": "first date string",
-          "firstTriggeredAt": undefined,
-          "isTriggered": false,
-          "lastCheckedAt": "first date string",
-          "lastResolvedAt": undefined,
-          "lastTriggeredAt": undefined,
-        }
-      `);
-      expect(secondState).toMatchInlineSnapshot(`
-        Object {
-          "currentTriggerStarted": "second date string",
-          "firstCheckedAt": "first date string",
-          "firstTriggeredAt": "second date string",
-          "isTriggered": true,
-          "lastCheckedAt": "second date string",
-          "lastResolvedAt": undefined,
-          "lastTriggeredAt": "second date string",
-        }
-      `);
-      expect(thirdState).toMatchInlineSnapshot(`
-        Object {
-          "currentTriggerStarted": undefined,
-          "firstCheckedAt": "first date string",
-          "firstTriggeredAt": "second date string",
-          "isTriggered": false,
-          "lastCheckedAt": "third date string",
-          "lastResolvedAt": "third date string",
-          "lastTriggeredAt": "second date string",
-        }
-      `);
-      expect(fourthState).toMatchInlineSnapshot(`
-        Object {
-          "currentTriggerStarted": "fourth date string",
-          "firstCheckedAt": "first date string",
-          "firstTriggeredAt": "second date string",
-          "isTriggered": true,
-          "lastCheckedAt": "fourth date string",
-          "lastResolvedAt": "third date string",
-          "lastTriggeredAt": "fourth date string",
-        }
-      `);
-      expect(fifthState).toMatchInlineSnapshot(`
-        Object {
-          "currentTriggerStarted": undefined,
-          "firstCheckedAt": "first date string",
-          "firstTriggeredAt": "second date string",
-          "isTriggered": false,
-          "lastCheckedAt": "fifth date string",
-          "lastResolvedAt": "fifth date string",
-          "lastTriggeredAt": "fourth date string",
-        }
       `);
     });
   });
@@ -555,7 +399,7 @@ describe('status check alert', () => {
       ];
     });
 
-    it('creates a set of unique IDs from a list of composite-unique objects', () => {
+    it('creates a set of unique IDs from a list of composite unique objects', () => {
       expect(uniqueMonitorIds(items)).toEqual(
         new Set<string>(['first', 'second', 'third', 'fourth', 'fifth'])
       );

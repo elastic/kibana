@@ -1,0 +1,38 @@
+{
+  "description": "The whoami application was executed on a Linux host. This is often used by tools and persistence mechanisms to test for privileged access.",
+  "false_positives": [
+    "Security testing tools and frameworks may run this command. Some normal use of this command may originate from automation tools and frameworks."
+  ],
+  "index": [
+    "auditbeat-*"
+  ],
+  "language": "kuery",
+  "name": "User Discovery via Whoami",
+  "query": "process.name:whoami and event.action:executed",
+  "risk_score": 21,
+  "rule_id": "120559c6-5e24-49f4-9e30-8ffe697df6b9",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Linux"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0007",
+        "name": "Discovery",
+        "reference": "https://attack.mitre.org/tactics/TA0007/"
+      },
+      "technique": [
+        {
+          "id": "T1033",
+          "name": "System Owner/User Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1033/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 2
+}

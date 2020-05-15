@@ -17,7 +17,7 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { ILicenseState, verifyApiAccess } from '../lib';
+import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../lib';
 import { BASE_ACTION_API_PATH } from '../../common';
 
 const paramSchema = schema.object({
@@ -37,17 +37,24 @@ export const deleteActionRoute = (router: IRouter, licenseState: ILicenseState) 
     },
     router.handleLegacyErrors(async function(
       context: RequestHandlerContext,
-      req: KibanaRequest<TypeOf<typeof paramSchema>, any, any, any>,
+      req: KibanaRequest<TypeOf<typeof paramSchema>, unknown, unknown>,
       res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
+    ): Promise<IKibanaResponse> {
       verifyApiAccess(licenseState);
       if (!context.actions) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
       }
       const actionsClient = context.actions.getActionsClient();
       const { id } = req.params;
-      await actionsClient.delete({ id });
-      return res.noContent();
+      try {
+        await actionsClient.delete({ id });
+        return res.noContent();
+      } catch (e) {
+        if (isErrorThatHandlesItsOwnResponse(e)) {
+          return e.sendResponse(res);
+        }
+        throw e;
+      }
     })
   );
 };

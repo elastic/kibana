@@ -13,7 +13,6 @@ import { ml } from '../../services/ml_api_service';
 import { Dictionary } from '../../../../common/types/common';
 import { getErrorMessage } from '../../../../common/util/errors';
 import { SavedSearchQuery } from '../../contexts/ml';
-import { SortDirection } from '../../components/ml_in_memory_table';
 
 export type IndexName = string;
 export type IndexPattern = string;
@@ -33,6 +32,7 @@ interface OutlierAnalysis {
 interface Regression {
   dependent_variable: string;
   training_percent?: number;
+  num_top_feature_importance_values?: number;
   prediction_field_name?: string;
 }
 export interface RegressionAnalysis {
@@ -44,6 +44,7 @@ interface Classification {
   dependent_variable: string;
   training_percent?: number;
   num_top_classes?: string;
+  num_top_feature_importance_values?: number;
   prediction_field_name?: string;
 }
 export interface ClassificationAnalysis {
@@ -52,18 +53,16 @@ export interface ClassificationAnalysis {
 }
 
 export interface LoadExploreDataArg {
-  field: string;
-  direction: SortDirection;
+  filterByIsTraining?: boolean;
   searchQuery: SavedSearchQuery;
-  requiresKeyword?: boolean;
-  pageIndex?: number;
-  pageSize?: number;
 }
 
 export const SEARCH_SIZE = 1000;
 
 export const TRAINING_PERCENT_MIN = 1;
 export const TRAINING_PERCENT_MAX = 100;
+
+export const NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN = 0;
 
 export const defaultSearchQuery = {
   match_all: {},
@@ -92,7 +91,7 @@ export interface FieldSelectionItem {
 }
 
 export interface DfAnalyticsExplainResponse {
-  field_selection: FieldSelectionItem[];
+  field_selection?: FieldSelectionItem[];
   memory_estimation: {
     expected_memory_without_disk: string;
     expected_memory_with_disk: string;
@@ -152,7 +151,7 @@ type AnalysisConfig =
   | ClassificationAnalysis
   | GenericAnalysis;
 
-export const getAnalysisType = (analysis: AnalysisConfig) => {
+export const getAnalysisType = (analysis: AnalysisConfig): string => {
   const keys = Object.keys(analysis);
 
   if (keys.length === 1) {
@@ -162,7 +161,11 @@ export const getAnalysisType = (analysis: AnalysisConfig) => {
   return 'unknown';
 };
 
-export const getDependentVar = (analysis: AnalysisConfig) => {
+export const getDependentVar = (
+  analysis: AnalysisConfig
+):
+  | RegressionAnalysis['regression']['dependent_variable']
+  | ClassificationAnalysis['classification']['dependent_variable'] => {
   let depVar = '';
 
   if (isRegressionAnalysis(analysis)) {
@@ -175,7 +178,11 @@ export const getDependentVar = (analysis: AnalysisConfig) => {
   return depVar;
 };
 
-export const getTrainingPercent = (analysis: AnalysisConfig) => {
+export const getTrainingPercent = (
+  analysis: AnalysisConfig
+):
+  | RegressionAnalysis['regression']['training_percent']
+  | ClassificationAnalysis['classification']['training_percent'] => {
   let trainingPercent;
 
   if (isRegressionAnalysis(analysis)) {
@@ -188,7 +195,11 @@ export const getTrainingPercent = (analysis: AnalysisConfig) => {
   return trainingPercent;
 };
 
-export const getPredictionFieldName = (analysis: AnalysisConfig) => {
+export const getPredictionFieldName = (
+  analysis: AnalysisConfig
+):
+  | RegressionAnalysis['regression']['prediction_field_name']
+  | ClassificationAnalysis['classification']['prediction_field_name'] => {
   // If undefined will be defaulted to dependent_variable when config is created
   let predictionFieldName;
   if (isRegressionAnalysis(analysis) && analysis.regression.prediction_field_name !== undefined) {
@@ -200,6 +211,26 @@ export const getPredictionFieldName = (analysis: AnalysisConfig) => {
     predictionFieldName = analysis.classification.prediction_field_name;
   }
   return predictionFieldName;
+};
+
+export const getNumTopFeatureImportanceValues = (
+  analysis: AnalysisConfig
+):
+  | RegressionAnalysis['regression']['num_top_feature_importance_values']
+  | ClassificationAnalysis['classification']['num_top_feature_importance_values'] => {
+  let numTopFeatureImportanceValues;
+  if (
+    isRegressionAnalysis(analysis) &&
+    analysis.regression.num_top_feature_importance_values !== undefined
+  ) {
+    numTopFeatureImportanceValues = analysis.regression.num_top_feature_importance_values;
+  } else if (
+    isClassificationAnalysis(analysis) &&
+    analysis.classification.num_top_feature_importance_values !== undefined
+  ) {
+    numTopFeatureImportanceValues = analysis.classification.num_top_feature_importance_values;
+  }
+  return numTopFeatureImportanceValues;
 };
 
 export const getPredictedFieldName = (
@@ -234,6 +265,11 @@ export const isClassificationAnalysis = (arg: any): arg is ClassificationAnalysi
 export const isResultsSearchBoolQuery = (arg: any): arg is ResultsSearchBoolQuery => {
   const keys = Object.keys(arg);
   return keys.length === 1 && keys[0] === 'bool';
+};
+
+export const isQueryStringQuery = (arg: any): arg is QueryStringQuery => {
+  const keys = Object.keys(arg);
+  return keys.length === 1 && keys[0] === 'query_string';
 };
 
 export const isRegressionEvaluateResponse = (arg: any): arg is RegressionEvaluateResponse => {
@@ -360,6 +396,10 @@ interface ResultsSearchTermQuery {
   term: Dictionary<any>;
 }
 
+interface QueryStringQuery {
+  query_string: Dictionary<any>;
+}
+
 export type ResultsSearchQuery = ResultsSearchBoolQuery | ResultsSearchTermQuery | SavedSearchQuery;
 
 export function getEvalQueryBody({
@@ -369,20 +409,44 @@ export function getEvalQueryBody({
   ignoreDefaultQuery,
 }: {
   resultsField: string;
-  isTraining: boolean;
+  isTraining?: boolean;
   searchQuery?: ResultsSearchQuery;
   ignoreDefaultQuery?: boolean;
 }) {
-  let query: ResultsSearchQuery = {
+  let query: any;
+
+  const trainingQuery: ResultsSearchQuery = {
     term: { [`${resultsField}.is_training`]: { value: isTraining } },
   };
 
-  if (searchQuery !== undefined && ignoreDefaultQuery === true) {
-    query = searchQuery;
-  } else if (searchQuery !== undefined && isResultsSearchBoolQuery(searchQuery)) {
-    const searchQueryClone = cloneDeep(searchQuery);
-    searchQueryClone.bool.must.push(query);
+  const searchQueryClone = cloneDeep(searchQuery);
+
+  if (isResultsSearchBoolQuery(searchQueryClone)) {
+    if (searchQueryClone.bool.must === undefined) {
+      searchQueryClone.bool.must = [];
+    }
+
+    if (isTraining !== undefined) {
+      searchQueryClone.bool.must.push(trainingQuery);
+    }
+
     query = searchQueryClone;
+  } else if (isQueryStringQuery(searchQueryClone)) {
+    query = {
+      bool: {
+        must: [searchQueryClone],
+      },
+    };
+    if (isTraining !== undefined) {
+      query.bool.must.push(trainingQuery);
+    }
+  } else {
+    // Not a bool or string query so we need to create it so can add the trainingQuery
+    query = {
+      bool: {
+        must: isTraining !== undefined ? [trainingQuery] : [],
+      },
+    };
   }
   return query;
 }
@@ -398,7 +462,7 @@ interface EvaluateMetrics {
 }
 
 interface LoadEvalDataConfig {
-  isTraining: boolean;
+  isTraining?: boolean;
   index: string;
   dependentVariable: string;
   resultsField: string;
@@ -477,7 +541,7 @@ interface TrackTotalHitsSearchResponse {
 
 interface LoadDocsCountConfig {
   ignoreDefaultQuery?: boolean;
-  isTraining: boolean;
+  isTraining?: boolean;
   searchQuery: SavedSearchQuery;
   resultsField: string;
   destIndex: string;

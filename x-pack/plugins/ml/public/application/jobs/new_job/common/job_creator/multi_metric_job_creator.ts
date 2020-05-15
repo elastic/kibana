@@ -19,7 +19,7 @@ import { getRichDetectors } from './util/general';
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 
 export class MultiMetricJobCreator extends JobCreator {
-  // a multi metric job has one optional overall partition field
+  // a multi-metric job has one optional overall partition field
   // which is the same for all detectors.
   private _splitField: SplitField = null;
 
@@ -32,6 +32,7 @@ export class MultiMetricJobCreator extends JobCreator {
   ) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
+    this._wizardInitialized$.next(true);
   }
 
   // set the split field, applying it to each detector

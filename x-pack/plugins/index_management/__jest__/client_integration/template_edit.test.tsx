@@ -49,7 +49,8 @@ jest.mock('@elastic/eui', () => ({
   ),
 }));
 
-describe('<TemplateEdit />', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/65567
+describe.skip('<TemplateEdit />', () => {
   let testBed: TemplateFormTestBed;
 
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -99,17 +100,17 @@ describe('<TemplateEdit />', () => {
     const templateToEdit = fixtures.getTemplate({
       name: TEMPLATE_NAME,
       indexPatterns: ['indexPattern1'],
-      mappings: MAPPING,
+      template: {
+        mappings: MAPPING,
+      },
     });
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadTemplateResponse(templateToEdit);
 
-      testBed = await setup();
-
       await act(async () => {
-        await nextTick();
-        testBed.component.update();
+        testBed = await setup();
+        await testBed.waitFor('templateForm');
       });
     });
 
@@ -128,10 +129,9 @@ describe('<TemplateEdit />', () => {
       expect(nameInput.props().disabled).toEqual(true);
     });
 
-    // TODO: Flakey test
-    describe.skip('form payload', () => {
+    describe('form payload', () => {
       beforeEach(async () => {
-        const { actions, component, find, form } = testBed;
+        const { actions } = testBed;
 
         await act(async () => {
           // Complete step 1 (logistics)
@@ -141,20 +141,32 @@ describe('<TemplateEdit />', () => {
 
           // Step 2 (index settings)
           await actions.completeStepTwo(JSON.stringify(SETTINGS));
+        });
+      });
 
-          // Step 3 (mappings)
-          // Select the first field to edit
-          actions.clickEditButtonAtField(0);
+      it('should send the correct payload with changed values', async () => {
+        const { actions, component, find, form } = testBed;
+
+        await act(async () => {
+          // Make some changes to the mappings (step 3)
+
+          actions.clickEditButtonAtField(0); // Select the first field to edit
           await nextTick();
           component.update();
-          // verify edit field flyout
-          expect(find('mappingsEditorFieldEdit').length).toEqual(1);
-          // change field name
+        });
+
+        // verify edit field flyout
+        expect(find('mappingsEditorFieldEdit').length).toEqual(1);
+
+        await act(async () => {
+          // change the field name
           form.setInputValue('nameParameterInput', UPDATED_MAPPING_TEXT_FIELD_NAME);
+
           // Save changes
           actions.clickEditFieldUpdateButton();
           await nextTick();
           component.update();
+
           // Proceed to the next step
           actions.clickNextButton();
           await nextTick(50);
@@ -162,19 +174,13 @@ describe('<TemplateEdit />', () => {
 
           // Step 4 (aliases)
           await actions.completeStepFour(JSON.stringify(ALIASES));
-        });
-      });
 
-      it('should send the correct payload with changed values', async () => {
-        const { actions } = testBed;
-
-        await act(async () => {
+          // Submit the form
           actions.clickSubmitButton();
           await nextTick();
         });
 
         const latestRequest = server.requests[server.requests.length - 1];
-
         const { version, order } = templateToEdit;
 
         const expected = {
@@ -182,27 +188,31 @@ describe('<TemplateEdit />', () => {
           version,
           order,
           indexPatterns: UPDATED_INDEX_PATTERN,
-          mappings: {
-            ...MAPPING,
-            _meta: {},
-            _source: {},
-            properties: {
-              [UPDATED_MAPPING_TEXT_FIELD_NAME]: {
-                type: 'text',
-                store: false,
-                index: true,
-                fielddata: false,
-                eager_global_ordinals: false,
-                index_phrases: false,
-                norms: true,
-                index_options: 'positions',
+          template: {
+            mappings: {
+              ...MAPPING,
+              properties: {
+                [UPDATED_MAPPING_TEXT_FIELD_NAME]: {
+                  type: 'text',
+                  store: false,
+                  index: true,
+                  fielddata: false,
+                  eager_global_ordinals: false,
+                  index_phrases: false,
+                  norms: true,
+                  index_options: 'positions',
+                },
               },
             },
+            settings: SETTINGS,
+            aliases: ALIASES,
           },
           isManaged: false,
-          settings: SETTINGS,
-          aliases: ALIASES,
+          _kbnMeta: {
+            formatVersion: templateToEdit._kbnMeta.formatVersion,
+          },
         };
+
         expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
       });
     });

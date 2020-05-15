@@ -17,7 +17,10 @@ import { useResolver } from '../../use_resolver';
 
 import { useTimefilter } from '../../../contexts/kibana';
 import { checkFullLicense } from '../../../license';
-import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';
+import {
+  checkGetJobsCapabilitiesResolver,
+  checkPermission,
+} from '../../../capabilities/check_capabilities';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { EditFilterList } from '../../../settings/filter_lists';
 import { SETTINGS, ML_BREADCRUMB } from '../../breadcrumbs';
@@ -74,7 +77,7 @@ const PageWrapper: FC<NewFilterPageProps> = ({ location, mode, deps }) => {
 
   const { context } = useResolver(undefined, undefined, deps.config, {
     checkFullLicense,
-    checkGetJobsPrivilege,
+    checkGetJobsCapabilities: checkGetJobsCapabilitiesResolver,
     checkMlNodesAvailable,
   });
 

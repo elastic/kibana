@@ -25,6 +25,7 @@ describe('Analytics job clone action', () => {
           classification: {
             dependent_variable: 'y',
             num_top_classes: 2,
+            num_top_feature_importance_values: 4,
             prediction_field_name: 'y_prediction',
             training_percent: 2,
             randomize_seed: 6233212276062807000,
@@ -90,6 +91,8 @@ describe('Analytics job clone action', () => {
             prediction_field_name: 'stab_prediction',
             training_percent: 20,
             randomize_seed: -2228827740028660200,
+            num_top_feature_importance_values: 4,
+            loss_function: 'mse',
           },
         },
         analyzed_fields: {
@@ -120,6 +123,7 @@ describe('Analytics job clone action', () => {
           classification: {
             dependent_variable: 'y',
             num_top_classes: 2,
+            num_top_feature_importance_values: 4,
             prediction_field_name: 'y_prediction',
             training_percent: 2,
             randomize_seed: 6233212276062807000,
@@ -188,6 +192,8 @@ describe('Analytics job clone action', () => {
             prediction_field_name: 'stab_prediction',
             training_percent: 20,
             randomize_seed: -2228827740028660200,
+            num_top_feature_importance_values: 4,
+            loss_function: 'mse',
           },
         },
         analyzed_fields: {
@@ -218,6 +224,7 @@ describe('Analytics job clone action', () => {
             dependent_variable: 'y',
             training_percent: 71,
             max_trees: 1500,
+            num_top_feature_importance_values: 4,
           },
         },
         model_memory_limit: '400mb',
@@ -243,6 +250,7 @@ describe('Analytics job clone action', () => {
             dependent_variable: 'y',
             training_percent: 71,
             maximum_number_trees: 1500,
+            num_top_feature_importance_values: 4,
           },
         },
         model_memory_limit: '400mb',

@@ -8,6 +8,7 @@ import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
   ERROR_EXC_MESSAGE,
+  ERROR_EXC_TYPE,
   ERROR_GROUP_ID,
   ERROR_LOG_MESSAGE
 } from '../../../common/elasticsearch_fieldnames';
@@ -67,6 +68,7 @@ export async function getErrorGroups({
                   ERROR_LOG_MESSAGE,
                   ERROR_EXC_MESSAGE,
                   ERROR_EXC_HANDLED,
+                  ERROR_EXC_TYPE,
                   ERROR_CULPRIT,
                   ERROR_GROUP_ID,
                   '@timestamp'
@@ -99,6 +101,7 @@ export async function getErrorGroups({
       exception?: Array<{
         handled?: boolean;
         message?: string;
+        type?: string;
       }>;
       culprit: APMError['error']['culprit'];
       grouping_key: APMError['error']['grouping_key'];
@@ -120,7 +123,8 @@ export async function getErrorGroups({
       culprit: source.error.culprit,
       groupId: source.error.grouping_key,
       latestOccurrenceAt: source['@timestamp'],
-      handled: source.error.exception?.[0].handled
+      handled: source.error.exception?.[0].handled,
+      type: source.error.exception?.[0].type
     };
   });
 

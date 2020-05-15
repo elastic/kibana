@@ -5,6 +5,7 @@
  */
 
 import { ComponentType, ReactWrapper } from 'enzyme';
+
 import { findTestSubject } from '../find_test_subject';
 import { reactRouterMock } from '../router_helpers';
 import {
@@ -104,7 +105,7 @@ export const registerTestBed = <T extends string = string>(
        * ----------------------------------------------------------------
        */
 
-      const find: TestBed<T>['find'] = (testSubject: T) => {
+      const find: TestBed<T>['find'] = (testSubject: T, sourceReactWrapper = component) => {
         const testSubjectToArray = testSubject.split('.');
 
         return testSubjectToArray.reduce((reactWrapper, subject, i) => {
@@ -117,7 +118,7 @@ export const registerTestBed = <T extends string = string>(
             );
           }
           return target;
-        }, component);
+        }, sourceReactWrapper);
       };
 
       const exists: TestBed<T>['exists'] = (testSubject, count = 1) =>
@@ -136,6 +137,41 @@ export const registerTestBed = <T extends string = string>(
         return component.setProps({
           children: getJSXComponentWithProps(Component, { ...defaultProps, ...updatedProps }),
         });
+      };
+
+      const waitForFn: TestBed<T>['waitForFn'] = async (predicate, errMessage) => {
+        const triggeredAt = Date.now();
+
+        const MAX_WAIT_TIME = 30000;
+        const WAIT_INTERVAL = 50;
+
+        const process = async (): Promise<void> => {
+          const isOK = await predicate();
+
+          if (isOK) {
+            // Great! nothing else to do here.
+            return;
+          }
+
+          const timeElapsed = Date.now() - triggeredAt;
+          if (timeElapsed > MAX_WAIT_TIME) {
+            throw new Error(errMessage);
+          }
+
+          return new Promise(resolve => setTimeout(resolve, WAIT_INTERVAL)).then(() => {
+            component.update();
+            return process();
+          });
+        };
+
+        return process();
+      };
+
+      const waitFor: TestBed<T>['waitFor'] = (testSubject: T, count = 1) => {
+        return waitForFn(
+          () => Promise.resolve(exists(testSubject, count)),
+          `I waited patiently for the "${testSubject}" test subject to appear with no luck. It is nowhere to be found!`
+        );
       };
 
       /**
@@ -161,6 +197,24 @@ export const registerTestBed = <T extends string = string>(
           return;
         }
         return new Promise(resolve => setTimeout(resolve));
+      };
+
+      const setSelectValue: TestBed<T>['form']['setSelectValue'] = (
+        select,
+        value,
+        doUpdateComponent = true
+      ) => {
+        const formSelect = typeof select === 'string' ? find(select) : (select as ReactWrapper);
+
+        if (!formSelect.length) {
+          throw new Error(`Select "${select}" was not found.`);
+        }
+
+        formSelect.simulate('change', { target: { value } });
+
+        if (doUpdateComponent) {
+          component.update();
+        }
       };
 
       const selectCheckBox: TestBed<T>['form']['selectCheckBox'] = (
@@ -254,11 +308,14 @@ export const registerTestBed = <T extends string = string>(
         exists,
         find,
         setProps,
+        waitFor,
+        waitForFn,
         table: {
           getMetaData,
         },
         form: {
           setInputValue,
+          setSelectValue,
           selectCheckBox,
           toggleEuiSwitch,
           setComboBoxValue,

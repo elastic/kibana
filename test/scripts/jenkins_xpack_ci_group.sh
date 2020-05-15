@@ -23,7 +23,7 @@ else
   cd "kibana${CI_GROUP}/x-pack"
 
   echo " -> running tests from the clone folder"
-  node scripts/functional_tests --debug --include-tag "ciGroup$CI_GROUP"  --config test/functional/config.coverage.js || true;
+  node scripts/functional_tests --debug --include-tag "ciGroup$CI_GROUP"  --exclude-tag "skipCoverage" || true;
 
   if [[ -d ../target/kibana-coverage/functional ]]; then
     echo " -> replacing kibana${CI_GROUP} with kibana in json files"

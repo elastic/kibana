@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { ISavedObjectsRepository } from 'kibana/server';
+import { ISavedObjectsRepository, SavedObjectsClientContract } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { PageViewParams, UptimeTelemetry } from './types';
 import { APICaller } from '../framework';
@@ -44,7 +44,7 @@ export class KibanaTelemetryAdapter {
       fetch: async (callCluster: APICaller) => {
         const savedObjectsClient = getSavedObjectsClient()!;
         if (savedObjectsClient) {
-          this.countNoOfUniqueMonitorAndLocations(callCluster, savedObjectsClient);
+          await this.countNoOfUniqueMonitorAndLocations(callCluster, savedObjectsClient);
         }
         const report = this.getReport();
         return { last_24_hours: { hits: { ...report } } };
@@ -54,6 +54,9 @@ export class KibanaTelemetryAdapter {
   }
 
   public static countPageView(pageView: PageViewParams) {
+    if (pageView.refreshTelemetryHistory) {
+      this.collector = {};
+    }
     const bucketId = this.getBucketToIncrement();
     const bucket = this.collector[bucketId];
     if (pageView.page === 'Overview') {
@@ -94,7 +97,7 @@ export class KibanaTelemetryAdapter {
 
   public static async countNoOfUniqueMonitorAndLocations(
     callCluster: APICaller,
-    savedObjectsClient: ISavedObjectsRepository
+    savedObjectsClient: ISavedObjectsRepository | SavedObjectsClientContract
   ) {
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
     const params = {
@@ -161,24 +164,27 @@ export class KibanaTelemetryAdapter {
     const monitorNameStats: any = result?.aggregations?.monitor_name;
     const locationNameStats: any = result?.aggregations?.observer_loc_name;
     const uniqueMonitors: any = result?.aggregations?.monitors.buckets;
-    const bucket = this.getBucketToIncrement();
 
-    this.collector[bucket].no_of_unique_monitors = numberOfUniqueMonitors;
-    this.collector[bucket].no_of_unique_observer_locations = numberOfUniqueLocations;
-    this.collector[bucket].no_of_unique_observer_locations = numberOfUniqueLocations;
-    this.collector[bucket].monitor_name_stats = {
+    const bucketId = this.getBucketToIncrement();
+    const bucket = this.collector[bucketId];
+
+    bucket.no_of_unique_monitors = numberOfUniqueMonitors;
+    bucket.no_of_unique_observer_locations = numberOfUniqueLocations;
+    bucket.no_of_unique_observer_locations = numberOfUniqueLocations;
+    bucket.monitor_name_stats = {
       min_length: monitorNameStats?.min_length ?? 0,
       max_length: monitorNameStats?.max_length ?? 0,
-      avg_length: +monitorNameStats?.avg_length.toFixed(2),
+      avg_length: +(monitorNameStats?.avg_length?.toFixed(2) ?? 0),
     };
 
-    this.collector[bucket].observer_location_name_stats = {
+    bucket.observer_location_name_stats = {
       min_length: locationNameStats?.min_length ?? 0,
       max_length: locationNameStats?.max_length ?? 0,
       avg_length: +(locationNameStats?.avg_length?.toFixed(2) ?? 0),
     };
 
-    this.collector[bucket].monitor_frequency = this.getMonitorsFrequency(uniqueMonitors);
+    bucket.monitor_frequency = this.getMonitorsFrequency(uniqueMonitors);
+    return bucket;
   }
 
   private static getMonitorsFrequency(uniqueMonitors = []) {

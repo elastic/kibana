@@ -6,8 +6,8 @@
 
 import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
 import { getMonitorStatus } from '../get_monitor_status';
-import { ScopedClusterClient } from 'src/core/server/elasticsearch';
-import { defaultDynamicSettings } from '../../../../../../legacy/plugins/uptime/common/runtime_types';
+import { ScopedClusterClient } from 'src/core/server';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
 interface BucketItemCriteria {
   monitor_id: string;
@@ -103,7 +103,7 @@ describe('getMonitorStatus', () => {
     }`;
     await getMonitorStatus({
       callES,
-      dynamicSettings: defaultDynamicSettings,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       filters: exampleFilter,
       locations: [],
       numTimes: 5,
@@ -206,7 +206,7 @@ describe('getMonitorStatus', () => {
     const [callES, esMock] = setupMock([]);
     await getMonitorStatus({
       callES,
-      dynamicSettings: defaultDynamicSettings,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       locations: ['fairbanks', 'harrisburg'],
       numTimes: 1,
       timerange: {
@@ -329,7 +329,7 @@ describe('getMonitorStatus', () => {
     };
     const result = await getMonitorStatus({
       callES,
-      dynamicSettings: defaultDynamicSettings,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       ...clientParameters,
     });
     expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(1);
@@ -494,7 +494,7 @@ describe('getMonitorStatus', () => {
     const [callES] = setupMock(criteria);
     const result = await getMonitorStatus({
       callES,
-      dynamicSettings: defaultDynamicSettings,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       locations: [],
       numTimes: 5,
       timerange: {

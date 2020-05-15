@@ -5,27 +5,27 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ConditionalHeaders, ServerFacade } from '../../../../types';
-import { LevelLogger } from '../../../../server/lib';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
-import { PAGELOAD_SELECTOR } from '../../constants';
+import { LevelLogger, startTrace } from '../../../../server/lib';
+import { CaptureConfig } from '../../../../server/types';
+import { ConditionalHeaders } from '../../../../types';
 
 export const openUrl = async (
-  server: ServerFacade,
+  captureConfig: CaptureConfig,
   browser: HeadlessBrowser,
   url: string,
+  pageLoadSelector: string,
   conditionalHeaders: ConditionalHeaders,
   logger: LevelLogger
 ): Promise<void> => {
-  const config = server.config();
-
+  const endTrace = startTrace('open_url', 'wait');
   try {
     await browser.open(
       url,
       {
         conditionalHeaders,
-        waitForSelector: PAGELOAD_SELECTOR,
-        timeout: config.get('xpack.reporting.capture.timeouts.openUrl'),
+        waitForSelector: pageLoadSelector,
+        timeout: captureConfig.timeouts.openUrl,
       },
       logger
     );
@@ -33,11 +33,10 @@ export const openUrl = async (
     throw new Error(
       i18n.translate('xpack.reporting.screencapture.couldntLoadKibana', {
         defaultMessage: `An error occurred when trying to open the Kibana URL. You may need to increase '{configKey}'. {error}`,
-        values: {
-          configKey: 'xpack.reporting.capture.timeouts.openUrl',
-          error: err,
-        },
+        values: { configKey: 'xpack.reporting.capture.timeouts.openUrl', error: err },
       })
     );
   }
+
+  endTrace();
 };

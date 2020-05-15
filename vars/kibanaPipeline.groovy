@@ -180,7 +180,18 @@ def bash(script, label) {
 }
 
 def doSetup() {
-  runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
+  retryWithDelay(2, 15) {
+    try {
+      runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
+    } catch (ex) {
+      try {
+        // Setup expects this directory to be missing, so we need to remove it before we do a retry
+        bash("rm -rf ../elasticsearch", "Remove elasticsearch sibling directory, if it exists")
+      } finally {
+        throw ex
+      }
+    }
+  }
 }
 
 def buildOss() {

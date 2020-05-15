@@ -150,6 +150,32 @@ describe('migration visualization', () => {
         expect(aggs[3]).not.toHaveProperty('params.customBucket.params.time_zone');
         expect(aggs[2]).not.toHaveProperty('params.time_zone');
       });
+
+      it('should migrate obsolete match_all query', () => {
+        const migratedDoc = migrate({
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            kibanaSavedObjectMeta: {
+              searchSourceJSON: JSON.stringify({
+                query: {
+                  match_all: {},
+                },
+              }),
+            },
+          },
+        });
+        const migratedSearchSource = JSON.parse(
+          migratedDoc.attributes.kibanaSavedObjectMeta.searchSourceJSON
+        );
+
+        expect(migratedSearchSource).toEqual({
+          query: {
+            query: '',
+            language: 'kuery',
+          },
+        });
+      });
     });
   });
 
@@ -181,13 +207,13 @@ describe('migration visualization', () => {
         },
       });
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "visState": "{}",
-  },
-  "references": Array [],
-}
-`);
+        Object {
+          "attributes": Object {
+            "visState": "{}",
+          },
+          "references": Array [],
+        }
+      `);
     });
 
     it('skips errors when searchSourceJSON is null', () => {
@@ -205,25 +231,25 @@ Object {
       const migratedDoc = migrate(doc);
 
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": null,
-    },
-    "savedSearchRefName": "search_0",
-    "visState": "{}",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "123",
-      "name": "search_0",
-      "type": "search",
-    },
-  ],
-  "type": "visualization",
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": null,
+            },
+            "savedSearchRefName": "search_0",
+            "visState": "{}",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "123",
+              "name": "search_0",
+              "type": "search",
+            },
+          ],
+          "type": "visualization",
+        }
+      `);
     });
 
     it('skips errors when searchSourceJSON is undefined', () => {
@@ -241,25 +267,25 @@ Object {
       const migratedDoc = migrate(doc);
 
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": undefined,
-    },
-    "savedSearchRefName": "search_0",
-    "visState": "{}",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "123",
-      "name": "search_0",
-      "type": "search",
-    },
-  ],
-  "type": "visualization",
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": undefined,
+            },
+            "savedSearchRefName": "search_0",
+            "visState": "{}",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "123",
+              "name": "search_0",
+              "type": "search",
+            },
+          ],
+          "type": "visualization",
+        }
+      `);
     });
 
     it('skips error when searchSourceJSON is not a string', () => {
@@ -276,25 +302,25 @@ Object {
       };
 
       expect(migrate(doc)).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": 123,
-    },
-    "savedSearchRefName": "search_0",
-    "visState": "{}",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "123",
-      "name": "search_0",
-      "type": "search",
-    },
-  ],
-  "type": "visualization",
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": 123,
+            },
+            "savedSearchRefName": "search_0",
+            "visState": "{}",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "123",
+              "name": "search_0",
+              "type": "search",
+            },
+          ],
+          "type": "visualization",
+        }
+      `);
     });
 
     it('skips error when searchSourceJSON is invalid json', () => {
@@ -311,25 +337,25 @@ Object {
       };
 
       expect(migrate(doc)).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{abc123}",
-    },
-    "savedSearchRefName": "search_0",
-    "visState": "{}",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "123",
-      "name": "search_0",
-      "type": "search",
-    },
-  ],
-  "type": "visualization",
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": "{abc123}",
+            },
+            "savedSearchRefName": "search_0",
+            "visState": "{}",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "123",
+              "name": "search_0",
+              "type": "search",
+            },
+          ],
+          "type": "visualization",
+        }
+      `);
     });
 
     it('skips error when "index" and "filter" is missing from searchSourceJSON', () => {
@@ -347,25 +373,25 @@ Object {
       const migratedDoc = migrate(doc);
 
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{\\"bar\\":true}",
-    },
-    "savedSearchRefName": "search_0",
-    "visState": "{}",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "123",
-      "name": "search_0",
-      "type": "search",
-    },
-  ],
-  "type": "visualization",
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": "{\\"bar\\":true}",
+            },
+            "savedSearchRefName": "search_0",
+            "visState": "{}",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "123",
+              "name": "search_0",
+              "type": "search",
+            },
+          ],
+          "type": "visualization",
+        }
+      `);
     });
 
     it('extracts "index" attribute from doc', () => {
@@ -383,30 +409,30 @@ Object {
       const migratedDoc = migrate(doc);
 
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{\\"bar\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
-    },
-    "savedSearchRefName": "search_0",
-    "visState": "{}",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "pattern*",
-      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-      "type": "index-pattern",
-    },
-    Object {
-      "id": "123",
-      "name": "search_0",
-      "type": "search",
-    },
-  ],
-  "type": "visualization",
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": "{\\"bar\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.index\\"}",
+            },
+            "savedSearchRefName": "search_0",
+            "visState": "{}",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "pattern*",
+              "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+              "type": "index-pattern",
+            },
+            Object {
+              "id": "123",
+              "name": "search_0",
+              "type": "search",
+            },
+          ],
+          "type": "visualization",
+        }
+      `);
     });
 
     it('extracts index patterns from the filter', () => {
@@ -431,30 +457,30 @@ Object {
       const migratedDoc = migrate(doc);
 
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{\\"bar\\":true,\\"filter\\":[{\\"meta\\":{\\"foo\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"}}]}",
-    },
-    "savedSearchRefName": "search_0",
-    "visState": "{}",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "my-index",
-      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
-      "type": "index-pattern",
-    },
-    Object {
-      "id": "123",
-      "name": "search_0",
-      "type": "search",
-    },
-  ],
-  "type": "visualization",
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": "{\\"bar\\":true,\\"filter\\":[{\\"meta\\":{\\"foo\\":true,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"}}]}",
+            },
+            "savedSearchRefName": "search_0",
+            "visState": "{}",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "my-index",
+              "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+              "type": "index-pattern",
+            },
+            Object {
+              "id": "123",
+              "name": "search_0",
+              "type": "search",
+            },
+          ],
+          "type": "visualization",
+        }
+      `);
     });
 
     it('extracts index patterns from controls', () => {
@@ -482,22 +508,22 @@ Object {
       const migratedDoc = migrate(doc);
 
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "foo": true,
-    "visState": "{\\"bar\\":false,\\"params\\":{\\"controls\\":[{\\"bar\\":true,\\"indexPatternRefName\\":\\"control_0_index_pattern\\"},{\\"foo\\":true}]}}",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "pattern*",
-      "name": "control_0_index_pattern",
-      "type": "index-pattern",
-    },
-  ],
-  "type": "visualization",
-}
-`);
+        Object {
+          "attributes": Object {
+            "foo": true,
+            "visState": "{\\"bar\\":false,\\"params\\":{\\"controls\\":[{\\"bar\\":true,\\"indexPatternRefName\\":\\"control_0_index_pattern\\"},{\\"foo\\":true}]}}",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "pattern*",
+              "name": "control_0_index_pattern",
+              "type": "index-pattern",
+            },
+          ],
+          "type": "visualization",
+        }
+      `);
     });
 
     it('skips extracting savedSearchId when missing', () => {
@@ -513,17 +539,17 @@ Object {
       const migratedDoc = migrate(doc);
 
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{}",
-    },
-    "visState": "{}",
-  },
-  "id": "1",
-  "references": Array [],
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": "{}",
+            },
+            "visState": "{}",
+          },
+          "id": "1",
+          "references": Array [],
+        }
+      `);
     });
 
     it('extract savedSearchId from doc', () => {
@@ -540,24 +566,24 @@ Object {
       const migratedDoc = migrate(doc);
 
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{}",
-    },
-    "savedSearchRefName": "search_0",
-    "visState": "{}",
-  },
-  "id": "1",
-  "references": Array [
-    Object {
-      "id": "123",
-      "name": "search_0",
-      "type": "search",
-    },
-  ],
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": "{}",
+            },
+            "savedSearchRefName": "search_0",
+            "visState": "{}",
+          },
+          "id": "1",
+          "references": Array [
+            Object {
+              "id": "123",
+              "name": "search_0",
+              "type": "search",
+            },
+          ],
+        }
+      `);
     });
 
     it('delete savedSearchId when empty string in doc', () => {
@@ -574,17 +600,17 @@ Object {
       const migratedDoc = migrate(doc);
 
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "kibanaSavedObjectMeta": Object {
-      "searchSourceJSON": "{}",
-    },
-    "visState": "{}",
-  },
-  "id": "1",
-  "references": Array [],
-}
-`);
+        Object {
+          "attributes": Object {
+            "kibanaSavedObjectMeta": Object {
+              "searchSourceJSON": "{}",
+            },
+            "visState": "{}",
+          },
+          "id": "1",
+          "references": Array [],
+        }
+      `);
     });
 
     it('should return a new object if vis is table and has multiple split aggs', () => {
@@ -904,12 +930,12 @@ Object {
         },
       });
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "visState": "{\\"type\\":\\"gauge\\",\\"params\\":{\\"gauge\\":{\\"alignment\\":\\"horizontal\\"}}}",
-  },
-}
-`);
+        Object {
+          "attributes": Object {
+            "visState": "{\\"type\\":\\"gauge\\",\\"params\\":{\\"gauge\\":{\\"alignment\\":\\"horizontal\\"}}}",
+          },
+        }
+      `);
     });
 
     it('migrates type = gauge verticalSplit: false to alignment: horizontal', () => {
@@ -920,12 +946,12 @@ Object {
       });
 
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "visState": "{\\"type\\":\\"gauge\\",\\"params\\":{\\"gauge\\":{\\"alignment\\":\\"vertical\\"}}}",
-  },
-}
-`);
+        Object {
+          "attributes": Object {
+            "visState": "{\\"type\\":\\"gauge\\",\\"params\\":{\\"gauge\\":{\\"alignment\\":\\"vertical\\"}}}",
+          },
+        }
+      `);
     });
 
     it('doesnt migrate type = gauge containing invalid visState object, adds message to log', () => {
@@ -936,18 +962,18 @@ Object {
       });
 
       expect(migratedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "visState": "{\\"type\\":\\"gauge\\"}",
-  },
-}
-`);
+        Object {
+          "attributes": Object {
+            "visState": "{\\"type\\":\\"gauge\\"}",
+          },
+        }
+      `);
       expect(logMsgArr).toMatchInlineSnapshot(`
-Array [
-  "Exception @ migrateGaugeVerticalSplitToAlignment! TypeError: Cannot read property 'gauge' of undefined",
-  "Exception @ migrateGaugeVerticalSplitToAlignment! Payload: {\\"type\\":\\"gauge\\"}",
-]
-`);
+        Array [
+          "Exception @ migrateGaugeVerticalSplitToAlignment! TypeError: Cannot read property 'gauge' of undefined",
+          "Exception @ migrateGaugeVerticalSplitToAlignment! Payload: {\\"type\\":\\"gauge\\"}",
+        ]
+      `);
     });
 
     describe('filters agg query migration', () => {
@@ -1351,6 +1377,145 @@ Array [
 
       expect(timeSeriesParams.series[0].split_filters[0].filter.query).toEqual('bytes:>1000');
       expect(timeSeriesParams.series[0].split_filters[0].filter.language).toEqual('lucene');
+    });
+  });
+
+  describe('7.7.0 tsvb opperator typo migration', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.7.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+    const generateDoc = (params: any) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify({ params }),
+        uiStateJSON: '{}',
+        version: 1,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '{}',
+        },
+      },
+    });
+
+    it('should remove the misspelled opperator key if it exists', () => {
+      const params = {
+        type: 'timeseries',
+        filter: {
+          query: 'bytes:>1000',
+          language: 'lucene',
+        },
+        series: [],
+        gauge_color_rules: [
+          {
+            value: 0,
+            id: '020e3d50-75a6-11ea-8f61-71579ff7f64d',
+            gauge: 'rgba(69,39,217,1)',
+            opperator: 'lt',
+          },
+        ],
+      };
+      const timeSeriesDoc = generateDoc(params);
+      const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
+      const migratedParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
+
+      expect(migratedParams.gauge_color_rules[0]).toMatchInlineSnapshot(`
+        Object {
+          "gauge": "rgba(69,39,217,1)",
+          "id": "020e3d50-75a6-11ea-8f61-71579ff7f64d",
+          "opperator": "lt",
+          "value": 0,
+        }
+      `);
+    });
+
+    it('should not change color rules with the correct spelling', () => {
+      const params = {
+        type: 'timeseries',
+        filter: {
+          query: 'bytes:>1000',
+          language: 'lucene',
+        },
+        series: [],
+        gauge_color_rules: [
+          {
+            value: 0,
+            id: '020e3d50-75a6-11ea-8f61-71579ff7f64d',
+            gauge: 'rgba(69,39,217,1)',
+            opperator: 'lt',
+          },
+          {
+            value: 0,
+            id: '020e3d50-75a6-11ea-8f61-71579ff7f64d',
+            gauge: 'rgba(69,39,217,1)',
+            operator: 'lt',
+          },
+        ],
+      };
+      const timeSeriesDoc = generateDoc(params);
+      const migratedtimeSeriesDoc = migrate(timeSeriesDoc);
+      const migratedParams = JSON.parse(migratedtimeSeriesDoc.attributes.visState).params;
+
+      expect(migratedParams.gauge_color_rules[1]).toEqual(params.gauge_color_rules[1]);
+    });
+  });
+
+  describe('7.8.0 tsvb split_color_mode', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.8.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const generateDoc = (params: any) => ({
+      attributes: {
+        title: 'My Vis',
+        type: 'visualization',
+        description: 'This is my super cool vis.',
+        visState: JSON.stringify(params),
+        uiStateJSON: '{}',
+        version: 1,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '{}',
+        },
+      },
+    });
+
+    it('should change a missing split_color_mode to gradient', () => {
+      const params = { type: 'metrics', params: { series: [{}] } };
+      const testDoc1 = generateDoc(params);
+      const migratedTestDoc1 = migrate(testDoc1);
+      const series = JSON.parse(migratedTestDoc1.attributes.visState).params.series;
+
+      expect(series[0].split_color_mode).toEqual('gradient');
+    });
+
+    it('should not change the color mode if it is set', () => {
+      const params = { type: 'metrics', params: { series: [{ split_color_mode: 'gradient' }] } };
+      const testDoc1 = generateDoc(params);
+      const migratedTestDoc1 = migrate(testDoc1);
+      const series = JSON.parse(migratedTestDoc1.attributes.visState).params.series;
+
+      expect(series[0].split_color_mode).toEqual('gradient');
+    });
+
+    it('should not change the color mode if it is non-default', () => {
+      const params = { type: 'metrics', params: { series: [{ split_color_mode: 'rainbow' }] } };
+      const testDoc1 = generateDoc(params);
+      const migratedTestDoc1 = migrate(testDoc1);
+      const series = JSON.parse(migratedTestDoc1.attributes.visState).params.series;
+
+      expect(series[0].split_color_mode).toEqual('rainbow');
+    });
+
+    it('should not migrate a visualization of unknown type', () => {
+      const params = { type: 'unknown', params: { series: [{}] } };
+      const doc = generateDoc(params);
+      const migratedDoc = migrate(doc);
+      const series = JSON.parse(migratedDoc.attributes.visState).params.series;
+
+      expect(series[0].split_color_mode).toBeUndefined();
     });
   });
 });

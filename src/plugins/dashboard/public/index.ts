@@ -17,48 +17,24 @@
  * under the License.
  */
 
-import './index.scss';
-
 import { PluginInitializerContext } from '../../../core/public';
-import { DashboardEmbeddableContainerPublicPlugin } from './plugin';
+import { DashboardPlugin } from './plugin';
 
-/**
- * These types can probably be internal once all of dashboard app is migrated into this plugin. Right
- * now, migrations are still in legacy land.
- */
-export {
-  DashboardDoc730ToLatest,
-  DashboardDoc700To720,
-  RawSavedDashboardPanelTo60,
-  RawSavedDashboardPanel610,
-  RawSavedDashboardPanel620,
-  RawSavedDashboardPanel630,
-  RawSavedDashboardPanel640To720,
-  RawSavedDashboardPanel730ToLatest,
-  DashboardDocPre700,
-} from './bwc';
-
-export {} from './types';
-export {} from './actions';
 export {
   DashboardContainer,
   DashboardContainerInput,
   DashboardContainerFactory,
   DASHBOARD_CONTAINER_TYPE,
-  DashboardPanelState,
   // Types below here can likely be made private when dashboard app moved into this NP plugin.
   DEFAULT_PANEL_WIDTH,
   DEFAULT_PANEL_HEIGHT,
-  GridData,
-} from './embeddable';
+} from './application';
+export { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 
-export { SavedObjectDashboard } from './saved_dashboards';
-export { DashboardStart } from './plugin';
-
-export { DashboardEmbeddableContainerPublicPlugin as Plugin };
-
+export { DashboardStart, DashboardUrlGenerator } from './plugin';
 export { DASHBOARD_APP_URL_GENERATOR } from './url_generator';
+export { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new DashboardEmbeddableContainerPublicPlugin(initializerContext);
+  return new DashboardPlugin(initializerContext);
 }

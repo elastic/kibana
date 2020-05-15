@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import './privilege_space_table.scss';
+
 import {
   EuiBadge,
   EuiBadgeProps,

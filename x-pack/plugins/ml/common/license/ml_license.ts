@@ -5,7 +5,7 @@
  */
 
 import { Observable, Subscription } from 'rxjs';
-import { ILicense, LICENSE_CHECK_STATE } from '../../../licensing/common/types';
+import { ILicense } from '../../../licensing/common/types';
 import { PLUGIN_ID } from '../constants/app';
 
 export const MINIMUM_LICENSE = 'basic';
@@ -38,10 +38,8 @@ export class MlLicense {
       this._isSecurityEnabled = securityIsEnabled;
       this._hasLicenseExpired = this._license.status === 'expired';
       this._isMlEnabled = this._license.getFeature(PLUGIN_ID).isEnabled;
-      this._isMinimumLicense =
-        this._license.check(PLUGIN_ID, MINIMUM_LICENSE).state === LICENSE_CHECK_STATE.Valid;
-      this._isFullLicense =
-        this._license.check(PLUGIN_ID, MINIMUM_FULL_LICENSE).state === LICENSE_CHECK_STATE.Valid;
+      this._isMinimumLicense = isMinimumLicense(this._license);
+      this._isFullLicense = isFullLicense(this._license);
 
       if (this._initialized === false && postInitFunctions !== undefined) {
         postInitFunctions.forEach(f => f(this));
@@ -75,4 +73,12 @@ export class MlLicense {
   public isFullLicense() {
     return this._isFullLicense;
   }
+}
+
+export function isFullLicense(license: ILicense) {
+  return license.check(PLUGIN_ID, MINIMUM_FULL_LICENSE).state === 'valid';
+}
+
+export function isMinimumLicense(license: ILicense) {
+  return license.check(PLUGIN_ID, MINIMUM_LICENSE).state === 'valid';
 }

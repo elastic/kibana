@@ -18,6 +18,7 @@
  */
 
 import React, { ReactElement } from 'react';
+import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
 
 import { I18nProvider } from '@kbn/i18n/react';
@@ -34,7 +35,9 @@ export const createRenderer = (element: ReactElement | null): Renderer => {
   return () =>
     new Promise(async resolve => {
       if (dom) {
-        dom.update();
+        await act(async () => {
+          dom.update();
+        });
       }
       setImmediate(() => resolve(dom)); // flushes any pending promises
     });
@@ -58,6 +61,7 @@ export const createAppMounter = ({
       mounter: {
         appRoute,
         appBasePath: appRoute,
+        legacy: false,
         mount: jest.fn(async (params: AppMountParameters) => {
           const { appBasePath: basename, element } = params;
           Object.assign(element, {
@@ -85,6 +89,7 @@ export const createLegacyAppMounter = (
       appRoute: `/app/${appId.split(':')[0]}`,
       appBasePath: `/app/${appId.split(':')[0]}`,
       unmountBeforeMounting: true,
+      legacy: true,
       mount: legacyMount,
     },
     unmount: jest.fn(),

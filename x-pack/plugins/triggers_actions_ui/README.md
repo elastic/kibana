@@ -67,15 +67,16 @@ AlertTypeModel:
 export function getAlertType(): AlertTypeModel {
   return {
     id: '.index-threshold',
-    name: 'Index Threshold',
+    name: 'Index threshold',
     iconClass: 'alert',
-    alertParamsExpression: IndexThresholdAlertTypeExpression,
+    alertParamsExpression: lazy(() => import('./index_threshold_expression')),
     validate: validateAlertType,
+    requiresAppContext: false,
   };
 }
 ```
 
-alertParamsExpression form represented as an expression using `EuiExpression` components:
+alertParamsExpression should be a lazy loaded React component extending an expression using `EuiExpression` components:
 ![Index Threshold Alert expression form](https://i.imgur.com/Ysk1ljY.png)
 
 ```
@@ -171,6 +172,7 @@ export const alertReducer = (state: any, action: AlertReducerAction) => {
 
 ```
 
+The Expression component should be lazy loaded which means it'll have to be the default export in `index_threshold_expression.ts`:
 
 ```
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThresholdProps> = ({
@@ -224,6 +226,9 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
       </Fragment>
   );
 };
+
+// Export as default in order to support lazy loading
+export {IndexThresholdAlertTypeExpression as default};
 ```
 
 Index Threshold Alert form with validation:
@@ -237,7 +242,9 @@ Each alert type should be defined as `AlertTypeModel` object with the these prop
   name: string;
   iconClass: string;
   validate: (alertParams: any) => ValidationResult;
-  alertParamsExpression: React.FunctionComponent<any>;
+  alertParamsExpression: React.LazyExoticComponent<
+        ComponentType<AlertTypeParamsExpressionProps<AlertParamsType, AlertsContextValue>>
+      >;
   defaultActionMessage?: string;
 ```
 |Property|Description|
@@ -246,8 +253,9 @@ Each alert type should be defined as `AlertTypeModel` object with the these prop
 |name|Name of the alert type that will be displayed on the select card in the UI.|
 |iconClass|Icon of the alert type that will be displayed on the select card in the UI.|
 |validate|Validation function for the alert params.|
-|alertParamsExpression|React functional component for building UI of the current alert type params.|
+|alertParamsExpression| A lazy loaded React component for building UI of the current alert type params.|
 |defaultActionMessage|Optional property for providing default message for all added actions with `message` property.|
+|requiresAppContext|Define if alert type is enabled for create and edit in the alerting management UI.|
 
 IMPORTANT: The current UI supports a single action group only. 
 Action groups are mapped from the server API result for [GET /api/alert/types: List alert types](https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/alerting#get-apialerttypes-list-alert-types).
@@ -261,6 +269,7 @@ export interface AlertType {
   };
   actionGroups: string[];
   executor: ({ services, params, state }: AlertExecutorOptions) => Promise<State | void>;
+  requiresAppContext: boolean;
 }
 ```
 Only the default (which means first item of the array) action group is displayed in the current UI.
@@ -295,8 +304,8 @@ Below is a list of steps that should be done to build and register a new alert t
 
 1. At any suitable place in Kibana, create a file, which will expose an object implementing interface [AlertTypeModel](https://github.com/elastic/kibana/blob/55b7905fb5265b73806006e7265739545d7521d0/x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/types.ts#L83). Example:
 ```
+import { lazy } from 'react';
 import { AlertTypeModel } from '../../../../types';
-import { ExampleExpression } from './expression';
 import { validateExampleAlertType } from './validation';
 
 export function getAlertType(): AlertTypeModel {
@@ -304,9 +313,10 @@ export function getAlertType(): AlertTypeModel {
     id: 'example',
     name: 'Example Alert Type',
     iconClass: 'bell',
-    alertParamsExpression: ExampleExpression,
+    alertParamsExpression: lazy(() => import('./expression')),
     validate: validateExampleAlertType,
     defaultActionMessage: 'Alert [{{ctx.metadata.name}}] has exceeded the threshold',
+    requiresAppContext: false,
   };
 }
 ```
@@ -360,6 +370,9 @@ export const ExampleExpression: React.FunctionComponent<ExampleProps> = ({
     </Fragment>
   );
 };
+
+// Export as default in order to support lazy loading
+export {ExampleExpression as default};
 
 ```
 This alert type form becomes available, when the card of `Example Alert Type` is selected.
@@ -985,8 +998,8 @@ Each action type should be defined as an `ActionTypeModel` object with the follo
 |selectMessage|Short description of action type responsibility, that will be displayed on the select card in UI.|
 |validateConnector|Validation function for action connector.|
 |validateParams|Validation function for action params.|
-|actionConnectorFields|React functional component for building UI of current action type connector.|
-|actionParamsFields|React functional component for building UI of current action type params. Displayed as a part of Create Alert flyout.|
+|actionConnectorFields|A lazy loaded React component for building UI of current action type connector.|
+|actionParamsFields|A lazy loaded React component for building UI of current action type params. Displayed as a part of Create Alert flyout.|
 
 ## Register action type model
 
@@ -1017,7 +1030,7 @@ Below is a list of steps that should be done to build and register a new action 
 
 1. At any suitable place in Kibana, create a file, which will expose an object implementing interface [ActionTypeModel]:
 ```
-import React, { Fragment } from 'react';
+import React, { Fragment, lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   ActionTypeModel,
@@ -1082,8 +1095,8 @@ export function getActionType(): ActionTypeModel {
       }
       return validationResult;
     },
-    actionConnectorFields: ExampleConnectorFields,
-    actionParamsFields: ExampleParamsFields,
+    actionConnectorFields: lazy(() => import('./example_connector_fields')),
+    actionParamsFields: lazy(() => import('./example_params_fields')),
   };
 }
 ```
@@ -1130,6 +1143,9 @@ const ExampleConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps
     </Fragment>
   );
 };
+
+// Export as default in order to support lazy loading
+export {ExampleConnectorFields as default};
 ```
 
 3. Define action type params fields using the property of `ActionTypeModel` `actionParamsFields`: 
@@ -1175,6 +1191,9 @@ const ExampleParamsFields: React.FunctionComponent<ActionParamsProps<ExampleActi
     </Fragment>
   );
 };
+
+// Export as default in order to support lazy loading
+export {ExampleParamsFields as default};
 ```
 
 4. Extend registration code with the new action type register in the file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/index.ts`
@@ -1374,7 +1393,7 @@ import { ActionsConnectorsContextProvider, ConnectorAddFlyout } from '../../../.
 const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
 
 // load required dependancied
-const { http, triggers_actions_ui, toastNotifications, capabilities } = useKibana().services;
+const { http, triggers_actions_ui, toastNotifications, capabilities, docLinks } = useKibana().services;
 
 const connector = {
       secrets: {},
@@ -1406,6 +1425,7 @@ const connector = {
           toastNotifications: toastNotifications,
           actionTypeRegistry: triggers_actions_ui.actionTypeRegistry,
           capabilities: capabilities,
+          docLinks, 
         }}
       >
         <ConnectorAddFlyout
@@ -1447,6 +1467,7 @@ export interface ActionsConnectorsContextValue {
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
   capabilities: ApplicationStart['capabilities'];
+  docLinks: DocLinksStart;
   reloadConnectors?: () => Promise<void>;
 }
 ```

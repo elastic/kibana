@@ -224,7 +224,7 @@ export function JobSelectorTable({
     <Fragment>
       {jobs.length === 0 && <EuiLoadingSpinner size="l" />}
       {jobs.length !== 0 && singleSelection === true && renderJobsTable()}
-      {jobs.length !== 0 && singleSelection === undefined && renderTabs()}
+      {jobs.length !== 0 && !singleSelection && renderTabs()}
     </Fragment>
   );
 }

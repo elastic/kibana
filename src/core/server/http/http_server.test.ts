@@ -1068,6 +1068,14 @@ describe('setup contract', () => {
       await create();
       expect(create()).rejects.toThrowError('A cookieSessionStorageFactory was already created');
     });
+
+    it('does not throw if called after stop', async () => {
+      const { createCookieSessionStorageFactory } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        createCookieSessionStorageFactory(cookieOptions);
+      }).not.toThrow();
+    });
   });
 
   describe('#isTlsEnabled', () => {
@@ -1111,6 +1119,56 @@ describe('setup contract', () => {
       const { getServerInfo } = await server.setup(configWithSSL);
 
       expect(getServerInfo().protocol).toEqual('https');
+    });
+  });
+
+  describe('#registerStaticDir', () => {
+    it('does not throw if called after stop', async () => {
+      const { registerStaticDir } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerStaticDir('/path1/{path*}', '/path/to/resource');
+      }).not.toThrow();
+    });
+  });
+
+  describe('#registerOnPreAuth', () => {
+    test('does not throw if called after stop', async () => {
+      const { registerOnPreAuth } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerOnPreAuth((req, res) => res.unauthorized());
+      }).not.toThrow();
+    });
+  });
+
+  describe('#registerOnPostAuth', () => {
+    test('does not throw if called after stop', async () => {
+      const { registerOnPostAuth } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerOnPostAuth((req, res) => res.unauthorized());
+      }).not.toThrow();
+    });
+  });
+
+  describe('#registerOnPreResponse', () => {
+    test('does not throw if called after stop', async () => {
+      const { registerOnPreResponse } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerOnPreResponse((req, res, t) => t.next());
+      }).not.toThrow();
+    });
+  });
+
+  describe('#registerAuth', () => {
+    test('does not throw if called after stop', async () => {
+      const { registerAuth } = await server.setup(config);
+      await server.stop();
+      expect(() => {
+        registerAuth((req, res) => res.unauthorized());
+      }).not.toThrow();
     });
   });
 });

@@ -29,12 +29,7 @@ describe('actions_connectors_list component empty', () => {
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );
-    loadAllActions.mockResolvedValueOnce({
-      page: 1,
-      perPage: 10000,
-      total: 0,
-      data: [],
-    });
+    loadAllActions.mockResolvedValueOnce([]);
     loadActionTypes.mockResolvedValueOnce([
       {
         id: 'test',
@@ -111,27 +106,32 @@ describe('actions_connectors_list component with items', () => {
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );
-    loadAllActions.mockResolvedValueOnce({
-      page: 1,
-      perPage: 10000,
-      total: 2,
-      data: [
-        {
-          id: '1',
-          actionTypeId: 'test',
-          description: 'My test',
-          referencedByCount: 1,
-          config: {},
-        },
-        {
-          id: '2',
-          actionTypeId: 'test2',
-          description: 'My test 2',
-          referencedByCount: 1,
-          config: {},
-        },
-      ],
-    });
+    loadAllActions.mockResolvedValueOnce([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        description: 'My test',
+        isPreconfigured: false,
+        referencedByCount: 1,
+        config: {},
+      },
+      {
+        id: '2',
+        actionTypeId: 'test2',
+        description: 'My test 2',
+        referencedByCount: 1,
+        isPreconfigured: false,
+        config: {},
+      },
+      {
+        id: '3',
+        actionTypeId: 'test2',
+        description: 'My preconfigured test 2',
+        referencedByCount: 1,
+        isPreconfigured: true,
+        config: {},
+      },
+    ]);
     loadActionTypes.mockResolvedValueOnce([
       {
         id: 'test',
@@ -195,14 +195,19 @@ describe('actions_connectors_list component with items', () => {
 
   it('renders table of connectors', () => {
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
-    expect(wrapper.find('EuiTableRow')).toHaveLength(2);
+    expect(wrapper.find('EuiTableRow')).toHaveLength(3);
   });
 
-  test('if select item for edit should render ConnectorEditFlyout', () => {
-    wrapper
+  it('renders table with preconfigured connectors', () => {
+    expect(wrapper.find('[data-test-subj="preConfiguredTitleMessage"]')).toHaveLength(2);
+  });
+
+  test('if select item for edit should render ConnectorEditFlyout', async () => {
+    await wrapper
       .find('[data-test-subj="edit1"]')
       .first()
       .simulate('click');
+
     expect(wrapper.find('ConnectorEditFlyout')).toHaveLength(1);
   });
 });
@@ -214,12 +219,7 @@ describe('actions_connectors_list component empty with show only capability', ()
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );
-    loadAllActions.mockResolvedValueOnce({
-      page: 1,
-      perPage: 10000,
-      total: 0,
-      data: [],
-    });
+    loadAllActions.mockResolvedValueOnce([]);
     loadActionTypes.mockResolvedValueOnce([
       {
         id: 'test',
@@ -289,27 +289,22 @@ describe('actions_connectors_list with show only capability', () => {
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );
-    loadAllActions.mockResolvedValueOnce({
-      page: 1,
-      perPage: 10000,
-      total: 2,
-      data: [
-        {
-          id: '1',
-          actionTypeId: 'test',
-          description: 'My test',
-          referencedByCount: 1,
-          config: {},
-        },
-        {
-          id: '2',
-          actionTypeId: 'test2',
-          description: 'My test 2',
-          referencedByCount: 1,
-          config: {},
-        },
-      ],
-    });
+    loadAllActions.mockResolvedValueOnce([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        description: 'My test',
+        referencedByCount: 1,
+        config: {},
+      },
+      {
+        id: '2',
+        actionTypeId: 'test2',
+        description: 'My test 2',
+        referencedByCount: 1,
+        config: {},
+      },
+    ]);
     loadActionTypes.mockResolvedValueOnce([
       {
         id: 'test',
@@ -384,27 +379,22 @@ describe('actions_connectors_list component with disabled items', () => {
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );
-    loadAllActions.mockResolvedValueOnce({
-      page: 1,
-      perPage: 10000,
-      total: 2,
-      data: [
-        {
-          id: '1',
-          actionTypeId: 'test',
-          description: 'My test',
-          referencedByCount: 1,
-          config: {},
-        },
-        {
-          id: '2',
-          actionTypeId: 'test2',
-          description: 'My test 2',
-          referencedByCount: 1,
-          config: {},
-        },
-      ],
-    });
+    loadAllActions.mockResolvedValueOnce([
+      {
+        id: '1',
+        actionTypeId: 'test',
+        description: 'My test',
+        referencedByCount: 1,
+        config: {},
+      },
+      {
+        id: '2',
+        actionTypeId: 'test2',
+        description: 'My test 2',
+        referencedByCount: 1,
+        config: {},
+      },
+    ]);
     loadActionTypes.mockResolvedValueOnce([
       {
         id: 'test',

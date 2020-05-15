@@ -7,14 +7,16 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
-import { Template } from '../../../../../../../common/types';
+import { TemplateDeserialized } from '../../../../../../../common';
 
 interface Props {
-  templateDetails: Template;
+  templateDetails: TemplateDeserialized;
 }
 
 export const TabMappings: React.FunctionComponent<Props> = ({ templateDetails }) => {
-  const { mappings } = templateDetails;
+  const {
+    template: { mappings },
+  } = templateDetails;
 
   if (mappings && Object.keys(mappings).length) {
     return (

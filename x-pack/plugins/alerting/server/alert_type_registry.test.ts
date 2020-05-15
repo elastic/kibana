@@ -36,6 +36,7 @@ describe('has()', () => {
       ],
       defaultActionGroupId: 'default',
       executor: jest.fn(),
+      producer: 'alerting',
     });
     expect(registry.has('foo')).toEqual(true);
   });
@@ -54,6 +55,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       executor: jest.fn(),
+      producer: 'alerting',
     };
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
@@ -72,6 +74,26 @@ describe('register()', () => {
     `);
   });
 
+  test('shallow clones the given alert type', () => {
+    const alertType: AlertType = {
+      id: 'test',
+      name: 'Test',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      defaultActionGroupId: 'default',
+      executor: jest.fn(),
+      producer: 'alerting',
+    };
+    const registry = new AlertTypeRegistry(alertTypeRegistryParams);
+    registry.register(alertType);
+    alertType.name = 'Changed';
+    expect(registry.get('test').name).toEqual('Test');
+  });
+
   test('should throw an error if type is already registered', () => {
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
     registry.register({
@@ -85,6 +107,7 @@ describe('register()', () => {
       ],
       defaultActionGroupId: 'default',
       executor: jest.fn(),
+      producer: 'alerting',
     });
     expect(() =>
       registry.register({
@@ -98,6 +121,7 @@ describe('register()', () => {
         ],
         defaultActionGroupId: 'default',
         executor: jest.fn(),
+        producer: 'alerting',
       })
     ).toThrowErrorMatchingInlineSnapshot(`"Alert type \\"test\\" is already registered."`);
   });
@@ -117,6 +141,7 @@ describe('get()', () => {
       ],
       defaultActionGroupId: 'default',
       executor: jest.fn(),
+      producer: 'alerting',
     });
     const alertType = registry.get('test');
     expect(alertType).toMatchInlineSnapshot(`
@@ -135,6 +160,7 @@ describe('get()', () => {
         "executor": [MockFunction],
         "id": "test",
         "name": "Test",
+        "producer": "alerting",
       }
     `);
   });
@@ -167,6 +193,7 @@ describe('list()', () => {
       ],
       defaultActionGroupId: 'testActionGroup',
       executor: jest.fn(),
+      producer: 'alerting',
     });
     const result = registry.list();
     expect(result).toMatchInlineSnapshot(`
@@ -185,6 +212,7 @@ describe('list()', () => {
           "defaultActionGroupId": "testActionGroup",
           "id": "test",
           "name": "Test",
+          "producer": "alerting",
         },
       ]
     `);
@@ -231,7 +259,8 @@ function alertTypeWithVariables(id: string, context: string, state: string): Ale
     name: `${id}-name`,
     actionGroups: [],
     defaultActionGroupId: id,
-    executor: (params: any): any => {},
+    async executor() {},
+    producer: 'alerting',
   };
 
   if (!context && !state) {

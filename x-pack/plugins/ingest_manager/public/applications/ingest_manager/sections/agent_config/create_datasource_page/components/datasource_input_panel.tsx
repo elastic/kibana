@@ -17,8 +17,10 @@ import {
   EuiButtonIcon,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiIconTip,
 } from '@elastic/eui';
 import { DatasourceInput, DatasourceInputStream, RegistryInput } from '../../../../types';
+import { DatasourceInputValidationResults, validationHasErrors } from '../services';
 import { DatasourceInputConfig } from './datasource_input_config';
 import { DatasourceInputStreamConfig } from './datasource_input_stream_config';
 
@@ -32,9 +34,20 @@ export const DatasourceInputPanel: React.FunctionComponent<{
   packageInput: RegistryInput;
   datasourceInput: DatasourceInput;
   updateDatasourceInput: (updatedInput: Partial<DatasourceInput>) => void;
-}> = ({ packageInput, datasourceInput, updateDatasourceInput }) => {
+  inputValidationResults: DatasourceInputValidationResults;
+  forceShowErrors?: boolean;
+}> = ({
+  packageInput,
+  datasourceInput,
+  updateDatasourceInput,
+  inputValidationResults,
+  forceShowErrors,
+}) => {
   // Showing streams toggle state
   const [isShowingStreams, setIsShowingStreams] = useState<boolean>(false);
+
+  // Errors state
+  const hasErrors = forceShowErrors && validationHasErrors(inputValidationResults);
 
   return (
     <EuiPanel>
@@ -43,9 +56,32 @@ export const DatasourceInputPanel: React.FunctionComponent<{
         <EuiFlexItem grow={false}>
           <EuiSwitch
             label={
-              <EuiText>
-                <h4>{packageInput.title || packageInput.type}</h4>
-              </EuiText>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiText>
+                    <h4>
+                      <EuiTextColor color={hasErrors ? 'danger' : 'default'}>
+                        {packageInput.title || packageInput.type}
+                      </EuiTextColor>
+                    </h4>
+                  </EuiText>
+                </EuiFlexItem>
+                {hasErrors ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip
+                      content={
+                        <FormattedMessage
+                          id="xpack.ingestManager.createDatasource.stepConfigure.inputLevelErrorsTooltip"
+                          defaultMessage="Fix configuration errors"
+                        />
+                      }
+                      position="right"
+                      type="alert"
+                      iconProps={{ color: 'danger' }}
+                    />
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
             }
             checked={datasourceInput.enabled}
             onChange={e => {
@@ -122,6 +158,8 @@ export const DatasourceInputPanel: React.FunctionComponent<{
             packageInputVars={packageInput.vars}
             datasourceInput={datasourceInput}
             updateDatasourceInput={updateDatasourceInput}
+            inputVarsValidationResults={{ vars: inputValidationResults.vars }}
+            forceShowErrors={forceShowErrors}
           />
           <EuiHorizontalRule margin="m" />
         </Fragment>
@@ -165,6 +203,10 @@ export const DatasourceInputPanel: React.FunctionComponent<{
 
                     updateDatasourceInput(updatedInput);
                   }}
+                  inputStreamValidationResults={
+                    inputValidationResults.streams![datasourceInputStream.id]
+                  }
+                  forceShowErrors={forceShowErrors}
                 />
                 <EuiSpacer size="m" />
                 <EuiHorizontalRule margin="none" />

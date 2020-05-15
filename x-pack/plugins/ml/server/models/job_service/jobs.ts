@@ -16,6 +16,7 @@ import {
   DatafeedWithStats,
   CombinedJobWithStats,
 } from '../../../common/types/anomaly_detection_jobs';
+import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import { datafeedsProvider, MlDatafeedsResponse, MlDatafeedsStatsResponse } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
 import { resultsServiceProvider } from '../results_service';
@@ -227,6 +228,8 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
     const groups: { [jobId: string]: string[] } = {};
     const datafeeds: { [id: string]: DatafeedWithStats } = {};
     const calendarsByJobId: { [jobId: string]: string[] } = {};
+    const globalCalendars: string[] = [];
+
     const requests: [
       Promise<MlJobsResponse>,
       Promise<MlJobsStatsResponse>,
@@ -298,7 +301,9 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
     if (calendarResults) {
       calendarResults.forEach(cal => {
         cal.job_ids.forEach(id => {
-          if (groups[id]) {
+          if (id === GLOBAL_CALENDAR) {
+            globalCalendars.push(cal.calendar_id);
+          } else if (groups[id]) {
             groups[id].forEach(jId => {
               if (calendarsByJobId[jId] !== undefined) {
                 calendarsByJobId[jId].push(cal.calendar_id);
@@ -323,18 +328,20 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
     // create jobs objects containing job stats, datafeeds, datafeed stats and calendars
     if (jobResults && jobResults.jobs) {
       jobResults.jobs.forEach(job => {
-        const tempJob = job as CombinedJobWithStats;
+        let tempJob = job as CombinedJobWithStats;
 
-        if (calendarsByJobId[tempJob.job_id].length) {
-          tempJob.calendars = calendarsByJobId[tempJob.job_id];
+        const calendars: string[] = [
+          ...(calendarsByJobId[tempJob.job_id] || []),
+          ...(globalCalendars || []),
+        ];
+        if (calendars.length) {
+          tempJob.calendars = calendars;
         }
 
         if (jobStatsResults && jobStatsResults.jobs) {
           const jobStats = jobStatsResults.jobs.find(js => js.job_id === tempJob.job_id);
           if (jobStats !== undefined) {
-            tempJob.state = jobStats.state;
-            tempJob.data_counts = jobStats.data_counts;
-            tempJob.model_size_stats = jobStats.model_size_stats;
+            tempJob = { ...tempJob, ...jobStats };
             if (jobStats.node) {
               tempJob.node = jobStats.node;
             }

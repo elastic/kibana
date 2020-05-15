@@ -7,7 +7,7 @@
 import { merge } from 'lodash';
 import { Server } from 'hapi';
 import { SavedObjectsClient } from 'src/core/server';
-import { PromiseReturnType } from '../../../../typings/common';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   APM_INDICES_SAVED_OBJECT_TYPE,
   APM_INDICES_SAVED_OBJECT_ID

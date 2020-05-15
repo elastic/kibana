@@ -21,8 +21,9 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/utils';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { ConfigSchema } from '../config';
+import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
 
 export interface GraphPluginSetupDependencies {
   licensing: LicensingPluginSetup;
@@ -32,6 +33,7 @@ export interface GraphPluginSetupDependencies {
 export interface GraphPluginStartDependencies {
   navigation: NavigationStart;
   data: DataPublicPluginStart;
+  savedObjects: SavedObjectsStart;
 }
 
 export class GraphPlugin
@@ -66,12 +68,15 @@ export class GraphPlugin
     core.application.register({
       id: 'graph',
       title: 'Graph',
-      order: 9000,
+      order: 6000,
       appRoute: '/app/graph',
       euiIconType: 'graphApp',
-      category: DEFAULT_APP_CATEGORIES.analyze,
+      category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
+        coreStart.chrome.docTitle.change(
+          i18n.translate('xpack.graph.pageTitle', { defaultMessage: 'Graph' })
+        );
         const { renderApp } = await import('./application');
         return renderApp({
           ...params,
@@ -89,10 +94,10 @@ export class GraphPlugin
           capabilities: coreStart.application.capabilities.graph,
           coreStart,
           chrome: coreStart.chrome,
-          config: coreStart.uiSettings,
           toastNotifications: coreStart.notifications.toasts,
           indexPatterns: pluginsStart.data!.indexPatterns,
           overlays: coreStart.overlays,
+          savedObjects: pluginsStart.savedObjects,
         });
       },
     });

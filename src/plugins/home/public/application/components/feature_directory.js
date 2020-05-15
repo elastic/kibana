@@ -35,6 +35,7 @@ import { FeatureCatalogueCategory } from '../../services';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { createAppNavigationHandler } from './app_navigation_handler';
 
 const ALL_TAB_ID = 'all';
 const OTHERS_TAB_ID = 'others';
@@ -89,6 +90,7 @@ export class FeatureDirectory extends React.Component {
   renderTabs = () => {
     return this.tabs.map((tab, index) => (
       <EuiTab
+        data-test-subj={`tab-${tab.id}`}
         onClick={() => this.onSelectedTabChanged(tab.id)}
         isSelected={tab.id === this.state.selectedTabId}
         key={index}
@@ -113,6 +115,7 @@ export class FeatureDirectory extends React.Component {
         return (
           <EuiFlexItem key={directory.id}>
             <Synopsis
+              onClick={createAppNavigationHandler(directory.path)}
               description={directory.description}
               iconType={directory.icon}
               title={directory.title}

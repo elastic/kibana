@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import url from 'url';
 import uuid from 'uuid';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { CallESAsCurrentUser } from '../types';
 import { agentConfigService } from './agent_config';
 import { outputService } from './output';
 import { ensureInstalledDefaultPackages } from './epm/packages/install';
+import { ensureDefaultIndices } from './epm/kibana/index_pattern/install';
 import {
   packageToConfigDatasource,
   Datasource,
@@ -17,10 +19,13 @@ import {
   Installation,
   Output,
   DEFAULT_AGENT_CONFIGS_PACKAGES,
+  decodeCloudId,
 } from '../../common';
 import { getPackageInfo } from './epm/packages';
 import { datasourceService } from './datasource';
 import { generateEnrollmentAPIKey } from './api_keys';
+import { settingsService } from '.';
+import { appContextService } from './app_context';
 
 const FLEET_ENROLL_USERNAME = 'fleet_enroll';
 const FLEET_ENROLL_ROLE = 'fleet_enroll';
@@ -34,6 +39,33 @@ export async function setupIngestManager(
     ensureInstalledDefaultPackages(soClient, callCluster),
     outputService.ensureDefaultOutput(soClient),
     agentConfigService.ensureDefaultAgentConfig(soClient),
+    ensureDefaultIndices(callCluster),
+    settingsService.getSettings(soClient).catch((e: any) => {
+      if (e.isBoom && e.output.statusCode === 404) {
+        const http = appContextService.getHttpSetup();
+        const serverInfo = http.getServerInfo();
+        const basePath = http.basePath;
+
+        const cloud = appContextService.getCloud();
+        const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
+        const cloudUrl = cloudId && decodeCloudId(cloudId)?.kibanaUrl;
+        const flagsUrl = appContextService.getConfig()?.fleet?.kibana?.host;
+        const defaultUrl = url.format({
+          protocol: serverInfo.protocol,
+          hostname: serverInfo.host,
+          port: serverInfo.port,
+          pathname: basePath.serverBasePath,
+        });
+
+        return settingsService.saveSettings(soClient, {
+          agent_auto_upgrade: true,
+          package_auto_upgrade: true,
+          kibana_url: cloudUrl || flagsUrl || defaultUrl,
+        });
+      }
+
+      return Promise.reject(e);
+    }),
   ]);
 
   // ensure default packages are added to the default conifg
@@ -67,11 +99,12 @@ export async function setupIngestManager(
 
 export async function setupFleet(
   soClient: SavedObjectsClientContract,
-  callCluster: CallESAsCurrentUser
+  callCluster: CallESAsCurrentUser,
+  options?: { forceRecreate?: boolean }
 ) {
   // Create fleet_enroll role
   // This should be done directly in ES at some point
-  await callCluster('transport.request', {
+  const res = await callCluster('transport.request', {
     method: 'PUT',
     path: `/_security/role/${FLEET_ENROLL_ROLE}`,
     body: {
@@ -84,6 +117,10 @@ export async function setupFleet(
       ],
     },
   });
+  // If the role is already created skip the rest unless you have forceRecreate set to true
+  if (options?.forceRecreate !== true && res.role.created === false) {
+    return;
+  }
   const password = generateRandomPassword();
   // Create fleet enroll user
   await callCluster('transport.request', {
@@ -92,11 +129,19 @@ export async function setupFleet(
     body: {
       password,
       roles: [FLEET_ENROLL_ROLE],
+      metadata: {
+        updated_at: new Date().toISOString(),
+      },
     },
   });
 
   // save fleet admin user
-  await outputService.updateOutput(soClient, await outputService.getDefaultOutputId(soClient), {
+  const defaultOutputId = await outputService.getDefaultOutputId(soClient);
+  if (!defaultOutputId) {
+    throw new Error('Default output does not exist');
+  }
+
+  await outputService.updateOutput(soClient, defaultOutputId, {
     fleet_enroll_username: FLEET_ENROLL_USERNAME,
     fleet_enroll_password: password,
   });
@@ -120,10 +165,21 @@ async function addPackageToConfig(
 ) {
   const packageInfo = await getPackageInfo({
     savedObjectsClient: soClient,
-    pkgkey: `${packageToInstall.name}-${packageToInstall.version}`,
+    pkgName: packageToInstall.name,
+    pkgVersion: packageToInstall.version,
   });
-  await datasourceService.create(
-    soClient,
-    packageToConfigDatasource(packageInfo, config.id, defaultOutput.id, undefined, config.namespace)
+
+  const newDatasource = packageToConfigDatasource(
+    packageInfo,
+    config.id,
+    defaultOutput.id,
+    undefined,
+    config.namespace
   );
+  newDatasource.inputs = await datasourceService.assignPackageStream(
+    packageInfo,
+    newDatasource.inputs
+  );
+
+  await datasourceService.create(soClient, newDatasource);
 }

@@ -4,24 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import {
+  ActionType,
+  Services,
+  ActionTypeExecutorOptions,
+  ActionTypeExecutorResult,
+} from '../types';
 import { validateParams, validateSecrets } from '../lib';
 import { getActionType } from './slack';
 import { actionsConfigMock } from '../actions_config.mock';
+import { actionsMock } from '../mocks';
 
 const ACTION_TYPE_ID = '.slack';
 
-const services: Services = {
-  callCluster: async (path: string, opts: any) => {},
-  savedObjectsClient: savedObjectsClientMock.create(),
-};
+const services: Services = actionsMock.createServices();
 
 let actionType: ActionType;
 
 beforeAll(() => {
   actionType = getActionType({
-    async executor(options: ActionTypeExecutorOptions): Promise<any> {},
+    async executor() {},
     configurationUtilities: actionsConfigMock.create(),
   });
 });
@@ -117,7 +119,7 @@ describe('validateActionTypeSecrets()', () => {
 
 describe('execute()', () => {
   beforeAll(() => {
-    async function mockSlackExecutor(options: ActionTypeExecutorOptions): Promise<any> {
+    async function mockSlackExecutor(options: ActionTypeExecutorOptions) {
       const { params } = options;
       const { message } = params;
       if (message == null) throw new Error('message property required in parameter');
@@ -130,7 +132,9 @@ describe('execute()', () => {
 
       return {
         text: `slack mockExecutor success: ${message}`,
-      };
+        actionId: '',
+        status: 'ok',
+      } as ActionTypeExecutorResult;
     }
 
     actionType = getActionType({
@@ -148,10 +152,12 @@ describe('execute()', () => {
       params: { message: 'this invocation should succeed' },
     });
     expect(response).toMatchInlineSnapshot(`
-Object {
-  "text": "slack mockExecutor success: this invocation should succeed",
-}
-`);
+      Object {
+        "actionId": "",
+        "status": "ok",
+        "text": "slack mockExecutor success: this invocation should succeed",
+      }
+    `);
   });
 
   test('calls the mock executor with failure', async () => {

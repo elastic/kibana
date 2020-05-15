@@ -106,7 +106,7 @@ export default class WatchOptimizer extends BaseOptimizer {
     });
   }
 
-  bindToServer(server, basePath, npUiPluginPublicDirs) {
+  bindToServer(server, basePath, npUiPluginPublicDirs, buildHash) {
     // pause all requests received while the compiler is running
     // and continue once an outcome is reached (aborting the request
     // with an error if it was a failure).
@@ -118,6 +118,7 @@ export default class WatchOptimizer extends BaseOptimizer {
     server.route(
       createBundlesRoute({
         npUiPluginPublicDirs: npUiPluginPublicDirs,
+        buildHash,
         regularBundlesPath: this.compiler.outputPath,
         dllBundlesPath: DllCompiler.getRawDllConfig().outputPath,
         basePublicPath: basePath,

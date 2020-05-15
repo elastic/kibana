@@ -7,7 +7,7 @@
 import Hapi from 'hapi';
 import { createMockReportingCore } from '../../test_helpers';
 import { Logger, ServerFacade } from '../../types';
-import { ReportingCore, ReportingSetupDeps } from '../../server/types';
+import { ReportingConfig, ReportingCore, ReportingSetupDeps } from '../types';
 
 jest.mock('./lib/authorized_user_pre_routing', () => ({
   authorizedUserPreRoutingFactory: () => () => ({}),
@@ -22,6 +22,8 @@ import { registerJobGenerationRoutes } from './generation';
 
 let mockServer: Hapi.Server;
 let mockReportingPlugin: ReportingCore;
+let mockReportingConfig: ReportingConfig;
+
 const mockLogger = ({
   error: jest.fn(),
   debug: jest.fn(),
@@ -33,8 +35,9 @@ beforeEach(async () => {
     port: 8080,
     routes: { log: { collect: true } },
   });
-  mockServer.config = () => ({ get: jest.fn(), has: jest.fn() });
-  mockReportingPlugin = await createMockReportingCore();
+
+  mockReportingConfig = { get: jest.fn(), kbnConfig: { get: jest.fn() } };
+  mockReportingPlugin = await createMockReportingCore(mockReportingConfig);
   mockReportingPlugin.getEnqueueJob = async () =>
     jest.fn().mockImplementation(() => ({ toJSON: () => '{ "job": "data" }' }));
 });

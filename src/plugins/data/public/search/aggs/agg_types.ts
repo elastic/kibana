@@ -17,83 +17,161 @@
  * under the License.
  */
 
-import { IUiSettingsClient, NotificationsSetup } from 'src/core/public';
+import { IUiSettingsClient } from 'src/core/public';
 import { QuerySetup } from '../../query/query_service';
 
-import { countMetricAgg } from './metrics/count';
-import { avgMetricAgg } from './metrics/avg';
-import { sumMetricAgg } from './metrics/sum';
-import { medianMetricAgg } from './metrics/median';
-import { minMetricAgg } from './metrics/min';
-import { maxMetricAgg } from './metrics/max';
-import { topHitMetricAgg } from './metrics/top_hit';
-import { stdDeviationMetricAgg } from './metrics/std_deviation';
-import { cardinalityMetricAgg } from './metrics/cardinality';
-import { percentilesMetricAgg } from './metrics/percentiles';
-import { geoBoundsMetricAgg } from './metrics/geo_bounds';
-import { geoCentroidMetricAgg } from './metrics/geo_centroid';
-import { percentileRanksMetricAgg } from './metrics/percentile_ranks';
-import { derivativeMetricAgg } from './metrics/derivative';
-import { cumulativeSumMetricAgg } from './metrics/cumulative_sum';
-import { movingAvgMetricAgg } from './metrics/moving_avg';
-import { serialDiffMetricAgg } from './metrics/serial_diff';
+import { getCountMetricAgg } from './metrics/count';
+import { getAvgMetricAgg } from './metrics/avg';
+import { getSumMetricAgg } from './metrics/sum';
+import { getMedianMetricAgg } from './metrics/median';
+import { getMinMetricAgg } from './metrics/min';
+import { getMaxMetricAgg } from './metrics/max';
+import { getTopHitMetricAgg } from './metrics/top_hit';
+import { getStdDeviationMetricAgg } from './metrics/std_deviation';
+import { getCardinalityMetricAgg } from './metrics/cardinality';
+import { getPercentilesMetricAgg } from './metrics/percentiles';
+import { getGeoBoundsMetricAgg } from './metrics/geo_bounds';
+import { getGeoCentroidMetricAgg } from './metrics/geo_centroid';
+import { getPercentileRanksMetricAgg } from './metrics/percentile_ranks';
+import { getDerivativeMetricAgg } from './metrics/derivative';
+import { getCumulativeSumMetricAgg } from './metrics/cumulative_sum';
+import { getMovingAvgMetricAgg } from './metrics/moving_avg';
+import { getSerialDiffMetricAgg } from './metrics/serial_diff';
+
 import { getDateHistogramBucketAgg } from './buckets/date_histogram';
 import { getHistogramBucketAgg } from './buckets/histogram';
-import { rangeBucketAgg } from './buckets/range';
+import { getRangeBucketAgg } from './buckets/range';
 import { getDateRangeBucketAgg } from './buckets/date_range';
-import { ipRangeBucketAgg } from './buckets/ip_range';
-import { termsBucketAgg } from './buckets/terms';
-import { filterBucketAgg } from './buckets/filter';
+import { getIpRangeBucketAgg } from './buckets/ip_range';
+import { getTermsBucketAgg } from './buckets/terms';
+import { getFilterBucketAgg } from './buckets/filter';
 import { getFiltersBucketAgg } from './buckets/filters';
-import { significantTermsBucketAgg } from './buckets/significant_terms';
-import { geoHashBucketAgg } from './buckets/geo_hash';
-import { geoTileBucketAgg } from './buckets/geo_tile';
-import { bucketSumMetricAgg } from './metrics/bucket_sum';
-import { bucketAvgMetricAgg } from './metrics/bucket_avg';
-import { bucketMinMetricAgg } from './metrics/bucket_min';
-import { bucketMaxMetricAgg } from './metrics/bucket_max';
+import { getSignificantTermsBucketAgg } from './buckets/significant_terms';
+import { getGeoHashBucketAgg } from './buckets/geo_hash';
+import { getGeoTitleBucketAgg } from './buckets/geo_tile';
+import { getBucketSumMetricAgg } from './metrics/bucket_sum';
+import { getBucketAvgMetricAgg } from './metrics/bucket_avg';
+import { getBucketMinMetricAgg } from './metrics/bucket_min';
+import { getBucketMaxMetricAgg } from './metrics/bucket_max';
+
+import { GetInternalStartServicesFn } from '../../types';
 
 export interface AggTypesDependencies {
-  notifications: NotificationsSetup;
   uiSettings: IUiSettingsClient;
   query: QuerySetup;
+  getInternalStartServices: GetInternalStartServicesFn;
 }
 
-export const getAggTypes = ({ notifications, uiSettings, query }: AggTypesDependencies) => ({
+export const getAggTypes = ({
+  uiSettings,
+  query,
+  getInternalStartServices,
+}: AggTypesDependencies) => ({
   metrics: [
-    countMetricAgg,
-    avgMetricAgg,
-    sumMetricAgg,
-    medianMetricAgg,
-    minMetricAgg,
-    maxMetricAgg,
-    stdDeviationMetricAgg,
-    cardinalityMetricAgg,
-    percentilesMetricAgg,
-    percentileRanksMetricAgg,
-    topHitMetricAgg,
-    derivativeMetricAgg,
-    cumulativeSumMetricAgg,
-    movingAvgMetricAgg,
-    serialDiffMetricAgg,
-    bucketAvgMetricAgg,
-    bucketSumMetricAgg,
-    bucketMinMetricAgg,
-    bucketMaxMetricAgg,
-    geoBoundsMetricAgg,
-    geoCentroidMetricAgg,
+    getCountMetricAgg({ getInternalStartServices }),
+    getAvgMetricAgg({ getInternalStartServices }),
+    getSumMetricAgg({ getInternalStartServices }),
+    getMedianMetricAgg({ getInternalStartServices }),
+    getMinMetricAgg({ getInternalStartServices }),
+    getMaxMetricAgg({ getInternalStartServices }),
+    getStdDeviationMetricAgg({ getInternalStartServices }),
+    getCardinalityMetricAgg({ getInternalStartServices }),
+    getPercentilesMetricAgg({ getInternalStartServices }),
+    getPercentileRanksMetricAgg({ getInternalStartServices }),
+    getTopHitMetricAgg({ getInternalStartServices }),
+    getDerivativeMetricAgg({ getInternalStartServices }),
+    getCumulativeSumMetricAgg({ getInternalStartServices }),
+    getMovingAvgMetricAgg({ getInternalStartServices }),
+    getSerialDiffMetricAgg({ getInternalStartServices }),
+    getBucketAvgMetricAgg({ getInternalStartServices }),
+    getBucketSumMetricAgg({ getInternalStartServices }),
+    getBucketMinMetricAgg({ getInternalStartServices }),
+    getBucketMaxMetricAgg({ getInternalStartServices }),
+    getGeoBoundsMetricAgg({ getInternalStartServices }),
+    getGeoCentroidMetricAgg({ getInternalStartServices }),
   ],
   buckets: [
-    getDateHistogramBucketAgg({ uiSettings, query }),
-    getHistogramBucketAgg({ uiSettings, notifications }),
-    rangeBucketAgg,
-    getDateRangeBucketAgg({ uiSettings }),
-    ipRangeBucketAgg,
-    termsBucketAgg,
-    filterBucketAgg,
-    getFiltersBucketAgg({ uiSettings }),
-    significantTermsBucketAgg,
-    geoHashBucketAgg,
-    geoTileBucketAgg,
+    getDateHistogramBucketAgg({ uiSettings, query, getInternalStartServices }),
+    getHistogramBucketAgg({ uiSettings, getInternalStartServices }),
+    getRangeBucketAgg({ getInternalStartServices }),
+    getDateRangeBucketAgg({ uiSettings, getInternalStartServices }),
+    getIpRangeBucketAgg({ getInternalStartServices }),
+    getTermsBucketAgg({ getInternalStartServices }),
+    getFilterBucketAgg({ getInternalStartServices }),
+    getFiltersBucketAgg({ uiSettings, getInternalStartServices }),
+    getSignificantTermsBucketAgg({ getInternalStartServices }),
+    getGeoHashBucketAgg({ getInternalStartServices }),
+    getGeoTitleBucketAgg({ getInternalStartServices }),
   ],
 });
+
+/** Buckets: **/
+import { aggFilter } from './buckets/filter_fn';
+import { aggFilters } from './buckets/filters_fn';
+import { aggSignificantTerms } from './buckets/significant_terms_fn';
+import { aggIpRange } from './buckets/ip_range_fn';
+import { aggDateRange } from './buckets/date_range_fn';
+import { aggRange } from './buckets/range_fn';
+import { aggGeoTile } from './buckets/geo_tile_fn';
+import { aggGeoHash } from './buckets/geo_hash_fn';
+import { aggHistogram } from './buckets/histogram_fn';
+import { aggDateHistogram } from './buckets/date_histogram_fn';
+import { aggTerms } from './buckets/terms_fn';
+
+/** Metrics: **/
+import { aggAvg } from './metrics/avg_fn';
+import { aggBucketAvg } from './metrics/bucket_avg_fn';
+import { aggBucketMax } from './metrics/bucket_max_fn';
+import { aggBucketMin } from './metrics/bucket_min_fn';
+import { aggBucketSum } from './metrics/bucket_sum_fn';
+import { aggCardinality } from './metrics/cardinality_fn';
+import { aggCount } from './metrics/count_fn';
+import { aggCumulativeSum } from './metrics/cumulative_sum_fn';
+import { aggDerivative } from './metrics/derivative_fn';
+import { aggGeoBounds } from './metrics/geo_bounds_fn';
+import { aggGeoCentroid } from './metrics/geo_centroid_fn';
+import { aggMax } from './metrics/max_fn';
+import { aggMedian } from './metrics/median_fn';
+import { aggMin } from './metrics/min_fn';
+import { aggMovingAvg } from './metrics/moving_avg_fn';
+import { aggPercentileRanks } from './metrics/percentile_ranks_fn';
+import { aggPercentiles } from './metrics/percentiles_fn';
+import { aggSerialDiff } from './metrics/serial_diff_fn';
+import { aggStdDeviation } from './metrics/std_deviation_fn';
+import { aggSum } from './metrics/sum_fn';
+import { aggTopHit } from './metrics/top_hit_fn';
+
+export const getAggTypesFunctions = () => [
+  aggAvg,
+  aggBucketAvg,
+  aggBucketMax,
+  aggBucketMin,
+  aggBucketSum,
+  aggCardinality,
+  aggCount,
+  aggCumulativeSum,
+  aggDerivative,
+  aggGeoBounds,
+  aggGeoCentroid,
+  aggMax,
+  aggMedian,
+  aggMin,
+  aggMovingAvg,
+  aggPercentileRanks,
+  aggPercentiles,
+  aggSerialDiff,
+  aggStdDeviation,
+  aggSum,
+  aggTopHit,
+  aggFilter,
+  aggFilters,
+  aggSignificantTerms,
+  aggIpRange,
+  aggDateRange,
+  aggRange,
+  aggGeoTile,
+  aggGeoHash,
+  aggDateHistogram,
+  aggHistogram,
+  aggTerms,
+];

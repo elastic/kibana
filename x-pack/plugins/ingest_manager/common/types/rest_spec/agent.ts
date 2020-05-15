@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Agent, AgentAction, AgentEvent, AgentStatus, AgentType, NewAgentAction } from '../models';
+import {
+  Agent,
+  AgentAction,
+  NewAgentEvent,
+  AgentEvent,
+  AgentStatus,
+  AgentType,
+  NewAgentAction,
+} from '../models';
 
 export interface GetAgentsRequest {
   query: {
@@ -40,7 +48,7 @@ export interface PostAgentCheckinRequest {
   };
   body: {
     local_metadata?: Record<string, any>;
-    events?: AgentEvent[];
+    events?: NewAgentEvent[];
   };
 }
 
@@ -96,16 +104,23 @@ export interface PostNewAgentActionResponse {
 }
 
 export interface PostAgentUnenrollRequest {
-  body: { kuery: string } | { ids: string[] };
+  params: {
+    agentId: string;
+  };
 }
 
 export interface PostAgentUnenrollResponse {
-  results: Array<{
-    success: boolean;
-    error?: any;
-    id: string;
-    action: string;
-  }>;
+  success: boolean;
+}
+
+export interface PutAgentReassignRequest {
+  params: {
+    agentId: string;
+  };
+  body: { config_id: string };
+}
+
+export interface PutAgentReassignResponse {
   success: boolean;
 }
 
@@ -145,7 +160,7 @@ export interface UpdateAgentRequest {
 
 export interface GetAgentStatusRequest {
   query: {
-    configId: string;
+    configId?: string;
   };
 }
 

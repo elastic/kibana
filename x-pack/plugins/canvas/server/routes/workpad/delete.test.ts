@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CANVAS_TYPE } from '../../../../../legacy/plugins/canvas/common/lib/constants';
+import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeDeleteWorkpadRoute } from './delete';
 import {
   IRouter,

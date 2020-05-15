@@ -11,7 +11,7 @@ import numeral from '@elastic/numeral';
 import { isEmpty } from 'lodash';
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
-import { collapseLiteralStrings } from '../../../../../../../../../../src/plugins/es_ui_shared/console_lang/lib/json_xjson_translation_tools';
+import { collapseLiteralStrings } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
 
 import { Action, ACTION } from './actions';
 import { getInitialState, getJobConfigFromFormState, State } from './state';
@@ -31,10 +31,12 @@ import {
 } from '../../../../../../../common/constants/validation';
 import {
   getDependentVar,
+  getNumTopFeatureImportanceValues,
   getTrainingPercent,
   isRegressionAnalysis,
   isClassificationAnalysis,
   ANALYSIS_CONFIG_TYPE,
+  NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN,
   TRAINING_PERCENT_MIN,
   TRAINING_PERCENT_MAX,
 } from '../../../../common/analytics';
@@ -100,6 +102,19 @@ const getSourceIndexString = (state: State) => {
   return '';
 };
 
+/**
+ * Validates num_top_feature_importance_values. Must be an integer >= 0.
+ */
+export const validateNumTopFeatureImportanceValues = (
+  numTopFeatureImportanceValues: any
+): boolean => {
+  return (
+    typeof numTopFeatureImportanceValues === 'number' &&
+    numTopFeatureImportanceValues >= NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN &&
+    Number.isInteger(numTopFeatureImportanceValues)
+  );
+};
+
 export const validateAdvancedEditor = (state: State): State => {
   const {
     jobIdEmpty,
@@ -109,6 +124,7 @@ export const validateAdvancedEditor = (state: State): State => {
     createIndexPattern,
     excludes,
     maxDistinctValuesError,
+    requiredFieldsError,
   } = state.form;
   const { jobConfig } = state;
 
@@ -147,6 +163,7 @@ export const validateAdvancedEditor = (state: State): State => {
   let dependentVariableEmpty = false;
   let excludesValid = true;
   let trainingPercentValid = true;
+  let numTopFeatureImportanceValuesValid = true;
 
   if (
     jobConfig.analysis === undefined &&
@@ -180,6 +197,7 @@ export const validateAdvancedEditor = (state: State): State => {
     if (
       trainingPercent !== undefined &&
       (isNaN(trainingPercent) ||
+        typeof trainingPercent !== 'number' ||
         trainingPercent < TRAINING_PERCENT_MIN ||
         trainingPercent > TRAINING_PERCENT_MAX)
     ) {
@@ -189,7 +207,7 @@ export const validateAdvancedEditor = (state: State): State => {
         error: i18n.translate(
           'xpack.ml.dataframe.analytics.create.advancedEditorMessage.trainingPercentInvalid',
           {
-            defaultMessage: 'The training percent must be a value between {min} and {max}.',
+            defaultMessage: 'The training percent must be a number between {min} and {max}.',
             values: {
               min: TRAINING_PERCENT_MIN,
               max: TRAINING_PERCENT_MAX,
@@ -198,6 +216,28 @@ export const validateAdvancedEditor = (state: State): State => {
         ),
         message: '',
       });
+    }
+
+    const numTopFeatureImportanceValues = getNumTopFeatureImportanceValues(jobConfig.analysis);
+    if (numTopFeatureImportanceValues !== undefined) {
+      numTopFeatureImportanceValuesValid = validateNumTopFeatureImportanceValues(
+        numTopFeatureImportanceValues
+      );
+      if (numTopFeatureImportanceValuesValid === false) {
+        state.advancedEditorMessages.push({
+          error: i18n.translate(
+            'xpack.ml.dataframe.analytics.create.advancedEditorMessage.numTopFeatureImportanceValuesInvalid',
+            {
+              defaultMessage:
+                'The value for num_top_feature_importance_values must be an integer of {min} or higher.',
+              values: {
+                min: 0,
+              },
+            }
+          ),
+          message: '',
+        });
+      }
     }
   }
 
@@ -229,6 +269,17 @@ export const validateAdvancedEditor = (state: State): State => {
         'xpack.ml.dataframe.analytics.create.advancedEditorMessage.destinationIndexNameEmpty',
         {
           defaultMessage: 'The destination index name must not be empty.',
+        }
+      ),
+      message: '',
+    });
+  } else if (destinationIndexPatternTitleExists && !createIndexPattern) {
+    state.advancedEditorMessages.push({
+      error: i18n.translate(
+        'xpack.ml.dataframe.analytics.create.advancedEditorMessage.destinationIndexNameExistsWarn',
+        {
+          defaultMessage:
+            'An index with this destination index name already exists. Be aware that running this analytics job will modify this destination index.',
         }
       ),
       message: '',
@@ -276,8 +327,11 @@ export const validateAdvancedEditor = (state: State): State => {
     });
   }
 
+  state.form.destinationIndexPatternTitleExists = destinationIndexPatternTitleExists;
+
   state.isValid =
     maxDistinctValuesError === undefined &&
+    requiredFieldsError === undefined &&
     excludesValid &&
     trainingPercentValid &&
     state.form.modelMemoryLimitUnitValid &&
@@ -290,6 +344,7 @@ export const validateAdvancedEditor = (state: State): State => {
     destinationIndexNameValid &&
     !dependentVariableEmpty &&
     !modelMemoryLimitEmpty &&
+    numTopFeatureImportanceValuesValid &&
     (!destinationIndexPatternTitleExists || !createIndexPattern);
 
   return state;
@@ -343,6 +398,8 @@ const validateForm = (state: State): State => {
     dependentVariable,
     maxDistinctValuesError,
     modelMemoryLimit,
+    numTopFeatureImportanceValuesValid,
+    requiredFieldsError,
   } = state.form;
   const { estimatedModelMemoryLimit } = state;
 
@@ -358,6 +415,7 @@ const validateForm = (state: State): State => {
 
   state.isValid =
     maxDistinctValuesError === undefined &&
+    requiredFieldsError === undefined &&
     !jobTypeEmpty &&
     !mmlValidationResult &&
     !jobIdEmpty &&
@@ -368,6 +426,7 @@ const validateForm = (state: State): State => {
     !destinationIndexNameEmpty &&
     destinationIndexNameValid &&
     !dependentVariableEmpty &&
+    numTopFeatureImportanceValuesValid &&
     (!destinationIndexPatternTitleExists || !createIndexPattern);
 
   return state;
@@ -441,6 +500,12 @@ export function reducer(state: State, action: Action): State {
         newFormState.sourceIndexNameEmpty = newFormState.sourceIndex === '';
         const validationMessages = indexPatterns.validate(newFormState.sourceIndex);
         newFormState.sourceIndexNameValid = Object.keys(validationMessages).length === 0;
+      }
+
+      if (action.payload.numTopFeatureImportanceValues !== undefined) {
+        newFormState.numTopFeatureImportanceValuesValid = validateNumTopFeatureImportanceValues(
+          newFormState?.numTopFeatureImportanceValues
+        );
       }
 
       return state.isAdvancedEditorEnabled

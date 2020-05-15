@@ -5,46 +5,83 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import uuid from 'uuid';
-import {
-  Agent,
-  AgentAction,
-  AgentSOAttributes,
-  NewAgentAction,
-} from '../../../common/types/models';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { Agent, AgentAction, AgentActionSOAttributes } from '../../../common/types/models';
+import { AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { savedObjectToAgentAction } from './saved_objects';
+import { appContextService } from '../app_context';
 
-export async function updateAgentActions(
+export async function createAgentAction(
   soClient: SavedObjectsClientContract,
-  agent: Agent,
-  newAgentAction: NewAgentAction
+  newAgentAction: Omit<AgentAction, 'id'>
 ): Promise<AgentAction> {
-  const agentAction = createAgentAction(new Date(), newAgentAction);
-
-  agent.actions.push(agentAction);
-
-  await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id, {
-    actions: agent.actions,
+  const so = await soClient.create<AgentActionSOAttributes>(AGENT_ACTION_SAVED_OBJECT_TYPE, {
+    ...newAgentAction,
+    data: newAgentAction.data ? JSON.stringify(newAgentAction.data) : undefined,
   });
+
+  const agentAction = savedObjectToAgentAction(so);
+  agentAction.data = newAgentAction.data;
 
   return agentAction;
 }
 
-export function createAgentAction(createdAt: Date, newAgentAction: NewAgentAction): AgentAction {
-  const agentAction = {
-    id: uuid.v4(),
-    created_at: createdAt.toISOString(),
-  };
+export async function getAgentActionsForCheckin(
+  soClient: SavedObjectsClientContract,
+  agentId: string
+): Promise<AgentAction[]> {
+  const res = await soClient.find<AgentActionSOAttributes>({
+    type: AGENT_ACTION_SAVED_OBJECT_TYPE,
+    filter: `not ${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.sent_at: * and ${AGENT_ACTION_SAVED_OBJECT_TYPE}.attributes.agent_id:${agentId}`,
+  });
 
-  return Object.assign(agentAction, newAgentAction);
+  return Promise.all(
+    res.saved_objects.map(async so => {
+      // Get decrypted actions
+      return savedObjectToAgentAction(
+        await appContextService
+          .getEncryptedSavedObjects()
+          .getDecryptedAsInternalUser<AgentActionSOAttributes>(
+            AGENT_ACTION_SAVED_OBJECT_TYPE,
+            so.id
+          )
+      );
+    })
+  );
+}
+
+export async function getAgentActionByIds(
+  soClient: SavedObjectsClientContract,
+  actionIds: string[]
+) {
+  const actions = (
+    await soClient.bulkGet<AgentActionSOAttributes>(
+      actionIds.map(actionId => ({
+        id: actionId,
+        type: AGENT_ACTION_SAVED_OBJECT_TYPE,
+      }))
+    )
+  ).saved_objects.map(savedObjectToAgentAction);
+
+  return Promise.all(
+    actions.map(async action => {
+      // Get decrypted actions
+      return savedObjectToAgentAction(
+        await appContextService
+          .getEncryptedSavedObjects()
+          .getDecryptedAsInternalUser<AgentActionSOAttributes>(
+            AGENT_ACTION_SAVED_OBJECT_TYPE,
+            action.id
+          )
+      );
+    })
+  );
 }
 
 export interface ActionsService {
   getAgent: (soClient: SavedObjectsClientContract, agentId: string) => Promise<Agent>;
 
-  updateAgentActions: (
+  createAgentAction: (
     soClient: SavedObjectsClientContract,
-    agent: Agent,
-    newAgentAction: NewAgentAction
+    newAgentAction: AgentActionSOAttributes
   ) => Promise<AgentAction>;
 }

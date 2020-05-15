@@ -51,5 +51,43 @@ describe('get_time', () => {
       });
       clock.restore();
     });
+
+    test('build range filter for non-primary field', () => {
+      const clock = sinon.useFakeTimers(moment.utc([2000, 1, 1, 0, 0, 0, 0]).valueOf());
+
+      const filter = getTime(
+        {
+          id: 'test',
+          title: 'test',
+          timeFieldName: 'date',
+          fields: [
+            {
+              name: 'date',
+              type: 'date',
+              esTypes: ['date'],
+              aggregatable: true,
+              searchable: true,
+              filterable: true,
+            },
+            {
+              name: 'myCustomDate',
+              type: 'date',
+              esTypes: ['date'],
+              aggregatable: true,
+              searchable: true,
+              filterable: true,
+            },
+          ],
+        } as any,
+        { from: 'now-60y', to: 'now' },
+        { fieldName: 'myCustomDate' }
+      );
+      expect(filter!.range.myCustomDate).toEqual({
+        gte: '1940-02-01T00:00:00.000Z',
+        lte: '2000-02-01T00:00:00.000Z',
+        format: 'strict_date_optional_time',
+      });
+      clock.restore();
+    });
   });
 });

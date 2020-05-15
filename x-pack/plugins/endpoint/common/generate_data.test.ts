@@ -45,6 +45,17 @@ describe('data generator', () => {
     expect(metadata.host).not.toBeNull();
   });
 
+  it('creates policy response documents', () => {
+    const timestamp = new Date().getTime();
+    const hostPolicyResponse = generator.generatePolicyResponse(timestamp);
+    expect(hostPolicyResponse['@timestamp']).toEqual(timestamp);
+    expect(hostPolicyResponse.event.created).toEqual(timestamp);
+    expect(hostPolicyResponse.endpoint).not.toBeNull();
+    expect(hostPolicyResponse.agent).not.toBeNull();
+    expect(hostPolicyResponse.host).not.toBeNull();
+    expect(hostPolicyResponse.endpoint.policy.applied).not.toBeNull();
+  });
+
   it('creates alert event documents', () => {
     const timestamp = new Date().getTime();
     const alert = generator.generateAlert(timestamp);
@@ -86,24 +97,42 @@ describe('data generator', () => {
     let events: Event[];
 
     beforeEach(() => {
-      events = generator.generateAlertEventAncestry(3);
+      events = generator.createAlertEventAncestry(3);
     });
 
     it('with n-1 process events', () => {
-      for (let i = 1; i < events.length - 1; i++) {
-        expect(events[i].process.parent?.entity_id).toEqual(events[i - 1].process.entity_id);
-        expect(events[i].event.kind).toEqual('event');
-        expect(events[i].event.category).toEqual('process');
+      for (let i = events.length - 2; i > 0; ) {
+        const parentEntityIdOfChild = events[i].process.parent?.entity_id;
+        for (
+          ;
+          --i >= -1 && (events[i].event.kind !== 'event' || events[i].event.category !== 'process');
+
+        ) {
+          // related event - skip it
+        }
+        expect(i).toBeGreaterThanOrEqual(0);
+        expect(parentEntityIdOfChild).toEqual(events[i].process.entity_id);
       }
     });
 
     it('with a corresponding alert at the end', () => {
+      let previousProcessEventIndex = events.length - 2;
+      for (
+        ;
+        previousProcessEventIndex >= -1 &&
+        (events[previousProcessEventIndex].event.kind !== 'event' ||
+          events[previousProcessEventIndex].event.category !== 'process');
+        previousProcessEventIndex--
+      ) {
+        // related event - skip it
+      }
+      expect(previousProcessEventIndex).toBeGreaterThanOrEqual(0);
       // The alert should be last and have the same entity_id as the previous process event
       expect(events[events.length - 1].process.entity_id).toEqual(
-        events[events.length - 2].process.entity_id
+        events[previousProcessEventIndex].process.entity_id
       );
       expect(events[events.length - 1].process.parent?.entity_id).toEqual(
-        events[events.length - 2].process.parent?.entity_id
+        events[previousProcessEventIndex].process.parent?.entity_id
       );
       expect(events[events.length - 1].event.kind).toEqual('alert');
       expect(events[events.length - 1].event.category).toEqual('malware');
@@ -153,7 +182,7 @@ describe('data generator', () => {
     const timestamp = new Date().getTime();
     const root = generator.generateEvent({ timestamp });
     const generations = 2;
-    const events = [root, ...generator.generateDescendantsTree(root, generations)];
+    const events = [root, ...generator.descendantsTreeGenerator(root, generations)];
     const rootNode = buildResolverTree(events);
     const visitedEvents = countResolverEvents(rootNode, generations);
     expect(visitedEvents).toEqual(events.length);
@@ -162,7 +191,7 @@ describe('data generator', () => {
   it('creates full resolver tree', () => {
     const alertAncestors = 3;
     const generations = 2;
-    const events = generator.generateFullResolverTree(alertAncestors, generations);
+    const events = [...generator.fullResolverTreeGenerator(alertAncestors, generations)];
     const rootNode = buildResolverTree(events);
     const visitedEvents = countResolverEvents(rootNode, alertAncestors + generations);
     expect(visitedEvents).toEqual(events.length);

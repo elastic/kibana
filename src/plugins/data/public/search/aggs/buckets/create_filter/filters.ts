@@ -18,7 +18,7 @@
  */
 
 import { get } from 'lodash';
-import { IBucketAggConfig } from '../_bucket_agg_type';
+import { IBucketAggConfig } from '../bucket_agg_type';
 import { buildQueryFilter } from '../../../../../common';
 
 export const createFilterFilters = (aggConfig: IBucketAggConfig, key: string) => {
@@ -28,6 +28,6 @@ export const createFilterFilters = (aggConfig: IBucketAggConfig, key: string) =>
   const indexPattern = aggConfig.getIndexPattern();
 
   if (filter && indexPattern && indexPattern.id) {
-    return buildQueryFilter(filter.query, indexPattern.id, key);
+    return buildQueryFilter(filter, indexPattern.id, key);
   }
 };

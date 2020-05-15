@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PolicyData, PolicyConfig } from '../../types';
+import { PolicyDetailsState, ServerApiError } from '../../types';
+import { GetAgentStatusResponse } from '../../../../../../ingest_manager/common/types/rest_spec';
+import { PolicyData, UIPolicyConfig } from '../../../../../common/types';
 
 interface ServerReturnedPolicyDetailsData {
   type: 'serverReturnedPolicyDetailsData';
@@ -13,14 +15,50 @@ interface ServerReturnedPolicyDetailsData {
   };
 }
 
+interface ServerFailedToReturnPolicyDetailsData {
+  type: 'serverFailedToReturnPolicyDetailsData';
+  payload: ServerApiError;
+}
+
 /**
  * When users change a policy via forms, this action is dispatched with a payload that modifies the configuration of a cloned policy config.
  */
 interface UserChangedPolicyConfig {
   type: 'userChangedPolicyConfig';
   payload: {
-    policyConfig: PolicyConfig;
+    policyConfig: UIPolicyConfig;
   };
 }
 
-export type PolicyDetailsAction = ServerReturnedPolicyDetailsData | UserChangedPolicyConfig;
+interface ServerReturnedPolicyDetailsAgentSummaryData {
+  type: 'serverReturnedPolicyDetailsAgentSummaryData';
+  payload: {
+    agentStatusSummary: GetAgentStatusResponse['results'];
+  };
+}
+
+interface ServerReturnedPolicyDetailsUpdateFailure {
+  type: 'serverReturnedPolicyDetailsUpdateFailure';
+  payload: PolicyDetailsState['updateStatus'];
+}
+
+interface ServerReturnedUpdatedPolicyDetailsData {
+  type: 'serverReturnedUpdatedPolicyDetailsData';
+  payload: {
+    policyItem: PolicyData;
+    updateStatus: PolicyDetailsState['updateStatus'];
+  };
+}
+
+interface UserClickedPolicyDetailsSaveButton {
+  type: 'userClickedPolicyDetailsSaveButton';
+}
+
+export type PolicyDetailsAction =
+  | ServerReturnedPolicyDetailsData
+  | UserClickedPolicyDetailsSaveButton
+  | ServerReturnedPolicyDetailsAgentSummaryData
+  | ServerReturnedPolicyDetailsUpdateFailure
+  | ServerReturnedUpdatedPolicyDetailsData
+  | ServerFailedToReturnPolicyDetailsData
+  | UserChangedPolicyConfig;

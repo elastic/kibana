@@ -22,6 +22,7 @@ import { useAgentRefresh } from '../hooks';
 import { useInput, sendRequest } from '../../../../hooks';
 import { Agent } from '../../../../types';
 import { agentRouteService } from '../../../../services';
+import { flattenMetadata, unflattenMetadata } from './helper';
 
 function useAddMetadataForm(agent: Agent, done: () => void) {
   const refreshAgent = useAgentRefresh();
@@ -66,15 +67,17 @@ function useAddMetadataForm(agent: Agent, done: () => void) {
         isLoading: true,
       });
 
+      const metadata = unflattenMetadata({
+        ...flattenMetadata(agent.user_provided_metadata),
+        [keyInput.value]: valueInput.value,
+      });
+
       try {
         const { error } = await sendRequest({
           path: agentRouteService.getUpdatePath(agent.id),
           method: 'put',
           body: JSON.stringify({
-            user_provided_metadata: {
-              ...agent.user_provided_metadata,
-              [keyInput.value]: valueInput.value,
-            },
+            user_provided_metadata: metadata,
           }),
         });
 

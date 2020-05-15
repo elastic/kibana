@@ -71,6 +71,7 @@ export class SecurityLicenseService {
         allowLogin: false,
         showLinks: false,
         showRoleMappingsManagement: false,
+        allowAccessAgreement: false,
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
         allowRbac: false,
@@ -88,6 +89,7 @@ export class SecurityLicenseService {
         allowLogin: false,
         showLinks: false,
         showRoleMappingsManagement: false,
+        allowAccessAgreement: false,
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
         allowRbac: false,
@@ -102,6 +104,7 @@ export class SecurityLicenseService {
       allowLogin: true,
       showLinks: true,
       showRoleMappingsManagement: isLicenseGoldOrBetter,
+      allowAccessAgreement: isLicenseGoldOrBetter,
       allowSubFeaturePrivileges: isLicenseGoldOrBetter,
       // Only platinum and trial licenses are compliant with field- and document-level security.
       allowRoleDocumentLevelSecurity: isLicensePlatinumOrBetter,

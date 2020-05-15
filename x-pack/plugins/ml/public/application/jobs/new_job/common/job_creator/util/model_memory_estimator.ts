@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Observable, of, Subject, Subscription } from 'rxjs';
+import { combineLatest, Observable, of, Subject, Subscription } from 'rxjs';
 import { isEqual, cloneDeep } from 'lodash';
 import {
   catchError,
@@ -16,8 +16,10 @@ import {
   switchMap,
   map,
   pairwise,
+  filter,
+  skipWhile,
 } from 'rxjs/operators';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
 import { ml } from '../../../../../services/ml_api_service';
 import { JobValidator, VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
@@ -27,7 +29,12 @@ import { JobCreator } from '../job_creator';
 
 export type CalculatePayload = Parameters<typeof ml.calculateModelMemoryLimit$>[0];
 
-export const modelMemoryEstimatorProvider = (jobValidator: JobValidator) => {
+type ModelMemoryEstimator = ReturnType<typeof modelMemoryEstimatorProvider>;
+
+export const modelMemoryEstimatorProvider = (
+  jobCreator: JobCreator,
+  jobValidator: JobValidator
+) => {
   const modelMemoryCheck$ = new Subject<CalculatePayload>();
   const error$ = new Subject<ErrorResponse['body']>();
 
@@ -36,29 +43,33 @@ export const modelMemoryEstimatorProvider = (jobValidator: JobValidator) => {
       return error$.asObservable();
     },
     get updates$(): Observable<string> {
-      return modelMemoryCheck$.pipe(
+      return combineLatest([
+        jobCreator.wizardInitialized$.pipe(
+          skipWhile(wizardInitialized => wizardInitialized === false)
+        ),
+        modelMemoryCheck$,
+      ]).pipe(
+        map(([, payload]) => payload),
         // delay the request, making sure the validation is completed
         debounceTime(VALIDATION_DELAY_MS + 100),
         // clone the object to compare payloads and proceed further only
         // if the configuration has been changed
         map(cloneDeep),
         distinctUntilChanged(isEqual),
+        // don't call the endpoint with invalid payload
+        filter(() => jobValidator.isModelMemoryEstimationPayloadValid),
         switchMap(payload => {
-          const isPayloadValid = jobValidator.isModelMemoryEstimationPayloadValid;
-
-          return isPayloadValid
-            ? ml.calculateModelMemoryLimit$(payload).pipe(
-                pluck('modelMemoryLimit'),
-                catchError(error => {
-                  // eslint-disable-next-line no-console
-                  console.error('Model memory limit could not be calculated', error.body);
-                  error$.next(error.body);
-                  return of(DEFAULT_MODEL_MEMORY_LIMIT);
-                })
-              )
-            : of(DEFAULT_MODEL_MEMORY_LIMIT);
-        }),
-        startWith(DEFAULT_MODEL_MEMORY_LIMIT)
+          return ml.calculateModelMemoryLimit$(payload).pipe(
+            pluck('modelMemoryLimit'),
+            catchError(error => {
+              // eslint-disable-next-line no-console
+              console.error('Model memory limit could not be calculated', error.body);
+              error$.next(error.body);
+              // fallback to the default in case estimation failed
+              return of(DEFAULT_MODEL_MEMORY_LIMIT);
+            })
+          );
+        })
       );
     },
     update(payload: CalculatePayload) {
@@ -78,7 +89,10 @@ export const useModelMemoryEstimator = (
   } = useMlKibana();
 
   // Initialize model memory estimator only once
-  const [modelMemoryEstimator] = useState(modelMemoryEstimatorProvider(jobValidator));
+  const modelMemoryEstimator = useMemo<ModelMemoryEstimator>(
+    () => modelMemoryEstimatorProvider(jobCreator, jobValidator),
+    []
+  );
 
   // Listen for estimation results and errors
   useEffect(() => {
@@ -86,7 +100,7 @@ export const useModelMemoryEstimator = (
 
     subscription.add(
       modelMemoryEstimator.updates$
-        .pipe(pairwise())
+        .pipe(startWith(jobCreator.modelMemoryLimit), pairwise())
         .subscribe(([previousEstimation, currentEstimation]) => {
           // to make sure we don't overwrite a manual input
           if (

@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
   EuiHorizontalRule,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -26,14 +25,27 @@ const PolicyDetailCard = styled.div`
   }
 `;
 export const ConfigForm: React.FC<{
+  /**
+   * A subtitle for this component.
+   **/
   type: string;
-  supportedOss: string[];
+  /**
+   * Types of supported operating systems.
+   */
+  supportedOss: React.ReactNode;
   children: React.ReactNode;
-  id: string;
-  selectedEventing: number;
-  totalEventing: number;
-}> = React.memo(({ type, supportedOss, children, id, selectedEventing, totalEventing }) => {
-  const typeTitle = () => {
+  /**
+   * A description for the component.
+   */
+  description: string;
+  /**
+   * The `data-test-subj` attribute to append to a certain child element.
+   */
+  dataTestSubj: string;
+  /** React Node to be put on the right corner of the card */
+  rightCorner: React.ReactNode;
+}> = React.memo(({ type, supportedOss, children, dataTestSubj, rightCorner, description }) => {
+  const typeTitle = useMemo(() => {
     return (
       <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
         <EuiFlexGroup direction="column" gutterSize="none">
@@ -60,51 +72,25 @@ export const ConfigForm: React.FC<{
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem className="policyDetailTitleFlexItem">
-            <EuiText>{supportedOss.join(', ')}</EuiText>
+            <EuiText>{supportedOss}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued">
-            <FormattedMessage
-              id="xpack.endpoint.policy.details.eventCollectionsEnabled"
-              defaultMessage="{selectedEventing} / {totalEventing} event collections enabled"
-              values={{ selectedEventing, totalEventing }}
-            />
-          </EuiText>
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{rightCorner}</EuiFlexItem>
       </EuiFlexGroup>
     );
-  };
-
-  const events = () => {
-    return (
-      <EuiTitle size="xxs">
-        <h5>
-          <FormattedMessage
-            id="xpack.endpoint.policyDetailsConfig.eventingEvents"
-            defaultMessage="Events"
-          />
-        </h5>
-      </EuiTitle>
-    );
-  };
+  }, [rightCorner, supportedOss, type]);
 
   return (
     <PolicyDetailCard>
       <EuiCard
-        data-test-subj={id}
+        description={description}
+        data-test-subj={dataTestSubj}
         textAlign="left"
-        title={typeTitle()}
-        description=""
-        children={
-          <>
-            <EuiHorizontalRule margin="m" />
-            {events()}
-            <EuiSpacer size="s" />
-            {children}
-          </>
-        }
-      />
+        title={typeTitle}
+      >
+        <EuiHorizontalRule margin="m" />
+        {children}
+      </EuiCard>
     </PolicyDetailCard>
   );
 });

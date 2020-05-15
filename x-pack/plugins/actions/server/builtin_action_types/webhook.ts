@@ -160,7 +160,7 @@ export async function executor(
 }
 
 // Action Executor Result w/ internationalisation
-function successResult(actionId: string, data: any): ActionTypeExecutorResult {
+function successResult(actionId: string, data: unknown): ActionTypeExecutorResult {
   return { status: 'ok', data, actionId };
 }
 

@@ -6,13 +6,13 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  EmbeddableFactory,
   IContainer,
   EmbeddableInput,
+  EmbeddableFactoryDefinition,
 } from '../../../../../../src/plugins/embeddable/public';
 import { ResolverEmbeddable } from './embeddable';
 
-export class ResolverEmbeddableFactory extends EmbeddableFactory {
+export class ResolverEmbeddableFactory implements EmbeddableFactoryDefinition {
   public readonly type = 'resolver';
 
   public async isEditable() {

@@ -22,6 +22,17 @@ import { MetricAggType } from './metric_agg_type';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
 import { METRIC_TYPES } from './metric_agg_types';
+import { AggConfigSerialized, BaseAggParams } from '../types';
+import { GetInternalStartServicesFn } from '../../../types';
+
+export interface AggParamsBucketSum extends BaseAggParams {
+  customMetric?: AggConfigSerialized;
+  customBucket?: AggConfigSerialized;
+}
+
+export interface BucketSumMetricAggDependencies {
+  getInternalStartServices: GetInternalStartServicesFn;
+}
 
 const overallSumLabel = i18n.translate('data.search.aggs.metrics.overallSumLabel', {
   defaultMessage: 'overall sum',
@@ -31,11 +42,20 @@ const sumBucketTitle = i18n.translate('data.search.aggs.metrics.sumBucketTitle',
   defaultMessage: 'Sum Bucket',
 });
 
-export const bucketSumMetricAgg = new MetricAggType({
-  name: METRIC_TYPES.SUM_BUCKET,
-  title: sumBucketTitle,
-  makeLabel: agg => makeNestedLabel(agg, overallSumLabel),
-  subtype: siblingPipelineAggHelper.subtype,
-  params: [...siblingPipelineAggHelper.params()],
-  getFormat: siblingPipelineAggHelper.getFormat,
-});
+export const getBucketSumMetricAgg = ({
+  getInternalStartServices,
+}: BucketSumMetricAggDependencies) => {
+  return new MetricAggType(
+    {
+      name: METRIC_TYPES.SUM_BUCKET,
+      title: sumBucketTitle,
+      makeLabel: agg => makeNestedLabel(agg, overallSumLabel),
+      subtype: siblingPipelineAggHelper.subtype,
+      params: [...siblingPipelineAggHelper.params()],
+      getFormat: siblingPipelineAggHelper.getFormat,
+    },
+    {
+      getInternalStartServices,
+    }
+  );
+};

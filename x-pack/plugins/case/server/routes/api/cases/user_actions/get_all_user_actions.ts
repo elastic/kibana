@@ -10,11 +10,12 @@ import { CaseUserActionsResponseRt } from '../../../../../common/api';
 import { CASE_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../../../saved_object_types';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
+import { CASE_USER_ACTIONS_URL } from '../../../../../common/constants';
 
 export function initGetAllUserActionsApi({ userActionService, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases/{case_id}/user_actions',
+      path: CASE_USER_ACTIONS_URL,
       validate: {
         params: schema.object({
           case_id: schema.string(),

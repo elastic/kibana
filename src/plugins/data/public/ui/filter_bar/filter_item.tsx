@@ -88,6 +88,7 @@ class FilterItemUI extends Component<Props, State> {
     const dataTestSubjDisabled = `filter-${
       this.props.filter.meta.disabled ? 'disabled' : 'enabled'
     }`;
+    const dataTestSubjPinned = `filter-${isFilterPinned(filter) ? 'pinned' : 'unpinned'}`;
 
     const classes = classNames(
       'globalFilterItem',
@@ -107,7 +108,7 @@ class FilterItemUI extends Component<Props, State> {
         className={classes}
         iconOnClick={() => this.props.onRemove()}
         onClick={this.handleBadgeClick}
-        data-test-subj={`filter ${dataTestSubjDisabled} ${dataTestSubjKey} ${dataTestSubjValue}`}
+        data-test-subj={`filter ${dataTestSubjDisabled} ${dataTestSubjKey} ${dataTestSubjValue} ${dataTestSubjPinned}`}
       />
     );
 

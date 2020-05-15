@@ -32,6 +32,7 @@ export class PopulationJobCreator extends JobCreator {
   ) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.POPULATION;
+    this._wizardInitialized$.next(true);
   }
 
   // add a by field to a specific detector

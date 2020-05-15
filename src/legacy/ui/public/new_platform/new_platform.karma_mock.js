@@ -88,6 +88,9 @@ const mockCoreStart = {
       get: sinon.fake.returns(''),
     },
   },
+  notifications: {
+    toasts: {},
+  },
   i18n: {},
   overlays: {},
   savedObjects: {
@@ -164,8 +167,11 @@ const mockAggTypesRegistry = () => {
   const registrySetup = registry.setup();
   const aggTypes = getAggTypes({
     uiSettings: mockCoreSetup.uiSettings,
-    notifications: mockCoreStart.notifications,
     query: querySetup,
+    getInternalStartServices: () => ({
+      fieldFormats: getFieldFormatsRegistry(mockCoreStart),
+      notifications: mockCoreStart.notifications,
+    }),
   });
   aggTypes.buckets.forEach(type => registrySetup.registerBucket(type));
   aggTypes.metrics.forEach(type => registrySetup.registerMetric(type));
@@ -236,6 +242,7 @@ export const npSetup = {
     },
     kibanaLegacy: {
       registerLegacyApp: () => {},
+      registerLegacyAppAlias: () => {},
       forwardApp: () => {},
       config: {
         defaultAppId: 'home',
@@ -284,6 +291,10 @@ export const npSetup = {
         }),
       },
     },
+    indexPatternManagement: {
+      list: { addListConfig: sinon.fake() },
+      creation: { addCreationConfig: sinon.fake() },
+    },
     discover: {
       docViews: {
         addDocView: sinon.fake(),
@@ -298,6 +309,12 @@ export const npSetup = {
       createReactVisualization: sinon.fake(),
       registerAlias: sinon.fake(),
       hideTypes: sinon.fake(),
+    },
+
+    mapsLegacy: {
+      serviceSettings: sinon.fake(),
+      getPrecision: sinon.fake(),
+      getZoomPrecision: sinon.fake(),
     },
   },
 };
@@ -319,6 +336,17 @@ export const npStart = {
         }),
       },
     },
+    indexPatternManagement: {
+      list: {
+        getType: sinon.fake(),
+        getIndexPatternCreationOptions: sinon.fake(),
+      },
+      creation: {
+        getIndexPatternTags: sinon.fake(),
+        getFieldInfo: sinon.fake(),
+        areScriptedFieldsEnabled: sinon.fake(),
+      },
+    },
     embeddable: {
       getEmbeddableFactory: sinon.fake(),
       getEmbeddableFactories: sinon.fake(),
@@ -329,12 +357,10 @@ export const npStart = {
       registerRenderer: sinon.fake(),
       registerType: sinon.fake(),
     },
-    devTools: {
-      getSortedDevTools: () => [],
-    },
     kibanaLegacy: {
       getApps: () => [],
       getForwards: () => [],
+      getLegacyAppAliases: () => [],
       config: {
         defaultAppId: 'home',
       },
@@ -348,7 +374,8 @@ export const npStart = {
     },
     data: {
       actions: {
-        createFiltersFromEvent: Promise.resolve(['yes']),
+        createFiltersFromValueClickAction: Promise.resolve(['yes']),
+        createFiltersFromRangeSelectAction: sinon.fake(),
       },
       autocomplete: {
         getProvider: sinon.fake(),
@@ -426,21 +453,12 @@ export const npStart = {
           createAggConfigs: (indexPattern, configStates = []) => {
             return new AggConfigs(indexPattern, configStates, {
               typesRegistry: aggTypesRegistry.start(),
+              fieldFormats: getFieldFormatsRegistry(mockCoreStart),
             });
           },
           types: aggTypesRegistry.start(),
         },
         __LEGACY: {
-          AggConfig: sinon.fake(),
-          AggType: sinon.fake(),
-          aggTypeFieldFilters: {
-            addFilter: sinon.fake(),
-            filter: sinon.fake(),
-          },
-          FieldParamType: sinon.fake(),
-          MetricAggType: sinon.fake(),
-          parentPipelineAggHelper: sinon.fake(),
-          siblingPipelineAggHelper: sinon.fake(),
           esClient: {
             search: sinon.fake(),
             msearch: sinon.fake(),
@@ -494,6 +512,7 @@ export const npStart = {
       docViews: {
         DocViewer: () => null,
       },
+      savedSearchLoader: {},
     },
   },
 };

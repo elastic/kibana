@@ -17,13 +17,14 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock, notificationServiceMock } from '../../../../../../../src/core/public/mocks';
 import { AggTypesRegistry, AggTypesRegistryStart } from '../agg_types_registry';
 import { getAggTypes } from '../agg_types';
-import { BucketAggType } from '../buckets/_bucket_agg_type';
+import { BucketAggType } from '../buckets/bucket_agg_type';
 import { MetricAggType } from '../metrics/metric_agg_type';
 import { queryServiceMock } from '../../../query/mocks';
+import { fieldFormatsServiceMock } from '../../../field_formats/mocks';
+import { InternalStartServices } from '../../../types';
 
 /**
  * Testing utility which creates a new instance of AggTypesRegistry,
@@ -52,11 +53,19 @@ export function mockAggTypesRegistry<T extends BucketAggType<any> | MetricAggTyp
       }
     });
   } else {
-    const core = coreMock.createSetup();
+    const coreSetup = coreMock.createSetup();
+    const coreStart = coreMock.createStart();
+
     const aggTypes = getAggTypes({
-      uiSettings: core.uiSettings,
-      notifications: core.notifications,
+      uiSettings: coreSetup.uiSettings,
       query: queryServiceMock.createSetupContract(),
+      getInternalStartServices: () =>
+        (({
+          fieldFormats: fieldFormatsServiceMock.createStartContract(),
+          notifications: notificationServiceMock.createStartContract(),
+          uiSettings: coreStart.uiSettings,
+          injectedMetadata: coreStart.injectedMetadata,
+        } as unknown) as InternalStartServices),
     });
 
     aggTypes.buckets.forEach(type => registrySetup.registerBucket(type));

@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-import { VisualizeConstants } from '../../../../src/legacy/core_plugins/kibana/public/visualize/np_ready/visualize_constants';
+import { VisualizeConstants } from '../../../../src/plugins/visualize/public/application/visualize_constants';
 
 export default function({ getService, getPageObjects }) {
   const retry = getService('retry');
@@ -48,7 +48,8 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visualize.clickAreaChart();
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.visualize.saveVisualizationExpectSuccess(
-          'visualization from top nav add new panel'
+          'visualization from top nav add new panel',
+          { redirectToOrigin: true }
         );
         await retry.try(async () => {
           const panelCount = await PageObjects.dashboard.getPanelCount();
@@ -64,7 +65,8 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visualize.clickAreaChart();
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.visualize.saveVisualizationExpectSuccess(
-          'visualization from add new link'
+          'visualization from add new link',
+          { redirectToOrigin: true }
         );
 
         await retry.try(async () => {

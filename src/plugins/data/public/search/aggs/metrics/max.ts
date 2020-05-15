@@ -21,25 +21,42 @@ import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
+import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
 const maxTitle = i18n.translate('data.search.aggs.metrics.maxTitle', {
   defaultMessage: 'Max',
 });
 
-export const maxMetricAgg = new MetricAggType({
-  name: METRIC_TYPES.MAX,
-  title: maxTitle,
-  makeLabel(aggConfig) {
-    return i18n.translate('data.search.aggs.metrics.maxLabel', {
-      defaultMessage: 'Max {field}',
-      values: { field: aggConfig.getFieldDisplayName() },
-    });
-  },
-  params: [
+export interface AggParamsMax extends BaseAggParams {
+  field: string;
+}
+
+export interface MaxMetricAggDependencies {
+  getInternalStartServices: GetInternalStartServicesFn;
+}
+
+export const getMaxMetricAgg = ({ getInternalStartServices }: MaxMetricAggDependencies) => {
+  return new MetricAggType(
     {
-      name: 'field',
-      type: 'field',
-      filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.DATE],
+      name: METRIC_TYPES.MAX,
+      title: maxTitle,
+      makeLabel(aggConfig) {
+        return i18n.translate('data.search.aggs.metrics.maxLabel', {
+          defaultMessage: 'Max {field}',
+          values: { field: aggConfig.getFieldDisplayName() },
+        });
+      },
+      params: [
+        {
+          name: 'field',
+          type: 'field',
+          filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.DATE],
+        },
+      ],
     },
-  ],
-});
+    {
+      getInternalStartServices,
+    }
+  );
+};

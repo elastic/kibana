@@ -22,12 +22,19 @@
  * (the shape of the mappings and documents in the index).
  */
 
-import { Logger } from 'src/core/server/logging';
 import { KibanaConfigType } from 'src/core/server/kibana_config';
+import { BehaviorSubject } from 'rxjs';
+import { Logger } from '../../../logging';
 import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings';
 import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
 import { docValidator, PropertyValidators } from '../../validation';
-import { buildActiveMappings, CallCluster, IndexMigrator } from '../core';
+import {
+  buildActiveMappings,
+  CallCluster,
+  IndexMigrator,
+  MigrationResult,
+  MigrationStatus,
+} from '../core';
 import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
 import { createIndexMap } from '../core/build_index_map';
 import { SavedObjectsMigrationConfigType } from '../../saved_objects_config';
@@ -46,6 +53,11 @@ export interface KibanaMigratorOptions {
 
 export type IKibanaMigrator = Pick<KibanaMigrator, keyof KibanaMigrator>;
 
+export interface KibanaMigratorStatus {
+  status: MigrationStatus;
+  result?: MigrationResult[];
+}
+
 /**
  * Manages the shape of mappings and documents in the Kibana index.
  */
@@ -58,7 +70,10 @@ export class KibanaMigrator {
   private readonly mappingProperties: SavedObjectsTypeMappingDefinitions;
   private readonly typeRegistry: ISavedObjectTypeRegistry;
   private readonly serializer: SavedObjectsSerializer;
-  private migrationResult?: Promise<Array<{ status: string }>>;
+  private migrationResult?: Promise<MigrationResult[]>;
+  private readonly status$ = new BehaviorSubject<KibanaMigratorStatus>({
+    status: 'waiting',
+  });
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -109,10 +124,18 @@ export class KibanaMigrator {
     Array<{ status: string }>
   > {
     if (this.migrationResult === undefined || rerun) {
-      this.migrationResult = this.runMigrationsInternal();
+      this.status$.next({ status: 'running' });
+      this.migrationResult = this.runMigrationsInternal().then(result => {
+        this.status$.next({ status: 'completed', result });
+        return result;
+      });
     }
 
     return this.migrationResult;
+  }
+
+  public getStatus$() {
+    return this.status$.asObservable();
   }
 
   private runMigrationsInternal() {

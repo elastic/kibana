@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { Assign } from '@kbn/utility-types';
 
-import { AggConfig, AggConfigOptions, IAggConfig } from './agg_config';
+import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import { IAggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
@@ -28,6 +28,7 @@ import { IndexPattern } from '../../index_patterns';
 import { ISearchSource } from '../search_source';
 import { FetchOptions } from '../fetch';
 import { TimeRange } from '../../../common';
+import { FieldFormatsStart } from '../../field_formats';
 
 function removeParentAggs(obj: any) {
   for (const prop in obj) {
@@ -47,9 +48,10 @@ function parseParentAggs(dslLvlCursor: any, dsl: any) {
 
 export interface AggConfigsOptions {
   typesRegistry: AggTypesRegistryStart;
+  fieldFormats: FieldFormatsStart;
 }
 
-export type CreateAggConfigParams = Assign<AggConfigOptions, { type: string | IAggType }>;
+export type CreateAggConfigParams = Assign<AggConfigSerialized, { type: string | IAggType }>;
 
 /**
  * @name AggConfigs
@@ -68,6 +70,7 @@ export type IAggConfigs = AggConfigs;
 export class AggConfigs {
   public indexPattern: IndexPattern;
   public timeRange?: TimeRange;
+  private readonly fieldFormats: FieldFormatsStart;
   private readonly typesRegistry: AggTypesRegistryStart;
 
   aggs: IAggConfig[];
@@ -83,6 +86,7 @@ export class AggConfigs {
 
     this.aggs = [];
     this.indexPattern = indexPattern;
+    this.fieldFormats = opts.fieldFormats;
 
     configStates.forEach((params: any) => this.createAggConfig(params));
   }
@@ -113,6 +117,7 @@ export class AggConfigs {
 
     const aggConfigs = new AggConfigs(this.indexPattern, this.aggs.filter(filterAggs), {
       typesRegistry: this.typesRegistry,
+      fieldFormats: this.fieldFormats,
     });
 
     return aggConfigs;
@@ -129,10 +134,14 @@ export class AggConfigs {
       aggConfig = params;
       params.parent = this;
     } else {
-      aggConfig = new AggConfig(this, {
-        ...params,
-        type: typeof type === 'string' ? this.typesRegistry.get(type) : type,
-      });
+      aggConfig = new AggConfig(
+        this,
+        {
+          ...params,
+          type: typeof type === 'string' ? this.typesRegistry.get(type) : type,
+        },
+        { fieldFormats: this.fieldFormats }
+      );
     }
 
     if (addToAggConfigs) {

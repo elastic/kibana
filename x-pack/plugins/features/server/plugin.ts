@@ -11,9 +11,9 @@ import {
   RecursiveReadonly,
 } from '../../../../src/core/server';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
-import { deepFreeze } from '../../../../src/core/utils';
+import { deepFreeze } from '../../../../src/core/server';
 import { XPackInfo } from '../../../legacy/plugins/xpack_main/server/lib/xpack_info';
-import { PluginSetupContract as TimelionSetupContract } from '../../../../src/plugins/timelion/server';
+import { PluginSetupContract as TimelionSetupContract } from '../../../../src/plugins/vis_type_timelion/server';
 import { FeatureRegistry } from './feature_registry';
 import { Feature, FeatureConfig } from '../common/feature';
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
@@ -65,7 +65,7 @@ export class Plugin {
 
   public async setup(
     core: CoreSetup,
-    { timelion }: { timelion?: TimelionSetupContract }
+    { visTypeTimelion }: { visTypeTimelion?: TimelionSetupContract }
   ): Promise<RecursiveReadonly<PluginSetupContract>> {
     defineRoutes({
       router: core.http.createRouter(),
@@ -84,7 +84,7 @@ export class Plugin {
         // Register OSS features.
         for (const feature of buildOSSFeatures({
           savedObjectTypes: this.legacyAPI.savedObjectTypes,
-          includeTimelion: timelion !== undefined && timelion.uiEnabled,
+          includeTimelion: visTypeTimelion !== undefined && visTypeTimelion.uiEnabled,
         })) {
           this.featureRegistry.register(feature);
         }

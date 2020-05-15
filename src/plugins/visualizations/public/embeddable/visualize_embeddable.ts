@@ -33,8 +33,7 @@ import {
   EmbeddableInput,
   EmbeddableOutput,
   Embeddable,
-  Container,
-  EmbeddableVisTriggerContext,
+  IContainer,
 } from '../../../../plugins/embeddable/public';
 import { dispatchRenderComplete } from '../../../../plugins/kibana_utils/public';
 import { IExpressionLoaderParams, ExpressionsStart } from '../../../../plugins/expressions/public';
@@ -42,14 +41,17 @@ import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
+import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
   indexPatterns?: IIndexPattern[];
+  editPath: string;
   editUrl: string;
   editable: boolean;
+  deps: VisualizeEmbeddableFactoryDeps;
 }
 
 export interface VisualizeInput extends EmbeddableInput {
@@ -59,15 +61,20 @@ export interface VisualizeInput extends EmbeddableInput {
   vis?: {
     colors?: { [key: string]: string };
   };
+  table?: unknown;
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
+  editPath: string;
+  editApp: string;
   editUrl: string;
   indexPatterns?: IIndexPattern[];
   visTypeName: string;
 }
 
 type ExpressionLoader = InstanceType<ExpressionsStart['ExpressionLoader']>;
+
+const visTypesWithoutInspector = ['markdown', 'input_control_vis', 'metrics', 'vega', 'timelion'];
 
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private handler?: ExpressionLoader;
@@ -76,7 +83,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private query?: Query;
   private title?: string;
   private filters?: Filter[];
-  private visCustomizations: VisualizeInput['vis'];
+  private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
   private expression: string = '';
   private vis: Vis;
@@ -84,17 +91,20 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
   private autoRefreshFetchSubscription: Subscription;
   private abortController?: AbortController;
+  private readonly deps: VisualizeEmbeddableFactoryDeps;
 
   constructor(
     timefilter: TimefilterContract,
-    { vis, editUrl, indexPatterns, editable }: VisualizeEmbeddableConfiguration,
+    { vis, editPath, editUrl, indexPatterns, editable, deps }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
-    parent?: Container
+    parent?: IContainer
   ) {
     super(
       initialInput,
       {
         defaultTitle: vis.title,
+        editPath,
+        editApp: 'visualize',
         editUrl,
         indexPatterns,
         editable,
@@ -102,9 +112,11 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       },
       parent
     );
+    this.deps = deps;
     this.timefilter = timefilter;
     this.vis = vis;
     this.vis.uiState.on('change', this.uiStateChangeHandler);
+    this.vis.uiState.on('reload', this.reload);
 
     this.autoRefreshFetchSubscription = timefilter
       .getAutoRefreshFetch$()
@@ -116,22 +128,26 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       })
     );
   }
-
   public getVisualizationDescription() {
     return this.vis.description;
   }
 
   public getInspectorAdapters = () => {
-    if (!this.handler) {
+    if (!this.handler || visTypesWithoutInspector.includes(this.vis.type.name)) {
       return undefined;
     }
     return this.handler.inspect();
   };
 
   public openInspector = () => {
-    if (this.handler) {
-      return this.handler.openInspector(this.getTitle() || '');
-    }
+    if (!this.handler) return;
+
+    const adapters = this.handler.inspect();
+    if (!adapters) return;
+
+    return this.deps.start().plugins.inspector.open(adapters, {
+      title: this.getTitle() || '',
+    });
   };
 
   /**
@@ -142,17 +158,22 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     // Check for changes that need to be forwarded to the uiState
     // Since the vis has an own listener on the uiState we don't need to
     // pass anything from here to the handler.update method
-    const visCustomizations = this.input.vis;
-    if (visCustomizations) {
+    const visCustomizations = { vis: this.input.vis, table: this.input.table };
+    if (visCustomizations.vis || visCustomizations.table) {
       if (!_.isEqual(visCustomizations, this.visCustomizations)) {
         this.visCustomizations = visCustomizations;
         // Turn this off or the uiStateChangeHandler will fire for every modification.
         this.vis.uiState.off('change', this.uiStateChangeHandler);
         this.vis.uiState.clearAllKeys();
-        this.vis.uiState.set('vis', visCustomizations);
-        getKeys(visCustomizations).forEach(key => {
-          this.vis.uiState.set(key, visCustomizations[key]);
-        });
+        if (visCustomizations.vis) {
+          this.vis.uiState.set('vis', visCustomizations.vis);
+          getKeys(visCustomizations).forEach(key => {
+            this.vis.uiState.set(key, visCustomizations[key]);
+          });
+        }
+        if (visCustomizations.table) {
+          this.vis.uiState.set('table', visCustomizations.table);
+        }
         this.vis.uiState.on('change', this.uiStateChangeHandler);
       }
     } else if (this.parent) {
@@ -201,19 +222,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
   // this is a hack to make editor still work, will be removed once we clean up editor
   // @ts-ignore
-  hasInspector = () => {
-    const visTypesWithoutInspector = [
-      'markdown',
-      'input_control_vis',
-      'metrics',
-      'vega',
-      'timelion',
-    ];
-    if (visTypesWithoutInspector.includes(this.vis.type.name)) {
-      return false;
-    }
-    return this.getInspectorAdapters();
-  };
+  hasInspector = () => Boolean(this.getInspectorAdapters());
 
   /**
    *
@@ -253,11 +262,11 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         if (!this.input.disableTriggers) {
           const triggerId =
             event.name === 'brush' ? VIS_EVENT_TO_TRIGGER.brush : VIS_EVENT_TO_TRIGGER.filter;
-          const context: EmbeddableVisTriggerContext = {
+          const context = {
             embeddable: this,
-            timeFieldName: this.vis.data.indexPattern!.timeFieldName!,
-            data: event.data,
+            data: { timeFieldName: this.vis.data.indexPattern?.timeFieldName!, ...event.data },
           };
+
           getUiActions()
             .getTrigger(triggerId)
             .exec(context);
@@ -299,6 +308,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     super.destroy();
     this.subscriptions.forEach(s => s.unsubscribe());
     this.vis.uiState.off('change', this.uiStateChangeHandler);
+    this.vis.uiState.off('reload', this.reload);
 
     if (this.handler) {
       this.handler.destroy();
@@ -324,13 +334,14 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       this.abortController.abort();
     }
     this.abortController = new AbortController();
+    const abortController = this.abortController;
     this.expression = await buildPipeline(this.vis, {
       timefilter: this.timefilter,
       timeRange: this.timeRange,
       abortSignal: this.abortController!.signal,
     });
 
-    if (this.handler) {
+    if (this.handler && !abortController.signal.aborted) {
       this.handler.update(this.expression, expressionParams);
     }
   }

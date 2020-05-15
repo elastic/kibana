@@ -17,19 +17,29 @@ export interface DatasourceConfigRecordEntry {
 
 export type DatasourceConfigRecord = Record<string, DatasourceConfigRecordEntry>;
 
-export interface DatasourceInputStream {
+export interface NewDatasourceInputStream {
   id: string;
   enabled: boolean;
   dataset: string;
   processors?: string[];
   config?: DatasourceConfigRecord;
+  vars?: DatasourceConfigRecord;
 }
 
-export interface DatasourceInput {
+export interface DatasourceInputStream extends NewDatasourceInputStream {
+  agent_stream?: any;
+}
+
+export interface NewDatasourceInput {
   type: string;
   enabled: boolean;
   processors?: string[];
   config?: DatasourceConfigRecord;
+  vars?: DatasourceConfigRecord;
+  streams: NewDatasourceInputStream[];
+}
+
+export interface DatasourceInput extends Omit<NewDatasourceInput, 'streams'> {
   streams: DatasourceInputStream[];
 }
 
@@ -41,10 +51,15 @@ export interface NewDatasource {
   enabled: boolean;
   package?: DatasourcePackage;
   output_id: string;
-  inputs: DatasourceInput[];
+  inputs: NewDatasourceInput[];
 }
 
-export type Datasource = NewDatasource & {
+export interface Datasource extends Omit<NewDatasource, 'inputs'> {
   id: string;
+  inputs: DatasourceInput[];
   revision: number;
-};
+  updated_at: string;
+  updated_by: string;
+  created_at: string;
+  created_by: string;
+}

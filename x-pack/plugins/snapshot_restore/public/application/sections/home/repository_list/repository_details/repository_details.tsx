@@ -25,6 +25,8 @@ import {
 
 import 'brace/theme/textmate';
 
+import { SectionError, Error } from '../../../../../shared_imports';
+
 import { useServices } from '../../../../app_context';
 import { documentationLinksService } from '../../../../services/documentation';
 import {
@@ -35,7 +37,8 @@ import {
 import { textService } from '../../../../services/text';
 import { linkToSnapshots, linkToEditRepository } from '../../../../services/navigation';
 
-import { REPOSITORY_TYPES } from '../../../../../../common/constants';
+import { REPOSITORY_TYPES } from '../../../../../../common';
+
 import {
   Repository,
   RepositoryVerification,
@@ -43,10 +46,8 @@ import {
 } from '../../../../../../common/types';
 import {
   RepositoryDeleteProvider,
-  SectionError,
   SectionLoading,
   RepositoryVerificationBadge,
-  Error,
 } from '../../../../components';
 import { TypeDetails } from './type_details';
 

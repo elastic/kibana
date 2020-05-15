@@ -5,24 +5,32 @@
  */
 
 import { getRandomString, getRandomNumber } from '../../../../test_utils';
-import { Template } from '../../common/types';
+import { TemplateDeserialized, DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT } from '../../common';
 
 export const getTemplate = ({
   name = getRandomString(),
   version = getRandomNumber(),
   order = getRandomNumber(),
   indexPatterns = [],
-  settings,
-  aliases,
-  mappings,
+  template: { settings, aliases, mappings } = {},
   isManaged = false,
-}: Partial<Template> = {}): Template => ({
+  templateFormatVersion = DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT,
+}: Partial<
+  TemplateDeserialized & {
+    templateFormatVersion?: 1 | 2;
+  }
+> = {}): TemplateDeserialized => ({
   name,
   version,
   order,
   indexPatterns,
-  settings,
-  aliases,
-  mappings,
+  template: {
+    aliases,
+    mappings,
+    settings,
+  },
   isManaged,
+  _kbnMeta: {
+    formatVersion: templateFormatVersion,
+  },
 });

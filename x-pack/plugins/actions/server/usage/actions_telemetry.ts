@@ -55,6 +55,8 @@ export async function getTotalCount(callCluster: APICaller, kibanaIndex: string)
       0
     ),
     countByType: Object.keys(searchResult.aggregations.byActionTypeId.value.types).reduce(
+      // ES DSL aggregations are returned as `any` by callCluster
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (obj: any, key: string) => ({
         ...obj,
         [key.replace('.', '__')]: searchResult.aggregations.byActionTypeId.value.types[key],

@@ -9,8 +9,8 @@ import { EuiCallOut, EuiConfirmModal, EuiOverlayMask, EuiSpacer } from '@elastic
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useCore, sendRequest, sendDeleteDatasource, useConfig } from '../../../hooks';
-import { AGENT_API_ROUTES } from '../../../../../../common/constants';
-import { AgentConfig } from '../../../../../../common/types/models';
+import { AGENT_API_ROUTES, AGENT_SAVED_OBJECT_TYPE } from '../../../constants';
+import { AgentConfig } from '../../../types';
 
 interface Props {
   agentConfig: AgentConfig;
@@ -51,7 +51,7 @@ export const DatasourceDeleteProvider: React.FunctionComponent<Props> = ({
         query: {
           page: 1,
           perPage: 1,
-          kuery: `agents.config_id : ${agentConfig.id}`,
+          kuery: `${AGENT_SAVED_OBJECT_TYPE}.config_id : ${agentConfig.id}`,
         },
       });
       setAgentsCount(data?.total || 0);

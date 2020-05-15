@@ -36,14 +36,14 @@ const metricAggFilter = [
   '!geo_centroid',
 ];
 
-const parentPipelineType = i18n.translate(
+export const parentPipelineType = i18n.translate(
   'data.search.aggs.metrics.parentPipelineAggregationsSubtypeTitle',
   {
     defaultMessage: 'Parent Pipeline Aggregations',
   }
 );
 
-const parentPipelineAggHelper = {
+export const parentPipelineAggHelper = {
   subtype: parentPipelineType,
   params() {
     return [
@@ -56,13 +56,9 @@ const parentPipelineAggHelper = {
         name: 'customMetric',
         type: 'agg',
         allowedAggs: metricAggFilter,
-        makeAgg(termsAgg, state: any) {
-          state = state || { type: 'count' };
-
+        makeAgg(termsAgg, state = { type: 'count' }) {
           const metricAgg = termsAgg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
-
           metricAgg.id = termsAgg.id + '-metric';
-
           return metricAgg;
         },
         modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart(
@@ -89,5 +85,3 @@ const parentPipelineAggHelper = {
     return subAgg ? subAgg.type.getFormat(subAgg) : new (FieldFormat.from(identity))();
   },
 };
-
-export { parentPipelineAggHelper, parentPipelineType };

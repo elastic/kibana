@@ -19,21 +19,40 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { Assign, Ensure } from '@kbn/utility-types';
+import { ExpressionAstFunction, ExpressionAstArgument } from 'src/plugins/expressions/public';
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
 import { IAggConfigs } from './agg_configs';
 import { FetchOptions } from '../fetch';
 import { ISearchSource } from '../search_source';
 import { FieldFormatsContentType, KBN_FIELD_TYPES } from '../../../common';
-import { getFieldFormats } from '../../../public/services';
+import { FieldFormatsStart } from '../../field_formats';
 
-export interface AggConfigOptions {
-  type: IAggType;
-  enabled?: boolean;
-  id?: string;
-  params?: Record<string, any>;
-  schema?: string;
+type State = string | number | boolean | null | undefined | SerializableState;
+
+/** @internal **/
+export interface SerializableState {
+  [key: string]: State | State[];
 }
+
+/** @internal **/
+export type AggConfigSerialized = Ensure<
+  {
+    type: string;
+    enabled?: boolean;
+    id?: string;
+    params?: SerializableState;
+    schema?: string;
+  },
+  SerializableState
+>;
+
+export interface AggConfigDependencies {
+  fieldFormats: FieldFormatsStart;
+}
+
+export type AggConfigOptions = Assign<AggConfigSerialized, { type: IAggType }>;
 
 /**
  * @name AggConfig
@@ -93,8 +112,13 @@ export class AggConfig {
   private __type: IAggType;
   private __typeDecorations: any;
   private subAggs: AggConfig[] = [];
+  private readonly fieldFormats: FieldFormatsStart;
 
-  constructor(aggConfigs: IAggConfigs, opts: AggConfigOptions) {
+  constructor(
+    aggConfigs: IAggConfigs,
+    opts: AggConfigOptions,
+    { fieldFormats }: AggConfigDependencies
+  ) {
     this.aggConfigs = aggConfigs;
     this.id = String(opts.id || AggConfig.nextId(aggConfigs.aggs as any));
     this.enabled = typeof opts.enabled === 'boolean' ? opts.enabled : true;
@@ -115,6 +139,8 @@ export class AggConfig {
 
     // @ts-ignore
     this.__type = this.__type;
+
+    this.fieldFormats = fieldFormats;
   }
 
   /**
@@ -246,7 +272,10 @@ export class AggConfig {
     return configDsl;
   }
 
-  toJSON() {
+  /**
+   * @returns Returns a serialized representation of an AggConfig.
+   */
+  serialize(): AggConfigSerialized {
     const params = this.params;
 
     const outParams = _.transform(
@@ -270,7 +299,64 @@ export class AggConfig {
       enabled: this.enabled,
       type: this.type && this.type.name,
       schema: this.schema,
-      params: outParams,
+      params: outParams as SerializableState,
+    };
+  }
+
+  /**
+   * @deprecated - Use serialize() instead.
+   */
+  toJSON(): AggConfigSerialized {
+    return this.serialize();
+  }
+
+  /**
+   * @returns Returns an ExpressionAst representing the function for this agg type.
+   */
+  toExpressionAst(): ExpressionAstFunction | undefined {
+    const functionName = this.type && this.type.expressionName;
+    const { type, ...rest } = this.serialize();
+    if (!functionName || !rest.params) {
+      // Return undefined - there is no matching expression function for this agg
+      return;
+    }
+
+    // Go through each of the params and convert to an array of expression args.
+    const params = Object.entries(rest.params).reduce((acc, [key, value]) => {
+      const deserializedParam = this.getAggParams().find(p => p.name === key);
+
+      if (deserializedParam && deserializedParam.toExpressionAst) {
+        // If the param provides `toExpressionAst`, we call it with the value
+        const paramExpressionAst = deserializedParam.toExpressionAst(this.getParam(key));
+        if (paramExpressionAst) {
+          acc[key] = [
+            {
+              type: 'expression',
+              chain: [paramExpressionAst],
+            },
+          ];
+        }
+      } else if (typeof value === 'object') {
+        // For object params which don't provide `toExpressionAst`, we stringify
+        acc[key] = [JSON.stringify(value)];
+      } else if (typeof value !== 'undefined') {
+        // Everything else just gets stored in an array if it is defined
+        acc[key] = [value];
+      }
+
+      return acc;
+    }, {} as Record<string, ExpressionAstArgument[]>);
+
+    return {
+      type: 'function',
+      function: functionName,
+      arguments: {
+        ...params,
+        // Expression args which are provided to all functions
+        id: [this.id],
+        enabled: [this.enabled],
+        ...(this.schema ? { schema: [this.schema] } : {}), // schema may be undefined
+      },
     };
   }
 
@@ -341,12 +427,10 @@ export class AggConfig {
   }
 
   fieldOwnFormatter(contentType?: FieldFormatsContentType, defaultFormat?: any) {
-    const fieldFormatsService = getFieldFormats();
-
     const field = this.getField();
     let format = field && field.format;
     if (!format) format = defaultFormat;
-    if (!format) format = fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.STRING);
+    if (!format) format = this.fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.STRING);
     return format.getConverterFor(contentType);
   }
 

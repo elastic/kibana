@@ -28,9 +28,8 @@ import {
 
 // @ts-ignore
 import StubIndexPattern from 'test_utils/stub_index_pattern';
-import { InvalidJSONProperty } from '../../../kibana_utils/public';
 import { coreMock } from '../../../../core/public/mocks';
-import { dataPluginMock } from '../../../../plugins/data/public/mocks';
+import { dataPluginMock, createSearchSourceMock } from '../../../../plugins/data/public/mocks';
 import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
 import { IIndexPattern } from '../../../data/common/index_patterns';
 
@@ -40,9 +39,9 @@ describe('Saved Object', () => {
   const startMock = coreMock.createStart();
   const dataStartMock = dataPluginMock.createStartContract();
   const saveOptionsMock = {} as SavedObjectSaveOpts;
+  const savedObjectsClientStub = startMock.savedObjects.client;
 
   let SavedObjectClass: new (config: SavedObjectConfig) => SavedObject;
-  const savedObjectsClientStub = startMock.savedObjects.client;
 
   /**
    * Returns a fake doc response with the given index and id, of type dashboard
@@ -99,14 +98,23 @@ describe('Saved Object', () => {
   function createInitializedSavedObject(config: SavedObjectConfig = {}) {
     const savedObject = new SavedObjectClass(config);
     savedObject.title = 'my saved object';
+
     return savedObject.init!();
   }
 
   beforeEach(() => {
-    SavedObjectClass = createSavedObjectClass({
+    SavedObjectClass = createSavedObjectClass(({
       savedObjectsClient: savedObjectsClientStub,
       indexPatterns: dataStartMock.indexPatterns,
-    } as SavedObjectKibanaServices);
+      search: {
+        ...dataStartMock.search,
+        searchSource: {
+          ...dataStartMock.search.searchSource,
+          create: createSearchSourceMock,
+          createEmpty: createSearchSourceMock,
+        },
+      },
+    } as unknown) as SavedObjectKibanaServices);
   });
 
   describe('save', () => {
@@ -269,7 +277,7 @@ describe('Saved Object', () => {
         );
       });
 
-      it('when index exists in searchSourceJSON', () => {
+      it('when search source references saved object', () => {
         const id = '123';
         stubESResponse(getMockedDocResponse(id));
         return createInitializedSavedObject({ type: 'dashboard', searchSource: true }).then(
@@ -407,28 +415,6 @@ describe('Saved Object', () => {
           expect(!!err).toBe(true);
         }
       });
-    });
-
-    it('throws error invalid JSON is detected', async () => {
-      const savedObject = await createInitializedSavedObject({
-        type: 'dashboard',
-        searchSource: true,
-      });
-      const response = {
-        found: true,
-        _source: {
-          kibanaSavedObjectMeta: {
-            searchSourceJSON: '"{\\n  \\"filter\\": []\\n}"',
-          },
-        },
-      };
-
-      try {
-        await savedObject.applyESResp(response);
-        throw new Error('applyESResp should have failed, but did not.');
-      } catch (err) {
-        expect(err instanceof InvalidJSONProperty).toBe(true);
-      }
     });
 
     it('preserves original defaults if not overridden', () => {
@@ -586,23 +572,31 @@ describe('Saved Object', () => {
         });
     });
 
-    it('injects references from searchSourceJSON', async () => {
+    it('passes references to search source parsing function', async () => {
+      SavedObjectClass = createSavedObjectClass(({
+        savedObjectsClient: savedObjectsClientStub,
+        indexPatterns: dataStartMock.indexPatterns,
+        search: {
+          ...dataStartMock.search,
+        },
+      } as unknown) as SavedObjectKibanaServices);
       const savedObject = new SavedObjectClass({ type: 'dashboard', searchSource: true });
-      return savedObject.init!().then(() => {
+      return savedObject.init!().then(async () => {
+        const searchSourceJSON = JSON.stringify({
+          indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          filter: [
+            {
+              meta: {
+                indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+              },
+            },
+          ],
+        });
         const response = {
           found: true,
           _source: {
             kibanaSavedObjectMeta: {
-              searchSourceJSON: JSON.stringify({
-                indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-                filter: [
-                  {
-                    meta: {
-                      indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
-                    },
-                  },
-                ],
-              }),
+              searchSourceJSON,
             },
           },
           references: [
@@ -618,16 +612,10 @@ describe('Saved Object', () => {
             },
           ],
         };
-        savedObject.applyESResp(response);
-        expect(savedObject.searchSource!.getFields()).toEqual({
+        await savedObject.applyESResp(response);
+        expect(dataStartMock.search.searchSource.create).toBeCalledWith({
+          filter: [{ meta: { index: 'my-index-2' } }],
           index: 'my-index-1',
-          filter: [
-            {
-              meta: {
-                index: 'my-index-2',
-              },
-            },
-          ],
         });
       });
     });

@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../common/types';
+import { Error } from '../../../../../shared_imports';
 import { UIM_POLICY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useServices } from '../../../../app_context';
 import {
@@ -28,7 +29,6 @@ import {
   PolicyExecuteProvider,
   PolicyDeleteProvider,
 } from '../../../../components';
-import { Error } from '../../../../components/section_error';
 import { linkToAddPolicy, linkToEditPolicy } from '../../../../services/navigation';
 import { SendRequestResponse } from '../../../../../shared_imports';
 

@@ -18,36 +18,53 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MetricAggType } from './metric_agg_type';
+import { MetricAggType, IMetricAggConfig } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
-import { getFieldFormats } from '../../../../public/services';
+import { GetInternalStartServicesFn } from '../../../types';
+import { BaseAggParams } from '../types';
 
 const uniqueCountTitle = i18n.translate('data.search.aggs.metrics.uniqueCountTitle', {
   defaultMessage: 'Unique Count',
 });
 
-export const cardinalityMetricAgg = new MetricAggType({
-  name: METRIC_TYPES.CARDINALITY,
-  title: uniqueCountTitle,
-  makeLabel(aggConfig) {
-    return i18n.translate('data.search.aggs.metrics.uniqueCountLabel', {
-      defaultMessage: 'Unique count of {field}',
-      values: { field: aggConfig.getFieldDisplayName() },
-    });
-  },
-  getFormat() {
-    const fieldFormatsService = getFieldFormats();
+export interface AggParamsCardinality extends BaseAggParams {
+  field: string;
+}
 
-    return fieldFormatsService.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
-  },
-  params: [
+export interface CardinalityMetricAggDependencies {
+  getInternalStartServices: GetInternalStartServicesFn;
+}
+
+export const getCardinalityMetricAgg = ({
+  getInternalStartServices,
+}: CardinalityMetricAggDependencies) =>
+  new MetricAggType(
     {
-      name: 'field',
-      type: 'field',
-      filterFieldTypes: Object.values(KBN_FIELD_TYPES).filter(
-        type => type !== KBN_FIELD_TYPES.HISTOGRAM
-      ),
+      name: METRIC_TYPES.CARDINALITY,
+      title: uniqueCountTitle,
+      makeLabel(aggConfig: IMetricAggConfig) {
+        return i18n.translate('data.search.aggs.metrics.uniqueCountLabel', {
+          defaultMessage: 'Unique count of {field}',
+          values: { field: aggConfig.getFieldDisplayName() },
+        });
+      },
+      getFormat() {
+        const { fieldFormats } = getInternalStartServices();
+
+        return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
+      },
+      params: [
+        {
+          name: 'field',
+          type: 'field',
+          filterFieldTypes: Object.values(KBN_FIELD_TYPES).filter(
+            type => type !== KBN_FIELD_TYPES.HISTOGRAM
+          ),
+        },
+      ],
     },
-  ],
-});
+    {
+      getInternalStartServices,
+    }
+  );

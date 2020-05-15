@@ -34,6 +34,11 @@ export interface SecurityLicenseFeatures {
   readonly showRoleMappingsManagement: boolean;
 
   /**
+   * Indicates whether we allow users to access agreement UI and acknowledge it.
+   */
+  readonly allowAccessAgreement: boolean;
+
+  /**
    * Indicates whether we allow users to define document level security in roles.
    */
   readonly allowRoleDocumentLevelSecurity: boolean;

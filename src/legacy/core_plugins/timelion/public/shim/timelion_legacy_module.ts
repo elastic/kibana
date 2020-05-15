@@ -21,7 +21,6 @@ import 'ngreact';
 import 'brace/mode/hjson';
 import 'brace/ext/searchbox';
 import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
-import 'ui/vis/map/service_settings';
 
 import { once } from 'lodash';
 // @ts-ignore

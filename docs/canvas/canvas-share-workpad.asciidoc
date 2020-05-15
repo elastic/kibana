@@ -10,7 +10,7 @@ When you've finished your workpad, you can share it outside of {kib}.
 
 Create a JSON file of your workpad that you can export outside of {kib}.
 
-. From your workpad, click the *Share workpad* icon in the upper left corner.
+. From your workpad, click the *Share workpad* icon.
 
 . Select *Download as JSON*.
 +
@@ -27,7 +27,7 @@ If you have a license that supports the {report-features}, you can create a PDF 
 
 For more information, refer to <<reporting-getting-started, Reporting from Kibana>>.
 
-. From your workpad, click the *Share workpad* icon in the upper left corner, then select *PDF reports*.
+. From your workpad, click the *Share workpad* icon, then select *PDF reports*.
 
 . Click *Generate PDF*.
 +
@@ -42,7 +42,7 @@ If you have a license that supports the {report-features}, you can create a POST
 
 For more information, refer to <<automating-report-generation, Automating report generation>>.
 
-. From your workpad, click the *Share workpad* icon in the upper left corner, then select *PDF reports*.
+. From your workpad, click the *Share workpad* icon, then select *PDF reports*.
 
 . Click *Copy POST URL*.
 +
@@ -55,7 +55,7 @@ image::images/canvas-create-URL.gif[Create POST URL]
 
 beta[] Canvas allows you to create _shareables_, which are workpads that you download and securely share on any website. To customize the behavior of the workpad on your website, you can choose to autoplay the pages or hide the workpad toolbar.
 
-. From your workpad, click the *Share this workpad* icon in the upper left corner, then select *Share on a website*.
+. From your workpad, click the *Share this workpad* icon, then select *Share on a website*.
 
 . On the *Share on a website* pane, follow the instructions.
 
@@ -76,7 +76,7 @@ After you've added the workpad to your website, you can change the autoplay and 
 
 To change the autoplay settings:
 
-. In the lower right corner of the shareable workpad, click the settings icon.
+. Click the settings icon.
 
 . Click *Auto Play*, then change the settings.
 +
@@ -85,7 +85,7 @@ image::images/canvas_share_autoplay_480.gif[Autoplay settings]
 
 To change the toolbar settings:
 
-. In the lower right corner, click the settings icon.
+. Click the settings icon.
 
 . Click *Toolbar*, then change the settings.
 +

@@ -14,7 +14,7 @@ export enum AlertType {
 export const ALERT_TYPES_CONFIG = {
   [AlertType.ErrorRate]: {
     name: i18n.translate('xpack.apm.errorRateAlert.name', {
-      defaultMessage: 'Error rate threshold'
+      defaultMessage: 'Error rate'
     }),
     actionGroups: [
       {
@@ -24,11 +24,12 @@ export const ALERT_TYPES_CONFIG = {
         })
       }
     ],
-    defaultActionGroupId: 'threshold_met'
+    defaultActionGroupId: 'threshold_met',
+    producer: 'apm'
   },
   [AlertType.TransactionDuration]: {
     name: i18n.translate('xpack.apm.transactionDurationAlert.name', {
-      defaultMessage: 'Transaction duration threshold'
+      defaultMessage: 'Transaction duration'
     }),
     actionGroups: [
       {
@@ -41,7 +42,8 @@ export const ALERT_TYPES_CONFIG = {
         )
       }
     ],
-    defaultActionGroupId: 'threshold_met'
+    defaultActionGroupId: 'threshold_met',
+    producer: 'apm'
   }
 };
 

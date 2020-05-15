@@ -8,20 +8,22 @@ import {
   AGENT_TYPE_TEMPORARY,
   AGENT_POLLING_THRESHOLD_MS,
   AGENT_TYPE_PERMANENT,
+  AGENT_SAVED_OBJECT_TYPE,
 } from '../constants';
 
 export function buildKueryForOnlineAgents() {
-  return `agents.last_checkin >= now-${(3 * AGENT_POLLING_THRESHOLD_MS) / 1000}s`;
+  return `${AGENT_SAVED_OBJECT_TYPE}.last_checkin >= now-${(3 * AGENT_POLLING_THRESHOLD_MS) /
+    1000}s`;
 }
 
 export function buildKueryForOfflineAgents() {
-  return `agents.type:${AGENT_TYPE_TEMPORARY} AND agents.last_checkin < now-${(3 *
+  return `${AGENT_SAVED_OBJECT_TYPE}.type:${AGENT_TYPE_TEMPORARY} AND ${AGENT_SAVED_OBJECT_TYPE}.last_checkin < now-${(3 *
     AGENT_POLLING_THRESHOLD_MS) /
     1000}s`;
 }
 
 export function buildKueryForErrorAgents() {
-  return `agents.type:${AGENT_TYPE_PERMANENT} AND agents.last_checkin < now-${(4 *
+  return `${AGENT_SAVED_OBJECT_TYPE}.type:${AGENT_TYPE_PERMANENT} AND ${AGENT_SAVED_OBJECT_TYPE}.last_checkin < now-${(4 *
     AGENT_POLLING_THRESHOLD_MS) /
     1000}s`;
 }

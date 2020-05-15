@@ -13,7 +13,6 @@ import {
 
 import { LicensingPluginSetup } from '../../../licensing/server';
 import { LicenseType } from '../../../licensing/common/types';
-import { LICENSE_CHECK_STATE } from '../../../licensing/common/types';
 
 export interface LicenseStatus {
   isValid: boolean;
@@ -38,7 +37,7 @@ export class License {
   ) {
     licensing.license$.subscribe(license => {
       const { state, message } = license.check(pluginId, minimumLicenseType);
-      const hasRequiredLicense = state === LICENSE_CHECK_STATE.Valid;
+      const hasRequiredLicense = state === 'valid';
 
       if (hasRequiredLicense) {
         this.licenseStatus = { isValid: true };
@@ -54,12 +53,12 @@ export class License {
     });
   }
 
-  guardApiRoute(handler: RequestHandler) {
+  guardApiRoute<P, Q, B>(handler: RequestHandler<P, Q, B>) {
     const license = this;
 
     return function licenseCheck(
       ctx: RequestHandlerContext,
-      request: KibanaRequest,
+      request: KibanaRequest<P, Q, B>,
       response: KibanaResponseFactory
     ) {
       const licenseStatus = license.getStatus();

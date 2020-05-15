@@ -20,7 +20,10 @@ import {
   elasticsearchServiceMock,
   sessionStorageMock,
 } from '../../../../../src/core/server/mocks';
+import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import { securityAuditLoggerMock } from '../audit/index.mock';
+import { SecurityLicenseFeatures } from '../../common/licensing';
 import { ConfigSchema, createConfig } from '../config';
 import { AuthenticationResult } from './authentication_result';
 import { Authenticator, AuthenticatorOptions, ProviderSession } from './authenticator';
@@ -39,8 +42,11 @@ function getMockOptions({
   selector?: AuthenticatorOptions['config']['authc']['selector'];
 } = {}) {
   return {
+    auditLogger: securityAuditLoggerMock.create(),
+    getCurrentUser: jest.fn(),
     clusterClient: elasticsearchServiceMock.createClusterClient(),
     basePath: httpServiceMock.createSetupContract().basePath,
+    license: licenseMock.create(),
     loggers: loggingServiceMock.create(),
     config: createConfig(
       ConfigSchema.validate({ session, authc: { selector, providers, http } }),
@@ -1108,6 +1114,141 @@ describe('Authenticator', () => {
         expect(mockBasicAuthenticationProvider.authenticate).not.toHaveBeenCalled();
       });
     });
+
+    describe('with Access Agreement', () => {
+      const mockUser = mockAuthenticatedUser();
+      beforeEach(() => {
+        mockOptions = getMockOptions({
+          providers: {
+            basic: { basic1: { order: 0, accessAgreement: { message: 'some notice' } } },
+          },
+        });
+        mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
+        mockOptions.license.getFeatures.mockReturnValue({
+          allowAccessAgreement: true,
+        } as SecurityLicenseFeatures);
+
+        mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+          AuthenticationResult.succeeded(mockUser)
+        );
+
+        authenticator = new Authenticator(mockOptions);
+      });
+
+      it('does not redirect to Access Agreement if there is no active session', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        mockSessionStorage.get.mockResolvedValue(null);
+
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.succeeded(mockUser)
+        );
+      });
+
+      it('does not redirect AJAX requests to Access Agreement', async () => {
+        const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
+        mockSessionStorage.get.mockResolvedValue(mockSessVal);
+
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.succeeded(mockUser)
+        );
+      });
+
+      it('does not redirect to Access Agreement if request cannot be handled', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        mockSessionStorage.get.mockResolvedValue(mockSessVal);
+
+        mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+          AuthenticationResult.notHandled()
+        );
+
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.notHandled()
+        );
+      });
+
+      it('does not redirect to Access Agreement if authentication fails', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        mockSessionStorage.get.mockResolvedValue(mockSessVal);
+
+        const failureReason = new Error('something went wrong');
+        mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+          AuthenticationResult.failed(failureReason)
+        );
+
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.failed(failureReason)
+        );
+      });
+
+      it('does not redirect to Access Agreement if redirect is required to complete authentication', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        mockSessionStorage.get.mockResolvedValue(mockSessVal);
+
+        mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+          AuthenticationResult.redirectTo('/some-url')
+        );
+
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.redirectTo('/some-url')
+        );
+      });
+
+      it('does not redirect to Access Agreement if user has already acknowledged it', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        mockSessionStorage.get.mockResolvedValue({
+          ...mockSessVal,
+          accessAgreementAcknowledged: true,
+        });
+
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.succeeded(mockUser)
+        );
+      });
+
+      it('does not redirect to Access Agreement its own requests', async () => {
+        const request = httpServerMock.createKibanaRequest({ path: '/security/access_agreement' });
+        mockSessionStorage.get.mockResolvedValue(mockSessVal);
+
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.succeeded(mockUser)
+        );
+      });
+
+      it('does not redirect to Access Agreement if it is not configured', async () => {
+        mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
+        mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
+        mockSessionStorage.get.mockResolvedValue(mockSessVal);
+        authenticator = new Authenticator(mockOptions);
+
+        const request = httpServerMock.createKibanaRequest();
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.succeeded(mockUser)
+        );
+      });
+
+      it('does not redirect to Access Agreement if license doesnt allow it.', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        mockSessionStorage.get.mockResolvedValue(mockSessVal);
+        mockOptions.license.getFeatures.mockReturnValue({
+          allowAccessAgreement: false,
+        } as SecurityLicenseFeatures);
+
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.succeeded(mockUser)
+        );
+      });
+
+      it('redirects to Access Agreement when needed.', async () => {
+        mockSessionStorage.get.mockResolvedValue(mockSessVal);
+
+        const request = httpServerMock.createKibanaRequest();
+        await expect(authenticator.authenticate(request)).resolves.toEqual(
+          AuthenticationResult.redirectTo(
+            '/mock-server-basepath/security/access_agreement?next=%2Fmock-server-basepath%2Fpath'
+          )
+        );
+      });
+    });
   });
 
   describe('`logout` method', () => {
@@ -1228,13 +1369,13 @@ describe('Authenticator', () => {
         now: currentDate,
         idleTimeoutExpiration: currentDate + 60000,
         lifespanExpiration: currentDate + 120000,
-        provider: 'basic1',
+        provider: { type: 'basic' as 'basic', name: 'basic1' },
       };
       mockSessionStorage.get.mockResolvedValue({
         idleTimeoutExpiration: mockInfo.idleTimeoutExpiration,
         lifespanExpiration: mockInfo.lifespanExpiration,
         state,
-        provider: { type: 'basic', name: mockInfo.provider },
+        provider: mockInfo.provider,
         path: mockOptions.basePath.serverBasePath,
       });
       jest.spyOn(Date, 'now').mockImplementation(() => currentDate);
@@ -1272,6 +1413,86 @@ describe('Authenticator', () => {
       );
       expect(authenticator.isProviderTypeEnabled('basic')).toBe(true);
       expect(authenticator.isProviderTypeEnabled('saml')).toBe(true);
+    });
+  });
+
+  describe('`acknowledgeAccessAgreement` method', () => {
+    let authenticator: Authenticator;
+    let mockOptions: ReturnType<typeof getMockOptions>;
+    let mockSessionStorage: jest.Mocked<SessionStorage<ProviderSession>>;
+    let mockSessionValue: any;
+    beforeEach(() => {
+      mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
+      mockSessionStorage = sessionStorageMock.create();
+      mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
+      mockSessionValue = {
+        idleTimeoutExpiration: null,
+        lifespanExpiration: null,
+        state: { authorization: 'Basic xxx' },
+        provider: { type: 'basic', name: 'basic1' },
+        path: mockOptions.basePath.serverBasePath,
+      };
+      mockSessionStorage.get.mockResolvedValue(mockSessionValue);
+      mockOptions.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
+      mockOptions.license.getFeatures.mockReturnValue({
+        allowAccessAgreement: true,
+      } as SecurityLicenseFeatures);
+
+      authenticator = new Authenticator(mockOptions);
+    });
+
+    it('fails if user is not authenticated', async () => {
+      mockOptions.getCurrentUser.mockReturnValue(null);
+
+      await expect(
+        authenticator.acknowledgeAccessAgreement(httpServerMock.createKibanaRequest())
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot acknowledge access agreement for unauthenticated user."`
+      );
+
+      expect(mockSessionStorage.set).not.toHaveBeenCalled();
+    });
+
+    it('fails if cannot retrieve user session', async () => {
+      mockSessionStorage.get.mockResolvedValue(null);
+
+      await expect(
+        authenticator.acknowledgeAccessAgreement(httpServerMock.createKibanaRequest())
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot acknowledge access agreement for unauthenticated user."`
+      );
+
+      expect(mockSessionStorage.set).not.toHaveBeenCalled();
+    });
+
+    it('fails if license doesn allow access agreement acknowledgement', async () => {
+      mockOptions.license.getFeatures.mockReturnValue({
+        allowAccessAgreement: false,
+      } as SecurityLicenseFeatures);
+
+      await expect(
+        authenticator.acknowledgeAccessAgreement(httpServerMock.createKibanaRequest())
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Current license does not allow access agreement acknowledgement."`
+      );
+
+      expect(mockSessionStorage.set).not.toHaveBeenCalled();
+    });
+
+    it('properly acknowledges access agreement for the authenticated user', async () => {
+      await authenticator.acknowledgeAccessAgreement(httpServerMock.createKibanaRequest());
+
+      expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
+      expect(mockSessionStorage.set).toHaveBeenCalledWith({
+        ...mockSessionValue,
+        accessAgreementAcknowledged: true,
+      });
+
+      expect(mockOptions.auditLogger.accessAgreementAcknowledged).toHaveBeenCalledTimes(1);
+      expect(mockOptions.auditLogger.accessAgreementAcknowledged).toHaveBeenCalledWith('user', {
+        type: 'basic',
+        name: 'basic1',
+      });
     });
   });
 });

@@ -28,11 +28,16 @@ import {
   MappingObject,
 } from '../../../../kibana_utils/public';
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
-
-import { findByTitle, getRoutes } from '../utils';
+import {
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  IIndexPattern,
+  IFieldType,
+  META_FIELDS_SETTING,
+} from '../../../common';
+import { findByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
-import { Field, FieldList, IFieldList } from '../fields';
+import { Field, IIndexPatternFieldList, getIndexPatternFieldListCreator } from '../fields';
 import { createFieldsFetcher } from './_fields_fetcher';
 import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
@@ -51,7 +56,7 @@ export class IndexPattern implements IIndexPattern {
   public type?: string;
   public fieldFormatMap: any;
   public typeMeta?: TypeMeta;
-  public fields: IFieldList;
+  public fields: IIndexPatternFieldList;
   public timeFieldName: string | undefined;
   public formatHit: any;
   public formatField: any;
@@ -104,11 +109,16 @@ export class IndexPattern implements IIndexPattern {
     this.getConfig = getConfig;
 
     this.shortDotsEnable = this.getConfig('shortDots:enable');
-    this.metaFields = this.getConfig('metaFields');
+    this.metaFields = this.getConfig(META_FIELDS_SETTING);
 
-    this.fields = new FieldList(this, [], this.shortDotsEnable);
-    this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig('metaFields'));
-    this.flattenHit = flattenHitWrapper(this, this.getConfig('metaFields'));
+    this.createFieldList = getIndexPatternFieldListCreator({
+      fieldFormats: getFieldFormats(),
+      toastNotifications: getNotifications().toasts,
+    });
+
+    this.fields = this.createFieldList(this, [], this.shortDotsEnable);
+    this.fieldsFetcher = createFieldsFetcher(this, apiClient, this.getConfig(META_FIELDS_SETTING));
+    this.flattenHit = flattenHitWrapper(this, this.getConfig(META_FIELDS_SETTING));
     this.formatHit = formatHitProvider(
       this,
       getFieldFormats().getDefaultInstance(KBN_FIELD_TYPES.STRING)
@@ -131,7 +141,7 @@ export class IndexPattern implements IIndexPattern {
   private initFields(input?: any) {
     const newValue = input || this.fields;
 
-    this.fields = new FieldList(this, newValue, this.shortDotsEnable);
+    this.fields = this.createFieldList(this, newValue, this.shortDotsEnable);
   }
 
   private isFieldRefreshRequired(): boolean {
@@ -183,10 +193,6 @@ export class IndexPattern implements IIndexPattern {
     }
 
     return this.indexFields(forceFieldRefresh);
-  }
-
-  public get routes() {
-    return getRoutes();
   }
 
   getComputedFields() {
@@ -281,7 +287,11 @@ export class IndexPattern implements IIndexPattern {
           filterable: true,
           searchable: true,
         },
-        false
+        false,
+        {
+          fieldFormats: getFieldFormats(),
+          toastNotifications: getNotifications().toasts,
+        }
       )
     );
 
@@ -294,6 +304,13 @@ export class IndexPattern implements IIndexPattern {
   }
 
   async popularizeField(fieldName: string, unit = 1) {
+    /**
+     * This function is just used by Discover and it's high likely to be removed in the near future
+     * It doesn't use the save function to skip the error message that's displayed when
+     * a user adds several columns in a higher frequency that the changes can be persisted to ES
+     * resulting in 409 errors
+     */
+    if (!this.id) return;
     const field = this.fields.getByName(fieldName);
     if (!field) {
       return;
@@ -303,7 +320,15 @@ export class IndexPattern implements IIndexPattern {
       return;
     }
     field.count = count;
-    await this.save();
+
+    try {
+      const res = await this.savedObjectsClient.update(type, this.id, this.prepBody(), {
+        version: this.version,
+      });
+      this.version = res._version;
+    } catch (e) {
+      // no need for an error message here
+    }
   }
 
   getNonScriptedFields() {

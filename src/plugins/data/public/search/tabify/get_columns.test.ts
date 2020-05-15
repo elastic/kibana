@@ -21,6 +21,7 @@ import { tabifyGetColumns } from './get_columns';
 import { TabbedAggColumn } from './types';
 import { AggConfigs } from '../aggs';
 import { mockAggTypesRegistry, mockDataServices } from '../aggs/test_helpers';
+import { fieldFormatsServiceMock } from '../../field_formats/mocks';
 
 describe('get columns', () => {
   beforeEach(() => {
@@ -28,6 +29,7 @@ describe('get columns', () => {
   });
 
   const typesRegistry = mockAggTypesRegistry();
+  const fieldFormats = fieldFormatsServiceMock.createStartContract();
 
   const createAggConfigs = (aggs: any[] = []) => {
     const field = {
@@ -45,6 +47,7 @@ describe('get columns', () => {
 
     return new AggConfigs(indexPattern, aggs, {
       typesRegistry,
+      fieldFormats,
     });
   };
 

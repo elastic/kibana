@@ -33,7 +33,7 @@ import { NavigationMenu } from '../../components/navigation_menu';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 import { isFullLicense } from '../../license';
-import { checkPermission } from '../../privilege/check_privilege';
+import { checkPermission } from '../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../ml_nodes_check/check_ml_nodes';
 import { FullTimeRangeSelector } from '../../components/full_time_range_selector';
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
@@ -41,7 +41,7 @@ import { useMlContext } from '../../contexts/ml';
 import { kbnTypeToMLJobType } from '../../util/field_types_utils';
 import { useTimefilter } from '../../contexts/kibana';
 import { timeBasedIndexCheck, getQueryFromSavedSearch } from '../../util/index_utils';
-import { TimeBuckets } from '../../util/time_buckets';
+import { getTimeBucketsFromCache } from '../../util/time_buckets';
 import { useUrlState } from '../../util/url_state';
 import { FieldRequestConfig, FieldVisConfig } from './common';
 import { ActionsPanel } from './components/actions_panel';
@@ -318,7 +318,7 @@ export const Page: FC = () => {
 
     // Obtain the interval to use for date histogram aggregations
     // (such as the document count chart). Aim for 75 bars.
-    const buckets = new TimeBuckets();
+    const buckets = getTimeBucketsFromCache();
 
     const tf = timefilter as any;
     let earliest: number | undefined;

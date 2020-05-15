@@ -1,13 +1,4 @@
 ---
-  - "Team:AppArch":
-    - "src/plugins/bfetch/**/*.*"
-    - "src/plugins/dashboard_embeddable_container/**/*.*"
-    - "src/plugins/data/**/*.*"
-    - "src/plugins/embeddable/**/*.*"
-    - "src/plugins/expressions/**/*.*"
-    - "src/plugins/inspector/**/*.*"
-    - "src/plugins/ui_actions/**/*.*"
-    - "src/plugins/visualizations/**/*.*"
   - "Feature:Embedding":
     - "src/plugins/embeddable/**/*.*"
     - "src/plugins/dashboard_embeddable_container/**/*.*"
@@ -17,3 +8,8 @@
   - "Feature:ExpressionLanguage":
     - "src/plugins/expressions/**/*.*"
     - "src/plugins/bfetch/**/*.*"
+  - "Team:apm":
+    - "x-pack/plugins/apm/**/*.*"
+    - "x-pack/plugins/apm/**/*.*"
+  - "Team:uptime":
+    - "x-pack/plugins/uptime/**/*.*"
