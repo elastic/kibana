@@ -42,7 +42,7 @@ const FIRING = i18n.translate('xpack.monitoring.alerts.cpuUsage.firing', {
   defaultMessage: 'firing',
 });
 
-const DEFAULT_THRESHOLD = 85;
+const DEFAULT_THRESHOLD = -1;
 
 export class CpuUsageAlert extends BaseAlert {
   public type = ALERT_CPU_USAGE;

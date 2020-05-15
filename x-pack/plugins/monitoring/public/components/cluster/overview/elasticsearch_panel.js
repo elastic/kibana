@@ -37,7 +37,9 @@ import {
   ELASTICSEARCH_SYSTEM_ID,
   ALERT_LICENSE_EXPIRATION,
   ALERT_CLUSTER_STATE,
+  ALERT_CPU_USAGE,
 } from '../../../../common/constants';
+import { AlertPopover } from '../../alert/popover';
 
 const calculateShards = shards => {
   const total = get(shards, 'total', 0);
@@ -210,6 +212,15 @@ export function ElasticsearchPanel(props) {
     return null;
   };
 
+  let alertStatus = null;
+  if (alerts[ALERT_CPU_USAGE]) {
+    alertStatus = (
+      <EuiFlexItem grow={false}>
+        <AlertPopover alert={alerts[ALERT_CPU_USAGE]} />
+      </EuiFlexItem>
+    );
+  }
+
   return (
     <ClusterItemContainer
       {...props}
@@ -292,6 +303,7 @@ export function ElasticsearchPanel(props) {
                 </EuiTitle>
               </EuiFlexItem>
               {setupModeTooltip}
+              {alertStatus}
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
