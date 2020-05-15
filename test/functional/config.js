@@ -78,6 +78,7 @@ export default async function({ readConfigFile }) {
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--oss',
         '--telemetry.optIn=false',
+        `--xpack.ingestManager.epm.registryUrl=http://localhost:${process.env.FLEET_PACKAGE_REGISTRY_PORT}`,
       ],
     },
 
