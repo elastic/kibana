@@ -89,7 +89,7 @@ const agentIcons: { [key: string]: string } = {
 function getAgentIcon(agentName?: string) {
   // RUM can have multiple names. Normalize it
   const normalizedAgentName = isRumAgentName(agentName) ? 'js-base' : agentName;
-  return normalizedAgentName && agentIcons[normalizedAgentName];
+  return normalizedAgentName && agentIcons[normalizedAgentName.toLowerCase()];
 }
 
 function getSpanIcon(type?: string, subtype?: string) {
