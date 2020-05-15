@@ -43,16 +43,26 @@ export function ResolverGeneratorProvider({ getService }: FtrProviderContext) {
         const tree = generator.generateTree(options);
         const body = tree.allEvents.reduce(
           (array: Array<Record<string, any>>, doc) => (
+            /**
+             * We're using data streams which require that a bulk use `create` instead of `index`.
+             */
             array.push({ create: { _index: eventsIndex } }, doc), array
           ),
           []
         );
+        // force a refresh here otherwise the documents might not be available when the tests search for them
         await client.bulk({ body, refresh: 'true' });
         allTrees.push(tree);
       }
       return { trees: allTrees, index: eventsIndex };
     },
     async deleteTrees(trees: GeneratedTrees) {
+      /**
+       * The ingest manager handles creating the template for the endpoint's indices. It is using a V2 template
+       * with data streams. Data streams aren't included in the javascript elasticsearch client in kibana yet so we
+       * need to do raw requests here. Delete a data stream is slightly different than that of a regular index which
+       * is why we're using _data_stream here.
+       */
       await client.transport.request({ method: 'DELETE', path: `_data_stream/${trees.index}` });
     },
   };
