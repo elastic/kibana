@@ -18,8 +18,8 @@
  */
 
 import { WebDriver, WebElement, By, until } from 'selenium-webdriver';
-import { FtrProviderContext } from '../ftr_provider_context';
-import { WebElementWrapper } from './lib/web_element_wrapper';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { WebElementWrapper } from '../lib/web_element_wrapper';
 
 export async function FindProvider({ getService }: FtrProviderContext) {
   const log = getService('log');

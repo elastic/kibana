@@ -24,10 +24,10 @@ import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
 import { ProvidedType } from '@kbn/test/types/ftr';
 
 import Jimp from 'jimp';
-import { modifyUrl } from '../../../src/core/utils';
-import { WebElementWrapper } from './lib/web_element_wrapper';
-import { FtrProviderContext } from '../ftr_provider_context';
-import { Browsers } from './remote/browsers';
+import { modifyUrl } from '../../../../src/core/utils';
+import { WebElementWrapper } from '../lib/web_element_wrapper';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { Browsers } from '../remote/browsers';
 
 export type Browser = ProvidedType<typeof BrowserProvider>;
 export async function BrowserProvider({ getService }: FtrProviderContext) {
