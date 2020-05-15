@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import {
   getMockCallWithInternal,
   getMockConfig,
@@ -13,6 +12,7 @@ import {
 } from '../../../test_utils';
 import { visualizationsTaskRunner } from './task_runner';
 import { TaskInstance } from '../../../../../task_manager/server';
+import { getNextMidnight } from '../../get_next_midnight';
 
 describe('visualizationsTaskRunner', () => {
   let mockTaskInstance: TaskInstance;
@@ -41,12 +41,6 @@ describe('visualizationsTaskRunner', () => {
   });
 
   test('Summarizes visualization response data', async () => {
-    const getNextMidnight = () =>
-      moment()
-        .add(1, 'days')
-        .startOf('day')
-        .toDate();
-
     const runner = visualizationsTaskRunner(mockTaskInstance, getMockConfig(), getMockEs());
     const result = await runner();
 
