@@ -14,6 +14,8 @@ import {
   nextTick,
 } from '../../../../../test_utils';
 import { IndexManagementHome } from '../../../public/application/sections/home'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+// @ts-ignore
+import { IndexTable } from '../../../public/application/sections/home/index_list/index_table/index_table'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { BASE_PATH } from '../../../common/constants';
 import { indexManagementStore } from '../../../public/application/store'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { TemplateDeserialized } from '../../../common';
@@ -43,6 +45,8 @@ export interface IdxMgmtHomeTestBed extends TestBed<IdxMgmtTestSubjects> {
     clickTemplateAt: (index: number) => void;
     clickCloseDetailsButton: () => void;
     clickActionMenu: (name: TemplateDeserialized['name']) => void;
+    getIncludeHiddenIndicesToggleStatus: () => boolean;
+    updateIncludeHiddenHashParam: (value: boolean) => void;
   };
 }
 
@@ -123,6 +127,24 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
     find('closeDetailsButton').simulate('click');
   };
 
+  const getIncludeHiddenIndicesToggleStatus = () => {
+    const { find } = testBed;
+    const props = find('indexTableIncludeHiddenIndicesToggle')
+      .first()
+      .props();
+    return Boolean(props['aria-checked']);
+  };
+
+  const updateIncludeHiddenHashParam = (value: boolean) => {
+    const { router, component } = testBed;
+    router.navigateTo(`${BASE_PATH}indices${value ? '?includeHidden=true' : ''}`);
+    const inner = component.find(IndexTable);
+    // We manually re-run the onHashChange listener because the it does not fire otherwise.
+    // This only works for class components, function components return null for .instance()
+    (inner.instance() as any).onHashChange();
+    component.update();
+  };
+
   return {
     ...testBed,
     findAction,
@@ -134,6 +156,8 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
       clickTemplateAt,
       clickCloseDetailsButton,
       clickActionMenu,
+      getIncludeHiddenIndicesToggleStatus,
+      updateIncludeHiddenHashParam,
     },
   };
 };
@@ -158,6 +182,7 @@ export type TestSubjects =
   | 'noSettingsCallout'
   | 'indicesList'
   | 'indicesTab'
+  | 'indexTableIncludeHiddenIndicesToggle'
   | 'reloadButton'
   | 'row'
   | 'sectionError'

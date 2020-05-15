@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { parse } from 'query-string';
 import { DetailPanel } from './detail_panel';
 import { IndexTable } from './index_table';
 
@@ -15,11 +14,9 @@ export function IndexList({
   },
   location,
 }) {
-  const { includeHidden } = parse((location && location.search) || '');
-
   return (
     <div className="im-snapshotTestSubject" data-test-subj="indicesList">
-      <IndexTable filterFromURI={filter} showHiddenFromURI={includeHidden === 'true'} />
+      <IndexTable filterFromURI={filter} location={location} />
       <DetailPanel />
     </div>
   );

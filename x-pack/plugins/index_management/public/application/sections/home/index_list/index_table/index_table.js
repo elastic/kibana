@@ -8,6 +8,7 @@ import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
+import { parse } from 'query-string';
 
 import {
   EuiButton,
@@ -93,15 +94,20 @@ export class IndexTable extends Component {
       selectedIndicesMap: {},
     };
   }
+
+  onHashChange = () => {
+    const { showHiddenIndicesChanged, showHiddenIndices, location } = this.props;
+    const { includeHidden } = parse((location && location.search) || '');
+    const nextValue = includeHidden === 'true';
+    if (nextValue !== showHiddenIndices) {
+      showHiddenIndicesChanged(nextValue);
+    }
+  };
+
   componentDidMount() {
     this.props.loadIndices();
     this.interval = setInterval(this.props.reloadIndices, REFRESH_RATE_INDEX_LIST);
-    const {
-      filterChanged,
-      filterFromURI,
-      showHiddenFromURI,
-      showHiddenIndicesChanged,
-    } = this.props;
+    const { filterChanged, filterFromURI } = this.props;
 
     if (filterFromURI) {
       const decodedFilter = decodeURIComponent(filterFromURI);
@@ -113,13 +119,12 @@ export class IndexTable extends Component {
         this.setState({ filterError: e });
       }
     }
-
-    if (showHiddenFromURI) {
-      showHiddenIndicesChanged(true);
-    }
+    this.onHashChange();
+    window.addEventListener('hashchange', this.onHashChange);
   }
   componentWillUnmount() {
     clearInterval(this.interval);
+    window.removeEventListener('hashchange', this.onHashChange);
   }
   onSort = column => {
     const { sortField, isSortAscending, sortChanged } = this.props;

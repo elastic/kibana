@@ -8,7 +8,7 @@ import { act } from 'react-dom/test-utils';
 import * as fixtures from '../../test/fixtures';
 import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
 import { IdxMgmtHomeTestBed } from './helpers/home.helpers';
-import { API_BASE_PATH } from '../../common/constants';
+import { API_BASE_PATH, BASE_PATH } from '../../common/constants';
 
 const { setup } = pageHelpers.home;
 
@@ -42,6 +42,18 @@ describe('<IndexManagementHome />', () => {
         await nextTick();
         component.update();
       });
+    });
+
+    test('sets the include hidden indices based on hash param', () => {
+      const { actions } = testBed;
+      try {
+        actions.updateIncludeHiddenHashParam(false);
+        expect(actions.getIncludeHiddenIndicesToggleStatus()).toBe(false);
+        actions.updateIncludeHiddenHashParam(true);
+        expect(actions.getIncludeHiddenIndicesToggleStatus()).toBe(true);
+      } finally {
+        actions.updateIncludeHiddenHashParam(false);
+      }
     });
 
     test('should set the correct app title', () => {
