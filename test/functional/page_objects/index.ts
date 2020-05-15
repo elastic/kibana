@@ -28,7 +28,7 @@ import { HomePageProvider } from './home_page';
 import { NewsfeedPageProvider } from './newsfeed_page';
 import { SettingsPageProvider } from './settings_page';
 import { SharePageProvider } from './share_page';
-import { ShieldPageProvider } from './shield_page';
+import { LoginPageProvider } from './login_page';
 import { TimePickerProvider } from './time_picker';
 import { TimelionPageProvider } from './timelion_page';
 import { VisualBuilderPageProvider } from './visual_builder_page';
@@ -51,7 +51,7 @@ export const pageObjects = {
   newsfeed: NewsfeedPageProvider,
   settings: SettingsPageProvider,
   share: SharePageProvider,
-  shield: ShieldPageProvider,
+  login: LoginPageProvider,
   timelion: TimelionPageProvider,
   timePicker: TimePickerProvider,
   visualBuilder: VisualBuilderPageProvider,

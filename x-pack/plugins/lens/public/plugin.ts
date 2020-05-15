@@ -103,9 +103,6 @@ export class LensPlugin {
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies) {
     this.createEditorFrame = this.editorFrameService.start(core, startDependencies).createInstance;
-    this.xyVisualization.start(core, startDependencies);
-    this.datatableVisualization.start(core, startDependencies);
-    this.pieVisualization.start(core, startDependencies);
   }
 
   stop() {
