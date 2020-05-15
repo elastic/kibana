@@ -129,24 +129,22 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
 
-      let objects = await PageObjects.settings.getSavedObjectsInTable();
+      const objects = await PageObjects.settings.getSavedObjectsInTable();
       expect(objects.includes('A Pie')).to.be(true);
 
       await PageObjects.common.navigateToActualUrl('kibana', testVisualizationUrl);
 
       await testSubjects.existOrFail('savedObjectEditSave');
 
-      expect(await getFieldValue('title')).to.eql('A Pie');
-
       let referencesValue = await getAceEditorFieldValue('references');
 
       await focusAndClickButton('savedObjectEditSave');
 
-      objects = await PageObjects.settings.getSavedObjectsInTable();
-      expect(objects.includes('A Pie')).to.be(true);
+      await PageObjects.settings.getSavedObjectsInTable();
 
       await PageObjects.common.navigateToActualUrl('kibana', testVisualizationUrl);
 
+      // Parsing to avoid random keys ordering issues in raw string comparison
       expect(JSON.parse(await getAceEditorFieldValue('references'))).to.eql(
         JSON.parse(referencesValue)
       );
@@ -155,8 +153,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       await focusAndClickButton('savedObjectEditSave');
 
-      objects = await PageObjects.settings.getSavedObjectsInTable();
-      expect(objects.includes('A Pie')).to.be(true);
+      await PageObjects.settings.getSavedObjectsInTable();
 
       await PageObjects.common.navigateToActualUrl('kibana', testVisualizationUrl);
 
