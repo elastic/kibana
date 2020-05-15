@@ -21,21 +21,36 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { EuiNavDrawer, EuiHorizontalRule, EuiNavDrawerGroup } from '@elastic/eui';
+import * as Rx from 'rxjs';
+import { useObservable } from 'react-use';
 import { OnIsLockedUpdate } from './';
-import { NavLink, RecentNavLink } from './nav_link';
 import { RecentLinks } from './recent_links';
+import { HttpStart } from '../../../http';
+import { InternalApplicationStart } from '../../../application/types';
+import { createRecentNavLink, createEuiListItem } from './nav_link';
+import { ChromeNavLink, CoreStart, ChromeRecentlyAccessedHistoryItem } from '../../..';
 
 export interface Props {
+  appId$: InternalApplicationStart['currentAppId$'];
+  basePath: HttpStart['basePath'];
   isLocked?: boolean;
+  legacyMode: boolean;
+  navLinks$: Rx.Observable<ChromeNavLink[]>;
+  recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
+  navigateToApp: CoreStart['application']['navigateToApp'];
   onIsLockedUpdate?: OnIsLockedUpdate;
-  navLinks: NavLink[];
-  recentNavLinks: RecentNavLink[];
 }
 
-function navDrawerRenderer(
-  { isLocked, onIsLockedUpdate, navLinks, recentNavLinks }: Props,
+function NavDrawerRenderer(
+  { isLocked, onIsLockedUpdate, basePath, legacyMode, navigateToApp, ...observables }: Props,
   ref: React.Ref<HTMLElement>
 ) {
+  const appId = useObservable(observables.appId$, '');
+  const navLinks = useObservable(observables.navLinks$, []).filter(link => !link.hidden);
+  const recentNavLinks = useObservable(observables.recentlyAccessed$, []).map(link =>
+    createRecentNavLink(link, navLinks, basePath)
+  );
+
   return (
     <EuiNavDrawer
       ref={ref}
@@ -50,7 +65,16 @@ function navDrawerRenderer(
       <EuiHorizontalRule margin="none" />
       <EuiNavDrawerGroup
         data-test-subj="navDrawerAppsMenu"
-        listItems={navLinks}
+        listItems={navLinks.map(link =>
+          createEuiListItem({
+            link,
+            legacyMode,
+            appId,
+            basePath,
+            navigateToApp,
+            dataTestSubj: 'navDrawerAppsMenuLink',
+          })
+        )}
         aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
           defaultMessage: 'Primary navigation links',
         })}
@@ -59,4 +83,4 @@ function navDrawerRenderer(
   );
 }
 
-export const NavDrawer = React.forwardRef(navDrawerRenderer);
+export const NavDrawer = React.forwardRef(NavDrawerRenderer);
