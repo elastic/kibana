@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { OSS_DATA_ARCHIVE_PATH, OSS_KIBANA_ARCHIVE_PATH } from './constants';
-import { ReportingUsageStats } from '../services';
 import { FtrProviderContext } from '../ftr_provider_context';
+import { OSS_DATA_ARCHIVE_PATH, OSS_KIBANA_ARCHIVE_PATH } from './constants';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ loadTestFile, getService }: FtrProviderContext) {

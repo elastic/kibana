@@ -7,8 +7,8 @@
 import expect from '@kbn/expect';
 // @ts-ignore no module definition
 import { indexTimestamp } from '../../legacy/plugins/reporting/server/lib/esqueue/helpers/index_timestamp';
-import { FtrProviderContext } from './ftr_provider_context';
 import { services as xpackServices } from '../functional/services';
+import { FtrProviderContext } from './ftr_provider_context';
 
 interface PDFAppCounts {
   app: {
@@ -19,7 +19,7 @@ interface PDFAppCounts {
   };
 }
 
-export interface ReportingUsageStats {
+interface ReportingUsageStats {
   available: boolean;
   enabled: boolean;
   total: number;
@@ -41,7 +41,7 @@ function removeWhitespace(str: string) {
   return str.replace(/\s/g, '');
 }
 
-export function ReportingAPIProvider({ getService }: FtrProviderContext) {
+function ReportingAPIProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
@@ -168,4 +168,4 @@ export const services = {
   reportingAPI: ReportingAPIProvider,
 };
 
-export { ReportingAPIProvider };
+export { ReportingUsageStats, ReportingAPIProvider };
