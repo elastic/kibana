@@ -288,7 +288,7 @@ const handleClickIncompatibleLicense = (scope, clusterName) => {
 };
 
 const handleClickInvalidLicense = (scope, clusterName) => {
-  const licensingPath = `${Legacy.shims.getBasePath()}/app/kibana#/management/data/license_management/home`;
+  const licensingPath = `${Legacy.shims.getBasePath()}/app/kibana#/management/stack/license_management/home`;
 
   licenseWarning(scope, {
     title: toMountPoint(
