@@ -13,6 +13,7 @@ import { ConcreteTaskInstance, TaskStatus } from './task';
 import { TaskManagerRunner } from './task_runner';
 import { mockLogger } from './test_utils';
 import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
+import moment from 'moment';
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -113,6 +114,60 @@ describe('TaskManagerRunner', () => {
     expect(instance.runAt.getTime()).toBeLessThanOrEqual(minutesFromNow(10).getTime());
   });
 
+  test('expiration returns time after which timeout will have elapsed from start', async () => {
+    const now = moment();
+    const { runner } = testOpts({
+      instance: {
+        schedule: { interval: '10m' },
+        status: TaskStatus.Running,
+        startedAt: now.toDate(),
+      },
+      definitions: {
+        bar: {
+          timeout: `1m`,
+          createTaskRunner: () => ({
+            async run() {
+              return;
+            },
+          }),
+        },
+      },
+    });
+
+    await runner.run();
+
+    expect(runner.isExpired).toBe(false);
+    expect(runner.expiration).toEqual(now.add(1, 'm').toDate());
+  });
+
+  test('runDuration returns duration which has elapsed since start', async () => {
+    const now = moment()
+      .subtract(30, 's')
+      .toDate();
+    const { runner } = testOpts({
+      instance: {
+        schedule: { interval: '10m' },
+        status: TaskStatus.Running,
+        startedAt: now,
+      },
+      definitions: {
+        bar: {
+          timeout: `1m`,
+          createTaskRunner: () => ({
+            async run() {
+              return;
+            },
+          }),
+        },
+      },
+    });
+
+    await runner.run();
+
+    expect(runner.isExpired).toBe(false);
+    expect(runner.startedAt).toEqual(now);
+  });
+
   test('reschedules tasks that return a runAt', async () => {
     const runAt = minutesFromNow(_.random(1, 10));
     const { runner, store } = testOpts({
@@ -208,7 +263,7 @@ describe('TaskManagerRunner', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  test('warns if cancel is called on a non-cancellable task', async () => {
+  test('debug logs if cancel is called on a non-cancellable task', async () => {
     const { runner, logger } = testOpts({
       definitions: {
         bar: {
@@ -223,10 +278,7 @@ describe('TaskManagerRunner', () => {
     await runner.cancel();
     await promise;
 
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-    expect(logger.warn.mock.calls[0][0]).toMatchInlineSnapshot(
-      `"The task bar \\"foo\\" is not cancellable."`
-    );
+    expect(logger.debug).toHaveBeenCalledWith(`The task bar "foo" is not cancellable.`);
   });
 
   test('sets startedAt, status, attempts and retryAt when claiming a task', async () => {
