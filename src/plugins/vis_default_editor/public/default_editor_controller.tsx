@@ -21,7 +21,7 @@ import React, { Suspense, lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { EventEmitter } from 'events';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiErrorBoundary, EuiLoadingChart } from '@elastic/eui';
 
 import { EditorRenderProps } from 'src/plugins/visualize/public';
 import { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
@@ -80,9 +80,24 @@ class DefaultEditorController {
 
   render(props: EditorRenderProps) {
     render(
-      <Suspense fallback={<EuiLoadingSpinner />}>
-        <DefaultEditor {...this.state} {...props} />
-      </Suspense>,
+      <EuiErrorBoundary>
+        <Suspense
+          fallback={
+            <div
+              style={{
+                display: 'flex',
+                flex: '1 1 auto',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <EuiLoadingChart size="xl" />
+            </div>
+          }
+        >
+          <DefaultEditor {...this.state} {...props} />
+        </Suspense>
+      </EuiErrorBoundary>,
       this.el
     );
   }
