@@ -45,6 +45,7 @@ export default async ({ readConfigFile }) => {
     // testFiles: ['monitoring'].map(prepend).map(logTest),
     // If we need to do things like disable animations, we can do it in configure_start_kibana.sh, in the provisioner...which lives in the integration-test private repo
     uiSettings: {},
+    security: { disableTestUser: true },
   };
 };
 
