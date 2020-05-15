@@ -17,9 +17,6 @@
  * under the License.
  */
 
-import { defineDockerServersConfig } from '@kbn/test';
-import { first, tap } from 'rxjs/operators';
-
 import { pageObjects } from './page_objects';
 import { services } from './services';
 
@@ -44,30 +41,6 @@ export default async function({ readConfigFile }) {
     pageObjects,
     services,
 
-    dockerServers: defineDockerServersConfig(
-      process.env.FLEET_PACKAGE_REGISTRY_PORT
-        ? {
-            helloWorld: {
-              image: 'docker.elastic.co/package-registry/package-registry:master',
-              portInContainer: 8080,
-              port: process.env.FLEET_PACKAGE_REGISTRY_PORT,
-              waitForLogLine: 'package manifests loaded into memory',
-              async waitFor(server, logLine$) {
-                await logLine$
-                  .pipe(
-                    first(line => line.includes('Package registry started')),
-                    tap(line => {
-                      console.log(`waitFor found log line "${line}"`);
-                      console.log('marking server ready', server);
-                    })
-                  )
-                  .toPromise();
-              },
-            },
-          }
-        : {}
-    ),
-
     servers: commonConfig.get('servers'),
 
     esTestCluster: commonConfig.get('esTestCluster'),
@@ -78,7 +51,6 @@ export default async function({ readConfigFile }) {
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--oss',
         '--telemetry.optIn=false',
-        `--xpack.ingestManager.epm.registryUrl=http://localhost:${process.env.FLEET_PACKAGE_REGISTRY_PORT}`,
       ],
     },
 
