@@ -34,7 +34,7 @@ export function ShieldPageProvider({ getService }: FtrProviderContext) {
 
   const samlLogin = async (user, pwd) => {
     try {
-      await find.clickByButtonText('Login with saml/saml');
+      await find.clickByButtonText('Login using SAML');
       await find.setValue('input[name="email"]', user);
       await find.setValue('input[type="password"]', pwd);
       await find.clickByCssSelector('.auth0-label-submit');
