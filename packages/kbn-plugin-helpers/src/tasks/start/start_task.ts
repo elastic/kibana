@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -19,10 +17,35 @@
  * under the License.
  */
 
-const nodeMajorVersion = parseFloat(process.version.replace(/^v(\d+)\..+/, '$1'));
-if (nodeMajorVersion < 6) {
-  console.error('FATAL: kibana-plugin-helpers requires node 6+');
-  process.exit(1);
-}
+import { execFileSync } from 'child_process';
+import { join } from 'path';
 
-require('../target/cli');
+// @ts-ignore
+import split from 'argv-split';
+
+import { TaskContext } from '../../lib';
+
+export function startTask({ plugin, options }: TaskContext) {
+  options = options || {};
+
+  const cmd = 'node';
+  const script = join('scripts', 'kibana.js');
+  const nodeOptions = split(process.env.NODE_OPTIONS || '');
+
+  let args = nodeOptions.concat([script, '--dev', '--plugin-path', plugin.root]);
+
+  if (Array.isArray(plugin.includePlugins)) {
+    plugin.includePlugins.forEach(path => {
+      args = args.concat(['--plugin-path', path]);
+    });
+  }
+
+  if (options.flags) {
+    args = args.concat(options.flags);
+  }
+
+  execFileSync(cmd, args, {
+    cwd: plugin.kibanaRoot,
+    stdio: ['ignore', 1, 2],
+  });
+}
