@@ -83,7 +83,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
-        include: [require.resolve('./monaco.ts'), require.resolve('./eui_theme.ts')],
+        include: [require.resolve('./monaco.ts')],
         use: [
           {
             loader: 'babel-loader',

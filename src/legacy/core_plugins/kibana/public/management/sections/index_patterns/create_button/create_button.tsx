@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { euiTheme } from '@kbn/ui-shared-deps/eui_theme';
+// @ts-ignore
+import { euiColorAccent } from '@elastic/eui/dist/eui_theme_light.json';
 import React, { Component, Fragment } from 'react';
 
 import {
@@ -143,7 +144,7 @@ class CreateButtonComponent extends Component<Props, State> {
 
   private renderBetaBadge = () => {
     return (
-      <EuiBadge color={euiTheme.euiColorAccent}>
+      <EuiBadge color={euiColorAccent}>
         <FormattedMessage
           id="kbn.management.indexPatternList.createButton.betaLabel"
           defaultMessage="Beta"

@@ -43,7 +43,6 @@ exports.externals = {
   'react-router': '__kbnSharedDeps__.ReactRouter',
   'react-router-dom': '__kbnSharedDeps__.ReactRouterDom',
   '@kbn/ui-shared-deps/monaco': '__kbnSharedDeps__.Monaco',
-  '@kbn/ui-shared-deps/eui_theme': '__kbnSharedDeps__.EuiTheme',
   // this is how plugins/consumers from npm load monaco
   'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.MonacoBare',
 
@@ -57,8 +56,8 @@ exports.externals = {
   '@elastic/eui/lib/services': '__kbnSharedDeps__.ElasticEuiLibServices',
   '@elastic/eui/lib/services/format': '__kbnSharedDeps__.ElasticEuiLibServicesFormat',
   '@elastic/eui/dist/eui_charts_theme': '__kbnSharedDeps__.ElasticEuiChartsTheme',
-  '@elastic/eui/dist/eui_theme_light.json': '__kbnSharedDeps__.euiLightTheme',
-  '@elastic/eui/dist/eui_theme_dark.json': '__kbnSharedDeps__.euiDarkTheme',
+  '@elastic/eui/dist/eui_theme_light.json': '__kbnSharedDeps__.ElasticEuiLightTheme',
+  '@elastic/eui/dist/eui_theme_dark.json': '__kbnSharedDeps__.ElasticEuiDarkTheme',
 
   /**
    * massive deps that we should really get rid of or reduce in size substantially

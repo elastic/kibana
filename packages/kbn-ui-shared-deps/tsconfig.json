@@ -2,7 +2,6 @@
   "extends": "../../tsconfig.json",
   "include": [
     "index.d.ts",
-    "monaco.ts",
-    "eui_theme.ts"
+    "monaco.ts"
   ]
 }
