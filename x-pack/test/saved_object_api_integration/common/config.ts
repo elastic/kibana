@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { resolveKibanaPath } from '@kbn/plugin-helpers';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import path from 'path';
