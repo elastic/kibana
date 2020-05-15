@@ -16,6 +16,13 @@ export function maps(kibana) {
     id: APP_ID,
     configPrefix: 'xpack.maps',
     publicDir: resolve(__dirname, 'public'),
+    config(Joi) {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+      })
+        .unknown()
+        .default();
+    },
     uiExports: {
       app: {
         title: getAppTitle(),
