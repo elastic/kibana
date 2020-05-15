@@ -11,6 +11,7 @@ import { SecurityNavControlService } from '.';
 import { SecurityLicenseService } from '../../common/licensing';
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { securityMock } from '../mocks';
+import { cloudMock } from '../../../cloud/public/mocks';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 
 const validLicense = {
@@ -39,6 +40,7 @@ describe('SecurityNavControlService', () => {
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       authc: mockSecuritySetup.authc,
       logoutUrl: '/some/logout/url',
+      cloud: cloudMock.createSetup(),
     });
 
     const coreStart = coreMock.createStart();

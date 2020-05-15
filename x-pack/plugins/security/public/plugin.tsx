@@ -20,6 +20,7 @@ import {
 } from '../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { ManagementSetup, ManagementStart } from '../../../../src/plugins/management/public';
+import { CloudSetup } from '../../cloud/public';
 import {
   ISessionTimeout,
   SessionExpired,
@@ -40,6 +41,7 @@ export interface PluginSetupDependencies {
   securityOss: SecurityOssPluginSetup;
   home?: HomePublicPluginSetup;
   management?: ManagementSetup;
+  cloud?: CloudSetup;
 }
 
 export interface PluginStartDependencies {
@@ -72,7 +74,7 @@ export class SecurityPlugin
 
   public setup(
     core: CoreSetup<PluginStartDependencies>,
-    { home, licensing, management, securityOss }: PluginSetupDependencies
+    { home, licensing, management, securityOss, cloud }: PluginSetupDependencies
   ) {
     const { http, notifications } = core;
     const { anonymousPaths } = http;
@@ -101,6 +103,7 @@ export class SecurityPlugin
       securityLicense: license,
       authc: this.authc,
       logoutUrl,
+      cloud,
     });
 
     accountManagementApp.create({

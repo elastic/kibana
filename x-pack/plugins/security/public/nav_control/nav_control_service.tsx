@@ -11,11 +11,13 @@ import React from 'react';
 import { SecurityLicense } from '../../common/licensing';
 import { SecurityNavControl } from './nav_control_component';
 import { AuthenticationServiceSetup } from '../authentication';
+import { CloudSetup } from '../../../cloud/public';
 
 interface SetupDeps {
   securityLicense: SecurityLicense;
   authc: AuthenticationServiceSetup;
   logoutUrl: string;
+  cloud?: CloudSetup;
 }
 
 interface StartDeps {
@@ -26,15 +28,23 @@ export class SecurityNavControlService {
   private securityLicense!: SecurityLicense;
   private authc!: AuthenticationServiceSetup;
   private logoutUrl!: string;
+  private isCloudEnabled!: boolean;
+  private cloudResetPasswordUrl?: string;
+  private cloudAccountUrl?: string;
+  private cloudSecurityUrl?: string;
 
   private navControlRegistered!: boolean;
 
   private securityFeaturesSubscription?: Subscription;
 
-  public setup({ securityLicense, authc, logoutUrl }: SetupDeps) {
+  public setup({ securityLicense, authc, logoutUrl, cloud }: SetupDeps) {
     this.securityLicense = securityLicense;
     this.authc = authc;
     this.logoutUrl = logoutUrl;
+    this.isCloudEnabled = cloud?.isCloudEnabled || false;
+    this.cloudResetPasswordUrl = cloud?.resetPasswordUrl;
+    this.cloudAccountUrl = cloud?.accountUrl;
+    this.cloudSecurityUrl = cloud?.securityUrl;
   }
 
   public start({ core }: StartDeps) {
@@ -72,6 +82,10 @@ export class SecurityNavControlService {
           user: currentUserPromise,
           editProfileUrl: core.http.basePath.prepend('/security/account'),
           logoutUrl: this.logoutUrl,
+          isCloudEnabled: this.isCloudEnabled,
+          cloudResetPasswordUrl: this.cloudResetPasswordUrl,
+          cloudAccountUrl: this.cloudAccountUrl,
+          cloudSecurityUrl: this.cloudSecurityUrl,
         };
         ReactDOM.render(
           <I18nContext>

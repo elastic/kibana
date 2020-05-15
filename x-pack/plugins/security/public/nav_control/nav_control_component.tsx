@@ -7,24 +7,27 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-
 import {
   EuiAvatar,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiHeaderSectionItemButton,
-  EuiLink,
-  EuiText,
-  EuiSpacer,
   EuiPopover,
   EuiLoadingSpinner,
+  EuiIcon,
+  EuiContextMenu,
+  EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { AuthenticatedUser } from '../../common/model';
+
+import './nav_control_component.scss';
 
 interface Props {
   user: Promise<AuthenticatedUser>;
   editProfileUrl: string;
   logoutUrl: string;
+  isCloudEnabled?: boolean;
+  cloudResetPasswordUrl?: string;
+  cloudAccountUrl?: string;
+  cloudSecurityUrl?: string;
 }
 
 interface State {
@@ -65,7 +68,14 @@ export class SecurityNavControl extends Component<Props, State> {
   };
 
   render() {
-    const { editProfileUrl, logoutUrl } = this.props;
+    const {
+      editProfileUrl,
+      logoutUrl,
+      isCloudEnabled = false,
+      cloudResetPasswordUrl,
+      cloudAccountUrl,
+      cloudSecurityUrl,
+    } = this.props;
     const { authenticatedUser } = this.state;
 
     const name =
@@ -92,6 +102,79 @@ export class SecurityNavControl extends Component<Props, State> {
       </EuiHeaderSectionItemButton>
     );
 
+    const items: EuiContextMenuPanelItemDescriptor[] = [
+      {
+        name: (
+          <FormattedMessage
+            id="xpack.security.navControlComponent.editProfileLinkText"
+            defaultMessage="Profile"
+          />
+        ),
+        icon: <EuiIcon type="user" size="m" />,
+        href: editProfileUrl,
+        'data-test-subj': 'profileLink',
+      },
+    ];
+
+    if (isCloudEnabled) {
+      items.push(
+        {
+          name: (
+            <FormattedMessage
+              id="xpack.security.navControlComponent.cloudProfileLinkText"
+              defaultMessage="Cloud profile"
+            />
+          ),
+          icon: <EuiIcon type="logoCloud" size="m" />,
+          href: cloudResetPasswordUrl,
+          'data-test-subj': 'cloudProfileLink',
+        },
+        {
+          name: (
+            <FormattedMessage
+              id="xpack.security.navControlComponent.cloudAccountLinkText"
+              defaultMessage="Account"
+            />
+          ),
+          icon: <EuiIcon type="gear" size="m" />,
+          href: cloudAccountUrl,
+          'data-test-subj': 'cloudAccountLink',
+        },
+        {
+          name: (
+            <FormattedMessage
+              id="xpack.security.navControlComponent.cloudSecurityLinkText"
+              defaultMessage="Security"
+            />
+          ),
+          icon: <EuiIcon type="lock" size="m" />,
+          href: cloudSecurityUrl,
+          'data-test-subj': 'cloudSecurityLink',
+        }
+      );
+    }
+
+    items.push({
+      name: (
+        <FormattedMessage
+          id="xpack.security.navControlComponent.logoutLinkText"
+          defaultMessage="Log out"
+        />
+      ),
+      className: 'securityNavControlComponent__logoutLink',
+      icon: <EuiIcon type="exit" size="m" />,
+      href: logoutUrl,
+      'data-test-subj': 'logoutLink',
+    });
+
+    const panels = [
+      {
+        id: 0,
+        title: name,
+        items,
+      },
+    ];
+
     return (
       <EuiPopover
         id="headerUserMenu"
@@ -103,44 +186,12 @@ export class SecurityNavControl extends Component<Props, State> {
         closePopover={this.closeMenu}
         panelPaddingSize="none"
       >
-        <div style={{ width: 320 }} data-test-subj="userMenu">
-          <EuiFlexGroup gutterSize="m" className="euiHeaderProfile" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiAvatar name={name} size="xl" />
-            </EuiFlexItem>
-
-            <EuiFlexItem>
-              <EuiText>
-                <p className="eui-textBreakWord">{name}</p>
-              </EuiText>
-
-              <EuiSpacer size="m" />
-
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiFlexGroup justifyContent="spaceBetween">
-                    <EuiFlexItem grow={false}>
-                      <EuiLink href={editProfileUrl} data-test-subj="profileLink">
-                        <FormattedMessage
-                          id="xpack.security.navControlComponent.editProfileLinkText"
-                          defaultMessage="Edit profile"
-                        />
-                      </EuiLink>
-                    </EuiFlexItem>
-
-                    <EuiFlexItem grow={false}>
-                      <EuiLink href={logoutUrl} data-test-subj="logoutLink">
-                        <FormattedMessage
-                          id="xpack.security.navControlComponent.logoutLinkText"
-                          defaultMessage="Log out"
-                        />
-                      </EuiLink>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <div data-test-subj="userMenu">
+          <EuiContextMenu
+            className="securityNavControlComponent__userMenu"
+            initialPanelId={0}
+            panels={panels}
+          />
         </div>
       </EuiPopover>
     );
