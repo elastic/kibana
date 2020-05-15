@@ -1,13 +1,13 @@
 [[release-highlights-7.0.0]]
 == 7.0.0 release highlights
 ++++
-<titleabbrev>7.0.0</titleabbrev>
+<titleabbrev>What's new in Kibana</titleabbrev>
 ++++
 
-Each release of {kib} brings new features and product improvements. 
+Each release of {kib} brings new features and product improvements.
 Here are the highlights of the feature and user experience changes in 7.0.0.
 
-Refer to the {kib} <<breaking-changes-7.0, breaking changes>> and <<release-notes, 
+Refer to the {kib} <<breaking-changes-7.0, breaking changes>> and <<release-notes,
 release notes>> for a list of bug fixes and other changes.
 
 //NOTE: The notable-highlights tagged regions are re-used in the
@@ -18,14 +18,14 @@ release notes>> for a list of bug fixes and other changes.
 [float]
 === Fresh, sleek design
 
-Since the introduction of the https://elastic.github.io/eui/#/[Elastic UI framework] in 6.2, 
-{kib} has undergone a major design revamp. This release showcases a lighter, more 
-minimal design that brings it all together. The biggest change is a persistent global header, which 
-displays information related to where you are in {kib}. The side navigation 
-is now collapsed by default, giving applications more horizontal space. 
-Dashboards and most of the {kib} applications also got much needed touch-ups. 
-Finally, the font changed to https://rsms.me/inter/[Inter UI], which is closer to 
-more modern system fonts found on your OS of choice. 
+Since the introduction of the https://elastic.github.io/eui/#/[Elastic UI framework] in 6.2,
+{kib} has undergone a major design revamp. This release showcases a lighter, more
+minimal design that brings it all together. The biggest change is a persistent global header, which
+displays information related to where you are in {kib}. The side navigation
+is now collapsed by default, giving applications more horizontal space.
+Dashboards and most of the {kib} applications also got much needed touch-ups.
+Finally, the font changed to https://rsms.me/inter/[Inter UI], which is closer to
+more modern system fonts found on your OS of choice.
 
 
 [role="screenshot"]
@@ -35,12 +35,12 @@ image::images/highlights-7.0.0-design.png[Fresh, sleek Kibana design]
 === {kib} Query Language on by default
 
 In 6.3, {kib} introduced the
-{kibana-ref}/kuery-query.html[Kibana Query Language (KQL)], and in 7.0.0, 
-KQL is the default.  KQL offers a simplified query syntax and support for 
+{kibana-ref}/kuery-query.html[Kibana Query Language (KQL)], and in 7.0.0,
+KQL is the default.  KQL offers a simplified query syntax and support for
 scripted fields. If you have a https://www.elastic.co/subscriptions[Basic license]
-(the default distribution) or above, KQL also provides 
+(the default distribution) or above, KQL also provides
 autocomplete. If you prefer the
-{kibana-ref}/lucene-query.html[Lucene query syntax], you have the option 
+{kibana-ref}/lucene-query.html[Lucene query syntax], you have the option
 to turn off KQL.
 
 [role="screenshot"]
@@ -51,7 +51,7 @@ image::images/highlights-7.0.0-kql.png[Kibana Query Language]
 
 {kib} now supports a dark theme across the entire application. To try out this theme, go
 to *Management > Advanced settings*, flip the dark mode switch, and reload your
-page. Because theme selection is saved at the {kibana-ref}/xpack-spaces.html[Spaces] level, 
+page. Because theme selection is saved at the {kibana-ref}/xpack-spaces.html[Spaces] level,
 you can no longer set a dark or light theme on an individual dashboard.
 
 [role="screenshot"]
@@ -62,9 +62,9 @@ image::images/highlights-7.0.0-dark-theme.png[Kibana dark theme]
 [float]
 === Responsive dashboards
 
-experimental[] As part of the enhancements to {kib} dashboards in 7.0, 
+experimental[] As part of the enhancements to {kib} dashboards in 7.0,
 the design is
-more responsive. If you want to view and interact with {kib} on the go, 
+more responsive. If you want to view and interact with {kib} on the go,
 pull it up on your phone and test out this new, experimental responsive layout.
 
 
@@ -77,15 +77,15 @@ image::images/highlights-7.0.0-responsive.png[Responsive dashboard]
 
 The timepicker now makes it easier to deal with complex date queries.  For example,
 you can mix relative times with absolute ones. The timepicker design is also improved.
-The control no longer pushes the content down the page as you interact 
-with it. The design is also more compact, which is necessary 
+The control no longer pushes the content down the page as you interact
+with it. The design is also more compact, which is necessary
 to make it work better on mobile dashboards.
 
 [role="screenshot"]
 image::images/highlights-7.0.0-timepicker.png[Kibana timepicker]
 
-Filters are enhanced in two ways.  Each filter now provides a dropdown menu 
-that clearly defines the actions you can take on the filter. There’s also a 
+Filters are enhanced in two ways.  Each filter now provides a dropdown menu
+that clearly defines the actions you can take on the filter. There’s also a
 new menu for dealing with filters in bulk.
 
 [role="screenshot"]
@@ -94,31 +94,27 @@ image::images/highlights-7.0.0-filters.png[Filters menu]
 [float]
 === Saved objects structure improvements
 
-The <<breaking-changes-7.0-saved-objects,structure of saved objects changed>> so 
-that they are now aware of each other.  
+The <<breaking-changes-7.0-saved-objects,structure of saved objects changed>> so
+that they are now aware of each other.
 This means you can now export a dashboard,
-including all visualization dependencies, from the Saved objects page. 
-You can also easily move objects from one {kib} instance to another or 
+including all visualization dependencies, from the Saved objects page.
+You can also easily move objects from one {kib} instance to another or
 between Spaces.
 
 [float]
 === Canvas enhancements
 
-Canvas has two notable improvements: an expandable expression editor and 
-additional keyboard shortcuts. 
+Canvas has two notable improvements: an expandable expression editor and
+additional keyboard shortcuts.
 
-To maximize or minimize the expression editor, 
+To maximize or minimize the expression editor,
 use the expand button image:images/highlights-7.0.0-expand.png[]
-in the top right corner of the editor. To adjust the font size, use the slider 
+in the top right corner of the editor. To adjust the font size, use the slider
 at the bottom.
 
-Canvas has more keyboard shortcuts for moving elements to the front and 
-back and for copying your elements. To discover all shortcuts available in Canvas, 
+Canvas has more keyboard shortcuts for moving elements to the front and
+back and for copying your elements. To discover all shortcuts available in Canvas,
 click the help icon.
 
 [role="screenshot"]
 image::images/highlights-7.0.0-canvas-kbd.png[]
-
-
-
-

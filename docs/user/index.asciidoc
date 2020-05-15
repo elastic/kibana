@@ -1,5 +1,7 @@
 include::introduction.asciidoc[]
 
+include::highlights-7.7.0.asciidoc[]
+
 include::getting-started.asciidoc[]
 
 include::setup.asciidoc[]
@@ -45,4 +47,3 @@ include::alerting/index.asciidoc[]
 include::api.asciidoc[]
 
 include::plugins.asciidoc[]
-

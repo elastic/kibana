@@ -17,7 +17,6 @@ full list, see <<release-notes>> and <<breaking-changes>>.
 
 --
 
-include::highlights-7.7.0.asciidoc[]
 include::highlights-7.6.0.asciidoc[]
 include::highlights-7.5.0.asciidoc[]
 include::highlights-7.4.0.asciidoc[]
