@@ -8,7 +8,7 @@ import { Alert } from '../../alerting/common';
 export interface CommonBaseAlert {
   type: string;
   label: string;
-  throttle: string;
+  defaultThrottle: string;
   rawAlert: Alert;
 }
 

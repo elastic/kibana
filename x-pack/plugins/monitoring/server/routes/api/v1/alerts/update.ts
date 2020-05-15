@@ -20,6 +20,7 @@ export function updateAlertsRoute(server: any, npRoute: RouteDependencies) {
           type: schema.string(),
         }),
         body: schema.object({
+          throttle: schema.maybe(schema.string()),
           action: schema.maybe(
             schema.object({
               id: schema.string(),
@@ -34,9 +35,13 @@ export function updateAlertsRoute(server: any, npRoute: RouteDependencies) {
     async (context, request, response) => {
       try {
         const { type } = request.params;
-        const { action } = request.body;
+        const { action, throttle } = request.body;
         const alertsClient = context.alerting?.getAlertsClient();
-        if (!alertsClient || !action || !type) {
+        if (!alertsClient || !type) {
+          return response.notFound();
+        }
+
+        if (!action && !throttle) {
           return response.notFound();
         }
 
@@ -45,7 +50,11 @@ export function updateAlertsRoute(server: any, npRoute: RouteDependencies) {
           return response.notFound();
         }
 
-        await alert.updateOrAddAction(alertsClient, action);
+        if (action) {
+          await alert.updateOrAddAction(alertsClient, action);
+        } else if (throttle) {
+          await alert.updateThrottle(alertsClient, throttle);
+        }
         return response.ok({ body: alert });
       } catch (err) {
         throw handleError(err);

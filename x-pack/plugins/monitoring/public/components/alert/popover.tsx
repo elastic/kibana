@@ -28,6 +28,8 @@ import {
   EuiOverlayMask,
   EuiSuperSelect,
   EuiFormRow,
+  EuiFieldNumber,
+  EuiSelect,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
@@ -46,6 +48,7 @@ import { ActionType, ActionResult } from '../../../../actions/common';
 import { ConnectorAddModal } from '../../../../triggers_actions_ui/public/application/sections/action_connector_form/connector_add_modal';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionConnector, IErrorObject } from '../../../../triggers_actions_ui/public/types';
+import { getTimeUnitLabel, TIME_UNITS } from '../../../../triggers_actions_ui/public';
 
 interface AlertPopoverContextProps {
   alert: CommonBaseAlert;
@@ -53,6 +56,7 @@ interface AlertPopoverContextProps {
   validConnectorTypes: ActionType[];
   defaultParametersByAlertType: CommonActionDefaultParameters;
   addAction: (action: ActionResult) => void;
+  updateThrottle: (throttle: string | null) => void;
 }
 const AlertPopoverContext = React.createContext<AlertPopoverContextProps>({} as any);
 
@@ -549,14 +553,160 @@ const AlertPopoverTriggeredActions: React.FC<AlertPopoverTriggeredActionsProps> 
   );
 };
 
+const parseRegex = /(\d+)(\w+)/;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface AlertPopoverConfigureThrottleProps {
+  done: (alert: CommonBaseAlert) => void;
+  cancel: () => void;
+}
+const AlertPopoverConfigureThrottle: React.FC<AlertPopoverConfigureThrottleProps> = (
+  props: AlertPopoverConfigureThrottleProps
+) => {
+  const { done, cancel } = props;
+  const context = React.useContext(AlertPopoverContext);
+  const parsed = parseRegex.exec(context.alert.rawAlert.throttle || '');
+  const defaultThrottleValue = parsed && parsed[1] ? parseInt(parsed[1], 10) : 1;
+  const defaultThrottleUnit = parsed && parsed[2] ? parsed[2] : TIME_UNITS.MINUTE;
+  const [throttleValue, setThrottleValue] = React.useState(defaultThrottleValue);
+  const [throttleUnit, setThrottleUnit] = React.useState(defaultThrottleUnit);
+  const [isSaving, setIsSaving] = React.useState(false);
+
+  const timeUnits = Object.values(TIME_UNITS).map(value => ({
+    value,
+    text: getTimeUnitLabel(value),
+  }));
+
+  async function save() {
+    setIsSaving(true);
+    let alert;
+    try {
+      alert = await Legacy.shims.kfetch({
+        method: 'PUT',
+        pathname: `/api/monitoring/v1/alert/${context.alert.type}`,
+        body: JSON.stringify({
+          throttle: `${throttleValue}${throttleUnit}`,
+        }),
+      });
+    } catch (err) {
+      Legacy.shims.toastNotifications.addDanger({
+        title: 'Error saving throttle',
+        text: err.message,
+      });
+    }
+    setIsSaving(false);
+    done(alert);
+  }
+
+  return (
+    <EuiOverlayMask>
+      <EuiModal onClose={cancel} initialFocus="[name=popswitch]">
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>Configure throttle</EuiModalHeaderTitle>
+        </EuiModalHeader>
+
+        <EuiModalBody>
+          <EuiFormRow label="Notify me every">
+            <EuiFlexGroup>
+              <EuiFlexItem grow={2}>
+                <EuiFieldNumber
+                  compressed
+                  value={throttleValue}
+                  onChange={e => setThrottleValue(parseInt(e.target.value, 10))}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={4}>
+                <EuiSelect
+                  compressed
+                  value={throttleUnit}
+                  onChange={e => setThrottleUnit(e.target.value)}
+                  options={timeUnits}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+        </EuiModalBody>
+
+        <EuiModalFooter>
+          <EuiButtonEmpty size="s" onClick={cancel}>
+            Cancel
+          </EuiButtonEmpty>
+          <EuiButton size="s" onClick={save} isDisabled={isSaving}>
+            {isSaving ? 'Saving...' : 'Save'}
+          </EuiButton>
+        </EuiModalFooter>
+      </EuiModal>
+    </EuiOverlayMask>
+  );
+};
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface AlertPopoverSettingsProps {}
+const AlertPopoverSettings: React.FC<AlertPopoverSettingsProps> = (
+  props: AlertPopoverTriggeredActionsProps
+) => {
+  const context = React.useContext(AlertPopoverContext);
+  const [activeConfigureSetting, setActiveConfigureSetting] = React.useState<string | null>(null);
+
+  let configureSettingUi = null;
+  switch (activeConfigureSetting) {
+    case 'throttle':
+      configureSettingUi = (
+        <AlertPopoverConfigureThrottle
+          cancel={() => setActiveConfigureSetting(null)}
+          done={alert => {
+            setActiveConfigureSetting(null);
+            context.updateThrottle(alert.rawAlert.throttle);
+          }}
+        />
+      );
+      break;
+  }
+
+  const settingsList = (
+    <Fragment>
+      <EuiListGroupItem
+        label={
+          <Fragment>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="clock" size="s" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <p>Notify me every {context.alert.rawAlert.throttle}</p>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiLink onClick={() => setActiveConfigureSetting('throttle')}>
+                  <EuiText size="s">Configure</EuiText>
+                </EuiLink>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {activeConfigureSetting ? (
+              <Fragment>
+                <EuiSpacer size="s" />
+                {configureSettingUi}
+              </Fragment>
+            ) : null}
+          </Fragment>
+        }
+      />
+    </Fragment>
+  );
+
+  return (
+    <EuiListGroup gutterSize="none" size="xs">
+      {settingsList}
+    </EuiListGroup>
+  );
+};
+
 interface AlertPopoverProps {
   alert: CommonAlertStatus;
 }
 export const AlertPopover: React.FC<AlertPopoverProps> = (props: AlertPopoverProps) => {
-  const {
-    alert: { alert, states },
-  } = props;
-
+  const states = props.alert.states;
+  const [alert, setAlert] = React.useState(props.alert.alert);
   const [showAlert, setShowAlert] = React.useState(false);
   const [validConnectorTypes, setValidConnectorTypes] = React.useState<ActionType[]>([]);
   const [configuredActions, setConfiguredActions] = React.useState<ActionResult[]>([]);
@@ -587,6 +737,17 @@ export const AlertPopover: React.FC<AlertPopoverProps> = (props: AlertPopoverPro
   function addAction(action: ActionResult) {
     setConfiguredActions([...configuredActions, action]);
   }
+  function updateThrottle(throttle: string | null) {
+    if (throttle) {
+      setAlert({
+        ...alert,
+        rawAlert: {
+          ...alert.rawAlert,
+          throttle,
+        },
+      });
+    }
+  }
 
   const firingStates = states.filter(state => state.firing);
   if (!firingStates.length) {
@@ -594,26 +755,6 @@ export const AlertPopover: React.FC<AlertPopoverProps> = (props: AlertPopoverPro
   }
 
   const firingState = firingStates[0];
-
-  const settingsList = (
-    <Fragment>
-      <EuiListGroupItem
-        label={
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="clock" size="s" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <p>Notify me every {alert.throttle}</p>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-      />
-    </Fragment>
-  );
-
   const nextStepsUi =
     firingState.state.ui.message.nextSteps && firingState.state.ui.message.nextSteps.length ? (
       <ul>
@@ -632,6 +773,7 @@ export const AlertPopover: React.FC<AlertPopoverProps> = (props: AlertPopoverPro
           configuredActions,
           defaultParametersByAlertType,
           addAction,
+          updateThrottle,
         }}
       >
         <EuiPopover
@@ -670,9 +812,7 @@ export const AlertPopover: React.FC<AlertPopoverProps> = (props: AlertPopoverPro
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="s" />
-            <EuiListGroup gutterSize="none" size="xs">
-              {settingsList}
-            </EuiListGroup>
+            <AlertPopoverSettings />
           </div>
         </EuiPopover>
       </AlertPopoverContext.Provider>

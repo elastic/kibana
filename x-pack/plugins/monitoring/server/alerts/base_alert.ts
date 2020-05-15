@@ -34,7 +34,7 @@ import { AlertSeverity } from './enums';
 import { ActionResult } from '../../../actions/common';
 
 const DEFAULT_SERVER_LOG_NAME = 'Monitoring: Write to Kibana log';
-const ALERTS_UPDATE_FIELDS = ['name', 'tags', 'schedule', 'params', 'throttle'];
+const ALERTS_UPDATE_FIELDS = ['name', 'tags', 'schedule', 'params', 'throttle', 'actions'];
 
 export class BaseAlert {
   protected getUiSettingsService!: () => Promise<UiSettingsServiceStart>;
@@ -44,8 +44,8 @@ export class BaseAlert {
   protected kibanaUrl!: string;
   public type!: string;
   public label!: string;
-  public throttle: string = '1m';
-  public interval: string = '1m';
+  public defaultThrottle: string = '1m';
+  public defaultInterval: string = '1m';
   protected alertType!: AlertType;
   public rawAlert: Alert | undefined;
 
@@ -145,13 +145,31 @@ export class BaseAlert {
     return await alertsClient.create({
       data: {
         enabled: true,
+        tags: [],
+        params: {},
+        consumer: 'monitoring',
         name: this.label,
         alertTypeId: this.type,
-        throttle: this.throttle,
-        schedule: { interval: this.interval },
+        throttle: this.defaultThrottle,
+        schedule: { interval: this.defaultInterval },
         actions,
       },
     });
+  }
+
+  public async updateThrottle(alertsClient: AlertsClient, throttle: string) {
+    if (!this.rawAlert) {
+      return null;
+    }
+
+    this.rawAlert = (await alertsClient.update({
+      id: this.rawAlert.id,
+      data: {
+        // TOOD: this will not scale, maybe an omit?
+        ...pick(this.rawAlert, ALERTS_UPDATE_FIELDS),
+        throttle,
+      },
+    })) as Alert;
   }
 
   public async updateOrAddAction(alertsClient: AlertsClient, action: AlertAction) {
