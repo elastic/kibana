@@ -1,18 +1,21 @@
 {
   "name": "@kbn/plugin-helpers",
-  "version": "9.0.2",
+  "version": "1.0.0",
   "private": true,
   "description": "Just some helpers for kibana plugin devs.",
   "license": "Apache-2.0",
   "main": "target/lib/index.js",
-  "scripts": {
-    "kbn:bootstrap": "tsc"
-  },
   "bin": {
     "plugin-helpers": "bin/plugin-helpers.js"
   },
+  "scripts": {
+    "kbn:bootstrap": "tsc",
+    "kbn:watch": "tsc --watch"
+  },
   "dependencies": {
     "@babel/core": "^7.9.0",
+    "@kbn/dev-utils": "1.0.0",
+    "@kbn/optimizer": "1.0.0",
     "argv-split": "^2.0.1",
     "commander": "^3.0.0",
     "del": "^5.1.0",

@@ -130,6 +130,7 @@ module.exports = function({ name, targetPath }) {
       'translations/**/*': 'generateTranslations',
       'i18nrc.json': 'generateTranslations',
       'eslintrc.js': 'generateEslint',
+      'package.json': '!customPath',
     },
     move: {
       'eslintrc.js': '.eslintrc.js',

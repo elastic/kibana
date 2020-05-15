@@ -1,0 +1,12 @@
+{
+  "name": "<%= camelCase(name) %>",
+  "version": "0.0.0",
+  "kibana": {
+    "version": "<%= kbnVersion %>"
+  },
+  "private": true,
+  "scripts": {
+    "plugin-helpers": "node ../../scripts/plugin_helpers",
+    "kbn": "node ../../scripts/kbn"
+  }
+}

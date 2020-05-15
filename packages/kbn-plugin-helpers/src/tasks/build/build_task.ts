@@ -26,7 +26,7 @@ import { createPackage } from './create_package';
 
 export async function buildTask({ plugin, options = {} }: TaskContext) {
   let buildVersion = plugin.version;
-  let kibanaVersion = (plugin.pkg.kibana && plugin.pkg.kibana.version) || plugin.pkg.version;
+  let kibanaVersion = plugin.pkg.kibana?.version || plugin.pkg.version;
   let buildFiles = plugin.buildSourcePatterns;
   let buildTarget = join(plugin.root, 'build');
 
@@ -41,7 +41,7 @@ export async function buildTask({ plugin, options = {} }: TaskContext) {
   if (options.kibanaVersion) kibanaVersion = options.kibanaVersion;
 
   const chosenKibanaVersion =
-    kibanaVersion === 'kibana' ? await askForKibanaVersion() : kibanaVersion;
+    !kibanaVersion || kibanaVersion === 'kibana' ? await askForKibanaVersion() : kibanaVersion;
 
   await createBuild(plugin, buildTarget, buildVersion, chosenKibanaVersion, buildFiles);
 

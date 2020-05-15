@@ -35,7 +35,7 @@
     "@kbn/dev-utils": "1.0.0",
     "@kbn/es": "1.0.0",
     "@kbn/expect": "1.0.0",
-    "@kbn/plugin-helpers": "9.0.2",
+    "@kbn/plugin-helpers": "1.0.0",
     "@kbn/test": "1.0.0",
     "@kbn/utility-types": "1.0.0",
     "@storybook/addon-actions": "^5.2.6",

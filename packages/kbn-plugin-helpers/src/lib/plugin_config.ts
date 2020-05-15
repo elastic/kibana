@@ -17,10 +17,12 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { readFileSync } from 'fs';
+import Path from 'path';
+import Fs from 'fs';
 
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { configFile } from './config_file';
+import { parsePkgJson } from './parse_pkg_json';
 
 export interface PluginConfig {
   root: string;
@@ -31,44 +33,62 @@ export interface PluginConfig {
   id: string;
   version: string;
   pkg: any;
+  usesKp: boolean;
+  styleSheetToCompile?: string;
   [k: string]: unknown;
 }
 
 export function pluginConfig(root: string = process.cwd()): PluginConfig {
-  const pluginPackageJsonPath = resolve(root, 'package.json');
-  const pkg = JSON.parse(readFileSync(pluginPackageJsonPath, 'utf8'));
+  const pluginPackageJsonPath = Path.resolve(root, 'package.json');
+  const pkg = parsePkgJson(pluginPackageJsonPath);
+
+  const usesKp = Fs.existsSync(Path.resolve(root, 'kibana.json'));
 
   const buildSourcePatterns = [
     'yarn.lock',
     'tsconfig.json',
     'package.json',
+    'kibana.json',
     'index.{js,ts}',
-    '{lib,public,server,webpackShims,translations}/**/*',
+    '{lib,server,server,webpackShims,translations}/**/*',
   ];
 
-  const kibanaExtraDir = resolve(root, '../../kibana');
-  const kibanaPluginsDir = resolve(root, '../../');
-  const isPluginOnKibanaExtra = pluginPackageJsonPath.includes(kibanaExtraDir);
-  const isPluginXpack = pkg.name === 'x-pack';
+  const isXpack = pkg.name === 'x-pack';
 
-  if (isPluginOnKibanaExtra && !isPluginXpack) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      `In the future we will disable ../kibana-extra/{pluginName}. You should move your plugin ${pkg.name} as soon as possible to ./plugins/{pluginName}`
+  if (!isXpack && Path.resolve(root, '..') !== Path.resolve(REPO_ROOT, 'plugins')) {
+    throw new Error(
+      `Plugin located at ${root} must be moved to the plugins directory within the Kibana repo`
     );
   }
 
-  const kibanaRootWhenNotXpackPlugin = isPluginOnKibanaExtra ? kibanaExtraDir : kibanaPluginsDir;
+  const config = configFile(root);
+
+  let styleSheetToCompile;
+  if (typeof config.styleSheetToCompile === 'string') {
+    if (usesKp) {
+      throw new Error(
+        '"styleSheetToCompile" is no longer supported once migrating to the Kibana Platform, import .scss files instead'
+      );
+    }
+    styleSheetToCompile = Path.resolve(root, config.styleSheetToCompile);
+    if (!Fs.existsSync(config.styleSheetToCompile)) {
+      throw new Error(`"styleSheetToCompile" path does not exist [${config.styleSheetToCompile}]`);
+    }
+  } else if (config.styleSheetToCompile) {
+    throw new Error(`"styleSheetToCompile" must be a string or undefined`);
+  }
 
   return {
     root,
-    kibanaRoot: isPluginXpack ? resolve(root, '..') : kibanaRootWhenNotXpackPlugin,
+    kibanaRoot: REPO_ROOT,
     serverTestPatterns: ['server/**/__tests__/**/*.js'],
     buildSourcePatterns,
     skipInstallDependencies: false,
     id: pkg.name as string,
     version: pkg.version as string,
     pkg,
-    ...configFile(root),
+    usesKp,
+    ...config,
+    styleSheetToCompile,
   };
 }

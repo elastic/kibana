@@ -32,6 +32,9 @@ import minimatch from 'minimatch';
 // @ts-ignore
 import gulpBabel from 'gulp-babel';
 
+import { ToolingLog } from '@kbn/dev-utils';
+import { OptimizerConfig, runOptimizer, logOptimizerState } from '@kbn/optimizer';
+
 import { PluginConfig, winCmd, pipeline } from '../../lib';
 import { rewritePackageJson } from './rewrite_package_json';
 
@@ -104,6 +107,7 @@ export async function createBuild(
 ) {
   const buildSource = plugin.root;
   const buildRoot = path.join(buildTarget, 'kibana', plugin.id);
+  const absBuildRoot = relative(buildTarget, buildRoot);
 
   await del(buildTarget);
 
@@ -121,7 +125,7 @@ export async function createBuild(
     // put all files inside the correct directories
     rename(function nestFileInDir(filePath) {
       const nonRelativeDirname = filePath.dirname!.replace(/^(\.\.\/?)+/g, '');
-      filePath.dirname = path.join(relative(buildTarget, buildRoot), nonRelativeDirname);
+      filePath.dirname = path.join(absBuildRoot, nonRelativeDirname);
     }),
 
     // write files back to disk
@@ -135,17 +139,32 @@ export async function createBuild(
     });
   }
 
+  if (plugin.usesKp) {
+    const config = OptimizerConfig.create({
+      repoRoot: plugin.kibanaRoot,
+      pluginPaths: [plugin.root],
+      cache: false,
+      dist: true,
+      pluginScanDirs: [],
+    });
+
+    const log = new ToolingLog({
+      level: 'info',
+      writeTo: process.stdout,
+    });
+
+    await runOptimizer(config)
+      .pipe(logOptimizerState(log, config))
+      .toPromise();
+  }
+
   // compile stylesheet
   if (typeof plugin.styleSheetToCompile === 'string') {
-    const file = path.resolve(plugin.root, plugin.styleSheetToCompile);
-    if (!existsSync(file)) {
-      throw new Error(`Path provided for styleSheetToCompile does not exist: ${file}`);
-    }
-
-    const outputFileName = path.basename(file, path.extname(file)) + '.css';
+    const outputFileName =
+      path.basename(plugin.styleSheetToCompile, path.extname(plugin.styleSheetToCompile)) + '.css';
     const output = path.join(buildRoot, path.dirname(plugin.styleSheetToCompile), outputFileName);
 
-    const rendered = sass.renderSync({ file, output });
+    const rendered = sass.renderSync({ file: plugin.styleSheetToCompile, output });
     writeFileSync(output, rendered.css);
 
     del.sync([path.join(buildRoot, '**', '*.s{a,c}ss')]);
@@ -185,7 +204,7 @@ export async function createBuild(
 
   // remove symlinked dependencies
   await pipeline(
-    vfs.src([relative(buildTarget, buildRoot) + '/**/*'], {
+    vfs.src([relative(absBuildRoot, '**/*')], {
       cwd: buildTarget,
       base: buildTarget,
       resolveSymlinks: false,

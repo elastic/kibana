@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import Fs from 'fs';
 import Path from 'path';
 
 import program from 'commander';
+import { REPO_ROOT } from '@kbn/dev-utils';
 
 import { createCommanderAction } from './lib/commander_action';
+import { parsePkgJson } from './lib/parse_pkg_json';
 import { docs } from './lib/docs';
 import { enableCollectingUnknownOptions } from './lib/enable_collecting_unknown_options';
 
-const pkg = JSON.parse(Fs.readFileSync(Path.resolve(__dirname, '../package.json'), 'utf8'));
-program.version(pkg.version);
+program.version(parsePkgJson(Path.resolve(REPO_ROOT, 'package.json')).branch);
 
 enableCollectingUnknownOptions(
   program
