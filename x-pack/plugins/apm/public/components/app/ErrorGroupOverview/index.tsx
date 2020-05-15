@@ -9,7 +9,7 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiTitle,
+  EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -20,61 +20,76 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../observability/public';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { callApmApi } from '../../../services/rest/createCallApmApi';
+import CustomPlot from '../../shared/charts/CustomPlot';
 
 const ErrorGroupOverview: React.FC = () => {
   const { urlParams, uiFilters } = useUrlParams();
 
   const { serviceName, start, end, sortField, sortDirection } = urlParams;
 
-  const { data: errorDistributionData } = useFetcher(
-    (callApmApi) => {
-      if (serviceName && start && end) {
-        return callApmApi({
-          pathname: '/api/apm/services/{serviceName}/errors/distribution',
-          params: {
-            path: {
-              serviceName,
-            },
-            query: {
-              start,
-              end,
-              uiFilters: JSON.stringify(uiFilters),
-            },
+  const { data: errorDistributionData } = useFetcher(() => {
+    if (serviceName && start && end) {
+      return callApmApi({
+        pathname: '/api/apm/services/{serviceName}/errors/distribution',
+        params: {
+          path: {
+            serviceName
           },
-        });
-      }
-    },
-    [serviceName, start, end, uiFilters]
-  );
+          query: {
+            start,
+            end,
+            uiFilters: JSON.stringify(uiFilters)
+          }
+        }
+      });
+    }
+  }, [serviceName, start, end, uiFilters]);
 
-  const { data: errorGroupListData } = useFetcher(
-    (callApmApi) => {
-      const normalizedSortDirection = sortDirection === 'asc' ? 'asc' : 'desc';
-
-      if (serviceName && start && end) {
-        return callApmApi({
-          pathname: '/api/apm/services/{serviceName}/errors',
-          params: {
-            path: {
-              serviceName,
-            },
-            query: {
-              start,
-              end,
-              sortField,
-              sortDirection: normalizedSortDirection,
-              uiFilters: JSON.stringify(uiFilters),
-            },
+  const { data: erroRateData } = useFetcher(() => {
+    if (serviceName && start && end) {
+      return callApmApi({
+        pathname: '/api/apm/services/{serviceName}/errors/rate',
+        params: {
+          path: {
+            serviceName
           },
-        });
-      }
-    },
-    [serviceName, start, end, sortField, sortDirection, uiFilters]
-  );
+          query: {
+            start,
+            end,
+            uiFilters: JSON.stringify(uiFilters)
+          }
+        }
+      });
+    }
+  }, [serviceName, start, end, uiFilters]);
+  console.log('### caue: erroRateData', erroRateData);
+
+  const { data: errorGroupListData } = useFetcher(() => {
+    const normalizedSortDirection = sortDirection === 'asc' ? 'asc' : 'desc';
+
+    if (serviceName && start && end) {
+      return callApmApi({
+        pathname: '/api/apm/services/{serviceName}/errors',
+        params: {
+          path: {
+            serviceName
+          },
+          query: {
+            start,
+            end,
+            sortField,
+            sortDirection: normalizedSortDirection,
+            uiFilters: JSON.stringify(uiFilters)
+          }
+        }
+      });
+    }
+  }, [serviceName, start, end, sortField, sortDirection, uiFilters]);
 
   useTrackPageview({
     app: 'apm',
-    path: 'error_group_overview',
+    path: 'error_group_overview'
   });
   useTrackPageview({ app: 'apm', path: 'error_group_overview', delay: 15000 });
 
@@ -82,9 +97,9 @@ const ErrorGroupOverview: React.FC = () => {
     const config: React.ComponentProps<typeof LocalUIFilters> = {
       filterNames: ['host', 'containerId', 'podName', 'serviceVersion'],
       params: {
-        serviceName,
+        serviceName
       },
-      projection: PROJECTION.ERROR_GROUPS,
+      projection: PROJECTION.ERROR_GROUPS
     };
 
     return config;
@@ -101,7 +116,7 @@ const ErrorGroupOverview: React.FC = () => {
         <EuiFlexItem grow={1}>
           <LocalUIFilters {...localUIFiltersConfig} />
         </EuiFlexItem>
-        <EuiFlexItem grow={7}>
+        <EuiFlexItem grow={5}>
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiPanel>
@@ -110,10 +125,37 @@ const ErrorGroupOverview: React.FC = () => {
                   title={i18n.translate(
                     'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
                     {
-                      defaultMessage: 'Error occurrences',
+                      defaultMessage: 'Error occurrences'
                     }
                   )}
                 />
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiPanel>
+                {/* <EuiTitle size="xs">
+                  <span>{tpmLabel(transactionType)}</span> */}
+                {/* </EuiTitle>
+                <TransactionLineChart
+                  series={tpmSeries}
+                  tickFormatY={this.getTPMFormatter}
+                  formatTooltipValue={this.getTPMTooltipFormatter}
+                  truncateLegends
+                /> */}
+                {erroRateData && (
+                  <CustomPlot
+                    series={[
+                      { data: erroRateData, type: 'line', color: '#f5a700' }
+                    ]}
+                    // onHover={combinedOnHover}
+                    // tickFormatY={tickFormatY}
+                    // formatTooltipValue={formatTooltipValue}
+                    // yMax={yMax}
+                    // height={height}
+                    // truncateLegends={truncateLegends}
+                    // {...(stacked ? { stackBy: 'y' } : {})}
+                  />
+                )}
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>
