@@ -180,7 +180,7 @@ describe('getCerts', () => {
                     },
                     Object {
                       "range": Object {
-                        "@timestamp": Object {
+                        "monitor.timespan": Object {
                           "gte": "now-2d",
                           "lte": "now+1h",
                         },
