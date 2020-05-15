@@ -10,7 +10,7 @@ import { AlertTlsComponent } from '../alert_tls';
 import { setAlertFlyoutVisible } from '../../../../state/actions';
 import { selectDynamicSettings } from '../../../../state/selectors';
 
-export const AlertTls = () => {
+export const AlertTls: React.FC<{}> = () => {
   const dispatch = useDispatch();
   const setFlyoutVisible = useCallback((value: boolean) => dispatch(setAlertFlyoutVisible(value)), [
     dispatch,
