@@ -1,0 +1,6 @@
+{
+  "id": "spacesTestPlugin",
+  "version": "kibana",
+  "server": true,
+  "ui": false
+}

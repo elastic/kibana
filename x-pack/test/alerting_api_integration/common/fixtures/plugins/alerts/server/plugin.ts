@@ -52,6 +52,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         },
       },
     });
+
     defineAlertTypes(core, { actions, alerting });
     defineRoutes(core);
   }

@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { CONTEXT_DEFAULT_SIZE_SETTING } from '../../../common';
 import { getAngularModule, getServices } from '../../kibana_services';
 import './context_app';
 import { getState } from './context_state';
@@ -47,10 +48,10 @@ getAngularModule().config($routeProvider => {
   $routeProvider
     // deprecated route, kept for compatibility
     // should be removed in the future
-    .when('/discover/context/:indexPatternId/:type/:id*', {
-      redirectTo: '/discover/context/:indexPatternId/:id',
+    .when('/context/:indexPatternId/:type/:id*', {
+      redirectTo: '/context/:indexPatternId/:id',
     })
-    .when('/discover/context/:indexPatternId/:id*', {
+    .when('/context/:indexPatternId/:id*', {
       controller: ContextAppRouteController,
       k7Breadcrumbs,
       controllerAs: 'contextAppRoute',
@@ -78,7 +79,7 @@ function ContextAppRouteController($routeParams, $scope, $route) {
     setAppState,
     flushToUrl,
   } = getState({
-    defaultStepSize: getServices().uiSettings.get('context:defaultSize'),
+    defaultStepSize: getServices().uiSettings.get(CONTEXT_DEFAULT_SIZE_SETTING),
     timeFieldName: indexPattern.timeFieldName,
     storeInSessionStorage: getServices().uiSettings.get('state:storeInSessionStorage'),
     history: getServices().history(),
@@ -86,7 +87,6 @@ function ContextAppRouteController($routeParams, $scope, $route) {
   this.state = { ...appState.getState() };
   this.anchorId = $routeParams.id;
   this.indexPattern = indexPattern;
-  this.discoverUrl = getServices().chrome.navLinks.get('kibana:discover').url;
   filterManager.setFilters(_.cloneDeep(getFilters()));
   startStateSync();
 

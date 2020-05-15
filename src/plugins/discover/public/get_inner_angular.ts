@@ -20,6 +20,7 @@
 // inner angular imports
 // these are necessary to bootstrap the local angular.
 // They can stay even after NP cutover
+import './application/index.scss';
 import angular from 'angular';
 // required for `ngSanitize` angular module
 import 'angular-sanitize';
@@ -59,6 +60,7 @@ import {
 import { createDiscoverSidebarDirective } from './application/components/sidebar';
 import { createHitsCounterDirective } from '././application/components/hits_counter';
 import { DiscoverStartPlugins } from './plugin';
+import { getScopedHistory } from './kibana_services';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
@@ -72,7 +74,7 @@ export function getInnerAngularModule(
 ) {
   initAngularBootstrap();
   const module = initializeInnerAngularModule(name, core, deps.navigation, deps.data);
-  configureAppAngularModule(module, { core, env: context.env }, true);
+  configureAppAngularModule(module, { core, env: context.env }, true, getScopedHistory);
   return module;
 }
 
@@ -86,7 +88,6 @@ export function getInnerAngularModuleEmbeddable(
   context: PluginInitializerContext
 ) {
   const module = initializeInnerAngularModule(name, core, deps.navigation, deps.data, true);
-  configureAppAngularModule(module, { core, env: context.env }, true);
   return module;
 }
 
