@@ -17,8 +17,8 @@ interface Props {
 }
 
 const LABELS = {
-  name: i18n.translate('xpack.infra.waffle.sort.nameLabel', { defaultMessage: 'Name' }),
-  value: i18n.translate('xpath.infra.waffle.sort.valueLabel', { defaultMessage: 'Metric value' }),
+  name: i18n.translate('xpack.infra.waffle.sortNameLabel', { defaultMessage: 'Name' }),
+  value: i18n.translate('xpack.infra.waffle.sort.valueLabel', { defaultMessage: 'Metric value' }),
 };
 
 export const WaffleSortControls = ({ sort, onChange }: Props) => {
@@ -36,7 +36,7 @@ export const WaffleSortControls = ({ sort, onChange }: Props) => {
 
   const button = (
     <DropdownButton
-      label={i18n.translate('xpath.infra.waffle.sortLabel', { defaultMessage: 'Sort by' })}
+      label={i18n.translate('xpack.infra.waffle.sortLabel', { defaultMessage: 'Sort by' })}
       onClick={showPopover}
     >
       {label}
@@ -95,7 +95,7 @@ export const WaffleSortControls = ({ sort, onChange }: Props) => {
       <SwitchContainer>
         <EuiSwitch
           compressed
-          label={i18n.translate('xpath.infra.waffle.sortDirectionLabel', {
+          label={i18n.translate('xpack.infra.waffle.sortDirectionLabel', {
             defaultMessage: 'Reverse direction',
           })}
           checked={sort.direction === 'desc'}
