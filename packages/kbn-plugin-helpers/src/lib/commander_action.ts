@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -19,10 +17,20 @@
  * under the License.
  */
 
-const nodeMajorVersion = parseFloat(process.version.replace(/^v(\d+)\..+/, '$1'));
-if (nodeMajorVersion < 6) {
-  console.error('FATAL: kibana-plugin-helpers requires node 6+');
-  process.exit(1);
-}
+import { run } from './run';
+import { Tasks } from './tasks';
 
-require('../target/cli');
+type GetOptions = (command: any, ...args: string[]) => any;
+
+export function createCommanderAction(taskName: keyof Tasks, getOptions: GetOptions = () => {}) {
+  return async (...args: string[]) => {
+    try {
+      // command is the last arg passed by commander, but we move it to the front of the list
+      const command = args.pop();
+      await run(taskName, getOptions(command, ...args));
+    } catch (error) {
+      process.stderr.write(`Task "${taskName}" failed:\n\n${error.stack || error.message}\n`);
+      process.exit(1);
+    }
+  };
+}
