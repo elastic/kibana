@@ -67,6 +67,24 @@ export default function({ getService }: FtrProviderContext) {
           });
         });
       });
+
+      describe('one component template', () => {
+        it('should return a single component template', async () => {
+          const uri = `${API_BASE_PATH}/component_templates/${COMPONENT_NAME}`;
+
+          const { body } = await supertest
+            .get(uri)
+            .set('kbn-xsrf', 'xxx')
+            .expect(200);
+
+          expect(body).to.eql({
+            name: COMPONENT_NAME,
+            component_template: {
+              ...COMPONENT,
+            },
+          });
+        });
+      });
     });
 
     describe('Create', () => {

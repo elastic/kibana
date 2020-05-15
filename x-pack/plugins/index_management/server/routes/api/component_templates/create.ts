@@ -46,7 +46,7 @@ export const registerCreateRoute = ({
 
         const { component_templates: componentTemplates } = componentTemplateResponse;
 
-        if (componentTemplates.length && componentTemplates[0].name) {
+        if (componentTemplates.length) {
           return res.conflict({
             body: new Error(
               i18n.translate('xpack.idxMgmt.componentTemplates.createRoute.duplicateErrorMessage', {
