@@ -139,27 +139,29 @@ let kibanaVersion;
 export const setKibanaVersion = version => (kibanaVersion = version);
 export const getKibanaVersion = () => kibanaVersion;
 
-let mapConfig;
-export const setMapConfig = config => (mapConfig = config);
-export const getMapConfig = () => mapConfig;
+// xpack.maps.* kibana.yml settings from this plugin
+let mapAppConfig;
+export const setMapAppConfig = config => (mapAppConfig = config);
+export const getMapAppConfig = () => mapAppConfig;
 
-export const getEnabled = () => getMapConfig().enabled;
-export const getShowMapVisualizationTypes = () => getMapConfig().showMapVisualizationTypes;
-export const getShowMapsInspectorAdapter = () => getMapConfig().showMapsInspectorAdapter;
-export const getPreserveDrawingBuffer = () => getMapConfig().preserveDrawingBuffer;
-export const getEnableVectorTiles = () => getMapConfig().enableVectorTiles;
+export const getEnabled = () => getMapAppConfig().enabled;
+export const getShowMapVisualizationTypes = () => getMapAppConfig().showMapVisualizationTypes;
+export const getShowMapsInspectorAdapter = () => getMapAppConfig().showMapsInspectorAdapter;
+export const getPreserveDrawingBuffer = () => getMapAppConfig().preserveDrawingBuffer;
+export const getEnableVectorTiles = () => getMapAppConfig().enableVectorTiles;
 
-let legacyMapConfig;
-export const setLegacyMapConfig = config => (legacyMapConfig = config);
-export const getLegacyMapConfig = () => legacyMapConfig;
+// map.* kibana.yml settings from maps_legacy plugin that are shared between OSS map visualizations and maps app
+let kibanaCommonConfig;
+export const setKibanaCommonConfig = config => (kibanaCommonConfig = config);
+export const getKibanaCommonConfig = () => kibanaCommonConfig;
 
-export const getIsEmsEnabled = () => getLegacyMapConfig().includeElasticMapsService;
-export const getEmsFontLibraryUrl = () => getLegacyMapConfig().emsFontLibraryUrl;
-export const getEmsTileLayerId = () => getLegacyMapConfig().emsTileLayerId;
-export const getEmsFileApiUrl = () => getLegacyMapConfig().emsFileApiUrl;
-export const getEmsTileApiUrl = () => getLegacyMapConfig().emsTileApiUrl;
-export const getEmsLandingPageUrl = () => getLegacyMapConfig().emsLandingPageUrl;
+export const getIsEmsEnabled = () => getKibanaCommonConfig().includeElasticMapsService;
+export const getEmsFontLibraryUrl = () => getKibanaCommonConfig().emsFontLibraryUrl;
+export const getEmsTileLayerId = () => getKibanaCommonConfig().emsTileLayerId;
+export const getEmsFileApiUrl = () => getKibanaCommonConfig().emsFileApiUrl;
+export const getEmsTileApiUrl = () => getKibanaCommonConfig().emsTileApiUrl;
+export const getEmsLandingPageUrl = () => getKibanaCommonConfig().emsLandingPageUrl;
 export const getProxyElasticMapsServiceInMaps = () =>
-  getLegacyMapConfig().proxyElasticMapsServiceInMaps;
-export const getRegionmapLayers = () => _.get(getLegacyMapConfig(), 'regionmap.layers', []);
-export const getTilemap = () => _.get(getLegacyMapConfig(), 'tilemap', []);
+  getKibanaCommonConfig().proxyElasticMapsServiceInMaps;
+export const getRegionmapLayers = () => _.get(getKibanaCommonConfig(), 'regionmap.layers', []);
+export const getTilemap = () => _.get(getKibanaCommonConfig(), 'tilemap', []);

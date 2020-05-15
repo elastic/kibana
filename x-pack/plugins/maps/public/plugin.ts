@@ -31,8 +31,8 @@ import {
   setUiSettings,
   setVisualizations,
   setSearchService,
-  setMapConfig,
-  setLegacyMapConfig,
+  setMapAppConfig,
+  setKibanaCommonConfig,
   setKibanaVersion,
 } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
@@ -71,11 +71,11 @@ export const bindSetupCoreAndPlugins = (
   setToasts(notifications.toasts);
   setVisualizations(plugins.visualizations);
   setUiSettings(uiSettings);
-  setLegacyMapConfig(mapsLegacy.config);
+  setKibanaCommonConfig(mapsLegacy.config);
 
   // TODO: Remove conditional logic when last legacy pieces removed
   if (config) {
-    setMapConfig(config);
+    setMapAppConfig(config);
   }
   if (kibanaVersion) {
     setKibanaVersion(kibanaVersion);

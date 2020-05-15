@@ -5,6 +5,7 @@
  */
 import { IIndexPattern, DataPublicPluginStart } from 'src/plugins/data/public';
 import _ from 'lodash';
+import { MapsConfigType } from './index';
 
 export function getLicenseId(): any;
 export function getInspector(): any;
@@ -30,8 +31,8 @@ export function getCore(): any;
 export function getNavigation(): any;
 export function getCoreI18n(): any;
 export function getSearchService(): DataPublicPluginStart['search'];
-export function getLegacyMapConfig(): any;
-export function getMapConfig(): any;
+export function getKibanaCommonConfig(): any;
+export function getMapAppConfig(): MapsConfigType;
 export function getIsEmsEnabled(): any;
 export function getEmsFontLibraryUrl(): any;
 export function getEmsTileLayerId(): any;
@@ -41,12 +42,12 @@ export function getEmsLandingPageUrl(): any;
 export function getRegionmapLayers(): any;
 export function getTilemap(): any;
 export function getKibanaVersion(): any;
-export function getEnabled(): any;
-export function getShowMapVisualizationTypes(): any;
-export function getShowMapsInspectorAdapter(): any;
-export function getPreserveDrawingBuffer(): any;
-export function getEnableVectorTiles(): any;
-export function getProxyElasticMapsServiceInMaps(): any;
+export function getEnabled(): boolean;
+export function getShowMapVisualizationTypes(): boolean;
+export function getShowMapsInspectorAdapter(): boolean;
+export function getPreserveDrawingBuffer(): boolean;
+export function getEnableVectorTiles(): boolean;
+export function getProxyElasticMapsServiceInMaps(): boolean;
 
 export function setLicenseId(args: unknown): void;
 export function setInspector(args: unknown): void;
@@ -70,6 +71,6 @@ export function setCore(args: unknown): void;
 export function setNavigation(args: unknown): void;
 export function setCoreI18n(args: unknown): void;
 export function setSearchService(args: DataPublicPluginStart['search']): void;
-export function setLegacyMapConfig(args: unknown): void;
-export function setMapConfig(args: unknown): void;
+export function setKibanaCommonConfig(args: unknown): void;
+export function setMapAppConfig(args: MapsConfigType): void;
 export function setKibanaVersion(args: unknown): void;

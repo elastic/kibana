@@ -25,7 +25,6 @@ import { emsBoundariesSpecProvider } from './tutorials/ems';
 import { initRoutes } from './routes';
 import { ILicense, LicensingPluginSetup } from '../../licensing/public';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
@@ -46,7 +45,7 @@ export class MapsPlugin implements Plugin {
   }
 
   _initHomeData(
-    home: HomePublicPluginSetup,
+    home: HomeServerPluginSetup,
     prependBasePath: (path: string) => string,
     mapConfig: any
   ) {
@@ -69,6 +68,7 @@ export class MapsPlugin implements Plugin {
         dashboardId: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
         oldEmbeddableId: '9c6f83f0-bb4d-11e8-9c84-77068524bcab',
         embeddableId: '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
+        // @ts-ignore
         embeddableType: 'map',
         embeddableConfig: {
           isLayerTOCOpen: false,
@@ -90,6 +90,7 @@ export class MapsPlugin implements Plugin {
         dashboardId: '7adfa750-4c81-11e8-b3d7-01146121b73d',
         oldEmbeddableId: '334084f0-52fd-11e8-a160-89cc2ad9e8e2',
         embeddableId: '5dd88580-1906-11e9-919b-ffe5949a18d2',
+        // @ts-ignore
         embeddableType: MAP_SAVED_OBJECT_TYPE,
         embeddableConfig: {
           isLayerTOCOpen: true,
@@ -109,6 +110,7 @@ export class MapsPlugin implements Plugin {
         dashboardId: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
         oldEmbeddableId: '06cf9c40-9ee8-11e7-8711-e7a007dcef99',
         embeddableId: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
+        // @ts-ignore
         embeddableType: MAP_SAVED_OBJECT_TYPE,
         embeddableConfig: {
           isLayerTOCOpen: false,
