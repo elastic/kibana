@@ -19,16 +19,13 @@ import {
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { AgentRefreshContext } from './hooks';
-import {
-  FLEET_AGENTS_PATH,
-  FLEET_AGENT_DETAIL_PATH,
-  AGENT_CONFIG_DETAILS_PATH,
-} from '../../../constants';
+import { Agent, AgentConfig } from '../../../types';
+import { PAGE_ROUTING_PATHS } from '../../../constants';
 import { Loading, Error } from '../../../components';
-import { useGetOneAgent, useGetOneAgentConfig, useLink } from '../../../hooks';
+import { useGetOneAgent, useGetOneAgentConfig, useLink, useBreadcrumbs } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 import { AgentHealth } from '../components';
+import { AgentRefreshContext } from './hooks';
 import { AgentEventsTable, AgentDetailsActionMenu, AgentDetailsContent } from './components';
 
 const Divider = styled.div`
@@ -41,6 +38,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
   const {
     params: { agentId, tabId = '' },
   } = useRouteMatch<{ agentId: string; tabId?: string }>();
+  const { getHref } = useLink();
   const {
     isLoading,
     isInitialRequest,
@@ -56,16 +54,16 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     sendRequest: sendAgentConfigRequest,
   } = useGetOneAgentConfig(agentData?.item?.config_id);
 
-  const agentListUrl = useLink(FLEET_AGENTS_PATH);
-  const agentActivityTabUrl = useLink(`${FLEET_AGENT_DETAIL_PATH}${agentId}/activity`);
-  const agentDetailsTabUrl = useLink(`${FLEET_AGENT_DETAIL_PATH}${agentId}/details`);
-  const agentConfigUrl = useLink(AGENT_CONFIG_DETAILS_PATH);
-
   const headerLeftContent = useMemo(
     () => (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="arrowLeft" href={agentListUrl} flush="left" size="xs">
+          <EuiButtonEmpty
+            iconType="arrowLeft"
+            href={getHref('fleet_agent_list')}
+            flush="left"
+            size="xs"
+          >
             <FormattedMessage
               id="xpack.ingestManager.agentDetails.viewAgentListTitle"
               defaultMessage="View all agent configurations"
@@ -92,7 +90,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [agentData, agentId, agentListUrl]
+    [agentData, agentId, getHref]
   );
 
   const headerRightContent = useMemo(
@@ -114,7 +112,9 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
               content: isAgentConfigLoading ? (
                 <Loading size="m" />
               ) : agentConfigData?.item ? (
-                <EuiLink href={`${agentConfigUrl}${agentData.item.config_id}`}>
+                <EuiLink
+                  href={getHref('configuration_details', { configId: agentData.item.config_id! })}
+                >
                   {agentConfigData.item.name || agentData.item.config_id}
                 </EuiLink>
               ) : (
@@ -143,7 +143,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
       ) : (
         undefined
       ),
-    [agentConfigData, agentConfigUrl, agentData, isAgentConfigLoading]
+    [agentConfigData, agentData, getHref, isAgentConfigLoading]
   );
 
   const headerTabs = useMemo(() => {
@@ -153,7 +153,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         name: i18n.translate('xpack.ingestManager.agentDetails.subTabs.activityLogTab', {
           defaultMessage: 'Activity log',
         }),
-        href: agentActivityTabUrl,
+        href: getHref('fleet_agent_details', { agentId, tabId: 'activity' }),
         isSelected: !tabId || tabId === 'activity',
       },
       {
@@ -161,11 +161,11 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         name: i18n.translate('xpack.ingestManager.agentDetails.subTabs.detailsTab', {
           defaultMessage: 'Agent details',
         }),
-        href: agentDetailsTabUrl,
+        href: getHref('fleet_agent_details', { agentId, tabId: 'details' }),
         isSelected: tabId === 'details',
       },
     ];
-  }, [agentActivityTabUrl, agentDetailsTabUrl, tabId]);
+  }, [getHref, agentId, tabId]);
 
   return (
     <AgentRefreshContext.Provider
@@ -194,22 +194,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             error={error}
           />
         ) : agentData && agentData.item ? (
-          <Switch>
-            <Route
-              path={`${FLEET_AGENT_DETAIL_PATH}:agentId/details`}
-              render={() => {
-                return (
-                  <AgentDetailsContent agent={agentData.item} agentConfig={agentConfigData?.item} />
-                );
-              }}
-            />
-            <Route
-              path={`${FLEET_AGENT_DETAIL_PATH}:agentId`}
-              render={() => {
-                return <AgentEventsTable agent={agentData.item} />;
-              }}
-            />
-          </Switch>
+          <AgentDetailsPageContent agent={agentData.item} agentConfig={agentConfigData?.item} />
         ) : (
           <Error
             title={
@@ -221,7 +206,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             error={i18n.translate(
               'xpack.ingestManager.agentDetails.agentNotFoundErrorDescription',
               {
-                defaultMessage: 'Cannot found agent ID {agentId}',
+                defaultMessage: 'Cannot find agent ID {agentId}',
                 values: {
                   agentId,
                 },
@@ -231,5 +216,34 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         )}
       </WithHeaderLayout>
     </AgentRefreshContext.Provider>
+  );
+};
+
+const AgentDetailsPageContent: React.FunctionComponent<{
+  agent: Agent;
+  agentConfig?: AgentConfig;
+}> = ({ agent, agentConfig }) => {
+  useBreadcrumbs('fleet_agent_details', {
+    agentHost:
+      typeof agent.local_metadata.host === 'object' &&
+      typeof agent.local_metadata.host.hostname === 'string'
+        ? agent.local_metadata.host.hostname
+        : '-',
+  });
+  return (
+    <Switch>
+      <Route
+        path={PAGE_ROUTING_PATHS.fleet_agent_details_details}
+        render={() => {
+          return <AgentDetailsContent agent={agent} agentConfig={agentConfig} />;
+        }}
+      />
+      <Route
+        path={PAGE_ROUTING_PATHS.fleet_agent_details_events}
+        render={() => {
+          return <AgentEventsTable agent={agent} />;
+        }}
+      />
+    </Switch>
   );
 };
