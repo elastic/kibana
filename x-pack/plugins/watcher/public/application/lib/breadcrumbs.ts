@@ -15,7 +15,7 @@ export const listBreadcrumb: Breadcrumb = {
   text: i18n.translate('xpack.watcher.breadcrumb.listLabel', {
     defaultMessage: 'Watcher',
   }),
-  href: '#/management/stack/watcher/watches/',
+  href: '#/management/insightsAndAlerting/watcher/watches/',
 };
 
 export const createBreadcrumb: Breadcrumb = {

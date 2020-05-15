@@ -36,7 +36,9 @@ export const MonitoringWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
       values={{
         watchName: watch.name,
         watchStatusLink: (
-          <EuiLink href={`#/management/stack/watcher/watches/watch/${watch.id}/status`}>
+          <EuiLink
+            href={`#/management/insightsAndAlerting/watcher/watches/watch/${watch.id}/status`}
+          >
             <FormattedMessage
               id="xpack.watcher.sections.watchEdit.monitoring.header.watchLinkTitle"
               defaultMessage="View watch status."

@@ -242,7 +242,7 @@ export const WatchList = () => {
           return (
             <EuiLink
               data-test-subj={`watchIdColumn-${id}`}
-              href={`#/management/stack/watcher/watches/watch/${id}/status`}
+              href={`#/management/insightsAndAlerting/watcher/watches/watch/${id}/status`}
             >
               {id}
             </EuiLink>
@@ -326,7 +326,7 @@ export const WatchList = () => {
                     )}
                     iconType="pencil"
                     color="primary"
-                    href={`#/management/stack/watcher/watches/watch/${watch.id}/edit`}
+                    href={`#/management/insightsAndAlerting/watcher/watches/watch/${watch.id}/edit`}
                     data-test-subj="editWatchButton"
                   />
                 </EuiToolTip>
