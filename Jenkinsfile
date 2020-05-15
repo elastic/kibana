@@ -53,7 +53,9 @@ kibanaPipeline(timeoutMinutes: 135, checkPrChanges: true) {
       }
     }
 
-    retryable.printFlakyFailures()
-    kibanaPipeline.sendMail()
+    if (params.NOTIFY_ON_FAILURE) {
+      slackNotifications.onFailure()
+      kibanaPipeline.sendMail()
+    }
   }
 }
