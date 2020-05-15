@@ -46,7 +46,9 @@ describe('usePushToService', () => {
     connectors: connectorsMock,
     updateCase,
     userCanCrud: true,
+    isValidConnector: true,
   };
+
   beforeEach(() => {
     jest.resetAllMocks();
     (usePostPushToService as jest.Mock).mockImplementation(() => mockPostPush);
@@ -55,6 +57,7 @@ describe('usePushToService', () => {
       actionLicense,
     }));
   });
+
   it('push case button posts the push with correct args', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
@@ -75,6 +78,7 @@ describe('usePushToService', () => {
       expect(result.current.pushCallouts).toBeNull();
     });
   });
+
   it('Displays message when user does not have premium license', async () => {
     (useGetActionLicense as jest.Mock).mockImplementation(() => ({
       isLoading: false,
@@ -96,6 +100,7 @@ describe('usePushToService', () => {
       expect(errorsMsg[0].title).toEqual(getLicenseError().title);
     });
   });
+
   it('Displays message when user does not have case enabled in config', async () => {
     (useGetActionLicense as jest.Mock).mockImplementation(() => ({
       isLoading: false,
@@ -117,6 +122,7 @@ describe('usePushToService', () => {
       expect(errorsMsg[0].title).toEqual(getKibanaConfigError().title);
     });
   });
+
   it('Displays message when user does not have a connector configured', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
@@ -135,6 +141,27 @@ describe('usePushToService', () => {
       expect(errorsMsg[0].title).toEqual(i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE);
     });
   });
+
+  it('Displays message when connector is deleted', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
+        () =>
+          usePushToService({
+            ...defaultArgs,
+            caseConnectorId: 'not-exist',
+            isValidConnector: false,
+          }),
+        {
+          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        }
+      );
+      await waitForNextUpdate();
+      const errorsMsg = result.current.pushCallouts?.props.messages;
+      expect(errorsMsg).toHaveLength(1);
+      expect(errorsMsg[0].title).toEqual(i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE);
+    });
+  });
+
   it('Displays message when case is closed', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<UsePushToService, ReturnUsePushToService>(
