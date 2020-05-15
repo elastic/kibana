@@ -20,6 +20,7 @@ export default function({ getService }: FtrProviderContext) {
   const usageAPI = getService('usageAPI' as any); // NOTE Usage API service is not Typescript
 
   describe('reporting usage', () => {
+    before(() => reportingAPI.deleteAllReportingIndexes());
     afterEach(() => reportingAPI.deleteAllReportingIndexes());
 
     describe('initial state', () => {
@@ -100,7 +101,7 @@ export default function({ getService }: FtrProviderContext) {
       it('should handle csv', async () => {
         await reportingAPI.expectAllJobsToFinishSuccessfully(
           await Promise.all([
-            await reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3),
+            await reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3), // depends on loaded archive
           ])
         );
 
