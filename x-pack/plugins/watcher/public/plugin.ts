@@ -76,7 +76,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
         defaultMessage: 'Detect changes in your data by creating, managing, and monitoring alerts.',
       }),
       icon: 'watchesApp',
-      path: '/app/kibana#/management/elasticsearch/watcher/watches',
+      path: '/app/kibana#/management/stack/watcher/watches',
       showOnHomePage: false,
     };
 

@@ -45,7 +45,7 @@ export const managementSections = [
     title: (
       <ManagementSectionTitle
         text="Ingest"
-        tip="Manage how data is transformed and loaded into the cluster"
+        tip="Manage how to transform data and load it into the cluster."
       />
     ),
   },
@@ -57,21 +57,21 @@ export const managementSections = [
     id: ManagementSectionId.InsightsAndAlerting,
     title: (
       <ManagementSectionTitle
-        text="Insights and Alerting"
+        text="Alerts and Insights"
         tip="Manage how to detect changes in your data"
       />
     ),
   },
   {
     id: ManagementSectionId.Security,
-    title: <ManagementSectionTitle text="Security" tip="Control access to data and apps" />,
+    title: <ManagementSectionTitle text="Security" tip="Control access to features and data" />,
   },
   {
     id: ManagementSectionId.Kibana,
-    title: <ManagementSectionTitle text="Kibana" tip="Customize Kibana and manage its internals" />,
+    title: <ManagementSectionTitle text="Kibana" tip="Customize Kibana and manage saved objects" />,
   },
   {
     id: ManagementSectionId.Stack,
-    title: <ManagementSectionTitle text="Stack" tip="Upgrade the Stack and manage your license" />,
+    title: <ManagementSectionTitle text="Stack" tip="Manage your license and upgrade the Stack" />,
   },
 ];
