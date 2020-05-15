@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export function DashboardReplacePanelProvider({ getService }) {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export function DashboardReplacePanelProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const flyout = getService('flyout');
@@ -28,7 +30,7 @@ export function DashboardReplacePanelProvider({ getService }) {
       await testSubjects.click('savedObjectFinderFilterButton');
     }
 
-    async toggleFilter(type) {
+    async toggleFilter(type: string) {
       log.debug(`DashboardReplacePanel.replaceToFilter(${type})`);
       await this.waitForListLoading();
       await this.toggleFilterPopover();
@@ -57,21 +59,21 @@ export function DashboardReplacePanelProvider({ getService }) {
       await flyout.ensureClosed('dashboardReplacePanel');
     }
 
-    async replaceSavedSearch(searchName) {
+    async replaceSavedSearch(searchName: string) {
       return this.replaceEmbeddable(searchName, 'search');
     }
 
-    async replaceSavedSearches(searches) {
+    async replaceSavedSearches(searches: string[]) {
       for (const name of searches) {
         await this.replaceSavedSearch(name);
       }
     }
 
-    async replaceVisualization(vizName) {
+    async replaceVisualization(vizName: string) {
       return this.replaceEmbeddable(vizName, 'visualization');
     }
 
-    async replaceEmbeddable(embeddableName, embeddableType) {
+    async replaceEmbeddable(embeddableName: string, embeddableType: string) {
       log.debug(
         `DashboardReplacePanel.replaceEmbeddable, name: ${embeddableName}, type: ${embeddableType}`
       );
@@ -86,14 +88,14 @@ export function DashboardReplacePanelProvider({ getService }) {
       return embeddableName;
     }
 
-    async filterEmbeddableNames(name) {
+    async filterEmbeddableNames(name: string) {
       // The search input field may be disabled while the table is loading so wait for it
       await this.waitForListLoading();
       await testSubjects.setValue('savedObjectFinderSearchInput', name);
       await this.waitForListLoading();
     }
 
-    async panelReplaceLinkExists(name) {
+    async panelReplaceLinkExists(name: string) {
       log.debug(`DashboardReplacePanel.panelReplaceLinkExists(${name})`);
       await this.ensureReplacePanelIsShowing();
       await this.filterEmbeddableNames(`"${name}"`);

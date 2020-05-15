@@ -28,10 +28,8 @@ import {
   DashboardExpectProvider,
   DashboardPanelActionsProvider,
   DashboardVisualizationProvider,
-  // @ts-ignore not TS yet
 } from './dashboard';
 import { DocTableProvider } from './doc_table';
-import { ElasticChartProvider } from './elastic_chart';
 import { EmbeddingProvider } from './embedding';
 import { FailureDebuggingProvider } from './failure_debugging';
 import { FilterBarProvider } from './filter_bar';
@@ -47,8 +45,7 @@ import { SnapshotsProvider } from './snapshots';
 import { TableProvider } from './table';
 import { TestSubjectsProvider } from './test_subjects';
 import { ToastsProvider } from './toasts';
-// @ts-ignore not TS yet
-import { PieChartProvider } from './visualizations';
+import { PieChartProvider, ElasticChartProvider } from './visualizations';
 import { ListingTableProvider } from './listing_table';
 import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
 import { KibanaSupertestProvider } from './supertest';
