@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import pluginHelpers from '@kbn/plugin-helpers';
+import * as pluginHelpers from '@kbn/plugin-helpers';
 import gulp from 'gulp';
 
 import { getEnabledPlugins } from './helpers/flags';
