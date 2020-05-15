@@ -379,7 +379,7 @@ export class EndpointDocGenerator {
 
   /**
    * This generates a full resolver tree and keeps the entire tree in memory. This is useful for tests that want
-   * to compare results from a elasticsearch with the actual events created by this generator. Because all the events
+   * to compare results from elasticsearch with the actual events created by this generator. Because all the events
    * are stored in memory do not use this function to generate large trees.
    *
    * @param options - options for the layout of the tree, like how many children, generations, and ancestry
@@ -479,8 +479,6 @@ export class EndpointDocGenerator {
       percentTerminated,
       alwaysGenMaxChildrenPerNode
     );
-    // return the origin/alert event
-    return ancestry[ancestry.length - 1];
   }
 
   /**

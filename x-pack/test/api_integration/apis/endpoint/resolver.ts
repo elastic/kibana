@@ -21,44 +21,6 @@ import {
   TreeNode,
 } from '../../../../../x-pack/plugins/endpoint/common/generate_data';
 
-// TODO move this stuff to a service
-interface Options extends TreeOptions {
-  numAlerts?: number;
-}
-
-interface GeneratedTrees {
-  trees: Tree[];
-  index: string;
-}
-
-async function createResolverTree(
-  getService: any,
-  options: Options,
-  eventsIndex: string = 'events-endpoint-1'
-): Promise<GeneratedTrees> {
-  const allTrees: Tree[] = [];
-  const client = getService('es');
-  const generator = new EndpointDocGenerator();
-  const numAlerts = options.numAlerts ?? 1;
-  for (let j = 0; j < numAlerts; j++) {
-    const tree = generator.generateTree(options);
-    const body = tree.allEvents.reduce(
-      (array: Array<Record<string, any>>, doc) => (
-        array.push({ create: { _index: eventsIndex } }, doc), array
-      ),
-      []
-    );
-    await client.bulk({ body, refresh: true });
-    allTrees.push(tree);
-  }
-  return { trees: allTrees, index: eventsIndex };
-}
-
-async function deleteTrees(getService: any, trees: GeneratedTrees) {
-  const es = getService('es');
-  await es.transport.request({ method: 'DELETE', path: `_data_stream/${trees.index}` });
-}
-
 /**
  * Check that the given lifecycle is in the resolver tree's corresponding map
  *
@@ -179,6 +141,7 @@ const compareArrays = (
 export default function resolverAPIIntegrationTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const resolver = getService('resolverGenerator');
 
   let resolverTrees: GeneratedTrees;
   let tree: Tree;
@@ -196,12 +159,12 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
   describe('Resolver', () => {
     before(async () => {
       await esArchiver.load('endpoint/resolver/api_feature');
-      resolverTrees = await createResolverTree(getService, treeOptions);
+      resolverTrees = await resolver.createTrees(treeOptions);
       // we only requested a single alert so there's only 1 tree
       tree = resolverTrees.trees[0];
     });
     after(async () => {
-      await deleteTrees(getService, resolverTrees);
+      await resolver.deleteTrees(resolverTrees);
       await esArchiver.unload('endpoint/resolver/api_feature');
     });
 
