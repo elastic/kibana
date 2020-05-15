@@ -45,6 +45,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
     {
       id: Section.Indices,
       name: <FormattedMessage id="xpack.idxMgmt.home.indicesTabTitle" defaultMessage="Indices" />,
+      'data-test-subj': 'indicesTab',
     },
     {
       id: Section.IndexTemplates,
@@ -54,6 +55,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
           defaultMessage="Index Templates"
         />
       ),
+      'data-test-subj': 'indexTemplatesTab',
     },
   ];
 
@@ -97,14 +99,14 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         <EuiSpacer size="m" />
 
         <EuiTabs>
-          {tabs.map(tab => (
+          {tabs.map(({ id, name, ...rest }) => (
             <EuiTab
-              onClick={() => onSectionChange(tab.id)}
-              isSelected={tab.id === section}
-              key={tab.id}
-              data-test-subj={`${tab.id}Tab`}
+              onClick={() => onSectionChange(id)}
+              isSelected={id === section}
+              key={id}
+              {...rest}
             >
-              {tab.name}
+              {name}
             </EuiTab>
           ))}
         </EuiTabs>

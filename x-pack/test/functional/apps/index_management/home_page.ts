@@ -34,7 +34,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('Index templates', () => {
       it('renders the index templates tab', async () => {
         // Navigate to the index templates tab
-        await pageObjects.indexManagement.changeTabs('templatesTab');
+        await pageObjects.indexManagement.changeTabs('indexTemplatesTab');
 
         await pageObjects.header.waitUntilLoadingHasFinished();
 
