@@ -15,7 +15,6 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     showMapsInspectorAdapter: true,
     enableVectorTiles: true,
     preserveDrawingBuffer: true,
-    proxyElasticMapsServiceInMaps: true,
   },
   schema: configSchema,
 };

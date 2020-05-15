@@ -148,7 +148,6 @@ export const getShowMapVisualizationTypes = () => getMapConfig().showMapVisualiz
 export const getShowMapsInspectorAdapter = () => getMapConfig().showMapsInspectorAdapter;
 export const getPreserveDrawingBuffer = () => getMapConfig().preserveDrawingBuffer;
 export const getEnableVectorTiles = () => getMapConfig().enableVectorTiles;
-export const getProxyElasticMapsServiceInMaps = () => getMapConfig().proxyElasticMapsServiceInMaps;
 
 let legacyMapConfig;
 export const setLegacyMapConfig = config => (legacyMapConfig = config);
@@ -160,5 +159,7 @@ export const getEmsTileLayerId = () => getLegacyMapConfig().emsTileLayerId;
 export const getEmsFileApiUrl = () => getLegacyMapConfig().emsFileApiUrl;
 export const getEmsTileApiUrl = () => getLegacyMapConfig().emsTileApiUrl;
 export const getEmsLandingPageUrl = () => getLegacyMapConfig().emsLandingPageUrl;
+export const getProxyElasticMapsServiceInMaps = () =>
+  getLegacyMapConfig().proxyElasticMapsServiceInMaps;
 export const getRegionmapLayers = () => _.get(getLegacyMapConfig(), 'regionmap.layers', []);
 export const getTilemap = () => _.get(getLegacyMapConfig(), 'tilemap', []);
