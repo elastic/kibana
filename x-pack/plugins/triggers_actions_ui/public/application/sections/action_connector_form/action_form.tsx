@@ -104,19 +104,13 @@ export const ActionForm = ({
           index[actionTypeItem.id] = actionTypeItem;
         }
         setActionTypesIndex(index);
-        const hasActionsDisabled = actions.some(action => !index[action.actionTypeId].enabled);
-        if (setHasActionsDisabled) {
-          setHasActionsDisabled(hasActionsDisabled);
-        }
       } catch (e) {
-        if (toastNotifications) {
-          toastNotifications.addDanger({
-            title: i18n.translate(
-              'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionTypesMessage',
-              { defaultMessage: 'Unable to load action types' }
-            ),
-          });
-        }
+        toastNotifications.addDanger({
+          title: i18n.translate(
+            'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionTypesMessage',
+            { defaultMessage: 'Unable to load action types' }
+          ),
+        });
       } finally {
         setIsLoadingActionTypes(false);
       }
@@ -124,29 +118,47 @@ export const ActionForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // load connectors
   useEffect(() => {
-    loadConnectors();
+    (async () => {
+      try {
+        setIsLoadingConnectors(true);
+        const loadedConnectors = await loadAllActions({ http });
+        setConnectors(loadedConnectors.data);
+      } catch (e) {
+        toastNotifications.addDanger({
+          title: i18n.translate(
+            'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionsMessage',
+            {
+              defaultMessage: 'Unable to load connectors',
+            }
+          ),
+        });
+      } finally {
+        setIsLoadingConnectors(false);
+      }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function loadConnectors() {
-    try {
-      setIsLoadingConnectors(true);
-      const actionsResponse = await loadAllActions({ http });
-      setConnectors(actionsResponse.data);
-    } catch (e) {
-      toastNotifications.addDanger({
-        title: i18n.translate(
-          'xpack.triggersActionsUI.sections.alertForm.unableToLoadActionsMessage',
-          {
-            defaultMessage: 'Unable to load connectors',
-          }
-        ),
-      });
-    } finally {
-      setIsLoadingConnectors(false);
+  useEffect(() => {
+    const setActionTypesAvalilability = () => {
+      const hasActionsDisabled = actions.some(
+        action =>
+          actionTypesIndex &&
+          !actionTypesIndex[action.actionTypeId].enabled &&
+          !checkActionTypeEnabled(actionTypesIndex[action.actionTypeId]).isEnabled
+      );
+      if (setHasActionsDisabled) {
+        setHasActionsDisabled(hasActionsDisabled);
+      }
+    };
+    if (connectors.length > 0 && actionTypesIndex) {
+      setActionTypesAvalilability();
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectors, actionTypesIndex]);
+
   const getSelectedOptions = (actionItemId: string) => {
     const val = connectors.find(connector => connector.id === actionItemId);
     if (!val) {
@@ -157,6 +169,7 @@ export const ActionForm = ({
         label: val.name,
         value: val.name,
         id: actionItemId,
+        'data-test-subj': 'itemActionConnector',
       },
     ];
   };
@@ -170,13 +183,9 @@ export const ActionForm = ({
     index: number
   ) => {
     const optionsList = connectors
-      .filter(
-        connectorItem =>
-          connectorItem.actionTypeId === actionItem.actionTypeId &&
-          connectorItem.id === actionItem.id
-      )
+      .filter(connectorItem => connectorItem.actionTypeId === actionItem.actionTypeId)
       .map(({ name, id }) => ({
-        label: name,
+        label: `${name}`,
         key: id,
         id,
       }));
@@ -207,6 +216,7 @@ export const ActionForm = ({
               labelAppend={
                 <EuiButtonEmpty
                   size="xs"
+                  data-test-subj="createActionConnectorButton"
                   onClick={() => {
                     setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
                     setAddModalVisibility(true);
@@ -223,6 +233,8 @@ export const ActionForm = ({
                 fullWidth
                 singleSelection={{ asPlainText: true }}
                 options={optionsList}
+                id={`selectActionConnector-${actionItem.id}`}
+                data-test-subj="selectActionConnector"
                 selectedOptions={getSelectedOptions(actionItem.id)}
                 onChange={selectedOptions => {
                   setActionIdByIndex(selectedOptions[0].id ?? '', index);
@@ -438,6 +450,7 @@ export const ActionForm = ({
     const actionTypeConnectors = connectors.filter(
       field => field.actionTypeId === actionTypeModel.id
     );
+
     if (actionTypeConnectors.length > 0) {
       actions.push({
         id: '',
@@ -472,6 +485,7 @@ export const ActionForm = ({
       .sort((a, b) => actionTypeCompare(actionTypesIndex[a.id], actionTypesIndex[b.id]))
       .map(function(item, index) {
         const actionType = actionTypesIndex[item.id];
+
         const checkEnabledResult = checkActionTypeEnabled(actionTypesIndex[item.id]);
         if (!actionType.enabledInLicense) {
           hasDisabledByLicenseActionTypes = true;

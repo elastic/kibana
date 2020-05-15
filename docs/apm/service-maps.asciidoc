@@ -73,7 +73,7 @@ Service maps are supported for the following Agent versions:
 Go Agent:: >= v1.7.0
 Java Agent:: >= v1.13.0
 .NET Agent:: >= v1.3.0
-Node.js Agent:: >= v3.6.0
+Node.js Agent:: Not supported. (Coming in v3.6.0)
 Python Agent:: >= v5.5.0
 Ruby Agent:: >= v3.6.0
 Real User Monitoring (RUM) Agent:: >= v4.7.0

@@ -90,7 +90,7 @@ describe('pagerduty action params validation', () => {
       summary: '2323',
       source: 'source',
       severity: 'critical',
-      timestamp: '234654564654',
+      timestamp: new Date().toISOString(),
       component: 'test',
       group: 'group',
       class: 'test class',
@@ -99,6 +99,7 @@ describe('pagerduty action params validation', () => {
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
         summary: [],
+        timestamp: [],
       },
     });
   });
@@ -156,7 +157,7 @@ describe('PagerDutyParamsFields renders', () => {
       summary: '2323',
       source: 'source',
       severity: SeverityActionOptions.CRITICAL,
-      timestamp: '234654564654',
+      timestamp: new Date().toISOString(),
       component: 'test',
       group: 'group',
       class: 'test class',
@@ -164,7 +165,7 @@ describe('PagerDutyParamsFields renders', () => {
     const wrapper = mountWithIntl(
       <ParamsFields
         actionParams={actionParams}
-        errors={{ summary: [] }}
+        errors={{ summary: [], timestamp: [] }}
         editAction={() => {}}
         index={0}
       />

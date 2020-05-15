@@ -142,6 +142,25 @@ describe('validateParams()', () => {
 - [eventAction.2]: expected value to equal [acknowledge]"
 `);
   });
+
+  test('should validate and throw error when timestamp has spaces', () => {
+    const randoDate = new Date('1963-09-23T01:23:45Z').toISOString();
+    const timestamp = `  ${randoDate}`;
+    expect(() => {
+      validateParams(actionType, {
+        timestamp,
+      });
+    }).toThrowError(`error validating action params: error parsing timestamp "${timestamp}"`);
+  });
+
+  test('should validate and throw error when timestamp is invalid', () => {
+    const timestamp = `1963-09-55 90:23:45`;
+    expect(() => {
+      validateParams(actionType, {
+        timestamp,
+      });
+    }).toThrowError(`error validating action params: error parsing timestamp "${timestamp}"`);
+  });
 });
 
 describe('execute()', () => {
