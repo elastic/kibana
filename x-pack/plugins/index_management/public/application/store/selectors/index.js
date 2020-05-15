@@ -86,9 +86,9 @@ const getFilteredIndices = createSelector(
   (indices, allIds, tableState) => {
     let indexArray = allIds.map(indexName => indices[indexName]);
     indexArray = filterByToggles(indexArray, tableState.toggleNameToVisibleMap);
-    const systemFilteredIndexes = tableState.showSystemIndices
+    const systemFilteredIndexes = tableState.showHiddenIndices
       ? indexArray
-      : indexArray.filter(index => !(index.name + '').startsWith('.'));
+      : indexArray.filter(index => !(index.name + '').startsWith('.') && !index.hidden);
     const filter = tableState.filter || EuiSearchBar.Query.MATCH_ALL;
     return EuiSearchBar.Query.execute(filter, systemFilteredIndexes, {
       defaultFields: defaultFilterFields,
@@ -151,9 +151,9 @@ export const getCurrentPage = createSelector(getPager, pager => {
 
 export const getFilter = createSelector(getTableState, ({ filter }) => filter);
 
-export const showSystemIndices = createSelector(
+export const showHiddenIndices = createSelector(
   getTableState,
-  ({ showSystemIndices }) => showSystemIndices
+  ({ showHiddenIndices }) => showHiddenIndices
 );
 
 export const isSortAscending = createSelector(
