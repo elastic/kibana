@@ -241,7 +241,12 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
         sorting={true}
         search={{
           toolsRight: [
-            <EuiButton color="primary" iconType="refresh" onClick={() => sendRequest()}>
+            <EuiButton
+              key="reloadButton"
+              color="primary"
+              iconType="refresh"
+              onClick={() => sendRequest()}
+            >
               <FormattedMessage
                 id="xpack.ingestManager.dataStreamList.reloadDataStreamsButtonText"
                 defaultMessage="Reload"
