@@ -435,8 +435,8 @@ export class SavedObjectsService
     };
 
     const clientProvider = new SavedObjectsClientProvider({
-      defaultClientFactory({ request }) {
-        const repository = repositoryFactory.createScopedRepository(request);
+      defaultClientFactory({ request, extraTypes }) {
+        const repository = repositoryFactory.createScopedRepository(request, extraTypes);
         return new SavedObjectsClient(repository);
       },
       typeRegistry: this.typeRegistry,

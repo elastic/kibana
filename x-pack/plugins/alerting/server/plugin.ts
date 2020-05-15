@@ -164,7 +164,7 @@ export class AlertingPlugin {
       });
     }
 
-    core.http.registerRouteHandlerContext('alerting', this.createRouteHandlerContext());
+    core.http.registerRouteHandlerContext('alerting', this.createRouteHandlerContext(core));
 
     // Routes
     const router = core.http.createRouter();
@@ -235,20 +235,26 @@ export class AlertingPlugin {
             `Unable to create alerts client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
           );
         }
-        return alertsClientFactory!.create(request, core.savedObjects.getScopedClient(request));
+        return alertsClientFactory!.create(
+          request,
+          core.savedObjects.getScopedClient(request, { extraTypes: ['alert'] })
+        );
       },
     };
   }
 
-  private createRouteHandlerContext = (): IContextProvider<
-    RequestHandler<unknown, unknown, unknown>,
-    'alerting'
-  > => {
+  private createRouteHandlerContext = (
+    core: CoreSetup
+  ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'alerting'> => {
     const { alertTypeRegistry, alertsClientFactory } = this;
     return async function alertsRouteHandlerContext(context, request) {
+      const [{ savedObjects }] = await core.getStartServices();
       return {
         getAlertsClient: () => {
-          return alertsClientFactory!.create(request, context.core.savedObjects.client);
+          return alertsClientFactory!.create(
+            request,
+            savedObjects.getScopedClient(request, { extraTypes: ['alert'] })
+          );
         },
         listTypes: alertTypeRegistry!.list.bind(alertTypeRegistry!),
       };
@@ -261,7 +267,7 @@ export class AlertingPlugin {
   ): (request: KibanaRequest) => Services {
     return request => ({
       callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
-      savedObjectsClient: savedObjects.getScopedClient(request),
+      savedObjectsClient: savedObjects.getScopedClient(request, { extraTypes: ['alert'] }),
       getScopedCallCluster(clusterClient: IClusterClient) {
         return clusterClient.asScoped(request).callAsCurrentUser;
       },

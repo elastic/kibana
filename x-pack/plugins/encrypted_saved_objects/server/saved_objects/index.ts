@@ -45,7 +45,7 @@ export function setupSavedObjects({
   );
 
   const internalRepositoryPromise = getStartServices().then(([core]) =>
-    core.savedObjects.createInternalRepository()
+    core.savedObjects.createInternalRepository(['alert'])
   );
   return {
     getDecryptedAsInternalUser: async <T = unknown>(
