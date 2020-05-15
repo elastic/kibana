@@ -29,6 +29,7 @@ export interface UsePushToService {
   connectors: Connector[];
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
+  isValidConnector: boolean;
 }
 
 export interface ReturnUsePushToService {
@@ -45,6 +46,7 @@ export const usePushToService = ({
   connectors,
   updateCase,
   userCanCrud,
+  isValidConnector,
 }: UsePushToService): ReturnUsePushToService => {
   const urlSearch = useGetUrlSearch(navTabs.case);
 
@@ -77,7 +79,7 @@ export const usePushToService = ({
           description: (
             <FormattedMessage
               defaultMessage="To open and update cases in external systems, you must configure a {link}."
-              id="xpack.siem.case.caseView.pushToServiceDisableByNoCaseConfigDescription"
+              id="xpack.siem.case.caseView.pushToServiceDisableByNoConnectors"
               values={{
                 link: (
                   <EuiLink href={getConfigureCasesUrl(urlSearch)} target="_blank">
@@ -97,7 +99,20 @@ export const usePushToService = ({
           description: (
             <FormattedMessage
               defaultMessage="To open and update cases in external systems, you must select an external incident management system for this case."
-              id="xpack.siem.case.caseView.pushToServiceDisableByNoCaseConfigDesc"
+              id="xpack.siem.case.caseView.pushToServiceDisableByNoCaseConfigDescription"
+            />
+          ),
+        },
+      ];
+    } else if (!isValidConnector && !loadingLicense) {
+      errors = [
+        ...errors,
+        {
+          title: i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE,
+          description: (
+            <FormattedMessage
+              defaultMessage="The connector used to send updates to external service has been deleted. To update cases in external systems, select a different connector or create a new one."
+              id="xpack.siem.case.caseView.pushToServiceDisableByInvalidConnector"
             />
           ),
         },
@@ -130,7 +145,9 @@ export const usePushToService = ({
         fill
         iconType="importAction"
         onClick={handlePushToService}
-        disabled={isLoading || loadingLicense || errorsMsg.length > 0 || !userCanCrud}
+        disabled={
+          isLoading || loadingLicense || errorsMsg.length > 0 || !userCanCrud || !isValidConnector
+        }
         isLoading={isLoading}
       >
         {caseServices[caseConnectorId]
@@ -147,6 +164,7 @@ export const usePushToService = ({
     isLoading,
     loadingLicense,
     userCanCrud,
+    isValidConnector,
   ]);
 
   const objToReturn = useMemo(() => {
