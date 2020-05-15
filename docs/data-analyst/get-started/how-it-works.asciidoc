@@ -1,0 +1,7 @@
+[[how-it-works]]
+= How {kib} works
+
+[partintro]
+--
+
+Value prop.

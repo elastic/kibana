@@ -1,6 +1,6 @@
 [role="xpack"]
 [[maps]]
-= Elastic Maps
+= Create maps
 
 [partintro]
 --
@@ -22,16 +22,6 @@ Start your tour of *Elastic Maps* with the <<maps-getting-started, getting start
 [role="screenshot"]
 image::maps/images/sample_data_ecommerce.png[]
 
---
 
-include::maps-getting-started.asciidoc[]
-include::heatmap-layer.asciidoc[]
-include::tile-layer.asciidoc[]
-include::vector-layer.asciidoc[]
-include::maps-aggregations.asciidoc[]
-include::search.asciidoc[]
-include::map-settings.asciidoc[]
-include::connect-to-ems.asciidoc[]
-include::geojson-upload.asciidoc[]
-include::indexing-geojson-data-tutorial.asciidoc[]
-include::trouble-shooting.asciidoc[]
+
+

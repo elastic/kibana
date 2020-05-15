@@ -1,5 +1,5 @@
 [[discover]]
-= Discover
+= Discover your data
 
 [partintro]
 --
@@ -18,36 +18,6 @@ With *Discover*, you can:
 
 [role="screenshot"]
 image::images/Discover-Start.png[Discover]
-
-
-[float]
-[[select-pattern]]
-=== Set up your index pattern
-
-The first thing to do in *Discover* is to select an <<index-patterns, index pattern>>, which
-defines the data you want to explore and visualize.
-If you haven't yet created an index pattern, you can add a <<add-sample-data, sample data set>>,
-which has a pre-built index pattern.
-
-[float]
-=== Set a time filter
-
-By default, *Discover* shows data for the last 15 minutes.
-If you have a time-based index, and no data displays,
-you might need to increase the time range. Using the <<set-time-filter, time filter>>,
-you can specify a common or recently-used time range, a relative time
-from now, or an absolute time range.
-
-[float]
-=== Search your data
-
-Now that you have your data and set the time span, you can start asking your questions.
-You can search your data using the <<kuery-query, Kibana Query language>>,
-which offers a simplified query syntax.
-For example, if
-you search for `day_of_week : Friday`, you'll get a list of all documents
-in which `day_of_week` is set to `Friday`. If you prefer
-<<lucene-query, Lucene query syntax>>, you can access it from the KQL menu.
 
 [float]
 === Filter your search results
@@ -100,12 +70,6 @@ or create a direct link to share.  The *Save* and *Share* actions are in the men
 
 
 --
-
-include::{kib-repo-dir}/management/index-patterns.asciidoc[]
-
-include::{kib-repo-dir}/discover/set-time-filter.asciidoc[]
-
-include::{kib-repo-dir}/discover/search.asciidoc[]
 
 include::{kib-repo-dir}/discover/field-filter.asciidoc[]
 

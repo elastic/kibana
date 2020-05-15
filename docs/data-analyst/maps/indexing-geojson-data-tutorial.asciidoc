@@ -1,6 +1,6 @@
 [role="xpack"]
 [[indexing-geojson-data-tutorial]]
-== Indexing GeoJSON data tutorial
+=== Indexing GeoJSON data tutorial
 
 In this tutorial, you'll build a customized map that shows the flight path between
 two airports, and the lightning hot spots on that route. You'll learn to:

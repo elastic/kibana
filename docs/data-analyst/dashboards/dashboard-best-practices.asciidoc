@@ -1,0 +1,4 @@
+[[dashboard-best-practices]]
+== Dashboard best practices
+
+Value prop.

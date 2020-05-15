@@ -1,5 +1,5 @@
 [[release-highlights]]
-= Release Highlights
+= What's new
 
 [partintro]
 --

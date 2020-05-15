@@ -1,0 +1,11 @@
+[role="xpack"]
+[[work-with-layers]]
+== Work with layers
+
+Value prop. 
+
+--
+
+include::heatmap-layer.asciidoc[]
+include::tile-layer.asciidoc[]
+include::vector-layer.asciidoc[]

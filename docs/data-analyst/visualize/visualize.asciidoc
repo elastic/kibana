@@ -42,12 +42,6 @@ data sets.
 
 * <<heat-map,Heat map>>:: Display shaded cells within a matrix.
 
-<<for-dashboard,Dashboard tools>>::
-
-* *Markdown widget* &mdash; Displays free-form information or instructions.
-
-* *Controls* &mdash; Adds interactive inputs to a dashboard.
-
 <<vega-graph,Vega>>:: Completes control over query and display.
 
 [float]
@@ -131,11 +125,8 @@ include::{kib-repo-dir}/visualize/lens.asciidoc[]
 
 include::{kib-repo-dir}/visualize/most-frequent.asciidoc[]
 
-include::{kib-repo-dir}/visualize/tsvb.asciidoc[]
-include::{kib-repo-dir}/visualize/timelion.asciidoc[]
+include::{kib-repo-dir}/visualize/time-series-analsis.asciidoc[]
 
 include::{kib-repo-dir}/visualize/tilemap.asciidoc[]
-
-include::{kib-repo-dir}/visualize/for-dashboard.asciidoc[]
 
 include::{kib-repo-dir}/visualize/vega.asciidoc[]

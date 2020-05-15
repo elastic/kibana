@@ -64,12 +64,3 @@ multi-node clusters and scales with your Elasticsearch deployment.
 Advanced options let you control how your data is sampled and summarized.
 You can also set timeouts to prevent graph queries from adversely
 affecting the cluster.
---
-
-include::getting-started.asciidoc[]
-
-include::configuring-graph.asciidoc[]
-
-include::troubleshooting.asciidoc[]
-
-include::limitations.asciidoc[]

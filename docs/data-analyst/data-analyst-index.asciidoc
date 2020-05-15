@@ -1,0 +1,85 @@
+[[kibana-data-analyst-guide]]
+= Kibana Data Analyst Guide
+
+:include-xpack:  true
+:lang:           en
+:kib-repo-dir:   {docdir}
+:blog-ref:       https://www.elastic.co/blog/
+:wikipedia:      https://en.wikipedia.org/wiki
+
+include::{asciidoc-dir}/../../shared/versions/stack/{source_branch}.asciidoc[]
+
+:docker-repo:    docker.elastic.co/kibana/kibana
+:docker-image:   docker.elastic.co/kibana/kibana:{version}
+:repo:           https://github.com/elastic/kibana/
+:issue:          {repo}issues/
+:pull:           {repo}pull/
+:commit:         {repo}commit/
+:blob:           {repo}blob/{branch}/
+:security-ref:   https://www.elastic.co/community/security/
+
+include::{asciidoc-dir}/../../shared/attributes.asciidoc[]
+
+include::release-notes/highlights.asciidoc[]
+
+GET STARTED//
+include::get-started/introduction.asciidoc[]
+include::get-started/how-it-works.asciidoc[]
+include::get-started/for-your-solution.asciidoc[]
+include::get-started/getting-started.asciidoc[]
+
+ADD DATA//
+include::add-data/add-data.asciidoc[]
+include::add-data/index-patterns.asciidoc[]
+include::add-data/set-time-filter.asciidoc[]
+
+EXPLORE//
+include::explore/search.asciidoc[]
+include::explore/discover.asciidoc[]
+
+BUILD DASHBOARDS//
+include::dashboards/what-are-dashboards.asciidoc[]
+include::dashboards/create-dashboard.asciidoc[]
+
+VISUALIZE//
+include::visualize/visualize.asciidoc[]
+include::visualize/aggregations.asciidoc[]
+include::visualize/lens.asciidoc[]
+include::visualize/most-frequent.asciidoc[]
+include::visualize/time-series-analysis.asciidoc[]
+include::visualize/vega.asciidoc[]
+
+CREATE PRESENTATIONS//
+include::canvas/canvas.asciidoc[]
+include::canvas/canvas-tutorial.asciidoc[]
+include::canvas/cavas-expression-lifecycle.asciidoc[]
+include::canvas/canvas-function-reference.asciidoc[]
+
+CREATE MAPS//
+include::maps/index.asciidoc[]
+include::maps/maps-getting-started.asciidoc[]
+include::maps/search.asciidoc[]
+include::maps/connect-to-ems.asciidoc[]
+include::maps/geojson-upload.asciidoc[]
+include::maps/trouble-shooting.asciidoc[]
+
+GRAPH DATA CONNECTIONS//
+include::graph/index.asciidoc[]
+include::graph/getting-started.asciidoc[]
+include::graph/configuring-graph.asciidoc[]
+include::graph/troubleshooting.asciidoc[]
+include::graph/limitations.asciidoc[]
+
+GENERATE REPORTS//
+include::reporting/index.asciidoc[]
+include::reporting/automating-report-generation.asciidoc[]
+include::reporting/configuring-reporting.asciidoc[]
+include::chromium-sandbox.asciidoc[]
+include::reporting-troubleshooting.asciidoc[]
+include::development/index.asciidoc[]
+
+
+MANAGE KIBANA//
+include::
+
+include::redirects.asciidoc[]

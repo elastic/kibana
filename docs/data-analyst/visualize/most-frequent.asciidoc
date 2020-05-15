@@ -1,5 +1,5 @@
 [[most-frequent]]
-== Most frequently used visualizations
+== Create classic visualizations
 
 The most frequently used visualizations allow you to plot aggregated data from a <<save-open-search, saved search>> or <<index-patterns, index pattern>>.
 

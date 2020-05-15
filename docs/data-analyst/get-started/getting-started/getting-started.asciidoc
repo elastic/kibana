@@ -1,5 +1,5 @@
 [[getting-started]]
-= Get started
+= Quickstart to {kib}
 
 [partintro]
 --

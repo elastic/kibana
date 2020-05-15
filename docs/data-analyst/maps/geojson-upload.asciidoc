@@ -40,3 +40,5 @@ should be identical to the locally-previewed data, but now it's indexed data fro
 . To continue adding data to the map, click *Add layer*.
 . In *Layer settings*, adjust any settings or <<maps-vector-style-properties, properties>> as needed.
 . Click *Save & close*.
+
+include::indexing-geojson-data-tutorial.asciidoc[]

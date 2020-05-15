@@ -1,5 +1,5 @@
 [[vega-graph]]
-== Vega
+== Build custom visualizations with Vega
 
 experimental[]
 

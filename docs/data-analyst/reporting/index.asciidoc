@@ -1,6 +1,6 @@
 [role="xpack"]
 [[reporting-getting-started]]
-= Reporting from Kibana
+= Generate reports
 
 [partintro]
 
@@ -104,11 +104,3 @@ download reports that you previously generated.
 
 To automatically generate a report from a script or with
 {watcher}, see <<automating-report-generation, Automating report generation>>.
-
---
-
-include::automating-report-generation.asciidoc[]
-include::configuring-reporting.asciidoc[]
-include::chromium-sandbox.asciidoc[]
-include::reporting-troubleshooting.asciidoc[]
-include::development/index.asciidoc[]

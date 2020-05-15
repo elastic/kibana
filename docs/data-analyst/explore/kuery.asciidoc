@@ -1,5 +1,5 @@
 [[kuery-query]]
-=== Kibana Query Language
+=== Kibana query language
 
 In Kibana 6.3, we introduced a number of exciting experimental query language enhancements. These
 features are now available by default in 7.0. Out of the box, Kibana's query language now includes scripted field support and a

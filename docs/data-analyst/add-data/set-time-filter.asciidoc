@@ -1,5 +1,6 @@
 [[set-time-filter]]
-== Setting the time filter
+== Set a time range
+
 If your index contains time-based events, and a time-field is configured for the 
 selected <<index-patterns, index pattern>>, set a time filter that displays only the data within the
 specified time range.

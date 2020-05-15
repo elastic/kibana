@@ -1,0 +1,9 @@
+[role="xpack"]
+[[plot-big-data]]
+== Plot big data
+
+Value prop. 
+
+--
+
+include::maps-aggregations.asciidoc[]

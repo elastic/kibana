@@ -1,6 +1,6 @@
 [role="xpack"]
 [[lens]]
-== Lens
+== Build visualizations with Lens
 
 beta[]
 

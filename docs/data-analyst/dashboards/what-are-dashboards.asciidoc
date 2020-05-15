@@ -1,0 +1,33 @@
+[[what-are-dashboards]]
+= What are dashboards?
+
+[partintro]
+--
+
+A _dashboard_ is a collection of visualizations, searches, and
+maps, typically in real-time. Dashboards provide
+at-a-glance insights into your data and enable you to drill down into details.
+
+With *Dashboard*, you can:
+
+* Add visualizations, saved searches, and maps for side-by-side analysis
+
+* Arrange dashboard elements to display exactly how you want
+
+* Customize time ranges to display only the data you want
+
+* Inspect and edit dashboard elements to find out exactly what kind of data is displayed
+
+[role="screenshot"]
+image:images/Dashboard_example.png[Example dashboard]
+
+[float]
+[[dashboard-read-only-access]]
+=== [xpack]#Read only access#
+If you see
+the read-only icon in the application header,
+then you don't have sufficient privileges to create and save dashboards. The buttons to create and edit
+dashboards are not visible. For more information, see <<xpack-security-authorization>>.
+
+[role="screenshot"]
+image::images/dashboard-read-only-badge.png[Example of Dashboard read only access indicator in Kibana header]
