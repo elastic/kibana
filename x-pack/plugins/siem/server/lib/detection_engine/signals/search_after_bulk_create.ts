@@ -97,6 +97,8 @@ export const searchAfterAndBulkCreate = async ({
   */
   let maxResults = ruleParams.maxSignals;
 
+  // Get
+
   while (searchResultSize < maxResults) {
     try {
       logger.debug(`sortIds: ${sortId}`);

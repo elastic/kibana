@@ -9,7 +9,7 @@ import { Logger } from 'src/core/server';
 import { ListItemArraySchema } from '../../../../../lists/common/schemas/response';
 import { Type as ListValueType } from '../../../../../lists/common/schemas/common';
 import { ListClient } from '../../../../../lists/server';
-import { SignalSearchResponse } from './types';
+import { SignalSearchResponse, SearchTypes } from './types';
 import { RuleAlertParams } from '../types';
 
 interface FilterEventsAgainstList {
@@ -32,28 +32,37 @@ export const filterEventsAgainstList = async ({
 
     // grab the signals with values found in the given exception lists.
     const filteredHitsPromises = exceptionsList.map(async exceptionItem => {
-      // acquire the list values we are checking for.
-      const valuesOfGivenType = eventSearchResult.hits.hits
-        .map(searchResultItem => get(exceptionItem.field, searchResultItem._source))
-        .filter((searchResultItem: string) => searchResultItem != null);
-      const valueSet = new Set<string>(valuesOfGivenType); // make them small
       if (exceptionItem.values == null || exceptionItem.values.length === 0) {
         throw new Error('Malformed exception list provided');
       }
+      // acquire the list values we are checking for.
+      const valuesOfGivenType = eventSearchResult.hits.hits.reduce((acc, searchResultItem) => {
+        const valueField = get(exceptionItem.field, searchResultItem._source);
+        if (valueField != null && !acc.has(valueField)) {
+          acc.add(valueField);
+        }
+        return acc;
+      }, new Set<SearchTypes>());
+
       const listSignals: ListItemArraySchema = await listClient.getListItemByValues({
-        listId: exceptionItem.values[0].id!,
+        listId: exceptionItem.values[0].id ?? '',
         type: exceptionItem.values[0].name as ListValueType, // bad, I know, I'll write a typeguard later.
-        value: [...valueSet],
+        value: [...valuesOfGivenType],
       });
+
       // create a set of list values that were a hit
-      const badSet = new Set<string>(listSignals.map(item => item.value));
-      // console.log({ badSet });
+      const badSet = new Set<SearchTypes>(listSignals.map(item => item.value));
+
+      // do a single search after with these values.
+      // painless script to do nested query in elasticsearch
       // filter out the search results that match with the values found in the list.
-      const filteredEvents = eventSearchResult.hits.hits.filter(item =>
-        get(exceptionItem.field, item._source)
-          ? !badSet.has(get(exceptionItem.field, item._source))
-          : true
-      );
+      const filteredEvents = eventSearchResult.hits.hits.filter(item => {
+        const eventItem = get(exceptionItem.field, item._source);
+        if (eventItem != null) {
+          return !badSet.has(eventItem);
+        }
+        return false;
+      });
       const diff = eventSearchResult.hits.hits.length - filteredEvents.length;
       logger.debug(`Lists filtered out ${diff} events`);
       return filteredEvents;

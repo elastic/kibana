@@ -43,8 +43,6 @@ export const signalRulesAlertType = ({
   version: string;
   ml: SetupPlugins['ml'];
   lists: SetupPlugins['lists'] | undefined;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  // getListItemByValues: any;
 }): SignalRuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
