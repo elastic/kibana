@@ -31,7 +31,7 @@ function getExpressionForLayer(layer: EsDSLLayer): Ast | null {
     chain: [
       {
         type: 'function',
-        function: 'esdsl',
+        function: 'lens_esdsl',
         arguments: {
           index: [layer.index],
           query: [layer.query],

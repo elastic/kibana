@@ -35,7 +35,7 @@ export class EsDSLDatasource {
     { expressions, editorFrame }: IndexPatternDatasourceSetupPlugins
   ) {
     expressions.registerFunction({
-      name: 'esdsl',
+      name: 'lens_esdsl',
       type: 'kibana_datatable',
       inputTypes: ['kibana_context', 'null'],
       help: '',
