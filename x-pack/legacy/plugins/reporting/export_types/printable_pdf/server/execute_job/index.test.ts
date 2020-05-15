@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+jest.mock('../lib/generate_pdf', () => ({ generatePdfObservableFactory: jest.fn() }));
+
 import * as Rx from 'rxjs';
 import { createMockReportingCore } from '../../../../test_helpers';
 import { cryptoFactory } from '../../../../server/lib/crypto';
@@ -13,8 +15,6 @@ import { ReportingCore } from '../../../../server';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
 import { JobDocPayloadPDF } from '../../types';
 import { executeJobFactory } from './index';
-
-jest.mock('../lib/generate_pdf', () => ({ generatePdfObservableFactory: jest.fn() }));
 
 let mockReporting: ReportingCore;
 
