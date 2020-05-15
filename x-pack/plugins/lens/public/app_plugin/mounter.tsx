@@ -47,15 +47,11 @@ export async function mountApp(
   );
   const redirectTo = (
     routeProps: RouteComponentProps<{ id?: string }>,
-    originatingApp: string,
     id?: string,
     returnToOrigin?: boolean,
+    originatingApp?: string,
     newlyCreated?: boolean
   ) => {
-    if (!!originatingApp && !returnToOrigin) {
-      removeQueryParam(routeProps.history, 'embeddableOriginatingApp');
-    }
-
     if (!id) {
       routeProps.history.push('/');
     } else if (!originatingApp) {
@@ -78,7 +74,10 @@ export async function mountApp(
   const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
     trackUiEvent('loaded');
     const urlParams = parse(routeProps.location.search) as Record<string, string>;
-    const originatingApp = urlParams.embeddableOriginatingApp;
+    const originatingAppFromUrl = urlParams.embeddableOriginatingApp;
+    if (urlParams.embeddableOriginatingApp) {
+      removeQueryParam(routeProps.history, 'embeddableOriginatingApp');
+    }
 
     return (
       <App
@@ -89,10 +88,10 @@ export async function mountApp(
         storage={new Storage(localStorage)}
         docId={routeProps.match.params.id}
         docStorage={new SavedObjectIndexStore(savedObjectsClient)}
-        redirectTo={(id, returnToOrigin, newlyCreated) =>
-          redirectTo(routeProps, originatingApp, id, returnToOrigin, newlyCreated)
+        redirectTo={(id, returnToOrigin, originatingApp, newlyCreated) =>
+          redirectTo(routeProps, id, returnToOrigin, originatingApp, newlyCreated)
         }
-        originatingApp={originatingApp}
+        originatingAppFromUrl={originatingAppFromUrl}
       />
     );
   };
