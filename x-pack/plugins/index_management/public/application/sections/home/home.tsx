@@ -24,10 +24,12 @@ import { IndexList } from './index_list';
 import { TemplateList } from './template_list';
 import { breadcrumbService } from '../../services/breadcrumbs';
 
-enum Section {
+export enum Section {
   Indices = 'indices',
   IndexTemplates = 'index_templates',
 }
+
+export const homeSections = [Section.Indices, Section.IndexTemplates];
 
 interface MatchParams {
   section: Section;
@@ -110,9 +112,17 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         <EuiSpacer size="m" />
 
         <Switch>
-          <Route exact path={`${BASE_PATH}indices`} component={IndexList} />
-          <Route exact path={`${BASE_PATH}indices/filter/:filter?`} component={IndexList} />
-          <Route exact path={`${BASE_PATH}templates/:templateName*`} component={TemplateList} />
+          <Route exact path={`${BASE_PATH}${Section.Indices}`} component={IndexList} />
+          <Route
+            exact
+            path={`${BASE_PATH}${Section.Indices}/filter/:filter?`}
+            component={IndexList}
+          />
+          <Route
+            exact
+            path={`${BASE_PATH}${Section.IndexTemplates}/:templateName*`}
+            component={TemplateList}
+          />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>
