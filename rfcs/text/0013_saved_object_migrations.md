@@ -91,15 +91,15 @@ migration failure which requires manual intervention to resolve:
 > Achieves goals: (2.3)
 > Mitigates errors: (3.1), (3.2)
 
-1. Introduce the option to perform a dry run migration to allow administrators
-   to locate and fix potential migration failures without taking their
-   existing Kibana node(s) offline.
+1. Introduce a CLI option to perform a dry run migration to allow
+   administrators to locate and fix potential migration failures without
+   taking their existing Kibana node(s) offline.
 2. To have the highest chance of surfacing potential failures such as low disk
    space, dry run migrations should not be mere simulations. A dry run should
    perform a real migration in a way that doesn’t impact the existing Kibana
    cluster.
-3. Generate a migration report to make it easy to create a support request
-   from a failed migration dry run.
+3. The CLI should generate a migration report to make it easy to create a
+   support request from a failed migration dry run.
     1. The report would be an NDJSON export of all failed objects.
     2. If support receives such a report, we could modify all the objects to
        ensure the migration would pass and send this back to the client.
@@ -122,10 +122,13 @@ migration failure which requires manual intervention to resolve:
    stack trace to aid in debugging. 
 3. Administrators should be able to generate a migration report (similar to
    the one dry run migrations create) which is an NDJSON export of all objects
-   tagged as “invalid”. 
+   tagged as “invalid”.
+   1. Expose this as an API first
+   2. (later) Notify administrators and allow them to export invalid objects
+      from the Kibana UI.
 4. When an invalid object is read, the Saved Objects repository will throw an
    invalid object exception which should include a link to the documentation
-   to help administrators resolve migration bugs.  
+   to help administrators resolve migration bugs.
 5. Educate Kibana developers to no longer simply write back an unmigrated
    document if an exception occurred. A migration function should either
    successfully transform the object or throw. 
