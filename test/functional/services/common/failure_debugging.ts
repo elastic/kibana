@@ -22,7 +22,7 @@ import { writeFile, mkdir } from 'fs';
 import { promisify } from 'util';
 
 import del from 'del';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 interface Test {
   fullTitle(): string;
