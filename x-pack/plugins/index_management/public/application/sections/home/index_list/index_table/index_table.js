@@ -400,8 +400,8 @@ export class IndexTable extends Component {
   render() {
     const {
       filter,
-      showSystemIndices,
-      showSystemIndicesChanged,
+      showHiddenIndices,
+      showHiddenIndicesChanged,
       indices,
       loadIndices,
       indicesLoading,
@@ -459,13 +459,13 @@ export class IndexTable extends Component {
                       })}
                       <EuiFlexItem grow={false}>
                         <EuiSwitch
-                          id="checkboxShowSystemIndices"
-                          checked={showSystemIndices}
-                          onChange={event => showSystemIndicesChanged(event.target.checked)}
+                          id="checkboxShowHiddenIndices"
+                          checked={showHiddenIndices}
+                          onChange={event => showHiddenIndicesChanged(event.target.checked)}
                           label={
                             <FormattedMessage
-                              id="xpack.idxMgmt.indexTable.systemIndicesSwitchLabel"
-                              defaultMessage="Include system indices"
+                              id="xpack.idxMgmt.indexTable.hiddenIndicesSwitchLabel"
+                              defaultMessage="Include hidden indices"
                             />
                           }
                         />
