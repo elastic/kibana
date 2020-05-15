@@ -18,7 +18,6 @@ import { useTrackPageview } from '../../../observability/public';
 import { MonitorList } from '../components/overview/monitor_list/monitor_list_container';
 import { EmptyState, FilterGroup, KueryBar, ParsingErrorCallout } from '../components/overview';
 import { StatusPanel } from '../components/overview/status_panel';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   indexPattern: IIndexPattern | null;
@@ -40,12 +39,6 @@ const EuiFlexItemStyled = styled(EuiFlexItem)`
 export const OverviewPageComponent = React.memo(({ indexPattern, setEsKueryFilters }: Props) => {
   const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = useGetUrlParams();
   const { search, filters: urlFilters } = params;
-
-  const {
-    services: {
-      data: { autocomplete },
-    },
-  } = useKibana();
 
   useTrackPageview({ app: 'uptime', path: 'overview' });
   useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
@@ -75,7 +68,6 @@ export const OverviewPageComponent = React.memo(({ indexPattern, setEsKueryFilte
               aria-label={i18n.translate('xpack.uptime.filterBar.ariaLabel', {
                 defaultMessage: 'Input filter criteria for the overview page',
               })}
-              autocomplete={autocomplete}
               data-test-subj="xpack.uptime.filterBar"
             />
           </EuiFlexItem>

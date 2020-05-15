@@ -6,12 +6,10 @@
 
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import { selectMonitorStatusAlert } from '../../../../state/selectors';
 import { AlertMonitorStatusComponent } from '../index';
 
 interface Props {
-  autocomplete: DataPublicPluginSetup['autocomplete'];
   enabled: boolean;
   numTimes: number;
   setAlertParams: (key: string, value: any) => void;
@@ -21,17 +19,10 @@ interface Props {
   };
 }
 
-export const AlertMonitorStatus = ({
-  autocomplete,
-  enabled,
-  numTimes,
-  setAlertParams,
-  timerange,
-}: Props) => {
+export const AlertMonitorStatus = ({ enabled, numTimes, setAlertParams, timerange }: Props) => {
   const { filters, locations } = useSelector(selectMonitorStatusAlert);
   return (
     <AlertMonitorStatusComponent
-      autocomplete={autocomplete}
       enabled={enabled}
       filters={filters}
       locations={locations}

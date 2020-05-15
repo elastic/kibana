@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { EuiIcon } from '@elastic/eui';
 import { tint } from 'polished';
@@ -20,7 +20,7 @@ import {
 
 import { QuerySuggestion } from '../../../../../../../../src/plugins/data/public';
 
-function getIconColor(type?: string) {
+function getIconColor(type: string) {
   switch (type) {
     case 'field':
       return theme.euiColorVis7;
@@ -71,9 +71,9 @@ const ListItem = styled.li<{ selected: boolean }>`
   }
 `;
 
-const Icon = styled.div<{ type?: string }>`
+const Icon = styled.div<{ type: string }>`
   flex: 0 0 ${px(units.double)};
-  background: ${props => tint(0.1, getIconColor(props.type))};
+  background: ${props => tint(0.1, getIconColor(props.type) as string)};
   color: ${props => getIconColor(props.type)};
   width: 100%;
   height: 100%;
@@ -126,9 +126,19 @@ export const Suggestion: React.FC<SuggestionProps> = ({
   onClick,
   onMouseEnter,
 }) => {
+  const childNode = useRef<HTMLLIElement>(null);
+
+  useEffect(() => {
+    if (childNode.current) {
+      innerRef(childNode.current);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [childNode]);
+
   return (
     <ListItem
-      innerRef={innerRef}
+      ref={childNode}
       selected={selected}
       onClick={() => onClick(suggestion)}
       onMouseEnter={onMouseEnter}

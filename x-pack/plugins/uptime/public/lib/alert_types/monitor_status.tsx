@@ -57,15 +57,11 @@ export const validate = (alertParams: any) => {
 
 const { defaultActionMessage } = MonitorStatusTranslations;
 
-export const initMonitorStatusAlertType: AlertTypeInitializer = ({
-  autocomplete,
-}): AlertTypeModel => ({
+export const initMonitorStatusAlertType: AlertTypeInitializer = (): AlertTypeModel => ({
   id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
   name: <MonitorStatusTitle />,
   iconClass: 'uptimeApp',
-  alertParamsExpression: (params: any) => (
-    <AlertMonitorStatus {...params} autocomplete={autocomplete} />
-  ),
+  alertParamsExpression: (params: any) => <AlertMonitorStatus {...params} />,
   validate,
   defaultActionMessage,
   requiresAppContext: true,

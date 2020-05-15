@@ -44,7 +44,7 @@ export const Suggestions: React.FC<SuggestionsProps> = ({
 }) => {
   const [childNodes, setChildNodes] = useState<Array<RefObject<HTMLLIElement>>>([]);
 
-  const parentNode = useRef<HTMLUListElement>();
+  const parentNode = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
     const scrollIntoView = () => {
@@ -87,13 +87,5 @@ export const Suggestions: React.FC<SuggestionsProps> = ({
     );
   });
 
-  return (
-    <List
-      innerRef={(node: any) => {
-        parentNode.current = node;
-      }}
-    >
-      {suggestionsNodes}
-    </List>
-  );
+  return <List ref={parentNode}>{suggestionsNodes}</List>;
 };

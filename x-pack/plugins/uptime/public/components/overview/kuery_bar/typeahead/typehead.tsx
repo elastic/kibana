@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { KeyboardEvent, ChangeEvent, MouseEvent, useState, useRef } from 'react';
+import React, { KeyboardEvent, ChangeEvent, MouseEvent, useState, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch, EuiProgress, EuiOutsideClickDetector } from '@elastic/eui';
 import { Suggestions } from './suggestions';
@@ -40,7 +40,16 @@ interface TypeaheadProps {
   ariaLabel: string;
 }
 
-export const Typeahead: React.FC<TypeaheadProps> = props => {
+export const Typeahead: React.FC<TypeaheadProps> = ({
+  initialValue,
+  suggestions,
+  onChange,
+  onSubmit,
+  dataTestSubj,
+  ariaLabel,
+  disabled,
+  isLoading,
+}) => {
   const [state, setState] = useState<TypeaheadState>({
     isSuggestionsVisible: false,
     index: null,
@@ -51,19 +60,15 @@ export const Typeahead: React.FC<TypeaheadProps> = props => {
 
   const inputRef = useRef<HTMLInputElement>();
 
-  // static getDerivedStateFromProps(props: TypeaheadProps, state: TypeaheadState) {
-  //   if (state.inputIsPristine && props.initialValue) {
-  //     return {
-  //       value: props.initialValue,
-  //     };
-  //   }
-
-  //   return null;
-  // }
+  useEffect(() => {
+    if (state.inputIsPristine && initialValue) {
+      setState({ ...state, value: initialValue });
+    }
+  }, [initialValue, state]);
 
   const incrementIndex = (currentIndex: number) => {
     let nextIndex = currentIndex + 1;
-    if (currentIndex === null || nextIndex >= props.suggestions.length) {
+    if (currentIndex === null || nextIndex >= suggestions.length) {
       nextIndex = 0;
     }
     setState({ ...state, index: nextIndex });
@@ -83,11 +88,11 @@ export const Typeahead: React.FC<TypeaheadProps> = props => {
     switch (event.keyCode) {
       case KEY_CODES.LEFT:
         setState({ ...state, isSuggestionsVisible: true });
-        props.onChange(value, selectionStart);
+        onChange(value, selectionStart);
         break;
       case KEY_CODES.RIGHT:
         setState({ ...state, isSuggestionsVisible: true });
-        props.onChange(value, selectionStart);
+        onChange(value, selectionStart);
         break;
     }
   };
@@ -111,11 +116,11 @@ export const Typeahead: React.FC<TypeaheadProps> = props => {
         break;
       case KEY_CODES.ENTER:
         event.preventDefault();
-        if (isSuggestionsVisible && props.suggestions[index!]) {
-          selectSuggestion(props.suggestions[index!]);
+        if (isSuggestionsVisible && suggestions[index!]) {
+          selectSuggestion(suggestions[index!]);
         } else {
           setState({ ...state, isSuggestionsVisible: false });
-          props.onSubmit(value);
+          onSubmit(value);
         }
         break;
       case KEY_CODES.ESC:
@@ -135,7 +140,7 @@ export const Typeahead: React.FC<TypeaheadProps> = props => {
       state.value.substr(suggestion.end);
 
     setState({ ...state, value: nextInputValue, index: null });
-    props.onChange(nextInputValue, nextInputValue.length);
+    onChange(nextInputValue, nextInputValue.length);
   };
 
   const onClickOutside = () => {
@@ -154,14 +159,14 @@ export const Typeahead: React.FC<TypeaheadProps> = props => {
     });
 
     if (!hasValue) {
-      props.onSubmit(value);
+      onSubmit(value);
     }
-    props.onChange(value, selectionStart!);
+    onChange(value, selectionStart!);
   };
 
   const onClickInput = (event: MouseEvent<HTMLInputElement> & ChangeEvent<HTMLInputElement>) => {
     const { selectionStart } = event.target;
-    props.onChange(state.value, selectionStart!);
+    onChange(state.value, selectionStart!);
   };
 
   const onClickSuggestion = (suggestion: QuerySuggestion) => {
@@ -173,9 +178,9 @@ export const Typeahead: React.FC<TypeaheadProps> = props => {
     setState({ ...state, index });
   };
 
-  const onSubmit = () => {
+  const onSuggestionSubmit = () => {
     if (state.lastSubmitted !== state.value) {
-      props.onSubmit(state.value);
+      onSubmit(state.value);
       setState({ ...state, lastSubmitted: state.value });
     }
     setState({ ...state, isSuggestionsVisible: false });
@@ -184,9 +189,9 @@ export const Typeahead: React.FC<TypeaheadProps> = props => {
   return (
     <EuiOutsideClickDetector onOutsideClick={onClickOutside}>
       <>
-        <div data-test-subj={props.dataTestSubj} style={{ position: 'relative' }}>
+        <div data-test-subj={dataTestSubj} style={{ position: 'relative' }}>
           <EuiFieldSearch
-            aria-label={props.ariaLabel}
+            aria-label={ariaLabel}
             fullWidth
             style={{
               backgroundImage: 'none',
@@ -199,18 +204,18 @@ export const Typeahead: React.FC<TypeaheadProps> = props => {
                 inputRef.current = node;
               }
             }}
-            disabled={props.disabled}
+            disabled={disabled}
             value={state.value}
             onKeyDown={onKeyDown}
             onKeyUp={onKeyUp}
-            onBlur={onSubmit}
+            onBlur={onSuggestionSubmit}
             onChange={onChangeInputValue}
             onClick={onClickInput}
             autoComplete="off"
             spellCheck={false}
           />
 
-          {props.isLoading && (
+          {isLoading && (
             <EuiProgress
               size="xs"
               color="accent"
@@ -225,7 +230,7 @@ export const Typeahead: React.FC<TypeaheadProps> = props => {
 
         <Suggestions
           show={state.isSuggestionsVisible}
-          suggestions={props.suggestions}
+          suggestions={suggestions}
           index={state.index!}
           onClick={onClickSuggestion}
           onMouseEnter={onMouseEnterSuggestion}

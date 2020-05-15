@@ -11,11 +11,11 @@ import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Typeahead } from './typeahead';
 import { useUrlParams } from '../../../hooks';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   esKuery,
   IIndexPattern,
   QuerySuggestion,
-  DataPublicPluginSetup,
 } from '../../../../../../../src/plugins/data/public';
 
 const Container = styled.div`
@@ -34,7 +34,6 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
 
 interface Props {
   'aria-label': string;
-  autocomplete: DataPublicPluginSetup['autocomplete'];
   'data-test-subj': string;
   loadIndexPattern: () => void;
   indexPattern: IIndexPattern | null;
@@ -43,12 +42,17 @@ interface Props {
 
 export function KueryBarComponent({
   'aria-label': ariaLabel,
-  autocomplete: autocompleteService,
   'data-test-subj': dataTestSubj,
   loadIndexPattern,
   indexPattern,
   loading,
 }: Props) {
+  const {
+    services: {
+      data: { autocomplete },
+    },
+  } = useKibana();
+
   useEffect(() => {
     if (!indexPattern) {
       loadIndexPattern();
@@ -67,7 +71,7 @@ export function KueryBarComponent({
 
   const indexPatternMissing = loading && !indexPattern;
 
-  async function onChange(inputValue: string, selectionStart: number) {
+  async function onChange(inputValue: string, selectionStart: number | null) {
     if (!indexPattern) {
       return;
     }
@@ -80,7 +84,7 @@ export function KueryBarComponent({
 
     try {
       const suggestions = (
-        (await autocompleteService.getQuerySuggestions({
+        (await autocomplete.getQuerySuggestions({
           language: 'kuery',
           indexPatterns: [indexPattern],
           query: inputValue,
@@ -88,7 +92,7 @@ export function KueryBarComponent({
           selectionEnd: selectionStart,
         })) || []
       )
-        .filter(suggestion => !startsWith(suggestion.text, 'span.'))
+        .filter((suggestion: QuerySuggestion) => !startsWith(suggestion.text, 'span.'))
         .slice(0, 15);
 
       if (currentRequest !== currentRequestCheck) {

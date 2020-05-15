@@ -6,7 +6,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import * as labels from './translations';
 import {
   DownNoExpressionSelect,
@@ -18,7 +17,6 @@ import { AddFilterButton } from './add_filter_btn';
 import { KueryBar } from '..';
 
 interface AlertMonitorStatusProps {
-  autocomplete: DataPublicPluginSetup['autocomplete'];
   enabled: boolean;
   filters: string;
   locations: string[];
@@ -44,7 +42,6 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
       <EuiSpacer size="m" />
       <KueryBar
         aria-label={labels.ALERT_KUERY_BAR_ARIA}
-        autocomplete={props.autocomplete}
         data-test-subj="xpack.uptime.alerts.monitorStatus.filterBar"
       />
 

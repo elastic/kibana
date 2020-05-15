@@ -34,15 +34,12 @@ export const getKibanaFrameworkAdapter = (
     i18n,
   } = core;
 
-  const {
-    data: { autocomplete },
-    triggers_actions_ui,
-  } = plugins;
+  const { triggers_actions_ui } = plugins;
 
   alertTypeInitializers.forEach(init => {
-    const alertInitializer = init({ autocomplete });
+    const alertInitializer = init({});
     if (!triggers_actions_ui.alertTypeRegistry.has(alertInitializer.id)) {
-      triggers_actions_ui.alertTypeRegistry.register(init({ autocomplete }));
+      triggers_actions_ui.alertTypeRegistry.register(init({}));
     }
   });
 
