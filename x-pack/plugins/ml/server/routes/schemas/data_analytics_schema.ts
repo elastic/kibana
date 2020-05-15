@@ -60,6 +60,13 @@ export const analyticsIdSchema = schema.object({
   analyticsId: schema.string(),
 });
 
+export const analyticsIdIndexSchema = schema.object({
+  /**
+   * Analytics ID
+   */
+  delete_index: schema.maybe(schema.string()),
+});
+
 export const stopsDataFrameAnalyticsJobQuerySchema = schema.object({
   force: schema.maybe(schema.boolean()),
 });

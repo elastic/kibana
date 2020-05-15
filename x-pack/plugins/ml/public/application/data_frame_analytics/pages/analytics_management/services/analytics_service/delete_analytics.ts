@@ -39,3 +39,31 @@ export const deleteAnalytics = async (d: DataFrameAnalyticsListRow) => {
   }
   refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.REFRESH);
 };
+
+export const deleteAnalyticsAndTargetIndex = async (d: DataFrameAnalyticsListRow) => {
+  const toastNotifications = getToastNotifications();
+  try {
+    if (isDataFrameAnalyticsFailed(d.stats.state)) {
+      await ml.dataFrameAnalytics.stopDataFrameAnalytics(d.config.id, true);
+    }
+    await ml.dataFrameAnalytics.deleteDataFrameAnalyticsAndTargetIndex(
+      d.config.id,
+      d.config.dest.index
+    );
+    toastNotifications.addSuccess(
+      i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsSuccessMessage', {
+        defaultMessage: 'Request to delete data frame analytics {analyticsId} acknowledged.',
+        values: { analyticsId: d.config.id },
+      })
+    );
+  } catch (e) {
+    toastNotifications.addDanger(
+      i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsErrorMessage', {
+        defaultMessage:
+          'An error occurred deleting the data frame analytics {analyticsId}: {error}',
+        values: { analyticsId: d.config.id, error: JSON.stringify(e) },
+      })
+    );
+  }
+  refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.REFRESH);
+};

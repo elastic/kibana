@@ -13,6 +13,7 @@ import {
   dataAnalyticsExplainSchema,
   analyticsIdSchema,
   stopsDataFrameAnalyticsJobQuerySchema,
+  analyticsIdIndexSchema,
 } from './schemas/data_analytics_schema';
 
 /**
@@ -275,8 +276,10 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
   router.delete(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}',
+      // validate: false,
       validate: {
         params: analyticsIdSchema,
+        query: analyticsIdIndexSchema,
       },
       options: {
         tags: ['access:ml:canDeleteDataFrameAnalytics'],
@@ -285,12 +288,27 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { analyticsId } = request.params;
+
+        const { destinationIndex } = request.query;
+
+        // Delete the dataframe analytics
         const results = await context.ml!.mlClient.callAsCurrentUser(
           'ml.deleteDataFrameAnalytics',
           {
             analyticsId,
           }
         );
+
+        // Delete the associated destinationIndex
+        if (destinationIndex) {
+          // const results = await context.ml!.mlClient.callAsCurrentUser(
+          //   'ml.deleteDataFrameAnalytics',
+          //   {
+          //     analyticsId,
+          //   }
+          // );
+        }
+
         return response.ok({
           body: results,
         });

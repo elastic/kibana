@@ -11,10 +11,11 @@ import {
   EuiConfirmModal,
   EuiOverlayMask,
   EuiToolTip,
+  EuiSwitch,
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
-import { deleteAnalytics } from '../../services/analytics_service';
+import { deleteAnalytics, deleteAnalyticsAndTargetIndex } from '../../services/analytics_service';
 
 import {
   checkPermission,
@@ -29,15 +30,20 @@ interface DeleteActionProps {
 
 export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
   const disabled = isDataFrameAnalyticsRunning(item.stats.state);
-
   const canDeleteDataFrameAnalytics: boolean = checkPermission('canDeleteDataFrameAnalytics');
 
   const [isModalVisible, setModalVisible] = useState(false);
+  const [deleteTargetIndices, toggleDeleteTargetIndices] = useState<boolean>(true);
 
   const closeModal = () => setModalVisible(false);
   const deleteAndCloseModal = () => {
     setModalVisible(false);
-    deleteAnalytics(item);
+
+    if (deleteTargetIndices) {
+      deleteAnalyticsAndTargetIndex(item);
+    } else {
+      deleteAnalytics(item);
+    }
   };
   const openModal = () => setModalVisible(true);
 
@@ -112,6 +118,15 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
                 defaultMessage: `Are you sure you want to delete this analytics job? The analytics job's destination index and optional Kibana index pattern will not be deleted.`,
               })}
             </p>
+
+            <EuiSwitch
+              label={i18n.translate('xpack.ml.dataframe.analyticsList.deleteTargetIndicesTitle', {
+                defaultMessage: 'Delete target indices associated with this job',
+              })}
+              checked={deleteTargetIndices}
+              onChange={e => toggleDeleteTargetIndices(!deleteTargetIndices)}
+              compressed
+            />
           </EuiConfirmModal>
         </EuiOverlayMask>
       )}

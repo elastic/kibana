@@ -86,6 +86,13 @@ export const dataFrameAnalytics = {
       method: 'DELETE',
     });
   },
+  deleteDataFrameAnalyticsAndTargetIndex(analyticsId: string, destinationIndex: string) {
+    return http<any>({
+      path: `${basePath()}/data_frame/analytics/${analyticsId}`,
+      query: { destinationIndex },
+      method: 'DELETE',
+    });
+  },
   startDataFrameAnalytics(analyticsId: string) {
     return http<any>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}/_start`,
