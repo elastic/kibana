@@ -19,10 +19,10 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function ShieldPageProvider({ getService }: FtrProviderContext) {
+export function LoginPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
-  class ShieldPage {
+  class LoginPage {
     async login(user: string, pwd: string) {
       await testSubjects.setValue('loginUsername', user);
       await testSubjects.setValue('loginPassword', pwd);
@@ -30,5 +30,5 @@ export function ShieldPageProvider({ getService }: FtrProviderContext) {
     }
   }
 
-  return new ShieldPage();
+  return new LoginPage();
 }

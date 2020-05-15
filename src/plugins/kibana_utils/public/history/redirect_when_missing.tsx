@@ -17,12 +17,13 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import { History } from 'history';
 import { i18n } from '@kbn/i18n';
+import ReactDOM from 'react-dom';
+import ReactMarkdown from 'react-markdown';
 
 import { ToastsSetup } from 'kibana/public';
-import { MarkdownSimple, toMountPoint } from '../../../kibana_react/public';
 import { SavedObjectNotFound } from '../errors';
 
 interface Mapping {
@@ -77,7 +78,19 @@ export function redirectWhenMissing({
       title: i18n.translate('kibana_utils.history.savedObjectIsMissingNotificationMessage', {
         defaultMessage: 'Saved object is missing',
       }),
-      text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
+      text: (element: HTMLElement) => {
+        ReactDOM.render(
+          <ReactMarkdown
+            renderers={{
+              root: Fragment,
+            }}
+          >
+            {error.message}
+          </ReactMarkdown>,
+          element
+        );
+        return () => ReactDOM.unmountComponentAtNode(element);
+      },
     });
 
     if (onBeforeRedirect) {
