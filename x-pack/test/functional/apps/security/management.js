@@ -17,6 +17,7 @@ export default function({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
 
   // FLAKY: https://github.com/elastic/kibana/issues/61173
@@ -24,8 +25,9 @@ export default function({ getService, getPageObjects }) {
     this.tags(['skipFirefox']);
 
     before(async () => {
-      // await PageObjects.security.login('elastic', 'changeme');
-      await PageObjects.security.initTests();
+      await esArchiver.load('empty_kibana');
+      await esArchiver.loadIfNeeded('logstash_functional');
+      await browser.setWindowSize(1600, 1000);
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
       });

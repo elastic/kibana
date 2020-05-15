@@ -14,7 +14,6 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
   const find = getService('find');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
-  const esArchiver = getService('esArchiver');
   const userMenu = getService('userMenu');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'home', 'error']);
 
@@ -187,13 +186,6 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
   class SecurityPage {
     public loginPage = loginPage;
     public loginSelector = loginSelector;
-
-    async initTests() {
-      log.debug('SecurityPage:initTests');
-      await esArchiver.load('empty_kibana');
-      await esArchiver.loadIfNeeded('logstash_functional');
-      await browser.setWindowSize(1600, 1000);
-    }
 
     async login(username?: string, password?: string, options: LoginOptions = {}) {
       await this.loginPage.login(username, password, options);
