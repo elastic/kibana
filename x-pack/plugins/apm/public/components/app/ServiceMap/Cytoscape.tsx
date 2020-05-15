@@ -126,19 +126,9 @@ export function Cytoscape({
 
   // Trigger a custom "data" event when data changes
   useEffect(() => {
-    if (cy && elements.length > 0) {
-      const renderedElements = cy.elements('node,edge');
-      const latestElementIds = elements.map(el => el.data.id);
-      const absentElements = renderedElements.filter(
-        el => !latestElementIds.includes(el.id())
-      );
-      cy.remove(absentElements);
+    if (cy) {
+      cy.remove(cy.elements());
       cy.add(elements);
-      // ensure all elements get latest data properties
-      elements.forEach(elementDefinition => {
-        const el = cy.getElementById(elementDefinition.data.id as string);
-        el.data(elementDefinition.data);
-      });
       cy.trigger('data');
     }
   }, [cy, elements]);
@@ -156,7 +146,7 @@ export function Cytoscape({
     };
 
     const dataHandler: cytoscape.EventHandler = event => {
-      if (cy) {
+      if (cy && cy.elements().length > 0) {
         if (serviceName) {
           resetConnectedEdgeStyle(cy.getElementById(serviceName));
           // Add the "primary" class to the node if its id matches the serviceName.

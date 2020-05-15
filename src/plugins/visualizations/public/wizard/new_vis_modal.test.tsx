@@ -21,7 +21,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { TypesStart, VisType } from '../vis_types';
 import { NewVisModal } from './new_vis_modal';
-import { SavedObjectsStart } from '../../../../core/public';
+import { ApplicationStart, SavedObjectsStart } from '../../../../core/public';
 
 describe('NewVisModal', () => {
   const { location } = window;
@@ -48,7 +48,8 @@ describe('NewVisModal', () => {
       name: 'visWithAliasUrl',
       title: 'Vis with alias Url',
       stage: 'production',
-      aliasUrl: '/aliasUrl',
+      aliasApp: 'otherApp',
+      aliasPath: '#/aliasUrl',
     },
   ];
   const visTypes: TypesStart = {
@@ -80,6 +81,7 @@ describe('NewVisModal', () => {
         visTypesRegistry={visTypes}
         addBasePath={addBasePath}
         uiSettings={uiSettings}
+        application={{} as ApplicationStart}
         savedObjects={{} as SavedObjectsStart}
       />
     );
@@ -94,6 +96,7 @@ describe('NewVisModal', () => {
         visTypesRegistry={visTypes}
         addBasePath={addBasePath}
         uiSettings={uiSettings}
+        application={{} as ApplicationStart}
         savedObjects={{} as SavedObjectsStart}
       />
     );
@@ -110,12 +113,13 @@ describe('NewVisModal', () => {
           visTypesRegistry={visTypes}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
+          application={{} as ApplicationStart}
           savedObjects={{} as SavedObjectsStart}
         />
       );
       const visButton = wrapper.find('button[data-test-subj="visType-vis"]');
       visButton.simulate('click');
-      expect(window.location.assign).toBeCalledWith('#/visualize/create?type=vis');
+      expect(window.location.assign).toBeCalledWith('testbasepath/app/visualize#/create?type=vis');
     });
 
     it('passes through editor params to the editor URL', () => {
@@ -128,17 +132,20 @@ describe('NewVisModal', () => {
           editorParams={['foo=true', 'bar=42']}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
+          application={{} as ApplicationStart}
           savedObjects={{} as SavedObjectsStart}
         />
       );
       const visButton = wrapper.find('button[data-test-subj="visType-vis"]');
       visButton.simulate('click');
-      expect(window.location.assign).toBeCalledWith('#/visualize/create?type=vis&foo=true&bar=42');
+      expect(window.location.assign).toBeCalledWith(
+        'testbasepath/app/visualize#/create?type=vis&foo=true&bar=42'
+      );
     });
 
-    it('closes and redirects properly if visualization with aliasUrl and addToDashboard in editorParams', () => {
+    it('closes and redirects properly if visualization with aliasPath and addToDashboard in editorParams', () => {
       const onClose = jest.fn();
-      window.location.assign = jest.fn();
+      const navigateToApp = jest.fn();
       const wrapper = mountWithIntl(
         <NewVisModal
           isOpen={true}
@@ -147,20 +154,21 @@ describe('NewVisModal', () => {
           editorParams={['foo=true', 'bar=42', 'embeddableOriginatingApp=notAnApp']}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
+          application={({ navigateToApp } as unknown) as ApplicationStart}
           savedObjects={{} as SavedObjectsStart}
         />
       );
       const visButton = wrapper.find('button[data-test-subj="visType-visWithAliasUrl"]');
       visButton.simulate('click');
-      expect(window.location.assign).toBeCalledWith(
-        'testbasepath/aliasUrl?embeddableOriginatingApp=notAnApp'
-      );
+      expect(navigateToApp).toBeCalledWith('otherApp', {
+        path: '#/aliasUrl?embeddableOriginatingApp=notAnApp',
+      });
       expect(onClose).toHaveBeenCalled();
     });
 
-    it('closes and redirects properly if visualization with aliasUrl and without addToDashboard in editorParams', () => {
+    it('closes and redirects properly if visualization with aliasApp and without addToDashboard in editorParams', () => {
       const onClose = jest.fn();
-      window.location.assign = jest.fn();
+      const navigateToApp = jest.fn();
       const wrapper = mountWithIntl(
         <NewVisModal
           isOpen={true}
@@ -169,12 +177,13 @@ describe('NewVisModal', () => {
           editorParams={['foo=true', 'bar=42']}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
+          application={({ navigateToApp } as unknown) as ApplicationStart}
           savedObjects={{} as SavedObjectsStart}
         />
       );
       const visButton = wrapper.find('button[data-test-subj="visType-visWithAliasUrl"]');
       visButton.simulate('click');
-      expect(window.location.assign).toBeCalledWith('testbasepath/aliasUrl');
+      expect(navigateToApp).toBeCalledWith('otherApp', { path: '#/aliasUrl' });
       expect(onClose).toHaveBeenCalled();
     });
   });
@@ -188,6 +197,7 @@ describe('NewVisModal', () => {
           visTypesRegistry={visTypes}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
+          application={{} as ApplicationStart}
           savedObjects={{} as SavedObjectsStart}
         />
       );
@@ -207,6 +217,7 @@ describe('NewVisModal', () => {
           visTypesRegistry={visTypes}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
+          application={{} as ApplicationStart}
           savedObjects={{} as SavedObjectsStart}
         />
       );
@@ -222,6 +233,7 @@ describe('NewVisModal', () => {
           visTypesRegistry={visTypes}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
+          application={{} as ApplicationStart}
           savedObjects={{} as SavedObjectsStart}
         />
       );
