@@ -19,20 +19,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from 'kibana/server';
+import { CoreSetup, Plugin } from 'kibana/server';
 import { COLOR_MAPPING_SETTING } from '../common';
 
 export class ChartsServerPlugin implements Plugin<object, object> {
-  private readonly logger: Logger;
-
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
-  }
-
   public setup(core: CoreSetup) {
-    this.logger.debug('charts: Setup');
-
     core.uiSettings.register({
       [COLOR_MAPPING_SETTING]: {
         name: i18n.translate('charts.advancedSettings.visualization.colorMappingTitle', {
@@ -53,8 +44,7 @@ export class ChartsServerPlugin implements Plugin<object, object> {
     return {};
   }
 
-  public start(core: CoreStart) {
-    this.logger.debug('charts: Started');
+  public start() {
     return {};
   }
 

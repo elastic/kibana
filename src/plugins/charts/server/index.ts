@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
 import { ChartsServerPlugin } from './plugin';
 
-export const plugin = (initContext: PluginInitializerContext) =>
-  new ChartsServerPlugin(initContext);
+export const plugin = () => new ChartsServerPlugin();
