@@ -19,9 +19,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-// @ts-ignore
+import { UiSettingsParams } from 'kibana/server';
+// @ts-ignore untyped module
 import numeralLanguages from '@elastic/numeral/languages';
-import { CoreSetup } from '../../../../src/core/server';
 import { DEFAULT_QUERY_LANGUAGE } from '../common';
 
 const luceneQueryLanguageLabel = i18n.translate('data.advancedSettings.searchQueryLanguageLucene', {
@@ -53,8 +53,8 @@ const numeralLanguageIds = [
   }),
 ];
 
-export function initUiSettings(uiSettings: CoreSetup['uiSettings']) {
-  uiSettings.register({
+export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
+  return {
     'query:queryString:options': {
       name: i18n.translate('data.advancedSettings.query.queryStringOptionsTitle', {
         defaultMessage: 'Query string options',
@@ -642,5 +642,5 @@ export function initUiSettings(uiSettings: CoreSetup['uiSettings']) {
       }),
       schema: schema.boolean(),
     },
-  });
+  };
 }
