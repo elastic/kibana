@@ -91,6 +91,13 @@ async function main() {
       type: 'number',
       default: 30,
     },
+    maxChildrenPerNode: {
+      alias: 'maxCh',
+      describe:
+        'always generate the max number of children per node instead of it being random up to the max children',
+      type: 'boolean',
+      default: false,
+    },
     numHosts: {
       alias: 'ne',
       describe: 'number of different hosts to generate alerts for',

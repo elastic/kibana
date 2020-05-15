@@ -34,13 +34,13 @@ describe('Children helper', () => {
 
   it('builds the children response structure', () => {
     const children = Array.from(generator.descendantsTreeGenerator(root, 3, 3, 0, 0, 100, true));
-    // this represents the aggregation returned from elastic search
-    // each node in the tree should have 3 children, so if these values are greater than 3 there should be
-    // pagination cursors created for those children
 
     // because we requested the generator to always return the max children, there will always be at least 2 parents
     const parents = findParents(children);
 
+    // this represents the aggregation returned from elastic search
+    // each node in the tree should have 3 children, so if these values are greater than 3 there should be
+    // pagination cursors created for those children
     const totals = {
       [root.process.entity_id]: 100,
       [entityId(parents[0])]: 10,

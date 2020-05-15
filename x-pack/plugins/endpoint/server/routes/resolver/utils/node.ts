@@ -13,6 +13,13 @@ import {
   ChildNode,
 } from '../../../../common/types';
 
+/**
+ * Creates a related event object that the related events handler would return
+ *
+ * @param id the entity_id for these related events
+ * @param events array of related events
+ * @param nextEvent the cursor to retrieve the next related event
+ */
 export function createRelatedEvents(
   id: string,
   events: ResolverEvent[] = [],
@@ -21,6 +28,11 @@ export function createRelatedEvents(
   return { id, events, nextEvent };
 }
 
+/**
+ * Creates a child node that would be used in the child handler response
+ *
+ * @param id the entity_id of the child
+ */
 export function createChild(id: string): ChildNode {
   const lifecycle = createLifecycle(id, []);
   return {
@@ -29,14 +41,28 @@ export function createChild(id: string): ChildNode {
   };
 }
 
+/**
+ * Creates an empty ancestry response structure.
+ */
 export function createAncestry(): ResolverAncestry {
   return { ancestors: [], nextAncestor: null };
 }
 
+/**
+ * Creates a lifecycle node for use in the ancestry or child handlers
+ *
+ * @param id the entity_id that these lifecycle nodes should have
+ * @param lifecycle an array of lifecycle events
+ */
 export function createLifecycle(id: string, lifecycle: ResolverEvent[]): LifecycleNode {
   return { id, lifecycle };
 }
 
+/**
+ * Creates an empty `Tree` response structure that the tree handler would return
+ *
+ * @param id the entity_id of the tree's origin node
+ */
 export function createTree(id: string): ResolverTree {
   return {
     id,
