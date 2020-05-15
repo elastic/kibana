@@ -8,6 +8,7 @@ import { EuiPopover } from '@elastic/eui';
 import cytoscape from 'cytoscape';
 import React, {
   CSSProperties,
+  MouseEvent,
   useCallback,
   useContext,
   useEffect,
@@ -16,8 +17,8 @@ import React, {
 } from 'react';
 import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { CytoscapeContext } from '../Cytoscape';
-import { Contents } from './Contents';
 import { animationOptions } from '../cytoscapeOptions';
+import { Contents } from './Contents';
 
 interface PopoverProps {
   focusedServiceName?: string;
@@ -28,12 +29,15 @@ export function Popover({ focusedServiceName }: PopoverProps) {
   const [selectedNode, setSelectedNode] = useState<
     cytoscape.NodeSingular | undefined
   >(undefined);
-  const deselect = useCallback(() => {
-    if (cy) {
-      cy.elements().unselect();
-    }
-    setSelectedNode(undefined);
-  }, [cy, setSelectedNode]);
+  const deselect = useCallback(
+    (_event: MouseEvent<HTMLAnchorElement>) => {
+      if (cy) {
+        cy.elements().unselect();
+      }
+      setSelectedNode(undefined);
+    },
+    [cy, setSelectedNode]
+  );
   const renderedHeight = selectedNode?.renderedHeight() ?? 0;
   const renderedWidth = selectedNode?.renderedWidth() ?? 0;
   const { x, y } = selectedNode?.renderedPosition() ?? { x: -10000, y: -10000 };
