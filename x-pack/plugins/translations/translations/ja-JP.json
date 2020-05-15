@@ -13160,7 +13160,6 @@
     "xpack.siem.case.caseView.pushToServiceDisableByConfigTitle": "Kibana の構成ファイルで ServiceNow を有効にする",
     "xpack.siem.case.caseView.pushToServiceDisableByLicenseDescription": "外部システムでケースを開くには、ライセンスをプラチナに更新するか、30 日間の無料トライアルを開始するか、AWS、GCP、または Azure で {link} にサインアップする必要があります。",
     "xpack.siem.case.caseView.pushToServiceDisableByLicenseTitle": "E lastic Platinum へのアップグレード",
-    "xpack.siem.case.caseView.pushToServiceDisableByNoCaseConfigDescription": "外部システムでケースを開いて更新するには、{link} を設定する必要があります。",
     "xpack.siem.case.caseView.pushToServiceDisableByNoCaseConfigTitle": "外部コネクターを構成",
     "xpack.siem.case.caseView.reopenCase": "ケースを再開",
     "xpack.siem.case.caseView.reopenedCase": "ケースを再開する",
