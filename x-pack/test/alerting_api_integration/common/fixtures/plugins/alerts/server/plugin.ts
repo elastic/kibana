@@ -5,14 +5,10 @@
  */
 
 import { Plugin, CoreSetup } from 'kibana/server';
-import { schema } from '@kbn/config-schema';
-import { times } from 'lodash';
 import { PluginSetupContract as ActionsPluginSetup } from '../../../../../../../plugins/actions/server/plugin';
 import { PluginSetupContract as AlertingPluginSetup } from '../../../../../../../plugins/alerting/server/plugin';
 import { EncryptedSavedObjectsPluginStart } from '../../../../../../../plugins/encrypted_saved_objects/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
-import { ActionType, ActionTypeExecutorOptions } from '../../../../../../../plugins/actions/server';
-import { AlertType, AlertExecutorOptions } from '../../../../../../../plugins/alerting/server';
 import { defineAlertTypes } from './alert_types';
 import { defineRoutes } from './routes';
 

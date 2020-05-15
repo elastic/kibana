@@ -21,11 +21,8 @@ interface FixtureSetupDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
 }
 
-export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
-  public setup(
-    core: CoreSetup<FixtureStartDeps>,
-    { spaces, encryptedSavedObjects }: FixtureSetupDeps
-  ) {
+export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps> {
+  public setup(core: CoreSetup, { spaces, encryptedSavedObjects }: FixtureSetupDeps) {
     core.http.createRouter().post(
       {
         path: '/api/check_aad',

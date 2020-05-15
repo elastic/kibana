@@ -8,10 +8,12 @@ import { CoreSetup } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { times } from 'lodash';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
+import { ActionType, ActionTypeExecutorOptions } from '../../../../../../../plugins/actions/server';
+import { AlertType, AlertExecutorOptions } from '../../../../../../../plugins/alerting/server';
 
 export function defineAlertTypes(
   core: CoreSetup<FixtureStartDeps>,
-  { actions, alerting }: FixtureSetupDeps
+  { actions, alerting }: Pick<FixtureSetupDeps, 'actions' | 'alerting'>
 ) {
   const clusterClient = core.elasticsearch.adminClient;
 

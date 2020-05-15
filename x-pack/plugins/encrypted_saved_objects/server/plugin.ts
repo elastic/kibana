@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Logger,
-  SavedObjectsBaseOptions,
-  PluginInitializerContext,
-  CoreSetup,
-} from 'src/core/server';
+import { Logger, PluginInitializerContext, CoreSetup } from 'src/core/server';
 import { first } from 'rxjs/operators';
 import { createConfig$ } from './config';
 import {
@@ -46,7 +41,7 @@ export interface LegacyAPI {
  */
 export class Plugin {
   private readonly logger: Logger;
-  private savedObjectsSetup!: SavedObjectsSetup;
+  private savedObjectsSetup!: (includedHiddenTypes?: string[]) => SavedObjectsSetup;
 
   private legacyAPI?: LegacyAPI;
   private readonly getLegacyAPI = () => {

@@ -7,10 +7,7 @@
 import { first, map } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { SecurityPluginSetup } from '../../security/server';
-import {
-  EncryptedSavedObjectsPluginSetup,
-  EncryptedSavedObjectsPluginStart,
-} from '../../encrypted_saved_objects/server';
+import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { SpacesPluginSetup, SpacesServiceSetup } from '../../spaces/server';
 import { AlertsClient } from './alerts_client';
@@ -203,7 +200,7 @@ export class AlertingPlugin {
       security,
     } = this;
 
-    const encryptedSavedObjectsPlugin = this.encryptedSavedObjects.startWithHiddenTypes(['alert']);
+    const encryptedSavedObjectsPlugin = this.encryptedSavedObjects!.startWithHiddenTypes(['alert']);
 
     alertsClientFactory.initialize({
       alertTypeRegistry: alertTypeRegistry!,
