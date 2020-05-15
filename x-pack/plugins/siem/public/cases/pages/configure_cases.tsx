@@ -6,6 +6,7 @@
 
 import React, { useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
+import styled from 'styled-components';
 
 import { getCaseUrl } from '../../common/components/link_to';
 import { useGetUrlSearch } from '../../common/components/navigation/use_get_url_search';
@@ -15,7 +16,7 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { navTabs } from '../../app/home/home_navigations';
 import { CaseHeaderPage } from '../components/case_header_page';
 import { ConfigureCases } from '../components/configure_cases';
-import { WhitePageWrapper, SectionWrapper, HeaderWrapper } from '../components/wrappers';
+import { WhitePageWrapper, SectionWrapper } from '../components/wrappers';
 import * as i18n from './translations';
 
 const ConfigureCasesPageComponent: React.FC = () => {
@@ -33,6 +34,10 @@ const ConfigureCasesPageComponent: React.FC = () => {
   if (userPermissions != null && !userPermissions.read) {
     return <Redirect to={getCaseUrl(search)} />;
   }
+
+  const HeaderWrapper = styled.div`
+    padding-top: ${({ theme }) => theme.eui.paddingSizes.l};
+  `;
 
   return (
     <>
