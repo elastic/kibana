@@ -262,6 +262,7 @@ export class LoginForm extends Component<Props, State> {
         {this.props.selector.providers.map(provider => (
           <button
             key={provider.name}
+            data-test-subj={`loginCard-${provider.type}/${provider.name}`}
             disabled={!this.isLoadingState(LoadingStateType.None)}
             onClick={() =>
               provider.usesLoginForm
