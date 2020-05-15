@@ -29,15 +29,12 @@ export function Popover({ focusedServiceName }: PopoverProps) {
   const [selectedNode, setSelectedNode] = useState<
     cytoscape.NodeSingular | undefined
   >(undefined);
-  const deselect = useCallback(
-    (_event: MouseEvent<HTMLAnchorElement>) => {
-      if (cy) {
-        cy.elements().unselect();
-      }
-      setSelectedNode(undefined);
-    },
-    [cy, setSelectedNode]
-  );
+  const deselect = useCallback(() => {
+    if (cy) {
+      cy.elements().unselect();
+    }
+    setSelectedNode(undefined);
+  }, [cy, setSelectedNode]);
   const renderedHeight = selectedNode?.renderedHeight() ?? 0;
   const renderedWidth = selectedNode?.renderedWidth() ?? 0;
   const { x, y } = selectedNode?.renderedPosition() ?? { x: -10000, y: -10000 };
@@ -118,7 +115,9 @@ export function Popover({ focusedServiceName }: PopoverProps) {
       <Contents
         isService={isService}
         label={label}
-        onFocusClick={isAlreadyFocused ? centerSelectedNode : deselect}
+        onFocusClick={
+          isAlreadyFocused ? centerSelectedNode : _event => deselect()
+        }
         selectedNodeData={selectedNodeData}
         selectedNodeServiceName={selectedNodeServiceName}
       />
