@@ -58,9 +58,9 @@ const getBorderWidth = (el: cytoscape.NodeSingular) => {
   if (nodeSeverity === severity.minor || nodeSeverity === severity.major) {
     return 4;
   } else if (nodeSeverity === severity.critical) {
-    return 12;
+    return 8;
   } else {
-    return 2;
+    return 4;
   }
 };
 
