@@ -224,7 +224,8 @@ async function main() {
         argv.children,
         argv.relatedEvents,
         argv.percentWithRelated,
-        argv.percentTerminated
+        argv.percentTerminated,
+        argv.maxChildrenPerNode
       );
       let result = resolverDocGenerator.next();
       while (!result.done) {

@@ -8,7 +8,12 @@ import { Dispatch, MiddlewareAPI } from 'redux';
 import { KibanaReactContextValue } from '../../../../../../../src/plugins/kibana_react/public';
 import { EndpointPluginServices } from '../../../plugin';
 import { ResolverState, ResolverAction } from '../types';
-import { ResolverEvent, ResolverNode } from '../../../../common/types';
+import {
+  ResolverEvent,
+  ResolverChildren,
+  ResolverAncestry,
+  LifecycleNode,
+} from '../../../../common/types';
 import * as event from '../../../../common/models/event';
 
 type MiddlewareFactory<S = ResolverState> = (
@@ -17,16 +22,13 @@ type MiddlewareFactory<S = ResolverState> = (
   api: MiddlewareAPI<Dispatch<ResolverAction>, S>
 ) => (next: Dispatch<ResolverAction>) => (action: ResolverAction) => unknown;
 
-function flattenEvents(children: ResolverNode[], events: ResolverEvent[] = []): ResolverEvent[] {
-  return children.reduce((flattenedEvents, currentNode) => {
+function flattenEvents(nodes: LifecycleNode[], events: ResolverEvent[] = []): ResolverEvent[] {
+  return nodes.reduce((flattenedEvents, currentNode) => {
     if (currentNode.lifecycle && currentNode.lifecycle.length > 0) {
       flattenedEvents.push(...currentNode.lifecycle);
     }
-    if (currentNode.children && currentNode.children.length > 0) {
-      return flattenEvents(currentNode.children, events);
-    } else {
-      return flattenedEvents;
-    }
+
+    return flattenedEvents;
   }, events);
 }
 
@@ -41,19 +43,19 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
         api.dispatch({ type: 'appRequestedResolverData' });
         try {
           let lifecycle: ResolverEvent[];
-          let children: ResolverNode[];
-          let ancestors: ResolverNode[];
+          let children: ResolverChildren;
+          let ancestry: ResolverAncestry;
           if (event.isLegacyEvent(action.payload.selectedEvent)) {
             const entityId = action.payload.selectedEvent?.endgame?.unique_pid;
             const legacyEndpointID = action.payload.selectedEvent?.agent?.id;
-            [{ lifecycle, children, ancestors }] = await Promise.all([
+            [{ lifecycle, children, ancestry }] = await Promise.all([
               context.services.http.get(`/api/endpoint/resolver/${entityId}`, {
                 query: { legacyEndpointID, children: 5, ancestors: 5 },
               }),
             ]);
           } else {
             const entityId = action.payload.selectedEvent.process.entity_id;
-            [{ lifecycle, children, ancestors }] = await Promise.all([
+            [{ lifecycle, children, ancestry }] = await Promise.all([
               context.services.http.get(`/api/endpoint/resolver/${entityId}`, {
                 query: {
                   children: 5,
@@ -64,8 +66,8 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
           }
           const response: ResolverEvent[] = [
             ...lifecycle,
-            ...flattenEvents(children),
-            ...flattenEvents(ancestors),
+            ...flattenEvents(children.childNodes),
+            ...flattenEvents(ancestry.ancestors),
           ];
           api.dispatch({
             type: 'serverReturnedResolverData',
