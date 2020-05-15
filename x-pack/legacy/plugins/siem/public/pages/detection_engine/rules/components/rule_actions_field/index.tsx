@@ -41,7 +41,6 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
     http,
     triggers_actions_ui: { actionTypeRegistry },
     notifications,
-    docLinks,
     application: { capabilities },
   } = useKibana().services;
 
@@ -122,7 +121,6 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
       ) : null}
       <ActionForm
         actions={actions}
-        docLinks={docLinks}
         capabilities={capabilities}
         messageVariables={messageVariables}
         defaultActionGroupId={DEFAULT_ACTION_GROUP_ID}
