@@ -17,19 +17,17 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { EventEmitter } from 'events';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { EditorRenderProps } from 'src/plugins/visualize/public';
 import { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
-import { Storage } from '../../kibana_utils/public';
-import { KibanaContextProvider } from '../../kibana_react/public';
-import { DefaultEditor } from './default_editor';
 import { DefaultEditorDataTab, OptionTab } from './components/sidebar';
 
-const localStorage = new Storage(window.localStorage);
+const DefaultEditor = lazy(() => import('./default_editor'));
 
 export interface DefaultEditorControllerState {
   vis: Vis;
@@ -80,20 +78,11 @@ class DefaultEditorController {
     };
   }
 
-  render({ data, core, ...props }: EditorRenderProps) {
+  render(props: EditorRenderProps) {
     render(
-      <core.i18n.Context>
-        <KibanaContextProvider
-          services={{
-            appName: 'vis_default_editor',
-            storage: localStorage,
-            data,
-            ...core,
-          }}
-        >
-          <DefaultEditor {...this.state} {...props} />
-        </KibanaContextProvider>
-      </core.i18n.Context>,
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <DefaultEditor {...this.state} {...props} />
+      </Suspense>,
       this.el
     );
   }

@@ -17,16 +17,20 @@
  * under the License.
  */
 
+import './index.scss';
+
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 
 import { EditorRenderProps } from 'src/plugins/visualize/public';
-import { PanelsContainer, Panel } from '../../kibana_react/public';
+import { KibanaContextProvider, PanelsContainer, Panel } from '../../kibana_react/public';
 
 import { DefaultEditorSideBar } from './components/sidebar';
 import { DefaultEditorControllerState } from './default_editor_controller';
 import { getInitialWidth } from './editor_size';
 
 function DefaultEditor({
+  core,
+  data,
   vis,
   uiState,
   timeRange,
@@ -37,7 +41,7 @@ function DefaultEditor({
   eventEmitter,
   linked,
   savedSearch,
-}: DefaultEditorControllerState & Omit<EditorRenderProps, 'data' | 'core'>) {
+}: DefaultEditorControllerState & EditorRenderProps) {
   const visRef = useRef<HTMLDivElement>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -69,34 +73,48 @@ function DefaultEditor({
   const editorInitialWidth = getInitialWidth(vis.type.editorConfig.defaultSize);
 
   return (
-    <PanelsContainer
-      className="visEditor--default"
-      resizerClassName={`visEditor__resizer ${isCollapsed ? 'visEditor__resizer-isHidden' : ''}`}
-    >
-      <Panel className="visEditor__visualization" initialWidth={100 - editorInitialWidth}>
-        <div className="visEditor__canvas" ref={visRef} data-shared-items-container />
-      </Panel>
-
-      <Panel
-        className={`visEditor__collapsibleSidebar ${
-          isCollapsed ? 'visEditor__collapsibleSidebar-isClosed' : ''
-        }`}
-        initialWidth={editorInitialWidth}
+    <core.i18n.Context>
+      <KibanaContextProvider
+        services={{
+          appName: 'vis_default_editor',
+          data,
+          ...core,
+        }}
       >
-        <DefaultEditorSideBar
-          isCollapsed={isCollapsed}
-          onClickCollapse={onClickCollapse}
-          optionTabs={optionTabs}
-          vis={vis}
-          uiState={uiState}
-          isLinkedSearch={linked}
-          savedSearch={savedSearch}
-          timeRange={timeRange}
-          eventEmitter={eventEmitter}
-        />
-      </Panel>
-    </PanelsContainer>
+        <PanelsContainer
+          className="visEditor--default"
+          resizerClassName={`visEditor__resizer ${
+            isCollapsed ? 'visEditor__resizer-isHidden' : ''
+          }`}
+        >
+          <Panel className="visEditor__visualization" initialWidth={100 - editorInitialWidth}>
+            <div className="visEditor__canvas" ref={visRef} data-shared-items-container />
+          </Panel>
+
+          <Panel
+            className={`visEditor__collapsibleSidebar ${
+              isCollapsed ? 'visEditor__collapsibleSidebar-isClosed' : ''
+            }`}
+            initialWidth={editorInitialWidth}
+          >
+            <DefaultEditorSideBar
+              isCollapsed={isCollapsed}
+              onClickCollapse={onClickCollapse}
+              optionTabs={optionTabs}
+              vis={vis}
+              uiState={uiState}
+              isLinkedSearch={linked}
+              savedSearch={savedSearch}
+              timeRange={timeRange}
+              eventEmitter={eventEmitter}
+            />
+          </Panel>
+        </PanelsContainer>
+      </KibanaContextProvider>
+    </core.i18n.Context>
   );
 }
 
-export { DefaultEditor };
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { DefaultEditor as default };
