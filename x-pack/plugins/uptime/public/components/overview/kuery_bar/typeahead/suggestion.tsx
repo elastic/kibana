@@ -5,9 +5,10 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { EuiIcon } from '@elastic/eui';
+import { tint } from 'polished';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import {
   fontFamilyCode,
   px,
@@ -16,10 +17,10 @@ import {
   unit,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../apm/public/style/variables';
-import { tint } from 'polished';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 
-function getIconColor(type) {
+import { QuerySuggestion } from '../../../../../../../../src/plugins/data/public';
+
+function getIconColor(type?: string) {
   switch (type) {
     case 'field':
       return theme.euiColorVis7;
@@ -49,7 +50,7 @@ const Description = styled.div`
   }
 `;
 
-const ListItem = styled.li`
+const ListItem = styled.li<{ selected: boolean }>`
   font-size: ${fontSizes.small};
   height: ${px(units.double)};
   align-items: center;
@@ -70,7 +71,7 @@ const ListItem = styled.li`
   }
 `;
 
-const Icon = styled.div`
+const Icon = styled.div<{ type?: string }>`
   flex: 0 0 ${px(units.double)};
   background: ${props => tint(0.1, getIconColor(props.type))};
   color: ${props => getIconColor(props.type)};
@@ -93,7 +94,7 @@ const TextValue = styled.div`
   }
 `;
 
-function getEuiIconType(type) {
+function getEuiIconType(type: string) {
   switch (type) {
     case 'field':
       return 'kqlField';
@@ -106,33 +107,37 @@ function getEuiIconType(type) {
     case 'operator':
       return 'kqlOperand';
     default:
-      throw new Error('Unknown type', type);
+      throw new Error(`Unknown type ${type}`);
   }
 }
 
-function Suggestion(props) {
-  return (
-    <ListItem
-      innerRef={props.innerRef}
-      selected={props.selected}
-      onClick={() => props.onClick(props.suggestion)}
-      onMouseEnter={props.onMouseEnter}
-    >
-      <Icon type={props.suggestion.type}>
-        <EuiIcon type={getEuiIconType(props.suggestion.type)} />
-      </Icon>
-      <TextValue>{props.suggestion.text}</TextValue>
-      <Description>{props.suggestion.description}</Description>
-    </ListItem>
-  );
+interface SuggestionProps {
+  onClick: (sug: QuerySuggestion) => void;
+  onMouseEnter: () => void;
+  selected: boolean;
+  suggestion: QuerySuggestion;
+  innerRef: (node: any) => void;
 }
 
-Suggestion.propTypes = {
-  onClick: PropTypes.func.isRequired,
-  onMouseEnter: PropTypes.func.isRequired,
-  selected: PropTypes.bool,
-  suggestion: PropTypes.object.isRequired,
-  innerRef: PropTypes.func.isRequired,
+export const Suggestion: React.FC<SuggestionProps> = ({
+  innerRef,
+  selected,
+  suggestion,
+  onClick,
+  onMouseEnter,
+}) => {
+  return (
+    <ListItem
+      innerRef={innerRef}
+      selected={selected}
+      onClick={() => onClick(suggestion)}
+      onMouseEnter={onMouseEnter}
+    >
+      <Icon type={suggestion.type as string}>
+        <EuiIcon type={getEuiIconType(suggestion.type)} />
+      </Icon>
+      <TextValue>{suggestion.text}</TextValue>
+      <Description>{suggestion.description}</Description>
+    </ListItem>
+  );
 };
-
-export default Suggestion;

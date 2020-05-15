@@ -123,8 +123,8 @@ export function KueryBarComponent({
   return (
     <Container>
       <Typeahead
-        aria-label={ariaLabel}
-        data-test-subj={dataTestSubj}
+        ariaLabel={ariaLabel}
+        dataTestSubj={dataTestSubj}
         disabled={indexPatternMissing}
         isLoading={isLoadingSuggestions || loading}
         initialValue={kuery}
