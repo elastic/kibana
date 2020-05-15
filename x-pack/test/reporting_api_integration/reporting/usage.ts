@@ -6,8 +6,9 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { ReportingUsageStats } from '../services';
 import * as GenerationUrls from '../generation_urls';
+import { ReportingUsageStats } from '../services';
+import { OSS_DATA_ARCHIVE_PATH, OSS_KIBANA_ARCHIVE_PATH } from './constants';
 
 interface UsageStats {
   reporting: ReportingUsageStats;
@@ -22,12 +23,20 @@ export default function({ getService }: FtrProviderContext) {
 
   describe('reporting usage', () => {
     before(async () => {
+      await reportingAPI.deleteAllReportingIndexes();
+
+      await esArchiver.load(OSS_KIBANA_ARCHIVE_PATH);
+      await esArchiver.load(OSS_DATA_ARCHIVE_PATH);
+
       await kibanaServer.uiSettings.update({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await reportingAPI.deleteAllReportingIndexes();
     });
-    afterEach(() => reportingAPI.deleteAllReportingIndexes());
+    afterEach(async () => {
+      await reportingAPI.deleteAllReportingIndexes();
+      await esArchiver.unload(OSS_KIBANA_ARCHIVE_PATH);
+      await esArchiver.unload(OSS_DATA_ARCHIVE_PATH);
+    });
 
     describe('initial state', () => {
       let usage: UsageStats;
