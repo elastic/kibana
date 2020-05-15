@@ -24,6 +24,7 @@ export interface EncryptedSavedObjectsPluginSetup {
   registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => void;
   __legacyCompat: { registerLegacyAPI: (legacyAPI: LegacyAPI) => void };
   usingEphemeralEncryptionKey: boolean;
+  startWithHiddenTypes: (includedHiddenTypes: string[]) => EncryptedSavedObjectsPluginStart;
 }
 
 export interface EncryptedSavedObjectsPluginStart extends SavedObjectsSetup {
@@ -83,17 +84,21 @@ export class Plugin {
         service.registerType(typeRegistration),
       __legacyCompat: { registerLegacyAPI: (legacyAPI: LegacyAPI) => (this.legacyAPI = legacyAPI) },
       usingEphemeralEncryptionKey,
+      startWithHiddenTypes: (includedHiddenTypes: string[]) =>
+        this.createStartApi(includedHiddenTypes),
     };
   }
 
   public start() {
     this.logger.debug('Starting plugin');
+    return this.createStartApi();
+  }
 
+  private createStartApi(includedHiddenTypes?: string[]) {
+    const { getDecryptedAsInternalUser } = this.savedObjectsSetup(includedHiddenTypes);
     return {
       isEncryptionError: (error: Error) => error instanceof EncryptionError,
-      getDecryptedAsInternalUser: (type: string, id: string, options?: SavedObjectsBaseOptions) => {
-        return this.savedObjectsSetup.getDecryptedAsInternalUser(type, id, options);
-      },
+      getDecryptedAsInternalUser,
     };
   }
 

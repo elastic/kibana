@@ -88,7 +88,6 @@ export interface AlertingPluginsSetup {
 }
 export interface AlertingPluginsStart {
   actions: ActionsPluginStartContract;
-  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   taskManager: TaskManagerStartContract;
 }
 
@@ -105,6 +104,7 @@ export class AlertingPlugin {
   private readonly telemetryLogger: Logger;
   private readonly kibanaIndex: Promise<string>;
   private eventLogger?: IEventLogger;
+  private encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'alerting');
@@ -126,6 +126,8 @@ export class AlertingPlugin {
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.spaces = plugins.spaces?.spacesService;
     this.security = plugins.security;
+    this.encryptedSavedObjects = plugins.encryptedSavedObjects;
+
     this.isESOUsingEphemeralEncryptionKey =
       plugins.encryptedSavedObjects.usingEphemeralEncryptionKey;
 
@@ -201,12 +203,14 @@ export class AlertingPlugin {
       security,
     } = this;
 
+    const encryptedSavedObjectsPlugin = this.encryptedSavedObjects.startWithHiddenTypes(['alert']);
+
     alertsClientFactory.initialize({
       alertTypeRegistry: alertTypeRegistry!,
       logger,
       taskManager: plugins.taskManager,
       securityPluginSetup: security,
-      encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
+      encryptedSavedObjectsPlugin,
       spaceIdToNamespace: this.spaceIdToNamespace,
       getSpaceId(request: KibanaRequest) {
         return spaces?.getSpaceId(request);
@@ -219,7 +223,7 @@ export class AlertingPlugin {
       getServices: this.getServicesFactory(core.savedObjects, core.elasticsearch),
       spaceIdToNamespace: this.spaceIdToNamespace,
       actionsPlugin: plugins.actions,
-      encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
+      encryptedSavedObjectsPlugin,
       getBasePath: this.getBasePath,
       eventLogger: this.eventLogger!,
     });
@@ -229,7 +233,7 @@ export class AlertingPlugin {
     return {
       listTypes: alertTypeRegistry!.list.bind(this.alertTypeRegistry!),
       // Ability to get an alerts client from legacy code
-      getAlertsClientWithRequest(request: KibanaRequest) {
+      getAlertsClientWithRequest: (request: KibanaRequest) => {
         if (isESOUsingEphemeralEncryptionKey === true) {
           throw new Error(
             `Unable to create alerts client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
@@ -237,7 +241,7 @@ export class AlertingPlugin {
         }
         return alertsClientFactory!.create(
           request,
-          core.savedObjects.getScopedClient(request, { extraTypes: ['alert'] })
+          this.getScopedClientWithAlertSavedObjectType(core.savedObjects, request)
         );
       },
     };
@@ -247,13 +251,13 @@ export class AlertingPlugin {
     core: CoreSetup
   ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'alerting'> => {
     const { alertTypeRegistry, alertsClientFactory } = this;
-    return async function alertsRouteHandlerContext(context, request) {
+    return async (context, request) => {
       const [{ savedObjects }] = await core.getStartServices();
       return {
         getAlertsClient: () => {
           return alertsClientFactory!.create(
             request,
-            savedObjects.getScopedClient(request, { extraTypes: ['alert'] })
+            this.getScopedClientWithAlertSavedObjectType(savedObjects, request)
           );
         },
         listTypes: alertTypeRegistry!.list.bind(alertTypeRegistry!),
@@ -267,7 +271,7 @@ export class AlertingPlugin {
   ): (request: KibanaRequest) => Services {
     return request => ({
       callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
-      savedObjectsClient: savedObjects.getScopedClient(request, { extraTypes: ['alert'] }),
+      savedObjectsClient: this.getScopedClientWithAlertSavedObjectType(savedObjects, request),
       getScopedCallCluster(clusterClient: IClusterClient) {
         return clusterClient.asScoped(request).callAsCurrentUser;
       },
@@ -281,6 +285,13 @@ export class AlertingPlugin {
   private getBasePath = (spaceId?: string): string => {
     return this.spaces && spaceId ? this.spaces.getBasePath(spaceId) : this.serverBasePath!;
   };
+
+  private getScopedClientWithAlertSavedObjectType(
+    savedObjects: SavedObjectsServiceStart,
+    request: KibanaRequest
+  ) {
+    return savedObjects.getScopedClient(request, { includedHiddenTypes: ['alert'] });
+  }
 
   public stop() {
     if (this.licenseState) {

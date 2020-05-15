@@ -13,19 +13,19 @@ import {
   IKibanaResponse,
 } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import { EncryptedSavedObjectsPluginStart } from '../../../../../../../plugins/encrypted_saved_objects/server';
+import { EncryptedSavedObjectsPluginSetup } from '../../../../../../../plugins/encrypted_saved_objects/server';
 import { SpacesPluginSetup } from '../../../../../../../plugins/spaces/server';
 
 interface FixtureSetupDeps {
   spaces?: SpacesPluginSetup;
-}
-
-interface FixtureStartDeps {
-  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
-  public setup(core: CoreSetup<FixtureStartDeps>, { spaces }: FixtureSetupDeps) {
+  public setup(
+    core: CoreSetup<FixtureStartDeps>,
+    { spaces, encryptedSavedObjects }: FixtureSetupDeps
+  ) {
     core.http.createRouter().post(
       {
         path: '/api/check_aad',
@@ -44,13 +44,19 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       ): Promise<IKibanaResponse<any>> {
         try {
           let namespace: string | undefined;
-          const [, { encryptedSavedObjects }] = await core.getStartServices();
+          const encryptedSavedObjectsWithAlert = encryptedSavedObjects.startWithHiddenTypes([
+            'alert',
+          ]);
           if (spaces && req.body.spaceId) {
             namespace = spaces.spacesService.spaceIdToNamespace(req.body.spaceId);
           }
-          await encryptedSavedObjects.getDecryptedAsInternalUser(req.body.type, req.body.id, {
-            namespace,
-          });
+          await encryptedSavedObjectsWithAlert.getDecryptedAsInternalUser(
+            req.body.type,
+            req.body.id,
+            {
+              namespace,
+            }
+          );
           return res.ok({ body: { success: true } });
         } catch (err) {
           return res.internalError({ body: err });

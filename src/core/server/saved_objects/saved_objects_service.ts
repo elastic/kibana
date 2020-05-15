@@ -198,20 +198,23 @@ export interface SavedObjectsServiceStart {
    * Elasticsearch.
    *
    * @param req - The request to create the scoped repository from.
-   * @param extraTypes - A list of additional hidden types the repository should have access to.
+   * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
    *
    * @remarks
    * Prefer using `getScopedClient`. This should only be used when using methods
    * not exposed on {@link SavedObjectsClientContract}
    */
-  createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
+  createScopedRepository: (
+    req: KibanaRequest,
+    includedHiddenTypes?: string[]
+  ) => ISavedObjectsRepository;
   /**
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
    * uses the internal Kibana user for authenticating with Elasticsearch.
    *
-   * @param extraTypes - A list of additional hidden types the repository should have access to.
+   * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
    */
-  createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
+  createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
   /**
    * Creates a {@link SavedObjectsSerializer | serializer} that is aware of all registered types.
    */
@@ -246,16 +249,19 @@ export interface SavedObjectsRepositoryFactory {
    * uses the credentials from the passed in request to authenticate with
    * Elasticsearch.
    *
-   * @param extraTypes - A list of additional hidden types the repository should have access to.
+   * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
    */
-  createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
+  createScopedRepository: (
+    req: KibanaRequest,
+    includedHiddenTypes?: string[]
+  ) => ISavedObjectsRepository;
   /**
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
    * uses the internal Kibana user for authenticating with Elasticsearch.
    *
-   * @param extraTypes - A list of additional hidden types the repository should have access to.
+   * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
    */
-  createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
+  createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
 }
 
 /** @internal */
@@ -417,26 +423,26 @@ export class SavedObjectsService
       await migrator.runMigrations();
     }
 
-    const createRepository = (callCluster: APICaller, extraTypes: string[] = []) => {
+    const createRepository = (callCluster: APICaller, includedHiddenTypes: string[] = []) => {
       return SavedObjectsRepository.createRepository(
         migrator,
         this.typeRegistry,
         kibanaConfig.index,
         callCluster,
-        extraTypes
+        includedHiddenTypes
       );
     };
 
     const repositoryFactory: SavedObjectsRepositoryFactory = {
-      createInternalRepository: (extraTypes?: string[]) =>
-        createRepository(adminClient.callAsInternalUser, extraTypes),
-      createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) =>
-        createRepository(adminClient.asScoped(req).callAsCurrentUser, extraTypes),
+      createInternalRepository: (includedHiddenTypes?: string[]) =>
+        createRepository(adminClient.callAsInternalUser, includedHiddenTypes),
+      createScopedRepository: (req: KibanaRequest, includedHiddenTypes?: string[]) =>
+        createRepository(adminClient.asScoped(req).callAsCurrentUser, includedHiddenTypes),
     };
 
     const clientProvider = new SavedObjectsClientProvider({
-      defaultClientFactory({ request, extraTypes }) {
-        const repository = repositoryFactory.createScopedRepository(request, extraTypes);
+      defaultClientFactory({ request, includedHiddenTypes }) {
+        const repository = repositoryFactory.createScopedRepository(request, includedHiddenTypes);
         return new SavedObjectsClient(repository);
       },
       typeRegistry: this.typeRegistry,
