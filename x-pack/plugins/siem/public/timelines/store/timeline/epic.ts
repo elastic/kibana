@@ -28,7 +28,11 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 
-import { esFilters, Filter, MatchAllFilter } from '../../../../../../../src/plugins/data/public';
+import {
+  esFilters,
+  Filter,
+  MatchAllFilter,
+} from '../../../../../../.../../../src/plugins/data/public';
 import { TimelineType } from '../../../../common/types/timeline';
 import { TimelineInput, ResponseTimeline, TimelineResult } from '../../../graphql/types';
 import { AppApolloClient } from '../../../common/lib/lib';
@@ -148,8 +152,10 @@ export const createTimelineEpic = <State>(): Epic<
           return true;
         }
         if (action.type === createTimeline.type && isItAtimelineAction(timelineId)) {
-          myEpicTimelineId.setTimelineId(null);
-          myEpicTimelineId.setTimelineVersion(null);
+          if (timelineObj.timelineType !== 'draft') {
+            myEpicTimelineId.setTimelineVersion(null);
+            myEpicTimelineId.setTimelineId(null);
+          }
         } else if (action.type === addTimeline.type && isItAtimelineAction(timelineId)) {
           const addNewTimeline: TimelineModel = get('payload.timeline', action);
           myEpicTimelineId.setTimelineId(addNewTimeline.savedObjectId);
