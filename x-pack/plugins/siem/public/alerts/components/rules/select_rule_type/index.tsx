@@ -77,7 +77,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
   const setQuery = useCallback(() => setType('query'), [setType]);
   const mlCardDisabled = isReadOnly || !hasValidLicense || !isMlAdmin;
   const licensingUrl = useKibana().services.application.getUrlForApp('kibana', {
-    path: '#/management/elasticsearch/license_management',
+    path: '#/management/stack/license_management',
   });
 
   return (

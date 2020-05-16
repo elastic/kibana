@@ -73,7 +73,7 @@ export const deleteListItemRoute = (router: IRouter): void => {
           }
         } else {
           return siemResponse.error({
-            body: `Either "list_id" or "id" needs to be defined in the request`,
+            body: 'Either "list_id" or "id" needs to be defined in the request',
             statusCode: 400,
           });
         }
