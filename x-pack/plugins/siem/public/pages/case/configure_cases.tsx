@@ -6,6 +6,7 @@
 
 import React, { useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
+import styled from 'styled-components';
 
 import { getCaseUrl } from '../../components/link_to';
 import { useGetUrlSearch } from '../../components/navigation/use_get_url_search';
@@ -17,12 +18,6 @@ import { CaseHeaderPage } from './components/case_header_page';
 import { ConfigureCases } from './components/configure_cases';
 import { WhitePageWrapper, SectionWrapper } from './components/wrappers';
 import * as i18n from './translations';
-
-const wrapperPageStyle: Record<string, string> = {
-  paddingLeft: '0',
-  paddingRight: '0',
-  paddingBottom: '0',
-};
 
 const ConfigureCasesPageComponent: React.FC = () => {
   const userPermissions = useGetUserSavedObjectPermissions();
@@ -40,11 +35,17 @@ const ConfigureCasesPageComponent: React.FC = () => {
     return <Redirect to={getCaseUrl(search)} />;
   }
 
+  const HeaderWrapper = styled.div`
+    padding-top: ${({ theme }) => theme.eui.paddingSizes.l};
+  `;
+
   return (
     <>
-      <WrapperPage style={wrapperPageStyle}>
+      <WrapperPage noPadding>
         <SectionWrapper>
-          <CaseHeaderPage title={i18n.CONFIGURE_CASES_PAGE_TITLE} backOptions={backOptions} />
+          <HeaderWrapper>
+            <CaseHeaderPage title={i18n.CONFIGURE_CASES_PAGE_TITLE} backOptions={backOptions} />
+          </HeaderWrapper>
         </SectionWrapper>
         <WhitePageWrapper>
           <ConfigureCases userCanCrud={userPermissions?.crud ?? false} />
