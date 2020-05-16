@@ -131,13 +131,13 @@ async function asyncSearch(
     ...request.params,
   };
 
-  // If we have an ID, then just poll for that ID, otherwise send the entire request body
-  const { body = undefined, index = undefined, ...queryParams } = request.id ? {} : params;
-
-  const method = request.id ? 'GET' : 'POST';
   const storedAsyncId = await getBackgroundSession(request, options, context);
   const asyncId = request.id ? request.id : storedAsyncId;
-  const path = encodeURI(request.id ? `/_async_search/${asyncId}` : `/${index}/_async_search`);
+
+  // If we have an ID, then just poll for that ID, otherwise send the entire request body
+  const { body = undefined, index = undefined, ...queryParams } = asyncId ? {} : params;
+  const method = asyncId ? 'GET' : 'POST';
+  const path = encodeURI(asyncId ? `/_async_search/${asyncId}` : `/${index}/_async_search`);
 
   // Wait up to 1s for the response to return
   // TODO: DONT MERGE WITH 1ms!!!!!!!!!!!!!!!!!!!!!!!

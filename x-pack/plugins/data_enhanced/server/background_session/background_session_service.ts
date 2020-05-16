@@ -206,20 +206,30 @@ export class BackgroundSessionService {
       .digest('hex');
   }
 
-  public async store(kibanaRequest: KibanaRequest, sessionId: string) {
+  /**
+   * Create a saved object for the provided session ID.
+   * Search IDs are synced into the object asynchronously.
+   * @param request
+   * @param sessionId
+   */
+  public async store(request: KibanaRequest, sessionId: string) {
     this.logger.debug(`${sessionId} Storing`);
-    const savedObjectsClient = this.savedObjects.getScopedClient(kibanaRequest);
+    const savedObjectsClient = this.savedObjects.getScopedClient(request);
     return await this.createSavedObject(savedObjectsClient, sessionId);
   }
 
-  public trackId(
-    kibanaRequest: KibanaRequest,
-    sessionId: string,
-    requestParams: any,
-    searchId: string
-  ) {
+  /**
+   * Track a single search ID, corresponding with the provided session ID and request parameters.
+   * IDs are tracked in memory until a user chooses to store the BackgroundSession.
+   * @param request
+   * @param sessionId
+   * @param requestParams
+   * @param searchId
+   */
+
+  public trackId(request: KibanaRequest, sessionId: string, requestParams: any, searchId: string) {
     this.logger.debug(`${sessionId} trackId ${searchId}`);
-    const user = this.security.authc.getCurrentUser(kibanaRequest);
+    const user = this.security.authc.getCurrentUser(request);
     if (!user) return;
     const reqHashKey = this.getKey(user.email, requestParams);
     let sessionIdsInfo = this.idMapping.get(sessionId);
@@ -235,20 +245,31 @@ export class BackgroundSessionService {
     this.idMapping.set(sessionId, sessionIdsInfo);
   }
 
-  public async get(kibanaRequest: KibanaRequest, sessionId: string) {
+  /**
+   * Attempt to retrieve a BackgroundSession corresponding to a specific session ID.
+   * @param request
+   * @param sessionId
+   */
+  public async get(request: KibanaRequest, sessionId: string) {
     try {
-      const savedObjectsClient = this.savedObjects.getScopedClient(kibanaRequest);
+      const savedObjectsClient = this.savedObjects.getScopedClient(request);
       return await this.getSavedObject(savedObjectsClient, sessionId);
     } catch (e) {
       return undefined;
     }
   }
 
-  public async getId(kibanaRequest: KibanaRequest, sessionId: string, requestParams: any) {
+  /**
+   * Attempt to retrieve a search ID corresponding to a session ID and request parameters
+   * @param request
+   * @param sessionId
+   * @param requestParams
+   */
+  public async getId(request: KibanaRequest, sessionId: string, requestParams: any) {
     try {
       this.logger.debug(`${sessionId} Checking.`);
-      const user = this.security.authc.getCurrentUser(kibanaRequest);
-      const bgSavedObject = await this.get(kibanaRequest, sessionId);
+      const user = this.security.authc.getCurrentUser(request);
+      const bgSavedObject = await this.get(request, sessionId);
       if (!bgSavedObject || !user) {
         return undefined;
       } else {

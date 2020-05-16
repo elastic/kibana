@@ -6,6 +6,7 @@
 
 import { ApplicationStart, ToastsStart } from 'kibana/public';
 import { getLongQueryNotification } from './long_query_notification';
+import { getBackgroundRunningNotification } from './background_running_notification';
 import { BackgroundSessionService } from '../background_session';
 import { SearchInterceptor, DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 
@@ -42,15 +43,28 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   /**
    * Un-schedule timing out all of the searches intercepted.
    */
-  public runBeyondTimeout = () => {
+  public runBeyondTimeout = async () => {
     this.hideToast();
     this.timeoutSubscriptions.forEach(subscription => subscription.unsubscribe());
     this.timeoutSubscriptions.clear();
-    this.backgroundSessionService.store();
-    this.events$.next({
-      name: 'background',
-      sessionId: this.data.search.session.get(),
-    });
+    const stored = await this.backgroundSessionService.store();
+    if (stored) {
+      this.events$.next({
+        name: 'background',
+        sessionId: this.data.search.session.get(),
+      });
+      this.toasts.addInfo(
+        {
+          title: 'Background request has started',
+          text: getBackgroundRunningNotification({
+            viewRequests: () => {},
+          }),
+        },
+        {
+          toastLifeTimeMs: 1000000,
+        }
+      );
+    }
   };
 
   private shouldNotifyLongRunning = async () => {
