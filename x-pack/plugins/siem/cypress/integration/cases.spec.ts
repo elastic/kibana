@@ -27,7 +27,7 @@ import {
   ACTION,
   CASE_DETAILS_DESCRIPTION,
   CASE_DETAILS_PAGE_TITLE,
-  CASE_DETAILS_PUSH_AS_SERVICE_NOW_BTN,
+  CASE_DETAILS_PUSH_TO_EXTERNAL_SERVICE_BTN,
   CASE_DETAILS_STATUS,
   CASE_DETAILS_TAGS,
   CASE_DETAILS_TIMELINE_MARKDOWN,
@@ -102,7 +102,7 @@ describe('Cases', () => {
       .eq(PARTICIPANTS)
       .should('have.text', case1.reporter);
     cy.get(CASE_DETAILS_TAGS).should('have.text', expectedTags);
-    cy.get(CASE_DETAILS_PUSH_AS_SERVICE_NOW_BTN).should('have.attr', 'disabled');
+    cy.get(CASE_DETAILS_PUSH_TO_EXTERNAL_SERVICE_BTN).should('have.attr', 'disabled');
     cy.get(CASE_DETAILS_TIMELINE_MARKDOWN).then($element => {
       const timelineLink = $element.prop('href').match(/http(s?):\/\/\w*:\w*(\S*)/)[0];
       openCaseTimeline(timelineLink);
