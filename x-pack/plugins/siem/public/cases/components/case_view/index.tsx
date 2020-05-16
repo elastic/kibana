@@ -18,6 +18,7 @@ import styled from 'styled-components';
 import * as i18n from './translations';
 import { Case } from '../../containers/types';
 import { getCaseUrl } from '../../../common/components/link_to';
+import { gutterTimeline } from '../../../common/lib/helpers';
 import { HeaderPage } from '../../../common/components/header_page';
 import { EditableTitle } from '../../../common/components/header_page/editable_title';
 import { TagList } from '../tag_list';
@@ -26,9 +27,8 @@ import { UserActionTree } from '../user_action_tree';
 import { UserList } from '../user_list';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { useGetUrlSearch } from '../../../common/components/navigation/use_get_url_search';
-import { WrapperPage } from '../../../common/components/wrapper_page';
 import { getTypedPayload } from '../../containers/utils';
-import { WhitePageWrapper } from '../wrappers';
+import { WhitePageWrapper, HeaderWrapper } from '../wrappers';
 import { useBasePath } from '../../../common/lib/kibana';
 import { CaseStatus } from '../case_status';
 import { navTabs } from '../../../app/home/home_navigations';
@@ -43,8 +43,11 @@ interface Props {
   userCanCrud: boolean;
 }
 
-const MyWrapper = styled(WrapperPage)`
-  padding-bottom: 0;
+const MyWrapper = styled.div`
+  padding: ${({
+    theme,
+  }) => `${theme.eui.paddingSizes.l} ${gutterTimeline} ${theme.eui.paddingSizes.l}
+  ${theme.eui.paddingSizes.l}`};
 `;
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
@@ -242,15 +245,20 @@ export const CaseComponent = React.memo<CaseProps>(
       }
     }, [initLoadingData, isLoadingUserActions]);
 
+    const backOptions = useMemo(
+      () => ({
+        href: getCaseUrl(search),
+        text: i18n.BACK_TO_ALL,
+        dataTestSubj: 'backToCases',
+      }),
+      [search]
+    );
+
     return (
       <>
-        <MyWrapper>
+        <HeaderWrapper>
           <HeaderPage
-            backOptions={{
-              href: getCaseUrl(search),
-              text: i18n.BACK_TO_ALL,
-              dataTestSubj: 'backToCases',
-            }}
+            backOptions={backOptions}
             data-test-subj="case-view-title"
             titleNode={
               <EditableTitle
@@ -272,7 +280,7 @@ export const CaseComponent = React.memo<CaseProps>(
               {...caseStatusData}
             />
           </HeaderPage>
-        </MyWrapper>
+        </HeaderWrapper>
         <WhitePageWrapper>
           <MyWrapper>
             {!initLoadingData && pushCallouts != null && pushCallouts}
