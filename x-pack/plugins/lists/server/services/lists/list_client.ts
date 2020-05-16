@@ -59,7 +59,7 @@ import {
   ImportListItemsToStreamOptions,
   UpdateListItemOptions,
   UpdateListOptions,
-} from './client_types';
+} from './list_client_types';
 
 export class ListClient {
   private readonly spaceId: string;

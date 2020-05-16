@@ -19,7 +19,10 @@ import { TagsContainer } from './containers/tags';
 import { FrontendLibs } from './lib/types';
 import { AppRouter } from './router';
 import { services } from './kbn_services';
-import { ManagementAppMountParams } from '../../../../src/plugins/management/public';
+import {
+  ManagementAppMountParams,
+  ManagementSectionId,
+} from '../../../../src/plugins/management/public';
 
 export const renderApp = (
   { basePath, element, setBreadcrumbs }: ManagementAppMountParams,
@@ -28,7 +31,7 @@ export const renderApp = (
   ReactDOM.render(
     <ThemeProvider theme={{ eui: euiVars }}>
       <services.I18nContext>
-        <HashRouter basename="/management/beats/beats_management">
+        <HashRouter basename={`/management/${ManagementSectionId.Ingest}/beats_management`}>
           <UnstatedProvider inject={[new BeatsContainer(libs), new TagsContainer(libs)]}>
             <BreadcrumbProvider useGlobalBreadcrumbs={libs.framework.versionGreaterThen('6.7.0')}>
               <Subscribe to={[BeatsContainer, TagsContainer]}>

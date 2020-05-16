@@ -1427,10 +1427,10 @@
     "@types/node-jose" "1.1.0"
     node-jose "1.1.0"
 
-"@elastic/static-fs@1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/static-fs/-/static-fs-1.0.1.tgz#2e084e9fc321dd4c7fb4579021ca8a6b26f3464e"
-  integrity sha512-Vl40Va/h0P6aDUrzgDeTabGVUb/s/W92le64E1UXTcG5927cZtTnOu0datMjr98xdr9C6RAJ3mr6zgxfox5TNw==
+"@elastic/static-fs@1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@elastic/static-fs/-/static-fs-1.0.2.tgz#c1e5fea6a1b35abcd005cecf7880156ed0f273ae"
+  integrity sha512-0cZc5D9Wg6pJsc8Sa2ns1eOuxtXEidE7GBb2B0KZdJq9nZzUCxMyplURqT0Nr3i5XpoHb6ZEmxWsji86j1KjDw==
 
 "@elastic/ui-ace@0.2.3":
   version "0.2.3"
