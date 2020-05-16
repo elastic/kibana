@@ -488,7 +488,6 @@ module.exports = {
         '.eslintrc.js',
         '**/webpackShims/**/*.js',
         'packages/kbn-plugin-generator/**/*.js',
-        'packages/kbn-plugin-helpers/**/*.js',
         'packages/kbn-eslint-import-resolver-kibana/**/*.js',
         'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',

@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -19,10 +17,30 @@
  * under the License.
  */
 
-const nodeMajorVersion = parseFloat(process.version.replace(/^v(\d+)\..+/, '$1'));
-if (nodeMajorVersion < 6) {
-  console.error('FATAL: kibana-plugin-helpers requires node 6+');
-  process.exit(1);
-}
+import { execFileSync } from 'child_process';
 
-require('../target/cli');
+export function gitInfo(rootPath: string) {
+  try {
+    const LOG_SEPARATOR = '||';
+
+    const commitCount = execFileSync('git', ['rev-list', '--count', 'HEAD'], {
+      cwd: rootPath,
+      stdio: ['ignore', 'pipe', 'ignore'],
+      encoding: 'utf8',
+    });
+
+    const logLine = execFileSync('git', ['log', '--pretty=%h' + LOG_SEPARATOR + '%cD', '-n', '1'], {
+      cwd: rootPath,
+      stdio: ['ignore', 'pipe', 'ignore'],
+      encoding: 'utf8',
+    }).split(LOG_SEPARATOR);
+
+    return {
+      count: commitCount.trim(),
+      sha: logLine[0].trim(),
+      date: logLine[1].trim(),
+    };
+  } catch (e) {
+    return {};
+  }
+}
