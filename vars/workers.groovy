@@ -61,12 +61,12 @@ def base(Map params, Closure closure) {
         def mergeBase
         if (env.ghprbTargetBranch) {
           sh(
-            script: "cd kibana && git fetch origin ${env.ghprbTargetBranch}",
-            label: "update reference to target branch 'origin/${env.ghprbTargetBranch}'"
+            script: "cd kibana && git fetch https://github.com/elastic/kibana.git ${env.ghprbTargetBranch}",
+            label: "fetch latest from '${env.ghprbTargetBranch}' at https://github.com/elastic/kibana.git"
           )
           mergeBase = sh(
             script: "cd kibana && git merge-base HEAD FETCH_HEAD",
-            label: "determining merge point with target branch 'origin/${env.ghprbTargetBranch}'",
+            label: "determining merge point with '${env.ghprbTargetBranch}' at https://github.com/elastic/kibana.git",
             returnStdout: true
           ).trim()
         }
