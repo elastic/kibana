@@ -39,15 +39,6 @@ export class TestingFrameworkAdapter implements FrameworkAdapter {
     return;
   }
 
-  public registerManagementSection(settings: {
-    id?: string;
-    name: string;
-    iconName: string;
-    order?: number;
-  }) {
-    throw new Error('not yet implamented');
-  }
-
   public registerManagementUI(settings: { sectionId?: string; name: string; order?: number }) {
     throw new Error('not yet implamented');
   }
