@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import './test_script.scss';
+
 import React, { Component, Fragment } from 'react';
 import { HttpStart, IUiSettingsClient } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import './samples.scss';
+
 import React, { PureComponent } from 'react';
 
 import { EuiBasicTable, EuiFormRow } from '@elastic/eui';

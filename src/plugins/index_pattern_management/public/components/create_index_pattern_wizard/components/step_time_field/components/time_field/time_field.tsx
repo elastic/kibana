@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import './time_field.scss';
+
 import React from 'react';
 
 import {
