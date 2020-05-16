@@ -26,7 +26,7 @@ import {
   IndexPatternManagementServiceStart,
 } from './service';
 
-import { ManagementSetup, ManagementApp } from '../../management/public';
+import { ManagementSetup, ManagementApp, ManagementSectionId } from '../../management/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
@@ -61,7 +61,7 @@ export class IndexPatternManagementPlugin
     core: CoreSetup<IndexPatternManagementStartDependencies, IndexPatternManagementStart>,
     { management }: IndexPatternManagementSetupDependencies
   ) {
-    const kibanaSection = management.sections.getSection('kibana');
+    const kibanaSection = management.sections.getSection(ManagementSectionId.Kibana);
 
     if (!kibanaSection) {
       throw new Error('`kibana` management section not found.');
