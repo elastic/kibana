@@ -19,8 +19,9 @@
 
 import { PluginInitializerContext } from 'src/core/public';
 import { coreMock } from '../../../core/public/mocks';
-import { managementPluginMock } from '../../../plugins/management/public/mocks';
-import { dataPluginMock } from '../../../plugins/data/public/mocks';
+import { managementPluginMock } from '../../management/public/mocks';
+import { kibanaLegacyPluginMock } from '../../kibana_legacy/public/mocks';
+import { dataPluginMock } from '../../data/public/mocks';
 import {
   IndexPatternManagementSetup,
   IndexPatternManagementStart,
@@ -61,6 +62,7 @@ const createInstance = async () => {
 
   const setup = plugin.setup(coreMock.createSetup(), {
     management: managementPluginMock.createSetupContract(),
+    kibanaLegacy: kibanaLegacyPluginMock.createSetupContract(),
   });
   const doStart = () =>
     plugin.start(coreMock.createStart(), {
