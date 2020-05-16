@@ -20,6 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { KibanaLegacySetup } from '../../kibana_legacy/public';
 import {
   IndexPatternManagementService,
   IndexPatternManagementServiceSetup,
@@ -30,6 +31,7 @@ import { ManagementSetup, ManagementApp, ManagementSectionId } from '../../manag
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
+  kibanaLegacy: KibanaLegacySetup;
 }
 
 export interface IndexPatternManagementStartDependencies {
@@ -43,6 +45,8 @@ export type IndexPatternManagementStart = IndexPatternManagementServiceStart;
 const sectionsHeader = i18n.translate('indexPatternManagement.indexPattern.sectionsHeader', {
   defaultMessage: 'Index Patterns',
 });
+
+const IPM_APP_ID = 'indexPatterns';
 
 export class IndexPatternManagementPlugin
   implements
@@ -59,7 +63,7 @@ export class IndexPatternManagementPlugin
 
   public setup(
     core: CoreSetup<IndexPatternManagementStartDependencies, IndexPatternManagementStart>,
-    { management }: IndexPatternManagementSetupDependencies
+    { management, kibanaLegacy }: IndexPatternManagementSetupDependencies
   ) {
     const kibanaSection = management.sections.getSection(ManagementSectionId.Kibana);
 
@@ -67,8 +71,17 @@ export class IndexPatternManagementPlugin
       throw new Error('`kibana` management section not found.');
     }
 
+    const newAppPath = `kibana#/management/kibana/${IPM_APP_ID}`;
+    const legacyPatternsPath = 'management/kibana/index_patterns';
+
+    kibanaLegacy.forwardApp('management/kibana/index_pattern', newAppPath, path => '/create');
+    kibanaLegacy.forwardApp(legacyPatternsPath, newAppPath, path => {
+      const pathInApp = path.substr(legacyPatternsPath.length + 1);
+      return pathInApp && `/patterns${pathInApp}`;
+    });
+
     this.managementApp = kibanaSection.registerApp({
-      id: 'indexPatterns',
+      id: IPM_APP_ID,
       title: sectionsHeader,
       order: 0,
       mount: async params => {
