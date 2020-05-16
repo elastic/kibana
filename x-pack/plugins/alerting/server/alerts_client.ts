@@ -60,21 +60,19 @@ interface ConstructorOptions {
 }
 
 export interface FindOptions {
-  options?: {
-    perPage?: number;
-    page?: number;
-    search?: string;
-    defaultSearchOperator?: 'AND' | 'OR';
-    searchFields?: string[];
-    sortField?: string;
-    sortOrder?: string;
-    hasReference?: {
-      type: string;
-      id: string;
-    };
-    fields?: string[];
-    filter?: string;
+  perPage?: number;
+  page?: number;
+  search?: string;
+  defaultSearchOperator?: 'AND' | 'OR';
+  searchFields?: string[];
+  sortField?: string;
+  sortOrder?: string;
+  hasReference?: {
+    type: string;
+    id: string;
   };
+  fields?: string[];
+  filter?: string;
 }
 
 export interface FindResult {
@@ -226,7 +224,7 @@ export class AlertsClient {
     }
   }
 
-  public async find({ options = {} }: FindOptions = {}): Promise<FindResult> {
+  public async find(options: FindOptions = {}): Promise<FindResult> {
     const {
       page,
       per_page: perPage,

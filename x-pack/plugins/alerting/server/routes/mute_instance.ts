@@ -17,8 +17,8 @@ import { verifyApiAccess } from '../lib/license_api_access';
 import { BASE_ALERT_API_PATH } from '../../common';
 
 const paramSchema = schema.object({
-  alertId: schema.string(),
-  alertInstanceId: schema.string(),
+  alert_id: schema.string(),
+  alert_instance_id: schema.string(),
 });
 
 export const muteAlertInstanceRoute = (router: IRouter, licenseState: LicenseState) => {
@@ -42,8 +42,8 @@ export const muteAlertInstanceRoute = (router: IRouter, licenseState: LicenseSta
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
       const alertsClient = context.alerting.getAlertsClient();
-      const { alertId, alertInstanceId } = req.params;
-      await alertsClient.muteInstance({ alertId, alertInstanceId });
+      const { alert_id, alert_instance_id } = req.params;
+      await alertsClient.muteInstance({ alertId: alert_id, alertInstanceId: alert_instance_id });
       return res.noContent();
     })
   );

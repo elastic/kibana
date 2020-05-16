@@ -18,7 +18,7 @@ import { BASE_ALERT_API_PATH } from '../../common';
 export const listAlertTypesRoute = (router: IRouter, licenseState: LicenseState) => {
   router.get(
     {
-      path: `${BASE_ALERT_API_PATH}/types`,
+      path: `${BASE_ALERT_API_PATH}/list_alert_types`,
       validate: {},
       options: {
         tags: ['access:alerting-read'],

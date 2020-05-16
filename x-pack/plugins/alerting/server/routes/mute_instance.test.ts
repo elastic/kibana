@@ -45,8 +45,8 @@ describe('muteAlertInstanceRoute', () => {
       { alertsClient },
       {
         params: {
-          alertId: '1',
-          alertInstanceId: '2',
+          alert_id: '1',
+          alert_instance_id: '2',
         },
       },
       ['noContent']
@@ -58,8 +58,8 @@ describe('muteAlertInstanceRoute', () => {
     expect(alertsClient.muteInstance.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "alertId": "1",
-          "alertInstanceId": "2",
+          "alert_id": "1",
+          "alertInstance_id": "2",
         },
       ]
     `);

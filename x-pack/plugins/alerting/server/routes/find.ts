@@ -16,6 +16,7 @@ import { FindOptions } from '../../../alerting/server';
 import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { BASE_ALERT_API_PATH } from '../../common';
+import { renameKeys } from './lib/rename_keys';
 
 // config definition
 const querySchema = schema.object({
@@ -64,7 +65,7 @@ export const findAlertRoute = (router: IRouter, licenseState: LicenseState) => {
       }
       const alertsClient = context.alerting.getAlertsClient();
       const query = req.query;
-      const options: FindOptions['options'] = {
+      const options: FindOptions = {
         perPage: query.per_page,
         page: query.page,
         search: query.search,
@@ -84,6 +85,21 @@ export const findAlertRoute = (router: IRouter, licenseState: LicenseState) => {
       if (query.has_reference) {
         options.hasReference = query.has_reference;
       }
+
+      const renameMap = {
+        defaultSearchOperator: 'default_search_operator',
+        fields: 'fields',
+        hasReference: 'has_reference',
+        page: 'page',
+        perPage: 'per_page',
+        search: 'search',
+        searchFields: 'search_fields',
+        sortField: 'sort_field',
+        sortOrder: 'sort_order',
+        filter: 'filter',
+      };
+
+      const renamedQuery = renameKeys<FindOptions, unknown>(renameMap, query);
 
       const findResult = await alertsClient.find({
         options,
