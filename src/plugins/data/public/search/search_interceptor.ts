@@ -18,7 +18,7 @@
  */
 
 import { BehaviorSubject, throwError, timer, Subscription, defer, fromEvent, Subject } from 'rxjs';
-import { takeUntil, finalize, mergeMapTo } from 'rxjs/operators';
+import { takeUntil, finalize, mergeMapTo, filter } from 'rxjs/operators';
 import { ApplicationStart, Toast, ToastsStart } from 'kibana/public';
 import { getCombinedSignal } from '../../common/utils';
 import { IKibanaSearchRequest } from '../../common/search';
@@ -26,7 +26,7 @@ import { ISearchGeneric, ISearchOptions } from './i_search';
 import { RequestTimeoutError } from './request_timeout_error';
 import { getLongQueryNotification } from './long_query_notification';
 
-const LONG_QUERY_NOTIFICATION_DELAY = 1000;
+const LONG_QUERY_NOTIFICATION_DELAY = 5000;
 
 export interface SearchEventInfo {
   name: string;
@@ -75,9 +75,9 @@ export class SearchInterceptor {
   ) {
     // When search requests go out, a notification is scheduled allowing users to continue the
     // request past the timeout. When all search requests complete, we remove the notification.
-    // this.getPendingCount$()
-    //   .pipe(filter(count => count === 0))
-    //   .subscribe(this.hideToast);
+    this.getPendingCount$()
+      .pipe(filter(count => count === 0))
+      .subscribe(this.hideToast);
   }
 
   /**
