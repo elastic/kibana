@@ -33,7 +33,7 @@ import { getEditBreadcrumbs } from '../breadcrumbs';
 
 import { EditIndexPattern } from '../edit_index_pattern';
 
-export interface EditIndexPatternContainerProps extends RouteComponentProps<{ id: string }> {
+interface EditIndexPatternContainerProps extends RouteComponentProps<{ id: string }> {
   getIndexPattern: (id: string) => Promise<IndexPattern>;
   config: IUiSettingsClient;
   services: {

@@ -18,13 +18,21 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render } from 'enzyme';
+import { RouteComponentProps } from 'react-router-dom';
 
 import { Header } from './header';
 
 describe('Header', () => {
   test('should render normally', () => {
-    const component = shallow(<Header indexPatternId="test" />);
+    const component = render(
+      <Header.WrappedComponent
+        indexPatternId="test"
+        history={({} as unknown) as RouteComponentProps['history']}
+        location={({} as unknown) as RouteComponentProps['location']}
+        match={({} as unknown) as RouteComponentProps['match']}
+      />
+    );
 
     expect(component).toMatchSnapshot();
   });

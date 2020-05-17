@@ -29,11 +29,7 @@ import {
 
 import { coreMock } from '../../../../../core/public/mocks';
 
-// eslint-disable-next-line
-import { docLinksServiceMock } from '../../../../../core/public/doc_links/doc_links_service.mock';
-
 jest.mock('brace/mode/groovy', () => ({}));
-jest.mock('ui/new_platform');
 
 import { FieldEdiorProps, FieldEditor } from './field_editor';
 import { dataPluginMock } from '../../../../data/public/mocks';
@@ -113,11 +109,11 @@ describe('FieldEditor', () => {
     getConfig: () => {},
     fieldFormatEditors: [],
     redirectAway: () => {},
-    docLinksScriptedFields: docLinksServiceMock.createStartContract().links.scriptedFields,
+    docLinksScriptedFields: {},
     fieldFormats: dataStartServices.fieldFormats,
     toasts: coreStartServices.notifications.toasts,
-    http: coreStartServices.http,
-    uiSettings: coreStartServices.uiSettings,
+    http: {},
+    uiSettings: {},
     SearchBar: dataStartServices.ui.SearchBar,
     indexPatterns: dataStartServices.indexPatterns,
   } as unknown) as FieldEdiorProps['services'];

@@ -34,7 +34,7 @@ interface IndexHeaderProps {
   defaultIndex?: string;
   setDefault?: () => void;
   refreshFields?: () => void;
-  deleteIndexPattern?: () => void;
+  deleteIndexPatternClick?: () => void;
 }
 
 const setDefaultAriaLabel = i18n.translate(
@@ -72,7 +72,7 @@ export function IndexHeader({
   indexPattern,
   setDefault,
   refreshFields,
-  deleteIndexPattern,
+  deleteIndexPatternClick,
 }: IndexHeaderProps) {
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -120,12 +120,12 @@ export function IndexHeader({
             </EuiFlexItem>
           )}
 
-          {deleteIndexPattern && (
+          {deleteIndexPatternClick && (
             <EuiFlexItem>
               <EuiToolTip content={removeTooltip}>
                 <EuiButtonIcon
                   color="danger"
-                  onClick={deleteIndexPattern}
+                  onClick={deleteIndexPatternClick}
                   iconType="trash"
                   aria-label={removeAriaLabel}
                   data-test-subj="deleteIndexPatternButton"

@@ -47,7 +47,7 @@ import { IndexHeader } from './index_header';
 import { IndexPatternTableItem } from '../types';
 import { getIndexPatterns } from '../utils';
 
-export interface EditIndexPatternProps extends RouteComponentProps {
+interface EditIndexPatternProps extends RouteComponentProps {
   indexPattern: IndexPattern;
   config: IUiSettingsClient;
   services: {
@@ -134,7 +134,7 @@ export const EditIndexPattern = withRouter(
         });
     };
 
-    const removePattern = () => {
+    const removePatternClick = () => {
       async function doRemove() {
         if (indexPattern.id === defaultIndex) {
           const indexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
@@ -198,7 +198,7 @@ export const EditIndexPattern = withRouter(
                 indexPattern={indexPattern}
                 setDefault={setDefaultPattern}
                 refreshFields={refreshFields}
-                deleteIndexPattern={removePattern}
+                deleteIndexPatternClick={removePatternClick}
                 defaultIndex={defaultIndex}
               />
               <EuiSpacer size="s" />

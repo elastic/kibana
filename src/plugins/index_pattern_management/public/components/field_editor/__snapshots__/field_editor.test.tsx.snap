@@ -19,57 +19,14 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       isVisible={false}
     />
     <scripting-warning-callOut
-      docLinksScriptedFields={
-        Object {
-          "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
-          "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
-          "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
-          "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
-          "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
-          "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
-        }
-      }
+      docLinksScriptedFields={Object {}}
       isVisible={true}
     />
     <ScriptingHelpFlyout
       SearchBar={[MockFunction]}
-      docLinksScriptedFields={
-        Object {
-          "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
-          "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
-          "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
-          "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
-          "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
-          "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
-        }
-      }
+      docLinksScriptedFields={Object {}}
       executeScript={[Function]}
-      http={
-        Object {
-          "addLoadingCountSource": [MockFunction],
-          "anonymousPaths": Object {
-            "isAnonymous": [MockFunction],
-            "register": [MockFunction],
-          },
-          "basePath": BasePath {
-            "basePath": "",
-            "get": [Function],
-            "prepend": [Function],
-            "remove": [Function],
-            "serverBasePath": "",
-          },
-          "delete": [MockFunction],
-          "fetch": [MockFunction],
-          "get": [MockFunction],
-          "getLoadingCount$": [MockFunction],
-          "head": [MockFunction],
-          "intercept": [MockFunction],
-          "options": [MockFunction],
-          "patch": [MockFunction],
-          "post": [MockFunction],
-          "put": [MockFunction],
-        }
-      }
+      http={Object {}}
       indexPattern={
         Object {
           "fields": Array [
@@ -82,23 +39,7 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       isVisible={false}
       lang="painless"
       onClose={[Function]}
-      uiSettings={
-        Object {
-          "get": [MockFunction],
-          "get$": [MockFunction],
-          "getAll": [MockFunction],
-          "getSaved$": [MockFunction],
-          "getUpdate$": [MockFunction],
-          "getUpdateErrors$": [MockFunction],
-          "isCustom": [MockFunction],
-          "isDeclared": [MockFunction],
-          "isDefault": [MockFunction],
-          "isOverridden": [MockFunction],
-          "overrideLocalDefault": [MockFunction],
-          "remove": [MockFunction],
-          "set": [MockFunction],
-        }
-      }
+      uiSettings={Object {}}
     />
     <eui-form-row
       error="Name is required"
@@ -318,57 +259,14 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       isVisible={false}
     />
     <scripting-warning-callOut
-      docLinksScriptedFields={
-        Object {
-          "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
-          "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
-          "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
-          "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
-          "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
-          "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
-        }
-      }
+      docLinksScriptedFields={Object {}}
       isVisible={true}
     />
     <ScriptingHelpFlyout
       SearchBar={[MockFunction]}
-      docLinksScriptedFields={
-        Object {
-          "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
-          "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
-          "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
-          "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
-          "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
-          "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
-        }
-      }
+      docLinksScriptedFields={Object {}}
       executeScript={[Function]}
-      http={
-        Object {
-          "addLoadingCountSource": [MockFunction],
-          "anonymousPaths": Object {
-            "isAnonymous": [MockFunction],
-            "register": [MockFunction],
-          },
-          "basePath": BasePath {
-            "basePath": "",
-            "get": [Function],
-            "prepend": [Function],
-            "remove": [Function],
-            "serverBasePath": "",
-          },
-          "delete": [MockFunction],
-          "fetch": [MockFunction],
-          "get": [MockFunction],
-          "getLoadingCount$": [MockFunction],
-          "head": [MockFunction],
-          "intercept": [MockFunction],
-          "options": [MockFunction],
-          "patch": [MockFunction],
-          "post": [MockFunction],
-          "put": [MockFunction],
-        }
-      }
+      http={Object {}}
       indexPattern={
         Object {
           "fields": Array [
@@ -391,23 +289,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       name="test"
       onClose={[Function]}
       script="doc.test.value"
-      uiSettings={
-        Object {
-          "get": [MockFunction],
-          "get$": [MockFunction],
-          "getAll": [MockFunction],
-          "getSaved$": [MockFunction],
-          "getUpdate$": [MockFunction],
-          "getUpdateErrors$": [MockFunction],
-          "isCustom": [MockFunction],
-          "isDeclared": [MockFunction],
-          "isDefault": [MockFunction],
-          "isOverridden": [MockFunction],
-          "overrideLocalDefault": [MockFunction],
-          "remove": [MockFunction],
-          "set": [MockFunction],
-        }
-      }
+      uiSettings={Object {}}
     />
     <eui-form-row
       helpText={null}
@@ -624,57 +506,14 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       isVisible={false}
     />
     <scripting-warning-callOut
-      docLinksScriptedFields={
-        Object {
-          "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
-          "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
-          "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
-          "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
-          "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
-          "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
-        }
-      }
+      docLinksScriptedFields={Object {}}
       isVisible={true}
     />
     <ScriptingHelpFlyout
       SearchBar={[MockFunction]}
-      docLinksScriptedFields={
-        Object {
-          "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
-          "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
-          "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
-          "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
-          "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
-          "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
-        }
-      }
+      docLinksScriptedFields={Object {}}
       executeScript={[Function]}
-      http={
-        Object {
-          "addLoadingCountSource": [MockFunction],
-          "anonymousPaths": Object {
-            "isAnonymous": [MockFunction],
-            "register": [MockFunction],
-          },
-          "basePath": BasePath {
-            "basePath": "",
-            "get": [Function],
-            "prepend": [Function],
-            "remove": [Function],
-            "serverBasePath": "",
-          },
-          "delete": [MockFunction],
-          "fetch": [MockFunction],
-          "get": [MockFunction],
-          "getLoadingCount$": [MockFunction],
-          "head": [MockFunction],
-          "intercept": [MockFunction],
-          "options": [MockFunction],
-          "patch": [MockFunction],
-          "post": [MockFunction],
-          "put": [MockFunction],
-        }
-      }
+      http={Object {}}
       indexPattern={
         Object {
           "fields": Array [
@@ -704,23 +543,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       lang="painless"
       name="foobar"
       onClose={[Function]}
-      uiSettings={
-        Object {
-          "get": [MockFunction],
-          "get$": [MockFunction],
-          "getAll": [MockFunction],
-          "getSaved$": [MockFunction],
-          "getUpdate$": [MockFunction],
-          "getUpdateErrors$": [MockFunction],
-          "isCustom": [MockFunction],
-          "isDeclared": [MockFunction],
-          "isDefault": [MockFunction],
-          "isOverridden": [MockFunction],
-          "overrideLocalDefault": [MockFunction],
-          "remove": [MockFunction],
-          "set": [MockFunction],
-        }
-      }
+      uiSettings={Object {}}
     />
     <eui-form-row
       error={null}
@@ -967,57 +790,14 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       isVisible={false}
     />
     <scripting-warning-callOut
-      docLinksScriptedFields={
-        Object {
-          "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
-          "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
-          "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
-          "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
-          "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
-          "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
-        }
-      }
+      docLinksScriptedFields={Object {}}
       isVisible={true}
     />
     <ScriptingHelpFlyout
       SearchBar={[MockFunction]}
-      docLinksScriptedFields={
-        Object {
-          "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
-          "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
-          "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
-          "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
-          "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
-          "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
-        }
-      }
+      docLinksScriptedFields={Object {}}
       executeScript={[Function]}
-      http={
-        Object {
-          "addLoadingCountSource": [MockFunction],
-          "anonymousPaths": Object {
-            "isAnonymous": [MockFunction],
-            "register": [MockFunction],
-          },
-          "basePath": BasePath {
-            "basePath": "",
-            "get": [Function],
-            "prepend": [Function],
-            "remove": [Function],
-            "serverBasePath": "",
-          },
-          "delete": [MockFunction],
-          "fetch": [MockFunction],
-          "get": [MockFunction],
-          "getLoadingCount$": [MockFunction],
-          "head": [MockFunction],
-          "intercept": [MockFunction],
-          "options": [MockFunction],
-          "patch": [MockFunction],
-          "post": [MockFunction],
-          "put": [MockFunction],
-        }
-      }
+      http={Object {}}
       indexPattern={
         Object {
           "fields": Array [
@@ -1048,23 +828,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       name="test"
       onClose={[Function]}
       script="doc.test.value"
-      uiSettings={
-        Object {
-          "get": [MockFunction],
-          "get$": [MockFunction],
-          "getAll": [MockFunction],
-          "getSaved$": [MockFunction],
-          "getUpdate$": [MockFunction],
-          "getUpdateErrors$": [MockFunction],
-          "isCustom": [MockFunction],
-          "isDeclared": [MockFunction],
-          "isDefault": [MockFunction],
-          "isOverridden": [MockFunction],
-          "overrideLocalDefault": [MockFunction],
-          "remove": [MockFunction],
-          "set": [MockFunction],
-        }
-      }
+      uiSettings={Object {}}
     />
     <eui-form-row
       helpText={
@@ -1092,7 +856,6 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
                   testlang
                 </eui-code>,
                 "painlessLink": <eui-link
-                  href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html"
                   target="_blank"
                 >
                   <FormattedMessage
@@ -1363,57 +1126,14 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       isVisible={false}
     />
     <scripting-warning-callOut
-      docLinksScriptedFields={
-        Object {
-          "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
-          "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
-          "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
-          "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
-          "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
-          "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
-        }
-      }
+      docLinksScriptedFields={Object {}}
       isVisible={true}
     />
     <ScriptingHelpFlyout
       SearchBar={[MockFunction]}
-      docLinksScriptedFields={
-        Object {
-          "luceneExpressions": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-expression.html",
-          "painless": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless.html",
-          "painlessApi": "https://www.elastic.co/guide/en/elasticsearch/painless/mocked-test-branch/painless-api-reference.html",
-          "painlessSyntax": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/modules-scripting-painless-syntax.html",
-          "scriptAggs": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source",
-          "scriptFields": "https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html",
-        }
-      }
+      docLinksScriptedFields={Object {}}
       executeScript={[Function]}
-      http={
-        Object {
-          "addLoadingCountSource": [MockFunction],
-          "anonymousPaths": Object {
-            "isAnonymous": [MockFunction],
-            "register": [MockFunction],
-          },
-          "basePath": BasePath {
-            "basePath": "",
-            "get": [Function],
-            "prepend": [Function],
-            "remove": [Function],
-            "serverBasePath": "",
-          },
-          "delete": [MockFunction],
-          "fetch": [MockFunction],
-          "get": [MockFunction],
-          "getLoadingCount$": [MockFunction],
-          "head": [MockFunction],
-          "intercept": [MockFunction],
-          "options": [MockFunction],
-          "patch": [MockFunction],
-          "post": [MockFunction],
-          "put": [MockFunction],
-        }
-      }
+      http={Object {}}
       indexPattern={
         Object {
           "fields": Array [
@@ -1443,23 +1163,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       lang="painless"
       name="foobar"
       onClose={[Function]}
-      uiSettings={
-        Object {
-          "get": [MockFunction],
-          "get$": [MockFunction],
-          "getAll": [MockFunction],
-          "getSaved$": [MockFunction],
-          "getUpdate$": [MockFunction],
-          "getUpdateErrors$": [MockFunction],
-          "isCustom": [MockFunction],
-          "isDeclared": [MockFunction],
-          "isDefault": [MockFunction],
-          "isOverridden": [MockFunction],
-          "overrideLocalDefault": [MockFunction],
-          "remove": [MockFunction],
-          "set": [MockFunction],
-        }
-      }
+      uiSettings={Object {}}
     />
     <eui-form-row
       error={null}
