@@ -27,8 +27,20 @@ interface CaseCallOutProps {
 const CaseCallOutComponent = ({ title, message, messages }: CaseCallOutProps) => {
   const [showCallOut, setShowCallOut] = useState(true);
   const handleCallOut = useCallback(() => setShowCallOut(false), [setShowCallOut]);
+  let callOutMessages = messages ?? [];
 
-  const groupedErrorMessages = (messages ?? []).reduce((acc, currentMessage: ErrorMessage) => {
+  if (message) {
+    callOutMessages = [
+      ...callOutMessages,
+      {
+        title: '',
+        description: <p data-test-subj="callout-message-primary">{message}</p>,
+        errorType: 'primary',
+      },
+    ];
+  }
+
+  const groupedErrorMessages = callOutMessages.reduce((acc, currentMessage: ErrorMessage) => {
     const key = currentMessage.errorType == null ? 'primary' : currentMessage.errorType;
     return {
       ...acc,
@@ -40,15 +52,23 @@ const CaseCallOutComponent = ({ title, message, messages }: CaseCallOutProps) =>
     <>
       {(Object.keys(groupedErrorMessages) as Array<keyof ErrorMessage['errorType']>).map(key => (
         <React.Fragment key={key}>
-          <EuiCallOut title={title} color={key} iconType="gear" data-test-subj="case-call-out">
-            {!isEmpty(messages) && (
+          <EuiCallOut
+            title={title}
+            color={key}
+            iconType="gear"
+            data-test-subj={`case-call-out-${key}`}
+          >
+            {!isEmpty(groupedErrorMessages[key]) && (
               <EuiDescriptionList
-                data-test-subj="callout-messages"
+                data-test-subj={`callout-messages-${key}`}
                 listItems={groupedErrorMessages[key]}
               />
             )}
-            {!isEmpty(message) && <p data-test-subj="callout-message">{message}</p>}
-            <EuiButton data-test-subj="callout-dismiss" color="primary" onClick={handleCallOut}>
+            <EuiButton
+              data-test-subj={`callout-dismiss-${key}`}
+              color="primary"
+              onClick={handleCallOut}
+            >
               {i18n.DISMISS_CALLOUT}
             </EuiButton>
           </EuiCallOut>
