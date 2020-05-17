@@ -27,9 +27,8 @@ describe('ManagementService', () => {
       const mockSection = { registerApp: jest.fn() };
       const managementSetup = {
         sections: {
-          getSection: jest.fn(),
+          getSection: jest.fn().mockReturnValue(mockSection),
           getAllSections: jest.fn(),
-          register: jest.fn().mockReturnValue(mockSection),
         },
       };
 
@@ -40,14 +39,6 @@ describe('ManagementService', () => {
         fatalErrors,
         authc,
         management: managementSetup,
-      });
-
-      expect(managementSetup.sections.register).toHaveBeenCalledTimes(1);
-      expect(managementSetup.sections.register).toHaveBeenCalledWith({
-        id: 'security',
-        title: 'Security',
-        order: 100,
-        euiIconType: 'securityApp',
       });
 
       expect(mockSection.registerApp).toHaveBeenCalledTimes(4);
@@ -96,9 +87,8 @@ describe('ManagementService', () => {
         authc: securityMock.createSetup().authc,
         management: {
           sections: {
-            getSection: jest.fn(),
+            getSection: jest.fn().mockReturnValue({ registerApp: jest.fn() }),
             getAllSections: jest.fn(),
-            register: jest.fn().mockReturnValue({ registerApp: jest.fn() }),
           },
         },
       });
