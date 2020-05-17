@@ -118,42 +118,62 @@ function SearchNode({ node, dispatch }: RenderNode<SearchNodeState>) {
           </EuiLink>
         }
       >
-        <EuiButton
-          onClick={() => {
-            dispatch({
-              type: 'SET_NODE',
-              nodeId: node.id,
-              newState: getStateForLogs(),
-            });
-            setState(false);
-          }}
-        >
-          Logs example
-        </EuiButton>
-        <EuiButton
-          onClick={() => {
-            dispatch({
-              type: 'SET_NODE',
-              nodeId: node.id,
-              newState: getStateForHistogram(),
-            });
-            setState(false);
-          }}
-        >
-          Histogram example
-        </EuiButton>
-        <EuiButton
-          onClick={() => {
-            dispatch({
-              type: 'SET_NODE',
-              nodeId: node.id,
-              newState: getStateForSql(),
-            });
-            setState(false);
-          }}
-        >
-          SQL example
-        </EuiButton>
+        <div>
+          <EuiButton
+            onClick={() => {
+              dispatch({
+                type: 'SET_NODE',
+                nodeId: node.id,
+                newState: getStateForLogs(),
+              });
+              setState(false);
+            }}
+          >
+            Logs example
+          </EuiButton>
+        </div>
+        <div>
+          <EuiButton
+            onClick={() => {
+              dispatch({
+                type: 'SET_NODE',
+                nodeId: node.id,
+                newState: getStateForHistogram(),
+              });
+              setState(false);
+            }}
+          >
+            Histogram example
+          </EuiButton>
+        </div>
+        <div>
+          <EuiButton
+            onClick={() => {
+              dispatch({
+                type: 'SET_NODE',
+                nodeId: node.id,
+                newState: getStateForSql(),
+              });
+              setState(false);
+            }}
+          >
+            SQL example
+          </EuiButton>
+        </div>
+        <div>
+          <EuiButton
+            onClick={() => {
+              dispatch({
+                type: 'SET_NODE',
+                nodeId: node.id,
+                newState: getStateForSource(),
+              });
+              setState(false);
+            }}
+          >
+            Raw documents example
+          </EuiButton>
+        </div>
       </EuiPopover>
     </div>
   );
@@ -244,6 +264,21 @@ function getStateForSql(): SearchNodeState {
       {
         query: 'SELECT "@timestamp", geo.src, bytes FROM kibana_sample_data_logs',
         fetch_size: 10,
+      },
+      null,
+      2
+    ),
+  };
+}
+
+function getStateForSource(): SearchNodeState {
+  return {
+    method: 'POST',
+    path: '/.metricbeat-*/_search',
+    body: JSON.stringify(
+      {
+        size: 100,
+        query: { match_all: {} },
       },
       null,
       2

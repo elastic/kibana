@@ -26,7 +26,7 @@ import {
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { State, DispatchFn, PipelineAppDeps, NodeDefinition, Node } from '../types';
 import { nodeRegistry } from '../nodes';
-import { renderersRegistry } from '../renderers';
+import { Renderer } from './renderer';
 import { useLoader, getChainInformation } from '../state';
 
 export function Layout({ state, dispatch }: { state: State; dispatch: DispatchFn }) {
@@ -38,8 +38,6 @@ export function Layout({ state, dispatch }: { state: State; dispatch: DispatchFn
 
   return (
     <div className="pipelineFrameLayout">
-      {/* {state.loading === true ? <EuiProgress /> : null} */}
-
       <div className="pipelineFrameLayout__pageContent">
         <EuiFlexGroup direction="row">
           {startChains.map(chain => (
@@ -169,15 +167,7 @@ export function Layout({ state, dispatch }: { state: State; dispatch: DispatchFn
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <EuiAccordion id={'chart'} buttonContent={'Chart'} initialIsOpen={true}>
-              {renderersRegistry.chart({ state })}
-            </EuiAccordion>
-          </EuiFlexItem>
-
-          <EuiFlexItem>
-            <EuiAccordion id={'table'} buttonContent={'Table'} initialIsOpen={true}>
-              {renderersRegistry.table({ state })}
-            </EuiAccordion>
+            <Renderer state={state} dispatch={dispatch} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>
@@ -230,7 +220,8 @@ function RenderNode({ node, id, dispatch }: { id: string; node: Node; dispatch: 
     <div>
       <EuiPanel className="pipelineBuilder__node">
         <span>
-          <strong>{id}</strong>: {nodeRegistry[node.type].title}
+          <EuiIcon type={nodeRegistry[node.type].icon} /> <strong>{id}</strong>:{' '}
+          {nodeRegistry[node.type].title}
         </span>
         <EuiTabbedContent display="condensed" tabs={tabs} />
       </EuiPanel>
@@ -275,6 +266,7 @@ function CreateNodeButton({
           onClick={() => {
             setState(true);
           }}
+          disabled={filteredNodes.length === 0}
           size="s"
           fullWidth
           fill

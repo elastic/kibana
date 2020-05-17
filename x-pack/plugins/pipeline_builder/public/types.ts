@@ -38,6 +38,7 @@ export interface PipelineStartDependencies {
 
 export interface State {
   nodes: Record<string, Node>;
+  rendererState: Record<string, unknown>;
   loading: false | 'success' | 'failure';
 }
 
@@ -90,7 +91,6 @@ interface CreateNode {
   type: 'CREATE_NODE';
   nodeType: NodeType;
   inputNodeIds: string[];
-  // outputNode?: string;
 }
 
 interface LoadingStart {
@@ -108,10 +108,16 @@ interface DeleteNodes {
   nodeIds: string[];
 }
 
+interface SetRenderer {
+  type: 'SET_RENDERER';
+  newState: Record<string, unknown>;
+}
+
 export type Action =
   | SetNode
   | CreateNode
   | LoadingStart
   | LoadingSuccess
   | LoadingFailure
-  | DeleteNodes;
+  | DeleteNodes
+  | SetRenderer;

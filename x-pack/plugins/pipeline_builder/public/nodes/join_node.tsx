@@ -141,7 +141,6 @@ export function joinTables(
   leftId?: string,
   rightId?: string
 ): Table {
-  debugger;
   if (joinType === 'full') {
     return {
       columns: left.columns.concat(right.columns),
@@ -156,6 +155,7 @@ export function joinTables(
     rightId = right.columns[0].id;
   }
 
+  debugger;
   if (joinType === 'left_outer') {
     return {
       columns: left.columns.concat(right.columns.filter(col => col.id !== rightId)),

@@ -104,6 +104,7 @@ function AppHome(props: { deps: PipelineAppDeps }) {
         inputNodeIds: ['0'],
       },
     },
+    rendererState: {},
     loading: false,
   } as State);
 

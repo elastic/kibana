@@ -17,6 +17,16 @@ export function reducer(state: State, action: Action): State {
         }, 1);
       const nodeId = String(highestNodeId + 1);
 
+      const newNodes = { ...state.nodes };
+      Object.entries(newNodes).forEach(([id, node]) => {
+        action.inputNodeIds.forEach(compNodeId => {
+          newNodes[id] = {
+            ...node,
+            inputNodeIds: node.inputNodeIds.map(n => (n === compNodeId ? nodeId : n)),
+          };
+        });
+      });
+
       return {
         ...state,
         nodes: {
@@ -61,6 +71,11 @@ export function reducer(state: State, action: Action): State {
       return {
         ...state,
         loading: 'success',
+      };
+    case 'SET_RENDERER':
+      return {
+        ...state,
+        rendererState: action.newState,
       };
     default:
       return state;
