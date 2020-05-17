@@ -97,7 +97,7 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
           spaceId: space.id,
           namespace: space.namespace,
           name: 'abc',
-          tags: [],
+          tags: ['tag-A', 'tag-B'],
           createdBy: null,
           updatedBy: null,
         },
@@ -119,7 +119,15 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
         params: {
           index: ES_TEST_INDEX_NAME,
           reference,
-          message: 'instanceContextValue: true, instanceStateValue: true',
+          message: `
+alertId: ${alertId},
+alertName: abc,
+spaceId: ${space.id},
+tags: tag-A,tag-B,
+alertInstanceId: 1,
+instanceContextValue: true,
+instanceStateValue: true
+`.trim(),
         },
         reference,
         source: 'action:test.index-record',
@@ -269,6 +277,7 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
       )[0];
       expect(alertTestRecord._source.state).to.eql({
         callClusterSuccess: true,
+        callScopedClusterSuccess: true,
         savedObjectsClientSuccess: false,
         savedObjectsClientError: {
           ...alertTestRecord._source.state.savedObjectsClientError,
@@ -324,6 +333,7 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
       )[0];
       expect(actionTestRecord._source.state).to.eql({
         callClusterSuccess: true,
+        callScopedClusterSuccess: true,
         savedObjectsClientSuccess: false,
         savedObjectsClientError: {
           ...actionTestRecord._source.state.savedObjectsClientError,

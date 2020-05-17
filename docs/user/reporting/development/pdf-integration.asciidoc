@@ -51,8 +51,7 @@ should have their screenshot taken and when the Visualizations are done renderin
 
 The print layout takes a screenshot of every element with the `data-shared-item` attribute and includes the
 individual screenshots in the PDF. The print layout also uses the `data-title` and `data-description`
-attributes on the same HTMLElement as the `data-shared-item` to specify the title and description
-that appears right above the individual screenshots.
+attributes on the same HTMLElement as the `data-shared-item` to specify the title and description.
 
 The preserve layout takes a screenshot of the element with the `data-shared-items-container` attribute. Additionally,
 reporting will resize the element with the `data-shared-items-container` to be the size specified in the layout dimensions.
@@ -64,3 +63,5 @@ If there are multiple visualizations, the `data-shared-items-count` attribute sh
 many Visualizations to look for. Reporting will look at every element with the `data-shared-item` attribute and use the corresponding
 `data-render-complete` attribute and `renderComplete` events to listen for rendering to complete. When rendering is complete for a visualization
 the `data-render-complete` attribute should be set to "true" and it should dispatch a custom DOM `renderComplete` event.
+
+If the reporting job uses multiple URLs, before looking for any of the `data-shared-item` or `data-shared-items-count` attributes, it waits for a `data-shared-page` attribute that specifies which page is being loaded.

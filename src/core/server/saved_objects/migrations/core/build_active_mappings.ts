@@ -132,14 +132,6 @@ function defaultMapping(): IndexMapping {
   return {
     dynamic: 'strict',
     properties: {
-      config: {
-        dynamic: 'true',
-        properties: {
-          buildNum: {
-            type: 'keyword',
-          },
-        },
-      },
       migrationVersion: {
         dynamic: 'true',
         type: 'object',
@@ -148,6 +140,9 @@ function defaultMapping(): IndexMapping {
         type: 'keyword',
       },
       namespace: {
+        type: 'keyword',
+      },
+      namespaces: {
         type: 'keyword',
       },
       updated_at: {

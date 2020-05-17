@@ -11,7 +11,7 @@ import { ApolloClient } from 'apollo-client';
 import { HttpLink } from 'apollo-link-http';
 
 import { FtrProviderContext } from '../ftr_provider_context';
-import introspectionQueryResultData from '../../../legacy/plugins/siem/public/graphql/introspection.json';
+import introspectionQueryResultData from '../../../plugins/siem/public/graphql/introspection.json';
 
 interface SiemGraphQLClientFactoryOptions {
   username?: string;

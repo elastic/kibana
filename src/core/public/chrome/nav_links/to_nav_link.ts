@@ -20,9 +20,11 @@
 import { App, AppNavLinkStatus, AppStatus, LegacyApp } from '../../application';
 import { IBasePath } from '../../http';
 import { NavLinkWrapper } from './nav_link';
+import { appendAppPath } from '../../application/utils';
 
 export function toNavLink(app: App | LegacyApp, basePath: IBasePath): NavLinkWrapper {
   const useAppStatus = app.navLinkStatus === AppNavLinkStatus.default;
+  const baseUrl = isLegacyApp(app) ? basePath.prepend(app.appUrl) : basePath.prepend(app.appRoute!);
   return new NavLinkWrapper({
     ...app,
     hidden: useAppStatus
@@ -30,9 +32,12 @@ export function toNavLink(app: App | LegacyApp, basePath: IBasePath): NavLinkWra
       : app.navLinkStatus === AppNavLinkStatus.hidden,
     disabled: useAppStatus ? false : app.navLinkStatus === AppNavLinkStatus.disabled,
     legacy: isLegacyApp(app),
-    baseUrl: isLegacyApp(app)
-      ? relativeToAbsolute(basePath.prepend(app.appUrl))
-      : relativeToAbsolute(basePath.prepend(app.appRoute!)),
+    baseUrl: relativeToAbsolute(baseUrl),
+    ...(isLegacyApp(app)
+      ? {}
+      : {
+          url: relativeToAbsolute(appendAppPath(baseUrl, app.defaultPath)),
+        }),
   });
 }
 

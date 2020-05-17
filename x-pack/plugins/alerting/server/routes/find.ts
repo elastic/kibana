@@ -15,6 +15,7 @@ import {
 import { FindOptions } from '../../../alerting/server';
 import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
+import { BASE_ALERT_API_PATH } from '../../common';
 
 // config definition
 const querySchema = schema.object({
@@ -26,6 +27,7 @@ const querySchema = schema.object({
   }),
   search_fields: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
   sort_field: schema.maybe(schema.string()),
+  sort_order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
   has_reference: schema.maybe(
     // use nullable as maybe is currently broken
     // in config-schema
@@ -43,7 +45,7 @@ const querySchema = schema.object({
 export const findAlertRoute = (router: IRouter, licenseState: LicenseState) => {
   router.get(
     {
-      path: '/api/alert/_find',
+      path: `${BASE_ALERT_API_PATH}/_find`,
       validate: {
         query: querySchema,
       },
@@ -53,10 +55,13 @@ export const findAlertRoute = (router: IRouter, licenseState: LicenseState) => {
     },
     router.handleLegacyErrors(async function(
       context: RequestHandlerContext,
-      req: KibanaRequest<any, TypeOf<typeof querySchema>, any, any>,
+      req: KibanaRequest<unknown, TypeOf<typeof querySchema>, unknown>,
       res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
+    ): Promise<IKibanaResponse> {
       verifyApiAccess(licenseState);
+      if (!context.alerting) {
+        return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
+      }
       const alertsClient = context.alerting.getAlertsClient();
       const query = req.query;
       const options: FindOptions['options'] = {
@@ -67,6 +72,7 @@ export const findAlertRoute = (router: IRouter, licenseState: LicenseState) => {
         sortField: query.sort_field,
         fields: query.fields,
         filter: query.filter,
+        sortOrder: query.sort_order,
       };
 
       if (query.search_fields) {

@@ -8,7 +8,8 @@ import { HttpSetup } from 'kibana/public';
 import * as t from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
-import { alertStateSchema } from '../../../../alerting/common';
+import { pick } from 'lodash';
+import { alertStateSchema, AlertingFrameworkHealth } from '../../../../alerting/common';
 import { BASE_ALERT_API_PATH } from '../constants';
 import { Alert, AlertType, AlertWithoutId, AlertTaskState } from '../../types';
 
@@ -86,12 +87,10 @@ export async function loadAlerts({
       search: searchText,
       filter: filters.length ? filters.join(' and ') : undefined,
       default_search_operator: 'AND',
+      sort_field: 'name.keyword',
+      sort_order: 'asc',
     },
   });
-}
-
-export async function deleteAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
-  await http.delete(`${BASE_ALERT_API_PATH}/${id}`);
 }
 
 export async function deleteAlerts({
@@ -100,8 +99,18 @@ export async function deleteAlerts({
 }: {
   ids: string[];
   http: HttpSetup;
-}): Promise<void> {
-  await Promise.all(ids.map(id => deleteAlert({ http, id })));
+}): Promise<{ successes: string[]; errors: string[] }> {
+  const successes: string[] = [];
+  const errors: string[] = [];
+  await Promise.all(ids.map(id => http.delete(`${BASE_ALERT_API_PATH}/${id}`))).then(
+    function(fulfilled) {
+      successes.push(...fulfilled);
+    },
+    function(rejected) {
+      errors.push(...rejected);
+    }
+  );
+  return { successes, errors };
 }
 
 export async function createAlert({
@@ -126,7 +135,9 @@ export async function updateAlert({
   id: string;
 }): Promise<Alert> {
   return await http.put(`${BASE_ALERT_API_PATH}/${id}`, {
-    body: JSON.stringify(alert),
+    body: JSON.stringify(
+      pick(alert, ['throttle', 'name', 'tags', 'schedule', 'params', 'actions'])
+    ),
   });
 }
 
@@ -202,4 +213,8 @@ export async function unmuteAlerts({
   http: HttpSetup;
 }): Promise<void> {
   await Promise.all(ids.map(id => unmuteAlert({ id, http })));
+}
+
+export async function health({ http }: { http: HttpSetup }): Promise<AlertingFrameworkHealth> {
+  return await http.get(`${BASE_ALERT_API_PATH}/_health`);
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const _ = require('lodash');
+import _ from 'lodash';
 
 export function wrapComponentWithDefaults(component, defaults) {
   const originalGetTerms = component.getTerms;
@@ -43,7 +43,7 @@ export function wrapComponentWithDefaults(component, defaults) {
 
 const tracer = function() {
   if (window.engine_trace) {
-    console.log.call(console, arguments);
+    console.log.call(console, ...arguments);
   }
 };
 

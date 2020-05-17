@@ -5,7 +5,7 @@
  */
 import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
-import { AlertsClient } from './alerts_client';
+import { AlertsClient, CreateOptions } from './alerts_client';
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../../plugins/task_manager/server/task_manager.mock';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
@@ -30,6 +30,7 @@ const alertsClientParams = {
   invalidateAPIKey: jest.fn(),
   logger: loggingServiceMock.create().get(),
   encryptedSavedObjectsPlugin: encryptedSavedObjects,
+  preconfiguredActions: [],
 };
 
 beforeEach(() => {
@@ -44,6 +45,7 @@ beforeEach(() => {
 });
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).Date = class Date {
   constructor() {
     return mockedDate;
@@ -53,7 +55,7 @@ const mockedDate = new Date('2019-02-12T21:01:22.479Z');
   }
 };
 
-function getMockData(overwrites: Record<string, any> = {}) {
+function getMockData(overwrites: Record<string, unknown> = {}): CreateOptions['data'] {
   return {
     enabled: true,
     name: 'abc',
@@ -89,6 +91,7 @@ describe('create()', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
       async executor() {},
+      producer: 'alerting',
     });
   });
 
@@ -537,6 +540,7 @@ describe('create()', () => {
         }),
       },
       async executor() {},
+      producer: 'alerting',
     });
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
@@ -1894,6 +1898,7 @@ describe('update()', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
       async executor() {},
+      producer: 'alerting',
     });
   });
 
@@ -1984,6 +1989,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        throttle: null,
         actions: [
           {
             group: 'default',
@@ -2101,6 +2107,7 @@ describe('update()', () => {
         "tags": Array [
           "foo",
         ],
+        "throttle": null,
         "updatedBy": "elastic",
       }
     `);
@@ -2186,6 +2193,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        throttle: '5m',
         actions: [
           {
             group: 'default',
@@ -2254,6 +2262,7 @@ describe('update()', () => {
         "tags": Array [
           "foo",
         ],
+        "throttle": "5m",
         "updatedBy": "elastic",
       }
     `);
@@ -2332,6 +2341,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        throttle: '5m',
         actions: [
           {
             group: 'default',
@@ -2401,6 +2411,7 @@ describe('update()', () => {
         "tags": Array [
           "foo",
         ],
+        "throttle": "5m",
         "updatedBy": "elastic",
       }
     `);
@@ -2430,6 +2441,7 @@ describe('update()', () => {
         }),
       },
       async executor() {},
+      producer: 'alerting',
     });
     await expect(
       alertsClient.update({
@@ -2441,6 +2453,7 @@ describe('update()', () => {
           params: {
             bar: true,
           },
+          throttle: null,
           actions: [
             {
               group: 'default',
@@ -2509,6 +2522,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        throttle: null,
         actions: [
           {
             group: 'default',
@@ -2613,6 +2627,7 @@ describe('update()', () => {
         params: {
           bar: true,
         },
+        throttle: '5m',
         actions: [
           {
             group: 'default',
@@ -2658,6 +2673,7 @@ describe('update()', () => {
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
         async executor() {},
+        producer: 'alerting',
       });
       savedObjectsClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [
@@ -2742,6 +2758,7 @@ describe('update()', () => {
           params: {
             bar: true,
           },
+          throttle: null,
           actions: [
             {
               group: 'default',
@@ -2772,6 +2789,7 @@ describe('update()', () => {
           params: {
             bar: true,
           },
+          throttle: null,
           actions: [
             {
               group: 'default',
@@ -2808,6 +2826,7 @@ describe('update()', () => {
           params: {
             bar: true,
           },
+          throttle: null,
           actions: [
             {
               group: 'default',
@@ -2843,6 +2862,7 @@ describe('update()', () => {
           params: {
             bar: true,
           },
+          throttle: null,
           actions: [
             {
               group: 'default',

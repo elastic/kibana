@@ -7,14 +7,15 @@
 import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 import { initIpToHostName } from './routes/ip_to_hostname';
 import { schemas } from './graphql';
-import { createLogEntriesResolvers } from './graphql/log_entries';
 import { createSourceStatusResolvers } from './graphql/source_status';
 import { createSourcesResolvers } from './graphql/sources';
 import { InfraBackendLibs } from './lib/infra_types';
 import {
   initGetLogEntryCategoriesRoute,
   initGetLogEntryCategoryDatasetsRoute,
+  initGetLogEntryCategoryExamplesRoute,
   initGetLogEntryRateRoute,
+  initValidateLogAnalysisDatasetsRoute,
   initValidateLogAnalysisIndicesRoute,
 } from './routes/log_analysis';
 import { initMetricExplorerRoute } from './routes/metrics_explorer';
@@ -29,11 +30,12 @@ import {
   initLogEntriesItemRoute,
 } from './routes/log_entries';
 import { initInventoryMetaRoute } from './routes/inventory_metadata';
+import { initLogSourceConfigurationRoutes, initLogSourceStatusRoutes } from './routes/log_sources';
+import { initSourceRoute } from './routes/source';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
   const schema = makeExecutableSchema({
     resolvers: [
-      createLogEntriesResolvers(libs) as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
       createSourceStatusResolvers(libs) as IResolvers,
     ],
@@ -45,9 +47,12 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initIpToHostName(libs);
   initGetLogEntryCategoriesRoute(libs);
   initGetLogEntryCategoryDatasetsRoute(libs);
+  initGetLogEntryCategoryExamplesRoute(libs);
   initGetLogEntryRateRoute(libs);
   initSnapshotRoute(libs);
   initNodeDetailsRoute(libs);
+  initSourceRoute(libs);
+  initValidateLogAnalysisDatasetsRoute(libs);
   initValidateLogAnalysisIndicesRoute(libs);
   initLogEntriesRoute(libs);
   initLogEntriesHighlightsRoute(libs);
@@ -57,4 +62,6 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initMetricExplorerRoute(libs);
   initMetadataRoute(libs);
   initInventoryMetaRoute(libs);
+  initLogSourceConfigurationRoutes(libs);
+  initLogSourceStatusRoutes(libs);
 };

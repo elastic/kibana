@@ -26,7 +26,7 @@ import { KibanaLegacySetup } from '../../kibana_legacy/public';
 import { LegacyManagementSection } from './legacy';
 import { ManagementChrome } from './components';
 import { ManagementSection } from './management_section';
-import { ChromeBreadcrumb, CoreSetup } from '../../../core/public/';
+import { ChromeBreadcrumb, StartServicesAccessor } from '../../../core/public/';
 
 export class ManagementApp {
   readonly id: string;
@@ -41,7 +41,7 @@ export class ManagementApp {
     getSections: () => ManagementSection[],
     registerLegacyApp: KibanaLegacySetup['registerLegacyApp'],
     getLegacyManagementSections: () => LegacyManagementSection,
-    getStartServices: CoreSetup['getStartServices']
+    getStartServices: StartServicesAccessor
   ) {
     this.id = id;
     this.title = title;
@@ -64,7 +64,7 @@ export class ManagementApp {
           coreStart.chrome.setBreadcrumbs([
             {
               text: i18n.translate('management.breadcrumb', {
-                defaultMessage: 'Management',
+                defaultMessage: 'Stack Management',
               }),
               href: '#/management',
             },

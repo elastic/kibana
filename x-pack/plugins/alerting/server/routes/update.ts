@@ -15,6 +15,8 @@ import {
 import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { validateDurationSchema } from '../lib';
+import { handleDisabledApiKeysError } from './lib/error_handler';
+import { BASE_ALERT_API_PATH } from '../../common';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -42,7 +44,7 @@ const bodySchema = schema.object({
 export const updateAlertRoute = (router: IRouter, licenseState: LicenseState) => {
   router.put(
     {
-      path: '/api/alert/{id}',
+      path: `${BASE_ALERT_API_PATH}/{id}`,
       validate: {
         body: bodySchema,
         params: paramSchema,
@@ -51,21 +53,26 @@ export const updateAlertRoute = (router: IRouter, licenseState: LicenseState) =>
         tags: ['access:alerting-all'],
       },
     },
-    router.handleLegacyErrors(async function(
-      context: RequestHandlerContext,
-      req: KibanaRequest<TypeOf<typeof paramSchema>, any, TypeOf<typeof bodySchema>, any>,
-      res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
-      verifyApiAccess(licenseState);
-      const alertsClient = context.alerting.getAlertsClient();
-      const { id } = req.params;
-      const { name, actions, params, schedule, tags } = req.body;
-      return res.ok({
-        body: await alertsClient.update({
-          id,
-          data: { name, actions, params, schedule, tags },
-        }),
-      });
-    })
+    handleDisabledApiKeysError(
+      router.handleLegacyErrors(async function(
+        context: RequestHandlerContext,
+        req: KibanaRequest<TypeOf<typeof paramSchema>, unknown, TypeOf<typeof bodySchema>>,
+        res: KibanaResponseFactory
+      ): Promise<IKibanaResponse> {
+        verifyApiAccess(licenseState);
+        if (!context.alerting) {
+          return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
+        }
+        const alertsClient = context.alerting.getAlertsClient();
+        const { id } = req.params;
+        const { name, actions, params, schedule, tags, throttle } = req.body;
+        return res.ok({
+          body: await alertsClient.update({
+            id,
+            data: { name, actions, params, schedule, tags, throttle },
+          }),
+        });
+      })
+    )
   );
 };

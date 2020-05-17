@@ -56,7 +56,7 @@ export class SavedObjectLoader {
    * @param id
    * @returns {Promise<SavedObject>}
    */
-  async get(id: string) {
+  async get(id?: string) {
     // @ts-ignore
     const obj = new this.Class(id);
     return obj.init();

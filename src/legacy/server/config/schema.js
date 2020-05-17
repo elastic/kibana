@@ -133,8 +133,8 @@ export default () =>
           .keys({
             enabled: Joi.boolean().default(false),
             everyBytes: Joi.number()
-              // > 100KB
-              .greater(102399)
+              // > 1MB
+              .greater(1048576)
               // < 1GB
               .less(1073741825)
               // 10MB
@@ -195,6 +195,7 @@ export default () =>
       }),
       workers: Joi.number().min(1),
       profile: Joi.boolean().default(false),
+      validateSyntaxOfNodeModules: Joi.boolean().default(true),
     }).default(),
     status: Joi.object({
       allowAnonymous: Joi.boolean().default(false),
@@ -263,7 +264,7 @@ export default () =>
         .allow(''),
       emsFileApiUrl: Joi.string().default('https://vector.maps.elastic.co'),
       emsTileApiUrl: Joi.string().default('https://tiles.maps.elastic.co'),
-      emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.6'),
+      emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v7.8'),
       emsFontLibraryUrl: Joi.string().default(
         'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf'
       ),

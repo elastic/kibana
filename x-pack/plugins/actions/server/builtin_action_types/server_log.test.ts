@@ -7,8 +7,8 @@
 import { ActionType } from '../types';
 import { validateParams } from '../lib';
 import { Logger } from '../../../../../src/core/server';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { createActionTypeRegistry } from './index.test';
+import { actionsMock } from '../mocks';
 
 const ACTION_TYPE_ID = '.server-log';
 
@@ -63,24 +63,24 @@ describe('validateParams()', () => {
       validateParams(actionType, { message: 'x', level: 2 });
     }).toThrowErrorMatchingInlineSnapshot(`
 "error validating action params: [level]: types that failed validation:
-- [level.0]: expected value to equal [trace] but got [2]
-- [level.1]: expected value to equal [debug] but got [2]
-- [level.2]: expected value to equal [info] but got [2]
-- [level.3]: expected value to equal [warn] but got [2]
-- [level.4]: expected value to equal [error] but got [2]
-- [level.5]: expected value to equal [fatal] but got [2]"
+- [level.0]: expected value to equal [trace]
+- [level.1]: expected value to equal [debug]
+- [level.2]: expected value to equal [info]
+- [level.3]: expected value to equal [warn]
+- [level.4]: expected value to equal [error]
+- [level.5]: expected value to equal [fatal]"
 `);
 
     expect(() => {
       validateParams(actionType, { message: 'x', level: 'foo' });
     }).toThrowErrorMatchingInlineSnapshot(`
 "error validating action params: [level]: types that failed validation:
-- [level.0]: expected value to equal [trace] but got [foo]
-- [level.1]: expected value to equal [debug] but got [foo]
-- [level.2]: expected value to equal [info] but got [foo]
-- [level.3]: expected value to equal [warn] but got [foo]
-- [level.4]: expected value to equal [error] but got [foo]
-- [level.5]: expected value to equal [fatal] but got [foo]"
+- [level.0]: expected value to equal [trace]
+- [level.1]: expected value to equal [debug]
+- [level.2]: expected value to equal [info]
+- [level.3]: expected value to equal [warn]
+- [level.4]: expected value to equal [error]
+- [level.5]: expected value to equal [fatal]"
 `);
   });
 });
@@ -90,10 +90,7 @@ describe('execute()', () => {
     const actionId = 'some-id';
     await actionType.executor({
       actionId,
-      services: {
-        callCluster: async (path: string, opts: any) => {},
-        savedObjectsClient: savedObjectsClientMock.create(),
-      },
+      services: actionsMock.createServices(),
       params: { message: 'message text here', level: 'info' },
       config: {},
       secrets: {},

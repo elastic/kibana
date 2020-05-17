@@ -33,7 +33,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useEffect, useState, Fragment, useRef } from 'react';
+import React, { useEffect, useState, Fragment, useRef } from 'react';
 import { sortBy } from 'lodash';
 import { SavedQuery, SavedQueryService } from '../..';
 import { SavedQueryListItem } from './saved_query_list_item';
@@ -49,7 +49,7 @@ interface Props {
   onClearSavedQuery: () => void;
 }
 
-export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
+export function SavedQueryManagementComponent({
   showSaveQuery,
   loadedSavedQuery,
   onSave,
@@ -57,7 +57,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
   onLoad,
   onClearSavedQuery,
   savedQueryService,
-}) => {
+}: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [count, setTotalCount] = useState(0);
@@ -124,6 +124,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
     }
 
     await savedQueryService.deleteSavedQuery(savedQuery.id);
+    setActivePage(0);
   };
 
   const savedQueryPopoverButton = (
@@ -179,6 +180,7 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
         }}
         anchorPosition="downLeft"
         panelPaddingSize="none"
+        buffer={-8}
         ownFocus
       >
         <div
@@ -315,4 +317,4 @@ export const SavedQueryManagementComponent: FunctionComponent<Props> = ({
       </EuiPopover>
     </Fragment>
   );
-};
+}

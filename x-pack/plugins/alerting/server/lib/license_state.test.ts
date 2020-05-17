@@ -7,20 +7,19 @@
 import expect from '@kbn/expect';
 import { LicenseState } from './license_state';
 import { licensingMock } from '../../../../plugins/licensing/server/mocks';
-import { LICENSE_CHECK_STATE } from '../../../../plugins/licensing/server';
 
 describe('license_state', () => {
-  let getRawLicense: any;
+  const getRawLicense = jest.fn();
 
   beforeEach(() => {
-    getRawLicense = jest.fn();
+    jest.resetAllMocks();
   });
 
   describe('status is LICENSE_STATUS_INVALID', () => {
     beforeEach(() => {
       const license = licensingMock.createLicense({ license: { status: 'invalid' } });
       license.check = jest.fn(() => ({
-        state: LICENSE_CHECK_STATE.Invalid,
+        state: 'invalid',
       }));
       getRawLicense.mockReturnValue(license);
     });
@@ -37,7 +36,7 @@ describe('license_state', () => {
     beforeEach(() => {
       const license = licensingMock.createLicense({ license: { status: 'active' } });
       license.check = jest.fn(() => ({
-        state: LICENSE_CHECK_STATE.Valid,
+        state: 'valid',
       }));
       getRawLicense.mockReturnValue(license);
     });

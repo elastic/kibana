@@ -4,43 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
-import { INDEX_META_DATA_CREATED_BY } from '../../../../../legacy/plugins/ml/common/constants/file_datavisualizer';
+import { APICaller } from 'kibana/server';
+import { INDEX_META_DATA_CREATED_BY } from '../../../common/constants/file_datavisualizer';
+import {
+  ImportResponse,
+  ImportFailure,
+  Settings,
+  Mappings,
+  IngestPipelineWrapper,
+} from '../../../common/types/file_datavisualizer';
 import { InputData } from './file_data_visualizer';
 
-export interface Settings {
-  pipeline?: string;
-  index: string;
-  body: any[];
-  [key: string]: any;
-}
-
-export interface Mappings {
-  [key: string]: any;
-}
-
-export interface InjectPipeline {
-  id: string;
-  pipeline: any;
-}
-
-interface Failure {
-  item: number;
-  reason: string;
-  doc: any;
-}
-
-export function importDataProvider(context: RequestHandlerContext) {
-  const callAsCurrentUser = context.ml!.mlClient.callAsCurrentUser;
-
+export function importDataProvider(callAsCurrentUser: APICaller) {
   async function importData(
     id: string,
     index: string,
     settings: Settings,
     mappings: Mappings,
-    ingestPipeline: InjectPipeline,
+    ingestPipeline: IngestPipelineWrapper,
     data: InputData
-  ) {
+  ): Promise<ImportResponse> {
     let createdIndex;
     let createdPipelineId;
     const docCount = data.length;
@@ -68,7 +51,7 @@ export function importDataProvider(context: RequestHandlerContext) {
         createdPipelineId = pipelineId;
       }
 
-      let failures: Failure[] = [];
+      let failures: ImportFailure[] = [];
       if (data.length) {
         const resp = await indexData(index, createdPipelineId, data);
         if (resp.success === false) {
@@ -146,7 +129,7 @@ export function importDataProvider(context: RequestHandlerContext) {
         };
       }
     } catch (error) {
-      let failures: Failure[] = [];
+      let failures: ImportFailure[] = [];
       let ingestError = false;
       if (error.errors !== undefined && Array.isArray(error.items)) {
         // an expected error where some or all of the bulk request
@@ -171,7 +154,7 @@ export function importDataProvider(context: RequestHandlerContext) {
     return await callAsCurrentUser('ingest.putPipeline', { id, body: pipeline });
   }
 
-  function getFailures(items: any[], data: InputData): Failure[] {
+  function getFailures(items: any[], data: InputData): ImportFailure[] {
     const failures = [];
     for (let i = 0; i < items.length; i++) {
       const item = items[i];

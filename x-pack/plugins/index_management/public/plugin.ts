@@ -7,13 +7,10 @@ import { i18n } from '@kbn/i18n';
 
 import { CoreSetup } from '../../../../src/core/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
+import { ManagementSetup, ManagementSectionId } from '../../../../src/plugins/management/public';
 import { UIM_APP_NAME, PLUGIN } from '../common/constants';
 
-import { AppDependencies } from './application';
 import { httpService } from './application/services/http';
-import { breadcrumbService } from './application/services/breadcrumbs';
-import { documentationService } from './application/services/documentation';
 import { notificationService } from './application/services/notification';
 import { UiMetricService } from './application/services/ui_metric';
 
@@ -23,7 +20,7 @@ import { setUiMetricService } from './application/services/api';
 import { IndexMgmtMetricsType } from './types';
 import { ExtensionsService, ExtensionsSetup } from './services';
 
-export interface IndexMgmtSetup {
+export interface IndexManagementPluginSetup {
   extensionsService: ExtensionsSetup;
 }
 
@@ -43,42 +40,27 @@ export class IndexMgmtUIPlugin {
     setUiMetricService(this.uiMetricService);
   }
 
-  public setup(coreSetup: CoreSetup, plugins: PluginsDependencies): IndexMgmtSetup {
-    const { http, notifications, getStartServices } = coreSetup;
+  public setup(coreSetup: CoreSetup, plugins: PluginsDependencies): IndexManagementPluginSetup {
+    const { http, notifications } = coreSetup;
     const { usageCollection, management } = plugins;
 
     httpService.setup(http);
     notificationService.setup(notifications);
     this.uiMetricService.setup(usageCollection);
 
-    management.sections.getSection('elasticsearch')!.registerApp({
+    management.sections.getSection(ManagementSectionId.Data).registerApp({
       id: PLUGIN.id,
       title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
-      order: 1,
-      mount: async ({ element, setBreadcrumbs }) => {
-        const [core] = await getStartServices();
-        const { docLinks, fatalErrors } = core;
-
-        breadcrumbService.setup(setBreadcrumbs);
-        documentationService.setup(docLinks);
-
-        const appDependencies: AppDependencies = {
-          core: {
-            fatalErrors,
-          },
-          plugins: {
-            usageCollection,
-          },
-          services: {
-            uiMetricService: this.uiMetricService,
-            extensionsService: this.extensionsService,
-            httpService,
-            notificationService,
-          },
+      order: 0,
+      mount: async params => {
+        const { mountManagementSection } = await import('./application/mount_management_section');
+        const services = {
+          httpService,
+          notificationService,
+          uiMetricService: this.uiMetricService,
+          extensionsService: this.extensionsService,
         };
-
-        const { renderApp } = await import('./application');
-        return renderApp(element, { core, dependencies: appDependencies });
+        return mountManagementSection(coreSetup, usageCollection, services, params);
       },
     });
 

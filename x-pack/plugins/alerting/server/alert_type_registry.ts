@@ -40,7 +40,8 @@ export class AlertTypeRegistry {
         })
       );
     }
-    this.alertTypes.set(alertType.id, alertType);
+    alertType.actionVariables = normalizedActionVariables(alertType.actionVariables);
+    this.alertTypes.set(alertType.id, { ...alertType });
     this.taskManager.registerTaskDefinitions({
       [`alerting:${alertType.id}`]: {
         title: alertType.name,
@@ -71,6 +72,15 @@ export class AlertTypeRegistry {
       name: alertType.name,
       actionGroups: alertType.actionGroups,
       defaultActionGroupId: alertType.defaultActionGroupId,
+      actionVariables: alertType.actionVariables,
+      producer: alertType.producer,
     }));
   }
+}
+
+function normalizedActionVariables(actionVariables: AlertType['actionVariables']) {
+  return {
+    context: actionVariables?.context ?? [],
+    state: actionVariables?.state ?? [],
+  };
 }

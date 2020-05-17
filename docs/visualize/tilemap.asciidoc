@@ -1,129 +1,14 @@
-[[visualize-maps]]
-== Maps
-
-To tell a story and answer questions about your geographical data, you can create several types of interactive maps with Visualize.
-
-Visualize supports the following maps:
-
-* *Coordinate* &mdash; Display latitude and longitude coordinates that are associated to the specified bucket aggregation.
-
-* *Region* &mdash; Display colored boundary vector shapes using a gradient. Darker colors indicate larger values, and lighter colors indicate smaller values.
-
-* *Heat* &mdash; Display graphical representations of data where the individual values are represented by colors.
-
-NOTE: The maps in Visualize have been replaced with <<maps>>, which offers more functionality.
-
-[float]
-[[coordinate-map]]
-=== Coordinate map
-
-Use a coordinate map when your data set includes latitude and longitude values. For example, use a coordinate map to see the varying popularity of destination airports using the sample flight data.
-
-[role="screenshot"]
-image::images/visualize_coordinate_map_example.png[]
-
-[float]
-[[build-coordinate-map]]
-==== Build a coordinate map
-
-Configure the `kibana.yml` settings and add the aggregations.
-
-. Configure the following `kibana.yml` settings:
-
-* Set `xpack.maps.showMapVisualizationTypes` to `true`.
-
-* To use a tile service provider for coordinate maps other than https://www.elastic.co/elastic-maps-service[Elastic Maps Service], configure the <<tilemap-settings,tilemap settings>>.
-
-. To display your data on the coordinate map, use the following aggregations:
-
-* <<visualize-metric-aggregations,Metric>>
-
-* <<visualize-bucket-aggregations,Geohash bucket aggregation>>
-
-. Specify the geohash bucket aggregation options:
-
-* *Precision* slider &mdash; Determines the granularity of the results displayed on the map. To show the *Precision* slider, deselect *Change precision on map zoom*. For information on the area specified by each precision level, refer to {ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[geohash grid].
-+
-NOTE: Higher precisions increase memory usage for the browser that displays {kib} and the underlying
-{es} cluster.
-
-* *Place markers off grid (use {ref}/search-aggregations-metrics-geocentroid-aggregation.html[geocentroid])* &mdash; When you selected, the markers are
-placed in the center of all documents in the bucket, and a more accurate visualization is created. When deselected, the markers are placed in the center
-of the geohash grid cell.
-+
-NOTE: When you have multiple values in the geo_point, the coordinate map is unable to accurately calculate the geo_centroid.
-
-[float]
-[[navigate-coordinate-map]]
-==== Navigate the coordinate map
-
-To navigate the coordinate map, use the navigation options.
-
-* To move the map center, click and hold anywhere on the map and move the cursor.
-
-* To change the zoom level, click *Zoom In* or *Zoom out* image:images/viz-zoom.png[].
-
-* To automatically crop the map boundaries to the
-geohash buckets that have at least one result, click *Fit Data Bounds* image:images/viz-fit-bounds.png[].
-
-[float]
-[[region-map]]
-=== Region map
-
-Use region maps when you want to show statistical data on a geographic area, such as a county, country, province, or state. For example, use a region map if you want to see the average sales for each country with the sample eCommerce order data.
-
-[role="screenshot"]
-image::images/visualize_region_map_example.png[]
-
-[float]
-[[build-region-maps]]
-==== Build a region map
-
-Configure the `kibana.yml` settings and add the aggregations.
-
-. In `kibana.yml`, set `xpack.maps.showMapVisualizationTypes` to `true`.
-
-. To display your data on the region map, use the following aggregations:
-
-* <<visualize-metric-aggregations,Metric>>
-* <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
-* <<visualize-bucket-aggregations,Terms bucket aggregation>>
-
-[float]
-[[navigate-region-map]]
-==== Navigate the region map
-
-To navigate the region map, use the navigation options.
-
-* To change the zoom level, click *Zoom In* or *Zoom out* image:images/viz-zoom.png[].
-
-* To automatically crop the map boundaries, click *Fit Data Bounds* image:images/viz-fit-bounds.png[].
-
-[float]
 [[heat-map]]
-=== Heat map
+== Heat map
 
-Use heat maps when your data set includes categorical data. For example, use a heat map to see the flights of origin countries compared to destination countries using the sample flight data.
+Display graphical representations of data where the individual values are represented by colors. Use heat maps when your data set includes categorical data. For example, use a heat map to see the flights of origin countries compared to destination countries using the sample flight data.
 
 [role="screenshot"]
 image::images/visualize_heat_map_example.png[]
 
 [float]
-[[build-heat-map]]
-==== Build a heat map
-
-To display your data on the heat map, use the supported aggregations.
-
-Heat maps support the following aggregations:
-
-* <<visualize-metric-aggregations,Metric>>
-* <<visualize-parent-pipeline-aggregations,Parent pipeline>>
-* <<visualize-sibling-pipeline-aggregations,Sibling pipeline>>
-* <<visualize-bucket-aggregations,Bucket>>
-
-[float]
 [[navigate-heatmap]]
-==== Change the color ranges
+=== Change the color ranges
 
 When only one color displays on the heat map, you might need to change the color ranges.
 

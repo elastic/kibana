@@ -23,6 +23,32 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
       await testSubjects.existOrFail(`mlInfluencerFieldName ${influencerField}`);
     },
 
+    async getInfluencerFieldLabels(influencerField: string): Promise<string[]> {
+      const influencerFieldLabelElements = await testSubjects.findAll(
+        `mlInfluencerEntry field-${influencerField} > mlInfluencerEntryFieldLabel`
+      );
+      const influencerFieldLabels = await Promise.all(
+        influencerFieldLabelElements.map(async elmnt => await elmnt.getVisibleText())
+      );
+      return influencerFieldLabels;
+    },
+
+    async assertInfluencerListContainsLabel(influencerField: string, label: string) {
+      const influencerFieldLabels = await this.getInfluencerFieldLabels(influencerField);
+      expect(influencerFieldLabels).to.contain(
+        label,
+        `Expected influencer list for '${influencerField}' to contain label '${label}' (got '${influencerFieldLabels}')`
+      );
+    },
+
+    async assertInfluencerFieldListLength(influencerField: string, expectedLength: number) {
+      const influencerFieldLabels = await this.getInfluencerFieldLabels(influencerField);
+      expect(influencerFieldLabels.length).to.eql(
+        expectedLength,
+        `Expected influencer list for '${influencerField}' to have length '${expectedLength}' (got '${influencerFieldLabels.length}')`
+      );
+    },
+
     async assertInfluencerFieldListNotEmpty(influencerField: string) {
       const influencerFieldEntries = await testSubjects.findAll(
         `mlInfluencerEntry field-${influencerField}`

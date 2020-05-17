@@ -28,8 +28,6 @@ export default function({ getService, getPageObjects }) {
 
   // FLAKY: https://github.com/elastic/kibana/issues/45089
   describe('gauge chart', function indexPatternCreation() {
-    this.tags('smoke');
-
     async function initGaugeVis() {
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();

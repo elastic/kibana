@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../legacy/plugins/siem/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/siem/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -18,12 +18,14 @@ import {
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
-} from './utils';
+  getSimpleMlRule,
+  getSimpleMlRuleOutput,
+} from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('create_rules', () => {
     describe('validation errors', () => {
@@ -63,6 +65,20 @@ export default ({ getService }: FtrProviderContext) => {
         expect(bodyToCompare).to.eql(getSimpleRuleOutput());
       });
 
+      it('should create a single rule without an input index', async () => {
+        const { index, ...payload } = getSimpleRule();
+        const { index: _index, ...expected } = getSimpleRuleOutput();
+
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(payload)
+          .expect(200);
+
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare).to.eql(expected);
+      });
+
       it('should create a single rule without a rule_id', async () => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
@@ -72,6 +88,17 @@ export default ({ getService }: FtrProviderContext) => {
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
+      });
+
+      it('should create a single Machine Learning rule', async () => {
+        const { body } = await supertest
+          .post(DETECTION_ENGINE_RULES_URL)
+          .set('kbn-xsrf', 'true')
+          .send(getSimpleMlRule())
+          .expect(200);
+
+        const bodyToCompare = removeServerGeneratedProperties(body);
+        expect(bodyToCompare).to.eql(getSimpleMlRuleOutput());
       });
 
       it('should cause a 409 conflict if we attempt to create the same rule_id twice', async () => {

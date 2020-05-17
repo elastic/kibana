@@ -6,6 +6,7 @@
 
 import { EMPTY, fromEvent, NEVER, Observable, throwError, timer } from 'rxjs';
 import { mergeMap, expand, takeUntil } from 'rxjs/operators';
+import { AbortError } from '../../../../../src/plugins/data/common';
 import {
   IKibanaSearchResponse,
   ISearchContext,
@@ -13,7 +14,7 @@ import {
   SYNC_SEARCH_STRATEGY,
   TSearchStrategyProvider,
 } from '../../../../../src/plugins/data/public';
-import { IAsyncSearchRequest, IAsyncSearchOptions } from './types';
+import { IAsyncSearchRequest, IAsyncSearchOptions, IAsyncSearchResponse } from './types';
 
 export const ASYNC_SEARCH_STRATEGY = 'ASYNC_SEARCH_STRATEGY';
 
@@ -45,18 +46,20 @@ export const asyncSearchStrategyProvider: TSearchStrategyProvider<typeof ASYNC_S
               if (id !== undefined) {
                 context.core.http.delete(`/internal/search/${request.serverStrategy}/${id}`);
               }
-
-              const error = new Error('Aborted');
-              error.name = 'AbortError';
-              return throwError(error);
+              return throwError(new AbortError());
             })
           )
         : NEVER;
 
       return search(request, options).pipe(
-        expand(response => {
+        expand((response: IAsyncSearchResponse) => {
+          // If the response indicates of an error, stop polling and complete the observable
+          if (!response || (response.is_partial && !response.is_running)) {
+            return throwError(new AbortError());
+          }
+
           // If the response indicates it is complete, stop polling and complete the observable
-          if ((response.loaded ?? 0) >= (response.total ?? 0)) return EMPTY;
+          if (!response.is_running) return EMPTY;
 
           id = response.id;
 

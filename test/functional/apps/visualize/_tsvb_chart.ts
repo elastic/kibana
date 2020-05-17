@@ -25,11 +25,14 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const inspector = getService('inspector');
+  const security = getService('security');
   const PageObjects = getPageObjects(['visualize', 'visualBuilder', 'timePicker', 'visChart']);
 
-  describe('visual builder', function describeIndexTests() {
-    this.tags('smoke');
+  // FLAKY: https://github.com/elastic/kibana/issues/43150
+  describe.skip('visual builder', function describeIndexTests() {
+    this.tags('includeFirefox');
     beforeEach(async () => {
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisualBuilder();
       await PageObjects.visualBuilder.checkVisualBuilderIsPresent();
@@ -111,8 +114,10 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
         await PageObjects.visualBuilder.checkMetricTabIsPresent();
+        await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
       });
       after(async () => {
+        await security.testUser.restoreDefaults();
         await esArchiver.unload('kibana_sample_data_flights');
       });
 

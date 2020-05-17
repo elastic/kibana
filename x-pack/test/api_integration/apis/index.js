@@ -23,10 +23,11 @@ export default function({ loadTestFile }) {
     loadTestFile(require.resolve('./management'));
     loadTestFile(require.resolve('./uptime'));
     loadTestFile(require.resolve('./maps'));
-    loadTestFile(require.resolve('./apm'));
     loadTestFile(require.resolve('./siem'));
     loadTestFile(require.resolve('./short_urls'));
     loadTestFile(require.resolve('./lens'));
+    loadTestFile(require.resolve('./fleet'));
+    loadTestFile(require.resolve('./ingest'));
     loadTestFile(require.resolve('./endpoint'));
     loadTestFile(require.resolve('./ml'));
   });

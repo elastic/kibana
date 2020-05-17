@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import { FormData } from '../types';
 import { useFormContext } from '../form_context';
@@ -28,12 +28,12 @@ interface Props {
 }
 
 export const FormDataProvider = React.memo(({ children, pathsToWatch }: Props) => {
-  const [formData, setFormData] = useState<FormData>({});
-  const previousRawData = useRef<FormData>({});
   const form = useFormContext();
+  const previousRawData = useRef<FormData>(form.__getFormData$().value);
+  const [formData, setFormData] = useState<FormData>(previousRawData.current);
 
-  useEffect(() => {
-    const subscription = form.subscribe(({ data: { raw } }) => {
+  const onFormData = useCallback(
+    ({ data: { raw } }) => {
       // To avoid re-rendering the children for updates on the form data
       // that we are **not** interested in, we can specify one or multiple path(s)
       // to watch.
@@ -41,6 +41,7 @@ export const FormDataProvider = React.memo(({ children, pathsToWatch }: Props) =
         const valuesToWatchArray = Array.isArray(pathsToWatch)
           ? (pathsToWatch as string[])
           : ([pathsToWatch] as string[]);
+
         if (valuesToWatchArray.some(value => previousRawData.current[value] !== raw[value])) {
           previousRawData.current = raw;
           setFormData(raw);
@@ -48,10 +49,14 @@ export const FormDataProvider = React.memo(({ children, pathsToWatch }: Props) =
       } else {
         setFormData(raw);
       }
-    });
+    },
+    [pathsToWatch]
+  );
 
+  useEffect(() => {
+    const subscription = form.subscribe(onFormData);
     return subscription.unsubscribe;
-  }, [form, pathsToWatch]);
+  }, [form.subscribe, onFormData]);
 
   return children(formData);
 });

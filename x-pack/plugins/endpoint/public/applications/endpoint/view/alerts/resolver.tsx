@@ -10,17 +10,17 @@ import { Provider } from 'react-redux';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { Resolver } from '../../../../embeddables/resolver/view';
 import { EndpointPluginServices } from '../../../../plugin';
-import { LegacyEndpointEvent } from '../../../../../common/types';
+import { ResolverEvent } from '../../../../../common/types';
 import { storeFactory } from '../../../../embeddables/resolver/store';
 
 export const AlertDetailResolver = styled(
   React.memo(
-    ({ className, selectedEvent }: { className?: string; selectedEvent?: LegacyEndpointEvent }) => {
+    ({ className, selectedEvent }: { className?: string; selectedEvent?: ResolverEvent }) => {
       const context = useKibana<EndpointPluginServices>();
       const { store } = storeFactory(context);
 
       return (
-        <div className={className} data-test-subj="alertResolver" data-testid="alertResolver">
+        <div className={className} data-test-subj="alertResolver">
           <Provider store={store}>
             <Resolver selectedEvent={selectedEvent} />
           </Provider>
@@ -33,4 +33,6 @@ export const AlertDetailResolver = styled(
   width: 100%;
   display: flex;
   flex-grow: 1;
+  /* gross demo hack */
+  min-height: calc(100vh - 505px);
 `;

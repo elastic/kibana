@@ -167,7 +167,7 @@ logging:
     - context: plugins
       appenders: [custom]
       level: warn
-    - context: plugins.pid
+    - context: plugins.myPlugin
       level: info
     - context: server
       level: fatal
@@ -180,14 +180,14 @@ logging:
 
 Here is what we get with the config above:
 
-| Context       | Appenders                | Level |
-| ------------- |:------------------------:| -----:|
-| root          | console, file            | error |
-| plugins       | custom                   | warn  |
-| plugins.pid   | custom                   | info  |
-| server        | console, file            | fatal |
-| optimize      | console                  | error |
-| telemetry     | json-file-appender       | all   |
+| Context          | Appenders                | Level |
+| ---------------- |:------------------------:| -----:|
+| root             | console, file            | error |
+| plugins          | custom                   | warn  |
+| plugins.myPlugin | custom                   | info  |
+| server           | console, file            | fatal |
+| optimize         | console                  | error |
+| telemetry        | json-file-appender       | all   |
 
 
 The `root` logger has a dedicated configuration node since this context is special and should always exist. By 
@@ -259,7 +259,7 @@ define a custom one.
 ```yaml
 logging:
   loggers:
-    - context: your-plugin
+    - context: plugins.myPlugin
       appenders: [console]
 ```
 Logs in a *file* if given file path. You should define a custom appender with `kind: file` 
@@ -273,7 +273,7 @@ logging:
       layout:
         kind: pattern
   loggers:
-    - context: your-plugin
+    - context: plugins.myPlugin
       appenders: [file]
 ``` 
 #### logging.json
@@ -282,10 +282,10 @@ the output format with [layouts](#layouts).
 
 #### logging.quiet
 Suppresses all logging output other than error messages. With new logging, config can be achieved 
-with adjusting minimum required [logging level](#log-level)
+with adjusting minimum required [logging level](#log-level).
 ```yaml
   loggers:
-    - context: my-plugin
+    - context: plugins.myPlugin
       appenders: [console]
       level: error
 # or for all output

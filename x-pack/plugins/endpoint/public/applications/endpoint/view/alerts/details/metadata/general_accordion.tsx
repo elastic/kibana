@@ -40,7 +40,7 @@ export const GeneralAccordion = memo(({ alertData }: { alertData: Immutable<Aler
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.malwareScore', {
           defaultMessage: 'MalwareScore',
         }),
-        description: alertData.file.malware_classifier.score,
+        description: alertData.file.malware_classification.score,
       },
       {
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.fileName', {
@@ -61,6 +61,7 @@ export const GeneralAccordion = memo(({ alertData }: { alertData: Immutable<Aler
       )}
       paddingSize="l"
       initialIsOpen={true}
+      data-test-subj="alertDetailsAlertAccordion"
     >
       <EuiDescriptionList type="column" listItems={columns} />
     </EuiAccordion>

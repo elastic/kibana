@@ -27,7 +27,6 @@ export interface LayoutSelectorDictionary {
   renderComplete: string;
   itemsCountAttribute: string;
   timefilterDurationAttribute: string;
-  toastHeader: string;
 }
 
 export interface PdfImageSize {
@@ -40,7 +39,6 @@ export const getDefaultLayoutSelectors = (): LayoutSelectorDictionary => ({
   renderComplete: '[data-shared-item]',
   itemsCountAttribute: 'data-shared-items-count',
   timefilterDurationAttribute: 'data-shared-timefilter-duration',
-  toastHeader: '[data-test-subj="euiToastHeader"]',
 });
 
 export abstract class Layout {
@@ -56,7 +54,7 @@ export abstract class Layout {
 
   public abstract getPdfPageSize(pageSizeParams: PageSizeParams): string | Size;
 
-  public abstract getViewport(itemsCount: number): ViewZoomWidthHeight;
+  public abstract getViewport(itemsCount: number): ViewZoomWidthHeight | null;
 
   public abstract getBrowserZoom(): number;
 
@@ -75,9 +73,11 @@ export interface LayoutParams {
   dimensions: Size;
 }
 
-export type LayoutInstance = Layout & {
+interface LayoutSelectors {
   // Fields that are not part of Layout: the instances
   // independently implement these fields on their own
   selectors: LayoutSelectorDictionary;
   positionElements?: (browser: HeadlessChromiumDriver, logger: LevelLogger) => Promise<void>;
-};
+}
+
+export type LayoutInstance = Layout & LayoutSelectors & Size;

@@ -27,7 +27,7 @@ export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const queryBar = getService('queryBar');
 
-  let kibanaBaseUrl;
+  let kibanaLegacyBaseUrl;
 
   const urlQuery =
     `` +
@@ -56,7 +56,8 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.dashboard.preserveCrossAppState();
 
       const currentUrl = await browser.getCurrentUrl();
-      kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
+      kibanaLegacyBaseUrl =
+        currentUrl.substring(0, currentUrl.indexOf('/app/dashboards')) + '/app/kibana';
     });
 
     describe('5.6 urls', () => {
@@ -79,7 +80,7 @@ export default function({ getService, getPageObjects }) {
           `title:'New+Dashboard',` +
           `uiState:(),` +
           `viewMode:edit)`;
-        const url = `${kibanaBaseUrl}#/dashboard?${url56}`;
+        const url = `${kibanaLegacyBaseUrl}#/dashboard?${url56}`;
         log.debug(`Navigating to ${url}`);
         await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -94,7 +95,7 @@ export default function({ getService, getPageObjects }) {
 
     describe('6.0 urls', () => {
       it('loads an unsaved dashboard', async function() {
-        const url = `${kibanaBaseUrl}#/dashboard?${urlQuery}`;
+        const url = `${kibanaLegacyBaseUrl}#/dashboard?${urlQuery}`;
         log.debug(`Navigating to ${url}`);
         await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -113,7 +114,8 @@ export default function({ getService, getPageObjects }) {
         });
 
         const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
-        const url = `${kibanaBaseUrl}#/dashboard/${id}`;
+        const url = `${kibanaLegacyBaseUrl}#/dashboard/${id}`;
+        log.debug(`Navigating to ${url}`);
         await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -128,11 +130,33 @@ export default function({ getService, getPageObjects }) {
       it('uiState in url takes precedence over saved dashboard state', async function() {
         const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
         const updatedQuery = urlQuery.replace(/F9D9F9/g, '000000');
-        const url = `${kibanaBaseUrl}#/dashboard/${id}?${updatedQuery}`;
+        const url = `${kibanaLegacyBaseUrl}#/dashboard/${id}?${updatedQuery}`;
+        log.debug(`Navigating to ${url}`);
 
         await browser.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
+        await dashboardExpect.selectedLegendColorCount('#000000', 5);
+      });
+
+      it('back button works for old dashboards after state migrations', async () => {
+        await PageObjects.dashboard.preserveCrossAppState();
+        const oldId = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboardExpect.selectedLegendColorCount('#000000', 5);
+
+        const url = `${kibanaLegacyBaseUrl}#/dashboard?${urlQuery}`;
+        log.debug(`Navigating to ${url}`);
+        await browser.get(url);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
+        await browser.goBack();
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const newId = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+        expect(newId).to.be.equal(oldId);
+        await PageObjects.dashboard.waitForRenderComplete();
         await dashboardExpect.selectedLegendColorCount('#000000', 5);
       });
     });

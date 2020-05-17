@@ -115,7 +115,7 @@ class TutorialDirectoryUi extends React.Component {
     getServices().chrome.setBreadcrumbs([
       {
         text: homeTitle,
-        href: '#/home',
+        href: '#/',
       },
       { text: addDataTitle },
     ]);
@@ -138,7 +138,7 @@ class TutorialDirectoryUi extends React.Component {
         icon: icon,
         name: tutorialConfig.name,
         description: tutorialConfig.shortDescription,
-        url: this.props.addBasePath(`#/home/tutorial/${tutorialConfig.id}`),
+        url: this.props.addBasePath(`#/tutorial/${tutorialConfig.id}`),
         elasticCloud: tutorialConfig.elasticCloud,
         // Beta label is skipped on the tutorial overview page for now. Too many beta labels.
         //isBeta: tutorialConfig.isBeta,
@@ -155,7 +155,7 @@ class TutorialDirectoryUi extends React.Component {
         id: 'home.tutorial.card.sampleDataDescription',
         defaultMessage: 'Get started exploring Kibana with these "one click" data sets.',
       }),
-      url: this.props.addBasePath('#/home/tutorial_directory/sampleData'),
+      url: this.props.addBasePath('#/tutorial_directory/sampleData'),
       elasticCloud: true,
       onClick: this.onSelectedTabChanged.bind(null, SAMPLE_DATA_TAB_ID),
     });
@@ -233,10 +233,7 @@ class TutorialDirectoryUi extends React.Component {
         <EuiPageBody>
           <EuiTitle size="l">
             <h1>
-              <FormattedMessage
-                id="home.tutorial.addDataToKibanaTitle"
-                defaultMessage="Add Data to Kibana"
-              />
+              <FormattedMessage id="home.tutorial.addDataToKibanaTitle" defaultMessage="Add data" />
             </h1>
           </EuiTitle>
 

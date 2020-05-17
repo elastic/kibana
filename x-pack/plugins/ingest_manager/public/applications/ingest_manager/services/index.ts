@@ -4,4 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { agentConfigRouteService } from '../../../../common';
+export { getFlattenedObject } from '../../../../../../../src/core/public';
+
+export {
+  agentConfigRouteService,
+  datasourceRouteService,
+  dataStreamRouteService,
+  fleetSetupRouteService,
+  agentRouteService,
+  enrollmentAPIKeyRouteService,
+  epmRouteService,
+  setupRouteService,
+  outputRoutesService,
+  settingsRoutesService,
+  appRoutesService,
+  packageToConfigDatasourceInputs,
+  storedDatasourceToAgentDatasource,
+  AgentStatusKueryHelper,
+} from '../../../../common';

@@ -14,7 +14,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const config = getService('config');
 
-  describe('spaces feature controls', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/57413
+  describe.skip('spaces feature controls', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
     });
@@ -42,7 +43,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map(link => link.text);
-        expect(navLinks).to.contain('Management');
+        expect(navLinks).to.contain('Stack Management');
       });
 
       it(`allows settings to be changed`, async () => {

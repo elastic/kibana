@@ -26,39 +26,40 @@ import { PluginInitializerContext } from '../../../core/public';
  */
 
 import {
-  FILTERS,
   buildEmptyFilter,
-  buildPhrasesFilter,
   buildExistsFilter,
   buildPhraseFilter,
+  buildPhrasesFilter,
   buildQueryFilter,
   buildRangeFilter,
-  toggleFilterNegated,
   disableFilter,
+  FILTERS,
   FilterStateStore,
+  getDisplayValueFromFilter,
   getPhraseFilterField,
   getPhraseFilterValue,
-  isPhraseFilter,
   isExistsFilter,
-  isPhrasesFilter,
-  isRangeFilter,
+  isFilterPinned,
   isMatchAllFilter,
   isMissingFilter,
+  isPhraseFilter,
+  isPhrasesFilter,
   isQueryStringFilter,
-  getDisplayValueFromFilter,
-  isFilterPinned,
+  isRangeFilter,
+  toggleFilterNegated,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
 } from '../common';
 
 import { FilterLabel } from './ui/filter_bar';
 
 import {
-  compareFilters,
-  COMPARE_ALL_OPTIONS,
   generateFilters,
   onlyDisabledFiltersChanged,
   changeTimeFilter,
   mapAndFlattenFilters,
   extractTimeFilter,
+  convertRangeFilterToTimeRangeString,
 } from './query';
 
 // Filter helpers namespace:
@@ -96,6 +97,7 @@ export const esFilters = {
   onlyDisabledFiltersChanged,
 
   changeTimeFilter,
+  convertRangeFilterToTimeRangeString,
   mapAndFlattenFilters,
   extractTimeFilter,
 };
@@ -204,11 +206,13 @@ export const fieldFormats = {
 
 export {
   IFieldFormat,
+  FieldFormatInstanceType,
   IFieldFormatsRegistry,
   FieldFormatsContentType,
   FieldFormatsGetConfigFn,
   FieldFormatConfig,
   FieldFormatId,
+  FieldFormat,
 } from '../common';
 
 /*
@@ -226,7 +230,6 @@ import {
   validateIndexPattern,
   getFromSavedObject,
   flattenHitWrapper,
-  getRoutes,
   formatHitProvider,
 } from './index_patterns';
 
@@ -242,19 +245,18 @@ export const indexPatterns = {
   validate: validateIndexPattern,
   getFromSavedObject,
   flattenHitWrapper,
-  // TODO: exported only in stub_index_pattern test. Move into data plugin and remove export.
-  getRoutes,
   formatHitProvider,
 };
 
 export {
   IndexPatternsContract,
   IndexPattern,
+  IIndexPatternFieldList,
   Field as IndexPatternField,
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
   // TODO: exported only in stub_index_pattern test. Move into data plugin and remove export.
-  FieldList as IndexPatternFieldList,
+  getIndexPatternFieldListCreator,
 } from './index_patterns';
 
 export {
@@ -283,8 +285,121 @@ export {
  * Search:
  */
 
-export { IRequestTypesMap, IResponseTypesMap } from './search';
-export * from './search';
+import {
+  // aggs
+  CidrMask,
+  intervalOptions,
+  isDateHistogramBucketAggConfig,
+  isNumberType,
+  isStringType,
+  isType,
+  parentPipelineType,
+  propFilter,
+  siblingPipelineType,
+  termsAggFilter,
+  // expressions utils
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  // tabify
+  tabifyAggResponse,
+  tabifyGetColumns,
+} from './search';
+
+import {
+  dateHistogramInterval,
+  InvalidEsCalendarIntervalError,
+  InvalidEsIntervalFormatError,
+  isValidEsInterval,
+  isValidInterval,
+  parseEsInterval,
+  parseInterval,
+  toAbsoluteDates,
+} from '../common';
+
+export { ParsedInterval } from '../common';
+
+export {
+  // aggs
+  AggGroupLabels,
+  AggGroupName,
+  AggGroupNames,
+  AggParam,
+  AggParamOption,
+  AggParamType,
+  AggConfigOptions,
+  BUCKET_TYPES,
+  IAggConfig,
+  IAggConfigs,
+  IAggType,
+  IFieldParamType,
+  IMetricAggType,
+  METRIC_TYPES,
+  OptionedParamType,
+  OptionedValueProp,
+  // search
+  ES_SEARCH_STRATEGY,
+  SYNC_SEARCH_STRATEGY,
+  getEsPreference,
+  getSearchErrorType,
+  ISearchContext,
+  TSearchStrategyProvider,
+  ISearchStrategy,
+  ISearch,
+  ISearchOptions,
+  IRequestTypesMap,
+  IResponseTypesMap,
+  ISearchGeneric,
+  IEsSearchResponse,
+  IEsSearchRequest,
+  ISyncSearchRequest,
+  IKibanaSearchResponse,
+  IKibanaSearchRequest,
+  SearchRequest,
+  SearchResponse,
+  SearchError,
+  ISearchSource,
+  parseSearchSourceJSON,
+  injectSearchSourceReferences,
+  extractSearchSourceReferences,
+  SearchSourceFields,
+  EsQuerySortValue,
+  SortDirection,
+  FetchOptions,
+  // tabify
+  TabbedAggColumn,
+  TabbedAggRow,
+  TabbedTable,
+  SearchInterceptor,
+  RequestTimeoutError,
+} from './search';
+
+// Search namespace
+export const search = {
+  aggs: {
+    CidrMask,
+    dateHistogramInterval,
+    intervalOptions,
+    InvalidEsCalendarIntervalError,
+    InvalidEsIntervalFormatError,
+    isDateHistogramBucketAggConfig, // TODO: remove in build_pipeline refactor
+    isNumberType,
+    isStringType,
+    isType,
+    isValidEsInterval,
+    isValidInterval,
+    parentPipelineType,
+    parseEsInterval,
+    parseInterval,
+    propFilter,
+    siblingPipelineType,
+    termsAggFilter,
+    toAbsoluteDates,
+  },
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  tabifyAggResponse,
+  tabifyGetColumns,
+};
 
 /*
  * UI components
@@ -312,13 +427,12 @@ export {
   QueryState,
   getTime,
   getQueryLog,
+  getDefaultQuery,
   FilterManager,
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,
-  SavedQueryAttributes,
   InputTimeRange,
-  TimefilterSetup,
   TimeHistory,
   TimefilterContract,
   TimeHistoryContract,
@@ -328,8 +442,6 @@ export {
   // kbn field types
   castEsToKbnFieldTypeName,
   getKbnTypeNames,
-  // utils
-  parseInterval,
 } from '../common';
 
 /*

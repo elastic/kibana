@@ -6,10 +6,7 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import {
-  Job,
-  Datafeed,
-} from '../../../../..//legacy/plugins/ml/public/application/jobs/new_job/common/job_creator/configs';
+import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
 const JOB_CONFIG: Job = {
   job_id: `fq_single_1_smv`,
@@ -32,7 +29,7 @@ const JOB_CONFIG: Job = {
 
 const DATAFEED_CONFIG: Datafeed = {
   datafeed_id: 'datafeed-fq_single_1_smv',
-  indices: ['farequote'],
+  indices: ['ft_farequote'],
   job_id: 'fq_single_1_smv',
   query: { bool: { must: [{ match_all: {} }] } },
 };
@@ -43,15 +40,17 @@ export default function({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('single metric viewer', function() {
-    this.tags(['smoke', 'mlqa']);
+    this.tags(['mlqa']);
     before(async () => {
-      await esArchiver.load('ml/farequote');
+      await esArchiver.loadIfNeeded('ml/farequote');
+      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.setKibanaTimeZoneToUTC();
+
       await ml.api.createAndRunAnomalyDetectionLookbackJob(JOB_CONFIG, DATAFEED_CONFIG);
       await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
-      await esArchiver.unload('ml/farequote');
       await ml.api.cleanMlIndices();
     });
 

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CallAPIOptions, IScopedClusterClient } from 'src/core/server';
+import { CallAPIOptions, IScopedClusterClient } from 'kibana/server';
 import _ from 'lodash';
-import { ML_JOB_FIELD_TYPES } from '../../../../../legacy/plugins/ml/common/constants/field_types';
-import { getSafeAggregationName } from '../../../../../legacy/plugins/ml/common/util/job_utils';
+import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
+import { getSafeAggregationName } from '../../../common/util/job_utils';
 import {
   buildBaseFilterCriteria,
   buildSamplerAggregation,
@@ -342,8 +342,8 @@ export class DataVisualizer {
     aggregatableFields: string[],
     samplerShardSize: number,
     timeFieldName: string,
-    earliestMs: number,
-    latestMs: number
+    earliestMs?: number,
+    latestMs?: number
   ) {
     const index = indexPatternTitle;
     const size = 0;

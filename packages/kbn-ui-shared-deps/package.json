@@ -1,37 +1,42 @@
 {
   "name": "@kbn/ui-shared-deps",
   "version": "1.0.0",
-  "license": "Apache-2.0",
   "private": true,
+  "license": "Apache-2.0",
   "scripts": {
     "build": "node scripts/build",
     "kbn:bootstrap": "node scripts/build --dev",
     "kbn:watch": "node scripts/build --watch"
   },
-  "devDependencies": {
-    "@elastic/charts": "^17.1.1",
-    "abortcontroller-polyfill": "^1.4.0",
-    "@elastic/eui": "19.0.0",
-    "@kbn/babel-preset": "1.0.0",
-    "@kbn/dev-utils": "1.0.0",
+  "dependencies": {
+    "@elastic/charts": "19.2.0",
+    "@elastic/eui": "22.3.1",
     "@kbn/i18n": "1.0.0",
-    "@yarnpkg/lockfile": "^1.1.0",
+    "abortcontroller-polyfill": "^1.4.0",
     "angular": "^1.7.9",
-    "core-js": "^3.2.1",
-    "css-loader": "^3.4.2",
+    "compression-webpack-plugin": "^3.1.0",
+    "core-js": "^3.6.4",
     "custom-event-polyfill": "^0.3.0",
-    "del": "^5.1.0",
-    "jquery": "^3.4.1",
-    "mini-css-extract-plugin": "0.8.0",
+    "elasticsearch-browser": "^16.7.0",
+    "jquery": "^3.5.0",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.27",
+    "monaco-editor": "~0.17.0",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "react-intl": "^2.8.0",
-    "read-pkg": "^5.2.0",
+    "react-router": "^5.1.2",
+    "react-router-dom": "^5.1.2",
     "regenerator-runtime": "^0.13.3",
+    "rxjs": "^6.5.3",
     "symbol-observable": "^1.2.0",
-    "webpack": "^4.41.5",
     "whatwg-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@kbn/babel-preset": "1.0.0",
+    "@kbn/dev-utils": "1.0.0",
+    "css-loader": "^3.4.2",
+    "del": "^5.1.0",
+    "webpack": "^4.41.5"
   }
 }

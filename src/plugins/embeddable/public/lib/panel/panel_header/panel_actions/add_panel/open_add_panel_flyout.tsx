@@ -18,15 +18,15 @@
  */
 import React from 'react';
 import { NotificationsStart, OverlayStart } from 'src/core/public';
+import { EmbeddableStart } from '../../../../../plugin';
 import { toMountPoint } from '../../../../../../../kibana_react/public';
 import { IContainer } from '../../../../containers';
 import { AddPanelFlyout } from './add_panel_flyout';
-import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../../../types';
 
 export async function openAddPanelFlyout(options: {
   embeddable: IContainer;
-  getFactory: GetEmbeddableFactory;
-  getAllFactories: GetEmbeddableFactories;
+  getFactory: EmbeddableStart['getEmbeddableFactory'];
+  getAllFactories: EmbeddableStart['getEmbeddableFactories'];
   overlays: OverlayStart;
   notifications: NotificationsStart;
   SavedObjectFinder: React.ComponentType<any>;
@@ -55,7 +55,8 @@ export async function openAddPanelFlyout(options: {
       />
     ),
     {
-      'data-test-subj': 'addPanelFlyout',
+      'data-test-subj': 'dashboardAddPanel',
+      ownFocus: true,
     }
   );
 }

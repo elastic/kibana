@@ -5,12 +5,18 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
+import { TypeOf } from '@kbn/config-schema';
+import { alertingIndexGetQuerySchema } from './schema/alert_index';
+import { indexPatternGetParamsSchema } from './schema/index_pattern';
+import { Datasource, NewDatasource } from '../../ingest_manager/common';
 
 /**
  * A deep readonly type that will make all children of a given object readonly recursively
  */
 export type Immutable<T> = T extends undefined | null | boolean | string | number
   ? T
+  : unknown extends T
+  ? unknown
   : T extends Array<infer U>
   ? ImmutableArray<U>
   : T extends Map<infer K, infer V>
@@ -20,34 +26,43 @@ export type Immutable<T> = T extends undefined | null | boolean | string | numbe
   : ImmutableObject<T>;
 
 export type ImmutableArray<T> = ReadonlyArray<Immutable<T>>;
-export type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
-export type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
-export type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
+type ImmutableMap<K, V> = ReadonlyMap<Immutable<K>, Immutable<V>>;
+type ImmutableSet<T> = ReadonlySet<Immutable<T>>;
+type ImmutableObject<T> = { readonly [K in keyof T]: Immutable<T[K]> };
 
-export enum Direction {
-  asc = 'asc',
-  desc = 'desc',
+/**
+ * Values for the Alert APIs 'order' and 'direction' parameters.
+ */
+export type AlertAPIOrdering = 'asc' | 'desc';
+
+export interface ResolverNodeStats {
+  totalEvents: number;
+  totalAlerts: number;
 }
 
-export class EndpointAppConstants {
-  static BASE_API_URL = '/api/endpoint';
-  static ALERT_INDEX_NAME = 'my-index';
-  static ENDPOINT_INDEX_NAME = 'endpoint-agent*';
-  static EVENT_INDEX_NAME = 'endpoint-events-*';
-  static DEFAULT_TOTAL_HITS = 10000;
-  /**
-   * Legacy events are stored in indices with endgame-* prefix
-   */
-  static LEGACY_EVENT_INDEX_NAME = 'endgame-*';
-
-  /**
-   * Alerts
-   **/
-  static ALERT_LIST_DEFAULT_PAGE_SIZE = 10;
-  static ALERT_LIST_DEFAULT_SORT = '@timestamp';
-  static ALERT_LIST_DEFAULT_ORDER = Direction.desc;
+export interface ResolverNodePagination {
+  nextChild?: string | null;
+  nextEvent?: string | null;
+  nextAncestor?: string | null;
+  nextAlert?: string | null;
 }
 
+/**
+ * A node that contains pointers to other nodes, arrrays of resolver events, and any metadata associated with resolver specific data
+ */
+export interface ResolverNode {
+  id: string;
+  children: ResolverNode[];
+  events: ResolverEvent[];
+  lifecycle: ResolverEvent[];
+  ancestors?: ResolverNode[];
+  pagination: ResolverNodePagination;
+  stats?: ResolverNodeStats;
+}
+
+/**
+ * Returned by 'api/endpoint/alerts'
+ */
 export interface AlertResultList {
   /**
    * The alerts restricted by page size.
@@ -85,10 +100,13 @@ export interface AlertResultList {
   prev: string | null;
 }
 
-export interface EndpointResultList {
-  /* the endpoints restricted by the page size */
-  endpoints: EndpointMetadata[];
-  /* the total number of unique endpoints in the index */
+/**
+ * Returned by the server via /api/endpoint/metadata
+ */
+export interface HostResultList {
+  /* the hosts restricted by the page size */
+  hosts: HostInfo[];
+  /* the total number of unique hosts in the index */
   total: number;
   /* the page size requested */
   request_page_size: number;
@@ -96,43 +114,61 @@ export interface EndpointResultList {
   request_page_index: number;
 }
 
-export interface OSFields {
+/**
+ * Operating System metadata for a host.
+ */
+export interface HostOS {
   full: string;
   name: string;
   version: string;
   variant: string;
 }
-export interface HostFields {
+
+/**
+ * Host metadata. Describes an endpoint host.
+ */
+export interface Host {
   id: string;
   hostname: string;
   ip: string[];
   mac: string[];
-  os: OSFields;
+  os: HostOS;
 }
-export interface HashFields {
+
+/**
+ * A record of hashes for something. Provides hashes in multiple formats. A favorite structure of the Elastic Endpoint.
+ */
+interface Hashes {
+  /**
+   * A hash in MD5 format.
+   */
   md5: string;
+  /**
+   * A hash in SHA-1 format.
+   */
   sha1: string;
+  /**
+   * A hash in SHA-256 format.
+   */
   sha256: string;
 }
-export interface MalwareClassifierFields {
+
+interface MalwareClassification {
   identifier: string;
   score: number;
   threshold: number;
   version: string;
 }
-export interface PrivilegesFields {
-  description: string;
-  name: string;
-  enabled: boolean;
-}
-export interface ThreadFields {
+
+interface ThreadFields {
   id: number;
   service_name: string;
   start: number;
   start_address: number;
   start_address_module: string;
 }
-export interface DllFields {
+
+interface DllFields {
   pe: {
     architecture: string;
     imphash: string;
@@ -142,8 +178,8 @@ export interface DllFields {
     trusted: boolean;
   };
   compile_time: number;
-  hash: HashFields;
-  malware_classifier: MalwareClassifierFields;
+  hash: Hashes;
+  malware_classification: MalwareClassification;
   mapped_address: number;
   mapped_size: number;
   path: string;
@@ -151,7 +187,6 @@ export interface DllFields {
 
 /**
  * Describes an Alert Event.
- * Should be in line with ECS schema.
  */
 export type AlertEvent = Immutable<{
   '@timestamp': number;
@@ -168,29 +203,34 @@ export type AlertEvent = Immutable<{
     module: string;
     type: string;
   };
+  endpoint: {
+    policy: {
+      id: string;
+    };
+  };
   process: {
     code_signature: {
       subject_name: string;
       trusted: boolean;
     };
-    command_line: string;
-    domain: string;
+    command_line?: string;
+    domain?: string;
     pid: number;
-    ppid: number;
+    ppid?: number;
     entity_id: string;
-    parent: {
+    parent?: {
       pid: number;
       entity_id: string;
     };
     name: string;
-    hash: HashFields;
-    pe: {
+    hash: Hashes;
+    pe?: {
       imphash: string;
     };
     executable: string;
-    sid: string;
+    sid?: string;
     start: number;
-    malware_classifier: MalwareClassifierFields;
+    malware_classification?: MalwareClassification;
     token: {
       domain: string;
       type: string;
@@ -198,9 +238,13 @@ export type AlertEvent = Immutable<{
       sid: string;
       integrity_level: number;
       integrity_level_name: string;
-      privileges: PrivilegesFields[];
+      privileges?: Array<{
+        description: string;
+        name: string;
+        enabled: boolean;
+      }>;
     };
-    thread: ThreadFields[];
+    thread?: ThreadFields[];
     uptime: number;
     user: string;
   };
@@ -212,33 +256,21 @@ export type AlertEvent = Immutable<{
     mtime: number;
     created: number;
     size: number;
-    hash: HashFields;
-    pe: {
+    hash: Hashes;
+    pe?: {
       imphash: string;
     };
     code_signature: {
       trusted: boolean;
       subject_name: string;
     };
-    malware_classifier: {
-      features: {
-        data: {
-          buffer: string;
-          decompressed_size: number;
-          encoding: string;
-        };
-      };
-    } & MalwareClassifierFields;
+    malware_classification: MalwareClassification;
     temp_file_path: string;
   };
-  host: HostFields;
-  thread: {};
-  dll: DllFields[];
+  host: Host;
+  dll?: DllFields[];
 }>;
 
-/**
- * Metadata associated with an alert event.
- */
 interface AlertMetadata {
   id: string;
 
@@ -247,15 +279,51 @@ interface AlertMetadata {
   prev: string | null;
 }
 
-/**
- * Union of alert data and metadata.
- */
+interface AlertState {
+  state: {
+    host_metadata: HostMetadata;
+  };
+}
+
 export type AlertData = AlertEvent & AlertMetadata;
 
-export interface EndpointMetadata {
-  '@timestamp': string;
+export type AlertDetails = AlertData & AlertState;
+
+/**
+ * The status of the host
+ */
+export enum HostStatus {
+  /**
+   * Default state of the host when no host information is present or host information cannot
+   * be retrieved. e.g. API error
+   */
+  ERROR = 'error',
+
+  /**
+   * Host is online as indicated by its checkin status during the last checkin window
+   */
+  ONLINE = 'online',
+
+  /**
+   * Host is offline as indicated by its checkin status during the last checkin window
+   */
+  OFFLINE = 'offline',
+}
+
+export type HostInfo = Immutable<{
+  metadata: HostMetadata;
+  host_status: HostStatus;
+}>;
+
+export type HostMetadata = Immutable<{
+  '@timestamp': number;
   event: {
-    created: Date;
+    created: number;
+  };
+  elastic: {
+    agent: {
+      id: string;
+    };
   };
   endpoint: {
     policy: {
@@ -263,11 +331,11 @@ export interface EndpointMetadata {
     };
   };
   agent: {
-    version: string;
     id: string;
+    version: string;
   };
-  host: HostFields;
-}
+  host: Host;
+}>;
 
 /**
  * Represents `total` response from Elasticsearch after ES 7.0.
@@ -311,28 +379,354 @@ export interface LegacyEndpointEvent {
 
 export interface EndpointEvent {
   '@timestamp': number;
-  event: {
-    category: string;
-    type: string;
-    id: string;
-  };
-  endpoint: {
-    process: {
-      entity_id: string;
-      parent: {
-        entity_id: string;
-      };
-    };
-  };
   agent: {
     id: string;
+    version: string;
     type: string;
+  };
+  ecs: {
+    version: string;
+  };
+  event: {
+    category: string | string[];
+    type: string | string[];
+    id: string;
+    kind: string;
+  };
+  host: {
+    id: string;
+    hostname: string;
+    ip: string[];
+    mac: string[];
+    os: HostOS;
+  };
+  process: {
+    entity_id: string;
+    name: string;
+    parent?: {
+      entity_id: string;
+      name?: string;
+    };
   };
 }
 
 export type ResolverEvent = EndpointEvent | LegacyEndpointEvent;
 
 /**
- * The PageId type is used for the payload when firing userNavigatedToPage actions
+ * Takes a @kbn/config-schema 'schema' type and returns a type that represents valid inputs.
+ * Similar to `TypeOf`, but allows strings as input for `schema.number()` (which is inline
+ * with the behavior of the validator.) Also, for `schema.object`, when a value is a `schema.maybe`
+ * the key will be marked optional (via `?`) so that you can omit keys for optional values.
+ *
+ * Use this when creating a value that will be passed to the schema.
+ * e.g.
+ * ```ts
+ * const input: KbnConfigSchemaInputTypeOf<typeof schema> = value
+ * schema.validate(input) // should be valid
+ * ```
+ * Note that because the types coming from `@kbn/config-schema`'s schemas sometimes have deeply nested
+ * `Type` types, we process the result of `TypeOf` instead, as this will be consistent.
  */
-export type PageId = 'alertsPage' | 'managementPage' | 'policyListPage';
+type KbnConfigSchemaInputTypeOf<T> = T extends Record<string, unknown>
+  ? KbnConfigSchemaInputObjectTypeOf<
+      T
+    > /** `schema.number()` accepts strings, so this type should accept them as well. */
+  : number extends T
+  ? T | string
+  : T;
+
+/**
+ * Works like ObjectResultType, except that 'maybe' schema will create an optional key.
+ * This allows us to avoid passing 'maybeKey: undefined' when constructing such an object.
+ *
+ * Instead of using this directly, use `InputTypeOf`.
+ */
+type KbnConfigSchemaInputObjectTypeOf<P extends Record<string, unknown>> = {
+  /** Use ? to make the field optional if the prop accepts undefined.
+   * This allows us to avoid writing `field: undefined` for optional fields.
+   */
+  [K in Exclude<keyof P, keyof KbnConfigSchemaNonOptionalProps<P>>]?: KbnConfigSchemaInputTypeOf<
+    P[K]
+  >;
+} &
+  { [K in keyof KbnConfigSchemaNonOptionalProps<P>]: KbnConfigSchemaInputTypeOf<P[K]> };
+
+/**
+ * Takes the props of a schema.object type, and returns a version that excludes
+ * optional values. Used by `InputObjectTypeOf`.
+ *
+ * Instead of using this directly, use `InputTypeOf`.
+ */
+type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pick<
+  Props,
+  {
+    [Key in keyof Props]: undefined extends Props[Key]
+      ? never
+      : null extends Props[Key]
+      ? never
+      : Key;
+  }[keyof Props]
+>;
+
+/**
+ * Query params to pass to the alert API when fetching new data.
+ */
+export type AlertingIndexGetQueryInput = KbnConfigSchemaInputTypeOf<
+  TypeOf<typeof alertingIndexGetQuerySchema>
+>;
+
+/**
+ * Result of the validated query params when handling alert index requests.
+ */
+export type AlertingIndexGetQueryResult = TypeOf<typeof alertingIndexGetQuerySchema>;
+
+/**
+ * Result of the validated params when handling an index pattern request.
+ */
+export type IndexPatternGetParamsResult = TypeOf<typeof indexPatternGetParamsSchema>;
+
+/**
+ * Endpoint Policy configuration
+ */
+export interface PolicyConfig {
+  windows: {
+    events: {
+      dll_and_driver_load: boolean;
+      dns: boolean;
+      file: boolean;
+      network: boolean;
+      process: boolean;
+      registry: boolean;
+      security: boolean;
+    };
+    malware: MalwareFields;
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+  mac: {
+    events: {
+      file: boolean;
+      process: boolean;
+      network: boolean;
+    };
+    malware: MalwareFields;
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+  linux: {
+    events: {
+      file: boolean;
+      process: boolean;
+      network: boolean;
+    };
+    logging: {
+      stdout: string;
+      file: string;
+    };
+    advanced: PolicyConfigAdvancedOptions;
+  };
+}
+
+/**
+ * The set of Policy configuration settings that are show/edited via the UI
+ */
+export interface UIPolicyConfig {
+  /**
+   * Windows-specific policy configuration that is supported via the UI
+   */
+  windows: Pick<PolicyConfig['windows'], 'events' | 'malware'>;
+  /**
+   * Mac-specific policy configuration that is supported via the UI
+   */
+  mac: Pick<PolicyConfig['mac'], 'malware' | 'events'>;
+  /**
+   * Linux-specific policy configuration that is supported via the UI
+   */
+  linux: Pick<PolicyConfig['linux'], 'events'>;
+}
+
+interface PolicyConfigAdvancedOptions {
+  elasticsearch: {
+    indices: {
+      control: string;
+      event: string;
+      logging: string;
+    };
+    kernel: {
+      connect: boolean;
+      process: boolean;
+    };
+  };
+}
+
+/** Policy: Malware protection fields */
+export interface MalwareFields {
+  mode: ProtectionModes;
+}
+
+/** Policy protection mode options */
+export enum ProtectionModes {
+  detect = 'detect',
+  prevent = 'prevent',
+  preventNotify = 'preventNotify',
+  off = 'off',
+}
+
+/**
+ * Endpoint Policy data, which extends Ingest's `Datasource` type
+ */
+export type PolicyData = Datasource & NewPolicyData;
+
+/**
+ * New policy data. Used when updating the policy record via ingest APIs
+ */
+export type NewPolicyData = NewDatasource & {
+  inputs: [
+    {
+      type: 'endpoint';
+      enabled: boolean;
+      streams: [];
+      config: {
+        policy: {
+          value: PolicyConfig;
+        };
+      };
+    }
+  ];
+};
+
+/**
+ * the possible status for actions, configurations and overall Policy Response
+ */
+export enum HostPolicyResponseActionStatus {
+  success = 'success',
+  failure = 'failure',
+  warning = 'warning',
+}
+
+/**
+ * The name of actions that can be applied during the processing of a policy
+ */
+type HostPolicyActionName =
+  | 'download_model'
+  | 'ingest_events_config'
+  | 'workflow'
+  | 'configure_elasticsearch_connection'
+  | 'configure_kernel'
+  | 'configure_logging'
+  | 'configure_malware'
+  | 'connect_kernel'
+  | 'detect_file_open_events'
+  | 'detect_file_write_events'
+  | 'detect_image_load_events'
+  | 'detect_process_events'
+  | 'download_global_artifacts'
+  | 'load_config'
+  | 'load_malware_model'
+  | 'read_elasticsearch_config'
+  | 'read_events_config'
+  | 'read_kernel_config'
+  | 'read_logging_config'
+  | 'read_malware_config'
+  | string;
+
+/**
+ * Host Policy Response Applied Action
+ */
+export interface HostPolicyResponseAppliedAction {
+  name: HostPolicyActionName;
+  status: HostPolicyResponseActionStatus;
+  message: string;
+}
+
+export type HostPolicyResponseConfiguration = HostPolicyResponse['endpoint']['policy']['applied']['response']['configurations'];
+
+interface HostPolicyResponseConfigurationStatus {
+  status: HostPolicyResponseActionStatus;
+  concerned_actions: HostPolicyActionName[];
+}
+
+/**
+ * Host Policy Response Applied Artifact
+ */
+interface HostPolicyResponseAppliedArtifact {
+  name: string;
+  sha256: string;
+}
+
+/**
+ * Information about the applying of a policy to a given host
+ */
+export interface HostPolicyResponse {
+  '@timestamp': number;
+  elastic: {
+    agent: {
+      id: string;
+    };
+  };
+  ecs: {
+    version: string;
+  };
+  host: {
+    id: string;
+  };
+  event: {
+    created: number;
+    kind: string;
+    id: string;
+    category: string;
+    type: string;
+    module: string;
+    action: string;
+    dataset: string;
+  };
+  agent: {
+    version: string;
+    id: string;
+  };
+  endpoint: {
+    policy: {
+      applied: {
+        version: string;
+        id: string;
+        status: HostPolicyResponseActionStatus;
+        actions: HostPolicyResponseAppliedAction[];
+        policy: {
+          id: string;
+          version: string;
+        };
+        response: {
+          configurations: {
+            malware: HostPolicyResponseConfigurationStatus;
+            events: HostPolicyResponseConfigurationStatus;
+            logging: HostPolicyResponseConfigurationStatus;
+            streaming: HostPolicyResponseConfigurationStatus;
+          };
+        };
+        artifacts: {
+          global: {
+            version: string;
+            identifiers: HostPolicyResponseAppliedArtifact[];
+          };
+          user: {
+            version: string;
+            identifiers: HostPolicyResponseAppliedArtifact[];
+          };
+        };
+      };
+    };
+  };
+}
+
+/**
+ * REST API response for retrieving a host's Policy Response status
+ */
+export interface GetHostPolicyResponse {
+  policy_response: HostPolicyResponse;
+}

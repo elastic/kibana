@@ -5,8 +5,8 @@
  */
 import * as React from 'react';
 import { shallow } from 'enzyme';
-import { EuiPopoverTitle } from '@elastic/eui';
 import { OfExpression } from './of';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 describe('of expression', () => {
   it('renders of builtin aggregation types', () => {
@@ -23,6 +23,7 @@ describe('of expression', () => {
     expect(wrapper.find('[data-test-subj="availablefieldsOptionsComboBox"]'))
       .toMatchInlineSnapshot(`
       <EuiComboBox
+        async={false}
         compressed={false}
         data-test-subj="availablefieldsOptionsComboBox"
         fullWidth={true}
@@ -44,6 +45,7 @@ describe('of expression', () => {
             "asPlainText": true,
           }
         }
+        sortMatchesBy="none"
       />
     `);
   });
@@ -75,35 +77,37 @@ describe('of expression', () => {
     );
     expect(wrapper.find('[data-test-subj="availablefieldsOptionsComboBox"]'))
       .toMatchInlineSnapshot(`
-    <EuiComboBox
-      compressed={false}
-      data-test-subj="availablefieldsOptionsComboBox"
-      fullWidth={true}
-      isClearable={true}
-      isInvalid={false}
-      noSuggestions={false}
-      onChange={[Function]}
-      options={
-        Array [
-          Object {
-            "label": "test2",
-          },
-        ]
-      }
-      placeholder="Select a field"
-      selectedOptions={
-        Array [
-          Object {
-            "label": "test",
-          },
-        ]
-      }
-      singleSelection={
-        Object {
-          "asPlainText": true,
+      <EuiComboBox
+        async={false}
+        compressed={false}
+        data-test-subj="availablefieldsOptionsComboBox"
+        fullWidth={true}
+        isClearable={true}
+        isInvalid={false}
+        noSuggestions={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "label": "test2",
+            },
+          ]
         }
-      }
-    />
+        placeholder="Select a field"
+        selectedOptions={
+          Array [
+            Object {
+              "label": "test",
+            },
+          ]
+        }
+        singleSelection={
+          Object {
+            "asPlainText": true,
+          }
+        }
+        sortMatchesBy="none"
+      />
     `);
   });
 
@@ -119,6 +123,13 @@ describe('of expression', () => {
       />
     );
     wrapper.simulate('click');
-    expect(wrapper.contains(<EuiPopoverTitle>of</EuiPopoverTitle>)).toBeTruthy();
+    expect(
+      wrapper.contains(
+        <FormattedMessage
+          id="xpack.triggersActionsUI.common.expressionItems.of.popoverTitle"
+          defaultMessage="of"
+        />
+      )
+    ).toBeTruthy();
   });
 });

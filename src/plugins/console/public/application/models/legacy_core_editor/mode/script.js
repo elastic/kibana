@@ -18,7 +18,7 @@
  */
 
 import ace from 'brace';
-import { ScriptHighlightRules } from '../../../../../../es_ui_shared/console_lang';
+import { ScriptHighlightRules } from '../../../../../../es_ui_shared/public';
 
 const oop = ace.acequire('ace/lib/oop');
 const TextMode = ace.acequire('ace/mode/text').Mode;

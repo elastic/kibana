@@ -6,27 +6,28 @@
 
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ToolbarProps } from '../../../public/components/inventory/toolbars/toolbar';
-import { MetricsAndGroupByToolbarItems } from '../shared/compontents/metrics_and_groupby_toolbar_items';
-import { CloudToolbarItems } from '../shared/compontents/cloud_toolbar_items';
+import { ToolbarProps } from '../../../public/pages/metrics/inventory_view/components/toolbars/toolbar';
+import { MetricsAndGroupByToolbarItems } from '../shared/components/metrics_and_groupby_toolbar_items';
+import { CloudToolbarItems } from '../shared/components/cloud_toolbar_items';
 import { SnapshotMetricType } from '../types';
 
+export const sqsMetricTypes: SnapshotMetricType[] = [
+  'sqsMessagesVisible',
+  'sqsMessagesDelayed',
+  'sqsMessagesSent',
+  'sqsMessagesEmpty',
+  'sqsOldestMessage',
+];
+export const sqsGroupByFields = ['cloud.region'];
+
 export const AwsSQSToolbarItems = (props: ToolbarProps) => {
-  const metricTypes: SnapshotMetricType[] = [
-    'sqsMessagesVisible',
-    'sqsMessagesDelayed',
-    'sqsMessagesSent',
-    'sqsMessagesEmpty',
-    'sqsOldestMessage',
-  ];
-  const groupByFields = ['cloud.region'];
   return (
     <>
       <CloudToolbarItems {...props} />
       <MetricsAndGroupByToolbarItems
         {...props}
-        metricTypes={metricTypes}
-        groupByFields={groupByFields}
+        metricTypes={sqsMetricTypes}
+        groupByFields={sqsGroupByFields}
       />
     </>
   );

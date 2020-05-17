@@ -5,12 +5,12 @@
  */
 
 import { Subscription } from 'rxjs';
-import { i18n } from '@kbn/i18n';
-import { CoreSetup, FatalErrorsSetup } from 'src/core/public';
+import { StartServicesAccessor, FatalErrorsSetup } from 'src/core/public';
 import {
   ManagementApp,
   ManagementSetup,
   ManagementStart,
+  ManagementSectionId,
 } from '../../../../../src/plugins/management/public';
 import { SecurityLicense } from '../../common/licensing';
 import { AuthenticationServiceSetup } from '../authentication';
@@ -25,7 +25,7 @@ interface SetupParams {
   license: SecurityLicense;
   authc: AuthenticationServiceSetup;
   fatalErrors: FatalErrorsSetup;
-  getStartServices: CoreSetup<PluginStartDependencies>['getStartServices'];
+  getStartServices: StartServicesAccessor<PluginStartDependencies>;
 }
 
 interface StartParams {
@@ -39,14 +39,7 @@ export class ManagementService {
   setup({ getStartServices, management, authc, license, fatalErrors }: SetupParams) {
     this.license = license;
 
-    const securitySection = management.sections.register({
-      id: 'security',
-      title: i18n.translate('xpack.security.management.securityTitle', {
-        defaultMessage: 'Security',
-      }),
-      order: 100,
-      euiIconType: 'securityApp',
-    });
+    const securitySection = management.sections.getSection(ManagementSectionId.Security);
 
     securitySection.registerApp(usersManagementApp.create({ authc, getStartServices }));
     securitySection.registerApp(
@@ -58,7 +51,7 @@ export class ManagementService {
 
   start({ management }: StartParams) {
     this.licenseFeaturesSubscription = this.license.features$.subscribe(async features => {
-      const securitySection = management.sections.getSection('security')!;
+      const securitySection = management.sections.getSection(ManagementSectionId.Security);
 
       const securityManagementAppsStatuses: Array<[ManagementApp, boolean]> = [
         [securitySection.getApp(usersManagementApp.id)!, features.showLinks],

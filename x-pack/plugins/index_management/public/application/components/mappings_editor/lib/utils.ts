@@ -17,6 +17,7 @@ import {
   ChildFieldName,
   ParameterName,
   ComboBoxOption,
+  GenericObject,
 } from '../types';
 
 import {
@@ -25,17 +26,17 @@ import {
   PARAMETERS_DEFINITION,
   TYPE_NOT_ALLOWED_MULTIFIELD,
   TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL,
+  TYPE_DEFINITION,
+  MAIN_DATA_TYPE_DEFINITION,
 } from '../constants';
 
 import { State } from '../reducer';
 import { FieldConfig } from '../shared_imports';
 import { TreeItem } from '../components/tree';
 
-export const getUniqueId = () => {
-  return uuid.v4();
-};
+export const getUniqueId = () => uuid.v4();
 
-const getChildFieldsName = (dataType: DataType): ChildFieldName | undefined => {
+export const getChildFieldsName = (dataType: DataType): ChildFieldName | undefined => {
   if (dataType === 'text' || dataType === 'keyword') {
     return 'fields';
   } else if (dataType === 'object' || dataType === 'nested') {
@@ -71,7 +72,13 @@ export const getFieldMeta = (field: Field, isMultiField?: boolean): FieldMeta =>
   };
 };
 
-export const getFieldConfig = (param: ParameterName, prop?: string): FieldConfig => {
+export const getTypeLabelFromType = (type: DataType) =>
+  TYPE_DEFINITION[type] ? TYPE_DEFINITION[type].label : `${TYPE_DEFINITION.other.label}: ${type}`;
+
+export const getFieldConfig = <T = unknown>(
+  param: ParameterName,
+  prop?: string
+): FieldConfig<any, T> => {
   if (prop !== undefined) {
     if (
       !(PARAMETERS_DEFINITION[param] as any).props ||
@@ -121,8 +128,31 @@ const replaceAliasPathByAliasId = (
   return { aliases, byId };
 };
 
-export const getMainTypeFromSubType = (subType: SubType): MainType =>
-  SUB_TYPE_MAP_TO_MAIN[subType] as MainType;
+const getMainTypeFromSubType = (subType: SubType): MainType =>
+  (SUB_TYPE_MAP_TO_MAIN[subType] ?? 'other') as MainType;
+
+/**
+ * Read the field source type and decide if it is a SubType of a MainType
+ * A SubType is for example the "float" datatype. It is the SubType of the "numeric" MainType
+ *
+ * @param sourceType The type declared on the mappings field
+ */
+export const getTypeMetaFromSource = (
+  sourceType: string
+): { mainType: MainType; subType?: SubType } => {
+  if (!MAIN_DATA_TYPE_DEFINITION[sourceType as MainType]) {
+    // If the sourceType provided if **not** one of the MainType, it is probably a SubType type
+    const mainType = getMainTypeFromSubType(sourceType as SubType);
+    if (!mainType) {
+      throw new Error(
+        `Property type "${sourceType}" not recognized and no subType was found for it.`
+      );
+    }
+    return { mainType, subType: sourceType as SubType };
+  }
+
+  return { mainType: sourceType as MainType };
+};
 
 /**
  * In order to better work with the recursive pattern of the mappings `properties`, this method flatten the fields
@@ -287,7 +317,9 @@ export const deNormalize = ({ rootLevelFields, byId, aliases }: NormalizedFields
       const { source, childFields, childFieldsName } = serializedFieldsById[id];
       const { name, ...normalizedField } = source;
       const field: Omit<Field, 'name'> = normalizedField;
+
       to[name] = field;
+
       if (childFields) {
         field[childFieldsName!] = {};
         return deNormalizePaths(childFields, field[childFieldsName!]);
@@ -502,3 +534,39 @@ export const isStateValid = (state: State): boolean | undefined =>
 
       return isValid && value.isValid;
     }, true as undefined | boolean);
+
+/**
+ * This helper removes all the keys on an object with an "undefined" value.
+ * To avoid sending updates from the mappings editor with this type of object:
+ *
+ *```
+ * {
+ *   "dyamic": undefined,
+ *   "date_detection": undefined,
+ *   "dynamic": undefined,
+ *   "dynamic_date_formats": undefined,
+ *   "dynamic_templates": undefined,
+ *   "numeric_detection": undefined,
+ *   "properties": {
+ *     "title": { "type": "text" }
+ *   }
+ * }
+ *```
+ *
+ * @param obj The object to retrieve the undefined values from
+ * @param recursive A flag to strip recursively into children objects
+ */
+export const stripUndefinedValues = <T = GenericObject>(obj: GenericObject, recursive = true): T =>
+  Object.entries(obj).reduce((acc, [key, value]) => {
+    if (value === undefined) {
+      return acc;
+    }
+
+    if (Array.isArray(value) || value instanceof Date || value === null) {
+      return { ...acc, [key]: value };
+    }
+
+    return recursive && typeof value === 'object'
+      ? { ...acc, [key]: stripUndefinedValues(value, recursive) }
+      : { ...acc, [key]: value };
+  }, {} as T);

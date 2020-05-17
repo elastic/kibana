@@ -26,11 +26,13 @@ const TEST_STEP_SIZE = 3;
 export default function({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const docTable = getService('docTable');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'context', 'timePicker', 'discover']);
   const esArchiver = getService('esArchiver');
 
   describe('context view for date_nanos', () => {
     before(async function() {
+      await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos']);
       await esArchiver.loadIfNeeded('date_nanos');
       await kibanaServer.uiSettings.replace({ defaultIndex: TEST_INDEX_PATTERN });
       await kibanaServer.uiSettings.update({
@@ -39,8 +41,9 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    after(function unloadMakelogs() {
-      return esArchiver.unload('date_nanos');
+    after(async function unloadMakelogs() {
+      await security.testUser.restoreDefaults();
+      await esArchiver.unload('date_nanos');
     });
 
     it('displays predessors - anchor - successors in right order ', async function() {

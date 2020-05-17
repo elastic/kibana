@@ -5,9 +5,9 @@
  */
 
 import { createContext, useContext } from 'react';
-import { History } from 'history';
+import { ScopedHistory } from 'src/core/public';
 
-export const HistoryContext = createContext<History | undefined>(undefined);
+export const HistoryContext = createContext<ScopedHistory | undefined>(undefined);
 
 export const useHistory = () => {
   return useContext(HistoryContext);

@@ -31,7 +31,7 @@ Indexing EMS administrative boundaries in Elasticsearch allows for search on bou
     }),
     euiIconType: 'emsApp',
     completionTimeMinutes: 1,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/ems/boundaries_screenshot.png',
+    previewImagePath: '/plugins/maps/assets/boundaries_screenshot.png',
     onPrem: {
       instructionSets: [
         {

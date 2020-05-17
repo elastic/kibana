@@ -17,5 +17,4 @@
  * under the License.
  */
 
-import './objects';
 import './index_patterns';

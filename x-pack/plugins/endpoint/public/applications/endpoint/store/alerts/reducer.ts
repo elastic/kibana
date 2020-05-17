@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Reducer } from 'redux';
-import { AlertListState } from '../../types';
+import { AlertListState, ImmutableReducer } from '../../types';
 import { AppAction } from '../action';
+import { Immutable } from '../../../../../common/types';
 
-const initialState = (): AlertListState => {
+const initialState = (): Immutable<AlertListState> => {
   return {
     alerts: [],
     alertDetails: undefined,
@@ -16,10 +16,13 @@ const initialState = (): AlertListState => {
     pageIndex: 0,
     total: 0,
     location: undefined,
+    searchBar: {
+      patterns: [],
+    },
   };
 };
 
-export const alertListReducer: Reducer<AlertListState, AppAction> = (
+export const alertListReducer: ImmutableReducer<AlertListState, AppAction> = (
   state = initialState(),
   action
 ) => {
@@ -48,6 +51,14 @@ export const alertListReducer: Reducer<AlertListState, AppAction> = (
     return {
       ...state,
       alertDetails: action.payload,
+    };
+  } else if (action.type === 'serverReturnedSearchBarIndexPatterns') {
+    return {
+      ...state,
+      searchBar: {
+        ...state.searchBar,
+        patterns: action.payload,
+      },
     };
   }
 

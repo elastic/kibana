@@ -13,7 +13,7 @@ import {
   TRANSACTION_RESULT,
   TRANSACTION_TYPE
 } from '../../../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../../../typings/common';
+import { PromiseReturnType } from '../../../../../../observability/typings/common';
 import { getBucketSize } from '../../../helpers/get_bucket_size';
 import { rangeFilter } from '../../../helpers/range_filter';
 import {
@@ -69,7 +69,11 @@ export function timeseriesFetcher({
           aggs: {
             avg: { avg: { field: TRANSACTION_DURATION } },
             pct: {
-              percentiles: { field: TRANSACTION_DURATION, percents: [95, 99] }
+              percentiles: {
+                field: TRANSACTION_DURATION,
+                percents: [95, 99],
+                hdr: { number_of_significant_value_digits: 2 }
+              }
             }
           }
         },

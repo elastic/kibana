@@ -23,6 +23,7 @@ import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
 import apm from 'elastic-apm-node';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { Server, Request, ResponseToolkit } from 'hapi';
+import HapiProxy from 'h2o2';
 import { sample } from 'lodash';
 import BrowserslistUserAgent from 'browserslist-useragent';
 import * as Rx from 'rxjs';
@@ -102,7 +103,7 @@ export class BasePathProxyServer {
 
     // Register hapi plugin that adds proxying functionality. It can be configured
     // through the route configuration object (see { handler: { proxy: ... } }).
-    await this.server.register({ plugin: require('h2o2') });
+    await this.server.register([HapiProxy]);
 
     if (this.httpConfig.ssl.enabled) {
       const tlsOptions = serverOptions.tls as TlsOptions;
@@ -166,7 +167,8 @@ export class BasePathProxyServer {
           host: this.server.info.host,
           passThrough: true,
           port: this.devConfig.basePathProxyTargetPort,
-          protocol: this.server.info.protocol,
+          // typings mismatch. h2o2 doesn't support "socket"
+          protocol: this.server.info.protocol as HapiProxy.ProxyHandlerOptions['protocol'],
           xforward: true,
         },
       },
@@ -195,7 +197,7 @@ export class BasePathProxyServer {
           agent: this.httpsAgent,
           passThrough: true,
           xforward: true,
-          mapUri: (request: Request) => ({
+          mapUri: async (request: Request) => ({
             uri: Url.format({
               hostname: request.server.info.host,
               port: this.devConfig.basePathProxyTargetPort,

@@ -5,18 +5,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import cytoscape from 'cytoscape';
 import { ILicense } from '../../licensing/public';
+import {
+  AGENT_NAME,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_SUBTYPE,
+  SPAN_TYPE
+} from './elasticsearch_fieldnames';
 
-export interface ServiceConnectionNode {
-  'service.name': string;
-  'service.environment': string | null;
-  'service.framework.name': string | null;
-  'agent.name': string;
+export interface ServiceConnectionNode extends cytoscape.NodeDataDefinition {
+  [SERVICE_NAME]: string;
+  [SERVICE_ENVIRONMENT]: string | null;
+  [AGENT_NAME]: string;
 }
-export interface ExternalConnectionNode {
-  'destination.address': string;
-  'span.type': string;
-  'span.subtype': string;
+export interface ExternalConnectionNode extends cytoscape.NodeDataDefinition {
+  [SPAN_DESTINATION_SERVICE_RESOURCE]: string;
+  [SPAN_TYPE]: string;
+  [SPAN_SUBTYPE]: string;
 }
 
 export type ConnectionNode = ServiceConnectionNode | ExternalConnectionNode;
@@ -27,7 +35,6 @@ export interface Connection {
 }
 
 export interface ServiceNodeMetrics {
-  numInstances: number;
   avgMemoryUsage: number | null;
   avgCpuUsage: number | null;
   avgTransactionDuration: number | null;
@@ -36,10 +43,7 @@ export interface ServiceNodeMetrics {
 }
 
 export function isValidPlatinumLicense(license: ILicense) {
-  return (
-    license.isActive &&
-    (license.type === 'platinum' || license.type === 'trial')
-  );
+  return license.isActive && license.hasAtLeast('platinum');
 }
 
 export const invalidLicenseMessage = i18n.translate(

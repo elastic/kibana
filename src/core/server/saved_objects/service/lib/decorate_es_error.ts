@@ -35,6 +35,8 @@ const {
   NotFound,
   BadRequest,
 } = legacyElasticsearch.errors;
+const SCRIPT_CONTEXT_DISABLED_REGEX = /(?:cannot execute scripts using \[)([a-z]*)(?:\] context)/;
+const INLINE_SCRIPTS_DISABLED_MESSAGE = 'cannot execute [inline] scripts';
 
 import { SavedObjectsErrorHelpers } from './errors';
 
@@ -43,7 +45,7 @@ export function decorateEsError(error: Error) {
     throw new Error('Expected an instance of Error');
   }
 
-  const { reason } = get(error, 'body.error', { reason: undefined });
+  const { reason } = get(error, 'body.error', { reason: undefined }) as { reason?: string };
   if (
     error instanceof ConnectionFault ||
     error instanceof ServiceUnavailable ||
@@ -74,6 +76,12 @@ export function decorateEsError(error: Error) {
   }
 
   if (error instanceof BadRequest) {
+    if (
+      SCRIPT_CONTEXT_DISABLED_REGEX.test(reason || '') ||
+      reason === INLINE_SCRIPTS_DISABLED_MESSAGE
+    ) {
+      return SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError(error, reason);
+    }
     return SavedObjectsErrorHelpers.decorateBadRequestError(error, reason);
   }
 

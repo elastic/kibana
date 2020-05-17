@@ -14,6 +14,8 @@ import {
 } from 'kibana/server';
 import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
+import { BASE_ALERT_API_PATH } from '../../common';
+import { handleDisabledApiKeysError } from './lib/error_handler';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -22,7 +24,7 @@ const paramSchema = schema.object({
 export const enableAlertRoute = (router: IRouter, licenseState: LicenseState) => {
   router.post(
     {
-      path: '/api/alert/{id}/_enable',
+      path: `${BASE_ALERT_API_PATH}/{id}/_enable`,
       validate: {
         params: paramSchema,
       },
@@ -30,16 +32,21 @@ export const enableAlertRoute = (router: IRouter, licenseState: LicenseState) =>
         tags: ['access:alerting-all'],
       },
     },
-    router.handleLegacyErrors(async function(
-      context: RequestHandlerContext,
-      req: KibanaRequest<TypeOf<typeof paramSchema>, any, any, any>,
-      res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
-      verifyApiAccess(licenseState);
-      const alertsClient = context.alerting.getAlertsClient();
-      const { id } = req.params;
-      await alertsClient.enable({ id });
-      return res.noContent();
-    })
+    handleDisabledApiKeysError(
+      router.handleLegacyErrors(async function(
+        context: RequestHandlerContext,
+        req: KibanaRequest<TypeOf<typeof paramSchema>, unknown, unknown>,
+        res: KibanaResponseFactory
+      ): Promise<IKibanaResponse> {
+        verifyApiAccess(licenseState);
+        if (!context.alerting) {
+          return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
+        }
+        const alertsClient = context.alerting.getAlertsClient();
+        const { id } = req.params;
+        await alertsClient.enable({ id });
+        return res.noContent();
+      })
+    )
   );
 };

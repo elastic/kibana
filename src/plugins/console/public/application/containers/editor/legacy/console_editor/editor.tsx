@@ -22,8 +22,9 @@ import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { parse } from 'query-string';
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
+import { useUIAceKeyboardMode } from '../../../../../../../es_ui_shared/public';
 // @ts-ignore
-import mappings from '../../../../../lib/mappings/mappings';
+import { retrieveAutoCompleteInfo, clearSubscriptions } from '../../../../../lib/mappings/mappings';
 import { ConsoleMenu } from '../../../../components';
 import { useEditorReadContext, useServicesContext } from '../../../../contexts';
 import {
@@ -34,7 +35,6 @@ import {
 import * as senseEditor from '../../../../models/sense_editor';
 import { autoIndent, getDocumentation } from '../console_menu_actions';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
-import { useUIAceKeyboardMode } from '../use_ui_ace_keyboard_mode';
 import { applyCurrentSettings } from './apply_editor_settings';
 import { registerCommands } from './keyboard_shortcuts';
 
@@ -172,14 +172,14 @@ function EditorUI({ initialTextValue }: EditorProps) {
     setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
-    mappings.retrieveAutoCompleteInfo(settingsService, settingsService.getAutocomplete());
+    retrieveAutoCompleteInfo(settingsService, settingsService.getAutocomplete());
 
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
     setupAutosave();
 
     return () => {
       unsubscribeResizer();
-      mappings.clearSubscriptions();
+      clearSubscriptions();
       window.removeEventListener('hashchange', onHashChange);
     };
   }, [saveCurrentTextObject, initialTextValue, history, setInputEditor, settingsService]);

@@ -5,22 +5,22 @@
  */
 
 import { combineLatest } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
+import { TypeOf } from '@kbn/config-schema';
 import {
   ICustomClusterClient,
   CoreSetup,
   Logger,
   PluginInitializerContext,
-  RecursiveReadonly,
 } from '../../../../src/core/server';
-import { deepFreeze } from '../../../../src/core/utils';
+import { deepFreeze } from '../../../../src/core/server';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { PluginSetupContract as FeaturesSetupContract } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 
 import { Authentication, setupAuthentication } from './authentication';
 import { Authorization, setupAuthorization } from './authorization';
-import { createConfig$ } from './config';
+import { ConfigSchema, createConfig } from './config';
 import { defineRoutes } from './routes';
 import { SecurityLicenseService, SecurityLicense } from '../common/licensing';
 import { setupSavedObjects } from './saved_objects';
@@ -48,8 +48,18 @@ export interface LegacyAPI {
  * Describes public Security plugin contract returned at the `setup` stage.
  */
 export interface SecurityPluginSetup {
-  authc: Authentication;
+  authc: Pick<
+    Authentication,
+    | 'isAuthenticated'
+    | 'getCurrentUser'
+    | 'areAPIKeysEnabled'
+    | 'createAPIKey'
+    | 'invalidateAPIKey'
+    | 'grantAPIKeyAsInternalUser'
+    | 'invalidateAPIKeyAsInternalUser'
+  >;
   authz: Pick<Authorization, 'actions' | 'checkPrivilegesWithRequest' | 'mode'>;
+  license: SecurityLicense;
 
   /**
    * If Spaces plugin is available it's supposed to register its SpacesService with Security plugin
@@ -64,8 +74,6 @@ export interface SecurityPluginSetup {
   __legacyCompat: {
     registerLegacyAPI: (legacyAPI: LegacyAPI) => void;
     registerPrivilegesWithCluster: () => void;
-    license: SecurityLicense;
-    config: RecursiveReadonly<{ secureCookies: boolean }>;
   };
 }
 
@@ -106,7 +114,13 @@ export class Plugin {
 
   public async setup(core: CoreSetup, { features, licensing }: PluginSetupDependencies) {
     const [config, legacyConfig] = await combineLatest([
-      createConfig$(this.initializerContext, core.http.isTlsEnabled),
+      this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
+        map(rawConfig =>
+          createConfig(rawConfig, this.initializerContext.logger.get('config'), {
+            isTLSEnabled: core.http.isTlsEnabled,
+          })
+        )
+      ),
       this.initializerContext.config.legacy.globalConfig$,
     ])
       .pipe(first())
@@ -121,7 +135,9 @@ export class Plugin {
       license$: licensing.license$,
     });
 
+    const auditLogger = new SecurityAuditLogger(() => this.getLegacyAPI().auditLogger);
     const authc = await setupAuthentication({
+      auditLogger,
       http: core.http,
       clusterClient: this.clusterClient,
       config,
@@ -141,9 +157,10 @@ export class Plugin {
     });
 
     setupSavedObjects({
-      auditLogger: new SecurityAuditLogger(() => this.getLegacyAPI().auditLogger),
+      auditLogger,
       authz,
       savedObjects: core.savedObjects,
+      getSpacesService: this.getSpacesService,
     });
 
     core.capabilities.registerSwitcher(authz.disableUnauthorizedCapabilities);
@@ -151,23 +168,33 @@ export class Plugin {
     defineRoutes({
       router: core.http.createRouter(),
       basePath: core.http.basePath,
+      httpResources: core.http.resources,
       logger: this.initializerContext.logger.get('routes'),
       clusterClient: this.clusterClient,
       config,
       authc,
       authz,
-      csp: core.http.csp,
       license,
     });
 
     return deepFreeze<SecurityPluginSetup>({
-      authc,
+      authc: {
+        isAuthenticated: authc.isAuthenticated,
+        getCurrentUser: authc.getCurrentUser,
+        areAPIKeysEnabled: authc.areAPIKeysEnabled,
+        createAPIKey: authc.createAPIKey,
+        invalidateAPIKey: authc.invalidateAPIKey,
+        grantAPIKeyAsInternalUser: authc.grantAPIKeyAsInternalUser,
+        invalidateAPIKeyAsInternalUser: authc.invalidateAPIKeyAsInternalUser,
+      },
 
       authz: {
         actions: authz.actions,
         checkPrivilegesWithRequest: authz.checkPrivilegesWithRequest,
         mode: authz.mode,
       },
+
+      license,
 
       registerSpacesService: service => {
         if (this.wasSpacesServiceAccessed()) {
@@ -181,13 +208,6 @@ export class Plugin {
         registerLegacyAPI: (legacyAPI: LegacyAPI) => (this.legacyAPI = legacyAPI),
 
         registerPrivilegesWithCluster: async () => await authz.registerPrivilegesWithCluster(),
-
-        license,
-
-        // We should stop exposing this config as soon as only new platform plugin consumes it.
-        // This is only currently required because we use legacy code to inject this as metadata
-        // for consumption by public code in the new platform.
-        config: { secureCookies: config.secureCookies },
       },
     });
   }

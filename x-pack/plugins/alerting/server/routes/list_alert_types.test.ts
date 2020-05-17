@@ -5,7 +5,7 @@
  */
 
 import { listAlertTypesRoute } from './list_alert_types';
-import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
+import { httpServiceMock } from 'src/core/server/mocks';
 import { mockLicenseState } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
@@ -21,7 +21,7 @@ beforeEach(() => {
 describe('listAlertTypesRoute', () => {
   it('lists alert types with proper parameters', async () => {
     const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     listAlertTypesRoute(router, licenseState);
 
@@ -47,6 +47,8 @@ describe('listAlertTypesRoute', () => {
           },
         ],
         defaultActionGroupId: 'default',
+        actionVariables: [],
+        producer: 'test',
       },
     ];
 
@@ -62,15 +64,17 @@ describe('listAlertTypesRoute', () => {
                 "name": "Default",
               },
             ],
+            "actionVariables": Array [],
             "defaultActionGroupId": "default",
             "id": "1",
             "name": "name",
+            "producer": "test",
           },
         ],
       }
     `);
 
-    expect(context.alerting.listTypes).toHaveBeenCalledTimes(1);
+    expect(context.alerting!.listTypes).toHaveBeenCalledTimes(1);
 
     expect(res.ok).toHaveBeenCalledWith({
       body: listTypes,
@@ -79,7 +83,7 @@ describe('listAlertTypesRoute', () => {
 
   it('ensures the license allows listing alert types', async () => {
     const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     listAlertTypesRoute(router, licenseState);
 
@@ -99,6 +103,15 @@ describe('listAlertTypesRoute', () => {
         id: '1',
         name: 'name',
         enabled: true,
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        actionVariables: [],
+        producer: 'alerting',
       },
     ];
 
@@ -117,7 +130,7 @@ describe('listAlertTypesRoute', () => {
 
   it('ensures the license check prevents listing alert types', async () => {
     const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('OMG');
@@ -147,6 +160,8 @@ describe('listAlertTypesRoute', () => {
           },
         ],
         defaultActionGroupId: 'default',
+        actionVariables: [],
+        producer: 'alerting',
       },
     ];
 

@@ -29,7 +29,6 @@ import {
 } from '../../../core/server/saved_objects';
 import { getRootPropertiesObjects } from '../../../core/server/saved_objects/mappings';
 import { convertTypesToLegacySchema } from '../../../core/server/saved_objects/utils';
-import { SavedObjectsManagement } from '../../../core/server/saved_objects/management';
 
 export function savedObjectsMixin(kbnServer, server) {
   const migrator = kbnServer.newPlatform.__internals.kibanaMigrator;
@@ -40,11 +39,6 @@ export function savedObjectsMixin(kbnServer, server) {
   const visibleTypes = allTypes.filter(type => !schema.isHiddenType(type));
 
   server.decorate('server', 'kibanaMigrator', migrator);
-  server.decorate(
-    'server',
-    'getSavedObjectsManagement',
-    () => new SavedObjectsManagement(kbnServer.uiExports.savedObjectsManagement)
-  );
 
   const warn = message => server.log(['warning', 'saved-objects'], message);
   // we use kibana.index which is technically defined in the kibana plugin, so if

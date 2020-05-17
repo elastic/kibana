@@ -4,13 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
+import {
+  ClassificationAnalysis,
+  RegressionAnalysis,
+} from '../../../../plugins/ml/public/application/data_frame_analytics/common/analytics';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlCommon } from './common';
+import { MlApi } from './api';
+
+enum ANALYSIS_CONFIG_TYPE {
+  OUTLIER_DETECTION = 'outlier_detection',
+  REGRESSION = 'regression',
+  CLASSIFICATION = 'classification',
+}
+
+const isRegressionAnalysis = (arg: any): arg is RegressionAnalysis => {
+  const keys = Object.keys(arg);
+  return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.REGRESSION;
+};
+
+const isClassificationAnalysis = (arg: any): arg is ClassificationAnalysis => {
+  const keys = Object.keys(arg);
+  return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
+};
 
 export function MachineLearningDataFrameAnalyticsCreationProvider(
   { getService }: FtrProviderContext,
-  mlCommon: MlCommon
+  mlCommon: MlCommon,
+  mlApi: MlApi
 ) {
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
@@ -111,6 +134,16 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       expect(actualSelection).to.eql(
         expectedSelection,
         `Source index should be '${expectedSelection}' (got '${actualSelection}')`
+      );
+    },
+
+    async assertExcludedFieldsSelection(expectedSelection: string[]) {
+      const actualSelection = await comboBox.getComboBoxSelectedOptions(
+        'mlAnalyticsCreateJobFlyoutExcludesSelect > comboBoxInput'
+      );
+      expect(actualSelection).to.eql(
+        expectedSelection,
+        `Excluded fields should be '${expectedSelection}' (got '${actualSelection}')`
       );
     },
 
@@ -254,10 +287,16 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async setModelMemory(modelMemory: string) {
-      await mlCommon.setValueWithChecks('mlAnalyticsCreateJobFlyoutModelMemoryInput', modelMemory, {
-        clearWithKeyboard: true,
+      await retry.tryForTime(15 * 1000, async () => {
+        await mlCommon.setValueWithChecks(
+          'mlAnalyticsCreateJobFlyoutModelMemoryInput',
+          modelMemory,
+          {
+            clearWithKeyboard: true,
+          }
+        );
+        await this.assertModelMemoryValue(modelMemory);
       });
-      await this.assertModelMemoryValue(modelMemory);
     },
 
     async assertCreateIndexPatternSwitchExists() {
@@ -297,12 +336,18 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await testSubjects.missingOrFail('mlAnalyticsCreateJobFlyoutCreateButton');
     },
 
-    async createAnalyticsJob() {
+    async isCreateButtonDisabled() {
+      const isEnabled = await testSubjects.isEnabled('mlAnalyticsCreateJobFlyoutCreateButton');
+      return !isEnabled;
+    },
+
+    async createAnalyticsJob(analyticsId: string) {
       await testSubjects.click('mlAnalyticsCreateJobFlyoutCreateButton');
       await retry.tryForTime(5000, async () => {
         await this.assertCreateButtonMissing();
         await this.assertStartButtonExists();
       });
+      await mlApi.waitForDataFrameAnalyticsJobToExist(analyticsId);
     },
 
     async assertStartButtonExists() {
@@ -326,10 +371,29 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async closeCreateAnalyticsJobFlyout() {
-      await testSubjects.click('mlAnalyticsCreateJobFlyoutCloseButton');
-      await retry.tryForTime(5000, async () => {
+      await retry.tryForTime(10 * 1000, async () => {
+        await testSubjects.click('mlAnalyticsCreateJobFlyoutCloseButton');
         await testSubjects.missingOrFail('mlAnalyticsCreateJobFlyout');
       });
+    },
+
+    async getHeaderText() {
+      return await testSubjects.getVisibleText('mlDataFrameAnalyticsFlyoutHeaderTitle');
+    },
+
+    async assertInitialCloneJobForm(job: DataFrameAnalyticsConfig) {
+      const jobType = Object.keys(job.analysis)[0];
+      await this.assertJobTypeSelection(jobType);
+      await this.assertJobIdValue(''); // id should be empty
+      await this.assertJobDescriptionValue(String(job.description));
+      await this.assertSourceIndexSelection(job.source.index as string[]);
+      await this.assertDestIndexValue(''); // destination index should be empty
+      if (isClassificationAnalysis(job.analysis) || isRegressionAnalysis(job.analysis)) {
+        await this.assertDependentVariableSelection([job.analysis[jobType].dependent_variable]);
+        await this.assertTrainingPercentValue(String(job.analysis[jobType].training_percent));
+      }
+      await this.assertExcludedFieldsSelection(job.analyzed_fields.excludes);
+      await this.assertModelMemoryValue(job.model_memory_limit);
     },
   };
 }

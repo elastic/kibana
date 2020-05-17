@@ -180,5 +180,5 @@ The map now looks like this:
 image::images/tutorial-visualize-map-2.png[]
 
 . Navigate the map by clicking and dragging.  Use the controls
-on the left to zoom the map and set filters.
+to zoom the map and set filters.
 . *Save* this map with the name `Map Example`.

@@ -6,48 +6,28 @@
 
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import {
-  PingResults,
+  GetPingsParams,
+  HttpResponseBody,
+  PingsResponse,
   Ping,
-  HttpBody,
-} from '../../../../../legacy/plugins/uptime/common/graphql/types';
-import { INDEX_NAMES } from '../../../../../legacy/plugins/uptime/common/constants';
+} from '../../../common/runtime_types';
 
-export interface GetPingsParams {
-  /** @member dateRangeStart timestamp bounds */
-  dateRangeStart: string;
+const DEFAULT_PAGE_SIZE = 25;
 
-  /** @member dateRangeEnd timestamp bounds */
-  dateRangeEnd: string;
-
-  /** @member monitorId optional limit by monitorId */
-  monitorId?: string | null;
-
-  /** @member status optional limit by check statuses */
-  status?: string | null;
-
-  /** @member sort optional sort by timestamp */
-  sort?: string | null;
-
-  /** @member size optional limit query size */
-  size?: number | null;
-
-  /** @member location optional location value for use in filtering*/
-  location?: string | null;
-}
-
-export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingResults> = async ({
+export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingsResponse> = async ({
   callES,
-  dateRangeStart,
-  dateRangeEnd,
+  dynamicSettings,
+  dateRange: { from, to },
+  index,
   monitorId,
   status,
   sort,
-  size,
+  size: sizeParam,
   location,
 }) => {
+  const size = sizeParam ?? DEFAULT_PAGE_SIZE;
   const sortParam = { sort: [{ '@timestamp': { order: sort ?? 'desc' } }] };
-  const sizeParam = size ? { size } : undefined;
-  const filter: any[] = [{ range: { '@timestamp': { gte: dateRangeStart, lte: dateRangeEnd } } }];
+  const filter: any[] = [{ range: { '@timestamp': { gte: from, lte: to } } }];
   if (monitorId) {
     filter.push({ term: { 'monitor.id': monitorId } });
   }
@@ -60,14 +40,14 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingResults> = asy
     postFilterClause = { post_filter: { term: { 'observer.geo.name': location } } };
   }
   const queryContext = { bool: { filter } };
-  const params = {
-    index: INDEX_NAMES.HEARTBEAT,
+  const params: any = {
+    index: dynamicSettings.heartbeatIndices,
     body: {
       query: {
         ...queryContext,
       },
       ...sortParam,
-      ...sizeParam,
+      size,
       aggregations: {
         locations: {
           terms: {
@@ -81,6 +61,10 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingResults> = asy
     },
   };
 
+  if (index) {
+    params.body.from = index * size;
+  }
+
   const {
     hits: { hits, total },
     aggregations: aggs,
@@ -88,25 +72,22 @@ export const getPings: UMElasticsearchQueryFn<GetPingsParams, PingResults> = asy
 
   const locations = aggs?.locations ?? { buckets: [{ key: 'N/A', doc_count: 0 }] };
 
-  const pings: Ping[] = hits.map(({ _id, _source }: any) => {
-    const timestamp = _source['@timestamp'];
-
+  const pings: Ping[] = hits.map((doc: any) => {
+    const { _id, _source } = doc;
     // Calculate here the length of the content string in bytes, this is easier than in client JS, where
     // we don't have access to Buffer.byteLength. There are some hacky ways to do this in the
     // client but this is cleaner.
-    const httpBody: HttpBody | undefined = _source?.http?.response?.body;
+    const httpBody: HttpResponseBody | undefined = _source?.http?.response?.body;
     if (httpBody && httpBody.content) {
       httpBody.content_bytes = Buffer.byteLength(httpBody.content);
     }
 
-    return { id: _id, timestamp, ..._source };
+    return { ..._source, timestamp: _source['@timestamp'], docId: _id };
   });
 
-  const results: PingResults = {
+  return {
     total: total.value,
     locations: locations.buckets.map((bucket: { key: string }) => bucket.key),
     pings,
   };
-
-  return results;
 };

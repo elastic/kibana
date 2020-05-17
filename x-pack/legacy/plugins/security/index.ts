@@ -51,10 +51,7 @@ export const security = (kibana: Record<string, any>) =>
     uiExports: {
       hacks: ['plugins/security/hacks/legacy'],
       injectDefaultVars: (server: Server) => {
-        return {
-          secureCookies: getSecurityPluginSetup(server).__legacyCompat.config.secureCookies,
-          enableSpaceAwarePrivileges: server.config().get('xpack.spaces.enabled'),
-        };
+        return { enableSpaceAwarePrivileges: server.config().get('xpack.spaces.enabled') };
       },
     },
 
@@ -81,9 +78,7 @@ export const security = (kibana: Record<string, any>) =>
       // features are up to date.
       xpackInfo
         .feature(this.id)
-        .registerLicenseCheckResultsGenerator(() =>
-          securityPlugin.__legacyCompat.license.getFeatures()
-        );
+        .registerLicenseCheckResultsGenerator(() => securityPlugin.license.getFeatures());
 
       server.expose({
         getUser: async (request: LegacyRequest) =>

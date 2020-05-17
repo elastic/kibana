@@ -12,3 +12,22 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { AdvancedUiActionsPublicPlugin as Plugin };
+export {
+  SetupContract as AdvancedUiActionsSetup,
+  StartContract as AdvancedUiActionsStart,
+} from './plugin';
+
+export { ActionWizard } from './components';
+export {
+  ActionFactoryDefinition as AdvancedUiActionsActionFactoryDefinition,
+  ActionFactory as AdvancedUiActionsActionFactory,
+  SerializedAction as UiActionsEnhancedSerializedAction,
+  SerializedEvent as UiActionsEnhancedSerializedEvent,
+  AbstractActionStorage as UiActionsEnhancedAbstractActionStorage,
+  DynamicActionManager as UiActionsEnhancedDynamicActionManager,
+  DynamicActionManagerParams as UiActionsEnhancedDynamicActionManagerParams,
+  DynamicActionManagerState as UiActionsEnhancedDynamicActionManagerState,
+  MemoryActionStorage as UiActionsEnhancedMemoryActionStorage,
+} from './dynamic_actions';
+
+export { DrilldownDefinition as UiActionsEnhancedDrilldownDefinition } from './drilldowns';

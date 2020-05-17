@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { Alert, AlertType, AlertTaskState } from '../../../../types';
+import { Alert, AlertType, AlertTaskState, AlertingFrameworkHealth } from '../../../../types';
 import { useAppDependencies } from '../../../app_context';
 import {
   deleteAlerts,
@@ -14,7 +14,6 @@ import {
   enableAlerts,
   muteAlerts,
   unmuteAlerts,
-  deleteAlert,
   disableAlert,
   enableAlert,
   muteAlert,
@@ -24,6 +23,7 @@ import {
   loadAlert,
   loadAlertState,
   loadAlertTypes,
+  health,
 } from '../../../lib/alert_api';
 
 export interface ComponentOpts {
@@ -31,17 +31,28 @@ export interface ComponentOpts {
   unmuteAlerts: (alerts: Alert[]) => Promise<void>;
   enableAlerts: (alerts: Alert[]) => Promise<void>;
   disableAlerts: (alerts: Alert[]) => Promise<void>;
-  deleteAlerts: (alerts: Alert[]) => Promise<void>;
+  deleteAlerts: (
+    alerts: Alert[]
+  ) => Promise<{
+    successes: string[];
+    errors: string[];
+  }>;
   muteAlert: (alert: Alert) => Promise<void>;
   unmuteAlert: (alert: Alert) => Promise<void>;
   muteAlertInstance: (alert: Alert, alertInstanceId: string) => Promise<void>;
   unmuteAlertInstance: (alert: Alert, alertInstanceId: string) => Promise<void>;
   enableAlert: (alert: Alert) => Promise<void>;
   disableAlert: (alert: Alert) => Promise<void>;
-  deleteAlert: (alert: Alert) => Promise<void>;
+  deleteAlert: (
+    alert: Alert
+  ) => Promise<{
+    successes: string[];
+    errors: string[];
+  }>;
   loadAlert: (id: Alert['id']) => Promise<Alert>;
   loadAlertState: (id: Alert['id']) => Promise<AlertTaskState>;
   loadAlertTypes: () => Promise<AlertType[]>;
+  getHealth: () => Promise<AlertingFrameworkHealth>;
 }
 
 export type PropsWithOptionalApiHandlers<T> = Omit<T, keyof ComponentOpts> & Partial<ComponentOpts>;
@@ -102,10 +113,11 @@ export function withBulkAlertOperations<T>(
             return disableAlert({ http, id: alert.id });
           }
         }}
-        deleteAlert={async (alert: Alert) => deleteAlert({ http, id: alert.id })}
+        deleteAlert={async (alert: Alert) => deleteAlerts({ http, ids: [alert.id] })}
         loadAlert={async (alertId: Alert['id']) => loadAlert({ http, alertId })}
         loadAlertState={async (alertId: Alert['id']) => loadAlertState({ http, alertId })}
         loadAlertTypes={async () => loadAlertTypes({ http })}
+        getHealth={async () => health({ http })}
       />
     );
   };

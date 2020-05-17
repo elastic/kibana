@@ -16,21 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { ManagementApp, ManagementSectionId } from '../../management/public';
 import { ComponentRegistry } from './component_registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
-import { registerAdvSettingsMgmntApp } from './management_app';
 
 const component = new ComponentRegistry();
 
+const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
+  defaultMessage: 'Advanced Settings',
+});
+
 export class AdvancedSettingsPlugin
   implements Plugin<AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup> {
+  private managementApp?: ManagementApp;
   public setup(core: CoreSetup, { management }: AdvancedSettingsPluginSetup) {
-    registerAdvSettingsMgmntApp({
-      management,
-      getStartServices: core.getStartServices,
-      componentRegistry: component.start,
+    const kibanaSection = management.sections.getSection(ManagementSectionId.Kibana);
+
+    this.managementApp = kibanaSection.registerApp({
+      id: 'settings',
+      title,
+      order: 3,
+      async mount(params) {
+        const { mountManagementSection } = await import(
+          './management_app/mount_management_section'
+        );
+        return mountManagementSection(core.getStartServices, params, component.start);
+      },
     });
 
     return {
@@ -39,6 +52,10 @@ export class AdvancedSettingsPlugin
   }
 
   public start(core: CoreStart) {
+    if (!core.application.capabilities.management.kibana.settings) {
+      this.managementApp!.disable();
+    }
+
     return {
       component: component.start,
     };

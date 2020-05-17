@@ -11,7 +11,7 @@ import {
   httpServerMock,
   loggingServiceMock,
 } from 'src/core/server/mocks';
-import { CUSTOM_ELEMENT_TYPE } from '../../../../../legacy/plugins/canvas/common/lib/constants';
+import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { initializeCreateCustomElementRoute } from './create';
 import {
   IRouter,

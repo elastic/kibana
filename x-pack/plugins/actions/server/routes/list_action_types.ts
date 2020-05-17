@@ -11,13 +11,13 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { LicenseState } from '../lib/license_state';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { ILicenseState, verifyApiAccess } from '../lib';
+import { BASE_ACTION_API_PATH } from '../../common';
 
-export const listActionTypesRoute = (router: IRouter, licenseState: LicenseState) => {
+export const listActionTypesRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.get(
     {
-      path: `/api/action/types`,
+      path: `${BASE_ACTION_API_PATH}/types`,
       validate: {},
       options: {
         tags: ['access:actions-read'],
@@ -25,10 +25,13 @@ export const listActionTypesRoute = (router: IRouter, licenseState: LicenseState
     },
     router.handleLegacyErrors(async function(
       context: RequestHandlerContext,
-      req: KibanaRequest<any, any, any, any>,
+      req: KibanaRequest<unknown, unknown, unknown>,
       res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
+    ): Promise<IKibanaResponse> {
       verifyApiAccess(licenseState);
+      if (!context.actions) {
+        return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
+      }
       return res.ok({
         body: context.actions.listTypes(),
       });

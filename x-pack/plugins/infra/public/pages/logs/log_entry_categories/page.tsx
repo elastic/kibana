@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
-
 import { ColumnarPage } from '../../../components/page';
 import { LogEntryCategoriesPageContent } from './page_content';
 import { LogEntryCategoriesPageProviders } from './page_providers';
 
 export const LogEntryCategoriesPage = () => {
   return (
-    <LogEntryCategoriesPageProviders>
-      <ColumnarPage data-test-subj="logsLogEntryCategoriesPage">
-        <LogEntryCategoriesPageContent />
-      </ColumnarPage>
-    </LogEntryCategoriesPageProviders>
+    <EuiErrorBoundary>
+      <LogEntryCategoriesPageProviders>
+        <ColumnarPage data-test-subj="logsLogEntryCategoriesPage">
+          <LogEntryCategoriesPageContent />
+        </ColumnarPage>
+      </LogEntryCategoriesPageProviders>
+    </EuiErrorBoundary>
   );
 };

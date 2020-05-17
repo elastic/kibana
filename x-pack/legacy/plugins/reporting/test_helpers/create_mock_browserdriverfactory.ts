@@ -10,16 +10,18 @@ import * as contexts from '../export_types/common/lib/screenshots/constants';
 import { ElementsPositionAndAttribute } from '../export_types/common/lib/screenshots/types';
 import { HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from '../server/browsers';
 import { createDriverFactory } from '../server/browsers/chromium';
-import { BrowserConfig, Logger, NetworkPolicy } from '../types';
+import { CaptureConfig } from '../server/types';
+import { Logger } from '../types';
 
 interface CreateMockBrowserDriverFactoryOpts {
   evaluate: jest.Mock<Promise<any>, any[]>;
   waitForSelector: jest.Mock<Promise<any>, any[]>;
   screenshot: jest.Mock<Promise<any>, any[]>;
+  open: jest.Mock<Promise<any>, any[]>;
   getCreatePage: (driver: HeadlessChromiumDriver) => jest.Mock<any, any>;
 }
 
-export const mockSelectors = {
+const mockSelectors = {
   renderComplete: 'renderedSelector',
   itemsCountAttribute: 'itemsSelector',
   screenshot: 'screenshotSelector',
@@ -33,7 +35,7 @@ const getMockElementsPositionAndAttributes = (
 ): ElementsPositionAndAttribute[] => [
   {
     position: {
-      boundingClientRect: { top: 0, left: 0, width: 10, height: 11 },
+      boundingClientRect: { top: 0, left: 0, width: 800, height: 600 },
       scroll: { x: 0, y: 0 },
     },
     attributes: { title, description },
@@ -73,14 +75,11 @@ mockBrowserEvaluate.mockImplementation(() => {
   if (mockCall === contexts.CONTEXT_ELEMENTATTRIBUTES) {
     return Promise.resolve(getMockElementsPositionAndAttributes('Default Mock Title', 'Default '));
   }
-  if (mockCall === contexts.CONTEXT_CHECKFORTOASTMESSAGE) {
-    return Promise.resolve('Toast Message');
-  }
   throw new Error(mockCall);
 });
 const mockScreenshot = jest.fn();
 mockScreenshot.mockImplementation((item: ElementsPositionAndAttribute) => {
-  return Promise.resolve(`allyourBase64 of ${Object.keys(item)}`);
+  return Promise.resolve(`allyourBase64`);
 });
 const getCreatePage = (driver: HeadlessChromiumDriver) =>
   jest.fn().mockImplementation(() => Rx.of({ driver, exit$: Rx.never() }));
@@ -89,40 +88,45 @@ const defaultOpts: CreateMockBrowserDriverFactoryOpts = {
   evaluate: mockBrowserEvaluate,
   waitForSelector: mockWaitForSelector,
   screenshot: mockScreenshot,
+  open: jest.fn(),
   getCreatePage,
 };
 
 export const createMockBrowserDriverFactory = async (
   logger: Logger,
-  opts: Partial<CreateMockBrowserDriverFactoryOpts>
+  opts: Partial<CreateMockBrowserDriverFactoryOpts> = {}
 ): Promise<HeadlessChromiumDriverFactory> => {
-  const browserConfig = {
-    inspect: true,
-    userDataDir: '/usr/data/dir',
-    viewport: { width: 12, height: 12 },
-    disableSandbox: false,
-    proxy: { enabled: false },
-  } as BrowserConfig;
+  const captureConfig: CaptureConfig = {
+    timeouts: { openUrl: 30000, waitForElements: 30000, renderComplete: 30000 },
+    browser: {
+      type: 'chromium',
+      chromium: {
+        inspect: false,
+        disableSandbox: false,
+        proxy: { enabled: false, server: undefined, bypass: undefined },
+      },
+      autoDownload: false,
+    },
+    networkPolicy: { enabled: true, rules: [] },
+    viewport: { width: 800, height: 600 },
+    loadDelay: 2000,
+    zoom: 2,
+    maxAttempts: 1,
+  };
 
   const binaryPath = '/usr/local/share/common/secure/';
-  const queueTimeout = 55;
-  const networkPolicy = {} as NetworkPolicy;
-
-  const mockBrowserDriverFactory = await createDriverFactory(
-    binaryPath,
-    logger,
-    browserConfig,
-    queueTimeout,
-    networkPolicy
-  );
-
+  const mockBrowserDriverFactory = await createDriverFactory(binaryPath, logger, captureConfig);
   const mockPage = {} as Page;
-  const mockBrowserDriver = new HeadlessChromiumDriver(mockPage, { inspect: true, networkPolicy });
+  const mockBrowserDriver = new HeadlessChromiumDriver(mockPage, {
+    inspect: true,
+    networkPolicy: captureConfig.networkPolicy,
+  });
 
   // mock the driver methods as either default mocks or passed-in
   mockBrowserDriver.waitForSelector = opts.waitForSelector ? opts.waitForSelector : defaultOpts.waitForSelector; // prettier-ignore
   mockBrowserDriver.evaluate = opts.evaluate ? opts.evaluate : defaultOpts.evaluate;
   mockBrowserDriver.screenshot = opts.screenshot ? opts.screenshot : defaultOpts.screenshot;
+  mockBrowserDriver.open = opts.open ? opts.open : defaultOpts.open;
 
   mockBrowserDriverFactory.createPage = opts.getCreatePage
     ? opts.getCreatePage(mockBrowserDriver)

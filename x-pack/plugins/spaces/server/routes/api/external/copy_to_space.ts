@@ -12,7 +12,6 @@ import {
   resolveCopySavedObjectsToSpacesConflictsFactory,
 } from '../../../lib/copy_to_spaces';
 import { ExternalRouteDeps } from '.';
-import { COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS } from '../../../lib/copy_to_spaces/copy_to_spaces';
 import { SPACE_ID_REGEX } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
 
@@ -22,7 +21,7 @@ const areObjectsUnique = (objects: SavedObjectIdentifier[]) =>
   _.uniq(objects, (o: SavedObjectIdentifier) => `${o.type}:${o.id}`).length === objects.length;
 
 export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
-  const { externalRouter, spacesService, getSavedObjects } = deps;
+  const { externalRouter, spacesService, getImportExportObjectLimit, getStartServices } = deps;
 
   externalRouter.post(
     {
@@ -67,13 +66,12 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const savedObjectsClient = getSavedObjects().getScopedSavedObjectsClient(
-        request,
-        COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS
-      );
+      const [startServices] = await getStartServices();
+
       const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
-        savedObjectsClient,
-        getSavedObjects()
+        startServices.savedObjects,
+        getImportExportObjectLimit,
+        request
       );
       const { spaces: destinationSpaceIds, objects, includeReferences, overwrite } = request.body;
       const sourceSpaceId = spacesService.getSpaceId(request);
@@ -128,13 +126,12 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const savedObjectsClient = getSavedObjects().getScopedSavedObjectsClient(
-        request,
-        COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS
-      );
+      const [startServices] = await getStartServices();
+
       const resolveCopySavedObjectsToSpacesConflicts = resolveCopySavedObjectsToSpacesConflictsFactory(
-        savedObjectsClient,
-        getSavedObjects()
+        startServices.savedObjects,
+        getImportExportObjectLimit,
+        request
       );
       const { objects, includeReferences, retries } = request.body;
       const sourceSpaceId = spacesService.getSpaceId(request);

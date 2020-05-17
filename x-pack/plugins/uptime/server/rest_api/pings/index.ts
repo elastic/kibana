@@ -5,3 +5,4 @@
  */
 
 export { createGetPingsRoute } from './get_pings';
+export { createGetPingHistogramRoute } from './get_ping_histogram';

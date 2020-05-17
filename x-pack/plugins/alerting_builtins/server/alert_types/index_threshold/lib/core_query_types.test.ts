@@ -19,7 +19,8 @@ const DefaultParams: Writable<Partial<CoreQueryParams>> = {
   timeWindowUnit: 'm',
 };
 
-export function runTests(schema: ObjectType, defaultTypeParams: Record<string, any>): void {
+export function runTests(schema: ObjectType, defaultTypeParams: Record<string, unknown>): void {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let params: any;
 
   describe('coreQueryTypes', () => {
@@ -64,15 +65,15 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, a
       params.index = '';
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
 "[index]: types that failed validation:
-- [index.0]: value is [] but it must have a minimum length of [1].
-- [index.1]: could not parse array value from []"
+- [index.0]: value has length [0] but it must have a minimum length of [1].
+- [index.1]: could not parse array value from json input"
 `);
 
       params.index = ['', 'a'];
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(`
 "[index]: types that failed validation:
 - [index.0]: expected value of type [string] but got [Array]
-- [index.1.0]: value is [] but it must have a minimum length of [1]."
+- [index.1.0]: value has length [0] but it must have a minimum length of [1]."
 `);
     });
 
@@ -89,7 +90,7 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, a
 
       params.timeField = '';
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[timeField]: value is [] but it must have a minimum length of [1]."`
+        `"[timeField]: value has length [0] but it must have a minimum length of [1]."`
       );
     });
 
@@ -113,7 +114,7 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, a
 
       params.aggField = '';
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[aggField]: value is [] but it must have a minimum length of [1]."`
+        `"[aggField]: value has length [0] but it must have a minimum length of [1]."`
       );
     });
 
@@ -126,7 +127,7 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, a
 
       params.termField = '';
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[termField]: value is [] but it must have a minimum length of [1]."`
+        `"[termField]: value has length [0] but it must have a minimum length of [1]."`
       );
     });
 
@@ -145,7 +146,7 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, a
 
       params.termSize = 0;
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[termSize]: Value is [0] but it must be equal to or greater than [1]."`
+        `"[termSize]: Value must be equal to or greater than [1]."`
       );
     });
 
@@ -157,7 +158,7 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, a
 
       params.timeWindowSize = 0;
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
-        `"[timeWindowSize]: Value is [0] but it must be equal to or greater than [1]."`
+        `"[timeWindowSize]: Value must be equal to or greater than [1]."`
       );
     });
 
@@ -186,7 +187,7 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, a
     return () => validate();
   }
 
-  function validate(): any {
+  function validate(): unknown {
     return schema.validate(params);
   }
 }

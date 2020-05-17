@@ -1,11 +1,21 @@
 #!/usr/bin/env bash
 
-source test/scripts/jenkins_test_setup_xpack.sh
+source src/dev/ci_setup/setup_env.sh
 source "$KIBANA_DIR/src/dev/ci_setup/setup_percy.sh"
 
+echo " -> building and extracting default Kibana distributable"
+cd "$KIBANA_DIR"
+node scripts/build --debug --no-oss
+linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
+installDir="$PARENT_DIR/install/kibana"
+mkdir -p "$installDir"
+tar -xzf "$linuxBuild" -C "$installDir" --strip=1
+
+echo " -> running visual regression tests from x-pack directory"
+cd "$XPACK_DIR"
 checks-reporter-with-killswitch "X-Pack visual regression tests" \
-  yarn run percy exec -t 500 \
+  yarn percy exec -t 500 -- -- \
   node scripts/functional_tests \
     --debug --bail \
-    --kibana-install-dir "$KIBANA_INSTALL_DIR" \
-    --config test/visual_regression/config.js;
+    --kibana-install-dir "$installDir" \
+    --config test/visual_regression/config.ts;

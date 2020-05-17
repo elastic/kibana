@@ -3,15 +3,24 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
-import { Observable, combineLatest, AsyncSubject } from 'rxjs';
+import {
+  PluginInitializerContext,
+  Plugin,
+  CoreSetup,
+  CoreStart,
+  Logger
+} from 'src/core/server';
+import { Observable, combineLatest } from 'rxjs';
 import { map, take } from 'rxjs/operators';
-import { Server } from 'hapi';
-import { once } from 'lodash';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { ObservabilityPluginSetup } from '../../observability/server';
+import { SecurityPluginSetup } from '../../security/public';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import { TaskManagerSetupContract } from '../../task_manager/server';
+import { AlertingPlugin } from '../../alerting/server';
+import { ActionsPlugin } from '../../actions/server';
 import { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server';
-import { makeApmUsageCollector } from './lib/apm_telemetry';
 import { createApmAgentConfigurationIndex } from './lib/settings/agent_configuration/create_agent_config_index';
+import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_custom_link_index';
 import { createApmApi } from './routes/create_apm_api';
 import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
 import { APMConfig, mergeConfigs, APMXPackConfig } from '.';
@@ -20,94 +29,126 @@ import { tutorialProvider } from './tutorial';
 import { CloudSetup } from '../../cloud/server';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
 import { LicensingPluginSetup } from '../../licensing/public';
+import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
+import { createApmTelemetry } from './lib/apm_telemetry';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../../plugins/features/server';
+import { APM_FEATURE } from './feature';
+import { apmIndices, apmTelemetry } from './saved_objects';
 
-export interface LegacySetup {
-  server: Server;
-}
-
-export interface APMPluginContract {
+export interface APMPluginSetup {
   config$: Observable<APMConfig>;
-  registerLegacyAPI: (__LEGACY: LegacySetup) => void;
   getApmIndices: () => ReturnType<typeof getApmIndices>;
 }
 
-export class APMPlugin implements Plugin<APMPluginContract> {
-  legacySetup$: AsyncSubject<LegacySetup>;
+export class APMPlugin implements Plugin<APMPluginSetup> {
+  private currentConfig?: APMConfig;
+  private logger?: Logger;
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
-    this.legacySetup$ = new AsyncSubject();
   }
 
   public async setup(
     core: CoreSetup,
     plugins: {
-      apm_oss: APMOSSPluginSetup;
+      apmOss: APMOSSPluginSetup;
       home: HomeServerPluginSetup;
       licensing: LicensingPluginSetup;
       cloud?: CloudSetup;
       usageCollection?: UsageCollectionSetup;
+      taskManager?: TaskManagerSetupContract;
+      alerting?: AlertingPlugin['setup'];
+      actions?: ActionsPlugin['setup'];
+      observability?: ObservabilityPluginSetup;
+      features: FeaturesPluginSetup;
+      security?: SecurityPluginSetup;
     }
   ) {
-    const logger = this.initContext.logger.get('apm');
+    this.logger = this.initContext.logger.get();
     const config$ = this.initContext.config.create<APMXPackConfig>();
-    const mergedConfig$ = combineLatest(plugins.apm_oss.config$, config$).pipe(
+    const mergedConfig$ = combineLatest(plugins.apmOss.config$, config$).pipe(
       map(([apmOssConfig, apmConfig]) => mergeConfigs(apmOssConfig, apmConfig))
     );
 
-    this.legacySetup$.subscribe(__LEGACY => {
-      createApmApi().init(core, { config$: mergedConfig$, logger, __LEGACY });
-    });
+    core.savedObjects.registerType(apmIndices);
+    core.savedObjects.registerType(apmTelemetry);
 
-    const currentConfig = await mergedConfig$.pipe(take(1)).toPromise();
+    if (plugins.actions && plugins.alerting) {
+      registerApmAlerts({
+        alerting: plugins.alerting,
+        actions: plugins.actions,
+        config$: mergedConfig$
+      });
+    }
 
-    // create agent configuration index without blocking setup lifecycle
-    createApmAgentConfigurationIndex({
-      esClient: core.elasticsearch.dataClient,
-      config: currentConfig,
-      logger
-    });
+    this.currentConfig = await mergedConfig$.pipe(take(1)).toPromise();
+
+    if (
+      plugins.taskManager &&
+      plugins.usageCollection &&
+      this.currentConfig['xpack.apm.telemetryCollectionEnabled']
+    ) {
+      createApmTelemetry({
+        core,
+        config$: mergedConfig$,
+        usageCollector: plugins.usageCollection,
+        taskManager: plugins.taskManager,
+        logger: this.logger
+      });
+    }
 
     plugins.home.tutorials.registerTutorial(
       tutorialProvider({
-        isEnabled: currentConfig['xpack.apm.ui.enabled'],
-        indexPatternTitle: currentConfig['apm_oss.indexPattern'],
+        isEnabled: this.currentConfig['xpack.apm.ui.enabled'],
+        indexPatternTitle: this.currentConfig['apm_oss.indexPattern'],
         cloud: plugins.cloud,
         indices: {
-          errorIndices: currentConfig['apm_oss.errorIndices'],
-          metricsIndices: currentConfig['apm_oss.metricsIndices'],
-          onboardingIndices: currentConfig['apm_oss.onboardingIndices'],
-          sourcemapIndices: currentConfig['apm_oss.sourcemapIndices'],
-          transactionIndices: currentConfig['apm_oss.transactionIndices']
+          errorIndices: this.currentConfig['apm_oss.errorIndices'],
+          metricsIndices: this.currentConfig['apm_oss.metricsIndices'],
+          onboardingIndices: this.currentConfig['apm_oss.onboardingIndices'],
+          sourcemapIndices: this.currentConfig['apm_oss.sourcemapIndices'],
+          transactionIndices: this.currentConfig['apm_oss.transactionIndices']
         }
       })
     );
+    plugins.features.registerFeature(APM_FEATURE);
 
-    const usageCollection = plugins.usageCollection;
-    if (usageCollection) {
-      getInternalSavedObjectsClient(core)
-        .then(savedObjectsClient => {
-          makeApmUsageCollector(usageCollection, savedObjectsClient);
-        })
-        .catch(error => {
-          logger.error('Unable to initialize use collection');
-          logger.error(error.message);
-        });
-    }
+    createApmApi().init(core, {
+      config$: mergedConfig$,
+      logger: this.logger!,
+      plugins: {
+        observability: plugins.observability,
+        security: plugins.security
+      }
+    });
 
     return {
       config$: mergedConfig$,
-      registerLegacyAPI: once((__LEGACY: LegacySetup) => {
-        this.legacySetup$.next(__LEGACY);
-        this.legacySetup$.complete();
-      }),
       getApmIndices: async () =>
         getApmIndices({
           savedObjectsClient: await getInternalSavedObjectsClient(core),
-          config: currentConfig
+          config: await mergedConfig$.pipe(take(1)).toPromise()
         })
     };
   }
 
-  public start() {}
+  public start(core: CoreStart) {
+    if (this.currentConfig == null || this.logger == null) {
+      throw new Error('APMPlugin needs to be setup before calling start()');
+    }
+
+    // create agent configuration index without blocking start lifecycle
+    createApmAgentConfigurationIndex({
+      esClient: core.elasticsearch.legacy.client,
+      config: this.currentConfig,
+      logger: this.logger
+    });
+    // create custom action index without blocking start lifecycle
+    createApmCustomLinkIndex({
+      esClient: core.elasticsearch.legacy.client,
+      config: this.currentConfig,
+      logger: this.logger
+    });
+  }
+
   public stop() {}
 }

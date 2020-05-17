@@ -35,7 +35,7 @@ const SecretsSchema = schema.object(secretsSchemaProps);
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 
 const ParamsSchema = schema.object({
-  message: schema.string(),
+  message: schema.string({ minLength: 1 }),
 });
 
 // action type definition
@@ -50,6 +50,7 @@ export function getActionType({
 }): ActionType {
   return {
     id: '.slack',
+    minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.actions.builtin.slackTitle', {
       defaultMessage: 'Slack',
     }),
@@ -155,7 +156,7 @@ async function slackExecutor(
   return successResult(actionId, result);
 }
 
-function successResult(actionId: string, data: any): ActionTypeExecutorResult {
+function successResult(actionId: string, data: unknown): ActionTypeExecutorResult {
   return { status: 'ok', data, actionId };
 }
 

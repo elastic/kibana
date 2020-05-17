@@ -17,11 +17,11 @@
  * under the License.
  */
 import _ from 'lodash';
-import mappings from '../../mappings/mappings';
+import { getFields } from '../../mappings/mappings';
 import { ListComponent } from './list_component';
 
 function FieldGenerator(context) {
-  return _.map(mappings.getFields(context.indices, context.types), function(field) {
+  return _.map(getFields(context.indices, context.types), function(field) {
     return { name: field.name, meta: field.type };
   });
 }

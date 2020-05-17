@@ -6,7 +6,8 @@
 
 import {
   staticIndexPatternRoute,
-  dynamicIndexPatternRoute
+  dynamicIndexPatternRoute,
+  apmIndexPatternTitleRoute
 } from './index_pattern';
 import {
   errorDistributionRoute,
@@ -18,10 +19,12 @@ import {
   serviceTransactionTypesRoute,
   servicesRoute,
   serviceNodeMetadataRoute,
-  serviceAnnotationsRoute
+  serviceAnnotationsRoute,
+  serviceAnnotationsCreateRoute
 } from './services';
 import {
   agentConfigurationRoute,
+  getSingleAgentConfigurationRoute,
   agentConfigurationSearchRoute,
   deleteAgentConfigurationRoute,
   listAgentConfigurationEnvironmentsRoute,
@@ -59,12 +62,20 @@ import {
 import { createApi } from './create_api';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
 import { indicesPrivilegesRoute } from './security';
+import {
+  createCustomLinkRoute,
+  updateCustomLinkRoute,
+  deleteCustomLinkRoute,
+  listCustomLinksRoute,
+  customLinkTransactionRoute
+} from './settings/custom_link';
 
 const createApmApi = () => {
   const api = createApi()
     // index pattern
     .add(staticIndexPatternRoute)
     .add(dynamicIndexPatternRoute)
+    .add(apmIndexPatternTitleRoute)
 
     // Errors
     .add(errorDistributionRoute)
@@ -77,8 +88,10 @@ const createApmApi = () => {
     .add(servicesRoute)
     .add(serviceNodeMetadataRoute)
     .add(serviceAnnotationsRoute)
+    .add(serviceAnnotationsCreateRoute)
 
     // Agent configuration
+    .add(getSingleAgentConfigurationRoute)
     .add(agentConfigurationAgentNameRoute)
     .add(agentConfigurationRoute)
     .add(agentConfigurationSearchRoute)
@@ -126,7 +139,14 @@ const createApmApi = () => {
     .add(serviceMapServiceNodeRoute)
 
     // security
-    .add(indicesPrivilegesRoute);
+    .add(indicesPrivilegesRoute)
+
+    // Custom links
+    .add(createCustomLinkRoute)
+    .add(updateCustomLinkRoute)
+    .add(deleteCustomLinkRoute)
+    .add(listCustomLinksRoute)
+    .add(customLinkTransactionRoute);
 
   return api;
 };

@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { render, act, RenderResult, fireEvent } from '@testing-library/react';
-import { useCamera } from './use_camera';
+import { renderHook, act as hooksAct } from '@testing-library/react-hooks';
+import { useCamera, useAutoUpdatingClientRect } from './use_camera';
 import { Provider } from 'react-redux';
 import * as selectors from '../store/selectors';
 import { storeFactory } from '../store';
 import { Matrix3, ResolverAction, ResolverStore, SideEffectSimulator } from '../types';
-import { LegacyEndpointEvent } from '../../../../common/types';
+import { ResolverEvent } from '../../../../common/types';
 import { SideEffectContext } from './side_effect_context';
 import { applyMatrix3 } from '../lib/vector2';
 import { sideEffectSimulator } from './side_effect_simulator';
@@ -32,7 +33,7 @@ describe('useCamera on an unpainted element', () => {
       const camera = useCamera();
       const { ref, onMouseDown } = camera;
       projectionMatrix = camera.projectionMatrix;
-      return <div data-testid={testID} onMouseDown={onMouseDown} ref={ref} />;
+      return <div data-test-subj={testID} onMouseDown={onMouseDown} ref={ref} />;
     };
 
     simulator = sideEffectSimulator();
@@ -81,6 +82,28 @@ describe('useCamera on an unpainted element', () => {
         });
       });
     });
+    test('should observe all resize reference changes', async () => {
+      const wrapper: FunctionComponent = ({ children }) => (
+        <Provider store={store}>
+          <SideEffectContext.Provider value={simulator.mock}>{children}</SideEffectContext.Provider>
+        </Provider>
+      );
+
+      const { result } = renderHook(() => useAutoUpdatingClientRect(), { wrapper });
+      const resizeObserverSpy = jest.spyOn(simulator.mock.ResizeObserver.prototype, 'observe');
+
+      let [rect, ref] = result.current;
+      hooksAct(() => ref(element));
+      expect(resizeObserverSpy).toHaveBeenCalledWith(element);
+
+      const div = document.createElement('div');
+      hooksAct(() => ref(div));
+      expect(resizeObserverSpy).toHaveBeenCalledWith(div);
+
+      [rect, ref] = result.current;
+      expect(rect?.width).toBe(0);
+    });
+
     test('provides a projection matrix that inverts the y axis and translates 400,300 (center of the element)', () => {
       expect(applyMatrix3([0, 0], projectionMatrix)).toEqual([400, 300]);
     });
@@ -133,9 +156,9 @@ describe('useCamera on an unpainted element', () => {
       expect(simulator.mock.requestAnimationFrame).not.toHaveBeenCalled();
     });
     describe('when the camera begins animation', () => {
-      let process: LegacyEndpointEvent;
+      let process: ResolverEvent;
       beforeEach(() => {
-        const events: LegacyEndpointEvent[] = [];
+        const events: ResolverEvent[] = [];
         const numberOfEvents: number = Math.floor(Math.random() * 10 + 1);
 
         for (let index = 0; index < numberOfEvents; index++) {
@@ -153,18 +176,12 @@ describe('useCamera on an unpainted element', () => {
         }
         const serverResponseAction: ResolverAction = {
           type: 'serverReturnedResolverData',
-          payload: {
-            data: {
-              result: {
-                search_results: events,
-              },
-            },
-          },
+          payload: events,
         };
         act(() => {
           store.dispatch(serverResponseAction);
         });
-        const processes: LegacyEndpointEvent[] = [
+        const processes: ResolverEvent[] = [
           ...selectors
             .processNodePositionsAndEdgeLineSegments(store.getState())
             .processNodePositions.keys(),

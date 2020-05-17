@@ -16,13 +16,21 @@ export const config = {
   },
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    serviceMapEnabled: schema.boolean({ defaultValue: false }),
+    serviceMapEnabled: schema.boolean({ defaultValue: true }),
+    serviceMapFingerprintBucketSize: schema.number({ defaultValue: 100 }),
+    serviceMapTraceIdBucketSize: schema.number({ defaultValue: 65 }),
+    serviceMapFingerprintGlobalBucketSize: schema.number({
+      defaultValue: 1000
+    }),
+    serviceMapTraceIdGlobalBucketSize: schema.number({ defaultValue: 6 }),
+    serviceMapMaxTracesPerRequest: schema.number({ defaultValue: 50 }),
     autocreateApmIndexPattern: schema.boolean({ defaultValue: true }),
     ui: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       transactionGroupBucketSize: schema.number({ defaultValue: 100 }),
       maxTraceItems: schema.number({ defaultValue: 1000 })
-    })
+    }),
+    telemetryCollectionEnabled: schema.boolean({ defaultValue: true })
   })
 };
 
@@ -41,11 +49,22 @@ export function mergeConfigs(
     'apm_oss.onboardingIndices': apmOssConfig.onboardingIndices,
     'apm_oss.indexPattern': apmOssConfig.indexPattern,
     'xpack.apm.serviceMapEnabled': apmConfig.serviceMapEnabled,
+    'xpack.apm.serviceMapFingerprintBucketSize':
+      apmConfig.serviceMapFingerprintBucketSize,
+    'xpack.apm.serviceMapTraceIdBucketSize':
+      apmConfig.serviceMapTraceIdBucketSize,
+    'xpack.apm.serviceMapFingerprintGlobalBucketSize':
+      apmConfig.serviceMapFingerprintGlobalBucketSize,
+    'xpack.apm.serviceMapTraceIdGlobalBucketSize':
+      apmConfig.serviceMapTraceIdGlobalBucketSize,
+    'xpack.apm.serviceMapMaxTracesPerRequest':
+      apmConfig.serviceMapMaxTracesPerRequest,
     'xpack.apm.ui.enabled': apmConfig.ui.enabled,
     'xpack.apm.ui.maxTraceItems': apmConfig.ui.maxTraceItems,
     'xpack.apm.ui.transactionGroupBucketSize':
       apmConfig.ui.transactionGroupBucketSize,
-    'xpack.apm.autocreateApmIndexPattern': apmConfig.autocreateApmIndexPattern
+    'xpack.apm.autocreateApmIndexPattern': apmConfig.autocreateApmIndexPattern,
+    'xpack.apm.telemetryCollectionEnabled': apmConfig.telemetryCollectionEnabled
   };
 }
 
@@ -54,4 +73,4 @@ export type APMConfig = ReturnType<typeof mergeConfigs>;
 export const plugin = (initContext: PluginInitializerContext) =>
   new APMPlugin(initContext);
 
-export { APMPlugin, APMPluginContract } from './plugin';
+export { APMPlugin, APMPluginSetup } from './plugin';

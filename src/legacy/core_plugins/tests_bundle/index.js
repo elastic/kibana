@@ -18,6 +18,7 @@
  */
 
 import { createReadStream } from 'fs';
+import { resolve } from 'path';
 
 import globby from 'globby';
 import MultiStream from 'multistream';
@@ -40,6 +41,7 @@ export default kibana => {
     },
 
     uiExports: {
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       async __bundleProvider__(kbnServer) {
         const modules = new Set();
 
@@ -146,6 +148,19 @@ export default kibana => {
               .response(stream)
               .code(200)
               .type('text/css');
+          },
+        });
+
+        // Sets global variables normally set by the bootstrap.js script
+        kbnServer.server.route({
+          path: '/test_bundle/karma/globals.js',
+          method: 'GET',
+          async handler(req, h) {
+            const basePath = config.get('server.basePath');
+
+            const file = `window.__kbnPublicPath__ = { 'kbn-ui-shared-deps': "${basePath}/bundles/kbn-ui-shared-deps/" };`;
+
+            return h.response(file).header('content-type', 'application/json');
           },
         });
       },

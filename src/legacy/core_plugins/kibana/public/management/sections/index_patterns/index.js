@@ -18,7 +18,7 @@
  */
 
 import { management } from 'ui/management';
-import { setup as managementSetup } from '../../../../../management/public/legacy';
+import { ManagementSectionId } from '../../../../../../../plugins/management/public';
 import './create_index_pattern_wizard';
 import './edit_index_pattern';
 import uiRoutes from 'ui/routes';
@@ -111,7 +111,7 @@ uiModules
       transclude: true,
       template: indexTemplate,
       link: async function($scope) {
-        const indexPatternCreationOptions = await managementSetup.indexPattern.creation.getIndexPatternCreationOptions(
+        const indexPatternCreationOptions = await npStart.plugins.indexPatternManagement.creation.getIndexPatternCreationOptions(
           url => {
             $scope.$evalAsync(() => kbnUrl.change(url));
           }
@@ -124,7 +124,7 @@ uiModules
                 const id = pattern.id;
                 const title = pattern.get('title');
                 const isDefault = $scope.defaultIndex === id;
-                const tags = managementSetup.indexPattern.list.getIndexPatternTags(
+                const tags = npStart.plugins.indexPatternManagement.list.getIndexPatternTags(
                   pattern,
                   isDefault
                 );
@@ -164,7 +164,7 @@ uiModules
     };
   });
 
-management.getSection('kibana').register('index_patterns', {
+management.getSection(ManagementSectionId.Kibana).register('index_patterns', {
   display: i18n.translate('kbn.management.indexPattern.sectionsHeader', {
     defaultMessage: 'Index Patterns',
   }),

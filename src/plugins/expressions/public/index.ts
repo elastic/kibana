@@ -37,7 +37,7 @@ export {
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
 } from './react_expression_renderer';
-export { ExpressionRenderHandler } from './render';
+export { ExpressionRenderHandler, ExpressionRendererEvent } from './render';
 export {
   AnyExpressionFunctionDefinition,
   AnyExpressionTypeDefinition,
@@ -78,7 +78,7 @@ export {
   ExpressionValueRender,
   ExpressionValueSearchContext,
   ExpressionValueUnboxed,
-  Filter,
+  ExpressionValueFilter,
   Font,
   FontLabel,
   FontStyle,
@@ -94,6 +94,7 @@ export {
   KibanaContext,
   KibanaDatatable,
   KibanaDatatableColumn,
+  KibanaDatatableColumnMeta,
   KibanaDatatableRow,
   KnownTypeToString,
   Overflow,

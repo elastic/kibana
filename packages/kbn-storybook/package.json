@@ -15,7 +15,6 @@
     "@storybook/react": "^5.2.8",
     "@storybook/theming": "^5.2.8",
     "copy-webpack-plugin": "5.0.3",
-    "execa": "1.0.0",
     "fast-glob": "2.2.7",
     "glob-watcher": "5.0.3",
     "jest-specific-snapshot": "2.0.0",

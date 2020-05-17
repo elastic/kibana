@@ -5,12 +5,9 @@
  */
 
 import { RouteInitializerDeps } from '../';
-import {
-  CANVAS_TYPE,
-  API_ROUTE_WORKPAD,
-} from '../../../../../legacy/plugins/canvas/common/lib/constants';
-import { CanvasWorkpad } from '../../../../../legacy/plugins/canvas/types';
-import { getId } from '../../../../../legacy/plugins/canvas/public/lib/get_id';
+import { CANVAS_TYPE, API_ROUTE_WORKPAD } from '../../../common/lib/constants';
+import { CanvasWorkpad } from '../../../types';
+import { getId } from '../../../common/lib/get_id';
 import { WorkpadAttributes } from './workpad_attributes';
 import { WorkpadSchema } from './workpad_schema';
 import { okResponse } from '../ok_response';

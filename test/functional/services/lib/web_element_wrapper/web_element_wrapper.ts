@@ -18,7 +18,7 @@
  */
 
 import { delay } from 'bluebird';
-import { WebElement, WebDriver, By, Key, until } from 'selenium-webdriver';
+import { WebElement, WebDriver, By, Key } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
 // @ts-ignore not supported yet
 import cheerio from 'cheerio';
@@ -28,12 +28,6 @@ import { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
 // @ts-ignore not supported yet
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
 import { Browsers } from '../../remote/browsers';
-
-interface Driver {
-  driver: WebDriver;
-  By: typeof By;
-  until: typeof until;
-}
 
 interface TypeOptions {
   charByChar: boolean;
@@ -51,19 +45,19 @@ const RETRY_CLICK_RETRY_ON_ERRORS = [
 ];
 
 export class WebElementWrapper {
-  private By = this.webDriver.By;
-  private driver: WebDriver = this.webDriver.driver;
+  private By = By;
   private Keys = Key;
-  public isW3CEnabled: boolean = (this.webDriver.driver as any).executor_.w3c === true;
+  public isW3CEnabled: boolean = (this.driver as any).executor_.w3c === true;
+  public isChromium: boolean = [Browsers.Chrome, Browsers.ChromiumEdge].includes(this.browserType);
 
   public static create(
     webElement: WebElement | WebElementWrapper,
     locator: By | null,
-    webDriver: Driver,
+    driver: WebDriver,
     timeout: number,
     fixedHeaderHeight: number,
     logger: ToolingLog,
-    browserType: string
+    browserType: Browsers
   ): WebElementWrapper {
     if (webElement instanceof WebElementWrapper) {
       return webElement;
@@ -72,7 +66,7 @@ export class WebElementWrapper {
     return new WebElementWrapper(
       webElement,
       locator,
-      webDriver,
+      driver,
       timeout,
       fixedHeaderHeight,
       logger,
@@ -83,11 +77,11 @@ export class WebElementWrapper {
   constructor(
     public _webElement: WebElement,
     private locator: By | null,
-    private webDriver: Driver,
+    private driver: WebDriver,
     private timeout: number,
     private fixedHeaderHeight: number,
     private logger: ToolingLog,
-    private browserType: string
+    private browserType: Browsers
   ) {}
 
   private async _findWithCustomTimeout(
@@ -108,7 +102,7 @@ export class WebElementWrapper {
     return WebElementWrapper.create(
       otherWebElement,
       locator,
-      this.webDriver,
+      this.driver,
       this.timeout,
       this.fixedHeaderHeight,
       this.logger,
@@ -243,7 +237,7 @@ export class WebElementWrapper {
       return this.clearValueWithKeyboard();
     }
     await this.retryCall(async function clearValue(wrapper) {
-      if (wrapper.browserType === Browsers.Chrome || options.withJS) {
+      if (wrapper.isChromium || options.withJS) {
         // https://bugs.chromium.org/p/chromedriver/issues/detail?id=2702
         await wrapper.driver.executeScript(`arguments[0].value=''`, wrapper._webElement);
       } else {
@@ -275,7 +269,7 @@ export class WebElementWrapper {
         await delay(100);
       }
     } else {
-      if (this.browserType === Browsers.Chrome) {
+      if (this.isChromium) {
         // https://bugs.chromium.org/p/chromedriver/issues/detail?id=30
         await this.retryCall(async function clearValueWithKeyboard(wrapper) {
           await wrapper.driver.executeScript(`arguments[0].select();`, wrapper._webElement);
@@ -531,6 +525,40 @@ export class WebElementWrapper {
       return wrapper._wrapAll(
         await wrapper._findWithCustomTimeout(
           async () => await wrapper._webElement.findElements(wrapper.By.css(selector)),
+          timeout
+        )
+      );
+    });
+  }
+
+  /**
+   * Gets the first element inside this element matching the given data-test-subj selector.
+   *
+   * @param {string} selector
+   * @return {Promise<WebElementWrapper>}
+   */
+  public async findByTestSubject(selector: string) {
+    return await this.retryCall(async function find(wrapper) {
+      return wrapper._wrap(
+        await wrapper._webElement.findElement(wrapper.By.css(testSubjSelector(selector))),
+        wrapper.By.css(selector)
+      );
+    });
+  }
+
+  /**
+   * Gets all elements inside this element matching the given data-test-subj selector.
+   *
+   * @param {string} selector
+   * @param {number} timeout
+   * @return {Promise<WebElementWrapper[]>}
+   */
+  public async findAllByTestSubject(selector: string, timeout?: number) {
+    return await this.retryCall(async function findAll(wrapper) {
+      return wrapper._wrapAll(
+        await wrapper._findWithCustomTimeout(
+          async () =>
+            await wrapper._webElement.findElements(wrapper.By.css(testSubjSelector(selector))),
           timeout
         )
       );

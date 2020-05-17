@@ -11,6 +11,6 @@ export enum AnnotationType {
 export interface Annotation {
   type: AnnotationType;
   id: string;
-  time: number;
+  '@timestamp': number;
   text: string;
 }

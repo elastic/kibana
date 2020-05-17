@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useReducer, useState } from 'react';
+import React, { useCallback, useReducer, useState, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -17,37 +17,44 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiBetaBadge,
+  EuiText,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
-import { useAppDependencies } from '../../app_context';
 import { ActionConnectorTableItem, ActionConnector, IErrorObject } from '../../../types';
 import { connectorReducer } from './connector_reducer';
 import { updateActionConnector } from '../../lib/action_connector_api';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
+import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
+import { PLUGIN } from '../../constants/plugin';
 
 export interface ConnectorEditProps {
   initialConnector: ActionConnectorTableItem;
+  editFlyoutVisible: boolean;
+  setEditFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) => {
+export const ConnectorEditFlyout = ({
+  initialConnector,
+  editFlyoutVisible,
+  setEditFlyoutVisibility,
+}: ConnectorEditProps) => {
   let hasErrors = false;
-  const { http, toastNotifications, capabilities, actionTypeRegistry } = useAppDependencies();
-  const canSave = hasSaveActionsCapability(capabilities);
   const {
-    editFlyoutVisible,
-    setEditFlyoutVisibility,
+    http,
+    toastNotifications,
+    capabilities,
+    actionTypeRegistry,
     reloadConnectors,
+    docLinks,
   } = useActionsConnectorsContext();
+  const canSave = hasSaveActionsCapability(capabilities);
   const closeFlyout = useCallback(() => setEditFlyoutVisibility(false), [setEditFlyoutVisibility]);
   const [{ connector }, dispatch] = useReducer(connectorReducer, {
     connector: { ...initialConnector, secrets: {} },
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [serverError, setServerError] = useState<{
-    body: { message: string; error: string };
-  } | null>(null);
 
   if (!editFlyoutVisible) {
     return null;
@@ -77,12 +84,87 @@ export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) =>
         return savedConnector;
       })
       .catch(errorRes => {
-        setServerError(errorRes);
+        toastNotifications.addDanger(
+          errorRes.body?.message ??
+            i18n.translate(
+              'xpack.triggersActionsUI.sections.editConnectorForm.updateErrorNotificationText',
+              { defaultMessage: 'Cannot update a connector.' }
+            )
+        );
         return undefined;
       });
 
+  const flyoutTitle = connector.isPreconfigured ? (
+    <Fragment>
+      <EuiTitle size="s">
+        <h3 id="flyoutTitle">
+          <FormattedMessage
+            defaultMessage="{connectorName}"
+            id="xpack.triggersActionsUI.sections.preconfiguredConnectorForm.flyoutTitle"
+            values={{ connectorName: initialConnector.name }}
+          />
+          &emsp;
+          <EuiBetaBadge
+            label="Preconfigured"
+            data-test-subj="preconfiguredBadge"
+            tooltipContent={i18n.translate(
+              'xpack.triggersActionsUI.sections.preconfiguredConnectorForm.tooltipContent',
+              {
+                defaultMessage: 'This connector is preconfigured and cannot be edited',
+              }
+            )}
+          />
+          &emsp;
+          <EuiBetaBadge
+            label="Beta"
+            tooltipContent={i18n.translate(
+              'xpack.triggersActionsUI.sections.preconfiguredConnectorForm.betaBadgeTooltipContent',
+              {
+                defaultMessage:
+                  '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                values: {
+                  pluginName: PLUGIN.getI18nName(i18n),
+                },
+              }
+            )}
+          />
+        </h3>
+      </EuiTitle>
+      <EuiText size="s">
+        <FormattedMessage
+          defaultMessage="{actionDescription}"
+          id="xpack.triggersActionsUI.sections.editConnectorForm.actionTypeDescription"
+          values={{ actionDescription: actionTypeModel.selectMessage }}
+        />
+      </EuiText>
+    </Fragment>
+  ) : (
+    <EuiTitle size="s">
+      <h3 id="flyoutTitle">
+        <FormattedMessage
+          defaultMessage="Edit connector"
+          id="xpack.triggersActionsUI.sections.editConnectorForm.flyoutPreconfiguredTitle"
+        />
+        &emsp;
+        <EuiBetaBadge
+          label="Beta"
+          tooltipContent={i18n.translate(
+            'xpack.triggersActionsUI.sections.editConnectorForm.betaBadgeTooltipContent',
+            {
+              defaultMessage:
+                '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+              values: {
+                pluginName: PLUGIN.getI18nName(i18n),
+              },
+            }
+          )}
+        />
+      </h3>
+    </EuiTitle>
+  );
+
   return (
-    <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutActionAddTitle" size="m">
+    <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutActionEditTitle" size="m">
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           {actionTypeModel ? (
@@ -90,38 +172,41 @@ export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) =>
               <EuiIcon type={actionTypeModel.iconClass} size="m" />
             </EuiFlexItem>
           ) : null}
-          <EuiFlexItem>
-            <EuiTitle size="s">
-              <h3 id="flyoutTitle">
-                <FormattedMessage
-                  defaultMessage="Edit connector"
-                  id="xpack.triggersActionsUI.sections.editConnectorForm.flyoutTitle"
-                />
-                &emsp;
-                <EuiBetaBadge
-                  label="Beta"
-                  tooltipContent={i18n.translate(
-                    'xpack.triggersActionsUI.sections.editConnectorForm.betaBadgeTooltipContent',
-                    {
-                      defaultMessage:
-                        'This module is not GA. Please help us by reporting any bugs.',
-                    }
-                  )}
-                />
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
+          <EuiFlexItem>{flyoutTitle}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <ActionConnectorForm
-          connector={connector}
-          serverError={serverError}
-          errors={errors}
-          actionTypeName={connector.actionType}
-          dispatch={dispatch}
-          actionTypeRegistry={actionTypeRegistry}
-        />
+        {!connector.isPreconfigured ? (
+          <ActionConnectorForm
+            connector={connector}
+            errors={errors}
+            actionTypeName={connector.actionType}
+            dispatch={dispatch}
+            actionTypeRegistry={actionTypeRegistry}
+            http={http}
+            docLinks={docLinks}
+          />
+        ) : (
+          <Fragment>
+            <EuiText>
+              {i18n.translate(
+                'xpack.triggersActionsUI.sections.editConnectorForm.descriptionText',
+                {
+                  defaultMessage: 'This connector is readonly.',
+                }
+              )}
+            </EuiText>
+            <EuiLink
+              href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/pre-configured-connectors.html`}
+              target="_blank"
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.editConnectorForm.preconfiguredHelpLabel"
+                defaultMessage="Learn more about preconfigured connectors."
+              />
+            </EuiLink>
+          </Fragment>
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -135,7 +220,7 @@ export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) =>
               )}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {canSave && actionTypeModel ? (
+          {canSave && actionTypeModel && !connector.isPreconfigured ? (
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
@@ -151,7 +236,9 @@ export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) =>
                   setIsSaving(false);
                   if (savedAction) {
                     closeFlyout();
-                    reloadConnectors();
+                    if (reloadConnectors) {
+                      reloadConnectors();
+                    }
                   }
                 }}
               >
@@ -167,3 +254,6 @@ export const ConnectorEditFlyout = ({ initialConnector }: ConnectorEditProps) =>
     </EuiFlyout>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { ConnectorEditFlyout as default };

@@ -6,10 +6,13 @@
 
 import { PluginInitializerContext } from 'src/core/server';
 import { ReportingPlugin as Plugin } from './plugin';
+import { ReportingConfig, ReportingCore } from './core';
 
-export const plugin = (context: PluginInitializerContext) => {
-  return new Plugin(context);
+export const plugin = (context: PluginInitializerContext, config: ReportingConfig) => {
+  return new Plugin(context, config);
 };
 
-export { ReportingCore } from './core';
 export { ReportingPlugin } from './plugin';
+export { ReportingConfig, ReportingCore };
+
+export { PreserveLayout, PrintLayout } from '../export_types/common/layouts';

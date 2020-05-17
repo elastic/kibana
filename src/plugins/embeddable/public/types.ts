@@ -17,6 +17,24 @@
  * under the License.
  */
 
-import { EmbeddableFactory } from './lib/embeddables';
+import { SavedObjectAttributes } from 'kibana/public';
+import {
+  EmbeddableFactory,
+  EmbeddableInput,
+  EmbeddableOutput,
+  IEmbeddable,
+  EmbeddableFactoryDefinition,
+} from './lib/embeddables';
+
+export const EMBEDDABLE_ORIGINATING_APP_PARAM = 'embeddableOriginatingApp';
 
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableFactory>;
+
+export type EmbeddableFactoryProvider = <
+  I extends EmbeddableInput = EmbeddableInput,
+  O extends EmbeddableOutput = EmbeddableOutput,
+  E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
+  T extends SavedObjectAttributes = SavedObjectAttributes
+>(
+  def: EmbeddableFactoryDefinition<I, O, E, T>
+) => EmbeddableFactory<I, O, E, T>;

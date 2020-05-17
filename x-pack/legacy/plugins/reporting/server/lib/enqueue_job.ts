@@ -5,22 +5,17 @@
  */
 
 import { get } from 'lodash';
-import { ElasticsearchServiceSetup } from 'kibana/server';
-// @ts-ignore
-import { events as esqueueEvents } from './esqueue';
 import {
+  ConditionalHeaders,
   EnqueueJobFn,
   ESQueueCreateJobFn,
-  ImmediateCreateJobFn,
   Job,
-  ServerFacade,
-  RequestFacade,
   Logger,
-  CaptureConfig,
-  QueueConfig,
-  ConditionalHeaders,
+  RequestFacade,
 } from '../../types';
 import { ReportingCore } from '../core';
+// @ts-ignore
+import { events as esqueueEvents } from './esqueue';
 
 interface ConfirmedJob {
   id: string;
@@ -29,18 +24,13 @@ interface ConfirmedJob {
   _primary_term: number;
 }
 
-export function enqueueJobFactory(
-  reporting: ReportingCore,
-  server: ServerFacade,
-  elasticsearch: ElasticsearchServiceSetup,
-  parentLogger: Logger
-): EnqueueJobFn {
+export function enqueueJobFactory(reporting: ReportingCore, parentLogger: Logger): EnqueueJobFn {
+  const config = reporting.getConfig();
+  const queueTimeout = config.get('queue', 'timeout');
+  const browserType = config.get('capture', 'browser', 'type');
+  const maxAttempts = config.get('capture', 'maxAttempts');
+
   const logger = parentLogger.clone(['queue-job']);
-  const config = server.config();
-  const captureConfig: CaptureConfig = config.get('xpack.reporting.capture');
-  const browserType = captureConfig.browser.type;
-  const maxAttempts = captureConfig.maxAttempts;
-  const queueConfig: QueueConfig = config.get('xpack.reporting.queue');
 
   return async function enqueueJob<JobParamsType>(
     exportTypeId: string,
@@ -49,7 +39,7 @@ export function enqueueJobFactory(
     headers: ConditionalHeaders['headers'],
     request: RequestFacade
   ): Promise<Job> {
-    type CreateJobFn = ESQueueCreateJobFn<JobParamsType> | ImmediateCreateJobFn<JobParamsType>;
+    type CreateJobFn = ESQueueCreateJobFn<JobParamsType>;
 
     const esqueue = await reporting.getEsqueue();
     const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);
@@ -58,17 +48,11 @@ export function enqueueJobFactory(
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
     }
 
-    // TODO: the createJobFn should be unwrapped in the register method of the export types registry
-    const createJob = exportType.createJobFactory(
-      reporting,
-      server,
-      elasticsearch,
-      logger
-    ) as CreateJobFn;
+    const createJob = exportType.createJobFactory(reporting, logger) as CreateJobFn;
     const payload = await createJob(jobParams, headers, request);
 
     const options = {
-      timeout: queueConfig.timeout,
+      timeout: queueTimeout,
       created_by: get(user, 'username', false),
       browser_type: browserType,
       max_attempts: maxAttempts,

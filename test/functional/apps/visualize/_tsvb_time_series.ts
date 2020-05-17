@@ -25,7 +25,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const kibanaServer = getService('kibanaServer');
-  const testSubjects = getService('testSubjects');
 
   describe('visual builder', function describeIndexTests() {
     beforeEach(async () => {
@@ -126,20 +125,18 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         expect(actualCountMin).to.be('3 hours');
       });
 
-      // --reversed class is not implemented in @elastic\chart
-      describe.skip('Dark mode', () => {
+      describe('Dark mode', () => {
         before(async () => {
           await kibanaServer.uiSettings.update({
             'theme:darkMode': true,
           });
         });
 
-        it(`viz should have 'reversed' class when background color is white`, async () => {
+        it(`viz should have light class when background color is white`, async () => {
           await visualBuilder.clickPanelOptions('timeSeries');
           await visualBuilder.setBackgroundColor('#FFFFFF');
 
-          const classNames = await testSubjects.getAttribute('timeseriesChart', 'class');
-          expect(classNames.includes('tvbVisTimeSeries--reversed')).to.be(true);
+          expect(await visualBuilder.checkTimeSeriesIsLight()).to.be(true);
         });
 
         after(async () => {

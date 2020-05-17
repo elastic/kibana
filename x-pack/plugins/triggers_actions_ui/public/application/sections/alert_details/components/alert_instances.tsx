@@ -7,11 +7,10 @@
 import React, { Fragment, useState } from 'react';
 import moment, { Duration } from 'moment';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiButtonToggle, EuiBadge, EuiHealth } from '@elastic/eui';
+import { EuiBasicTable, EuiHealth, EuiSpacer, EuiSwitch } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { padLeft, difference, chunk } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { Alert, AlertTaskState, RawAlertInstance, Pagination } from '../../../../types';
 import {
   ComponentOpts as AlertApis,
@@ -23,6 +22,7 @@ type AlertInstancesProps = {
   alert: Alert;
   alertState: AlertTaskState;
   requestRefresh: () => Promise<void>;
+  durationEpoch?: number;
 } & Pick<AlertApis, 'muteAlertInstance' | 'unmuteAlertInstance'>;
 
 export const alertInstancesTableColumns = (
@@ -79,40 +79,19 @@ export const alertInstancesTableColumns = (
     field: '',
     align: RIGHT_ALIGNMENT,
     name: i18n.translate(
-      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.actions',
-      { defaultMessage: 'Actions' }
+      'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.columns.mute',
+      { defaultMessage: 'Mute' }
     ),
     render: (alertInstance: AlertInstanceListItem) => {
       return (
         <Fragment>
-          {alertInstance.isMuted ? (
-            <EuiBadge data-test-subj={`mutedAlertInstanceLabel_${alertInstance.instance}`}>
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.mutedAlert"
-                defaultMessage="Muted"
-              />
-            </EuiBadge>
-          ) : (
-            <Fragment />
-          )}
-          <EuiButtonToggle
-            label={
-              alertInstance.isMuted
-                ? i18n.translate(
-                    'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.actions.unmute',
-                    { defaultMessage: 'Unmute' }
-                  )
-                : i18n.translate(
-                    'xpack.triggersActionsUI.sections.alertDetails.alertInstancesList.actions.mute',
-                    { defaultMessage: 'Mute' }
-                  )
-            }
+          <EuiSwitch
+            label="mute"
+            showLabel={false}
+            compressed={true}
+            checked={alertInstance.isMuted}
             data-test-subj={`muteAlertInstanceButton_${alertInstance.instance}`}
-            iconType={alertInstance.isMuted ? 'eyeClosed' : 'eye'}
             onChange={() => onMuteAction(alertInstance)}
-            isSelected={alertInstance.isMuted}
-            isEmpty
-            isIconOnly
           />
         </Fragment>
       );
@@ -134,6 +113,7 @@ export function AlertInstances({
   muteAlertInstance,
   unmuteAlertInstance,
   requestRefresh,
+  durationEpoch = Date.now(),
 }: AlertInstancesProps) {
   const [pagination, setPagination] = useState<Pagination>({
     index: 0,
@@ -142,10 +122,10 @@ export function AlertInstances({
 
   const mergedAlertInstances = [
     ...Object.entries(alertInstances).map(([instanceId, instance]) =>
-      alertInstanceToListItem(alert, instanceId, instance)
+      alertInstanceToListItem(durationEpoch, alert, instanceId, instance)
     ),
     ...difference(alert.mutedInstanceIds, Object.keys(alertInstances)).map(instanceId =>
-      alertInstanceToListItem(alert, instanceId)
+      alertInstanceToListItem(durationEpoch, alert, instanceId)
     ),
   ];
   const pageOfAlertInstances = getPage(mergedAlertInstances, pagination);
@@ -158,25 +138,34 @@ export function AlertInstances({
   };
 
   return (
-    <EuiBasicTable
-      items={pageOfAlertInstances}
-      pagination={{
-        pageIndex: pagination.index,
-        pageSize: pagination.size,
-        totalItemCount: mergedAlertInstances.length,
-      }}
-      onChange={({ page: changedPage }: { page: Pagination }) => {
-        setPagination(changedPage);
-      }}
-      rowProps={() => ({
-        'data-test-subj': 'alert-instance-row',
-      })}
-      cellProps={() => ({
-        'data-test-subj': 'cell',
-      })}
-      columns={alertInstancesTableColumns(onMuteAction)}
-      data-test-subj="alertInstancesList"
-    />
+    <Fragment>
+      <EuiSpacer size="xl" />
+      <input
+        type="hidden"
+        data-test-subj="alertInstancesDurationEpoch"
+        name="alertInstancesDurationEpoch"
+        value={durationEpoch}
+      />
+      <EuiBasicTable
+        items={pageOfAlertInstances}
+        pagination={{
+          pageIndex: pagination.index,
+          pageSize: pagination.size,
+          totalItemCount: mergedAlertInstances.length,
+        }}
+        onChange={({ page: changedPage }: { page: Pagination }) => {
+          setPagination(changedPage);
+        }}
+        rowProps={() => ({
+          'data-test-subj': 'alert-instance-row',
+        })}
+        cellProps={() => ({
+          'data-test-subj': 'cell',
+        })}
+        columns={alertInstancesTableColumns(onMuteAction)}
+        data-test-subj="alertInstancesList"
+      />
+    </Fragment>
   );
 }
 export const AlertInstancesWithApi = withBulkAlertOperations(AlertInstances);
@@ -207,9 +196,11 @@ const INACTIVE_LABEL = i18n.translate(
   { defaultMessage: 'Inactive' }
 );
 
-const durationSince = (start?: Date) => (start ? Date.now() - start.getTime() : 0);
+const durationSince = (durationEpoch: number, startTime?: number) =>
+  startTime ? durationEpoch - startTime : 0;
 
 export function alertInstanceToListItem(
+  durationEpoch: number,
   alert: Alert,
   instanceId: string,
   instance?: RawAlertInstance
@@ -221,7 +212,10 @@ export function alertInstanceToListItem(
       ? { label: ACTIVE_LABEL, healthColor: 'primary' }
       : { label: INACTIVE_LABEL, healthColor: 'subdued' },
     start: instance?.meta?.lastScheduledActions?.date,
-    duration: durationSince(instance?.meta?.lastScheduledActions?.date),
+    duration: durationSince(
+      durationEpoch,
+      instance?.meta?.lastScheduledActions?.date?.getTime() ?? 0
+    ),
     isMuted,
   };
 }

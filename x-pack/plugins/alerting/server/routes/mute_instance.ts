@@ -14,6 +14,7 @@ import {
 } from 'kibana/server';
 import { LicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
+import { BASE_ALERT_API_PATH } from '../../common';
 
 const paramSchema = schema.object({
   alertId: schema.string(),
@@ -23,7 +24,7 @@ const paramSchema = schema.object({
 export const muteAlertInstanceRoute = (router: IRouter, licenseState: LicenseState) => {
   router.post(
     {
-      path: '/api/alert/{alertId}/alert_instance/{alertInstanceId}/_mute',
+      path: `${BASE_ALERT_API_PATH}/{alertId}/alert_instance/{alertInstanceId}/_mute`,
       validate: {
         params: paramSchema,
       },
@@ -33,10 +34,13 @@ export const muteAlertInstanceRoute = (router: IRouter, licenseState: LicenseSta
     },
     router.handleLegacyErrors(async function(
       context: RequestHandlerContext,
-      req: KibanaRequest<TypeOf<typeof paramSchema>, any, any, any>,
+      req: KibanaRequest<TypeOf<typeof paramSchema>, unknown, unknown>,
       res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
+    ): Promise<IKibanaResponse> {
       verifyApiAccess(licenseState);
+      if (!context.alerting) {
+        return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
+      }
       const alertsClient = context.alerting.getAlertsClient();
       const { alertId, alertInstanceId } = req.params;
       await alertsClient.muteInstance({ alertId, alertInstanceId });

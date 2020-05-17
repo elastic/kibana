@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CaptureConfig } from '../../../../types';
+import { i18n } from '@kbn/i18n';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
-import { LevelLogger } from '../../../../server/lib';
+import { LevelLogger, startTrace } from '../../../../server/lib';
+import { CaptureConfig } from '../../../../server/types';
 import { LayoutInstance } from '../../layouts/layout';
 import { CONTEXT_WAITFORRENDER } from './constants';
 
@@ -16,7 +17,13 @@ export const waitForRenderComplete = async (
   layout: LayoutInstance,
   logger: LevelLogger
 ) => {
-  logger.debug('waiting for rendering to complete');
+  const endTrace = startTrace('wait_for_render', 'wait');
+
+  logger.debug(
+    i18n.translate('xpack.reporting.screencapture.waitingForRenderComplete', {
+      defaultMessage: 'waiting for rendering to complete',
+    })
+  );
 
   return await browser
     .evaluate(
@@ -66,6 +73,12 @@ export const waitForRenderComplete = async (
       logger
     )
     .then(() => {
-      logger.debug('rendering is complete');
+      logger.debug(
+        i18n.translate('xpack.reporting.screencapture.renderIsComplete', {
+          defaultMessage: 'rendering is complete',
+        })
+      );
+
+      endTrace();
     });
 };

@@ -5,10 +5,9 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { INDEX_NAMES, QUERY } from '../../../../../legacy/plugins/uptime/common/constants';
 import { getFilterClause } from '../helper';
-import { HistogramQueryResult } from './types';
-import { HistogramResult } from '../../../../../legacy/plugins/uptime/common/types';
+import { HistogramResult, HistogramQueryResult } from '../../../common/runtime_types';
+import { QUERY } from '../../../common/constants';
 
 export interface GetPingHistogramParams {
   /** @member dateRangeStart timestamp bounds */
@@ -19,14 +18,12 @@ export interface GetPingHistogramParams {
   filters?: string | null;
   /** @member monitorId optional limit to monitorId */
   monitorId?: string | null;
-  /** @member statusFilter special filter targeting the latest status of each monitor */
-  statusFilter?: string | null;
 }
 
 export const getPingHistogram: UMElasticsearchQueryFn<
   GetPingHistogramParams,
   HistogramResult
-> = async ({ callES, from, to, filters, monitorId, statusFilter }) => {
+> = async ({ callES, dynamicSettings, from, to, filters, monitorId }) => {
   const boolFilters = filters ? JSON.parse(filters) : null;
   const additionalFilters = [];
   if (monitorId) {
@@ -38,7 +35,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   const filter = getFilterClause(from, to, additionalFilters);
 
   const params = {
-    index: INDEX_NAMES.HEARTBEAT,
+    index: dynamicSettings.heartbeatIndices,
     body: {
       query: {
         bool: {
@@ -74,7 +71,7 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   };
 
   const result = await callES('search', params);
-  const interval = result.aggregations.timeseries?.interval;
+  const interval = result.aggregations?.timeseries?.interval;
   const buckets: HistogramQueryResult[] = result?.aggregations?.timeseries?.buckets ?? [];
   const histogram = buckets.map(bucket => {
     const x: number = bucket.key;
@@ -82,8 +79,8 @@ export const getPingHistogram: UMElasticsearchQueryFn<
     const upCount: number = bucket.up.doc_count;
     return {
       x,
-      downCount: statusFilter && statusFilter !== 'down' ? 0 : downCount,
-      upCount: statusFilter && statusFilter !== 'up' ? 0 : upCount,
+      downCount,
+      upCount,
       y: 1,
     };
   });

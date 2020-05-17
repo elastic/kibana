@@ -463,3 +463,97 @@ describe('connect_to_app_state', () => {
     });
   });
 });
+
+describe('filters with different state', () => {
+  let queryServiceStart: QueryStart;
+  let filterManager: FilterManager;
+  let state: BaseStateContainer<QueryState>;
+  let stateSub: Subscription;
+  let stateChangeTriggered = jest.fn();
+  let filterManagerChangeSub: Subscription;
+  let filterManagerChangeTriggered = jest.fn();
+
+  let filter: Filter;
+
+  beforeEach(() => {
+    const queryService = new QueryService();
+    queryService.setup({
+      uiSettings: setupMock.uiSettings,
+      storage: new Storage(new StubBrowserStorage()),
+    });
+    queryServiceStart = queryService.start(startMock.savedObjects);
+    filterManager = queryServiceStart.filterManager;
+
+    state = createStateContainer({});
+    stateChangeTriggered = jest.fn();
+    stateSub = state.state$.subscribe(stateChangeTriggered);
+
+    filterManagerChangeTriggered = jest.fn();
+    filterManagerChangeSub = filterManager.getUpdates$().subscribe(filterManagerChangeTriggered);
+
+    filter = getFilter(FilterStateStore.GLOBAL_STATE, true, true, 'key1', 'value1');
+  });
+
+  // applies filter state changes, changes only internal $state.store value
+  function runChanges() {
+    filter = { ...filter, $state: { store: FilterStateStore.GLOBAL_STATE } };
+
+    state.set({
+      filters: [filter],
+    });
+
+    filter = { ...filter, $state: { store: FilterStateStore.APP_STATE } };
+
+    state.set({
+      filters: [filter],
+    });
+
+    filter = { ...filter };
+    delete filter.$state;
+
+    state.set({
+      filters: [filter],
+    });
+  }
+
+  test('when syncing all filters, changes to filter.state$ should be taken into account', () => {
+    const stop = connectToQueryState(queryServiceStart, state, {
+      filters: true,
+    });
+
+    runChanges();
+
+    expect(filterManagerChangeTriggered).toBeCalledTimes(3);
+
+    stop();
+  });
+
+  test('when syncing app state filters, changes to filter.state$ should be ignored', () => {
+    const stop = connectToQueryState(queryServiceStart, state, {
+      filters: FilterStateStore.APP_STATE,
+    });
+
+    runChanges();
+
+    expect(filterManagerChangeTriggered).toBeCalledTimes(1);
+
+    stop();
+  });
+
+  test('when syncing global state filters, changes to filter.state$ should be ignored', () => {
+    const stop = connectToQueryState(queryServiceStart, state, {
+      filters: FilterStateStore.GLOBAL_STATE,
+    });
+
+    runChanges();
+
+    expect(filterManagerChangeTriggered).toBeCalledTimes(1);
+
+    stop();
+  });
+
+  afterEach(() => {
+    stateSub.unsubscribe();
+    filterManagerChangeSub.unsubscribe();
+  });
+});

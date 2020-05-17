@@ -6,7 +6,7 @@
 
 import { of } from 'rxjs';
 import { LicenseState } from './license_state';
-import { LICENSE_CHECK_STATE, ILicense } from '../../../licensing/server';
+import { ILicense } from '../../../licensing/server';
 
 export const mockLicenseState = () => {
   const license: ILicense = {
@@ -24,7 +24,7 @@ export const mockLicenseState = () => {
     },
     check() {
       return {
-        state: LICENSE_CHECK_STATE.Valid,
+        state: 'valid',
       };
     },
     getFeature() {

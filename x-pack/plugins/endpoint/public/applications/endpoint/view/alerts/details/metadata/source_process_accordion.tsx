@@ -51,13 +51,13 @@ export const SourceProcessAccordion = memo(({ alertData }: { alertData: Immutabl
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.malwareScore', {
           defaultMessage: 'MalwareScore',
         }),
-        description: alertData.process.malware_classifier.score,
+        description: alertData.process.malware_classification?.score || '-',
       },
       {
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.parentProcessID', {
           defaultMessage: 'Parent Process ID',
         }),
-        description: alertData.process.parent.pid,
+        description: alertData.process.parent?.pid || '-',
       },
       {
         title: i18n.translate('xpack.endpoint.application.endpoint.alertDetails.signer', {
@@ -90,6 +90,7 @@ export const SourceProcessAccordion = memo(({ alertData }: { alertData: Immutabl
         }
       )}
       paddingSize="l"
+      data-test-subj="alertDetailsSourceProcessAccordion"
     >
       <EuiDescriptionList type="column" listItems={columns} />
     </EuiAccordion>

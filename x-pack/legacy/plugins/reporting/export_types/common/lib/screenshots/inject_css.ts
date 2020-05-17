@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import fs from 'fs';
 import { promisify } from 'util';
-import { LevelLogger } from '../../../../server/lib';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
+import { LevelLogger, startTrace } from '../../../../server/lib';
 import { Layout } from '../../layouts/layout';
 import { CONTEXT_INJECTCSS } from './constants';
 
@@ -18,21 +19,37 @@ export const injectCustomCss = async (
   layout: Layout,
   logger: LevelLogger
 ): Promise<void> => {
-  logger.debug('injecting custom css');
+  const endTrace = startTrace('inject_css', 'correction');
+  logger.debug(
+    i18n.translate('xpack.reporting.screencapture.injectingCss', {
+      defaultMessage: 'injecting custom css',
+    })
+  );
 
   const filePath = layout.getCssOverridesPath();
   const buffer = await fsp.readFile(filePath);
-  await browser.evaluate(
-    {
-      fn: css => {
-        const node = document.createElement('style');
-        node.type = 'text/css';
-        node.innerHTML = css; // eslint-disable-line no-unsanitized/property
-        document.getElementsByTagName('head')[0].appendChild(node);
+  try {
+    await browser.evaluate(
+      {
+        fn: css => {
+          const node = document.createElement('style');
+          node.type = 'text/css';
+          node.innerHTML = css; // eslint-disable-line no-unsanitized/property
+          document.getElementsByTagName('head')[0].appendChild(node);
+        },
+        args: [buffer.toString()],
       },
-      args: [buffer.toString()],
-    },
-    { context: CONTEXT_INJECTCSS },
-    logger
-  );
+      { context: CONTEXT_INJECTCSS },
+      logger
+    );
+  } catch (err) {
+    throw new Error(
+      i18n.translate('xpack.reporting.screencapture.injectCss', {
+        defaultMessage: `An error occurred when trying to update Kibana CSS for reporting. {error}`,
+        values: { error: err },
+      })
+    );
+  }
+
+  endTrace();
 };

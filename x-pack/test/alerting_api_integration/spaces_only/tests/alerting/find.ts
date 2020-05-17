@@ -32,7 +32,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         )}/api/alert/_find?search=test.noop&search_fields=alertTypeId`
       );
 
-      expect(response.statusCode).to.eql(200);
+      expect(response.status).to.eql(200);
       expect(response.body.page).to.equal(1);
       expect(response.body.perPage).to.be.greaterThan(0);
       expect(response.body.total).to.be.greaterThan(0);

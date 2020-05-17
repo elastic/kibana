@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ElasticsearchMonitorsAdapter getMonitorChartsData will provide expected filters when a location is specified 1`] = `
+exports[`ElasticsearchMonitorsAdapter getMonitorChartsData will provide expected filters 1`] = `
 Array [
   "search",
   Object {
@@ -15,13 +15,6 @@ Array [
                     "field": "monitor.duration.us",
                   },
                 },
-                "status": Object {
-                  "terms": Object {
-                    "field": "monitor.status",
-                    "shard_size": 2,
-                    "size": 2,
-                  },
-                },
               },
               "terms": Object {
                 "field": "observer.geo.name",
@@ -29,10 +22,12 @@ Array [
               },
             },
           },
-          "date_histogram": Object {
+          "auto_date_histogram": Object {
+            "buckets": 25,
             "field": "@timestamp",
+          },
+          "date_histogram": Object {
             "fixed_interval": "36000ms",
-            "min_doc_count": 0,
           },
         },
       },
@@ -53,80 +48,10 @@ Array [
               },
             },
             Object {
-              "term": Object {
-                "monitor.status": "up",
-              },
-            },
-            Object {
-              "term": Object {
-                "observer.geo.name": "Philadelphia",
-              },
-            },
-          ],
-        },
-      },
-      "size": 0,
-    },
-    "index": "heartbeat-8*",
-  },
-]
-`;
-
-exports[`ElasticsearchMonitorsAdapter getMonitorChartsData will run expected parameters when no location is specified 1`] = `
-Array [
-  "search",
-  Object {
-    "body": Object {
-      "aggs": Object {
-        "timeseries": Object {
-          "aggs": Object {
-            "location": Object {
-              "aggs": Object {
-                "duration": Object {
-                  "stats": Object {
-                    "field": "monitor.duration.us",
-                  },
-                },
-                "status": Object {
-                  "terms": Object {
-                    "field": "monitor.status",
-                    "shard_size": 2,
-                    "size": 2,
-                  },
-                },
-              },
-              "terms": Object {
-                "field": "observer.geo.name",
-                "missing": "N/A",
-              },
-            },
-          },
-          "date_histogram": Object {
-            "field": "@timestamp",
-            "fixed_interval": "36000ms",
-            "min_doc_count": 0,
-          },
-        },
-      },
-      "query": Object {
-        "bool": Object {
-          "filter": Array [
-            Object {
               "range": Object {
-                "@timestamp": Object {
-                  "gte": "now-15m",
-                  "lte": "now",
+                "monitor.duration.us": Object {
+                  "gt": 0,
                 },
-              },
-            },
-            Object {
-              "term": Object {
-                "monitor.id": "fooID",
-              },
-            },
-            Object {
-              "term": Object {
-                "monitor.status": "up",
               },
             },
           ],
@@ -141,7 +66,6 @@ Array [
 
 exports[`ElasticsearchMonitorsAdapter inserts empty buckets for missing data 1`] = `
 Object {
-  "durationMaxValue": 0,
   "locationDurationLines": Array [
     Object {
       "line": Array [
@@ -314,128 +238,5 @@ Object {
       "name": "us-west-4",
     },
   ],
-  "status": Array [
-    Object {
-      "down": null,
-      "total": 4,
-      "up": null,
-      "x": 1568411568000,
-    },
-    Object {
-      "down": null,
-      "total": 0,
-      "up": null,
-      "x": 1568411604000,
-    },
-    Object {
-      "down": null,
-      "total": 8,
-      "up": null,
-      "x": 1568411640000,
-    },
-    Object {
-      "down": null,
-      "total": 8,
-      "up": null,
-      "x": 1568411784000,
-    },
-    Object {
-      "down": null,
-      "total": 0,
-      "up": null,
-      "x": 1568411820000,
-    },
-    Object {
-      "down": null,
-      "total": 0,
-      "up": null,
-      "x": 1568411856000,
-    },
-    Object {
-      "down": null,
-      "total": 0,
-      "up": null,
-      "x": 1568411892000,
-    },
-    Object {
-      "down": null,
-      "total": 4,
-      "up": null,
-      "x": 1568411928000,
-    },
-    Object {
-      "down": null,
-      "total": 7,
-      "up": null,
-      "x": 1568411964000,
-    },
-    Object {
-      "down": null,
-      "total": 5,
-      "up": null,
-      "x": 1568412036000,
-    },
-    Object {
-      "down": null,
-      "total": 4,
-      "up": null,
-      "x": 1568412072000,
-    },
-    Object {
-      "down": null,
-      "total": 3,
-      "up": null,
-      "x": 1568412108000,
-    },
-    Object {
-      "down": null,
-      "total": 4,
-      "up": null,
-      "x": 1568412144000,
-    },
-    Object {
-      "down": null,
-      "total": 4,
-      "up": null,
-      "x": 1568412180000,
-    },
-    Object {
-      "down": null,
-      "total": 3,
-      "up": null,
-      "x": 1568412216000,
-    },
-    Object {
-      "down": null,
-      "total": 1,
-      "up": null,
-      "x": 1568412252000,
-    },
-    Object {
-      "down": null,
-      "total": 3,
-      "up": null,
-      "x": 1568412288000,
-    },
-    Object {
-      "down": null,
-      "total": 8,
-      "up": null,
-      "x": 1568412324000,
-    },
-    Object {
-      "down": null,
-      "total": 8,
-      "up": null,
-      "x": 1568412432000,
-    },
-    Object {
-      "down": null,
-      "total": 1,
-      "up": null,
-      "x": 1568412468000,
-    },
-  ],
-  "statusMaxCount": 0,
 }
 `;

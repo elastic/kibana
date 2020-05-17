@@ -46,6 +46,18 @@ export default function({ getService, getPageObjects }) {
     });
 
     describe('state:storeInSessionStorage', () => {
+      async function getStateFromUrl() {
+        const currentUrl = await browser.getCurrentUrl();
+        let match = currentUrl.match(/(.*)?_g=(.*)&_a=(.*)/);
+        if (match) return [match[2], match[3]];
+        match = currentUrl.match(/(.*)?_a=(.*)&_g=(.*)/);
+        if (match) return [match[3], match[2]];
+
+        if (!match) {
+          throw new Error('State in url is missing or malformed: ' + currentUrl);
+        }
+      }
+
       it('defaults to null', async () => {
         await PageObjects.settings.clickKibanaSettings();
         const storeInSessionStorage = await PageObjects.settings.getAdvancedSettingCheckbox(
@@ -58,10 +70,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
-        const currentUrl = await browser.getCurrentUrl();
-        const urlPieces = currentUrl.match(/(.*)?_g=(.*)&_a=(.*)/);
-        const globalState = urlPieces[2];
-        const appState = urlPieces[3];
+        const [globalState, appState] = await getStateFromUrl();
 
         // We don't have to be exact, just need to ensure it's greater than when the hashed variation is being used,
         // which is less than 20 characters.
@@ -83,10 +92,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
-        const currentUrl = await browser.getCurrentUrl();
-        const urlPieces = currentUrl.match(/(.*)?_g=(.*)&_a=(.*)/);
-        const globalState = urlPieces[2];
-        const appState = urlPieces[3];
+        const [globalState, appState] = await getStateFromUrl();
 
         // We don't have to be exact, just need to ensure it's less than the unhashed version, which will be
         // greater than 20 characters with the default state plus a time.
@@ -100,10 +106,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.settings.clickKibanaSettings();
         await PageObjects.settings.toggleAdvancedSettingCheckbox('state:storeInSessionStorage');
         await PageObjects.header.clickDashboard();
-        const currentUrl = await browser.getCurrentUrl();
-        const urlPieces = currentUrl.match(/(.*)?_g=(.*)&_a=(.*)/);
-        const globalState = urlPieces[2];
-        const appState = urlPieces[3];
+        const [globalState, appState] = await getStateFromUrl();
         // We don't have to be exact, just need to ensure it's greater than when the hashed variation is being used,
         // which is less than 20 characters.
         expect(globalState.length).to.be.greaterThan(20);

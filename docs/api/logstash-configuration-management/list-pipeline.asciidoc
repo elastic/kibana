@@ -9,14 +9,14 @@ experimental[] List all centrally-managed Logstash pipelines.
 [[logstash-configuration-management-api-list-request]]
 ==== Request
 
-`GET /api/logstash/pipelines`
+`GET <kibana host>:<port>/api/logstash/pipelines`
 
 [[logstash-configuration-management-api-list-example]]
 ==== Example
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "pipelines": [

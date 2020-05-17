@@ -5,9 +5,9 @@
  */
 
 import { estimateBucketSpanFactory } from '../../models/bucket_span_estimator';
-import { mlFunctionToESAggregation } from '../../../../../legacy/plugins/ml/common/util/job_utils';
-import { SKIP_BUCKET_SPAN_ESTIMATION } from '../../../../../legacy/plugins/ml/common/constants/validation';
-import { parseInterval } from '../../../../../legacy/plugins/ml/common/util/parse_interval';
+import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
+import { SKIP_BUCKET_SPAN_ESTIMATION } from '../../../common/constants/validation';
+import { parseInterval } from '../../../common/util/parse_interval';
 
 import { validateJobObject } from './validate_job_object';
 
@@ -65,7 +65,7 @@ export async function validateBucketSpan(
   }
 
   const messages = [];
-  const parsedBucketSpan = parseInterval(job.analysis_config.bucket_span, false);
+  const parsedBucketSpan = parseInterval(job.analysis_config.bucket_span);
   if (parsedBucketSpan === null || parsedBucketSpan.asMilliseconds() === 0) {
     messages.push({ id: 'bucket_span_invalid' });
     return messages;

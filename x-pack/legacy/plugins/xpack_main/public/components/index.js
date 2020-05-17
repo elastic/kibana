@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { LicenseStatus } from '../../../license_management/public/np_ready/application/sections/license_dashboard/license_status/license_status';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+export { LicenseStatus } from '../../../../../plugins/license_management/public/application/sections/license_dashboard/license_status/license_status';
 
-export { AddLicense } from '../../../license_management/public/np_ready/application/sections/license_dashboard/add_license/add_license';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+export { AddLicense } from '../../../../../plugins/license_management/public/application/sections/license_dashboard/add_license/add_license';
 
 /*
  * For to link to management
  */
-export { BASE_PATH as MANAGEMENT_BASE_PATH } from '../../../license_management/common/constants';
+export { BASE_PATH as MANAGEMENT_BASE_PATH } from '../../../../../plugins/license_management/common/constants';

@@ -21,7 +21,7 @@ import React, { FunctionComponent, useMemo } from 'react';
 import { Route, RouteComponentProps, Router, Switch } from 'react-router-dom';
 import { History } from 'history';
 import { Observable } from 'rxjs';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 
 import { AppLeaveHandler, AppStatus, Mounter } from '../types';
 import { AppContainer } from './app_container';
@@ -32,6 +32,7 @@ interface Props {
   history: History;
   appStatuses$: Observable<Map<string, AppStatus>>;
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
+  setIsMounting: (isMounting: boolean) => void;
 }
 
 interface Params {
@@ -43,6 +44,7 @@ export const AppRouter: FunctionComponent<Props> = ({
   mounters,
   setAppLeaveHandler,
   appStatuses$,
+  setIsMounting,
 }) => {
   const appStatuses = useObservable(appStatuses$, new Map());
   const createScopedHistory = useMemo(
@@ -53,26 +55,25 @@ export const AppRouter: FunctionComponent<Props> = ({
   return (
     <Router history={history}>
       <Switch>
-        {[...mounters].flatMap(([appId, mounter]) =>
-          // Remove /app paths from the routes as they will be handled by the
-          // "named" route parameter `:appId` below
-          mounter.appBasePath.startsWith('/app')
-            ? []
-            : [
-                <Route
-                  key={mounter.appRoute}
-                  path={mounter.appRoute}
-                  render={({ match: { url } }) => (
-                    <AppContainer
-                      appPath={url}
-                      appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
-                      createScopedHistory={createScopedHistory}
-                      {...{ appId, mounter, setAppLeaveHandler }}
-                    />
-                  )}
-                />,
-              ]
-        )}
+        {[...mounters]
+          // legacy apps can have multiple sub-apps registered with the same route
+          // which needs additional logic that is handled in the catch-all route below
+          .filter(([_, mounter]) => !mounter.legacy)
+          .map(([appId, mounter]) => (
+            <Route
+              key={mounter.appRoute}
+              path={mounter.appRoute}
+              render={({ match: { url } }) => (
+                <AppContainer
+                  appPath={url}
+                  appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
+                  createScopedHistory={createScopedHistory}
+                  {...{ appId, mounter, setAppLeaveHandler, setIsMounting }}
+                />
+              )}
+            />
+          ))}
+        {/* handler for legacy apps and used as a catch-all to display 404 page on not existing /app/appId apps*/}
         <Route
           path="/app/:appId"
           render={({
@@ -92,7 +93,7 @@ export const AppRouter: FunctionComponent<Props> = ({
                 appId={id}
                 appStatus={appStatuses.get(id) ?? AppStatus.inaccessible}
                 createScopedHistory={createScopedHistory}
-                {...{ mounter, setAppLeaveHandler }}
+                {...{ mounter, setAppLeaveHandler, setIsMounting }}
               />
             );
           }}

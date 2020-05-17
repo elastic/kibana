@@ -8,7 +8,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { isJSON } from '../../../../shared_imports';
-import { StepProps } from '../types';
+import { StepProps, DataGetterFunc } from '../types';
 
 interface Parameters {
   prop: 'settings' | 'mappings' | 'aliases';
@@ -44,11 +44,13 @@ export const useJsonStep = ({
     return isValid;
   }, [content]);
 
-  const dataGetter = useCallback(() => {
+  const dataGetter = useCallback<DataGetterFunc>(() => {
     const isValid = validateContent();
     const value = isValid && content.trim() !== '' ? JSON.parse(content) : {};
-    const data = { [prop]: value };
-    return Promise.resolve({ isValid, data });
+    // If no key has been added to the JSON object, we strip it out so an empty object is not sent in the request
+    const data = { [prop]: Object.keys(value).length > 0 ? value : undefined };
+
+    return Promise.resolve({ isValid, data, path: 'template' });
   }, [content, validateContent, prop]);
 
   useEffect(() => {

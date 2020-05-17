@@ -20,9 +20,12 @@
 import { LegacyConfig } from '../legacy';
 import { SavedObjectMigrationMap } from './migrations';
 import {
+  SavedObjectsNamespaceType,
   SavedObjectsType,
   SavedObjectsLegacyUiExports,
   SavedObjectLegacyMigrationMap,
+  SavedObjectsLegacyManagementTypeDefinition,
+  SavedObjectsTypeManagementDefinition,
 } from './types';
 import { SavedObjectsSchemaDefinition } from './schema';
 
@@ -35,19 +38,26 @@ export const convertLegacyTypes = (
     savedObjectMappings = [],
     savedObjectMigrations = {},
     savedObjectSchemas = {},
+    savedObjectsManagement = {},
   }: SavedObjectsLegacyUiExports,
   legacyConfig: LegacyConfig
 ): SavedObjectsType[] => {
-  return savedObjectMappings.reduce((types, { pluginId, properties }) => {
+  return savedObjectMappings.reduce((types, { properties }) => {
     return [
       ...types,
       ...Object.entries(properties).map(([type, mappings]) => {
         const schema = savedObjectSchemas[type];
         const migrations = savedObjectMigrations[type];
+        const management = savedObjectsManagement[type];
+        const namespaceType = (schema?.isNamespaceAgnostic
+          ? 'agnostic'
+          : schema?.multiNamespace
+          ? 'multiple'
+          : 'single') as SavedObjectsNamespaceType;
         return {
           name: type,
           hidden: schema?.hidden ?? false,
-          namespaceAgnostic: schema?.isNamespaceAgnostic ?? false,
+          namespaceType,
           mappings,
           indexPattern:
             typeof schema?.indexPattern === 'function'
@@ -55,6 +65,7 @@ export const convertLegacyTypes = (
               : schema?.indexPattern,
           convertToAliasScript: schema?.convertToAliasScript,
           migrations: convertLegacyMigrations(migrations ?? {}),
+          management: management ? convertLegacyTypeManagement(management) : undefined,
         };
       }),
     ];
@@ -71,7 +82,8 @@ export const convertTypesToLegacySchema = (
     return {
       ...schema,
       [type.name]: {
-        isNamespaceAgnostic: type.namespaceAgnostic,
+        isNamespaceAgnostic: type.namespaceType === 'agnostic',
+        multiNamespace: type.namespaceType === 'multiple',
         hidden: type.hidden,
         indexPattern: type.indexPattern,
         convertToAliasScript: type.convertToAliasScript,
@@ -89,4 +101,17 @@ const convertLegacyMigrations = (
       [version]: (doc, context) => migrationFn(doc, context.log),
     };
   }, {} as SavedObjectMigrationMap);
+};
+
+const convertLegacyTypeManagement = (
+  legacyTypeManagement: SavedObjectsLegacyManagementTypeDefinition
+): SavedObjectsTypeManagementDefinition => {
+  return {
+    importableAndExportable: legacyTypeManagement.isImportableAndExportable,
+    defaultSearchField: legacyTypeManagement.defaultSearchField,
+    icon: legacyTypeManagement.icon,
+    getTitle: legacyTypeManagement.getTitle,
+    getEditUrl: legacyTypeManagement.getEditUrl,
+    getInAppUrl: legacyTypeManagement.getInAppUrl,
+  };
 };

@@ -9,12 +9,12 @@ import { RequestHandler } from 'kibana/server';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { wrapEsError } from '../../../../../legacy/server/lib/create_router/error_wrappers';
 
-import { TRANSFORM_STATE } from '../../../../../legacy/plugins/transform/public/app/common';
 import {
   TransformEndpointRequest,
   TransformEndpointResult,
-} from '../../../../../legacy/plugins/transform/public/app/hooks/use_api_types';
-import { TransformId } from '../../../../../legacy/plugins/transform/public/app/common/transform';
+  TransformId,
+  TRANSFORM_STATE,
+} from '../../../common';
 
 import { RouteDependencies } from '../../types';
 
@@ -148,6 +148,29 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
   );
   router.post(
     {
+      path: addBasePath('transforms/{transformId}/_update'),
+      validate: {
+        ...schemaTransformId,
+        body: schema.maybe(schema.any()),
+      },
+    },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { transformId } = req.params as SchemaTransformId;
+
+      try {
+        return res.ok({
+          body: await ctx.transform!.dataClient.callAsCurrentUser('transform.updateTransform', {
+            body: req.body,
+            transformId,
+          }),
+        });
+      } catch (e) {
+        return res.customError(wrapError(e));
+      }
+    })
+  );
+  router.post(
+    {
       path: addBasePath('delete_transforms'),
       validate: {
         body: schema.maybe(schema.any()),
@@ -273,9 +296,7 @@ const previewTransformHandler: RequestHandler = async (ctx, req, res) => {
 };
 
 const startTransformsHandler: RequestHandler = async (ctx, req, res) => {
-  const { transformsInfo } = req.body as {
-    transformsInfo: TransformEndpointRequest[];
-  };
+  const transformsInfo = req.body as TransformEndpointRequest[];
 
   try {
     return res.ok({
@@ -313,9 +334,7 @@ async function startTransforms(
 }
 
 const stopTransformsHandler: RequestHandler = async (ctx, req, res) => {
-  const { transformsInfo } = req.body as {
-    transformsInfo: TransformEndpointRequest[];
-  };
+  const transformsInfo = req.body as TransformEndpointRequest[];
 
   try {
     return res.ok({

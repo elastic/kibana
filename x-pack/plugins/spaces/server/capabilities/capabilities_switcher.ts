@@ -30,9 +30,10 @@ export function setupCapabilitiesSwitcher(
 
       const registeredFeatures = features.getFeatures();
 
+      // try to retrieve capabilities for authenticated or "maybe authenticated" users
       return toggleCapabilities(registeredFeatures, capabilities, activeSpace);
     } catch (e) {
-      logger.warn(`Error toggling capabilities for request to ${request.url.pathname}: ${e}`);
+      logger.debug(`Error toggling capabilities for request to ${request.url.pathname}: ${e}`);
       return capabilities;
     }
   };

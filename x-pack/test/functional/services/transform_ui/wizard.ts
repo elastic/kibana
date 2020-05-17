@@ -52,8 +52,8 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await this.assertDetailsSummaryExists();
     },
 
-    async assertSourceIndexPreviewExists(subSelector?: string) {
-      let selector = 'transformSourceIndexPreview';
+    async assertIndexPreviewExists(subSelector?: string) {
+      let selector = 'transformIndexPreview';
       if (subSelector !== undefined) {
         selector = `${selector} ${subSelector}`;
       } else {
@@ -62,8 +62,8 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await testSubjects.existOrFail(selector);
     },
 
-    async assertSourceIndexPreviewLoaded() {
-      await this.assertSourceIndexPreviewExists('loaded');
+    async assertIndexPreviewLoaded() {
+      await this.assertIndexPreviewExists('loaded');
     },
 
     async assertPivotPreviewExists(subSelector?: string) {
@@ -124,10 +124,10 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async assertSourceIndexPreview(columns: number, rows: number) {
+    async assertIndexPreview(columns: number, rows: number) {
       await retry.tryForTime(2000, async () => {
         // get a 2D array of rows and cell values
-        const rowsData = await this.parseEuiDataGrid('transformSourceIndexPreview');
+        const rowsData = await this.parseEuiDataGrid('transformIndexPreview');
 
         expect(rowsData).to.length(
           rows,
@@ -143,8 +143,8 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async assertSourceIndexPreviewColumnValues(column: number, values: string[]) {
-      await this.assertEuiDataGridColumnValues('transformSourceIndexPreview', column, values);
+    async assertIndexPreviewColumnValues(column: number, values: string[]) {
+      await this.assertEuiDataGridColumnValues('transformIndexPreview', column, values);
     },
 
     async assertPivotPreviewColumnValues(column: number, values: string[]) {
@@ -160,15 +160,15 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     },
 
     async assertQueryInputExists() {
-      await testSubjects.existOrFail('tarnsformQueryInput');
+      await testSubjects.existOrFail('transformQueryInput');
     },
 
     async assertQueryInputMissing() {
-      await testSubjects.missingOrFail('tarnsformQueryInput');
+      await testSubjects.missingOrFail('transformQueryInput');
     },
 
     async assertQueryValue(expectedQuery: string) {
-      const actualQuery = await testSubjects.getVisibleText('tarnsformQueryInput');
+      const actualQuery = await testSubjects.getVisibleText('transformQueryInput');
       expect(actualQuery).to.eql(
         expectedQuery,
         `Query input text should be '${expectedQuery}' (got ${actualQuery})`
@@ -274,10 +274,15 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await this.assertAggregationEntryExists(index, expectedLabel);
     },
 
-    async assertAdvancedPivotEditorContent(expectedValue: Record<string, any>) {
+    async assertAdvancedPivotEditorContent(expectedValue: string[]) {
       const advancedEditorString = await aceEditor.getValue('transformAdvancedPivotEditor');
-      const advancedEditorValue = JSON.parse(advancedEditorString);
-      expect(advancedEditorValue).to.eql(expectedValue);
+      // Not all lines may be visible in the editor and thus aceEditor may not return all lines.
+      // This means we might not get back valid JSON so we only test against the first few lines
+      // and see if the string matches.
+
+      // const advancedEditorValue = JSON.parse(advancedEditorString);
+      // expect(advancedEditorValue).to.eql(expectedValue);
+      expect(advancedEditorString.split('\n').splice(0, 3)).to.eql(expectedValue);
     },
 
     async assertAdvancedPivotEditorSwitchExists() {

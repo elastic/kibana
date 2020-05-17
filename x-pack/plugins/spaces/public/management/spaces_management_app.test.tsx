@@ -23,6 +23,8 @@ import { coreMock } from '../../../../../src/core/public/mocks';
 import { securityMock } from '../../../security/public/mocks';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 import { SecurityLicenseFeatures } from '../../../security/public';
+import { featuresPluginMock } from '../../../features/public/mocks';
+import { PluginsStart } from '../plugin';
 
 async function mountApp(basePath: string, spaceId?: string) {
   const container = document.createElement('div');
@@ -42,11 +44,14 @@ async function mountApp(basePath: string, spaceId?: string) {
     showLinks: true,
   } as SecurityLicenseFeatures);
 
+  const [coreStart, pluginsStart] = await coreMock.createSetup().getStartServices();
+  (pluginsStart as PluginsStart).features = featuresPluginMock.createStart();
+
   const unmount = await spacesManagementApp
     .create({
       spacesManager,
       securityLicense,
-      getStartServices: coreMock.createSetup().getStartServices as any,
+      getStartServices: async () => [coreStart, pluginsStart as PluginsStart, {}],
     })
     .mount({ basePath, element: container, setBreadcrumbs });
 
@@ -65,7 +70,7 @@ describe('spacesManagementApp', () => {
       Object {
         "id": "spaces",
         "mount": [Function],
-        "order": 10,
+        "order": 2,
         "title": "Spaces",
       }
     `);
@@ -81,7 +86,7 @@ describe('spacesManagementApp', () => {
     expect(setBreadcrumbs).toHaveBeenCalledWith([{ href: `#${basePath}`, text: 'Spaces' }]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Spaces Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"securityEnabled":true}
+        Spaces Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"securityEnabled":true}
       </div>
     `);
 
@@ -103,7 +108,7 @@ describe('spacesManagementApp', () => {
     ]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"securityEnabled":true}
+        Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"securityEnabled":true}
       </div>
     `);
 
@@ -126,7 +131,7 @@ describe('spacesManagementApp', () => {
     ]);
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"spaceId":"some-space","securityEnabled":true}
+        Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{"_isScalar":false}},"spaceId":"some-space","securityEnabled":true}
       </div>
     `);
 
