@@ -11,15 +11,37 @@ Some APM app features are provided via a REST API:
 * <<agent-config-api>>
 * <<apm-annotation-api>>
 
-TIP: The Kibana <<api,REST API reference>> provides additional information on how to use Kibana APIs,
-like required request headers and authentication options.
+Here's an example CURL request that adds an annotation to the APM app:
+
+[source,curl]
+----
+curl -X POST \
+  http://localhost:5601/api/apm/services/opbeans-java/annotation \
+-H 'Content-Type: application/json' \
+-H 'kbn-xsrf: true' \
+-H 'Authorization: Basic YhUlubWZhM0FDbnlQeE6WRtaW49FQmSGZ4RUWXdX' \
+-d '{
+      "@timestamp": "2020-05-11T10:31:30.452Z",
+      "service": {
+        "version": "1.2"
+      },
+      "message": "Revert upgrade",
+      "tags": [
+        "elastic.co", "customer"
+      ]
+    }'
+----
+
+For more information, the Kibana <<api,REST API reference>> provides information on how to use Kibana APIs,
+like required request headers and authentication options. 
 
 // AGENT CONFIG API
 // GET --> Feature (APM) Read
 // CREAT/EDIT/DELETE --> Feature (APM) All
 
 // ANNOTATION API
-// Still in progress
+// Feature (APM) All
+// Index: `observability-annotations`. Privileges: `create_index`, `create_doc`, `manage`, and `read`.
 
 ////
 *******************************************************
