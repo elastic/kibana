@@ -55,7 +55,7 @@ export function azureMetricsSpecProvider(context: TutorialContext): TutorialSche
         label: i18n.translate('home.tutorials.azureMetrics.artifacts.application.label', {
           defaultMessage: 'Discover',
         }),
-        path: '/app/kibana#/discover',
+        path: '/app/discover#/',
       },
       dashboards: [],
       exportedFields: {

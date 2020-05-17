@@ -41,6 +41,9 @@ describe('HostList store concerns', () => {
         details: undefined,
         detailsLoading: false,
         detailsError: undefined,
+        policyResponse: undefined,
+        policyResponseLoading: false,
+        policyResponseError: undefined,
         location: undefined,
       });
     });

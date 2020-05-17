@@ -68,11 +68,12 @@
     "kbn:watch": "node scripts/kibana --dev --logging.json=false",
     "build:types": "tsc --p tsconfig.types.json",
     "docs:acceptApiChanges": "node  --max-old-space-size=6144  scripts/check_published_api_changes.js --accept",
-    "kbn:bootstrap": "yarn build:types && node scripts/register_git_hook",
+    "kbn:bootstrap": "node scripts/register_git_hook",
     "spec_to_console": "node scripts/spec_to_console",
     "backport-skip-ci": "backport --prDescription \"[skip-ci]\"",
     "storybook": "node scripts/storybook",
-    "cover:report": "nyc report --temp-dir target/kibana-coverage/functional --report-dir target/coverage/report --reporter=lcov && open ./target/coverage/report/lcov-report/index.html"
+    "cover:report": "nyc report --temp-dir target/kibana-coverage/functional --report-dir target/coverage/report --reporter=lcov && open ./target/coverage/report/lcov-report/index.html",
+    "cover:functional:merge": "nyc report --temp-dir target/kibana-coverage/functional --report-dir target/coverage/report/functional --reporter=json-summary"
   },
   "repository": {
     "type": "git",
@@ -297,7 +298,7 @@
     "@elastic/eslint-plugin-eui": "0.0.2",
     "@elastic/github-checks-reporter": "0.0.20b3",
     "@elastic/makelogs": "^5.0.1",
-    "@elastic/static-fs": "1.0.1",
+    "@elastic/static-fs": "1.0.2",
     "@kbn/dev-utils": "1.0.0",
     "@kbn/es": "1.0.0",
     "@kbn/eslint-import-resolver-kibana": "2.0.0",
