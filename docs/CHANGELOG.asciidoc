@@ -50,6 +50,9 @@ SIEM::
 * When you deactivate an action within a rule, the rule fails {issue}64870[#64870]
 * When you add a timestamp to the PagerDuty action, the rule fails {issue}64871[#64871]
 
+Management::
+* Editing Saved Objects (eg. Dashboards) via the "Inspect" JSON editor in Management corrupts objects {issue}66542[#66542]
+
 Configuration::
 * The `server.customResponseHeaders` option prevents {kib} from starting if headers are set using a type other than string.
 To fix this, convert your boolean and number headers to strings.  For example, use `my-header: "true"` instead of `my-header: true`.
