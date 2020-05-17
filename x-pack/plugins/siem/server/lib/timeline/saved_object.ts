@@ -10,13 +10,14 @@ import { SavedObjectsFindOptions } from '../../../../../../src/core/server';
 import { UNAUTHENTICATED_USER } from '../../../common/constants';
 import { NoteSavedObject } from '../../../common/types/timeline/note';
 import { PinnedEventSavedObject } from '../../../common/types/timeline/pinned_event';
-import { SavedTimeline, TimelineSavedObject, TimelineType } from '../../../common/types/timeline';
+import { SavedTimeline, TimelineSavedObject } from '../../../common/types/timeline';
 import {
   ResponseTimeline,
   PageInfoTimeline,
   SortTimeline,
   ResponseFavoriteTimeline,
   TimelineResult,
+  TimelineType,
   Maybe,
 } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
@@ -49,7 +50,7 @@ export interface Timeline {
     pageInfo: PageInfoTimeline | null,
     search: string | null,
     sort: SortTimeline | null,
-    timelineType: string | null
+    timelineType: TimelineType | null
   ) => Promise<ResponseTimelines>;
 
   persistFavorite: (
@@ -104,7 +105,7 @@ const getTimelineTypeFilter = (timelineType: string | null) => {
     : /** Show me every timeline whose timelineType is not "template".
        * which includes timelineType === 'default' and
        * those timelineType doesn't exists */
-      `not siem-ui-timeline.attributes.timelineType: ${TimelineType.template} and not siem-ui-timeline.attributes.timelineType: ${TimelineType.draft}`;
+      `not siem-ui-timeline.attributes.timelineType: ${TimelineType.template}`;
 };
 
 export const getAllTimeline = async (
@@ -113,7 +114,7 @@ export const getAllTimeline = async (
   pageInfo: PageInfoTimeline | null,
   search: string | null,
   sort: SortTimeline | null,
-  timelineType: string | null
+  timelineType: TimelineType | null
 ): Promise<ResponseTimelines> => {
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,
@@ -130,11 +131,14 @@ export const getAllTimeline = async (
   return getAllSavedTimeline(request, options);
 };
 
-export const getDraftTimeline = async (request: FrameworkRequest): Promise<ResponseTimelines> => {
+export const getDraftTimeline = async (
+  request: FrameworkRequest,
+  timelineType: TimelineType | null
+): Promise<ResponseTimelines> => {
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,
     perPage: 1,
-    filter: `siem-ui-timeline.attributes.timelineType: ${TimelineType.draft}`,
+    filter: `siem-ui-timeline.attributes.timelineType: ${timelineType} and siem-ui-timeline.attributes.draft: true`,
     sortField: 'created',
     sortOrder: 'desc',
   };

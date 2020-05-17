@@ -24,7 +24,7 @@ import {
   DEFAULT_INTERVAL_VALUE,
 } from '../../../common/constants';
 import { networkModel } from '../../network/store';
-import { TimelineType } from '../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
 
 export const mockGlobalState: State = {
   app: {
@@ -222,6 +222,7 @@ export const mockGlobalState: State = {
         width: DEFAULT_TIMELINE_WIDTH,
         isSaving: false,
         version: null,
+        status: TimelineStatus.active,
       },
     },
   },

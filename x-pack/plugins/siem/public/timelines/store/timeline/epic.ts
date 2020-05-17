@@ -33,8 +33,13 @@ import {
   Filter,
   MatchAllFilter,
 } from '../../../../../../.../../../src/plugins/data/public';
-import { TimelineType } from '../../../../common/types/timeline';
-import { TimelineInput, ResponseTimeline, TimelineResult } from '../../../graphql/types';
+import { TimelineStatus } from '../../../../common/types/timeline';
+import {
+  TimelineType,
+  TimelineInput,
+  ResponseTimeline,
+  TimelineResult,
+} from '../../../graphql/types';
 import { AppApolloClient } from '../../../common/lib/lib';
 import { addError } from '../../../common/store/app/actions';
 import { NotesById } from '../../../common/store/app/model';
@@ -152,7 +157,7 @@ export const createTimelineEpic = <State>(): Epic<
           return true;
         }
         if (action.type === createTimeline.type && isItAtimelineAction(timelineId)) {
-          if (timelineObj.timelineType !== 'draft') {
+          if (timelineObj.status !== TimelineStatus.draft) {
             myEpicTimelineId.setTimelineVersion(null);
             myEpicTimelineId.setTimelineId(null);
           }
