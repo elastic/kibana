@@ -99,13 +99,23 @@ export const getTimelineByTemplateTimelineId = async (
 
 /** The filter here is able to handle the legacy data,
  * which has no timelineType exists in the savedObject */
-const getTimelineTypeFilter = (timelineType: string | null) => {
-  return timelineType === TimelineType.template
-    ? `siem-ui-timeline.attributes.timelineType: ${TimelineType.template}` /** Show only whose timelineType exists and equals to "template" */
-    : /** Show me every timeline whose timelineType is not "template".
-       * which includes timelineType === 'default' and
-       * those timelineType doesn't exists */
-      `not siem-ui-timeline.attributes.timelineType: ${TimelineType.template}`;
+const getTimelineTypeFilter = (timelineType: string | null, includeDraft: boolean) => {
+  const typeFilter =
+    timelineType === TimelineType.template
+      ? `siem-ui-timeline.attributes.timelineType: ${TimelineType.template}` /** Show only whose timelineType exists and equals to "template" */
+      : /** Show me every timeline whose timelineType is not "template".
+         * which includes timelineType === 'default' and
+         * those timelineType doesn't exists */
+        `not siem-ui-timeline.attributes.timelineType: ${TimelineType.template}`;
+
+  /** Show me every timeline whose status is not "draft".
+   * which includes status === 'active' and
+   * those status doesn't exists */
+  const draftFilter = includeDraft
+    ? `siem-ui-timeline.attributes.status: draft`
+    : `not siem-ui-timeline.attributes.status: draft`;
+
+  return `${typeFilter} and ${draftFilter}`;
 };
 
 export const getAllTimeline = async (
@@ -124,7 +134,7 @@ export const getAllTimeline = async (
     searchFields: onlyUserFavorite
       ? ['title', 'description', 'favorite.keySearch']
       : ['title', 'description'],
-    filter: getTimelineTypeFilter(timelineType),
+    filter: getTimelineTypeFilter(timelineType, false),
     sortField: sort != null ? sort.sortField : undefined,
     sortOrder: sort != null ? sort.sortOrder : undefined,
   };
@@ -138,7 +148,7 @@ export const getDraftTimeline = async (
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,
     perPage: 1,
-    filter: `siem-ui-timeline.attributes.timelineType: ${timelineType} and siem-ui-timeline.attributes.draft: true`,
+    filter: getTimelineTypeFilter(timelineType, true),
     sortField: 'created',
     sortOrder: 'desc',
   };
