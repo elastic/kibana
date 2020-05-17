@@ -53,6 +53,11 @@ SIEM::
 Management::
 * Editing Saved Objects (eg. Dashboards) via the "Inspect" JSON editor in Management corrupts objects {issue}66542[#66542]
 
+Configuration::
+* The `server.customResponseHeaders` option prevents {kib} from starting if headers are set using a type other than string.
+To fix this, convert your boolean and number headers to strings.  For example, use `my-header: "true"` instead of `my-header: true`.
+{issue}66146[#66146]
+
 [float]
 [[enhancement-7.7.0]]
 === Enhancements
