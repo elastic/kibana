@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { CONTEXT_STEP_SETTING, CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../common';
 import { getAngularModule, getServices } from '../../kibana_services';
 import contextAppTemplate from './context_app.html';
 import './context/components/action_bar';
@@ -51,7 +52,6 @@ module.directive('contextApp', function ContextApp() {
       predecessorCount: '=',
       successorCount: '=',
       sort: '=',
-      discoverUrl: '=',
     },
     template: contextAppTemplate,
   };
@@ -62,9 +62,8 @@ function ContextAppController($scope, Private) {
   const queryParameterActions = getQueryParameterActions(filterManager, indexpatterns);
   const queryActions = Private(QueryActionsProvider);
   this.state = createInitialState(
-    parseInt(uiSettings.get('context:step'), 10),
-    getFirstSortableField(this.indexPattern, uiSettings.get('context:tieBreakerFields')),
-    this.discoverUrl
+    parseInt(uiSettings.get(CONTEXT_STEP_SETTING), 10),
+    getFirstSortableField(this.indexPattern, uiSettings.get(CONTEXT_TIE_BREAKER_FIELDS_SETTING))
   );
 
   this.actions = _.mapValues(
@@ -129,7 +128,7 @@ function ContextAppController($scope, Private) {
   );
 }
 
-function createInitialState(defaultStepSize, tieBreakerField, discoverUrl) {
+function createInitialState(defaultStepSize, tieBreakerField) {
   return {
     queryParameters: createInitialQueryParametersState(defaultStepSize, tieBreakerField),
     rows: {
@@ -139,10 +138,5 @@ function createInitialState(defaultStepSize, tieBreakerField, discoverUrl) {
       successors: [],
     },
     loadingStatus: createInitialLoadingStatusState(),
-    navigation: {
-      discover: {
-        url: discoverUrl,
-      },
-    },
   };
 }

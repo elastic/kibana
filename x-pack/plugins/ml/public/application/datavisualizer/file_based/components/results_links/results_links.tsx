@@ -89,7 +89,7 @@ export const ResultsLinks: FC<Props> = ({
               />
             }
             description=""
-            href={`${basePath.get()}/app/kibana#/discover?&_a=(index:'${indexPatternId}')${globalStateString}`}
+            href={`${basePath.get()}/app/discover#/?&_a=(index:'${indexPatternId}')${globalStateString}`}
           />
         </EuiFlexItem>
       )}
@@ -139,7 +139,7 @@ export const ResultsLinks: FC<Props> = ({
             />
           }
           description=""
-          href={`${basePath.get()}/app/kibana#/management/elasticsearch/index_management/indices/filter/${index}`}
+          href={`${basePath.get()}/app/kibana#/management/data/index_management/indices/filter/${index}`}
         />
       </EuiFlexItem>
 

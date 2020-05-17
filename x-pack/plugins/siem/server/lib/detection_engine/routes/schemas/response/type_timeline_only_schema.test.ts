@@ -9,8 +9,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import { TypeAndTimelineOnly, typeAndTimelineOnlySchema } from './type_timeline_only_schema';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
-import { exactCheck } from '../../../../../utils/build_validation/exact_check';
-import { foldLeftRight, getPaths } from '../../../../../utils/build_validation/__mocks__/utils';
+import { exactCheck } from '../../../../../../common/exact_check';
+import { foldLeftRight, getPaths } from '../../../../../../common/test_utils';
 
 describe('prepackaged_rule_schema', () => {
   beforeAll(() => {

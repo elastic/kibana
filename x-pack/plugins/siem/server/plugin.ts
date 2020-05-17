@@ -98,7 +98,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       router,
       config,
       plugins.encryptedSavedObjects?.usingEphemeralEncryptionKey ?? false,
-      plugins.security
+      plugins.security,
+      plugins.ml
     );
 
     plugins.features.registerFeature({

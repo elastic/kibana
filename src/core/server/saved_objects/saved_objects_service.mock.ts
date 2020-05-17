@@ -107,4 +107,5 @@ export const savedObjectsServiceMock = {
   createInternalStartContract: createInternalStartContractMock,
   createStartContract: createStartContractMock,
   createMigrationContext: migrationMocks.createContext,
+  createTypeRegistryMock: typeRegistryMock.create,
 };
