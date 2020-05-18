@@ -29,7 +29,7 @@ interface ServerReturnedRelatedEventData {
  */
 interface ServerFailedToReturnRelatedEventData {
   readonly type: 'serverFailedToReturnRelatedEventData';
-  readonly payload: [ResolverEvent];
+  readonly payload: ResolverEvent;
 }
 
 export type DataAction =
