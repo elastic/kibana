@@ -11,7 +11,7 @@ import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../../../common/constants'
 import { VectorLayer, VectorLayerArguments } from '../vector_layer/vector_layer';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
 import { ITiledSingleLayerVectorSource } from '../../sources/vector_source';
-import { SyncContext } from '../../../actions/map_actions';
+import { SyncContext } from '../../../actions';
 import { ISource } from '../../sources/source';
 import {
   VectorLayerDescriptor,

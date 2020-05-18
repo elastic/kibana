@@ -40,14 +40,6 @@ import {
   setQuery,
   clearTransientLayerStateAndCloseFlyout,
   setMapSettings,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../plugins/maps/public/actions/map_actions';
-import {
-  DEFAULT_IS_LAYER_TOC_OPEN,
-  FLYOUT_STATE,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../plugins/maps/public/reducers/ui';
-import {
   enableFullScreen,
   updateFlyout,
   setReadOnly,
@@ -55,7 +47,12 @@ import {
   setOpenTOCDetails,
   openMapSettings,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../plugins/maps/public/actions/ui_actions';
+} from '../../../../../plugins/maps/public/actions';
+import {
+  DEFAULT_IS_LAYER_TOC_OPEN,
+  FLYOUT_STATE,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps/public/reducers/ui';
 import {
   getIsFullScreen,
   getFlyoutDisplay,

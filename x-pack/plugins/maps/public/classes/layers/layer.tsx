@@ -27,7 +27,7 @@ import {
   StyleDescriptor,
 } from '../../../common/descriptor_types';
 import { Attribution, ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
-import { SyncContext } from '../../actions/map_actions';
+import { SyncContext } from '../../actions';
 import { IStyle } from '../styles/style';
 
 export interface ILayer {
