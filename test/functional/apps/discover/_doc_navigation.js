@@ -32,7 +32,8 @@ export default function({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
 
   // FLAKY: https://github.com/elastic/kibana/issues/62281
-  describe.skip('doc link in discover', function contextSize() {
+  // eslint-disable-next-line mocha/no-exclusive-tests
+  describe.only('doc link in discover', function contextSize() {
     before(async function() {
       await esArchiver.loadIfNeeded('logstash_functional');
       await PageObjects.common.navigateToApp('discover');
