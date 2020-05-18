@@ -7,6 +7,7 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { toExpression } from '@kbn/interpreter/common';
+import { TIMEPICKER_QUICK_RANGES_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { syncFilterExpression } from '../../../public/lib/sync_filter_expression';
 import { RendererStrings } from '../../../i18n';
 import { TimeFilter } from './components';
@@ -20,7 +21,7 @@ const { timeFilter: strings } = RendererStrings;
 export const timeFilterFactory: StartInitializer<RendererFactory<Arguments>> = (core, plugins) => {
   const { uiSettings } = core;
 
-  const customQuickRanges = (uiSettings.get('timepicker:quickRanges') || []).map(
+  const customQuickRanges = (uiSettings.get(TIMEPICKER_QUICK_RANGES_SETTINGS) || []).map(
     ({ from, to, display }: { from: string; to: string; display: string }) => ({
       start: from,
       end: to,

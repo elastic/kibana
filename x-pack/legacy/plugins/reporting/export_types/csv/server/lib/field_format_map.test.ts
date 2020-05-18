@@ -10,6 +10,10 @@ import {
   fieldFormats,
   FieldFormatsGetConfigFn,
 } from '../../../../../../../../src/plugins/data/server';
+import {
+  FORMAT_DEFAULT_TYPE_MAP_SETTINGS,
+  FORMAT_NUMBER_DEFAULT_PATTERN_SETTINGS,
+} from '../../../../../../../../src/plugins/data/common';
 import { fieldFormatMapFactory } from './field_format_map';
 
 type ConfigValue = { number: { id: string; params: {} } } | string;
@@ -28,10 +32,10 @@ describe('field format map', function() {
     },
   };
   const configMock: Record<string, ConfigValue> = {};
-  configMock['format:defaultTypeMap'] = {
+  configMock[FORMAT_DEFAULT_TYPE_MAP_SETTINGS] = {
     number: { id: 'number', params: {} },
   };
-  configMock['format:number:defaultPattern'] = '0,0.[000]';
+  configMock[FORMAT_NUMBER_DEFAULT_PATTERN_SETTINGS] = '0,0.[000]';
   const getConfig = ((key: string) => configMock[key]) as FieldFormatsGetConfigFn;
   const testValue = '4000';
 

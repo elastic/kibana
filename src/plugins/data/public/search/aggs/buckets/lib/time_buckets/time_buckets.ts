@@ -20,7 +20,11 @@
 import { isString, isObject as isObjectLodash, isPlainObject, sortBy } from 'lodash';
 import moment, { Moment } from 'moment';
 
-import { parseInterval } from '../../../../../../common';
+import {
+  parseInterval,
+  HISTOGRAM_BAR_TARGET_SETTINGS,
+  HISTOGRAM_MAX_BARS_SETTINGS,
+} from '../../../../../../common';
 import { TimeRangeBounds } from '../../../../../query';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {
@@ -49,8 +53,8 @@ function isValidMoment(m: any): boolean {
 }
 
 export interface TimeBucketsConfig {
-  'histogram:maxBars': number;
-  'histogram:barTarget': number;
+  [HISTOGRAM_MAX_BARS_SETTINGS]: number;
+  [HISTOGRAM_BAR_TARGET_SETTINGS]: number;
   dateFormat: string;
   'dateFormat:scaled': string[][];
 }
@@ -250,7 +254,10 @@ export class TimeBuckets {
     const readInterval = () => {
       const interval = this._i;
       if (moment.isDuration(interval)) return interval;
-      return calcAutoIntervalNear(this._timeBucketConfig['histogram:barTarget'], Number(duration));
+      return calcAutoIntervalNear(
+        this._timeBucketConfig[HISTOGRAM_BAR_TARGET_SETTINGS],
+        Number(duration)
+      );
     };
 
     const parsedInterval = readInterval();
@@ -261,7 +268,7 @@ export class TimeBuckets {
         return interval;
       }
 
-      const maxLength: number = this._timeBucketConfig['histogram:maxBars'];
+      const maxLength: number = this._timeBucketConfig[HISTOGRAM_MAX_BARS_SETTINGS];
       const approxLen = Number(duration) / Number(interval);
 
       let scaled;

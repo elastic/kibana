@@ -31,7 +31,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { DiscoverSidebar, DiscoverSidebarProps } from './discover_sidebar';
 import { coreMock } from '../../../../../../core/public/mocks';
-import { IndexPatternAttributes } from '../../../../../data/common';
+import { IndexPatternAttributes, SHORT_DOTS_ENABLE_SETTINGS } from '../../../../../data/common';
 import { SavedObject } from '../../../../../../core/types';
 
 jest.mock('../../../kibana_services', () => ({
@@ -50,7 +50,7 @@ jest.mock('../../../kibana_services', () => ({
       get: (key: string) => {
         if (key === 'fields:popularLimit') {
           return 5;
-        } else if (key === 'shortDots:enable') {
+        } else if (key === SHORT_DOTS_ENABLE_SETTINGS) {
           return false;
         }
       },

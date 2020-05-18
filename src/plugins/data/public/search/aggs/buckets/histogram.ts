@@ -24,7 +24,7 @@ import { IUiSettingsClient } from 'src/core/public';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { KBN_FIELD_TYPES, HISTOGRAM_MAX_BARS_SETTINGS } from '../../../../common';
 import { GetInternalStartServicesFn } from '../../../types';
 import { BaseAggParams } from '../types';
 import { ExtendedBounds } from './lib/extended_bounds';
@@ -155,8 +155,8 @@ export const getHistogramBucketAgg = ({
               const range = autoBounds.max - autoBounds.min;
               const bars = range / interval;
 
-              if (bars > uiSettings.get('histogram:maxBars')) {
-                const minInterval = range / uiSettings.get('histogram:maxBars');
+              if (bars > uiSettings.get(HISTOGRAM_MAX_BARS_SETTINGS)) {
+                const minInterval = range / uiSettings.get(HISTOGRAM_MAX_BARS_SETTINGS);
 
                 // Round interval by order of magnitude to provide clean intervals
                 // Always round interval up so there will always be less buckets than histogram:maxBars

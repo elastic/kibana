@@ -33,6 +33,10 @@ import {
 import { RequestHandler } from '../../../../../../../src/core/server';
 import { InfraConfig } from '../../../plugin';
 import { IndexPatternsFetcher } from '../../../../../../../src/plugins/data/server';
+import {
+  COURIER_MAX_CONCURRENT_SHARD_REQUESTS_SETTINGS,
+  SEARCH_INCLUDE_FROZEN_SETTINGS,
+} from '../../../../../../../src/plugins/data/common';
 
 export class KibanaFramework {
   public router: IRouter;
@@ -197,10 +201,10 @@ export class KibanaFramework {
   ) {
     const { elasticsearch, uiSettings } = requestContext.core;
 
-    const includeFrozen = await uiSettings.client.get('search:includeFrozen');
+    const includeFrozen = await uiSettings.client.get(SEARCH_INCLUDE_FROZEN_SETTINGS);
     if (endpoint === 'msearch') {
       const maxConcurrentShardRequests = await uiSettings.client.get(
-        'courier:maxConcurrentShardRequests'
+        COURIER_MAX_CONCURRENT_SHARD_REQUESTS_SETTINGS
       );
       if (maxConcurrentShardRequests > 0) {
         params = { ...params, max_concurrent_shard_requests: maxConcurrentShardRequests };

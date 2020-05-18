@@ -24,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useMount } from 'react-use';
 
 import { Query } from 'src/plugins/data/public';
+import { SEARCH_QUERY_LANGUAGE_SETTINGS } from '../../../../data/common';
 import { useKibana } from '../../../../kibana_react/public';
 import { FilterRow } from './filter';
 import { AggParamEditorProps } from '../agg_param_props';
@@ -68,7 +69,7 @@ function FiltersParamEditor({ agg, value = [], setValue }: AggParamEditorProps<F
     updateFilters([
       ...filters,
       {
-        input: { query: '', language: services.uiSettings.get('search:queryLanguage') },
+        input: { query: '', language: services.uiSettings.get(SEARCH_QUERY_LANGUAGE_SETTINGS) },
         label: '',
         id: generateId(),
       },

@@ -12,6 +12,7 @@ import {
   ISearch,
   getEsPreference,
 } from '../../../../../src/plugins/data/public';
+import { SEARCH_INCLUDE_FROZEN_SETTINGS } from '../../../../../src/plugins/data/common';
 import { IEnhancedEsSearchRequest, EnhancedSearchParams } from '../../common';
 import { ASYNC_SEARCH_STRATEGY } from './async_search_strategy';
 import { IAsyncSearchOptions } from './types';
@@ -27,7 +28,7 @@ export const enhancedEsSearchStrategyProvider: TSearchStrategyProvider<typeof ES
     options
   ) => {
     const params: EnhancedSearchParams = {
-      ignoreThrottled: !context.core.uiSettings.get<boolean>('search:includeFrozen'),
+      ignoreThrottled: !context.core.uiSettings.get<boolean>(SEARCH_INCLUDE_FROZEN_SETTINGS),
       preference: getEsPreference(context.core.uiSettings),
       ...request.params,
     };

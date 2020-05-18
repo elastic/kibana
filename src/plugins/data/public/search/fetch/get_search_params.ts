@@ -18,6 +18,12 @@
  */
 
 import { IUiSettingsClient } from 'kibana/public';
+import {
+  COURIER_SET_REQUEST_PREFERENCE_SETTINGS,
+  COURIER_CUSTOM_REQUEST_PREFERENCE_SETTINGS,
+  COURIER_MAX_CONCURRENT_SHARD_REQUESTS_SETTINGS,
+  SEARCH_INCLUDE_FROZEN_SETTINGS,
+} from '../../../common';
 
 const sessionId = Date.now();
 
@@ -33,19 +39,19 @@ export function getSearchParams(config: IUiSettingsClient, esShardTimeout: numbe
 }
 
 export function getIgnoreThrottled(config: IUiSettingsClient) {
-  return !config.get('search:includeFrozen');
+  return !config.get(SEARCH_INCLUDE_FROZEN_SETTINGS);
 }
 
 export function getMaxConcurrentShardRequests(config: IUiSettingsClient) {
-  const maxConcurrentShardRequests = config.get('courier:maxConcurrentShardRequests');
+  const maxConcurrentShardRequests = config.get(COURIER_MAX_CONCURRENT_SHARD_REQUESTS_SETTINGS);
   return maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined;
 }
 
 export function getPreference(config: IUiSettingsClient) {
-  const setRequestPreference = config.get('courier:setRequestPreference');
+  const setRequestPreference = config.get(COURIER_SET_REQUEST_PREFERENCE_SETTINGS);
   if (setRequestPreference === 'sessionId') return sessionId;
   return setRequestPreference === 'custom'
-    ? config.get('courier:customRequestPreference')
+    ? config.get(COURIER_CUSTOM_REQUEST_PREFERENCE_SETTINGS)
     : undefined;
 }
 

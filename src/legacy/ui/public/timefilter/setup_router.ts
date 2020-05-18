@@ -25,6 +25,7 @@ import { RefreshInterval, TimeRange, TimefilterContract } from 'src/plugins/data
 import { Subscription } from 'rxjs';
 import { fatalError } from 'ui/notify/fatal_error';
 import { subscribeWithScope } from '../../../../plugins/kibana_legacy/public';
+import { TIMEPICKER_REFRESH_INTERVAL_DEFAULTS_SETTINGS } from '../../../../plugins/data/common';
 
 // TODO
 // remove everything underneath once globalState is no longer an angular service
@@ -38,7 +39,7 @@ export function getTimefilterConfig() {
   const settings = chrome.getUiSettingsClient();
   return {
     timeDefaults: settings.get('timepicker:timeDefaults'),
-    refreshIntervalDefaults: settings.get('timepicker:refreshIntervalDefaults'),
+    refreshIntervalDefaults: settings.get(TIMEPICKER_REFRESH_INTERVAL_DEFAULTS_SETTINGS),
   };
 }
 

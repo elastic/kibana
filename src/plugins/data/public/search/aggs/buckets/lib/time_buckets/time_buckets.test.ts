@@ -17,13 +17,17 @@
  * under the License.
  */
 import moment from 'moment';
+import {
+  HISTOGRAM_BAR_TARGET_SETTINGS,
+  HISTOGRAM_MAX_BARS_SETTINGS,
+} from '../../../../../../common';
 
 import { TimeBuckets, TimeBucketsConfig } from './time_buckets';
 
 describe('TimeBuckets', () => {
   const timeBucketConfig: TimeBucketsConfig = {
-    'histogram:maxBars': 4,
-    'histogram:barTarget': 3,
+    [HISTOGRAM_MAX_BARS_SETTINGS]: 4,
+    [HISTOGRAM_BAR_TARGET_SETTINGS]: 3,
     dateFormat: 'YYYY-MM-DD',
     'dateFormat:scaled': [
       ['', 'HH:mm:ss.SSS'],

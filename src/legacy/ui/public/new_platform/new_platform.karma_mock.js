@@ -28,6 +28,18 @@ import {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../src/plugins/data/public/search/aggs';
 import { ComponentRegistry } from '../../../../../src/plugins/advanced_settings/public/';
+import {
+  QUERY_STRING_OPTIONS_SETTINGS,
+  QUERY_ALLOW_LEADING_WILDCARDS_SETTINGS,
+  SEARCH_QUERY_LANGUAGE_SETTINGS,
+  COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_SETTINGS,
+  SHORT_DOTS_ENABLE_SETTINGS,
+  FORMAT_DEFAULT_TYPE_MAP_SETTINGS,
+  FORMAT_NUMBER_DEFAULT_PATTERN_SETTINGS,
+  FORMAT_PERCENT_DEFAULT_PATTERN_SETTINGS,
+  FORMAT_CURRENCY_DEFAULT_PATTERN_SETTINGS,
+  FORMAT_NUMBER_DEFAULT_LOCALE_SETTINGS,
+} from '../../../../../src/plugins/data/common';
 
 const mockObservable = () => {
   return {
@@ -53,18 +65,18 @@ export const mockUiSettings = {
     const defaultValues = {
       dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
       'dateFormat:tz': 'UTC',
-      'shortDots:enable': true,
-      'courier:ignoreFilterIfFieldNotInIndex': true,
-      'query:allowLeadingWildcards': true,
-      'query:queryString:options': {},
-      'format:currency:defaultPattern': '($0,0.[00])',
-      'format:number:defaultPattern': '0,0.[000]',
-      'format:percent:defaultPattern': '0,0.[000]%',
-      'format:number:defaultLocale': 'en',
-      'format:defaultTypeMap': {},
+      [SHORT_DOTS_ENABLE_SETTINGS]: true,
+      [COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_SETTINGS]: true,
+      [QUERY_ALLOW_LEADING_WILDCARDS_SETTINGS]: true,
+      [QUERY_STRING_OPTIONS_SETTINGS]: {},
+      [FORMAT_CURRENCY_DEFAULT_PATTERN_SETTINGS]: '($0,0.[00])',
+      [FORMAT_NUMBER_DEFAULT_PATTERN_SETTINGS]: '0,0.[000]',
+      [FORMAT_PERCENT_DEFAULT_PATTERN_SETTINGS]: '0,0.[000]%',
+      [FORMAT_NUMBER_DEFAULT_LOCALE_SETTINGS]: 'en',
+      [FORMAT_DEFAULT_TYPE_MAP_SETTINGS]: {},
       'csv:separator': ',',
       'csv:quoteValues': true,
-      'search:queryLanguage': 'kuery',
+      [SEARCH_QUERY_LANGUAGE_SETTINGS]: 'kuery',
       'state:storeInSessionStorage': false,
     };
 

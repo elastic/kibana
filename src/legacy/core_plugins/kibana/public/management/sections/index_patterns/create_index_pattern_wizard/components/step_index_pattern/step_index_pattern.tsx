@@ -26,6 +26,7 @@ import {
   DataPublicPluginStart,
   IndexPatternAttributes,
 } from '../../../../../../../../../../plugins/data/public';
+import { INDEXPATTERN_PLACEHOLDER_SETTINGS } from '../../../../../../../../../../plugins/data/common';
 import { SavedObjectsClient, IUiSettingsClient } from '../../../../../../../../../../core/public';
 import { MAX_SEARCH_SIZE } from '../../constants';
 import {
@@ -84,7 +85,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     super(props);
     const { indexPatternCreationType, initialQuery } = this.props;
 
-    this.state.query = initialQuery || props.uiSettings.get('indexPattern:placeholder');
+    this.state.query = initialQuery || props.uiSettings.get(INDEXPATTERN_PLACEHOLDER_SETTINGS);
     this.state.indexPatternName = indexPatternCreationType.getIndexPatternName();
   }
 

@@ -24,6 +24,7 @@ import numeralLanguages from '@elastic/numeral/languages';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert } from '../types';
+import { FORMAT_NUMBER_DEFAULT_LOCALE_SETTINGS } from '../../';
 
 const numeralInst = numeral();
 
@@ -51,7 +52,8 @@ export abstract class NumeralFormat extends FieldFormat {
     if (isNaN(val)) return '';
 
     const previousLocale = numeral.language();
-    const defaultLocale = (this.getConfig && this.getConfig('format:number:defaultLocale')) || 'en';
+    const defaultLocale =
+      (this.getConfig && this.getConfig(FORMAT_NUMBER_DEFAULT_LOCALE_SETTINGS)) || 'en';
     numeral.language(defaultLocale);
 
     const formatted = numeralInst.set(val).format(this.param('pattern'));

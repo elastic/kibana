@@ -2040,8 +2040,6 @@
     "data.advancedSettings.historyLimitTitle": "历史记录限制",
     "data.advancedSettings.indexPatternPlaceholderText": "在“管理 > 索引模式 > 创建索引模式”中“索引模式名称”的占位符。",
     "data.advancedSettings.indexPatternPlaceholderTitle": "索引模式占位符",
-    "kbn.advancedSettings.maxBucketsText": "单个数据源可以返回的最大存储桶数目",
-    "kbn.advancedSettings.maxBucketsTitle": "最大存储桶数",
     "kbn.advancedSettings.maxCellHeightText": "表中单元格应占用的最大高度。设置为 0 可禁用截短",
     "kbn.advancedSettings.maxCellHeightTitle": "最大表单元格高度",
     "kbn.advancedSettings.notifications.banner.markdownLinkText": "Markdown 受支持",

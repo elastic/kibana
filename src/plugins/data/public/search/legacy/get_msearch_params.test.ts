@@ -19,6 +19,10 @@
 
 import { getMSearchParams } from './get_msearch_params';
 import { IUiSettingsClient } from '../../../../../core/public';
+import {
+  COURIER_MAX_CONCURRENT_SHARD_REQUESTS_SETTINGS,
+  SEARCH_INCLUDE_FROZEN_SETTINGS,
+} from '../../../common';
 
 function getConfigStub(config: any = {}) {
   return {
@@ -34,29 +38,29 @@ describe('getMSearchParams', () => {
   });
 
   test('includes ignore_throttled according to search:includeFrozen', () => {
-    let config = getConfigStub({ 'search:includeFrozen': true });
+    let config = getConfigStub({ [SEARCH_INCLUDE_FROZEN_SETTINGS]: true });
     let msearchParams = getMSearchParams(config);
     expect(msearchParams.ignore_throttled).toBe(false);
 
-    config = getConfigStub({ 'search:includeFrozen': false });
+    config = getConfigStub({ [SEARCH_INCLUDE_FROZEN_SETTINGS]: false });
     msearchParams = getMSearchParams(config);
     expect(msearchParams.ignore_throttled).toBe(true);
   });
 
   test('includes max_concurrent_shard_requests according to courier:maxConcurrentShardRequests if greater than 0', () => {
-    let config = getConfigStub({ 'courier:maxConcurrentShardRequests': 0 });
+    let config = getConfigStub({ [COURIER_MAX_CONCURRENT_SHARD_REQUESTS_SETTINGS]: 0 });
     let msearchParams = getMSearchParams(config);
     expect(msearchParams.max_concurrent_shard_requests).toBe(undefined);
 
-    config = getConfigStub({ 'courier:maxConcurrentShardRequests': 5 });
+    config = getConfigStub({ [COURIER_MAX_CONCURRENT_SHARD_REQUESTS_SETTINGS]: 5 });
     msearchParams = getMSearchParams(config);
     expect(msearchParams.max_concurrent_shard_requests).toBe(5);
   });
 
   test('does not include other search params that are included in the msearch header or body', () => {
     const config = getConfigStub({
-      'search:includeFrozen': false,
-      'courier:maxConcurrentShardRequests': 5,
+      [SEARCH_INCLUDE_FROZEN_SETTINGS]: false,
+      [COURIER_MAX_CONCURRENT_SHARD_REQUESTS_SETTINGS]: 5,
     });
     const msearchParams = getMSearchParams(config);
     expect(msearchParams.hasOwnProperty('ignore_unavailable')).toBe(false);

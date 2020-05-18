@@ -21,7 +21,12 @@ import { Subscription } from 'rxjs';
 import { createBrowserHistory, History } from 'history';
 import { FilterManager } from '../filter_manager';
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
-import { Filter, FilterStateStore } from '../../../common';
+import {
+  Filter,
+  FilterStateStore,
+  TIMEPICKER_REFRESH_INTERVAL_DEFAULTS_SETTINGS,
+  FILTERS_PINNED_BY_DEFAULT_SETTINGS,
+} from '../../../common';
 import { coreMock } from '../../../../../core/public/mocks';
 import {
   createKbnUrlStateStorage,
@@ -39,11 +44,11 @@ const startMock = coreMock.createStart();
 
 setupMock.uiSettings.get.mockImplementation((key: string) => {
   switch (key) {
-    case 'filters:pinnedByDefault':
+    case FILTERS_PINNED_BY_DEFAULT_SETTINGS:
       return true;
     case 'timepicker:timeDefaults':
       return { from: 'now-15m', to: 'now' };
-    case 'timepicker:refreshIntervalDefaults':
+    case TIMEPICKER_REFRESH_INTERVAL_DEFAULTS_SETTINGS:
       return { pause: false, value: 0 };
     default:
       throw new Error(`sync_query test: not mocked uiSetting: ${key}`);

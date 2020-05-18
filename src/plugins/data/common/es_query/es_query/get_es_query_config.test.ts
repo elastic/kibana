@@ -19,18 +19,23 @@
 import { get } from 'lodash';
 import { getEsQueryConfig } from './get_es_query_config';
 import { IUiSettingsClient } from 'kibana/public';
+import {
+  QUERY_STRING_OPTIONS_SETTINGS,
+  QUERY_ALLOW_LEADING_WILDCARDS_SETTINGS,
+  COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_SETTINGS,
+} from '../../';
 
 const config = ({
   get(item: string) {
     return get(config, item);
   },
-  'query:allowLeadingWildcards': {
+  [QUERY_ALLOW_LEADING_WILDCARDS_SETTINGS]: {
     allowLeadingWildcards: true,
   },
-  'query:queryString:options': {
+  [QUERY_STRING_OPTIONS_SETTINGS]: {
     queryStringOptions: {},
   },
-  'courier:ignoreFilterIfFieldNotInIndex': {
+  [COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_SETTINGS]: {
     ignoreFilterIfFieldNotInIndex: true,
   },
   'dateFormat:tz': {

@@ -17,6 +17,7 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
+import { TIMEPICKER_REFRESH_INTERVAL_DEFAULTS_SETTINGS } from '../../../../src/plugins/data/common';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { MonitoringPluginDependencies, MonitoringConfig } from './types';
 import {
@@ -110,7 +111,7 @@ export class MonitoringPlugin
     timefilter.setRefreshInterval(refreshInterval);
     timefilter.setTime(time);
     uiSettings.overrideLocalDefault(
-      'timepicker:refreshIntervalDefaults',
+      TIMEPICKER_REFRESH_INTERVAL_DEFAULTS_SETTINGS,
       JSON.stringify(refreshInterval)
     );
     uiSettings.overrideLocalDefault('timepicker:timeDefaults', JSON.stringify(time));

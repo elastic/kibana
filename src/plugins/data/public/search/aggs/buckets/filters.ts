@@ -26,7 +26,12 @@ import { toAngularJSON } from '../utils';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { Storage } from '../../../../../../plugins/kibana_utils/public';
-import { getEsQueryConfig, buildEsQuery, Query } from '../../../../common';
+import {
+  getEsQueryConfig,
+  buildEsQuery,
+  Query,
+  SEARCH_QUERY_LANGUAGE_SETTINGS,
+} from '../../../../common';
 import { getQueryLog } from '../../../query';
 import { GetInternalStartServicesFn } from '../../../types';
 import { BaseAggParams } from '../types';
@@ -69,7 +74,10 @@ export const getFiltersBucketAgg = ({
         {
           name: 'filters',
           default: [
-            { input: { query: '', language: uiSettings.get('search:queryLanguage') }, label: '' },
+            {
+              input: { query: '', language: uiSettings.get(SEARCH_QUERY_LANGUAGE_SETTINGS) },
+              label: '',
+            },
           ],
           write(aggConfig, output) {
             const inFilters: FilterValue[] = aggConfig.params.filters;

@@ -17,6 +17,7 @@
  * under the License.
  */
 import { SingleSearchRequest } from './single_search_request';
+import { SEARCH_INCLUDE_FROZEN_SETTINGS } from '../../../../../data/common';
 
 describe('SingleSearchRequest', () => {
   let searchRequest;
@@ -48,7 +49,7 @@ describe('SingleSearchRequest', () => {
 
     expect(responses).toEqual([{}]);
     expect(req.getUiSettingsService).toHaveBeenCalled();
-    expect(getServiceMock).toHaveBeenCalledWith('search:includeFrozen');
+    expect(getServiceMock).toHaveBeenCalledWith(SEARCH_INCLUDE_FROZEN_SETTINGS);
     expect(callWithRequest).toHaveBeenCalledWith(req, 'search', {
       body: 'body',
       index: 'index',

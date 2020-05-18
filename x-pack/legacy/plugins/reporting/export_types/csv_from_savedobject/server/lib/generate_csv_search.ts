@@ -15,6 +15,11 @@ import {
   // be moved under reporting/server/
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../../../src/plugins/data/server';
+import {
+  QUERY_STRING_OPTIONS_SETTINGS,
+  QUERY_ALLOW_LEADING_WILDCARDS_SETTINGS,
+  COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_SETTINGS,
+} from '../../../../../../../../src/plugins/data/common';
 import { CancellationToken } from '../../../../common/cancellation_token';
 import { ReportingCore } from '../../../../server';
 import { Logger, RequestFacade } from '../../../../types';
@@ -37,9 +42,9 @@ import { getFilters } from './get_filters';
 
 const getEsQueryConfig = async (config: IUiSettingsClient) => {
   const configs = await Promise.all([
-    config.get('query:allowLeadingWildcards'),
-    config.get('query:queryString:options'),
-    config.get('courier:ignoreFilterIfFieldNotInIndex'),
+    config.get(QUERY_ALLOW_LEADING_WILDCARDS_SETTINGS),
+    config.get(QUERY_STRING_OPTIONS_SETTINGS),
+    config.get(COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_SETTINGS),
   ]);
   const [allowLeadingWildcards, queryStringOptions, ignoreFilterIfFieldNotInIndex] = configs;
   return {

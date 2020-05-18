@@ -2039,8 +2039,6 @@
     "data.advancedSettings.historyLimitTitle": "履歴制限数",
     "data.advancedSettings.indexPatternPlaceholderText": "「管理 > インデックスパターン > インデックスパターンを作成」で使用される「インデックスパターン名」フィールドのプレースホルダーです。",
     "data.advancedSettings.indexPatternPlaceholderTitle": "インデックスパターンのプレースホルダー",
-    "kbn.advancedSettings.maxBucketsText": "1 つのデータソースが返せるバケットの最大数です",
-    "kbn.advancedSettings.maxBucketsTitle": "バケットの最大数",
     "kbn.advancedSettings.maxCellHeightText": "表のセルが使用する高さの上限です。この切り捨てを無効にするには 0 に設定します",
     "kbn.advancedSettings.maxCellHeightTitle": "表のセルの高さの上限",
     "kbn.advancedSettings.notifications.banner.markdownLinkText": "マークダウン対応",

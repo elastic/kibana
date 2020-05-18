@@ -19,7 +19,7 @@
 
 import { get } from 'lodash';
 import { APICaller } from 'kibana/server';
-import { DEFAULT_QUERY_LANGUAGE } from '../../../common';
+import { DEFAULT_QUERY_LANGUAGE, SEARCH_QUERY_LANGUAGE_SETTINGS } from '../../../common';
 
 const defaultSearchQueryLanguageSetting = DEFAULT_QUERY_LANGUAGE;
 
@@ -40,7 +40,7 @@ export function fetchProvider(index: string) {
 
     const queryLanguageConfigValue = get(
       config,
-      'hits.hits[0]._source.config.search:queryLanguage'
+      `hits.hits[0]._source.config.${SEARCH_QUERY_LANGUAGE_SETTINGS}`
     );
 
     // search:queryLanguage can potentially be in four states in the .kibana index:

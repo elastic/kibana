@@ -80,7 +80,13 @@ import { IIndexPattern, ISearchGeneric, SearchRequest } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
 import { FetchOptions, RequestFailure, getSearchParams, handleResponse } from '../fetch';
 
-import { getEsQueryConfig, buildEsQuery, Filter } from '../../../common';
+import {
+  getEsQueryConfig,
+  buildEsQuery,
+  Filter,
+  SORT_OPTIONS_SETTINGS,
+  COURIER_BATCH_SEARCHES_SETTINGS,
+} from '../../../common';
 import { getHighlightRequest } from '../../../common/field_formats';
 import { fetchSoon } from '../legacy';
 import { extractReferences } from './extract_references';
@@ -251,7 +257,7 @@ export class SearchSource {
     this.history = [searchRequest];
 
     let response;
-    if (uiSettings.get('courier:batchSearches')) {
+    if (uiSettings.get(COURIER_BATCH_SEARCHES_SETTINGS)) {
       response = await this.legacyFetch(searchRequest, options);
     } else {
       response = this.fetch$(searchRequest, options.abortSignal).toPromise();
@@ -365,7 +371,7 @@ export class SearchSource {
         const sort = normalizeSortRequest(
           val,
           this.getField('index'),
-          uiSettings.get('sort:options')
+          uiSettings.get(SORT_OPTIONS_SETTINGS)
         );
         return addToBody(key, sort);
       default:

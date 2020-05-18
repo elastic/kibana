@@ -22,6 +22,7 @@ import { shortenDottedString } from '../../utils';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import { SHORT_DOTS_ENABLE_SETTINGS } from '../../';
 
 /**
  * Remove all of the whitespace between html tags
@@ -71,7 +72,7 @@ export class SourceFormat extends FieldFormat {
     const formatted = field.indexPattern.formatHit(hit);
     const highlightPairs: any[] = [];
     const sourcePairs: any[] = [];
-    const isShortDots = this.getConfig!('shortDots:enable');
+    const isShortDots = this.getConfig!(SHORT_DOTS_ENABLE_SETTINGS);
 
     keys(formatted).forEach(key => {
       const pairs = highlights[key] ? highlightPairs : sourcePairs;

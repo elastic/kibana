@@ -36,6 +36,7 @@ import {
   toggleFilterDisabled,
   toggleFilterNegated,
   unpinFilter,
+  FILTERS_PINNED_BY_DEFAULT_SETTINGS,
 } from '../../../common';
 
 interface Props {
@@ -75,7 +76,7 @@ function FilterBarUI(props: Props) {
   }
 
   function renderAddFilter() {
-    const isPinned = uiSettings!.get('filters:pinnedByDefault');
+    const isPinned = uiSettings!.get(FILTERS_PINNED_BY_DEFAULT_SETTINGS);
     const [indexPattern] = props.indexPatterns;
     const index = indexPattern && indexPattern.id;
     const newFilter = buildEmptyFilter(isPinned, index);

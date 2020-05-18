@@ -73,6 +73,7 @@ import {
   getDefaultQuery,
   search,
 } from '../../../../data/public';
+import { SEARCH_QUERY_LANGUAGE_SETTINGS } from '../../../../data/common';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { addFatalError } from '../../../../kibana_legacy/public';
 import {
@@ -596,7 +597,7 @@ function discoverController(
     const query =
       $scope.searchSource.getField('query') ||
       getDefaultQuery(
-        localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
+        localStorage.get('kibana.userQueryLanguage') || config.get(SEARCH_QUERY_LANGUAGE_SETTINGS)
       );
     return {
       query,

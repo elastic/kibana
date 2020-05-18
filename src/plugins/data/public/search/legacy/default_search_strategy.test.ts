@@ -21,6 +21,11 @@ import { IUiSettingsClient } from 'kibana/public';
 import { defaultSearchStrategy } from './default_search_strategy';
 import { searchStartMock } from '../mocks';
 import { SearchStrategySearchParams } from './types';
+import {
+  COURIER_MAX_CONCURRENT_SHARD_REQUESTS_SETTINGS,
+  COURIER_BATCH_SEARCHES_SETTINGS,
+  SEARCH_INCLUDE_FROZEN_SETTINGS,
+} from '../../../common';
 
 const { search } = defaultSearchStrategy;
 
@@ -69,30 +74,30 @@ describe('defaultSearchStrategy', function() {
     });
 
     test('does not send max_concurrent_shard_requests by default', async () => {
-      const config = getConfigStub({ 'courier:batchSearches': true });
+      const config = getConfigStub({ [COURIER_BATCH_SEARCHES_SETTINGS]: true });
       await search({ ...searchArgs, config });
       expect(es.msearch.mock.calls[0][0].max_concurrent_shard_requests).toBe(undefined);
     });
 
     test('allows configuration of max_concurrent_shard_requests', async () => {
       const config = getConfigStub({
-        'courier:batchSearches': true,
-        'courier:maxConcurrentShardRequests': 42,
+        [COURIER_BATCH_SEARCHES_SETTINGS]: true,
+        [COURIER_MAX_CONCURRENT_SHARD_REQUESTS_SETTINGS]: 42,
       });
       await search({ ...searchArgs, config });
       expect(es.msearch.mock.calls[0][0].max_concurrent_shard_requests).toBe(42);
     });
 
     test('should set rest_total_hits_as_int to true on a request', async () => {
-      const config = getConfigStub({ 'courier:batchSearches': true });
+      const config = getConfigStub({ [COURIER_BATCH_SEARCHES_SETTINGS]: true });
       await search({ ...searchArgs, config });
       expect(es.msearch.mock.calls[0][0]).toHaveProperty('rest_total_hits_as_int', true);
     });
 
     test('should set ignore_throttled=false when including frozen indices', async () => {
       const config = getConfigStub({
-        'courier:batchSearches': true,
-        'search:includeFrozen': true,
+        [COURIER_BATCH_SEARCHES_SETTINGS]: true,
+        [SEARCH_INCLUDE_FROZEN_SETTINGS]: true,
       });
       await search({ ...searchArgs, config });
       expect(es.msearch.mock.calls[0][0]).toHaveProperty('ignore_throttled', false);
@@ -100,7 +105,7 @@ describe('defaultSearchStrategy', function() {
 
     test('should properly call abort with msearch', () => {
       const config = getConfigStub({
-        'courier:batchSearches': true,
+        [COURIER_BATCH_SEARCHES_SETTINGS]: true,
       });
       search({ ...searchArgs, config }).abort();
       expect(msearchMockResponse.abort).toHaveBeenCalled();

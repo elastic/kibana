@@ -16,6 +16,10 @@ import {
   KibanaRequest,
 } from '../../../../../../src/core/server';
 import { IndexPatternsFetcher } from '../../../../../../src/plugins/data/server';
+import {
+  COURIER_MAX_CONCURRENT_SHARD_REQUESTS_SETTINGS,
+  SEARCH_INCLUDE_FROZEN_SETTINGS,
+} from '../../../../../../src/plugins/data/common';
 import { AuthenticatedUser } from '../../../../security/common/model';
 import { SetupPlugins } from '../../plugin';
 
@@ -43,10 +47,10 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
     params: Record<string, any>
   ) {
     const { elasticsearch, uiSettings } = req.context.core;
-    const includeFrozen = await uiSettings.client.get('search:includeFrozen');
+    const includeFrozen = await uiSettings.client.get(SEARCH_INCLUDE_FROZEN_SETTINGS);
     const maxConcurrentShardRequests =
       endpoint === 'msearch'
-        ? await uiSettings.client.get('courier:maxConcurrentShardRequests')
+        ? await uiSettings.client.get(COURIER_MAX_CONCURRENT_SHARD_REQUESTS_SETTINGS)
         : 0;
 
     return elasticsearch.dataClient.callAsCurrentUser(endpoint, {

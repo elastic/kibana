@@ -17,12 +17,18 @@
  * under the License.
  */
 
+import {
+  QUERY_STRING_OPTIONS_SETTINGS,
+  QUERY_ALLOW_LEADING_WILDCARDS_SETTINGS,
+  COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_SETTINGS,
+} from '../../../../../data/common';
+
 export async function getEsQueryConfig(req) {
   const uiSettings = req.getUiSettingsService();
-  const allowLeadingWildcards = await uiSettings.get('query:allowLeadingWildcards');
-  const queryStringOptions = await uiSettings.get('query:queryString:options');
+  const allowLeadingWildcards = await uiSettings.get(QUERY_ALLOW_LEADING_WILDCARDS_SETTINGS);
+  const queryStringOptions = await uiSettings.get(QUERY_STRING_OPTIONS_SETTINGS);
   const ignoreFilterIfFieldNotInIndex = await uiSettings.get(
-    'courier:ignoreFilterIfFieldNotInIndex'
+    COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_SETTINGS
   );
   return {
     allowLeadingWildcards,

@@ -34,6 +34,7 @@ import {
   IndexPatternField,
   IndexPattern,
 } from '../../../../../data/public';
+import { SHORT_DOTS_ENABLE_SETTINGS } from '../../../../../data/common';
 import { AppState } from '../../angular/discover_state';
 import { getDetails } from './lib/get_details';
 import { getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
@@ -133,7 +134,7 @@ export function DiscoverSidebar({
   );
 
   const popularLimit = services.uiSettings.get(FIELDS_LIMIT_SETTING);
-  const useShortDots = services.uiSettings.get('shortDots:enable');
+  const useShortDots = services.uiSettings.get(SHORT_DOTS_ENABLE_SETTINGS);
 
   const {
     selected: selectedFields,

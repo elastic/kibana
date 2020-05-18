@@ -18,11 +18,12 @@
  */
 
 import { BytesFormat } from './bytes';
+import { FORMAT_BYTES_DEFAULT_PATTERN_SETTINGS } from '../../';
 
 describe('BytesFormat', () => {
   const config: Record<string, any> = {};
 
-  config['format:bytes:defaultPattern'] = '0,0.[000]b';
+  config[FORMAT_BYTES_DEFAULT_PATTERN_SETTINGS] = '0,0.[000]b';
 
   const getConfig = (key: string) => config[key];
 

@@ -16,6 +16,7 @@ import { setFieldFormats } from '../../../server/services';
 import { executeJobFactory } from './execute_job';
 import { JobDocPayloadDiscoverCsv } from '../types';
 import { CSV_BOM_CHARS } from '../../../common/constants';
+import { FORMAT_DEFAULT_TYPE_MAP_SETTINGS } from '../../../../../../../src/plugins/data/common';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(() => resolve(), ms));
 
@@ -96,7 +97,7 @@ describe('CSV Execute Job', function() {
     setFieldFormats({
       fieldFormatServiceFactory() {
         const uiConfigMock = {};
-        (uiConfigMock as any)['format:defaultTypeMap'] = {
+        (uiConfigMock as any)[FORMAT_DEFAULT_TYPE_MAP_SETTINGS] = {
           _default_: { id: 'string', params: {} },
         };
 

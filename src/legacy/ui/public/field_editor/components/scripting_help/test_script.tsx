@@ -40,6 +40,7 @@ const { SearchBar } = npStart.plugins.data.ui;
 const { uiSettings } = npStart.core;
 
 import { esQuery, IndexPattern, Query } from '../../../../../../plugins/data/public';
+import { SEARCH_QUERY_LANGUAGE_SETTINGS } from '../../../../../../plugins/data/common';
 import { ExecuteScript } from '../../types';
 
 interface TestScriptProps {
@@ -242,7 +243,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
             showFilterBar={false}
             showDatePicker={false}
             showQueryInput={true}
-            query={{ language: uiSettings.get('search:queryLanguage'), query: '' }}
+            query={{ language: uiSettings.get(SEARCH_QUERY_LANGUAGE_SETTINGS), query: '' }}
             onQuerySubmit={this.previewScript}
             indexPatterns={[this.props.indexPattern]}
             customSubmitButton={

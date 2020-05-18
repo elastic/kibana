@@ -22,7 +22,36 @@ import { schema } from '@kbn/config-schema';
 import { UiSettingsParams } from 'kibana/server';
 // @ts-ignore untyped module
 import numeralLanguages from '@elastic/numeral/languages';
-import { DEFAULT_QUERY_LANGUAGE, META_FIELDS_SETTING, DOC_HIGHLIGHT_SETTING } from '../common';
+import {
+  DEFAULT_QUERY_LANGUAGE,
+  META_FIELDS_SETTING,
+  DOC_HIGHLIGHT_SETTING,
+  QUERY_STRING_OPTIONS_SETTINGS,
+  QUERY_ALLOW_LEADING_WILDCARDS_SETTINGS,
+  SEARCH_QUERY_LANGUAGE_SETTINGS,
+  SORT_OPTIONS_SETTINGS,
+  COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_SETTINGS,
+  COURIER_SET_REQUEST_PREFERENCE_SETTINGS,
+  COURIER_CUSTOM_REQUEST_PREFERENCE_SETTINGS,
+  COURIER_MAX_CONCURRENT_SHARD_REQUESTS_SETTINGS,
+  COURIER_BATCH_SEARCHES_SETTINGS,
+  SEARCH_INCLUDE_FROZEN_SETTINGS,
+  HISTOGRAM_BAR_TARGET_SETTINGS,
+  HISTOGRAM_MAX_BARS_SETTINGS,
+  HISTORY_LIMIT_SETTINGS,
+  SHORT_DOTS_ENABLE_SETTINGS,
+  FORMAT_DEFAULT_TYPE_MAP_SETTINGS,
+  FORMAT_NUMBER_DEFAULT_PATTERN_SETTINGS,
+  FORMAT_PERCENT_DEFAULT_PATTERN_SETTINGS,
+  FORMAT_BYTES_DEFAULT_PATTERN_SETTINGS,
+  FORMAT_CURRENCY_DEFAULT_PATTERN_SETTINGS,
+  FORMAT_NUMBER_DEFAULT_LOCALE_SETTINGS,
+  TIMEPICKER_REFRESH_INTERVAL_DEFAULTS_SETTINGS,
+  TIMEPICKER_QUICK_RANGES_SETTINGS,
+  INDEXPATTERN_PLACEHOLDER_SETTINGS,
+  FILTERS_PINNED_BY_DEFAULT_SETTINGS,
+  FILTERS_EDITOR_SUGGEST_VALUES_SETTINGS,
+} from '../common';
 
 const luceneQueryLanguageLabel = i18n.translate('data.advancedSettings.searchQueryLanguageLucene', {
   defaultMessage: 'Lucene',
@@ -79,7 +108,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       category: ['discover'],
       schema: schema.boolean(),
     },
-    'query:queryString:options': {
+    [QUERY_STRING_OPTIONS_SETTINGS]: {
       name: i18n.translate('data.advancedSettings.query.queryStringOptionsTitle', {
         defaultMessage: 'Query string options',
       }),
@@ -107,7 +136,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
         analyze_wildcard: schema.boolean(),
       }),
     },
-    'query:allowLeadingWildcards': {
+    [QUERY_ALLOW_LEADING_WILDCARDS_SETTINGS]: {
       name: i18n.translate('data.advancedSettings.query.allowWildcardsTitle', {
         defaultMessage: 'Allow leading wildcards in query',
       }),
@@ -118,12 +147,12 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'Currently only applies when experimental query features are enabled in the query bar. ' +
           'To disallow leading wildcards in basic lucene queries, use {queryStringOptionsPattern}.',
         values: {
-          queryStringOptionsPattern: 'query:queryString:options',
+          queryStringOptionsPattern: QUERY_STRING_OPTIONS_SETTINGS,
         },
       }),
       schema: schema.boolean(),
     },
-    'search:queryLanguage': {
+    [SEARCH_QUERY_LANGUAGE_SETTINGS]: {
       name: queryLanguageSettingName,
       value: DEFAULT_QUERY_LANGUAGE,
       description: i18n.translate('data.advancedSettings.searchQueryLanguageText', {
@@ -140,7 +169,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       },
       schema: schema.string(),
     },
-    'sort:options': {
+    [SORT_OPTIONS_SETTINGS]: {
       name: i18n.translate('data.advancedSettings.sortOptionsTitle', {
         defaultMessage: 'Sort options',
       }),
@@ -175,7 +204,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.nullable(schema.string()),
     },
-    'courier:ignoreFilterIfFieldNotInIndex': {
+    [COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_SETTINGS]: {
       name: i18n.translate('data.advancedSettings.courier.ignoreFilterTitle', {
         defaultMessage: 'Ignore filter(s)',
       }),
@@ -190,7 +219,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       category: ['search'],
       schema: schema.boolean(),
     },
-    'courier:setRequestPreference': {
+    [COURIER_SET_REQUEST_PREFERENCE_SETTINGS]: {
       name: i18n.translate('data.advancedSettings.courier.requestPreferenceTitle', {
         defaultMessage: 'Request preference',
       }),
@@ -204,7 +233,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
             <li><strong>{sessionId}:</strong> restricts operations to execute all search requests on the same shards.
               This has the benefit of reusing shard caches across requests.</li>
             <li><strong>{custom}:</strong> allows you to define a your own preference.
-              Use <strong>courier:customRequestPreference</strong> to customize your preference value.</li>
+              Use <strong>${COURIER_CUSTOM_REQUEST_PREFERENCE_SETTINGS}</strong> to customize your preference value.</li>
             <li><strong>{none}:</strong> means do not set a preference.
               This might provide better performance because requests can be spread across all shard copies.
               However, results might be inconsistent because different shards might be in different refresh states.</li>
@@ -218,7 +247,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       category: ['search'],
       schema: schema.string(),
     },
-    'courier:customRequestPreference': {
+    [COURIER_CUSTOM_REQUEST_PREFERENCE_SETTINGS]: {
       name: i18n.translate('data.advancedSettings.courier.customRequestPreferenceTitle', {
         defaultMessage: 'Custom request preference',
       }),
@@ -231,7 +260,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'Part of composite text: data.advancedSettings.courier.customRequestPreference.requestPreferenceLinkText + ' +
           'data.advancedSettings.courier.customRequestPreferenceText',
         values: {
-          setRequestReferenceSetting: '<strong>courier:setRequestPreference</strong>',
+          setRequestReferenceSetting: `<strong>${COURIER_SET_REQUEST_PREFERENCE_SETTINGS}</strong>`,
           customSettingValue: '"custom"',
           requestPreferenceLink:
             '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-preference.html" target="_blank" rel="noopener">' +
@@ -247,7 +276,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       category: ['search'],
       schema: schema.string(),
     },
-    'courier:maxConcurrentShardRequests': {
+    [COURIER_MAX_CONCURRENT_SHARD_REQUESTS_SETTINGS]: {
       name: i18n.translate('data.advancedSettings.courier.maxRequestsTitle', {
         defaultMessage: 'Max Concurrent Shard Requests',
       }),
@@ -265,7 +294,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       category: ['search'],
       schema: schema.number(),
     },
-    'courier:batchSearches': {
+    [COURIER_BATCH_SEARCHES_SETTINGS]: {
       name: i18n.translate('data.advancedSettings.courier.batchSearchesTitle', {
         defaultMessage: 'Batch concurrent searches',
       }),
@@ -285,7 +314,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       category: ['search'],
       schema: schema.boolean(),
     },
-    'search:includeFrozen': {
+    [SEARCH_INCLUDE_FROZEN_SETTINGS]: {
       name: 'Search in frozen indices',
       description: `Will include <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/frozen-indices.html"
         target="_blank" rel="noopener">frozen indices</a> in results if enabled. Searching through frozen indices
@@ -294,7 +323,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       category: ['search'],
       schema: schema.boolean(),
     },
-    'histogram:barTarget': {
+    [HISTOGRAM_BAR_TARGET_SETTINGS]: {
       name: i18n.translate('data.advancedSettings.histogram.barTargetTitle', {
         defaultMessage: 'Target bars',
       }),
@@ -305,7 +334,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.number(),
     },
-    'histogram:maxBars': {
+    [HISTOGRAM_MAX_BARS_SETTINGS]: {
       name: i18n.translate('data.advancedSettings.histogram.maxBarsTitle', {
         defaultMessage: 'Maximum bars',
       }),
@@ -316,7 +345,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.number(),
     },
-    'history:limit': {
+    [HISTORY_LIMIT_SETTINGS]: {
       name: i18n.translate('data.advancedSettings.historyLimitTitle', {
         defaultMessage: 'History limit',
       }),
@@ -327,7 +356,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.number(),
     },
-    'shortDots:enable': {
+    [SHORT_DOTS_ENABLE_SETTINGS]: {
       name: i18n.translate('data.advancedSettings.shortenFieldsTitle', {
         defaultMessage: 'Shorten fields',
       }),
@@ -337,7 +366,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.boolean(),
     },
-    'format:defaultTypeMap': {
+    [FORMAT_DEFAULT_TYPE_MAP_SETTINGS]: {
       name: i18n.translate('data.advancedSettings.format.defaultTypeMapTitle', {
         defaultMessage: 'Field type format name',
       }),
@@ -391,7 +420,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
         }),
       }),
     },
-    'format:number:defaultPattern': {
+    [FORMAT_NUMBER_DEFAULT_PATTERN_SETTINGS]: {
       name: i18n.translate('data.advancedSettings.format.numberFormatTitle', {
         defaultMessage: 'Number format',
       }),
@@ -413,7 +442,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.string(),
     },
-    'format:percent:defaultPattern': {
+    [FORMAT_PERCENT_DEFAULT_PATTERN_SETTINGS]: {
       name: i18n.translate('data.advancedSettings.format.percentFormatTitle', {
         defaultMessage: 'Percent format',
       }),
@@ -435,7 +464,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.string(),
     },
-    'format:bytes:defaultPattern': {
+    [FORMAT_BYTES_DEFAULT_PATTERN_SETTINGS]: {
       name: i18n.translate('data.advancedSettings.format.bytesFormatTitle', {
         defaultMessage: 'Bytes format',
       }),
@@ -457,7 +486,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.string(),
     },
-    'format:currency:defaultPattern': {
+    [FORMAT_CURRENCY_DEFAULT_PATTERN_SETTINGS]: {
       name: i18n.translate('data.advancedSettings.format.currencyFormatTitle', {
         defaultMessage: 'Currency format',
       }),
@@ -479,7 +508,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.string(),
     },
-    'format:number:defaultLocale': {
+    [FORMAT_NUMBER_DEFAULT_LOCALE_SETTINGS]: {
       name: i18n.translate('data.advancedSettings.format.formattingLocaleTitle', {
         defaultMessage: 'Formatting locale',
       }),
@@ -508,7 +537,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.string(),
     },
-    'timepicker:refreshIntervalDefaults': {
+    [TIMEPICKER_REFRESH_INTERVAL_DEFAULTS_SETTINGS]: {
       name: i18n.translate('data.advancedSettings.timepicker.refreshIntervalDefaultsTitle', {
         defaultMessage: 'Time filter refresh interval',
       }),
@@ -526,7 +555,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
         value: schema.number(),
       }),
     },
-    'timepicker:quickRanges': {
+    [TIMEPICKER_QUICK_RANGES_SETTINGS]: {
       name: i18n.translate('data.advancedSettings.timepicker.quickRangesTitle', {
         defaultMessage: 'Time filter quick ranges',
       }),
@@ -633,7 +662,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
         })
       ),
     },
-    'indexPattern:placeholder': {
+    [INDEXPATTERN_PLACEHOLDER_SETTINGS]: {
       name: i18n.translate('data.advancedSettings.indexPatternPlaceholderTitle', {
         defaultMessage: 'Index pattern placeholder',
       }),
@@ -644,7 +673,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.string(),
     },
-    'filters:pinnedByDefault': {
+    [FILTERS_PINNED_BY_DEFAULT_SETTINGS]: {
       name: i18n.translate('data.advancedSettings.pinFiltersTitle', {
         defaultMessage: 'Pin filters by default',
       }),
@@ -654,7 +683,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.boolean(),
     },
-    'filterEditor:suggestValues': {
+    [FILTERS_EDITOR_SUGGEST_VALUES_SETTINGS]: {
       name: i18n.translate('data.advancedSettings.suggestFilterValuesTitle', {
         defaultMessage: 'Filter editor suggest values',
         description: '"Filter editor" refers to the UI you create filters in.',

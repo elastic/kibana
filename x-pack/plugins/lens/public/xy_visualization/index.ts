@@ -8,6 +8,7 @@ import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist
 import { CoreSetup, IUiSettingsClient } from 'kibana/public';
 import moment from 'moment-timezone';
 import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
+import { HISTOGRAM_BAR_TARGET_SETTINGS } from '../../../../../src/plugins/data/common';
 import { xyVisualization } from './xy_visualization';
 import { xyChart, getXyChartRenderer } from './xy_expression';
 import { legendConfig, xConfig, layerConfig } from './types';
@@ -47,7 +48,7 @@ export class XyVisualization {
           ? EUI_CHARTS_THEME_DARK.theme
           : EUI_CHARTS_THEME_LIGHT.theme,
         timeZone: getTimeZone(core.uiSettings),
-        histogramBarTarget: core.uiSettings.get<number>('histogram:barTarget'),
+        histogramBarTarget: core.uiSettings.get<number>(HISTOGRAM_BAR_TARGET_SETTINGS),
       })
     );
 

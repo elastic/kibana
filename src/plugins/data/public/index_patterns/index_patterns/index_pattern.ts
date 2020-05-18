@@ -34,6 +34,7 @@ import {
   IIndexPattern,
   IFieldType,
   META_FIELDS_SETTING,
+  SHORT_DOTS_ENABLE_SETTINGS,
 } from '../../../common';
 import { findByTitle } from '../utils';
 import { IndexPatternMissingIndices } from '../lib';
@@ -108,7 +109,7 @@ export class IndexPattern implements IIndexPattern {
     // which cause problems when being consumed from angular
     this.getConfig = getConfig;
 
-    this.shortDotsEnable = this.getConfig('shortDots:enable');
+    this.shortDotsEnable = this.getConfig(SHORT_DOTS_ENABLE_SETTINGS);
     this.metaFields = this.getConfig(META_FIELDS_SETTING);
 
     this.createFieldList = getIndexPatternFieldListCreator({

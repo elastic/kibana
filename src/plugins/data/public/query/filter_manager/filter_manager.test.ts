@@ -24,14 +24,14 @@ import { Subscription } from 'rxjs';
 import { FilterManager } from './filter_manager';
 import { getFilter } from './test_helpers/get_stub_filter';
 import { getFiltersArray } from './test_helpers/get_filters_array';
-import { Filter, FilterStateStore } from '../../../common';
+import { Filter, FilterStateStore, FILTERS_PINNED_BY_DEFAULT_SETTINGS } from '../../../common';
 
 import { coreMock } from '../../../../../core/public/mocks';
 const setupMock = coreMock.createSetup();
 
 const uiSettingsMock = (pinnedByDefault: boolean) => (key: string) => {
   switch (key) {
-    case 'filters:pinnedByDefault':
+    case FILTERS_PINNED_BY_DEFAULT_SETTINGS:
       return pinnedByDefault;
     default:
       throw new Error(`Unexpected uiSettings key in FilterManager mock: ${key}`);

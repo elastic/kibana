@@ -20,6 +20,7 @@
 import { callClient } from './call_client';
 import { FetchHandlers, FetchOptions } from '../fetch/types';
 import { SearchRequest, SearchResponse } from '../index';
+import { COURIER_BATCH_SEARCHES_SETTINGS } from '../../../common';
 
 /**
  * This function introduces a slight delay in the request process to allow multiple requests to queue
@@ -30,7 +31,7 @@ export async function fetchSoon(
   options: FetchOptions,
   fetchHandlers: FetchHandlers
 ) {
-  const msToDelay = fetchHandlers.config.get('courier:batchSearches') ? 50 : 0;
+  const msToDelay = fetchHandlers.config.get(COURIER_BATCH_SEARCHES_SETTINGS) ? 50 : 0;
   return delayedFetch(request, options, fetchHandlers, msToDelay);
 }
 

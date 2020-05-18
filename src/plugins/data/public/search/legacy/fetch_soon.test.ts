@@ -22,6 +22,7 @@ import { callClient } from './call_client';
 import { IUiSettingsClient } from 'kibana/public';
 import { FetchHandlers, FetchOptions } from '../fetch/types';
 import { SearchRequest, SearchResponse } from '../index';
+import { COURIER_BATCH_SEARCHES_SETTINGS } from '../../../common';
 
 function getConfigStub(config: any = {}) {
   return {
@@ -60,7 +61,7 @@ describe('fetchSoon', () => {
 
   test('should execute asap if config is set to not batch searches', () => {
     const config = getConfigStub({
-      'courier:batchSearches': false,
+      [COURIER_BATCH_SEARCHES_SETTINGS]: false,
     });
     const request = {};
     const options = {};
@@ -72,7 +73,7 @@ describe('fetchSoon', () => {
 
   test('should delay by 50ms if config is set to batch searches', () => {
     const config = getConfigStub({
-      'courier:batchSearches': true,
+      [COURIER_BATCH_SEARCHES_SETTINGS]: true,
     });
     const request = {};
     const options = {};
@@ -88,7 +89,7 @@ describe('fetchSoon', () => {
 
   test('should send a batch of requests to callClient', () => {
     const config = getConfigStub({
-      'courier:batchSearches': true,
+      [COURIER_BATCH_SEARCHES_SETTINGS]: true,
     });
     const requests = [{ foo: 1 }, { foo: 2 }];
     const options = [{ bar: 1 }, { bar: 2 }];
@@ -105,7 +106,7 @@ describe('fetchSoon', () => {
 
   test('should return the response to the corresponding call for multiple batched requests', async () => {
     const config = getConfigStub({
-      'courier:batchSearches': true,
+      [COURIER_BATCH_SEARCHES_SETTINGS]: true,
     });
     const requests = [{ _mockResponseId: 'foo' }, { _mockResponseId: 'bar' }];
 
@@ -120,7 +121,7 @@ describe('fetchSoon', () => {
 
   test('should wait for the previous batch to start before starting a new batch', () => {
     const config = getConfigStub({
-      'courier:batchSearches': true,
+      [COURIER_BATCH_SEARCHES_SETTINGS]: true,
     });
     const firstBatch = [{ foo: 1 }, { foo: 2 }];
     const secondBatch = [{ bar: 1 }, { bar: 2 }];

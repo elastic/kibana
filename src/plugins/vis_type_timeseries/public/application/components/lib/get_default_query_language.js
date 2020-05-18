@@ -18,7 +18,8 @@
  */
 
 import { getUISettings } from '../../../services';
+import { SEARCH_QUERY_LANGUAGE_SETTINGS } from '../../../../../data/common';
 
 export function getDefaultQueryLanguage() {
-  return getUISettings().get('search:queryLanguage');
+  return getUISettings().get(SEARCH_QUERY_LANGUAGE_SETTINGS);
 }
