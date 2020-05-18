@@ -74,7 +74,6 @@ export interface TestBed<T = string> {
    * and we need to wait for the data to be fetched (and bypass any "loading" state).
    */
   waitFor: (testSubject: T, count?: number) => Promise<void>;
-  waitForFn: (predicate: () => Promise<boolean>, errMessage: string) => Promise<void>;
   form: {
     /**
      * Set the value of a form text input.
