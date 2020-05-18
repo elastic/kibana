@@ -83,7 +83,7 @@ const installPreBuiltTemplates = async (
     // The existing convenience endpoint `indices.putTemplate` only sends to _template,
     // which does not support v2 templates.
     // See src/core/server/elasticsearch/api_types.ts for available endpoints.
-    return await callCluster('transport.request', callClusterParams);
+    return callCluster('transport.request', callClusterParams);
   });
   try {
     return await Promise.all(templateInstallPromises);
@@ -123,7 +123,7 @@ const installPreBuiltComponentTemplates = async (
     // This uses the catch-all endpoint 'transport.request' because there is no
     // convenience endpoint for component templates yet.
     // See src/core/server/elasticsearch/api_types.ts for available endpoints.
-    return await callCluster('transport.request', callClusterParams);
+    return callCluster('transport.request', callClusterParams);
   });
   try {
     return await Promise.all(templateInstallPromises);
