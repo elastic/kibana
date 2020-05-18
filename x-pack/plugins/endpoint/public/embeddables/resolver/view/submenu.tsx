@@ -101,15 +101,9 @@ export const NodeSubMenu = styled(
       menuAction,
       optionsWithActions,
       className,
-    }: { menuTitle: string; className?: string; menuAction: () => unknown } & (
-      | {
-          optionsWithActions:
-            | ResolverSubmenuOptionList
-            | typeof subMenuAssets.initialMenuStatus
-            | 'waitingForRelatedEventData';
-        }
-      | { optionsWithActions?: undefined }
-    )) => {
+    }: { menuTitle: string; className?: string; menuAction: () => unknown } & {
+      optionsWithActions?: ResolverSubmenuOptionList | string | undefined;
+    }) => {
       const [menuIsOpen, setMenuOpen] = useState(false);
       const handleMenuOpenClick = useCallback(
         (clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
