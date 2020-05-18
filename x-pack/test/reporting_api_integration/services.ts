@@ -130,6 +130,8 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async deleteAllReports() {
+      log.debug('ReportingAPI.deleteAllReports');
+
       // ignores 409 errs and keeps retrying
       const deleted$ = Rx.interval(100).pipe(
         switchMap(() =>
@@ -146,8 +148,6 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
 
       const reportsDeleted = await deleted$.toPromise();
       expect(reportsDeleted).to.be(true);
-
-      log.debug('ReportingAPI.deleteAllReports');
     },
 
     expectRecentPdfAppStats(stats: UsageStats, app: string, count: number) {
