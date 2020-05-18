@@ -25,3 +25,11 @@ interface EventHandlers {
 export function setEventHandlers(eventHandlers?: EventHandlers): AnyAction;
 
 export function getInspectorAdapters(args: unknown): Adapters;
+
+export function getEventHandlers(state: unknown): Partial<EventHandlers>;
+
+export function cancelRequest(requestToken: symbol): AnyAction;
+
+export function registerCancelCallback(requestToken: symbol, callback: () => void): AnyAction;
+
+export function unregisterCancelCallback(requestToken: symbol): AnyAction;

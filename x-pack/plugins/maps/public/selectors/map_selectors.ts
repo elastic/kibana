@@ -10,7 +10,7 @@ import { Adapters } from 'src/plugins/inspector/public';
 import { TileLayer } from '../classes/layers/tile_layer/tile_layer';
 // @ts-ignore
 import { VectorTileLayer } from '../classes/layers/vector_tile_layer/vector_tile_layer';
-import { VectorLayer } from '../classes/layers/vector_layer/vector_layer';
+import { IVectorLayer, VectorLayer } from '../classes/layers/vector_layer/vector_layer';
 import { VectorStyle } from '../classes/styles/vector/vector_style';
 // @ts-ignore
 import { HeatmapLayer } from '../classes/layers/heatmap_layer/heatmap_layer';
@@ -300,7 +300,7 @@ export const getLayerList = createSelector(
   }
 );
 
-export function getLayerById(state: MapStoreState, layerId: string): ILayer | undefined {
+export function getLayerById(layerId: string, state: MapStoreState): ILayer | undefined {
   return getLayerList(state).find(layer => {
     return layerId === layer.getId();
   });
@@ -346,7 +346,11 @@ export const getMapColors = createSelector(
 );
 
 export const getSelectedLayerJoinDescriptors = createSelector(getSelectedLayer, selectedLayer => {
-  return selectedLayer.getJoins().map((join: IJoin) => {
+  if (!selectedLayer || !('getJoins' in selectedLayer)) {
+    return [];
+  }
+
+  return (selectedLayer as IVectorLayer).getJoins().map((join: IJoin) => {
     return join.toDescriptor();
   });
 });

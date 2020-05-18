@@ -5,8 +5,7 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { AnyAction, Dispatch } from 'redux';
-import { ThunkAction } from 'redux-thunk';
+import { Dispatch } from 'redux';
 import { MapStoreState } from '../reducers/store';
 import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
 import {
@@ -20,7 +19,6 @@ import {
   registerCancelCallback,
   unregisterCancelCallback,
   getEventHandlers,
-  // @ts-ignore
 } from '../reducers/non_serializable_instances';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
 import {
@@ -45,9 +43,9 @@ export type DataRequestContext = {
   dataFilters: MapFilters;
 };
 
-export function clearDataRequests(layer: ILayer): ThunkAction {
-  return dispatch => {
-    layer.getInFlightRequestTokens().forEach(requestToken => {
+export function clearDataRequests(layer: ILayer) {
+  return (dispatch: Dispatch) => {
+    layer.getInFlightRequestTokens().forEach((requestToken: symbol) => {
       dispatch(cancelRequest(requestToken));
     });
     dispatch({
@@ -59,7 +57,7 @@ export function clearDataRequests(layer: ILayer): ThunkAction {
   };
 }
 
-export function cancelAllInFlightRequests(): AnyAction {
+export function cancelAllInFlightRequests() {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
     getLayerList(getState()).forEach(layer => {
       dispatch(clearDataRequests(layer));
@@ -67,7 +65,7 @@ export function cancelAllInFlightRequests(): AnyAction {
   };
 }
 
-export function updateStyleMeta(layerId): AnyAction {
+export function updateStyleMeta(layerId: string) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const layer = getLayerById(layerId, getState());
     if (!layer) {
@@ -88,34 +86,34 @@ export function updateStyleMeta(layerId): AnyAction {
 }
 
 function getDataRequestContext(
-  dispatch: Dispatch<AnyAction>,
+  dispatch: Dispatch,
   getState: () => MapStoreState,
   layerId: string
 ): DataRequestContext {
   return {
     dataFilters: getDataFilters(getState()),
-    startLoading: (dataId, requestToken, meta) =>
+    startLoading: (dataId: string, requestToken: symbol, meta: DataMeta) =>
       dispatch(startDataLoad(layerId, dataId, requestToken, meta)),
-    stopLoading: (dataId, requestToken, data, meta) =>
+    stopLoading: (dataId: string, requestToken: symbol, data: unknown, meta: DataMeta) =>
       dispatch(endDataLoad(layerId, dataId, requestToken, data, meta)),
-    onLoadError: (dataId, requestToken, errorMessage) =>
+    onLoadError: (dataId: string, requestToken: symbol, errorMessage: string) =>
       dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
-    updateSourceData: newData => {
+    updateSourceData: (newData: unknown) => {
       dispatch(updateSourceDataRequest(layerId, newData));
     },
-    isRequestStillActive: (dataId, requestToken) => {
+    isRequestStillActive: (dataId: string, requestToken: symbol) => {
       const dataRequest = getDataRequestDescriptor(getState(), layerId, dataId);
       if (!dataRequest) {
         return false;
       }
       return dataRequest.dataRequestToken === requestToken;
     },
-    registerCancelCallback: (requestToken, callback) =>
+    registerCancelCallback: (requestToken: symbol, callback: () => void) =>
       dispatch(registerCancelCallback(requestToken, callback)),
   };
 }
 
-export function syncDataForAllLayers(): AnyAction {
+export function syncDataForAllLayers() {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const syncPromises = getLayerList(getState()).map(async layer => {
       return dispatch(syncDataForLayer(layer));
@@ -124,7 +122,7 @@ export function syncDataForAllLayers(): AnyAction {
   };
 }
 
-export function syncDataForLayer(layer): AnyAction {
+export function syncDataForLayer(layer: ILayer) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const dataRequestContext = getDataRequestContext(dispatch, getState, layer.getId());
     if (!layer.isVisible() || !layer.showAtZoomLevel(dataRequestContext.dataFilters.zoom)) {
@@ -134,7 +132,7 @@ export function syncDataForLayer(layer): AnyAction {
   };
 }
 
-export function syncDataForLayerId(layerId): AnyAction {
+export function syncDataForLayerId(layerId: string) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const layer = getLayerById(layerId, getState());
     if (layer) {
@@ -143,8 +141,8 @@ export function syncDataForLayerId(layerId): AnyAction {
   };
 }
 
-function setLayerDataLoadErrorStatus(layerId, errorMessage): AnyAction {
-  return dispatch => {
+function setLayerDataLoadErrorStatus(layerId: string, errorMessage: string) {
+  return (dispatch: Dispatch) => {
     dispatch({
       type: SET_LAYER_ERROR_STATUS,
       isInErrorState: errorMessage !== null,
@@ -154,7 +152,7 @@ function setLayerDataLoadErrorStatus(layerId, errorMessage): AnyAction {
   };
 }
 
-function startDataLoad(layerId, dataId, requestToken, meta = {}): AnyAction {
+function startDataLoad(layerId: string, dataId: string, requestToken: symbol, meta: DataMeta) {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
     const layer = getLayerById(layerId, getState());
     if (layer) {
@@ -185,7 +183,7 @@ function endDataLoad(
   requestToken: symbol,
   data: unknown,
   meta: DataMeta
-): AnyAction {
+) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     dispatch(unregisterCancelCallback(requestToken));
 
@@ -225,7 +223,12 @@ function endDataLoad(
   };
 }
 
-function onDataLoadError(layerId, dataId, requestToken, errorMessage): AnyAction {
+function onDataLoadError(
+  layerId: string,
+  dataId: string,
+  requestToken: symbol,
+  errorMessage: string
+) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     dispatch(unregisterCancelCallback(requestToken));
 
@@ -251,8 +254,8 @@ function onDataLoadError(layerId, dataId, requestToken, errorMessage): AnyAction
   };
 }
 
-export function updateSourceDataRequest(layerId, newData) {
-  return dispatch => {
+export function updateSourceDataRequest(layerId: string, newData: unknown) {
+  return (dispatch: Dispatch) => {
     dispatch({
       type: UPDATE_SOURCE_DATA_REQUEST,
       dataId: SOURCE_DATA_ID_ORIGIN,
