@@ -9,6 +9,7 @@ import { Store } from 'redux';
 import { ResolverAction } from './store/actions';
 export { ResolverAction } from './store/actions';
 import { ResolverEvent } from '../../../common/types';
+import { eventType } from '../../../common/models/event';
 
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.
@@ -137,7 +138,7 @@ export type CameraState = {
 export interface RelatedEventDataEntry {
   relatedEvents: Array<{
     relatedEvent: ResolverEvent;
-    relatedEventType: string;
+    relatedEventType: ReturnType<typeof eventType>;
   }>;
 }
 
