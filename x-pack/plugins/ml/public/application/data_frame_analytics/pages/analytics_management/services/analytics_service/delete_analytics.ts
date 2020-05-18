@@ -7,9 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 import { ml } from '../../../../../services/ml_api_service';
-
 import { refreshAnalyticsList$, REFRESH_ANALYTICS_LIST_STATE } from '../../../../common';
-
 import {
   isDataFrameAnalyticsFailed,
   DataFrameAnalyticsListRow,
@@ -66,4 +64,26 @@ export const deleteAnalyticsAndTargetIndex = async (d: DataFrameAnalyticsListRow
     );
   }
   refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.REFRESH);
+};
+
+export const checkUserCanDeleteIndex = async (indexName: string) => {
+  const toastNotifications = getToastNotifications();
+  try {
+    const privilege = await ml.hasPrivileges({
+      index: [
+        {
+          names: [indexName], // uses wildcard
+          privileges: ['delete_index'],
+        },
+      ],
+    });
+    return privilege.index[indexName].delete_index === true;
+  } catch (e) {
+    toastNotifications.addDanger(
+      i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsPrivilegeErrorMessage', {
+        defaultMessage: 'User does not have permission to delete index {indexName}: {error}',
+        values: { indexName, error: JSON.stringify(e) },
+      })
+    );
+  }
 };

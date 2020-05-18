@@ -5,6 +5,10 @@
  */
 
 export { getAnalyticsFactory } from './get_analytics';
-export { deleteAnalytics, deleteAnalyticsAndTargetIndex } from './delete_analytics';
+export {
+  deleteAnalytics,
+  deleteAnalyticsAndTargetIndex,
+  checkUserCanDeleteIndex,
+} from './delete_analytics';
 export { startAnalytics } from './start_analytics';
 export { stopAnalytics } from './stop_analytics';
