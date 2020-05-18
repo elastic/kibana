@@ -32,10 +32,6 @@ import { BrowserFields } from '../common/containers/source';
 const FIELD_COMBO_BOX_WIDTH = 195;
 const OPERATOR_SELECT_WIDTH = 135;
 
-const ExceptionWrapper = styled(EuiFlexGroup)<{ isLast: boolean }>`
-  margin-bottom: ${({ isLast }) => (isLast ? 0 : '8px')};
-`;
-
 const EuiFormRowWrapper = styled(EuiFormRow)`
   max-width: 100%;
 `;
@@ -241,7 +237,7 @@ export const EntryItem = React.memo<EntryItemProps>(
     };
 
     return (
-      <ExceptionWrapper isLast={isLastEntry} direction="row" gutterSize="s" alignItems="center">
+      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
         <EuiFlexItem grow={1}>
           {exceptionItemIndex === 0 && entryIndex === 0 ? (
             <EuiFormRowWrapper
@@ -287,7 +283,7 @@ export const EntryItem = React.memo<EntryItemProps>(
             aria-label={i18n.DELETE}
           />
         </EuiFlexItem>
-      </ExceptionWrapper>
+      </EuiFlexGroup>
     );
   }
 );

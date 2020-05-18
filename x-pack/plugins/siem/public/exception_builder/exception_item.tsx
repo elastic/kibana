@@ -13,18 +13,12 @@ import { AndOrBadge } from './and_or_badge';
 import { BrowserFields } from '../common/containers/source';
 import { ExceptionItem } from './types';
 
-interface AndBadgeContainerProps {
-  isFirstEntry: boolean;
-  hideBadge: boolean;
-  displayAndBadges: boolean;
-}
-const AndBadgeContainer = styled(EuiFlexItem)<AndBadgeContainerProps>`
-  > &.euiFlexItem {
-    padding-top: ${props => (props.isFirstEntry ? '10px' : 0)};
+const AndBadgeContainer = styled(EuiFlexItem)`
+  &.andBadgeFirstEntryItemContainer {
+    padding-top: 22px;
   }
-  .andBadgeContainer {
-    display: ${props => (props.displayAndBadges ? 'inherit' : 'none')};
-    visibility: ${props => (props.hideBadge ? 'hidden' : 'inherit')};
+  &.andBadgeNotVisible {
+    visibility: hidden;
   }
   .euiBadge {
     margin: 0;
@@ -77,15 +71,17 @@ export const ExceptionItemComponent = ({
 
   return (
     <EuiFlexGroup gutterSize="none">
-      <AndBadgeContainer
-        isFirstEntry={exceptionItemIndex === 0}
-        hideBadge={exceptionItem.entries.length <= 1}
-        displayAndBadges={isAndLogicIncluded}
-        grow={false}
-        data-test-subj="exceptionItemAndBadge"
-      >
-        <AndOrBadge includeAntenas type="and" />
-      </AndBadgeContainer>
+      {isAndLogicIncluded && (
+        <AndBadgeContainer
+          className={`${exceptionItemIndex === 0 ? 'andBadgeFirstEntryItemContainer' : ''} ${
+            exceptionItem.entries.length <= 1 ? 'andBadgeNotVisible' : ''
+          }`}
+          grow={false}
+          data-test-subj="exceptionItemAndBadge"
+        >
+          <AndOrBadge includeAntenas type="and" />
+        </AndBadgeContainer>
+      )}
       <EuiFlexItem grow={6}>
         {exceptionItem.entries.map((entry, index) => (
           <EntryItem

@@ -10,8 +10,8 @@ import styled, { css } from 'styled-components';
 
 import * as i18n from './translations';
 
-const AndOrBadgeAntena = styled(EuiFlexItem)<{ isTop: boolean }>`
-  ${({ isTop, theme }) => css`
+const AndOrBadgeAntena = styled(EuiFlexItem)`
+  ${({ theme }) => css`
     background: ${theme.eui.euiColorLightShade};
     position: relative;
     width: 2px;
@@ -19,17 +19,20 @@ const AndOrBadgeAntena = styled(EuiFlexItem)<{ isTop: boolean }>`
       background: ${theme.eui.euiColorLightShade};
       content: '';
       height: 8px;
-      ${isTop
-        ? css`
-            top: -1px;
-          `
-        : css`
-            bottom: -1px;
-          `}
       right: -4px;
       position: absolute;
       width: 9px;
       clip-path: circle();
+    }
+    &.topAndOrBadgeAntenna {
+      &:after {
+        top: -1px;
+      }
+    }
+    &.bottomAndOrBadgeAntenna {
+      &:after {
+        bottom: -1px;
+      }
     }
     &.euiFlexItem {
       margin: 0 12px 0 0;
@@ -84,9 +87,17 @@ export const AndOrBadge = React.memo<{ type: AndOr; includeAntenas?: boolean }>(
         direction="column"
         alignItems="center"
       >
-        <AndOrBadgeAntena data-test-subj="and-or-badge-bar" isTop={true} grow={1} />
+        <AndOrBadgeAntena
+          className="topAndOrBadgeAntenna"
+          data-test-subj="and-or-badge-bar"
+          grow={1}
+        />
         <EuiFlexItemWrapper grow={false}>{getBadge()}</EuiFlexItemWrapper>
-        <AndOrBadgeAntena data-test-subj="and-or-badge-bar" isTop={false} grow={1} />
+        <AndOrBadgeAntena
+          className="bottomAndOrBadgeAntenna"
+          data-test-subj="and-or-badge-bar"
+          grow={1}
+        />
       </EuiFlexGroup>
     );
 
