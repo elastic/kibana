@@ -34,7 +34,6 @@ describe('test endpoint plugin', () => {
       registerFeature: jest.fn(),
       getFeatures: jest.fn(),
       getFeaturesUICapabilities: jest.fn(),
-      registerLegacyAPI: jest.fn(),
     };
   });
 

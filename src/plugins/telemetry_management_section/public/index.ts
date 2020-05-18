@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+export { OptInExampleFlyout } from './components';
 import { TelemetryManagementSectionPlugin } from './plugin';
 
 export function plugin() {

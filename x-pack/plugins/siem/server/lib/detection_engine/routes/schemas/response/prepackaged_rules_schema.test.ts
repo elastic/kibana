@@ -8,8 +8,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { PrePackagedRulesSchema, prePackagedRulesSchema } from './prepackaged_rules_schema';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
-import { exactCheck } from '../../../../../utils/build_validation/exact_check';
-import { foldLeftRight, getPaths } from '../../../../../utils/build_validation/__mocks__/utils';
+import { exactCheck } from '../../../../../../common/exact_check';
+import { getPaths, foldLeftRight } from '../../../../../../common/test_utils';
 
 describe('prepackaged_rules_schema', () => {
   beforeAll(() => {

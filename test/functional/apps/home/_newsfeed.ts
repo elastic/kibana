@@ -61,8 +61,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       }
     });
 
-    // TODO currently fails because styles are not correctly applied in the new platform
-    it.skip('clicking on newsfeed icon should close opened newsfeed', async () => {
+    it('clicking on newsfeed icon should close opened newsfeed', async () => {
       await globalNav.clickNewsfeed();
       const isOpen = await PageObjects.newsfeed.openNewsfeedPanel();
       expect(isOpen).to.be(false);
