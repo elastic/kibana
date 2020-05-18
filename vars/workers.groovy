@@ -51,19 +51,19 @@ def base(Map params, Closure closure) {
       }
     }
 
-    def repoInfo = [:]
+    def checkoutInfo = [:]
 
     if (config.scm) {
       // Try to clone from Github up to 8 times, waiting 15 secs between attempts
       retryWithDelay(8, 15) {
-        repoInfo = getRepoInfo(checkout scm)
+        checkoutInfo = getCheckoutInfo(checkout(scm))
       }
 
       ciStats.reportGitInfo(
-        repoInfo.branch,
-        repoInfo.commit,
-        repoInfo.targetBranch,
-        repoInfo.mergeBase
+        checkoutInfo.branch,
+        checkoutInfo.commit,
+        checkoutInfo.targetBranch,
+        checkoutInfo.mergeBase
       )
     }
 
@@ -74,7 +74,7 @@ def base(Map params, Closure closure) {
       "PR_TARGET_BRANCH=${env.ghprbTargetBranch ?: ''}",
       "PR_AUTHOR=${env.ghprbPullAuthorLogin ?: ''}",
       "TEST_BROWSER_HEADLESS=1",
-      "GIT_BRANCH=${repoInfo.branch ?: ''}",
+      "GIT_BRANCH=${checkoutInfo.branch ?: ''}",
     ]) {
       withCredentials([
         string(credentialsId: 'vault-addr', variable: 'VAULT_ADDR'),
