@@ -19,40 +19,28 @@
 
 import expect from '@kbn/expect';
 
-const TEST_COLUMN_NAMES = ['@message'];
-const TEST_FILTER_COLUMN_NAMES = [
-  ['extension', 'jpg'],
-  ['geo.src', 'IN'],
-];
-
 export default function({ getService, getPageObjects }) {
   const docTable = getService('docTable');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
   const esArchiver = getService('esArchiver');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/62281
-  // eslint-disable-next-line mocha/no-exclusive-tests
-  describe.only('doc link in discover', function contextSize() {
+  describe('doc link in discover', function contextSize() {
     before(async function() {
       await esArchiver.loadIfNeeded('logstash_functional');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.discover.waitForDocTableLoadingComplete();
-      for (const columnName of TEST_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItemAdd(columnName);
-      }
-      for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItem(columnName);
-        await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
-      }
     });
 
     it('should open the doc view of the selected document', async function() {
       // navigate to the doc view
       await docTable.clickRowToggle({ rowIndex: 0 });
-      await (await docTable.getRowActions({ rowIndex: 0 }))[1].click();
+      await PageObjects.common.sleep(500);
+      const rowActions = await docTable.getRowActions({ rowIndex: 0 });
+      expect(rowActions.length).to.be(2);
 
+      await rowActions[1].click();
       const hasDocHit = await testSubjects.exists('doc-hit');
       expect(hasDocHit).to.be(true);
     });
