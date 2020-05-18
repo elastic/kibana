@@ -20,9 +20,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { useSelector } from 'react-redux';
 import * as labels from './translations';
 import { UptimeSettingsContext } from '../../../contexts';
 import { ShowLicenseInfo } from './license_info';
+import { hasMLFeatureSelector } from '../../../state/selectors';
 
 interface Props {
   isCreatingJob: boolean;
@@ -32,7 +34,9 @@ interface Props {
 }
 
 export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateMLJob }: Props) {
-  const { basePath, license } = useContext(UptimeSettingsContext);
+  const { basePath } = useContext(UptimeSettingsContext);
+
+  const hasMlFeature = useSelector(hasMLFeatureSelector);
 
   const isLoadingMLJob = false;
 
@@ -47,7 +51,7 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
         <EuiSpacer size="s" />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {!hasPlatinumLicense && <ShowLicenseInfo />}
+        {!hasMlFeature && <ShowLicenseInfo />}
         <EuiText>
           <p>{labels.CREAT_ML_JOB_DESC}</p>
           <p>
