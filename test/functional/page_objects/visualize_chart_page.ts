@@ -312,6 +312,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
 
     /**
      * If you are writing new tests, you should rather look into getTableVisContent method instead.
+     * @deprecated Use getTableVisContent instead.
      */
     public async getTableVisData() {
       return await testSubjects.getVisibleText('paginated-table-body');
