@@ -88,11 +88,15 @@ export function TransactionOverview() {
 
   const { http } = useApmPluginContext().core;
 
-  const { data: hasMLJob = false } = useFetcher(() => {
-    if (serviceName && transactionType) {
-      return getHasMLJob({ serviceName, transactionType, http });
-    }
-  }, [http, serviceName, transactionType]);
+  const { data: hasMLJob = false } = useFetcher(
+    () => {
+      if (serviceName && transactionType) {
+        return getHasMLJob({ serviceName, transactionType, http });
+      }
+    },
+    [http, serviceName, transactionType],
+    { showToastOnError: false }
+  );
 
   const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
     () => ({
