@@ -18,7 +18,7 @@ import { GlobalSearchConfigType } from './config';
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
-    globalSearch: RouteHandlerGlobalSearchContext;
+    globalSearch?: RouteHandlerGlobalSearchContext;
   }
 }
 
