@@ -1,12 +1,13 @@
 def call(scmVars) {
-  def branch = env.ghprbSourceBranch ?: scmVars.GIT_LOCAL_BRANCH ?: scmVars.GIT_BRANCH,
+  def branch = env.ghprbSourceBranch ?: scmVars.GIT_LOCAL_BRANCH ?: scmVars.GIT_BRANCH
+
   def commit = sh(
     script: "cd kibana && git rev-parse HEAD",
     label: "determining checked out sha",
     returnStdout: true
   ).trim()
 
-  def targetBranch = env.ghprbTargetBranch,
+  def targetBranch = env.ghprbTargetBranch
   def mergeBase
   if (env.ghprbTargetBranch) {
     sh(
