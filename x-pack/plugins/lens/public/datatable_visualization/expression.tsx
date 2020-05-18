@@ -161,7 +161,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
   });
 
   const handleFilterClick = useMemo(
-    () => (field: string, value: unknown, colIndex: number, negate = false) => {
+    () => (field: string, value: unknown, colIndex: number, negate: boolean = false) => {
       const col = firstTable.columns[colIndex];
       const isDateHistogram = col.meta?.type === 'date_histogram';
       const timeFieldName =
