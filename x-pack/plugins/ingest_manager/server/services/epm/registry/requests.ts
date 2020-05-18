@@ -10,19 +10,15 @@ import { streamToString } from './streams';
 import { appContextService } from '../..';
 
 export async function getResponse(url: string): Promise<Response> {
-  const logger = appContextService.getLogger();
   try {
     const response = await fetch(url);
     if (response.ok) {
       return response;
     } else {
-      logger.error(`Error connecting to package registry: ${response.statusText}`);
       throw new Boom(response.statusText, { statusCode: response.status });
     }
   } catch (e) {
-    const message = `Error connecting to package registry: ${e.message}`;
-    logger.error(message);
-    throw new Boom(message, { statusCode: 502 });
+    throw new Boom(`Error connecting to package registry: ${e.message}`, { statusCode: 502 });
   }
 }
 
