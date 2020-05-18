@@ -40,7 +40,7 @@ export default function({ getService, getPageObjects }) {
     it('should redirect when app is disabled', async () => {
       await PageObjects.common.navigateToActualUrl(
         'kibana',
-        'management/test-section/test-management-disabled'
+        'management/data/test-management-disabled'
       );
       await testSubjects.existOrFail('management-landing');
     });
