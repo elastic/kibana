@@ -69,7 +69,7 @@ export function getUiSettingDefaults() {
       name: i18n.translate('kbn.advancedSettings.defaultRoute.defaultRouteTitle', {
         defaultMessage: 'Default route',
       }),
-      value: '/app/kibana',
+      value: '/app/home',
       schema: schema.string({
         validate(value) {
           if (!value.startsWith('/') || !isRelativeUrl(value)) {
@@ -271,106 +271,6 @@ export function getUiSettingDefaults() {
         defaultMessage: 'The index to access if no index is set',
       }),
     },
-    defaultColumns: {
-      name: i18n.translate('kbn.advancedSettings.defaultColumnsTitle', {
-        defaultMessage: 'Default columns',
-      }),
-      value: ['_source'],
-      description: i18n.translate('kbn.advancedSettings.defaultColumnsText', {
-        defaultMessage: 'Columns displayed by default in the Discovery tab',
-      }),
-      category: ['discover'],
-    },
-    metaFields: {
-      name: i18n.translate('kbn.advancedSettings.metaFieldsTitle', {
-        defaultMessage: 'Meta fields',
-      }),
-      value: ['_source', '_id', '_type', '_index', '_score'],
-      description: i18n.translate('kbn.advancedSettings.metaFieldsText', {
-        defaultMessage:
-          'Fields that exist outside of _source to merge into our document when displaying it',
-      }),
-    },
-    'discover:sampleSize': {
-      name: i18n.translate('kbn.advancedSettings.discover.sampleSizeTitle', {
-        defaultMessage: 'Number of rows',
-      }),
-      value: 500,
-      description: i18n.translate('kbn.advancedSettings.discover.sampleSizeText', {
-        defaultMessage: 'The number of rows to show in the table',
-      }),
-      category: ['discover'],
-    },
-    'discover:aggs:terms:size': {
-      name: i18n.translate('kbn.advancedSettings.discover.aggsTermsSizeTitle', {
-        defaultMessage: 'Number of terms',
-      }),
-      value: 20,
-      type: 'number',
-      description: i18n.translate('kbn.advancedSettings.discover.aggsTermsSizeText', {
-        defaultMessage:
-          'Determines how many terms will be visualized when clicking the "visualize" ' +
-          'button, in the field drop downs, in the discover sidebar.',
-      }),
-      category: ['discover'],
-    },
-    'discover:sort:defaultOrder': {
-      name: i18n.translate('kbn.advancedSettings.discover.sortDefaultOrderTitle', {
-        defaultMessage: 'Default sort direction',
-      }),
-      value: 'desc',
-      options: ['desc', 'asc'],
-      optionLabels: {
-        desc: i18n.translate('kbn.advancedSettings.discover.sortOrderDesc', {
-          defaultMessage: 'Descending',
-        }),
-        asc: i18n.translate('kbn.advancedSettings.discover.sortOrderAsc', {
-          defaultMessage: 'Ascending',
-        }),
-      },
-      type: 'select',
-      description: i18n.translate('kbn.advancedSettings.discover.sortDefaultOrderText', {
-        defaultMessage:
-          'Controls the default sort direction for time based index patterns in the Discover app.',
-      }),
-      category: ['discover'],
-    },
-    'discover:searchOnPageLoad': {
-      name: i18n.translate('kbn.advancedSettings.discover.searchOnPageLoadTitle', {
-        defaultMessage: 'Search on page load',
-      }),
-      value: true,
-      type: 'boolean',
-      description: i18n.translate('kbn.advancedSettings.discover.searchOnPageLoadText', {
-        defaultMessage:
-          'Controls whether a search is executed when Discover first loads. This setting does not ' +
-          'have an effect when loading a saved search.',
-      }),
-      category: ['discover'],
-    },
-    'doc_table:highlight': {
-      name: i18n.translate('kbn.advancedSettings.docTableHighlightTitle', {
-        defaultMessage: 'Highlight results',
-      }),
-      value: true,
-      description: i18n.translate('kbn.advancedSettings.docTableHighlightText', {
-        defaultMessage:
-          'Highlight results in Discover and Saved Searches Dashboard. ' +
-          'Highlighting makes requests slow when working on big documents.',
-      }),
-      category: ['discover'],
-    },
-    'doc_table:hideTimeColumn': {
-      name: i18n.translate('kbn.advancedSettings.docTableHideTimeColumnTitle', {
-        defaultMessage: "Hide 'Time' column",
-      }),
-      value: false,
-      description: i18n.translate('kbn.advancedSettings.docTableHideTimeColumnText', {
-        defaultMessage:
-          "Hide the 'Time' column in Discover and in all Saved Searches on Dashboards.",
-      }),
-      category: ['discover'],
-    },
     'courier:ignoreFilterIfFieldNotInIndex': {
       name: i18n.translate('kbn.advancedSettings.courier.ignoreFilterTitle', {
         defaultMessage: 'Ignore filter(s)',
@@ -484,15 +384,6 @@ export function getUiSettingDefaults() {
       value: false,
       category: ['search'],
     },
-    'fields:popularLimit': {
-      name: i18n.translate('kbn.advancedSettings.fieldsPopularLimitTitle', {
-        defaultMessage: 'Popular fields limit',
-      }),
-      value: 10,
-      description: i18n.translate('kbn.advancedSettings.fieldsPopularLimitText', {
-        defaultMessage: 'The top N most popular fields to show',
-      }),
-    },
     'histogram:barTarget': {
       name: i18n.translate('kbn.advancedSettings.histogram.barTargetTitle', {
         defaultMessage: 'Target bars',
@@ -599,56 +490,6 @@ export function getUiSettingDefaults() {
       description: i18n.translate('kbn.advancedSettings.visualization.showRegionMapWarningsText', {
         defaultMessage:
           'Whether the region map shows a warning when terms cannot be joined to a shape on the map.',
-      }),
-      category: ['visualization'],
-    },
-    'visualization:colorMapping': {
-      name: i18n.translate('kbn.advancedSettings.visualization.colorMappingTitle', {
-        defaultMessage: 'Color mapping',
-      }),
-      value: JSON.stringify({
-        Count: '#00A69B',
-      }),
-      type: 'json',
-      description: i18n.translate('kbn.advancedSettings.visualization.colorMappingText', {
-        defaultMessage: 'Maps values to specified colors within visualizations',
-      }),
-      category: ['visualization'],
-    },
-    'visualization:loadingDelay': {
-      name: i18n.translate('kbn.advancedSettings.visualization.loadingDelayTitle', {
-        defaultMessage: 'Loading delay',
-      }),
-      value: '2s',
-      description: i18n.translate('kbn.advancedSettings.visualization.loadingDelayText', {
-        defaultMessage: 'Time to wait before dimming visualizations during query',
-      }),
-      category: ['visualization'],
-    },
-    'visualization:dimmingOpacity': {
-      name: i18n.translate('kbn.advancedSettings.visualization.dimmingOpacityTitle', {
-        defaultMessage: 'Dimming opacity',
-      }),
-      value: 0.5,
-      type: 'number',
-      description: i18n.translate('kbn.advancedSettings.visualization.dimmingOpacityText', {
-        defaultMessage:
-          'The opacity of the chart items that are dimmed when highlighting another element of the chart. ' +
-          'The lower this number, the more the highlighted element will stand out. ' +
-          'This must be a number between 0 and 1.',
-      }),
-      category: ['visualization'],
-    },
-    'visualization:heatmap:maxBuckets': {
-      name: i18n.translate('kbn.advancedSettings.visualization.heatmap.maxBucketsTitle', {
-        defaultMessage: 'Heatmap maximum buckets',
-      }),
-      value: 50,
-      type: 'number',
-      description: i18n.translate('kbn.advancedSettings.visualization.heatmap.maxBucketsText', {
-        defaultMessage:
-          'The maximum number of buckets a single datasource can return. ' +
-          'A higher number might have negative impact on browser rendering performance',
       }),
       category: ['visualization'],
     },
@@ -829,26 +670,6 @@ export function getUiSettingDefaults() {
             }) +
             '</a>',
         },
-      }),
-    },
-    'savedObjects:perPage': {
-      name: i18n.translate('kbn.advancedSettings.savedObjects.perPageTitle', {
-        defaultMessage: 'Objects per page',
-      }),
-      value: 20,
-      type: 'number',
-      description: i18n.translate('kbn.advancedSettings.savedObjects.perPageText', {
-        defaultMessage: 'Number of objects to show per page in the load dialog',
-      }),
-    },
-    'savedObjects:listingLimit': {
-      name: i18n.translate('kbn.advancedSettings.savedObjects.listingLimitTitle', {
-        defaultMessage: 'Objects listing limit',
-      }),
-      type: 'number',
-      value: 1000,
-      description: i18n.translate('kbn.advancedSettings.savedObjects.listingLimitText', {
-        defaultMessage: 'Number of objects to fetch for the listing pages',
       }),
     },
     'timepicker:timeDefaults': {
@@ -1097,15 +918,6 @@ export function getUiSettingDefaults() {
       type: 'number',
       category: ['notifications'],
     },
-    'metrics:max_buckets': {
-      name: i18n.translate('kbn.advancedSettings.maxBucketsTitle', {
-        defaultMessage: 'Maximum buckets',
-      }),
-      value: 2000,
-      description: i18n.translate('kbn.advancedSettings.maxBucketsText', {
-        defaultMessage: 'The maximum number of buckets a single datasource can return',
-      }),
-    },
     'state:storeInSessionStorage': {
       name: i18n.translate('kbn.advancedSettings.storeUrlTitle', {
         defaultMessage: 'Store URLs in session storage',
@@ -1127,38 +939,6 @@ export function getUiSettingDefaults() {
         defaultMessage:
           'The placeholder for the "Index pattern name" field in "Management > Index Patterns > Create Index Pattern".',
       }),
-    },
-    'context:defaultSize': {
-      name: i18n.translate('kbn.advancedSettings.context.defaultSizeTitle', {
-        defaultMessage: 'Context size',
-      }),
-      value: 5,
-      description: i18n.translate('kbn.advancedSettings.context.defaultSizeText', {
-        defaultMessage: 'The number of surrounding entries to show in the context view',
-      }),
-      category: ['discover'],
-    },
-    'context:step': {
-      name: i18n.translate('kbn.advancedSettings.context.sizeStepTitle', {
-        defaultMessage: 'Context size step',
-      }),
-      value: 5,
-      description: i18n.translate('kbn.advancedSettings.context.sizeStepText', {
-        defaultMessage: 'The step size to increment or decrement the context size by',
-      }),
-      category: ['discover'],
-    },
-    'context:tieBreakerFields': {
-      name: i18n.translate('kbn.advancedSettings.context.tieBreakerFieldsTitle', {
-        defaultMessage: 'Tie breaker fields',
-      }),
-      value: ['_doc'],
-      description: i18n.translate('kbn.advancedSettings.context.tieBreakerFieldsText', {
-        defaultMessage:
-          'A comma-separated list of fields to use for tie-breaking between documents that have the same timestamp value. ' +
-          'From this list the first field that is present and sortable in the current index pattern is used.',
-      }),
-      category: ['discover'],
     },
     'accessibility:disableAnimations': {
       name: i18n.translate('kbn.advancedSettings.disableAnimationsTitle', {
