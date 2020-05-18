@@ -254,8 +254,8 @@ function addPercentageCol(columns, title, rows, insertAtIndex) {
     formatter,
   });
   const newRows = rows.map(row => ({
-    ...row,
     [newId]: row[id] / sumTotal,
+    ...row,
   }));
 
   return { cols: newCols, rows: newRows };
