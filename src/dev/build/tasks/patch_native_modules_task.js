@@ -27,12 +27,12 @@ const DOWNLOAD_DIRECTORY = '.native_modules';
 const packages = [
   {
     name: 're2',
-    version: '1.10.5',
+    version: '1.11.0',
     destinationPath: 'node_modules/re2/build/Release/',
     shas: {
-      darwin: '0deba2bb0e8c59f1cab1bcd3a30e30b82b1f3f49d8740a73f0e4de4ab0e44658',
-      linux: '6006ff9fd22387de349aad14fa117ddde41665d02ad28a3b47e34bdd8ba48acf',
-      windows: 'cd79658510357f3865cdceb60a80c80a642e90ae798fb31515cebed76eda8264',
+      darwin: 'acf7fd4a6f09b50566e58cdfe8370afa8f0a60ec48141a9bacbe9ce947b8e33e',
+      linux: '64e49d78ad265e36cba4e450be39f67e7f585d86bd86b11696adb23ce85944e9',
+      windows: 'aad1893067b01f2de2897f1e0aed62b3b4f0b97920ddfdd4e7f09789902736f6',
     },
   },
 ];
