@@ -367,7 +367,7 @@ describe('licensing plugin', () => {
       expect(coreStart.overlays.banners.add).toHaveBeenCalledTimes(1);
       expect(mountExpiredBannerMock).toHaveBeenCalledWith({
         type: 'gold',
-        uploadUrl: '/app/kibana#/management/elasticsearch/license_management/upload_license',
+        uploadUrl: '/app/kibana#/management/stack/license_management/upload_license',
       });
     });
   });
