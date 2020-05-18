@@ -33,10 +33,7 @@ export const statsAndstaticSiteUrl = (...xs) => {
   };
 };
 
-export const addJsonSummaryPath = jsonSummaryPath => obj => ({
-  jsonSummaryPath: trimLeftFrom('target', jsonSummaryPath),
-  ...obj,
-});
+export const addJsonSummaryPath = jsonSummaryPath => obj => ({ jsonSummaryPath, ...obj });
 
 export const truncate = text => obj => {
   const { staticSiteUrl } = obj;
