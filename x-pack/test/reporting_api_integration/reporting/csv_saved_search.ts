@@ -48,8 +48,8 @@ export default function({ getService }: FtrProviderContext) {
 
   describe('Generation from Saved Search ID', () => {
     describe('Saved Search Features', () => {
-      afterEach(async () => {
-        await reportingAPI.deleteAllReportingIndexes();
+      after(async () => {
+        await reportingAPI.deleteAllReports();
       });
 
       it('With filters and timebased data', async () => {

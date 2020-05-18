@@ -29,14 +29,16 @@ export default function({ getService }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await reportingAPI.deleteAllReportingIndexes();
+      await reportingAPI.deleteAllReports();
     });
+
     after(async () => {
       await esArchiver.unload(OSS_KIBANA_ARCHIVE_PATH);
       await esArchiver.unload(OSS_DATA_ARCHIVE_PATH);
     });
+
     afterEach(async () => {
-      await reportingAPI.deleteAllReportingIndexes();
+      await reportingAPI.deleteAllReports();
     });
 
     describe('initial state', () => {

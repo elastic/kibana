@@ -38,7 +38,7 @@ export default function({ getService }: FtrProviderContext) {
     after(async () => {
       await esArchiver.unload('reporting/logs');
       await esArchiver.unload('logstash_functional');
-      await reportingAPI.deleteAllReportingIndexes();
+      await reportingAPI.deleteAllReports();
     });
 
     it('Rejects bogus jobParams', async () => {
