@@ -1,8 +1,9 @@
-def call(scmVars) {
-  def repoInfo = [:]
+def call() {
 
-  repoInfo.branch = env.ghprbSourceBranch ?: scmVars.GIT_LOCAL_BRANCH ?: scmVars.GIT_BRANCH
-  repoInfo.targetBranch = env.ghprbTargetBranch
+  def repoInfo = [
+    branch: env.ghprbSourceBranch ?: params.branch_specifier ?: 'missing branch_specifier'
+    targetBranch: env.ghprbTargetBranch
+  ]
 
   dir("kibana") {
     repoInfo.commit = sh(
