@@ -76,7 +76,7 @@ You'll notice that the error is gone, but the number could use some formatting.
 +
 You're now looking at the raw data syntax that Canvas uses to display the element.
 
-.. Look for `math "sum_total_price"`, then add `| formatNumber "$0a"`.
+.. Look for `math "sum_total_price"`, then add `| formatnumber "$0a"`.
 
 .. To update, click *Run*.
 
