@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { NavigableGlobalSearchResult } from '../../../../plugins/global_search/public/services/types';
-// import { GlobalSearchTestApi } from '../../plugins/global_search_test/public/types';
+import '../../plugins/global_search_test/public/types';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common']);
