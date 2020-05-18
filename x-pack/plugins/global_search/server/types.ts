@@ -22,7 +22,7 @@ export type GlobalSearchPluginSetup = Pick<SearchServiceSetup, 'registerResultPr
 export type GlobalSearchPluginStart = Pick<SearchServiceStart, 'find'>;
 
 /**
- * globalSearch's route handler context
+ * globalSearch route handler context
  *
  * @public
  */
@@ -32,6 +32,8 @@ export interface RouteHandlerGlobalSearchContext {
 
 /**
  * Context passed to server-side {@GlobalSearchResultProvider | result provider}'s `find` method.
+ *
+ * @public
  */
 export interface GlobalSearchProviderContext {
   core: {
@@ -51,7 +53,9 @@ export interface GlobalSearchProviderContext {
 }
 
 /**
- * Options for the server-side {@link GlobalSearchServiceStart.find | find API}
+ * Options for the server-side {@link GlobalSearchPluginStart.find | find API}
+ *
+ * @public
  */
 export interface GlobalSearchFindOptions {
   /**
@@ -63,12 +67,14 @@ export interface GlobalSearchFindOptions {
   preference?: string;
   /**
    * Optional observable to notify that the associated `find` call should be canceled.
-   * If/when provided and emitting, the result observable will be completed and no further result emission will be performed.
+   * If/when provided and emitting, no further result emission will be performed and the result observable will be completed.
    */
   aborted$?: Observable<void>;
 }
 /**
- * Response returned from the server-side {@link GlobalSearchServiceStart | global search service}'s `find` API
+ * Response returned from the server-side {@link GlobalSearchPluginStart | global search service}'s `find` API
+ *
+ * @public
  */
 export interface GlobalSearchBatchedResults {
   /**
@@ -79,6 +85,8 @@ export interface GlobalSearchBatchedResults {
 
 /**
  * GlobalSearch result provider, to be registered using the {@link GlobalSearchPluginSetup | global search API}
+ *
+ * @public
  */
 export interface GlobalSearchResultProvider {
   id: string;

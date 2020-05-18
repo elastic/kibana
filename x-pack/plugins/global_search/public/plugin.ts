@@ -19,18 +19,18 @@ export class GlobalSearchPlugin
   private readonly searchService = new SearchService();
 
   setup(core: CoreSetup) {
-    const searchSetup = this.searchService.setup({ config: this.config });
+    const { registerResultProvider } = this.searchService.setup({ config: this.config });
 
     return {
-      ...searchSetup,
+      registerResultProvider,
     };
   }
 
   start({ http, application }: CoreStart) {
-    const searchStart = this.searchService.start({ http, application });
+    const { find } = this.searchService.start({ http, application });
 
     return {
-      ...searchStart,
+      find,
     };
   }
 }

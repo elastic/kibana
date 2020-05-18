@@ -15,6 +15,7 @@ export const plugin: PluginInitializer<
 
 export {
   GlobalSearchProviderFindOptions,
+  GlobalSearchProviderResult,
   GlobalSearchProviderResultUrl,
   GlobalSearchResult,
 } from '../common/types';

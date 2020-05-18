@@ -12,13 +12,13 @@ import { GlobalSearchResult } from '../../common/types';
  */
 export type NavigableGlobalSearchResult = GlobalSearchResult & {
   /**
-   * Navigate to this result's associated url. If the result is on this kibana instance, user will be redirected to it
-   * in a SPA friendly way using `application.navigateToApp`, else, a full page refresh will be performed.
+   * Navigate to this result's associated url. If the result belongs to this Kibana instance, user will be redirected to it
+   * in a SPA friendly way using `application.navigateToApp`, else a full page refresh will be performed.
    */
   navigate: () => Promise<void>;
 };
 /**
- * Options for the server-side {@link GlobalSearchServiceStart.find | find API}
+ * Options for the server-side {@link GlobalSearchPluginStart.find | find API}
  */
 export interface GlobalSearchFindOptions {
   /**
@@ -35,7 +35,7 @@ export interface GlobalSearchFindOptions {
   aborted$?: Observable<void>;
 }
 /**
- * Response returned from the server-side {@link GlobalSearchServiceStart | global search service}'s `find` API
+ * Response returned from the server-side {@link GlobalSearchPluginStart.find | find API}
  */
 export interface GlobalSearchBatchedResults {
   /**

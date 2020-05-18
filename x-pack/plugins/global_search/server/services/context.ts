@@ -9,6 +9,9 @@ import { GlobalSearchProviderContext } from '../types';
 
 export type GlobalSearchContextFactory = (request: KibanaRequest) => GlobalSearchProviderContext;
 
+/**
+ * {@link GlobalSearchProviderContext | context} factory
+ */
 export const getContextFactory = (coreStart: CoreStart) => (
   request: KibanaRequest
 ): GlobalSearchProviderContext => {

@@ -28,4 +28,5 @@ export {
   GlobalSearchPluginStart,
   GlobalSearchPluginSetup,
   GlobalSearchResultProvider,
+  RouteHandlerGlobalSearchContext,
 } from './types';
