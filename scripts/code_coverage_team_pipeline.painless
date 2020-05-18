@@ -243,6 +243,7 @@ PUT _ingest/pipeline/team_assignment_new
                 if (path.indexOf('packages/kbn-analytics/') == 0) ctx.team = 'pulse';
                 else if (path.indexOf('packages/kbn-babel') == 0) ctx.team = 'kibana-operations';
                 else if (path.indexOf('packages/kbn-config-schema/') == 0) ctx.team = 'kibana-platform';
+                else if (path.indexOf('package/elastic-datemath') == 0) ctx.team = 'kibana-app-arch';
                 else if (path.indexOf('packages/kbn-dev-utils') == 0) ctx.team = 'kibana-operations';
                 else if (path.indexOf('packages/kbn-es/') == 0) ctx.team = 'kibana-operations';
                 else if (path.indexOf('packages/kbn-eslint') == 0) ctx.team = 'kibana-operations';
