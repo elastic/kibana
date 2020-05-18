@@ -64,7 +64,6 @@ export class DataServerPlugin implements Plugin<DataPluginSetup, DataPluginStart
     this.queryService.setup(core);
     this.autocompleteService.setup(core);
     this.kqlTelemetryService.setup(core, { usageCollection });
-    core.uiSettings.register(uiSettings);
 
     core.uiSettings.register(getUiSettings());
 
