@@ -4,7 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-export { getPaths, foldLeftRight } from '../../siem/server/utils/build_validation/__mocks__/utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-export { exactCheck } from '../../siem/server/utils/build_validation/exact_check';
+export { exactCheck } from '../../siem/common/exact_check';
+export { getPaths, foldLeftRight } from '../../siem/common/test_utils';

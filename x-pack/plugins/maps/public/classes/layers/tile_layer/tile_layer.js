@@ -25,9 +25,6 @@ export class TileLayer extends AbstractLayer {
   }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
-    if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
-      return;
-    }
     const sourceDataRequest = this.getSourceDataRequest();
     if (sourceDataRequest) {
       //data is immmutable
