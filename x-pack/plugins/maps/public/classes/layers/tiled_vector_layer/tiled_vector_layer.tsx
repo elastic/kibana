@@ -78,10 +78,6 @@ export class TiledVectorLayer extends VectorLayer {
   }
 
   async syncData(syncContext: SyncContext) {
-    if (!this.isVisible() || !this.showAtZoomLevel(syncContext.dataFilters.zoom)) {
-      return;
-    }
-
     await this._syncSourceStyleMeta(syncContext, this._source, this._style);
     await this._syncSourceFormatters(syncContext, this._source, this._style);
     await this._syncMVTUrlTemplate(syncContext);
