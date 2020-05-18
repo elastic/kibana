@@ -164,5 +164,37 @@ describe('Markdown', () => {
 
       expect(wrapper).toMatchSnapshot();
     });
+
+    describe('markdown timeline links', () => {
+      const timelineId = '1e10f150-949b-11ea-b63c-2bc51864784c';
+      const markdownWithTimelineLink = `A link to a timeline [timeline](http://localhost:5601/app/siem#/timelines?timeline=(id:'${timelineId}',isOpen:!t))`;
+      const onClickTimeline = jest.fn();
+      beforeEach(() => {
+        jest.resetAllMocks();
+      });
+      test('it renders a timeline link without href when provided the onClickTimeline argument', () => {
+        const wrapper = mount(
+          <Markdown raw={markdownWithTimelineLink} onClickTimeline={onClickTimeline} />
+        );
+
+        expect(
+          wrapper
+            .find('[data-test-subj="markdown-timeline-link"]')
+            .first()
+            .getDOMNode()
+        ).not.toHaveProperty('href');
+      });
+      test('timeline link onClick calls onClickTimeline with timelineId', () => {
+        const wrapper = mount(
+          <Markdown raw={markdownWithTimelineLink} onClickTimeline={onClickTimeline} />
+        );
+        wrapper
+          .find('[data-test-subj="markdown-timeline-link"]')
+          .first()
+          .simulate('click');
+
+        expect(onClickTimeline).toHaveBeenCalledWith(timelineId);
+      });
+    });
   });
 });
