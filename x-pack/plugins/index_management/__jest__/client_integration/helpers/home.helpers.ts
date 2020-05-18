@@ -6,20 +6,17 @@
 
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import {
-  registerTestBed,
-  TestBed,
-  TestBedConfig,
-  findTestSubject,
-  nextTick,
-} from '../../../../../test_utils';
+import { TestUtils } from 'src/plugins/es_ui_shared/public';
+
 import { IndexManagementHome } from '../../../public/application/sections/home'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { BASE_PATH } from '../../../common/constants';
 import { indexManagementStore } from '../../../public/application/store'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { TemplateDeserialized } from '../../../common';
 import { WithAppDependencies, services } from './setup_environment';
 
-const testBedConfig: TestBedConfig = {
+const { registerTestBed, findTestSubject, nextTick } = TestUtils;
+
+const testBedConfig: TestUtils.TestBedConfig = {
   store: () => indexManagementStore(services as any),
   memoryRouter: {
     initialEntries: [`${BASE_PATH}indices`],
@@ -30,7 +27,7 @@ const testBedConfig: TestBedConfig = {
 
 const initTestBed = registerTestBed(WithAppDependencies(IndexManagementHome), testBedConfig);
 
-export interface IdxMgmtHomeTestBed extends TestBed<IdxMgmtTestSubjects> {
+export interface IdxMgmtHomeTestBed extends TestUtils.TestBed<IdxMgmtTestSubjects> {
   findAction: (action: 'edit' | 'clone' | 'delete') => ReactWrapper;
   actions: {
     selectHomeTab: (tab: 'indicesTab' | 'templatesTab') => void;

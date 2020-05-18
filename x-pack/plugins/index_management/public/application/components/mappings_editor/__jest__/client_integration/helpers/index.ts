@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { TestUtils } from 'src/plugins/es_ui_shared/public';
 import {
   setup as mappingsEditorSetup,
   MappingsEditorTestBed,
@@ -10,12 +11,11 @@ import {
   getMappingsEditorDataFactory,
 } from './mappings_editor.helpers';
 
-export {
-  nextTick,
-  getRandomString,
-  findTestSubject,
-  TestBed,
-} from '../../../../../../../../../test_utils';
+const { nextTick, getRandomString, findTestSubject } = TestUtils;
+
+type TestBed = TestUtils.TestBed;
+
+export { nextTick, getRandomString, findTestSubject, TestBed };
 
 export const componentHelpers = {
   mappingsEditor: { setup: mappingsEditorSetup, getMappingsEditorDataFactory },

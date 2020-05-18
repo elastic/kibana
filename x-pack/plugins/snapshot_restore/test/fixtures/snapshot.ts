@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { TestUtils } from 'src/plugins/es_ui_shared/public';
 
-import { getRandomString, getRandomNumber } from '../../../../test_utils';
+const { getRandomString, getRandomNumber } = TestUtils;
 
 export const getSnapshot = ({
   repository = 'my-repo',

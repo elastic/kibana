@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed, findTestSubject } from '../../../../../../test_utils';
+import { TestUtils } from '../../../../../../../src/plugins/es_ui_shared/public';
 import { FollowerIndicesList } from '../../../app/sections/home/follower_indices_list';
 import { ccrStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';
 
+const { registerTestBed, findTestSubject } = TestUtils;
 const testBedConfig = {
   store: ccrStore,
   memoryRouter: {

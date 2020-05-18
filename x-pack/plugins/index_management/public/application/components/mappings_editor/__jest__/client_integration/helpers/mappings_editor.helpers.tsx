@@ -7,9 +7,11 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 
-import { registerTestBed, TestBed } from '../../../../../../../../../test_utils';
+import { TestUtils } from 'src/plugins/es_ui_shared/public';
 import { getChildFieldsName } from '../../../lib';
 import { MappingsEditor } from '../../../mappings_editor';
+
+const { registerTestBed } = TestUtils;
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -55,7 +57,7 @@ export interface DomFields {
   };
 }
 
-const createActions = (testBed: TestBed<TestSubjects>) => {
+const createActions = (testBed: TestUtils.TestBed<TestSubjects>) => {
   const { find, form, component } = testBed;
 
   const getFieldInfo = (testSubjectField: string): { name: string; type: string } => {
@@ -291,7 +293,7 @@ export const getMappingsEditorDataFactory = (onChangeHandler: jest.MockedFunctio
   };
 };
 
-export type MappingsEditorTestBed = TestBed<TestSubjects> & {
+export type MappingsEditorTestBed = TestUtils.TestBed<TestSubjects> & {
   actions: ReturnType<typeof createActions>;
 };
 

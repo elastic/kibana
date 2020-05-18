@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed } from '../../../../../../test_utils';
+import { TestUtils } from '../../../../../../../src/plugins/es_ui_shared/public';
 import { BASE_PATH } from '../../../../common/constants';
 import { CrossClusterReplicationHome } from '../../../app/sections/home/home';
 import { ccrStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';
 
+const { registerTestBed } = TestUtils;
 const testBedConfig = {
   store: ccrStore,
   memoryRouter: {

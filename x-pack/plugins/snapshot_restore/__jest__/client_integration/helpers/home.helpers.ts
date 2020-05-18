@@ -5,19 +5,15 @@
  */
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { act } from 'react-dom/test-utils';
+import { TestUtils } from 'src/plugins/es_ui_shared/public';
 
-import {
-  registerTestBed,
-  findTestSubject,
-  TestBed,
-  TestBedConfig,
-  nextTick,
-} from '../../../../../test_utils';
 import { SnapshotRestoreHome } from '../../../public/application/sections/home/home';
 import { BASE_PATH } from '../../../public/application/constants';
 import { WithAppDependencies } from './setup_environment';
 
-const testBedConfig: TestBedConfig = {
+const { registerTestBed, findTestSubject, nextTick } = TestUtils;
+
+const testBedConfig: TestUtils.TestBedConfig = {
   memoryRouter: {
     initialEntries: [`${BASE_PATH}/repositories`],
     componentRoutePath: `${BASE_PATH}/:section(repositories|snapshots)/:repositoryName?/:snapshotId*`,
@@ -27,7 +23,7 @@ const testBedConfig: TestBedConfig = {
 
 const initTestBed = registerTestBed(WithAppDependencies(SnapshotRestoreHome), testBedConfig);
 
-export interface HomeTestBed extends TestBed<HomeTestSubjects> {
+export interface HomeTestBed extends TestUtils.TestBed<HomeTestSubjects> {
   actions: {
     clickReloadButton: () => void;
     selectRepositoryAt: (index: number) => void;

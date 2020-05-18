@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed } from '../../../../../../test_utils';
+import { TestUtils } from '../../../../../../../src/plugins/es_ui_shared/public';
 import { FollowerIndexAdd } from '../../../app/sections/follower_index_add';
 import { ccrStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';
@@ -16,6 +16,7 @@ const testBedConfig = {
   },
 };
 
+const { registerTestBed } = TestUtils;
 const initTestBed = registerTestBed(FollowerIndexAdd, testBedConfig);
 
 export const setup = props => {

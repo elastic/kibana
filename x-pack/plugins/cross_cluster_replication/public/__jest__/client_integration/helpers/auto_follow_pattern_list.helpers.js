@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed, findTestSubject } from '../../../../../../test_utils';
+import { TestUtils } from '../../../../../../../src/plugins/es_ui_shared/public';
 import { AutoFollowPatternList } from '../../../app/sections/home/auto_follow_pattern_list';
 import { ccrStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';
@@ -16,6 +16,7 @@ const testBedConfig = {
   },
 };
 
+const { registerTestBed, findTestSubject } = TestUtils;
 const initTestBed = registerTestBed(AutoFollowPatternList, testBedConfig);
 
 export const setup = props => {

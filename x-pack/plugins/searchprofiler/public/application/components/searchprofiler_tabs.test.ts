@@ -3,10 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { registerTestBed } from '../../../../../test_utils';
+import { TestUtils } from 'src/plugins/es_ui_shared/public';
 
 import { SearchProfilerTabs, Props } from './searchprofiler_tabs';
+
+const { registerTestBed } = TestUtils;
 
 describe('Search Profiler Tabs', () => {
   it('renders', async () => {

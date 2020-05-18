@@ -5,7 +5,9 @@
  */
 
 import { Moment } from 'moment';
-import { getRandomString } from '../../../../test_utils';
+import { TestUtils } from 'src/plugins/es_ui_shared/public';
+
+const { getRandomString } = TestUtils;
 
 interface Watch {
   id: string;

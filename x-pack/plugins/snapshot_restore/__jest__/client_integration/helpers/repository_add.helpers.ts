@@ -4,17 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 /* eslint-disable @kbn/eslint/no-restricted-paths */
-
-import { registerTestBed, TestBed } from '../../../../../test_utils';
+import { TestUtils } from 'src/plugins/es_ui_shared/public';
 import { RepositoryType } from '../../../common/types';
 import { RepositoryAdd } from '../../../public/application/sections/repository_add';
 import { WithAppDependencies } from './setup_environment';
+
+const { registerTestBed } = TestUtils;
 
 const initTestBed = registerTestBed<RepositoryAddTestSubjects>(WithAppDependencies(RepositoryAdd), {
   doMountAsync: true,
 });
 
-export interface RepositoryAddTestBed extends TestBed<RepositoryAddTestSubjects> {
+export interface RepositoryAddTestBed extends TestUtils.TestBed<RepositoryAddTestSubjects> {
   actions: {
     clickNextButton: () => void;
     clickBackButton: () => void;

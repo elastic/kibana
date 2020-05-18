@@ -13,7 +13,7 @@ import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
-import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
+import { TestUtils } from '../../../../../src/plugins/es_ui_shared/public';
 import { fetchedPolicies, fetchedNodes } from '../../public/application/store/actions';
 import { indexLifecycleManagementStore } from '../../public/application/store';
 import { EditPolicy } from '../../public/application/sections/edit_policy';
@@ -34,6 +34,8 @@ import {
   policyNameAlreadyUsedErrorMessage,
   maximumDocumentsRequiredMessage,
 } from '../../public/application/store/selectors/lifecycle';
+
+const { mountWithIntl } = TestUtils;
 
 initHttp(axios.create({ adapter: axiosXhrAdapter }), path => path);
 initUiMetric({ reportUiStats: () => {} });

@@ -3,9 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { getRandomString } from '../../../test_utils';
+import { TestUtils } from '../../../../src/plugins/es_ui_shared/public';
 
 import { SNIFF_MODE } from '../common/constants';
+
+const { getRandomString } = TestUtils;
 
 export const getRemoteClusterMock = ({
   name = getRandomString(),

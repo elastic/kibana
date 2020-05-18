@@ -17,6 +17,7 @@ import { MemoryRouter } from 'react-router-dom';
  */
 import * as stubWebWorker from '../../../../test_utils/stub_web_worker'; // eslint-disable-line no-unused-vars
 
+import { TestUtils } from '../../../../../src/plugins/es_ui_shared/public';
 import { AppWithoutRouter } from '../../public/application/app';
 import { AppContextProvider } from '../../public/application/app_context';
 import { Provider } from 'react-redux';
@@ -29,13 +30,14 @@ import { setUiMetricService } from '../../public/application/services/api';
 import { indexManagementStore } from '../../public/application/store';
 import { setExtensionsService } from '../../public/application/store/selectors';
 import { BASE_PATH, API_BASE_PATH } from '../../common/constants';
-import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
 import { ExtensionsService } from '../../public/services';
 import sinon from 'sinon';
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { notificationServiceMock } from '../../../../../src/core/public/notifications/notifications_service.mock';
+
+const { mountWithIntl } = TestUtils;
 
 jest.mock('ui/new_platform');
 

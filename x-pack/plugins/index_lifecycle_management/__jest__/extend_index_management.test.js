@@ -8,7 +8,7 @@ import moment from 'moment-timezone';
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
-import { mountWithIntl } from '../../../test_utils/enzyme_helpers';
+import { TestUtils } from '../../../../src/plugins/es_ui_shared/public';
 import {
   retryLifecycleActionExtension,
   removeLifecyclePolicyActionExtension,
@@ -19,6 +19,8 @@ import {
 } from '../public/extend_index_management';
 import { init as initHttp } from '../public/application/services/http';
 import { init as initUiMetric } from '../public/application/services/ui_metric';
+
+const { mountWithIntl } = TestUtils;
 
 // We need to init the http with a mock for any tests that depend upon the http service.
 // For example, add_lifecycle_confirm_modal makes an API request in its componentDidMount

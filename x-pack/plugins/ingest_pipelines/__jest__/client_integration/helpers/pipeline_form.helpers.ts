@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { TestBed } from '../../../../../test_utils';
+import { TestUtils } from 'src/plugins/es_ui_shared/public';
 
-export const getFormActions = (testBed: TestBed) => {
+export const getFormActions = (testBed: TestUtils.TestBed) => {
   const { find, form } = testBed;
 
   // User actions

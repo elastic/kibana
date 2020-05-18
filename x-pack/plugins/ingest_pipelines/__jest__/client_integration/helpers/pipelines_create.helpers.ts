@@ -4,17 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed, TestBedConfig, TestBed } from '../../../../../test_utils';
+import { TestUtils } from 'src/plugins/es_ui_shared/public';
 import { BASE_PATH } from '../../../common/constants';
 import { PipelinesCreate } from '../../../public/application/sections/pipelines_create'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { getFormActions, PipelineFormTestSubjects } from './pipeline_form.helpers';
 import { WithAppDependencies } from './setup_environment';
 
-export type PipelinesCreateTestBed = TestBed<PipelineFormTestSubjects> & {
+const { registerTestBed } = TestUtils;
+
+export type PipelinesCreateTestBed = TestUtils.TestBed<PipelineFormTestSubjects> & {
   actions: ReturnType<typeof getFormActions>;
 };
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: TestUtils.TestBedConfig = {
   memoryRouter: {
     initialEntries: [`${BASE_PATH}/create`],
     componentRoutePath: `${BASE_PATH}/create`,

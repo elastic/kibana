@@ -3,9 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { getRandomString, getRandomNumber } from '../../../../test_utils';
+import { TestUtils } from 'src/plugins/es_ui_shared/public';
 import { TemplateDeserialized, DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT } from '../../common';
+
+const { getRandomString, getRandomNumber } = TestUtils;
 
 export const getTemplate = ({
   name = getRandomString(),

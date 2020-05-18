@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 /* eslint-disable @kbn/eslint/no-restricted-paths */
-
-import { getRandomString, getRandomNumber } from '../../../../test_utils';
+import { TestUtils } from 'src/plugins/es_ui_shared/public';
 import { SlmPolicy } from '../../common/types';
 import { DEFAULT_POLICY_SCHEDULE } from '../../public/application/constants';
 
+const { getRandomString, getRandomNumber } = TestUtils;
 const dateNow = new Date();
 const randomModifiedDateMillis = new Date().setDate(dateNow.getDate() - 1);
 const randomExecutionDateMillis = new Date().setDate(dateNow.getDate() + 1);
