@@ -62,6 +62,7 @@ configService.atPath.mockReturnValue(
       disableProtection: true,
       whitelist: [],
     },
+    customResponseHeaders: {},
   } as any)
 );
 
