@@ -30,6 +30,9 @@ export const mockField: IField = new MockField({
 });
 
 export class MockStyle {
+  private readonly _min: number;
+  private readonly _max: number;
+
   constructor({ min = 0, max = 100 } = {}) {
     this._min = min;
     this._max = max;
