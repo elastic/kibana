@@ -16,10 +16,10 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { AGENT_CONFIG_DETAILS_PATH } from '../../../constants';
 import { AgentConfig, PackageInfo, NewDatasource } from '../../../types';
 import {
   useLink,
+  useBreadcrumbs,
   useCore,
   useConfig,
   sendUpdateDatasource,
@@ -41,7 +41,11 @@ import { StepConfigureDatasource } from '../create_datasource_page/step_configur
 import { StepDefineDatasource } from '../create_datasource_page/step_define_datasource';
 
 export const EditDatasourcePage: React.FunctionComponent = () => {
-  const { notifications } = useCore();
+  const {
+    notifications,
+    chrome: { getIsNavDrawerLocked$ },
+    uiSettings,
+  } = useCore();
   const {
     fleet: { enabled: isFleetEnabled },
   } = useConfig();
@@ -49,6 +53,16 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
     params: { configId, datasourceId },
   } = useRouteMatch();
   const history = useHistory();
+  const { getHref, getPath } = useLink();
+  const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
+
+  useEffect(() => {
+    const subscription = getIsNavDrawerLocked$().subscribe((newIsNavDrawerLocked: boolean) => {
+      setIsNavDrawerLocked(newIsNavDrawerLocked);
+    });
+
+    return () => subscription.unsubscribe();
+  });
 
   // Agent config, package info, and datasource states
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
@@ -172,8 +186,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
   };
 
   // Cancel url
-  const CONFIG_URL = useLink(`${AGENT_CONFIG_DETAILS_PATH}${configId}`);
-  const cancelUrl = CONFIG_URL;
+  const cancelUrl = getHref('configuration_details', { configId });
 
   // Save datasource
   const [formState, setFormState] = useState<DatasourceFormState>('INVALID');
@@ -195,7 +208,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
     }
     const { error } = await saveDatasource();
     if (!error) {
-      history.push(`${AGENT_CONFIG_DETAILS_PATH}${configId}`);
+      history.push(getPath('configuration_details', { configId }));
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.ingestManager.editDatasource.updatedNotificationTitle', {
           defaultMessage: `Successfully updated '{datasourceName}'`,
@@ -249,6 +262,7 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
         />
       ) : (
         <>
+          <Breadcrumb configName={agentConfig.name} configId={configId} />
           {formState === 'CONFIRM' && (
             <ConfirmDeployConfigModal
               agentCount={agentCount}
@@ -296,7 +310,16 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
             ]}
           />
           <EuiSpacer size="l" />
-          <EuiBottomBar css={{ zIndex: 5 }} paddingSize="s">
+          {/* TODO #64541 - Remove classes */}
+          <EuiBottomBar
+            className={
+              uiSettings.get('pageNavigation') === 'legacy'
+                ? isNavDrawerLocked
+                  ? 'ingestManager__bottomBar-isNavDrawerLocked'
+                  : 'ingestManager__bottomBar'
+                : undefined
+            }
+          >
             <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty color="ghost" href={cancelUrl}>
@@ -327,4 +350,12 @@ export const EditDatasourcePage: React.FunctionComponent = () => {
       )}
     </CreateDatasourcePageLayout>
   );
+};
+
+const Breadcrumb: React.FunctionComponent<{ configName: string; configId: string }> = ({
+  configName,
+  configId,
+}) => {
+  useBreadcrumbs('edit_datasource', { configName, configId });
+  return null;
 };

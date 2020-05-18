@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { RequestHandler } from 'src/core/server';
+import { TypeOf } from '@kbn/config-schema';
 import { outputService, appContextService } from '../../services';
 import { GetFleetStatusResponse } from '../../../common';
 import { setupIngestManager, setupFleet } from '../../services/setup';
+import { PostFleetSetupRequestSchema } from '../../types';
 
 export const getFleetStatusHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
@@ -45,12 +47,18 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
   }
 };
 
-export const createFleetSetupHandler: RequestHandler = async (context, request, response) => {
+export const createFleetSetupHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof PostFleetSetupRequestSchema.body>
+> = async (context, request, response) => {
   try {
     const soClient = context.core.savedObjects.client;
     const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
     await setupIngestManager(soClient, callCluster);
-    await setupFleet(soClient, callCluster);
+    await setupFleet(soClient, callCluster, {
+      forceRecreate: request.body?.forceRecreate ?? false,
+    });
 
     return response.ok({
       body: { isInitialized: true },
