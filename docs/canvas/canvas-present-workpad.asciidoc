@@ -12,7 +12,7 @@ When you are ready to present your workpad, use and enable the presentation opti
 +
 //Need to replace image
 //[role="screenshot"]
-//image::images/canvas-refresh-interval.png[Element data refresh interval]
+//image::images/canvas-autoplay-interval.png[Element autoplay interval]
 
 . To enable autoplay, click *View > Turn autoplay on*.
 
