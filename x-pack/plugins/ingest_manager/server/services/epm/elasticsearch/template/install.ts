@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from 'boom';
 import { Dataset, RegistryPackage, ElasticsearchAssetType, TemplateRef } from '../../../../types';
 import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
@@ -20,8 +21,8 @@ export const installTemplates = async (
   // install any pre-built index template assets,
   // atm, this is only the base package's global index templates
   // Install component templates first, as they are used by the index templates
-  installPreBuiltComponentTemplates(pkgName, pkgVersion, callCluster);
-  installPreBuiltTemplates(pkgName, pkgVersion, callCluster);
+  await installPreBuiltComponentTemplates(pkgName, pkgVersion, callCluster);
+  await installPreBuiltTemplates(pkgName, pkgVersion, callCluster);
 
   // build templates per dataset from yml files
   const datasets = registryPackage.datasets;
@@ -53,16 +54,7 @@ const installPreBuiltTemplates = async (
     pkgVersion,
     (entry: Registry.ArchiveEntry) => isTemplate(entry)
   );
-  // templatePaths.forEach(async path => {
-  //   const { file } = Registry.pathParts(path);
-  //   const templateName = file.substr(0, file.lastIndexOf('.'));
-  //   const content = JSON.parse(Registry.getAsset(path).toString('utf8'));
-  //   await callCluster('indices.putTemplate', {
-  //     name: templateName,
-  //     body: content,
-  //   });
-  // });
-  templatePaths.forEach(async path => {
+  const templateInstallPromises = templatePaths.map(async path => {
     const { file } = Registry.pathParts(path);
     const templateName = file.substr(0, file.lastIndexOf('.'));
     const content = JSON.parse(Registry.getAsset(path).toString('utf8'));
@@ -91,8 +83,15 @@ const installPreBuiltTemplates = async (
     // The existing convenience endpoint `indices.putTemplate` only sends to _template,
     // which does not support v2 templates.
     // See src/core/server/elasticsearch/api_types.ts for available endpoints.
-    await callCluster('transport.request', callClusterParams);
+    return await callCluster('transport.request', callClusterParams);
   });
+  try {
+    return await Promise.all(templateInstallPromises);
+  } catch (e) {
+    throw new Boom(`Error installing prebuilt index templates ${e.message}`, {
+      statusCode: 400,
+    });
+  }
 };
 
 const installPreBuiltComponentTemplates = async (
@@ -105,7 +104,7 @@ const installPreBuiltComponentTemplates = async (
     pkgVersion,
     (entry: Registry.ArchiveEntry) => isComponentTemplate(entry)
   );
-  templatePaths.forEach(async path => {
+  const templateInstallPromises = templatePaths.map(async path => {
     const { file } = Registry.pathParts(path);
     const templateName = file.substr(0, file.lastIndexOf('.'));
     const content = JSON.parse(Registry.getAsset(path).toString('utf8'));
@@ -124,8 +123,15 @@ const installPreBuiltComponentTemplates = async (
     // This uses the catch-all endpoint 'transport.request' because there is no
     // convenience endpoint for component templates yet.
     // See src/core/server/elasticsearch/api_types.ts for available endpoints.
-    await callCluster('transport.request', callClusterParams);
+    return await callCluster('transport.request', callClusterParams);
   });
+  try {
+    return await Promise.all(templateInstallPromises);
+  } catch (e) {
+    throw new Boom(`Error installing prebuilt component templates ${e.message}`, {
+      statusCode: 400,
+    });
+  }
 };
 
 const isTemplate = ({ path }: Registry.ArchiveEntry) => {
