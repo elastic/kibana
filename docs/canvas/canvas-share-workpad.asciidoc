@@ -52,7 +52,7 @@ For more information, refer to <<automating-report-generation, Automating report
 
 beta[] Canvas allows you to create _shareables_, which are workpads that you download and securely share on any website. To customize the behavior of the workpad on your website, you can choose to autoplay the pages or hide the workpad toolbar.
 
-. Click *Share > *Share > Share on a website*.
+. Click *Share > Share on a website*.
 
 . On the *Share on a website* flyout, follow the instructions.
 
