@@ -5,10 +5,10 @@
  */
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiAccordion, EuiDescriptionList } from '@elastic/eui';
-import { EuiHealth } from '@elastic/eui';
+import { EuiAccordion, EuiDescriptionList, EuiHealth } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Immutable, AlertDetails } from '../../../../../../../common/alerts/types';
+
+import { Immutable, AlertDetails } from '../../../../../common/endpoint_alerts/types';
 
 export const HostAccordion = memo(({ alertData }: { alertData: Immutable<AlertDetails> }) => {
   const columns = useMemo(() => {
@@ -82,3 +82,5 @@ export const HostAccordion = memo(({ alertData }: { alertData: Immutable<AlertDe
     </EuiAccordion>
   );
 });
+
+HostAccordion.displayName = 'HostAccordion';

@@ -5,20 +5,17 @@
  */
 
 import { Store, createStore, applyMiddleware } from 'redux';
-import { History } from 'history';
+import { History, createBrowserHistory } from 'history';
 import { alertListReducer } from './reducer';
-import { AlertListState } from '../../../../../common/alerts/types';
+import { AlertListState, AlertResultList, Immutable } from '../../../common/endpoint_alerts/types';
 import { alertMiddlewareFactory } from './middleware';
-import { AppAction } from '../../store/action';
 import { coreMock } from 'src/core/public/mocks';
-import { DepsStartMock, depsStartMock } from '../../mocks';
-import { AlertResultList, Immutable } from '../../../../../common/alerts/types';
+import { DepsStartMock, depsStartMock } from '../../common/mock/endpoint';
 import { isOnAlertPage } from './selectors';
-import { createBrowserHistory } from 'history';
 import { mockAlertResultList } from './mock_alert_result_list';
 
 describe('alert list tests', () => {
-  let store: Store<Immutable<AlertListState>, Immutable<AppAction>>;
+  let store: Store;
   let coreStart: ReturnType<typeof coreMock.createStart>;
   let depsStart: DepsStartMock;
   let history: History<never>;

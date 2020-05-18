@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertResultList, AlertDetails } from '../../../../../common/alerts/types';
-import { EndpointDocGenerator } from '../../../../../common/generate_data';
+import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
+import { AlertResultList, AlertDetails } from '../../../common/endpoint_alerts/types';
 
 export const mockAlertResultList: (options?: {
   total?: number;
@@ -30,7 +30,7 @@ export const mockAlertResultList: (options?: {
     alerts.push({
       ...generator.generateAlert(new Date().getTime() + index * 1000),
       ...{
-        id: 'xDUYMHABAJk0XnHd8rrd' + index,
+        id: `xDUYMHABAJk0XnHd8rrd${index}`,
         prev: null,
         next: null,
       },

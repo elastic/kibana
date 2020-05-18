@@ -5,14 +5,13 @@
  */
 
 import { useSelector } from 'react-redux';
-import { Immutable } from '../../../../../../common/types';
-import { GlobalState } from '../../../types';
-import { AlertListState } from '../../../../../../common/alerts/types';
+import { Immutable, AlertListState } from '../../../../common/endpoint_alerts/types';
+import { State } from '../../../common/store/reducer';
 
 export function useAlertListSelector<TSelected>(
   selector: (
     state: Immutable<AlertListState>
   ) => TSelected extends Immutable<TSelected> ? TSelected : never
 ) {
-  return useSelector((state: Immutable<GlobalState>) => selector(state.alertList));
+  return useSelector((state: Immutable<State>) => selector(state.alertList));
 }

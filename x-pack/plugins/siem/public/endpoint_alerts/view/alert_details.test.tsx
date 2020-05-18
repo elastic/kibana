@@ -5,17 +5,18 @@
  */
 
 import * as reactTestingLibrary from '@testing-library/react';
-import { appStoreFactory } from '../../store';
-import { fireEvent } from '@testing-library/react';
 import { MemoryHistory } from 'history';
-import { AppAction } from '../../types';
+import { Store } from 'redux';
+
 import { mockAlertDetailsResult } from '../store/mock_alert_result_list';
 import { alertPageTestRender } from './test_helpers/render_alert_page';
+import { AppAction } from '../../common/store/actions';
+import { State } from '../../common/store/reducer';
 
 describe('when the alert details flyout is open', () => {
   let render: () => reactTestingLibrary.RenderResult;
   let history: MemoryHistory<never>;
-  let store: ReturnType<typeof appStoreFactory>;
+  let store: Store<State>;
 
   beforeEach(async () => {
     // Creates the render elements for the tests to use
@@ -50,7 +51,7 @@ describe('when the alert details flyout is open', () => {
             'alertDetailTakeActionDropdownButton'
           );
           if (takeActionButton) {
-            fireEvent.click(takeActionButton);
+            reactTestingLibrary.fireEvent.click(takeActionButton);
           }
         });
         it('should display the correct fields in the dropdown', async () => {
@@ -64,7 +65,7 @@ describe('when the alert details flyout is open', () => {
           renderResult = render();
           const overviewTab = await renderResult.findByTestId('overviewMetadata');
           if (overviewTab) {
-            fireEvent.click(overviewTab);
+            reactTestingLibrary.fireEvent.click(overviewTab);
           }
         });
         it('should render all accordion panels', async () => {

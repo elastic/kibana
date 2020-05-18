@@ -38,3 +38,5 @@ export const MetadataPanel = memo(() => {
     </section>
   );
 });
+
+MetadataPanel.displayName = 'MetadataPanel';

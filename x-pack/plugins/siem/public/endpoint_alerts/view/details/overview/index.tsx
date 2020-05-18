@@ -20,104 +20,106 @@ import * as selectors from '../../../store/selectors';
 import { MetadataPanel } from './metadata_panel';
 import { FormattedDate } from '../../formatted_date';
 import { AlertDetailResolver } from '../../resolver';
-import { ResolverEvent } from '../../../../../../../common/types';
+import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { TakeActionDropdown } from './take_action_dropdown';
 
-export const AlertDetailsOverview = styled(
-  memo(() => {
-    const alertDetailsData = useAlertListSelector(selectors.selectedAlertDetailsData);
-    if (alertDetailsData === undefined) {
-      return null;
-    }
+const AlertDetailsOverviewComponent = memo(() => {
+  const alertDetailsData = useAlertListSelector(selectors.selectedAlertDetailsData);
+  if (alertDetailsData === undefined) {
+    return null;
+  }
 
-    const tabs: EuiTabbedContentTab[] = useMemo(() => {
-      return [
-        {
-          id: 'overviewMetadata',
-          'data-test-subj': 'overviewMetadata',
-          name: i18n.translate(
-            'xpack.endpoint.application.endpoint.alertDetails.overview.tabs.overview',
-            {
-              defaultMessage: 'Overview',
-            }
-          ),
-          content: (
-            <>
-              <EuiSpacer />
-              <MetadataPanel />
-            </>
-          ),
-        },
-        {
-          id: 'overviewResolver',
-          'data-test-subj': 'overviewResolverTab',
-          name: i18n.translate(
-            'xpack.endpoint.application.endpoint.alertDetails.overview.tabs.resolver',
-            {
-              defaultMessage: 'Resolver',
-            }
-          ),
-          content: (
-            <>
-              <EuiSpacer />
-              <AlertDetailResolver selectedEvent={(alertDetailsData as unknown) as ResolverEvent} />
-            </>
-          ),
-        },
-      ];
-    }, [alertDetailsData]);
+  const tabs: EuiTabbedContentTab[] = useMemo(() => {
+    return [
+      {
+        id: 'overviewMetadata',
+        'data-test-subj': 'overviewMetadata',
+        name: i18n.translate(
+          'xpack.endpoint.application.endpoint.alertDetails.overview.tabs.overview',
+          {
+            defaultMessage: 'Overview',
+          }
+        ),
+        content: (
+          <>
+            <EuiSpacer />
+            <MetadataPanel />
+          </>
+        ),
+      },
+      {
+        id: 'overviewResolver',
+        'data-test-subj': 'overviewResolverTab',
+        name: i18n.translate(
+          'xpack.endpoint.application.endpoint.alertDetails.overview.tabs.resolver',
+          {
+            defaultMessage: 'Resolver',
+          }
+        ),
+        content: (
+          <>
+            <EuiSpacer />
+            <AlertDetailResolver selectedEvent={(alertDetailsData as unknown) as ResolverEvent} />
+          </>
+        ),
+      },
+    ];
+  }, [alertDetailsData]);
 
-    return (
-      <>
-        <section className="details-overview-summary">
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.endpoint.application.endpoint.alertDetails.overview.title"
-                defaultMessage="Detected Malicious File"
-              />
-            </h3>
-          </EuiTitle>
-          <EuiSpacer />
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="xpack.endpoint.application.endpoint.alertDetails.overview.summary"
-                defaultMessage="MalwareScore detected the opening of a document on {hostname} on {date}"
-                values={{
-                  hostname: alertDetailsData.host.hostname,
-                  date: <FormattedDate timestamp={alertDetailsData['@timestamp']} />,
-                }}
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer />
-          <EuiText>
-            Endpoint Status:{' '}
-            <EuiHealth color="success">
-              {' '}
-              <FormattedMessage
-                id="xpack.endpoint.application.endpoint.alertDetails.endpoint.status.online"
-                defaultMessage="Online"
-              />
-            </EuiHealth>
-          </EuiText>
-          <EuiText>
-            {' '}
+  return (
+    <>
+      <section className="details-overview-summary">
+        <EuiTitle size="s">
+          <h3>
             <FormattedMessage
-              id="xpack.endpoint.application.endpoint.alertDetails.alert.status.open"
-              defaultMessage="Alert Status: Open"
+              id="xpack.endpoint.application.endpoint.alertDetails.overview.title"
+              defaultMessage="Detected Malicious File"
             />
-          </EuiText>
-          <EuiSpacer />
-          <TakeActionDropdown />
-          <EuiSpacer />
-        </section>
-        <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
-      </>
-    );
-  })
-)`
+          </h3>
+        </EuiTitle>
+        <EuiSpacer />
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.endpoint.application.endpoint.alertDetails.overview.summary"
+              defaultMessage="MalwareScore detected the opening of a document on {hostname} on {date}"
+              values={{
+                hostname: alertDetailsData.host.hostname,
+                date: <FormattedDate timestamp={alertDetailsData['@timestamp']} />,
+              }}
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer />
+        <EuiText>
+          {'Endpoint Status: '}
+          <EuiHealth color="success">
+            <FormattedMessage
+              id="xpack.endpoint.application.endpoint.alertDetails.endpoint.status.online"
+              defaultMessage="Online"
+            />
+          </EuiHealth>
+        </EuiText>
+        <EuiText>
+          <FormattedMessage
+            id="xpack.endpoint.application.endpoint.alertDetails.alert.status.open"
+            defaultMessage="Alert Status: Open"
+          />
+        </EuiText>
+        <EuiSpacer />
+        <TakeActionDropdown />
+        <EuiSpacer />
+      </section>
+      <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
+    </>
+  );
+});
+
+AlertDetailsOverviewComponent.displayName = 'AlertDetailsOverview';
+
+export const AlertDetailsOverview = styled(AlertDetailsOverviewComponent)`
   height: 100%;
   width: 100%;
 `;
+
+AlertDetailsOverview.displayName = 'AlertDetailsOverview';

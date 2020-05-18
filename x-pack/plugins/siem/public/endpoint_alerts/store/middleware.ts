@@ -4,14 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IIndexPattern } from 'src/plugins/data/public';
-import { AlertResultList, AlertDetails, AlertListState } from '../../../../../common/alerts/types';
-import { ImmutableMiddlewareFactory } from '../../types';
+import { IIndexPattern } from '../../../../../../src/plugins/data/public';
+import {
+  AlertResultList,
+  AlertDetails,
+  AlertListState,
+} from '../../../common/endpoint_alerts/types';
+import { AlertConstants } from '../../../common/endpoint_alerts/alert_constants';
+import { ImmutableMiddlewareFactory } from '../../common/store';
+import { cloneHttpFetchQuery } from '../../common/utils/clone_http_fetch_query';
 import { isOnAlertPage, apiQueryParams, hasSelectedAlert, uiQueryParams } from './selectors';
-import { cloneHttpFetchQuery } from '../../../../common/clone_http_fetch_query';
-import { AlertConstants } from '../../../../../common/alerts/alert_constants';
+import { Immutable } from '../../../common/endpoint/types';
 
-export const alertMiddlewareFactory: ImmutableMiddlewareFactory<AlertListState> = (
+export const alertMiddlewareFactory: ImmutableMiddlewareFactory<Immutable<AlertListState>> = (
   coreStart,
   depsStart
 ) => {

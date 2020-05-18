@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
-import { memo, useEffect, useCallback } from 'react';
+import React, { useMemo, memo, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Query, TimeRange } from 'src/plugins/data/public';
 import { encode, RisonValue } from 'rison-node';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { urlFromQueryParams } from './url_from_query_params';
 import { useAlertListSelector } from './hooks/use_alerts_selector';
 import * as selectors from '../store/selectors';
-import { EndpointPluginServices } from '../../../../plugin';
+import { StartServices } from '../../plugin';
 import { clone } from '../models/index_pattern';
 
 export const AlertIndexSearchBar = memo(() => {
@@ -30,7 +30,7 @@ export const AlertIndexSearchBar = memo(() => {
   const searchBarDateRange = useAlertListSelector(selectors.searchBarDateRange);
   const searchBarFilters = useAlertListSelector(selectors.searchBarFilters);
 
-  const kibanaContext = useKibana<EndpointPluginServices>();
+  const kibanaContext = useKibana<StartServices>();
   const {
     ui: { SearchBar },
     query: { filterManager },

@@ -6,18 +6,19 @@
 
 import * as reactTestingLibrary from '@testing-library/react';
 import { IIndexPattern } from 'src/plugins/data/public';
-import { appStoreFactory } from '../../store';
-import { fireEvent, act } from '@testing-library/react';
 import { MemoryHistory } from 'history';
-import { AppAction } from '../../types';
+import { Store } from 'redux';
+
 import { mockAlertResultList } from '../store/mock_alert_result_list';
-import { DepsStartMock } from '../../mocks';
 import { alertPageTestRender } from './test_helpers/render_alert_page';
+import { DepsStartMock } from '../../common/mock/endpoint';
+import { State } from '../../common/store/reducer';
+import { AppAction } from '../../common/store/actions';
 
 describe('when on the alerting page', () => {
   let render: () => reactTestingLibrary.RenderResult;
   let history: MemoryHistory<never>;
-  let store: ReturnType<typeof appStoreFactory>;
+  let store: Store<State>;
   let depsStart: DepsStartMock;
 
   beforeEach(async () => {
@@ -63,7 +64,7 @@ describe('when on the alerting page', () => {
           /**
            * This is the cell with the alert type, it has a link.
            */
-          fireEvent.click(alertLinks[0]);
+          reactTestingLibrary.fireEvent.click(alertLinks[0]);
         });
         it('should show the flyout', async () => {
           await renderResult.findByTestId('alertDetailFlyout');
@@ -92,7 +93,7 @@ describe('when on the alerting page', () => {
          */
         const closeButton = await renderResult.findByTestId('euiFlyoutCloseButton');
         if (closeButton) {
-          fireEvent.click(closeButton);
+          reactTestingLibrary.fireEvent.click(closeButton);
         }
       });
       it('should no longer show the flyout', () => {
@@ -125,14 +126,14 @@ describe('when on the alerting page', () => {
         const renderResult = render();
         const paginationButton = await renderResult.findByTestId('tablePaginationPopoverButton');
         if (paginationButton) {
-          act(() => {
-            fireEvent.click(paginationButton);
+          reactTestingLibrary.act(() => {
+            reactTestingLibrary.fireEvent.click(paginationButton);
           });
         }
         const show10RowsButton = await renderResult.findByTestId('tablePagination-10-rows');
         if (show10RowsButton) {
-          act(() => {
-            fireEvent.click(show10RowsButton);
+          reactTestingLibrary.act(() => {
+            reactTestingLibrary.fireEvent.click(show10RowsButton);
           });
         }
       });

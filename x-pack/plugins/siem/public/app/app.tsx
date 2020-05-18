@@ -80,7 +80,8 @@ const StartAppComponent: FC<StartAppComponent> = ({ subPlugins, ...libs }) => {
   const store = createStore(
     createInitialState(subPluginsStore.initialState),
     subPluginsStore.reducer,
-    libs$.pipe(pluck('apolloClient'))
+    libs$.pipe(pluck('apolloClient')),
+    subPluginsStore.middlewares
   );
 
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);

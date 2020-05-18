@@ -10,8 +10,12 @@ import { IIndexPattern, TimeRange, Filter, Query } from 'src/plugins/data/public
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { alertingIndexGetQuerySchema } from './schema/alert_index';
 import { indexPatternGetParamsSchema } from './schema/index_pattern';
-import { AlertEvent, KbnConfigSchemaInputTypeOf, HostMetadata } from '../types';
-import { EndpointAppLocation } from '../../public/applications/endpoint/types';
+import {
+  HostMetadata,
+  AlertEvent,
+  KbnConfigSchemaInputTypeOf,
+  AppLocation,
+} from '../endpoint/types';
 
 /**
  * A deep readonly type that will make all children of a given object readonly recursively
@@ -146,7 +150,7 @@ export interface AlertListState {
   readonly pageIndex: number;
 
   /** Current location object from React Router history. */
-  readonly location?: Immutable<EndpointAppLocation>;
+  readonly location?: Immutable<AppLocation>;
 
   /** Specific Alert data to be shown in the details view */
   readonly alertDetails?: Immutable<AlertDetails>;

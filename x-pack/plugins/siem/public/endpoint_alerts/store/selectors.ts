@@ -9,15 +9,17 @@ import {
   createSelector,
   createStructuredSelector as createStructuredSelectorWithBadType,
 } from 'reselect';
-import { Query, TimeRange, Filter } from 'src/plugins/data/public';
 import { encode, decode } from 'rison-node';
-import { CreateStructuredSelector } from '../../types';
+
+import { Query, TimeRange, Filter } from '../../../../../../src/plugins/data/public';
+
 import {
   Immutable,
   AlertingIndexGetQueryInput,
   AlertListState,
   AlertingIndexUIQueryParams,
-} from '../../../../../common/alerts/types';
+} from '../../../common/endpoint_alerts/types';
+import { CreateStructuredSelector } from '../../common/store';
 
 const createStructuredSelector: CreateStructuredSelector = createStructuredSelectorWithBadType;
 

@@ -4,21 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 import { Store, createStore, applyMiddleware } from 'redux';
-import { History } from 'history';
-import { alertListReducer } from './reducer';
-import { AlertListState, AlertingIndexUIQueryParams } from '../../../../../common/alerts/types';
+import { History, createBrowserHistory } from 'history';
+
+import { coreMock } from '../../../../../../src/core/public/mocks';
+
+import { AlertingIndexUIQueryParams } from '../../../common/endpoint_alerts/types';
+import { DepsStartMock, depsStartMock } from '../../common/mock/endpoint';
+
 import { alertMiddlewareFactory } from './middleware';
-import { AppAction } from '../../store/action';
-import { coreMock } from 'src/core/public/mocks';
-import { DepsStartMock, depsStartMock } from '../../mocks';
-import { createBrowserHistory } from 'history';
+
+import { alertListReducer } from './reducer';
 import { uiQueryParams } from './selectors';
 import { urlFromQueryParams } from '../view/url_from_query_params';
-import { Immutable } from '../../../../../common/types';
 
 describe('alert list pagination', () => {
-  let store: Store<Immutable<AlertListState>, Immutable<AppAction>>;
+  let store: Store;
   let coreStart: ReturnType<typeof coreMock.createStart>;
   let depsStart: DepsStartMock;
   let history: History<never>;

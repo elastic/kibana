@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memo, useState, useMemo, useCallback } from 'react';
-import React from 'react';
+import React, { memo, useState, useMemo, useCallback } from 'react';
 import {
   EuiDataGrid,
   EuiDataGridColumn,
@@ -26,8 +25,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { AlertData } from '../../../common/endpoint_alerts/types';
 import { urlFromQueryParams } from './url_from_query_params';
-import { AlertData } from '../../../../../common/alerts/types';
 import * as selectors from '../store/selectors';
 import { useAlertListSelector } from './hooks/use_alerts_selector';
 import { AlertDetailsOverview } from './details';
@@ -133,8 +132,8 @@ export const AlertIndex = memo(() => {
     );
   }, [alertListData]);
 
-  const renderCellValue = useMemo(() => {
-    return ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
+  const renderCellValue = useCallback(
+    ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
       if (rowIndex > total) {
         return null;
       }
@@ -186,8 +185,9 @@ export const AlertIndex = memo(() => {
         return row.file.malware_classification.score;
       }
       return null;
-    };
-  }, [total, alertListData, pageSize, history, queryParams, timestampForRows]);
+    },
+    [total, alertListData, pageSize, history, queryParams, timestampForRows]
+  );
 
   const pagination = useMemo(() => {
     return {
@@ -260,3 +260,5 @@ export const AlertIndex = memo(() => {
     </>
   );
 });
+
+AlertIndex.displayName = 'AlertIndex';

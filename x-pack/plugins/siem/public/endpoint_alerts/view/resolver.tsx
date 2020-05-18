@@ -7,28 +7,30 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Provider } from 'react-redux';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { Resolver } from '../../../../embeddables/resolver/view';
-import { EndpointPluginServices } from '../../../../plugin';
-import { ResolverEvent } from '../../../../../common/types';
-import { storeFactory } from '../../../../embeddables/resolver/store';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { ResolverEvent } from '../../../common/endpoint/types';
+import { StartServices } from '../../plugin';
+import { storeFactory } from '../../resolver/store';
+import { Resolver } from '../../resolver/view';
 
-export const AlertDetailResolver = styled(
-  React.memo(
-    ({ className, selectedEvent }: { className?: string; selectedEvent?: ResolverEvent }) => {
-      const context = useKibana<EndpointPluginServices>();
-      const { store } = storeFactory(context);
+const AlertDetailResolverComponents = React.memo(
+  ({ className, selectedEvent }: { className?: string; selectedEvent?: ResolverEvent }) => {
+    const context = useKibana<StartServices>();
+    const { store } = storeFactory(context);
 
-      return (
-        <div className={className} data-test-subj="alertResolver">
-          <Provider store={store}>
-            <Resolver selectedEvent={selectedEvent} />
-          </Provider>
-        </div>
-      );
-    }
-  )
-)`
+    return (
+      <div className={className} data-test-subj="alertResolver">
+        <Provider store={store}>
+          <Resolver selectedEvent={selectedEvent} />
+        </Provider>
+      </div>
+    );
+  }
+);
+
+AlertDetailResolverComponents.displayName = 'AlertDetailResolver';
+
+export const AlertDetailResolver = styled(AlertDetailResolverComponents)`
   height: 100%;
   width: 100%;
   display: flex;

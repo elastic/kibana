@@ -9,11 +9,13 @@ import { Provider } from 'react-redux';
 import { I18nProvider } from '@kbn/i18n/react';
 import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
+
+import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { AlertIndex } from '../index';
-import { appStoreFactory } from '../../../store';
-import { KibanaContextProvider } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { RouteCapture } from '../../../view/route_capture';
-import { depsStartMock } from '../../../mocks';
+import { RouteCapture } from '../../../common/components/endpoint/route_capture';
+import { depsStartMock } from '../../../common/mock/endpoint';
+import { createStore } from '../../../common/store';
+import { SUB_PLUGINS_REDUCER, mockGlobalState, apolloClientObservable } from '../../../common/mock';
 
 export const alertPageTestRender = () => {
   /**
@@ -23,7 +25,7 @@ export const alertPageTestRender = () => {
   /**
    * Create a store, with the middleware disabled. We don't want side effects being created by our code in this test.
    */
-  const store = appStoreFactory();
+  const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, apolloClientObservable);
 
   const depsStart = depsStartMock();
   depsStart.data.ui.SearchBar.mockImplementation(() => <div />);

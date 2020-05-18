@@ -22,6 +22,8 @@ const TakeActionButton = memo(({ onClick }: { onClick: () => void }) => (
   </EuiButton>
 ));
 
+TakeActionButton.displayName = 'TakeActionButton';
+
 export const TakeActionDropdown = memo(() => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -69,3 +71,5 @@ export const TakeActionDropdown = memo(() => {
     </EuiPopover>
   );
 });
+
+TakeActionDropdown.displayName = 'TakeActionDropdown';
