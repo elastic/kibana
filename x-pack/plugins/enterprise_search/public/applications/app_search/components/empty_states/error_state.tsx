@@ -25,7 +25,7 @@ export const ErrorState: ReactFC<> = () => {
       <SendTelemetry action="error" metric="cannot_connect" />
 
       <EuiPageBody>
-        <EngineOverviewHeader />
+        <EngineOverviewHeader isButtonDisabled />
         <EuiPageContent>
           <EuiEmptyPrompt
             iconType="alert"

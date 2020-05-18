@@ -11,15 +11,23 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { sendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
 
-export const EngineOverviewHeader: React.FC<> = () => {
+interface IEngineOverviewHeaderProps {
+  isButtonDisabled?: boolean;
+}
+
+export const EngineOverviewHeader: React.FC<IEngineOverviewHeaderProps> = ({
+  isButtonDisabled,
+}) => {
   const { enterpriseSearchUrl, http } = useContext(KibanaContext) as IKibanaContext;
 
   const buttonProps = {
     fill: true,
     iconType: 'popout',
-    ['data-test-subj']: 'launchButton',
+    'data-test-subj': 'launchButton',
   };
-  if (enterpriseSearchUrl) {
+  if (isButtonDisabled) {
+    buttonProps.isDisabled = true;
+  } else {
     buttonProps.href = `${enterpriseSearchUrl}/as`;
     buttonProps.target = '_blank';
     buttonProps.onClick = () =>
@@ -29,8 +37,6 @@ export const EngineOverviewHeader: React.FC<> = () => {
         action: 'clicked',
         metric: 'header_launch_button',
       });
-  } else {
-    buttonProps.isDisabled = true;
   }
 
   return (
