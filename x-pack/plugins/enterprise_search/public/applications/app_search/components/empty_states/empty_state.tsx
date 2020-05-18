@@ -6,6 +6,7 @@
 
 import React, { useContext } from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { sendTelemetry } from '../../../shared/telemetry';
 import { SetAppSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
@@ -39,17 +40,34 @@ export const EmptyState: React.FC<> = () => {
         <EuiPageContent>
           <EuiEmptyPrompt
             iconType="eyeClosed"
-            title={<h2>There’s nothing here yet</h2>}
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.appSearch.emptyState.title"
+                  defaultMessage="There’s nothing here yet"
+                />
+              </h2>
+            }
             titleSize="l"
             body={
               <p>
-                Looks like you don’t have any App Search engines.
-                <br /> Let’s create your first one now.
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.appSearch.emptyState.description1"
+                  defaultMessage="Looks like you don’t have any App Search engines."
+                />
+                <br />
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.appSearch.emptyState.description2"
+                  defaultMessage="Let’s create your first one now."
+                />
               </p>
             }
             actions={
               <EuiButton iconType="popout" fill {...buttonProps}>
-                Create your first Engine
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.appSearch.emptyState.createFirstEngineCta"
+                  defaultMessage="Create your first Engine"
+                />
               </EuiButton>
             }
           />
