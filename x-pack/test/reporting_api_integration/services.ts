@@ -5,6 +5,8 @@
  */
 
 import expect from '@kbn/expect';
+import * as Rx from 'rxjs';
+import { filter, first, switchMap, timeout } from 'rxjs/operators';
 // @ts-ignore no module definition
 import { indexTimestamp } from '../../legacy/plugins/reporting/server/lib/esqueue/helpers/index_timestamp';
 import { services as xpackServices } from '../functional/services';
@@ -128,11 +130,23 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async deleteAllReportingIndexes() {
+      // ignores 409 errs and keeps retrying
+      const deleted$ = Rx.interval(100).pipe(
+        switchMap(() =>
+          esSupertest
+            .post('/.reporting*/_delete_by_query')
+            .send({ query: { match_all: {} } })
+            .then(({ status }) => status)
+        ),
+        filter(status => status === 200),
+        first(),
+        timeout(5000)
+      );
+
+      const reportsDeleted = await deleted$.toPromise();
+      expect(reportsDeleted).to.be(true);
+
       log.debug('ReportingAPI.deleteAllReportingIndexes');
-      await esSupertest
-        .post('/.reporting*/_delete_by_query')
-        .send({ query: { match_all: {} } })
-        .expect(200);
     },
 
     expectRecentPdfAppStats(stats: UsageStats, app: string, count: number) {
