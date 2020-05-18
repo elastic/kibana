@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 import { Serializable } from 'src/core/types';
 
 /**
- * Options provided to {@link GlobalSearchResultProvider | result providers} `find` method.
+ * Options provided to {@link GlobalSearchResultProvider | a result provider}'s `find` method.
  */
 export interface GlobalSearchProviderFindOptions {
   /**
@@ -18,18 +18,23 @@ export interface GlobalSearchProviderFindOptions {
    */
   preference: string;
   /**
-   * Observable that emit once if and when the `find` call has been aborted by the consumer, or when the timeout period as been reached.
-   * When a `find` request is aborted, the service will stop emitting any new result to the consumer anyway, but
-   * this can (and should) be used to cancel any pending asynchronous task and complete the result observable.
+   * Observable that emits once if and when the `find` call has been aborted, either manually by the consumer,
+   * or when the internal timeout period as been reached.
+   *
+   * When a `find` request is effectively aborted, the service will stop emitting any new result to the consumer anyway, but
+   * this can (and should) be used to cancel any pending asynchronous task and complete the result observable from within the provider.
    */
   aborted$: Observable<void>;
   /**
-   * The total maximum number of results (including all batches / emissions) that should be returned by the provider for a given `find` request.
+   * The total maximum number of results (including all batches, not per emission) that should be returned by the provider for a given `find` request.
    * Any result emitted exceeding this quota will be ignored by the service and not emitted to the consumer.
    */
   maxResults: number;
 }
 
+/**
+ * Structured type for the {@link GlobalSearchProviderResult.url | provider result's url property}
+ */
 export type GlobalSearchProviderResultUrl = string | { path: string; prependBasePath: boolean };
 
 /**

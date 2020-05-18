@@ -35,6 +35,7 @@ describe('processProviderResult', () => {
   it('returns all properties unchanged except `url`', () => {
     const r1 = createResult({
       id: '1',
+      type: 'test',
       url: '/url-1',
       title: 'title 1',
       icon: 'foo',
@@ -42,30 +43,30 @@ describe('processProviderResult', () => {
       meta: { hello: 'dolly' },
     });
 
-    expect(processProviderResult(r1, basePath)).toEqual(
-      expect.objectContaining({
-        id: '1',
-        title: 'title 1',
-        icon: 'foo',
-        score: 69,
-        meta: { hello: 'dolly' },
-      })
-    );
+    expect(processProviderResult(r1, basePath)).toEqual({
+      ...r1,
+      url: expect.any(String),
+    });
   });
 
   it('converts the url using `convertResultUrl`', () => {
     const r1 = createResult({ id: '1', url: '/url-1' });
     const r2 = createResult({ id: '2', url: '/url-2' });
 
+    convertResultUrlMock.mockReturnValueOnce('/url-A');
+    convertResultUrlMock.mockReturnValueOnce('/url-B');
+
     expect(convertResultUrlMock).not.toHaveBeenCalled();
 
-    processProviderResult(r1, basePath);
+    const g1 = processProviderResult(r1, basePath);
 
+    expect(g1.url).toEqual('/url-A');
     expect(convertResultUrlMock).toHaveBeenCalledTimes(1);
     expect(convertResultUrlMock).toHaveBeenCalledWith(r1.url, basePath);
 
-    processProviderResult(r2, basePath);
+    const g2 = processProviderResult(r2, basePath);
 
+    expect(g2.url).toEqual('/url-B');
     expect(convertResultUrlMock).toHaveBeenCalledTimes(2);
     expect(convertResultUrlMock).toHaveBeenCalledWith(r2.url, basePath);
   });

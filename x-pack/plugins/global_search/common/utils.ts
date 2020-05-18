@@ -7,11 +7,15 @@
 import { GlobalSearchProviderResultUrl } from './types';
 
 // interface matching both the server and client-side implementation of IBasePath for our needs
-// used to avoid duplicating `convertResultUrl` in server and client code
+// used to avoid duplicating `convertResultUrl` in server and client code due to different signatures.
 export interface IBasePath {
   prepend(path: string): string;
 }
 
+/**
+ * Convert a {@link GlobalSearchProviderResultUrl | provider result's url} to an absolute or relative url
+ * usable in {@link GlobalSearchResult | service results}
+ */
 export const convertResultUrl = (
   url: GlobalSearchProviderResultUrl,
   basePath: IBasePath

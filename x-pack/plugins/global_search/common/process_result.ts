@@ -7,6 +7,10 @@
 import { GlobalSearchProviderResult, GlobalSearchResult } from './types';
 import { convertResultUrl, IBasePath } from './utils';
 
+/**
+ * Convert a {@link GlobalSearchProviderResult | provider result}
+ * to a {@link GlobalSearchResult | service result}
+ */
 export const processProviderResult = (
   result: GlobalSearchProviderResult,
   basePath: IBasePath
