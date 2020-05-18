@@ -81,7 +81,7 @@ export class SearchService {
     const aborted$ = options.aborted$ ? merge(options.aborted$, timeout$) : timeout$;
     const providerOptions = {
       ...options,
-      preference: options.preference ?? 'default_preference', // TODO: generate a value?
+      preference: options.preference ?? 'default',
       maxResults: this.maxProviderResults,
       aborted$,
     };
