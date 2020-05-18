@@ -12,6 +12,8 @@ import {
   EuiOverlayMask,
   EuiToolTip,
   EuiSwitch,
+  EuiFlexGroup,
+  EuiFlexItem,
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 import { IndexPatternAttributes } from 'src/plugins/data/common';
@@ -189,33 +191,40 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
           >
             <p>
               {i18n.translate('xpack.ml.dataframe.analyticsList.deleteModalBody', {
-                defaultMessage: `Are you sure you want to delete this analytics job? The analytics job's destination index and optional Kibana index pattern will not be deleted.`,
+                defaultMessage: `Are you sure you want to delete this analytics job?`,
               })}
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              {userCanDeleteIndex && (
-                <EuiSwitch
-                  style={{ paddingBottom: 10 }}
-                  label={i18n.translate('xpack.ml.dataframe.analyticsList.deleteTargetIndexTitle', {
-                    defaultMessage: 'Delete destination index',
-                  })}
-                  checked={deleteTargetIndex}
-                  onChange={e => toggleDeleteTargetIndex(!deleteTargetIndex)}
-                  compressed
-                />
-              )}
-              {userCanDeleteIndex && indexPatternExists && (
-                <EuiSwitch
-                  style={{ paddingBottom: 10 }}
-                  label={i18n.translate('xpack.ml.dataframe.analyticsList.deleteTargetIndexTitle', {
-                    defaultMessage: 'Delete index pattern',
-                  })}
-                  checked={deleteIndexPattern}
-                  onChange={e => toggleDeleteIndexPattern(!deleteIndexPattern)}
-                  compressed
-                />
-              )}
-            </div>
+            <EuiFlexGroup direction="column" gutterSize="none">
+              <EuiFlexItem>
+                {userCanDeleteIndex && (
+                  <EuiSwitch
+                    style={{ paddingBottom: 10 }}
+                    label={i18n.translate(
+                      'xpack.ml.dataframe.analyticsList.deleteTargetIndexTitle',
+                      {
+                        defaultMessage: 'Delete destination index',
+                      }
+                    )}
+                    checked={deleteTargetIndex}
+                    onChange={e => toggleDeleteTargetIndex(!deleteTargetIndex)}
+                  />
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {userCanDeleteIndex && indexPatternExists && (
+                  <EuiSwitch
+                    label={i18n.translate(
+                      'xpack.ml.dataframe.analyticsList.deleteTargetIndexTitle',
+                      {
+                        defaultMessage: 'Delete index pattern',
+                      }
+                    )}
+                    checked={deleteIndexPattern}
+                    onChange={e => toggleDeleteIndexPattern(!deleteIndexPattern)}
+                  />
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiConfirmModal>
         </EuiOverlayMask>
       )}
