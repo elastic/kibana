@@ -67,7 +67,7 @@ describe('host list pagination: ', () => {
         type: 'userChangedUrl',
         payload: {
           ...history.location,
-          pathname: '/hosts',
+          pathname: '/endpoint-hosts',
         },
       });
       await waitForAction('serverReturnedHostList');
@@ -128,7 +128,7 @@ describe('host list pagination: ', () => {
         type: 'userChangedUrl',
         payload: {
           ...history.location,
-          pathname: '/hosts',
+          pathname: '/endpoint-hosts',
           search: '?foo=bar',
         },
       });
@@ -140,7 +140,7 @@ describe('host list pagination: ', () => {
         type: 'userChangedUrl',
         payload: {
           ...history.location,
-          pathname: '/hosts',
+          pathname: '/endpoint-hosts',
           search: '?page_index=2&page_index=3&page_size=20&page_size=50',
         },
       });

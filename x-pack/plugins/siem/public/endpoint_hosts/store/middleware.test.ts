@@ -55,7 +55,7 @@ describe('host list middleware', () => {
       type: 'userChangedUrl',
       payload: {
         ...history.location,
-        pathname: '/hosts',
+        pathname: '/endpoint-hosts',
       },
     });
     await waitForAction('serverReturnedHostList');

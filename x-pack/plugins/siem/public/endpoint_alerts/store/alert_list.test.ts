@@ -56,7 +56,7 @@ describe('alert list tests', () => {
         type: 'userChangedUrl',
         payload: {
           ...history.location,
-          pathname: '/alerts',
+          pathname: '/endpoint-alerts',
         },
       });
     });
