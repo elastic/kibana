@@ -7,10 +7,10 @@
 import { RequestQuery } from 'hapi';
 import { Legacy } from 'kibana';
 import {
+  RequestFacade,
   ReportingRequestPayload,
   ReportingRequestPre,
   ReportingRequestQuery,
-  RequestFacade,
 } from '../../../server/types';
 
 export function makeRequestFacade(request: Legacy.Request): RequestFacade {

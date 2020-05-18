@@ -11,10 +11,11 @@ import { API_BASE_GENERATE_V1 } from '../../common/constants';
 import { createJobFactory, executeJobFactory } from '../../export_types/csv_from_savedobject';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
 import { JobDocPayloadPanelCsv } from '../../export_types/csv_from_savedobject/types';
-import { LevelLogger } from '../lib';
+import { LevelLogger as Logger } from '../lib';
 import { JobDocOutput, ReportingSetupDeps, ServerFacade } from '../types';
 import { makeRequestFacade } from './lib/make_request_facade';
 import { getRouteOptionsCsv } from './lib/route_config_factories';
+import { ReportingResponseToolkit } from './types';
 
 type ResponseFacade = ResponseObject & {
   isBoom: boolean;
@@ -33,7 +34,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
   reporting: ReportingCore,
   server: ServerFacade,
   plugins: ReportingSetupDeps,
-  parentLogger: LevelLogger
+  parentLogger: Logger
 ) {
   const config = reporting.getConfig();
   const routeOptions = getRouteOptionsCsv(config, plugins, parentLogger);
@@ -47,7 +48,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
     path: `${API_BASE_GENERATE_V1}/immediate/csv/saved-object/{savedObjectType}:{savedObjectId}`,
     method: 'POST',
     options: routeOptions,
-    handler: async (legacyRequest: Legacy.Request, h: Legacy.ResponseToolkit) => {
+    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
       const request = makeRequestFacade(legacyRequest);
       const logger = parentLogger.clone(['savedobject-csv']);
       const jobParams = getJobParamsFromRequest(request, { isImmediate: true });

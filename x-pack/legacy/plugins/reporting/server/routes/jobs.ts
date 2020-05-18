@@ -9,7 +9,7 @@ import { ResponseObject } from 'hapi';
 import { Legacy } from 'kibana';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
-import { LevelLogger } from '../lib';
+import { LevelLogger as Logger } from '../lib';
 import { jobsQueryFactory } from '../lib/jobs_query';
 import { JobDocOutput, JobSource, ReportingSetupDeps, ServerFacade } from '../types';
 import {
@@ -22,6 +22,7 @@ import {
   getRouteConfigFactoryDownloadPre,
   getRouteConfigFactoryManagementPre,
 } from './lib/route_config_factories';
+import { ReportingResponseToolkit } from './types';
 
 interface ListQuery {
   page: string;
@@ -38,7 +39,7 @@ export function registerJobInfoRoutes(
   reporting: ReportingCore,
   server: ServerFacade,
   plugins: ReportingSetupDeps,
-  logger: LevelLogger
+  logger: Logger
 ) {
   const config = reporting.getConfig();
   const { elasticsearch } = plugins;
@@ -147,7 +148,7 @@ export function registerJobInfoRoutes(
     path: `${MAIN_ENTRY}/download/{docId}`,
     method: 'GET',
     options: getRouteConfigDownload(),
-    handler: async (legacyRequest: Legacy.Request, h: Legacy.ResponseToolkit) => {
+    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
       const request = makeRequestFacade(legacyRequest);
       const { docId } = request.params;
 
@@ -187,7 +188,7 @@ export function registerJobInfoRoutes(
     path: `${MAIN_ENTRY}/delete/{docId}`,
     method: 'DELETE',
     options: getRouteConfigDelete(),
-    handler: async (legacyRequest: Legacy.Request, h: Legacy.ResponseToolkit) => {
+    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
       const request = makeRequestFacade(legacyRequest);
       const { docId } = request.params;
 

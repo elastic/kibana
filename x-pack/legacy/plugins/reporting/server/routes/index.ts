@@ -5,7 +5,7 @@
  */
 
 import { ReportingCore } from '../';
-import { LevelLogger } from '../lib';
+import { LevelLogger as Logger } from '../lib';
 import { ReportingSetupDeps, ServerFacade } from '../types';
 import { registerJobGenerationRoutes } from './generation';
 import { registerJobInfoRoutes } from './jobs';
@@ -14,7 +14,7 @@ export function registerRoutes(
   reporting: ReportingCore,
   server: ServerFacade,
   plugins: ReportingSetupDeps,
-  logger: LevelLogger
+  logger: Logger
 ) {
   registerJobGenerationRoutes(reporting, server, plugins, logger);
   registerJobInfoRoutes(reporting, server, plugins, logger);

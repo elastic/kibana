@@ -7,7 +7,7 @@
 import Hapi from 'hapi';
 import { ReportingConfig, ReportingCore } from '../';
 import { createMockReportingCore } from '../../test_helpers';
-import { LevelLogger } from '../lib';
+import { LevelLogger as Logger } from '../lib';
 import { ReportingSetupDeps, ServerFacade } from '../types';
 import { registerJobGenerationRoutes } from './generation';
 
@@ -27,7 +27,7 @@ let mockReportingConfig: ReportingConfig;
 const mockLogger = ({
   error: jest.fn(),
   debug: jest.fn(),
-} as unknown) as LevelLogger;
+} as unknown) as Logger;
 
 beforeEach(async () => {
   mockServer = new Hapi.Server({

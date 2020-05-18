@@ -6,7 +6,7 @@
 
 import Joi from 'joi';
 import { ReportingConfig } from '../../';
-import { LevelLogger } from '../../lib';
+import { LevelLogger as Logger } from '../../lib';
 import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../common/constants';
 import { ReportingSetupDeps } from '../../types';
 import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
@@ -32,7 +32,7 @@ export type GetRouteConfigFactoryFn = (
 export function getRouteConfigFactoryReportingPre(
   config: ReportingConfig,
   plugins: ReportingSetupDeps,
-  logger: LevelLogger
+  logger: Logger
 ): GetRouteConfigFactoryFn {
   const authorizedUserPreRouting = authorizedUserPreRoutingFactory(config, plugins, logger);
   const reportingFeaturePreRouting = reportingFeaturePreRoutingFactory(config, plugins, logger);
@@ -53,7 +53,7 @@ export function getRouteConfigFactoryReportingPre(
 export function getRouteOptionsCsv(
   config: ReportingConfig,
   plugins: ReportingSetupDeps,
-  logger: LevelLogger
+  logger: Logger
 ) {
   const getRouteConfig = getRouteConfigFactoryReportingPre(config, plugins, logger);
   return {
@@ -78,7 +78,7 @@ export function getRouteOptionsCsv(
 export function getRouteConfigFactoryManagementPre(
   config: ReportingConfig,
   plugins: ReportingSetupDeps,
-  logger: LevelLogger
+  logger: Logger
 ): GetRouteConfigFactoryFn {
   const authorizedUserPreRouting = authorizedUserPreRoutingFactory(config, plugins, logger);
   const reportingFeaturePreRouting = reportingFeaturePreRoutingFactory(config, plugins, logger);
@@ -102,7 +102,7 @@ export function getRouteConfigFactoryManagementPre(
 export function getRouteConfigFactoryDownloadPre(
   config: ReportingConfig,
   plugins: ReportingSetupDeps,
-  logger: LevelLogger
+  logger: Logger
 ): GetRouteConfigFactoryFn {
   const getManagementRouteConfig = getRouteConfigFactoryManagementPre(config, plugins, logger);
   return (): RouteConfigFactory => ({
@@ -117,7 +117,7 @@ export function getRouteConfigFactoryDownloadPre(
 export function getRouteConfigFactoryDeletePre(
   config: ReportingConfig,
   plugins: ReportingSetupDeps,
-  logger: LevelLogger
+  logger: Logger
 ): GetRouteConfigFactoryFn {
   const getManagementRouteConfig = getRouteConfigFactoryManagementPre(config, plugins, logger);
   return (): RouteConfigFactory => ({

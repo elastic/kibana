@@ -50,13 +50,6 @@ export interface GenerateExportTypePayload {
 
 export type ReportingRequestPayload = GenerateExportTypePayload | JobParamPostPayload;
 
-export type HandlerFunction = (
-  exportType: string,
-  jobParams: object,
-  request: Legacy.Request,
-  h: Legacy.ResponseToolkit
-) => any;
-
 export interface TimeRangeParams {
   timezone: string;
   min: Date | string | number;
@@ -67,22 +60,11 @@ export interface JobParamPostPayload {
   timerange: TimeRangeParams;
 }
 
-export type HandlerErrorFunction = (exportType: string, err: Error) => any;
-
 export interface JobDocPayload<JobParamsType> {
   headers?: string; // serialized encrypted headers
   jobParams: JobParamsType;
   title: string;
   type: string | null;
-}
-
-export interface QueuedJobPayload<JobParamsType> {
-  error?: boolean;
-  source: {
-    job: {
-      payload: JobDocPayload<JobParamsType>;
-    };
-  };
 }
 
 export interface JobSource<JobParamsType> {

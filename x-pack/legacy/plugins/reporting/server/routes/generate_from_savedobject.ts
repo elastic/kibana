@@ -9,16 +9,16 @@ import { get } from 'lodash';
 import { ReportingCore } from '../';
 import { API_BASE_GENERATE_V1, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../common/constants';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
-import { LevelLogger } from '../lib';
+import { LevelLogger as Logger } from '../lib';
+import { ReportingSetupDeps, ServerFacade } from '../types';
+import { makeRequestFacade } from './lib/make_request_facade';
+import { getRouteOptionsCsv } from './lib/route_config_factories';
 import {
   HandlerErrorFunction,
   HandlerFunction,
   QueuedJobPayload,
-  ReportingSetupDeps,
-  ServerFacade,
-} from '../types';
-import { makeRequestFacade } from './lib/make_request_facade';
-import { getRouteOptionsCsv } from './lib/route_config_factories';
+  ReportingResponseToolkit,
+} from './types';
 
 /*
  * This function registers API Endpoints for queuing Reporting jobs. The API inputs are:
@@ -35,7 +35,7 @@ export function registerGenerateCsvFromSavedObject(
   plugins: ReportingSetupDeps,
   handleRoute: HandlerFunction,
   handleRouteError: HandlerErrorFunction,
-  logger: LevelLogger
+  logger: Logger
 ) {
   const config = reporting.getConfig();
   const routeOptions = getRouteOptionsCsv(config, plugins, logger);
@@ -44,7 +44,7 @@ export function registerGenerateCsvFromSavedObject(
     path: `${API_BASE_GENERATE_V1}/csv/saved-object/{savedObjectType}:{savedObjectId}`,
     method: 'POST',
     options: routeOptions,
-    handler: async (legacyRequest: Legacy.Request, h: Legacy.ResponseToolkit) => {
+    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
       const requestFacade = makeRequestFacade(legacyRequest);
 
       /*

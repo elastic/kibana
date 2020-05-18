@@ -8,7 +8,7 @@ import Boom from 'boom';
 import { Legacy } from 'kibana';
 import { AuthenticatedUser } from '../../../../../../plugins/security/server';
 import { ReportingConfig } from '../../../server';
-import { LevelLogger } from '../../../server/lib';
+import { LevelLogger as Logger } from '../../../server/lib';
 import { ReportingSetupDeps } from '../../../server/types';
 import { getUserFactory } from '../../lib/get_user';
 
@@ -21,7 +21,7 @@ export type PreRoutingFunction = (
 export const authorizedUserPreRoutingFactory = function authorizedUserPreRoutingFn(
   config: ReportingConfig,
   plugins: ReportingSetupDeps,
-  logger: LevelLogger
+  logger: Logger
 ) {
   const getUser = getUserFactory(plugins.security, logger);
   const { info: xpackInfo } = plugins.__LEGACY.plugins.xpack_main;

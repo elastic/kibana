@@ -10,14 +10,15 @@ import { Legacy } from 'kibana';
 import rison from 'rison-node';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
-import { LevelLogger } from '../lib';
-import { HandlerErrorFunction, HandlerFunction, ReportingSetupDeps, ServerFacade } from '../types';
+import { LevelLogger as Logger } from '../lib';
+import { ReportingSetupDeps, ServerFacade } from '../types';
 import { makeRequestFacade } from './lib/make_request_facade';
 import {
   GetRouteConfigFactoryFn,
   getRouteConfigFactoryReportingPre,
   RouteConfigFactory,
 } from './lib/route_config_factories';
+import { HandlerErrorFunction, HandlerFunction, ReportingResponseToolkit } from './types';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 
@@ -27,7 +28,7 @@ export function registerGenerateFromJobParams(
   plugins: ReportingSetupDeps,
   handler: HandlerFunction,
   handleError: HandlerErrorFunction,
-  logger: LevelLogger
+  logger: Logger
 ) {
   const config = reporting.getConfig();
   const getRouteConfig = () => {
@@ -63,7 +64,7 @@ export function registerGenerateFromJobParams(
     path: `${BASE_GENERATE}/{exportType}`,
     method: 'POST',
     options: getRouteConfig(),
-    handler: async (legacyRequest: Legacy.Request, h: Legacy.ResponseToolkit) => {
+    handler: async (legacyRequest: Legacy.Request, h: ReportingResponseToolkit) => {
       const request = makeRequestFacade(legacyRequest);
       let jobParamsRison: string | null;
 

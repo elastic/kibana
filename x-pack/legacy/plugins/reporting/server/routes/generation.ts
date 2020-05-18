@@ -9,12 +9,13 @@ import { errors as elasticsearchErrors } from 'elasticsearch';
 import { Legacy } from 'kibana';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
-import { LevelLogger } from '../lib';
+import { LevelLogger as Logger } from '../lib';
 import { ReportingSetupDeps, ServerFacade } from '../types';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
 import { makeRequestFacade } from './lib/make_request_facade';
+import { ReportingResponseToolkit } from './types';
 
 const esErrors = elasticsearchErrors as Record<string, any>;
 
@@ -22,7 +23,7 @@ export function registerJobGenerationRoutes(
   reporting: ReportingCore,
   server: ServerFacade,
   plugins: ReportingSetupDeps,
-  logger: LevelLogger
+  logger: Logger
 ) {
   const config = reporting.getConfig();
   const downloadBaseUrl =
@@ -35,7 +36,7 @@ export function registerJobGenerationRoutes(
     exportTypeId: string,
     jobParams: object,
     legacyRequest: Legacy.Request,
-    h: Legacy.ResponseToolkit
+    h: ReportingResponseToolkit
   ) {
     const request = makeRequestFacade(legacyRequest);
     const user = request.pre.user;

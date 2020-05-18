@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import { Legacy } from 'kibana';
 import { ReportingConfig } from '../../';
-import { LevelLogger } from '../../lib';
+import { LevelLogger as Logger } from '../../lib';
 import { ReportingSetupDeps } from '../../types';
 
 export type GetReportingFeatureIdFn = (request: Legacy.Request) => string;
@@ -15,7 +15,7 @@ export type GetReportingFeatureIdFn = (request: Legacy.Request) => string;
 export const reportingFeaturePreRoutingFactory = function reportingFeaturePreRoutingFn(
   config: ReportingConfig,
   plugins: ReportingSetupDeps,
-  logger: LevelLogger
+  logger: Logger
 ) {
   const xpackMainPlugin = plugins.__LEGACY.plugins.xpack_main;
   const pluginId = 'reporting';
