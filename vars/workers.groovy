@@ -71,12 +71,16 @@ def base(Map params, Closure closure) {
           ).trim()
         }
 
-        ciStats.reportGitInfo(
-          env.ghprbSourceBranch ?: scmVars.GIT_LOCAL_BRANCH ?: scmVars.GIT_BRANCH,
-          scmVars.GIT_COMMIT,
-          env.ghprbTargetBranch,
-          mergeBase
-        )
+        def branch = env.ghprbSourceBranch ?: scmVars.GIT_LOCAL_BRANCH ?: scmVars.GIT_BRANCH
+        def commit = scmVars.GIT_COMMIT
+        def targetBranch = env.ghprbTargetBranch
+
+        print "sending git info to ci-stats"
+        print "[branch=${branch}] [commit=${commit}] [mergeBase=${mergeBase}] [targetBranch=${targetBranch}]"
+        print "scmvars:"
+        print scmVars
+
+        ciStats.reportGitInfo(branch, commit, targetBranch, mergeBase)
       }
     }
 
