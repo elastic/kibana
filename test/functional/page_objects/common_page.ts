@@ -73,12 +73,10 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       const loginPage = currentUrl.includes('/login');
       const wantedLoginPage = appUrl.includes('/login') || appUrl.includes('/logout');
 
-      // Disable the welcome screen if the corresponding environment variable is set
-      // This is relevant for environments which don't allow to use the yml setting, e.g. cloud production
-      // It is done here so it applies to logins but also to a login re-use
-      if (process.env.DISABLE_WELCOME_SCREEN) {
-        await browser.setLocalStorageItem('home:welcome:show', 'false');
-      }
+      // Disable the welcome screen. This is relevant for environments
+      // which don't allow to use the yml setting, e.g. cloud production.
+      // It is done here so it applies to logins but also to a login re-use.
+      await browser.setLocalStorageItem('home:welcome:show', 'false');
 
       if (loginPage && !wantedLoginPage) {
         log.debug('Found login page');
