@@ -77,6 +77,7 @@ export class MockStyle {
 }
 
 export class MockLayer {
+  private readonly _style: IStyle;
   constructor(style = new MockStyle()) {
     this._style = style;
   }
