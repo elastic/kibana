@@ -12,13 +12,7 @@ import { defaultHeaders } from '../body/column_headers/default_headers';
 
 import { timelineActions } from '../../../store/timeline';
 import { NewTimeline } from './helpers';
-import {
-  // CreateTemplateTimelineBtn
-  // Remove the comment here to enable saving as expected type
-  // TimelineTypeLiteralWithNull,
-  // TimelineType,
-  TimelineTypeLiteral,
-} from '../../../../../common/types/timeline';
+import { TimelineType, TimelineTypeLiteral } from '../../../../../common/types/timeline';
 import { useKibana } from '../../../../common/lib/kibana';
 
 interface OwnProps {
@@ -47,11 +41,7 @@ export const CreateTimelineBtnComponent: React.FC<OwnProps> = ({
           id,
           columns: defaultHeaders,
           show,
-          /**
-           * CreateTemplateTimelineBtn
-           * Remove the comment here to enable saving as expected type
-           * timelineType: timelineType ?? TimelineType.template,
-           */
+          timelineType: timelineType ?? TimelineType.default,
         })
       );
     },

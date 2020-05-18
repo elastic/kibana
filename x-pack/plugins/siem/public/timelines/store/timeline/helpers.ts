@@ -7,6 +7,7 @@
 import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
 
 import { Filter } from '../../../../../../../src/plugins/data/public';
+
 import { getColumnWidthFromType } from '../../../timelines/components/timeline/body/column_headers/helpers';
 import { Sort } from '../../../timelines/components/timeline/body/sort';
 import {
@@ -15,16 +16,14 @@ import {
   QueryMatch,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/model';
+import { TimelineNonEcsData } from '../../../graphql/types';
+import { TimelineTypeLiteral } from '../../../../common/types/timeline';
+
+import { disableTemplate } from '../../components/open_timeline';
 
 import { timelineDefaults } from './defaults';
 import { ColumnHeaderOptions, KqlMode, TimelineModel, EventType } from './model';
 import { TimelineById, TimelineState } from './types';
-import { TimelineNonEcsData } from '../../../graphql/types';
-/**
- * CreateTemplateTimelineBtn
- * Remove the comment here to enable saving as expected type
- * import { TimelineTypeLiteral } from '../../../../common/types/timeline';
- */
 
 const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
 
@@ -152,11 +151,7 @@ interface AddNewTimelineParams {
   showCheckboxes?: boolean;
   showRowRenderers?: boolean;
   timelineById: TimelineById;
-  /**
-   * CreateTemplateTimelineBtn
-   * Remove the comment here to enable saving as expected type
-   * timelineType: TimelineTypeLiteral;
-   */
+  timelineType: TimelineTypeLiteral;
 }
 
 /** Adds a new `Timeline` to the provided collection of `TimelineById` */
@@ -173,12 +168,8 @@ export const addNewTimeline = ({
   showCheckboxes = false,
   showRowRenderers = true,
   timelineById,
-}: /**
- * CreateTemplateTimelineBtn
- * Remove the comment here to enable saving as expected type
- * timelineType,
- */
-AddNewTimelineParams): TimelineById => ({
+  timelineType,
+}: AddNewTimelineParams): TimelineById => ({
   ...timelineById,
   [id]: {
     id,
@@ -197,11 +188,7 @@ AddNewTimelineParams): TimelineById => ({
     isLoading: false,
     showCheckboxes,
     showRowRenderers,
-    /**
-     * CreateTemplateTimelineBtn
-     * Remove the comment here to enable saving as expected type
-     * timelineType,
-     */
+    timelineType: !disableTemplate ? timelineType : timelineDefaults.timelineType,
   },
 });
 

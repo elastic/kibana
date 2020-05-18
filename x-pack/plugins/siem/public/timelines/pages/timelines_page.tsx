@@ -13,13 +13,11 @@ import { HeaderPage } from '../../common/components/header_page';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { useKibana } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { StatefulOpenTimeline } from '../components/open_timeline';
+import { StatefulOpenTimeline, disableTemplate } from '../components/open_timeline';
 import * as i18n from './translations';
 import {
   NEW_TIMELINE,
-  // CreateTemplateTimelineBtn
-  // Remove the comment here to enable CreateTemplateTimelineBtn
-  // NEW_TEMPLATE_TIMELINE,
+  NEW_TEMPLATE_TIMELINE,
 } from '../components/timeline/properties/translations';
 import { CreateTimelineBtn } from '../components/timeline/properties/create_timeline_btn';
 import { TimelineType } from '../../../common/types/timeline';
@@ -63,23 +61,29 @@ export const TimelinesPageComponent: React.FC<OwnProps> = ({ apolloClient }) => 
               )}
             </EuiFlexItem>
             <EuiFlexItem>
-              <CreateTimelineBtn
-                outline={true}
-                timelineType={TimelineType.default}
-                title={NEW_TIMELINE}
-              />
+              {capabilitiesCanUserCRUD && (
+                <CreateTimelineBtn
+                  outline={true}
+                  timelineType={TimelineType.default}
+                  title={NEW_TIMELINE}
+                  data-test-subj="create-default-btn"
+                />
+              )}
             </EuiFlexItem>
             {/**
              * CreateTemplateTimelineBtn
              * Remove the comment here to enable CreateTemplateTimelineBtn
-             * <EuiFlexItem>
-             *   <CreateTimelineBtn
-             *     outline={true}
-             *     timelineType={TimelineType.template}
-             *     title={NEW_TEMPLATE_TIMELINE}
-             *   />
-             * </EuiFlexItem>
              */}
+            {!disableTemplate && capabilitiesCanUserCRUD && (
+              <EuiFlexItem>
+                <CreateTimelineBtn
+                  outline={true}
+                  timelineType={TimelineType.template}
+                  title={NEW_TEMPLATE_TIMELINE}
+                  data-test-subj="create-template-btn"
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </HeaderPage>
 

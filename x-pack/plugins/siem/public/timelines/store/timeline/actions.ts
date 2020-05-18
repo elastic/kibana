@@ -16,11 +16,8 @@ import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/t
 
 import { EventType, KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
 import { TimelineNonEcsData } from '../../../graphql/types';
-/**
- * CreateTemplateTimelineBtn
- * Remove the comment here to enable saving as expected type
- * import { TimelineTypeLiteral } from '../../../../common/types/timeline';
- */
+import { TimelineTypeLiteral } from '../../../../common/types/timeline';
+
 const actionCreator = actionCreatorFactory('x-pack/siem/local/timeline');
 
 export const addHistory = actionCreator<{ id: string; historyId: string }>('ADD_HISTORY');
@@ -71,11 +68,7 @@ export const createTimeline = actionCreator<{
   sort?: Sort;
   showCheckboxes?: boolean;
   showRowRenderers?: boolean;
-  /**
-   * CreateTemplateTimelineBtn
-   * Remove the comment here to enable saving as expected type
-   * timelineType?: TimelineTypeLiteral;
-   */
+  timelineType?: TimelineTypeLiteral;
 }>('CREATE_TIMELINE');
 
 export const pinEvent = actionCreator<{ id: string; eventId: string }>('PIN_EVENT');

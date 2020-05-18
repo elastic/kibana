@@ -23,15 +23,9 @@ import * as i18n from './translations';
 import { AssociateNote } from '../../notes/helpers';
 import { Note } from '../../../../common/lib/note';
 import { CreateTimelineBtn } from './create_timeline_btn';
-import {
-  TimelineType,
-  /**
-   * CreateTemplateTimelineBtn
-   * Remove the comment here to enable saving as expected type
-   * TimelineTypeLiteral
-   */
-} from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/types/timeline';
 import { useKibana } from '../../../../common/lib/kibana';
+import { disableTemplate } from '../../open_timeline';
 
 export const PropertiesRightStyle = styled(EuiFlexGroup)`
   margin-right: 5px;
@@ -147,19 +141,19 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
               )}
 
               {/*
-                 * CreateTemplateTimelineBtn
-                 * Remove the comment here to enable CreateTemplateTimelineBtn
-                 {capabilitiesCanUserCRUD && (
-                    <EuiFlexItem grow={false}>
-                      <CreateTimelineBtn
-                        onClosePopover={onClosePopover}
-                        timelineId={timelineId}
-                        timelineType={TimelineType.template}
-                        title={i18n.NEW_TEMPLATE_TIMELINE}
-                      />
-                    </EuiFlexItem>
-                  )}
-                 */}
+               * CreateTemplateTimelineBtn
+               * Remove the comment here to enable CreateTemplateTimelineBtn
+               */}
+              {!disableTemplate && capabilitiesCanUserCRUD && (
+                <EuiFlexItem grow={false}>
+                  <CreateTimelineBtn
+                    onClosePopover={onClosePopover}
+                    timelineId={timelineId}
+                    timelineType={TimelineType.template}
+                    title={i18n.NEW_TEMPLATE_TIMELINE}
+                  />
+                </EuiFlexItem>
+              )}
 
               <EuiFlexItem grow={false}>
                 <OpenTimelineModalButton onClick={onOpenTimelineModal} />
