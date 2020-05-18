@@ -61,6 +61,11 @@ export const processAdjacencies = composeSelectors(
 );
 
 /**
+ * Returns a map of `ResolverEvent`s to their related `ResolverEvent`s
+ */
+export const relatedEvents = composeSelectors(dataStateSelector, dataSelectors.relatedEvents);
+
+/**
  * Returns the id of the "current" tree node (fake-focused)
  */
 export const uiActiveDescendantId = composeSelectors(
