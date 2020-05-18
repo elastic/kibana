@@ -43,6 +43,7 @@ export function MachineLearningJobManagementProvider(
     },
 
     async waitForJobCompletion(jobId: string) {
+      await mlApi.waitForADJobRecordCountToBePositive(jobId);
       await mlApi.waitForDatafeedState(`datafeed-${jobId}`, DATAFEED_STATE.STOPPED);
       await mlApi.waitForJobState(jobId, JOB_STATE.CLOSED);
     },
