@@ -23,17 +23,11 @@ import {
   EuiLink,
   euiDragDropReorder,
 } from '@elastic/eui';
-import { NodeDefinition, RenderNode } from '../types';
+import { NodeDefinition, RenderNode, DataType, PipelineColumn, PipelineTable } from '../types';
 import { useLoader } from '../state';
 
-interface ColumnDef {
-  path: string;
-  label?: string;
-}
-
 interface TableConvertState {
-  columns: ColumnDef[];
-  autoColumns: boolean;
+  columns: PipelineColumn[];
 }
 
 // Recursive function to determine if the _source of a document
@@ -163,11 +157,13 @@ function TableConvert({ node, dispatch }: RenderNode<TableConvertState>) {
   const paths = getFlattenedArrayPaths(inputData);
   const converted = !node.state.columns.length && inputData ? collectRows(inputData, paths) : null;
 
-  const columns: ColumnDef[] = node.state.columns.length
+  let columns: PipelineColumn[] = node.state.columns.length
     ? node.state.columns
-    : paths.map(path => ({
-        path,
-      })) || [];
+    : paths.map(path => ({ id: path })) || [];
+
+  if (converted) {
+    columns = columns.map(c => ({ ...c, dataType: guessDataType(c.id, converted) }));
+  }
 
   return (
     <EuiDragDropContext
@@ -205,10 +201,16 @@ function TableConvert({ node, dispatch }: RenderNode<TableConvertState>) {
 
       <EuiDroppable droppableId={'a'}>
         {columns.map((col, index) => (
-          <EuiDraggable index={index} key={col.path} draggableId={col.path || `draggable${index}`}>
+          <EuiDraggable index={index} key={col.id} draggableId={col.id || `draggable${index}`}>
             <EuiFlexGroup className="pipelineBuilder__tableConvert__column">
               <EuiFlexItem grow={true}>
-                <EuiText>{col.path}</EuiText>
+                <EuiText>{col.id}</EuiText>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiText>
+                  <em>{col.dataType}</em>
+                </EuiText>
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
@@ -222,7 +224,7 @@ function TableConvert({ node, dispatch }: RenderNode<TableConvertState>) {
                       nodeId: node.id,
                       newState: {
                         ...node.state,
-                        columns: columns.filter(c => c.path !== col.path),
+                        columns: columns.filter(c => c.id !== col.id),
                       },
                     });
                   }}
@@ -280,25 +282,43 @@ export const definition: NodeDefinition<TableConvertState> = {
   initialize: () => {
     return {
       columns: [],
-      autoColumns: true,
     } as TableConvertState;
   },
 
   renderReact: TableConvert,
 
-  async run(state, inputs, inputNodeIds, deps) {
+  async run(node, inputs, inputNodeIds, deps): Promise<PipelineTable> {
+    const state = node.state;
     const inputData = inputs[inputNodeIds[0]]?.value;
     const paths = state.columns.length
-      ? state.columns.map(({ path }) => path)
+      ? state.columns.map(({ id }) => id)
       : getFlattenedArrayPaths(inputData);
 
+    const columns = state.columns.length
+      ? state.columns.map(({ id, label }) => ({ id, label }))
+      : paths.map(p => ({ id: p, label: p }));
     const rows = collectRows(inputData, paths);
 
     return {
-      columns: state.columns.length
-        ? state.columns.map(({ path, label }) => ({ id: path, label }))
-        : paths.map(p => ({ id: p, label: p })),
+      columns: columns.map(c => ({ ...c, dataType: guessDataType(c.id, rows) })),
       rows,
     };
   },
 };
+
+function guessDataType(id: string, rows: PipelineTable['rows']): DataType {
+  const isString = rows.every(row => typeof row[id] === 'string');
+  if (isString) {
+    return 'string';
+  }
+  const isBoolean = rows.every(row => typeof row[id] === 'boolean');
+  if (isBoolean) {
+    return 'boolean';
+  }
+  const isNumber = rows.every(row => typeof row[id] === 'number');
+  if (isNumber) {
+    return 'number';
+  }
+
+  return 'other';
+}

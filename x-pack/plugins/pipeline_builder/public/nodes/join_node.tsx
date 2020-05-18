@@ -122,7 +122,8 @@ export const definition: NodeDefinition<JoinNodeState> = {
 
   renderReact: JoinNode,
 
-  async run(state, inputs, inputNodeIds, deps) {
+  async run(node, inputs, inputNodeIds, deps) {
+    const { state } = node;
     const values = inputNodeIds.map(i => inputs[i]?.value);
 
     return joinTables(state.joinType, values[0], values[1], state.leftColumn, state.rightColumn);
@@ -155,7 +156,6 @@ export function joinTables(
     rightId = right.columns[0].id;
   }
 
-  debugger;
   if (joinType === 'left_outer') {
     return {
       columns: left.columns.concat(right.columns.filter(col => col.id !== rightId)),

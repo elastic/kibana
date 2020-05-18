@@ -63,7 +63,7 @@ export interface NodeDefinition<T = unknown> {
   outputType: 'json' | 'table' | 'scalar';
 
   run: (
-    state: T,
+    state: Node<T>,
     inputs: Inputs,
     inputNodeIds: string[],
     deps: {
@@ -75,6 +75,17 @@ export interface NodeDefinition<T = unknown> {
 }
 
 export type DispatchFn = (action: Action) => void;
+
+export type DataType = 'number' | 'string' | 'date' | 'boolean' | 'other';
+export interface PipelineColumn {
+  id: string;
+  label?: string;
+  dataType?: DataType;
+}
+export interface PipelineTable {
+  columns: PipelineColumn[];
+  rows: Array<Record<string, unknown>>;
+}
 
 export interface RenderNode<T = unknown> {
   node: Node<T>;
@@ -91,6 +102,11 @@ interface CreateNode {
   type: 'CREATE_NODE';
   nodeType: NodeType;
   inputNodeIds: string[];
+}
+
+interface DeleteNode {
+  type: 'DELETE_NODE';
+  nodeId: string;
 }
 
 interface LoadingStart {
@@ -116,6 +132,7 @@ interface SetRenderer {
 export type Action =
   | SetNode
   | CreateNode
+  | DeleteNode
   | LoadingStart
   | LoadingSuccess
   | LoadingFailure

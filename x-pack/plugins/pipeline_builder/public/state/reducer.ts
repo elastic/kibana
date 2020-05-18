@@ -53,6 +53,16 @@ export function reducer(state: State, action: Action): State {
       action.nodeIds.forEach(id => {
         delete nodeCopy[id];
       });
+      const deletedChain: string[] = [];
+      Object.entries(nodeCopy).forEach(([id, n]) => {
+        if (
+          action.nodeIds.some(otherNodeId => n.inputNodeIds.includes(otherNodeId)) ||
+          deletedChain.some(otherNodeId => n.inputNodeIds.includes(otherNodeId))
+        ) {
+          deletedChain.push(id);
+          delete nodeCopy[id];
+        }
+      });
       return {
         ...state,
         nodes: nodeCopy,

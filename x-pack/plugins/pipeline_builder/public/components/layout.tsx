@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
+  EuiButtonIcon,
   EuiProgress,
   EuiPopover,
   EuiAccordion,
@@ -43,19 +44,6 @@ export function Layout({ state, dispatch }: { state: State; dispatch: DispatchFn
           {startChains.map(chain => (
             <EuiFlexItem>
               <EuiPanel className="pipelineBuilder__chain">
-                <EuiButton
-                  type="danger"
-                  size="s"
-                  onClick={() => {
-                    dispatch({
-                      type: 'DELETE_NODES',
-                      nodeIds: chain.map(({ id }) => id),
-                    });
-                  }}
-                >
-                  <EuiIcon type="trash" size="s" />
-                </EuiButton>
-
                 <EuiFlexGroup direction="column">
                   {chain.map(n => (
                     <EuiFlexItem key={n.id}>
@@ -139,14 +127,6 @@ export function Layout({ state, dispatch }: { state: State; dispatch: DispatchFn
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
-
-        <EuiFlexItem>
-          <div>
-            {i18n.translate('xpack.pipeline_builder.renderVisualizationLabel', {
-              defaultMessage: 'Render visualization',
-            })}
-          </div>
-        </EuiFlexItem>
       </div>
       <div className="pipelineFrameLayout__sidebar">
         <EuiFlexGroup direction="column">
@@ -219,10 +199,25 @@ function RenderNode({ node, id, dispatch }: { id: string; node: Node; dispatch: 
   return (
     <div>
       <EuiPanel className="pipelineBuilder__node">
-        <span>
-          <EuiIcon type={nodeRegistry[node.type].icon} /> <strong>{id}</strong>:{' '}
-          {nodeRegistry[node.type].title}
-        </span>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <span>
+              <EuiIcon type={nodeRegistry[node.type].icon} /> <strong>{id}</strong>:{' '}
+              {nodeRegistry[node.type].title}
+            </span>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="trash"
+              onClick={() => {
+                dispatch({
+                  type: 'DELETE_NODES',
+                  nodeIds: [id],
+                });
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiTabbedContent display="condensed" tabs={tabs} />
       </EuiPanel>
     </div>

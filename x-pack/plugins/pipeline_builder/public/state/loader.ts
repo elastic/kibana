@@ -55,7 +55,7 @@ export class Loader {
       this.lastData[id] = { loading: true };
     });
 
-    const { startChains, otherChains } = getChainInformation(state.nodes);
+    const { startChains } = getChainInformation(state.nodes);
 
     startChains.forEach(chain => {
       this.runNode(state, chain[0], deps);
@@ -88,7 +88,7 @@ export class Loader {
     this.loadingSubject.next(node.id);
 
     nodeRegistry[node.type]
-      .run(node.state, this.lastData, node.inputNodeIds, {
+      .run(node, this.lastData, node.inputNodeIds, {
         ...deps,
         signal: this.abortController!.signal,
       })

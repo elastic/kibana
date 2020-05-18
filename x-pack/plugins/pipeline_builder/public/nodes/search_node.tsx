@@ -66,19 +66,6 @@ function SearchNode({ node, dispatch }: RenderNode<SearchNodeState>) {
         width="99%"
         height="200px"
         value={node.state.body}
-        // languageConfiguration={{
-        //   autoClosingPairs: [
-        //     { open: '{', close: '}' },
-        //     { open: '"', close: '"' },
-        //   ],
-        // }}
-        // suggestionProvider={{
-        //   // triggerCharacters: [' ', '{', '"'],
-        //   // provideCompletionItems: async () => [],
-        // }}
-        // hoverProvider={{
-        //   // provideHover: async () => ({}),
-        // }}
         onChange={code => {
           dispatch({
             type: 'SET_NODE',
@@ -194,7 +181,8 @@ export const definition: NodeDefinition<SearchNodeState> = {
 
   renderReact: SearchNode,
 
-  async run(state, inputs, inputNodeIds, deps) {
+  async run(node, inputs, inputNodeIds, deps) {
+    const { state } = node;
     const fn = deps.http.post;
     const result = await fn('/api/console/proxy', {
       query: { path: state.path, method: state.method },
@@ -274,7 +262,7 @@ function getStateForSql(): SearchNodeState {
 function getStateForSource(): SearchNodeState {
   return {
     method: 'POST',
-    path: '/.metricbeat-*/_search',
+    path: 'metricbeat-*/_search',
     body: JSON.stringify(
       {
         size: 100,

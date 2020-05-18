@@ -17,23 +17,33 @@ import {
   EuiFormRow,
   EuiSwitch,
 } from '@elastic/eui';
-import { Chart, Settings, Axis, BarSeries, Position } from '@elastic/charts';
+import {
+  Chart,
+  Settings,
+  Axis,
+  BarSeries,
+  BubbleSeries,
+  Position,
+  ScaleType,
+} from '@elastic/charts';
+import moment from 'moment';
 import { State, DispatchFn } from '../types';
 import { nodeRegistry } from '../nodes';
 import { useLoader, getChainInformation } from '../state';
 
-interface ColumnDef {
-  dataType: 'string' | 'number' | 'date' | 'boolean';
-}
-
 interface RendererState {
-  outputType?: 'json' | 'table' | 'bar';
-  columns?: ColumnDef[];
+  outputType?: 'json' | 'table' | 'bar' | 'scatter';
   bars?: {
     x: string;
     y: string[];
     split?: string;
     stacked?: boolean;
+  };
+  scatter?: {
+    x: string;
+    y: string[];
+    split?: string;
+    markSize?: string;
   };
 }
 
@@ -86,6 +96,11 @@ export function Renderer(props: { state: State; dispatch: DispatchFn }) {
             label: 'Bar chart',
             iconType: 'visBarVertical',
           },
+          {
+            id: 'scatter',
+            label: 'Scatter chart',
+            iconType: 'apps',
+          },
         ]}
         onChange={id => {
           dispatch({
@@ -123,6 +138,9 @@ export function Renderer(props: { state: State; dispatch: DispatchFn }) {
       {selectedButtonGroup === 'bar' ? (
         <BarChartRender state={state} dispatch={dispatch} table={data} />
       ) : null}
+      {selectedButtonGroup === 'scatter' ? (
+        <ScatterChartRender state={state} dispatch={dispatch} table={data} />
+      ) : null}
     </>
   );
 }
@@ -143,22 +161,41 @@ function BarChartRender({
   const barState = rendererState.bars || {
     x: table.columns[0]?.id,
     y: table.columns[1]?.id,
-    stacked: true,
-    xScale: 'auto', //  'ordinal' | 'ordinal' | 'time',
+    split: undefined,
+    stacked: false,
   };
+
+  const xColumn = table.columns.find(c => c.id === barState.x);
+
+  let xScaleType = ScaleType.Ordinal;
+  if (xColumn?.dataType === 'date') {
+    xScaleType = ScaleType.Time;
+    table.rows = table.rows.map(r => ({ ...r, [xColumn.id]: r[xColumn.id].valueOf() }));
+  } else if (xColumn?.dataType === 'number') {
+    xScaleType = ScaleType.Linear;
+  }
 
   return (
     <>
       <div style={{ height: '200px' }}>
         <Chart>
           <Settings />
-          <Axis id={'x'} position={Position.Bottom} />
+          <Axis
+            id={'x'}
+            position={Position.Bottom}
+            tickFormat={
+              xScaleType === ScaleType.Time ? v => moment(v).format('YYYY-MM-DD') : undefined
+            }
+          />
           <Axis id={'y'} position={Position.Left} />
           <BarSeries
             id={'bar'}
             data={table.rows}
             xAccessor={barState.x}
+            xScaleType={xScaleType}
             yAccessors={barState.y ? [barState.y] : []}
+            splitSeriesAccessors={barState.split ? [barState.split] : []}
+            stackAccessors={barState.stacked ? [barState.x] : []}
           />
         </Chart>
       </div>
@@ -200,10 +237,10 @@ function BarChartRender({
 
         <EuiFormRow label="Split by">
           <EuiSelect
-            options={[{ text: 'None', value: null }].concat(
+            options={[{ text: 'None', value: undefined }].concat(
               table.columns.map(c => ({ text: c.id }))
             )}
-            value={barState.split ? barState.split : null}
+            value={barState.split ? barState.split : undefined}
             onChange={e => {
               const newValue = e.target.value ?? undefined;
               dispatch({
@@ -218,12 +255,156 @@ function BarChartRender({
           />
         </EuiFormRow>
 
-        <EuiFormRow label="Split by">
-          </EuiFormRow>
+        <EuiFormRow label="Stacked">
+          <EuiSwitch
+            checked={barState.stacked}
+            label="Stacked"
+            onChange={() => {
+              dispatch({
+                type: 'SET_RENDERER',
+                newState: {
+                  ...rendererState,
+                  outputType: 'bar',
+                  bars: { ...barState, stacked: !barState.stacked },
+                },
+              });
+            }}
+          />
+        </EuiFormRow>
+      </div>
+    </>
+  );
+}
 
-        {/* <EuiFormRow label="Stacked">
-          <EuiSwitch checked={barState.stacked} label="Stacked" onChange={() => {}} />
-        </EuiFormRow> */}
+function ScatterChartRender({
+  state,
+  dispatch,
+  table,
+}: {
+  state: State;
+  dispatch: DispatchFn;
+  table: unknown;
+}) {
+  if (!table || !table.columns) {
+    return null;
+  }
+  const rendererState: RendererState = state.rendererState;
+  const scatterState = rendererState.scatter || {
+    x: table.columns[0]?.id,
+    y: table.columns[1]?.id,
+    split: undefined,
+    markSize: undefined,
+  };
+
+  const xColumn = table.columns.find(c => c.id === scatterState.x);
+
+  let xScaleType = ScaleType.Ordinal;
+  if (xColumn && xColumn.dataType === 'date') {
+    xScaleType = ScaleType.Time;
+    table.rows = table.rows.map(r => ({ ...r, [xColumn.id]: r[xColumn.id].valueOf() }));
+  } else if (xColumn && xColumn.dataType === 'number') {
+    xScaleType = ScaleType.Linear;
+  }
+
+  return (
+    <>
+      <div style={{ height: '200px' }}>
+        <Chart>
+          <Settings />
+          <Axis
+            id={'x'}
+            position={Position.Bottom}
+            tickFormat={
+              xScaleType === ScaleType.Time ? v => moment(v).format('YYYY-MM-DD') : undefined
+            }
+          />
+          <Axis id={'y'} position={Position.Left} />
+          <BubbleSeries
+            id={'bar'}
+            data={table.rows}
+            xAccessor={scatterState.x}
+            xScaleType={xScaleType}
+            yAccessors={scatterState.y ? [scatterState.y] : []}
+            splitSeriesAccessors={scatterState.split ? [scatterState.split] : []}
+            markSizeAccessor={scatterState.markSize ?? undefined}
+          />
+        </Chart>
+      </div>
+
+      <div>
+        <EuiFormRow label="X axis">
+          <EuiSelect
+            options={table.columns.map(c => ({ text: c.id }))}
+            value={scatterState.x}
+            onChange={e => {
+              dispatch({
+                type: 'SET_RENDERER',
+                newState: {
+                  ...rendererState,
+                  outputType: 'scatter',
+                  scatter: { ...scatterState, x: e.target.value },
+                },
+              });
+            }}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow label="Y axis">
+          <EuiSelect
+            options={table.columns.map(c => ({ text: c.id }))}
+            value={scatterState.y}
+            onChange={e => {
+              dispatch({
+                type: 'SET_RENDERER',
+                newState: {
+                  ...rendererState,
+                  outputType: 'scatter',
+                  scatter: { ...scatterState, y: e.target.value },
+                },
+              });
+            }}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow label="Split by">
+          <EuiSelect
+            options={[{ text: 'None', value: undefined }].concat(
+              table.columns.map(c => ({ text: c.id }))
+            )}
+            value={scatterState.split ? scatterState.split : undefined}
+            onChange={e => {
+              const newValue = e.target.value ?? undefined;
+              dispatch({
+                type: 'SET_RENDERER',
+                newState: {
+                  ...rendererState,
+                  outputType: 'scatter',
+                  scatter: { ...scatterState, split: newValue },
+                },
+              });
+            }}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow label="Size of dot">
+          <EuiSelect
+            options={[{ text: 'None', value: undefined }].concat(
+              table.columns.map(c => ({ text: c.id }))
+            )}
+            value={scatterState.markSize ? scatterState.markSize : undefined}
+            onChange={e => {
+              const newValue = e.target.value ?? undefined;
+              dispatch({
+                type: 'SET_RENDERER',
+                newState: {
+                  ...rendererState,
+                  outputType: 'scatter',
+                  scatter: { ...scatterState, markSize: newValue },
+                },
+              });
+            }}
+          />
+        </EuiFormRow>
       </div>
     </>
   );
