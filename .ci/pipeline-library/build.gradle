@@ -1,0 +1,75 @@
+plugins {
+  id "groovy"
+  id "idea"
+}
+
+group = "co.elastic.kibana.pipeline"
+version = "0.0.1"
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+  maven { url 'https://repo.jenkins-ci.org/releases/' }
+  maven { url "https://repo.maven.apache.org/maven2" }
+}
+
+dependencies {
+  implementation "org.codehaus.groovy:groovy-all:2.4.12"
+  implementation 'org.jenkins-ci.main:jenkins-core:2.23'
+  implementation 'org.jenkins-ci.plugins.workflow:workflow-step-api:2.19@jar'
+  testImplementation "com.lesfurets:jenkins-pipeline-unit:1.3"
+  testImplementation "junit:junit:4.12"
+  // testImplementation "org.jenkins-ci.plugins.workflow:workflow-support:2.16@jar"
+}
+
+sourceSets {
+  main {
+    groovy {
+      srcDirs = ['vars']
+    }
+  }
+
+  test {
+    groovy {
+      srcDirs = ['src/test']
+    }
+  }
+}
+
+test {
+  // useJUnit()
+  // inputs.files ("$projectDir/.ci/pipeline-library/src/test")
+
+   // delete old test reports
+   dependsOn cleanTest
+
+   // don't stop if tests fail
+   ignoreFailures = true
+
+   // minimize logging
+   // testLogging.maxGranularity = 0
+
+   // show stdout from tests
+   onOutput { dest, event -> print event.message }
+
+   // show test results
+   def results = []
+
+   afterTest { desc, result ->
+       println "${desc.className.split("\\.")[-1]}: " +
+           "${desc.name}: ${result.resultType}"
+   }
+
+   afterSuite { desc, result ->
+      if (desc.className) { results << result }
+   }
+
+   // show summary
+   doLast {
+       println "Tests: ${results.sum { it.testCount }}" +
+           ", Failures: ${results.sum { it.failedTestCount }}" +
+           ", Errors: ${results.sum { it.exceptions.size() }}" +
+           ", Skipped: ${results.sum { it.skippedTestCount }}"
+   }
+}

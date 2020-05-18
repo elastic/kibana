@@ -49,3 +49,5 @@ apm.tsconfig.json
 /x-pack/legacy/plugins/apm/e2e/snapshots.js
 /x-pack/plugins/apm/e2e/snapshots.js
 .nyc_output
+.ci/pipeline-library/build/
+.gradle
