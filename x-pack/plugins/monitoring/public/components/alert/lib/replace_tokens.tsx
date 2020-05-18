@@ -10,10 +10,10 @@ import {
   AlertMessage,
   AlertMessageTimeToken,
   AlertMessageLinkToken,
-} from '../../../server/alerts/types';
+} from '../../../../server/alerts/types';
 // @ts-ignore
-import { formatTimestampToDuration } from '../../../common';
-import { CALCULATE_DURATION_UNTIL } from '../../../common/constants';
+import { formatTimestampToDuration } from '../../../../common';
+import { CALCULATE_DURATION_UNTIL } from '../../../../common/constants';
 
 export function replaceTokens(alertMessage: AlertMessage): JSX.Element | string | null {
   if (!alertMessage) {

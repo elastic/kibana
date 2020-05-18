@@ -39,7 +39,7 @@ import {
   ALERT_CLUSTER_STATE,
   ALERT_CPU_USAGE,
 } from '../../../../common/constants';
-import { AlertPopover } from '../../alert/popover';
+import { AlertPopover } from '../../alert';
 
 const calculateShards = shards => {
   const total = get(shards, 'total', 0);
