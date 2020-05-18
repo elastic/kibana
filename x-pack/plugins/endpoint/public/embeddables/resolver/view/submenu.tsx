@@ -113,6 +113,7 @@ export const NodeSubMenu = styled(
       const [menuIsOpen, setMenuOpen] = useState(false);
       const handleMenuOpenClick = useCallback(
         (clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+          // stopping propagation/default to prevent other node animations from triggering
           clickEvent.preventDefault();
           clickEvent.stopPropagation();
           setMenuOpen(!menuIsOpen);
@@ -121,6 +122,7 @@ export const NodeSubMenu = styled(
       );
       const handleMenuActionClick = useCallback(
         (clickEvent: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+          // stopping propagation/default to prevent other node animations from triggering
           clickEvent.preventDefault();
           clickEvent.stopPropagation();
           if (typeof menuAction === 'function') menuAction();
@@ -128,13 +130,8 @@ export const NodeSubMenu = styled(
         },
         [menuAction]
       );
-      const isMenuDataAvailable = useMemo(() => {
-        return typeof optionsWithActions === 'object';
-      }, [optionsWithActions]);
 
-      const isMenuLoading = useMemo(() => {
-        return optionsWithActions === 'waitingForRelatedEventData';
-      }, [optionsWithActions]);
+      const isMenuLoading = optionsWithActions === 'waitingForRelatedEventData';
 
       if (!optionsWithActions) {
         /**
@@ -156,7 +153,9 @@ export const NodeSubMenu = styled(
       return (
         <div className={className + (menuIsOpen ? ' is-open' : '')}>
           <EuiButton
-            onClick={isMenuDataAvailable ? handleMenuOpenClick : handleMenuActionClick}
+            onClick={
+              typeof optionsWithActions === 'object' ? handleMenuOpenClick : handleMenuActionClick
+            }
             color="ghost"
             size="s"
             iconType={menuIsOpen ? 'arrowUp' : 'arrowDown'}
@@ -165,7 +164,7 @@ export const NodeSubMenu = styled(
           >
             {menuTitle}
           </EuiButton>
-          {menuIsOpen && isMenuDataAvailable && (
+          {menuIsOpen && typeof optionsWithActions === 'object' && (
             <OptionList isLoading={isMenuLoading} subMenuOptions={optionsWithActions} />
           )}
         </div>
