@@ -30,15 +30,10 @@ class SlackNotificationsTest extends BasePipelineTest {
     @Test
     void testCall() {
       def failureMessage = slackNotifications.getTestFailures()
-      
+
       assertEquals(
         "*Test Failures*\n• <${TEST_FAILURE_URL}|${TEST_FAILURE_NAME}>",
         failureMessage
       )
-
-        // call slackNotifications and check result
-        // def result = slackNotifications(text: "a_B-c.1")
-        // println "test"
-        // assertEquals "true:", true, true
     }
 }
