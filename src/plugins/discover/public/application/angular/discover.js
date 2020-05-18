@@ -75,6 +75,13 @@ import {
 } from '../../../../data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { addFatalError } from '../../../../kibana_legacy/public';
+import {
+  DEFAULT_COLUMNS_SETTING,
+  SAMPLE_SIZE_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
+  SEARCH_ON_PAGE_LOAD_SETTING,
+  DOC_HIDE_TIME_COLUMN_SETTING,
+} from '../../../common';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -554,7 +561,7 @@ function discoverController(
     const { searchFields, selectFields } = await getSharingDataFields(
       $scope.state.columns,
       $scope.indexPattern.timeFieldName,
-      config.get('doc_table:hideTimeColumn')
+      config.get(DOC_HIDE_TIME_COLUMN_SETTING)
     );
     searchSource.setField('fields', searchFields);
     searchSource.setField(
@@ -562,7 +569,7 @@ function discoverController(
       getSortForSearchSource(
         $scope.state.sort,
         $scope.indexPattern,
-        config.get('discover:sort:defaultOrder')
+        config.get(SORT_DEFAULT_ORDER_SETTING)
       )
     );
     searchSource.setField('highlight', null);
@@ -595,7 +602,9 @@ function discoverController(
       query,
       sort: getSortArray(savedSearch.sort, $scope.indexPattern),
       columns:
-        savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
+        savedSearch.columns.length > 0
+          ? savedSearch.columns
+          : config.get(DEFAULT_COLUMNS_SETTING).slice(),
       index: $scope.indexPattern.id,
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.getOwnField('filter')),
@@ -625,7 +634,7 @@ function discoverController(
 
   $scope.opts = {
     // number of records to fetch, then paginate through
-    sampleSize: config.get('discover:sampleSize'),
+    sampleSize: config.get(SAMPLE_SIZE_SETTING),
     timefield: getTimeField(),
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.savedObjects.ip.list,
@@ -635,7 +644,7 @@ function discoverController(
     // A saved search is created on every page load, so we check the ID to see if we're loading a
     // previously saved search or if it is just transient
     return (
-      config.get('discover:searchOnPageLoad') ||
+      config.get(SEARCH_ON_PAGE_LOAD_SETTING) ||
       savedSearch.id !== undefined ||
       timefilter.getRefreshInterval().pause === false
     );
@@ -947,7 +956,7 @@ function discoverController(
         getSortForSearchSource(
           $scope.state.sort,
           indexPattern,
-          config.get('discover:sort:defaultOrder')
+          config.get(SORT_DEFAULT_ORDER_SETTING)
         )
       )
       .setField('query', $scope.state.query || null)

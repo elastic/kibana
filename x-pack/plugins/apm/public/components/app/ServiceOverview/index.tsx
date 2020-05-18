@@ -66,7 +66,7 @@ export function ServiceOverview() {
             <EuiLink
               href={url.format({
                 pathname: core.http.basePath.prepend('/app/kibana'),
-                hash: '/management/elasticsearch/upgrade_assistant'
+                hash: '/management/stack/upgrade_assistant'
               })}
             >
               {i18n.translate(

@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin } from 'src/core/public';
 
+import { ManagementSectionId } from '../../../../src/plugins/management/public';
 import { PLUGIN_ID } from '../common/constants';
 import { uiMetricService, apiService } from './application/services';
 import { Dependencies } from './types';
@@ -20,7 +21,7 @@ export class IngestPipelinesPlugin implements Plugin {
     uiMetricService.setup(usageCollection);
     apiService.setup(http, uiMetricService);
 
-    management.sections.getSection('elasticsearch')!.registerApp({
+    management.sections.getSection(ManagementSectionId.Ingest).registerApp({
       id: PLUGIN_ID,
       order: 1,
       title: i18n.translate('xpack.ingestPipelines.appTitle', {
