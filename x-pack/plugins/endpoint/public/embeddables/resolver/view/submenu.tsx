@@ -52,7 +52,7 @@ const OptionList = React.memo(
     subMenuOptions: ResolverSubmenuOptionList;
     isLoading: boolean;
   }) => {
-    const selectableOptions =
+    const [options, setOptions] = useState(() =>
       typeof subMenuOptions !== 'object'
         ? []
         : subMenuOptions.map((opt: ResolverSubmenuOption): {
@@ -62,14 +62,14 @@ const OptionList = React.memo(
             return opt.prefix
               ? {
                   label: opt.optionTitle,
-                  prepend: <span>{opt.prefix}</span>,
+                  prepend: <span>{opt.prefix} </span>,
                 }
               : {
                   label: opt.optionTitle,
                   prepend: <span />,
                 };
-          });
-    const [options, setOptions] = useState(selectableOptions);
+          })
+    );
     return useMemo(
       () => (
         <EuiSelectable
