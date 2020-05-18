@@ -1003,7 +1003,6 @@
     "discover.reloadSavedSearchButton": "重置搜索",
     "discover.rootBreadcrumb": "Discover",
     "discover.savedSearch.savedObjectName": "已保存搜索",
-    "discover.scaledToDescription": "已缩放至 {bucketIntervalDescription}",
     "discover.searchingTitle": "正在搜索",
     "discover.showingDefaultIndexPatternWarningDescription": "显示默认索引模式：“{loadedIndexPatternTitle}” ({loadedIndexPatternId})",
     "discover.showingSavedIndexPatternWarningDescription": "显示保存的索引模式：“{ownIndexPatternTitle}” ({ownIndexPatternId})",

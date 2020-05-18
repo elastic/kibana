@@ -1002,7 +1002,6 @@
     "discover.reloadSavedSearchButton": "検索をリセット",
     "discover.rootBreadcrumb": "ディスカバリ",
     "discover.savedSearch.savedObjectName": "保存された検索",
-    "discover.scaledToDescription": "{bucketIntervalDescription} にスケーリング済み",
     "discover.searchingTitle": "検索中",
     "discover.showingDefaultIndexPatternWarningDescription": "デフォルトのインデックスパターン「{loadedIndexPatternTitle}」 ({loadedIndexPatternId}) を表示中",
     "discover.showingSavedIndexPatternWarningDescription": "保存されたインデックスパターン「{ownIndexPatternTitle}」 ({ownIndexPatternId}) を表示中",
