@@ -34,6 +34,7 @@ import {
 export interface ShowNewVisModalParams {
   editorParams?: string[];
   onClose?: () => void;
+  redirectState?: unknown;
   outsideVisualizeApp?: boolean;
 }
 
@@ -45,6 +46,7 @@ export interface ShowNewVisModalParams {
 export function showNewVisModal({
   editorParams = [],
   onClose,
+  redirectState,
   outsideVisualizeApp,
 }: ShowNewVisModalParams = {}) {
   const container = document.createElement('div');
@@ -66,6 +68,7 @@ export function showNewVisModal({
         isOpen={true}
         onClose={handleClose}
         outsideVisualizeApp={outsideVisualizeApp}
+        redirectState={redirectState}
         editorParams={editorParams}
         visTypesRegistry={getTypes()}
         addBasePath={getHttp().basePath.prepend}

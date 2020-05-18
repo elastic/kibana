@@ -45,6 +45,10 @@ export interface LensPluginStartDependencies {
   dashboard: DashboardStart;
 }
 
+export interface LensIncomingState {
+  embeddableOriginatingApp: string;
+}
+
 export class LensPlugin {
   private datatableVisualization: DatatableVisualization;
   private editorFrameService: EditorFrameService;
@@ -93,8 +97,12 @@ export class LensPlugin {
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
+        const { embeddableOriginatingApp } = params.history.fetchLocationState<LensIncomingState>();
+        if (embeddableOriginatingApp) {
+          params.history.removeFromLocationState(['embeddableOriginatingApp']);
+        }
         const { mountApp } = await import('./app_plugin/mounter');
-        return mountApp(core, params, this.createEditorFrame!);
+        return mountApp(core, params, { embeddableOriginatingApp }, this.createEditorFrame!);
       },
     });
 

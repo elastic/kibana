@@ -40,6 +40,7 @@ interface TypeSelectionProps {
   savedObjects: SavedObjectsStart;
   usageCollection?: UsageCollectionSetup;
   application: ApplicationStart;
+  redirectState: unknown;
   outsideVisualizeApp?: boolean;
 }
 
@@ -147,14 +148,11 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     let params;
     if ('aliasPath' in visType) {
       params = visType.aliasPath;
-      if (this.props.editorParams) {
-        const originatingAppParam = this.props.editorParams?.find((param: string) =>
-          param.startsWith(EMBEDDABLE_ORIGINATING_APP_PARAM)
-        );
-        params = originatingAppParam ? `${params}?${originatingAppParam}` : params;
-      }
       this.props.onClose();
-      this.props.application.navigateToApp(visType.aliasApp, { path: params });
+      this.props.application.navigateToApp(visType.aliasApp, {
+        path: params,
+        state: this.props.redirectState,
+      });
       return;
     }
 
@@ -169,6 +167,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     if (this.props.outsideVisualizeApp) {
       this.props.application.navigateToApp('visualize', {
         path: `#${basePath}${params.join('&')}`,
+        state: this.props.redirectState,
       });
     } else {
       location.assign(this.props.addBasePath(`${baseUrl}${params.join('&')}`));

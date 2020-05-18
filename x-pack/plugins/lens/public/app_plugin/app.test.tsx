@@ -563,7 +563,7 @@ describe('Lens App', () => {
           expression: 'kibana 3',
         });
 
-        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, undefined, true);
+        expect(args.redirectTo).toHaveBeenCalledWith('aaa', undefined, true);
 
         inst.setProps({ docId: 'aaa' });
 

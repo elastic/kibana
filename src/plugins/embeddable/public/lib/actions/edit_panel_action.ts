@@ -32,6 +32,12 @@ interface ActionContext {
   embeddable: IEmbeddable;
 }
 
+interface NavigationContext {
+  app: string;
+  path: string;
+  state?: unknown;
+}
+
 export class EditPanelAction implements Action<ActionContext> {
   public readonly type = ACTION_EDIT_PANEL;
   public readonly id = ACTION_EDIT_PANEL;
@@ -81,7 +87,10 @@ export class EditPanelAction implements Action<ActionContext> {
     const appTarget = this.getAppTarget(context);
 
     if (appTarget) {
-      await this.application.navigateToApp(appTarget.app, { path: appTarget.path });
+      await this.application.navigateToApp(appTarget.app, {
+        path: appTarget.path,
+        state: appTarget.state,
+      });
       return;
     }
 
@@ -92,12 +101,13 @@ export class EditPanelAction implements Action<ActionContext> {
     }
   }
 
-  public getAppTarget({ embeddable }: ActionContext): { app: string; path: string } | undefined {
+  public getAppTarget({ embeddable }: ActionContext): NavigationContext | undefined {
     const app = embeddable ? embeddable.getOutput().editApp : undefined;
-    let path = embeddable ? embeddable.getOutput().editPath : undefined;
+    const path = embeddable ? embeddable.getOutput().editPath : undefined;
     if (app && path) {
       if (this.currentAppId) {
-        path += `?${EMBEDDABLE_ORIGINATING_APP_PARAM}=${this.currentAppId}`;
+        const state = { embeddableOriginatingApp: this.currentAppId };
+        return { app, path, state };
       }
       return { app, path };
     }

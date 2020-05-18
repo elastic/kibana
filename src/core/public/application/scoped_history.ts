@@ -63,6 +63,8 @@ export class ScopedHistory<HistoryLocationState = unknown>
    */
   private currentLocationKeyIndex: number = 0;
 
+  private parentLocationState: { [key: string]: unknown } = {};
+
   constructor(private readonly parentHistory: History, private readonly basePath: string) {
     const parentPath = this.parentHistory.location.pathname;
     if (!parentPath.startsWith(basePath)) {
@@ -71,6 +73,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
       );
     }
 
+    this.parentLocationState = parentHistory.location.state as { [key: string]: unknown };
     this.locationKeys.push(this.parentHistory.location.key);
     this.setupHistoryListener();
   }
@@ -109,6 +112,25 @@ export class ScopedHistory<HistoryLocationState = unknown>
   public get action() {
     this.verifyActive();
     return this.parentHistory.action;
+  }
+
+  /**
+   * Fetches the parent location state
+   */
+  public fetchLocationState<T extends unknown = unknown>(): T {
+    this.verifyActive();
+    return this.parentLocationState as T;
+  }
+
+  /**
+   * Removes a key from the parent location state
+   *
+   * * @param key, the key to remove from the parent state
+   */
+  public removeFromLocationState(keys: string[]) {
+    this.verifyActive();
+    keys.forEach((key: string) => delete this.parentLocationState[key]);
+    this.replace(this.location, (this.parentLocationState as unknown) as HistoryLocationState);
   }
 
   /**

@@ -10,9 +10,8 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { parse } from 'query-string';
 
-import { removeQueryParam, Storage } from '../../../../../src/plugins/kibana_utils/public';
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import { LensReportManager, setReportManager, trackUiEvent } from '../lens_ui_telemetry';
 
@@ -20,12 +19,13 @@ import { App } from './app';
 import { EditorFrameStart } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { SavedObjectIndexStore } from '../persistence';
-import { LensPluginStartDependencies } from '../plugin';
+import { LensPluginStartDependencies, LensIncomingState } from '../plugin';
 import { LENS_EMBEDDABLE_TYPE } from '../../common';
 
 export async function mountApp(
   core: CoreSetup<LensPluginStartDependencies, void>,
   params: AppMountParameters,
+  incomingState: LensIncomingState,
   createEditorFrame: EditorFrameStart['createInstance']
 ) {
   const [coreStart, startDependencies] = await core.getStartServices();
@@ -73,11 +73,7 @@ export async function mountApp(
 
   const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
     trackUiEvent('loaded');
-    const urlParams = parse(routeProps.location.search) as Record<string, string>;
-    const originatingAppFromUrl = urlParams.embeddableOriginatingApp;
-    if (urlParams.embeddableOriginatingApp) {
-      removeQueryParam(routeProps.history, 'embeddableOriginatingApp');
-    }
+    const originatingApp = incomingState.embeddableOriginatingApp;
 
     return (
       <App
@@ -88,10 +84,10 @@ export async function mountApp(
         storage={new Storage(localStorage)}
         docId={routeProps.match.params.id}
         docStorage={new SavedObjectIndexStore(savedObjectsClient)}
-        redirectTo={(id, returnToOrigin, originatingApp, newlyCreated) =>
+        redirectTo={(id, returnToOrigin, newlyCreated) =>
           redirectTo(routeProps, id, returnToOrigin, originatingApp, newlyCreated)
         }
-        originatingAppFromUrl={originatingAppFromUrl}
+        originatingApp={originatingApp}
       />
     );
   };

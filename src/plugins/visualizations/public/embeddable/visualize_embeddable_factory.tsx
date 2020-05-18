@@ -137,7 +137,7 @@ export class VisualizeEmbeddableFactory
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
     const originatingAppParam = await this.getCurrentAppId();
     showNewVisModal({
-      editorParams: [`${EMBEDDABLE_ORIGINATING_APP_PARAM}=${originatingAppParam}`],
+      redirectState: { embeddableOriginatingApp: originatingAppParam },
       outsideVisualizeApp: true,
     });
     return undefined;
