@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+// eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
 import { createSelector } from 'reselect';
 import {

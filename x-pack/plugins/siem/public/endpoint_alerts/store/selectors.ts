@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
 import {
   createSelector,
