@@ -38,7 +38,7 @@ export function setupSavedObjects({
   savedObjects,
   security,
   getStartServices,
-}: SetupSavedObjectsParams): (includedHiddenTypes?: string[]) => SavedObjectsSetup {
+}: SetupSavedObjectsParams): SavedObjectsSetup {
   // Register custom saved object client that will encrypt, decrypt and strip saved object
   // attributes where appropriate for any saved object repository request. We choose max possible
   // priority for this wrapper to allow all other wrappers to set proper `namespace` for the Saved

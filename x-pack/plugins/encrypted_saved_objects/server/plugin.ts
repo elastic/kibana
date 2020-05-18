@@ -46,7 +46,7 @@ export interface LegacyAPI {
  */
 export class Plugin {
   private readonly logger: Logger;
-  private savedObjectsSetup!: (includedHiddenTypes?: string[]) => SavedObjectsSetup;
+  private savedObjectsSetup!: SavedObjectsSetup;
 
   private legacyAPI?: LegacyAPI;
   private readonly getLegacyAPI = () => {
