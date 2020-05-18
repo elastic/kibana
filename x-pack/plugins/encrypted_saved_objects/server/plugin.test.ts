@@ -20,21 +20,7 @@ describe('EncryptedSavedObjects Plugin', () => {
                   "registerLegacyAPI": [Function],
                 },
                 "registerType": [Function],
-                "startWithHiddenTypes": [Function],
                 "usingEphemeralEncryptionKey": true,
-              }
-            `);
-    });
-
-    it('exposes a start contract with included hidden types', async () => {
-      const plugin = new Plugin(coreMock.createPluginInitializerContext());
-      const startApiWithHiddenTypes = (
-        await plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() })
-      ).startWithHiddenTypes(['hiddenType']);
-      expect(startApiWithHiddenTypes).toMatchInlineSnapshot(`
-              Object {
-                "getDecryptedAsInternalUser": [Function],
-                "isEncryptionError": [Function],
               }
             `);
     });
@@ -44,10 +30,18 @@ describe('EncryptedSavedObjects Plugin', () => {
     it('exposes proper contract', async () => {
       const plugin = new Plugin(coreMock.createPluginInitializerContext());
       await plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() });
-      await expect(plugin.start()).toMatchInlineSnapshot(`
+
+      const startContract = plugin.start();
+      await expect(startContract).toMatchInlineSnapshot(`
+              Object {
+                "getClient": [Function],
+                "isEncryptionError": [Function],
+              }
+            `);
+
+      expect(startContract.getClient()).toMatchInlineSnapshot(`
               Object {
                 "getDecryptedAsInternalUser": [Function],
-                "isEncryptionError": [Function],
               }
             `);
     });
