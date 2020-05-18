@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiComboBoxOptionOption, EuiSelectOption } from '@elastic/eui';
+import uuid from 'uuid';
 
 import {
   EXCEPTION_OPERATORS,
@@ -17,8 +18,11 @@ import {
   doesNotExistOperator,
 } from './operators';
 import { OperatorOption, OperatorType, ExceptionItemEntry, ExceptionItem } from './types';
-import { BrowserField, BrowserFields } from '../common/containers/source';
-import { IIndexPattern, isFilterable } from '../../../../../src/plugins/data/common/index_patterns';
+import { BrowserField, BrowserFields } from '../../containers/source';
+import {
+  IIndexPattern,
+  isFilterable,
+} from '../../../../../../../src/plugins/data/common/index_patterns';
 
 export const getOperatorLabels = (type: string): EuiSelectOption[] => {
   const isTypeEndgame = type === 'endgame';
@@ -207,27 +211,29 @@ export const getFilterableFields = (indexPattern: IIndexPattern) => {
 /** Creates a new instance of an `ExceptionItem` */
 export const createExceptionItem = ({
   listType,
-  itemId,
   listId,
 }: {
   listType: string;
-  itemId: string;
   listId: string;
-}): ExceptionItem => ({
-  id: null,
-  list_id: listId,
-  item_id: itemId,
-  name: itemId,
-  _tags: [listType],
-  type: 'simple',
-  entries: [
-    {
-      field: '',
-      operator: 'included',
-      match: '',
-    },
-  ],
-});
+}): ExceptionItem => {
+  const newItemId = uuid.v4();
+
+  return {
+    id: null,
+    list_id: listId,
+    item_id: newItemId,
+    name: newItemId,
+    _tags: [listType],
+    type: 'simple',
+    entries: [
+      {
+        field: '',
+        operator: 'included',
+        match: '',
+      },
+    ],
+  };
+};
 
 export const getNonDeletedExceptionItems = (items: ExceptionItem[]): ExceptionItem[] => {
   return items.filter(t => t._delete === null || !t._delete);

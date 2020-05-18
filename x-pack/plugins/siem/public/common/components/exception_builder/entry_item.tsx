@@ -27,7 +27,7 @@ import {
   getOperatorLabels,
 } from './helpers';
 import { Operator, ExceptionItemEntry } from './types';
-import { BrowserFields } from '../common/containers/source';
+import { BrowserFields } from '../../containers/source';
 
 const FIELD_COMBO_BOX_WIDTH = 195;
 const OPERATOR_SELECT_WIDTH = 135;

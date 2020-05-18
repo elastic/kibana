@@ -9,7 +9,7 @@ import React from 'react';
 
 import * as i18n from './translations';
 import { EntryItem } from './entry_item';
-import { mockBrowserFields } from '../common/containers/source/mock';
+import { mockBrowserFields } from '../../containers/source/mock';
 import { Operator } from './types';
 import {
   isOperator,

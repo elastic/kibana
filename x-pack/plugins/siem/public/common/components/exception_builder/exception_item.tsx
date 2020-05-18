@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, htmlIdGenerator } from '@elastic/eui';
 import React, { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { EntryItem } from './entry_item';
-import { AndOrBadge } from './and_or_badge';
-import { BrowserFields } from '../common/containers/source';
+import { AndOrBadge } from '../and_or_badge';
+import { BrowserFields } from '../../containers/source';
 import { ExceptionItem } from './types';
 
 const AndBadgeContainer = styled(EuiFlexItem)`
@@ -104,7 +104,7 @@ export const ExceptionItemComponent = ({
       <EuiFlexItem grow={6}>
         {exceptionItem.entries.map((entry, index) => (
           <EntryItem
-            key={`exceptionItemEntry-${index}`}
+            key={`exceptionItemEntry-${htmlIdGenerator()('excetpionItem')}`}
             exceptionItemEntry={entry}
             exceptionItemIndex={exceptionItemIndex}
             listType={listType}

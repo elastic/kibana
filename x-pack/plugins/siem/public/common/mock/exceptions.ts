@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Operator } from '../../exception_builder/types';
+import { Operator } from '../components/exception_builder/types';
 
 export const getMockNewExceptionItem = (exceptionItemId: string) => ({
   id: null,

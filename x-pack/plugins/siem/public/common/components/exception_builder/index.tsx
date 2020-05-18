@@ -6,14 +6,13 @@
 import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
-import uuid from 'uuid';
 
-import { DEFAULT_INDEX_KEY } from '../../common/constants';
+import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { ExceptionItemComponent } from './exception_item';
 import { AndOrExceptionOperator } from './and_or_operator';
-import { AndOrBadge } from './and_or_badge';
-import { useFetchIndexPatterns } from '../alerts/containers/detection_engine/rules/fetch_index_patterns';
-import { useUiSetting$ } from '../common/lib/kibana';
+import { AndOrBadge } from '../and_or_badge';
+import { useFetchIndexPatterns } from '../../../alerts/containers/detection_engine/rules/fetch_index_patterns';
+import { useUiSetting$ } from '../../lib/kibana';
 import { ExceptionItem, Operator } from './types';
 import {
   createExceptionItem,
@@ -114,8 +113,7 @@ export const ExceptionBuilder = ({
   }, [exceptionBuilderData]);
 
   const addExceptionItem = useCallback((): void => {
-    const newItemId = uuid.v4();
-    const newException = createExceptionItem({ listType, itemId: newItemId, listId });
+    const newException = createExceptionItem({ listType, listId });
     setExceptionBuilderData([...exceptionBuilderData, newException]);
     onChange([...exceptionBuilderData, newException]);
   }, [exceptionBuilderData]);

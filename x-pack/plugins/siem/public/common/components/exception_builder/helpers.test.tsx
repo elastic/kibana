@@ -15,7 +15,7 @@ import {
   formatFieldValues,
   getUpdatedEntryFromOperator,
 } from './helpers';
-import { mockBrowserFields } from '../common/containers/source/mock';
+import { mockBrowserFields } from '../../containers/source/mock';
 import {
   isOperator,
   isNotOperator,

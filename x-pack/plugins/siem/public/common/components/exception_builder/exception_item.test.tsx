@@ -10,8 +10,8 @@ import { ThemeProvider } from 'styled-components';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { ExceptionItemComponent } from './exception_item';
-import { mockBrowserFields } from '../common/containers/source/mock';
-import { getMockExceptionItem, getMockNewExceptionItem } from '../common/mock/exceptions';
+import { mockBrowserFields } from '../../containers/source/mock';
+import { getMockExceptionItem, getMockNewExceptionItem } from '../../mock/exceptions';
 
 const theme = () => ({ eui: euiLightVars, darkMode: false });
 

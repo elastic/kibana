@@ -9,7 +9,7 @@ import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 
-import { AndOrBadge } from './and_or_badge';
+import { AndOrBadge } from './';
 
 describe('AndOrBadge', () => {
   test('it renders top and bottom antenna bars when "includeAntenas" is true', () => {
