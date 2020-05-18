@@ -158,18 +158,14 @@ export type TimelineStatusLiteralWithNull = runtimeTypes.TypeOf<
 export enum TimelineType {
   default = 'default',
   template = 'template',
-  // TODO: Added to support legacy TimelineType.draft, can be removed in 7.10
-  draft = 'draft',
 }
 
 export const TimelineTypeLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TimelineType.template),
   runtimeTypes.literal(TimelineType.default),
-  // TODO: Added to support legacy TimelineType.draft, can be removed in 7.10
-  runtimeTypes.literal(TimelineType.draft),
 ]);
 
-const TimelineTypeLiteralWithNullRt = unionWithNullType(TimelineTypeLiteralRt);
+export const TimelineTypeLiteralWithNullRt = unionWithNullType(TimelineTypeLiteralRt);
 
 export type TimelineTypeLiteral = runtimeTypes.TypeOf<typeof TimelineTypeLiteralRt>;
 export type TimelineTypeLiteralWithNull = runtimeTypes.TypeOf<typeof TimelineTypeLiteralWithNullRt>;
