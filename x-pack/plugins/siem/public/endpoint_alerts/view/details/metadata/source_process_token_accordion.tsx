@@ -19,9 +19,12 @@ export const SourceProcessTokenAccordion = memo(
           description: alertData.process.token.sid,
         },
         {
-          title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.integrityLevel', {
-            defaultMessage: 'Integrity Level',
-          }),
+          title: i18n.translate(
+            'xpack.siem.endpoint.application.endpoint.alertDetails.integrityLevel',
+            {
+              defaultMessage: 'Integrity Level',
+            }
+          ),
           description: alertData.process.token.integrity_level,
         },
       ];

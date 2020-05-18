@@ -37,9 +37,12 @@ export const GeneralAccordion = memo(({ alertData }: { alertData: Immutable<Aler
         description: <FormattedDate timestamp={alertData['@timestamp']} />,
       },
       {
-        title: i18n.translate('xpack.siem.endpoint.application.endpoint.alertDetails.malwareScore', {
-          defaultMessage: 'MalwareScore',
-        }),
+        title: i18n.translate(
+          'xpack.siem.endpoint.application.endpoint.alertDetails.malwareScore',
+          {
+            defaultMessage: 'MalwareScore',
+          }
+        ),
         description: alertData.file.malware_classification.score,
       },
       {

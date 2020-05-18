@@ -27,9 +27,12 @@ export const WindowsEvents = React.memo(() => {
       protectionField: keyof UIPolicyConfig['windows']['events'];
     }>> = [
       {
-        name: i18n.translate('xpack.siem.endpoint.policyDetailsConfig.windows.events.dllDriverLoad', {
-          defaultMessage: 'DLL and Driver Load',
-        }),
+        name: i18n.translate(
+          'xpack.siem.endpoint.policyDetailsConfig.windows.events.dllDriverLoad',
+          {
+            defaultMessage: 'DLL and Driver Load',
+          }
+        ),
         os: OS.windows,
         protectionField: 'dll_and_driver_load',
       },

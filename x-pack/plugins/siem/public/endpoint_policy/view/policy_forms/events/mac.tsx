@@ -95,7 +95,9 @@ export const MacEvents = React.memo(() => {
       description={i18n.translate('xpack.siem.endpoint.policy.details.eventCollectionLabel', {
         defaultMessage: 'Event Collection',
       })}
-      supportedOss={i18n.translate('xpack.siem.endpoint.policy.details.mac', { defaultMessage: 'Mac' })}
+      supportedOss={i18n.translate('xpack.siem.endpoint.policy.details.mac', {
+        defaultMessage: 'Mac',
+      })}
       dataTestSubj="macEventingForm"
       rightCorner={collectionsEnabled}
     >
