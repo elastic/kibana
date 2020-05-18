@@ -1332,7 +1332,7 @@
     "home.tutorials.awsMetrics.longDescription": "Metricbeat モジュール「aws」は、AWS API と Cloudwatch から監視メトリックを取得します。[詳細]({learnMoreLink})。",
     "home.tutorials.awsMetrics.nameTitle": "AWS メトリック",
     "home.tutorials.awsMetrics.shortDescription": "AWS API と Cloudwatch からの EC2 インスタンスの監視メトリックです。",
-    "home.tutorials.azureMetrics.artifacts.application.label": "発見",
+    "home.tutorials.azureMetrics.artifacts.dashboards.linkLabel": "Azure メトリックダッシュボード",
     "home.tutorials.azureMetrics.longDescription": "Metricbeat モジュール「azure」は、Azure から監視メトリックを取得します。[詳細]({learnMoreLink})。",
     "home.tutorials.azureMetrics.nameTitle": "Azure メトリック",
     "home.tutorials.azureMetrics.shortDescription": "Azure 監視メトリックをフェッチします。",

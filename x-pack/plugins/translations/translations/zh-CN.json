@@ -1333,7 +1333,7 @@
     "home.tutorials.awsMetrics.longDescription": "Metricbeat 模块 `aws` 从 AWS API 和 Cloudwatch 提取监测指标。[了解详情]({learnMoreLink})。",
     "home.tutorials.awsMetrics.nameTitle": "AWS 指标",
     "home.tutorials.awsMetrics.shortDescription": "从 AWS API 和 Cloudwatch 提取 EC2 实例的监测指标。",
-    "home.tutorials.azureMetrics.artifacts.application.label": "Discover",
+    "home.tutorials.azureMetrics.artifacts.dashboards.linkLabel": "Azure 指标仪表板",
     "home.tutorials.azureMetrics.longDescription": "Metricbeat 模块 `azure` 提取 Azure Monitor 指标。[了解详情]({learnMoreLink})。",
     "home.tutorials.azureMetrics.nameTitle": "Azure 指标",
     "home.tutorials.azureMetrics.shortDescription": "提取 Azure Monitor 指标。",
