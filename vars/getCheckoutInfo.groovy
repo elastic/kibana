@@ -1,8 +1,8 @@
 def call() {
 
   def repoInfo = [
-    branch: env.ghprbSourceBranch ?: params.branch_specifier ?: 'missing branch_specifier'
-    targetBranch: env.ghprbTargetBranch
+    branch: env.ghprbSourceBranch ?: params.branch_specifier ?: 'missing branch_specifier',
+    targetBranch: env.ghprbTargetBranch,
   ]
 
   dir("kibana") {
