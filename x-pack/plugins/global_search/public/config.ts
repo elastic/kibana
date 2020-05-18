@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface GlobalSearchConfigType {
-  search_timeout: string; // TODO: check type as it's a duration on the server
+export interface GlobalSearchClientConfigType {
+  // is a string because the server-side counterpart is a duration
+  // which is serialized to string when sent to the client
+  // should be parsed using moment.duration(config.search_timeout)
+  search_timeout: string;
 }

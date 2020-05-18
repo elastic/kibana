@@ -57,7 +57,7 @@ describe('fetchServerResults', () => {
 
   describe('returns an observable that', () => {
     // NOTE: test scheduler do not properly work with promises because of their asynchronous nature.
-    // we are cheating here by having `post` return an observable instead of a promise.
+    // we are cheating here by having `http.post` return an observable instead of a promise.
     // this still allows more finely grained testing about timing, and asserting that the method
     // works properly when `post` returns a real promise is handled in other tests of this suite
 

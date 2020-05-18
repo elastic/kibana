@@ -6,15 +6,15 @@
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { GlobalSearchPluginSetup, GlobalSearchPluginStart } from './types';
-import { GlobalSearchConfigType } from './config';
+import { GlobalSearchClientConfigType } from './config';
 import { SearchService } from './services';
 
 export class GlobalSearchPlugin
   implements Plugin<GlobalSearchPluginSetup, GlobalSearchPluginStart> {
-  private readonly config: GlobalSearchConfigType;
+  private readonly config: GlobalSearchClientConfigType;
 
   constructor(context: PluginInitializerContext) {
-    this.config = context.config.get<GlobalSearchConfigType>();
+    this.config = context.config.get<GlobalSearchClientConfigType>();
   }
   private readonly searchService = new SearchService();
 

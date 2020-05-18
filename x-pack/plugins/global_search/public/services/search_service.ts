@@ -12,7 +12,7 @@ import { GlobalSearchProviderResult } from '../../common/types';
 import { takeInArray } from '../../common/operators';
 import { processProviderResult } from '../../common/process_result';
 import { GlobalSearchResultProvider } from '../types';
-import { GlobalSearchConfigType } from '../config';
+import { GlobalSearchClientConfigType } from '../config';
 import { GlobalSearchBatchedResults, GlobalSearchFindOptions } from './types';
 import { addNavigate } from './utils';
 import { fetchServerResults } from './fetch_server_results';
@@ -27,21 +27,29 @@ export interface SearchServiceStart {
   find(term: string, options: GlobalSearchFindOptions): Observable<GlobalSearchBatchedResults>;
 }
 
-interface ServiceStartDeps {
+interface SetupDeps {
+  config: GlobalSearchClientConfigType;
+  maxProviderResults?: number;
+}
+
+interface StartDeps {
   http: HttpStart;
   application: ApplicationStart;
 }
 
+const defaultMaxProviderResults = 20;
+
 /** @internal */
 export class SearchService {
   private readonly providers: GlobalSearchResultProvider[] = [];
-  private config?: GlobalSearchConfigType;
+  private config?: GlobalSearchClientConfigType;
   private http?: HttpStart;
   private application?: ApplicationStart;
-  private readonly maxProviderResults = 20;
+  private maxProviderResults = defaultMaxProviderResults;
 
-  setup({ config }: { config: GlobalSearchConfigType }): SearchServiceSetup {
+  setup({ config, maxProviderResults = defaultMaxProviderResults }: SetupDeps): SearchServiceSetup {
     this.config = config;
+    this.maxProviderResults = maxProviderResults;
 
     return {
       registerResultProvider: provider => {
@@ -53,7 +61,7 @@ export class SearchService {
     };
   }
 
-  start({ http, application }: ServiceStartDeps): SearchServiceStart {
+  start({ http, application }: StartDeps): SearchServiceStart {
     this.http = http;
     this.application = application;
 
