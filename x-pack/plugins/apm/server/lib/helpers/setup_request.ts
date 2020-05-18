@@ -5,6 +5,10 @@
  */
 
 import moment from 'moment';
+import {
+  PROCESSOR_EVENT,
+  TRANSACTION_DURATION_HISTOGRAM
+} from '../../../common/elasticsearch_fieldnames';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common';
 import { APMConfig } from '../..';
@@ -19,6 +23,7 @@ import { APMRequestHandlerContext } from '../../routes/typings';
 import { getESClient } from './es_client';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { getDynamicIndexPattern } from '../index_pattern/get_dynamic_index_pattern';
+import { rangeFilter } from './range_filter';
 
 function decodeUiFilters(
   indexPattern: IIndexPattern | undefined,
@@ -50,6 +55,10 @@ export interface SetupUIFilters {
   uiFiltersES: ESFilter[];
 }
 
+export interface SetupHasTransactionDurationMetrics {
+  hasTransactionDurationMetrics: boolean;
+}
+
 interface SetupRequestParams {
   query?: {
     _debug?: boolean;
@@ -60,17 +69,31 @@ interface SetupRequestParams {
   };
 }
 
-type InferSetup<TParams extends SetupRequestParams> = Setup &
+interface SetupRequestOptions {
+  checkForTransactionDurationMetrics: boolean;
+}
+
+type InferSetup<
+  TParams extends SetupRequestParams,
+  TOptions extends SetupRequestOptions
+> = Setup &
   (TParams extends { query: { start: string } } ? { start: number } : {}) &
   (TParams extends { query: { end: string } } ? { end: number } : {}) &
   (TParams extends { query: { uiFilters: string } }
     ? { uiFiltersES: ESFilter[] }
+    : {}) &
+  (TOptions extends { checkForTransactionDurationMetrics: true }
+    ? { hasTransactionDurationMetrics: boolean }
     : {});
 
-export async function setupRequest<TParams extends SetupRequestParams>(
+export async function setupRequest<
+  TParams extends SetupRequestParams,
+  TOptions extends SetupRequestOptions
+>(
   context: APMRequestHandlerContext<TParams>,
-  request: KibanaRequest
-): Promise<InferSetup<TParams>> {
+  request: KibanaRequest,
+  options?: TOptions
+): Promise<InferSetup<TParams, TOptions>> {
   const { config } = context;
   const { query } = context.params;
 
@@ -79,17 +102,56 @@ export async function setupRequest<TParams extends SetupRequestParams>(
     config
   });
 
-  const dynamicIndexPattern = await getDynamicIndexPattern({
-    context,
-    indices,
-    processorEvent: query.processorEvent
-  });
+  const client = getESClient(context, request, { clientAsInternalUser: false });
+
+  const start =
+    'start' in query ? { start: moment.utc(query.start).valueOf() } : {};
+  const end = 'end' in query ? { end: moment.utc(query.end).valueOf() } : {};
+
+  const checkTransactionDurationMetrics = async () => {
+    const response = await client.search({
+      index: indices['apm_oss.metricsIndices'],
+      body: {
+        query: {
+          bool: {
+            filter: [
+              { term: { [PROCESSOR_EVENT]: 'metric' } },
+              ...(start.start && end.end
+                ? [{ range: rangeFilter(start.start, end.end) }]
+                : []),
+              { exists: { field: TRANSACTION_DURATION_HISTOGRAM } }
+            ]
+          }
+        },
+        size: 0
+      },
+      terminateAfter: 1
+    });
+
+    return {
+      hasTransactionDurationMetrics: response.hits.total.value > 0
+    };
+  };
+
+  const [
+    dynamicIndexPattern,
+    hasTransactionDurationMetrics
+  ] = await Promise.all([
+    getDynamicIndexPattern({
+      context,
+      indices,
+      processorEvent: query.processorEvent
+    }),
+    options?.checkForTransactionDurationMetrics
+      ? checkTransactionDurationMetrics()
+      : Promise.resolve({})
+  ]);
 
   const uiFiltersES = decodeUiFilters(dynamicIndexPattern, query.uiFilters);
 
   const coreSetupRequest = {
     indices,
-    client: getESClient(context, request, { clientAsInternalUser: false }),
+    client,
     internalClient: getESClient(context, request, {
       clientAsInternalUser: true
     }),
@@ -98,9 +160,10 @@ export async function setupRequest<TParams extends SetupRequestParams>(
   };
 
   return {
-    ...('start' in query ? { start: moment.utc(query.start).valueOf() } : {}),
-    ...('end' in query ? { end: moment.utc(query.end).valueOf() } : {}),
+    ...start,
+    ...end,
+    ...hasTransactionDurationMetrics,
     ...('uiFilters' in query ? { uiFiltersES } : {}),
     ...coreSetupRequest
-  } as InferSetup<TParams>;
+  } as InferSetup<TParams, TOptions>;
 }

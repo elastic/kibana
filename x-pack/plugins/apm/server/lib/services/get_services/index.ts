@@ -9,7 +9,8 @@ import { PromiseReturnType } from '../../../../typings/common';
 import {
   Setup,
   SetupTimeRange,
-  SetupUIFilters
+  SetupUIFilters,
+  SetupHasTransactionDurationMetrics
 } from '../../helpers/setup_request';
 import { hasHistoricalAgentData } from './has_historical_agent_data';
 import { getLegacyDataStatus } from './get_legacy_data_status';
@@ -18,7 +19,10 @@ import { getServicesItems } from './get_services_items';
 export type ServiceListAPIResponse = PromiseReturnType<typeof getServices>;
 
 export async function getServices(
-  setup: Setup & SetupTimeRange & SetupUIFilters
+  setup: Setup &
+    SetupTimeRange &
+    SetupUIFilters &
+    SetupHasTransactionDurationMetrics
 ) {
   const [items, hasLegacyData] = await Promise.all([
     getServicesItems(setup),

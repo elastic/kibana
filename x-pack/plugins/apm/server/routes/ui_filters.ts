@@ -10,7 +10,8 @@ import {
   setupRequest,
   Setup,
   SetupUIFilters,
-  SetupTimeRange
+  SetupTimeRange,
+  SetupHasTransactionDurationMetrics
 } from '../lib/helpers/setup_request';
 import { getEnvironments } from '../lib/ui_filters/get_environments';
 import { Projection } from '../../common/projections/typings';
@@ -68,15 +69,18 @@ const localUiBaseQueryRt = t.intersection([
 function createLocalFiltersRoute<
   TPath extends string,
   TProjection extends Projection,
-  TQueryRT extends t.HasProps
+  TQueryRT extends t.HasProps,
+  TOptions extends { checkForTransactionDurationMetrics: boolean }
 >({
   path,
   getProjection,
-  queryRt
+  queryRt,
+  options
 }: {
   path: TPath;
-  getProjection: GetProjection<TProjection, TQueryRT & BaseQueryType>;
+  getProjection: GetProjection<TProjection, TQueryRT & BaseQueryType, TOptions>;
   queryRt: TQueryRT;
+  options?: TOptions;
 }) {
   return createRoute(() => ({
     path,
@@ -84,7 +88,10 @@ function createLocalFiltersRoute<
       query: t.intersection([localUiBaseQueryRt, queryRt])
     },
     handler: async ({ context, request }) => {
-      const setup = await setupRequest(context, request);
+      const setup = await setupRequest(context, request, {
+        checkForTransactionDurationMetrics:
+          options?.checkForTransactionDurationMetrics || false
+      });
       const { query } = context.params;
 
       const { uiFilters, filterNames } = query;
@@ -92,7 +99,7 @@ function createLocalFiltersRoute<
       const projection = getProjection({
         query,
         setup: {
-          ...setup,
+          ...(setup as any),
           uiFiltersES: getUiFiltersES(
             setup.dynamicIndexPattern,
             omit(parsedUiFilters, filterNames)
@@ -113,7 +120,10 @@ function createLocalFiltersRoute<
 export const servicesLocalFiltersRoute = createLocalFiltersRoute({
   path: `/api/apm/ui_filters/local_filters/services`,
   getProjection: ({ setup }) => getServicesProjection({ setup }),
-  queryRt: t.type({})
+  queryRt: t.type({}),
+  options: {
+    checkForTransactionDurationMetrics: true
+  }
 });
 
 export const transactionGroupsLocalFiltersRoute = createLocalFiltersRoute({
@@ -221,11 +231,17 @@ type BaseQueryType = typeof localUiBaseQueryRt;
 
 type GetProjection<
   TProjection extends Projection,
-  TQueryRT extends t.HasProps
+  TQueryRT extends t.HasProps,
+  TOptions extends { checkForTransactionDurationMetrics: boolean }
 > = ({
   query,
   setup
 }: {
   query: t.TypeOf<TQueryRT>;
-  setup: Setup & SetupUIFilters & SetupTimeRange;
+  setup: Setup &
+    SetupUIFilters &
+    SetupTimeRange &
+    (TOptions extends { checkForTransactionDurationMetrics: true }
+      ? SetupHasTransactionDurationMetrics
+      : {});
 }) => TProjection;

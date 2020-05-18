@@ -38,6 +38,7 @@ export const TRANSACTION_ID = 'transaction.id';
 export const TRANSACTION_SAMPLED = 'transaction.sampled';
 export const TRANSACTION_BREAKDOWN_COUNT = 'transaction.breakdown.count';
 export const TRANSACTION_PAGE_URL = 'transaction.page.url';
+export const TRANSACTION_DURATION_HISTOGRAM = 'transaction.duration.histogram';
 
 export const TRACE_ID = 'trace.id';
 

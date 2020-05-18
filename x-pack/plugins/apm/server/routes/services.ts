@@ -23,7 +23,9 @@ export const servicesRoute = createRoute(core => ({
     query: t.intersection([uiFiltersRt, rangeRt])
   },
   handler: async ({ context, request }) => {
-    const setup = await setupRequest(context, request);
+    const setup = await setupRequest(context, request, {
+      checkForTransactionDurationMetrics: true
+    });
     const services = await getServices(setup);
 
     return services;

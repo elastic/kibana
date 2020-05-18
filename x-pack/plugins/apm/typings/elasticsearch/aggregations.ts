@@ -5,6 +5,7 @@
  */
 
 import { Unionize } from 'utility-types';
+import { UnionToIntersection } from '@kbn/utility-types';
 
 type SortOrder = 'asc' | 'desc';
 type SortInstruction = Record<string, SortOrder | { order: SortOrder }>;
@@ -49,23 +50,33 @@ type CompositeOptionsSource = Record<
   { terms: { field: string; missing_bucket?: boolean } } | undefined
 >;
 
-export interface AggregationOptionsByType {
-  terms: {
-    field: string;
-    size?: number;
-    missing?: string;
-    order?: SortOptions;
-    execution_hint?: 'map' | 'global_ordinals';
+export type DateHistogramAggregationOptions = {
+  field: string;
+  format?: string;
+  min_doc_count?: number;
+  extended_bounds?: {
+    min: number;
+    max: number;
   };
-  date_histogram: {
-    field: string;
-    format?: string;
-    min_doc_count?: number;
-    extended_bounds?: {
-      min: number;
-      max: number;
-    };
-  } & ({ calendar_interval: string } | { fixed_interval: string });
+} & ({ calendar_interval: string } | { fixed_interval: string });
+
+export interface TermsAggregationOptions {
+  field: string;
+  size?: number;
+  missing?: string;
+  order?: SortOptions;
+  execution_hint?: 'map' | 'global_ordinals';
+}
+
+export interface CompositeAggregationOptions {
+  size?: number;
+  sources: CompositeOptionsSource[];
+  after?: Record<string, string | number | null>;
+}
+
+export interface AggregationOptionsByType {
+  terms: TermsAggregationOptions;
+  date_histogram: DateHistogramAggregationOptions;
   histogram: {
     field: string;
     interval: number;
@@ -86,7 +97,6 @@ export interface AggregationOptionsByType {
   percentiles: {
     field: string;
     percents?: number[];
-    hdr?: { number_of_significant_value_digits: number };
   };
   extended_stats: {
     field: string;
@@ -111,11 +121,7 @@ export interface AggregationOptionsByType {
     buckets_path: BucketsPath;
     script?: Script;
   };
-  composite: {
-    size?: number;
-    sources: CompositeOptionsSource[];
-    after?: Record<string, string | number | null>;
-  };
+  composite: CompositeAggregationOptions;
   diversified_sampler: {
     shard_size?: number;
     max_docs_per_value?: number;
@@ -321,6 +327,7 @@ export type AggregationResponseMap<
       [TName in keyof TAggregationInputMap]: AggregationResponsePart<
         TAggregationInputMap[TName],
         TDocument
-      >[AggregationType & keyof TAggregationInputMap[TName]];
+      >[AggregationType &
+        keyof UnionToIntersection<TAggregationInputMap[TName]>];
     }
   : undefined;
