@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const CLIENT_BASE_PATH = '/management/elasticsearch/transform/';
+export const CLIENT_BASE_PATH = '/management/data/transform/';
 
 export enum SECTION_SLUG {
   HOME = 'transform_management',

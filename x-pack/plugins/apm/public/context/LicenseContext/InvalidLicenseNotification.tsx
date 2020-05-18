@@ -11,7 +11,7 @@ import { useApmPluginContext } from '../../hooks/useApmPluginContext';
 export function InvalidLicenseNotification() {
   const { core } = useApmPluginContext();
   const manageLicenseURL = core.http.basePath.prepend(
-    '/app/kibana#/management/elasticsearch/license_management'
+    '/app/kibana#/management/stack/license_management'
   );
 
   return (
