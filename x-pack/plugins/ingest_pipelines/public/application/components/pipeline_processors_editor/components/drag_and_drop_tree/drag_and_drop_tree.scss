@@ -1,7 +1,38 @@
-
+$minItemHeight: 65px;
 .pipelineProcessorsEditor__dragAndDropTree {
   // This relaxes limitations imposed by any parents
   // that can lead to the bottom area of the droppable zone
   // being dead (only tested on chrome).
   overflow: auto;
+
+  &__item {
+    // ability to center align children
+    display: flex;
+    min-height: $minItemHeight;
+  }
+
+
+  &__itemAngleBracketContainer {
+    // Align container to top of flex item
+    align-self: baseline;
+  }
+
+  &__itemAngleBracket {
+    width: 20px;
+    border-bottom: $euiColorMediumShade 2px solid;
+    border-left: $euiColorMediumShade 2px solid;
+    min-height: calc(#{$minItemHeight} / 2);
+  }
+
+  &__droppableContainer {
+    padding: $euiSizeS $euiSizeS $euiSize $euiSizeS;
+  }
+
+  &__draggableContainer {
+    padding: $euiSizeS $euiSizeS 0px $euiSizeS;
+
+    &--last {
+      padding: $euiSizeS;
+    }
+  }
 }

@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, memo, useRef, useMemo, useEffect } from 'react';
+import React, { FunctionComponent, memo, useRef, useEffect, useMemo } from 'react';
 import { EuiDroppable, EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 
 import { ProcessorInternal, ProcessorSelector } from '../../types';
 
 import { TreeNode, TreeNodeComponentArgs } from './tree_node';
-import { useDragDropContext, ON_FAILURE } from './drag_and_drop_tree_provider';
+import { ON_FAILURE, useDragDropContext } from './drag_and_drop_tree_provider';
 
 import './drag_and_drop_tree.scss';
 
@@ -23,9 +23,18 @@ export interface Props {
   baseSelector: ProcessorSelector;
 }
 
-type SelectorReactElementTuple = [ProcessorSelector, React.ReactElement];
-
 export const DROPPABLE_TYPE = 'processor';
+
+export type DerivedProcessor = ProcessorInternal & {
+  id: string;
+  flattenedIndex: number;
+  selector: ProcessorSelector;
+};
+
+interface DerivedTreeState {
+  selectors: ProcessorSelector[];
+  processors: DerivedProcessor[];
+}
 
 /**
  * Takes in array of {@link ProcessorInternal} and renders a drag and drop tree.
@@ -51,66 +60,67 @@ export const DragAndDropTreeUI: FunctionComponent<Props> = ({
     return treeIdRef.current;
   };
 
-  const items = useMemo<SelectorReactElementTuple[]>(() => {
-    let flatTreeIndex = 0;
-    const _items: SelectorReactElementTuple[] = [];
-    const treeId = readTreeId();
-
-    const addRenderedItems = (
-      _processors: ProcessorInternal[],
-      _selector: ProcessorSelector,
-      level = 0
-    ) => {
-      _processors.forEach((processor, idx) => {
-        const index = flatTreeIndex++;
-        const nodeSelector = _selector.concat(String(idx));
-        const id = [treeId].concat(nodeSelector).join('.');
-        _items.push([
-          nodeSelector,
-          <TreeNode
-            key={index}
-            index={index}
-            level={level}
-            processor={processor}
-            id={id}
-            selector={baseSelector.concat(nodeSelector)}
-            component={renderItem}
-          />,
-        ]);
-
-        if (
-          processor.onFailure?.length &&
-          [treeId].concat(nodeSelector).join('.') !== currentDragSelector
-        ) {
-          addRenderedItems(processor.onFailure, nodeSelector.concat(ON_FAILURE), level + 1);
-        }
-      });
-    };
-
-    addRenderedItems(processors, [], 0);
-    return _items;
-  }, [processors, renderItem, currentDragSelector, baseSelector]);
-
   const treeId = `${readTreeId()}_PIPELINE_PROCESSORS_EDITOR`;
 
-  useEffect(() => {
-    registerTreeItems(treeId, {
-      selectors: items.map(([selector]) => selector),
-      baseSelector,
-    });
+  const derivedTreeState = useMemo<DerivedTreeState>(() => {
+    const state: DerivedTreeState = { processors: [], selectors: [] };
+    let flatTreeIndex = 0;
+    const getNextFlatTreeIndex = () => {
+      return flatTreeIndex++;
+    };
+    const deriveState = (processor: ProcessorInternal, selector: ProcessorSelector) => {
+      state.selectors.push(selector);
+      const id = [treeId].concat(selector).join('.');
+      const derived = { ...processor, flattenedIndex: getNextFlatTreeIndex(), selector, id };
+      if (derived.onFailure) {
+        derived.onFailure =
+          currentDragSelector !== id
+            ? derived.onFailure.map((p, idx) =>
+                deriveState(p, selector.concat([ON_FAILURE, String(idx)]))
+              )
+            : [];
+      }
+      return derived;
+    };
 
-    return () => unRegisterTreeItems(treeId);
-  }, [items, registerTreeItems, unRegisterTreeItems, treeId, baseSelector]);
+    state.processors = processors.map((processor, idx) => deriveState(processor, [String(idx)]));
+    return state;
+  }, [processors, currentDragSelector, treeId]);
 
-  const droppableContent = items.length ? (
-    items.map(([, component]) => component)
+  const droppableContent = derivedTreeState.processors.length ? (
+    derivedTreeState.processors.map((processor, idx) => {
+      return (
+        <TreeNode
+          key={processor.flattenedIndex}
+          component={renderItem}
+          level={0}
+          baseSelector={baseSelector}
+          index={idx}
+          processor={processor}
+          treeId={readTreeId()}
+        />
+      );
+    })
   ) : (
     <EuiSpacer size="xs" />
   );
 
+  useEffect(() => {
+    registerTreeItems(treeId, {
+      selectors: derivedTreeState.selectors,
+      baseSelector,
+    });
+    return () => unRegisterTreeItems(treeId);
+  }, [derivedTreeState, baseSelector, registerTreeItems, unRegisterTreeItems, treeId]);
+
   return (
     <div className="pipelineProcessorsEditor__dragAndDropTree">
-      <EuiDroppable type={DROPPABLE_TYPE} droppableId={treeId} isCombineEnabled>
+      <EuiDroppable
+        className="pipelineProcessorsEditor__dragAndDropTree__droppableContainer"
+        type={DROPPABLE_TYPE}
+        droppableId={treeId}
+        isCombineEnabled
+      >
         {droppableContent}
       </EuiDroppable>
     </div>

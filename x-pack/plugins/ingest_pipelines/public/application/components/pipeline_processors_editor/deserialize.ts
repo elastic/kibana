@@ -4,46 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Processor } from '../../../../common/types';
-
-import { DeserializeResult } from './serialize';
 import { ProcessorInternal } from './types';
 
-type SerializeArgs = DeserializeResult;
-
-export interface SerializeResult {
+export interface DeserializeArgs {
   processors: Processor[];
-  on_failure?: Processor[];
+  onFailure?: Processor[];
 }
 
-const convertProcessorInternalToProcessor = (processor: ProcessorInternal): Processor => {
-  const { options, onFailure, type } = processor;
-  const outProcessor = {
-    [type]: {
-      ...options,
-    },
-  };
+export interface DeserializeResult {
+  processors: ProcessorInternal[];
+  onFailure?: ProcessorInternal[];
+}
 
-  if (onFailure?.length) {
-    outProcessor[type].on_failure = convertProcessors(onFailure);
-  } else if (onFailure) {
-    outProcessor[type].on_failure = [];
-  }
-
-  return outProcessor;
+const getProcessorType = (processor: Processor): string => {
+  return Object.keys(processor)[0]!;
 };
 
-const convertProcessors = (processors: ProcessorInternal[]) => {
+const convertToPipelineInternalProcessor = (processor: Processor): ProcessorInternal => {
+  const type = getProcessorType(processor);
+  const { on_failure: originalOnFailure, ...options } = processor[type];
+  const onFailure = originalOnFailure?.length
+    ? convertProcessors(originalOnFailure)
+    : (originalOnFailure as ProcessorInternal[] | undefined);
+  return {
+    type,
+    onFailure,
+    options,
+  };
+};
+
+const convertProcessors = (processors: Processor[]) => {
   const convertedProcessors = [];
 
   for (const processor of processors) {
-    convertedProcessors.push(convertProcessorInternalToProcessor(processor));
+    convertedProcessors.push(convertToPipelineInternalProcessor(processor));
   }
   return convertedProcessors;
 };
 
-export const serialize = ({ processors, onFailure }: SerializeArgs): SerializeResult => {
+export const deserialize = ({ processors, onFailure }: DeserializeArgs): DeserializeResult => {
   return {
     processors: convertProcessors(processors),
-    on_failure: onFailure?.length ? convertProcessors(onFailure) : undefined,
+    onFailure: onFailure ? convertProcessors(onFailure) : undefined,
   };
 };

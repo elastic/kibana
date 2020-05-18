@@ -126,6 +126,12 @@ export const DragAndDropTreeProvider: FunctionComponent<Props> = ({ children, on
           }
 
           if (source && destination) {
+            if (
+              source.droppableId === destination.droppableId &&
+              source.index === destination.index
+            ) {
+              return;
+            }
             const dragDirection = determineDragDirection(destination.index, start?.index);
             const sourceTree = privateTreeItemMap.get(source.droppableId)!;
             const crossTreeDrag = source.droppableId !== destination.droppableId;

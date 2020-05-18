@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Reducer, useReducer, Dispatch } from 'react';
-
-import { DeserializeResult } from '../serialize';
+import { DeserializeResult } from '../deserialize';
 import { unsafeProcessorMove } from './utils';
 import { getValue, setValue } from '../utils';
 import { ProcessorInternal, ProcessorSelector } from '../types';
@@ -18,12 +17,12 @@ export type State = Omit<DeserializeResult, 'onFailure'> & {
 type Action =
   | {
       type: 'addTopLevelProcessor';
-      payload: { processor: Omit<ProcessorInternal, 'id'>; selector: ProcessorSelector };
+      payload: { processor: ProcessorInternal; selector: ProcessorSelector };
     }
   | {
       type: 'addOnFailureProcessor';
       payload: {
-        onFailureProcessor: Omit<ProcessorInternal, 'id'>;
+        onFailureProcessor: ProcessorInternal;
         targetSelector: ProcessorSelector;
       };
     }

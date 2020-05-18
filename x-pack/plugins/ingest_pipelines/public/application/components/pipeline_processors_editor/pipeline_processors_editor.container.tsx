@@ -16,10 +16,10 @@ import React, {
 import { Processor } from '../../../../common/types';
 import { OnFormUpdateArg } from '../../../shared_imports';
 
-import { deserialize } from './serialize';
+import { deserialize } from './deserialize';
 import { ProcessorInternal, ProcessorSelector } from './types';
 import { useProcessorsState } from './processors_reducer';
-import { serialize, SerializeResult } from './deserialize';
+import { serialize, SerializeResult } from './serialize';
 import { ProcessorRemoveModal, SettingsFormFlyout } from './components';
 import { getValue } from './utils';
 
