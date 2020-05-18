@@ -20,7 +20,21 @@ describe('EncryptedSavedObjects Plugin', () => {
                   "registerLegacyAPI": [Function],
                 },
                 "registerType": [Function],
+                "startWithHiddenTypes": [Function],
                 "usingEphemeralEncryptionKey": true,
+              }
+            `);
+    });
+
+    it('exposes a start contract with included hidden types', async () => {
+      const plugin = new Plugin(coreMock.createPluginInitializerContext());
+      const startApiWithHiddenTypes = (
+        await plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() })
+      ).startWithHiddenTypes(['hiddenType']);
+      expect(startApiWithHiddenTypes).toMatchInlineSnapshot(`
+              Object {
+                "getDecryptedAsInternalUser": [Function],
+                "isEncryptionError": [Function],
               }
             `);
     });

@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Logger,
-  SavedObjectsBaseOptions,
-  PluginInitializerContext,
-  CoreSetup,
-} from 'src/core/server';
+import { Logger, PluginInitializerContext, CoreSetup } from 'src/core/server';
 import { first } from 'rxjs/operators';
 import { SecurityPluginSetup } from '../../security/server';
 import { createConfig$ } from './config';
@@ -29,9 +24,10 @@ export interface EncryptedSavedObjectsPluginSetup {
   registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => void;
   __legacyCompat: { registerLegacyAPI: (legacyAPI: LegacyAPI) => void };
   usingEphemeralEncryptionKey: boolean;
+  startWithHiddenTypes: (includedHiddenTypes: string[]) => EncryptedSavedObjectsPluginStart;
 }
 
-export interface EncryptedSavedObjectsPluginStart extends SavedObjectsSetup {
+export interface EncryptedSavedObjectsPluginStart extends ReturnType<SavedObjectsSetup> {
   isEncryptionError: (error: Error) => boolean;
 }
 
@@ -92,17 +88,21 @@ export class Plugin {
         service.registerType(typeRegistration),
       __legacyCompat: { registerLegacyAPI: (legacyAPI: LegacyAPI) => (this.legacyAPI = legacyAPI) },
       usingEphemeralEncryptionKey,
+      startWithHiddenTypes: (includedHiddenTypes: string[]) =>
+        this.createStartApi(includedHiddenTypes),
     };
   }
 
   public start() {
     this.logger.debug('Starting plugin');
+    return this.createStartApi();
+  }
 
+  private createStartApi(includedHiddenTypes?: string[]) {
+    const { getDecryptedAsInternalUser } = this.savedObjectsSetup(includedHiddenTypes);
     return {
       isEncryptionError: (error: Error) => error instanceof EncryptionError,
-      getDecryptedAsInternalUser: (type: string, id: string, options?: SavedObjectsBaseOptions) => {
-        return this.savedObjectsSetup.getDecryptedAsInternalUser(type, id, options);
-      },
+      getDecryptedAsInternalUser,
     };
   }
 

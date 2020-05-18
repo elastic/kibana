@@ -35,6 +35,10 @@ import { legacyServiceMock } from '../legacy/legacy_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { SavedObjectsClientFactoryProvider } from './service/lib';
 import { NodesVersionCompatibility } from '../elasticsearch/version_check/ensure_es_version';
+import { SavedObjectsRepository } from './service/lib/repository';
+import { KibanaRequest } from '../http';
+
+jest.mock('./service/lib/repository');
 
 describe('SavedObjectsService', () => {
   const createCoreContext = ({
@@ -267,6 +271,88 @@ describe('SavedObjectsService', () => {
         const { getTypeRegistry } = await soService.start({});
 
         expect(getTypeRegistry()).toBe(typeRegistryInstanceMock);
+      });
+    });
+
+    describe('#createScopedRepository', () => {
+      it('creates a respository scoped to the user', async () => {
+        const coreContext = createCoreContext({ skipMigration: false });
+        const soService = new SavedObjectsService(coreContext);
+        const coreSetup = createSetupDeps();
+        await soService.setup(coreSetup);
+        const { createScopedRepository } = await soService.start({});
+
+        const req = {} as KibanaRequest;
+        createScopedRepository(req);
+
+        expect(coreSetup.elasticsearch.adminClient.asScoped).toHaveBeenCalledWith(req);
+
+        const [
+          {
+            value: { callAsCurrentUser },
+          },
+        ] = coreSetup.elasticsearch.adminClient.asScoped.mock.results;
+
+        const [
+          [, , , callCluster, includedHiddenTypes],
+        ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+
+        // expect(coreSetup.elasticsearch.adminClient.callAsInternalUser).toBe(callCluster);
+        expect(callCluster).toBe(callAsCurrentUser);
+        expect(includedHiddenTypes).toEqual([]);
+      });
+
+      it('creates a respository including hidden types when specified', async () => {
+        const coreContext = createCoreContext({ skipMigration: false });
+        const soService = new SavedObjectsService(coreContext);
+        const coreSetup = createSetupDeps();
+        await soService.setup(coreSetup);
+        const { createScopedRepository } = await soService.start({});
+
+        const req = {} as KibanaRequest;
+        createScopedRepository(req, ['someHiddenType']);
+
+        const [
+          [, , , , includedHiddenTypes],
+        ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+
+        expect(includedHiddenTypes).toEqual(['someHiddenType']);
+      });
+    });
+
+    describe('#createInternalRepository', () => {
+      it('creates a respository using the admin user', async () => {
+        const coreContext = createCoreContext({ skipMigration: false });
+        const soService = new SavedObjectsService(coreContext);
+        const coreSetup = createSetupDeps();
+        await soService.setup(coreSetup);
+        const { createInternalRepository } = await soService.start({});
+
+        createInternalRepository();
+
+        const [
+          [, , , callCluster, includedHiddenTypes],
+        ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+
+        expect(coreSetup.elasticsearch.adminClient.callAsInternalUser).toBe(callCluster);
+        expect(callCluster).toBe(coreSetup.elasticsearch.adminClient.callAsInternalUser);
+        expect(includedHiddenTypes).toEqual([]);
+      });
+
+      it('creates a respository including hidden types when specified', async () => {
+        const coreContext = createCoreContext({ skipMigration: false });
+        const soService = new SavedObjectsService(coreContext);
+        const coreSetup = createSetupDeps();
+        await soService.setup(coreSetup);
+        const { createInternalRepository } = await soService.start({});
+
+        createInternalRepository(['someHiddenType']);
+
+        const [
+          [, , , , includedHiddenTypes],
+        ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+
+        expect(includedHiddenTypes).toEqual(['someHiddenType']);
       });
     });
   });
