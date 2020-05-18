@@ -7,6 +7,7 @@
 import React from 'react';
 import { useParams, Redirect } from 'react-router-dom';
 
+import { WrapperPage } from '../../components/wrapper_page';
 import { useGetUrlSearch } from '../../components/navigation/use_get_url_search';
 import { useGetUserSavedObjectPermissions } from '../../lib/kibana';
 import { SpyRoute } from '../../utils/route/spy_routes';
@@ -26,10 +27,15 @@ export const CaseDetailsPage = React.memo(() => {
 
   return caseId != null ? (
     <>
-      {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (
-        <CaseCallOut title={savedObjectReadOnly.title} message={savedObjectReadOnly.description} />
-      )}
-      <CaseView caseId={caseId} userCanCrud={userPermissions?.crud ?? false} />
+      <WrapperPage noPadding>
+        {userPermissions != null && !userPermissions?.crud && userPermissions?.read && (
+          <CaseCallOut
+            title={savedObjectReadOnly.title}
+            message={savedObjectReadOnly.description}
+          />
+        )}
+        <CaseView caseId={caseId} userCanCrud={userPermissions?.crud ?? false} />
+      </WrapperPage>
       <SpyRoute />
     </>
   ) : null;
