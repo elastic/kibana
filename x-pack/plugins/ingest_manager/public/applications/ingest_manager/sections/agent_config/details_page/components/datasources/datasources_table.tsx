@@ -275,6 +275,7 @@ export const DatasourcesTable: React.FunctionComponent<Props> = ({
       search={{
         toolsRight: [
           <EuiButton
+            key="addDatasourceButton"
             isDisabled={!hasWriteCapabilities}
             iconType="plusInCircle"
             href={getHref('add_datasource_from_configuration', { configId: config.id })}

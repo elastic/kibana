@@ -15,6 +15,7 @@ import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
+  ICustomClusterClient,
   Plugin,
   Logger,
   PluginInitializerContext,
@@ -34,6 +35,13 @@ import { formatEsError } from './lib/format_es_error';
 
 interface CrossClusterReplicationContext {
   client: IScopedClusterClient;
+}
+
+async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {
+  const [core] = await getStartServices();
+  // Extend the elasticsearchJs client with additional endpoints.
+  const esClientConfig = { plugins: [elasticsearchJsPlugin] };
+  return core.elasticsearch.legacy.createClient('crossClusterReplication', esClientConfig);
 }
 
 const ccrDataEnricher = async (indicesList: Index[], callWithRequest: APICaller) => {
@@ -69,6 +77,7 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
   private readonly config$: Observable<CrossClusterReplicationConfig>;
   private readonly license: License;
   private readonly logger: Logger;
+  private ccrEsClient?: ICustomClusterClient;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -77,7 +86,7 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
   }
 
   setup(
-    { http, elasticsearch }: CoreSetup,
+    { http, getStartServices }: CoreSetup,
     { licensing, indexManagement, remoteClusters }: Dependencies
   ) {
     this.config$
@@ -115,12 +124,10 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
       }
     );
 
-    // Extend the elasticsearchJs client with additional endpoints.
-    const esClientConfig = { plugins: [elasticsearchJsPlugin] };
-    const ccrEsClient = elasticsearch.createClient('crossClusterReplication', esClientConfig);
-    http.registerRouteHandlerContext('crossClusterReplication', (ctx, request) => {
+    http.registerRouteHandlerContext('crossClusterReplication', async (ctx, request) => {
+      this.ccrEsClient = this.ccrEsClient ?? (await getCustomEsClient(getStartServices));
       return {
-        client: ccrEsClient.asScoped(request),
+        client: this.ccrEsClient.asScoped(request),
       };
     });
 
@@ -135,5 +142,10 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
   }
 
   start() {}
-  stop() {}
+
+  stop() {
+    if (this.ccrEsClient) {
+      this.ccrEsClient.close();
+    }
+  }
 }
