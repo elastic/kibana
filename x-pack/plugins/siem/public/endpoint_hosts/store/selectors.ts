@@ -95,7 +95,7 @@ export const policyResponseLoading = (state: Immutable<HostState>): boolean =>
 export const policyResponseError = (state: Immutable<HostState>) => state.policyResponseError;
 
 export const isOnHostPage = (state: Immutable<HostState>) =>
-  state.location ? state.location.pathname === '/hosts' : false;
+  state.location ? state.location.pathname === '/endpoint-hosts' : false;
 
 export const uiQueryParams: (
   state: Immutable<HostState>

@@ -43,7 +43,7 @@ export const alertListPagination = createStructuredSelector({
  * Returns a boolean based on whether or not the user is on the alerts page
  */
 export const isOnAlertPage = (state: Immutable<AlertListState>): boolean => {
-  return state.location ? state.location.pathname === '/alerts' : false;
+  return state.location ? state.location.pathname === '/endpoint-alerts' : false;
 };
 
 /**
