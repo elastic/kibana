@@ -48,7 +48,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     return state;
   } else if (action.type === 'serverReturnedRelatedEventData') {
     const statsMap = state.resultsEnrichedWithRelatedEventInfo;
-    if (statsMap && typeof statsMap?.set === 'function') {
+    if (statsMap) {
       const relatedDataEntries = new Map([...statsMap, ...action.payload]);
       return { ...state, resultsEnrichedWithRelatedEventInfo: relatedDataEntries };
     }
