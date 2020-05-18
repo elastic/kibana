@@ -26,8 +26,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/65949
-  describe.skip('sample data dashboard', function describeIndexTests() {
+  describe('sample data dashboard', function describeIndexTests() {
     before(async () => {
       await PageObjects.common.sleep(5000);
       await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
