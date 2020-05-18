@@ -21,4 +21,4 @@ export {
   registerTestBed,
   getRandomString,
   TestBed,
-} from '../../../__packages_do_not_import__/test_utils_temp';
+} from '../../../__packages_do_not_import__/test_utils';

@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import * as TestUtils from '../__packages_do_not_import__/test_utils';
 
 export { JsonEditor, OnJsonEditorUpdateHandler } from './components/json_editor';
 
@@ -58,6 +59,8 @@ export {
   Error,
   useAuthorizationContext,
 } from './authorization';
+
+export { TestUtils };
 
 /** dummy plugin, we just want esUiShared to have its own bundle */
 export function plugin() {
