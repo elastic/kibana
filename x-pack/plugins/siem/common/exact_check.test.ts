@@ -8,8 +8,8 @@ import * as t from 'io-ts';
 import { left, right, Either } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { foldLeftRight, getPaths } from './__mocks__/utils';
 import { exactCheck, findDifferencesRecursive } from './exact_check';
+import { foldLeftRight, getPaths } from './test_utils';
 
 describe('exact_check', () => {
   test('it returns an error if given extra object properties', () => {

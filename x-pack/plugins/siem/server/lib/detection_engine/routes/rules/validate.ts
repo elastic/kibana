@@ -9,8 +9,8 @@ import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as t from 'io-ts';
 
-import { formatErrors } from '../../../../utils/build_validation/format_errors';
-import { exactCheck } from '../../../../utils/build_validation/exact_check';
+import { formatErrors } from '../../../../../common/format_errors';
+import { exactCheck } from '../../../../../common/exact_check';
 import { PartialAlert, FindResult } from '../../../../../../alerting/server';
 import {
   isAlertType,
