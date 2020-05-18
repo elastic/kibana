@@ -20,6 +20,7 @@ export interface IField {
   isValid(): boolean;
   getOrdinalFieldMetaRequest(): Promise<unknown>;
   getCategoricalFieldMetaRequest(size: number): Promise<unknown>;
+  supportsFieldMeta(): boolean;
 }
 
 export class AbstractField implements IField {
