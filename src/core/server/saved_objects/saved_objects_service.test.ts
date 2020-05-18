@@ -297,7 +297,6 @@ describe('SavedObjectsService', () => {
           [, , , callCluster, includedHiddenTypes],
         ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
 
-        // expect(coreSetup.elasticsearch.adminClient.callAsInternalUser).toBe(callCluster);
         expect(callCluster).toBe(callAsCurrentUser);
         expect(includedHiddenTypes).toEqual([]);
       });
