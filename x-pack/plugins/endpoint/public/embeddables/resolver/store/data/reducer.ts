@@ -26,33 +26,24 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     };
   } else if (action.type === 'userRequestedRelatedEventData') {
     const resolverEvent = action.payload;
-    const statsMap = state.resultsEnrichedWithRelatedEventInfo;
-    if (statsMap) {
-      const currentStatsMap = new Map(statsMap);
-      /**
-       * Set the waiting indicator for this event to indicate that related event results are pending.
-       * It will be replaced by the actual results from the API when they are returned.
-       */
-      currentStatsMap.set(resolverEvent, 'waitingForRelatedEventData');
-      return { ...state, resultsEnrichedWithRelatedEventInfo: currentStatsMap };
-    }
-    return state;
+    const currentStatsMap = new Map(state.resultsEnrichedWithRelatedEventInfo);
+    /**
+     * Set the waiting indicator for this event to indicate that related event results are pending.
+     * It will be replaced by the actual results from the API when they are returned.
+     */
+    currentStatsMap.set(resolverEvent, 'waitingForRelatedEventData');
+    return { ...state, resultsEnrichedWithRelatedEventInfo: currentStatsMap };
   } else if (action.type === 'serverFailedToReturnRelatedEventData') {
-    const statsMap = state.resultsEnrichedWithRelatedEventInfo;
-    if (statsMap) {
-      const currentStatsMap = new Map(statsMap);
-      const resolverEvent = action.payload;
-      currentStatsMap.set(resolverEvent, 'error');
-      return { ...state, resultsEnrichedWithRelatedEventInfo: currentStatsMap };
-    }
-    return state;
+    const currentStatsMap = new Map(state.resultsEnrichedWithRelatedEventInfo);
+    const resolverEvent = action.payload;
+    currentStatsMap.set(resolverEvent, 'error');
+    return { ...state, resultsEnrichedWithRelatedEventInfo: currentStatsMap };
   } else if (action.type === 'serverReturnedRelatedEventData') {
-    const statsMap = state.resultsEnrichedWithRelatedEventInfo;
-    if (statsMap) {
-      const relatedDataEntries = new Map([...statsMap, ...action.payload]);
-      return { ...state, resultsEnrichedWithRelatedEventInfo: relatedDataEntries };
-    }
-    return state;
+    const relatedDataEntries = new Map([
+      ...state.resultsEnrichedWithRelatedEventInfo,
+      ...action.payload,
+    ]);
+    return { ...state, resultsEnrichedWithRelatedEventInfo: relatedDataEntries };
   } else if (action.type === 'appRequestedResolverData') {
     return {
       ...state,

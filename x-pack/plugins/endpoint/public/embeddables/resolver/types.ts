@@ -184,7 +184,7 @@ export interface DataState {
   readonly results: readonly ResolverEvent[];
   isLoading: boolean;
   hasError: boolean;
-  resultsEnrichedWithRelatedEventInfo?: Map<ResolverEvent, RelatedEventDataResults>;
+  resultsEnrichedWithRelatedEventInfo: Map<ResolverEvent, RelatedEventDataResults>;
 }
 
 export type Vector2 = readonly [number, number];
