@@ -23,10 +23,13 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 
 import { EditorRenderProps } from 'src/plugins/visualize/public';
 import { KibanaContextProvider, PanelsContainer, Panel } from '../../kibana_react/public';
+import { Storage } from '../../kibana_utils/public';
 
 import { DefaultEditorSideBar } from './components/sidebar';
 import { DefaultEditorControllerState } from './default_editor_controller';
 import { getInitialWidth } from './editor_size';
+
+const localStorage = new Storage(window.localStorage);
 
 function DefaultEditor({
   core,
@@ -77,6 +80,7 @@ function DefaultEditor({
       <KibanaContextProvider
         services={{
           appName: 'vis_default_editor',
+          storage: localStorage,
           data,
           ...core,
         }}
