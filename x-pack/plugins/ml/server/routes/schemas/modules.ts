@@ -73,5 +73,23 @@ export const setupModuleBodySchema = schema.object({
 
 export const getModuleIdParamSchema = (optional = false) => {
   const stringType = schema.string();
-  return { moduleId: optional ? schema.maybe(stringType) : stringType };
+  return schema.object({
+    /**
+     * ID of the module.
+     */
+    moduleId: optional ? schema.maybe(stringType) : stringType,
+  });
 };
+
+export const optionalModuleIdParamSchema = getModuleIdParamSchema(true);
+
+export const moduleIdParamSchema = getModuleIdParamSchema(false);
+
+export const modulesIndexPatternTitleSchema = schema.object({
+  /**
+   * Index pattern to recognize. Note that this does not need to be a Kibana
+   * index pattern, and can be the name of a single Elasticsearch index,
+   * or include a wildcard (*) to match multiple indices.
+   */
+  indexPatternTitle: schema.string(),
+});

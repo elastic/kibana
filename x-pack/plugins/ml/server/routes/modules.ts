@@ -4,13 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { TypeOf } from '@kbn/config-schema';
 
 import { RequestHandlerContext } from 'kibana/server';
 import { DatafeedOverride, JobOverride } from '../../common/types/modules';
 import { wrapError } from '../client/error_wrapper';
 import { DataRecognizer } from '../models/data_recognizer';
-import { getModuleIdParamSchema, setupModuleBodySchema } from './schemas/modules';
+import {
+  moduleIdParamSchema,
+  optionalModuleIdParamSchema,
+  modulesIndexPatternTitleSchema,
+  setupModuleBodySchema,
+} from './schemas/modules';
 import { RouteInitialization } from '../types';
 
 function recognize(context: RequestHandlerContext, indexPatternTitle: string) {
@@ -86,9 +91,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
    * @api {get} /api/ml/modules/recognize/:indexPatternTitle Recognize index pattern
    * @apiName RecognizeIndex
    * @apiDescription By supplying an index pattern, discover if any of the modules are a match for data in that index.
-   * @apiParam {String} indexPatternTitle index pattern to recognize. Note that this does not need to be a Kibana
-   *      index pattern, and can be the name of a single Elasticsearch index,
-   *      or include a wildcard (*) to match multiple indices.
+   * @apiSchema (params) modulesIndexPatternTitleSchema
    * @apiSuccess {object[]} modules Array of objects describing the modules which match the index pattern.
    * @apiSuccessExample {json} Success-Response:
    * [{
@@ -113,9 +116,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/modules/recognize/{indexPatternTitle}',
       validate: {
-        params: schema.object({
-          indexPatternTitle: schema.string(),
-        }),
+        params: modulesIndexPatternTitleSchema,
       },
       options: {
         tags: ['access:ml:canCreateJob'],
@@ -138,9 +139,9 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
    *
    * @api {get} /api/ml/modules/get_module/:moduleId Get module
    * @apiName GetModule
-   * @apiDescription Retrieve a whole ML module, containing jobs, datafeeds and saved objects.
-   * @apiParam {String} [moduleId] ID of the module to return. If no module ID is supplied,
-   *      an array of all modules will be returned.
+   * @apiDescription Retrieve a whole ML module, containing jobs, datafeeds and saved objects. If
+   *    no module ID is supplied, returns all modules.
+   * @apiSchema (params) moduleIdParamSchema
    * @apiSuccess {object} module When a module ID is specified, returns a module object containing
    *      all of the jobs, datafeeds and saved objects which will be created when the module is setup.
    * @apiSuccess {object[]} modules If no module ID is supplied, an array of all modules will be returned.
@@ -245,9 +246,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/modules/get_module/{moduleId?}',
       validate: {
-        params: schema.object({
-          ...getModuleIdParamSchema(true),
-        }),
+        params: optionalModuleIdParamSchema,
       },
       options: {
         tags: ['access:ml:canGetJobs'],
@@ -278,6 +277,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
    * @apiDescription Runs the module setup process.
    *      This creates jobs, datafeeds and kibana saved objects. It allows for customization of the module,
    *      overriding the default configuration. It also allows the user to start the datafeed.
+   * @apiSchema (params) moduleIdParamSchema
    * @apiSchema (body) setupModuleBodySchema
    * @apiParamExample {json} jobOverrides-no-job-ID:
    * "jobOverrides": {
@@ -413,7 +413,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/modules/setup/{moduleId}',
       validate: {
-        params: schema.object(getModuleIdParamSchema()),
+        params: moduleIdParamSchema,
         body: setupModuleBodySchema,
       },
       options: {
@@ -470,8 +470,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
    *      current list of jobs. The check runs a test to see if any of the jobs in existence
    *      have an ID which ends with the ID of each job in the module. This is done as a prefix
    *      may be supplied in the setup endpoint which is added to the start of the ID of every job in the module.
-   *
-   * @apiParam {String} moduleId ID of the module to check whether the jobs defined in the module exist.
+   * @apiSchema (params) moduleIdParamSchema
    * @apiSuccess {boolean} jobsExist <code>true</code> if all the jobs in the module have a matching job with an
    *      ID which ends with the job ID specified in the module, <code>false</code> otherwise.
    * @apiSuccess {Object[]} jobs  present if the jobs do all exist, with each object having keys of <code>id</code>,
@@ -518,7 +517,7 @@ export function dataRecognizer({ router, mlLicense }: RouteInitialization) {
     {
       path: '/api/ml/modules/jobs_exist/{moduleId}',
       validate: {
-        params: schema.object(getModuleIdParamSchema()),
+        params: moduleIdParamSchema,
       },
       options: {
         tags: ['access:ml:canGetJobs'],
