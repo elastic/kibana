@@ -194,7 +194,10 @@ export class ChromeService {
               values={{
                 link: (
                   <EuiLink target="_blank" href="https://www.elastic.co/support/matrix" external>
-                    the support matrix on our website
+                    <FormattedMessage
+                      id="core.chrome.browserDeprecationLink"
+                      defaultMessage="the support matrix on our website"
+                    />
                   </EuiLink>
                 ),
               }}
