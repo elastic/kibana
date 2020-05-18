@@ -7,7 +7,7 @@
 import { ListsDefaultArray } from './lists_default_array';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import { foldLeftRight, getPaths } from '../../../../../utils/build_validation/__mocks__/utils';
+import { getPaths, foldLeftRight } from '../../../../../../common/test_utils';
 
 describe('lists_default_array', () => {
   test('it should validate an empty array', () => {
