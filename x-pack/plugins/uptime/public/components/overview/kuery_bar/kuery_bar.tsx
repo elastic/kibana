@@ -59,11 +59,12 @@ export function KueryBarComponent({
     suggestions: [],
     isLoadingIndexPattern: true,
   });
+  const [suggestionLimit, setSuggestionLimit] = useState(15);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState<boolean>(false);
   let currentRequestCheck: string;
 
   const [getUrlParams, updateUrlParams] = useUrlParams();
-  const { search: kuery } = getUrlParams();
+  const { search: kuery, dateRangeStart, dateRangeEnd } = getUrlParams();
 
   const indexPatternMissing = loading && !indexPattern;
 
@@ -74,6 +75,7 @@ export function KueryBarComponent({
 
     setIsLoadingSuggestions(true);
     setState({ ...state, suggestions: [] });
+    setSuggestionLimit(15);
 
     const currentRequest = uniqueId();
     currentRequestCheck = currentRequest;
@@ -86,10 +88,18 @@ export function KueryBarComponent({
           query: inputValue,
           selectionStart,
           selectionEnd: selectionStart,
+          boolFilter: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: dateRangeStart,
+                  lte: dateRangeEnd,
+                },
+              },
+            },
+          ],
         })) || []
-      )
-        .filter(suggestion => !startsWith(suggestion.text, 'span.'))
-        .slice(0, 15);
+      ).filter(suggestion => !startsWith(suggestion.text, 'span.'));
 
       if (currentRequest !== currentRequestCheck) {
         return;
@@ -120,6 +130,10 @@ export function KueryBarComponent({
     }
   }
 
+  const increaseLimit = () => {
+    setSuggestionLimit(suggestionLimit + 15);
+  };
+
   return (
     <Container>
       <Typeahead
@@ -130,7 +144,8 @@ export function KueryBarComponent({
         initialValue={kuery}
         onChange={onChange}
         onSubmit={onSubmit}
-        suggestions={state.suggestions}
+        suggestions={state.suggestions.slice(0, suggestionLimit)}
+        loadMore={increaseLimit}
         queryExample=""
       />
 

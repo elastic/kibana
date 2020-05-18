@@ -113,7 +113,7 @@ export class Typeahead extends Component {
       suggestion.text +
       this.state.value.substr(suggestion.end);
 
-    this.setState({ value: nextInputValue, index: null });
+    this.setState({ value: nextInputValue.trim(), index: null });
     this.props.onChange(nextInputValue, nextInputValue.length);
   };
 
@@ -152,11 +152,19 @@ export class Typeahead extends Component {
   };
 
   onSubmit = () => {
-    if (this.state.lastSubmitted !== this.state.value) {
-      this.props.onSubmit(this.state.value);
-      this.setState({ lastSubmitted: this.state.value });
+    const { isSuggestionsVisible, index, value, lastSubmitted } = this.state;
+
+    if (isSuggestionsVisible && this.props.suggestions[index]) {
+      this.selectSuggestion(this.props.suggestions[index]);
     }
-    this.setState({ isSuggestionsVisible: false });
+    if (lastSubmitted !== value) {
+      this.props.onSubmit(value);
+      this.setState({ lastSubmitted: value });
+    }
+  };
+
+  onFocus = () => {
+    this.setState({ isSuggestionsVisible: true });
   };
 
   render() {
@@ -182,6 +190,7 @@ export class Typeahead extends Component {
             onKeyDown={this.onKeyDown}
             onKeyUp={this.onKeyUp}
             onBlur={this.onSubmit}
+            onFocus={this.onFocus}
             onChange={this.onChangeInputValue}
             onClick={this.onClickInput}
             autoComplete="off"
@@ -207,6 +216,7 @@ export class Typeahead extends Component {
           index={this.state.index}
           onClick={this.onClickSuggestion}
           onMouseEnter={this.onMouseEnterSuggestion}
+          loadMore={this.props.loadMore}
         />
       </ClickOutside>
     );
@@ -219,6 +229,7 @@ Typeahead.propTypes = {
   disabled: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
+  loadMore: PropTypes.func.isRequired,
   suggestions: PropTypes.array.isRequired,
   queryExample: PropTypes.string.isRequired,
 };
