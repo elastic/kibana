@@ -367,13 +367,12 @@ export const ProcessEventDot = styled(
                   category: statsEntry[0],
                 },
               });
-              return false;
             },
           };
         });
       }, [relatedEvents, dispatch, event]);
 
-      const relatedEventStatusOrOptions = useMemo(() => {
+      const relatedEventStatusOrOptions = (() => {
         if (!relatedEvents) {
           // If related events have not yet been requested
           return subMenuAssets.initialMenuStatus;
@@ -388,7 +387,7 @@ export const ProcessEventDot = styled(
           return relatedEvents;
         }
         return relatedEventOptions;
-      }, [relatedEvents, relatedEventOptions]);
+      })();
 
       /* eslint-disable jsx-a11y/click-events-have-key-events */
       /**

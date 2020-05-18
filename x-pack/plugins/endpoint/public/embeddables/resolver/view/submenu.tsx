@@ -39,10 +39,7 @@ interface ResolverSubmenuOption {
   prefix?: number | JSX.Element;
 }
 
-export type ResolverSubmenuOptionList =
-  | ResolverSubmenuOption[]
-  | 'waitingForRelatedEventData'
-  | typeof subMenuAssets.initialMenuStatus;
+export type ResolverSubmenuOptionList = ResolverSubmenuOption[] | string;
 
 const OptionList = React.memo(
   ({
