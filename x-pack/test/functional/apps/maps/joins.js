@@ -171,10 +171,10 @@ export default function({ getPageObjects, getService }) {
         const split = layerTOCDetails.trim().split('\n');
 
         const min = split[0];
-        expect(min).to.equal('12');
+        expect(min).to.equal('max prop1');
 
-        const max = split[2];
-        expect(max).to.equal('12');
+        const max = split[1];
+        expect(max).to.equal('12'); // just single band because single value
       });
 
       it('should flag only the joined features as visible', async () => {
