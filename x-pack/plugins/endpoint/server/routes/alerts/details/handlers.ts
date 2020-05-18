@@ -6,11 +6,11 @@
 import { GetResponse } from 'elasticsearch';
 import { KibanaRequest, RequestHandler } from 'kibana/server';
 import { AlertEvent } from '../../../../common/types';
-import { AlertConstants } from '../../../../common/alert_constants';
 import { EndpointAppContext } from '../../../types';
 import { AlertDetailsRequestParams } from '../types';
 import { AlertDetailsPagination } from './lib';
 import { getHostData } from '../../metadata';
+import { AlertId } from '../lib';
 
 export const alertDetailsHandlerWrapper = function(
   endpointAppContext: EndpointAppContext
@@ -21,10 +21,10 @@ export const alertDetailsHandlerWrapper = function(
     res
   ) => {
     try {
-      const alertId = req.params.id;
+      const alertId = AlertId.fromEncoded(req.params.id);
       const response = (await ctx.core.elasticsearch.dataClient.callAsCurrentUser('get', {
-        index: AlertConstants.ALERT_INDEX_NAME,
-        id: alertId,
+        index: alertId.index,
+        id: alertId.id,
       })) as GetResponse<AlertEvent>;
 
       const indexPattern = await endpointAppContext.service
@@ -50,7 +50,7 @@ export const alertDetailsHandlerWrapper = function(
 
       return res.ok({
         body: {
-          id: response._id,
+          id: alertId.toString(),
           ...response._source,
           state: {
             host_metadata: currentHostInfo?.metadata,
@@ -60,6 +60,9 @@ export const alertDetailsHandlerWrapper = function(
         },
       });
     } catch (err) {
+      const logger = endpointAppContext.logFactory.get('alerts');
+      logger.warn(err);
+
       if (err.status === 404) {
         return res.notFound({ body: err });
       }
