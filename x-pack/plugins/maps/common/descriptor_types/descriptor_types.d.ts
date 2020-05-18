@@ -115,6 +115,7 @@ export type JoinDescriptor = {
 // todo : this union type is incompatible with dynamic extensibility of sources.
 // Reconsider using SourceDescriptor in type signatures for top-level classes
 export type SourceDescriptor =
+  | AbstractSourceDescriptor
   | XYZTMSSourceDescriptor
   | WMSSourceDescriptor
   | KibanaTilemapSourceDescriptor
