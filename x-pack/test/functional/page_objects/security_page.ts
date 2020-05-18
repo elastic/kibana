@@ -108,6 +108,9 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
     async login(username?: string, password?: string, options: LoginOptions = {}) {
       await PageObjects.common.navigateToApp('login');
 
+      // ensure welcome screen won't be shown. This is relevant for environments which don't allow
+      // to use the yml setting, e.g. cloud
+      await browser.setLocalStorageItem('home:welcome:show', 'false');
       await waitForLoginForm();
 
       const [superUsername, superPassword] = config.get('servers.elasticsearch.auth').split(':');
