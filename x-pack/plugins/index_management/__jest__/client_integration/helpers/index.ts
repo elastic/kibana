@@ -10,7 +10,7 @@ import { setup as templateCreateSetup } from './template_create.helpers';
 import { setup as templateCloneSetup } from './template_clone.helpers';
 import { setup as templateEditSetup } from './template_edit.helpers';
 
-type TestBed = TestUtils.TestBed;
+type TestBed<T> = TestUtils.TestBed<T>;
 const { nextTick, getRandomString, findTestSubject } = TestUtils;
 
 export { nextTick, getRandomString, findTestSubject, TestBed };

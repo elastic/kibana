@@ -13,7 +13,7 @@ import {
 
 const { nextTick, getRandomString, findTestSubject } = TestUtils;
 
-type TestBed = TestUtils.TestBed;
+type TestBed<T> = TestUtils.TestBed<T>;
 
 export { nextTick, getRandomString, findTestSubject, TestBed };
 

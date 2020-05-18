@@ -11,7 +11,7 @@ import { setup as watchCreateThresholdSetup } from './watch_create_threshold.hel
 import { setup as watchEditSetup } from './watch_edit.helpers';
 
 const { nextTick, getRandomString, findTestSubject } = TestUtils;
-type TestBed = TestUtils.TestBed;
+type TestBed<T> = TestUtils.TestBed<T>;
 
 export { nextTick, getRandomString, findTestSubject, TestBed };
 

@@ -11,7 +11,7 @@ import { setup as policyAddSetup } from './policy_add.helpers';
 import { setup as policyEditSetup } from './policy_edit.helpers';
 
 const { nextTick, getRandomString, findTestSubject } = TestUtils;
-type TestBed = TestUtils.TestBed;
+type TestBed<T> = TestUtils.TestBed<T>;
 
 export { nextTick, getRandomString, findTestSubject, TestBed };
 
