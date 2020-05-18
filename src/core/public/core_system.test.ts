@@ -197,6 +197,11 @@ describe('#setup()', () => {
     expect(MockInjectedMetadataService.setup).toHaveBeenCalledTimes(1);
   });
 
+  it('calls docLinks#setup()', async () => {
+    await setupCore();
+    expect(MockDocLinksService.setup).toHaveBeenCalledTimes(1);
+  });
+
   it('calls http#setup()', async () => {
     await setupCore();
     expect(MockHttpService.setup).toHaveBeenCalledTimes(1);
