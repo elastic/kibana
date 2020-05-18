@@ -24,12 +24,10 @@ import {
   RecursivePartial,
   LayerValue,
 } from '@elastic/charts';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
-import { FormatFactory } from '../types';
+import { FormatFactory, LensFilterEvent } from '../types';
 import { VisualizationContainer } from '../visualization_container';
 import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
 import { ColumnGroups, PieExpressionProps } from './types';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { getSliceValueWithFallback, getFilterContext } from './render_helpers';
 import { EmptyPlaceholder } from '../shared_components';
 import './visualization.scss';
@@ -43,13 +41,13 @@ export function PieComponent(
     formatFactory: FormatFactory;
     chartTheme: Exclude<PartialTheme, undefined>;
     isDarkMode: boolean;
-    executeTriggerActions: UiActionsStart['executeTriggerActions'];
+    onClickValue: (data: LensFilterEvent['data']) => void;
   }
 ) {
   const [firstTable] = Object.values(props.data.tables);
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
-  const { chartTheme, isDarkMode, executeTriggerActions } = props;
+  const { chartTheme, isDarkMode, onClickValue } = props;
   const {
     shape,
     groups,
@@ -246,7 +244,7 @@ export function PieComponent(
               firstTable
             );
 
-            executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, context);
+            onClickValue(context);
           }}
         />
         <Partition
