@@ -7,15 +7,21 @@
 import { Store, createStore } from 'redux';
 import { DataAction } from './action';
 import { dataReducer } from './reducer';
-import { DataState, RelatedEventDataEntry, RelatedEventDataEntryWithStats } from '../../types';
+import {
+  DataState,
+  RelatedEventDataEntry,
+  RelatedEventDataEntryWithStats,
+  RelatedEventData,
+} from '../../types';
 import { ResolverEvent } from '../../../../../common/types';
 import { relatedEventStats, relatedEvents } from './selectors';
 
 describe('resolver data selectors', () => {
   const store: Store<DataState, DataAction> = createStore(dataReducer, undefined);
   describe('when related event data is reduced into state with no results', () => {
-    const relatedEventInfoBeforeAction = new Map(relatedEvents(store.getState()) || []);
+    let relatedEventInfoBeforeAction: RelatedEventData;
     beforeEach(() => {
+      relatedEventInfoBeforeAction = new Map(relatedEvents(store.getState()) || []);
       const payload: Map<ResolverEvent, RelatedEventDataEntry> = new Map();
       const action: DataAction = { type: 'serverReturnedRelatedEventData', payload };
       store.dispatch(action);
@@ -26,8 +32,9 @@ describe('resolver data selectors', () => {
     });
   });
   describe('when related event data is reduced into state with 2 dns results', () => {
-    const mockBaseEvent = {} as ResolverEvent;
+    let mockBaseEvent: ResolverEvent;
     beforeEach(() => {
+      mockBaseEvent = {} as ResolverEvent;
       function dnsRelatedEventEntry() {
         const fakeEvent = {} as ResolverEvent;
         return { relatedEvent: fakeEvent, relatedEventType: 'dns' };

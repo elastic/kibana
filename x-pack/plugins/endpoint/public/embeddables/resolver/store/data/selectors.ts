@@ -414,6 +414,10 @@ export const relatedEventResults = function(data: DataState) {
   return data.resultsEnrichedWithRelatedEventInfo;
 };
 
+/**
+ * This selector compiles the related event data attached in `relatedEventResults`
+ * into a `RelatedEventData` map of ResolverEvents to statistics about their related events
+ */
 export const relatedEventStats = createSelector(relatedEventResults, function getRelatedEvents(
   /* eslint-disable no-shadow */
   relatedEventResults
@@ -431,10 +435,13 @@ export const relatedEventStats = createSelector(relatedEventResults, function ge
     if (typeof newStatsEntry === 'object') {
       // compile stats
       if (newStatsEntry instanceof Error) {
+        // If the entry is an error, return it as is
         relatedEventStats.set(updatedEvent, newStatsEntry);
         continue;
       }
       /**
+       * Otherwise, it should be a valid stats entry.
+       * Do the work to compile the stats.
        * Folowing reduction, this will be a record like
        * {DNS: 10, File: 2} etc.
        */
@@ -456,6 +463,9 @@ export const relatedEventStats = createSelector(relatedEventResults, function ge
   return relatedEventStats;
 });
 
+/**
+ * This selects `RelatedEventData` maps specifically for graphable processes
+ */
 export const relatedEvents = createSelector(
   graphableProcesses,
   relatedEventStats,
