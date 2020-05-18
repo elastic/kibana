@@ -11,7 +11,6 @@ import { debounce } from 'lodash';
 
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { useMlContext } from '../../../../../contexts/ml';
-import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public'; // indexPatterns
 
 import {
   DfAnalyticsExplainResponse,
@@ -27,16 +26,14 @@ import {
   getJobConfigFromFormState,
   State,
 } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import {
-  OMIT_FIELDS,
-  shouldAddAsDepVarOption,
-} from '../../../analytics_management/components/create_analytics_form/form_options_validation';
+import { shouldAddAsDepVarOption } from '../../../analytics_management/components/create_analytics_form/form_options_validation';
 import { ml } from '../../../../../services/ml_api_service';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { ANALYTICS_STEPS } from '../../page';
 import { ContinueButton } from '../continue_button';
 import { JobType } from './job_type';
+import { SupportedFieldsMessage } from './supported_fields_message';
 import { AnalysisFieldsTable } from './analysis_fields_table';
 import { DataGrid } from '../../../../../components/data_grid';
 import { useIndexData } from '../../hooks';
@@ -76,7 +73,6 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
     modelMemoryLimit,
     previousJobType,
     requiredFieldsError,
-    sourceIndexContainsNumericalFields,
     trainingPercent,
   } = form;
 
@@ -101,37 +97,13 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
     maxDistinctValuesError !== undefined ||
     requiredFieldsError !== undefined;
 
-  // Find out if index pattern contain numeric fields. Provides a hint in the form
-  // that an analytics jobs is not able to identify outliers if there are no numeric fields present.
-  const validateSourceIndexFields = async () => {
-    if (currentIndexPattern && currentIndexPattern.id) {
-      try {
-        const indexPattern: IndexPattern = await mlContext.indexPatterns.get(
-          currentIndexPattern.id
-        );
-        const containsNumericalFields: boolean = indexPattern.fields.some(
-          ({ name, type }) => !OMIT_FIELDS.includes(name) && type === 'number'
-        );
-
-        setFormState({
-          sourceIndexContainsNumericalFields: containsNumericalFields,
-          sourceIndexFieldsCheckFailed: false,
-        });
-      } catch (e) {
-        setFormState({
-          sourceIndexFieldsCheckFailed: true,
-        });
-      }
-    }
-  };
-
   const loadDepVarOptions = async (formState: State['form']) => {
     setFormState({
       loadingDepVarOptions: true,
       // clear when the source index changes
       maxDistinctValuesError: undefined,
-      sourceIndexFieldsCheckFailed: false,
-      sourceIndexContainsNumericalFields: true,
+      // sourceIndexFieldsCheckFailed: false,
+      // sourceIndexContainsNumericalFields: true,
     });
     try {
       if (currentIndexPattern !== undefined) {
@@ -240,7 +212,8 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
         e.body &&
         e.body.message !== undefined &&
         e.body.message.includes('status_exception') &&
-        e.body.message.includes('must have at most')
+        (e.body.message.includes('must have at most') ||
+          e.body.message.includes('must have at least'))
       ) {
         errorMessage = e.body.message;
       }
@@ -256,7 +229,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
         ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: fallbackModelMemoryLimit } : {}),
       });
     }
-  }, 400);
+  }, 300);
 
   useEffect(() => {
     initiateWizard();
@@ -267,17 +240,6 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
   }, []);
 
   useEffect(() => {
-    if (jobType !== undefined) {
-      setFormState({
-        sourceIndexContainsNumericalFields: true,
-        sourceIndexFieldsCheckFailed: false,
-      });
-
-      if (jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION) {
-        validateSourceIndexFields();
-      }
-    }
-
     if (isJobTypeWithDepVar) {
       loadDepVarOptions(form);
     }
@@ -302,18 +264,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
   return (
     <Fragment>
       <Messages messages={requestMessages} />
-      <EuiFormRow
-        fullWidth
-        helpText={
-          !sourceIndexContainsNumericalFields &&
-          i18n.translate('xpack.ml.dataframe.analytics.create.sourceObjectHelpText', {
-            defaultMessage:
-              'This index pattern does not contain any numeric type fields. The analytics job may not be able to come up with any outliers.',
-          })
-        }
-      >
-        <Fragment />
-      </EuiFormRow>
+      <SupportedFieldsMessage jobType={jobType} />
       <JobType type={jobType} setFormState={setFormState} />
       <EuiFormRow
         label={i18n.translate('xpack.ml.dataframe.analytics.create.sourceQueryLabel', {
@@ -346,27 +297,6 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
         <Fragment>
           <EuiFormRow
             fullWidth
-            isInvalid={maxDistinctValuesError !== undefined}
-            error={[
-              ...(fieldOptionsFetchFail === true && maxDistinctValuesError !== undefined
-                ? [
-                    <Fragment>
-                      {i18n.translate(
-                        'xpack.ml.dataframe.analytics.create.dependentVariableMaxDistictValuesError',
-                        {
-                          defaultMessage: 'Invalid. {message}',
-                          values: { message: maxDistinctValuesError },
-                        }
-                      )}
-                    </Fragment>,
-                  ]
-                : []),
-            ]}
-          >
-            <Fragment />
-          </EuiFormRow>
-          <EuiFormRow
-            fullWidth
             label={i18n.translate('xpack.ml.dataframe.analytics.create.dependentVariableLabel', {
               defaultMessage: 'Dependent variable',
             })}
@@ -391,6 +321,19 @@ export const ConfigurationStepForm: FC<CreateAnalyticsFormProps> = ({
                         {
                           defaultMessage:
                             'There was a problem fetching fields. Please refresh the page and try again.',
+                        }
+                      )}
+                    </Fragment>,
+                  ]
+                : []),
+              ...(fieldOptionsFetchFail === true && maxDistinctValuesError !== undefined
+                ? [
+                    <Fragment>
+                      {i18n.translate(
+                        'xpack.ml.dataframe.analytics.create.dependentVariableMaxDistictValuesError',
+                        {
+                          defaultMessage: 'Invalid. {message}',
+                          values: { message: maxDistinctValuesError },
                         }
                       )}
                     </Fragment>,

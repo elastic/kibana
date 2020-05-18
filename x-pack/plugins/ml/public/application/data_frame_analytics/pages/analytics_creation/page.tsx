@@ -70,7 +70,7 @@ export const Page: FC = () => {
     },
     {
       title: i18n.translate('xpack.dataframe.analytics.creation.advancedStepTitle', {
-        defaultMessage: 'Advanced',
+        defaultMessage: 'Additional options',
       }),
       children: (
         <AdvancedStep
@@ -84,7 +84,7 @@ export const Page: FC = () => {
     },
     {
       title: i18n.translate('xpack.dataframe.analytics.creation.detailsStepTitle', {
-        defaultMessage: 'Details',
+        defaultMessage: 'Job details',
       }),
       children: (
         <DetailsStep
@@ -153,9 +153,9 @@ export const Page: FC = () => {
                   >
                     <EuiText size="s" grow={false}>
                       {i18n.translate(
-                        'xpack.ml.dataframe.analytics.create.enableJsonEditorSwitch',
+                        'xpack.ml.dataframe.analytics.create.switchToJsonEditorSwitch',
                         {
-                          defaultMessage: 'Enable json editor',
+                          defaultMessage: 'Switch to json editor',
                         }
                       )}
                     </EuiText>

@@ -6,21 +6,27 @@
 
 import React, { FC, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { State } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import {
+  EuiButtonEmpty,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
+import {
+  State,
+  UNSET_CONFIG_ITEM,
+} from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 import { useMlContext } from '../../../../../contexts/ml';
 import { ANALYTICS_STEPS } from '../../page';
 
-export interface ListItems {
-  title: string;
-  description: string | JSX.Element;
+interface Props {
+  setCurrentStep: React.Dispatch<React.SetStateAction<any>>;
+  state: State;
 }
 
-export const ConfigurationStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
-  setCurrentStep,
-  state,
-}) => {
+export const ConfigurationStepDetails: FC<Props> = ({ setCurrentStep, state }) => {
   const mlContext = useMlContext();
   const { currentIndexPattern } = mlContext;
   const { form } = state;
@@ -29,18 +35,18 @@ export const ConfigurationStepDetails: FC<{ setCurrentStep: any; state: State }>
   const isJobTypeWithDepVar =
     jobType === ANALYSIS_CONFIG_TYPE.REGRESSION || jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
 
-  const detailsFirstCol: ListItems[] = [
+  const detailsFirstCol = [
     {
       title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.jobType', {
         defaultMessage: 'Source index',
       }),
-      description: currentIndexPattern.title || '',
+      description: currentIndexPattern.title || UNSET_CONFIG_ITEM,
     },
     {
       title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.Query', {
         defaultMessage: 'Query',
       }),
-      description: jobConfigQueryString || '',
+      description: jobConfigQueryString || UNSET_CONFIG_ITEM,
     },
   ];
 
@@ -49,18 +55,27 @@ export const ConfigurationStepDetails: FC<{ setCurrentStep: any; state: State }>
       title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.jobType', {
         defaultMessage: 'Job type',
       }),
-      description: jobType || '',
+      description: jobType! as string,
+    },
+  ];
+
+  const detailsThirdCol = [
+    {
+      title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.excludedFields', {
+        defaultMessage: 'Excluded fields',
+      }),
+      description: excludes.length > 0 ? excludes.join(', ') : UNSET_CONFIG_ITEM,
     },
   ];
 
   if (isJobTypeWithDepVar) {
-    detailsFirstCol.push({
+    detailsSecondCol.push({
       title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.trainingPercent', {
         defaultMessage: 'Training percent',
       }),
       description: `${trainingPercent}`,
     });
-    detailsSecondCol.push({
+    detailsThirdCol.unshift({
       title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.dependentVariable', {
         defaultMessage: 'Dependent variable',
       }),
@@ -68,18 +83,9 @@ export const ConfigurationStepDetails: FC<{ setCurrentStep: any; state: State }>
     });
   }
 
-  const detailsThirdCol = [
-    {
-      title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.excludedFields', {
-        defaultMessage: 'Excluded fields',
-      }),
-      description: excludes.join(', '),
-    },
-  ];
-
   return (
     <Fragment>
-      <EuiFlexGroup>
+      <EuiFlexGroup style={{ width: '70%' }} justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiDescriptionList compressed listItems={detailsFirstCol} />
         </EuiFlexItem>
@@ -91,7 +97,7 @@ export const ConfigurationStepDetails: FC<{ setCurrentStep: any; state: State }>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <EuiButton
+      <EuiButtonEmpty
         iconType="pencil"
         size="s"
         onClick={() => {
@@ -101,7 +107,7 @@ export const ConfigurationStepDetails: FC<{ setCurrentStep: any; state: State }>
         {i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.editButtonText', {
           defaultMessage: 'Edit',
         })}
-      </EuiButton>
+      </EuiButtonEmpty>
     </Fragment>
   );
 };

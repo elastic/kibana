@@ -6,10 +6,26 @@
 
 import React, { FC, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { State } from '../../../analytics_management/hooks/use_create_analytics_form/state';
+import {
+  EuiButtonEmpty,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
+import {
+  UNSET_CONFIG_ITEM,
+  State,
+} from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 import { ANALYTICS_STEPS } from '../../page';
+
+const defaultPredictionField = 'ml';
+
+function getStringValue(value) {
+  return value !== undefined ? `${value}` : UNSET_CONFIG_ITEM;
+}
 
 export interface ListItems {
   title: string;
@@ -42,124 +58,19 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
     standardizationEnabled,
   } = form;
 
-  const detailsFirstCol: ListItems[] = [];
+  const isDepVarJob =
+    jobType === ANALYSIS_CONFIG_TYPE.REGRESSION || jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
 
-  const detailsSecondCol: ListItems[] = [];
+  const advancedFirstCol: ListItems[] = [];
+  const advancedSecondCol: ListItems[] = [];
+  const advancedThirdCol: ListItems[] = [];
 
-  const detailsThirdCol: ListItems[] = [];
-
-  if (jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION) {
-    detailsFirstCol.push({
-      title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.numTopClasses', {
-        defaultMessage: 'Top classes',
-      }),
-      description: `${numTopClasses}`,
-    });
-  }
-
-  if (
-    jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
-    jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
-  ) {
-    detailsFirstCol.push({
-      title: i18n.translate(
-        'xpack.ml.dataframe.analytics.create.configDetails.numTopFeatureImportanceValues',
-        {
-          defaultMessage: 'Top feature importance values',
-        }
-      ),
-      description: `${numTopFeatureImportanceValues}`,
-    });
-
-    if (lambda !== undefined) {
-      detailsFirstCol.push({
-        title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.lambdaFields', {
-          defaultMessage: 'Lambda',
-        }),
-        description: `${lambda}`,
-      });
-    }
-
-    if (eta !== undefined) {
-      detailsFirstCol.push({
-        title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.eta', {
-          defaultMessage: 'ETA',
-        }),
-        description: `${eta}`,
-      });
-    }
-
-    if (predictionFieldName !== '') {
-      detailsSecondCol.push({
-        title: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.configDetails.predictionFieldName',
-          {
-            defaultMessage: 'Prediction field name',
-          }
-        ),
-        description: predictionFieldName,
-      });
-    } else if (dependentVariable !== '') {
-      detailsSecondCol.push({
-        title: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.configDetails.predictionFieldName',
-          {
-            defaultMessage: 'Prediction field name',
-          }
-        ),
-        description: `${dependentVariable}_prediction`,
-      });
-    }
-
-    if (maxTrees !== undefined) {
-      detailsSecondCol.push({
-        title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.maxTreesFields', {
-          defaultMessage: 'Max trees',
-        }),
-        description: `${maxTrees || '""'}`,
-      });
-    }
-
-    if (featureBagFraction !== undefined) {
-      detailsSecondCol.push({
-        title: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.configDetails.featureBagFraction',
-          {
-            defaultMessage: 'Feature bag fraction',
-          }
-        ),
-        description: `${featureBagFraction}` || '""',
-      });
-    }
-
-    detailsThirdCol.push({
-      title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.modelMemoryLimit', {
-        defaultMessage: 'Model memory limit',
-      }),
-      description: `${modelMemoryLimit}`,
-    });
-
-    if (gamma !== undefined) {
-      detailsThirdCol.push({
-        title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.gamma', {
-          defaultMessage: 'Gamma',
-        }),
-        description: `${gamma || ''}`,
-      });
-    }
-
-    if (randomizeSeed !== undefined) {
-      detailsThirdCol.push({
-        title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.randomizedSeed', {
-          defaultMessage: 'Randomized seed',
-        }),
-        description: `${randomizeSeed || ''}`,
-      });
-    }
-  }
+  const hyperFirstCol: ListItems[] = [];
+  const hyperSecondCol: ListItems[] = [];
+  const hyperThirdCol: ListItems[] = [];
 
   if (jobType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION) {
-    detailsFirstCol.push({
+    advancedFirstCol.push({
       title: i18n.translate(
         'xpack.ml.dataframe.analytics.create.configDetails.computeFeatureInfluence',
         {
@@ -169,53 +80,46 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
       description: computeFeatureInfluence,
     });
 
-    if (featureInfluenceThreshold !== undefined) {
-      detailsFirstCol.push({
-        title: i18n.translate(
-          'xpack.ml.dataframe.analytics.create.configDetails.featureInfluenceThreshold',
-          {
-            defaultMessage: 'Feature influence threshold',
-          }
-        ),
-        description: `${featureInfluenceThreshold}`,
-      });
-    }
+    advancedSecondCol.push({
+      title: i18n.translate(
+        'xpack.ml.dataframe.analytics.create.configDetails.featureInfluenceThreshold',
+        {
+          defaultMessage: 'Feature influence threshold',
+        }
+      ),
+      description: getStringValue(featureInfluenceThreshold),
+    });
 
-    if (nNeighbors !== undefined) {
-      detailsFirstCol.push({
-        title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.nNeighbors', {
-          defaultMessage: 'N neighbors',
-        }),
-        description: `${nNeighbors}`,
-      });
-    }
-
-    detailsSecondCol.push({
+    advancedThirdCol.push({
       title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.modelMemoryLimit', {
         defaultMessage: 'Model memory limit',
       }),
       description: `${modelMemoryLimit}`,
     });
 
-    if (outlierFraction !== undefined) {
-      detailsSecondCol.push({
+    hyperFirstCol.push(
+      {
+        title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.nNeighbors', {
+          defaultMessage: 'N neighbors',
+        }),
+        description: getStringValue(nNeighbors),
+      },
+      {
         title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.outlierFraction', {
           defaultMessage: 'Outlier fraction',
         }),
-        description: `${outlierFraction}`,
-      });
-    }
+        description: getStringValue(outlierFraction),
+      }
+    );
 
-    if (method !== undefined) {
-      detailsThirdCol.push({
-        title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.nNeighbors', {
-          defaultMessage: 'Method',
-        }),
-        description: `${method}`,
-      });
-    }
+    hyperSecondCol.push({
+      title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.nNeighbors', {
+        defaultMessage: 'Method',
+      }),
+      description: getStringValue(method),
+    });
 
-    detailsThirdCol.push({
+    hyperThirdCol.push({
       title: i18n.translate(
         'xpack.ml.dataframe.analytics.create.configDetails.standardizationEnabled',
         {
@@ -226,21 +130,135 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
     });
   }
 
+  if (isDepVarJob) {
+    if (jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION) {
+      advancedFirstCol.push({
+        title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.numTopClasses', {
+          defaultMessage: 'Top classes',
+        }),
+        description: `${numTopClasses}`,
+      });
+    }
+
+    advancedFirstCol.push({
+      title: i18n.translate(
+        'xpack.ml.dataframe.analytics.create.configDetails.numTopFeatureImportanceValues',
+        {
+          defaultMessage: 'Top feature importance values',
+        }
+      ),
+      description: `${numTopFeatureImportanceValues}`,
+    });
+
+    hyperFirstCol.push(
+      {
+        title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.lambdaFields', {
+          defaultMessage: 'Lambda',
+        }),
+        description: getStringValue(lambda),
+      },
+      {
+        title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.eta', {
+          defaultMessage: 'Eta',
+        }),
+        description: getStringValue(eta),
+      }
+    );
+
+    advancedSecondCol.push({
+      title: i18n.translate(
+        'xpack.ml.dataframe.analytics.create.configDetails.predictionFieldName',
+        {
+          defaultMessage: 'Prediction field name',
+        }
+      ),
+      description: `${dependentVariable}_prediction`,
+    });
+
+    hyperSecondCol.push(
+      {
+        title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.maxTreesFields', {
+          defaultMessage: 'Max trees',
+        }),
+        description: getStringValue(maxTrees),
+      },
+      {
+        title: i18n.translate(
+          'xpack.ml.dataframe.analytics.create.configDetails.featureBagFraction',
+          {
+            defaultMessage: 'Feature bag fraction',
+          }
+        ),
+        description: getStringValue(featureBagFraction),
+      }
+    );
+
+    advancedThirdCol.push({
+      title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.modelMemoryLimit', {
+        defaultMessage: 'Model memory limit',
+      }),
+      description: `${modelMemoryLimit}`,
+    });
+
+    hyperThirdCol.push(
+      {
+        title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.gamma', {
+          defaultMessage: 'Gamma',
+        }),
+        description: getStringValue(gamma),
+      },
+      {
+        title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.randomizedSeed', {
+          defaultMessage: 'Randomized seed',
+        }),
+        description: getStringValue(randomizeSeed),
+      }
+    );
+  }
+
   return (
     <Fragment>
-      <EuiFlexGroup>
+      <EuiTitle size="xs">
+        <h3>
+          {i18n.translate('xpack.ml.dataframe.analytics.create.advancedConfigDetailsTitle', {
+            defaultMessage: 'Advanced configuration',
+          })}
+        </h3>
+      </EuiTitle>
+      <EuiSpacer />
+      <EuiFlexGroup style={{ width: '70%' }} justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiDescriptionList compressed listItems={detailsFirstCol} />
+          <EuiDescriptionList compressed listItems={advancedFirstCol} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiDescriptionList compressed listItems={detailsSecondCol} />
+          <EuiDescriptionList compressed listItems={advancedSecondCol} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiDescriptionList compressed listItems={detailsThirdCol} />
+          <EuiDescriptionList compressed listItems={advancedThirdCol} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <EuiButton
+      <EuiTitle size="xs">
+        <h3>
+          {i18n.translate('xpack.ml.dataframe.analytics.create.hyperParametersDetailsTitle', {
+            defaultMessage: 'Hyper parameters',
+          })}
+        </h3>
+      </EuiTitle>
+      <EuiSpacer />
+      <EuiFlexGroup style={{ width: '70%' }} justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiDescriptionList compressed listItems={hyperFirstCol} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiDescriptionList compressed listItems={hyperSecondCol} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiDescriptionList compressed listItems={hyperThirdCol} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <EuiButtonEmpty
         iconType="pencil"
         size="s"
         onClick={() => {
@@ -250,7 +268,7 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
         {i18n.translate('xpack.ml.dataframe.analytics.create.advancedDetails.editButtonText', {
           defaultMessage: 'Edit',
         })}
-      </EuiButton>
+      </EuiButtonEmpty>
     </Fragment>
   );
 };

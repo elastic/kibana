@@ -6,7 +6,13 @@
 
 import React, { FC, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import { State } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { ANALYTICS_STEPS } from '../../page';
 
@@ -51,7 +57,7 @@ export const DetailsStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
 
   return (
     <Fragment>
-      <EuiFlexGroup>
+      <EuiFlexGroup style={{ width: '70%' }} justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiDescriptionList compressed listItems={detailsFirstCol} />
         </EuiFlexItem>
@@ -63,7 +69,7 @@ export const DetailsStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <EuiButton
+      <EuiButtonEmpty
         iconType="pencil"
         size="s"
         onClick={() => {
@@ -73,7 +79,7 @@ export const DetailsStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
         {i18n.translate('xpack.ml.dataframe.analytics.create.detailsDetails.editButtonText', {
           defaultMessage: 'Edit',
         })}
-      </EuiButton>
+      </EuiButtonEmpty>
     </Fragment>
   );
 };

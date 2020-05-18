@@ -91,7 +91,7 @@ export const HyperParameters: FC<CreateAnalyticsFormProps> = ({ actions, state }
       <EuiFlexItem style={{ minWidth: '30%' }}>
         <EuiFormRow
           label={i18n.translate('xpack.ml.dataframe.analytics.create.etaLabel', {
-            defaultMessage: 'ETA',
+            defaultMessage: 'Eta',
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.etaText', {
             defaultMessage: 'The shrinkage applied to the weights. Must be between 0.001 and 1.',

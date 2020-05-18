@@ -12,8 +12,6 @@ import { ConfigurationStepDetails } from './configuration_step_details';
 import { ConfigurationStepForm } from './configuration_step_form';
 import { ANALYTICS_STEPS } from '../../page';
 
-// TODO: validate index fields for whatever job type to ensure they are supported
-// show error callout at the top with a link back to selection if not valid fields
 export const ConfigurationStep: FC<CreateAnalyticsFormProps> = ({
   actions,
   state,

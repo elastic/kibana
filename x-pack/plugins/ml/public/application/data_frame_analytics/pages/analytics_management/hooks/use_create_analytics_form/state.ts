@@ -28,6 +28,7 @@ export enum DEFAULT_MODEL_MEMORY_LIMIT {
 }
 
 export const DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES = 2;
+export const UNSET_CONFIG_ITEM = '--';
 
 export type EsIndexName = string;
 export type DependentVariable = string;
@@ -166,14 +167,14 @@ export const getInitialState = (): State => ({
     outlierFraction: undefined,
     predictionFieldName: '',
     previousJobType: null,
-    previousSourceIndex: undefined,
+    previousSourceIndex: undefined, // TODO: deprecated - remove
     requiredFieldsError: undefined,
     randomizeSeed: undefined,
     sourceIndex: '',
-    sourceIndexNameEmpty: true,
-    sourceIndexNameValid: false,
-    sourceIndexContainsNumericalFields: true,
-    sourceIndexFieldsCheckFailed: false,
+    sourceIndexNameEmpty: true, // TODO: deprecated - remove
+    sourceIndexNameValid: false, // TODO: deprecated - remove
+    sourceIndexContainsNumericalFields: true, // TODO: deprecated - remove
+    sourceIndexFieldsCheckFailed: false, // TODO: deprecated - remove
     standardizationEnabled: 'true',
     trainingPercent: 80,
   },

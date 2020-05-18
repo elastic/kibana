@@ -4,17 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useState } from 'react';
-import { EuiButton, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import React, { FC, Fragment, useEffect, useState } from 'react';
+import {
+  EuiButton,
+  EuiCard,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiHorizontalRule,
+  EuiIcon,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+// import { useMlKibana } from '../../../../../contexts/kibana';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { Messages } from '../../../analytics_management/components/create_analytics_form/messages';
 import { ANALYTICS_STEPS } from '../../page';
 
-// function redirectToAnalyticsManagementPage() {
-//   window.location.href = '#/data_frame_analytics?';
-// }
+function redirectToAnalyticsManagementPage() {
+  window.location.href = '#/data_frame_analytics?';
+}
 
 export const CreateStep: FC<CreateAnalyticsFormProps> = ({ actions, state, step }) => {
   const { createAnalyticsJob, startAnalyticsJob } = actions;
@@ -27,19 +37,28 @@ export const CreateStep: FC<CreateAnalyticsFormProps> = ({ actions, state, step 
     requestMessages,
   } = state;
 
-  const [checked, setChecked] = useState<boolean>(false);
+  // const {
+  //   services: { notifications },
+  // } = useMlKibana();
+
+  const [checked, setChecked] = useState<boolean>(true);
+
+  // useEffect(() => {
+  //   if (requestMessages.length) {
+  //     requestMessages.map(message => {
+  //       notifications.toasts.addSuccess(message.message);
+  //     });
+  //   }
+  // }, [requestMessages.length]);
 
   if (step !== ANALYTICS_STEPS.CREATE) return null;
 
   const handleCreation = async () => {
-    // create
     await createAnalyticsJob();
+
     if (checked) {
-      // create and start
       startAnalyticsJob();
     }
-    // redirect to list
-    // redirectToAnalyticsManagementPage();
   };
 
   return (
@@ -81,6 +100,26 @@ export const CreateStep: FC<CreateAnalyticsFormProps> = ({ actions, state, step 
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
+      )}
+      {isJobCreated === true && (
+        <Fragment>
+          <EuiHorizontalRule />
+          <EuiCard
+            style={{ width: '300px' }}
+            icon={<EuiIcon size="xxl" type="list" />}
+            title={i18n.translate('xpack.ml.dataframe.analytics.create.analyticsListCardTitle', {
+              defaultMessage: 'Data Frame Analytics',
+            })}
+            description={i18n.translate(
+              'xpack.ml.dataframe.analytics.create.analyticsListCardDescription',
+              {
+                defaultMessage: 'Return to the analytics management page.',
+              }
+            )}
+            onClick={redirectToAnalyticsManagementPage}
+            data-test-subj="analyticsWizardCardManagement"
+          />
+        </Fragment>
       )}
     </Fragment>
   );
