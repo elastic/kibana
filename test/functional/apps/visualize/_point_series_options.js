@@ -341,6 +341,17 @@ export default function({ getService, getPageObjects }) {
         log.debug('close inspector');
         await inspector.close();
       });
+
+      after(async () => {
+        const timezone = await kibanaServer.uiSettings.get('dateFormat:tz');
+
+        // make sure the timezone was set to default correctly to avoid further failures
+        // for details see https://github.com/elastic/kibana/issues/63037
+        if (timezone !== 'UTC') {
+          log.debug("set 'dateFormat:tz': 'UTC'");
+          await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
+        }
+      });
     });
   });
 }

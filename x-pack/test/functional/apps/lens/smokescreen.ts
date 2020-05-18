@@ -72,7 +72,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       .perform();
   }
 
-  describe('lens smokescreen tests', () => {
+  // Failing: https://github.com/elastic/kibana/issues/66779
+  describe.skip('lens smokescreen tests', () => {
     it('should allow editing saved visualizations', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await PageObjects.lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
