@@ -72,10 +72,17 @@ export const StepConfigureDatasource: React.FunctionComponent<{
           body={
             <EuiText>
               <p>
-                <FormattedMessage
-                  id="xpack.ingestManager.createDatasource.stepConfigure.noConfigOptionsMessage"
-                  defaultMessage="Nothing to configure"
-                />
+                {datasource.package?.name === 'endpoint' ? (
+                  <FormattedMessage
+                    id="xpack.ingestManager.createDatasource.stepConfigure.endpointConfigOptionsMessage"
+                    defaultMessage="endpoint nothing to configure"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ingestManager.createDatasource.stepConfigure.noConfigOptionsMessage"
+                    defaultMessage="Nothing to configure"
+                  />
+                )}
               </p>
             </EuiText>
           }
