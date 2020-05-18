@@ -10,7 +10,7 @@ import { EndpointAppContext } from '../../../types';
 import { AlertDetailsRequestParams } from '../types';
 import { AlertDetailsPagination } from './lib';
 import { getHostData } from '../../metadata';
-import { AlertId } from '../lib';
+import { AlertId, AlertIdError } from '../lib';
 
 export const alertDetailsHandlerWrapper = function(
   endpointAppContext: EndpointAppContext
@@ -63,7 +63,10 @@ export const alertDetailsHandlerWrapper = function(
       const logger = endpointAppContext.logFactory.get('alerts');
       logger.warn(err);
 
-      if (err.status === 404) {
+      // err will be an AlertIdError if the passed in alert id is not valid
+      if (err instanceof AlertIdError) {
+        return res.badRequest({ body: err });
+      } else if (err.status === 404) {
         return res.notFound({ body: err });
       }
       return res.internalError({ body: err });
