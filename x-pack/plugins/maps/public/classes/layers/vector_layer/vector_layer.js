@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import turf from 'turf';
 import React from 'react';
 import { AbstractLayer } from '../layer';
 import { VectorStyle } from '../../styles/vector/vector_style';
@@ -30,6 +29,7 @@ import {
   canSkipFormattersUpdate,
 } from '../../util/can_skip_fetch';
 import { assignFeatureIds } from '../../util/assign_feature_ids';
+import { getFeatureCollectionBounds } from '../../util/get_feature_collection_bounds';
 import {
   getFillFilterExpression,
   getLineFilterExpression,
@@ -153,31 +153,10 @@ export class VectorLayer extends AbstractLayer {
     return this.getCurrentStyle().renderLegendDetails();
   }
 
-  _getBoundsBasedOnData() {
-    const featureCollection = this._getSourceFeatureCollection();
-    if (!featureCollection) {
-      return null;
-    }
-
-    const visibleFeatures = featureCollection.features.filter(
-      feature => feature.properties[FEATURE_VISIBLE_PROPERTY_NAME]
-    );
-    const bbox = turf.bbox({
-      type: 'FeatureCollection',
-      features: visibleFeatures,
-    });
-    return {
-      minLon: bbox[0],
-      minLat: bbox[1],
-      maxLon: bbox[2],
-      maxLat: bbox[3],
-    };
-  }
-
   async getBounds(dataFilters) {
     const isStaticLayer = !this.getSource().isBoundsAware();
     if (isStaticLayer) {
-      return this._getBoundsBasedOnData();
+      return getFeatureCollectionBounds(this._getSourceFeatureCollection(), this._hasJoins());
     }
 
     const searchFilters = this._getSearchFilters(
@@ -592,10 +571,6 @@ export class VectorLayer extends AbstractLayer {
   // Given 2 above, which source/style to use can not be pulled from data request state.
   // Therefore, source and style are provided as arugments and must be used instead of calling getSource or getCurrentStyle.
   async _syncData(syncContext, source, style) {
-    if (!this.isVisible() || !this.showAtZoomLevel(syncContext.dataFilters.zoom)) {
-      return;
-    }
-
     await this._syncSourceStyleMeta(syncContext, source, style);
     await this._syncSourceFormatters(syncContext, source, style);
     const sourceResult = await this._syncSource(syncContext, source, style);
