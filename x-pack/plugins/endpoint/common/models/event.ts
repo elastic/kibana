@@ -52,7 +52,7 @@ export function eventType(event: ResolverEvent): string {
   if (isLegacyEvent(event)) {
     const legacyFullType = event.endgame.event_type_full;
     if (legacyFullType) {
-      eventCategoryToReturn = legacyFullType;
+      return legacyFullType;
     }
   } else {
     const eventCategories = event.event.category;
