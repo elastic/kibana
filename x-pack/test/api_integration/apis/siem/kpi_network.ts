@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { kpiNetworkQuery } from '../../../../plugins/siem/public/containers/kpi_network/index.gql_query';
+import { kpiNetworkQuery } from '../../../../plugins/siem/public/network/containers/kpi_network/index.gql_query';
 import { GetKpiNetworkQuery } from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
