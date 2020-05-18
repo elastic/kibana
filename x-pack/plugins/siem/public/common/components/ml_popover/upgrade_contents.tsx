@@ -59,7 +59,7 @@ export const UpgradeContentsComponent = () => (
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
-          href={`${useBasePath()}/app/kibana#/management/elasticsearch/license_management`}
+          href={`${useBasePath()}/app/kibana#/management/stack/license_management`}
           iconType="gear"
           target="_blank"
         >
