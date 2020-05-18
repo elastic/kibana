@@ -228,3 +228,28 @@ export const createExceptionItem = ({
     },
   ],
 });
+
+export const getNonDeletedExceptionItems = (items: ExceptionItem[]): ExceptionItem[] => {
+  return items.filter(t => t._delete === null || !t._delete);
+};
+export const getUpdatedExceptionItems = ({
+  updatedException,
+  exceptions,
+  index,
+}: {
+  updatedException: ExceptionItem;
+  exceptions: ExceptionItem[];
+  index: number;
+}): ExceptionItem[] => {
+  const updatedExceptions =
+    exceptions.length > 1
+      ? [
+          ...exceptions.slice(0, index),
+          {
+            ...updatedException,
+          },
+          ...exceptions.slice(index + 1),
+        ]
+      : [{ ...updatedException }];
+  return updatedExceptions;
+};

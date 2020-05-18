@@ -9,13 +9,19 @@ import styled from 'styled-components';
 
 import * as i18n from './translations';
 
-const AndOrButtonsWrapper = styled.div<{ indent: boolean }>`
-  margin: ${props => (props.indent ? '8px 0 8px 46px' : '8px 0')};
+const AndOrButtonsWrapper = styled.div`
+  margin: 8px 0;
+`;
+
+const MyEuiButton = styled(EuiButton)`
+  min-width: 90px;
 `;
 
 interface AndOrExceptionOperatorProps {
   isAndDisabled?: boolean;
   indent?: boolean;
+  displayInitButton: boolean;
+  onAddExceptionClicked: () => void;
   onAndClicked: () => void;
   onOrClicked: () => void;
 }
@@ -23,33 +29,54 @@ interface AndOrExceptionOperatorProps {
 export const AndOrExceptionOperator = ({
   isAndDisabled = false,
   indent = false,
+  displayInitButton,
+  onAddExceptionClicked,
   onAndClicked,
   onOrClicked,
 }: AndOrExceptionOperatorProps) => {
   return (
-    <AndOrButtonsWrapper indent={indent}>
+    <AndOrButtonsWrapper className={indent ? 'exceptionIndent' : ''}>
       <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            iconType="plusInCircle"
-            onClick={onAndClicked}
-            data-test-subj="exceptionsAndButton"
-            isDisabled={isAndDisabled}
-          >
-            {i18n.AND}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            iconType="plusInCircle"
-            onClick={onOrClicked}
-            data-test-subj="exceptionsOrButton"
-          >
-            {i18n.OR}
-          </EuiButton>
-        </EuiFlexItem>
+        {displayInitButton ? (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              size="s"
+              iconType="plusInCircle"
+              onClick={onAddExceptionClicked}
+              data-test-subj="exceptionsAddNewExceptionButton"
+              isDisabled={isAndDisabled}
+            >
+              {i18n.ADD_EXCEPTION_TITLE}
+            </EuiButton>
+          </EuiFlexItem>
+        ) : (
+          <>
+            <EuiFlexItem grow={false}>
+              <MyEuiButton
+                fill
+                size="s"
+                iconType="plusInCircle"
+                onClick={onAndClicked}
+                data-test-subj="exceptionsAndButton"
+                isDisabled={isAndDisabled}
+              >
+                {i18n.AND}
+              </MyEuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <MyEuiButton
+                fill
+                size="s"
+                iconType="plusInCircle"
+                onClick={onOrClicked}
+                data-test-subj="exceptionsOrButton"
+              >
+                {i18n.OR}
+              </MyEuiButton>
+            </EuiFlexItem>
+          </>
+        )}
       </EuiFlexGroup>
     </AndOrButtonsWrapper>
   );

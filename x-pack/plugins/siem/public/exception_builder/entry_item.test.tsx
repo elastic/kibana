@@ -27,6 +27,7 @@ describe('EntryItem', () => {
     test('it renders expected placedholder if field is empty', () => {
       const wrapper = mount(
         <EntryItem
+          idAria="someAriaId"
           listType="siem"
           exceptionItemEntry={{
             field: '',
@@ -57,6 +58,7 @@ describe('EntryItem', () => {
     test('it renders "field" value if "field" exists', () => {
       const wrapper = mount(
         <EntryItem
+          idAria="someAriaId"
           listType="siem"
           exceptionItemEntry={{
             field: 'agent.hostname',
@@ -89,6 +91,7 @@ describe('EntryItem', () => {
     test('it renders "operator" of "is" when operator is "included" and operator type is "match"', () => {
       const wrapper = mount(
         <EntryItem
+          idAria="someAriaId"
           listType="siem"
           exceptionItemEntry={{ field: '', operator: 'included', match: '' }}
           exceptionItemIndex={0}
@@ -112,6 +115,7 @@ describe('EntryItem', () => {
     test('it renders "operator" of "is_not" when operator is "excluded" and operator type is "match"', () => {
       const wrapper = mount(
         <EntryItem
+          idAria="someAriaId"
           listType="siem"
           exceptionItemEntry={{ field: '', operator: Operator.EXCLUSION, match: '' }}
           exceptionItemIndex={0}
@@ -135,6 +139,7 @@ describe('EntryItem', () => {
     test('it renders "operator" of "is_one_of" when operator is "included" and operator type is "match_any"', () => {
       const wrapper = mount(
         <EntryItem
+          idAria="someAriaId"
           listType="siem"
           exceptionItemEntry={{ field: '', operator: 'included', match_any: [] }}
           exceptionItemIndex={0}
@@ -158,6 +163,7 @@ describe('EntryItem', () => {
     test('it renders "operator" of "is_not_one_of" when operator is "excluded" and operator type is "match_any"', () => {
       const wrapper = mount(
         <EntryItem
+          idAria="someAriaId"
           listType="siem"
           exceptionItemEntry={{ field: '', operator: Operator.EXCLUSION, match_any: [] }}
           exceptionItemIndex={0}
@@ -181,6 +187,7 @@ describe('EntryItem', () => {
     test('it renders "operator" of "exists" when operator is "included" and operator type is "exists"', () => {
       const wrapper = mount(
         <EntryItem
+          idAria="someAriaId"
           listType="siem"
           exceptionItemEntry={{ field: '', operator: 'included' }}
           exceptionItemIndex={0}
@@ -204,6 +211,7 @@ describe('EntryItem', () => {
     test('it renders "operator" of "does_not_exist" when operator is "excluded" and operator type is "exists"', () => {
       const wrapper = mount(
         <EntryItem
+          idAria="someAriaId"
           listType="siem"
           exceptionItemEntry={{ field: '', operator: Operator.EXCLUSION }}
           exceptionItemIndex={0}
@@ -227,6 +235,7 @@ describe('EntryItem', () => {
     test('it renders "operator" of "is in list" when operator is "included" and operator type is "list"', () => {
       const wrapper = mount(
         <EntryItem
+          idAria="someAriaId"
           listType="siem"
           exceptionItemEntry={{ field: '', operator: 'included', list: '' }}
           exceptionItemIndex={0}
@@ -250,6 +259,7 @@ describe('EntryItem', () => {
     test('it renders "operator" of "is_not_in_list" when operator is "excluded" and operator type is "list"', () => {
       const wrapper = mount(
         <EntryItem
+          idAria="someAriaId"
           listType="siem"
           exceptionItemEntry={{ field: '', operator: Operator.EXCLUSION, list: '' }}
           exceptionItemIndex={0}
@@ -275,6 +285,7 @@ describe('EntryItem', () => {
     test('it renders expected placedholder if operator type is "match" and field value is empty', () => {
       const wrapper = mount(
         <EntryItem
+          idAria="someAriaId"
           listType="siem"
           exceptionItemEntry={{
             field: '',
@@ -305,6 +316,7 @@ describe('EntryItem', () => {
     test('it renders field value if "match" value exists', () => {
       const wrapper = mount(
         <EntryItem
+          idAria="someAriaId"
           listType="siem"
           exceptionItemEntry={{
             field: 'host.name',
@@ -335,6 +347,7 @@ describe('EntryItem', () => {
     test('it renders expected placedholder if operator type is "match_any" and field value is empty', () => {
       const wrapper = mount(
         <EntryItem
+          idAria="someAriaId"
           listType="siem"
           exceptionItemEntry={{ field: '', operator: 'included', match_any: [] }}
           exceptionItemIndex={0}
@@ -361,6 +374,7 @@ describe('EntryItem', () => {
     test('it renders field value if "match_any" value exists', () => {
       const wrapper = mount(
         <EntryItem
+          idAria="someAriaId"
           listType="siem"
           exceptionItemEntry={{
             field: 'host.name',
@@ -391,6 +405,7 @@ describe('EntryItem', () => {
     test('it renders expected placedholder if operator type is "list" and field value is empty', () => {
       const wrapper = mount(
         <EntryItem
+          idAria="someAriaId"
           listType="siem"
           exceptionItemEntry={{ field: '', operator: 'included', list: '' }}
           exceptionItemIndex={0}
@@ -417,6 +432,7 @@ describe('EntryItem', () => {
     test('it renders field value if "list" value exists', () => {
       const wrapper = mount(
         <EntryItem
+          idAria="someAriaId"
           listType="siem"
           exceptionItemEntry={{ field: 'host.name', operator: 'included', list: '123' }}
           exceptionItemIndex={0}
@@ -443,6 +459,7 @@ describe('EntryItem', () => {
     test('it renders input disabled if operator type is "exists"', () => {
       const wrapper = mount(
         <EntryItem
+          idAria="someAriaId"
           listType="siem"
           exceptionItemEntry={{ field: '', operator: 'included' }}
           exceptionItemIndex={0}

@@ -20,6 +20,7 @@ describe('ExceptionItemComponent', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <ExceptionItemComponent
+          idAria="someAriaId"
           exceptionItem={getMockExceptionItem('exception-item-1')}
           exceptionItemIndex={0}
           listType="siem"
@@ -28,6 +29,7 @@ describe('ExceptionItemComponent', () => {
           indexPatternLoading={false}
           onChange={jest.fn()}
           setAndLogicIncluded={jest.fn()}
+          onDelete={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -39,6 +41,7 @@ describe('ExceptionItemComponent', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <ExceptionItemComponent
+          idAria="someAriaId"
           exceptionItem={getMockExceptionItem('exception-item-1')}
           exceptionItemIndex={0}
           listType="siem"
@@ -47,6 +50,7 @@ describe('ExceptionItemComponent', () => {
           indexPatternLoading={false}
           onChange={jest.fn()}
           setAndLogicIncluded={jest.fn()}
+          onDelete={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -58,6 +62,7 @@ describe('ExceptionItemComponent', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <ExceptionItemComponent
+          idAria="someAriaId"
           exceptionItem={getMockNewExceptionItem('exception-item-1')}
           exceptionItemIndex={0}
           listType="siem"
@@ -66,6 +71,7 @@ describe('ExceptionItemComponent', () => {
           indexPatternLoading={false}
           onChange={jest.fn()}
           setAndLogicIncluded={jest.fn()}
+          onDelete={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -78,6 +84,7 @@ describe('ExceptionItemComponent', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <ExceptionItemComponent
+          idAria="someAriaId"
           exceptionItem={getMockNewExceptionItem('exception-item-1')}
           exceptionItemIndex={0}
           listType="siem"
@@ -86,6 +93,7 @@ describe('ExceptionItemComponent', () => {
           indexPatternLoading={false}
           onChange={mockOnChange}
           setAndLogicIncluded={jest.fn()}
+          onDelete={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -116,6 +124,7 @@ describe('ExceptionItemComponent', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <ExceptionItemComponent
+          idAria="someAriaId"
           exceptionItem={getMockNewExceptionItem('exception-item-1')}
           exceptionItemIndex={0}
           listType="siem"
@@ -124,6 +133,7 @@ describe('ExceptionItemComponent', () => {
           indexPatternLoading={false}
           onChange={mockOnChange}
           setAndLogicIncluded={jest.fn()}
+          onDelete={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -153,6 +163,7 @@ describe('ExceptionItemComponent', () => {
     const wrapper = mount(
       <ThemeProvider theme={theme}>
         <ExceptionItemComponent
+          idAria="someAriaId"
           exceptionItem={getMockNewExceptionItem('exception-item-1')}
           exceptionItemIndex={0}
           listType="siem"
@@ -161,6 +172,7 @@ describe('ExceptionItemComponent', () => {
           indexPatternLoading={false}
           onChange={mockOnChange}
           setAndLogicIncluded={jest.fn()}
+          onDelete={jest.fn()}
         />
       </ThemeProvider>
     );

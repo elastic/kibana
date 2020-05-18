@@ -14,9 +14,6 @@ import { BrowserFields } from '../common/containers/source';
 import { ExceptionItem } from './types';
 
 const AndBadgeContainer = styled(EuiFlexItem)`
-  &.andBadgeFirstEntryItemContainer {
-    padding-top: 22px;
-  }
   &.andBadgeNotVisible {
     visibility: hidden;
   }
@@ -32,8 +29,10 @@ interface ExceptionItemProps {
   browserFields: BrowserFields;
   isAndLogicIncluded: boolean;
   indexPatternLoading: boolean;
+  idAria: string;
   onChange: (arg: ExceptionItem, index: number) => void;
   setAndLogicIncluded: (arg: boolean) => void;
+  onDelete: (arg: ExceptionItem, index: number) => void;
 }
 
 export const ExceptionItemComponent = ({
@@ -45,6 +44,8 @@ export const ExceptionItemComponent = ({
   indexPatternLoading,
   onChange,
   setAndLogicIncluded,
+  onDelete,
+  idAria,
 }: ExceptionItemProps) => {
   useEffect(() => {
     if (exceptionItem.entries.length > 1) {
@@ -69,11 +70,29 @@ export const ExceptionItemComponent = ({
     [exceptionItem, exceptionItemIndex]
   );
 
+  const onDeleteEntry = useCallback(
+    index => {
+      const { entries: existingEntries } = exceptionItem;
+      const updatedEntries = [
+        ...existingEntries.slice(0, index),
+        ...existingEntries.slice(index + 1),
+      ];
+      const updatedExceptionItem = {
+        ...exceptionItem,
+        entries: updatedEntries,
+        _delete: existingEntries.length < 2,
+      };
+
+      onDelete(updatedExceptionItem, exceptionItemIndex);
+    },
+    [exceptionItem, exceptionItemIndex]
+  );
+
   return (
-    <EuiFlexGroup gutterSize="none">
+    <EuiFlexGroup gutterSize="s" data-test-subj="exceptionEntriesContainer">
       {isAndLogicIncluded && (
         <AndBadgeContainer
-          className={`${exceptionItemIndex === 0 ? 'andBadgeFirstEntryItemContainer' : ''} ${
+          className={`exceptionAndBadgeContainer ${
             exceptionItem.entries.length <= 1 ? 'andBadgeNotVisible' : ''
           }`}
           grow={false}
@@ -85,7 +104,7 @@ export const ExceptionItemComponent = ({
       <EuiFlexItem grow={6}>
         {exceptionItem.entries.map((entry, index) => (
           <EntryItem
-            key={`${exceptionItem.id}-${entry.field}`}
+            key={`exceptionItemEntry-${index}`}
             exceptionItemEntry={entry}
             exceptionItemIndex={exceptionItemIndex}
             listType={listType}
@@ -94,7 +113,8 @@ export const ExceptionItemComponent = ({
             indexPatternLoading={indexPatternLoading}
             isLastEntry={index === exceptionItem.entries.length - 1}
             onEntryUpdate={onEntryChange}
-            onDeleteEntry={() => {}}
+            onDeleteEntry={onDeleteEntry}
+            idAria={idAria}
             data-test-subj="exceptionEntryItem"
           />
         ))}

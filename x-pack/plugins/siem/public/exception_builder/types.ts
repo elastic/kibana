@@ -53,6 +53,7 @@ export const ExceptionItemSchema = t.exact(
       entries: t.array(ExceptionItemEntrySchema),
     }),
     t.partial({
+      _delete: t.boolean,
       tie_breaker_id: t.string,
       updated_at: t.string,
       updated_by: t.string,

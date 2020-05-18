@@ -44,6 +44,7 @@ interface EntryItemProps {
   isLastEntry: boolean;
   browserFields: BrowserFields;
   indexPatternLoading: boolean;
+  idAria: string;
   onEntryUpdate: (item: ExceptionItemEntry, index: number) => void;
   onDeleteEntry: (index: number) => void;
 }
@@ -54,9 +55,9 @@ export const EntryItem = React.memo<EntryItemProps>(
     exceptionItemIndex,
     listType,
     entryIndex,
-    isLastEntry,
     browserFields,
     indexPatternLoading,
+    idAria,
     onEntryUpdate,
     onDeleteEntry,
   }) => {
@@ -237,12 +238,21 @@ export const EntryItem = React.memo<EntryItemProps>(
     };
 
     return (
-      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="s"
+        alignItems="center"
+        className="exceptionItemEntryContainer"
+        data-test-subj="exceptionItemEntryContainer"
+      >
         <EuiFlexItem grow={1}>
           {exceptionItemIndex === 0 && entryIndex === 0 ? (
             <EuiFormRowWrapper
               label={i18n.FIELD}
               data-test-subj="exceptionBuilderEntryFieldFormRow"
+              describedByIds={
+                idAria ? [`${idAria} exceptionBuilderEntryField`] : ['exceptionBuilderEntryField']
+              }
             >
               <>{getEntryFieldInput(exceptionItemEntry.field)}</>
             </EuiFormRowWrapper>
@@ -255,6 +265,11 @@ export const EntryItem = React.memo<EntryItemProps>(
             <EuiFormRowWrapper
               label={i18n.OPERATOR}
               data-test-subj="exceptionBuilderEntryOperatorFormRow"
+              describedByIds={
+                idAria
+                  ? [`${idAria} exceptionBuilderEntryOperator`]
+                  : ['exceptionBuilderEntryOperator']
+              }
             >
               <>{getEntryOperatorSelector(exceptionItemEntry)}</>
             </EuiFormRowWrapper>
@@ -266,7 +281,9 @@ export const EntryItem = React.memo<EntryItemProps>(
           {exceptionItemIndex === 0 && entryIndex === 0 ? (
             <EuiFormRowWrapper
               label="Value"
-              describedByIds={['exceptionBuilderEntryValue']}
+              describedByIds={
+                idAria ? [`${idAria} exceptionBuilderEntryValue`] : ['exceptionBuilderEntryValue']
+              }
               data-test-subj="exceptionBuilderEntryValue"
             >
               <>{getEntryValueInput(exceptionItemEntry)}</>
@@ -281,6 +298,8 @@ export const EntryItem = React.memo<EntryItemProps>(
             iconType="trash"
             onClick={() => onDeleteEntry(entryIndex)}
             aria-label={i18n.DELETE}
+            className="exceptionItemEntryDeleteButton"
+            data-test-subj="exceptionItemEntryDeleteButton"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
