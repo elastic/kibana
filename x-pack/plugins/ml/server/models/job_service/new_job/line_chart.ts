@@ -155,7 +155,7 @@ function getSearchJsonFromConfig(
 
   json.body.query = query;
 
-  const aggs: Record<number, Record<string, { field: string; percents?: number[] }>> = {};
+  const aggs: Record<number, Record<string, { field: string; percents?: string[] }>> = {};
 
   aggFieldNamePairs.forEach(({ agg, field }, i) => {
     if (field !== null && field !== EVENT_RATE_FIELD_ID) {

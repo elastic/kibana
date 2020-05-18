@@ -42,11 +42,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.dashboard.saveDashboard(dashboardName);
 
         await PageObjects.dashboard.gotoDashboardLandingPage();
-        const countOfDashboards = await listingTable.searchAndGetItemsCount(
-          'dashboard',
-          dashboardName
-        );
-        expect(countOfDashboards).to.equal(1);
+        await listingTable.searchAndExpectItemsCount('dashboard', dashboardName, 1);
       });
 
       it('is not shown when there is a dashboard', async function() {
@@ -55,11 +51,7 @@ export default function({ getService, getPageObjects }) {
       });
 
       it('is not shown when there are no dashboards shown during a search', async function() {
-        const countOfDashboards = await listingTable.searchAndGetItemsCount(
-          'dashboard',
-          'gobeldeguck'
-        );
-        expect(countOfDashboards).to.equal(0);
+        await listingTable.searchAndExpectItemsCount('dashboard', 'gobeldeguck', 0);
 
         const promptExists = await PageObjects.dashboard.getCreateDashboardPromptExists();
         expect(promptExists).to.be(false);
@@ -78,11 +70,7 @@ export default function({ getService, getPageObjects }) {
 
         await PageObjects.common.expectConfirmModalOpenState(false);
 
-        const countOfDashboards = await listingTable.searchAndGetItemsCount(
-          'dashboard',
-          dashboardName
-        );
-        expect(countOfDashboards).to.equal(1);
+        await listingTable.searchAndExpectItemsCount('dashboard', dashboardName, 1);
       });
 
       it('succeeds on confirmation press', async function() {
@@ -91,11 +79,7 @@ export default function({ getService, getPageObjects }) {
 
         await PageObjects.common.clickConfirmOnModal();
 
-        const countOfDashboards = await listingTable.searchAndGetItemsCount(
-          'dashboard',
-          dashboardName
-        );
-        expect(countOfDashboards).to.equal(0);
+        await listingTable.searchAndExpectItemsCount('dashboard', dashboardName, 0);
       });
     });
 
@@ -109,38 +93,32 @@ export default function({ getService, getPageObjects }) {
 
       it('matches on the first word', async function() {
         await listingTable.searchForItemWithName('Two');
-        const countOfDashboards = await listingTable.getItemsCount('dashboard');
-        expect(countOfDashboards).to.equal(1);
+        await listingTable.expectItemsCount('dashboard', 1);
       });
 
       it('matches the second word', async function() {
         await listingTable.searchForItemWithName('Words');
-        const countOfDashboards = await listingTable.getItemsCount('dashboard');
-        expect(countOfDashboards).to.equal(1);
+        await listingTable.expectItemsCount('dashboard', 1);
       });
 
       it('matches the second word prefix', async function() {
         await listingTable.searchForItemWithName('Wor');
-        const countOfDashboards = await listingTable.getItemsCount('dashboard');
-        expect(countOfDashboards).to.equal(1);
+        await listingTable.expectItemsCount('dashboard', 1);
       });
 
       it('does not match mid word', async function() {
         await listingTable.searchForItemWithName('ords');
-        const countOfDashboards = await listingTable.getItemsCount('dashboard');
-        expect(countOfDashboards).to.equal(0);
+        await listingTable.expectItemsCount('dashboard', 0);
       });
 
       it('is case insensitive', async function() {
         await listingTable.searchForItemWithName('two words');
-        const countOfDashboards = await listingTable.getItemsCount('dashboard');
-        expect(countOfDashboards).to.equal(1);
+        await listingTable.expectItemsCount('dashboard', 1);
       });
 
       it('is using AND operator', async function() {
         await listingTable.searchForItemWithName('three words');
-        const countOfDashboards = await listingTable.getItemsCount('dashboard');
-        expect(countOfDashboards).to.equal(0);
+        await listingTable.expectItemsCount('dashboard', 0);
       });
     });
 

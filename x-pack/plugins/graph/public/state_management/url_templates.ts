@@ -35,7 +35,7 @@ function generateDefaultTemplate(
   datasource: IndexpatternDatasource,
   addBasePath: (url: string) => string
 ): UrlTemplate {
-  const appPath = modifyUrl('/discover', parsed => {
+  const appPath = modifyUrl('/', parsed => {
     parsed.query._a = rison.encode({
       columns: ['_source'],
       index: datasource.id,
@@ -44,7 +44,7 @@ function generateDefaultTemplate(
       sort: ['_score', 'desc'],
     });
   });
-  const parsedAppPath = parse(`/app/kibana#${appPath}`, true, true);
+  const parsedAppPath = parse(`/app/discover#${appPath}`, true, true);
   const formattedAppPath = format({
     protocol: parsedAppPath.protocol,
     host: parsedAppPath.host,

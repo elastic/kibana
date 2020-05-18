@@ -96,18 +96,21 @@ export function getTabs(
   tabs.push({
     name: getTitle('indexed', filteredCount, totalCount),
     id: TAB_INDEXED_FIELDS,
+    'data-test-subj': 'tab-indexedFields',
   });
 
   if (indexPatternListProvider.areScriptedFieldsEnabled(indexPattern)) {
     tabs.push({
       name: getTitle('scripted', filteredCount, totalCount),
       id: TAB_SCRIPTED_FIELDS,
+      'data-test-subj': 'tab-scriptedFields',
     });
   }
 
   tabs.push({
     name: getTitle('sourceFilters', filteredCount, totalCount),
     id: TAB_SOURCE_FILTERS,
+    'data-test-subj': 'tab-sourceFilters',
   });
 
   return tabs;

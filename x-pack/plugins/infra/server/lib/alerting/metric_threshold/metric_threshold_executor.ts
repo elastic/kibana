@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { mapValues } from 'lodash';
+import { mapValues, first } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { InfraDatabaseSearchResponse } from '../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../utils/create_afterkey_handler';
@@ -21,12 +21,16 @@ import { AlertServices, AlertExecutorOptions } from '../../../../../alerting/ser
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { getDateHistogramOffset } from '../../snapshot/query_helpers';
 import { InfraBackendLibs } from '../../infra_types';
+import { createPercentileAggregation } from './create_percentile_aggregation';
 
 const TOTAL_BUCKETS = 5;
 
 interface Aggregation {
   aggregatedIntervals: {
-    buckets: Array<{ aggregatedValue: { value: number }; doc_count: number }>;
+    buckets: Array<{
+      aggregatedValue: { value: number; values?: Array<{ key: number; value: number }> };
+      doc_count: number;
+    }>;
   };
 }
 
@@ -46,6 +50,12 @@ const getCurrentValueFromAggregations = (
     const mostRecentBucket = buckets[buckets.length - 1];
     if (aggType === Aggregators.COUNT) {
       return mostRecentBucket.doc_count;
+    }
+    if (aggType === Aggregators.P95 || aggType === Aggregators.P99) {
+      const values = mostRecentBucket.aggregatedValue?.values || [];
+      const firstValue = first(values);
+      if (!firstValue) return null;
+      return firstValue.value;
     }
     const { value } = mostRecentBucket.aggregatedValue;
     return value;
@@ -86,6 +96,8 @@ export const getElasticsearchMetricQuery = (
       ? {}
       : aggType === Aggregators.RATE
       ? networkTraffic('aggregatedValue', metric)
+      : aggType === Aggregators.P95 || aggType === Aggregators.P99
+      ? createPercentileAggregation(aggType, metric)
       : {
           aggregatedValue: {
             [aggType]: {
@@ -275,7 +287,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
     );
 
     // Because each alert result has the same group definitions, just grap the groups from the first one.
-    const groups = Object.keys(alertResults[0]);
+    const groups = Object.keys(first(alertResults));
     for (const group of groups) {
       const alertInstance = services.alertInstanceFactory(`${alertId}-${group}`);
 

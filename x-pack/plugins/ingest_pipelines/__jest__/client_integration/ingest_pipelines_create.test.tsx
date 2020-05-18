@@ -107,15 +107,11 @@ describe('<PipelinesCreate />', () => {
           component.update();
         });
 
-        expect(form.getErrorsMessages()).toEqual([
-          'Name is required.',
-          'A description is required.',
-        ]);
+        expect(form.getErrorsMessages()).toEqual(['Name is required.']);
         expect(find('submitButton').props().disabled).toEqual(true);
 
         // Add required fields and verify button is enabled again
         form.setInputValue('nameField.input', 'my_pipeline');
-        form.setInputValue('descriptionField.input', 'pipeline description');
 
         await act(async () => {
           await nextTick();

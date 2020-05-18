@@ -23,7 +23,7 @@ import { useHostSelector, useHostLogsUrl } from '../hooks';
 import { urlFromQueryParams } from '../url_from_query_params';
 import { policyResponseStatus, uiQueryParams } from '../../../store/hosts/selectors';
 import { useNavigateByRouterEventHandler } from '../../hooks/use_navigate_by_router_event_handler';
-import { POLICY_STATUS_TO_HEALTH_COLOR } from './host_constants';
+import { POLICY_STATUS_TO_HEALTH_COLOR } from '../host_constants';
 
 const HostIds = styled(EuiListGroupItem)`
   margin-top: 0;

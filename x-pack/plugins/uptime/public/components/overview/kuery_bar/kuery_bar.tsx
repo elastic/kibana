@@ -19,7 +19,7 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 
 const Container = styled.div`
-  margin-bottom: 10px;
+  margin-bottom: 4px;
 `;
 
 interface State {
@@ -134,7 +134,7 @@ export function KueryBarComponent({
         queryExample=""
       />
 
-      {indexPatternMissing && (
+      {indexPatternMissing && !loading && (
         <EuiCallOut
           style={{ display: 'inline-block', marginTop: '10px' }}
           title={

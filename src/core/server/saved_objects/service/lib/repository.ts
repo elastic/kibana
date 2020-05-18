@@ -18,6 +18,7 @@
  */
 
 import { omit } from 'lodash';
+import uuid from 'uuid';
 import { retryCallCluster } from '../../../elasticsearch/retry_call_cluster';
 import { APICaller } from '../../../elasticsearch/';
 
@@ -299,6 +300,8 @@ export class SavedObjectsRepository {
       const requiresNamespacesCheck =
         method === 'index' && this._registry.isMultiNamespace(object.type);
 
+      if (object.id == null) object.id = uuid.v1();
+
       return {
         tag: 'Right' as 'Right',
         value: {
@@ -404,35 +407,25 @@ export class SavedObjectsRepository {
         }
 
         const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
-        const response = bulkResponse.items[esRequestIndex];
-        const {
-          error,
-          _id: responseId,
-          _seq_no: seqNo,
-          _primary_term: primaryTerm,
-        } = Object.values(response)[0] as any;
+        const { error, ...rawResponse } = Object.values(
+          bulkResponse.items[esRequestIndex]
+        )[0] as any;
 
-        const {
-          _source: { type, [type]: attributes, references = [], namespaces },
-        } = rawMigratedDoc;
-
-        const id = requestedId || responseId;
         if (error) {
           return {
-            id,
-            type,
-            error: getBulkOperationError(error, type, id),
+            id: requestedId,
+            type: rawMigratedDoc._source.type,
+            error: getBulkOperationError(error, rawMigratedDoc._source.type, requestedId),
           };
         }
-        return {
-          id,
-          type,
-          ...(namespaces && { namespaces }),
-          updated_at: time,
-          version: encodeVersion(seqNo, primaryTerm),
-          attributes,
-          references,
-        };
+
+        // When method == 'index' the bulkResponse doesn't include the indexed
+        // _source so we return rawMigratedDoc but have to spread the latest
+        // _seq_no and _primary_term values from the rawResponse.
+        return this._serializer.rawToSavedObject({
+          ...rawMigratedDoc,
+          ...{ _seq_no: rawResponse._seq_no, _primary_term: rawResponse._primary_term },
+        });
       }),
     };
   }

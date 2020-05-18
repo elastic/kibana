@@ -36,5 +36,6 @@ export {
   isErrorNonFatal,
 } from './saved_object';
 export { SavedObjectSaveOpts, SavedObjectKibanaServices, SavedObject } from './types';
+export { SavedObjectsStart } from './plugin';
 
 export const plugin = () => new SavedObjectsPublicPlugin();

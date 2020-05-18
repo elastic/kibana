@@ -33,6 +33,7 @@ import { i18n } from '@kbn/i18n';
 import { fieldWildcardMatcher } from '../../../../../../../../../plugins/kibana_utils/public';
 import { IndexPatternManagementStart } from '../../../../../../../../../plugins/index_pattern_management/public';
 import { IndexPattern, IndexPatternField } from '../../../../../../../../../plugins/data/public';
+import { META_FIELDS_SETTING } from '../../../../../../../../../plugins/data/common';
 import { createEditIndexPatternPageStateContainer } from '../edit_index_pattern_state_container';
 import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from '../constants';
 import { SourceFiltersTable } from '../source_filters_table';
@@ -49,14 +50,18 @@ interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   };
 }
 
+const searchAriaLabel = i18n.translate('kbn.management.editIndexPattern.fields.searchAria', {
+  defaultMessage: 'Search fields',
+});
+
 const filterAriaLabel = i18n.translate('kbn.management.editIndexPattern.fields.filterAria', {
-  defaultMessage: 'Filter',
+  defaultMessage: 'Filter field types',
 });
 
 const filterPlaceholder = i18n.translate(
   'kbn.management.editIndexPattern.fields.filterPlaceholder',
   {
-    defaultMessage: 'Filter',
+    defaultMessage: 'Search',
   }
 );
 
@@ -94,7 +99,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
   }, [indexPattern, indexPattern.fields, refreshFilters]);
 
   const fieldWildcardMatcherDecorated = useCallback(
-    (filters: string[]) => fieldWildcardMatcher(filters, config.get('metaFields')),
+    (filters: string[]) => fieldWildcardMatcher(filters, config.get(META_FIELDS_SETTING)),
     [config]
   );
 
@@ -108,7 +113,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
               value={fieldFilter}
               onChange={e => setFieldFilter(e.target.value)}
               data-test-subj="indexPatternFieldFilter"
-              aria-label={filterAriaLabel}
+              aria-label={searchAriaLabel}
             />
           </EuiFlexItem>
           {type === TAB_INDEXED_FIELDS && indexedFieldTypes.length > 0 && (
@@ -118,6 +123,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
                 value={indexedFieldTypeFilter}
                 onChange={e => setIndexedFieldTypeFilter(e.target.value)}
                 data-test-subj="indexedFieldTypeFilterDropdown"
+                aria-label={filterAriaLabel}
               />
             </EuiFlexItem>
           )}

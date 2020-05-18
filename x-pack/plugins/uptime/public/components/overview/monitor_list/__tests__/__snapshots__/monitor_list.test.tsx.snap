@@ -745,7 +745,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               scope="col"
             >
               <div
-                class="euiTableCellContent euiTableCellContent--alignCenter"
+                class="euiTableCellContent"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -915,7 +915,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 TLS Certificate
               </div>
               <div
-                class="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span>
                   -
@@ -953,6 +953,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 <button
                   aria-label="Expand row for monitor with ID foo"
                   class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="xpack.uptime.monitorList.foo.expandMonitorDetail"
                   type="button"
                 >
                   <div
@@ -1091,7 +1092,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 TLS Certificate
               </div>
               <div
-                class="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span>
                   -
@@ -1129,6 +1130,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 <button
                   aria-label="Expand row for monitor with ID bar"
                   class="euiButtonIcon euiButtonIcon--primary"
+                  data-test-subj="xpack.uptime.monitorList.bar.expandMonitorDetail"
                   type="button"
                 >
                   <div

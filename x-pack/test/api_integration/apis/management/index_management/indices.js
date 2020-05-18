@@ -34,8 +34,7 @@ export default function({ getService }) {
     clearCache,
   } = registerHelpers({ supertest });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/64473
-  describe.skip('indices', () => {
+  describe('indices', () => {
     after(() => Promise.all([cleanUpEsResources()]));
 
     describe('clear cache', () => {
@@ -185,6 +184,7 @@ export default function({ getService }) {
         const { body } = await list().expect(200);
         const expectedKeys = [
           'health',
+          'hidden',
           'status',
           'name',
           'uuid',
@@ -215,6 +215,7 @@ export default function({ getService }) {
           const { body } = await reload().expect(200);
           const expectedKeys = [
             'health',
+            'hidden',
             'status',
             'name',
             'uuid',

@@ -74,6 +74,7 @@ export const Expressions: React.FC<Props> = props => {
     fetch: alertsContext.http.fetch,
     toastWarning: alertsContext.toastNotifications.addWarning,
   });
+
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnit>('m');
   const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
@@ -102,9 +103,13 @@ export const Expressions: React.FC<Props> = props => {
 
   const addExpression = useCallback(() => {
     const exp = alertParams.criteria?.slice() || [];
-    exp.push(defaultExpression);
+    exp.push({
+      ...defaultExpression,
+      timeSize: timeSize ?? defaultExpression.timeSize,
+      timeUnit: timeUnit ?? defaultExpression.timeUnit,
+    });
     setAlertParams('criteria', exp);
-  }, [setAlertParams, alertParams.criteria]);
+  }, [setAlertParams, alertParams.criteria, timeSize, timeUnit]);
 
   const removeExpression = useCallback(
     (id: number) => {
@@ -173,52 +178,57 @@ export const Expressions: React.FC<Props> = props => {
     [alertParams.criteria, setAlertParams]
   );
 
-  useEffect(() => {
+  const preFillAlertCriteria = useCallback(() => {
     const md = alertsContext.metadata;
-    if (md) {
-      if (md.currentOptions?.metrics) {
-        setAlertParams(
-          'criteria',
-          md.currentOptions.metrics.map(metric => ({
-            metric: metric.field,
-            comparator: Comparator.GT,
-            threshold: [],
-            timeSize,
-            timeUnit,
-            aggType: metric.aggregation,
-          }))
-        );
-      } else {
-        setAlertParams('criteria', [defaultExpression]);
-      }
-
-      if (md.currentOptions) {
-        if (md.currentOptions.filterQuery) {
-          setAlertParams('filterQueryText', md.currentOptions.filterQuery);
-          setAlertParams(
-            'filterQuery',
-            convertKueryToElasticSearchQuery(md.currentOptions.filterQuery, derivedIndexPattern) ||
-              ''
-          );
-        } else if (md.currentOptions.groupBy && md.series) {
-          const filter = `${md.currentOptions.groupBy}: "${md.series.id}"`;
-          setAlertParams('filterQueryText', filter);
-          setAlertParams(
-            'filterQuery',
-            convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
-          );
-        }
-
-        setAlertParams('groupBy', md.currentOptions.groupBy);
-      }
-      setAlertParams('sourceId', source?.id);
+    if (md && md.currentOptions?.metrics) {
+      setAlertParams(
+        'criteria',
+        md.currentOptions.metrics.map(metric => ({
+          metric: metric.field,
+          comparator: Comparator.GT,
+          threshold: [],
+          timeSize,
+          timeUnit,
+          aggType: metric.aggregation,
+        }))
+      );
     } else {
-      if (!alertParams.criteria) {
-        setAlertParams('criteria', [defaultExpression]);
-      }
-      if (!alertParams.sourceId) {
-        setAlertParams('sourceId', source?.id || 'default');
-      }
+      setAlertParams('criteria', [defaultExpression]);
+    }
+  }, [alertsContext.metadata, setAlertParams, timeSize, timeUnit]);
+
+  const preFillAlertFilter = useCallback(() => {
+    const md = alertsContext.metadata;
+    if (md && md.currentOptions?.filterQuery) {
+      setAlertParams('filterQueryText', md.currentOptions.filterQuery);
+      setAlertParams(
+        'filterQuery',
+        convertKueryToElasticSearchQuery(md.currentOptions.filterQuery, derivedIndexPattern) || ''
+      );
+    } else if (md && md.currentOptions?.groupBy && md.series) {
+      const filter = `${md.currentOptions?.groupBy}: "${md.series.id}"`;
+      setAlertParams('filterQueryText', filter);
+      setAlertParams(
+        'filterQuery',
+        convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
+      );
+    }
+  }, [alertsContext.metadata, derivedIndexPattern, setAlertParams]);
+
+  useEffect(() => {
+    if (alertParams.criteria && alertParams.criteria.length) {
+      setTimeSize(alertParams.criteria[0].timeSize);
+      setTimeUnit(alertParams.criteria[0].timeUnit);
+    } else {
+      preFillAlertCriteria();
+    }
+
+    if (!alertParams.filterQuery) {
+      preFillAlertFilter();
+    }
+
+    if (!alertParams.sourceId) {
+      setAlertParams('sourceId', source?.id || 'default');
     }
   }, [alertsContext.metadata, defaultExpression, source]); // eslint-disable-line react-hooks/exhaustive-deps
 

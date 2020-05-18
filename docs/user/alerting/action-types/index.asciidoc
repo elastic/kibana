@@ -21,20 +21,30 @@ Execution time field::  This field will be automatically set to the time the ale
 
 [source,text]
 --
- id: 'my-index'
- name: action-type-index
- actionTypeId: .index
- config:
-   index: .kibana <1>
-   refresh: true <2>
-   executionTimeField: somedate <3>
+ my-index:
+   name: action-type-index
+   actionTypeId: .index
+   config:
+     index: .kibana
+     refresh: true
+     executionTimeField: somedate
 --
 
 `config` defines the action type specific to the configuration and contains the following properties:
 
-<1> `index:` is a string and correspond to *Index*.
-<2> `refresh:` is a boolean and correspond to *Refresh*.
-<3> `executionTimeField:` is a string and correspond to *Execution time field*.
+[cols="2*<"]
+|===
+
+|`index`
+| A string that corresponds to *Index*.
+
+|`refresh`
+| A boolean that corresponds to *Refresh*.
+
+|`executionTimeField`
+| A string that corresponds to *Execution time field*.
+
+|===
 
 
 [float]
