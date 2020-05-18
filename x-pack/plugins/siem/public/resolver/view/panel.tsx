@@ -99,7 +99,7 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
     () => [
       {
         field: 'name',
-        name: i18n.translate('xpack.endpoint.resolver.panel.tabel.row.processNameTitle', {
+        name: i18n.translate('xpack.siem.endpoint.resolver.panel.tabel.row.processNameTitle', {
           defaultMessage: 'Process Name',
         }),
         sortable: true,
@@ -107,9 +107,12 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
         render(name: string) {
           return name === '' ? (
             <EuiBadge color="warning">
-              {i18n.translate('xpack.endpoint.resolver.panel.table.row.valueMissingDescription', {
-                defaultMessage: 'Value is missing',
-              })}
+              {i18n.translate(
+                'xpack.siem.endpoint.resolver.panel.table.row.valueMissingDescription',
+                {
+                  defaultMessage: 'Value is missing',
+                }
+              )}
             </EuiBadge>
           ) : (
             name
@@ -118,7 +121,7 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
       },
       {
         field: 'timestamp',
-        name: i18n.translate('xpack.endpoint.resolver.panel.tabel.row.timestampTitle', {
+        name: i18n.translate('xpack.siem.endpoint.resolver.panel.tabel.row.timestampTitle', {
           defaultMessage: 'Timestamp',
         }),
         dataType: 'date',
@@ -128,27 +131,30 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
             formatter.format(eventDate)
           ) : (
             <EuiBadge color="warning">
-              {i18n.translate('xpack.endpoint.resolver.panel.tabel.row.timestampInvalidLabel', {
-                defaultMessage: 'invalid',
-              })}
+              {i18n.translate(
+                'xpack.siem.endpoint.resolver.panel.tabel.row.timestampInvalidLabel',
+                {
+                  defaultMessage: 'invalid',
+                }
+              )}
             </EuiBadge>
           );
         },
       },
       {
-        name: i18n.translate('xpack.endpoint.resolver.panel.tabel.row.actionsTitle', {
+        name: i18n.translate('xpack.siem.endpoint.resolver.panel.tabel.row.actionsTitle', {
           defaultMessage: 'Actions',
         }),
         actions: [
           {
             name: i18n.translate(
-              'xpack.endpoint.resolver.panel.tabel.row.actions.bringIntoViewButtonLabel',
+              'xpack.siem.endpoint.resolver.panel.tabel.row.actions.bringIntoViewButtonLabel',
               {
                 defaultMessage: 'Bring into view',
               }
             ),
             description: i18n.translate(
-              'xpack.endpoint.resolver.panel.tabel.row.bringIntoViewLabel',
+              'xpack.siem.endpoint.resolver.panel.tabel.row.bringIntoViewLabel',
               {
                 defaultMessage: 'Bring the process into view on the map.',
               }
@@ -166,7 +172,7 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
     <EuiPanel className={className}>
       <EuiTitle size="xs">
         <h4>
-          {i18n.translate('xpack.endpoint.resolver.panel.title', {
+          {i18n.translate('xpack.siem.endpoint.resolver.panel.title', {
             defaultMessage: 'Processes',
           })}
         </h4>

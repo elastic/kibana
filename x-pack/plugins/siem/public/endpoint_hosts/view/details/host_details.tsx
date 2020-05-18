@@ -41,19 +41,19 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   const detailsResultsUpper = useMemo(() => {
     return [
       {
-        title: i18n.translate('xpack.endpoint.host.details.os', {
+        title: i18n.translate('xpack.siem.endpoint.host.details.os', {
           defaultMessage: 'OS',
         }),
         description: details.host.os.full,
       },
       {
-        title: i18n.translate('xpack.endpoint.host.details.lastSeen', {
+        title: i18n.translate('xpack.siem.endpoint.host.details.lastSeen', {
           defaultMessage: 'Last Seen',
         }),
         description: <FormattedDateAndTime date={new Date(details['@timestamp'])} />,
       },
       {
-        title: i18n.translate('xpack.endpoint.host.details.alerts', {
+        title: i18n.translate('xpack.siem.endpoint.host.details.alerts', {
           defaultMessage: 'Alerts',
         }),
         description: '0',
@@ -73,13 +73,13 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
   const detailsResultsLower = useMemo(() => {
     return [
       {
-        title: i18n.translate('xpack.endpoint.host.details.policy', {
+        title: i18n.translate('xpack.siem.endpoint.host.details.policy', {
           defaultMessage: 'Policy',
         }),
         description: details.endpoint.policy.id,
       },
       {
-        title: i18n.translate('xpack.endpoint.host.details.policyStatus', {
+        title: i18n.translate('xpack.siem.endpoint.host.details.policyStatus', {
           defaultMessage: 'Policy Status',
         }),
         description: (
@@ -94,7 +94,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
               onClick={policyStatusClickHandler}
             >
               <FormattedMessage
-                id="xpack.endpoint.host.details.policyStatusValue"
+                id="xpack.siem.endpoint.host.details.policyStatusValue"
                 defaultMessage="{policyStatus, select, success {Success} warning {Warning} failure {Failed} other {Unknown}}"
                 values={{ policyStatus }}
               />
@@ -103,7 +103,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         ),
       },
       {
-        title: i18n.translate('xpack.endpoint.host.details.ipAddress', {
+        title: i18n.translate('xpack.siem.endpoint.host.details.ipAddress', {
           defaultMessage: 'IP Address',
         }),
         description: (
@@ -115,13 +115,13 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
         ),
       },
       {
-        title: i18n.translate('xpack.endpoint.host.details.hostname', {
+        title: i18n.translate('xpack.siem.endpoint.host.details.hostname', {
           defaultMessage: 'Hostname',
         }),
         description: details.host.hostname,
       },
       {
-        title: i18n.translate('xpack.endpoint.host.details.sensorVersion', {
+        title: i18n.translate('xpack.siem.endpoint.host.details.sensorVersion', {
           defaultMessage: 'Sensor Version',
         }),
         description: details.agent.version,
@@ -159,7 +159,7 @@ export const HostDetails = memo(({ details }: { details: HostMetadata }) => {
           data-test-subj="hostDetailsLinkToLogs"
         >
           <FormattedMessage
-            id="xpack.endpoint.host.details.linkToLogsTitle"
+            id="xpack.siem.endpoint.host.details.linkToLogsTitle"
             defaultMessage="Endpoint Logs"
           />
         </LinkToApp>

@@ -58,13 +58,13 @@ export const HostDetailsFlyout = memo(() => {
       notifications.toasts.danger({
         title: (
           <FormattedMessage
-            id="xpack.endpoint.host.details.errorTitle"
+            id="xpack.siem.endpoint.host.details.errorTitle"
             defaultMessage="Could not find host"
           />
         ),
         body: (
           <FormattedMessage
-            id="xpack.endpoint.host.details.errorBody"
+            id="xpack.siem.endpoint.host.details.errorBody"
             defaultMessage="Please exit the flyout and select an available host."
           />
         ),
@@ -126,7 +126,7 @@ const PolicyResponseFlyoutPanel = memo<{
   const backToDetailsClickHandler = useNavigateByRouterEventHandler(detailsUri);
   const backButtonProp = useMemo((): FlyoutSubHeaderProps['backButton'] => {
     return {
-      title: i18n.translate('xpack.endpoint.host.policyResponse.backLinkTitle', {
+      title: i18n.translate('xpack.siem.endpoint.host.policyResponse.backLinkTitle', {
         defaultMessage: 'Endpoint Details',
       }),
       href: `?${detailsUri.search}`,
@@ -144,7 +144,7 @@ const PolicyResponseFlyoutPanel = memo<{
         <EuiText data-test-subj="hostDetailsPolicyResponseFlyoutTitle">
           <h4>
             <FormattedMessage
-              id="xpack.endpoint.host.policyResponse.title"
+              id="xpack.siem.endpoint.host.policyResponse.title"
               defaultMessage="Policy Response"
             />
           </h4>
@@ -153,7 +153,7 @@ const PolicyResponseFlyoutPanel = memo<{
           <EuiEmptyPrompt
             title={
               <FormattedMessage
-                id="xpack.endpoint.hostDetails.noPolicyResponse"
+                id="xpack.siem.endpoint.hostDetails.noPolicyResponse"
                 defaultMessage="No policy response available"
               />
             }

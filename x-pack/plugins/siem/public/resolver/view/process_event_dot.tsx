@@ -29,7 +29,7 @@ const nodeAssets = {
     cubeSymbol: `#${SymbolIds.runningProcessCube}`,
     labelBackground: NamedColors.labelBackgroundRunningProcess,
     descriptionFill: NamedColors.empty,
-    descriptionText: i18n.translate('xpack.endpoint.resolver.runningProcess', {
+    descriptionText: i18n.translate('xpack.siem.endpoint.resolver.runningProcess', {
       defaultMessage: 'Running Process',
     }),
   },
@@ -37,7 +37,7 @@ const nodeAssets = {
     cubeSymbol: `#${SymbolIds.runningTriggerCube}`,
     labelBackground: NamedColors.labelBackgroundRunningTrigger,
     descriptionFill: NamedColors.empty,
-    descriptionText: i18n.translate('xpack.endpoint.resolver.runningTrigger', {
+    descriptionText: i18n.translate('xpack.siem.endpoint.resolver.runningTrigger', {
       defaultMessage: 'Running Trigger',
     }),
   },
@@ -45,7 +45,7 @@ const nodeAssets = {
     cubeSymbol: `#${SymbolIds.terminatedProcessCube}`,
     labelBackground: NamedColors.labelBackgroundTerminatedProcess,
     descriptionFill: NamedColors.empty,
-    descriptionText: i18n.translate('xpack.endpoint.resolver.terminatedProcess', {
+    descriptionText: i18n.translate('xpack.siem.endpoint.resolver.terminatedProcess', {
       defaultMessage: 'Terminated Process',
     }),
   },
@@ -53,7 +53,7 @@ const nodeAssets = {
     cubeSymbol: `#${SymbolIds.terminatedTriggerCube}`,
     labelBackground: NamedColors.labelBackgroundTerminatedTrigger,
     descriptionFill: NamedColors.empty,
-    descriptionText: i18n.translate('xpack.endpoint.resolver.terminatedTrigger', {
+    descriptionText: i18n.translate('xpack.siem.endpoint.resolver.terminatedTrigger', {
       defaultMessage: 'Terminated Trigger',
     }),
   },
@@ -72,7 +72,7 @@ const ChildEventsButton = React.memo(() => {
       iconSide="right"
       tabIndex={-1}
     >
-      {i18n.translate('xpack.endpoint.resolver.relatedEvents', {
+      {i18n.translate('xpack.siem.endpoint.resolver.relatedEvents', {
         defaultMessage: 'Events',
       })}
     </EuiButton>
@@ -92,7 +92,7 @@ const RelatedAlertsButton = React.memo(() => {
       size="s"
       tabIndex={-1}
     >
-      {i18n.translate('xpack.endpoint.resolver.relatedAlerts', {
+      {i18n.translate('xpack.siem.endpoint.resolver.relatedAlerts', {
         defaultMessage: 'Related Alerts',
       })}
     </EuiButton>

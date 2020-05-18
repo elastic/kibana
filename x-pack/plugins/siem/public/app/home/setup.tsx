@@ -13,11 +13,11 @@ export const Setup: React.FunctionComponent<{
   notifications: NotificationsStart;
 }> = ({ ingestManager, notifications }) => {
   React.useEffect(() => {
-    const defaultText = i18n.translate('xpack.endpoint.ingestToastMessage', {
+    const defaultText = i18n.translate('xpack.siem.endpoint.ingestToastMessage', {
       defaultMessage: 'Ingest Manager failed during its setup.',
     });
 
-    const title = i18n.translate('xpack.endpoint.ingestToastTitle', {
+    const title = i18n.translate('xpack.siem.endpoint.ingestToastTitle', {
       defaultMessage: 'App failed to initialize',
     });
 

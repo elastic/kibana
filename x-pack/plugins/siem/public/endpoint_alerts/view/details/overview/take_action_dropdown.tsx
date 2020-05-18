@@ -16,7 +16,7 @@ const TakeActionButton = memo(({ onClick }: { onClick: () => void }) => (
     onClick={onClick}
   >
     <FormattedMessage
-      id="xpack.endpoint.application.endpoint.alertDetails.takeAction.title"
+      id="xpack.siem.endpoint.application.endpoint.alertDetails.takeAction.title"
       defaultMessage="Take Action"
     />
   </EuiButton>
@@ -50,7 +50,7 @@ export const TakeActionDropdown = memo(() => {
           iconType="folderCheck"
         >
           <FormattedMessage
-            id="xpack.endpoint.application.endpoint.alertDetails.takeAction.close"
+            id="xpack.siem.endpoint.application.endpoint.alertDetails.takeAction.close"
             defaultMessage="Close Alert"
           />
         </EuiButtonEmpty>
@@ -63,7 +63,7 @@ export const TakeActionDropdown = memo(() => {
           iconType="listAdd"
         >
           <FormattedMessage
-            id="xpack.endpoint.application.endpoint.alertDetails.takeAction.whitelist"
+            id="xpack.siem.endpoint.application.endpoint.alertDetails.takeAction.whitelist"
             defaultMessage="Whitelist..."
           />
         </EuiButtonEmpty>

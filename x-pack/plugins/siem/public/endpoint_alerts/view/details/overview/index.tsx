@@ -35,7 +35,7 @@ const AlertDetailsOverviewComponent = memo(() => {
         id: 'overviewMetadata',
         'data-test-subj': 'overviewMetadata',
         name: i18n.translate(
-          'xpack.endpoint.application.endpoint.alertDetails.overview.tabs.overview',
+          'xpack.siem.endpoint.application.endpoint.alertDetails.overview.tabs.overview',
           {
             defaultMessage: 'Overview',
           }
@@ -51,7 +51,7 @@ const AlertDetailsOverviewComponent = memo(() => {
         id: 'overviewResolver',
         'data-test-subj': 'overviewResolverTab',
         name: i18n.translate(
-          'xpack.endpoint.application.endpoint.alertDetails.overview.tabs.resolver',
+          'xpack.siem.endpoint.application.endpoint.alertDetails.overview.tabs.resolver',
           {
             defaultMessage: 'Resolver',
           }
@@ -72,7 +72,7 @@ const AlertDetailsOverviewComponent = memo(() => {
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
-              id="xpack.endpoint.application.endpoint.alertDetails.overview.title"
+              id="xpack.siem.endpoint.application.endpoint.alertDetails.overview.title"
               defaultMessage="Detected Malicious File"
             />
           </h3>
@@ -81,7 +81,7 @@ const AlertDetailsOverviewComponent = memo(() => {
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.endpoint.application.endpoint.alertDetails.overview.summary"
+              id="xpack.siem.endpoint.application.endpoint.alertDetails.overview.summary"
               defaultMessage="MalwareScore detected the opening of a document on {hostname} on {date}"
               values={{
                 hostname: alertDetailsData.host.hostname,
@@ -95,14 +95,14 @@ const AlertDetailsOverviewComponent = memo(() => {
           {'Endpoint Status: '}
           <EuiHealth color="success">
             <FormattedMessage
-              id="xpack.endpoint.application.endpoint.alertDetails.endpoint.status.online"
+              id="xpack.siem.endpoint.application.endpoint.alertDetails.endpoint.status.online"
               defaultMessage="Online"
             />
           </EuiHealth>
         </EuiText>
         <EuiText>
           <FormattedMessage
-            id="xpack.endpoint.application.endpoint.alertDetails.alert.status.open"
+            id="xpack.siem.endpoint.application.endpoint.alertDetails.alert.status.open"
             defaultMessage="Alert Status: Open"
           />
         </EuiText>

@@ -27,49 +27,49 @@ export const WindowsEvents = React.memo(() => {
       protectionField: keyof UIPolicyConfig['windows']['events'];
     }>> = [
       {
-        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.dllDriverLoad', {
+        name: i18n.translate('xpack.siem.endpoint.policyDetailsConfig.windows.events.dllDriverLoad', {
           defaultMessage: 'DLL and Driver Load',
         }),
         os: OS.windows,
         protectionField: 'dll_and_driver_load',
       },
       {
-        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.dns', {
+        name: i18n.translate('xpack.siem.endpoint.policyDetailsConfig.windows.events.dns', {
           defaultMessage: 'DNS',
         }),
         os: OS.windows,
         protectionField: 'dns',
       },
       {
-        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.file', {
+        name: i18n.translate('xpack.siem.endpoint.policyDetailsConfig.windows.events.file', {
           defaultMessage: 'File',
         }),
         os: OS.windows,
         protectionField: 'file',
       },
       {
-        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.network', {
+        name: i18n.translate('xpack.siem.endpoint.policyDetailsConfig.windows.events.network', {
           defaultMessage: 'Network',
         }),
         os: OS.windows,
         protectionField: 'network',
       },
       {
-        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.process', {
+        name: i18n.translate('xpack.siem.endpoint.policyDetailsConfig.windows.events.process', {
           defaultMessage: 'Process',
         }),
         os: OS.windows,
         protectionField: 'process',
       },
       {
-        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.registry', {
+        name: i18n.translate('xpack.siem.endpoint.policyDetailsConfig.windows.events.registry', {
           defaultMessage: 'Registry',
         }),
         os: OS.windows,
         protectionField: 'registry',
       },
       {
-        name: i18n.translate('xpack.endpoint.policyDetailsConfig.windows.events.security', {
+        name: i18n.translate('xpack.siem.endpoint.policyDetailsConfig.windows.events.security', {
           defaultMessage: 'Security',
         }),
         os: OS.windows,
@@ -81,7 +81,7 @@ export const WindowsEvents = React.memo(() => {
         <EuiTitle size="xxs">
           <h5>
             <FormattedMessage
-              id="xpack.endpoint.policyDetailsConfig.eventingEvents"
+              id="xpack.siem.endpoint.policyDetailsConfig.eventingEvents"
               defaultMessage="Events"
             />
           </h5>
@@ -107,7 +107,7 @@ export const WindowsEvents = React.memo(() => {
     return (
       <EuiText size="s" color="subdued">
         <FormattedMessage
-          id="xpack.endpoint.policy.details.eventCollectionsEnabled"
+          id="xpack.siem.endpoint.policy.details.eventCollectionsEnabled"
           defaultMessage="{selected} / {total} event collections enabled"
           values={{ selected, total }}
         />
@@ -117,13 +117,13 @@ export const WindowsEvents = React.memo(() => {
 
   return (
     <ConfigForm
-      type={i18n.translate('xpack.endpoint.policy.details.eventCollection', {
+      type={i18n.translate('xpack.siem.endpoint.policy.details.eventCollection', {
         defaultMessage: 'Event Collection',
       })}
-      description={i18n.translate('xpack.endpoint.policy.details.windowsLabel', {
+      description={i18n.translate('xpack.siem.endpoint.policy.details.windowsLabel', {
         defaultMessage: 'Windows',
       })}
-      supportedOss={i18n.translate('xpack.endpoint.policy.details.windows', {
+      supportedOss={i18n.translate('xpack.siem.endpoint.policy.details.windows', {
         defaultMessage: 'Windows',
       })}
       dataTestSubj="windowsEventingForm"

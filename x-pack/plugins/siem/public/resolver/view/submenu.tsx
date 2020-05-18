@@ -15,19 +15,19 @@ import styled from 'styled-components';
  *   menuError: if the submenu requested data, but received an error
  */
 export const subMenuAssets = {
-  initialMenuStatus: i18n.translate('xpack.endpoint.resolver.relatedNotRetrieved', {
+  initialMenuStatus: i18n.translate('xpack.siem.endpoint.resolver.relatedNotRetrieved', {
     defaultMessage: 'Related Events have not yet been retrieved.',
   }),
-  menuError: i18n.translate('xpack.endpoint.resolver.relatedRetrievalError', {
+  menuError: i18n.translate('xpack.siem.endpoint.resolver.relatedRetrievalError', {
     defaultMessage: 'There was an error retrieving related events.',
   }),
   relatedAlerts: {
-    title: i18n.translate('xpack.endpoint.resolver.relatedAlerts', {
+    title: i18n.translate('xpack.siem.endpoint.resolver.relatedAlerts', {
       defaultMessage: 'Related Alerts',
     }),
   },
   relatedEvents: {
-    title: i18n.translate('xpack.endpoint.resolver.relatedEvents', {
+    title: i18n.translate('xpack.siem.endpoint.resolver.relatedEvents', {
       defaultMessage: 'Events',
     }),
   },

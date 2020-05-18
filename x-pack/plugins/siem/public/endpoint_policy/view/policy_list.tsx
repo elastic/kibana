@@ -88,7 +88,7 @@ export const PolicyList = React.memo(() => {
     () => [
       {
         field: 'name',
-        name: i18n.translate('xpack.endpoint.policyList.nameField', {
+        name: i18n.translate('xpack.siem.endpoint.policyList.nameField', {
           defaultMessage: 'Policy Name',
         }),
         // eslint-disable-next-line react/display-name
@@ -106,14 +106,14 @@ export const PolicyList = React.memo(() => {
       },
       {
         field: 'revision',
-        name: i18n.translate('xpack.endpoint.policyList.revisionField', {
+        name: i18n.translate('xpack.siem.endpoint.policyList.revisionField', {
           defaultMessage: 'Revision',
         }),
         dataType: 'number',
       },
       {
         field: 'package',
-        name: i18n.translate('xpack.endpoint.policyList.versionField', {
+        name: i18n.translate('xpack.siem.endpoint.policyList.versionField', {
           defaultMessage: 'Version',
         }),
         render(pkg) {
@@ -122,14 +122,14 @@ export const PolicyList = React.memo(() => {
       },
       {
         field: 'description',
-        name: i18n.translate('xpack.endpoint.policyList.descriptionField', {
+        name: i18n.translate('xpack.siem.endpoint.policyList.descriptionField', {
           defaultMessage: 'Description',
         }),
         truncateText: true,
       },
       {
         field: 'config_id',
-        name: i18n.translate('xpack.endpoint.policyList.agentConfigField', {
+        name: i18n.translate('xpack.siem.endpoint.policyList.agentConfigField', {
           defaultMessage: 'Agent Configuration',
         }),
         render(version: string) {
@@ -153,13 +153,13 @@ export const PolicyList = React.memo(() => {
     <PageView
       viewType="list"
       data-test-subj="policyListPage"
-      headerLeft={i18n.translate('xpack.endpoint.policyList.viewTitle', {
+      headerLeft={i18n.translate('xpack.siem.endpoint.policyList.viewTitle', {
         defaultMessage: 'Policies',
       })}
       bodyHeader={
         <EuiText color="subdued" data-test-subj="policyTotalCount">
           <FormattedMessage
-            id="xpack.endpoint.policyList.viewTitleTotalCount"
+            id="xpack.siem.endpoint.policyList.viewTitleTotalCount"
             defaultMessage="{totalItemCount, plural, one {# Policy} other {# Policies}}"
             values={{ totalItemCount }}
           />

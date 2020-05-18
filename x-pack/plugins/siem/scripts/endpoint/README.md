@@ -11,7 +11,7 @@ Example command sequence to get ES and kibana running with sample data after ins
 
 ```yarn es snapshot``` -> starts ES
 
-```npx yarn start --xpack.endpoint.enabled=true --no-base-path``` -> starts kibana
+```npx yarn start --xpack.siem.endpoint.enabled=true --no-base-path``` -> starts kibana
 
 ```cd ~/path/to/kibana/x-pack/plugins/endpoint```
 

@@ -31,28 +31,28 @@ export const AgentsSummary = memo<AgentsSummaryProps>(props => {
     return [
       {
         key: 'total',
-        title: i18n.translate('xpack.endpoint.policyDetails.agentsSummary.totalTitle', {
+        title: i18n.translate('xpack.siem.endpoint.policyDetails.agentsSummary.totalTitle', {
           defaultMessage: 'Hosts',
         }),
         health: '',
       },
       {
         key: 'online',
-        title: i18n.translate('xpack.endpoint.policyDetails.agentsSummary.onlineTitle', {
+        title: i18n.translate('xpack.siem.endpoint.policyDetails.agentsSummary.onlineTitle', {
           defaultMessage: 'Online',
         }),
         health: 'success',
       },
       {
         key: 'offline',
-        title: i18n.translate('xpack.endpoint.policyDetails.agentsSummary.offlineTitle', {
+        title: i18n.translate('xpack.siem.endpoint.policyDetails.agentsSummary.offlineTitle', {
           defaultMessage: 'Offline',
         }),
         health: 'warning',
       },
       {
         key: 'error',
-        title: i18n.translate('xpack.endpoint.policyDetails.agentsSummary.errorTitle', {
+        title: i18n.translate('xpack.siem.endpoint.policyDetails.agentsSummary.errorTitle', {
           defaultMessage: 'Error',
         }),
         health: 'danger',
