@@ -7,7 +7,6 @@
 import Boom from 'boom';
 import fetch, { Response } from 'node-fetch';
 import { streamToString } from './streams';
-import { appContextService } from '../..';
 
 export async function getResponse(url: string): Promise<Response> {
   try {
