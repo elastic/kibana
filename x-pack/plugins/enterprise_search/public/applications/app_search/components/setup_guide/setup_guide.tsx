@@ -23,6 +23,8 @@ import {
   EuiAccordion,
   EuiLink,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import { SetAppSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
@@ -38,7 +40,12 @@ export const SetupGuide: React.FC<> = () => {
 
       <EuiPageSideBar>
         <EuiText color="subdued" size="s">
-          <strong>Setup Guide</strong>
+          <strong>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.setupGuide.title"
+              defaultMessage="Setup Guide"
+            />
+          </strong>
         </EuiText>
         <EuiSpacer size="s" />
 
@@ -48,7 +55,12 @@ export const SetupGuide: React.FC<> = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="m">
-              <h1>App Search</h1>
+              <h1>
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.productTitle"
+                  defaultMessage="App Search"
+                />
+              </h1>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -61,7 +73,10 @@ export const SetupGuide: React.FC<> = () => {
           <img
             className="setup-guide__thumbnail"
             src={GettingStarted}
-            alt="Getting started with App Search - in this short video we'll guide you through how to get App Search up and running"
+            alt={i18n.translate('xpack.enterpriseSearch.setupGuide.videoAlt', {
+              defaultMessage:
+                "Getting started with App Search - in this short video we'll guide you through how to get App Search up and running",
+            })}
             width="1280"
             height-="720"
           />
@@ -69,15 +84,19 @@ export const SetupGuide: React.FC<> = () => {
 
         <EuiTitle size="s">
           <p>
-            Elastic App Search provides user-friendly tools to design and deploy a powerful search
-            to your websites or web/mobile applications.
+            <FormattedMessage
+              id="xpack.enterpriseSearch.setupGuide.description"
+              defaultMessage="Elastic App Search provides user-friendly tools to design and deploy a powerful search to your websites or web/mobile applications."
+            />
           </p>
         </EuiTitle>
         <EuiSpacer size="m" />
         <EuiText>
           <p>
-            App Search has not been configured in your Kibana instance yet. To get started, follow
-            the instructions on this page.
+            <FormattedMessage
+              id="xpack.enterpriseSearch.setupGuide.notConfigured"
+              defaultMessage="App Search has not been configured in your Kibana instance yet. To get started, follow the instructions on this page."
+            />
           </p>
         </EuiText>
       </EuiPageSideBar>
@@ -88,13 +107,20 @@ export const SetupGuide: React.FC<> = () => {
             headingElement="h2"
             steps={[
               {
-                title: 'Add your App Search host URL to your Kibana configuration',
+                title: i18n.translate('xpack.enterpriseSearch.setupGuide.step1.title', {
+                  defaultMessage: 'Add your App Search host URL to your Kibana configuration',
+                }),
                 children: (
                   <EuiText>
                     <p>
-                      Within your <EuiCode>config/kibana.yml</EuiCode> file, set{' '}
-                      <EuiCode>enterpriseSearch.host</EuiCode> to the URL of your App Search
-                      instance. For example:
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.setupGuide.step1.instruction1"
+                        defaultMessage="Within your {configFile} file, set {configSetting} to the URL of your App Search instance. For example:"
+                        values={{
+                          configFile: <EuiCode>config/kibana.yml</EuiCode>,
+                          configSetting: <EuiCode>enterpriseSearch.host</EuiCode>,
+                        }}
+                      />
                     </p>
                     <EuiCodeBlock language="yml">
                       enterpriseSearch.host: &apos;http://localhost:3002&apos;
@@ -103,75 +129,110 @@ export const SetupGuide: React.FC<> = () => {
                 ),
               },
               {
-                title: 'Reload your Kibana instance',
+                title: i18n.translate('xpack.enterpriseSearch.setupGuide.step2.title', {
+                  defaultMessage: 'Reload your Kibana instance',
+                }),
                 children: (
                   <EuiText>
                     <p>
-                      Restart Kibana to pick up the configuration changes from the previous step.
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.setupGuide.step2.instruction1"
+                        defaultMessage="Restart Kibana to pick up the configuration changes from the previous step."
+                      />
                     </p>
                     <p>
-                      If you’re using{' '}
-                      <EuiLink
-                        href="https://swiftype.com/documentation/app-search/self-managed/security#elasticsearch-native-realm"
-                        target="_blank"
-                      >
-                        Elasticsearch Native
-                      </EuiLink>{' '}
-                      auth within App Search - you’re all set! All users should be able to use App
-                      Search in Kibana automatically, inheriting the existing access and permissions
-                      they have within App Search.
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.setupGuide.step2.instruction2"
+                        defaultMessage="If you’re using {elasticsearchNativeAuthLink} within App Search - you’re all set! All users should be able to use App Search in Kibana automatically, inheriting the existing access and permissions they have within App Search."
+                        values={{
+                          elasticsearchNativeAuthLink: (
+                            <EuiLink
+                              href="https://swiftype.com/documentation/app-search/self-managed/security#elasticsearch-native-realm"
+                              target="_blank"
+                            >
+                              Elasticsearch Native Auth
+                            </EuiLink>
+                          ),
+                        }}
+                      />
                     </p>
                   </EuiText>
                 ),
               },
               {
-                title: 'Troubleshooting issues',
+                title: i18n.translate('xpack.enterpriseSearch.setupGuide.step3.title', {
+                  defaultMessage: 'Troubleshooting issues',
+                }),
                 children: (
                   <>
                     <EuiAccordion
-                      buttonContent="App Search and Kibana are on different Elasticsearch clusters"
-                      id="standard-auth"
+                      buttonContent={i18n.translate(
+                        'xpack.enterpriseSearch.troubleshooting.differentEsClusters.title',
+                        {
+                          defaultMessage:
+                            'App Search and Kibana are on different Elasticsearch clusters',
+                        }
+                      )}
+                      id="differentEsClusters"
                       paddingSize="s"
                     >
                       <EuiText>
                         <p>
-                          This plugin does not currently support App Search and Kibana running on
-                          different clusters.
+                          <FormattedMessage
+                            id="xpack.enterpriseSearch.troubleshooting.differentEsClusters.description"
+                            defaultMessage="This plugin does not currently support App Search and Kibana running on different clusters."
+                          />
                         </p>
                       </EuiText>
                     </EuiAccordion>
                     <EuiSpacer />
                     <EuiAccordion
-                      buttonContent="App Search and Kibana are on different authentication methods"
-                      id="standard-auth"
+                      buttonContent={i18n.translate(
+                        'xpack.enterpriseSearch.troubleshooting.differentAuth.title',
+                        {
+                          defaultMessage:
+                            'App Search and Kibana are on different authentication methods',
+                        }
+                      )}
+                      id="differentAuth"
                       paddingSize="s"
                     >
                       <EuiText>
                         <p>
-                          This plugin does not currently support App Search and Kibana operating on
-                          different authentication methods (for example, App Search using a
-                          different SAML provider than Kibana).
+                          <FormattedMessage
+                            id="xpack.enterpriseSearch.troubleshooting.differentAuth.description"
+                            defaultMessage="This plugin does not currently support App Search and Kibana operating on different authentication methods (for example, App Search using a different SAML provider than Kibana)."
+                          />
                         </p>
                       </EuiText>
                     </EuiAccordion>
                     <EuiSpacer />
                     <EuiAccordion
-                      buttonContent="App Search on Standard authentication"
-                      id="standard-auth"
+                      buttonContent={i18n.translate(
+                        'xpack.enterpriseSearch.troubleshooting.standardAuth.title',
+                        {
+                          defaultMessage: 'App Search on Standard authentication',
+                        }
+                      )}
+                      id="standardAuth"
                       paddingSize="s"
                     >
                       <EuiText>
                         <p>
-                          App Search operating on{' '}
-                          <EuiLink
-                            href="https://swiftype.com/documentation/app-search/self-managed/security#standard"
-                            target="_blank"
-                          >
-                            Standard Auth
-                          </EuiLink>{' '}
-                          is currently not fully supported by this plugin. Users created in App
-                          Search must be granted Kibana access. Users created in Kibana will see
-                          &quot;Cannot find App Search account&quot; error messages.
+                          <FormattedMessage
+                            id="xpack.enterpriseSearch.troubleshooting.standardAuth.description"
+                            defaultMessage='App Search operating on {standardAuthLink} is currently not fully supported by this plugin. Users created in App Search must be granted Kibana access. Users created in Kibana will see "Cannot find App Search account" error messages.'
+                            values={{
+                              standardAuthLink: (
+                                <EuiLink
+                                  href="https://swiftype.com/documentation/app-search/self-managed/security#standard"
+                                  target="_blank"
+                                >
+                                  Standard Auth
+                                </EuiLink>
+                              ),
+                            }}
+                          />
                         </p>
                       </EuiText>
                     </EuiAccordion>

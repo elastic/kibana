@@ -10,9 +10,10 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { render } from 'enzyme';
 
+import { I18nProvider } from '@kbn/i18n/react';
 import { KibanaContext } from '../../../';
 import { LicenseContext } from '../../../shared/licensing';
-import { mountWithKibanaContext, mockKibanaContext } from '../../../__mocks__';
+import { mountWithContext, mockKibanaContext } from '../../../__mocks__';
 
 import { EmptyState, ErrorState, NoUserState } from '../empty_states';
 import { EngineTable } from './engine_table';
@@ -23,12 +24,15 @@ describe('EngineOverview', () => {
   describe('non-happy-path states', () => {
     it('isLoading', () => {
       // We use render() instead of mount() here to not trigger lifecycle methods (i.e., useEffect)
+      // TODO: Consider pulling this out to a renderWithContext mock/helper
       const wrapper = render(
-        <KibanaContext.Provider value={{ http: {} }}>
-          <LicenseContext.Provider value={{ license: {} }}>
-            <EngineOverview />
-          </LicenseContext.Provider>
-        </KibanaContext.Provider>
+        <I18nProvider>
+          <KibanaContext.Provider value={{ http: {} }}>
+            <LicenseContext.Provider value={{ license: {} }}>
+              <EngineOverview />
+            </LicenseContext.Provider>
+          </KibanaContext.Provider>
+        </I18nProvider>
       );
 
       // render() directly renders HTML which means we have to look for selectors instead of for LoadingState directly
@@ -66,7 +70,7 @@ describe('EngineOverview', () => {
       results: [
         {
           name: 'hello-world',
-          created_at: 'somedate',
+          created_at: 'Fri, 1 Jan 1970 12:00:00 +0000',
           document_count: 50,
           field_count: 10,
         },
@@ -164,12 +168,7 @@ describe('EngineOverview', () => {
     // TBH, I don't fully understand why since Enzyme's mount is supposed to
     // have act() baked in - could be because of the wrapping context provider?
     await act(async () => {
-      wrapper = mountWithKibanaContext(
-        <LicenseContext.Provider value={{ license }}>
-          <EngineOverview />
-        </LicenseContext.Provider>,
-        { http: httpMock }
-      );
+      wrapper = mountWithContext(<EngineOverview />, { http: httpMock, license });
     });
     wrapper.update(); // This seems to be required for the DOM to actually update
 

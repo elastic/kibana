@@ -14,6 +14,7 @@ import {
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { SetAppSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
@@ -100,7 +101,10 @@ export const EngineOverview: ReactFC<> = () => {
             <EuiTitle size="s">
               <h2>
                 <img src={EnginesIcon} alt="" className="engine-icon" />
-                Engines
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.appSearch.enginesOverview.engines"
+                  defaultMessage="Engines"
+                />
               </h2>
             </EuiTitle>
           </EuiPageContentHeader>
@@ -122,7 +126,10 @@ export const EngineOverview: ReactFC<> = () => {
                 <EuiTitle size="s">
                   <h2>
                     <img src={MetaEnginesIcon} alt="" className="engine-icon" />
-                    Meta Engines
+                    <FormattedMessage
+                      id="xpack.enterpriseSearch.appSearch.enginesOverview.metaEngines"
+                      defaultMessage="Meta Engines"
+                    />
                   </h2>
                 </EuiTitle>
               </EuiPageContentHeader>

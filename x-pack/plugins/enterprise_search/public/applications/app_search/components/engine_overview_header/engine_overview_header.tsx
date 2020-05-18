@@ -6,6 +6,7 @@
 
 import React, { useContext } from 'react';
 import { EuiPageHeader, EuiPageHeaderSection, EuiTitle, EuiButton } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { sendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
@@ -36,11 +37,21 @@ export const EngineOverviewHeader: React.FC<> = () => {
     <EuiPageHeader>
       <EuiPageHeaderSection>
         <EuiTitle size="l">
-          <h1>Engine Overview</h1>
+          <h1>
+            <FormattedMessage
+              id="xpack.enterpriseSearch.appSearch.enginesOverview.title"
+              defaultMessage="Engine Overview"
+            />
+          </h1>
         </EuiTitle>
       </EuiPageHeaderSection>
       <EuiPageHeaderSection>
-        <EuiButton {...buttonProps}>Launch App Search</EuiButton>
+        <EuiButton {...buttonProps}>
+          <FormattedMessage
+            id="xpack.enterpriseSearch.appSearch.productCta"
+            defaultMessage="Launch App Search"
+          />
+        </EuiButton>
       </EuiPageHeaderSection>
     </EuiPageHeader>
   );

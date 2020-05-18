@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { SetAppSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
@@ -27,21 +28,31 @@ export const NoUserState: React.FC<> = () => {
         <EuiPageContent>
           <EuiEmptyPrompt
             iconType="lock"
-            title={<h2>Cannot find App Search account</h2>}
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.appSearch.noUserState.title"
+                  defaultMessage="Cannot find App Search account"
+                />
+              </h2>
+            }
             titleSize="l"
             body={
               <>
                 <p>
-                  We cannot find an App Search account matching your username
-                  {username && (
-                    <>
-                      : <EuiCode>{username}</EuiCode>
-                    </>
-                  )}
-                  .
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.appSearch.noUserState.description1"
+                    defaultMessage="We cannot find an App Search account matching your username{username}."
+                    values={{
+                      username: username ? <EuiCode>{username}</EuiCode> : '',
+                    }}
+                  />
                 </p>
                 <p>
-                  Please contact your App Search administrator to request an invite for that user.
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.appSearch.noUserState.description2"
+                    defaultMessage="Please contact your App Search administrator to request an invite for that user."
+                  />
                 </p>
               </>
             }

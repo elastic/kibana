@@ -6,6 +6,8 @@
 
 import React, { useContext } from 'react';
 import { EuiBasicTable, EuiLink } from '@elastic/eui';
+import { FormattedMessage, FormattedDate, FormattedNumber } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import { sendTelemetry } from '../../../shared/telemetry';
 import { KibanaContext, IKibanaContext } from '../../../index';
@@ -51,7 +53,9 @@ export const EngineTable: ReactFC<IEngineTableProps> = ({
   const columns = [
     {
       field: 'name',
-      name: 'Name',
+      name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.name', {
+        defaultMessage: 'Name',
+      }),
       render: name => <EuiLink {...engineLinkProps(name)}>{name}</EuiLink>,
       width: '30%',
       truncateText: true,
@@ -64,36 +68,59 @@ export const EngineTable: ReactFC<IEngineTableProps> = ({
     },
     {
       field: 'created_at',
-      name: 'Created At',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.appSearch.enginesOverview.table.column.createdAt',
+        {
+          defaultMessage: 'Created At',
+        }
+      ),
       dataType: 'string',
-      render: dateString => {
+      render: dateString => (
         // e.g., January 1, 1970
-        return new Date(dateString).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        });
-      },
+        <FormattedDate value={new Date(dateString)} year="numeric" month="long" day="numeric" />
+      ),
     },
     {
       field: 'document_count',
-      name: 'Document Count',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.appSearch.enginesOverview.table.column.documentCount',
+        {
+          defaultMessage: 'Document Count',
+        }
+      ),
       dataType: 'number',
-      render: number => number.toLocaleString(), // Display with comma thousand separators
+      render: number => <FormattedNumber value={number} />,
       truncateText: true,
     },
     {
       field: 'field_count',
-      name: 'Field Count',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.appSearch.enginesOverview.table.column.fieldCount',
+        {
+          defaultMessage: 'Field Count',
+        }
+      ),
       dataType: 'number',
-      render: number => number.toLocaleString(), // Display with comma thousand separators
+      render: number => <FormattedNumber value={number} />,
       truncateText: true,
     },
     {
       field: 'name',
-      name: 'Actions',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.appSearch.enginesOverview.table.column.actions',
+        {
+          defaultMessage: 'Actions',
+        }
+      ),
       dataType: 'string',
-      render: name => <EuiLink {...engineLinkProps(name)}>Manage</EuiLink>,
+      render: name => (
+        <EuiLink {...engineLinkProps(name)}>
+          <FormattedMessage
+            id="xpack.enterpriseSearch.appSearch.enginesOverview.table.action.manage"
+            defaultMessage="Manage"
+          />
+        </EuiLink>
+      ),
       align: 'right',
       width: '100px',
     },

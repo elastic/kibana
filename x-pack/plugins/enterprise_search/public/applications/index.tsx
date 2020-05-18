@@ -8,6 +8,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Redirect } from 'react-router-dom';
 
+import { I18nProvider } from '@kbn/i18n/react';
 import { CoreStart, AppMountParams, HttpHandler } from 'src/core/public';
 import { ClientConfigType, PluginsSetup } from '../plugin';
 import { TSetBreadcrumbs } from './shared/kibana_breadcrumbs';
@@ -37,20 +38,22 @@ export const renderApp = (
   plugins: PluginsSetup
 ) => {
   ReactDOM.render(
-    <KibanaContext.Provider
-      value={{
-        http: core.http,
-        enterpriseSearchUrl: config.host,
-        setBreadcrumbs: core.chrome.setBreadcrumbs,
-        license$: plugins.licensing.license$,
-      }}
-    >
-      <LicenseProvider>
-        <Router history={params.history}>
-          <App />
-        </Router>
-      </LicenseProvider>
-    </KibanaContext.Provider>,
+    <I18nProvider>
+      <KibanaContext.Provider
+        value={{
+          http: core.http,
+          enterpriseSearchUrl: config.host,
+          setBreadcrumbs: core.chrome.setBreadcrumbs,
+          license$: plugins.licensing.license$,
+        }}
+      >
+        <LicenseProvider>
+          <Router history={params.history}>
+            <App />
+          </Router>
+        </LicenseProvider>
+      </KibanaContext.Provider>
+    </I18nProvider>,
     params.element
   );
   return () => ReactDOM.unmountComponentAtNode(params.element);

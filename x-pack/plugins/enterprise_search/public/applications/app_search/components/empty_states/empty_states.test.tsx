@@ -9,6 +9,8 @@ import '../../../__mocks__/shallow_usecontext.mock';
 import React from 'react';
 import { shallow } from 'enzyme';
 import { EuiEmptyPrompt, EuiButton, EuiCode, EuiLoadingContent } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { shallowWithIntl } from '../../../__mocks__';
 
 jest.mock('../../utils/get_username', () => ({ getUserName: jest.fn() }));
 import { getUserName } from '../../utils/get_username';
@@ -24,38 +26,36 @@ import { ErrorState, NoUserState, EmptyState, LoadingState } from './';
 describe('ErrorState', () => {
   it('renders', () => {
     const wrapper = shallow(<ErrorState />);
-    const prompt = wrapper.find(EuiEmptyPrompt);
 
-    expect(prompt).toHaveLength(1);
-    expect(prompt.prop('title')).toEqual(<h2>Cannot connect to App Search</h2>);
+    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
   });
 });
 
 describe('NoUserState', () => {
   it('renders', () => {
     const wrapper = shallow(<NoUserState />);
-    const prompt = wrapper.find(EuiEmptyPrompt);
 
-    expect(prompt).toHaveLength(1);
-    expect(prompt.prop('title')).toEqual(<h2>Cannot find App Search account</h2>);
+    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
   });
 
   it('renders with username', () => {
     getUserName.mockImplementationOnce(() => 'dolores-abernathy');
-    const wrapper = shallow(<NoUserState />);
+    const wrapper = shallowWithIntl(<NoUserState />);
     const prompt = wrapper.find(EuiEmptyPrompt).dive();
+    const description1 = prompt
+      .find(FormattedMessage)
+      .at(1)
+      .dive();
 
-    expect(prompt.find(EuiCode).prop('children')).toContain('dolores-abernathy');
+    expect(description1.find(EuiCode).prop('children')).toContain('dolores-abernathy');
   });
 });
 
 describe('EmptyState', () => {
   it('renders', () => {
     const wrapper = shallow(<EmptyState />);
-    const prompt = wrapper.find(EuiEmptyPrompt);
 
-    expect(prompt).toHaveLength(1);
-    expect(prompt.prop('title')).toEqual(<h2>There’s nothing here yet</h2>);
+    expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(1);
   });
 
   it('sends telemetry on create first engine click', () => {

@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiBasicTable, EuiPagination, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 
-import { mountWithKibanaContext } from '../../../__mocks__';
+import { mountWithContext } from '../../../__mocks__';
 jest.mock('../../../shared/telemetry', () => ({ sendTelemetry: jest.fn() }));
 import { sendTelemetry } from '../../../shared/telemetry';
 
@@ -16,7 +16,7 @@ import { EngineTable } from './engine_table';
 describe('EngineTable', () => {
   const onPaginate = jest.fn(); // onPaginate updates the engines API call upstream
 
-  const wrapper = mountWithKibanaContext(
+  const wrapper = mountWithContext(
     <EngineTable
       data={[
         {
@@ -71,7 +71,7 @@ describe('EngineTable', () => {
   });
 
   it('handles empty data', () => {
-    const emptyWrapper = mountWithKibanaContext(
+    const emptyWrapper = mountWithContext(
       <EngineTable data={[]} pagination={{ totalEngines: 0 }} />
     );
     const emptyTable = wrapper.find(EuiBasicTable);

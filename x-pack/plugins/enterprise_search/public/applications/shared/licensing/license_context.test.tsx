@@ -6,7 +6,7 @@
 
 import React, { useContext } from 'react';
 
-import { mountWithKibanaContext } from '../../__mocks__';
+import { mountWithContext } from '../../__mocks__';
 import { LicenseContext, ILicenseContext } from './';
 
 describe('LicenseProvider', () => {
@@ -16,11 +16,7 @@ describe('LicenseProvider', () => {
   };
 
   it('renders children', () => {
-    const wrapper = mountWithKibanaContext(
-      <LicenseContext.Provider value={{ license: { type: 'basic' } }}>
-        <MockComponent />
-      </LicenseContext.Provider>
-    );
+    const wrapper = mountWithContext(<MockComponent />, { license: { type: 'basic' } });
 
     expect(wrapper.find('.license-test')).toHaveLength(1);
     expect(wrapper.text()).toEqual('basic');
