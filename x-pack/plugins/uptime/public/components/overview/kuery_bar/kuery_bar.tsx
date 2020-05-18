@@ -134,7 +134,7 @@ export function KueryBarComponent({
         queryExample=""
       />
 
-      {indexPatternMissing && (
+      {indexPatternMissing && !loading && (
         <EuiCallOut
           style={{ display: 'inline-block', marginTop: '10px' }}
           title={

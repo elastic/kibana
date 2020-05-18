@@ -73,17 +73,13 @@ export async function ensureInstalledPackage(options: {
   if (installedPackage) {
     return installedPackage;
   }
-  // if the requested packaged was not found to be installed, try installing
-  try {
-    await installLatestPackage({
-      savedObjectsClient,
-      pkgName,
-      callCluster,
-    });
-    return await getInstallation({ savedObjectsClient, pkgName });
-  } catch (err) {
-    throw new Error(err.message);
-  }
+  // if the requested packaged was not found to be installed, install
+  await installLatestPackage({
+    savedObjectsClient,
+    pkgName,
+    callCluster,
+  });
+  return await getInstallation({ savedObjectsClient, pkgName });
 }
 
 export async function installPackage(options: {
