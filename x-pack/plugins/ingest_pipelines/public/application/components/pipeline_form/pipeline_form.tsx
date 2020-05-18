@@ -44,7 +44,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
 
   const [isTestingPipeline, setIsTestingPipeline] = useState<boolean>(false);
 
-  const handleSave: FormConfig['onSubmit'] = (formData, isValid) => {
+  const handleSave: FormConfig['onSubmit'] = async (formData, isValid) => {
     if (isValid) {
       onSave(formData as Pipeline);
     }

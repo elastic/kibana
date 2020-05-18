@@ -35,6 +35,7 @@ import { contextServiceMock } from '../context/context_service.mock';
 
 const applicationSetup = applicationServiceMock.createInternalSetupContract();
 const contextSetup = contextServiceMock.createSetupContract();
+const docLinksSetup = docLinksServiceMock.createSetupContract();
 const fatalErrorsSetup = fatalErrorsServiceMock.createSetupContract();
 const httpSetup = httpServiceMock.createSetupContract();
 const injectedMetadataSetup = injectedMetadataServiceMock.createSetupContract();
@@ -65,6 +66,7 @@ const defaultSetupDeps = {
   core: {
     application: applicationSetup,
     context: contextSetup,
+    docLinks: docLinksSetup,
     fatalErrors: fatalErrorsSetup,
     injectedMetadata: injectedMetadataSetup,
     notifications: notificationsSetup,
