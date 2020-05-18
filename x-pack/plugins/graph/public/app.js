@@ -46,13 +46,13 @@ export function initGraphApp(angularModule, deps) {
     addBasePath,
     getBasePath,
     data,
-    config,
     capabilities,
     coreStart,
     storage,
     canEditDrillDownUrls,
     graphSavePolicy,
     overlays,
+    savedObjects,
   } = deps;
 
   const app = angularModule;
@@ -77,6 +77,7 @@ export function initGraphApp(angularModule, deps) {
       ['hideWriteControls', { watchDepth: 'reference' }],
       ['capabilities', { watchDepth: 'reference' }],
       ['initialFilter', { watchDepth: 'reference' }],
+      ['initialPageSize', { watchDepth: 'reference' }],
     ]);
   });
 
@@ -111,7 +112,8 @@ export function initGraphApp(angularModule, deps) {
         template: listingTemplate,
         badge: getReadonlyBadge,
         controller: function($location, $scope) {
-          $scope.listingLimit = config.get('savedObjects:listingLimit');
+          $scope.listingLimit = savedObjects.settings.getListingLimit();
+          $scope.initialPageSize = savedObjects.settings.getPerPage();
           $scope.create = () => {
             $location.url(getNewPath());
           };
