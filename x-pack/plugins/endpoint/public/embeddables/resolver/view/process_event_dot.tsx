@@ -344,7 +344,7 @@ export const ProcessEventDot = styled(
        * e.g. "10 DNS", "230 File"
        */
       const relatedEventOptions = useMemo(() => {
-        if (relatedEvents instanceof Error) {
+        if (relatedEvents === 'error') {
           // Return an empty set of options if there was an error requesting them
           return [];
         }
@@ -377,7 +377,7 @@ export const ProcessEventDot = styled(
           // If related events have not yet been requested
           return subMenuAssets.initialMenuStatus;
         }
-        if (relatedEvents instanceof Error) {
+        if (relatedEvents === 'error') {
           // If there was an error when we tried to request the events
           return subMenuAssets.menuError;
         }

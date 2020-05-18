@@ -146,7 +146,10 @@ export interface RelatedEventDataEntry {
  * Represents the status of the request for related event data, which will be either the data,
  * a value indicating that it's still waiting for the data or an Error indicating the data can't be retrieved as expected
  */
-export type RelatedEventDataResults = RelatedEventDataEntry | 'waitingForRelatedEventData' | Error;
+export type RelatedEventDataResults =
+  | RelatedEventDataEntry
+  | 'waitingForRelatedEventData'
+  | 'error';
 
 /**
  * This represents the raw related events data enhanced with statistics
@@ -166,7 +169,7 @@ export type RelatedEventDataEntryWithStats = RelatedEventDataEntry & {
 export type RelatedEventEntryWithStatsOrWaiting =
   | RelatedEventDataEntryWithStats
   | `waitingForRelatedEventData`
-  | Error;
+  | 'error';
 
 /**
  * This represents a Map that will return either a `RelatedEventDataEntryWithStats`

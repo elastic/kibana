@@ -42,7 +42,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     if (statsMap) {
       const currentStatsMap = new Map(statsMap);
       const resolverEvent = action.payload;
-      currentStatsMap.set(resolverEvent, new Error('error requesting related events'));
+      currentStatsMap.set(resolverEvent, 'error');
       return { ...state, resultsEnrichedWithRelatedEventInfo: currentStatsMap };
     }
     return state;

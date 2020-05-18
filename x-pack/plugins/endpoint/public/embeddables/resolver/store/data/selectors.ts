@@ -432,13 +432,12 @@ export const relatedEventStats = createSelector(relatedEventResults, function ge
 
   for (const updatedEvent of relatedEventResults.keys()) {
     const newStatsEntry = relatedEventResults.get(updatedEvent);
+    if (newStatsEntry === 'error') {
+      // If the entry is an error, return it as is
+      relatedEventStats.set(updatedEvent, newStatsEntry);
+      continue;
+    }
     if (typeof newStatsEntry === 'object') {
-      // compile stats
-      if (newStatsEntry instanceof Error) {
-        // If the entry is an error, return it as is
-        relatedEventStats.set(updatedEvent, newStatsEntry);
-        continue;
-      }
       /**
        * Otherwise, it should be a valid stats entry.
        * Do the work to compile the stats.

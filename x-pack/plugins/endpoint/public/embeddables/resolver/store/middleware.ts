@@ -31,7 +31,7 @@ function flattenEvents(children: ResolverNode[], events: ResolverEvent[] = []): 
   }, events);
 }
 
-type RelatedEventAPIResponse = Error | { events: ResolverEvent[] };
+type RelatedEventAPIResponse = 'error' | { events: ResolverEvent[] };
 /**
  * As the design goal of this stopgap was to prevent saturating the server with /events
  * requests, this generator intentionally processes events in serial rather than in parallel.
@@ -52,7 +52,7 @@ async function* getEachRelatedEventsResult(
         query: { events: 100 },
       });
     } catch (e) {
-      result = new Error(`Error fetching related events for entity=${id}`);
+      result = 'error';
     }
     yield [eventToQueryForRelateds, result];
   }
@@ -119,7 +119,7 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
            * [event requested , response of event against the /related api]
            */
           const [baseEvent, apiResults] = results;
-          if (apiResults instanceof Error) {
+          if (apiResults === 'error') {
             api.dispatch({
               type: 'serverFailedToReturnRelatedEventData',
               payload: results[0],
