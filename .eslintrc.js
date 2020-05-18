@@ -219,6 +219,8 @@ module.exports = {
                   // for absolute imports until fixed in
                   // https://github.com/elastic/kibana/issues/36096
                   '!src/core/server/*.test.mocks{,.ts}',
+
+                  'target/types/**',
                 ],
                 allowSameFolder: true,
                 errorMessage:
@@ -491,7 +493,6 @@ module.exports = {
         '.eslintrc.js',
         '**/webpackShims/**/*.js',
         'packages/kbn-plugin-generator/**/*.js',
-        'packages/kbn-plugin-helpers/**/*.js',
         'packages/kbn-eslint-import-resolver-kibana/**/*.js',
         'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
