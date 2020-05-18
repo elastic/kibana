@@ -38,7 +38,7 @@ export function createElasticCloudInstructions(cloudSetup?: CloudSetup) {
 function getApmServerInstructionSet(cloudSetup?: CloudSetup) {
   const cloudId = cloudSetup?.cloudId;
   return {
-    title: i18n.translate('apm.tutorial.apmServer.title', {
+    title: i18n.translate('xpack.apm.tutorial.apmServer.title', {
       defaultMessage: 'APM Server'
     }),
     instructionVariants: [
