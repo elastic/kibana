@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { formatErrors } from '../format_errors';
+import { formatErrors } from './format_errors';
 
 interface Message<T> {
   errors: t.Errors;
