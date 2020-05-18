@@ -6,15 +6,28 @@
 
 import _ from 'lodash';
 import semver from 'semver';
+// @ts-ignore
 import numeral from '@elastic/numeral';
 
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
 import { CREATED_BY_LABEL } from '../constants/new_job';
+import { CombinedJob, CustomSettings, Datafeed, JobId, Job } from '../types/anomaly_detection_jobs';
+import { EntityField } from './anomaly_utils';
+import { MlServerLimits } from '../types/ml_server_info';
+import { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
+import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';
+
+export interface ValidationResults {
+  valid: boolean;
+  messages: JobValidationMessage[];
+  contains: (id: JobValidationMessageId) => boolean;
+  find: (id: JobValidationMessageId) => { id: JobValidationMessageId } | undefined;
+}
 
 // work out the default frequency based on the bucket_span in seconds
-export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds) {
+export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds: number): number {
   let freq = 3600;
   if (bucketSpanSeconds <= 120) {
     freq = 60;
@@ -29,40 +42,36 @@ export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds) {
 
 // Returns a flag to indicate whether the job is suitable for viewing
 // in the Time Series dashboard.
-export function isTimeSeriesViewJob(job) {
+export function isTimeSeriesViewJob(job: CombinedJob): boolean {
   // only allow jobs with at least one detector whose function corresponds to
   // an ES aggregation which can be viewed in the single metric view and which
   // doesn't use a scripted field which can be very difficult or impossible to
   // invert to a reverse search, or when model plot has been enabled.
-  let isViewable = false;
-  const dtrs = job.analysis_config.detectors;
-
-  for (let i = 0; i < dtrs.length; i++) {
-    isViewable = isTimeSeriesViewDetector(job, i);
-    if (isViewable === true) {
-      break;
+  for (let i = 0; i < job.analysis_config.detectors.length; i++) {
+    if (isTimeSeriesViewDetector(job, i)) {
+      return true;
     }
   }
 
-  return isViewable;
+  return false;
 }
 
 // Returns a flag to indicate whether the detector at the index in the specified job
 // is suitable for viewing in the Time Series dashboard.
-export function isTimeSeriesViewDetector(job, dtrIndex) {
+export function isTimeSeriesViewDetector(job: CombinedJob, detectorIndex: number): boolean {
   return (
-    isSourceDataChartableForDetector(job, dtrIndex) ||
-    isModelPlotChartableForDetector(job, dtrIndex)
+    isSourceDataChartableForDetector(job, detectorIndex) ||
+    isModelPlotChartableForDetector(job, detectorIndex)
   );
 }
 
 // Returns a flag to indicate whether the source data can be plotted in a time
 // series chart for the specified detector.
-export function isSourceDataChartableForDetector(job, detectorIndex) {
+export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex: number): boolean {
   let isSourceDataChartable = false;
-  const dtrs = job.analysis_config.detectors;
-  if (detectorIndex >= 0 && detectorIndex < dtrs.length) {
-    const dtr = dtrs[detectorIndex];
+  const { detectors } = job.analysis_config;
+  if (detectorIndex >= 0 && detectorIndex < detectors.length) {
+    const dtr = detectors[detectorIndex];
     const functionName = dtr.function;
 
     // Check that the function maps to an ES aggregation,
@@ -79,15 +88,14 @@ export function isSourceDataChartableForDetector(job, detectorIndex) {
     // If the datafeed uses script fields, we can only plot the time series if
     // model plot is enabled. Without model plot it will be very difficult or impossible
     // to invert to a reverse search of the underlying metric data.
-    const usesScriptFields = _.has(job, 'datafeed_config.script_fields');
-    if (isSourceDataChartable === true && usesScriptFields === true) {
+    if (isSourceDataChartable === true && typeof job.datafeed_config?.script_fields === 'object') {
       // Perform extra check to see if the detector is using a scripted field.
-      const scriptFields = usesScriptFields ? _.keys(job.datafeed_config.script_fields) : [];
+      const scriptFields = Object.keys(job.datafeed_config.script_fields);
       isSourceDataChartable =
-        scriptFields.indexOf(dtr.field_name) === -1 &&
-        scriptFields.indexOf(dtr.partition_field_name) === -1 &&
-        scriptFields.indexOf(dtr.by_field_name) === -1 &&
-        scriptFields.indexOf(dtr.over_field_name) === -1;
+        scriptFields.indexOf(dtr.field_name!) === -1 &&
+        scriptFields.indexOf(dtr.partition_field_name!) === -1 &&
+        scriptFields.indexOf(dtr.by_field_name!) === -1 &&
+        scriptFields.indexOf(dtr.over_field_name!) === -1;
     }
   }
 
@@ -96,29 +104,29 @@ export function isSourceDataChartableForDetector(job, detectorIndex) {
 
 // Returns a flag to indicate whether model plot data can be plotted in a time
 // series chart for the specified detector.
-export function isModelPlotChartableForDetector(job, detectorIndex) {
+export function isModelPlotChartableForDetector(job: Job, detectorIndex: number): boolean {
   let isModelPlotChartable = false;
 
-  const modelPlotEnabled = _.get(job, ['model_plot_config', 'enabled'], false);
-  const dtrs = job.analysis_config.detectors;
-  if (detectorIndex >= 0 && detectorIndex < dtrs.length && modelPlotEnabled === true) {
-    const dtr = dtrs[detectorIndex];
-    const functionName = dtr.function;
+  const modelPlotEnabled = job.model_plot_config?.enabled ?? false;
+  const { detectors } = job.analysis_config;
+  if (detectorIndex >= 0 && detectorIndex < detectors.length && modelPlotEnabled) {
+    const dtr = detectors[detectorIndex];
+    const functionName = dtr.function as ML_JOB_AGGREGATION;
 
     // Model plot can be charted for any of the functions which map to ES aggregations
     // (except rare, for which no model plot results are generated),
     // plus varp and info_content functions.
     isModelPlotChartable =
-      functionName !== 'rare' &&
+      functionName !== ML_JOB_AGGREGATION.RARE &&
       (mlFunctionToESAggregation(functionName) !== null ||
         [
-          'varp',
-          'high_varp',
-          'low_varp',
-          'info_content',
-          'high_info_content',
-          'low_info_content',
-        ].includes(functionName) === true);
+          ML_JOB_AGGREGATION.VARP,
+          ML_JOB_AGGREGATION.HIGH_VARP,
+          ML_JOB_AGGREGATION.LOW_VARP,
+          ML_JOB_AGGREGATION.INFO_CONTENT,
+          ML_JOB_AGGREGATION.HIGH_INFO_CONTENT,
+          ML_JOB_AGGREGATION.LOW_INFO_CONTENT,
+        ].includes(functionName));
   }
 
   return isModelPlotChartable;
@@ -126,16 +134,16 @@ export function isModelPlotChartableForDetector(job, detectorIndex) {
 
 // Returns the names of the partition, by, and over fields for the detector with the
 // specified index from the supplied ML job configuration.
-export function getPartitioningFieldNames(job, detectorIndex) {
-  const fieldNames = [];
+export function getPartitioningFieldNames(job: CombinedJob, detectorIndex: number): string[] {
+  const fieldNames: string[] = [];
   const detector = job.analysis_config.detectors[detectorIndex];
-  if (_.has(detector, 'partition_field_name')) {
+  if (typeof detector.partition_field_name === 'string') {
     fieldNames.push(detector.partition_field_name);
   }
-  if (_.has(detector, 'by_field_name')) {
+  if (typeof detector.by_field_name === 'string') {
     fieldNames.push(detector.by_field_name);
   }
-  if (_.has(detector, 'over_field_name')) {
+  if (typeof detector.over_field_name === 'string') {
     fieldNames.push(detector.over_field_name);
   }
 
@@ -148,31 +156,41 @@ export function getPartitioningFieldNames(job, detectorIndex) {
 // the supplied entities contains 'by' and 'partition' fields in the detector,
 // if configured, whose values are in the configured model_plot_config terms,
 // where entityFields is in the format [{fieldName:status, fieldValue:404}].
-export function isModelPlotEnabled(job, detectorIndex, entityFields) {
+export function isModelPlotEnabled(
+  job: Job,
+  detectorIndex: number,
+  entityFields?: EntityField[]
+): boolean {
   // Check if model_plot_config is enabled.
-  let isEnabled = _.get(job, ['model_plot_config', 'enabled'], false);
+  let isEnabled = job.model_plot_config?.enabled ?? false;
 
-  if (isEnabled === true && entityFields !== undefined && entityFields.length > 0) {
+  if (isEnabled && entityFields !== undefined && entityFields.length > 0) {
     // If terms filter is configured in model_plot_config, check supplied entities.
-    const termsStr = _.get(job, ['model_plot_config', 'terms'], '');
+    const termsStr = job.model_plot_config?.terms ?? '';
     if (termsStr !== '') {
       // NB. Do not currently support empty string values as being valid 'by' or
       // 'partition' field values even though this is supported on the back-end.
       // If supplied, check both the by and partition entities are in the terms.
       const detector = job.analysis_config.detectors[detectorIndex];
-      const detectorHasPartitionField = _.has(detector, 'partition_field_name');
-      const detectorHasByField = _.has(detector, 'by_field_name');
+      const detectorHasPartitionField = detector.hasOwnProperty('partition_field_name');
+      const detectorHasByField = detector.hasOwnProperty('by_field_name');
       const terms = termsStr.split(',');
 
-      if (detectorHasPartitionField === true) {
-        const partitionEntity = _.find(entityFields, { fieldName: detector.partition_field_name });
+      if (detectorHasPartitionField) {
+        const partitionEntity = entityFields.find(
+          entityField => entityField.fieldName === detector.partition_field_name
+        );
         isEnabled =
-          partitionEntity !== undefined && terms.indexOf(partitionEntity.fieldValue) !== -1;
+          partitionEntity?.fieldValue !== undefined &&
+          terms.indexOf(String(partitionEntity.fieldValue)) !== -1;
       }
 
       if (isEnabled === true && detectorHasByField === true) {
-        const byEntity = _.find(entityFields, { fieldName: detector.by_field_name });
-        isEnabled = byEntity !== undefined && terms.indexOf(byEntity.fieldValue) !== -1;
+        const byEntity = entityFields.find(
+          entityField => entityField.fieldName === detector.by_field_name
+        );
+        isEnabled =
+          byEntity?.fieldValue !== undefined && terms.indexOf(String(byEntity.fieldValue)) !== -1;
       }
     }
   }
@@ -182,8 +200,8 @@ export function isModelPlotEnabled(job, detectorIndex, entityFields) {
 
 // Returns whether the version of the job (the version number of the elastic stack that the job was
 // created with) is greater than or equal to the supplied version (e.g. '6.1.0').
-export function isJobVersionGte(job, version) {
-  const jobVersion = _.get(job, 'job_version', '0.0.0');
+export function isJobVersionGte(job: CombinedJob, version: string): boolean {
+  const jobVersion = job.job_version ?? '0.0.0';
   return semver.gte(jobVersion, version);
 }
 
@@ -191,60 +209,62 @@ export function isJobVersionGte(job, version) {
 // for querying metric data. Returns null if there is no suitable ES aggregation.
 // Note that the 'function' field in a record contains what the user entered e.g. 'high_count',
 // whereas the 'function_description' field holds an ML-built display hint for function e.g. 'count'.
-export function mlFunctionToESAggregation(functionName) {
+export function mlFunctionToESAggregation(
+  functionName: ML_JOB_AGGREGATION | string
+): ES_AGGREGATION | null {
   if (
-    functionName === 'mean' ||
-    functionName === 'high_mean' ||
-    functionName === 'low_mean' ||
-    functionName === 'metric'
+    functionName === ML_JOB_AGGREGATION.MEAN ||
+    functionName === ML_JOB_AGGREGATION.HIGH_MEAN ||
+    functionName === ML_JOB_AGGREGATION.LOW_MEAN ||
+    functionName === ML_JOB_AGGREGATION.METRIC
   ) {
-    return 'avg';
-  }
-
-  if (
-    functionName === 'sum' ||
-    functionName === 'high_sum' ||
-    functionName === 'low_sum' ||
-    functionName === 'non_null_sum' ||
-    functionName === 'low_non_null_sum' ||
-    functionName === 'high_non_null_sum'
-  ) {
-    return 'sum';
+    return ES_AGGREGATION.AVG;
   }
 
   if (
-    functionName === 'count' ||
-    functionName === 'high_count' ||
-    functionName === 'low_count' ||
-    functionName === 'non_zero_count' ||
-    functionName === 'low_non_zero_count' ||
-    functionName === 'high_non_zero_count'
+    functionName === ML_JOB_AGGREGATION.SUM ||
+    functionName === ML_JOB_AGGREGATION.HIGH_SUM ||
+    functionName === ML_JOB_AGGREGATION.LOW_SUM ||
+    functionName === ML_JOB_AGGREGATION.NON_NULL_SUM ||
+    functionName === ML_JOB_AGGREGATION.LOW_NON_NULL_SUM ||
+    functionName === ML_JOB_AGGREGATION.HIGH_NON_NULL_SUM
   ) {
-    return 'count';
+    return ES_AGGREGATION.SUM;
   }
 
   if (
-    functionName === 'distinct_count' ||
-    functionName === 'low_distinct_count' ||
-    functionName === 'high_distinct_count'
+    functionName === ML_JOB_AGGREGATION.COUNT ||
+    functionName === ML_JOB_AGGREGATION.HIGH_COUNT ||
+    functionName === ML_JOB_AGGREGATION.LOW_COUNT ||
+    functionName === ML_JOB_AGGREGATION.NON_ZERO_COUNT ||
+    functionName === ML_JOB_AGGREGATION.LOW_NON_ZERO_COUNT ||
+    functionName === ML_JOB_AGGREGATION.HIGH_NON_ZERO_COUNT
   ) {
-    return 'cardinality';
+    return ES_AGGREGATION.COUNT;
   }
 
   if (
-    functionName === 'median' ||
-    functionName === 'high_median' ||
-    functionName === 'low_median'
+    functionName === ML_JOB_AGGREGATION.DISTINCT_COUNT ||
+    functionName === ML_JOB_AGGREGATION.LOW_DISTINCT_COUNT ||
+    functionName === ML_JOB_AGGREGATION.HIGH_DISTINCT_COUNT
   ) {
-    return 'percentiles';
+    return ES_AGGREGATION.CARDINALITY;
   }
 
-  if (functionName === 'min' || functionName === 'max') {
-    return functionName;
+  if (
+    functionName === ML_JOB_AGGREGATION.MEDIAN ||
+    functionName === ML_JOB_AGGREGATION.HIGH_MEDIAN ||
+    functionName === ML_JOB_AGGREGATION.LOW_MEDIAN
+  ) {
+    return ES_AGGREGATION.PERCENTILES;
   }
 
-  if (functionName === 'rare') {
-    return 'count';
+  if (functionName === ML_JOB_AGGREGATION.MIN || functionName === ML_JOB_AGGREGATION.MAX) {
+    return (functionName as unknown) as ES_AGGREGATION;
+  }
+
+  if (functionName === ML_JOB_AGGREGATION.RARE) {
+    return ES_AGGREGATION.COUNT;
   }
 
   // Return null if ML function does not map to an ES aggregation.
@@ -256,7 +276,7 @@ export function mlFunctionToESAggregation(functionName) {
 
 // Job name must contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores;
 // it must also start and end with an alphanumeric character'
-export function isJobIdValid(jobId) {
+export function isJobIdValid(jobId: JobId): boolean {
   return /^[a-z0-9\-\_]+$/g.test(jobId) && !/^([_-].*)?(.*[_-])?$/g.test(jobId);
 }
 
@@ -270,7 +290,7 @@ export const ML_MEDIAN_PERCENTS = '50.0';
 export const ML_DATA_PREVIEW_COUNT = 10;
 
 // add a prefix to a datafeed id before the "datafeed-" part of the name
-export function prefixDatafeedId(datafeedId, prefix) {
+export function prefixDatafeedId(datafeedId: string, prefix: string): string {
   return datafeedId.match(/^datafeed-/)
     ? datafeedId.replace(/^datafeed-/, `datafeed-${prefix}`)
     : `datafeed-${prefix}${datafeedId}`;
@@ -280,13 +300,13 @@ export function prefixDatafeedId(datafeedId, prefix) {
 // field name. Aggregation names must be alpha-numeric and can only contain '_' and '-' characters,
 // so if the supplied field names contains disallowed characters, the provided index
 // identifier is used to return a safe 'dummy' name in the format 'field_index' e.g. field_0, field_1
-export function getSafeAggregationName(fieldName, index) {
+export function getSafeAggregationName(fieldName: string, index: number): string {
   return fieldName.match(/^[a-zA-Z0-9-_.]+$/) ? fieldName : `field_${index}`;
 }
 
-export function uniqWithIsEqual(arr) {
+export function uniqWithIsEqual<T extends any[]>(arr: T): T {
   return arr.reduce((dedupedArray, value) => {
-    if (dedupedArray.filter(compareValue => _.isEqual(compareValue, value)).length === 0) {
+    if (dedupedArray.filter((compareValue: any) => _.isEqual(compareValue, value)).length === 0) {
       dedupedArray.push(value);
     }
     return dedupedArray;
@@ -296,8 +316,13 @@ export function uniqWithIsEqual(arr) {
 // check job without manipulating UI and return a list of messages
 // job and fields get passed as arguments and are not accessed as $scope.* via the outer scope
 // because the plan is to move this function to the common code area so that it can be used on the server side too.
-export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
-  const messages = [];
+export function basicJobValidation(
+  job: Job,
+  fields: object | undefined,
+  limits: MlServerLimits,
+  skipMmlChecks = false
+): ValidationResults {
+  const messages: ValidationResults['messages'] = [];
   let valid = true;
 
   if (job) {
@@ -459,8 +484,8 @@ export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
   };
 }
 
-export function basicDatafeedValidation(datafeed) {
-  const messages = [];
+export function basicDatafeedValidation(datafeed: Datafeed): ValidationResults {
+  const messages: ValidationResults['messages'] = [];
   let valid = true;
 
   if (datafeed) {
@@ -487,8 +512,8 @@ export function basicDatafeedValidation(datafeed) {
   };
 }
 
-export function validateModelMemoryLimit(job, limits) {
-  const messages = [];
+export function validateModelMemoryLimit(job: Job, limits: MlServerLimits): ValidationResults {
+  const messages: ValidationResults['messages'] = [];
   let valid = true;
   // model memory limit
   if (
@@ -499,7 +524,9 @@ export function validateModelMemoryLimit(job, limits) {
       const max = limits.max_model_memory_limit.toUpperCase();
       const mml = job.analysis_limits.model_memory_limit.toUpperCase();
 
+      // @ts-ignore
       const mmlBytes = numeral(mml).value();
+      // @ts-ignore
       const maxBytes = numeral(max).value();
 
       if (mmlBytes > maxBytes) {
@@ -518,8 +545,10 @@ export function validateModelMemoryLimit(job, limits) {
   };
 }
 
-export function validateModelMemoryLimitUnits(modelMemoryLimit) {
-  const messages = [];
+export function validateModelMemoryLimitUnits(
+  modelMemoryLimit: string | undefined
+): ValidationResults {
+  const messages: ValidationResults['messages'] = [];
   let valid = true;
 
   if (modelMemoryLimit !== undefined) {
@@ -527,13 +556,14 @@ export function validateModelMemoryLimitUnits(modelMemoryLimit) {
     const mmlSplit = mml.match(/\d+(\w+)$/);
     const unit = mmlSplit && mmlSplit.length === 2 ? mmlSplit[1] : null;
 
-    if (ALLOWED_DATA_UNITS.indexOf(unit) === -1) {
+    if (unit === null || ALLOWED_DATA_UNITS.indexOf(unit) === -1) {
       messages.push({ id: 'model_memory_limit_units_invalid' });
       valid = false;
     } else {
       messages.push({ id: 'model_memory_limit_units_valid' });
     }
   }
+
   return {
     valid,
     messages,
@@ -542,9 +572,9 @@ export function validateModelMemoryLimitUnits(modelMemoryLimit) {
   };
 }
 
-export function validateGroupNames(job) {
+export function validateGroupNames(job: Job): ValidationResults {
   const { groups = [] } = job;
-  const errorMessages = [
+  const errorMessages: ValidationResults['messages'] = [
     ...(groups.some(group => !isJobIdValid(group)) ? [{ id: 'job_group_id_invalid' }] : []),
     ...(groups.some(group => maxLengthValidator(JOB_ID_MAX_LENGTH)(group))
       ? [{ id: 'job_group_id_invalid_max_length' }]
@@ -561,18 +591,21 @@ export function validateGroupNames(job) {
   };
 }
 
-function isValidTimeFormat(value) {
+function isValidTimeFormat(value: string | undefined): boolean {
   if (value === undefined) {
     return true;
   }
-  const interval = parseInterval(value, false);
+  const interval = parseInterval(value);
   return interval !== null && interval.asMilliseconds() !== 0;
 }
 
 // Returns the latest of the last source data and last processed bucket timestamp,
 // as used for example in setting the end time of results views for cases where
 // anomalies might have been raised after the point at which data ingest has stopped.
-export function getLatestDataOrBucketTimestamp(latestDataTimestamp, latestBucketTimestamp) {
+export function getLatestDataOrBucketTimestamp(
+  latestDataTimestamp: number | undefined,
+  latestBucketTimestamp: number | undefined
+): number | undefined {
   if (latestDataTimestamp !== undefined && latestBucketTimestamp !== undefined) {
     return Math.max(latestDataTimestamp, latestBucketTimestamp);
   } else {
@@ -585,13 +618,13 @@ export function getLatestDataOrBucketTimestamp(latestDataTimestamp, latestBucket
  * it was created by a job wizard as the rules cannot currently be edited
  * in the job wizards and so would be lost in a clone.
  */
-export function processCreatedBy(customSettings) {
-  if (Object.values(CREATED_BY_LABEL).includes(customSettings.created_by)) {
+export function processCreatedBy(customSettings: CustomSettings) {
+  if (Object.values(CREATED_BY_LABEL).includes(customSettings.created_by!)) {
     delete customSettings.created_by;
   }
 }
 
-export function splitIndexPatternNames(indexPatternName) {
+export function splitIndexPatternNames(indexPatternName: string): string[] {
   return indexPatternName.includes(',')
     ? indexPatternName.split(',').map(i => i.trim())
     : [indexPatternName];
