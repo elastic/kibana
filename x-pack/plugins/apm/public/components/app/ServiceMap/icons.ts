@@ -5,7 +5,7 @@
  */
 
 import cytoscape from 'cytoscape';
-import { isRumAgentName } from '../../../../common/agent_name';
+import { getNormalizedAgentName } from '../../../../common/agent_name';
 import {
   AGENT_NAME,
   SPAN_SUBTYPE,
@@ -87,9 +87,8 @@ const agentIcons: { [key: string]: string } = {
 };
 
 function getAgentIcon(agentName?: string) {
-  // RUM can have multiple names. Normalize it
-  const normalizedAgentName = isRumAgentName(agentName) ? 'js-base' : agentName;
-  return normalizedAgentName && agentIcons[normalizedAgentName.toLowerCase()];
+  const normalizedAgentName = getNormalizedAgentName(agentName);
+  return normalizedAgentName && agentIcons[normalizedAgentName];
 }
 
 function getSpanIcon(type?: string, subtype?: string) {
