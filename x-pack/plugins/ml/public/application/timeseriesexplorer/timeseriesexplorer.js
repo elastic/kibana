@@ -36,6 +36,7 @@ import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import {
   isModelPlotEnabled,
+  isModelPlotChartableForDetector,
   isSourceDataChartableForDetector,
   isTimeSeriesViewDetector,
   mlFunctionToESAggregation,
@@ -506,11 +507,9 @@ export class TimeSeriesExplorer extends React.Component {
               contextForecastData: undefined,
               focusChartData: undefined,
               focusForecastData: undefined,
-              modelPlotEnabled: isModelPlotEnabled(
-                currentSelectedJob,
-                selectedDetectorIndex,
-                entityControls
-              ),
+              modelPlotEnabled:
+                isModelPlotChartableForDetector(currentSelectedJob, selectedDetectorIndex) &&
+                isModelPlotEnabled(currentSelectedJob, selectedDetectorIndex, entityControls),
               hasResults: false,
               dataNotChartable: false,
             }
@@ -1180,6 +1179,8 @@ export class TimeSeriesExplorer extends React.Component {
             )}
           </EuiFlexGroup>
         </div>
+
+        <EuiSpacer size="m" />
 
         {fullRefresh && loading === true && (
           <LoadingIndicator

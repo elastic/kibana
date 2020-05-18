@@ -201,3 +201,6 @@ export const AlertEdit = ({ initialAlert, onClose }: AlertEditProps) => {
     </EuiPortal>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { AlertEdit as default };

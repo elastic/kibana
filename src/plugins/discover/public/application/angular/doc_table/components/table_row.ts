@@ -29,6 +29,7 @@ import openRowHtml from './table_row/open.html';
 import detailsHtml from './table_row/details.html';
 
 import { dispatchRenderComplete } from '../../../../../../kibana_utils/public';
+import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../../../../common';
 import cellTemplateHtml from '../components/table_row/cell.html';
 import truncateByHeightTemplateHtml from '../components/table_row/truncate_by_height.html';
 import { esFilters } from '../../../../../../data/public';
@@ -106,19 +107,23 @@ export function createTableRowDirective($compile: ng.ICompileService, $httpParam
       };
 
       $scope.getContextAppHref = () => {
-        const path = `#/discover/context/${encodeURIComponent(
-          $scope.indexPattern.id
-        )}/${encodeURIComponent($scope.row._id)}`;
+        const path = `#/context/${encodeURIComponent($scope.indexPattern.id)}/${encodeURIComponent(
+          $scope.row._id
+        )}`;
         const globalFilters: any = getServices().filterManager.getGlobalFilters();
         const appFilters: any = getServices().filterManager.getAppFilters();
         const hash = $httpParamSerializer({
-          _g: rison.encode({
-            filters: globalFilters || [],
-          }),
-          _a: rison.encode({
-            columns: $scope.columns,
-            filters: (appFilters || []).map(esFilters.disableFilter),
-          }),
+          _g: encodeURI(
+            rison.encode({
+              filters: globalFilters || [],
+            })
+          ),
+          _a: encodeURI(
+            rison.encode({
+              columns: $scope.columns,
+              filters: (appFilters || []).map(esFilters.disableFilter),
+            })
+          ),
         });
 
         return `${path}?${hash}`;
@@ -133,7 +138,7 @@ export function createTableRowDirective($compile: ng.ICompileService, $httpParam
         const newHtmls = [openRowHtml];
 
         const mapping = indexPattern.fields.getByName;
-        const hideTimeColumn = getServices().uiSettings.get('doc_table:hideTimeColumn');
+        const hideTimeColumn = getServices().uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false);
         if (indexPattern.timeFieldName && !hideTimeColumn) {
           newHtmls.push(
             cellTemplate({

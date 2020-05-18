@@ -28,27 +28,46 @@ Password::  password for 'login' type authentication.
    name: preconfigured-email-action-type
    actionTypeId: .email
    config:
-     from: testsender@test.com <1.1>
-     host: validhostname <1.2>
-     port: 8080 <1.3>
-     secure: false <1.4>
+     from: testsender@test.com
+     host: validhostname
+     port: 8080
+     secure: false
    secrets:
-     user: testuser <2.1>
-     password: passwordkeystorevalue <2.2>
+     user: testuser
+     password: passwordkeystorevalue
 --
 
 `config` defines the action type specific to the configuration and contains the following properties:
 
-<1.1> `from:` is an email address and correspond to *Sender*.
-<1.2> `host:` is a string and correspond to *Host*.
-<1.3> `port:` is a number and correspond to *Port*.
-<1.4> `secure:` is a boolean and correspond to *Secure*.
+[cols="2*<"]
+|===
 
-`secrets` defines action type sensitive configuration:
+| `from`
+| An email address that corresponds to *Sender*.
 
-<2.1> `user:` is a string and correspond to *User*.
-<2.2> `password:` is a string and correspond to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+| `host`
+| A string that corresponds to *Host*.
 
+| `port`
+| A number that corresponds to *Port*.
+
+| `secure`
+| A boolean that corresponds to *Secure*.
+
+|===
+
+`secrets` defines sensitive information for the action type:
+
+[cols="2*<"]
+|===
+
+| `user`
+| A string that corresponds to *User*.
+
+| `password`
+| A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+
+|===
 
 [[email-action-configuration]]
 ==== Action configuration
