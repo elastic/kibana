@@ -168,7 +168,7 @@ test(`allows all wrappers to be excluded`, () => {
   expect(secondClientWrapperFactoryMock).not.toHaveBeenCalled();
 });
 
-test(`allows typed to be excluded`, () => {
+test(`allows typed to be included`, () => {
   const defaultClient = Symbol();
   const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
   const clientProvider = new SavedObjectsClientProvider({
@@ -178,12 +178,12 @@ test(`allows typed to be excluded`, () => {
   const request = Symbol();
 
   const actualClient = clientProvider.getClient(request, {
-    extraTypes: ['task'],
+    includedHiddenTypes: ['task'],
   });
 
   expect(actualClient).toBe(defaultClient);
   expect(defaultClientFactoryMock).toHaveBeenCalledWith({
     request,
-    extraTypes: ['task'],
+    includedHiddenTypes: ['task'],
   });
 });
