@@ -33,7 +33,7 @@ export class HTTPAuthorizationHeader {
       return null;
     }
 
-    const [scheme] = authorizationHeaderValue.split(/\s+/);
+    const [scheme] = authorizationHeaderValue.split(/\s+/, 1);
     const credentials = authorizationHeaderValue.substring(scheme.length + 1);
 
     return new HTTPAuthorizationHeader(scheme, credentials);

@@ -277,6 +277,41 @@ describe('KerberosAuthenticationProvider', () => {
 
       expect(request.headers.authorization).toBe('negotiate spnego');
     });
+
+    it('forwards the SPNEGO ticket unmodified, even if it contains whitespace', async () => {
+      const user = mockAuthenticatedUser();
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'negotiate spnego token with whitespace ' },
+      });
+
+      const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockScopedClusterClient.callAsCurrentUser.mockResolvedValue(user);
+      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
+      mockOptions.client.callAsInternalUser.mockResolvedValue({
+        access_token: 'some-token',
+        refresh_token: 'some-refresh-token',
+      });
+
+      await expect(operation(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(
+          { ...user, authentication_provider: 'kerberos' },
+          {
+            authHeaders: { authorization: 'Bearer some-token' },
+            state: { accessToken: 'some-token', refreshToken: 'some-refresh-token' },
+          }
+        )
+      );
+
+      expectAuthenticateCall(mockOptions.client, {
+        headers: { authorization: 'Bearer some-token' },
+      });
+
+      expect(mockOptions.client.callAsInternalUser).toHaveBeenCalledWith('shield.getAccessToken', {
+        body: { grant_type: '_kerberos', kerberos_ticket: 'spnego token with whitespace ' },
+      });
+
+      expect(request.headers.authorization).toBe('negotiate spnego token with whitespace ');
+    });
   }
 
   describe('`login` method', () => {
