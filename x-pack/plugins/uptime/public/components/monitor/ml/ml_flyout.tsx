@@ -40,8 +40,6 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
 
   const isLoadingMLJob = false;
 
-  const hasPlatinumLicense = license?.getFeature('ml')?.isAvailable;
-
   return (
     <EuiFlyout onClose={onClose} size="s" data-test-subj="uptimeMLFlyout">
       <EuiFlyoutHeader>
@@ -84,7 +82,7 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
               onClick={() => onClickCreate()}
               fill
               isLoading={isCreatingJob}
-              disabled={isCreatingJob || isLoadingMLJob || !hasPlatinumLicense || !canCreateMLJob}
+              disabled={isCreatingJob || isLoadingMLJob || !hasMlFeature || !canCreateMLJob}
             >
               {labels.CREATE_NEW_JOB}
             </EuiButton>
