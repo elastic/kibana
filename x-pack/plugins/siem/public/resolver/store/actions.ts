@@ -45,6 +45,15 @@ interface AppRequestedResolverData {
 }
 
 /**
+ * The action dispatched when the app requests related event data for one or more
+ * subjects (whose ids should be included as an array @ `payload`)
+ */
+interface UserRequestedRelatedEventData {
+  readonly type: 'userRequestedRelatedEventData';
+  readonly payload: ResolverEvent;
+}
+
+/**
  * When the user switches the "active descendant" of the Resolver.
  * The "active descendant" (from the point of view of the parent element)
  * corresponds to the "current" child element. "active" or "current" here meaning
@@ -77,6 +86,28 @@ interface UserSelectedResolverNode {
   };
 }
 
+/**
+ * This action should dispatch to indicate that the user chose to
+ * focus on examining the related events of a particular ResolverEvent.
+ * Optionally, this can be bound by a category of related events (e.g. 'file' or 'dns')
+ */
+interface UserSelectedRelatedEventCategory {
+  readonly type: 'userSelectedRelatedEventCategory';
+  readonly payload: {
+    subject: ResolverEvent;
+    category?: string;
+  };
+}
+
+/**
+ * This action should dispatch to indicate that the user chose to focus
+ * on examining alerts related to a particular ResolverEvent
+ */
+interface UserSelectedRelatedAlerts {
+  readonly type: 'userSelectedRelatedAlerts';
+  readonly payload: ResolverEvent;
+}
+
 export type ResolverAction =
   | CameraAction
   | DataAction
@@ -84,4 +115,7 @@ export type ResolverAction =
   | UserChangedSelectedEvent
   | AppRequestedResolverData
   | UserFocusedOnResolverNode
-  | UserSelectedResolverNode;
+  | UserSelectedResolverNode
+  | UserRequestedRelatedEventData
+  | UserSelectedRelatedEventCategory
+  | UserSelectedRelatedAlerts;

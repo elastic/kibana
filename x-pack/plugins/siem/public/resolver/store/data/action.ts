@@ -5,6 +5,7 @@
  */
 
 import { ResolverEvent } from '../../../../common/endpoint/types';
+import { RelatedEventDataEntry } from '../../types';
 
 interface ServerReturnedResolverData {
   readonly type: 'serverReturnedResolverData';
@@ -15,4 +16,24 @@ interface ServerFailedToReturnResolverData {
   readonly type: 'serverFailedToReturnResolverData';
 }
 
-export type DataAction = ServerReturnedResolverData | ServerFailedToReturnResolverData;
+/**
+ * Will occur when a request for related event data is fulfilled by the API.
+ */
+interface ServerReturnedRelatedEventData {
+  readonly type: 'serverReturnedRelatedEventData';
+  readonly payload: Map<ResolverEvent, RelatedEventDataEntry>;
+}
+
+/**
+ * Will occur when a request for related event data is unsuccessful.
+ */
+interface ServerFailedToReturnRelatedEventData {
+  readonly type: 'serverFailedToReturnRelatedEventData';
+  readonly payload: ResolverEvent;
+}
+
+export type DataAction =
+  | ServerReturnedResolverData
+  | ServerFailedToReturnResolverData
+  | ServerReturnedRelatedEventData
+  | ServerFailedToReturnRelatedEventData;

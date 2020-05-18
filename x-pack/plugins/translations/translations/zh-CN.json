@@ -13159,7 +13159,6 @@
     "xpack.siem.case.configureCases.incidentManagementSystemLabel": "事件管理系统",
     "xpack.siem.case.configureCases.incidentManagementSystemTitle": "连接到第三方事件管理系统",
     "xpack.siem.case.configureCases.noConnector": "未选择连接器",
-    "xpack.siem.case.configureCases.saveChangesButton": "保存更改",
     "xpack.siem.case.configureCases.updateConnector": "更新连接器",
     "xpack.siem.case.configureCases.warningMessage": "配置似乎无效。选择的连接器缺失。您是否已删除该连接器？",
     "xpack.siem.case.configureCases.warningTitle": "警告",

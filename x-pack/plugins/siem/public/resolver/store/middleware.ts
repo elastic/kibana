@@ -5,9 +5,10 @@
  */
 
 import { Dispatch, MiddlewareAPI } from 'redux';
+import { HttpHandler } from 'kibana/public';
 import { KibanaReactContextValue } from '../../../../../../src/plugins/kibana_react/public';
 import { StartServices } from '../../plugin';
-import { ResolverState, ResolverAction } from '../types';
+import { ResolverState, ResolverAction, RelatedEventDataEntry } from '../types';
 import { ResolverEvent, ResolverNode } from '../../../common/endpoint/types';
 import * as event from '../../../common/endpoint/models/event';
 
@@ -28,6 +29,33 @@ function flattenEvents(children: ResolverNode[], events: ResolverEvent[] = []): 
       return flattenedEvents;
     }
   }, events);
+}
+
+type RelatedEventAPIResponse = 'error' | { events: ResolverEvent[] };
+/**
+ * As the design goal of this stopgap was to prevent saturating the server with /events
+ * requests, this generator intentionally processes events in serial rather than in parallel.
+ * @param eventsToFetch
+ *  events to run against the /id/events API
+ * @param httpGetter
+ *  the HttpHandler to use
+ */
+async function* getEachRelatedEventsResult(
+  eventsToFetch: ResolverEvent[],
+  httpGetter: HttpHandler
+): AsyncGenerator<[ResolverEvent, RelatedEventAPIResponse]> {
+  for (const eventToQueryForRelateds of eventsToFetch) {
+    const id = event.entityId(eventToQueryForRelateds);
+    let result: RelatedEventAPIResponse;
+    try {
+      result = await httpGetter(`/api/endpoint/resolver/${id}/events`, {
+        query: { events: 100 },
+      });
+    } catch (e) {
+      result = 'error';
+    }
+    yield [eventToQueryForRelateds, result];
+  }
 }
 
 export const resolverMiddlewareFactory: MiddlewareFactory = context => {
@@ -76,6 +104,46 @@ export const resolverMiddlewareFactory: MiddlewareFactory = context => {
             type: 'serverFailedToReturnResolverData',
           });
         }
+      }
+    }
+
+    if (action.type === 'userRequestedRelatedEventData') {
+      if (typeof context !== 'undefined') {
+        const response: Map<ResolverEvent, RelatedEventDataEntry> = new Map();
+        for await (const results of getEachRelatedEventsResult(
+          [action.payload],
+          context.services.http.get
+        )) {
+          /**
+           * results here will take the shape of
+           * [event requested , response of event against the /related api]
+           */
+          const [baseEvent, apiResults] = results;
+          if (apiResults === 'error') {
+            api.dispatch({
+              type: 'serverFailedToReturnRelatedEventData',
+              payload: results[0],
+            });
+            // eslint-disable-next-line no-continue
+            continue;
+          }
+
+          const fetchedResults = apiResults.events;
+          // pack up the results into response
+          const relatedEventEntry = fetchedResults.map(relatedEvent => {
+            return {
+              relatedEvent,
+              relatedEventType: event.eventType(relatedEvent),
+            };
+          });
+
+          response.set(baseEvent, { relatedEvents: relatedEventEntry });
+        }
+
+        api.dispatch({
+          type: 'serverReturnedRelatedEventData',
+          payload: response,
+        });
       }
     }
   };
