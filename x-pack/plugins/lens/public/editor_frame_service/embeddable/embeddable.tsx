@@ -8,25 +8,30 @@ import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import {
-  Query,
-  TimeRange,
   Filter,
   IIndexPattern,
+  Query,
   TimefilterContract,
+  TimeRange,
 } from 'src/plugins/data/public';
 
 import { Subscription } from 'rxjs';
-import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
+import {
+  ExpressionRendererEvent,
+  ReactExpressionRendererType,
+} from '../../../../../../src/plugins/expressions/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public';
 
 import {
   Embeddable as AbstractEmbeddable,
+  EmbeddableInput,
   EmbeddableOutput,
   IContainer,
-  EmbeddableInput,
 } from '../../../../../../src/plugins/embeddable/public';
-import { Document, DOC_TYPE } from '../../persistence';
+import { DOC_TYPE, Document } from '../../persistence';
 import { ExpressionWrapper } from './expression_wrapper';
+import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
+import { isLensBrushEvent, isLensFilterEvent } from '../../types';
 
 export interface LensEmbeddableConfiguration {
   savedVis: Document;
@@ -50,6 +55,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
   type = DOC_TYPE;
 
   private expressionRenderer: ReactExpressionRendererType;
+  private getTrigger: UiActionsStart['getTrigger'] | undefined;
   private savedVis: Document;
   private domNode: HTMLElement | Element | undefined;
   private subscription: Subscription;
@@ -65,6 +71,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
   constructor(
     timefilter: TimefilterContract,
     expressionRenderer: ReactExpressionRendererType,
+    getTrigger: UiActionsStart['getTrigger'] | undefined,
     { savedVis, editPath, editUrl, editable, indexPatterns }: LensEmbeddableConfiguration,
     initialInput: LensEmbeddableInput,
     parent?: IContainer
@@ -86,6 +93,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
       parent
     );
 
+    this.getTrigger = getTrigger;
     this.expressionRenderer = expressionRenderer;
     this.savedVis = savedVis;
     this.subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
@@ -100,6 +108,9 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
     switch (this.savedVis.visualizationType) {
       case 'lnsXY':
         return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
+      case 'lnsDatatable':
+      case 'lnsPie':
+        return [VIS_EVENT_TO_TRIGGER.filter];
       case 'lnsMetric':
       default:
         return [];
@@ -140,10 +151,29 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
         ExpressionRenderer={this.expressionRenderer}
         expression={this.savedVis.expression}
         context={this.currentContext}
+        handleEvent={this.handleEvent}
       />,
       domNode
     );
   }
+
+  handleEvent = (event: ExpressionRendererEvent) => {
+    if (!this.getTrigger || this.input.disableTriggers) {
+      return;
+    }
+    if (isLensBrushEvent(event)) {
+      this.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+        data: event.data,
+        embeddable: this,
+      });
+    }
+    if (isLensFilterEvent(event)) {
+      this.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+        data: event.data,
+        embeddable: this,
+      });
+    }
+  };
 
   destroy() {
     super.destroy();

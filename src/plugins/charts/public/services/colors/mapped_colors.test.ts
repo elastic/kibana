@@ -21,6 +21,7 @@ import _ from 'lodash';
 import d3 from 'd3';
 
 import { coreMock } from '../../../../../core/public/mocks';
+import { COLOR_MAPPING_SETTING } from '../../../common';
 import { seedColors } from './seed_colors';
 import { MappedColors } from './mapped_colors';
 
@@ -36,16 +37,16 @@ describe('Mapped Colors', () => {
   let previousConfig: any;
 
   beforeEach(() => {
-    previousConfig = config.get('visualization:colorMapping');
+    previousConfig = config.get(COLOR_MAPPING_SETTING);
     mappedColors.purge();
   });
 
   afterEach(() => {
-    config.set('visualization:colorMapping', previousConfig);
+    config.set(COLOR_MAPPING_SETTING, previousConfig);
   });
 
   it('should properly map keys to unique colors', () => {
-    config.set('visualization:colorMapping', {});
+    config.set(COLOR_MAPPING_SETTING, {});
 
     const arr = [1, 2, 3, 4, 5];
     mappedColors.mapKeys(arr);
@@ -59,7 +60,7 @@ describe('Mapped Colors', () => {
 
   it('should not include colors used by the config', () => {
     const newConfig = { bar: seedColors[0] };
-    config.set('visualization:colorMapping', newConfig);
+    config.set(COLOR_MAPPING_SETTING, newConfig);
 
     const arr = ['foo', 'baz', 'qux'];
     mappedColors.mapKeys(arr);
@@ -71,7 +72,7 @@ describe('Mapped Colors', () => {
 
   it('should create a unique array of colors even when config is set', () => {
     const newConfig = { bar: seedColors[0] };
-    config.set('visualization:colorMapping', newConfig);
+    config.set(COLOR_MAPPING_SETTING, newConfig);
 
     const arr = ['foo', 'bar', 'baz', 'qux'];
     mappedColors.mapKeys(arr);
@@ -92,7 +93,7 @@ describe('Mapped Colors', () => {
     const color = d3.rgb(seedColors[0]);
     const rgb = `rgb(${color.r}, ${color.g}, ${color.b})`;
     const newConfig = { bar: rgb };
-    config.set('visualization:colorMapping', newConfig);
+    config.set(COLOR_MAPPING_SETTING, newConfig);
 
     const arr = ['foo', 'bar', 'baz', 'qux'];
     mappedColors.mapKeys(arr);
