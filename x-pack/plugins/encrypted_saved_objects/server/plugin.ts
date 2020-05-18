@@ -27,7 +27,7 @@ export interface EncryptedSavedObjectsPluginSetup {
   startWithHiddenTypes: (includedHiddenTypes: string[]) => EncryptedSavedObjectsPluginStart;
 }
 
-export interface EncryptedSavedObjectsPluginStart extends SavedObjectsSetup {
+export interface EncryptedSavedObjectsPluginStart extends ReturnType<SavedObjectsSetup> {
   isEncryptionError: (error: Error) => boolean;
 }
 

@@ -24,7 +24,7 @@ import {
 import { EncryptedSavedObjectsService } from '../crypto';
 
 describe('#setupSavedObjects', () => {
-  let setupContract: (includedHiddenTypes?: string[]) => SavedObjectsSetup;
+  let setupContract: SavedObjectsSetup;
   let coreStartMock: ReturnType<typeof coreMock.createStart>;
   let coreSetupMock: ReturnType<typeof coreMock.createSetup>;
   let mockSavedObjectsRepository: jest.Mocked<ISavedObjectsRepository>;

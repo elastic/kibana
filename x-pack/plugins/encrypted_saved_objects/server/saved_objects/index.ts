@@ -23,13 +23,15 @@ interface SetupSavedObjectsParams {
   getStartServices: StartServicesAccessor;
 }
 
-export interface SavedObjectsSetup {
+export type SavedObjectsSetup = (
+  includedHiddenTypes?: string[]
+) => {
   getDecryptedAsInternalUser: <T = unknown>(
     type: string,
     id: string,
     options?: SavedObjectsBaseOptions
   ) => Promise<SavedObject<T>>;
-}
+};
 
 export function setupSavedObjects({
   service,
