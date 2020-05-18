@@ -17,7 +17,7 @@ export interface Props {
   onClick: (eventType: ProcessorClickEventType) => void;
 }
 
-export const PipelineProcessorEditorItem: FunctionComponent<Props> = ({ processor, onClick }) => {
+export const PipelineProcessorsEditorItem: FunctionComponent<Props> = ({ processor, onClick }) => {
   return (
     <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>{processor.type}</EuiFlexItem>

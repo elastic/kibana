@@ -14,7 +14,7 @@ import {
   DragAndDropTree,
   RenderTreeItemFunction,
   OnDragEndArgs,
-  PipelineProcessorEditorItem,
+  PipelineProcessorsEditorItem,
   ProcessorsTitleAndTestButton,
   OnFailureProcessorsTitle,
   DragAndDropTreeProvider,
@@ -54,7 +54,7 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
     const renderTreeItem = useCallback<RenderTreeItemFunction>(
       ({ processor, selector }) => {
         return (
-          <PipelineProcessorEditorItem
+          <PipelineProcessorsEditorItem
             onClick={type => {
               switch (type) {
                 case 'edit':
