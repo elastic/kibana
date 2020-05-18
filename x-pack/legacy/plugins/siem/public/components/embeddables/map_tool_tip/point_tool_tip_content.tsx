@@ -12,14 +12,14 @@ import {
 } from '../../page/add_filter_to_global_search_bar';
 import { getEmptyTagValue, getOrEmptyTagFromValue } from '../../empty_value';
 import { DescriptionListStyled } from '../../page';
-import { FeatureProperty } from '../types';
 import { HostDetailsLink, IPDetailsLink } from '../../links';
 import { DefaultFieldRenderer } from '../../field_renderers/field_renderers';
 import { FlowTarget } from '../../../graphql/types';
+import { ITooltipProperty } from '../../../../../maps/public';
 
 interface PointToolTipContentProps {
   contextId: string;
-  featureProps: FeatureProperty[];
+  featureProps: ITooltipProperty[];
   closeTooltip?(): void;
 }
 
@@ -28,8 +28,11 @@ export const PointToolTipContentComponent = ({
   featureProps,
   closeTooltip,
 }: PointToolTipContentProps) => {
-  const featureDescriptionListItems = featureProps.map(
-    ({ _propertyKey: key, _rawValue: value }) => ({
+  const featureDescriptionListItems = featureProps.map(featureProp => {
+    const key = featureProp.getPropertyKey();
+    const value = featureProp.getRawValue() ?? [];
+
+    return {
       title: sourceDestinationFieldMappings[key],
       description: (
         <AddFilterToGlobalSearchBar
@@ -49,8 +52,8 @@ export const PointToolTipContentComponent = ({
           )}
         </AddFilterToGlobalSearchBar>
       ),
-    })
-  );
+    };
+  });
 
   return <DescriptionListStyled listItems={featureDescriptionListItems} />;
 };
