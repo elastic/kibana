@@ -24,6 +24,7 @@ export default function({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
   const esArchiver = getService('esArchiver');
+  const retry = getService('retry');
 
   describe('doc link in discover', function contextSize() {
     before(async function() {
@@ -36,11 +37,16 @@ export default function({ getService, getPageObjects }) {
     it('should open the doc view of the selected document', async function() {
       // navigate to the doc view
       await docTable.clickRowToggle({ rowIndex: 0 });
-      await PageObjects.common.sleep(500);
-      const rowActions = await docTable.getRowActions({ rowIndex: 0 });
-      expect(rowActions.length).to.be(2);
 
-      await rowActions[1].click();
+      // click the open action
+      await retry.try(async () => {
+        const rowActions = await docTable.getRowActions({ rowIndex: 0 });
+        if (!rowActions.length) {
+          throw new Error('row actions empty, trying again');
+        }
+        await rowActions[1].click();
+      });
+
       const hasDocHit = await testSubjects.exists('doc-hit');
       expect(hasDocHit).to.be(true);
     });
