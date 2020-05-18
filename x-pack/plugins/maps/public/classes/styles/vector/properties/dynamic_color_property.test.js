@@ -15,72 +15,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { DynamicColorProperty } from './dynamic_color_property';
-import { StyleMeta } from '../style_meta';
-import { COLOR_MAP_TYPE, FIELD_ORIGIN, VECTOR_STYLES } from '../../../../../common/constants';
-
-const mockField = {
-  async getLabel() {
-    return 'foobar_label';
-  },
-  getName() {
-    return 'foobar';
-  },
-  getRootName() {
-    return 'foobar';
-  },
-  getOrigin() {
-    return FIELD_ORIGIN.SOURCE;
-  },
-  supportsFieldMeta() {
-    return true;
-  },
-};
-
-class MockStyle {
-  constructor({ min = 0, max = 100 } = {}) {
-    this._min = min;
-    this._max = max;
-  }
-  getStyleMeta() {
-    return new StyleMeta({
-      geometryTypes: {
-        isPointsOnly: false,
-        isLinesOnly: false,
-        isPolygonsOnly: false,
-      },
-      fieldMeta: {
-        foobar: {
-          range: { min: this._min, max: this._max, delta: this._max - this._min },
-          categories: {
-            categories: [
-              {
-                key: 'US',
-                count: 10,
-              },
-              {
-                key: 'CN',
-                count: 8,
-              },
-            ],
-          },
-        },
-      },
-    });
-  }
-}
-
-class MockLayer {
-  constructor(style = new MockStyle()) {
-    this._style = style;
-  }
-  getStyle() {
-    return this._style;
-  }
-
-  getDataRequest() {
-    return null;
-  }
-}
+import { COLOR_MAP_TYPE, VECTOR_STYLES } from '../../../../../common/constants';
+import { mockField, MockLayer, MockStyle } from './__tests__/test_util';
 
 const makeProperty = (options, mockStyle, field = mockField) => {
   return new DynamicColorProperty(

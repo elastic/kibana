@@ -118,7 +118,8 @@ export const TRACE: Section = {
   key: 'trace',
   label: i18n.translate('xpack.apm.metadataTable.section.traceLabel', {
     defaultMessage: 'Trace'
-  })
+  }),
+  properties: ['id']
 };
 
 export const ERROR: Section = {

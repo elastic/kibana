@@ -23,6 +23,11 @@ export class DynamicIconProperty extends DynamicStyleProperty {
     return true;
   }
 
+  getNumberOfCategories() {
+    const palette = getIconPalette(this._options.iconPaletteId);
+    return palette ? palette.length : 0;
+  }
+
   syncIconWithMb(symbolLayerId, mbMap, iconPixelSize) {
     if (this._isIconDynamicConfigComplete()) {
       mbMap.setLayoutProperty(

@@ -265,8 +265,8 @@ export const ExpressionChart: React.FC<Props> = ({
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.infra.metrics.alerts.dataTimeRangeLabel"
-              defaultMessage="Last 20 {timeLabel}"
-              values={{ timeLabel }}
+              defaultMessage="Last {lookback} {timeLabel}"
+              values={{ timeLabel, lookback: timeSize * 20 }}
             />
           </EuiText>
         )}
