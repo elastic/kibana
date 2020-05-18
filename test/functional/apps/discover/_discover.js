@@ -131,6 +131,10 @@ export default function({ getService, getPageObjects }) {
         // apply query some changes
         await queryBar.setQuery('test');
         await queryBar.submitQuery();
+        await retry.try(async function() {
+          expect(await PageObjects.discover.getHitCount()).to.be('22');
+        });
+
         // reset to persisted state
         await PageObjects.discover.clickResetSavedSearchButton();
         const expectedHitCount = '14,004';
