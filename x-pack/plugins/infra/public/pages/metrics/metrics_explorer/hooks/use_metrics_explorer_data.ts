@@ -7,7 +7,7 @@
 import DateMath from '@elastic/datemath';
 import { isEqual } from 'lodash';
 import { useEffect, useState } from 'react';
-import { HttpHandler } from 'target/types/core/public/http';
+import { HttpHandler } from 'src/core/public';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { SourceQuery } from '../../../../../common/graphql/types';
 import {
