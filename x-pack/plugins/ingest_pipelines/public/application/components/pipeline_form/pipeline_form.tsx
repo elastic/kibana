@@ -112,6 +112,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
         {/* All form fields */}
         <PipelineFormFields
           initialProcessors={defaultValue.processors}
+          initialOnFailureProcessors={defaultValue.on_failure}
           onProcessorsUpdate={onProcessorsChangeHandler}
           hasVersion={Boolean(defaultValue.version)}
           isTestButtonDisabled={isTestingPipeline || form.isValid === false}

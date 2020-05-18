@@ -16,6 +16,7 @@ import { getUseField, getFormRow, Field, useKibana } from '../../../shared_impor
 interface Props {
   // TODO: Fix processors type anno
   initialProcessors: any;
+  initialOnFailureProcessors: any;
   onProcessorsUpdate: OnUpdateHandler;
   hasVersion: boolean;
   isTestButtonDisabled: boolean;
@@ -28,6 +29,7 @@ const FormRow = getFormRow({ titleTag: 'h3' });
 
 export const PipelineFormFields: React.FunctionComponent<Props> = ({
   initialProcessors,
+  initialOnFailureProcessors,
   onProcessorsUpdate,
   isEditing,
   hasVersion,
@@ -117,7 +119,9 @@ export const PipelineFormFields: React.FunctionComponent<Props> = ({
               : initialProcessors ?? [];
 
           const onFailureProp =
-            typeof onFailure === 'string' && onFailure ? JSON.parse(onFailure) : onFailure ?? [];
+            typeof onFailure === 'string' && onFailure
+              ? JSON.parse(onFailure)
+              : initialOnFailureProcessors ?? [];
 
           return (
             <PipelineProcessorsEditor
