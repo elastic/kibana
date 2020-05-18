@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GetResponse, SearchResponse } from 'elasticsearch';
+import { SearchResponse } from 'elasticsearch';
 import { AlertEvent, AlertHits, AlertAPIOrdering } from '../../../../../common/types';
 import { AlertConstants } from '../../../../../common/alert_constants';
 import { EndpointConfigType } from '../../../../config';
@@ -17,15 +17,12 @@ import { Filter } from '../../../../../../../../src/plugins/data/server';
 /**
  * Pagination class for alert details.
  */
-export class AlertDetailsPagination extends Pagination<
-  AlertDetailsRequestParams,
-  GetResponse<AlertEvent>
-> {
+export class AlertDetailsPagination extends Pagination<AlertDetailsRequestParams, AlertEvent> {
   constructor(
     config: EndpointConfigType,
     requestContext: RequestHandlerContext,
     state: AlertDetailsRequestParams,
-    data: GetResponse<AlertEvent>,
+    data: AlertEvent,
     private readonly indexPattern: string
   ) {
     super(config, requestContext, state, data);
@@ -69,8 +66,8 @@ export class AlertDetailsPagination extends Pagination<
    */
   async getNextUrl(): Promise<string | null> {
     const response = await this.doSearch('asc', [
-      this.data._source['@timestamp'].toString(),
-      this.data._source.event.id,
+      this.data['@timestamp'].toString(),
+      this.data.event.id,
     ]);
     return this.getUrlFromHits(response.hits.hits);
   }
@@ -80,8 +77,8 @@ export class AlertDetailsPagination extends Pagination<
    */
   async getPrevUrl(): Promise<string | null> {
     const response = await this.doSearch('desc', [
-      this.data._source['@timestamp'].toString(),
-      this.data._source.event.id,
+      this.data['@timestamp'].toString(),
+      this.data.event.id,
     ]);
     return this.getUrlFromHits(response.hits.hits);
   }
