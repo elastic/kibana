@@ -38,7 +38,7 @@ import { RouteDependencies } from './types';
 interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
-  apm_oss: APMOSSPluginSetup;
+  apmOss: APMOSSPluginSetup;
   cloud?: CloudSetup;
 }
 
@@ -68,7 +68,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
 
   setup(
     { http, getStartServices, capabilities, savedObjects }: CoreSetup,
-    { usageCollection, cloud, licensing, apm_oss: apmOSS }: PluginsSetup
+    { usageCollection, cloud, licensing, apmOss: apmOSS }: PluginsSetup
   ) {
     this.licensing = licensing;
     this.apmOSS = apmOSS;

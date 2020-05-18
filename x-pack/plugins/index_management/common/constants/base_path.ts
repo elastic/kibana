@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const BASE_PATH = '/management/elasticsearch/index_management/';
+export const BASE_PATH = '/management/data/index_management/';
