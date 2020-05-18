@@ -659,12 +659,6 @@ function discoverController(
           error => addFatalError(core.fatalErrors, error)
         )
       );
-      //Handling change oft the histogram interval
-      $scope.$watch('state.interval', function(newInterval, oldInterval) {
-        if (newInterval !== oldInterval) {
-          setAppState({ interval: newInterval });
-        }
-      });
 
       $scope.changeInterval = interval => {
         if (interval) {
