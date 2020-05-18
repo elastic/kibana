@@ -86,14 +86,23 @@ interface UserSelectedResolverNode {
   };
 }
 
+/**
+ * This action should dispatch to indicate that the user chose to
+ * focus on examining the related events of a particular ResolverEvent.
+ * Optionally, this can be bound by a category of related events (e.g. 'file' or 'dns')
+ */
 interface UserSelectedRelatedEventCategory {
   readonly type: 'userSelectedRelatedEventCategory';
   readonly payload: {
     subject: ResolverEvent;
-    category: string;
+    category?: string;
   };
 }
 
+/**
+ * This action should dispatch to indicate that the user chose to focus
+ * on examining alerts related to a particular ResolverEvent
+ */
 interface UserSelectedRelatedAlerts {
   readonly type: 'userSelectedRelatedAlerts';
   readonly payload: ResolverEvent;
