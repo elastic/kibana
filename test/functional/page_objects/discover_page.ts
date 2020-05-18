@@ -162,9 +162,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return selectedOption.getVisibleText();
     }
 
-    public async getChartIntervalScaledToDesc() {
+    public async getChartIntervalWarningIcon() {
       await header.waitUntilLoadingHasFinished();
-      return await testSubjects.getVisibleText('discoverIntervalSelectScaledToDesc');
+      return await find.byCssSelector('.euiToolTipAnchor');
     }
 
     public async setChartInterval(interval: string) {

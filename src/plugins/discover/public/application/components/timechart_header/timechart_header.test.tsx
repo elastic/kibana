@@ -20,6 +20,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { TimechartHeader, TimechartHeaderProps } from './timechart_header';
+import { EuiIconTip } from '@elastic/eui';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 
@@ -55,20 +56,20 @@ describe('timechart header', function() {
 
   it('TimechartHeader not renders an info text when the showScaledInfo property is not provided', () => {
     component = mountWithIntl(<TimechartHeader {...props} />);
-    expect(findTestSubject(component, 'discoverIntervalSelectScaledToDesc').length).toBe(0);
+    expect(component.find(EuiIconTip).length).toBe(0);
   });
 
   it('TimechartHeader renders an info text by providing the showScaledInfo property', () => {
     props.showScaledInfo = true;
     component = mountWithIntl(<TimechartHeader {...props} />);
-    expect(findTestSubject(component, 'discoverIntervalSelectScaledToDesc').length).toBe(1);
+    expect(component.find(EuiIconTip).length).toBe(1);
   });
 
   it('expect to render the date range', function() {
     component = mountWithIntl(<TimechartHeader {...props} />);
     const datetimeRangeText = findTestSubject(component, 'discoverIntervalDateRange');
     expect(datetimeRangeText.text()).toBe(
-      'May 14, 2020 @ 11:05:13.590 - May 14, 2020 @ 11:20:13.590 —'
+      'May 14, 2020 @ 11:05:13.590 - May 14, 2020 @ 11:20:13.590 per'
     );
   });
 
@@ -90,11 +91,5 @@ describe('timechart header', function() {
       target: { value: 'ms' },
     });
     expect(props.onChangeInterval).toHaveBeenCalled();
-  });
-
-  it('expect to render the bucket interval description', function() {
-    component = mountWithIntl(<TimechartHeader {...props} />);
-    const description = findTestSubject(component, 'discoverIntervalSelectScaledToDesc');
-    expect(description.text()).toBe('Scaled to second');
   });
 });

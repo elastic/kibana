@@ -92,8 +92,8 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       const chartCanvasExist = await elasticChart.canvasExists();
       expect(chartCanvasExist).to.be(true);
-      const chartIntervalScaledDesc = await PageObjects.discover.getChartIntervalScaledToDesc();
-      expect(chartIntervalScaledDesc).to.be('Scaled to 30 days');
+      const chartIntervalIconTip = await PageObjects.discover.getChartIntervalWarningIcon();
+      expect(chartIntervalIconTip).to.be(true);
     });
   });
 }

@@ -127,6 +127,7 @@ export function TimechartHeader({
             append={
               showScaledInfo ? (
                 <EuiIconTip
+                  id="discoverIntervalIconTip"
                   content={i18n.translate('discover.bucketIntervalTooltip', {
                     defaultMessage:
                       'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}.',
