@@ -8,3 +8,9 @@ export const fetchServerResultsMock = jest.fn();
 jest.doMock('./fetch_server_results', () => ({
   fetchServerResults: fetchServerResultsMock,
 }));
+
+export const getDefaultPreferenceMock = jest.fn();
+jest.doMock('./utils', () => ({
+  ...jest.requireActual('./utils'),
+  getDefaultPreference: getDefaultPreferenceMock,
+}));

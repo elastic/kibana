@@ -14,7 +14,7 @@ import { processProviderResult } from '../../common/process_result';
 import { GlobalSearchResultProvider } from '../types';
 import { GlobalSearchClientConfigType } from '../config';
 import { GlobalSearchBatchedResults, GlobalSearchFindOptions } from './types';
-import { addNavigate } from './utils';
+import { addNavigate, getDefaultPreference } from './utils';
 import { fetchServerResults } from './fetch_server_results';
 
 /** @public */
@@ -74,8 +74,7 @@ export class SearchService {
     const timeout = duration(this.config!.search_timeout).asMilliseconds();
     const timeout$ = timer(timeout).pipe(map(() => undefined));
     const aborted$ = options.aborted$ ? merge(options.aborted$, timeout$) : timeout$;
-
-    const preference = options.preference ?? 'default_preference'; // TODO: generate a session value
+    const preference = options.preference ?? getDefaultPreference();
 
     const providerOptions = {
       ...options,

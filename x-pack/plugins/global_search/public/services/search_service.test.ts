@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fetchServerResultsMock } from './search_service.test.mocks';
+import { fetchServerResultsMock, getDefaultPreferenceMock } from './search_service.test.mocks';
 
 import { Observable, of } from 'rxjs';
 import { take } from 'rxjs/operators';
@@ -82,6 +82,9 @@ describe('SearchService', () => {
 
     fetchServerResultsMock.mockClear();
     fetchServerResultsMock.mockReturnValue(of());
+
+    getDefaultPreferenceMock.mockClear();
+    getDefaultPreferenceMock.mockReturnValue('default_pref');
   });
 
   describe('#setup()', () => {
@@ -131,6 +134,40 @@ describe('SearchService', () => {
           httpStart,
           'foobar',
           expect.objectContaining({ preference: 'pref', aborted$: expect.any(Object) })
+        );
+      });
+
+      it('calls `getDefaultPreference` when `preference` is not specified', () => {
+        const { registerResultProvider } = service.setup({
+          config: createConfig(),
+        });
+
+        const provider = createProvider('A');
+        registerResultProvider(provider);
+
+        const { find } = service.start(startDeps());
+        find('foobar', { preference: 'pref' });
+
+        expect(getDefaultPreferenceMock).not.toHaveBeenCalled();
+
+        expect(provider.find).toHaveBeenNthCalledWith(
+          1,
+          'foobar',
+          expect.objectContaining({
+            preference: 'pref',
+          })
+        );
+
+        find('foobar', {});
+
+        expect(getDefaultPreferenceMock).toHaveBeenCalledTimes(1);
+
+        expect(provider.find).toHaveBeenNthCalledWith(
+          2,
+          'foobar',
+          expect.objectContaining({
+            preference: 'default_pref',
+          })
         );
       });
 
