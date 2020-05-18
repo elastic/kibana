@@ -236,6 +236,9 @@ export default ({ getService }: FtrProviderContext) => {
             const datafeedId = `datafeed-${job.jobId}`;
             await ml.api.waitForAnomalyDetectionJobToExist(job.jobId);
             await ml.api.waitForDatafeedToExist(datafeedId);
+            if (testData.requestBody.startDatafeed === true) {
+              await ml.api.waitForADJobRecordCountToBePositive(job.jobId);
+            }
             await ml.api.waitForJobState(job.jobId, job.jobState);
             await ml.api.waitForDatafeedState(datafeedId, job.datafeedState);
           }
