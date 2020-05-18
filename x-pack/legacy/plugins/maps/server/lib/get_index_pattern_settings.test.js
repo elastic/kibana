@@ -24,6 +24,14 @@ describe('max_result_window and max_inner_result_window are not set', () => {
     expect(maxInnerResultWindow).toBe(DEFAULT_MAX_INNER_RESULT_WINDOW);
   });
 
+  test('Should provide default values from cross cluster index response', () => {
+    // _settings returns empty object for cross cluster index
+    const indicesSettingsResp = {};
+    const { maxResultWindow, maxInnerResultWindow } = getIndexPatternSettings(indicesSettingsResp);
+    expect(maxResultWindow).toBe(DEFAULT_MAX_RESULT_WINDOW);
+    expect(maxInnerResultWindow).toBe(DEFAULT_MAX_INNER_RESULT_WINDOW);
+  });
+
   test('Should include default values when providing minimum values for indices in index pattern', () => {
     const indicesSettingsResp = {
       kibana_sample_data_logs: {
