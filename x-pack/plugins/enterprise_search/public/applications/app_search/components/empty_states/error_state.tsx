@@ -6,6 +6,7 @@
 
 import React, { useContext } from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiButton } from '../../../shared/react_router_helpers';
 import { SetAppSearchBreadcrumbs as SetBreadcrumbs } from '../../../shared/kibana_breadcrumbs';
@@ -29,23 +30,43 @@ export const ErrorState: ReactFC<> = () => {
           <EuiEmptyPrompt
             iconType="alert"
             iconColor="danger"
-            title={<h2>Cannot connect to App Search</h2>}
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.appSearch.errorConnectingState.title"
+                  defaultMessage="Cannot connect to App Search"
+                />
+              </h2>
+            }
             titleSize="l"
             body={
               <>
                 <p>
-                  We cannot connect to the App Search instance at the configured host URL:{' '}
-                  <EuiCode>{enterpriseSearchUrl}</EuiCode>
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.appSearch.errorConnectingState.description1"
+                    defaultMessage="We cannot connect to the App Search instance at the configured host URL: {enterpriseSearchUrl}"
+                    values={{
+                      enterpriseSearchUrl: <EuiCode>{enterpriseSearchUrl}</EuiCode>,
+                    }}
+                  />
                 </p>
                 <p>
-                  Please ensure your App Search host URL is configured correctly within{' '}
-                  <EuiCode>config/kibana.yml</EuiCode>.
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.appSearch.errorConnectingState.description2"
+                    defaultMessage="Please ensure your App Search host URL is configured correctly within {configFile}."
+                    values={{
+                      configFile: <EuiCode>config/kibana.yml</EuiCode>,
+                    }}
+                  />
                 </p>
               </>
             }
             actions={
               <EuiButton iconType="help" fill to="/setup_guide">
-                Review the setup guide
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.appSearch.errorConnectingState.setupGuideCta"
+                  defaultMessage="Review the setup guide"
+                />
               </EuiButton>
             }
           />
