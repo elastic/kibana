@@ -1,0 +1,8 @@
+{
+  "list_id": "endpoint_list",
+  "_tags": ["endpoint", "process", "malware", "os:linux"],
+  "tags": ["user added string for a tag", "malware"],
+  "type": "endpoint",
+  "description": "This is a sample endpoint type exception",
+  "name": "Sample Endpoint Exception List"
+}

@@ -22,7 +22,7 @@ import { schema } from '@kbn/config-schema';
 import { UiSettingsParams } from 'kibana/server';
 // @ts-ignore untyped module
 import numeralLanguages from '@elastic/numeral/languages';
-import { DEFAULT_QUERY_LANGUAGE } from '../common';
+import { DEFAULT_QUERY_LANGUAGE, META_FIELDS_SETTING, DOC_HIGHLIGHT_SETTING } from '../common';
 
 const luceneQueryLanguageLabel = i18n.translate('data.advancedSettings.searchQueryLanguageLucene', {
   defaultMessage: 'Lucene',
@@ -55,6 +55,30 @@ const numeralLanguageIds = [
 
 export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
   return {
+    [META_FIELDS_SETTING]: {
+      name: i18n.translate('data.advancedSettings.metaFieldsTitle', {
+        defaultMessage: 'Meta fields',
+      }),
+      value: ['_source', '_id', '_type', '_index', '_score'],
+      description: i18n.translate('data.advancedSettings.metaFieldsText', {
+        defaultMessage:
+          'Fields that exist outside of _source to merge into our document when displaying it',
+      }),
+      schema: schema.arrayOf(schema.string()),
+    },
+    [DOC_HIGHLIGHT_SETTING]: {
+      name: i18n.translate('data.advancedSettings.docTableHighlightTitle', {
+        defaultMessage: 'Highlight results',
+      }),
+      value: true,
+      description: i18n.translate('data.advancedSettings.docTableHighlightText', {
+        defaultMessage:
+          'Highlight results in Discover and Saved Searches Dashboard. ' +
+          'Highlighting makes requests slow when working on big documents.',
+      }),
+      category: ['discover'],
+      schema: schema.boolean(),
+    },
     'query:queryString:options': {
       name: i18n.translate('data.advancedSettings.query.queryStringOptionsTitle', {
         defaultMessage: 'Query string options',

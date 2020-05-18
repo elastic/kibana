@@ -20,8 +20,8 @@ import { left } from 'fp-ts/lib/Either';
 import { RulesSchema } from './rules_schema';
 import { TypeAndTimelineOnly } from './type_timeline_only_schema';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
-import { foldLeftRight, getPaths } from '../../../../../utils/build_validation/__mocks__/utils';
-import { exactCheck } from '../../../../../utils/build_validation/exact_check';
+import { exactCheck } from '../../../../../../common/exact_check';
+import { foldLeftRight, getPaths } from '../../../../../../common/test_utils';
 
 describe('check_type_dependents', () => {
   beforeAll(() => {

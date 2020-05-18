@@ -171,6 +171,7 @@ export class Form extends Component<FormProps, FormState> {
       set(source, field.name, value);
     });
 
+    // we extract the `references` field that does not belong to attributes
     const { references, ...attributes } = source;
 
     await onSave({ attributes, references });
