@@ -12,7 +12,26 @@ import {
   TimelineSavedObjectRuntimeType,
   TimelineSavedObject,
   TimelineType,
+  TimelineStatus,
 } from '../../../common/types/timeline';
+
+const getTimelineTypeAndStatus = (
+  timelineType: TimelineType = TimelineType.default,
+  status: TimelineStatus = TimelineStatus.active
+): { timelineType: TimelineType; status: TimelineStatus } => {
+  // TODO: Added to support legacy TimelineType.draft, can be removed in 7.10
+  if (timelineType === 'draft') {
+    return {
+      timelineType: TimelineType.default,
+      status: TimelineStatus.draft,
+    };
+  }
+
+  return {
+    timelineType,
+    status,
+  };
+};
 
 export const convertSavedObjectToSavedTimeline = (savedObject: unknown): TimelineSavedObject => {
   const timeline = pipe(
@@ -20,7 +39,10 @@ export const convertSavedObjectToSavedTimeline = (savedObject: unknown): Timelin
     map(savedTimeline => {
       const attributes = {
         ...savedTimeline.attributes,
-        timelineType: savedTimeline.attributes.timelineType ?? TimelineType.default,
+        ...getTimelineTypeAndStatus(
+          savedTimeline.attributes.timelineType,
+          savedTimeline.attributes.status
+        ),
       };
       return {
         savedObjectId: savedTimeline.id,
