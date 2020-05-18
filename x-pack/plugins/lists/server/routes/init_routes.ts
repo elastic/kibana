@@ -6,23 +6,32 @@
 
 import { IRouter } from 'kibana/server';
 
-import { updateListRoute } from './update_list_route';
-import { updateListItemRoute } from './update_list_item_route';
-
 import {
+  createExceptionListItemRoute,
+  createExceptionListRoute,
   createListIndexRoute,
   createListItemRoute,
   createListRoute,
+  deleteExceptionListItemRoute,
+  deleteExceptionListRoute,
   deleteListIndexRoute,
   deleteListItemRoute,
   deleteListRoute,
   exportListItemRoute,
+  findExceptionListItemRoute,
+  findExceptionListRoute,
   importListItemRoute,
   patchListItemRoute,
   patchListRoute,
+  readExceptionListItemRoute,
+  readExceptionListRoute,
   readListIndexRoute,
   readListItemRoute,
   readListRoute,
+  updateExceptionListItemRoute,
+  updateExceptionListRoute,
+  updateListItemRoute,
+  updateListRoute,
 } from '.';
 
 export const initRoutes = (router: IRouter): void => {
@@ -33,7 +42,7 @@ export const initRoutes = (router: IRouter): void => {
   deleteListRoute(router);
   patchListRoute(router);
 
-  // lists items
+  // list items
   createListItemRoute(router);
   readListItemRoute(router);
   updateListItemRoute(router);
@@ -46,4 +55,18 @@ export const initRoutes = (router: IRouter): void => {
   createListIndexRoute(router);
   readListIndexRoute(router);
   deleteListIndexRoute(router);
+
+  // exception lists
+  createExceptionListRoute(router);
+  readExceptionListRoute(router);
+  updateExceptionListRoute(router);
+  deleteExceptionListRoute(router);
+  findExceptionListRoute(router);
+
+  // exception list items
+  createExceptionListItemRoute(router);
+  readExceptionListItemRoute(router);
+  updateExceptionListItemRoute(router);
+  deleteExceptionListItemRoute(router);
+  findExceptionListItemRoute(router);
 };
