@@ -18,6 +18,7 @@
  */
 
 import { management } from 'ui/management';
+import { ManagementSectionId } from '../../../../../../../plugins/management/public';
 import './create_index_pattern_wizard';
 import './edit_index_pattern';
 import uiRoutes from 'ui/routes';
@@ -163,7 +164,7 @@ uiModules
     };
   });
 
-management.getSection('kibana').register('index_patterns', {
+management.getSection(ManagementSectionId.Kibana).register('index_patterns', {
   display: i18n.translate('kbn.management.indexPattern.sectionsHeader', {
     defaultMessage: 'Index Patterns',
   }),

@@ -81,9 +81,6 @@ function getLayoutOptions(
     fit: true,
     padding: nodeHeight,
     spacingFactor: 0.85,
-    animate: true,
-    animationEasing: animationOptions.easing,
-    animationDuration: animationOptions.duration,
     // @ts-ignore
     // Rotate nodes counter-clockwise to transform layout from top→bottom to left→right.
     // The extra 5° achieves the effect of separating overlapping taxi-styled edges.
@@ -146,7 +143,7 @@ export function Cytoscape({
     };
 
     const dataHandler: cytoscape.EventHandler = event => {
-      if (cy) {
+      if (cy && cy.elements().length > 0) {
         if (serviceName) {
           resetConnectedEdgeStyle(cy.getElementById(serviceName));
           // Add the "primary" class to the node if its id matches the serviceName.
