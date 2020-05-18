@@ -7,7 +7,7 @@
 import { IsoDateString } from './iso_date_string';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import { foldLeftRight, getPaths } from '../../../../../utils/build_validation/__mocks__/utils';
+import { getPaths, foldLeftRight } from '../../../../../../common/test_utils';
 
 describe('ios_date_string', () => {
   test('it should validate a iso string', () => {
