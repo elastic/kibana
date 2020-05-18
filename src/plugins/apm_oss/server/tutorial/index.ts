@@ -23,7 +23,7 @@ import apmIndexPattern from './index_pattern.json';
 import { ArtifactsSchema, TutorialsCategory } from '../../../../../src/plugins/home/server';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../common/index_pattern_constants';
 
-const apmIntro = i18n.translate('apm.tutorial.introduction', {
+const apmIntro = i18n.translate('apmOss.tutorial.introduction', {
   defaultMessage: 'Collect in-depth performance metrics and errors from inside your applications.',
 });
 
@@ -55,7 +55,7 @@ export const tutorialProvider = ({
     dashboards: [
       {
         id: '8d3ed660-7828-11e7-8c47-65b845b5cfb3',
-        linkLabel: i18n.translate('apm.tutorial.specProvider.artifacts.dashboards.linkLabel', {
+        linkLabel: i18n.translate('apmOss.tutorial.specProvider.artifacts.dashboards.linkLabel', {
           defaultMessage: 'APM dashboard',
         }),
         isOverview: true,
@@ -65,12 +65,12 @@ export const tutorialProvider = ({
 
   return {
     id: 'apm',
-    name: i18n.translate('apm.tutorial.specProvider.name', {
+    name: i18n.translate('apmOss.tutorial.specProvider.name', {
       defaultMessage: 'APM',
     }),
     category: TutorialsCategory.OTHER,
     shortDescription: apmIntro,
-    longDescription: i18n.translate('apm.tutorial.specProvider.longDescription', {
+    longDescription: i18n.translate('apmOss.tutorial.specProvider.longDescription', {
       defaultMessage:
         'Application Performance Monitoring (APM) collects in-depth \
 performance metrics and errors from inside your application. \
@@ -86,7 +86,7 @@ It allows you to monitor the performance of thousands of applications in real ti
     onPrem: onPremInstructions(indices),
     previewImagePath: '/plugins/apmOss/assets/apm.png',
     savedObjects,
-    savedObjectsInstallMsg: i18n.translate('apm.tutorial.specProvider.savedObjectsInstallMsg', {
+    savedObjectsInstallMsg: i18n.translate('apmOss.tutorial.specProvider.savedObjectsInstallMsg', {
       defaultMessage: 'An APM index pattern is required for some features in the APM UI.',
     }),
   };

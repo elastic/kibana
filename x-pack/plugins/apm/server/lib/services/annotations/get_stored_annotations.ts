@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller } from 'src/core/server';
+import { APICaller } from 'kibana/server';
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { ESSearchResponse } from '../../../../typings/elasticsearch';
 import { ScopedAnnotationsClient } from '../../../../../observability/server';

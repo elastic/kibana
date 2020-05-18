@@ -25,3 +25,5 @@ export function plugin() {
   return new ApmOssPlugin();
 }
 export { ApmOssPluginSetup, ApmOssPluginStart } from './types';
+
+export { APM_STATIC_INDEX_PATTERN_ID } from '../common/index_pattern_constants';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { merge } from 'lodash';
-import { Logger, CallAPIOptions } from 'src/core/server';
+import { Logger, CallAPIOptions } from 'kibana/server';
 import { IndicesStatsParams, Client } from 'elasticsearch';
 import {
   ESSearchRequest,

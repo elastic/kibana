@@ -21,8 +21,7 @@ import yaml from 'js-yaml';
 import { Client } from 'elasticsearch';
 import { argv } from 'yargs';
 import { promisify } from 'util';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Logger } from 'src/core/server';
+import { Logger } from 'kibana/server';
 // @ts-ignore
 import consoleStamp from 'console-stamp';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
