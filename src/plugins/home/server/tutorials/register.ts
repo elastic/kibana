@@ -89,6 +89,7 @@ import { statsdMetricsSpecProvider } from './statsd_metrics';
 import { redisenterpriseMetricsSpecProvider } from './redisenterprise_metrics';
 import { openmetricsMetricsSpecProvider } from './openmetrics_metrics';
 import { oracleMetricsSpecProvider } from './oracle_metrics';
+import { iisMetricsSpecProvider } from './iis_metrics';
 
 export const builtInTutorials = [
   systemLogsSpecProvider,
@@ -164,4 +165,5 @@ export const builtInTutorials = [
   redisenterpriseMetricsSpecProvider,
   openmetricsMetricsSpecProvider,
   oracleMetricsSpecProvider,
+  iisMetricsSpecProvider,
 ];
