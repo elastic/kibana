@@ -51,6 +51,7 @@ interface OwnProps<TCache = object> {
   hideActions?: ActionTimelineToShow[];
   onOpenTimeline?: (timeline: TimelineModel) => void;
 }
+export const enableTemplate = false;
 
 export type OpenTimelineOwnProps = OwnProps &
   Pick<
@@ -275,7 +276,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         selectedItems={selectedItems}
         sortDirection={sortDirection}
         sortField={sortField}
-        tabs={timelineTabs}
+        tabs={enableTemplate ? timelineTabs : undefined}
         title={title}
         totalSearchResultsCount={totalCount}
       />
@@ -302,7 +303,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         selectedItems={selectedItems}
         sortDirection={sortDirection}
         sortField={sortField}
-        tabs={timelineFilters}
+        tabs={enableTemplate ? timelineFilters : undefined}
         title={title}
         totalSearchResultsCount={totalCount}
       />
