@@ -78,7 +78,6 @@ interface Props {
   docLinks: DocumentationLinksService;
   http: HttpStart;
   license: SecurityLicense;
-  spacesEnabled: boolean;
   uiCapabilities: Capabilities;
   notifications: NotificationsStart;
   fatalErrors: FatalErrorsSetup;
@@ -221,14 +220,21 @@ function useRole(
   return [role, setRole] as [Role | null, typeof setRole];
 }
 
-function useSpaces(http: HttpStart, fatalErrors: FatalErrorsSetup, spacesEnabled: boolean) {
-  const [spaces, setSpaces] = useState<Space[] | null>(null);
+function useSpaces(http: HttpStart, fatalErrors: FatalErrorsSetup) {
+  const [spaces, setSpaces] = useState<{ enabled: boolean; list: Space[] } | null>(null);
   useEffect(() => {
-    (spacesEnabled ? http.get('/api/spaces/space') : Promise.resolve([])).then(
-      fetchedSpaces => setSpaces(fetchedSpaces),
-      err => fatalErrors.add(err)
+    http.get('/api/spaces/space').then(
+      fetchedSpaces => setSpaces({ enabled: true, list: fetchedSpaces }),
+      (err: IHttpFetchError) => {
+        // Spaces plugin can be disabled and hence this endpoint can be unavailable.
+        if (err.response?.status === 404) {
+          setSpaces({ enabled: false, list: [] });
+        } else {
+          fatalErrors.add(err);
+        }
+      }
     );
-  }, [http, fatalErrors, spacesEnabled]);
+  }, [http, fatalErrors]);
 
   return spaces;
 }
@@ -278,7 +284,6 @@ export const EditRolePage: FunctionComponent<Props> = ({
   roleName,
   action,
   fatalErrors,
-  spacesEnabled,
   license,
   docLinks,
   uiCapabilities,
@@ -292,7 +297,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const runAsUsers = useRunAsUsers(userAPIClient, fatalErrors);
   const indexPatternsTitles = useIndexPatternsTitles(indexPatterns, fatalErrors, notifications);
   const privileges = usePrivileges(privilegesAPIClient, fatalErrors);
-  const spaces = useSpaces(http, fatalErrors, spacesEnabled);
+  const spaces = useSpaces(http, fatalErrors);
   const features = useFeatures(getFeatures, fatalErrors);
   const [role, setRole] = useRole(
     rolesAPIClient,
@@ -432,8 +437,8 @@ export const EditRolePage: FunctionComponent<Props> = ({
         <EuiSpacer />
         <KibanaPrivilegesRegion
           kibanaPrivileges={new KibanaPrivileges(kibanaPrivileges, features)}
-          spaces={spaces}
-          spacesEnabled={spacesEnabled}
+          spaces={spaces.list}
+          spacesEnabled={spaces.enabled}
           uiCapabilities={uiCapabilities}
           canCustomizeSubFeaturePrivileges={license.getFeatures().allowSubFeaturePrivileges}
           editable={!isRoleReadOnly}
@@ -517,7 +522,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
       setFormError(null);
 
       try {
-        await rolesAPIClient.saveRole({ role, spacesEnabled });
+        await rolesAPIClient.saveRole({ role, spacesEnabled: spaces.enabled });
       } catch (error) {
         notifications.toasts.addDanger(get(error, 'data.message'));
         return;
@@ -552,7 +557,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
     backToRoleList();
   };
 
-  const description = spacesEnabled ? (
+  const description = spaces.enabled ? (
     <FormattedMessage
       id="xpack.security.management.editRole.setPrivilegesToKibanaSpacesDescription"
       defaultMessage="Set privileges on your Elasticsearch data and control access to your Kibana spaces."

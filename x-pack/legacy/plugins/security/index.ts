@@ -29,12 +29,7 @@ export const security = (kibana: Record<string, any>) =>
         .default();
     },
 
-    uiExports: {
-      hacks: ['plugins/security/hacks/legacy'],
-      injectDefaultVars: (server: Server) => {
-        return { enableSpaceAwarePrivileges: server.config().get('xpack.spaces.enabled') };
-      },
-    },
+    uiExports: { hacks: ['plugins/security/hacks/legacy'] },
 
     async init(server: Server) {
       const securityPlugin = server.newPlatform.setup.plugins.security as SecurityPluginSetup;

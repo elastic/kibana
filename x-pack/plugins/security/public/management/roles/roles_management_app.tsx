@@ -36,10 +36,7 @@ export const rolesManagementApp = Object.freeze({
         ];
 
         const [
-          [
-            { application, docLinks, http, i18n: i18nStart, injectedMetadata, notifications },
-            { data, features },
-          ],
+          [{ application, docLinks, http, i18n: i18nStart, notifications }, { data, features }],
           { RolesGridPage },
           { EditRolePage },
           { RolesAPIClient },
@@ -80,9 +77,6 @@ export const rolesManagementApp = Object.freeze({
             <EditRolePage
               action={action}
               roleName={roleName}
-              spacesEnabled={
-                injectedMetadata.getInjectedVar('enableSpaceAwarePrivileges') as boolean
-              }
               rolesAPIClient={rolesAPIClient}
               userAPIClient={new UserAPIClient(http)}
               indicesAPIClient={new IndicesAPIClient(http)}

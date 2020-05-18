@@ -163,7 +163,12 @@ function getProps({
   const { http, docLinks, notifications } = coreMock.createStart();
   http.get.mockImplementation(async (path: any) => {
     if (path === '/api/spaces/space') {
-      return buildSpaces();
+      if (spacesEnabled) {
+        return buildSpaces();
+      }
+
+      const notFoundError = { response: { status: 404 } };
+      throw notFoundError;
     }
   });
 
@@ -181,7 +186,6 @@ function getProps({
     notifications,
     docLinks: new DocumentationLinksService(docLinks),
     fatalErrors,
-    spacesEnabled,
     uiCapabilities: buildUICapabilities(canManageSpaces),
   };
 }
