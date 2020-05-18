@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { ManagementSetup } from '../../management/public';
+import { ManagementSetup, ManagementSectionId } from '../../management/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { DashboardStart } from '../../dashboard/public';
 import { DiscoverStart } from '../../discover/public';
@@ -87,16 +87,13 @@ export class SavedObjectsManagementPlugin
       category: FeatureCatalogueCategory.ADMIN,
     });
 
-    const kibanaSection = management.sections.getSection('kibana');
-    if (!kibanaSection) {
-      throw new Error('`kibana` management section not found.');
-    }
+    const kibanaSection = management.sections.getSection(ManagementSectionId.Kibana);
     kibanaSection.registerApp({
       id: 'objects',
       title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
         defaultMessage: 'Saved Objects',
       }),
-      order: 10,
+      order: 1,
       mount: async mountParams => {
         const { mountManagementSection } = await import('./management_section');
         return mountManagementSection({

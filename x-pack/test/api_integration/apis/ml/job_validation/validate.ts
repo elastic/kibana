@@ -6,6 +6,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/machine_learning/security_common';
+import pkg from '../../../../../../package.json';
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
@@ -74,15 +75,14 @@ export default ({ getService }: FtrProviderContext) => {
           heading: 'Job ID format is valid',
           text:
             'Lowercase alphanumeric (a-z and 0-9) characters, hyphens or underscores, starts and ends with an alphanumeric character, and is no more than 64 characters long.',
-          url:
-            'https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-job-resource.html#ml-job-resource',
+          url: `https://www.elastic.co/guide/en/elasticsearch/reference/${pkg.branch}/ml-job-resource.html#ml-job-resource`,
           status: 'success',
         },
         {
           id: 'detectors_function_not_empty',
           heading: 'Detector functions',
           text: 'Presence of detector functions validated in all detectors.',
-          url: 'https://www.elastic.co/guide/en/machine-learning/master/create-jobs.html#detectors',
+          url: `https://www.elastic.co/guide/en/machine-learning/${pkg.branch}/create-jobs.html#detectors`,
           status: 'success',
         },
         {
@@ -90,8 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
           bucketSpan: '15m',
           heading: 'Bucket span',
           text: 'Format of "15m" is valid and passed validation checks.',
-          url:
-            'https://www.elastic.co/guide/en/machine-learning/master/create-jobs.html#bucket-span',
+          url: `https://www.elastic.co/guide/en/machine-learning/${pkg.branch}/create-jobs.html#bucket-span`,
           status: 'success',
         },
         {
@@ -104,8 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
           id: 'success_mml',
           heading: 'Model memory limit',
           text: 'Valid and within the estimated model memory limit.',
-          url:
-            'https://www.elastic.co/guide/en/machine-learning/master/create-jobs.html#model-memory-limits',
+          url: `https://www.elastic.co/guide/en/machine-learning/${pkg.branch}/create-jobs.html#model-memory-limits`,
           status: 'success',
         },
       ]);
@@ -157,15 +155,14 @@ export default ({ getService }: FtrProviderContext) => {
           id: 'job_id_invalid',
           text:
             'Job ID is invalid. It can contain lowercase alphanumeric (a-z and 0-9) characters, hyphens or underscores and must start and end with an alphanumeric character.',
-          url:
-            'https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-job-resource.html#ml-job-resource',
+          url: `https://www.elastic.co/guide/en/elasticsearch/reference/${pkg.branch}/ml-job-resource.html#ml-job-resource`,
           status: 'error',
         },
         {
           id: 'detectors_function_not_empty',
           heading: 'Detector functions',
           text: 'Presence of detector functions validated in all detectors.',
-          url: 'https://www.elastic.co/guide/en/machine-learning/master/create-jobs.html#detectors',
+          url: `https://www.elastic.co/guide/en/machine-learning/${pkg.branch}/create-jobs.html#detectors`,
           status: 'success',
         },
         {
@@ -173,8 +170,7 @@ export default ({ getService }: FtrProviderContext) => {
           bucketSpan: '15m',
           heading: 'Bucket span',
           text: 'Format of "15m" is valid.',
-          url:
-            'https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-job-resource.html#ml-analysisconfig',
+          url: `https://www.elastic.co/guide/en/elasticsearch/reference/${pkg.branch}/ml-job-resource.html#ml-analysisconfig`,
           status: 'success',
         },
         {
@@ -239,15 +235,14 @@ export default ({ getService }: FtrProviderContext) => {
           heading: 'Job ID format is valid',
           text:
             'Lowercase alphanumeric (a-z and 0-9) characters, hyphens or underscores, starts and ends with an alphanumeric character, and is no more than 64 characters long.',
-          url:
-            'https://www.elastic.co/guide/en/elasticsearch/reference/master/ml-job-resource.html#ml-job-resource',
+          url: `https://www.elastic.co/guide/en/elasticsearch/reference/${pkg.branch}/ml-job-resource.html#ml-job-resource`,
           status: 'success',
         },
         {
           id: 'detectors_function_not_empty',
           heading: 'Detector functions',
           text: 'Presence of detector functions validated in all detectors.',
-          url: 'https://www.elastic.co/guide/en/machine-learning/master/create-jobs.html#detectors',
+          url: `https://www.elastic.co/guide/en/machine-learning/${pkg.branch}/create-jobs.html#detectors`,
           status: 'success',
         },
         {
@@ -262,8 +257,7 @@ export default ({ getService }: FtrProviderContext) => {
           fieldName: 'order_id',
           text:
             'Cardinality of partition_field "order_id" is above 1000 and might result in high memory usage.',
-          url:
-            'https://www.elastic.co/guide/en/machine-learning/master/create-jobs.html#cardinality',
+          url: `https://www.elastic.co/guide/en/machine-learning/${pkg.branch}/create-jobs.html#cardinality`,
           status: 'warning',
         },
         {
@@ -271,8 +265,7 @@ export default ({ getService }: FtrProviderContext) => {
           heading: 'Bucket span',
           text:
             'Bucket span is 1 day or more. Be aware that days are considered as UTC days, not local days.',
-          url:
-            'https://www.elastic.co/guide/en/machine-learning/master/create-jobs.html#bucket-span',
+          url: `https://www.elastic.co/guide/en/machine-learning/${pkg.branch}/create-jobs.html#bucket-span`,
           status: 'info',
         },
         {
@@ -287,7 +280,7 @@ export default ({ getService }: FtrProviderContext) => {
         {
           id: 'success_influencers',
           text: 'Influencer configuration passed the validation checks.',
-          url: 'https://www.elastic.co/guide/en/machine-learning/master/ml-influencers.html',
+          url: `https://www.elastic.co/guide/en/machine-learning/${pkg.branch}/ml-influencers.html`,
           status: 'success',
         },
         {
@@ -295,8 +288,7 @@ export default ({ getService }: FtrProviderContext) => {
           mml: '1MB',
           text:
             'The specified model memory limit is less than half of the estimated model memory limit and will likely hit the hard limit.',
-          url:
-            'https://www.elastic.co/guide/en/machine-learning/master/create-jobs.html#model-memory-limits',
+          url: `https://www.elastic.co/guide/en/machine-learning/${pkg.branch}/create-jobs.html#model-memory-limits`,
           status: 'warning',
         },
       ]);
