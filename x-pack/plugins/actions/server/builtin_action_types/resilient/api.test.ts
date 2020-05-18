@@ -26,18 +26,18 @@ describe('api', () => {
         const res = await api.pushToService({ externalService, mapping, params });
 
         expect(res).toEqual({
-          id: 'incident-1',
-          title: 'CK-1',
-          pushedDate: '2020-04-27T10:59:46.202Z',
-          url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+          id: '1',
+          title: '1',
+          pushedDate: '2020-06-03T15:09:13.606Z',
+          url: 'https://resilient.elastic.co/#incidents/1',
           comments: [
             {
               commentId: 'case-comment-1',
-              pushedDate: '2020-04-27T10:59:46.202Z',
+              pushedDate: '2020-06-03T15:09:13.606Z',
             },
             {
               commentId: 'case-comment-2',
-              pushedDate: '2020-04-27T10:59:46.202Z',
+              pushedDate: '2020-06-03T15:09:13.606Z',
             },
           ],
         });
@@ -48,10 +48,10 @@ describe('api', () => {
         const res = await api.pushToService({ externalService, mapping, params });
 
         expect(res).toEqual({
-          id: 'incident-1',
-          title: 'CK-1',
-          pushedDate: '2020-04-27T10:59:46.202Z',
-          url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+          id: '1',
+          title: '1',
+          pushedDate: '2020-06-03T15:09:13.606Z',
+          url: 'https://resilient.elastic.co/#incidents/1',
         });
       });
 
@@ -62,8 +62,8 @@ describe('api', () => {
         expect(externalService.createIncident).toHaveBeenCalledWith({
           incident: {
             description:
-              'Incident description (created at 2020-04-27T10:59:46.202Z by Elastic User)',
-            summary: 'Incident title (created at 2020-04-27T10:59:46.202Z by Elastic User)',
+              'Incident description (created at 2020-06-03T15:09:13.606Z by Elastic User)',
+            name: 'Incident title (created at 2020-06-03T15:09:13.606Z by Elastic User)',
           },
         });
         expect(externalService.updateIncident).not.toHaveBeenCalled();
@@ -74,16 +74,16 @@ describe('api', () => {
         await api.pushToService({ externalService, mapping, params });
         expect(externalService.createComment).toHaveBeenCalledTimes(2);
         expect(externalService.createComment).toHaveBeenNthCalledWith(1, {
-          incidentId: 'incident-1',
+          incidentId: '1',
           comment: {
             commentId: 'case-comment-1',
-            comment: 'A comment (added at 2020-04-27T10:59:46.202Z by Elastic User)',
-            createdAt: '2020-04-27T10:59:46.202Z',
+            comment: 'A comment (added at 2020-06-03T15:09:13.606Z by Elastic User)',
+            createdAt: '2020-06-03T15:09:13.606Z',
             createdBy: {
               fullName: 'Elastic User',
               username: 'elastic',
             },
-            updatedAt: '2020-04-27T10:59:46.202Z',
+            updatedAt: '2020-06-03T15:09:13.606Z',
             updatedBy: {
               fullName: 'Elastic User',
               username: 'elastic',
@@ -93,16 +93,16 @@ describe('api', () => {
         });
 
         expect(externalService.createComment).toHaveBeenNthCalledWith(2, {
-          incidentId: 'incident-1',
+          incidentId: '1',
           comment: {
             commentId: 'case-comment-2',
-            comment: 'Another comment (added at 2020-04-27T10:59:46.202Z by Elastic User)',
-            createdAt: '2020-04-27T10:59:46.202Z',
+            comment: 'Another comment (added at 2020-06-03T15:09:13.606Z by Elastic User)',
+            createdAt: '2020-06-03T15:09:13.606Z',
             createdBy: {
               fullName: 'Elastic User',
               username: 'elastic',
             },
-            updatedAt: '2020-04-27T10:59:46.202Z',
+            updatedAt: '2020-06-03T15:09:13.606Z',
             updatedBy: {
               fullName: 'Elastic User',
               username: 'elastic',
@@ -118,18 +118,18 @@ describe('api', () => {
         const res = await api.pushToService({ externalService, mapping, params: apiParams });
 
         expect(res).toEqual({
-          id: 'incident-1',
-          title: 'CK-1',
-          pushedDate: '2020-04-27T10:59:46.202Z',
-          url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+          id: '1',
+          title: '1',
+          pushedDate: '2020-06-03T15:09:13.606Z',
+          url: 'https://resilient.elastic.co/#incidents/1',
           comments: [
             {
               commentId: 'case-comment-1',
-              pushedDate: '2020-04-27T10:59:46.202Z',
+              pushedDate: '2020-06-03T15:09:13.606Z',
             },
             {
               commentId: 'case-comment-2',
-              pushedDate: '2020-04-27T10:59:46.202Z',
+              pushedDate: '2020-06-03T15:09:13.606Z',
             },
           ],
         });
@@ -140,10 +140,10 @@ describe('api', () => {
         const res = await api.pushToService({ externalService, mapping, params });
 
         expect(res).toEqual({
-          id: 'incident-1',
-          title: 'CK-1',
-          pushedDate: '2020-04-27T10:59:46.202Z',
-          url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+          id: '1',
+          title: '1',
+          pushedDate: '2020-06-03T15:09:13.606Z',
+          url: 'https://resilient.elastic.co/#incidents/1',
         });
       });
 
@@ -155,8 +155,8 @@ describe('api', () => {
           incidentId: 'incident-3',
           incident: {
             description:
-              'Incident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-            summary: 'Incident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+              'Incident description (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
+            name: 'Incident title (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
           },
         });
         expect(externalService.createIncident).not.toHaveBeenCalled();
@@ -167,16 +167,16 @@ describe('api', () => {
         await api.pushToService({ externalService, mapping, params });
         expect(externalService.createComment).toHaveBeenCalledTimes(2);
         expect(externalService.createComment).toHaveBeenNthCalledWith(1, {
-          incidentId: 'incident-1',
+          incidentId: '1',
           comment: {
             commentId: 'case-comment-1',
-            comment: 'A comment (added at 2020-04-27T10:59:46.202Z by Elastic User)',
-            createdAt: '2020-04-27T10:59:46.202Z',
+            comment: 'A comment (added at 2020-06-03T15:09:13.606Z by Elastic User)',
+            createdAt: '2020-06-03T15:09:13.606Z',
             createdBy: {
               fullName: 'Elastic User',
               username: 'elastic',
             },
-            updatedAt: '2020-04-27T10:59:46.202Z',
+            updatedAt: '2020-06-03T15:09:13.606Z',
             updatedBy: {
               fullName: 'Elastic User',
               username: 'elastic',
@@ -186,16 +186,16 @@ describe('api', () => {
         });
 
         expect(externalService.createComment).toHaveBeenNthCalledWith(2, {
-          incidentId: 'incident-1',
+          incidentId: '1',
           comment: {
             commentId: 'case-comment-2',
-            comment: 'Another comment (added at 2020-04-27T10:59:46.202Z by Elastic User)',
-            createdAt: '2020-04-27T10:59:46.202Z',
+            comment: 'Another comment (added at 2020-06-03T15:09:13.606Z by Elastic User)',
+            createdAt: '2020-06-03T15:09:13.606Z',
             createdBy: {
               fullName: 'Elastic User',
               username: 'elastic',
             },
-            updatedAt: '2020-04-27T10:59:46.202Z',
+            updatedAt: '2020-06-03T15:09:13.606Z',
             updatedBy: {
               fullName: 'Elastic User',
               username: 'elastic',
@@ -209,7 +209,7 @@ describe('api', () => {
     describe('mapping variations', () => {
       test('overwrite & append', async () => {
         mapping.set('title', {
-          target: 'summary',
+          target: 'name',
           actionType: 'overwrite',
         });
 
@@ -223,7 +223,7 @@ describe('api', () => {
           actionType: 'append',
         });
 
-        mapping.set('summary', {
+        mapping.set('name', {
           target: 'title',
           actionType: 'overwrite',
         });
@@ -232,16 +232,16 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
-            summary: 'Incident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+            name: 'Incident title (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
             description:
-              'description from jira \r\nIncident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+              'description from ibm resilient \r\nIncident description (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
           },
         });
       });
 
       test('nothing & append', async () => {
         mapping.set('title', {
-          target: 'summary',
+          target: 'name',
           actionType: 'nothing',
         });
 
@@ -255,7 +255,7 @@ describe('api', () => {
           actionType: 'append',
         });
 
-        mapping.set('summary', {
+        mapping.set('name', {
           target: 'title',
           actionType: 'nothing',
         });
@@ -265,14 +265,14 @@ describe('api', () => {
           incidentId: 'incident-3',
           incident: {
             description:
-              'description from jira \r\nIncident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+              'description from ibm resilient \r\nIncident description (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
           },
         });
       });
 
       test('append & append', async () => {
         mapping.set('title', {
-          target: 'summary',
+          target: 'name',
           actionType: 'append',
         });
 
@@ -286,7 +286,7 @@ describe('api', () => {
           actionType: 'append',
         });
 
-        mapping.set('summary', {
+        mapping.set('name', {
           target: 'title',
           actionType: 'append',
         });
@@ -295,17 +295,17 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
-            summary:
-              'title from jira \r\nIncident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+            name:
+              'title from ibm resilient \r\nIncident title (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
             description:
-              'description from jira \r\nIncident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+              'description from ibm resilient \r\nIncident description (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
           },
         });
       });
 
       test('nothing & nothing', async () => {
         mapping.set('title', {
-          target: 'summary',
+          target: 'name',
           actionType: 'nothing',
         });
 
@@ -319,7 +319,7 @@ describe('api', () => {
           actionType: 'append',
         });
 
-        mapping.set('summary', {
+        mapping.set('name', {
           target: 'title',
           actionType: 'nothing',
         });
@@ -333,7 +333,7 @@ describe('api', () => {
 
       test('overwrite & nothing', async () => {
         mapping.set('title', {
-          target: 'summary',
+          target: 'name',
           actionType: 'overwrite',
         });
 
@@ -347,7 +347,7 @@ describe('api', () => {
           actionType: 'append',
         });
 
-        mapping.set('summary', {
+        mapping.set('name', {
           target: 'title',
           actionType: 'overwrite',
         });
@@ -356,14 +356,14 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
-            summary: 'Incident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+            name: 'Incident title (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
           },
         });
       });
 
       test('overwrite & overwrite', async () => {
         mapping.set('title', {
-          target: 'summary',
+          target: 'name',
           actionType: 'overwrite',
         });
 
@@ -377,7 +377,7 @@ describe('api', () => {
           actionType: 'append',
         });
 
-        mapping.set('summary', {
+        mapping.set('name', {
           target: 'title',
           actionType: 'overwrite',
         });
@@ -386,16 +386,16 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
-            summary: 'Incident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+            name: 'Incident title (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
             description:
-              'Incident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+              'Incident description (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
           },
         });
       });
 
       test('nothing & overwrite', async () => {
         mapping.set('title', {
-          target: 'summary',
+          target: 'name',
           actionType: 'nothing',
         });
 
@@ -409,7 +409,7 @@ describe('api', () => {
           actionType: 'append',
         });
 
-        mapping.set('summary', {
+        mapping.set('name', {
           target: 'title',
           actionType: 'nothing',
         });
@@ -419,14 +419,14 @@ describe('api', () => {
           incidentId: 'incident-3',
           incident: {
             description:
-              'Incident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+              'Incident description (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
           },
         });
       });
 
       test('append & overwrite', async () => {
         mapping.set('title', {
-          target: 'summary',
+          target: 'name',
           actionType: 'append',
         });
 
@@ -440,7 +440,7 @@ describe('api', () => {
           actionType: 'append',
         });
 
-        mapping.set('summary', {
+        mapping.set('name', {
           target: 'title',
           actionType: 'append',
         });
@@ -449,17 +449,17 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
-            summary:
-              'title from jira \r\nIncident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+            name:
+              'title from ibm resilient \r\nIncident title (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
             description:
-              'Incident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+              'Incident description (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
           },
         });
       });
 
       test('append & nothing', async () => {
         mapping.set('title', {
-          target: 'summary',
+          target: 'name',
           actionType: 'append',
         });
 
@@ -473,7 +473,7 @@ describe('api', () => {
           actionType: 'append',
         });
 
-        mapping.set('summary', {
+        mapping.set('name', {
           target: 'title',
           actionType: 'append',
         });
@@ -482,15 +482,15 @@ describe('api', () => {
         expect(externalService.updateIncident).toHaveBeenCalledWith({
           incidentId: 'incident-3',
           incident: {
-            summary:
-              'title from jira \r\nIncident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+            name:
+              'title from ibm resilient \r\nIncident title (updated at 2020-06-03T15:09:13.606Z by Elastic User)',
           },
         });
       });
 
       test('comment nothing', async () => {
         mapping.set('title', {
-          target: 'summary',
+          target: 'name',
           actionType: 'overwrite',
         });
 
@@ -504,7 +504,7 @@ describe('api', () => {
           actionType: 'nothing',
         });
 
-        mapping.set('summary', {
+        mapping.set('name', {
           target: 'title',
           actionType: 'overwrite',
         });

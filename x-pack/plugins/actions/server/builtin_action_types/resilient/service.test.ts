@@ -6,7 +6,7 @@
 
 import axios from 'axios';
 
-import { createExternalService } from './service';
+import { createExternalService, getValueTextContent, formatUpdateRequest } from './service';
 import * as utils from '../case/utils';
 import { ExternalService } from '../case/types';
 
@@ -21,36 +21,135 @@ jest.mock('../case/utils', () => {
 
 axios.create = jest.fn(() => axios);
 const requestMock = utils.request as jest.Mock;
+const now = Date.now;
+const TIMESTAMP = 1589391874472;
 
-describe('Jira service', () => {
+// Incident update makes three calls to the API.
+// The function below mocks this calls.
+// a) Get the latest incident
+// b) Update the incident
+// c) Get the updated incident
+const mockIncidentUpdate = (withUpdateError = false) => {
+  requestMock.mockImplementationOnce(() => ({
+    data: {
+      id: '1',
+      name: 'title',
+      description: {
+        format: 'html',
+        content: 'description',
+      },
+    },
+  }));
+
+  if (withUpdateError) {
+    requestMock.mockImplementationOnce(() => {
+      throw new Error('An error has occurred');
+    });
+  } else {
+    requestMock.mockImplementationOnce(() => ({
+      data: {
+        success: true,
+        id: '1',
+        inc_last_modified_date: 1589391874472,
+      },
+    }));
+  }
+
+  requestMock.mockImplementationOnce(() => ({
+    data: {
+      id: '1',
+      name: 'title_updated',
+      description: {
+        format: 'html',
+        content: 'desc_updated',
+      },
+      inc_last_modified_date: 1589391874472,
+    },
+  }));
+};
+
+describe('IBM Resilient service', () => {
   let service: ExternalService;
 
   beforeAll(() => {
     service = createExternalService({
-      config: { apiUrl: 'https://siem-kibana.atlassian.net', projectKey: 'CK' },
-      secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
+      config: { apiUrl: 'https://resilient.elastic.co', orgId: '201' },
+      secrets: { apiKeyId: 'keyId', apiKeySecret: 'secret' },
     });
   });
 
+  afterAll(() => {
+    Date.now = now;
+  });
+
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
+    Date.now = jest.fn().mockReturnValue(TIMESTAMP);
+  });
+
+  describe('getValueTextContent', () => {
+    test('transforms correctly', () => {
+      expect(getValueTextContent('name', 'title')).toEqual({
+        text: 'title',
+      });
+    });
+
+    test('transforms correctly the description', () => {
+      expect(getValueTextContent('description', 'desc')).toEqual({
+        textarea: {
+          format: 'html',
+          content: 'desc',
+        },
+      });
+    });
+  });
+
+  describe('formatUpdateRequest', () => {
+    test('transforms correctly', () => {
+      const oldIncident = { name: 'title', description: 'desc' };
+      const newIncident = { name: 'title_updated', description: 'desc_updated' };
+      expect(formatUpdateRequest({ oldIncident, newIncident })).toEqual({
+        changes: [
+          {
+            field: { name: 'name' },
+            old_value: { text: 'title' },
+            new_value: { text: 'title_updated' },
+          },
+          {
+            field: { name: 'description' },
+            old_value: {
+              textarea: {
+                format: 'html',
+                content: 'desc',
+              },
+            },
+            new_value: {
+              textarea: {
+                format: 'html',
+                content: 'desc_updated',
+              },
+            },
+          },
+        ],
+      });
+    });
   });
 
   describe('createExternalService', () => {
     test('throws without url', () => {
       expect(() =>
         createExternalService({
-          config: { apiUrl: null, projectKey: 'CK' },
-          secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
+          config: { apiUrl: null, orgId: '201' },
+          secrets: { apiKeyId: 'token', apiKeySecret: 'secret' },
         })
       ).toThrow();
     });
 
-    test('throws without projectKey', () => {
+    test('throws without orgId', () => {
       expect(() =>
         createExternalService({
-          config: { apiUrl: 'test.com', projectKey: null },
-          secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
+          config: { apiUrl: 'test.com', orgId: null },
+          secrets: { apiKeyId: 'token', apiKeySecret: 'secret' },
         })
       ).toThrow();
     });
@@ -59,7 +158,7 @@ describe('Jira service', () => {
       expect(() =>
         createExternalService({
           config: { apiUrl: 'test.com' },
-          secrets: { apiToken: '', email: 'elastic@elastic.com' },
+          secrets: { apiKeyId: '', apiKeySecret: 'secret' },
         })
       ).toThrow();
     });
@@ -68,7 +167,7 @@ describe('Jira service', () => {
       expect(() =>
         createExternalService({
           config: { apiUrl: 'test.com' },
-          secrets: { apiToken: '', email: undefined },
+          secrets: { apiKeyId: '', apiKeySecret: undefined },
         })
       ).toThrow();
     });
@@ -77,21 +176,29 @@ describe('Jira service', () => {
   describe('getIncident', () => {
     test('it returns the incident correctly', async () => {
       requestMock.mockImplementation(() => ({
-        data: { id: '1', key: 'CK-1', fields: { summary: 'title', description: 'description' } },
+        data: {
+          id: '1',
+          name: '1',
+          description: {
+            format: 'html',
+            content: 'description',
+          },
+        },
       }));
       const res = await service.getIncident('1');
-      expect(res).toEqual({ id: '1', key: 'CK-1', summary: 'title', description: 'description' });
+      expect(res).toEqual({ id: '1', name: '1', description: 'description' });
     });
 
     test('it should call request with correct arguments', async () => {
       requestMock.mockImplementation(() => ({
-        data: { id: '1', key: 'CK-1' },
+        data: { id: '1' },
       }));
 
       await service.getIncident('1');
       expect(requestMock).toHaveBeenCalledWith({
         axios,
-        url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/1',
+        url:
+          'https://resilient.elastic.co/rest/orgs/201/incidents/1?text_content_output_format=objects_convert',
       });
     });
 
@@ -107,26 +214,25 @@ describe('Jira service', () => {
 
   describe('createIncident', () => {
     test('it creates the incident correctly', async () => {
-      // The response from Jira when creating an issue contains only the key and the id.
-      // The service makes two calls when creating an issue. One to create and one to get
-      // the created incident with all the necessary fields.
-      requestMock.mockImplementationOnce(() => ({
-        data: { id: '1', key: 'CK-1', fields: { summary: 'title', description: 'description' } },
-      }));
-
-      requestMock.mockImplementationOnce(() => ({
-        data: { id: '1', key: 'CK-1', fields: { created: '2020-04-27T10:59:46.202Z' } },
+      requestMock.mockImplementation(() => ({
+        data: {
+          id: '1',
+          name: 'title',
+          description: 'description',
+          discovered_date: 1589391874472,
+          create_date: 1589391874472,
+        },
       }));
 
       const res = await service.createIncident({
-        incident: { summary: 'title', description: 'desc' },
+        incident: { name: 'title', description: 'desc' },
       });
 
       expect(res).toEqual({
-        title: 'CK-1',
+        title: '1',
         id: '1',
-        pushedDate: '2020-04-27T10:59:46.202Z',
-        url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+        pushedDate: '2020-05-13T17:44:34.472Z',
+        url: 'https://resilient.elastic.co/#incidents/1',
       });
     });
 
@@ -134,26 +240,28 @@ describe('Jira service', () => {
       requestMock.mockImplementation(() => ({
         data: {
           id: '1',
-          key: 'CK-1',
-          fields: { created: '2020-04-27T10:59:46.202Z' },
+          name: 'title',
+          description: 'description',
+          discovered_date: 1589391874472,
+          create_date: 1589391874472,
         },
       }));
 
       await service.createIncident({
-        incident: { summary: 'title', description: 'desc' },
+        incident: { name: 'title', description: 'desc' },
       });
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
-        url: 'https://siem-kibana.atlassian.net/rest/api/2/issue',
+        url: 'https://resilient.elastic.co/rest/orgs/201/incidents',
         method: 'post',
         data: {
-          fields: {
-            summary: 'title',
-            description: 'desc',
-            project: { key: 'CK' },
-            issuetype: { name: 'Task' },
+          name: 'title',
+          description: {
+            format: 'html',
+            content: 'desc',
           },
+          discovered_date: TIMESTAMP,
         },
       });
     });
@@ -165,69 +273,81 @@ describe('Jira service', () => {
 
       expect(
         service.createIncident({
-          incident: { summary: 'title', description: 'desc' },
+          incident: { name: 'title', description: 'desc' },
         })
-      ).rejects.toThrow('[Action][Jira]: Unable to create incident. Error: An error has occurred');
+      ).rejects.toThrow(
+        '[Action][IBM Resilient]: Unable to create incident. Error: An error has occurred'
+      );
     });
   });
 
   describe('updateIncident', () => {
     test('it updates the incident correctly', async () => {
-      requestMock.mockImplementation(() => ({
-        data: {
-          id: '1',
-          key: 'CK-1',
-          fields: { updated: '2020-04-27T10:59:46.202Z' },
-        },
-      }));
-
+      mockIncidentUpdate();
       const res = await service.updateIncident({
         incidentId: '1',
-        incident: { summary: 'title', description: 'desc' },
+        incident: { name: 'title_updated', description: 'desc_updated' },
       });
 
       expect(res).toEqual({
-        title: 'CK-1',
+        title: '1',
         id: '1',
-        pushedDate: '2020-04-27T10:59:46.202Z',
-        url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+        pushedDate: '2020-05-13T17:44:34.472Z',
+        url: 'https://resilient.elastic.co/#incidents/1',
       });
     });
 
     test('it should call request with correct arguments', async () => {
-      requestMock.mockImplementation(() => ({
-        data: {
-          id: '1',
-          key: 'CK-1',
-          fields: { updated: '2020-04-27T10:59:46.202Z' },
-        },
-      }));
+      mockIncidentUpdate();
 
       await service.updateIncident({
         incidentId: '1',
-        incident: { summary: 'title', description: 'desc' },
+        incident: { name: 'title_updated', description: 'desc_updated' },
       });
 
-      expect(requestMock).toHaveBeenCalledWith({
+      // Incident update makes three calls to the API.
+      // The second call to the API is the update call.
+      expect(requestMock.mock.calls[1][0]).toEqual({
         axios,
-        method: 'put',
-        url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/1',
-        data: { fields: { summary: 'title', description: 'desc' } },
+        method: 'patch',
+        url: 'https://resilient.elastic.co/rest/orgs/201/incidents/1',
+        data: {
+          changes: [
+            {
+              field: { name: 'name' },
+              old_value: { text: 'title' },
+              new_value: { text: 'title_updated' },
+            },
+            {
+              field: { name: 'description' },
+              old_value: {
+                textarea: {
+                  content: 'description',
+                  format: 'html',
+                },
+              },
+              new_value: {
+                textarea: {
+                  content: 'desc_updated',
+                  format: 'html',
+                },
+              },
+            },
+          ],
+        },
       });
     });
 
     test('it should throw an error', async () => {
-      requestMock.mockImplementation(() => {
-        throw new Error('An error has occurred');
-      });
+      mockIncidentUpdate(true);
 
       expect(
         service.updateIncident({
           incidentId: '1',
-          incident: { summary: 'title', description: 'desc' },
+          incident: { name: 'title', description: 'desc' },
         })
       ).rejects.toThrow(
-        '[Action][Jira]: Unable to update incident with id 1. Error: An error has occurred'
+        '[Action][IBM Resilient]: Unable to update incident with id 1. Error: An error has occurred'
       );
     });
   });
@@ -237,8 +357,7 @@ describe('Jira service', () => {
       requestMock.mockImplementation(() => ({
         data: {
           id: '1',
-          key: 'CK-1',
-          created: '2020-04-27T10:59:46.202Z',
+          create_date: 1589391874472,
         },
       }));
 
@@ -250,7 +369,7 @@ describe('Jira service', () => {
 
       expect(res).toEqual({
         commentId: 'comment-1',
-        pushedDate: '2020-04-27T10:59:46.202Z',
+        pushedDate: '2020-05-13T17:44:34.472Z',
         externalCommentId: '1',
       });
     });
@@ -259,8 +378,7 @@ describe('Jira service', () => {
       requestMock.mockImplementation(() => ({
         data: {
           id: '1',
-          key: 'CK-1',
-          created: '2020-04-27T10:59:46.202Z',
+          create_date: 1589391874472,
         },
       }));
 
@@ -273,8 +391,13 @@ describe('Jira service', () => {
       expect(requestMock).toHaveBeenCalledWith({
         axios,
         method: 'post',
-        url: 'https://siem-kibana.atlassian.net/rest/api/2/issue/1/comment',
-        data: { body: 'comment' },
+        url: 'https://resilient.elastic.co/rest/orgs/201/incidents/1/comments',
+        data: {
+          text: {
+            content: 'comment',
+            format: 'text',
+          },
+        },
       });
     });
 
@@ -290,7 +413,7 @@ describe('Jira service', () => {
           field: 'comments',
         })
       ).rejects.toThrow(
-        '[Action][Jira]: Unable to create comment at incident with id 1. Error: An error has occurred'
+        '[Action][IBM Resilient]: Unable to create comment at incident with id 1. Error: An error has occurred'
       );
     });
   });

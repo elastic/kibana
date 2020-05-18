@@ -15,28 +15,28 @@ const createMock = (): jest.Mocked<ExternalService> => {
   const service = {
     getIncident: jest.fn().mockImplementation(() =>
       Promise.resolve({
-        id: 'incident-1',
-        key: 'CK-1',
-        summary: 'title from jira',
-        description: 'description from jira',
-        created: '2020-04-27T10:59:46.202Z',
-        updated: '2020-04-27T10:59:46.202Z',
+        id: '1',
+        name: 'title from ibm resilient',
+        description: 'description from ibm resilient',
+        discovered_date: 1589391874472,
+        create_date: 1591192608323,
+        inc_last_modified_date: 1591192650372,
       })
     ),
     createIncident: jest.fn().mockImplementation(() =>
       Promise.resolve({
-        id: 'incident-1',
-        title: 'CK-1',
-        pushedDate: '2020-04-27T10:59:46.202Z',
-        url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+        id: '1',
+        title: '1',
+        pushedDate: '2020-06-03T15:09:13.606Z',
+        url: 'https://resilient.elastic.co/#incidents/1',
       })
     ),
     updateIncident: jest.fn().mockImplementation(() =>
       Promise.resolve({
-        id: 'incident-1',
-        title: 'CK-1',
-        pushedDate: '2020-04-27T10:59:46.202Z',
-        url: 'https://siem-kibana.atlassian.net/browse/CK-1',
+        id: '1',
+        title: '1',
+        pushedDate: '2020-06-03T15:09:13.606Z',
+        url: 'https://resilient.elastic.co/#incidents/1',
       })
     ),
     createComment: jest.fn(),
@@ -45,7 +45,7 @@ const createMock = (): jest.Mocked<ExternalService> => {
   service.createComment.mockImplementationOnce(() =>
     Promise.resolve({
       commentId: 'case-comment-1',
-      pushedDate: '2020-04-27T10:59:46.202Z',
+      pushedDate: '2020-06-03T15:09:13.606Z',
       externalCommentId: '1',
     })
   );
@@ -53,7 +53,7 @@ const createMock = (): jest.Mocked<ExternalService> => {
   service.createComment.mockImplementationOnce(() =>
     Promise.resolve({
       commentId: 'case-comment-2',
-      pushedDate: '2020-04-27T10:59:46.202Z',
+      pushedDate: '2020-06-03T15:09:13.606Z',
       externalCommentId: '2',
     })
   );
@@ -68,7 +68,7 @@ const externalServiceMock = {
 const mapping: Map<string, Partial<MapRecord>> = new Map();
 
 mapping.set('title', {
-  target: 'summary',
+  target: 'name',
   actionType: 'overwrite',
 });
 
@@ -82,7 +82,7 @@ mapping.set('comments', {
   actionType: 'append',
 });
 
-mapping.set('summary', {
+mapping.set('name', {
   target: 'title',
   actionType: 'overwrite',
 });
@@ -90,9 +90,9 @@ mapping.set('summary', {
 const executorParams: ExecutorSubActionPushParams = {
   caseId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
   externalId: 'incident-3',
-  createdAt: '2020-04-27T10:59:46.202Z',
+  createdAt: '2020-06-03T15:09:13.606Z',
   createdBy: { fullName: 'Elastic User', username: 'elastic' },
-  updatedAt: '2020-04-27T10:59:46.202Z',
+  updatedAt: '2020-06-03T15:09:13.606Z',
   updatedBy: { fullName: 'Elastic User', username: 'elastic' },
   title: 'Incident title',
   description: 'Incident description',
@@ -100,17 +100,17 @@ const executorParams: ExecutorSubActionPushParams = {
     {
       commentId: 'case-comment-1',
       comment: 'A comment',
-      createdAt: '2020-04-27T10:59:46.202Z',
+      createdAt: '2020-06-03T15:09:13.606Z',
       createdBy: { fullName: 'Elastic User', username: 'elastic' },
-      updatedAt: '2020-04-27T10:59:46.202Z',
+      updatedAt: '2020-06-03T15:09:13.606Z',
       updatedBy: { fullName: 'Elastic User', username: 'elastic' },
     },
     {
       commentId: 'case-comment-2',
       comment: 'Another comment',
-      createdAt: '2020-04-27T10:59:46.202Z',
+      createdAt: '2020-06-03T15:09:13.606Z',
       createdBy: { fullName: 'Elastic User', username: 'elastic' },
-      updatedAt: '2020-04-27T10:59:46.202Z',
+      updatedAt: '2020-06-03T15:09:13.606Z',
       updatedBy: { fullName: 'Elastic User', username: 'elastic' },
     },
   ],
@@ -118,7 +118,7 @@ const executorParams: ExecutorSubActionPushParams = {
 
 const apiParams: PushToServiceApiParams = {
   ...executorParams,
-  externalCase: { summary: 'Incident title', description: 'Incident description' },
+  externalCase: { name: 'Incident title', description: 'Incident description' },
 };
 
 export { externalServiceMock, mapping, executorParams, apiParams };

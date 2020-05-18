@@ -24,6 +24,23 @@ interface CreateIncidentRequestArgs extends CreateIncidentBasicRequestArgs {
   comments?: Comment[];
 }
 
+export interface UpdateFieldText {
+  text: string;
+}
+
+export interface UpdateFieldTextArea {
+  textarea: { format: 'html' | 'text'; content: string };
+}
+
+interface UpdateField {
+  field: { name: string };
+  old_value: UpdateFieldText | UpdateFieldTextArea;
+  new_value: UpdateFieldText | UpdateFieldTextArea;
+}
+
 export type CreateIncidentRequest = CreateIncidentRequestArgs;
-export type UpdateIncidentRequest = Partial<CreateIncidentBasicRequestArgs>;
 export type CreateCommentRequest = Comment;
+
+export interface UpdateIncidentRequest {
+  changes: UpdateField[];
+}

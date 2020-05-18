@@ -5,6 +5,7 @@
  */
 
 import axios from 'axios';
+import https from 'https';
 
 import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from '../case/types';
 import {
@@ -13,6 +14,8 @@ import {
   CreateIncidentRequest,
   UpdateIncidentRequest,
   CreateCommentRequest,
+  UpdateFieldText,
+  UpdateFieldTextArea,
 } from './types';
 
 import * as i18n from './translations';
@@ -23,6 +26,37 @@ const INCIDENT_URL = `incidents`;
 const COMMENT_URL = `comments`;
 
 const VIEW_INCIDENT_URL = `#incidents`;
+
+export const getValueTextContent = (
+  field: string,
+  value: string
+): UpdateFieldText | UpdateFieldTextArea => {
+  if (field === 'description') {
+    return {
+      textarea: {
+        format: 'html',
+        content: value,
+      },
+    };
+  }
+
+  return {
+    text: value,
+  };
+};
+
+export const formatUpdateRequest = ({
+  oldIncident,
+  newIncident,
+}: ExternalServiceParams): UpdateIncidentRequest => {
+  return {
+    changes: Object.keys(newIncident).map((key) => ({
+      field: { name: key },
+      old_value: getValueTextContent(key, oldIncident[key]),
+      new_value: getValueTextContent(key, newIncident[key]),
+    })),
+  };
+};
 
 export const createExternalService = ({
   config,
@@ -35,9 +69,12 @@ export const createExternalService = ({
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
-  const incidentUrl = `${url}/${BASE_URL}/${orgId}/${INCIDENT_URL}`;
+  const incidentUrl = `${url}/${BASE_URL}/orgs/${orgId}/${INCIDENT_URL}`;
   const commentUrl = `${incidentUrl}/{inc_id}/${COMMENT_URL}`;
   const axiosInstance = axios.create({
+    httpsAgent: new https.Agent({
+      rejectUnauthorized: false,
+    }),
     auth: { username: apiKeyId, password: apiKeySecret },
   });
 
@@ -53,12 +90,10 @@ export const createExternalService = ({
     try {
       const res = await request({
         axios: axiosInstance,
-        url: `${incidentUrl}/${id}`,
+        url: `${incidentUrl}/${id}?text_content_output_format=objects_convert`,
       });
 
-      const { fields, ...rest } = res.data;
-
-      return { ...rest, ...fields };
+      return { ...res.data, description: res.data.description?.content ?? '' };
     } catch (error) {
       throw new Error(
         getErrorMessage(i18n.NAME, `Unable to get incident with id ${id}. Error: ${error.message}`)
@@ -67,9 +102,6 @@ export const createExternalService = ({
   };
 
   const createIncident = async ({ incident }: ExternalServiceParams) => {
-    // The response from Resilient when creating an issue contains only the key and the id.
-    // The function makes two calls when creating an issue. One to create the issue and one to get
-    // the created issue with all the necessary fields.
     try {
       const res = await request<CreateIncidentRequest>({
         axios: axiosInstance,
@@ -77,16 +109,19 @@ export const createExternalService = ({
         method: 'post',
         data: {
           ...incident,
+          description: {
+            format: 'html',
+            content: incident.description ?? '',
+          },
+          discovered_date: Date.now(),
         },
       });
 
-      const updatedIncident = await getIncident(res.data.id);
-
       return {
-        title: updatedIncident.key,
-        id: updatedIncident.id,
-        pushedDate: new Date(updatedIncident.created).toISOString(),
-        url: getIncidentViewURL(updatedIncident.key),
+        title: `${res.data.id}`,
+        id: `${res.data.id}`,
+        pushedDate: new Date(res.data.create_date).toISOString(),
+        url: getIncidentViewURL(res.data.id),
       };
     } catch (error) {
       throw new Error(
@@ -97,20 +132,27 @@ export const createExternalService = ({
 
   const updateIncident = async ({ incidentId, incident }: ExternalServiceParams) => {
     try {
-      await request<UpdateIncidentRequest>({
+      const latestIncident = await getIncident(incidentId);
+
+      const data = formatUpdateRequest({ oldIncident: latestIncident, newIncident: incident });
+      const res = await request<UpdateIncidentRequest>({
         axios: axiosInstance,
-        method: 'put',
+        method: 'patch',
         url: `${incidentUrl}/${incidentId}`,
-        data: { ...incident },
+        data,
       });
+
+      if (!res.data.success) {
+        throw new Error(res.data.message);
+      }
 
       const updatedIncident = await getIncident(incidentId);
 
       return {
-        title: updatedIncident.key,
-        id: updatedIncident.id,
-        pushedDate: new Date(updatedIncident.updated).toISOString(),
-        url: getIncidentViewURL(updatedIncident.key),
+        title: `${updatedIncident.id}`,
+        id: `${updatedIncident.id}`,
+        pushedDate: new Date(updatedIncident.inc_last_modified_date).toISOString(),
+        url: getIncidentViewURL(updatedIncident.id),
       };
     } catch (error) {
       throw new Error(
@@ -134,7 +176,7 @@ export const createExternalService = ({
       return {
         commentId: comment.commentId,
         externalCommentId: res.data.id,
-        pushedDate: new Date(res.data.created).toISOString(),
+        pushedDate: new Date(res.data.create_date).toISOString(),
       };
     } catch (error) {
       throw new Error(
