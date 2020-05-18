@@ -164,7 +164,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async getChartIntervalWarningIcon() {
       await header.waitUntilLoadingHasFinished();
-      return await find.byCssSelector('.euiToolTipAnchor');
+      return await find.existsByCssSelector('.euiToolTipAnchor');
     }
 
     public async setChartInterval(interval: string) {
