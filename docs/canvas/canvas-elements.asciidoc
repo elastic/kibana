@@ -12,9 +12,8 @@ Choose the type of element you want to use, then connect it to your own data.
 
 . Click *Add element*, then select the element you want to use.
 +
-//Need to replace image
-//[role="screenshot"]
-//image::images/canvas-element-select.gif[Canvas elements]
+[role="screenshot"]
+image::images/canvas-element-select.gif[Canvas elements]
 
 . To familiarize yourself with the element, use the preconfigured data demo data.
 +
@@ -28,6 +27,8 @@ By default, most of the elements you create use demo data until you change the d
 
 * *Timelion* &mdash; Access your time series data using <<timelion,Timelion>> queries. To use Timelion queries, you can enter a query using the <<lucene-query,Lucene Query Syntax>>.
 
+Each element can display a different data source. Pages and workpads often contain multiple data sources.
+
 [float]
 [[canvas-add-object]]
 ==== Add a saved object
@@ -38,9 +39,8 @@ Add <<managing-saved-objects,saved objects>> to your workpad, such as maps, Lens
 
 . Select the visualization you want to add.
 +
-//Need to replace image
-//[role="screenshot"]
-//image::images/canvas-map-embed.gif[]
+[role="screenshot"]
+image::images/canvas-map-embed.gif[]
 
 . To use the customization options, click the panel menu, then select one of the following options:
 
@@ -64,9 +64,8 @@ To personalize your workpad, add your own logos and graphics.
 
 . To add the image to the workpad, click the *Create image element* icon.
 +
-//Need to replace image
-//[role="screenshot"]
-//image::images/canvas-add-image.gif[]
+[role="screenshot"]
+image::images/canvas-add-image.gif[]
 
 [float]
 [[move-canvas-elements]]
@@ -88,13 +87,13 @@ Move and resize your elements to meet your design needs.
 
 For consistency and readability across your workpad pages, align, distribute, and reorder elements.
 
-To align elements:
+To align two or more elements:
 
 . Press and hold Shift, then select the elements you want to align.
 
 . Click *Edit > Alignment*, then select the alignment option.
 
-To distribute elements:
+To distribute three or more elements:
 
 . Press and hold Shift, then select the elements you want to distribute.
 
@@ -147,9 +146,8 @@ To use the elements across all workpads, save the elements.
 
 When you're ready to save your element, select the element, then click *Edit > Save as new element*.
 
-//Need to replace image
-//[role="screenshot"]
-//image::images/canvas_save_element.png[]
+[role="screenshot"]
+image::images/canvas_save_element.png[]
 
 To save a group of elements, press and hold Shift, select the elements you want to save, then click *Edit > Save as new element*.
 
@@ -165,6 +163,5 @@ When you no longer need an element, delete it from your workpad.
 
 . Click *Edit > Delete*.
 +
-//Need to replace image
-//[role="screenshot"]
-//image::images/canvas_element_options.png[]
+[role="screenshot"]
+image::images/canvas_element_options.png[]

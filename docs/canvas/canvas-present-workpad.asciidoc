@@ -10,16 +10,14 @@ When you are ready to present your workpad, use and enable the presentation opti
 
 .. Under *Change cycling interval*, select the interval you want to use, or *Set a custom interval*.
 +
-//Need to replace image
-//[role="screenshot"]
-//image::images/canvas-autoplay-interval.png[Element autoplay interval]
+[role="screenshot"]
+image::images/canvas-autoplay-interval.png[Element autoplay interval]
 
 . To enable autoplay, click *View > Turn autoplay on*.
 
 . To start your presentation, click *View > Enter fullscreen mode*.
 +
-//Need to replace image
-//[role="screenshot"]
-//image::images/canvas-fullscreen.png[Fullscreen mode]
+[role="screenshot"]
+image::images/canvas-fullscreen.png[Fullscreen mode]
 
 . When you are ready to exit fullscreen mode, press the Esc (Escape) key.
