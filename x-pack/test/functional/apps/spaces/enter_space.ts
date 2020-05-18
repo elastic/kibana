@@ -27,7 +27,7 @@ export default function enterSpaceFunctonalTests({
     it('falls back to the default home page when the configured default route is malformed', async () => {
       const spaceId = 'default';
 
-      await PageObjects.security.login(null, null, {
+      await PageObjects.security.login(undefined, undefined, {
         expectSpaceSelector: true,
       });
 
@@ -39,7 +39,7 @@ export default function enterSpaceFunctonalTests({
     it('allows user to navigate to different spaces, respecting the configured default route', async () => {
       const spaceId = 'another-space';
 
-      await PageObjects.security.login(null, null, {
+      await PageObjects.security.login(undefined, undefined, {
         expectSpaceSelector: true,
       });
 

@@ -10,7 +10,7 @@ import {
   pageChanged,
   pageSizeChanged,
   sortChanged,
-  showSystemIndicesChanged,
+  showHiddenIndicesChanged,
   toggleChanged,
 } from '../actions';
 
@@ -20,7 +20,7 @@ export const defaultTableState = {
   currentPage: 0,
   sortField: 'index.name',
   isSortAscending: true,
-  showSystemIndices: false,
+  showHiddenIndices: false,
 };
 
 export const tableState = handleActions(
@@ -33,12 +33,12 @@ export const tableState = handleActions(
         currentPage: 0,
       };
     },
-    [showSystemIndicesChanged](state, action) {
-      const { showSystemIndices } = action.payload;
+    [showHiddenIndicesChanged](state, action) {
+      const { showHiddenIndices } = action.payload;
 
       return {
         ...state,
-        showSystemIndices,
+        showHiddenIndices,
       };
     },
     [toggleChanged](state, action) {
