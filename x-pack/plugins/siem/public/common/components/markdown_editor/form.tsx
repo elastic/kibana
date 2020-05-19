@@ -16,6 +16,7 @@ interface IMarkdownEditorForm {
   field: FieldHook;
   idAria: string;
   isDisabled: boolean;
+  onClickTimeline?: (timelineId: string) => void;
   onCursorPositionUpdate?: (cursorPosition: CursorPosition) => void;
   placeholder?: string;
   topRightContent?: React.ReactNode;
@@ -26,6 +27,7 @@ export const MarkdownEditorForm = ({
   field,
   idAria,
   isDisabled = false,
+  onClickTimeline,
   onCursorPositionUpdate,
   placeholder,
   topRightContent,
@@ -55,6 +57,7 @@ export const MarkdownEditorForm = ({
         content={field.value as string}
         isDisabled={isDisabled}
         onChange={handleContentChange}
+        onClickTimeline={onClickTimeline}
         onCursorPositionUpdate={onCursorPositionUpdate}
         placeholder={placeholder}
         topRightContent={topRightContent}
