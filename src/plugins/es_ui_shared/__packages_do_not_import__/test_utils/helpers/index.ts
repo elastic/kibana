@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { mountWithIntl } from './enzyme_helpers';
+export { mountWithIntl } from '../../../../../test_utils/public/enzyme_helpers';
 
 export { findTestSubject } from './find_test_subject';
 
