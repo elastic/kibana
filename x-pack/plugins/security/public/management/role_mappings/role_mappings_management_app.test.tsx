@@ -12,6 +12,7 @@ jest.mock('./edit_role_mapping', () => ({
   EditRoleMappingPage: (props: any) => `Role Mapping Edit Page: ${JSON.stringify(props)}`,
 }));
 
+import { ScopedHistory } from 'kibana/public';
 import { roleMappingsManagementApp } from './role_mappings_management_app';
 
 import { coreMock } from '../../../../../../src/core/public/mocks';
@@ -22,7 +23,7 @@ async function mountApp(basePath: string) {
 
   const unmount = await roleMappingsManagementApp
     .create({ getStartServices: coreMock.createSetup().getStartServices as any })
-    .mount({ basePath, element: container, setBreadcrumbs });
+    .mount({ basePath, element: container, setBreadcrumbs, history: {} as ScopedHistory });
 
   return { unmount, container, setBreadcrumbs };
 }

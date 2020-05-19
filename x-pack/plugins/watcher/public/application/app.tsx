@@ -79,7 +79,7 @@ export const App = (deps: AppDeps) => {
     );
   }
   return (
-    <Router history={history}>
+    <Router history={deps.history}>
       <ShareRouter>
         <AppContextProvider value={deps}>
           <AppWithoutRouter />

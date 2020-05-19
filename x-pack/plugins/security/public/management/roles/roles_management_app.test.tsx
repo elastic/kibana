@@ -5,6 +5,7 @@
  */
 
 import { licenseMock } from '../../../common/licensing/index.mock';
+import { ScopedHistory } from 'kibana/public';
 
 jest.mock('./roles_grid', () => ({
   RolesGridPage: (props: any) => `Roles Page: ${JSON.stringify(props)}`,
@@ -34,7 +35,7 @@ async function mountApp(basePath: string) {
         .fn()
         .mockResolvedValue([coreMock.createStart(), { data: {}, features: featuresStart }]),
     })
-    .mount({ basePath, element: container, setBreadcrumbs });
+    .mount({ basePath, element: container, setBreadcrumbs, history: {} as ScopedHistory });
 
   return { unmount, container, setBreadcrumbs };
 }

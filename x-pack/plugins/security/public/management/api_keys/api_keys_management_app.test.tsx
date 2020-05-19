@@ -10,6 +10,7 @@ jest.mock('./api_keys_grid', () => ({
 
 import { apiKeysManagementApp } from './api_keys_management_app';
 import { coreMock } from '../../../../../../src/core/public/mocks';
+import { ScopedHistory } from 'kibana/public';
 
 describe('apiKeysManagementApp', () => {
   it('create() returns proper management app descriptor', () => {
@@ -37,6 +38,7 @@ describe('apiKeysManagementApp', () => {
         basePath: '/some-base-path',
         element: container,
         setBreadcrumbs,
+        history: {} as ScopedHistory,
       });
 
     expect(setBreadcrumbs).toHaveBeenCalledTimes(1);

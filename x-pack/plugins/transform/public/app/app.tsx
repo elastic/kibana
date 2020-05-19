@@ -16,7 +16,7 @@ import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/p
 import { API_BASE_PATH } from '../../common/constants';
 
 import { SectionError } from './components';
-import { CLIENT_BASE_PATH, SECTION_SLUG } from './constants';
+import { SECTION_SLUG } from './constants';
 import { AuthorizationContext, AuthorizationProvider } from './lib/authorization';
 import { AppDependencies } from './app_dependencies';
 

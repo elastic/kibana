@@ -7,6 +7,7 @@
 import React from 'react';
 import { of } from 'rxjs';
 import { ComponentType } from 'enzyme';
+import { ScopedHistory } from 'kibana/public';
 import {
   docLinksServiceMock,
   uiSettingsServiceMock,
@@ -39,6 +40,7 @@ export const mockContextValue = {
   } as any,
   // For our test harness, we don't use this mocked out http service
   http: httpServiceMock.createSetupContract(),
+  history: {} as ScopedHistory,
 };
 
 export const withAppContext = (Component: ComponentType<any>) => (props: any) => {
