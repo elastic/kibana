@@ -18,6 +18,7 @@
  */
 
 import * as Rx from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { parseBundles, parseWorkerConfig, WorkerMsg, isWorkerMsg, WorkerMsgs } from '../common';
 
@@ -81,20 +82,22 @@ Rx.defer(() => {
   process.env.BROWSERSLIST_ENV = workerConfig.browserslistEnv;
 
   return runCompilers(workerConfig, bundles);
-}).subscribe(
-  msg => {
-    send(msg);
-  },
-  error => {
-    if (isWorkerMsg(error)) {
-      send(error);
-    } else {
-      send(workerMsgs.error(error));
-    }
+})
+  .pipe(takeUntil(Rx.fromEvent(process as any, 'disconnect')))
+  .subscribe(
+    msg => {
+      send(msg);
+    },
+    error => {
+      if (isWorkerMsg(error)) {
+        send(error);
+      } else {
+        send(workerMsgs.error(error));
+      }
 
-    exit(1);
-  },
-  () => {
-    exit(0);
-  }
-);
+      exit(1);
+    },
+    () => {
+      exit(0);
+    }
+  );
