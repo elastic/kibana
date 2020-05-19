@@ -13,6 +13,7 @@ import {
   ResolverRelatedEvents,
   ResolverChildren,
   ResolverTree,
+  LegacyEndpointEvent,
 } from '../../../../plugins/endpoint/common/types';
 import { parentEntityId } from '../../../../plugins/endpoint/common/models/event';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -381,7 +382,11 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
             .expect(200);
           expect(body.childNodes.length).to.eql(1);
           expect(body.childNodes[0].lifecycle.length).to.eql(2);
-          expect(body.childNodes[0].lifecycle[0].endgame.unique_pid).to.eql(94042);
+          expect(
+            // for some reason the ts server doesn't think `endgame` exists even though we're using ResolverEvent
+            // here, so to avoid it complaining we'll just force it
+            (body.childNodes[0].lifecycle[0] as LegacyEndpointEvent).endgame.unique_pid
+          ).to.eql(94042);
         });
 
         it('returns multiple levels of child process lifecycle events', async () => {
@@ -394,7 +399,11 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           expect(body.childNodes[0].nextChild).to.be(null);
           expect(body.childNodes.length).to.eql(8);
           expect(body.childNodes[0].lifecycle.length).to.eql(1);
-          expect(body.childNodes[0].lifecycle[0].endgame.unique_pid).to.eql(93932);
+          expect(
+            // for some reason the ts server doesn't think `endgame` exists even though we're using ResolverEvent
+            // here, so to avoid it complaining we'll just force it
+            (body.childNodes[0].lifecycle[0] as LegacyEndpointEvent).endgame.unique_pid
+          ).to.eql(93932);
         });
 
         it('returns no values when there is no more data', async () => {
