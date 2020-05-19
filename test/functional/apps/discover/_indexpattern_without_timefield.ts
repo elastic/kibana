@@ -22,16 +22,14 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
 
   describe('indexpattern without timefield', function() {
     before(async function() {
       await esArchiver.loadIfNeeded('index_pattern_without_timefield');
-    });
-
-    beforeEach(async function() {
+      await kibanaServer.uiSettings.replace({ defaultIndex: 'without-timefield' });
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.selectIndexPattern('without-timefield');
     });
 
     after(async function unloadMakelogs() {
@@ -44,7 +42,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should display a timepicker after switching to an index pattern with timefield', async function() {
-      expect(await PageObjects.timePicker.timePickerExists()).to.be(false);
       await PageObjects.discover.selectIndexPattern('with-timefield');
       expect(await PageObjects.timePicker.timePickerExists()).to.be(true);
     });
