@@ -92,7 +92,6 @@ class FilterItemUI extends Component<Props, State> {
       this.props.className
     );
 
-
     const badge = (
       <FilterView
         filter={filter}
