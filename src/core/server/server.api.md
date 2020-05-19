@@ -2068,6 +2068,8 @@ export interface SavedObjectsImportAmbiguousConflictError {
 // @public
 export interface SavedObjectsImportConflictError {
     // (undocumented)
+    destinationId?: string;
+    // (undocumented)
     type: 'conflict';
 }
 

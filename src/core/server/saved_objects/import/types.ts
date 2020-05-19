@@ -55,6 +55,7 @@ export interface SavedObjectsImportRetry {
  */
 export interface SavedObjectsImportConflictError {
   type: 'conflict';
+  destinationId?: string;
 }
 
 /**
