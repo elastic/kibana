@@ -5,13 +5,11 @@
  */
 
 import { validateUrls } from '../../../../common/validate_urls';
-import { ReportingCore } from '../../../../server';
 import { cryptoFactory } from '../../../../server/lib';
 import {
   ConditionalHeaders,
   CreateJobFactory,
   ESQueueCreateJobFn,
-  Logger,
   RequestFacade,
 } from '../../../../server/types';
 import { JobParamsPDF } from '../../types';
@@ -28,7 +26,7 @@ interface CreateJobFnOpts {
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<
   JobParamsPDF
->> = function createJobFactoryFn(reporting: ReportingCore, logger: Logger) {
+>> = function createJobFactoryFn(reporting, logger) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
   const compatibilityShim = compatibilityShimFactory(reporting, logger);
