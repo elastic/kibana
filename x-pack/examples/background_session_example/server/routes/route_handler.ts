@@ -30,7 +30,9 @@ export async function backgroundSessionRouteHandler(
   request: KibanaRequest<unknown, unknown, DemoBody>,
   response: KibanaResponseFactory
 ) {
-  const storedId = await backgroundSession.getId(request, request.body.sessionId, request.body);
+  const storedId = await backgroundSession.getId(request, request.body.sessionId, {
+    wordCount: request.body.wordCount,
+  });
   let wordsArray: string[] | undefined;
   if (storedId) {
     wordsArray = demoWords.get(storedId);
