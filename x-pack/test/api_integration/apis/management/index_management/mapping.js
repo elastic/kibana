@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { initElasticsearchHelpers } from './lib';
 import { registerHelpers } from './mapping.helpers';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 

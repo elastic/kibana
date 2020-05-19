@@ -20,7 +20,7 @@ export const getTimeRange = async (
 
   const timeRange: TimeRange | null = await browser.evaluate(
     {
-      fn: durationAttribute => {
+      fn: (durationAttribute) => {
         const durationElement = document.querySelector(`[${durationAttribute}]`);
 
         if (!durationElement) {

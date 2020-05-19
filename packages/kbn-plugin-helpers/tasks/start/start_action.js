@@ -21,7 +21,7 @@ const execFileSync = require('child_process').execFileSync;
 const { join } = require('path');
 const split = require('argv-split');
 
-module.exports = function(plugin, run, options) {
+module.exports = function (plugin, run, options) {
   options = options || {};
 
   const cmd = 'node';
@@ -31,7 +31,7 @@ module.exports = function(plugin, run, options) {
   let args = nodeOptions.concat([script, '--dev', '--plugin-path', plugin.root]);
 
   if (Array.isArray(plugin.includePlugins)) {
-    plugin.includePlugins.forEach(path => {
+    plugin.includePlugins.forEach((path) => {
       args = args.concat(['--plugin-path', path]);
     });
   }

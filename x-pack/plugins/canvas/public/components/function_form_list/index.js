@@ -29,7 +29,7 @@ function getArgTypeDef(fn) {
   return modelRegistry.get(fn) || viewRegistry.get(fn) || transformRegistry.get(fn);
 }
 
-const functionFormItems = withProps(props => {
+const functionFormItems = withProps((props) => {
   const selectedElement = props.element;
   const FunctionFormChain = get(selectedElement, 'ast.chain', []);
 
@@ -47,7 +47,7 @@ const functionFormItems = withProps(props => {
           args: argType.arguments,
           argType: argType.function,
           argTypeDef: argTypeDef,
-          argResolver: argAst => interpretAst(argAst, prevContext),
+          argResolver: (argAst) => interpretAst(argAst, prevContext),
           contextExpression: getExpression(prevContext),
           expressionIndex: i, // preserve the index in the AST
           nextArgType: nextArg && nextArg.function,

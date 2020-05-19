@@ -13,11 +13,11 @@ export function postProcess(parsedFiles: any[]): void {
   const schemasDirPath = `${__dirname}${path.sep}..${path.sep}..${path.sep}schemas${path.sep}`;
   const schemaFiles = fs
     .readdirSync(schemasDirPath)
-    .map(filename => path.resolve(schemasDirPath + filename));
+    .map((filename) => path.resolve(schemasDirPath + filename));
 
   const schemaDocs = extractDocumentation(schemaFiles);
 
-  parsedFiles.forEach(parsedFile => {
+  parsedFiles.forEach((parsedFile) => {
     parsedFile.forEach((block: Block) => {
       const {
         local: { schemas },

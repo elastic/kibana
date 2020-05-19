@@ -29,7 +29,7 @@ const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
@@ -70,7 +70,7 @@ export default function({ getService }: FtrProviderContext) {
         pairs(
           logSummaryResponse.data.buckets,
           (first: any, second: any) => first.end === second.start
-        ).every(pair => pair)
+        ).every((pair) => pair)
       ).to.equal(true);
     });
   });

@@ -48,7 +48,7 @@ export const SuperSelectField = ({ field, euiFieldProps = { options: [] }, ...re
       <EuiSuperSelect
         fullWidth
         valueOfSelected={field.value as string}
-        onChange={value => {
+        onChange={(value) => {
           field.setValue(value);
         }}
         isInvalid={isInvalid}

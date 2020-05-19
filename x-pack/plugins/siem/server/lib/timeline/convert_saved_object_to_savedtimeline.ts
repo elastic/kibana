@@ -17,7 +17,7 @@ import {
 export const convertSavedObjectToSavedTimeline = (savedObject: unknown): TimelineSavedObject => {
   const timeline = pipe(
     TimelineSavedObjectRuntimeType.decode(savedObject),
-    map(savedTimeline => {
+    map((savedTimeline) => {
       const attributes = {
         ...savedTimeline.attributes,
         timelineType: savedTimeline.attributes.timelineType ?? TimelineType.default,
@@ -28,7 +28,7 @@ export const convertSavedObjectToSavedTimeline = (savedObject: unknown): Timelin
         ...attributes,
       };
     }),
-    fold(errors => {
+    fold((errors) => {
       throw new Error(failure(errors).join('\n'));
     }, identity)
   );

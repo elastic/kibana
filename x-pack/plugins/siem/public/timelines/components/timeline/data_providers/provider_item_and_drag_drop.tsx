@@ -35,14 +35,14 @@ DropAndTargetDataProvidersContainer.displayName = 'DropAndTargetDataProvidersCon
 const DropAndTargetDataProviders = styled.div<{ hasAndItem: boolean }>`
   min-width: 230px;
   width: auto;
-  border: 0.1rem dashed ${props => props.theme.eui.euiColorSuccess};
+  border: 0.1rem dashed ${(props) => props.theme.eui.euiColorSuccess};
   border-radius: 5px;
   text-align: center;
   padding: 3px 10px;
   display: flex;
   justify-content: center;
   align-items: center;
-  ${props =>
+  ${(props) =>
     props.hasAndItem
       ? `&:hover {
     transition: background-color 0.7s ease;

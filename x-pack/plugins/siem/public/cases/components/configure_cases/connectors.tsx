@@ -56,7 +56,7 @@ const ConnectorsComponent: React.FC<Props> = ({
   handleShowEditFlyout,
 }) => {
   const connectorsName = useMemo(
-    () => connectors.find(c => c.id === selectedConnector)?.name ?? 'none',
+    () => connectors.find((c) => c.id === selectedConnector)?.name ?? 'none',
     [connectors, selectedConnector]
   );
 

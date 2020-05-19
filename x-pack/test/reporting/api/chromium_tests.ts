@@ -8,11 +8,11 @@ import { OSS_DATA_ARCHIVE_PATH, OSS_KIBANA_ARCHIVE_PATH } from './constants';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ loadTestFile, getService }: FtrProviderContext) {
+export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('chromium', function() {
+  describe('chromium', function () {
     this.tags('ciGroup2');
 
     before(async () => {

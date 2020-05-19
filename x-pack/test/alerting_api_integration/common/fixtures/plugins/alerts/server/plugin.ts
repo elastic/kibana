@@ -313,7 +313,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
 
         const runCount = (state.runCount || 0) + 1;
 
-        times(runCount, index => {
+        times(runCount, (index) => {
           services
             .alertInstanceFactory(`instance-${index}`)
             .replaceState({ instanceStateValue: true })

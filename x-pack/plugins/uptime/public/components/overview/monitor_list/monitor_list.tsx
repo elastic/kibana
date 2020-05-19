@@ -175,7 +175,7 @@ export const MonitorListComponent: React.FC<Props> = ({
             iconType={drawerIds.includes(id) ? 'arrowUp' : 'arrowDown'}
             onClick={() => {
               if (drawerIds.includes(id)) {
-                updateDrawerIds(drawerIds.filter(p => p !== id));
+                updateDrawerIds(drawerIds.filter((p) => p !== id));
               } else {
                 updateDrawerIds([...drawerIds, id]);
               }

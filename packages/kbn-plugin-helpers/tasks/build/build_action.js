@@ -24,7 +24,7 @@ const inquirer = require('inquirer');
 const createBuild = require('./create_build');
 const createPackage = require('./create_package');
 
-module.exports = function(plugin, run, options) {
+module.exports = function (plugin, run, options) {
   options = options || {};
   let buildVersion = plugin.version;
   let kibanaVersion = (plugin.pkg.kibana && plugin.pkg.kibana.version) || plugin.pkg.version;
@@ -43,14 +43,14 @@ module.exports = function(plugin, run, options) {
 
   let buildStep;
   if (kibanaVersion === 'kibana') {
-    buildStep = askForKibanaVersion().then(function(customKibanaVersion) {
+    buildStep = askForKibanaVersion().then(function (customKibanaVersion) {
       return createBuild(plugin, buildTarget, buildVersion, customKibanaVersion, buildFiles);
     });
   } else {
     buildStep = createBuild(plugin, buildTarget, buildVersion, kibanaVersion, buildFiles);
   }
 
-  return buildStep.then(function() {
+  return buildStep.then(function () {
     if (options.skipArchive) return;
     return createPackage(plugin, buildTarget, buildVersion);
   });
@@ -65,7 +65,7 @@ function askForKibanaVersion() {
         message: 'What version of Kibana are you building for?',
       },
     ])
-    .then(function(answers) {
+    .then(function (answers) {
       return answers.kibanaVersion;
     });
 }

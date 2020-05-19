@@ -91,7 +91,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
       };
       return [future.promise, entry];
     },
-    onBatch: async items => {
+    onBatch: async (items) => {
       try {
         let responsesReceived = 0;
         const batch = items.map(({ payload }) => payload);
@@ -111,7 +111,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
               items[response.id].future.resolve(response.result);
             }
           },
-          error: error => {
+          error: (error) => {
             const normalizedError = normalizeError<BatchedFunctionProtocolError>(error);
             normalizedError.code = 'STREAM';
             for (const { future } of items) future.reject(normalizedError);

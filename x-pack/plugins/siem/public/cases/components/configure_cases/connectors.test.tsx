@@ -34,30 +34,17 @@ describe('Connectors', () => {
   });
 
   test('it shows the connectors from group', () => {
-    expect(
-      wrapper
-        .find('[data-test-subj="case-connectors-form-group"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="case-connectors-form-group"]').first().exists()).toBe(
+      true
+    );
   });
 
   test('it shows the connectors form row', () => {
-    expect(
-      wrapper
-        .find('[data-test-subj="case-connectors-form-row"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="case-connectors-form-row"]').first().exists()).toBe(true);
   });
 
   test('it shows the connectors dropdown', () => {
-    expect(
-      wrapper
-        .find('[data-test-subj="case-connectors-dropdown"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="case-connectors-dropdown"]').first().exists()).toBe(true);
   });
 
   test('it pass the correct props to child', () => {

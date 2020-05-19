@@ -20,18 +20,8 @@ describe('CaseCallOut ', () => {
       message: 'we have one message',
     };
     const wrapper = mount(<CaseCallOut {...props} />);
-    expect(
-      wrapper
-        .find(`[data-test-subj="callout-message"]`)
-        .last()
-        .exists()
-    ).toBeTruthy();
-    expect(
-      wrapper
-        .find(`[data-test-subj="callout-messages"]`)
-        .last()
-        .exists()
-    ).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="callout-message"]`).last().exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="callout-messages"]`).last().exists()).toBeFalsy();
   });
   it('Renders multi message callout', () => {
     const props = {
@@ -42,18 +32,8 @@ describe('CaseCallOut ', () => {
       ],
     };
     const wrapper = mount(<CaseCallOut {...props} />);
-    expect(
-      wrapper
-        .find(`[data-test-subj="callout-message"]`)
-        .last()
-        .exists()
-    ).toBeFalsy();
-    expect(
-      wrapper
-        .find(`[data-test-subj="callout-messages"]`)
-        .last()
-        .exists()
-    ).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="callout-message"]`).last().exists()).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="callout-messages"]`).last().exists()).toBeTruthy();
   });
   it('Dismisses callout', () => {
     const props = {
@@ -62,10 +42,7 @@ describe('CaseCallOut ', () => {
     };
     const wrapper = mount(<CaseCallOut {...props} />);
     expect(wrapper.find(`[data-test-subj="case-call-out"]`).exists()).toBeTruthy();
-    wrapper
-      .find(`[data-test-subj="callout-dismiss"]`)
-      .last()
-      .simulate('click');
+    wrapper.find(`[data-test-subj="callout-dismiss"]`).last().simulate('click');
     expect(wrapper.find(`[data-test-subj="case-call-out"]`).exists()).toBeFalsy();
   });
 });

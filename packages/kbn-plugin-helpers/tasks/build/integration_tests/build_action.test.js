@@ -91,7 +91,7 @@ describe('calling create_build', () => {
     expect(mockBuild.mock.calls).toHaveLength(1);
 
     const { files } = nameArgs(mockBuild.mock.calls[0]);
-    PLUGIN.buildSourcePatterns.forEach(file => expect(files).toContain(file));
+    PLUGIN.buildSourcePatterns.forEach((file) => expect(files).toContain(file));
   });
 
   it('uses only files passed in', async () => {
@@ -104,7 +104,7 @@ describe('calling create_build', () => {
     expect(mockBuild.mock.calls).toHaveLength(1);
 
     const { files } = nameArgs(mockBuild.mock.calls[0]);
-    options.files.forEach(file => expect(files).toContain(file));
+    options.files.forEach((file) => expect(files).toContain(file));
   });
 
   it('rejects returned promise when build fails', async () => {

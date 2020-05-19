@@ -20,7 +20,7 @@
 const execFileSync = require('child_process').execFileSync;
 const globby = require('globby');
 
-module.exports = function(plugin, run, options) {
+module.exports = function (plugin, run, options) {
   options = options || {};
   let testPatterns = plugin.serverTestPatterns;
 

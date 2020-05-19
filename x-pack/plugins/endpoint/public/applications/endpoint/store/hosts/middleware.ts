@@ -9,8 +9,8 @@ import { isOnHostPage, hasSelectedHost, uiQueryParams, listData } from './select
 import { HostState } from '../../types';
 import { ImmutableMiddlewareFactory } from '../../types';
 
-export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = coreStart => {
-  return ({ getState, dispatch }) => next => async action => {
+export const hostMiddlewareFactory: ImmutableMiddlewareFactory<HostState> = (coreStart) => {
+  return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
     const state = getState();
     if (

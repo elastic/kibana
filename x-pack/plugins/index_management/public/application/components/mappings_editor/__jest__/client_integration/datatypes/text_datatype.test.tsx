@@ -369,7 +369,7 @@ describe('Mappings editor: text datatype', () => {
     const subSelectOptions = indexAnalyzerSelects
       .at(1)
       .find('option')
-      .map(wrapper => wrapper.text());
+      .map((wrapper) => wrapper.text());
 
     expect(subSelectOptions).toEqual(customAnalyzers);
 

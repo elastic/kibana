@@ -154,7 +154,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
   const [firstTable] = Object.values(props.data.tables);
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
-  firstTable.columns.forEach(column => {
+  firstTable.columns.forEach((column) => {
     formatters[column.id] = props.formatFactory(column.formatHint);
   });
 
@@ -162,7 +162,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
     const col = firstTable.columns[colIndex];
     const isDateHistogram = col.meta?.type === 'date_histogram';
     const timeFieldName = negate && isDateHistogram ? undefined : col?.meta?.aggConfigParams?.field;
-    const rowIndex = firstTable.rows.findIndex(row => row[field] === value);
+    const rowIndex = firstTable.rows.findIndex((row) => row[field] === value);
 
     const data: LensFilterEvent['data'] = {
       negate,
@@ -186,9 +186,9 @@ export function DatatableComponent(props: DatatableRenderProps) {
         data-test-subj="lnsDataTable"
         tableLayout="auto"
         columns={props.args.columns.columnIds
-          .map(field => {
-            const col = firstTable.columns.find(c => c.id === field);
-            const colIndex = firstTable.columns.findIndex(c => c.id === field);
+          .map((field) => {
+            const col = firstTable.columns.find((c) => c.id === field);
+            const colIndex = firstTable.columns.findIndex((c) => c.id === field);
 
             const filterable = col?.meta?.type && props.getType(col.meta.type)?.type === 'buckets';
             return {

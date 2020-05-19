@@ -115,9 +115,9 @@ export class ChromeService {
       // in the sense that the chrome UI should not be displayed until a non-chromeless app is mounting or mounted
       of(true),
       application.currentAppId$.pipe(
-        flatMap(appId =>
+        flatMap((appId) =>
           application.applications$.pipe(
-            map(applications => {
+            map((applications) => {
               return !!appId && applications.has(appId) && !!applications.get(appId)!.chromeless;
             })
           )
@@ -226,7 +226,7 @@ export class ChromeService {
 
       getApplicationClasses$: () =>
         applicationClasses$.pipe(
-          map(set => [...set]),
+          map((set) => [...set]),
           takeUntil(this.stop$)
         ),
 

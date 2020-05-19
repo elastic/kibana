@@ -19,10 +19,12 @@ import {
 import { NewPolicyData, PolicyData } from '../../../../../common/types';
 import { factory as policyConfigFactory } from '../../../../../common/models/policy_config';
 
-export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDetailsState> = coreStart => {
+export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDetailsState> = (
+  coreStart
+) => {
   const http = coreStart.http;
 
-  return ({ getState, dispatch }) => next => async action => {
+  return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
     const state = getState();
 

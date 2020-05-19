@@ -10,7 +10,7 @@ import { OverviewPageComponent } from '../../pages/overview';
 import { selectIndexPattern } from '../../state/selectors';
 import { setEsKueryString } from '../../state/actions';
 
-export const OverviewPage: React.FC = props => {
+export const OverviewPage: React.FC = (props) => {
   const dispatch = useDispatch();
   const setEsKueryFilters = useCallback(
     (esFilters: string) => dispatch(setEsKueryString(esFilters)),

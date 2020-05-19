@@ -55,7 +55,7 @@ async function getPagingProperties(
     for (const property of request.body.paging_properties) {
       Object.assign(
         pagingProperties,
-        ...Object.keys(property).map(key => ({ [key]: property[key] }))
+        ...Object.keys(property).map((key) => ({ [key]: property[key] }))
       );
     }
   }

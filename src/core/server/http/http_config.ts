@@ -103,7 +103,7 @@ export const config = {
       }),
     },
     {
-      validate: rawConfig => {
+      validate: (rawConfig) => {
         if (!rawConfig.basePath && rawConfig.rewriteBasePath) {
           return 'cannot use [rewriteBasePath] when [basePath] is not specified';
         }

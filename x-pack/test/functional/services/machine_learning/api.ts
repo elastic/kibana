@@ -259,10 +259,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async createCalendar(calendarId: string, body = { description: '', job_ids: [] }) {
       log.debug(`Creating calendar with id '${calendarId}'...`);
-      await esSupertest
-        .put(`/_ml/calendars/${calendarId}`)
-        .send(body)
-        .expect(200);
+      await esSupertest.put(`/_ml/calendars/${calendarId}`).send(body).expect(200);
 
       await retry.waitForWithTimeout(`'${calendarId}' to be created`, 30 * 1000, async () => {
         if (await this.getCalendar(calendarId)) {
@@ -290,10 +287,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async createAnomalyDetectionJob(jobConfig: Job) {
       const jobId = jobConfig.job_id;
       log.debug(`Creating anomaly detection job with id '${jobId}'...`);
-      await esSupertest
-        .put(`/_ml/anomaly_detectors/${jobId}`)
-        .send(jobConfig)
-        .expect(200);
+      await esSupertest.put(`/_ml/anomaly_detectors/${jobId}`).send(jobConfig).expect(200);
 
       await this.waitForAnomalyDetectionJobToExist(jobId);
     },
@@ -315,10 +309,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async createDatafeed(datafeedConfig: Datafeed) {
       const datafeedId = datafeedConfig.datafeed_id;
       log.debug(`Creating datafeed with id '${datafeedId}'...`);
-      await esSupertest
-        .put(`/_ml/datafeeds/${datafeedId}`)
-        .send(datafeedConfig)
-        .expect(200);
+      await esSupertest.put(`/_ml/datafeeds/${datafeedId}`).send(datafeedConfig).expect(200);
 
       await this.waitForDatafeedToExist(datafeedId);
     },

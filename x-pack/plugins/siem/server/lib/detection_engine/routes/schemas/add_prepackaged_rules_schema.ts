@@ -67,10 +67,7 @@ export const addPrepackagedRulesSchema = Joi.object({
   filters,
   from: from.default('now-6m'),
   rule_id: rule_id.required(),
-  immutable: immutable
-    .forbidden()
-    .default(true)
-    .valid(true),
+  immutable: immutable.forbidden().default(true).valid(true),
   index: index.when('type', {
     is: 'machine_learning',
     then: Joi.forbidden(),

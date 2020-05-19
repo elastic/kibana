@@ -51,7 +51,7 @@ describe('DraggableWrapperHoverContent', () => {
    */
   const forOrOut = ['for', 'out'];
 
-  forOrOut.forEach(hoverAction => {
+  forOrOut.forEach((hoverAction) => {
     describe(`Filter ${hoverAction} value`, () => {
       test(`it renders the 'Filter ${hoverAction} value' button when showTopN is false`, () => {
         const wrapper = mount(
@@ -66,10 +66,7 @@ describe('DraggableWrapperHoverContent', () => {
         );
 
         expect(
-          wrapper
-            .find(`[data-test-subj="filter-${hoverAction}-value"]`)
-            .first()
-            .exists()
+          wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().exists()
         ).toBe(true);
       });
 
@@ -86,10 +83,7 @@ describe('DraggableWrapperHoverContent', () => {
         );
 
         expect(
-          wrapper
-            .find(`[data-test-subj="filter-${hoverAction}-value"]`)
-            .first()
-            .exists()
+          wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().exists()
         ).toBe(false);
       });
 
@@ -119,10 +113,7 @@ describe('DraggableWrapperHoverContent', () => {
         });
 
         test('when clicked, it adds a filter to the timeline when running in the context of a timeline', () => {
-          wrapper
-            .find(`[data-test-subj="filter-${hoverAction}-value"]`)
-            .first()
-            .simulate('click');
+          wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().simulate('click');
           wrapper.update();
 
           expect(filterManager.addFilters).toBeCalledWith({
@@ -140,10 +131,7 @@ describe('DraggableWrapperHoverContent', () => {
         });
 
         test('when clicked, invokes onFilterAdded when running in the context of a timeline', () => {
-          wrapper
-            .find(`[data-test-subj="filter-${hoverAction}-value"]`)
-            .first()
-            .simulate('click');
+          wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().simulate('click');
           wrapper.update();
 
           expect(onFilterAdded).toBeCalled();
@@ -173,10 +161,7 @@ describe('DraggableWrapperHoverContent', () => {
         });
 
         test('when clicked, it adds a filter to the global filters when NOT running in the context of a timeline', () => {
-          wrapper
-            .find(`[data-test-subj="filter-${hoverAction}-value"]`)
-            .first()
-            .simulate('click');
+          wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().simulate('click');
           wrapper.update();
 
           expect(kibana.services.data.query.filterManager.addFilters).toBeCalledWith({
@@ -194,10 +179,7 @@ describe('DraggableWrapperHoverContent', () => {
         });
 
         test('when clicked, invokes onFilterAdded when NOT running in the context of a timeline', () => {
-          wrapper
-            .find(`[data-test-subj="filter-${hoverAction}-value"]`)
-            .first()
-            .simulate('click');
+          wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().simulate('click');
           wrapper.update();
 
           expect(onFilterAdded).toBeCalled();
@@ -257,10 +239,7 @@ describe('DraggableWrapperHoverContent', () => {
                   },
                 };
 
-          wrapper
-            .find(`[data-test-subj="filter-${hoverAction}-value"]`)
-            .first()
-            .simulate('click');
+          wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().simulate('click');
           wrapper.update();
 
           expect(filterManager.addFilters).toBeCalledWith(expected);
@@ -317,10 +296,7 @@ describe('DraggableWrapperHoverContent', () => {
                   },
                 };
 
-          wrapper
-            .find(`[data-test-subj="filter-${hoverAction}-value"]`)
-            .first()
-            .simulate('click');
+          wrapper.find(`[data-test-subj="filter-${hoverAction}-value"]`).first().simulate('click');
           wrapper.update();
 
           expect(kibana.services.data.query.filterManager.addFilters).toBeCalledWith(expected);
@@ -348,12 +324,7 @@ describe('DraggableWrapperHoverContent', () => {
       await wait(); // https://github.com/apollographql/react-apollo/issues/1711
       wrapper.update();
 
-      expect(
-        wrapper
-          .find('[data-test-subj="show-top-field"]')
-          .first()
-          .exists()
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="show-top-field"]').first().exists()).toBe(true);
     });
 
     test(`it renders the 'Show top field' button when showTopN is false and a whitelisted signal field is provided`, async () => {
@@ -374,12 +345,7 @@ describe('DraggableWrapperHoverContent', () => {
       await wait();
       wrapper.update();
 
-      expect(
-        wrapper
-          .find('[data-test-subj="show-top-field"]')
-          .first()
-          .exists()
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="show-top-field"]').first().exists()).toBe(true);
     });
 
     test(`it does NOT render the 'Show top field' button when showTopN is false and a field not known to BrowserFields is provided`, async () => {
@@ -400,12 +366,7 @@ describe('DraggableWrapperHoverContent', () => {
       await wait();
       wrapper.update();
 
-      expect(
-        wrapper
-          .find('[data-test-subj="show-top-field"]')
-          .first()
-          .exists()
-      ).toBe(false);
+      expect(wrapper.find('[data-test-subj="show-top-field"]').first().exists()).toBe(false);
     });
 
     test(`invokes the toggleTopN function when the 'Show top field' button is clicked`, async () => {
@@ -427,10 +388,7 @@ describe('DraggableWrapperHoverContent', () => {
       await wait();
       wrapper.update();
 
-      wrapper
-        .find('[data-test-subj="show-top-field"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="show-top-field"]').first().simulate('click');
       wrapper.update();
 
       expect(toggleTopN).toBeCalled();
@@ -454,12 +412,9 @@ describe('DraggableWrapperHoverContent', () => {
       await wait();
       wrapper.update();
 
-      expect(
-        wrapper
-          .find('[data-test-subj="eventsByDatasetOverviewPanel"]')
-          .first()
-          .exists()
-      ).toBe(false);
+      expect(wrapper.find('[data-test-subj="eventsByDatasetOverviewPanel"]').first().exists()).toBe(
+        false
+      );
     });
 
     test(`it does NOT render the 'Show top field' button when showTopN is true`, async () => {
@@ -480,12 +435,7 @@ describe('DraggableWrapperHoverContent', () => {
       await wait();
       wrapper.update();
 
-      expect(
-        wrapper
-          .find('[data-test-subj="show-top-field"]')
-          .first()
-          .exists()
-      ).toBe(false);
+      expect(wrapper.find('[data-test-subj="show-top-field"]').first().exists()).toBe(false);
     });
 
     test(`it renders the Top N histogram when when showTopN is true`, async () => {
@@ -507,10 +457,7 @@ describe('DraggableWrapperHoverContent', () => {
       wrapper.update();
 
       expect(
-        wrapper
-          .find('[data-test-subj="eventsByDatasetOverview-uuid.v4()Panel"]')
-          .first()
-          .exists()
+        wrapper.find('[data-test-subj="eventsByDatasetOverview-uuid.v4()Panel"]').first().exists()
       ).toBe(true);
     });
   });
@@ -528,12 +475,7 @@ describe('DraggableWrapperHoverContent', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find(`[data-test-subj="copy-to-clipboard"]`)
-          .first()
-          .exists()
-      ).toBe(true);
+      expect(wrapper.find(`[data-test-subj="copy-to-clipboard"]`).first().exists()).toBe(true);
     });
 
     test(`it does NOT render the 'Copy to Clipboard' button when showTopN is true`, () => {
@@ -548,12 +490,7 @@ describe('DraggableWrapperHoverContent', () => {
         </TestProviders>
       );
 
-      expect(
-        wrapper
-          .find(`[data-test-subj="copy-to-clipboard"]`)
-          .first()
-          .exists()
-      ).toBe(false);
+      expect(wrapper.find(`[data-test-subj="copy-to-clipboard"]`).first().exists()).toBe(false);
     });
   });
 });

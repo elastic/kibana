@@ -70,10 +70,7 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
   const selectDetailsTab = (tab: 'summary' | 'settings' | 'mappings' | 'aliases') => {
     const tabs = ['summary', 'settings', 'mappings', 'aliases'];
 
-    testBed
-      .find('templateDetails.tab')
-      .at(tabs.indexOf(tab))
-      .simulate('click');
+    testBed.find('templateDetails.tab').at(tabs.indexOf(tab)).simulate('click');
   };
 
   const clickReloadButton = () => {
@@ -98,10 +95,7 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
 
     clickActionMenu(templateName);
 
-    component
-      .find('.euiContextMenuItem')
-      .at(actions.indexOf(action))
-      .simulate('click');
+    component.find('.euiContextMenuItem').at(actions.indexOf(action)).simulate('click');
   };
 
   const clickTemplateAt = async (index: number) => {

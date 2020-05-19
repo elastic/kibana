@@ -18,15 +18,15 @@ export type FlyoutSubHeaderProps = CommonProps & {
 };
 
 const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
-  padding: ${props => props.theme.eui.paddingSizes.s};
+  padding: ${(props) => props.theme.eui.paddingSizes.s};
 
   &.hasButtons {
     .buttons {
-      padding-bottom: ${props => props.theme.eui.paddingSizes.s};
+      padding-bottom: ${(props) => props.theme.eui.paddingSizes.s};
     }
 
     .flyoutSubHeaderBackButton {
-      font-size: ${props => props.theme.eui.euiFontSizeXS};
+      font-size: ${(props) => props.theme.eui.euiFontSizeXS};
     }
     .back-button-content {
       padding-left: 0;
@@ -37,7 +37,7 @@ const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   }
 
   .flyout-content {
-    padding-left: ${props => props.theme.eui.paddingSizes.m};
+    padding-left: ${(props) => props.theme.eui.paddingSizes.m};
   }
 `;
 

@@ -62,7 +62,7 @@ const installPreBuiltTemplates = async (
   //     body: content,
   //   });
   // });
-  templatePaths.forEach(async path => {
+  templatePaths.forEach(async (path) => {
     const { file } = Registry.pathParts(path);
     const templateName = file.substr(0, file.lastIndexOf('.'));
     const content = JSON.parse(Registry.getAsset(path).toString('utf8'));
@@ -105,7 +105,7 @@ const installPreBuiltComponentTemplates = async (
     pkgVersion,
     (entry: Registry.ArchiveEntry) => isComponentTemplate(entry)
   );
-  templatePaths.forEach(async path => {
+  templatePaths.forEach(async (path) => {
     const { file } = Registry.pathParts(path);
     const templateName = file.substr(0, file.lastIndexOf('.'));
     const content = JSON.parse(Registry.getAsset(path).toString('utf8'));

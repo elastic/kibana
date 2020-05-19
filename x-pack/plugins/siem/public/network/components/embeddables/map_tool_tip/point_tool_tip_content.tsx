@@ -45,7 +45,7 @@ export const PointToolTipContentComponent = ({
               rowItems={Array.isArray(value) ? value : [value]}
               attrName={key}
               idPrefix={`map-point-tooltip-${contextId}-${key}-${value}`}
-              render={item => getRenderedFieldValue(key, item)}
+              render={(item) => getRenderedFieldValue(key, item)}
             />
           ) : (
             getEmptyTagValue()

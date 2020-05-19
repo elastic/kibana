@@ -18,7 +18,7 @@ import { getTracker } from './tracker';
 import { pdf } from './pdf';
 
 const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
-  const grouped = groupBy(urlScreenshots.map(u => u.timeRange));
+  const grouped = groupBy(urlScreenshots.map((u) => u.timeRange));
   const values = Object.values(grouped);
   if (values.length === 1) {
     return values[0][0];
@@ -67,8 +67,8 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
         }
         tracker.endSetup();
 
-        results.forEach(r => {
-          r.screenshots.forEach(screenshot => {
+        results.forEach((r) => {
+          r.screenshots.forEach((screenshot) => {
             logger.debug(`Adding image to PDF. Image base64 size: ${screenshot.base64EncodedData?.length || 0}`); // prettier-ignore
             tracker.startAddImage();
             tracker.endAddImage();

@@ -12,7 +12,7 @@ import React, {
   useContext,
   useEffect,
   useRef,
-  useState
+  useState,
 } from 'react';
 import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { CytoscapeContext } from '../Cytoscape';
@@ -43,7 +43,7 @@ export function Popover({ focusedServiceName }: PopoverProps) {
     background: 'transparent',
     height: renderedHeight,
     position: 'absolute',
-    width: renderedWidth
+    width: renderedWidth,
   };
   const trigger = <div style={triggerStyle} />;
   const zoom = cy?.zoom() ?? 1;
@@ -51,7 +51,7 @@ export function Popover({ focusedServiceName }: PopoverProps) {
   const translateY = y - ((zoom + 1) * height) / 4;
   const popoverStyle: CSSProperties = {
     position: 'absolute',
-    transform: `translate(${x}px, ${translateY}px)`
+    transform: `translate(${x}px, ${translateY}px)`,
   };
   const selectedNodeData = selectedNode?.data() ?? {};
   const selectedNodeServiceName = selectedNodeData.id;
@@ -60,7 +60,7 @@ export function Popover({ focusedServiceName }: PopoverProps) {
 
   // Set up Cytoscape event handlers
   useEffect(() => {
-    const selectHandler: cytoscape.EventHandler = event => {
+    const selectHandler: cytoscape.EventHandler = (event) => {
       setSelectedNode(event.target);
     };
 
@@ -91,7 +91,7 @@ export function Popover({ focusedServiceName }: PopoverProps) {
     if (cy) {
       cy.animate({
         ...animationOptions,
-        center: { eles: cy.getElementById(selectedNodeServiceName) }
+        center: { eles: cy.getElementById(selectedNodeServiceName) },
       });
     }
   }, [cy, selectedNodeServiceName]);

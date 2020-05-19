@@ -31,7 +31,7 @@ export const alertMiddlewareFactory: ImmutableMiddlewareFactory<AlertListState> 
     return [indexPattern];
   }
 
-  return api => next => async action => {
+  return (api) => (next) => async (action) => {
     next(action);
     const state = api.getState();
     if (action.type === 'userChangedUrl' && isOnAlertPage(state)) {

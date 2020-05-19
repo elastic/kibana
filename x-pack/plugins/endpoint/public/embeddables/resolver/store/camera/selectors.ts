@@ -63,8 +63,8 @@ function animationIsActive(animation: CameraAnimationState, time: number): boole
  *
  */
 export const scale: (state: CameraState) => (time: number) => Vector2 = createSelector(
-  state => state.scalingFactor,
-  state => state.animation,
+  (state) => state.scalingFactor,
+  (state) => state.animation,
   (scalingFactor, animation) => {
     const scaleNotCountingAnimation = scaleFromScalingFactor(scalingFactor);
     /**
@@ -164,7 +164,7 @@ export const scale: (state: CameraState) => (time: number) => Vector2 = createSe
         scalingConstants.maximum
       );
 
-      return time => {
+      return (time) => {
         /**
          * If the animation has completed, return the `scaleNotCountingAnimation`, as
          * the animation always completes with the scale set back at starting value.
@@ -275,7 +275,7 @@ export const scale: (state: CameraState) => (time: number) => Vector2 = createSe
 export const clippingPlanes: (
   state: CameraState
 ) => (time: number) => ClippingPlanes = createSelector(
-  state => state.rasterSize,
+  (state) => state.rasterSize,
   scale,
   (rasterSize, scaleAtTime) => (time: number) => {
     const [scaleX, scaleY] = scaleAtTime(time);
@@ -299,8 +299,8 @@ export const clippingPlanes: (
  * Whether or not the camera is animating, at a given time.
  */
 export const isAnimating: (state: CameraState) => (time: number) => boolean = createSelector(
-  state => state.animation,
-  animation => time => {
+  (state) => state.animation,
+  (animation) => (time) => {
     return animation !== undefined && animationIsActive(animation, time);
   }
 );
@@ -318,10 +318,10 @@ export const isAnimating: (state: CameraState) => (time: number) => boolean = cr
  * We could update the translation as the user moved the mouse but floating point drift (round-off error) could occur.
  */
 export const translation: (state: CameraState) => (time: number) => Vector2 = createSelector(
-  state => state.panning,
-  state => state.translationNotCountingCurrentPanning,
+  (state) => state.panning,
+  (state) => state.translationNotCountingCurrentPanning,
   scale,
-  state => state.animation,
+  (state) => state.animation,
   (panning, translationNotCountingCurrentPanning, scaleAtTime, animation) => {
     return (time: number) => {
       const [scaleX, scaleY] = scaleAtTime(time);

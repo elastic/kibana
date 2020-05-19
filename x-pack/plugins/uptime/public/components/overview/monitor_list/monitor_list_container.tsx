@@ -16,7 +16,7 @@ export interface MonitorListProps {
   linkParameters?: string;
 }
 
-export const MonitorList: React.FC<MonitorListProps> = props => {
+export const MonitorList: React.FC<MonitorListProps> = (props) => {
   const dispatch = useDispatch();
 
   const dispatchCallback = useCallback(

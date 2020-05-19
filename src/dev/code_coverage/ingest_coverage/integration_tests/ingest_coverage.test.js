@@ -40,9 +40,9 @@ const env = {
   NODE_ENV: 'integration_test',
   COVERAGE_INGESTION_KIBANA_ROOT: '/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana',
 };
-const includesSiteUrlPredicate = x => x.includes(STATIC_SITE_URL_PROP_NAME);
+const includesSiteUrlPredicate = (x) => x.includes(STATIC_SITE_URL_PROP_NAME);
 const siteUrlLines = specificLinesOnly(includesSiteUrlPredicate);
-const splitByNewLine = x => x.split('\n');
+const splitByNewLine = (x) => x.split('\n');
 const siteUrlsSplitByNewLine = siteUrlLines(splitByNewLine);
 const siteUrlsSplitByNewLineWithoutBlanks = siteUrlsSplitByNewLine(notBlankLines);
 
@@ -63,7 +63,7 @@ describe('Ingesting Coverage to Cluster', () => {
       describe(`to the [${COVERAGE_INDEX}] index`, () => {
         const mutableCoverageIndexChunks = [];
 
-        beforeAll(done => {
+        beforeAll((done) => {
           const ingestAndMutateAsync = ingestAndMutate(done);
           const ingestAndMutateAsyncWithPath = ingestAndMutateAsync(noTotalsPath);
           const verboseIngestAndMutateAsyncWithPath = ingestAndMutateAsyncWithPath(verboseArgs);
@@ -85,7 +85,7 @@ describe('Ingesting Coverage to Cluster', () => {
       describe(`to both indexes in the same push`, () => {
         const mutableBothIndexesChunks = [];
 
-        beforeAll(done => {
+        beforeAll((done) => {
           const ingestAndMutateAsync = ingestAndMutate(done);
           const ingestAndMutateAsyncWithPath = ingestAndMutateAsync(bothIndexesPath);
           const verboseIngestAndMutateAsyncWithPath = ingestAndMutateAsyncWithPath(verboseArgs);
@@ -102,15 +102,15 @@ describe('Ingesting Coverage to Cluster', () => {
         );
 
         it('should result in the "just logging" message being present in the log', () => {
-          expect(mutableBothIndexesChunks.some(x => x.includes('Just Logging'))).to.be(true);
+          expect(mutableBothIndexesChunks.some((x) => x.includes('Just Logging'))).to.be(true);
         });
         it('should result in the "actually sending" message NOT being present in the log', () => {
-          expect(mutableBothIndexesChunks.every(x => !x.includes('Actually sending...'))).to.be(
+          expect(mutableBothIndexesChunks.every((x) => !x.includes('Actually sending...'))).to.be(
             true
           );
         });
         describe(`with provided vcs info file`, () => {
-          const filterZero = xs => included => xs.filter(x => x.includes(included))[0];
+          const filterZero = (xs) => (included) => xs.filter((x) => x.includes(included))[0];
           const filteredWith = filterZero(mutableBothIndexesChunks);
           it('should have a vcs block', () => {
             const vcs = 'vcs';
@@ -148,19 +148,19 @@ describe('Ingesting Coverage to Cluster', () => {
 });
 
 function ingestAndMutate(done) {
-  return summaryPathSuffix => args => xs => {
+  return (summaryPathSuffix) => (args) => (xs) => {
     const coverageSummaryPath = resolve(MOCKS_DIR, summaryPathSuffix);
     const opts = [...args, coverageSummaryPath];
     const ingest = spawn(process.execPath, opts, { cwd: ROOT_DIR, env });
 
-    ingest.stdout.on('data', x => xs.push(x + ''));
+    ingest.stdout.on('data', (x) => xs.push(x + ''));
     ingest.on('close', done);
   };
 }
 
 function specificLinesOnly(predicate) {
-  return splitByNewLine => notBlankLines => xs =>
-    xs.filter(predicate).map(x => splitByNewLine(x).reduce(notBlankLines));
+  return (splitByNewLine) => (notBlankLines) => (xs) =>
+    xs.filter(predicate).map((x) => splitByNewLine(x).reduce(notBlankLines));
 }
 
 function notBlankLines(acc, item) {
@@ -169,8 +169,8 @@ function notBlankLines(acc, item) {
 }
 
 function expectAllRegexesToPass(staticSiteUrlRegexes) {
-  return urlLine =>
-    Object.entries(staticSiteUrlRegexes).forEach(regexTuple => {
+  return (urlLine) =>
+    Object.entries(staticSiteUrlRegexes).forEach((regexTuple) => {
       if (!regexTuple[1].test(urlLine))
         throw new Error(
           `\n### ${green('FAILED')}\nAsserting: [\n\t${green(

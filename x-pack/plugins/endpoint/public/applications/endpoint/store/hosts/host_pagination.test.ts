@@ -41,7 +41,7 @@ describe('host list pagination: ', () => {
     ({ actionSpyMiddleware, waitForAction } = createSpyMiddleware<HostState>());
     store = createStore(hostListReducer, applyMiddleware(middleware, actionSpyMiddleware));
 
-    history.listen(location => {
+    history.listen((location) => {
       store.dispatch({ type: 'userChangedUrl', payload: location });
     });
 

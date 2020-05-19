@@ -31,7 +31,7 @@ describe('ML - Endpoints', () => {
       factory(obj: ClientAction) {
         // add each endpoint URL to a list
         if (obj.urls) {
-          obj.urls.forEach(url => {
+          obj.urls.forEach((url) => {
             urls.push(url.fmt);
           });
         }
@@ -52,7 +52,7 @@ describe('ML - Endpoints', () => {
 
   describe('paths', () => {
     it(`should start with ${PATH_START}`, () => {
-      urls.forEach(url => {
+      urls.forEach((url) => {
         expect(url[0]).toEqual(PATH_START);
       });
     });

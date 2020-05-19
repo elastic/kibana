@@ -109,7 +109,7 @@ export class Tree {
   }
 
   public addEvent(...events: ResolverEvent[]): void {
-    events.forEach(event => {
+    events.forEach((event) => {
       const id = entityId(event);
 
       this.ensureCache(id);
@@ -121,7 +121,7 @@ export class Tree {
   }
 
   public addAncestor(id: string, ...events: ResolverEvent[]): void {
-    events.forEach(event => {
+    events.forEach((event) => {
       const ancestorID = entityId(event);
       if (this.cache.get(ancestorID) === undefined) {
         const newParent = createNode(ancestorID);
@@ -159,7 +159,7 @@ export class Tree {
   }
 
   public addChild(...events: ResolverEvent[]): void {
-    events.forEach(event => {
+    events.forEach((event) => {
       const id = entityId(event);
       const parentID = parentEntityId(event);
 
@@ -181,7 +181,7 @@ export class Tree {
   }
 
   public markLeafNode(...ids: string[]): void {
-    ids.forEach(id => {
+    ids.forEach((id) => {
       this.ensureCache(id);
       const currentNode = this.cache.get(id);
       if (currentNode !== undefined && !currentNode.pagination.nextChild) {

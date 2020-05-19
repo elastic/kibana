@@ -100,8 +100,8 @@ module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaV
   const buildRoot = path.join(buildTarget, 'kibana', plugin.id);
 
   return del(buildTarget)
-    .then(function() {
-      return new Promise(function(resolve, reject) {
+    .then(function () {
+      return new Promise(function (resolve, reject) {
         vfs
           .src(files, {
             cwd: buildSource,
@@ -124,7 +124,7 @@ module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaV
           .on('error', reject);
       });
     })
-    .then(function() {
+    .then(function () {
       if (plugin.skipInstallDependencies) {
         return;
       }
@@ -134,7 +134,7 @@ module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaV
         cwd: buildRoot,
       });
     })
-    .then(function() {
+    .then(function () {
       if (!plugin.styleSheetToCompile) {
         return;
       }
@@ -152,7 +152,7 @@ module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaV
 
       del.sync([path.join(buildRoot, '**', '*.s{a,c}ss')]);
     })
-    .then(async function() {
+    .then(async function () {
       const buildConfigPath = path.join(buildRoot, 'tsconfig.json');
 
       if (!existsSync(buildConfigPath)) {
@@ -187,7 +187,7 @@ module.exports = function createBuild(plugin, buildTarget, buildVersion, kibanaV
         path.join(buildRoot, 'tsconfig.json'),
       ]);
     })
-    .then(function() {
+    .then(function () {
       const buildFiles = [relative(buildTarget, buildRoot) + '/**/*'];
 
       return new Promise((resolve, reject) => {

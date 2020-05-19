@@ -32,7 +32,7 @@ enableCollectingUnknownOptions(
     .description('Start kibana and have it include this plugin')
     .on('--help', docs('start'))
     .action(
-      createCommanderAction('start', command => ({
+      createCommanderAction('start', (command) => ({
         flags: command.unknownOptions,
       }))
     )
@@ -72,7 +72,7 @@ program
   .option('-p, --plugins <plugin-ids>', "Manually specify which plugins' test bundles to run")
   .on('--help', docs('test/karma'))
   .action(
-    createCommanderAction('testKarma', command => ({
+    createCommanderAction('testKarma', (command) => ({
       dev: Boolean(command.dev),
       plugins: command.plugins,
     }))

@@ -18,7 +18,7 @@ export class Plugin {
   setup(coreSetup, plugins) {
     const framework = new KibanaFramework(coreSetup);
 
-    plugins.licensing.license$.subscribe(license => {
+    plugins.licensing.license$.subscribe((license) => {
       framework.setLicense(license);
     });
 

@@ -64,7 +64,7 @@ export class CrossClusterReplicationPlugin implements Plugin {
     licensing.license$
       .pipe(first())
       .toPromise()
-      .then(license => {
+      .then((license) => {
         const licenseStatus = license.check(PLUGIN.ID, PLUGIN.minimumLicenseType);
         const isLicenseOk = licenseStatus.state === 'valid';
         const config = this.initializerContext.config.get<ClientConfigType>();

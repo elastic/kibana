@@ -47,7 +47,7 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
 
   const processTableView: ProcessTableView[] = useMemo(
     () =>
-      [...processNodePositions.keys()].map(processEvent => {
+      [...processNodePositions.keys()].map((processEvent) => {
         let dateTime;
         const eventTime = event.eventTimestamp(processEvent);
         const name = event.eventName(processEvent);
@@ -78,7 +78,7 @@ export const Panel = memo(function Event({ className }: { className?: string }) 
   const dispatch = useResolverDispatch();
 
   const handleBringIntoViewClick = useCallback(
-    processTableViewItem => {
+    (processTableViewItem) => {
       dispatch({
         type: 'userBroughtProcessIntoView',
         payload: {

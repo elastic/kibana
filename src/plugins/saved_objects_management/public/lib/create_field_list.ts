@@ -86,7 +86,7 @@ const recursiveCreateFields = (key: string, value: any, parents: string[] = []):
   return [field];
 };
 
-const addFieldsFromClass = function(
+const addFieldsFromClass = function (
   Class: { mapping: Record<string, string>; searchSource: any },
   fields: ObjectField[]
 ) {

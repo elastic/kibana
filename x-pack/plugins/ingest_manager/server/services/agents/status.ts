@@ -65,7 +65,7 @@ export async function getAgentStatusForConfig(
       undefined,
       AgentStatusKueryHelper.buildKueryForErrorAgents(),
       AgentStatusKueryHelper.buildKueryForOfflineAgents(),
-    ].map(kuery =>
+    ].map((kuery) =>
       listAgents(soClient, {
         showInactive: false,
         perPage: 0,

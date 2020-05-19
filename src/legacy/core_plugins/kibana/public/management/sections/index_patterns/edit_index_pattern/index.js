@@ -74,7 +74,7 @@ uiRoutes.when('/management/kibana/index_patterns/:indexPatternId', {
   template,
   k7Breadcrumbs: getEditBreadcrumbs,
   resolve: {
-    indexPattern: function($route, Promise, redirectWhenMissing) {
+    indexPattern: function ($route, Promise, redirectWhenMissing) {
       const { indexPatterns } = npStart.plugins.data;
       return Promise.resolve(indexPatterns.get($route.current.params.indexPatternId)).catch(
         redirectWhenMissing('/management/kibana/index_patterns')
@@ -85,7 +85,7 @@ uiRoutes.when('/management/kibana/index_patterns/:indexPatternId', {
 
 uiModules
   .get('apps/management')
-  .controller('managementIndexPatternsEdit', function($scope, $route, config) {
+  .controller('managementIndexPatternsEdit', function ($scope, $route, config) {
     $scope.$on('$destroy', () => {
       destroyEditIndexPattern();
     });
@@ -144,7 +144,7 @@ uiRoutes
     template: createEditFieldtemplate,
     mapBreadcrumbs($route, breadcrumbs) {
       const { indexPattern } = $route.current.locals;
-      return breadcrumbs.map(crumb => {
+      return breadcrumbs.map((crumb) => {
         if (crumb.id !== indexPattern.id) {
           return crumb;
         }
@@ -156,7 +156,7 @@ uiRoutes
       });
     },
     resolve: {
-      indexPattern: function($route, Promise, redirectWhenMissing) {
+      indexPattern: function ($route, Promise, redirectWhenMissing) {
         const { indexPatterns } = npStart.plugins.data;
         return Promise.resolve(indexPatterns.get($route.current.params.indexPatternId)).catch(
           redirectWhenMissing('/management/kibana/index_patterns')

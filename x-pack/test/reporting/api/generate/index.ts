@@ -7,8 +7,8 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ loadTestFile }: FtrProviderContext) {
-  describe('CSV', function() {
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('CSV', function () {
     this.tags('ciGroup2');
     loadTestFile(require.resolve('./csv_saved_search'));
     loadTestFile(require.resolve('./csv_job_params'));

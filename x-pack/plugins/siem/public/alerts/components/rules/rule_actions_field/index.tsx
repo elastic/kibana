@@ -56,9 +56,9 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
   );
 
   useEffect(() => {
-    (async function() {
+    (async function () {
       const actionTypes = await loadActionTypes({ http });
-      const supportedTypes = actionTypes.filter(actionType =>
+      const supportedTypes = actionTypes.filter((actionType) =>
         NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS.includes(actionType.id)
       );
       setSupportedActionTypes(supportedTypes);

@@ -66,7 +66,7 @@ const defaultExpression = {
   timeUnit: 'm',
 } as MetricExpression;
 
-export const Expressions: React.FC<Props> = props => {
+export const Expressions: React.FC<Props> = (props) => {
   const { setAlertParams, alertParams, errors, alertsContext } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
@@ -155,7 +155,7 @@ export const Expressions: React.FC<Props> = props => {
   const updateTimeSize = useCallback(
     (ts: number | undefined) => {
       const criteria =
-        alertParams.criteria?.map(c => ({
+        alertParams.criteria?.map((c) => ({
           ...c,
           timeSize: ts,
         })) || [];
@@ -168,7 +168,7 @@ export const Expressions: React.FC<Props> = props => {
   const updateTimeUnit = useCallback(
     (tu: string) => {
       const criteria =
-        alertParams.criteria?.map(c => ({
+        alertParams.criteria?.map((c) => ({
           ...c,
           timeUnit: tu,
         })) || [];
@@ -183,7 +183,7 @@ export const Expressions: React.FC<Props> = props => {
     if (md && md.currentOptions?.metrics) {
       setAlertParams(
         'criteria',
-        md.currentOptions.metrics.map(metric => ({
+        md.currentOptions.metrics.map((metric) => ({
           metric: metric.field,
           comparator: Comparator.GT,
           threshold: [],
@@ -319,7 +319,7 @@ export const Expressions: React.FC<Props> = props => {
           </>
         }
         checked={alertParams.alertOnNoData}
-        onChange={e => setAlertParams('alertOnNoData', e.target.checked)}
+        onChange={(e) => setAlertParams('alertOnNoData', e.target.checked)}
       />
 
       <EuiSpacer size={'m'} />

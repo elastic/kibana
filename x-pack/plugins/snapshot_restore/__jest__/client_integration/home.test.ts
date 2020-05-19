@@ -37,7 +37,7 @@ jest.mock('@kbn/i18n/react', () => {
 });
 
 const removeWhiteSpaceOnArrayValues = (array: any[]) =>
-  array.map(value => {
+  array.map((value) => {
     if (!value.trim) {
       return value;
     }
@@ -102,7 +102,7 @@ describe('<SnapshotRestoreHome />', () => {
         ];
 
         expect(tabs.length).toBe(4);
-        expect(tabs.map(t => t.text())).toEqual([
+        expect(tabs.map((t) => t.text())).toEqual([
           'Snapshots',
           'Repositories',
           'Policies',
@@ -610,7 +610,7 @@ describe('<SnapshotRestoreHome />', () => {
               const tabs = find('snapshotDetail.tab');
 
               expect(tabs.length).toBe(2);
-              expect(tabs.map(t => t.text())).toEqual(['Summary', 'Failed indices (0)']);
+              expect(tabs.map((t) => t.text())).toEqual(['Summary', 'Failed indices (0)']);
             });
 
             test('should have the default tab set on "Summary"', () => {
@@ -727,18 +727,16 @@ describe('<SnapshotRestoreHome />', () => {
 
         test('should update the tab label', () => {
           const { find } = testBed;
-          expect(
-            find('snapshotDetail.tab')
-              .at(1)
-              .text()
-          ).toBe(`Failed indices (${indexFailures.length})`);
+          expect(find('snapshotDetail.tab').at(1).text()).toBe(
+            `Failed indices (${indexFailures.length})`
+          );
         });
 
         test('should display the failed indices', () => {
           const { find } = testBed;
 
-          const expected = indexFailures.map(failure => failure.index);
-          const found = find('snapshotDetail.indexFailure.index').map(wrapper => wrapper.text());
+          const expected = indexFailures.map((failure) => failure.index);
+          const found = find('snapshotDetail.indexFailure.index').map((wrapper) => wrapper.text());
 
           expect(find('snapshotDetail.indexFailure').length).toBe(2);
           expect(found).toEqual(expected);

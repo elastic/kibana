@@ -23,7 +23,7 @@ export class MapPlugin {
     let routesInitialized = false;
     const mapConfig = mapsLegacy.config;
 
-    licensing.license$.subscribe(license => {
+    licensing.license$.subscribe((license) => {
       const { state } = license.check('maps', 'basic');
       if (state === 'valid' && !routesInitialized) {
         routesInitialized = true;

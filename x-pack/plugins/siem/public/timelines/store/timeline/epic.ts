@@ -131,7 +131,7 @@ export const createTimelineEpic = <State>(): Epic<
   const timeline$ = state$.pipe(map(timelineByIdSelector), filter(isNotNull));
 
   const allTimelineQuery$ = state$.pipe(
-    map(state => {
+    map((state) => {
       const getQuery = selectAllTimelineQuery();
       return getQuery(state, ALL_TIMELINE_QUERY_ID);
     }),

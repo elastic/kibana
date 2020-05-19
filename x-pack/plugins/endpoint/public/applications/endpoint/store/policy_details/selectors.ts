@@ -22,7 +22,7 @@ export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.pol
  */
 export const policyDetailsForUpdate: (
   state: Immutable<PolicyDetailsState>
-) => Immutable<NewPolicyData> | undefined = createSelector(policyDetails, policy => {
+) => Immutable<NewPolicyData> | undefined = createSelector(policyDetails, (policy) => {
   if (policy) {
     const { id, revision, created_by, created_at, updated_by, updated_at, ...newPolicy } = policy;
     return newPolicy;
@@ -41,7 +41,7 @@ export const isOnPolicyDetailsPage = (state: Immutable<PolicyDetailsState>) => {
 
 /** Returns the policyId from the url */
 export const policyIdFromParams: (state: Immutable<PolicyDetailsState>) => string = createSelector(
-  state => state.location,
+  (state) => state.location,
   (location: PolicyDetailsState['location']) => {
     if (location) {
       return location.pathname.split('/')[2];
@@ -58,23 +58,23 @@ const defaultFullPolicy: Immutable<PolicyConfig> = policyConfigFactory();
  */
 export const fullPolicy: (s: Immutable<PolicyDetailsState>) => PolicyConfig = createSelector(
   policyDetails,
-  policyData => {
+  (policyData) => {
     return policyData?.inputs[0]?.config?.policy?.value ?? defaultFullPolicy;
   }
 );
 
 const fullWindowsPolicySettings: (
   s: PolicyDetailsState
-) => PolicyConfig['windows'] = createSelector(fullPolicy, policy => policy?.windows);
+) => PolicyConfig['windows'] = createSelector(fullPolicy, (policy) => policy?.windows);
 
 const fullMacPolicySettings: (s: PolicyDetailsState) => PolicyConfig['mac'] = createSelector(
   fullPolicy,
-  policy => policy?.mac
+  (policy) => policy?.mac
 );
 
 const fullLinuxPolicySettings: (s: PolicyDetailsState) => PolicyConfig['linux'] = createSelector(
   fullPolicy,
-  policy => policy?.linux
+  (policy) => policy?.linux
 );
 
 /** Returns the policy configuration */

@@ -21,7 +21,7 @@ const resolve = require('path').resolve;
 const readFileSync = require('fs').readFileSync;
 const configFile = require('./config_file');
 
-module.exports = function(root) {
+module.exports = function (root) {
   if (!root) root = process.cwd();
 
   const pluginPackageJsonPath = resolve(root, 'package.json');

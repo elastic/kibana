@@ -10,15 +10,12 @@ import url from 'url';
 import { getStateAndNonce } from '../../fixtures/oidc_tools';
 import { delay } from 'bluebird';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertestWithoutAuth');
 
   describe('OpenID Connect authentication', () => {
     it('should reject API requests if client is not authenticated', async () => {
-      await supertest
-        .get('/internal/security/me')
-        .set('kbn-xsrf', 'xxx')
-        .expect(401);
+      await supertest.get('/internal/security/me').set('kbn-xsrf', 'xxx').expect(401);
     });
 
     describe('initiating handshake', () => {
@@ -422,7 +419,7 @@ export default function({ getService }) {
         sessionCookie = request.cookie(cookies[0]);
       });
 
-      const expectNewSessionCookie = cookie => {
+      const expectNewSessionCookie = (cookie) => {
         expect(cookie.key).to.be('sid');
         expect(cookie.value).to.not.be.empty();
         expect(cookie.path).to.be('/');
@@ -430,7 +427,7 @@ export default function({ getService }) {
         expect(cookie.value).to.not.be(sessionCookie.value);
       };
 
-      it('expired access token should be automatically refreshed', async function() {
+      it('expired access token should be automatically refreshed', async function () {
         this.timeout(40000);
 
         // Access token expiration is set to 15s for API integration tests.
@@ -512,7 +509,7 @@ export default function({ getService }) {
         sessionCookie = request.cookie(cookies[0]);
       });
 
-      it('should properly set cookie and start new OIDC handshake', async function() {
+      it('should properly set cookie and start new OIDC handshake', async function () {
         // Let's delete tokens from `.security-tokens` index directly to simulate the case when
         // Elasticsearch automatically removes access/refresh token document from the index
         // after some period of time.
@@ -521,9 +518,7 @@ export default function({ getService }) {
           q: 'doc_type:token',
           refresh: true,
         });
-        expect(esResponse)
-          .to.have.property('deleted')
-          .greaterThan(0);
+        expect(esResponse).to.have.property('deleted').greaterThan(0);
 
         const handshakeResponse = await supertest
           .get('/abc/xyz/handshake?one=two three')

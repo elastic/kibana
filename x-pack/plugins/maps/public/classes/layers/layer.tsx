@@ -132,7 +132,7 @@ export class AbstractLayer implements ILayer {
     this._style = style;
     if (this._descriptor.__dataRequests) {
       this._dataRequests = this._descriptor.__dataRequests.map(
-        dataRequest => new DataRequest(dataRequest)
+        (dataRequest) => new DataRequest(dataRequest)
       );
     } else {
       this._dataRequests = [];
@@ -159,7 +159,7 @@ export class AbstractLayer implements ILayer {
     // @ts-ignore
     if (clonedDescriptor.joins) {
       // @ts-ignore
-      clonedDescriptor.joins.forEach(joinDescriptor => {
+      clonedDescriptor.joins.forEach((joinDescriptor) => {
         // right.id is uuid used to track requests in inspector
         // @ts-ignore
         joinDescriptor.right.id = uuid();
@@ -331,7 +331,7 @@ export class AbstractLayer implements ILayer {
       // @ts-ignore
       const mbStyle = mbMap.getStyle();
       // @ts-ignore
-      mbStyle.layers.forEach(mbLayer => {
+      mbStyle.layers.forEach((mbLayer) => {
         // @ts-ignore
         if (this.ownsMbLayerId(mbLayer.id)) {
           // @ts-ignore
@@ -339,7 +339,7 @@ export class AbstractLayer implements ILayer {
         }
       });
       // @ts-ignore
-      Object.keys(mbStyle.sources).some(mbSourceId => {
+      Object.keys(mbStyle.sources).some((mbSourceId) => {
         // @ts-ignore
         if (this.ownsMbSourceId(mbSourceId)) {
           // @ts-ignore
@@ -385,7 +385,7 @@ export class AbstractLayer implements ILayer {
       return [];
     }
 
-    const requestTokens = this._dataRequests.map(dataRequest => dataRequest.getRequestToken());
+    const requestTokens = this._dataRequests.map((dataRequest) => dataRequest.getRequestToken());
 
     // Compact removes all the undefineds
     // @ts-ignore
@@ -397,11 +397,11 @@ export class AbstractLayer implements ILayer {
   }
 
   getDataRequest(id: string): DataRequest | undefined {
-    return this._dataRequests.find(dataRequest => dataRequest.getDataId() === id);
+    return this._dataRequests.find((dataRequest) => dataRequest.getDataId() === id);
   }
 
   isLayerLoading(): boolean {
-    return this._dataRequests.some(dataRequest => dataRequest.isLoading());
+    return this._dataRequests.some((dataRequest) => dataRequest.isLoading());
   }
 
   hasErrors(): boolean {

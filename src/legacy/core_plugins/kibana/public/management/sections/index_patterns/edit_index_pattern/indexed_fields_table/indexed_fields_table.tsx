@@ -73,7 +73,7 @@ export class IndexedFieldsTable extends Component<
 
     return (
       (fields &&
-        fields.map(field => {
+        fields.map((field) => {
           return {
             ...field,
             displayName: field.displayName,
@@ -95,11 +95,11 @@ export class IndexedFieldsTable extends Component<
     (fields, fieldFilter, indexedFieldTypeFilter) => {
       if (fieldFilter) {
         const normalizedFieldFilter = fieldFilter.toLowerCase();
-        fields = fields.filter(field => field.name.toLowerCase().includes(normalizedFieldFilter));
+        fields = fields.filter((field) => field.name.toLowerCase().includes(normalizedFieldFilter));
       }
 
       if (indexedFieldTypeFilter) {
-        fields = fields.filter(field => field.type === indexedFieldTypeFilter);
+        fields = fields.filter((field) => field.type === indexedFieldTypeFilter);
       }
 
       return fields;
@@ -116,7 +116,7 @@ export class IndexedFieldsTable extends Component<
         <Table
           indexPattern={indexPattern}
           items={fields}
-          editField={field => this.props.helpers.redirectToRoute(field)}
+          editField={(field) => this.props.helpers.redirectToRoute(field)}
         />
       </div>
     );
