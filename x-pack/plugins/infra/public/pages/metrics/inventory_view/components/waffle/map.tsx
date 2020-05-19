@@ -15,6 +15,7 @@ import { GroupOfNodes } from './group_of_nodes';
 import { applyWaffleMapLayout } from '../../lib/apply_wafflemap_layout';
 import { SnapshotNode } from '../../../../../../common/http_api/snapshot_api';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
+import { sortNodes } from '../../lib/sort_nodes';
 
 interface Props {
   nodes: SnapshotNode[];
@@ -37,7 +38,8 @@ export const Map: React.FC<Props> = ({
   nodeType,
   dataBounds,
 }) => {
-  const map = nodesToWaffleMap(nodes);
+  const sortedNodes = sortNodes(options.sort, nodes);
+  const map = nodesToWaffleMap(sortedNodes);
   return (
     <AutoSizer content>
       {({ measureRef, content: { width = 0, height = 0 } }) => {
