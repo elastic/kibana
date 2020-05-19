@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EndpointDocGenerator } from '../../../../common/generate_data';
+import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { Tree } from './tree';
-import { ResolverAncestry, ResolverEvent, ResolverRelatedEvents } from '../../../../common/types';
-import { entityId } from '../../../../common/models/event';
+import {
+  ResolverAncestry,
+  ResolverEvent,
+  ResolverRelatedEvents,
+} from '../../../../../common/endpoint/types';
+import { entityId } from '../../../../../common/endpoint/models/event';
 
 describe('Tree', () => {
   const generator = new EndpointDocGenerator();

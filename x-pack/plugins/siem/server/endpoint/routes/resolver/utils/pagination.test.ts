@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PaginationBuilder } from './pagination';
-import { EndpointDocGenerator } from '../../../../common/generate_data';
-import { EndpointEvent } from '../../../../common/types';
+import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
+import { EndpointEvent } from '../../../../../common/endpoint/types';
 
 describe('Pagination', () => {
   const generator = new EndpointDocGenerator();
