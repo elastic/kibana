@@ -180,7 +180,7 @@ migrations are idempotent:
 | Yes                   | 3.3.1 Idempotent migrations performed without coordination      |
 | No                    | 3.3.2 Single node migrations coordinated through a lease / lock |
 
-Because idempotent migrations don't require coordination, solution (3.3.1) is
+Because idempotent migrations don't require coordination, solution (4.3.1) is
 significantly less complex and it will never require manual intervention to
 retry. We, therefore, prefer this solution, even though it introduces new
 restrictions on migrations (4.3.1.1).
@@ -460,7 +460,7 @@ Advantages:
   migration using optimistic concurrency control.
 
 Drawbacks:
-- Cannot make breaking mapping changes (even though it was possible we never
+- Cannot make breaking mapping changes (even though it was possible, we have not
   introduced a breaking mapping change during 7.x).
 - Rollback is only possible by restoring a snapshot which requires educating
   users to ensure that they don't rely on `.kibana_n` indices as backups.
