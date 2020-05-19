@@ -1,39 +1,48 @@
 import org.junit.*
-import com.lesfurets.jenkins.unit.*
 import static groovy.test.GroovyAssert.*
 
-class SlackNotificationsTest extends BasePipelineTest {
-    def slackNotifications
 
-    def TEST_FAILURE_URL = "https://localhost/"
-    def TEST_FAILURE_NAME = "x-pack/test/functional/apps/fake/test·ts.Fake test should pass"
-    def TEST_FAILURE_NAME_FULL = "Kibana Pipeline / kibana-xpack-agent / Chrome X-Pack UI Functional Tests.${TEST_FAILURE_NAME}"
+class SlackNotificationsTest extends KibanaBasePipelineTest {
+  def slackNotifications
 
-    @Before
-    void setUp() {
-        super.setUp()
+  @Before
+  void setUp() {
+    super.setUp()
 
-        binding.setProperty('testUtils', [
-          getFailures: {
-            return [
-              [
-                url: TEST_FAILURE_URL,
-                fullDisplayName: TEST_FAILURE_NAME_FULL,
-              ]
-            ]
-          }
-        ])
+    slackNotifications = loadScript("vars/slackNotifications.groovy")
+  }
 
-        slackNotifications = loadScript("vars/slackNotifications.groovy")
+  @Test
+  void testFailures() {
+    mockFailureBuild()
+
+    def failureMessage = slackNotifications.getTestFailures()
+
+    assertEquals(
+      "*Test Failures*\n• <${Mocks.TEST_FAILURE_URL}|${Mocks.TEST_FAILURE_NAME_SHORT}>",
+      failureMessage
+    )
+  }
+
+  @Test
+  void testSendFailedBuild() {
+    mockFailureBuild()
+
+    slackNotifications.sendFailedBuild()
+
+    def fn = helper.callStack.find { it.methodName == 'slackSend' }
+    def args = fn.args[0]
+
+    def expected = [
+      channel: "#kibana-operations-alerts",
+      username: "Kibana Operations",
+      iconEmoji: ":jenkins:",
+      color: 'danger',
+      message: ':broken_heart: elastic / kibana # master #1',
+    ]
+
+    expected.each {
+      assertEquals(it.value.toString(), args[it.key].toString())
     }
-
-    @Test
-    void testCall() {
-      def failureMessage = slackNotifications.getTestFailures()
-
-      assertEquals(
-        "*Test Failures*\n• <${TEST_FAILURE_URL}|${TEST_FAILURE_NAME}>",
-        failureMessage
-      )
-    }
+  }
 }
