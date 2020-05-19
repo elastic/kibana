@@ -138,16 +138,22 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async getJobState(jobId: string): Promise<JOB_STATE> {
-      log.debug(`Fetching job state for job ${jobId}`);
-      const jobStats = await esSupertest
-        .get(`/_ml/anomaly_detectors/${jobId}/_stats`)
-        .expect(200)
-        .then((res: any) => res.body);
+      const jobStats = await this.getADJobStats(jobId);
 
       expect(jobStats.jobs).to.have.length(1);
       const state: JOB_STATE = jobStats.jobs[0].state;
 
       return state;
+    },
+
+    async getADJobStats(jobId: string): Promise<any> {
+      log.debug(`Fetching anomaly detection job stats for job ${jobId}...`);
+      const jobStats = await esSupertest
+        .get(`/_ml/anomaly_detectors/${jobId}/_stats`)
+        .expect(200)
+        .then((res: any) => res.body);
+
+      return jobStats;
     },
 
     async waitForJobState(jobId: string, expectedJobState: JOB_STATE) {
@@ -389,6 +395,32 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .expect(200);
 
       await this.waitForDataFrameAnalyticsJobToExist(analyticsId);
+    },
+
+    async getADJobRecordCount(jobId: string): Promise<number> {
+      const jobStats = await this.getADJobStats(jobId);
+
+      expect(jobStats.jobs).to.have.length(1);
+      const processedRecordCount: number = jobStats.jobs[0].data_counts.processed_record_count;
+
+      return processedRecordCount;
+    },
+
+    async waitForADJobRecordCountToBePositive(jobId: string) {
+      await retry.waitForWithTimeout(
+        `'${jobId}' to have processed_record_count > 0`,
+        10 * 1000,
+        async () => {
+          const processedRecordCount = await this.getADJobRecordCount(jobId);
+          if (processedRecordCount > 0) {
+            return true;
+          } else {
+            throw new Error(
+              `expected anomaly detection job '${jobId}' to have processed_record_count > 0 (got ${processedRecordCount})`
+            );
+          }
+        }
+      );
     },
   };
 }

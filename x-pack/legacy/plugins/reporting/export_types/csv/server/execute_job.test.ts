@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import nodeCrypto from '@elastic/node-crypto';
 // @ts-ignore
 import Puid from 'puid';
 import sinon from 'sinon';
-import nodeCrypto from '@elastic/node-crypto';
-import { CancellationToken } from '../../../common/cancellation_token';
 import { fieldFormats } from '../../../../../../../src/plugins/data/server';
-import { createMockReportingCore } from '../../../test_helpers';
-import { LevelLogger } from '../../../server/lib/level_logger';
-import { setFieldFormats } from '../../../server/services';
-import { executeJobFactory } from './execute_job';
-import { JobDocPayloadDiscoverCsv } from '../types';
+import { CancellationToken } from '../../../../../../plugins/reporting/common';
 import { CSV_BOM_CHARS } from '../../../common/constants';
+import { LevelLogger } from '../../../server/lib';
+import { setFieldFormats } from '../../../server/services';
+import { createMockReportingCore } from '../../../test_helpers';
+import { JobDocPayloadDiscoverCsv } from '../types';
+import { executeJobFactory } from './execute_job';
 import { FORMAT_DEFAULT_TYPE_MAP_SETTINGS } from '../../../../../../../src/plugins/data/common';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(() => resolve(), ms));
@@ -66,6 +66,7 @@ describe('CSV Execute Job', function() {
 
   beforeEach(async function() {
     configGetStub = sinon.stub();
+    configGetStub.withArgs('index').returns('.reporting-foo-test');
     configGetStub.withArgs('encryptionKey').returns(encryptionKey);
     configGetStub.withArgs('csv', 'maxSizeBytes').returns(1024 * 1000); // 1mB
     configGetStub.withArgs('csv', 'scroll').returns({});

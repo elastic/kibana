@@ -11,18 +11,16 @@ import {
   Filter,
   IIndexPattern,
   Query,
-  // Reporting uses an unconventional directory structure so the linter marks this as a violation, server files should
-  // be moved under reporting/server/
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../../../src/plugins/data/server';
 import {
   QUERY_STRING_OPTIONS_SETTINGS,
   QUERY_ALLOW_LEADING_WILDCARDS_SETTINGS,
   COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_SETTINGS,
 } from '../../../../../../../../src/plugins/data/common';
-import { CancellationToken } from '../../../../common/cancellation_token';
+import { CancellationToken } from '../../../../../../../plugins/reporting/common';
 import { ReportingCore } from '../../../../server';
-import { Logger, RequestFacade } from '../../../../types';
+import { LevelLogger } from '../../../../server/lib';
+import { RequestFacade } from '../../../../server/types';
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import {
   CsvResultFromSearch,
@@ -63,7 +61,7 @@ const getUiSettings = async (config: IUiSettingsClient) => {
 export async function generateCsvSearch(
   req: RequestFacade,
   reporting: ReportingCore,
-  logger: Logger,
+  logger: LevelLogger,
   searchPanel: SearchPanel,
   jobParams: JobParamsDiscoverCsv
 ): Promise<CsvResultFromSearch> {

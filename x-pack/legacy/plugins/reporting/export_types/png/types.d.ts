@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LayoutInstance, LayoutParams } from '../common/layouts/layout';
-import { ConditionalHeaders, JobDocPayload, RequestFacade } from '../../types';
+import { JobDocPayload } from '../../server/types';
+import { LayoutInstance, LayoutParams } from '../common/layouts';
 
 // Job params: structure of incoming user request data
 export interface JobParamsPNG {
