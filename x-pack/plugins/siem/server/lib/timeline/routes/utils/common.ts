@@ -5,7 +5,7 @@
  */
 import { set } from 'lodash/fp';
 
-import { KibanaRequest, KibanaRequest } from 'src/core/server';
+import { KibanaRequest } from 'src/core/server';
 import { RequestHandlerContext } from '../../../../../../../../target/types/core/server';
 
 import { TimelineTypeLiteralWithNull, TimelineType } from '../../../../../common/types/timeline';
