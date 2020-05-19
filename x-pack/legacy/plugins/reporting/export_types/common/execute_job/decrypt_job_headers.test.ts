@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cryptoFactory } from '../../../server/lib/crypto';
-import { Logger } from '../../../types';
+import { cryptoFactory, LevelLogger } from '../../../server/lib';
 import { decryptJobHeaders } from './decrypt_job_headers';
 
 const encryptHeaders = async (encryptionKey: string, headers: Record<string, string>) => {
@@ -23,7 +22,7 @@ describe('headers', () => {
         },
         logger: ({
           error: jest.fn(),
-        } as unknown) as Logger,
+        } as unknown) as LevelLogger,
       });
     await expect(getDecryptedHeaders()).rejects.toMatchInlineSnapshot(
       `[Error: Failed to decrypt report job data. Please ensure that xpack.reporting.encryptionKey is set and re-generate this report. Error: Invalid IV length]`
@@ -44,7 +43,7 @@ describe('headers', () => {
         type: 'csv',
         headers: encryptedHeaders,
       },
-      logger: {} as Logger,
+      logger: {} as LevelLogger,
     });
     expect(decryptedHeaders).toEqual(headers);
   });

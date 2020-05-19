@@ -97,7 +97,9 @@ describe('start', () => {
     expect(startDeps.notifications.toasts.addWarning.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "Your browser does not meet the security requirements for Kibana.",
+          Object {
+            "title": [Function],
+          },
         ],
       ]
     `);
@@ -146,18 +148,18 @@ describe('start', () => {
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
-        Array [
-          Object {},
-          Object {
-            "logo": "big logo",
-            "smallLogo": "not so big logo",
-          },
-          Object {
-            "logo": "big logo without small logo",
-            "smallLogo": undefined,
-          },
-        ]
-      `);
+                      Array [
+                        Object {},
+                        Object {
+                          "logo": "big logo",
+                          "smallLogo": "not so big logo",
+                        },
+                        Object {
+                          "logo": "big logo without small logo",
+                          "smallLogo": undefined,
+                        },
+                      ]
+                  `);
     });
   });
 
@@ -175,13 +177,13 @@ describe('start', () => {
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
-        Array [
-          false,
-          false,
-          false,
-          false,
-        ]
-      `);
+                      Array [
+                        false,
+                        false,
+                        false,
+                        false,
+                      ]
+                  `);
     });
 
     it('emits false until manually overridden when in embed mode', async () => {
@@ -203,13 +205,13 @@ describe('start', () => {
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
-        Array [
-          false,
-          false,
-          true,
-          false,
-        ]
-      `);
+                      Array [
+                        false,
+                        false,
+                        true,
+                        false,
+                      ]
+                  `);
     });
 
     it('application-specified visibility on mount', async () => {
@@ -230,13 +232,13 @@ describe('start', () => {
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
-        Array [
-          false,
-          true,
-          false,
-          true,
-        ]
-      `);
+                      Array [
+                        false,
+                        true,
+                        false,
+                        true,
+                      ]
+                  `);
     });
 
     it('changing visibility has no effect on chrome-hiding application', async () => {
@@ -253,12 +255,12 @@ describe('start', () => {
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
-        Array [
-          false,
-          false,
-          false,
-        ]
-      `);
+                      Array [
+                        false,
+                        false,
+                        false,
+                      ]
+                  `);
     });
   });
 
@@ -280,36 +282,36 @@ describe('start', () => {
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
-        Array [
-          Array [],
-          Array [
-            "foo",
-          ],
-          Array [
-            "foo",
-          ],
-          Array [
-            "foo",
-            "bar",
-          ],
-          Array [
-            "foo",
-            "bar",
-          ],
-          Array [
-            "foo",
-            "bar",
-            "baz",
-          ],
-          Array [
-            "foo",
-            "baz",
-          ],
-          Array [
-            "baz",
-          ],
-        ]
-      `);
+                      Array [
+                        Array [],
+                        Array [
+                          "foo",
+                        ],
+                        Array [
+                          "foo",
+                        ],
+                        Array [
+                          "foo",
+                          "bar",
+                        ],
+                        Array [
+                          "foo",
+                          "bar",
+                        ],
+                        Array [
+                          "foo",
+                          "bar",
+                          "baz",
+                        ],
+                        Array [
+                          "foo",
+                          "baz",
+                        ],
+                        Array [
+                          "baz",
+                        ],
+                      ]
+                  `);
     });
   });
 
@@ -327,19 +329,19 @@ describe('start', () => {
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
-        Array [
-          undefined,
-          Object {
-            "text": "foo",
-            "tooltip": "foo's tooltip",
-          },
-          Object {
-            "text": "bar",
-            "tooltip": "bar's tooltip",
-          },
-          undefined,
-        ]
-      `);
+                      Array [
+                        undefined,
+                        Object {
+                          "text": "foo",
+                          "tooltip": "foo's tooltip",
+                        },
+                        Object {
+                          "text": "bar",
+                          "tooltip": "bar's tooltip",
+                        },
+                        undefined,
+                      ]
+                  `);
     });
   });
 
@@ -358,29 +360,29 @@ describe('start', () => {
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
-        Array [
-          Array [],
-          Array [
-            Object {
-              "text": "foo",
-            },
-            Object {
-              "text": "bar",
-            },
-          ],
-          Array [
-            Object {
-              "text": "foo",
-            },
-          ],
-          Array [
-            Object {
-              "text": "bar",
-            },
-          ],
-          Array [],
-        ]
-      `);
+                      Array [
+                        Array [],
+                        Array [
+                          Object {
+                            "text": "foo",
+                          },
+                          Object {
+                            "text": "bar",
+                          },
+                        ],
+                        Array [
+                          Object {
+                            "text": "foo",
+                          },
+                        ],
+                        Array [
+                          Object {
+                            "text": "bar",
+                          },
+                        ],
+                        Array [],
+                      ]
+                  `);
     });
   });
 
