@@ -35,6 +35,7 @@ export interface IdxMgmtHomeTestBed extends TestBed<IdxMgmtTestSubjects> {
   actions: {
     selectHomeTab: (tab: 'indicesTab' | 'templatesTab') => void;
     selectDetailsTab: (tab: 'summary' | 'settings' | 'mappings' | 'aliases') => void;
+    selectIndexDetailsTab: (tab: 'settings' | 'mappings' | 'stats' | 'edit_settings') => void;
     clickReloadButton: () => void;
     clickTemplateAction: (
       name: TemplateDeserialized['name'],
@@ -123,12 +124,26 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
     find('closeDetailsButton').simulate('click');
   };
 
+  const selectIndexDetailsTab = async (
+    tab: 'settings' | 'mappings' | 'stats' | 'edit_settings'
+  ) => {
+    const indexDetailsTabs = ['settings', 'mappings', 'stats', 'edit_settings'];
+    const { find, component } = testBed;
+    await act(async () => {
+      find('detailPanelTab')
+        .at(indexDetailsTabs.indexOf(tab))
+        .simulate('click');
+    });
+    component.update();
+  };
+
   return {
     ...testBed,
     findAction,
     actions: {
       selectHomeTab,
       selectDetailsTab,
+      selectIndexDetailsTab,
       clickReloadButton,
       clickTemplateAction,
       clickTemplateAt,
@@ -158,7 +173,9 @@ export type TestSubjects =
   | 'noSettingsCallout'
   | 'indicesList'
   | 'indicesTab'
+  | 'indexTableIndexNameLink'
   | 'reloadButton'
+  | 'reloadIndicesButton'
   | 'row'
   | 'sectionError'
   | 'sectionLoading'
