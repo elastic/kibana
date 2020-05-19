@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { OperatorOption, OperatorType, Operator } from './types';
 
 export const isOperator: OperatorOption = {
-  message: i18n.translate('exceptions.isOperatorLabel', {
+  message: i18n.translate('xpack.siem.exceptions.isOperatorLabel', {
     defaultMessage: 'is',
   }),
   value: 'is',
@@ -17,7 +17,7 @@ export const isOperator: OperatorOption = {
 };
 
 export const isNotOperator: OperatorOption = {
-  message: i18n.translate('exceptions.isNotOperatorLabel', {
+  message: i18n.translate('xpack.siem.exceptions.isNotOperatorLabel', {
     defaultMessage: 'is not',
   }),
   value: 'is_not',
@@ -26,7 +26,7 @@ export const isNotOperator: OperatorOption = {
 };
 
 export const isOneOfOperator: OperatorOption = {
-  message: i18n.translate('exceptions.isOneOfOperatorLabel', {
+  message: i18n.translate('xpack.siem.exceptions.isOneOfOperatorLabel', {
     defaultMessage: 'is one of',
   }),
   value: 'is_one_of',
@@ -35,7 +35,7 @@ export const isOneOfOperator: OperatorOption = {
 };
 
 export const isNotOneOfOperator: OperatorOption = {
-  message: i18n.translate('exceptions.isNotOneOfOperatorLabel', {
+  message: i18n.translate('xpack.siem.exceptions.isNotOneOfOperatorLabel', {
     defaultMessage: 'is not one of',
   }),
   value: 'is_not_one_of',
@@ -44,7 +44,7 @@ export const isNotOneOfOperator: OperatorOption = {
 };
 
 export const existsOperator: OperatorOption = {
-  message: i18n.translate('exceptions.existsOperatorLabel', {
+  message: i18n.translate('xpack.siem.exceptions.existsOperatorLabel', {
     defaultMessage: 'exists',
   }),
   value: 'exists',
@@ -53,7 +53,7 @@ export const existsOperator: OperatorOption = {
 };
 
 export const doesNotExistOperator: OperatorOption = {
-  message: i18n.translate('exceptions.doesNotExistOperatorLabel', {
+  message: i18n.translate('xpack.siem.exceptions.doesNotExistOperatorLabel', {
     defaultMessage: 'does not exist',
   }),
   value: 'does_not_exist',
@@ -62,7 +62,7 @@ export const doesNotExistOperator: OperatorOption = {
 };
 
 export const isInListOperator: OperatorOption = {
-  message: i18n.translate('exceptions.isInListOperatorLabel', {
+  message: i18n.translate('xpack.siem.exceptions.isInListOperatorLabel', {
     defaultMessage: 'is in list',
   }),
   value: 'is_in_list',
@@ -71,7 +71,7 @@ export const isInListOperator: OperatorOption = {
 };
 
 export const isNotInListOperator: OperatorOption = {
-  message: i18n.translate('exceptions.isNotInListOperatorLabel', {
+  message: i18n.translate('xpack.siem.exceptions.isNotInListOperatorLabel', {
     defaultMessage: 'is not in list',
   }),
   value: 'is_not_in_list',

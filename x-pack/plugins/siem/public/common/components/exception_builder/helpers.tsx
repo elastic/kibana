@@ -19,10 +19,6 @@ import {
 } from './operators';
 import { OperatorOption, OperatorType, ExceptionItemEntry, ExceptionItem } from './types';
 import { BrowserField, BrowserFields } from '../../containers/source';
-import {
-  IIndexPattern,
-  isFilterable,
-} from '../../../../../../../src/plugins/data/common/index_patterns';
 
 export const getOperatorLabels = (type: string): EuiSelectOption[] => {
   const isTypeEndgame = type === 'endgame';
@@ -204,10 +200,6 @@ export const getUpdatedEntryFromOperator = ({
   }
 };
 
-export const getFilterableFields = (indexPattern: IIndexPattern) => {
-  return indexPattern.fields.filter(isFilterable);
-};
-
 /** Creates a new instance of an `ExceptionItem` */
 export const createExceptionItem = ({
   listType,
@@ -235,27 +227,24 @@ export const createExceptionItem = ({
   };
 };
 
-export const getNonDeletedExceptionItems = (items: ExceptionItem[]): ExceptionItem[] => {
-  return items.filter(t => t._delete === null || !t._delete);
-};
 export const getUpdatedExceptionItems = ({
   updatedException,
   exceptions,
   index,
 }: {
-  updatedException: ExceptionItem;
+  updatedException: ExceptionItem | null;
   exceptions: ExceptionItem[];
   index: number;
 }): ExceptionItem[] => {
-  const updatedExceptions =
-    exceptions.length > 1
-      ? [
-          ...exceptions.slice(0, index),
-          {
-            ...updatedException,
-          },
-          ...exceptions.slice(index + 1),
-        ]
-      : [{ ...updatedException }];
-  return updatedExceptions;
+  if (updatedException !== null) {
+    return [
+      ...exceptions.slice(0, index),
+      {
+        ...updatedException,
+      },
+      ...exceptions.slice(index + 1),
+    ];
+  } else {
+    return [...exceptions.slice(0, index), ...exceptions.slice(index + 1)];
+  }
 };

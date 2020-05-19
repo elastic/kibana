@@ -13,12 +13,8 @@ import { AndOrExceptionOperator } from './and_or_operator';
 import { AndOrBadge } from '../and_or_badge';
 import { useFetchIndexPatterns } from '../../../alerts/containers/detection_engine/rules/fetch_index_patterns';
 import { useUiSetting$ } from '../../lib/kibana';
-import { ExceptionItem, Operator } from './types';
-import {
-  createExceptionItem,
-  getNonDeletedExceptionItems,
-  getUpdatedExceptionItems,
-} from './helpers';
+import { Operator, ExceptionItem } from './types';
+import { createExceptionItem, getUpdatedExceptionItems } from './helpers';
 
 export const MyExceptionBuilder = styled.div`
   margin: 10px 0;
@@ -71,7 +67,7 @@ export const ExceptionBuilder = ({
   );
 
   const onExceptionItemChange = useCallback(
-    (updatedException: ExceptionItem, index: number): void => {
+    (updatedException: ExceptionItem, index: number) => {
       const updatedExceptions = getUpdatedExceptionItems({
         updatedException,
         exceptions: exceptionBuilderData,
@@ -84,7 +80,7 @@ export const ExceptionBuilder = ({
     [exceptionBuilderData]
   );
 
-  const addExceptionItemEntry = useCallback((): void => {
+  const addExceptionItemEntry = useCallback(() => {
     const updatedException = {
       ...exceptionBuilderData[exceptionBuilderData.length - 1],
       entries: [
@@ -112,16 +108,14 @@ export const ExceptionBuilder = ({
     onChange([...updatedExceptions]);
   }, [exceptionBuilderData]);
 
-  const addExceptionItem = useCallback((): void => {
+  const addExceptionItem = useCallback(() => {
     const newException = createExceptionItem({ listType, listId });
     setExceptionBuilderData([...exceptionBuilderData, newException]);
     onChange([...exceptionBuilderData, newException]);
   }, [exceptionBuilderData]);
 
   const onAddExceptionClicked = useCallback(() => {
-    const items = getNonDeletedExceptionItems(exceptionBuilderData);
-
-    if (items.length === 1) {
+    if (exceptionBuilderData.length === 1) {
       addExceptionItemEntry();
     } else {
       addExceptionItem();
@@ -129,16 +123,15 @@ export const ExceptionBuilder = ({
   }, [exceptionBuilderData]);
 
   const onDeleteEntry = useCallback(
-    (updatedException: ExceptionItem, index: number): void => {
+    (updatedException: ExceptionItem, index: number) => {
+      const exception = updatedException.entries.length > 0 ? updatedException : null;
       const updatedExceptions = getUpdatedExceptionItems({
-        updatedException,
+        updatedException: exception,
         exceptions: exceptionBuilderData,
         index,
       });
 
-      const multiEntryExceptionItems = getNonDeletedExceptionItems(updatedExceptions).filter(
-        t => t.entries.length > 1
-      );
+      const multiEntryExceptionItems = updatedExceptions.filter(t => t.entries.length > 1);
 
       setAndLogicIncluded(multiEntryExceptionItems.length > 0);
       setExceptionBuilderData([...updatedExceptions]);
@@ -147,12 +140,10 @@ export const ExceptionBuilder = ({
     [exceptionBuilderData]
   );
 
-  const exceptions = getNonDeletedExceptionItems(exceptionBuilderData);
-
   return (
     <MyExceptionBuilder>
       <EuiFlexGroup gutterSize="none" direction="column">
-        {exceptions.map((exceptionItem, index) => (
+        {exceptionBuilderData.map((exceptionItem, index) => (
           <EuiFlexItem
             grow={1}
             key={`${exceptionItem.item_id}`}
@@ -194,8 +185,8 @@ export const ExceptionBuilder = ({
         <EuiFlexItem data-test-subj={`andOrOperatorButtons-${dataTestSubj}`}>
           <AndOrExceptionOperator
             displayInitButton={
-              exceptions.length === 0 ||
-              (exceptions.length === 1 && exceptions[0].entries.length === 0)
+              exceptionBuilderData.length === 0 ||
+              (exceptionBuilderData.length === 1 && exceptionBuilderData[0].entries.length === 0)
             }
             indent={andLogicIncluded}
             onOrClicked={addExceptionItem}

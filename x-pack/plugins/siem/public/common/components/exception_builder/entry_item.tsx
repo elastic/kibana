@@ -63,7 +63,8 @@ export const EntryItem = React.memo<EntryItemProps>(
   }) => {
     const onFieldChange = useCallback(
       (selectedField: EuiComboBoxOptionOption[]) => {
-        const newValue = selectedField[0] ? selectedField[0].label : '';
+        const [selectedLabel] = selectedField;
+        const newValue = selectedLabel ? selectedLabel.label : '';
         const updatedEntry = {
           field: newValue,
           operator: Operator.INCLUSION,
@@ -115,7 +116,8 @@ export const EntryItem = React.memo<EntryItemProps>(
 
     const onMatchChange = useCallback(
       (values: Array<EuiComboBoxOptionOption<string>>) => {
-        const value: string = values[0].label;
+        const [selectedLabel] = values;
+        const value: string = selectedLabel.label;
         const updatedEntry = {
           field: exceptionItemEntry.field,
           operator: exceptionItemEntry.operator,

@@ -9,10 +9,10 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
-import { ExceptionBuilder } from './';
-import { getMockExceptionItem } from '../common/mock/exceptions';
+import { ExceptionBuilder } from '.';
+import { getMockExceptionItem } from '../../mock/exceptions';
 
-jest.mock('../common/lib/kibana');
+jest.mock('../../lib/kibana');
 
 const theme = () => ({ eui: euiLightVars, darkMode: false });
 
