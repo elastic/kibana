@@ -291,6 +291,7 @@ describe('Epic Timeline', () => {
         templateTimelineVersion: null,
         timelineType: TimelineType.default,
         title: 'saved',
+        status: TimelineStatus.active,
       });
     });
   });

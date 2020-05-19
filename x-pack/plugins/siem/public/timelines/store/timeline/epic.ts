@@ -304,6 +304,7 @@ const timelineInput: TimelineInput = {
   dateRange: null,
   savedQueryId: null,
   sort: null,
+  status: null,
 };
 
 export const convertTimelineAsInput = (
