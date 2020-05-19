@@ -15,7 +15,6 @@ import { connectors } from './__mock__';
 describe('Connectors', () => {
   let wrapper: ReactWrapper;
   const onChangeConnector = jest.fn();
-  const handleShowAddFlyout = jest.fn();
   const handleShowEditFlyout = jest.fn();
 
   const props: Props = {
@@ -25,7 +24,6 @@ describe('Connectors', () => {
     selectedConnector: 'none',
     isLoading: false,
     onChangeConnector,
-    handleShowAddFlyout,
     handleShowEditFlyout,
   };
 
@@ -90,6 +88,15 @@ describe('Connectors', () => {
 
     expect(onChangeConnector).toHaveBeenCalled();
     expect(onChangeConnector).toHaveBeenCalledWith('none');
+  });
+
+  test('it shows the add connector button', () => {
+    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+    wrapper.update();
+
+    expect(
+      wrapper.find('button[data-test-subj="dropdown-connector-add-connector"]').exists()
+    ).toBeTruthy();
   });
 
   test('the text of the update button is shown correctly', () => {

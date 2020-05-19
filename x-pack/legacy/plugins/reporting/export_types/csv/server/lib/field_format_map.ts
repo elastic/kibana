@@ -9,7 +9,15 @@ import {
   FieldFormatConfig,
   IFieldFormatsRegistry,
 } from '../../../../../../../../src/plugins/data/server';
-import { IndexPatternSavedObject } from '../../../../types';
+
+interface IndexPatternSavedObject {
+  attributes: {
+    fieldFormatMap: string;
+  };
+  id: string;
+  type: string;
+  version: string;
+}
 
 /**
  *  Create a map of FieldFormat instances for index pattern fields
