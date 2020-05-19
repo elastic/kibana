@@ -19,20 +19,17 @@ describe('CaseCallOut ', () => {
       ...defaultProps,
       message: 'we have one message',
     };
+
     const wrapper = mount(<CaseCallOut {...props} />);
+
     expect(
       wrapper
-        .find(`[data-test-subj="callout-message"]`)
+        .find(`[data-test-subj="callout-message-primary"]`)
         .last()
         .exists()
     ).toBeTruthy();
-    expect(
-      wrapper
-        .find(`[data-test-subj="callout-messages"]`)
-        .last()
-        .exists()
-    ).toBeFalsy();
   });
+
   it('Renders multi message callout', () => {
     const props = {
       ...defaultProps,
@@ -44,28 +41,57 @@ describe('CaseCallOut ', () => {
     const wrapper = mount(<CaseCallOut {...props} />);
     expect(
       wrapper
-        .find(`[data-test-subj="callout-message"]`)
+        .find(`[data-test-subj="callout-message-primary"]`)
         .last()
         .exists()
     ).toBeFalsy();
     expect(
       wrapper
-        .find(`[data-test-subj="callout-messages"]`)
+        .find(`[data-test-subj="callout-messages-primary"]`)
         .last()
         .exists()
     ).toBeTruthy();
   });
+
+  it('it shows the correct type of callouts', () => {
+    const props = {
+      ...defaultProps,
+      messages: [
+        {
+          ...defaultProps,
+          description: <p>{'we have two messages'}</p>,
+          errorType: 'danger' as 'primary' | 'success' | 'warning' | 'danger',
+        },
+        { ...defaultProps, description: <p>{'for real'}</p> },
+      ],
+    };
+    const wrapper = mount(<CaseCallOut {...props} />);
+    expect(
+      wrapper
+        .find(`[data-test-subj="callout-messages-danger"]`)
+        .last()
+        .exists()
+    ).toBeTruthy();
+
+    expect(
+      wrapper
+        .find(`[data-test-subj="callout-messages-primary"]`)
+        .last()
+        .exists()
+    ).toBeTruthy();
+  });
+
   it('Dismisses callout', () => {
     const props = {
       ...defaultProps,
       message: 'we have one message',
     };
     const wrapper = mount(<CaseCallOut {...props} />);
-    expect(wrapper.find(`[data-test-subj="case-call-out"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="case-call-out-primary"]`).exists()).toBeTruthy();
     wrapper
-      .find(`[data-test-subj="callout-dismiss"]`)
+      .find(`[data-test-subj="callout-dismiss-primary"]`)
       .last()
       .simulate('click');
-    expect(wrapper.find(`[data-test-subj="case-call-out"]`).exists()).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="case-call-out-primary"]`).exists()).toBeFalsy();
   });
 });

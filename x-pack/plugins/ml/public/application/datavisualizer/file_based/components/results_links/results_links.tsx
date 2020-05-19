@@ -153,8 +153,8 @@ export const ResultsLinks: FC<Props> = ({
             />
           }
           description=""
-          href={`${basePath.get()}/app/kibana#/management/kibana/index_patterns/${
-            createIndexPattern ? indexPatternId : ''
+          href={`${basePath.get()}/app/kibana#/management/kibana/indexPatterns${
+            createIndexPattern ? `/patterns/${indexPatternId}` : ''
           }`}
         />
       </EuiFlexItem>
