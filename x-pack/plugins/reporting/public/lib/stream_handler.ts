@@ -8,13 +8,13 @@ import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { NotificationsSetup } from 'src/core/public';
+import { JobId, JobStatusBuckets, JobSummary, SourceJob } from '../../common/types';
 import {
   JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY,
   JOB_STATUS_COMPLETED,
   JOB_STATUS_FAILED,
   JOB_STATUS_WARNINGS,
 } from '../../constants';
-import { JobId, JobStatusBuckets, JobSummary, SourceJob } from '../../index.d';
 import {
   getFailureToast,
   getGeneralErrorToast,
