@@ -10,7 +10,6 @@
     - "src/plugins/bfetch/**/*.*"
   - "Team:apm":
     - "x-pack/plugins/apm/**/*.*"
-    - "x-pack/plugins/apm/**/*.*"
   - "Team:Ingest Management":
     - "x-pack/plugins/ingest_manager/**/*.*"
     - "x-pack/test/api_integration/apis/fleet/**/*.*"
