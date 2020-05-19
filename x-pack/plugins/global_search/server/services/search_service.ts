@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable, timer, merge } from 'rxjs';
+import { Observable, timer, merge, throwError } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { KibanaRequest, CoreStart, IBasePath } from 'src/core/server';
 import { GlobalSearchProviderResult } from '../../common/types';
 import { takeInArray } from '../../common/operators';
+import { ILicenseChecker } from '../../common/license_checker';
+
 import { processProviderResult } from '../../common/process_result';
 import { GlobalSearchConfigType } from '../config';
 import { getContextFactory, GlobalSearchContextFactory } from './context';
@@ -34,6 +36,7 @@ export interface SearchServiceStart {
 
 interface SetupDeps {
   basePath: IBasePath;
+  licenseChecker: ILicenseChecker;
   config: GlobalSearchConfigType;
   maxProviderResults?: number;
 }
@@ -46,15 +49,18 @@ export class SearchService {
   private basePath?: IBasePath;
   private config?: GlobalSearchConfigType;
   private contextFactory?: GlobalSearchContextFactory;
+  private licenseChecker?: ILicenseChecker;
   private maxProviderResults = defaultMaxProviderResults;
 
   setup({
     basePath,
     config,
+    licenseChecker,
     maxProviderResults = defaultMaxProviderResults,
   }: SetupDeps): SearchServiceSetup {
     this.basePath = basePath;
     this.config = config;
+    this.licenseChecker = licenseChecker;
     this.maxProviderResults = maxProviderResults;
 
     return {
@@ -75,6 +81,13 @@ export class SearchService {
   }
 
   private performFind(term: string, options: GlobalSearchFindOptions, request: KibanaRequest) {
+    const licenseState = this.licenseChecker!.getState();
+    if (!licenseState.valid) {
+      return throwError(
+        `GlobalSearch API is disabled because of invalid license state: ${licenseState.message}`
+      );
+    }
+
     const context = this.contextFactory!(request);
 
     const timeout$ = timer(this.config!.search_timeout.asMilliseconds()).pipe(map(() => undefined));

@@ -9,6 +9,7 @@ import { take } from 'rxjs/operators';
 import { TestScheduler } from 'rxjs/testing';
 import { duration } from 'moment';
 import { httpServiceMock, httpServerMock, coreMock } from '../../../../../src/core/server/mocks';
+import { licenseCheckerMock } from '../../common/license_checker.mock';
 import { GlobalSearchProviderResult } from '../../common/types';
 import { GlobalSearchConfigType } from '../config';
 import { GlobalSearchResultProvider } from '../types';
@@ -23,6 +24,7 @@ describe('SearchService', () => {
   let service: SearchService;
   let basePath: ReturnType<typeof httpServiceMock.createBasePath>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
+  let licenseChecker: ReturnType<typeof licenseCheckerMock.create>;
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
 
   const createConfig = (timeoutMs: number = 30000): GlobalSearchConfigType => {
@@ -62,7 +64,7 @@ describe('SearchService', () => {
     basePath = httpServiceMock.createBasePath();
     basePath.prepend.mockImplementation(path => `/base-path${path}`);
     coreStart = coreMock.createStart();
-    httpServerMock.createKibanaRequest();
+    licenseChecker = licenseCheckerMock.create();
   });
 
   describe('#setup()', () => {
@@ -70,6 +72,7 @@ describe('SearchService', () => {
       it('throws when trying to register the same provider twice', () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
+          licenseChecker,
           basePath,
         });
 
@@ -87,6 +90,7 @@ describe('SearchService', () => {
       it('calls the provider with the correct parameters', () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
+          licenseChecker,
           basePath,
         });
 
@@ -107,6 +111,7 @@ describe('SearchService', () => {
       it('return the results from the provider', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
+          licenseChecker,
           basePath,
         });
 
@@ -130,6 +135,7 @@ describe('SearchService', () => {
       it('handles multiple providers', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
+          licenseChecker,
           basePath,
         });
 
@@ -168,6 +174,7 @@ describe('SearchService', () => {
       it('handles the `aborted$` option', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
+          licenseChecker,
           basePath,
         });
 
@@ -192,6 +199,7 @@ describe('SearchService', () => {
       it('respects the timeout duration', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(100),
+          licenseChecker,
           basePath,
         });
 
@@ -216,6 +224,7 @@ describe('SearchService', () => {
       it('only returns a given maximum number of results per provider', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(100),
+          licenseChecker,
           basePath,
           maxProviderResults: 2,
         });
@@ -254,6 +263,7 @@ describe('SearchService', () => {
       it('process the results before returning them', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
+          licenseChecker,
           basePath,
         });
 
@@ -287,6 +297,33 @@ describe('SearchService', () => {
         expect(batch.results[1]).toEqual({
           ...resultB,
           url: '/foo',
+        });
+      });
+
+      it('emits an error when the license is invalid', async () => {
+        licenseChecker.getState.mockReturnValue({ valid: false, message: 'expired' });
+
+        const { registerResultProvider } = service.setup({
+          config: createConfig(),
+          licenseChecker,
+          basePath,
+        });
+
+        getTestScheduler().run(({ expectObservable, hot }) => {
+          const providerResults = hot('a-b-|', {
+            a: [result('1')],
+            b: [result('2')],
+          });
+          registerResultProvider(createProvider('A', providerResults));
+
+          const { find } = service.start(coreStart);
+          const results = find('foo', {}, request);
+
+          expectObservable(results).toBe(
+            '#',
+            {},
+            'GlobalSearch API is disabled because of invalid license state: expired'
+          );
         });
       });
     });
