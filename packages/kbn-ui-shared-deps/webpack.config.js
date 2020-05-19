@@ -40,18 +40,14 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
       '@elastic/eui/dist/eui_theme_light.css',
       '@elastic/charts/dist/theme_only_light.css',
     ],
-    ...(dev
-      ? {
-          'kbn-ui-shared-deps.v8.dark': [
-            '@elastic/eui/dist/eui_theme_amsterdam_dark.css',
-            '@elastic/charts/dist/theme_only_dark.css',
-          ],
-          'kbn-ui-shared-deps.v8.light': [
-            '@elastic/eui/dist/eui_theme_amsterdam_light.css',
-            '@elastic/charts/dist/theme_only_light.css',
-          ],
-        }
-      : {}),
+    'kbn-ui-shared-deps.v8.dark': [
+      '@elastic/eui/dist/eui_theme_amsterdam_dark.css',
+      '@elastic/charts/dist/theme_only_dark.css',
+    ],
+    'kbn-ui-shared-deps.v8.light': [
+      '@elastic/eui/dist/eui_theme_amsterdam_light.css',
+      '@elastic/charts/dist/theme_only_light.css',
+    ],
   },
   context: __dirname,
   devtool: dev ? '#cheap-source-map' : false,
@@ -133,9 +129,6 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     ...(dev
       ? []
       : [
-          new webpack.DefinePlugin({
-            'window.__kbnThemeVersion__': '"v7"',
-          }),
           new CompressionPlugin({
             algorithm: 'brotliCompress',
             filename: '[path].br',
