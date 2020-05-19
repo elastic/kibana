@@ -407,6 +407,17 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
           };
         });
     }
+
+    public async getChartValues() {
+      const elements = await find.allByCssSelector('.series.histogram text');
+      const values = await Promise.all(
+        elements.map(async element => {
+          const text = await element.getVisibleText();
+          return text;
+        })
+      );
+      return values;
+    }
   }
 
   return new VisualizeChart();

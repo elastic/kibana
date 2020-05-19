@@ -78,6 +78,7 @@
 
 # Canvas
 /x-pack/plugins/canvas/  @elastic/kibana-canvas
+/x-pack/test/functional/apps/canvas/  @elastic/kibana-canvas
 
 # Observability UIs
 /x-pack/legacy/plugins/infra/ @elastic/logs-metrics-ui
