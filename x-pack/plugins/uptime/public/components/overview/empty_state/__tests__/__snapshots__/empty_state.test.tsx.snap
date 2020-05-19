@@ -638,7 +638,7 @@ exports[`EmptyState component doesn't render child components when count is fals
                           <EuiButton
                             color="primary"
                             fill={true}
-                            href="/app/home#/tutorial/uptimeMonitors"
+                            href="/app/kibana#/home/tutorial/uptimeMonitors"
                           >
                             <FormattedMessage
                               defaultMessage="View setup instructions"
@@ -806,11 +806,11 @@ exports[`EmptyState component doesn't render child components when count is fals
                               <EuiButton
                                 color="primary"
                                 fill={true}
-                                href="/app/home#/tutorial/uptimeMonitors"
+                                href="/app/kibana#/home/tutorial/uptimeMonitors"
                               >
                                 <a
                                   className="euiButton euiButton--primary euiButton--fill"
-                                  href="/app/home#/tutorial/uptimeMonitors"
+                                  href="/app/kibana#/home/tutorial/uptimeMonitors"
                                   rel="noreferrer"
                                 >
                                   <span
