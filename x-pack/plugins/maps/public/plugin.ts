@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
+// @ts-ignore
+import { i18n } from '@kbn/i18n';
 import {
   Plugin,
   CoreSetup,
   CoreStart,
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
-} from 'src/core/public';
-import { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
-// @ts-ignore
-import { i18n } from '@kbn/i18n';
+} from '../../../../src/core/public';
 import { MapView } from './inspector/views/map_view';
 import {
   setAutocompleteService,
