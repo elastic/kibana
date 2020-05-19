@@ -36,8 +36,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { esQuery, IndexPattern, Query } from '../../../../../../plugins/data/public';
-import { SEARCH_QUERY_LANGUAGE_SETTINGS } from '../../../../../../plugins/data/common';
+import { esQuery, IndexPattern, Query } from '../../../../../../data/public';
+import { SEARCH_QUERY_LANGUAGE_SETTINGS } from '../../../../../../data/common';
 import { ExecuteScript } from '../../types';
 
 interface TestScriptProps {

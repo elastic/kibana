@@ -25,6 +25,8 @@ import { i18n } from '@kbn/i18n';
 
 import { getServices } from '../../kibana_services';
 import { syncQueryStateWithUrl } from '../../../../data/public';
+import { VISUALIZE_ENABLE_LABS_SETTINGS } from '../../../../visualizations/common/constants';
+
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 
@@ -120,7 +122,7 @@ export function VisualizeListingController($scope, createNewVis, kbnUrlStateStor
   }
 
   this.fetchItems = filter => {
-    const isLabsEnabled = uiSettings.get('visualize:enableLabs');
+    const isLabsEnabled = uiSettings.get(VISUALIZE_ENABLE_LABS_SETTINGS);
     return savedVisualizations
       .findListItems(filter, savedObjectsPublic.settings.getListingLimit())
       .then(result => {

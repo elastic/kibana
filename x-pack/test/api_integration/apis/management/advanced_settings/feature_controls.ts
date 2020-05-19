@@ -7,6 +7,7 @@
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { CSV_QUOTE_VALUES_SETTINGS } from '../../../../../../src/plugins/share/common/constants';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
   const supertest: SuperTest<any> = getService('supertestWithoutAuth');
@@ -32,7 +33,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       .post(`${basePath}/api/kibana/settings`)
       .auth(username, password)
       .set('kbn-xsrf', 'foo')
-      .send({ changes: { 'csv:quoteValues': null } })
+      .send({ changes: { [CSV_QUOTE_VALUES_SETTINGS]: null } })
       .then((response: any) => ({ error: undefined, response }))
       .catch((error: any) => ({ error, response: undefined }));
   }

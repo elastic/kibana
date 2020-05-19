@@ -233,7 +233,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
             <li><strong>{sessionId}:</strong> restricts operations to execute all search requests on the same shards.
               This has the benefit of reusing shard caches across requests.</li>
             <li><strong>{custom}:</strong> allows you to define a your own preference.
-              Use <strong>${COURIER_CUSTOM_REQUEST_PREFERENCE_SETTINGS}</strong> to customize your preference value.</li>
+              Use <strong>'courier:customRequestPreference'</strong> to customize your preference value.</li>
             <li><strong>{none}:</strong> means do not set a preference.
               This might provide better performance because requests can be spread across all shard copies.
               However, results might be inconsistent because different shards might be in different refresh states.</li>

@@ -40,6 +40,10 @@ import {
   FORMAT_CURRENCY_DEFAULT_PATTERN_SETTINGS,
   FORMAT_NUMBER_DEFAULT_LOCALE_SETTINGS,
 } from '../../../../../src/plugins/data/common';
+import {
+  CSV_SEPARATOR_SETTINGS,
+  CSV_QUOTE_VALUES_SETTINGS,
+} from '../../../../../src/plugins/share/common/constants';
 
 const mockObservable = () => {
   return {
@@ -74,8 +78,8 @@ export const mockUiSettings = {
       [FORMAT_PERCENT_DEFAULT_PATTERN_SETTINGS]: '0,0.[000]%',
       [FORMAT_NUMBER_DEFAULT_LOCALE_SETTINGS]: 'en',
       [FORMAT_DEFAULT_TYPE_MAP_SETTINGS]: {},
-      'csv:separator': ',',
-      'csv:quoteValues': true,
+      [CSV_SEPARATOR_SETTINGS]: ',',
+      [CSV_QUOTE_VALUES_SETTINGS]: true,
       [SEARCH_QUERY_LANGUAGE_SETTINGS]: 'kuery',
       'state:storeInSessionStorage': false,
     };

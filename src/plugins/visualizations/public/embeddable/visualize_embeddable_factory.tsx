@@ -43,6 +43,7 @@ import { convertToSerializedVis } from '../saved_visualizations/_saved_vis';
 import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
 import { StartServicesGetter } from '../../../kibana_utils/public';
 import { VisualizationsStartDeps } from '../plugin';
+import { VISUALIZE_ENABLE_LABS_SETTINGS } from '../../common/constants';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -82,7 +83,7 @@ export class VisualizeEmbeddableFactory
       if (!visType) {
         return false;
       }
-      if (getUISettings().get('visualize:enableLabs')) {
+      if (getUISettings().get(VISUALIZE_ENABLE_LABS_SETTINGS)) {
         return true;
       }
       return visType.stage !== 'experimental';

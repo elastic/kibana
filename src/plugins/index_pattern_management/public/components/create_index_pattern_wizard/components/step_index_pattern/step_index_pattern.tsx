@@ -25,12 +25,9 @@ import {
   indexPatterns,
   DataPublicPluginStart,
   IndexPatternAttributes,
-} from '../../../../../../../../../../plugins/data/public';
-import { INDEXPATTERN_PLACEHOLDER_SETTINGS } from '../../../../../../../../../../plugins/data/common';
-import {
-  SavedObjectsClientContract,
-  IUiSettingsClient,
-} from '../../../../../../../../../../core/public';
+} from '../../../../../../../plugins/data/public';
+import { INDEXPATTERN_PLACEHOLDER_SETTINGS } from '../../../../../../../plugins/data/common';
+import { SavedObjectsClientContract, IUiSettingsClient } from '../../../../../../../core/public';
 import { MAX_SEARCH_SIZE } from '../../constants';
 import {
   getIndices,

@@ -29,6 +29,7 @@ import { TypeSelection } from './type_selection';
 import { TypesStart, VisType, VisTypeAlias } from '../vis_types';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
 import { EMBEDDABLE_ORIGINATING_APP_PARAM } from '../../../embeddable/public';
+import { VISUALIZE_ENABLE_LABS_SETTINGS } from '../../common/constants';
 
 interface TypeSelectionProps {
   isOpen: boolean;
@@ -65,7 +66,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
 
   constructor(props: TypeSelectionProps) {
     super(props);
-    this.isLabsEnabled = props.uiSettings.get('visualize:enableLabs');
+    this.isLabsEnabled = props.uiSettings.get(VISUALIZE_ENABLE_LABS_SETTINGS);
 
     this.state = {
       showSearchVisModal: false,

@@ -27,6 +27,8 @@ import {
   Logger,
 } from '../../../core/server';
 
+import { VISUALIZE_ENABLE_LABS_SETTINGS } from '../common/constants';
+
 import { visualizationSavedObjectType } from './saved_objects';
 
 import { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
@@ -45,7 +47,7 @@ export class VisualizationsPlugin
     core.savedObjects.registerType(visualizationSavedObjectType);
 
     core.uiSettings.register({
-      'visualize:enableLabs': {
+      [VISUALIZE_ENABLE_LABS_SETTINGS]: {
         name: i18n.translate('visualizations.advancedSettings.visualizeEnableLabsTitle', {
           defaultMessage: 'Enable experimental visualizations',
         }),

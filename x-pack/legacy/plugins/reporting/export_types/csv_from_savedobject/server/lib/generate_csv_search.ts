@@ -17,6 +17,10 @@ import {
   QUERY_ALLOW_LEADING_WILDCARDS_SETTINGS,
   COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_SETTINGS,
 } from '../../../../../../../../src/plugins/data/common';
+import {
+  CSV_SEPARATOR_SETTINGS,
+  CSV_QUOTE_VALUES_SETTINGS,
+} from '../../../../../../../../src/plugins/share/common/constants';
 import { CancellationToken } from '../../../../../../../plugins/reporting/common';
 import { ReportingCore } from '../../../../server';
 import { LevelLogger } from '../../../../server/lib';
@@ -53,7 +57,10 @@ const getEsQueryConfig = async (config: IUiSettingsClient) => {
 };
 
 const getUiSettings = async (config: IUiSettingsClient) => {
-  const configs = await Promise.all([config.get('csv:separator'), config.get('csv:quoteValues')]);
+  const configs = await Promise.all([
+    config.get(CSV_SEPARATOR_SETTINGS),
+    config.get(CSV_QUOTE_VALUES_SETTINGS),
+  ]);
   const [separator, quoteValues] = configs;
   return { separator, quoteValues };
 };

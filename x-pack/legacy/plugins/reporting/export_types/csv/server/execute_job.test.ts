@@ -17,6 +17,10 @@ import { createMockReportingCore } from '../../../test_helpers';
 import { JobDocPayloadDiscoverCsv } from '../types';
 import { executeJobFactory } from './execute_job';
 import { FORMAT_DEFAULT_TYPE_MAP_SETTINGS } from '../../../../../../../src/plugins/data/common';
+import {
+  CSV_SEPARATOR_SETTINGS,
+  CSV_QUOTE_VALUES_SETTINGS,
+} from '../../../../../../../src/plugins/share/common/constants';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(() => resolve(), ms));
 
@@ -92,8 +96,8 @@ describe('CSV Execute Job', function() {
       .stub(clusterStub, 'callAsCurrentUser')
       .resolves(defaultElasticsearchResponse);
 
-    mockUiSettingsClient.get.withArgs('csv:separator').returns(',');
-    mockUiSettingsClient.get.withArgs('csv:quoteValues').returns(true);
+    mockUiSettingsClient.get.withArgs(CSV_SEPARATOR_SETTINGS).returns(',');
+    mockUiSettingsClient.get.withArgs(CSV_QUOTE_VALUES_SETTINGS).returns(true);
 
     setFieldFormats({
       fieldFormatServiceFactory() {
@@ -746,7 +750,7 @@ describe('CSV Execute Job', function() {
     });
 
     it('should use custom uiSettings csv:separator for header', async function() {
-      mockUiSettingsClient.get.withArgs('csv:separator').returns(';');
+      mockUiSettingsClient.get.withArgs(CSV_SEPARATOR_SETTINGS).returns(';');
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
@@ -758,7 +762,7 @@ describe('CSV Execute Job', function() {
     });
 
     it('should escape column headers if uiSettings csv:quoteValues is true', async function() {
-      mockUiSettingsClient.get.withArgs('csv:quoteValues').returns(true);
+      mockUiSettingsClient.get.withArgs(CSV_QUOTE_VALUES_SETTINGS).returns(true);
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
@@ -770,7 +774,7 @@ describe('CSV Execute Job', function() {
     });
 
     it(`shouldn't escape column headers if uiSettings csv:quoteValues is false`, async function() {
-      mockUiSettingsClient.get.withArgs('csv:quoteValues').returns(false);
+      mockUiSettingsClient.get.withArgs(CSV_QUOTE_VALUES_SETTINGS).returns(false);
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
