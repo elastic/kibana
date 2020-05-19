@@ -5,9 +5,9 @@
  */
 
 import sinon from 'sinon';
+import { ReportingConfig, ReportingCore } from '../../../server';
+import { JobDocPayload } from '../../../server/types';
 import { createMockReportingCore } from '../../../test_helpers';
-import { ReportingConfig, ReportingCore } from '../../../server/types';
-import { JobDocPayload } from '../../../types';
 import { JobDocPayloadPDF } from '../../printable_pdf/types';
 import { getConditionalHeaders, getCustomLogo } from './index';
 
