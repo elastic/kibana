@@ -23,7 +23,7 @@ import {
 } from '../link_to';
 import { FlowTarget, FlowTargetSourceDest } from '../../../graphql/types';
 import { useUiSetting$ } from '../../lib/kibana';
-import { isUrlInvalid } from '../../../alerts/components/rules/step_about_rule/helpers';
+import { isUrlInvalid } from '../../utils/validators';
 import { ExternalLinkIcon } from '../external_link_icon';
 import { navTabs } from '../../../app/home/home_navigations';
 import { useGetUrlSearch } from '../navigation/use_get_url_search';
