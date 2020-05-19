@@ -13152,7 +13152,6 @@
     "xpack.siem.case.configureCases.incidentManagementSystemLabel": "インシデント管理システム",
     "xpack.siem.case.configureCases.incidentManagementSystemTitle": "サードパーティのインシデント管理システムに接続",
     "xpack.siem.case.configureCases.noConnector": "コネクターを選択していません",
-    "xpack.siem.case.configureCases.saveChangesButton": "変更を保存",
     "xpack.siem.case.configureCases.updateConnector": "コネクターを更新",
     "xpack.siem.case.configureCases.warningMessage": "構成が無効のようです。選択したコネクターが見つかりませんコネクターを削除しましたか？",
     "xpack.siem.case.configureCases.warningTitle": "警告",
