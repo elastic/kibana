@@ -54,10 +54,10 @@ export const isValidCertVal = (val: string | number) => {
   if (val === '') {
     return Translations.BLANK_STR;
   }
-  if (val <= 0) {
+  const number = typeof val === 'string' ? Number(val) : val;
+  if (number <= 0) {
     return VALUE_MUST_BE_GREATER_THAN_ZERO;
   }
-  const number = Number(val);
   if (!number || number % 1) {
     return VALUE_MUST_BE_AN_INTEGER;
   }
