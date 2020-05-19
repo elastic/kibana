@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SearchResponse } from 'elasticsearch';
-import { ResolverEvent } from '../../../../common/types';
+import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { ResolverQuery } from './base';
 import { PaginationBuilder, PaginatedResults } from '../utils/pagination';
-import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/public';
+import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/public';
 
 /**
  * Builds a query for retrieving descendants of a node.
