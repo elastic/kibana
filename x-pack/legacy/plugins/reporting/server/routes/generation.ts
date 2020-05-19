@@ -7,14 +7,16 @@
 import boom from 'boom';
 import { errors as elasticsearchErrors } from 'elasticsearch';
 import { Legacy } from 'kibana';
+import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
-import { Logger, ReportingResponseToolkit, ServerFacade } from '../../types';
-import { ReportingCore, ReportingSetupDeps } from '../types';
+import { LevelLogger as Logger } from '../lib';
+import { ReportingSetupDeps, ServerFacade } from '../types';
 import { registerGenerateFromJobParams } from './generate_from_jobparams';
 import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerGenerateCsvFromSavedObjectImmediate } from './generate_from_savedobject_immediate';
 import { registerLegacy } from './legacy';
 import { makeRequestFacade } from './lib/make_request_facade';
+import { ReportingResponseToolkit } from './types';
 
 const esErrors = elasticsearchErrors as Record<string, any>;
 
