@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Maybe } from '../../../../../typings/common';
-import { Annotation } from '../../../../../common/annotations';
+import { Annotation, AnnotationType } from '../../../../../common/annotations';
 import { PlotValues, SharedPlot } from './plotUtils';
 import { asAbsoluteDateTime } from '../../../../utils/formatters';
 
@@ -29,6 +29,11 @@ interface Props {
 const style = {
   stroke: theme.euiColorSecondary,
   strokeDasharray: 'none'
+};
+
+const colorMap = {
+  [AnnotationType.VERSION]: theme.euiColorSecondary,
+  [AnnotationType.ALERT]: theme.euiColorVis3
 };
 
 export function AnnotationsPlot(props: Props) {
@@ -56,8 +61,8 @@ export function AnnotationsPlot(props: Props) {
               <EuiFlexGroup>
                 <EuiFlexItem grow={true}>
                   <EuiText>
-                    {i18n.translate('xpack.apm.version', {
-                      defaultMessage: 'Version'
+                    {i18n.translate('xpack.apm.annotation.message', {
+                      defaultMessage: 'Message'
                     })}
                   </EuiText>
                 </EuiFlexItem>
@@ -65,7 +70,7 @@ export function AnnotationsPlot(props: Props) {
               </EuiFlexGroup>
             }
           >
-            <EuiIcon type="dot" color={theme.euiColorSecondary} />
+            <EuiIcon type="dot" color={colorMap[annotation.type]} />
           </EuiToolTip>
         </div>
       ))}

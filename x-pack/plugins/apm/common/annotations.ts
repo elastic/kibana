@@ -5,7 +5,8 @@
  */
 
 export enum AnnotationType {
-  VERSION = 'version'
+  VERSION = 'version',
+  ALERT = 'alert'
 }
 
 export interface Annotation {

@@ -46,14 +46,6 @@ export function createAnnotationsClient(params: {
 }) {
   const { index, apiCaller, logger, license } = params;
 
-  const initIndex = () =>
-    createOrUpdateIndex({
-      index,
-      mappings,
-      apiCaller,
-      logger,
-    });
-
   function ensureGoldLicense<T extends (...args: any[]) => any>(fn: T): T {
     return ((...args) => {
       if (!license?.hasAtLeast('gold')) {
@@ -71,13 +63,12 @@ export function createAnnotationsClient(params: {
       async (
         createParams: CreateParams
       ): Promise<{ _id: string; _index: string; _source: Annotation }> => {
-        const indexExists = await apiCaller('indices.exists', {
+        await createOrUpdateIndex({
           index,
+          mappings,
+          apiCaller,
+          logger,
         });
-
-        if (!indexExists) {
-          await initIndex();
-        }
 
         const annotation = {
           ...createParams,

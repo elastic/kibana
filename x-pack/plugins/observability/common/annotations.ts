@@ -22,6 +22,9 @@ export const createAnnotationRt = t.intersection([
       environment: t.string,
       version: t.string,
     }),
+    transaction: t.type({
+      type: t.string,
+    }),
   }),
 ]);
 

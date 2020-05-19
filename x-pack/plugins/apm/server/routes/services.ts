@@ -95,8 +95,7 @@ export const serviceAnnotationsRoute = createRoute(() => ({
     const { environment } = context.params.query;
 
     const annotationsClient = await context.plugins.observability?.getScopedAnnotationsClient(
-      context,
-      request
+      context.core.elasticsearch.dataClient.callAsCurrentUser
     );
 
     return getServiceAnnotations({
@@ -139,8 +138,7 @@ export const serviceAnnotationsCreateRoute = createRoute(() => ({
   },
   handler: async ({ request, context }) => {
     const annotationsClient = await context.plugins.observability?.getScopedAnnotationsClient(
-      context,
-      request
+      context.core.elasticsearch.dataClient.callAsCurrentUser
     );
 
     if (!annotationsClient) {

@@ -46,7 +46,7 @@ export async function getStoredAnnotations({
                     }
                   }
                 },
-                { term: { 'annotation.type': 'deployment' } },
+                { terms: { 'annotation.type': ['deployment', 'alert'] } },
                 { term: { tags: 'apm' } },
                 { term: { [SERVICE_NAME]: serviceName } },
                 ...(environmentFilter ? [environmentFilter] : [])
@@ -59,7 +59,10 @@ export async function getStoredAnnotations({
 
     return response.hits.hits.map(hit => {
       return {
-        type: AnnotationType.VERSION,
+        type:
+          hit._source.annotation.type === 'deployment'
+            ? AnnotationType.VERSION
+            : AnnotationType.ALERT,
         id: hit._id,
         '@timestamp': new Date(hit._source['@timestamp']).getTime(),
         text: hit._source.message

@@ -122,8 +122,8 @@ export default function Legends({
           }}
           text={
             <LegendContent>
-              {i18n.translate('xpack.apm.serviceVersion', {
-                defaultMessage: 'Service version'
+              {i18n.translate('xpack.apm.legends.annotations', {
+                defaultMessage: 'Annotations'
               })}
             </LegendContent>
           }

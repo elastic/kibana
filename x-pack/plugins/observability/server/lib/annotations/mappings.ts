@@ -43,5 +43,12 @@ export const mappings = {
         },
       },
     },
+    transaction: {
+      properties: {
+        type: {
+          type: 'keyword',
+        },
+      },
+    },
   },
 } as const;

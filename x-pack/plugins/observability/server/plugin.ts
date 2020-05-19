@@ -3,18 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
+import { PluginInitializerContext, Plugin, CoreSetup, APICaller } from 'src/core/server';
 import { take } from 'rxjs/operators';
+import { LicensingPluginSetup } from '../../licensing/server';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
   ScopedAnnotationsClient,
-  ScopedAnnotationsClientFactory,
   AnnotationsAPI,
 } from './lib/annotations/bootstrap_annotations';
 
 type LazyScopedAnnotationsClientFactory = (
-  ...args: Parameters<ScopedAnnotationsClientFactory>
+  apiCaller: APICaller
 ) => Promise<ScopedAnnotationsClient | undefined>;
 
 export interface ObservabilityPluginSetup {
@@ -26,7 +26,12 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     this.initContext = initContext;
   }
 
-  public async setup(core: CoreSetup, plugins: {}): Promise<ObservabilityPluginSetup> {
+  public async setup(
+    core: CoreSetup,
+    plugins: {
+      licensing?: LicensingPluginSetup;
+    }
+  ): Promise<ObservabilityPluginSetup> {
     const config$ = this.initContext.config.create<ObservabilityConfig>();
 
     const config = await config$.pipe(take(1)).toPromise();
@@ -46,9 +51,12 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     }
 
     return {
-      getScopedAnnotationsClient: async (...args) => {
+      getScopedAnnotationsClient: async (apiCaller: APICaller) => {
         const api = await annotationsApiPromise;
-        return api?.getScopedAnnotationsClient(...args);
+        return api?.getScopedAnnotationsClient({
+          apiCaller,
+          license: await plugins.licensing?.license$.pipe(take(1)).toPromise(),
+        });
       },
     };
   }

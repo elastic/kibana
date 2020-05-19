@@ -8,6 +8,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
+import { ObservabilityPluginSetup } from '../../../../observability/server';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import { ESSearchResponse } from '../../../typings/elasticsearch';
@@ -24,6 +25,7 @@ import { APMConfig } from '../..';
 
 interface RegisterAlertParams {
   alerting: AlertingPlugin['setup'];
+  observability?: ObservabilityPluginSetup;
   config$: Observable<APMConfig>;
 }
 
@@ -44,6 +46,7 @@ const paramsSchema = schema.object({
 const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.TransactionDuration];
 
 export function registerTransactionDurationAlertType({
+  observability,
   alerting,
   config$
 }: RegisterAlertParams) {
@@ -81,7 +84,15 @@ export function registerTransactionDurationAlertType({
     executor: async ({ services, params }) => {
       const config = await config$.pipe(take(1)).toPromise();
 
-      const alertParams = params as TypeOf<typeof paramsSchema>;
+      const {
+        serviceName,
+        environment,
+        threshold,
+        transactionType,
+        windowSize,
+        windowUnit,
+        aggregationType
+      } = params as TypeOf<typeof paramsSchema>;
 
       const indices = await getApmIndices({
         config,
@@ -89,9 +100,9 @@ export function registerTransactionDurationAlertType({
       });
 
       const environmentTerm =
-        alertParams.environment === ENVIRONMENT_ALL
+        environment === ENVIRONMENT_ALL
           ? []
-          : [{ term: { [SERVICE_ENVIRONMENT]: alertParams.environment } }];
+          : [{ term: { [SERVICE_ENVIRONMENT]: environment } }];
 
       const searchParams = {
         index: indices['apm_oss.transactionIndices'],
@@ -103,7 +114,7 @@ export function registerTransactionDurationAlertType({
                 {
                   range: {
                     '@timestamp': {
-                      gte: `now-${alertParams.windowSize}${alertParams.windowUnit}`
+                      gte: `now-${windowSize}${windowUnit}`
                     }
                   }
                 },
@@ -114,12 +125,12 @@ export function registerTransactionDurationAlertType({
                 },
                 {
                   term: {
-                    [SERVICE_NAME]: alertParams.serviceName
+                    [SERVICE_NAME]: serviceName
                   }
                 },
                 {
                   term: {
-                    [TRANSACTION_TYPE]: alertParams.transactionType
+                    [TRANSACTION_TYPE]: transactionType
                   }
                 },
                 ...environmentTerm
@@ -128,7 +139,7 @@ export function registerTransactionDurationAlertType({
           },
           aggs: {
             agg:
-              alertParams.aggregationType === 'avg'
+              aggregationType === 'avg'
                 ? {
                     avg: {
                       field: TRANSACTION_DURATION
@@ -137,9 +148,7 @@ export function registerTransactionDurationAlertType({
                 : {
                     percentiles: {
                       field: TRANSACTION_DURATION,
-                      percents: [
-                        alertParams.aggregationType === '95th' ? 95 : 99
-                      ]
+                      percents: [aggregationType === '95th' ? 95 : 99]
                     }
                   }
           }
@@ -159,13 +168,39 @@ export function registerTransactionDurationAlertType({
 
       const value = 'values' in agg ? agg.values[0] : agg.value;
 
-      if (value && value > alertParams.threshold * 1000) {
+      if (value && value > threshold * 1000) {
         const alertInstance = services.alertInstanceFactory(
           AlertType.TransactionDuration
         );
+
         alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
-          transactionType: alertParams.transactionType,
-          serviceName: alertParams.serviceName
+          transactionType,
+          serviceName
+        });
+
+        const annotationsClient = await observability?.getScopedAnnotationsClient(
+          services.callCluster
+        );
+
+        await annotationsClient?.create({
+          '@timestamp': new Date().toISOString(),
+          annotation: {
+            type: 'alert'
+          },
+          message: i18n.translate(
+            'xpack.apm.registerTransactionDurationAlertType.annotation',
+            {
+              defaultMessage: `Transaction duration exceeded`
+            }
+          ),
+          tags: ['apm'],
+          service: {
+            name: serviceName,
+            ...(environment !== ENVIRONMENT_ALL ? { environment } : {})
+          },
+          transaction: {
+            type: transactionType
+          }
         });
       }
 

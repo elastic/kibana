@@ -8,6 +8,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
+import { ObservabilityPluginSetup } from '../../../../observability/server';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
@@ -25,6 +26,7 @@ import { APMConfig } from '../..';
 
 interface RegisterAlertParams {
   alerting: AlertingPlugin['setup'];
+  observability?: ObservabilityPluginSetup;
   config$: Observable<APMConfig>;
 }
 
@@ -40,6 +42,7 @@ const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.ErrorRate];
 
 export function registerErrorRateAlertType({
   alerting,
+  observability,
   config$
 }: RegisterAlertParams) {
   alerting.registerType({
