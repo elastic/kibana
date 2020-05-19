@@ -17,7 +17,9 @@ import {
   UndefinedResultPosition,
 } from '../types';
 
+export { AlertIdError } from './error';
 export { Pagination } from './pagination';
+export { AlertId } from './alert_id';
 
 function reverseSortDirection(order: AlertAPIOrdering): AlertAPIOrdering {
   if (order === 'asc') {
