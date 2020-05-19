@@ -18,6 +18,13 @@ import { MSearchQuery } from './multi_searcher';
  * Elasticsearch's SearchResponse<ResolverEvent> response.
  */
 export abstract class ResolverQuery<T> implements MSearchQuery {
+  /**
+   *
+   * @param indexPattern the index pattern to use in the query for finding indices with documents in ES.
+   * @param endpointID this field is optional because it is only used when searching for legacy event data. The reason
+   *  we need `endpointID` for legacy data is because we don't have a cross endpoint unique identifier for process
+   *  events. Instead we use `unique_pid/ppid` and `endpointID` to uniquely identify a process event.
+   */
   constructor(private readonly indexPattern: string, private readonly endpointID?: string) {}
 
   private static createIdsArray(ids: string | string[]): string[] {
