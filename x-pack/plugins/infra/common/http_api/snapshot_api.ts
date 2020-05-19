@@ -6,6 +6,7 @@
 
 import * as rt from 'io-ts';
 import { SnapshotMetricTypeRT, ItemTypeRT } from '../inventory_models/types';
+import { metricsExplorerSeriesRT } from './metrics_explorer';
 
 export const SnapshotNodePathRT = rt.intersection([
   rt.type({
@@ -21,6 +22,7 @@ const SnapshotNodeMetricOptionalRT = rt.partial({
   value: rt.union([rt.number, rt.null]),
   avg: rt.union([rt.number, rt.null]),
   max: rt.union([rt.number, rt.null]),
+  timeseries: metricsExplorerSeriesRT,
 });
 
 const SnapshotNodeMetricRequiredRT = rt.type({
@@ -41,11 +43,19 @@ export const SnapshotNodeResponseRT = rt.type({
   interval: rt.string,
 });
 
-export const InfraTimerangeInputRT = rt.type({
-  interval: rt.string,
-  to: rt.number,
-  from: rt.number,
-});
+export const InfraTimerangeInputRT = rt.intersection([
+  rt.type({
+    interval: rt.string,
+    to: rt.number,
+    from: rt.number,
+  }),
+  rt.partial({
+    lookbackSize: rt.number,
+    ignoreLookback: rt.boolean,
+    forceInterval: rt.boolean,
+    interval: rt.string,
+  }),
+]);
 
 export const SnapshotGroupByRT = rt.array(
   rt.partial({
@@ -97,6 +107,9 @@ export const SnapshotRequestRT = rt.intersection([
     accountId: rt.string,
     region: rt.string,
     filterQuery: rt.union([rt.string, rt.null]),
+    includeTimeseries: rt.boolean,
+    limit: rt.number,
+    afterKey: rt.record(rt.string, rt.string),
   }),
 ]);
 
