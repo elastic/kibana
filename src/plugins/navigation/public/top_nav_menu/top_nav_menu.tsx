@@ -53,8 +53,8 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     return null;
   }
 
-  function renderItems() {
-    if (!config || config.length === 0) return;
+  function renderItems(): ReactElement[] | null {
+    if (!config || config.length === 0) return null;
     return config.map((menuItem: TopNavMenuData, i: number) => {
       return (
         <EuiFlexItem
@@ -68,8 +68,8 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     });
   }
 
-  function renderMenu(className: string) {
-    if (!config || config.length === 0) return;
+  function renderMenu(className: string): ReactElement | null {
+    if (!config || config.length === 0) return null;
     return (
       <EuiFlexGroup
         data-test-subj="top-nav"
@@ -84,9 +84,9 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     );
   }
 
-  function renderSearchBar() {
+  function renderSearchBar(): ReactElement | null {
     // Validate presense of all required fields
-    if (!showSearchBar || !props.data) return;
+    if (!showSearchBar || !props.data) return null;
     const { SearchBar } = props.data.ui;
     return <SearchBar {...searchBarProps} />;
   }
