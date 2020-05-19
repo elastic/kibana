@@ -12,9 +12,11 @@ jest.mock('./edit_user', () => ({
   EditUserPage: (props: any) => `User Edit Page: ${JSON.stringify(props)}`,
 }));
 
+import { ScopedHistory } from 'src/core/public';
+
 import { usersManagementApp } from './users_management_app';
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
 import { securityMock } from '../../mocks';
 
 async function mountApp(basePath: string) {
@@ -26,7 +28,12 @@ async function mountApp(basePath: string) {
       authc: securityMock.createSetup().authc,
       getStartServices: coreMock.createSetup().getStartServices as any,
     })
-    .mount({ basePath, element: container, setBreadcrumbs });
+    .mount({
+      basePath,
+      element: container,
+      setBreadcrumbs,
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+    });
 
   return { unmount, container, setBreadcrumbs };
 }

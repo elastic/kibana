@@ -17,9 +17,11 @@ jest.mock('./edit_space', () => ({
   },
 }));
 
+import { ScopedHistory } from 'src/core/public';
+
 import { spacesManagementApp } from './spaces_management_app';
 
-import { coreMock } from '../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../src/core/public/mocks';
 import { securityMock } from '../../../security/public/mocks';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 import { SecurityLicenseFeatures } from '../../../security/public';
@@ -53,7 +55,12 @@ async function mountApp(basePath: string, spaceId?: string) {
       securityLicense,
       getStartServices: async () => [coreStart, pluginsStart as PluginsStart, {}],
     })
-    .mount({ basePath, element: container, setBreadcrumbs });
+    .mount({
+      basePath,
+      element: container,
+      setBreadcrumbs,
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+    });
 
   return { unmount, container, setBreadcrumbs };
 }
