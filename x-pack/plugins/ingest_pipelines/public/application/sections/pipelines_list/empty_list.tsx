@@ -6,8 +6,8 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiButton, EuiEmptyPrompt, EuiLink, EuiPageBody, EuiPageContent } from '@elastic/eui';
-import { BASE_PATH } from '../../../../common/constants';
+import { EuiEmptyPrompt, EuiLink, EuiPageBody, EuiPageContent } from '@elastic/eui';
+import { EuiButtonReactRouter } from '../../../../../../../src/plugins/kibana_react/public';
 import { useKibana } from '../../../shared_imports';
 
 export const EmptyList: FunctionComponent = () => {
@@ -41,11 +41,11 @@ export const EmptyList: FunctionComponent = () => {
             </p>
           }
           actions={
-            <EuiButton href={`/create`} iconType="plusInCircle" fill>
+            <EuiButtonReactRouter to="/create" iconType="plusInCircle" fill>
               {i18n.translate('xpack.ingestPipelines.list.table.emptyPrompt.createButtonLabel', {
                 defaultMessage: 'Create a pipeline',
               })}
-            </EuiButton>
+            </EuiButtonReactRouter>
           }
         />
       </EuiPageContent>

@@ -19,7 +19,6 @@
 
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -33,6 +32,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiButtonEmptyReactRouter } from '../../../../kibana_react/public';
 import {
   SavedObjectsClientContract,
   IUiSettingsClient,
@@ -46,7 +46,7 @@ import { IndexPatternManagementStart } from '../../plugin';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
 
-const columns = (history: AppMountParameters['history']) => [
+const columns = [
   {
     field: 'title',
     name: 'Pattern',
@@ -60,7 +60,7 @@ const columns = (history: AppMountParameters['history']) => [
         }>;
       }
     ) => (
-      <EuiButtonEmpty size="xs" onClick={() => history.push(`/patterns/${index.id}`)}>
+      <EuiButtonEmptyReactRouter size="xs" to={`/patterns/${index.id}`}>
         {name}
         {index.tags &&
           index.tags.map(({ key: tagKey, name: tagName }) => (
@@ -68,7 +68,7 @@ const columns = (history: AppMountParameters['history']) => [
               {tagName}
             </EuiBadge>
           ))}
-      </EuiButtonEmpty>
+      </EuiButtonEmptyReactRouter>
     ),
     dataType: 'string' as const,
     sortable: ({ sort }: { sort: string }) => sort,
@@ -197,7 +197,7 @@ export const IndexPatternTable = ({
         itemId="id"
         isSelectable={false}
         items={indexPatterns}
-        columns={columns(history)}
+        columns={columns}
         pagination={pagination}
         sorting={sorting}
         search={search}

@@ -49,6 +49,7 @@ export const ManagementApp = ({ context, dependencies, history }: ManagementAppP
   const onManagementSectionSelected = useCallback(
     (id: string, path: string) => {
       history.push(path);
+      window.scrollTo(0, 0);
     },
     [history]
   );

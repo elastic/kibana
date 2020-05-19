@@ -17,26 +17,6 @@
  * under the License.
  */
 
-export * from './code_editor';
-export * from './exit_full_screen_button';
-export * from './context';
-export * from './overlays';
-export * from './ui_settings';
-export * from './field_icon';
-export * from './table_list_view';
-export * from './split_panel';
-export * from './eui_link_react_router';
-export { ValidatedDualRange, Value } from './validated_range';
-export * from './notifications';
-export { Markdown, MarkdownSimple } from './markdown';
-export { reactToUiComponent, uiToReactComponent } from './adapters';
-export { useUrlTracker } from './use_url_tracker';
-export { toMountPoint } from './util';
-
-/** dummy plugin, we just want kibanaReact to have its own bundle */
-export function plugin() {
-  return new (class KibanaReactPlugin {
-    setup() {}
-    start() {}
-  })();
-}
+export { EuiLinkReactRouter } from './eui_link_react_router';
+export { EuiButtonReactRouter } from './eui_button_react_router';
+export { EuiButtonEmptyReactRouter } from './eui_button_empty_react_router';
