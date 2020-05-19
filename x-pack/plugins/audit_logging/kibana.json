@@ -1,0 +1,12 @@
+{
+  "id": "auditLogging",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": [
+    "xpack",
+    "audit_logging"
+  ],
+  "requiredPlugins": ["licensing"],
+  "server": true,
+  "ui": false
+}

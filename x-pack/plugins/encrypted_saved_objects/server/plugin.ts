@@ -27,7 +27,6 @@ export interface PluginsSetup {
 
 export interface EncryptedSavedObjectsPluginSetup {
   registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => void;
-  __legacyCompat: { registerLegacyAPI: (legacyAPI: LegacyAPI) => void };
   usingEphemeralEncryptionKey: boolean;
 }
 
@@ -36,29 +35,11 @@ export interface EncryptedSavedObjectsPluginStart extends SavedObjectsSetup {
 }
 
 /**
- * Describes a set of APIs that is available in the legacy platform only and required by this plugin
- * to function properly.
- */
-export interface LegacyAPI {
-  auditLogger: {
-    log: (eventType: string, message: string, data?: Record<string, unknown>) => void;
-  };
-}
-
-/**
  * Represents EncryptedSavedObjects Plugin instance that will be managed by the Kibana plugin system.
  */
 export class Plugin {
   private readonly logger: Logger;
   private savedObjectsSetup!: SavedObjectsSetup;
-
-  private legacyAPI?: LegacyAPI;
-  private readonly getLegacyAPI = () => {
-    if (!this.legacyAPI) {
-      throw new Error('Legacy API is not registered!');
-    }
-    return this.legacyAPI;
-  };
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -72,12 +53,12 @@ export class Plugin {
       .pipe(first())
       .toPromise();
 
+    const auditLogger = new EncryptedSavedObjectsAuditLogger(
+      deps.security?.audit.createAuditLogger(this.logger)
+    );
+
     const service = Object.freeze(
-      new EncryptedSavedObjectsService(
-        config.encryptionKey,
-        this.logger,
-        new EncryptedSavedObjectsAuditLogger(() => this.getLegacyAPI().auditLogger)
-      )
+      new EncryptedSavedObjectsService(config.encryptionKey, this.logger, auditLogger)
     );
 
     this.savedObjectsSetup = setupSavedObjects({
@@ -90,7 +71,6 @@ export class Plugin {
     return {
       registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) =>
         service.registerType(typeRegistration),
-      __legacyCompat: { registerLegacyAPI: (legacyAPI: LegacyAPI) => (this.legacyAPI = legacyAPI) },
       usingEphemeralEncryptionKey,
     };
   }

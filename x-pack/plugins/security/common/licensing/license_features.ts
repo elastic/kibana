@@ -59,6 +59,11 @@ export interface SecurityLicenseFeatures {
   readonly allowSubFeaturePrivileges: boolean;
 
   /**
+   * Indicates whether we allow audit logging.
+   */
+  readonly allowAuditLogging: boolean;
+
+  /**
    * Describes the layout of the login form if it's displayed.
    */
   readonly layout?: LoginLayout;

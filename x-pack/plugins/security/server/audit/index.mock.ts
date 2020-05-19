@@ -15,3 +15,11 @@ export const securityAuditLoggerMock = {
     } as unknown) as jest.Mocked<SecurityAuditLogger>;
   },
 };
+
+export const auditLoggingServiceMock = {
+  create() {
+    return {
+      createAuditLogger: jest.fn(),
+    };
+  },
+};

@@ -24,6 +24,7 @@ describe('license features', function() {
       layout: 'error-es-unavailable',
       allowRbac: false,
       allowSubFeaturePrivileges: false,
+      allowAuditLogging: false,
     });
   });
 
@@ -44,6 +45,7 @@ describe('license features', function() {
       layout: 'error-xpack-unavailable',
       allowRbac: false,
       allowSubFeaturePrivileges: false,
+      allowAuditLogging: false,
     });
   });
 
@@ -63,6 +65,7 @@ describe('license features', function() {
         Array [
           Object {
             "allowAccessAgreement": false,
+            "allowAuditLogging": false,
             "allowLogin": false,
             "allowRbac": false,
             "allowRoleDocumentLevelSecurity": false,
@@ -82,6 +85,7 @@ describe('license features', function() {
         Array [
           Object {
             "allowAccessAgreement": true,
+            "allowAuditLogging": true,
             "allowLogin": true,
             "allowRbac": true,
             "allowRoleDocumentLevelSecurity": true,
@@ -118,6 +122,34 @@ describe('license features', function() {
       allowRoleFieldLevelSecurity: false,
       allowRbac: true,
       allowSubFeaturePrivileges: false,
+      allowAuditLogging: false,
+    });
+    expect(getFeatureSpy).toHaveBeenCalledTimes(1);
+    expect(getFeatureSpy).toHaveBeenCalledWith('security');
+  });
+
+  it('should allow all basic features plus audit logging for if license is standard.', () => {
+    const mockRawLicense = licensingMock.createLicense({
+      license: { mode: 'standard', type: 'standard' },
+      features: { security: { isEnabled: true, isAvailable: true } },
+    });
+
+    const getFeatureSpy = jest.spyOn(mockRawLicense, 'getFeature');
+
+    const serviceSetup = new SecurityLicenseService().setup({
+      license$: of(mockRawLicense),
+    });
+    expect(serviceSetup.license.getFeatures()).toEqual({
+      showLogin: true,
+      allowLogin: true,
+      showLinks: true,
+      showRoleMappingsManagement: false,
+      allowAccessAgreement: false,
+      allowRoleDocumentLevelSecurity: false,
+      allowRoleFieldLevelSecurity: false,
+      allowRbac: true,
+      allowSubFeaturePrivileges: false,
+      allowAuditLogging: true,
     });
     expect(getFeatureSpy).toHaveBeenCalledTimes(1);
     expect(getFeatureSpy).toHaveBeenCalledWith('security');
@@ -141,6 +173,7 @@ describe('license features', function() {
       allowRoleFieldLevelSecurity: false,
       allowRbac: false,
       allowSubFeaturePrivileges: false,
+      allowAuditLogging: false,
     });
   });
 
@@ -163,6 +196,7 @@ describe('license features', function() {
       allowRoleFieldLevelSecurity: false,
       allowRbac: true,
       allowSubFeaturePrivileges: true,
+      allowAuditLogging: true,
     });
   });
 
@@ -185,6 +219,7 @@ describe('license features', function() {
       allowRoleFieldLevelSecurity: true,
       allowRbac: true,
       allowSubFeaturePrivileges: true,
+      allowAuditLogging: true,
     });
   });
 });

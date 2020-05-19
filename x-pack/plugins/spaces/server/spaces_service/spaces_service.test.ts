@@ -17,6 +17,7 @@ import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { getSpaceIdFromPath } from '../../common/lib/spaces_url_parser';
 import { spacesConfig } from '../lib/__fixtures__';
 import { securityMock } from '../../../security/server/mocks';
+import { auditLoggingServiceMock } from '../../../security/server/audit/index.mock';
 
 const mockLogger = loggingServiceMock.createLogger();
 
@@ -71,7 +72,8 @@ const createService = async (serverBasePath: string = '') => {
     getStartServices: async () => [coreStart, {}, {}],
     config$: Rx.of(spacesConfig),
     authorization: securityMock.createSetup().authz,
-    getSpacesAuditLogger: () => new SpacesAuditLogger({}),
+    getSpacesAuditLogger: () =>
+      new SpacesAuditLogger(auditLoggingServiceMock.create().createAuditLogger()),
   });
 
   return spacesServiceSetup;

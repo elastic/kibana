@@ -55,14 +55,9 @@ export interface PluginsStart {
 
 export interface SpacesPluginSetup {
   spacesService: SpacesServiceSetup;
-  __legacyCompat: {
-    registerLegacyAPI: (legacyAPI: LegacyAPI) => void;
-  };
 }
 
 export class Plugin {
-  private readonly pluginId = 'spaces';
-
   private readonly config$: Observable<ConfigType>;
 
   private readonly kibanaIndexConfig$: Observable<{ kibana: { index: string } }>;
@@ -72,24 +67,6 @@ export class Plugin {
   private readonly spacesLicenseService = new SpacesLicenseService();
 
   private defaultSpaceService?: DefaultSpaceService;
-
-  private legacyAPI?: LegacyAPI;
-  private readonly getLegacyAPI = () => {
-    if (!this.legacyAPI) {
-      throw new Error('Legacy API is not registered!');
-    }
-    return this.legacyAPI;
-  };
-
-  private spacesAuditLogger?: SpacesAuditLogger;
-  private readonly getSpacesAuditLogger = () => {
-    if (!this.spacesAuditLogger) {
-      this.spacesAuditLogger = new SpacesAuditLogger(
-        this.getLegacyAPI().auditLogger.create(this.pluginId)
-      );
-    }
-    return this.spacesAuditLogger;
-  };
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config$ = initializerContext.config.create<ConfigType>();
@@ -105,11 +82,16 @@ export class Plugin {
   ): Promise<SpacesPluginSetup> {
     const service = new SpacesService(this.log);
 
+    let spacesAuditLogger: SpacesAuditLogger | undefined;
+    if (plugins.security) {
+      spacesAuditLogger = new SpacesAuditLogger(plugins.security.audit.createAuditLogger(this.log));
+    }
+
     const spacesService = await service.setup({
       http: core.http,
       getStartServices: core.getStartServices,
       authorization: plugins.security ? plugins.security.authz : null,
-      getSpacesAuditLogger: this.getSpacesAuditLogger,
+      getSpacesAuditLogger: () => spacesAuditLogger,
       config$: this.config$,
     });
 
@@ -177,11 +159,6 @@ export class Plugin {
 
     return {
       spacesService,
-      __legacyCompat: {
-        registerLegacyAPI: (legacyAPI: LegacyAPI) => {
-          this.legacyAPI = legacyAPI;
-        },
-      },
     };
   }
 

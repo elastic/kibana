@@ -14,7 +14,7 @@ const createMockAuditLogger = () => {
 describe(`#savedObjectsAuthorizationFailure`, () => {
   test('logs via auditLogger', () => {
     const auditLogger = createMockAuditLogger();
-    const securityAuditLogger = new SecurityAuditLogger(() => auditLogger);
+    const securityAuditLogger = new SecurityAuditLogger(auditLogger);
     const username = 'foo-user';
     const action = 'foo-action';
     const types = ['foo-type-1', 'foo-type-2'];
@@ -64,7 +64,7 @@ describe(`#savedObjectsAuthorizationFailure`, () => {
 describe(`#savedObjectsAuthorizationSuccess`, () => {
   test('logs via auditLogger', () => {
     const auditLogger = createMockAuditLogger();
-    const securityAuditLogger = new SecurityAuditLogger(() => auditLogger);
+    const securityAuditLogger = new SecurityAuditLogger(auditLogger);
     const username = 'foo-user';
     const action = 'foo-action';
     const types = ['foo-type-1', 'foo-type-2'];
@@ -96,7 +96,7 @@ describe(`#savedObjectsAuthorizationSuccess`, () => {
 describe(`#accessAgreementAcknowledged`, () => {
   test('logs via auditLogger', () => {
     const auditLogger = createMockAuditLogger();
-    const securityAuditLogger = new SecurityAuditLogger(() => auditLogger);
+    const securityAuditLogger = new SecurityAuditLogger(auditLogger);
     const username = 'foo-user';
     const provider = { type: 'saml', name: 'saml1' };
 

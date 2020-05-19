@@ -9,7 +9,7 @@ import { mockAuthenticatedUser } from '../../../security/common/model/authentica
 
 it('properly logs audit events', () => {
   const mockInternalAuditLogger = { log: jest.fn() };
-  const audit = new EncryptedSavedObjectsAuditLogger(() => mockInternalAuditLogger);
+  const audit = new EncryptedSavedObjectsAuditLogger(mockInternalAuditLogger);
 
   audit.encryptAttributesSuccess(['one', 'two'], {
     type: 'known-type',
@@ -169,4 +169,70 @@ it('properly logs audit events', () => {
       username: 'user',
     }
   );
+});
+
+it('gracefully handles a missing logger', () => {
+  const audit = new EncryptedSavedObjectsAuditLogger();
+
+  expect(() => {
+    audit.encryptAttributesSuccess(['one', 'two'], {
+      type: 'known-type',
+      id: 'object-id',
+    });
+    audit.encryptAttributesSuccess(['one', 'two'], {
+      type: 'known-type-ns',
+      id: 'object-id-ns',
+      namespace: 'object-ns',
+    });
+    audit.encryptAttributesSuccess(
+      ['one', 'two'],
+      { type: 'known-type-ns', id: 'object-id-ns', namespace: 'object-ns' },
+      mockAuthenticatedUser()
+    );
+
+    audit.decryptAttributesSuccess(['three', 'four'], {
+      type: 'known-type-1',
+      id: 'object-id-1',
+    });
+    audit.decryptAttributesSuccess(['three', 'four'], {
+      type: 'known-type-1-ns',
+      id: 'object-id-1-ns',
+      namespace: 'object-ns',
+    });
+    audit.decryptAttributesSuccess(
+      ['three', 'four'],
+      { type: 'known-type-1-ns', id: 'object-id-1-ns', namespace: 'object-ns' },
+      mockAuthenticatedUser()
+    );
+
+    audit.encryptAttributeFailure('five', {
+      type: 'known-type-2',
+      id: 'object-id-2',
+    });
+    audit.encryptAttributeFailure('five', {
+      type: 'known-type-2-ns',
+      id: 'object-id-2-ns',
+      namespace: 'object-ns',
+    });
+    audit.encryptAttributeFailure(
+      'five',
+      { type: 'known-type-2-ns', id: 'object-id-2-ns', namespace: 'object-ns' },
+      mockAuthenticatedUser()
+    );
+
+    audit.decryptAttributeFailure('six', {
+      type: 'known-type-3',
+      id: 'object-id-3',
+    });
+    audit.decryptAttributeFailure('six', {
+      type: 'known-type-3-ns',
+      id: 'object-id-3-ns',
+      namespace: 'object-ns',
+    });
+    audit.decryptAttributeFailure(
+      'six',
+      { type: 'known-type-3-ns', id: 'object-id-3-ns', namespace: 'object-ns' },
+      mockAuthenticatedUser()
+    );
+  }).not.toThrowError();
 });

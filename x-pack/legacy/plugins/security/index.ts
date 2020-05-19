@@ -9,8 +9,6 @@ import { resolve } from 'path';
 import { Server } from 'src/legacy/server/kbn_server';
 import { KibanaRequest, LegacyRequest } from '../../../../src/core/server';
 // @ts-ignore
-import { AuditLogger } from '../../server/lib/audit_logger';
-// @ts-ignore
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { AuthenticatedUser, SecurityPluginSetup } from '../../../plugins/security/server';
 
@@ -68,9 +66,6 @@ export const security = (kibana: Record<string, any>) =>
       const securityPlugin = getSecurityPluginSetup(server);
 
       const xpackInfo = server.plugins.xpack_main.info;
-      securityPlugin.__legacyCompat.registerLegacyAPI({
-        auditLogger: new AuditLogger(server, 'security', server.config(), xpackInfo),
-      });
 
       // Legacy xPack Info endpoint returns whatever we return in a callback for `registerLicenseCheckResultsGenerator`
       // and the result is consumed by the legacy plugins all over the place, so we should keep it here for now. We assume

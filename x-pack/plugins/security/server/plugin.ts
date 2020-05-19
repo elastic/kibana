@@ -24,7 +24,7 @@ import { ConfigSchema, createConfig } from './config';
 import { defineRoutes } from './routes';
 import { SecurityLicenseService, SecurityLicense } from '../common/licensing';
 import { setupSavedObjects } from './saved_objects';
-import { SecurityAuditLogger } from './audit';
+import { SecurityAuditLogger, AuditLoggingService, AuditLoggingServiceSetup } from './audit';
 import { elasticsearchClientPlugin } from './elasticsearch_client_plugin';
 
 export type SpacesService = Pick<
@@ -48,6 +48,7 @@ export interface LegacyAPI {
  * Describes public Security plugin contract returned at the `setup` stage.
  */
 export interface SecurityPluginSetup {
+  audit: AuditLoggingServiceSetup;
   authc: Pick<
     Authentication,
     | 'isAuthenticated'
@@ -72,7 +73,6 @@ export interface SecurityPluginSetup {
   registerSpacesService: (service: SpacesService) => void;
 
   __legacyCompat: {
-    registerLegacyAPI: (legacyAPI: LegacyAPI) => void;
     registerPrivilegesWithCluster: () => void;
   };
 }
@@ -90,14 +90,6 @@ export class Plugin {
   private clusterClient?: ICustomClusterClient;
   private spacesService?: SpacesService | symbol = Symbol('not accessed');
   private securityLicenseService?: SecurityLicenseService;
-
-  private legacyAPI?: LegacyAPI;
-  private readonly getLegacyAPI = () => {
-    if (!this.legacyAPI) {
-      throw new Error('Legacy API is not registered!');
-    }
-    return this.legacyAPI;
-  };
 
   private readonly getSpacesService = () => {
     // Changing property value from Symbol to undefined denotes the fact that property was accessed.
@@ -135,7 +127,9 @@ export class Plugin {
       license$: licensing.license$,
     });
 
-    const auditLogger = new SecurityAuditLogger(() => this.getLegacyAPI().auditLogger);
+    const { createAuditLogger } = new AuditLoggingService(config, license).setup();
+
+    const auditLogger = new SecurityAuditLogger(createAuditLogger(this.logger));
     const authc = await setupAuthentication({
       auditLogger,
       http: core.http,
@@ -178,6 +172,10 @@ export class Plugin {
     });
 
     return deepFreeze<SecurityPluginSetup>({
+      audit: {
+        createAuditLogger,
+      },
+
       authc: {
         isAuthenticated: authc.isAuthenticated,
         getCurrentUser: authc.getCurrentUser,
@@ -205,8 +203,6 @@ export class Plugin {
       },
 
       __legacyCompat: {
-        registerLegacyAPI: (legacyAPI: LegacyAPI) => (this.legacyAPI = legacyAPI),
-
         registerPrivilegesWithCluster: async () => await authz.registerPrivilegesWithCluster(),
       },
     });

@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export {
-  AuditLogger,
-  AuditLoggingService,
-  AuditLoggingServiceSetup,
-} from './audit_logging_service';
-export { SecurityAuditLogger } from './audit_logger';
+
+import { PluginInitializerContext } from 'src/core/server';
+import { AuditLoggingPlugin } from './plugin';
+
+export const plugin = (context: PluginInitializerContext) => new AuditLoggingPlugin(context);

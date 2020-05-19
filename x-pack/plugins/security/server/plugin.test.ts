@@ -31,6 +31,9 @@ describe('Security Plugin', () => {
           saml: { realm: 'saml1', maxRedirectURLSize: new ByteSizeValue(2048) },
           http: { enabled: true, autoSchemesEnabled: true, schemes: ['apikey'] },
         },
+        audit: {
+          enabled: true,
+        },
       })
     );
 
@@ -50,8 +53,10 @@ describe('Security Plugin', () => {
       await expect(plugin.setup(mockCoreSetup, mockDependencies)).resolves.toMatchInlineSnapshot(`
               Object {
                 "__legacyCompat": Object {
-                  "registerLegacyAPI": [Function],
                   "registerPrivilegesWithCluster": [Function],
+                },
+                "audit": Object {
+                  "createAuditLogger": [Function],
                 },
                 "authc": Object {
                   "areAPIKeysEnabled": [Function],
