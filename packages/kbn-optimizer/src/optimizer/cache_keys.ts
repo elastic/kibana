@@ -28,7 +28,7 @@ import stripAnsi from 'strip-ansi';
 
 import jestDiff from 'jest-diff';
 import jsonStable from 'json-stable-stringify';
-import { ascending, WorkerConfig } from '../common';
+import { ascending, CacheableWorkerConfig } from '../common';
 
 import { getMtimes } from './get_mtimes';
 import { getChanges } from './get_changes';
@@ -119,7 +119,7 @@ export function reformatJestDiff(diff: string | null) {
 export interface OptimizerCacheKey {
   readonly lastCommit: string | undefined;
   readonly bootstrap: string | undefined;
-  readonly workerConfig: WorkerConfig;
+  readonly workerConfig: CacheableWorkerConfig;
   readonly deletedPaths: string[];
   readonly modifiedTimes: Record<string, number>;
 }
@@ -164,7 +164,7 @@ export async function getOptimizerCacheKey(config: OptimizerConfig) {
   }
 
   const cacheKeys: OptimizerCacheKey = {
-    workerConfig: config.getWorkerConfig('♻'),
+    workerConfig: config.getCacheableWorkerConfig(),
     lastCommit,
     bootstrap,
     deletedPaths,
