@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { FrontendLibs } from './lib/types';
 import { compose } from './lib/compose/kibana';
 
@@ -20,27 +19,14 @@ async function startApp(libs: FrontendLibs, core: CoreSetup<StartDeps>) {
   await libs.framework.waitUntilFrameworkReady();
 
   if (libs.framework.licenseIsAtLeast('standard')) {
-    libs.framework.registerManagementSection({
-      id: 'beats',
-      name: i18n.translate('xpack.beatsManagement.centralManagementSectionLabel', {
-        defaultMessage: 'Beats',
-      }),
-      iconName: 'logoBeats',
-    });
+    const mount = async (params: any) => {
+      const [coreStart, pluginsStart] = await core.getStartServices();
+      setServices(coreStart, pluginsStart, params);
+      const { renderApp } = await import('./application');
+      return renderApp(params, libs);
+    };
 
-    libs.framework.registerManagementUI({
-      sectionId: 'beats',
-      appId: 'beats_management',
-      name: i18n.translate('xpack.beatsManagement.centralManagementLinkLabel', {
-        defaultMessage: 'Central Management',
-      }),
-      async mount(params) {
-        const [coreStart, pluginsStart] = await core.getStartServices();
-        setServices(coreStart, pluginsStart, params);
-        const { renderApp } = await import('./application');
-        return renderApp(params, libs);
-      },
-    });
+    libs.framework.registerManagementUI(mount);
   }
 }
 

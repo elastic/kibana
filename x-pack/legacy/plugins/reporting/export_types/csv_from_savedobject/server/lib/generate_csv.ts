@@ -5,12 +5,13 @@
  */
 
 import { badRequest } from 'boom';
-import { ReportingCore } from '../../../../server/types';
-import { Logger, RequestFacade } from '../../../../types';
+import { ReportingCore } from '../../../../server';
+import { LevelLogger } from '../../../../server/lib';
+import { RequestFacade } from '../../../../server/types';
 import { FakeRequest, JobParamsPanelCsv, SearchPanel, VisPanel } from '../../types';
 import { generateCsvSearch } from './generate_csv_search';
 
-export function createGenerateCsv(reporting: ReportingCore, logger: Logger) {
+export function createGenerateCsv(reporting: ReportingCore, logger: LevelLogger) {
   return async function generateCsv(
     request: RequestFacade | FakeRequest,
     visType: string,
