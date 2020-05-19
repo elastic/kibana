@@ -46,6 +46,9 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.strict=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
+        '--xpack.ingestManager.enabled=true',
+        '--xpack.ingestManager.epm.enabled=true',
+        '--xpack.ingestManager.fleet.enabled=true',
       ],
     },
   };
