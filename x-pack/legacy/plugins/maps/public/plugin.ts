@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
 // @ts-ignore
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
@@ -56,7 +57,7 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
       });
 
     // @ts-ignore
-    const config = np.maps.config;
+    const config = _.get(np, 'maps.config', {});
     // @ts-ignore
     const kibanaVersion = core.injectedMetadata.getKibanaVersion();
     bindNpSetupCoreAndPlugins(core, np, config, kibanaVersion);
