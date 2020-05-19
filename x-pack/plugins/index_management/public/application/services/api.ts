@@ -275,3 +275,10 @@ export async function updateTemplate(template: TemplateDeserialized) {
 
   return result;
 }
+
+export function useLoadComponentTemplates() {
+  return useRequest<any>({
+    path: `${API_BASE_PATH}/component_templates`,
+    method: 'get',
+  });
+}

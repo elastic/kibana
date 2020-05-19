@@ -204,6 +204,10 @@ class DocumentationService {
   public getRootLocaleLink() {
     return 'https://docs.oracle.com/javase/8/docs/api/java/util/Locale.html#ROOT';
   }
+
+  public getComponentTemplatesLink() {
+    return `${this.esDocsBase}/indices-component-template.html`;
+  }
 }
 
 export const documentationService = new DocumentationService();
