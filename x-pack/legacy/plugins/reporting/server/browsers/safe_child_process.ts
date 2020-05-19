@@ -6,7 +6,7 @@
 
 import * as Rx from 'rxjs';
 import { take, share, mapTo, delay, tap } from 'rxjs/operators';
-import { Logger } from '../../types';
+import { LevelLogger } from '../lib';
 
 interface IChild {
   kill: (signal: string) => Promise<any>;
@@ -15,7 +15,7 @@ interface IChild {
 // Our process can get sent various signals, and when these occur we wish to
 // kill the subprocess and then kill our process as long as the observer isn't cancelled
 export function safeChildProcess(
-  logger: Logger,
+  logger: LevelLogger,
   childProcess: IChild
 ): { terminate$: Rx.Observable<string> } {
   const ownTerminateSignal$ = Rx.merge(
