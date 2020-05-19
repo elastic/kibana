@@ -1305,8 +1305,7 @@ describe('xy_expression', () => {
           timeZone="UTC"
           chartTheme={{}}
           histogramBarTarget={50}
-          onClickValue={onClickValue}
-          onSelectRange={onSelectRange}
+          executeTriggerActions={executeTriggerActions}
         />
       );
 
