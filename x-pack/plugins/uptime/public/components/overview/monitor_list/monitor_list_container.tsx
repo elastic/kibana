@@ -17,10 +17,20 @@ export interface MonitorListProps {
   linkParameters?: string;
 }
 
+const DEFAULT_PAGE_SIZE = 10;
+const LOCAL_STORAGE_KEY = 'xpack.uptime.monitorList.pageSize';
+const getPageSizeValue = () => {
+  const value = parseInt(localStorage.getItem(LOCAL_STORAGE_KEY) ?? '', 10);
+  if (isNaN(value)) {
+    return DEFAULT_PAGE_SIZE;
+  }
+  return value;
+};
+
 export const MonitorList: React.FC<MonitorListProps> = props => {
   const { filters } = props;
 
-  const [pageSize, setPageSize] = useState<number>(10);
+  const [pageSize, setPageSize] = useState<number>(getPageSizeValue);
 
   const dispatch = useDispatch();
 

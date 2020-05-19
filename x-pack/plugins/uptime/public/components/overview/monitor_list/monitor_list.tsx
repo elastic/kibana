@@ -14,7 +14,7 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { HistogramPoint } from '../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../common/runtime_types';
@@ -43,16 +43,6 @@ const TruncatedEuiLink = styled(EuiLink)`
   text-overflow: ellipsis;
 `;
 
-const DEFAULT_PAGE_SIZE = 10;
-const LOCAL_STORAGE_KEY = 'xpack.uptime.monitorList.pageSize';
-const getPageSizeValue = () => {
-  const value = parseInt(localStorage.getItem(LOCAL_STORAGE_KEY) ?? '', 10);
-  if (isNaN(value)) {
-    return DEFAULT_PAGE_SIZE;
-  }
-  return value;
-};
-
 export const MonitorListComponent: React.FC<Props> = ({
   filters,
   monitorList: { list, error, loading },
@@ -60,10 +50,6 @@ export const MonitorListComponent: React.FC<Props> = ({
   pageSize,
   setPageSize,
 }) => {
-  useEffect(() => {
-    setPageSize(getPageSizeValue());
-  }, [setPageSize]);
-
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
 
   const items = list.summaries ?? [];
