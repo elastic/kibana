@@ -184,12 +184,19 @@ export const definition: NodeDefinition<SearchNodeState> = {
   async run(node, inputs, inputNodeIds, deps) {
     const { state } = node;
     const fn = deps.http.post;
-    const result = await fn('/api/console/proxy', {
-      query: { path: state.path, method: state.method },
-      body: state.body,
-    });
+    try {
+      const result = await fn('/api/console/proxy', {
+        query: { path: state.path, method: state.method },
+        body: state.body,
+      });
 
-    return result;
+      return result;
+    } catch (e) {
+      throw new Error(`${e.body.error.reason}
+
+      On line ${e.body.error.line}:
+${state.body.split('\n')[e.body.error.line - 1]}`);
+    }
   },
 };
 

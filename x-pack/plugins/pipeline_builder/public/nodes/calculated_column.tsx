@@ -103,7 +103,7 @@ export const definition: NodeDefinition<CalculatedColumnState> = {
     const value = inputs[inputNodeIds[0]]?.value;
 
     const { outputColumnId, selectedFormula, formulaState } = node.state;
-    if (!outputColumnId || !selectedFormula || !formulaState) {
+    if (!outputColumnId || !selectedFormula || !formulaState || !value) {
       return value;
     }
 
@@ -149,10 +149,10 @@ const calculations: Record<
         const groupTotals: Record<string, number> = {};
 
         table.rows.forEach(row => {
-          if (groupTotals[row[formulaState.otherColumn]]) {
-            groupTotals[row[formulaState.otherColumn]] += row[state.formulaState.column];
+          if (groupTotals[row[state.formulaState.otherColumn]]) {
+            groupTotals[row[state.formulaState.otherColumn]] += row[state.formulaState.column];
           } else {
-            groupTotals[row[formulaState.otherColumn]] = row[state.formulaState.column];
+            groupTotals[row[state.formulaState.otherColumn]] = row[state.formulaState.column];
           }
         });
         return {
@@ -160,7 +160,7 @@ const calculations: Record<
           rows: table.rows.map(r => ({
             ...r,
             [state.outputColumnId]:
-              r[state.formulaState.column] / groupTotals[row[formulaState.otherColumn]],
+              r[state.formulaState.column] / groupTotals[r[state.formulaState.otherColumn]],
           })),
         };
       }
@@ -169,7 +169,7 @@ const calculations: Record<
           columns: table.columns.concat([{ id: state.outputColumnId, dataType: 'number' }]),
           rows: table.rows.map(r => ({
             ...r,
-            [state.outputColumnId]: r[state.formulaState.column] / row[formulaState.otherColumn],
+            [state.outputColumnId]: r[state.formulaState.column] / r[state.formulaState.otherColumn],
           })),
         };
       }
@@ -177,6 +177,9 @@ const calculations: Record<
       return table;
     },
     renderEditor: (node, table, dispatch) => {
+      if (!table) {
+        return <>No columns available from table</>;
+      }
       return (
         <>
           <EuiFormRow label="Column">
@@ -226,8 +229,8 @@ const calculations: Record<
             <EuiFormRow label="Group by column">
               <EuiSelect
                 options={[{ text: 'No column', value: '' }].concat(
-                  table.columns
-                    .filter(c => c.id !== node.state.formulaState.column)
+                  table?.columns
+                    .filter(c => c.id !== node.state.formulaState?.column)
                     .map(c => ({ text: c.label || c.id, value: c.id }))
                 )}
                 value={node.state.formulaState?.otherColumn ?? ''}
