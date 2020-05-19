@@ -59,8 +59,8 @@ export interface MapsPluginStartDependencies {}
 export const bindSetupCoreAndPlugins = (
   core: CoreSetup,
   plugins: any,
-  config?: MapsConfigType,
-  kibanaVersion?: string
+  config: MapsConfigType,
+  kibanaVersion: string
 ) => {
   const { licensing, mapsLegacy } = plugins;
   const { uiSettings, http, notifications } = core;
@@ -72,14 +72,8 @@ export const bindSetupCoreAndPlugins = (
   setVisualizations(plugins.visualizations);
   setUiSettings(uiSettings);
   setKibanaCommonConfig(mapsLegacy.config);
-
-  // TODO: Remove conditional logic when last legacy pieces removed
-  if (config) {
-    setMapAppConfig(config);
-  }
-  if (kibanaVersion) {
-    setKibanaVersion(kibanaVersion);
-  }
+  setMapAppConfig(config);
+  setKibanaVersion(kibanaVersion);
 };
 
 export const bindStartCoreAndPlugins = (core: CoreStart, plugins: any) => {
@@ -136,6 +130,9 @@ export class MapsPlugin
     home.featureCatalogue.register(featureCatalogueEntry);
     visualizations.registerAlias(getMapsVisTypeAlias());
     embeddable.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
+    return {
+      config,
+    };
   }
 
   public start(core: CoreStart, plugins: any) {

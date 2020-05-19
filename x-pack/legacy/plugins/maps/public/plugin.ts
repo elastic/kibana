@@ -55,7 +55,9 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
         return reactDirective(wrapInI18nContext(MapListing));
       });
 
-    bindNpSetupCoreAndPlugins(core, np);
+    const config = np.maps.config;
+    const kibanaVersion = core.injectedMetadata.getKibanaVersion();
+    bindNpSetupCoreAndPlugins(core, np, config, kibanaVersion);
   }
 
   public start(core: CoreStart, plugins: MapsPluginStartDependencies) {
