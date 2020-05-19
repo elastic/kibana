@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { JobId, JobSummary } from '../../index.d';
+import React from 'react';
+import { JobId, JobSummary } from '../../common/types';
 
 interface Props {
   getUrl: (jobId: JobId) => string;
