@@ -59,13 +59,19 @@ export enum ExportUrlAsType {
   EXPORT_URL_AS_SNAPSHOT = 'snapshot',
 }
 
+interface UrlParams {
+  [extensionName: string]: {
+    [queryParam: string]: boolean;
+  };
+}
+
 interface State {
   exportUrlAs: ExportUrlAsType;
   useShortUrl: boolean;
   isCreatingShortUrl: boolean;
   url?: string;
   shortUrlErrorMsg?: string;
-  urlParams?: { [key: string]: { [queryParam: string]: boolean } };
+  urlParams?: UrlParams;
 }
 
 export class UrlPanelContent extends Component<Props, State> {
@@ -212,29 +218,20 @@ export class UrlPanelContent extends Component<Props, State> {
   };
 
   private getUrlParamExtensions = (url: string): string => {
-    if (!this.state.urlParams) {
-      return url;
-    }
-
-    return Object.keys(this.state.urlParams).reduce((urlAccumulator, key) => {
-      if (!this.state.urlParams || !this.state.urlParams[key]) {
-        return urlAccumulator;
-      }
-
-      return Object.keys(this.state.urlParams[key]).reduce((queryAccumulator, queryParam) => {
-        if (
-          !this.state.urlParams ||
-          !this.state.urlParams[key] ||
-          !this.state.urlParams[key][queryParam]
-        ) {
-          return queryAccumulator;
-        }
-
-        return this.state.urlParams[key][queryParam]
-          ? queryAccumulator + `&${queryParam}=true`
-          : queryAccumulator;
-      }, urlAccumulator);
-    }, url);
+    const { urlParams } = this.state;
+    return urlParams
+      ? Object.keys(urlParams).reduce((urlAccumulator, key) => {
+          const urlParam = urlParams[key];
+          return urlParam
+            ? Object.keys(urlParam).reduce((queryAccumulator, queryParam) => {
+                const isQueryParamEnabled = urlParam[queryParam];
+                return isQueryParamEnabled
+                  ? queryAccumulator + `&${queryParam}=true`
+                  : queryAccumulator;
+              }, urlAccumulator)
+            : urlAccumulator;
+        }, url)
+      : url;
   };
 
   private makeIframeTag = (url?: string) => {
