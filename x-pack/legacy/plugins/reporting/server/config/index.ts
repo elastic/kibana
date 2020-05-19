@@ -5,10 +5,9 @@
  */
 
 import { Legacy } from 'kibana';
-import { CoreSetup } from 'src/core/server';
 import { get } from 'lodash';
+import { CoreSetup } from 'src/core/server';
 import { ConfigType as ReportingConfigType } from '../../../../../plugins/reporting/server';
-export { ReportingConfigType };
 
 // make config.get() aware of the value type it returns
 interface Config<BaseType> {
@@ -85,3 +84,5 @@ export const buildConfig = (
     },
   };
 };
+
+export { ReportingConfigType };

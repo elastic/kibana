@@ -11,14 +11,14 @@ import { goToEditExternalConnection } from '../tasks/all_cases';
 import {
   addServiceNowConnector,
   openAddNewConnectorOption,
-  saveChanges,
   selectLastConnectorCreated,
 } from '../tasks/configure_cases';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { CASES } from '../urls/navigation';
 
-describe('Cases connectors', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/65278
+describe.skip('Cases connectors', () => {
   before(() => {
     cy.server();
     cy.route('POST', '**/api/action').as('createConnector');
@@ -37,7 +37,6 @@ describe('Cases connectors', () => {
     cy.get(TOASTER).should('have.text', "Created 'New connector'");
 
     selectLastConnectorCreated();
-    saveChanges();
 
     cy.wait('@saveConnector', { timeout: 10000 })
       .its('status')

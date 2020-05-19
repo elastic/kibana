@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CancellationToken } from '../../common/cancellation_token';
-import { ScrollConfig } from '../../server/types';
-import { JobDocPayload, JobParamPostPayload } from '../../types';
+import { CancellationToken } from '../../../../../plugins/reporting/common';
+import { JobDocPayload, JobParamPostPayload, ScrollConfig } from '../../server/types';
+
+export type RawValue = string | object | null | undefined;
 
 interface DocValueField {
   field: string;

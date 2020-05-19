@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Action, applyMiddleware, compose, createStore as createReduxStore, Store } from 'redux';
+import {
+  Action,
+  applyMiddleware,
+  compose,
+  createStore as createReduxStore,
+  Store,
+  Middleware,
+  Dispatch,
+} from 'redux';
 
 import { createEpicMiddleware } from 'redux-observable';
 import { Observable } from 'rxjs';
@@ -16,6 +24,8 @@ import { inputsSelectors } from './inputs';
 import { State, SubPluginsInitReducer, createReducer } from './reducer';
 import { createRootEpic } from './epic';
 import { AppApolloClient } from '../lib/lib';
+import { AppAction } from './actions';
+import { Immutable } from '../../../common/endpoint/types';
 
 type ComposeType = typeof compose;
 declare global {
@@ -28,7 +38,8 @@ export { SubPluginsInitReducer };
 export const createStore = (
   state: State,
   pluginsReducer: SubPluginsInitReducer,
-  apolloClient: Observable<AppApolloClient>
+  apolloClient: Observable<AppApolloClient>,
+  additionalMiddleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>
 ): Store<State, Action> => {
   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
@@ -49,7 +60,9 @@ export const createStore = (
   store = createReduxStore(
     createReducer(pluginsReducer),
     state,
-    composeEnhancers(applyMiddleware(epicMiddleware, telemetryMiddleware))
+    composeEnhancers(
+      applyMiddleware(epicMiddleware, telemetryMiddleware, ...(additionalMiddleware ?? []))
+    )
   );
 
   epicMiddleware.run(createRootEpic<State>());
