@@ -45,7 +45,7 @@ describe('<IndexManagementHome />', () => {
     });
 
     test('sets the hash query param base on include hidden indices toggle', () => {
-      // Note: this test modifies the shared locaiton.hash state, we put it back the way it was
+      // Note: this test modifies the shared location.hash state, we put it back the way it was
       const { actions } = testBed;
       try {
         expect(actions.getIncludeHiddenIndicesToggleStatus()).toBe(true);
