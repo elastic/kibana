@@ -19,15 +19,53 @@
 
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { ScopedHistory } from 'kibana/public';
 
 const isModifiedEvent = (event: any) =>
   !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 
 const isLeftClickEvent = (event: any) => event.button === 0;
 
+export const reactRouterHrefOnClick = (to: string | LocationObject) => {
+  const toAsObject = typeof to === 'string' ? { pathname: to } : to;
+  const history = useHistory() as ScopedHistory;
+
+  return {
+    href: history.createHref(toAsObject),
+    onClick: reactRouterOnClickHandler(history, toAsObject),
+  };
+};
+
+export const reactRouterOnClickHandler = (
+  history: ScopedHistory,
+  locationObject: LocationObject
+) => (event: any) => {
+  if (event.defaultPrevented) {
+    return;
+  }
+
+  if (event.target.getAttribute('target')) {
+    return;
+  }
+
+  if (isModifiedEvent(event) || !isLeftClickEvent(event)) {
+    return;
+  }
+
+  // prevents page reload
+  event.preventDefault();
+  history.push(locationObject);
+};
+
 /*
  * Attempt at abstracting react router wrapped eui components
  */
+
+interface LocationObject {
+  pathname?: string;
+  search?: string;
+  hash?: string;
+}
 
 export function reactRouterElementWrapper({
   Component,
@@ -35,29 +73,8 @@ export function reactRouterElementWrapper({
   props,
 }: {
   Component: React.ComponentClass;
-  to: string | { pathname?: string; search?: string; hash?: string };
+  to: string | LocationObject;
   props: { [key: string]: any };
 }) {
-  const toAsObject = typeof to === 'string' ? { pathname: to } : to;
-  const history = useHistory();
-
-  function onClick(event: any) {
-    if (event.defaultPrevented) {
-      return;
-    }
-
-    if (event.target.getAttribute('target')) {
-      return;
-    }
-
-    if (isModifiedEvent(event) || !isLeftClickEvent(event)) {
-      return;
-    }
-
-    // prevents page reload
-    event.preventDefault();
-    history.push(toAsObject);
-  }
-
-  return <Component {...props} href={history.createHref(toAsObject)} onClick={onClick} />;
+  return <Component {...props} {...reactRouterHrefOnClick(to)} />;
 }
