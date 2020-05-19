@@ -14,8 +14,8 @@ import {
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 
-import { BASE_PATH } from '../../../../common/constants';
 import { Pipeline } from '../../../../common/types';
+import { useKibana } from '../../../shared_imports';
 
 export interface Props {
   pipelines: Pipeline[];
@@ -32,6 +32,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
   onClonePipelineClick,
   onDeletePipelineClick,
 }) => {
+  const { history } = useKibana().services;
   const [selection, setSelection] = useState<Pipeline[]>([]);
 
   const tableProps: EuiInMemoryTableProps<Pipeline> = {
@@ -82,7 +83,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
           })}
         </EuiButton>,
         <EuiButton
-          href={`#${BASE_PATH}/create`}
+          href={history.createHref({ pathname: '/create' })}
           fill
           iconType="plusInCircle"
           data-test-subj="createPipelineButton"
@@ -109,7 +110,10 @@ export const PipelineTable: FunctionComponent<Props> = ({
         }),
         sortable: true,
         render: (name: string) => (
-          <EuiLink href={`#${BASE_PATH}?pipeline=${name}`} data-test-subj="pipelineDetailsLink">
+          <EuiLink
+            href={history.createHref({ pathname: '/', search: `pipeline=${name}` })}
+            data-test-subj="pipelineDetailsLink"
+          >
             {name}
           </EuiLink>
         ),

@@ -28,7 +28,7 @@ export class BreadcrumbService {
     create: [
       {
         text: homeBreadcrumbText,
-        href: `#${BASE_PATH}`,
+        href: `/`,
       },
       {
         text: i18n.translate('xpack.ingestPipelines.breadcrumb.createPipelineLabel', {
@@ -39,7 +39,7 @@ export class BreadcrumbService {
     edit: [
       {
         text: homeBreadcrumbText,
-        href: `#${BASE_PATH}`,
+        href: `/`,
       },
       {
         text: i18n.translate('xpack.ingestPipelines.breadcrumb.editPipelineLabel', {
