@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header should render normally 1`] = `
+<div
+  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+>
+  <div
+    class="euiFlexItem"
+  >
+    <h3
+      class="euiTitle euiTitle--small"
+    >
+      <span>
+        Scripted fields
+      </span>
+    </h3>
+    <div
+      class="euiText euiText--medium"
+    >
+      <p>
+        <span>
+          You can use scripted fields in visualizations and display them in your documents. However, you cannot search scripted fields.
+        </span>
+      </p>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero"
+  >
+    <button
+      class="euiButton euiButton--primary"
+      data-test-subj="addScriptedFieldLink"
+      type="button"
+    >
+      <span
+        class="euiButton__content"
+      >
+        <span
+          class="euiButton__text"
+        >
+          <span>
+            Add scripted field
+          </span>
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
