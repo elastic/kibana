@@ -66,8 +66,9 @@ function PointSeriesOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
           />
         )}
 
-        {vis.type.type === 'histogram' && (
+        {vis.type.name === 'histogram' && (
           <SwitchOption
+            data-test-subj="showValuesOnChart"
             label={i18n.translate('visTypeVislib.editors.pointSeries.showLabels', {
               defaultMessage: 'Show values on chart',
             })}

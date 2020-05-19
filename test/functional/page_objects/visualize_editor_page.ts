@@ -487,6 +487,10 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       }
       await options[optionIndex].click();
     }
+
+    public async toggleValuesOnChart() {
+      return await testSubjects.click('showValuesOnChart');
+    }
   }
 
   return new VisualizeEditorPage();
