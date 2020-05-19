@@ -60,6 +60,7 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
     const config = _.get(np, 'maps.config', {});
     // @ts-ignore
     const kibanaVersion = core.injectedMetadata.getKibanaVersion();
+    // @ts-ignore
     bindNpSetupCoreAndPlugins(core, np, config, kibanaVersion);
   }
 
