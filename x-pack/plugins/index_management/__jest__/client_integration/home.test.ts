@@ -44,15 +44,16 @@ describe('<IndexManagementHome />', () => {
       });
     });
 
-    test('sets the include hidden indices based on hash param', () => {
+    test('sets the hash query param base on include hidden indices toggle', () => {
+      // Note: this test modifies the shared locaiton.hash state, we put it back the way it was
       const { actions } = testBed;
       try {
-        actions.updateIncludeHiddenHashParam(false);
-        expect(actions.getIncludeHiddenIndicesToggleStatus()).toBe(false);
-        actions.updateIncludeHiddenHashParam(true);
         expect(actions.getIncludeHiddenIndicesToggleStatus()).toBe(true);
+        expect(window.location.hash.includes('includeHidden=true')).toBe(true);
+        actions.clickIncludeHiddenIndicesToggle();
+        expect(window.location.hash.includes('includeHidden=true')).toBe(false);
       } finally {
-        actions.updateIncludeHiddenHashParam(false);
+        actions.clickIncludeHiddenIndicesToggle();
       }
     });
 

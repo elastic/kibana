@@ -15,7 +15,6 @@ import {
 } from '../../../../../test_utils';
 import { IndexManagementHome } from '../../../public/application/sections/home'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 // @ts-ignore
-import { IndexTable } from '../../../public/application/sections/home/index_list/index_table/index_table'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { BASE_PATH } from '../../../common/constants';
 import { indexManagementStore } from '../../../public/application/store'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { TemplateDeserialized } from '../../../common';
@@ -24,7 +23,7 @@ import { WithAppDependencies, services } from './setup_environment';
 const testBedConfig: TestBedConfig = {
   store: () => indexManagementStore(services as any),
   memoryRouter: {
-    initialEntries: [`${BASE_PATH}indices`],
+    initialEntries: [`${BASE_PATH}indices?includeHidden=true`],
     componentRoutePath: `${BASE_PATH}:section(indices|templates)`,
   },
   doMountAsync: true,
@@ -46,7 +45,7 @@ export interface IdxMgmtHomeTestBed extends TestBed<IdxMgmtTestSubjects> {
     clickCloseDetailsButton: () => void;
     clickActionMenu: (name: TemplateDeserialized['name']) => void;
     getIncludeHiddenIndicesToggleStatus: () => boolean;
-    updateIncludeHiddenHashParam: (value: boolean) => void;
+    clickIncludeHiddenIndicesToggle: () => void;
   };
 }
 
@@ -127,22 +126,15 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
     find('closeDetailsButton').simulate('click');
   };
 
-  const getIncludeHiddenIndicesToggleStatus = () => {
+  const clickIncludeHiddenIndicesToggle = () => {
     const { find } = testBed;
-    const props = find('indexTableIncludeHiddenIndicesToggle')
-      .first()
-      .props();
-    return Boolean(props['aria-checked']);
+    find('indexTableIncludeHiddenIndicesToggle').simulate('click');
   };
 
-  const updateIncludeHiddenHashParam = (value: boolean) => {
-    const { router, component } = testBed;
-    router.navigateTo(`${BASE_PATH}indices${value ? '?includeHidden=true' : ''}`);
-    const inner = component.find(IndexTable);
-    // We manually re-run the onHashChange listener because the it does not fire otherwise.
-    // This only works for class components, function components return null for .instance()
-    (inner.instance() as any).onHashChange();
-    component.update();
+  const getIncludeHiddenIndicesToggleStatus = () => {
+    const { find } = testBed;
+    const props = find('indexTableIncludeHiddenIndicesToggle').props();
+    return Boolean(props['aria-checked']);
   };
 
   return {
@@ -157,7 +149,7 @@ export const setup = async (): Promise<IdxMgmtHomeTestBed> => {
       clickCloseDetailsButton,
       clickActionMenu,
       getIncludeHiddenIndicesToggleStatus,
-      updateIncludeHiddenHashParam,
+      clickIncludeHiddenIndicesToggle,
     },
   };
 };

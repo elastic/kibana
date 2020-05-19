@@ -95,19 +95,16 @@ export class IndexTable extends Component {
     };
   }
 
-  onHashChange = () => {
-    const { showHiddenIndicesChanged, showHiddenIndices, location } = this.props;
-    const { includeHidden } = parse((location && location.search) || '');
-    const nextValue = includeHidden === 'true';
-    if (nextValue !== showHiddenIndices) {
-      showHiddenIndicesChanged(nextValue);
-    }
-  };
-
   componentDidMount() {
     this.props.loadIndices();
     this.interval = setInterval(this.props.reloadIndices, REFRESH_RATE_INDEX_LIST);
-    const { filterChanged, filterFromURI } = this.props;
+    const {
+      filterChanged,
+      filterFromURI,
+      showHiddenIndicesChanged,
+      showHiddenIndices,
+      location,
+    } = this.props;
 
     if (filterFromURI) {
       const decodedFilter = decodeURIComponent(filterFromURI);
@@ -119,12 +116,16 @@ export class IndexTable extends Component {
         this.setState({ filterError: e });
       }
     }
-    this.onHashChange();
-    window.addEventListener('hashchange', this.onHashChange);
+
+    // Check if the we have the includeHidden query param
+    const { includeHidden } = parse((location && location.search) || '');
+    const nextValue = includeHidden === 'true';
+    if (nextValue !== showHiddenIndices) {
+      showHiddenIndicesChanged(nextValue);
+    }
   }
   componentWillUnmount() {
     clearInterval(this.interval);
-    window.removeEventListener('hashchange', this.onHashChange);
   }
   onSort = column => {
     const { sortField, isSortAscending, sortChanged } = this.props;
@@ -475,6 +476,7 @@ export class IndexTable extends Component {
                       <EuiFlexItem grow={false}>
                         <EuiSwitch
                           id="checkboxShowHiddenIndices"
+                          data-test-subj="indexTableIncludeHiddenIndicesToggle"
                           checked={showHiddenIndices}
                           onChange={event => showHiddenIndicesChanged(event.target.checked)}
                           label={
