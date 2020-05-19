@@ -91,7 +91,7 @@ class DefaultEditorController {
                 alignItems: 'center',
               }}
             >
-              <EuiLoadingChart size="xl" />
+              <EuiLoadingChart size="xl" mono />
             </div>
           }
         >
