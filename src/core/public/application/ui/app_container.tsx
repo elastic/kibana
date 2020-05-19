@@ -87,6 +87,8 @@ export const AppContainer: FunctionComponent<Props> = ({
           })) || null;
       } catch (e) {
         // TODO: add error UI
+        // eslint-disable-next-line no-console
+        console.error(e);
       } finally {
         setShowSpinner(false);
         setIsMounting(false);
