@@ -5,16 +5,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers';
-import { LevelLogger as Logger, startTrace } from '../../../../server/lib';
-import { LayoutInstance } from '../../layouts/layout';
+import { HeadlessChromiumDriver } from '../../../../server/browsers';
+import { LevelLogger, startTrace } from '../../../../server/lib';
+import { AttributesMap, ElementsPositionAndAttribute } from '../../../../server/types';
+import { LayoutInstance } from '../../layouts';
 import { CONTEXT_ELEMENTATTRIBUTES } from './constants';
-import { AttributesMap, ElementsPositionAndAttribute } from './types';
 
 export const getElementPositionAndAttributes = async (
-  browser: HeadlessBrowser,
+  browser: HeadlessChromiumDriver,
   layout: LayoutInstance,
-  logger: Logger
+  logger: LevelLogger
 ): Promise<ElementsPositionAndAttribute[] | null> => {
   const endTrace = startTrace('get_element_position_data', 'read');
   const { screenshot: screenshotSelector } = layout.selectors; // data-shared-items-container
