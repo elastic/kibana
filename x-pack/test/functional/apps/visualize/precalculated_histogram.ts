@@ -39,9 +39,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickMetricEditor();
       });
 
-      const renderTableForAggregation = async (
-        aggregation: string
-      ): Promise<string[][] | string[][][]> => {
+      const renderTableForAggregation = async (aggregation: string) => {
         await PageObjects.visEditor.selectAggregation(aggregation, 'metrics');
         await PageObjects.visEditor.selectField('histogram-content', 'metrics');
         await PageObjects.visEditor.clickGo();
@@ -68,8 +66,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         expect(data).to.eql([['2.8510720308359434']]);
       });
 
-      it('with mean aggregation', async () => {
-        // Percentile values (which are used by media behind the scenes) are not deterministic,
+      it('with median aggregation', async () => {
+        // Percentile values (which are used by median behind the scenes) are not deterministic,
         // so we can't check for the exact values here, but just check they are all within the given range
         // see https://github.com/elastic/elasticsearch/issues/49225
         const data = await renderTableForAggregation('Median');
