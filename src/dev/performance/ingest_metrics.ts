@@ -80,13 +80,9 @@ export function ingestPerformanceMetrics(
   }
 
   const reporter = CiStatsReporter.fromEnv(log);
-  metrics.map(asset => {
-    reporter.metrics([
-      {
-        group: 'Asset size',
-        id: asset.url,
-        value: asset.encodedBodyLength,
-      },
-    ]);
-  });
+  await reporter.metrics(metrics.map(asset => ({
+    group: 'Asset size',
+    id: asset.url,
+    value: asset.encodedBodyLength,
+  })));
 }
