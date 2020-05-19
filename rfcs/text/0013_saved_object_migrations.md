@@ -444,7 +444,7 @@ Algorithm:
     2. If all the nodes’ `hasLock === false` it sets it’s own `hasLock` to
        true and attempts to write the document. If the update fails
        (presumably because of another node’s heartbeat update) it restarts the
-       process from (3)(a)
+       process to obtain a lease from step (3).
     3. If another nodes’ `hasLock === true` the node failed to acquire a
        lock and waits until the active lock has expired before attempting to
        obtain a lock again. 
