@@ -939,6 +939,7 @@ function discoverController(
 
   $scope.resetQuery = function() {
     history.push(`/${encodeURIComponent($route.current.params.id)}`);
+    $route.reload();
   };
 
   $scope.newQuery = function() {
