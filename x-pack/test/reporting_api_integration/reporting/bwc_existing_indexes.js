@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as GenerationUrls from './generation_urls';
+import * as GenerationUrls from '../generation_urls';
 
 /**
  * This file tests the situation when a reporting index spans releases. By default reporting indexes are created

@@ -4,13 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ loadTestFile }: FtrProviderContext) {
-  describe('CSV', function() {
+  describe('Reporting APIs', function() {
     this.tags('ciGroup2');
-    loadTestFile(require.resolve('./csv_saved_search'));
+    loadTestFile(require.resolve('./bwc_existing_indexes'));
+    loadTestFile(require.resolve('./bwc_generation_urls'));
     loadTestFile(require.resolve('./csv_job_params'));
+    loadTestFile(require.resolve('./csv_saved_search'));
+    loadTestFile(require.resolve('./usage'));
   });
 }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as GenerationUrls from './generation_urls';
+import * as GenerationUrls from '../generation_urls';
 
 export default function({ getService }) {
   const reportingAPI = getService('reportingAPI');
