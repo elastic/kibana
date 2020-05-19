@@ -6,7 +6,17 @@
 
 import * as _ from 'lodash';
 import { parse } from 'url';
-import { NetworkPolicyRule } from '../../types';
+
+interface NetworkPolicyRule {
+  allow: boolean;
+  protocol?: string;
+  host?: string;
+}
+
+export interface NetworkPolicy {
+  enabled: boolean;
+  rules: NetworkPolicyRule[];
+}
 
 const isHostMatch = (actualHost: string, ruleHost: string) => {
   const hostParts = actualHost.split('.').reverse();

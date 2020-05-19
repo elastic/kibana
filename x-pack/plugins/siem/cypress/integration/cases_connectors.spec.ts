@@ -11,7 +11,6 @@ import { goToEditExternalConnection } from '../tasks/all_cases';
 import {
   addServiceNowConnector,
   openAddNewConnectorOption,
-  saveChanges,
   selectLastConnectorCreated,
 } from '../tasks/configure_cases';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
@@ -37,7 +36,6 @@ describe('Cases connectors', () => {
     cy.get(TOASTER).should('have.text', "Created 'New connector'");
 
     selectLastConnectorCreated();
-    saveChanges();
 
     cy.wait('@saveConnector', { timeout: 10000 })
       .its('status')

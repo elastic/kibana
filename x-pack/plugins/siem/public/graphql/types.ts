@@ -2541,6 +2541,140 @@ export interface DeleteTimelineMutationArgs {
 // Documents
 // ====================================================
 
+export namespace GetLastEventTimeQuery {
+  export type Variables = {
+    sourceId: string;
+    indexKey: LastEventIndexKey;
+    details: LastTimeDetails;
+    defaultIndex: string[];
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    LastEventTime: LastEventTime;
+  };
+
+  export type LastEventTime = {
+    __typename?: 'LastEventTimeData';
+
+    lastSeen: Maybe<string>;
+  };
+}
+
+export namespace GetMatrixHistogramQuery {
+  export type Variables = {
+    defaultIndex: string[];
+    filterQuery?: Maybe<string>;
+    histogramType: HistogramType;
+    inspect: boolean;
+    sourceId: string;
+    stackByField: string;
+    timerange: TimerangeInput;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    MatrixHistogram: MatrixHistogram;
+  };
+
+  export type MatrixHistogram = {
+    __typename?: 'MatrixHistogramOverTimeData';
+
+    matrixHistogramData: MatrixHistogramData[];
+
+    totalCount: number;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type MatrixHistogramData = {
+    __typename?: 'MatrixOverTimeHistogramData';
+
+    x: Maybe<number>;
+
+    y: Maybe<number>;
+
+    g: Maybe<string>;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
+
+export namespace SourceQuery {
+  export type Variables = {
+    sourceId?: Maybe<string>;
+    defaultIndex: string[];
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    status: Status;
+  };
+
+  export type Status = {
+    __typename?: 'SourceStatus';
+
+    indicesExist: boolean;
+
+    indexFields: IndexFields[];
+  };
+
+  export type IndexFields = {
+    __typename?: 'IndexField';
+
+    category: string;
+
+    description: Maybe<string>;
+
+    example: Maybe<string>;
+
+    indexes: (Maybe<string>)[];
+
+    name: string;
+
+    searchable: boolean;
+
+    type: string;
+
+    aggregatable: boolean;
+
+    format: Maybe<string>;
+  };
+}
+
 export namespace GetAuthenticationsQuery {
   export type Variables = {
     sourceId: string;
@@ -2677,35 +2811,6 @@ export namespace GetAuthenticationsQuery {
     dsl: string[];
 
     response: string[];
-  };
-}
-
-export namespace GetLastEventTimeQuery {
-  export type Variables = {
-    sourceId: string;
-    indexKey: LastEventIndexKey;
-    details: LastTimeDetails;
-    defaultIndex: string[];
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    LastEventTime: LastEventTime;
-  };
-
-  export type LastEventTime = {
-    __typename?: 'LastEventTimeData';
-
-    lastSeen: Maybe<string>;
   };
 }
 
@@ -2935,6 +3040,241 @@ export namespace GetHostOverviewQuery {
   };
 }
 
+export namespace GetKpiHostDetailsQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    filterQuery?: Maybe<string>;
+    defaultIndex: string[];
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    KpiHostDetails: KpiHostDetails;
+  };
+
+  export type KpiHostDetails = {
+    __typename?: 'KpiHostDetailsData';
+
+    authSuccess: Maybe<number>;
+
+    authSuccessHistogram: Maybe<AuthSuccessHistogram[]>;
+
+    authFailure: Maybe<number>;
+
+    authFailureHistogram: Maybe<AuthFailureHistogram[]>;
+
+    uniqueSourceIps: Maybe<number>;
+
+    uniqueSourceIpsHistogram: Maybe<UniqueSourceIpsHistogram[]>;
+
+    uniqueDestinationIps: Maybe<number>;
+
+    uniqueDestinationIpsHistogram: Maybe<UniqueDestinationIpsHistogram[]>;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type AuthSuccessHistogram = KpiHostDetailsChartFields.Fragment;
+
+  export type AuthFailureHistogram = KpiHostDetailsChartFields.Fragment;
+
+  export type UniqueSourceIpsHistogram = KpiHostDetailsChartFields.Fragment;
+
+  export type UniqueDestinationIpsHistogram = KpiHostDetailsChartFields.Fragment;
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
+
+export namespace GetKpiHostsQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    filterQuery?: Maybe<string>;
+    defaultIndex: string[];
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    KpiHosts: KpiHosts;
+  };
+
+  export type KpiHosts = {
+    __typename?: 'KpiHostsData';
+
+    hosts: Maybe<number>;
+
+    hostsHistogram: Maybe<HostsHistogram[]>;
+
+    authSuccess: Maybe<number>;
+
+    authSuccessHistogram: Maybe<AuthSuccessHistogram[]>;
+
+    authFailure: Maybe<number>;
+
+    authFailureHistogram: Maybe<AuthFailureHistogram[]>;
+
+    uniqueSourceIps: Maybe<number>;
+
+    uniqueSourceIpsHistogram: Maybe<UniqueSourceIpsHistogram[]>;
+
+    uniqueDestinationIps: Maybe<number>;
+
+    uniqueDestinationIpsHistogram: Maybe<UniqueDestinationIpsHistogram[]>;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type HostsHistogram = KpiHostChartFields.Fragment;
+
+  export type AuthSuccessHistogram = KpiHostChartFields.Fragment;
+
+  export type AuthFailureHistogram = KpiHostChartFields.Fragment;
+
+  export type UniqueSourceIpsHistogram = KpiHostChartFields.Fragment;
+
+  export type UniqueDestinationIpsHistogram = KpiHostChartFields.Fragment;
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
+
+export namespace GetUncommonProcessesQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    pagination: PaginationInputPaginated;
+    filterQuery?: Maybe<string>;
+    defaultIndex: string[];
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    UncommonProcesses: UncommonProcesses;
+  };
+
+  export type UncommonProcesses = {
+    __typename?: 'UncommonProcessesData';
+
+    totalCount: number;
+
+    edges: Edges[];
+
+    pageInfo: PageInfo;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type Edges = {
+    __typename?: 'UncommonProcessesEdges';
+
+    node: Node;
+
+    cursor: Cursor;
+  };
+
+  export type Node = {
+    __typename?: 'UncommonProcessItem';
+
+    _id: string;
+
+    instances: number;
+
+    process: Process;
+
+    user: Maybe<User>;
+
+    hosts: Hosts[];
+  };
+
+  export type Process = {
+    __typename?: 'ProcessEcsFields';
+
+    args: Maybe<string[]>;
+
+    name: Maybe<string[]>;
+  };
+
+  export type User = {
+    __typename?: 'UserEcsFields';
+
+    id: Maybe<string[]>;
+
+    name: Maybe<string[]>;
+  };
+
+  export type Hosts = {
+    __typename?: 'HostEcsFields';
+
+    name: Maybe<string[]>;
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+
+    value: Maybe<string>;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfoPaginated';
+
+    activePage: number;
+
+    fakeTotalCount: number;
+
+    showMorePagesIndicator: boolean;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
+
 export namespace GetIpOverviewQuery {
   export type Variables = {
     sourceId: string;
@@ -3113,136 +3453,6 @@ export namespace GetIpOverviewQuery {
   };
 }
 
-export namespace GetKpiHostDetailsQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    filterQuery?: Maybe<string>;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    KpiHostDetails: KpiHostDetails;
-  };
-
-  export type KpiHostDetails = {
-    __typename?: 'KpiHostDetailsData';
-
-    authSuccess: Maybe<number>;
-
-    authSuccessHistogram: Maybe<AuthSuccessHistogram[]>;
-
-    authFailure: Maybe<number>;
-
-    authFailureHistogram: Maybe<AuthFailureHistogram[]>;
-
-    uniqueSourceIps: Maybe<number>;
-
-    uniqueSourceIpsHistogram: Maybe<UniqueSourceIpsHistogram[]>;
-
-    uniqueDestinationIps: Maybe<number>;
-
-    uniqueDestinationIpsHistogram: Maybe<UniqueDestinationIpsHistogram[]>;
-
-    inspect: Maybe<Inspect>;
-  };
-
-  export type AuthSuccessHistogram = KpiHostDetailsChartFields.Fragment;
-
-  export type AuthFailureHistogram = KpiHostDetailsChartFields.Fragment;
-
-  export type UniqueSourceIpsHistogram = KpiHostDetailsChartFields.Fragment;
-
-  export type UniqueDestinationIpsHistogram = KpiHostDetailsChartFields.Fragment;
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetKpiHostsQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    filterQuery?: Maybe<string>;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    KpiHosts: KpiHosts;
-  };
-
-  export type KpiHosts = {
-    __typename?: 'KpiHostsData';
-
-    hosts: Maybe<number>;
-
-    hostsHistogram: Maybe<HostsHistogram[]>;
-
-    authSuccess: Maybe<number>;
-
-    authSuccessHistogram: Maybe<AuthSuccessHistogram[]>;
-
-    authFailure: Maybe<number>;
-
-    authFailureHistogram: Maybe<AuthFailureHistogram[]>;
-
-    uniqueSourceIps: Maybe<number>;
-
-    uniqueSourceIpsHistogram: Maybe<UniqueSourceIpsHistogram[]>;
-
-    uniqueDestinationIps: Maybe<number>;
-
-    uniqueDestinationIpsHistogram: Maybe<UniqueDestinationIpsHistogram[]>;
-
-    inspect: Maybe<Inspect>;
-  };
-
-  export type HostsHistogram = KpiHostChartFields.Fragment;
-
-  export type AuthSuccessHistogram = KpiHostChartFields.Fragment;
-
-  export type AuthFailureHistogram = KpiHostChartFields.Fragment;
-
-  export type UniqueSourceIpsHistogram = KpiHostChartFields.Fragment;
-
-  export type UniqueDestinationIpsHistogram = KpiHostChartFields.Fragment;
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
 export namespace GetKpiNetworkQuery {
   export type Variables = {
     sourceId: string;
@@ -3291,60 +3501,6 @@ export namespace GetKpiNetworkQuery {
   export type UniqueSourcePrivateIpsHistogram = KpiNetworkChartFields.Fragment;
 
   export type UniqueDestinationPrivateIpsHistogram = KpiNetworkChartFields.Fragment;
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetMatrixHistogramQuery {
-  export type Variables = {
-    defaultIndex: string[];
-    filterQuery?: Maybe<string>;
-    histogramType: HistogramType;
-    inspect: boolean;
-    sourceId: string;
-    stackByField: string;
-    timerange: TimerangeInput;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    MatrixHistogram: MatrixHistogram;
-  };
-
-  export type MatrixHistogram = {
-    __typename?: 'MatrixHistogramOverTimeData';
-
-    matrixHistogramData: MatrixHistogramData[];
-
-    totalCount: number;
-
-    inspect: Maybe<Inspect>;
-  };
-
-  export type MatrixHistogramData = {
-    __typename?: 'MatrixOverTimeHistogramData';
-
-    x: Maybe<number>;
-
-    y: Maybe<number>;
-
-    g: Maybe<string>;
-  };
 
   export type Inspect = {
     __typename?: 'Inspect';
@@ -3832,6 +3988,184 @@ export namespace GetNetworkTopNFlowQuery {
   };
 }
 
+export namespace GetTlsQuery {
+  export type Variables = {
+    sourceId: string;
+    filterQuery?: Maybe<string>;
+    flowTarget: FlowTargetSourceDest;
+    ip: string;
+    pagination: PaginationInputPaginated;
+    sort: TlsSortField;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    Tls: Tls;
+  };
+
+  export type Tls = {
+    __typename?: 'TlsData';
+
+    totalCount: number;
+
+    edges: Edges[];
+
+    pageInfo: PageInfo;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type Edges = {
+    __typename?: 'TlsEdges';
+
+    node: Node;
+
+    cursor: Cursor;
+  };
+
+  export type Node = {
+    __typename?: 'TlsNode';
+
+    _id: Maybe<string>;
+
+    subjects: Maybe<string[]>;
+
+    ja3: Maybe<string[]>;
+
+    issuers: Maybe<string[]>;
+
+    notAfter: Maybe<string[]>;
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+
+    value: Maybe<string>;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfoPaginated';
+
+    activePage: number;
+
+    fakeTotalCount: number;
+
+    showMorePagesIndicator: boolean;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
+
+export namespace GetUsersQuery {
+  export type Variables = {
+    sourceId: string;
+    filterQuery?: Maybe<string>;
+    flowTarget: FlowTarget;
+    ip: string;
+    pagination: PaginationInputPaginated;
+    sort: UsersSortField;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    Users: Users;
+  };
+
+  export type Users = {
+    __typename?: 'UsersData';
+
+    totalCount: number;
+
+    edges: Edges[];
+
+    pageInfo: PageInfo;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type Edges = {
+    __typename?: 'UsersEdges';
+
+    node: Node;
+
+    cursor: Cursor;
+  };
+
+  export type Node = {
+    __typename?: 'UsersNode';
+
+    user: Maybe<User>;
+  };
+
+  export type User = {
+    __typename?: 'UsersItem';
+
+    name: Maybe<string>;
+
+    id: Maybe<string[]>;
+
+    groupId: Maybe<string[]>;
+
+    groupName: Maybe<string[]>;
+
+    count: Maybe<number>;
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+
+    value: Maybe<string>;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfoPaginated';
+
+    activePage: number;
+
+    fakeTotalCount: number;
+
+    showMorePagesIndicator: boolean;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
+  };
+}
+
 export namespace GetOverviewHostQuery {
   export type Variables = {
     sourceId: string;
@@ -3955,57 +4289,6 @@ export namespace GetOverviewNetworkQuery {
     dsl: string[];
 
     response: string[];
-  };
-}
-
-export namespace SourceQuery {
-  export type Variables = {
-    sourceId?: Maybe<string>;
-    defaultIndex: string[];
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    status: Status;
-  };
-
-  export type Status = {
-    __typename?: 'SourceStatus';
-
-    indicesExist: boolean;
-
-    indexFields: IndexFields[];
-  };
-
-  export type IndexFields = {
-    __typename?: 'IndexField';
-
-    category: string;
-
-    description: Maybe<string>;
-
-    example: Maybe<string>;
-
-    indexes: (Maybe<string>)[];
-
-    name: string;
-
-    searchable: boolean;
-
-    type: string;
-
-    aggregatable: boolean;
-
-    format: Maybe<string>;
   };
 }
 
@@ -5659,289 +5942,6 @@ export namespace PersistTimelinePinnedEventMutation {
     updatedBy: Maybe<string>;
 
     version: Maybe<string>;
-  };
-}
-
-export namespace GetTlsQuery {
-  export type Variables = {
-    sourceId: string;
-    filterQuery?: Maybe<string>;
-    flowTarget: FlowTargetSourceDest;
-    ip: string;
-    pagination: PaginationInputPaginated;
-    sort: TlsSortField;
-    timerange: TimerangeInput;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    Tls: Tls;
-  };
-
-  export type Tls = {
-    __typename?: 'TlsData';
-
-    totalCount: number;
-
-    edges: Edges[];
-
-    pageInfo: PageInfo;
-
-    inspect: Maybe<Inspect>;
-  };
-
-  export type Edges = {
-    __typename?: 'TlsEdges';
-
-    node: Node;
-
-    cursor: Cursor;
-  };
-
-  export type Node = {
-    __typename?: 'TlsNode';
-
-    _id: Maybe<string>;
-
-    subjects: Maybe<string[]>;
-
-    ja3: Maybe<string[]>;
-
-    issuers: Maybe<string[]>;
-
-    notAfter: Maybe<string[]>;
-  };
-
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value: Maybe<string>;
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
-
-    activePage: number;
-
-    fakeTotalCount: number;
-
-    showMorePagesIndicator: boolean;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetUncommonProcessesQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    pagination: PaginationInputPaginated;
-    filterQuery?: Maybe<string>;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    UncommonProcesses: UncommonProcesses;
-  };
-
-  export type UncommonProcesses = {
-    __typename?: 'UncommonProcessesData';
-
-    totalCount: number;
-
-    edges: Edges[];
-
-    pageInfo: PageInfo;
-
-    inspect: Maybe<Inspect>;
-  };
-
-  export type Edges = {
-    __typename?: 'UncommonProcessesEdges';
-
-    node: Node;
-
-    cursor: Cursor;
-  };
-
-  export type Node = {
-    __typename?: 'UncommonProcessItem';
-
-    _id: string;
-
-    instances: number;
-
-    process: Process;
-
-    user: Maybe<User>;
-
-    hosts: Hosts[];
-  };
-
-  export type Process = {
-    __typename?: 'ProcessEcsFields';
-
-    args: Maybe<string[]>;
-
-    name: Maybe<string[]>;
-  };
-
-  export type User = {
-    __typename?: 'UserEcsFields';
-
-    id: Maybe<string[]>;
-
-    name: Maybe<string[]>;
-  };
-
-  export type Hosts = {
-    __typename?: 'HostEcsFields';
-
-    name: Maybe<string[]>;
-  };
-
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value: Maybe<string>;
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
-
-    activePage: number;
-
-    fakeTotalCount: number;
-
-    showMorePagesIndicator: boolean;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
-  };
-}
-
-export namespace GetUsersQuery {
-  export type Variables = {
-    sourceId: string;
-    filterQuery?: Maybe<string>;
-    flowTarget: FlowTarget;
-    ip: string;
-    pagination: PaginationInputPaginated;
-    sort: UsersSortField;
-    timerange: TimerangeInput;
-    defaultIndex: string[];
-    inspect: boolean;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    Users: Users;
-  };
-
-  export type Users = {
-    __typename?: 'UsersData';
-
-    totalCount: number;
-
-    edges: Edges[];
-
-    pageInfo: PageInfo;
-
-    inspect: Maybe<Inspect>;
-  };
-
-  export type Edges = {
-    __typename?: 'UsersEdges';
-
-    node: Node;
-
-    cursor: Cursor;
-  };
-
-  export type Node = {
-    __typename?: 'UsersNode';
-
-    user: Maybe<User>;
-  };
-
-  export type User = {
-    __typename?: 'UsersItem';
-
-    name: Maybe<string>;
-
-    id: Maybe<string[]>;
-
-    groupId: Maybe<string[]>;
-
-    groupName: Maybe<string[]>;
-
-    count: Maybe<number>;
-  };
-
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value: Maybe<string>;
-  };
-
-  export type PageInfo = {
-    __typename?: 'PageInfoPaginated';
-
-    activePage: number;
-
-    fakeTotalCount: number;
-
-    showMorePagesIndicator: boolean;
-  };
-
-  export type Inspect = {
-    __typename?: 'Inspect';
-
-    dsl: string[];
-
-    response: string[];
   };
 }
 

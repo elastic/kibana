@@ -8,7 +8,7 @@ import { GetResponse, SearchResponse } from 'elasticsearch';
 import { AlertEvent, AlertHits, AlertAPIOrdering } from '../../../../../common/types';
 import { AlertConstants } from '../../../../../common/alert_constants';
 import { EndpointConfigType } from '../../../../config';
-import { searchESForAlerts, Pagination } from '../../lib';
+import { searchESForAlerts, Pagination, AlertId } from '../../lib';
 import { AlertSearchQuery, SearchCursor, AlertDetailsRequestParams } from '../../types';
 import { BASE_ALERTS_ROUTE } from '../..';
 import { RequestHandlerContext } from '../../../../../../../../src/core/server';
@@ -59,7 +59,8 @@ export class AlertDetailsPagination extends Pagination<
 
   protected getUrlFromHits(hits: AlertHits): string | null {
     if (hits.length > 0) {
-      return `${BASE_ALERTS_ROUTE}/${hits[0]._id}`;
+      const id = new AlertId(hits[0]._index, hits[0]._id);
+      return `${BASE_ALERTS_ROUTE}/${id.toString()}`;
     }
     return null;
   }

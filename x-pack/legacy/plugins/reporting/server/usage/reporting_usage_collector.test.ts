@@ -5,14 +5,14 @@
  */
 
 import sinon from 'sinon';
+import { ReportingConfig } from '../';
 import { createMockReportingCore } from '../../test_helpers';
 import { getExportTypesRegistry } from '../lib/export_types_registry';
+import { ReportingUsageType, SearchResponse } from './types';
 import {
-  registerReportingUsageCollector,
   getReportingUsageCollector,
+  registerReportingUsageCollector,
 } from './reporting_usage_collector';
-import { ReportingConfig } from '../types';
-import { SearchResponse, ReportingUsageType } from './types';
 
 const exportTypesRegistry = getExportTypesRegistry();
 

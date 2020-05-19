@@ -197,7 +197,8 @@ export const javaSettings: RawSettingDefinition[] = [
           'The minimum duration of an inferred span. Note that the min duration is also implicitly set by the sampling interval. However, increasing the sampling interval also decreases the accuracy of the duration of inferred spans.'
       }
     ),
-    includeAgents: ['java']
+    includeAgents: ['java'],
+    min: '0ms'
   },
   {
     key: 'profiling_inferred_spans_included_classes',
