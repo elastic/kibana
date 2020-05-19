@@ -42,21 +42,15 @@ describe('EditConnector ', () => {
 
     expect(
       wrapper
-        .find(`[data-test-subj="dropdown-connectors"]`)
-        .last()
-        .prop('disabled')
-    ).toBeTruthy();
-
-    expect(
-      wrapper
         .find(`span[data-test-subj="dropdown-connector-no-connector"]`)
         .last()
         .exists()
     ).toBeTruthy();
-    wrapper
-      .find(`[data-test-subj="connector-edit-button"]`)
-      .last()
-      .simulate('click');
+
+    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+    wrapper.update();
+    wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
+    wrapper.update();
 
     expect(
       wrapper
@@ -64,30 +58,27 @@ describe('EditConnector ', () => {
         .last()
         .exists()
     ).toBeTruthy();
-
-    expect(
-      wrapper
-        .find(`[data-test-subj="dropdown-connectors"]`)
-        .last()
-        .prop('disabled')
-    ).toBeFalsy();
   });
+
   it('Edit external service on submit', async () => {
     const wrapper = mount(
       <TestProviders>
         <EditConnector {...defaultProps} />
       </TestProviders>
     );
-    wrapper
-      .find(`[data-test-subj="connector-edit-button"]`)
-      .last()
-      .simulate('click');
+
+    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+    wrapper.update();
+    wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
+    wrapper.update();
+
     expect(
       wrapper
         .find(`[data-test-subj="edit-connectors-submit"]`)
         .last()
         .exists()
     ).toBeTruthy();
+
     await act(async () => {
       wrapper
         .find(`[data-test-subj="edit-connectors-submit"]`)
@@ -97,6 +88,7 @@ describe('EditConnector ', () => {
       expect(onSubmit).toBeCalledWith(sampleConnector);
     });
   });
+
   it('Resets selector on cancel', async () => {
     const props = {
       ...defaultProps,
@@ -106,10 +98,12 @@ describe('EditConnector ', () => {
         <EditConnector {...props} />
       </TestProviders>
     );
-    wrapper
-      .find(`[data-test-subj="connector-edit-button"]`)
-      .last()
-      .simulate('click');
+
+    wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+    wrapper.update();
+    wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
+    wrapper.update();
+
     await act(async () => {
       wrapper
         .find(`[data-test-subj="edit-connectors-cancel"]`)
@@ -123,20 +117,7 @@ describe('EditConnector ', () => {
       );
     });
   });
-  it('Renders disabled button', () => {
-    const props = { ...defaultProps, disabled: true };
-    const wrapper = mount(
-      <TestProviders>
-        <EditConnector {...props} />
-      </TestProviders>
-    );
-    expect(
-      wrapper
-        .find(`[data-test-subj="connector-edit-button"]`)
-        .last()
-        .prop('disabled')
-    ).toBeTruthy();
-  });
+
   it('Renders loading spinner', () => {
     const props = { ...defaultProps, isLoading: true };
     const wrapper = mount(
