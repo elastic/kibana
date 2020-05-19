@@ -157,10 +157,8 @@ export const createTimelineEpic = <State>(): Epic<
           return true;
         }
         if (action.type === createTimeline.type && isItAtimelineAction(timelineId)) {
-          if (timelineObj.status !== TimelineStatus.draft) {
-            myEpicTimelineId.setTimelineVersion(null);
-            myEpicTimelineId.setTimelineId(null);
-          }
+          myEpicTimelineId.setTimelineVersion(null);
+          myEpicTimelineId.setTimelineId(null);
         } else if (action.type === addTimeline.type && isItAtimelineAction(timelineId)) {
           const addNewTimeline: TimelineModel = get('payload.timeline', action);
           myEpicTimelineId.setTimelineId(addNewTimeline.savedObjectId);
@@ -248,6 +246,7 @@ export const createTimelineEpic = <State>(): Epic<
                         ...savedTimeline,
                         savedObjectId: response.timeline.savedObjectId,
                         version: response.timeline.version,
+                        status: response.timeline.status ?? TimelineStatus.active,
                         timelineType: response.timeline.timelineType ?? TimelineType.default,
                         templateTimelineId: response.timeline.templateTimelineId ?? null,
                         templateTimelineVersion: response.timeline.templateTimelineVersion ?? null,
