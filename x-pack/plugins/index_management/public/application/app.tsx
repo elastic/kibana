@@ -7,7 +7,7 @@
 import React, { useEffect } from 'react';
 import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 import { BASE_PATH, UIM_APP_LOAD } from '../../common/constants';
-import { IndexManagementHome } from './sections/home';
+import { IndexManagementHome, Section, homeSections } from './sections/home';
 import { TemplateCreate } from './sections/template_create';
 import { TemplateClone } from './sections/template_clone';
 import { TemplateEdit } from './sections/template_edit';
@@ -31,7 +31,10 @@ export const AppWithoutRouter = () => (
     <Route exact path={`${BASE_PATH}create_template`} component={TemplateCreate} />
     <Route exact path={`${BASE_PATH}clone_template/:name*`} component={TemplateClone} />
     <Route exact path={`${BASE_PATH}edit_template/:name*`} component={TemplateEdit} />
-    <Route path={`${BASE_PATH}:section(indices|templates)`} component={IndexManagementHome} />
-    <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}indices`} />
+    <Route
+      path={`${BASE_PATH}:section(${homeSections.join('|')})`}
+      component={IndexManagementHome}
+    />
+    <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}${Section.Indices}`} />
   </Switch>
 );

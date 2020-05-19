@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { IndexManagementHome, Section, homeSections } from './home';
+export { ComponentTemplateList } from './component_template_list';
