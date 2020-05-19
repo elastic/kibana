@@ -51,33 +51,24 @@ def base(Map params, Closure closure) {
       }
     }
 
-    def scmVars = [:]
+    def checkoutInfo = [:]
 
     if (config.scm) {
       // Try to clone from Github up to 8 times, waiting 15 secs between attempts
       retryWithDelay(8, 15) {
-        scmVars = checkout scm
-
-        def mergeBase
-        if (env.ghprbTargetBranch) {
-          sh(
-            script: "cd kibana && git fetch origin ${env.ghprbTargetBranch}",
-            label: "update reference to target branch 'origin/${env.ghprbTargetBranch}'"
-          )
-          mergeBase = sh(
-            script: "cd kibana && git merge-base HEAD FETCH_HEAD",
-            label: "determining merge point with target branch 'origin/${env.ghprbTargetBranch}'",
-            returnStdout: true
-          ).trim()
-        }
-
-        ciStats.reportGitInfo(
-          env.ghprbSourceBranch ?: scmVars.GIT_LOCAL_BRANCH ?: scmVars.GIT_BRANCH,
-          scmVars.GIT_COMMIT,
-          env.ghprbTargetBranch,
-          mergeBase
-        )
+        checkout scm
       }
+
+      dir("kibana") {
+        checkoutInfo = getCheckoutInfo()
+      }
+
+      ciStats.reportGitInfo(
+        checkoutInfo.branch,
+        checkoutInfo.commit,
+        checkoutInfo.targetBranch,
+        checkoutInfo.mergeBase
+      )
     }
 
     withEnv([
@@ -87,7 +78,7 @@ def base(Map params, Closure closure) {
       "PR_TARGET_BRANCH=${env.ghprbTargetBranch ?: ''}",
       "PR_AUTHOR=${env.ghprbPullAuthorLogin ?: ''}",
       "TEST_BROWSER_HEADLESS=1",
-      "GIT_BRANCH=${scmVars.GIT_BRANCH ?: ''}",
+      "GIT_BRANCH=${checkoutInfo.branch ?: ''}",
     ]) {
       withCredentials([
         string(credentialsId: 'vault-addr', variable: 'VAULT_ADDR'),
