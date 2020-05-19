@@ -31,6 +31,7 @@ export const Layout = () => {
   const {
     metric,
     groupBy,
+    sort,
     nodeType,
     accountId,
     region,
@@ -58,6 +59,7 @@ export const Layout = () => {
     formatTemplate: '{{value}}',
     legend: createLegend(legend.palette, legend.steps, legend.reverseColors),
     metric,
+    sort,
     fields: source?.configuration?.fields,
     groupBy,
   };

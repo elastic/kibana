@@ -21,6 +21,16 @@ export const inventoryViewSavedObjectType: SavedObjectsType = {
       name: {
         type: 'keyword',
       },
+      sort: {
+        properties: {
+          by: {
+            type: 'keyword',
+          },
+          direction: {
+            type: 'keyword',
+          },
+        },
+      },
       metric: {
         properties: {
           type: {

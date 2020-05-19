@@ -38,6 +38,7 @@ export const DEFAULT_WAFFLE_OPTIONS_STATE: WaffleOptionsState = {
     steps: 10,
     reverseColors: false,
   },
+  sort: { by: 'name', direction: 'desc' },
 };
 
 export const useWaffleOptions = () => {
@@ -112,6 +113,13 @@ export const useWaffleOptions = () => {
     [setState]
   );
 
+  const changeSort = useCallback(
+    (sort: WaffleSortOption) => {
+      setState(previous => ({ ...previous, sort }));
+    },
+    [setState]
+  );
+
   return {
     ...DEFAULT_WAFFLE_OPTIONS_STATE,
     ...state,
@@ -126,6 +134,7 @@ export const useWaffleOptions = () => {
     changeRegion,
     changeCustomMetrics,
     changeLegend,
+    changeSort,
     setWaffleOptionsState: setState,
   };
 };
@@ -137,6 +146,11 @@ const WaffleLegendOptionsRT = rt.type({
 });
 
 export type WaffleLegendOptions = rt.TypeOf<typeof WaffleLegendOptionsRT>;
+
+export const WaffleSortOptionRT = rt.type({
+  by: rt.keyof({ name: null, value: null }),
+  direction: rt.keyof({ asc: null, desc: null }),
+});
 
 export const WaffleOptionsStateRT = rt.type({
   metric: SnapshotMetricInputRT,
@@ -158,8 +172,10 @@ export const WaffleOptionsStateRT = rt.type({
   region: rt.string,
   customMetrics: rt.array(SnapshotCustomMetricInputRT),
   legend: WaffleLegendOptionsRT,
+  sort: WaffleSortOptionRT,
 });
 
+export type WaffleSortOption = rt.TypeOf<typeof WaffleSortOptionRT>;
 export type WaffleOptionsState = rt.TypeOf<typeof WaffleOptionsStateRT>;
 const encodeUrlState = (state: WaffleOptionsState) => {
   return WaffleOptionsStateRT.encode(state);
