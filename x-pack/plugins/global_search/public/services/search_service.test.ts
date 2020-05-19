@@ -11,6 +11,7 @@ import { take } from 'rxjs/operators';
 import { TestScheduler } from 'rxjs/testing';
 import { duration } from 'moment';
 import { httpServiceMock, applicationServiceMock } from '../../../../../src/core/public/mocks';
+import { licenseCheckerMock } from '../../common/license_checker.mock';
 import { GlobalSearchProviderResult, GlobalSearchResult } from '../../common/types';
 import { GlobalSearchClientConfigType } from '../config';
 import { GlobalSearchResultProvider } from '../types';
@@ -25,6 +26,7 @@ describe('SearchService', () => {
   let service: SearchService;
   let applicationStart: ReturnType<typeof applicationServiceMock.createStartContract>;
   let httpStart: ReturnType<typeof httpServiceMock.createStartContract>;
+  let licenseChecker: ReturnType<typeof licenseCheckerMock.create>;
 
   const createConfig = (timeoutMs: number = 30000): GlobalSearchClientConfigType => {
     return {
@@ -79,6 +81,7 @@ describe('SearchService', () => {
     service = new SearchService();
     httpStart = httpServiceMock.createStartContract({ basePath: '/base-path' });
     applicationStart = applicationServiceMock.createStartContract();
+    licenseChecker = licenseCheckerMock.create();
 
     fetchServerResultsMock.mockClear();
     fetchServerResultsMock.mockReturnValue(of());
@@ -92,6 +95,7 @@ describe('SearchService', () => {
       it('throws when trying to register the same provider twice', () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
+          licenseChecker,
         });
 
         const provider = createProvider('A');
@@ -108,6 +112,7 @@ describe('SearchService', () => {
       it('calls the provider with the correct parameters', () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
+          licenseChecker,
         });
 
         const provider = createProvider('A');
@@ -124,7 +129,7 @@ describe('SearchService', () => {
       });
 
       it('calls `fetchServerResults` with the correct parameters', () => {
-        service.setup({ config: createConfig() });
+        service.setup({ config: createConfig(), licenseChecker });
 
         const { find } = service.start(startDeps());
         find('foobar', { preference: 'pref' });
@@ -140,6 +145,7 @@ describe('SearchService', () => {
       it('calls `getDefaultPreference` when `preference` is not specified', () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
+          licenseChecker,
         });
 
         const provider = createProvider('A');
@@ -174,6 +180,7 @@ describe('SearchService', () => {
       it('return the results from the provider', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
+          licenseChecker,
         });
 
         getTestScheduler().run(({ expectObservable, hot }) => {
@@ -194,7 +201,7 @@ describe('SearchService', () => {
       });
 
       it('return the results from the server', async () => {
-        service.setup({ config: createConfig() });
+        service.setup({ config: createConfig(), licenseChecker });
 
         getTestScheduler().run(({ expectObservable, hot }) => {
           const serverResults = hot('a-b-|', {
@@ -217,6 +224,7 @@ describe('SearchService', () => {
       it('handles multiple providers', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
+          licenseChecker,
         });
 
         getTestScheduler().run(({ expectObservable, hot }) => {
@@ -254,6 +262,7 @@ describe('SearchService', () => {
       it('return mixed server/client providers results', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
+          licenseChecker,
         });
 
         getTestScheduler().run(({ expectObservable, hot }) => {
@@ -287,6 +296,7 @@ describe('SearchService', () => {
       it('handles the `aborted$` option', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
+          licenseChecker,
         });
 
         getTestScheduler().run(({ expectObservable, hot }) => {
@@ -310,6 +320,7 @@ describe('SearchService', () => {
       it('respects the timeout duration', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(100),
+          licenseChecker,
         });
 
         getTestScheduler().run(({ expectObservable, hot }) => {
@@ -333,6 +344,7 @@ describe('SearchService', () => {
       it('only returns a given maximum number of results per provider', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(100),
+          licenseChecker,
           maxProviderResults: 2,
         });
 
@@ -370,6 +382,7 @@ describe('SearchService', () => {
       it('process the results before returning them', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
+          licenseChecker,
         });
 
         const resultA = providerResult('A', {
@@ -404,6 +417,32 @@ describe('SearchService', () => {
           ...resultB,
           url: '/foo',
           navigate: expect.any(Function),
+        });
+      });
+
+      it('emits an error when the license is invalid', async () => {
+        licenseChecker.getState.mockReturnValue({ valid: false, message: 'expired' });
+
+        const { registerResultProvider } = service.setup({
+          config: createConfig(),
+          licenseChecker,
+        });
+
+        getTestScheduler().run(({ expectObservable, hot }) => {
+          const providerResults = hot('a-b-|', {
+            a: [providerResult('1')],
+            b: [providerResult('2')],
+          });
+          registerResultProvider(createProvider('A', providerResults));
+
+          const { find } = service.start(startDeps());
+          const results = find('foo', {});
+
+          expectObservable(results).toBe(
+            '#',
+            {},
+            'GlobalSearch API is disabled because of invalid license state: expired'
+          );
         });
       });
     });

@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { merge, Observable, timer, throwError } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-import { merge, Observable, timer } from 'rxjs';
 import { duration } from 'moment';
 import { HttpStart, ApplicationStart } from 'src/core/public';
 import { GlobalSearchProviderResult } from '../../common/types';
 import { takeInArray } from '../../common/operators';
 import { processProviderResult } from '../../common/process_result';
+import { ILicenseChecker } from '../../common/license_checker';
 import { GlobalSearchResultProvider } from '../types';
 import { GlobalSearchClientConfigType } from '../config';
 import { GlobalSearchBatchedResults, GlobalSearchFindOptions } from './types';
@@ -30,6 +31,7 @@ export interface SearchServiceStart {
 interface SetupDeps {
   config: GlobalSearchClientConfigType;
   maxProviderResults?: number;
+  licenseChecker: ILicenseChecker;
 }
 
 interface StartDeps {
@@ -46,9 +48,15 @@ export class SearchService {
   private http?: HttpStart;
   private application?: ApplicationStart;
   private maxProviderResults = defaultMaxProviderResults;
+  private licenseChecker?: ILicenseChecker;
 
-  setup({ config, maxProviderResults = defaultMaxProviderResults }: SetupDeps): SearchServiceSetup {
+  setup({
+    config,
+    licenseChecker,
+    maxProviderResults = defaultMaxProviderResults,
+  }: SetupDeps): SearchServiceSetup {
     this.config = config;
+    this.licenseChecker = licenseChecker;
     this.maxProviderResults = maxProviderResults;
 
     return {
@@ -71,6 +79,13 @@ export class SearchService {
   }
 
   private performFind(term: string, options: GlobalSearchFindOptions) {
+    const licenseState = this.licenseChecker!.getState();
+    if (!licenseState.valid) {
+      return throwError(
+        `GlobalSearch API is disabled because of invalid license state: ${licenseState.message}`
+      );
+    }
+
     const timeout = duration(this.config!.search_timeout).asMilliseconds();
     const timeout$ = timer(timeout).pipe(map(() => undefined));
     const aborted$ = options.aborted$ ? merge(options.aborted$, timeout$) : timeout$;
