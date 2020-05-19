@@ -27,7 +27,10 @@ export function ingestPerformanceMetrics(
     Map<string, { loadingFinished: LoadingFinishedEvent; responseRecieved: ResponseReceivedEvent }>
   >
 ) {
-  const uniqueRequests = new Map<string, Array<{ path: string; encodedBodyLength: number }>>();
+  const uniqueRequests = new Map<
+    string,
+    Array<{ path: string; encodedBodyLength: number; plugin?: string; type?: string }>
+  >();
 
   for (const [path, frameResponses] of responses) {
     for (const [, response] of frameResponses) {
@@ -46,15 +49,33 @@ export function ingestPerformanceMetrics(
     }
   }
 
-  const metrics = [];
+  const metrics = Array<{
+    url: string;
+    encodedBodyLength: number;
+    plugin?: string;
+    type?: string;
+  }>();
 
-  for (const [path, array] of uniqueRequests) {
-    if (array.length > 1) {
-      const avgSize = Math.round(
+  for (const [url, array] of uniqueRequests) {
+    const isPlugin = url.endsWith('.plugin.js');
+    if (isPlugin) {
+      const type = url.match(/.*\/\d+.plugin.js$/) ? 'lazy' : 'entry';
+      const results = url.match(/(?<=plugin\/)(.*)(?=\/)/);
+      const plugin = results ? results[0] : url;
+      const encodedBodyLength = Math.round(
         array.map((i: any) => i.encodedBodyLength).reduce((acc, value) => acc + value) /
           array.length
       );
-      metrics.push({ path, encodedBodyLength: avgSize });
+
+      metrics.push({ url, plugin, type, encodedBodyLength });
+    } else {
+      if (array.length > 1) {
+        const encodedBodyLength = Math.round(
+          array.map((i: any) => i.encodedBodyLength).reduce((acc, value) => acc + value) /
+            array.length
+        );
+        metrics.push({ url, encodedBodyLength });
+      }
     }
   }
 
@@ -63,7 +84,7 @@ export function ingestPerformanceMetrics(
     reporter.metrics([
       {
         group: 'Asset size',
-        id: asset.path,
+        id: asset.url,
         value: asset.encodedBodyLength,
       },
     ]);
