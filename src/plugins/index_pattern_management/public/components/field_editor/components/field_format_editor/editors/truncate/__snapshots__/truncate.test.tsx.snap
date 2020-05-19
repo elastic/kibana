@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TruncateFormatEditor should render normally 1`] = `
+<Fragment>
+  <EuiFormRow
+    describedByIds={Array []}
+    display="row"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    isInvalid={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Field length"
+        id="indexPatternManagement.truncate.lengthLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiFieldNumber
+      defaultValue={5}
+      isInvalid={false}
+      min={1}
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <FormatEditorSamples
+    sampleType="text"
+    samples={
+      Array [
+        Object {
+          "input": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris vitae sem consequat, sollicitudin enim a, feugiat mi. Curabitur congue laoreet elit, eu dictum nisi commodo ut. Nullam congue sem a blandit commodo. Suspendisse eleifend sodales leo ac hendrerit. Nam fringilla tempor fermentum. Ut tristique pharetra sapien sit amet pharetra. Ut turpis massa, viverra id erat quis, fringilla vehicula risus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Phasellus tincidunt gravida gravida. Praesent et ligula viverra, semper lacus in, tristique elit. Cras ac eleifend diam. Nulla facilisi. Morbi id sagittis magna. Sed fringilla, magna in suscipit aliquet.",
+          "output": "Lorem ipsu",
+        },
+      ]
+    }
+  />
+</Fragment>
+`;
