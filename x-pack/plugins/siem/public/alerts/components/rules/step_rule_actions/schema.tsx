@@ -8,9 +8,69 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { FormSchema } from '../../../../shared_imports';
+import {
+  AlertAction,
+  ActionTypeRegistryContract,
+} from '../../../../../../triggers_actions_ui/public';
+import { FormSchema, FormData, ValidationFunc, ERROR_CODE } from '../../../../shared_imports';
+import * as I18n from './translations';
+import { isUuidv4, getActionTypeName, validateMustache, validateActionParams } from './utils';
 
-export const schema: FormSchema = {
+export const validateSingleAction = (
+  actionItem: AlertAction,
+  actionTypeRegistry: ActionTypeRegistryContract
+): string[] => {
+  if (!isUuidv4(actionItem.id)) {
+    return [I18n.NO_CONNECTOR_SELECTED];
+  }
+
+  const actionParamsErrors = validateActionParams(actionItem, actionTypeRegistry);
+  const mustacheErrors = validateMustache(actionItem.params);
+
+  return [...actionParamsErrors, ...mustacheErrors];
+};
+
+export const validateRuleActionsField = (actionTypeRegistry: ActionTypeRegistryContract) => (
+  ...data: Parameters<ValidationFunc>
+): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+  const [{ value, path }] = data as [{ value: AlertAction[]; path: string }];
+
+  const errors = value.reduce((acc, actionItem) => {
+    const errorsArray = validateSingleAction(actionItem, actionTypeRegistry);
+
+    if (errorsArray.length) {
+      const actionTypeName = getActionTypeName(actionItem.actionTypeId);
+      const errorsListItems = errorsArray.map(error => `*   ${error}\n`);
+
+      return [...acc, `\n**${actionTypeName}:**\n${errorsListItems.join('')}`];
+    }
+
+    return acc;
+  }, [] as string[]);
+
+  if (errors.length) {
+    return {
+      code: 'ERR_FIELD_FORMAT',
+      path,
+      message: `${errors.join('\n')}`,
+    };
+  }
+};
+
+export const getSchema = ({
+  actionTypeRegistry,
+}: {
+  actionTypeRegistry: ActionTypeRegistryContract;
+}): FormSchema<FormData> => ({
+  actions: {
+    validations: [
+      {
+        validator: validateRuleActionsField(actionTypeRegistry),
+      },
+    ],
+  },
+  enabled: {},
+  kibanaSiemAppUrl: {},
   throttle: {
     label: i18n.translate(
       'xpack.siem.detectionEngine.createRule.stepRuleActions.fieldThrottleLabel',
@@ -26,14 +86,4 @@ export const schema: FormSchema = {
       }
     ),
   },
-  actions: {
-    label: i18n.translate(
-      'xpack.siem.detectionEngine.createRule.stepRuleActions.fieldActionsLabel',
-      {
-        defaultMessage: 'Actions',
-      }
-    ),
-  },
-  enabled: {},
-  kibanaSiemAppUrl: {},
-};
+});

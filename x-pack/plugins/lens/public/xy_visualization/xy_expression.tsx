@@ -21,24 +21,22 @@ import {
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
-  IInterpreterRenderHandlers,
-  ExpressionRenderDefinition,
   ExpressionFunctionDefinition,
+  ExpressionRenderDefinition,
   ExpressionValueSearchContext,
 } from 'src/plugins/expressions/public';
 import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  ValueClickTriggerContext,
-  RangeSelectTriggerContext,
-} from '../../../../../src/plugins/embeddable/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
-import { LensMultiTable, FormatFactory } from '../types';
+  LensMultiTable,
+  FormatFactory,
+  ILensInterpreterRenderHandlers,
+  LensFilterEvent,
+  LensBrushEvent,
+} from '../types';
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart } from './state_helpers';
-import { getExecuteTriggerActions } from '../services';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { parseInterval } from '../../../../../src/plugins/data/common';
 import { EmptyPlaceholder } from '../shared_components';
 
@@ -63,7 +61,8 @@ type XYChartRenderProps = XYChartProps & {
   formatFactory: FormatFactory;
   timeZone: string;
   histogramBarTarget: number;
-  executeTriggerActions: UiActionsStart['executeTriggerActions'];
+  onClickValue: (data: LensFilterEvent['data']) => void;
+  onSelectRange: (data: LensBrushEvent['data']) => void;
 };
 
 export const xyChart: ExpressionFunctionDefinition<
@@ -125,9 +124,18 @@ export const getXyChartRenderer = (dependencies: {
   }),
   validate: () => undefined,
   reuseDomNode: true,
-  render: async (domNode: Element, config: XYChartProps, handlers: IInterpreterRenderHandlers) => {
-    const executeTriggerActions = getExecuteTriggerActions();
+  render: async (
+    domNode: Element,
+    config: XYChartProps,
+    handlers: ILensInterpreterRenderHandlers
+  ) => {
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+    const onClickValue = (data: LensFilterEvent['data']) => {
+      handlers.event({ name: 'filter', data });
+    };
+    const onSelectRange = (data: LensBrushEvent['data']) => {
+      handlers.event({ name: 'brush', data });
+    };
     const formatFactory = await dependencies.formatFactory;
     ReactDOM.render(
       <I18nProvider>
@@ -137,7 +145,8 @@ export const getXyChartRenderer = (dependencies: {
           chartTheme={dependencies.chartTheme}
           timeZone={dependencies.timeZone}
           histogramBarTarget={dependencies.histogramBarTarget}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
+          onSelectRange={onSelectRange}
         />
       </I18nProvider>,
       domNode,
@@ -177,7 +186,8 @@ export function XYChart({
   timeZone,
   chartTheme,
   histogramBarTarget,
-  executeTriggerActions,
+  onClickValue,
+  onSelectRange,
 }: XYChartRenderProps) {
   const { legend, layers } = args;
 
@@ -287,15 +297,13 @@ export function XYChart({
           );
           const timeFieldName = table.columns[xAxisColumnIndex]?.meta?.aggConfigParams?.field;
 
-          const context: RangeSelectTriggerContext = {
-            data: {
-              range: [min, max],
-              table,
-              column: xAxisColumnIndex,
-            },
+          const context: LensBrushEvent['data'] = {
+            range: [min, max],
+            table,
+            column: xAxisColumnIndex,
             timeFieldName,
           };
-          executeTriggerActions(VIS_EVENT_TO_TRIGGER.brush, context);
+          onSelectRange(context);
         }}
         onElementClick={([[geometry, series]]) => {
           // for xyChart series is always XYChartSeriesIdentifier and geometry is always type of GeometryValue
@@ -337,18 +345,16 @@ export function XYChart({
             ?.aggConfigParams?.field;
           const timeFieldName = xDomain && xAxisFieldName;
 
-          const context: ValueClickTriggerContext = {
-            data: {
-              data: points.map(point => ({
-                row: point.row,
-                column: point.column,
-                value: point.value,
-                table,
-              })),
-            },
+          const context: LensFilterEvent['data'] = {
+            data: points.map(point => ({
+              row: point.row,
+              column: point.column,
+              value: point.value,
+              table,
+            })),
             timeFieldName,
           };
-          executeTriggerActions(VIS_EVENT_TO_TRIGGER.filter, context);
+          onClickValue(context);
         }}
       />
 
@@ -396,8 +402,12 @@ export function XYChart({
           const rows = table.rows.filter(
             row =>
               xAccessor &&
-              row[xAccessor] &&
-              !(splitAccessor && !row[splitAccessor] && accessors.every(accessor => !row[accessor]))
+              typeof row[xAccessor] !== 'undefined' &&
+              !(
+                splitAccessor &&
+                typeof row[splitAccessor] === 'undefined' &&
+                accessors.every(accessor => typeof row[accessor] === 'undefined')
+              )
           );
 
           const seriesProps: SeriesSpec = {

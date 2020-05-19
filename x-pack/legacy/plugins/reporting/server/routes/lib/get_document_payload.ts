@@ -8,8 +8,9 @@
 import contentDisposition from 'content-disposition';
 import * as _ from 'lodash';
 import { CSV_JOB_TYPE } from '../../../common/constants';
-import { ExportTypeDefinition, ExportTypesRegistry, JobDocOutput, JobSource } from '../../../types';
 import { statuses } from '../../lib/esqueue/constants/statuses';
+import { ExportTypesRegistry } from '../../lib/export_types_registry';
+import { ExportTypeDefinition, JobDocOutput, JobSource } from '../../types';
 
 interface ICustomHeaders {
   [x: string]: any;
