@@ -70,6 +70,53 @@ describe.skip('<RemoteClusterList />', () => {
     });
   });
 
+  describe('when there are multiple pages of remote clusters', () => {
+    let find;
+    let table;
+    let actions;
+    let waitFor;
+    let form;
+
+    const remoteClusters = [
+      {
+        name: 'unique',
+        seeds: [],
+      },
+    ];
+
+    for (let i = 0; i < 29; i++) {
+      remoteClusters.push({
+        name: `name${i}`,
+        seeds: [],
+      });
+    }
+
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
+
+      await act(async () => {
+        ({ find, table, actions, waitFor, form } = setup());
+        await waitFor('remoteClusterListTable');
+      });
+    });
+
+    test('pagination works', () => {
+      actions.clickPaginationNextButton();
+      const { tableCellsValues } = table.getMetaData('remoteClusterListTable');
+
+      // Pagination defaults to 20 remote clusters per page. We loaded 30 remote clusters,
+      // so the second page should have 10.
+      expect(tableCellsValues.length).toBe(10);
+    });
+
+    // Skipped until we can figure out how to get this test to work.
+    test.skip('search works', () => {
+      form.setInputValue(find('remoteClusterSearch'), 'unique');
+      const { tableCellsValues } = table.getMetaData('remoteClusterListTable');
+      expect(tableCellsValues.length).toBe(1);
+    });
+  });
+
   describe('when there are remote clusters', () => {
     let find;
     let exists;

@@ -71,6 +71,7 @@ export function getAlertType(): AlertTypeModel {
     iconClass: 'alert',
     alertParamsExpression: IndexThresholdAlertTypeExpression,
     validate: validateAlertType,
+    requiresAppContext: false,
   };
 }
 ```
@@ -248,6 +249,7 @@ Each alert type should be defined as `AlertTypeModel` object with the these prop
 |validate|Validation function for the alert params.|
 |alertParamsExpression|React functional component for building UI of the current alert type params.|
 |defaultActionMessage|Optional property for providing default message for all added actions with `message` property.|
+|requiresAppContext|Define if alert type is enabled for create and edit in the alerting management UI.|
 
 IMPORTANT: The current UI supports a single action group only. 
 Action groups are mapped from the server API result for [GET /api/alert/types: List alert types](https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/alerting#get-apialerttypes-list-alert-types).
@@ -261,6 +263,7 @@ export interface AlertType {
   };
   actionGroups: string[];
   executor: ({ services, params, state }: AlertExecutorOptions) => Promise<State | void>;
+  requiresAppContext: boolean;
 }
 ```
 Only the default (which means first item of the array) action group is displayed in the current UI.
@@ -307,6 +310,7 @@ export function getAlertType(): AlertTypeModel {
     alertParamsExpression: ExampleExpression,
     validate: validateExampleAlertType,
     defaultActionMessage: 'Alert [{{ctx.metadata.name}}] has exceeded the threshold',
+    requiresAppContext: false,
   };
 }
 ```

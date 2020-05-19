@@ -218,6 +218,7 @@ export default function(program) {
         "Don't put a proxy in front of the dev server, which adds a random basePath"
       )
       .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
+      .option('--no-cache', 'Disable the kbn/optimizer cache')
       .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode');
   }
 

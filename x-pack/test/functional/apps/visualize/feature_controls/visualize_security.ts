@@ -408,10 +408,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.security.login(
           'no_visualize_privileges_user',
           'no_visualize_privileges_user-password',
-          {
-            expectSpaceSelector: false,
-            shouldLoginIfPrompted: false,
-          }
+          { expectSpaceSelector: false }
         );
       });
 
