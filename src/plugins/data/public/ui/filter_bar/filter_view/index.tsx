@@ -26,6 +26,7 @@ import { Filter, isFilterPinned } from '../../../../common';
 interface Props {
   filter: Filter;
   valueLabel: string;
+  errorMessage?: string;
   [propName: string]: any;
 }
 
@@ -34,14 +35,17 @@ export const FilterView: FC<Props> = ({
   iconOnClick,
   onClick,
   valueLabel,
+  errorMessage,
   ...rest
 }: Props) => {
   const [ref, innerText] = useInnerText();
 
-  let title = i18n.translate('data.filter.filterBar.moreFilterActionsMessage', {
-    defaultMessage: 'Filter: {innerText}. Select for more filter actions.',
-    values: { innerText },
-  });
+  let title =
+    errorMessage ||
+    i18n.translate('data.filter.filterBar.moreFilterActionsMessage', {
+      defaultMessage: 'Filter: {innerText}. Select for more filter actions.',
+      values: { innerText },
+    });
 
   if (isFilterPinned(filter)) {
     title = `${i18n.translate('data.filter.filterBar.pinnedFilterPrefix', {

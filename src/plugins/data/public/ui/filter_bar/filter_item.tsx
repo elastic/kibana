@@ -33,7 +33,6 @@ import {
   toggleFilterPinned,
   toggleFilterDisabled,
 } from '../../../common';
-import { getNotifications } from '../../services';
 
 interface Props {
   id: string;
@@ -65,26 +64,21 @@ class FilterItemUI extends Component<Props, State> {
   public render() {
     const { filter, id } = this.props;
     const { negate, disabled } = filter.meta;
-    let hasError: boolean = false;
+    let errorMessage: string | undefined;
 
     let valueLabel;
     try {
       valueLabel = getDisplayValueFromFilter(filter, this.props.indexPatterns);
     } catch (e) {
-      getNotifications().toasts.addError(e, {
-        title: this.props.intl.formatMessage({
-          id: 'data.filter.filterBar.labelErrorMessage',
-          defaultMessage: 'Failed to display filter',
-        }),
-      });
-      valueLabel = this.props.intl.formatMessage({
+      errorMessage = valueLabel = this.props.intl.formatMessage({
         id: 'data.filter.filterBar.labelErrorText',
-        defaultMessage: 'Error',
+        defaultMessage: `Error: ${e.message}`,
       });
-      hasError = true;
     }
     const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
-    const dataTestSubjValue = filter.meta.value ? `filter-value-${valueLabel}` : '';
+    const dataTestSubjValue = filter.meta.value
+      ? `filter-value-${!!errorMessage ? 'error' : valueLabel}`
+      : '';
     const dataTestSubjDisabled = `filter-${
       this.props.filter.meta.disabled ? 'disabled' : 'enabled'
     }`;
@@ -93,8 +87,8 @@ class FilterItemUI extends Component<Props, State> {
     const classes = classNames(
       'globalFilterItem',
       {
-        'globalFilterItem-isDisabled': disabled || hasError,
-        'globalFilterItem-isInvalid': hasError,
+        'globalFilterItem-isDisabled': disabled || !!errorMessage,
+        'globalFilterItem-isInvalid': !!errorMessage,
         'globalFilterItem-isPinned': isFilterPinned(filter),
         'globalFilterItem-isExcluded': negate,
       },
@@ -105,6 +99,7 @@ class FilterItemUI extends Component<Props, State> {
       <FilterView
         filter={filter}
         valueLabel={valueLabel}
+        errorMessage={errorMessage}
         className={classes}
         iconOnClick={() => this.props.onRemove()}
         onClick={this.handleBadgeClick}
