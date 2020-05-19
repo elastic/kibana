@@ -6,8 +6,9 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { Dispatch } from 'redux';
+import { FeatureCollection } from 'geojson';
 import { MapStoreState } from '../reducers/store';
-import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
+import { LAYER_TYPE, SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
 import {
   getDataFilters,
   getDataRequestDescriptor,
@@ -19,6 +20,7 @@ import {
   registerCancelCallback,
   unregisterCancelCallback,
   getEventHandlers,
+  ResultMeta,
 } from '../reducers/non_serializable_instances';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
 import {
@@ -35,7 +37,12 @@ import { DataMeta, MapFilters } from '../../common/descriptor_types';
 
 export type DataRequestContext = {
   startLoading(dataId: string, requestToken: symbol, meta: DataMeta): void;
-  stopLoading(dataId: string, requestToken: symbol, data: unknown, meta: DataMeta): void;
+  stopLoading(
+    dataId: string,
+    requestToken: symbol,
+    data: FeatureCollection | object,
+    meta: DataMeta
+  ): void;
   onLoadError(dataId: string, requestToken: symbol, errorMessage: string): void;
   updateSourceData(newData: unknown): void;
   isRequestStillActive(dataId: string, requestToken: symbol): boolean;
@@ -60,7 +67,7 @@ export function clearDataRequests(layer: ILayer) {
 export function cancelAllInFlightRequests() {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
     getLayerList(getState()).forEach(layer => {
-      dispatch(clearDataRequests(layer));
+      dispatch<any>(clearDataRequests(layer));
     });
   };
 }
@@ -93,13 +100,17 @@ function getDataRequestContext(
   return {
     dataFilters: getDataFilters(getState()),
     startLoading: (dataId: string, requestToken: symbol, meta: DataMeta) =>
-      dispatch(startDataLoad(layerId, dataId, requestToken, meta)),
-    stopLoading: (dataId: string, requestToken: symbol, data: unknown, meta: DataMeta) =>
-      dispatch(endDataLoad(layerId, dataId, requestToken, data, meta)),
+      dispatch<any>(startDataLoad(layerId, dataId, requestToken, meta)),
+    stopLoading: (
+      dataId: string,
+      requestToken: symbol,
+      data: FeatureCollection | object,
+      meta: DataMeta
+    ) => dispatch<any>(endDataLoad(layerId, dataId, requestToken, data, meta)),
     onLoadError: (dataId: string, requestToken: symbol, errorMessage: string) =>
-      dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
+      dispatch<any>(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
     updateSourceData: (newData: unknown) => {
-      dispatch(updateSourceDataRequest(layerId, newData));
+      dispatch<any>(updateSourceDataRequest(layerId, newData));
     },
     isRequestStillActive: (dataId: string, requestToken: symbol) => {
       const dataRequest = getDataRequestDescriptor(getState(), layerId, dataId);
@@ -116,7 +127,7 @@ function getDataRequestContext(
 export function syncDataForAllLayers() {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const syncPromises = getLayerList(getState()).map(async layer => {
-      return dispatch(syncDataForLayer(layer));
+      return dispatch<any>(syncDataForLayer(layer));
     });
     await Promise.all(syncPromises);
   };
@@ -136,12 +147,12 @@ export function syncDataForLayerId(layerId: string) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const layer = getLayerById(layerId, getState());
     if (layer) {
-      dispatch(syncDataForLayer(layer));
+      dispatch<any>(syncDataForLayer(layer));
     }
   };
 }
 
-function setLayerDataLoadErrorStatus(layerId: string, errorMessage: string) {
+function setLayerDataLoadErrorStatus(layerId: string, errorMessage: string | null) {
   return (dispatch: Dispatch) => {
     dispatch({
       type: SET_LAYER_ERROR_STATUS,
@@ -156,7 +167,7 @@ function startDataLoad(layerId: string, dataId: string, requestToken: symbol, me
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
     const layer = getLayerById(layerId, getState());
     if (layer) {
-      dispatch(cancelRequest(layer.getPrevRequestToken(dataId)));
+      dispatch<any>(cancelRequest(layer.getPrevRequestToken(dataId)));
     }
 
     const eventHandlers = getEventHandlers(getState());
@@ -181,18 +192,18 @@ function endDataLoad(
   layerId: string,
   dataId: string,
   requestToken: symbol,
-  data: unknown,
+  data: FeatureCollection | object,
   meta: DataMeta
 ) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     dispatch(unregisterCancelCallback(requestToken));
 
-    const features = data && data.features ? data.features : [];
+    const features = data && 'features' in data ? (data as FeatureCollection).features : [];
 
     const eventHandlers = getEventHandlers(getState());
     if (eventHandlers && eventHandlers.onDataLoadEnd) {
       const layer = getLayerById(layerId, getState());
-      const resultMeta = {};
+      const resultMeta: ResultMeta = {};
       if (layer && layer.getType() === LAYER_TYPE.VECTOR) {
         resultMeta.featuresCount = features.length;
       }
@@ -204,7 +215,7 @@ function endDataLoad(
       });
     }
 
-    dispatch(cleanTooltipStateForLayer(layerId, features));
+    dispatch<any>(cleanTooltipStateForLayer(layerId, features));
     dispatch({
       type: LAYER_DATA_LOAD_ENDED,
       layerId,
@@ -217,9 +228,9 @@ function endDataLoad(
     // Clear any data-load errors when there is a succesful data return.
     // Co this on end-data-load iso at start-data-load to avoid blipping the error status between true/false.
     // This avoids jitter in the warning icon of the TOC when the requests continues to return errors.
-    dispatch(setLayerDataLoadErrorStatus(layerId, null));
+    dispatch<any>(setLayerDataLoadErrorStatus(layerId, null));
 
-    dispatch(updateStyleMeta(layerId));
+    dispatch<any>(updateStyleMeta(layerId));
   };
 }
 
@@ -241,7 +252,7 @@ function onDataLoadError(
       });
     }
 
-    dispatch(cleanTooltipStateForLayer(layerId));
+    dispatch<any>(cleanTooltipStateForLayer(layerId));
     dispatch({
       type: LAYER_DATA_LOAD_ERROR,
       data: null,
@@ -250,7 +261,7 @@ function onDataLoadError(
       requestToken,
     });
 
-    dispatch(setLayerDataLoadErrorStatus(layerId, errorMessage));
+    dispatch<any>(setLayerDataLoadErrorStatus(layerId, errorMessage));
   };
 }
 
@@ -263,6 +274,6 @@ export function updateSourceDataRequest(layerId: string, newData: unknown) {
       newData,
     });
 
-    dispatch(updateStyleMeta(layerId));
+    dispatch<any>(updateStyleMeta(layerId));
   };
 }

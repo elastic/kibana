@@ -7,19 +7,39 @@
 import { Adapters } from 'src/plugins/inspector/public';
 import { AnyAction } from 'redux';
 
+export interface ResultMeta {
+  featuresCount?: number;
+}
+
 interface EventHandlers {
   /**
    * Take action on data load.
    */
-  onDataLoad: (layerId: string, dataId: string) => void;
+  onDataLoad: ({ layerId, dataId }: { layerId: string; dataId: string }) => void;
   /**
    * Take action on data load end.
    */
-  onDataLoadEnd: (layerId: string, dataId: string, resultMeta: object) => void;
+  onDataLoadEnd: ({
+    layerId,
+    dataId,
+    resultMeta,
+  }: {
+    layerId: string;
+    dataId: string;
+    resultMeta: ResultMeta;
+  }) => void;
   /**
    * Take action on data load error.
    */
-  onDataLoadError: (layerId: string, dataId: string, errorMessage: string) => void;
+  onDataLoadError: ({
+    layerId,
+    dataId,
+    errorMessage,
+  }: {
+    layerId: string;
+    dataId: string;
+    errorMessage: string;
+  }) => void;
 }
 
 export function setEventHandlers(eventHandlers?: EventHandlers): AnyAction;
@@ -28,7 +48,7 @@ export function getInspectorAdapters(args: unknown): Adapters;
 
 export function getEventHandlers(state: unknown): Partial<EventHandlers>;
 
-export function cancelRequest(requestToken: symbol): AnyAction;
+export function cancelRequest(requestToken?: symbol): AnyAction;
 
 export function registerCancelCallback(requestToken: symbol, callback: () => void): AnyAction;
 
