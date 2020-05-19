@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { Provider } from 'react-redux';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { ResolverEvent } from '../../../common/endpoint/types';
-import { StartServices } from '../../plugin';
+import { StartServices } from '../../types';
 import { storeFactory } from '../../resolver/store';
 import { Resolver } from '../../resolver/view';
 

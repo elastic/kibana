@@ -11,7 +11,7 @@ import { Immutable } from '../../common/endpoint/types';
 import { HostState } from './types';
 import { hostMiddlewareFactory } from './store/middleware';
 import { CoreStart } from '../../../../../src/core/public';
-import { StartPlugins } from '../plugin';
+import { StartPlugins } from '../types';
 import { substateMiddlewareFactory } from '../common/store';
 
 export class EndpointHosts {

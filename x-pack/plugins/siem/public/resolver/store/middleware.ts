@@ -7,7 +7,7 @@
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { HttpHandler } from 'kibana/public';
 import { KibanaReactContextValue } from '../../../../../../src/plugins/kibana_react/public';
-import { StartServices } from '../../plugin';
+import { StartServices } from '../../types';
 import { ResolverState, ResolverAction, RelatedEventDataEntry } from '../types';
 import { ResolverEvent, ResolverNode } from '../../../common/endpoint/types';
 import * as event from '../../../common/endpoint/models/event';

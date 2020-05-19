@@ -14,53 +14,12 @@ import {
   Plugin as IPlugin,
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/public';
-import {
-  HomePublicPluginSetup,
-  FeatureCatalogueCategory,
-} from '../../../../src/plugins/home/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import { Start as NewsfeedStart } from '../../../../src/plugins/newsfeed/public';
-import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
-import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { IngestManagerStart } from '../../ingest_manager/public';
-import {
-  TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
-  TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
-} from '../../triggers_actions_ui/public';
-import { SecurityPluginSetup } from '../../security/public';
-import { APP_ID, APP_NAME, APP_PATH, APP_ICON } from '../common/constants';
+import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
 import { serviceNowActionType, jiraActionType } from './common/lib/connectors';
-
-export interface SetupPlugins {
-  home: HomePublicPluginSetup;
-  security: SecurityPluginSetup;
-  triggers_actions_ui: TriggersActionsSetup;
-  usageCollection?: UsageCollectionSetup;
-}
-
-export interface StartPlugins {
-  data: DataPublicPluginStart;
-  embeddable: EmbeddableStart;
-  inspector: InspectorStart;
-  ingestManager: IngestManagerStart;
-  newsfeed?: NewsfeedStart;
-  triggers_actions_ui: TriggersActionsStart;
-  uiActions: UiActionsStart;
-}
-
-export type StartServices = CoreStart &
-  StartPlugins & {
-    security: SecurityPluginSetup;
-  };
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginStart {}
+import { PluginSetup, PluginStart, SetupPlugins, StartPlugins, StartServices } from './types';
+import { APP_ID, APP_NAME, APP_ICON, APP_PATH } from '../common/constants';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;

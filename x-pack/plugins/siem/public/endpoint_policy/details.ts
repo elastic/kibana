@@ -11,7 +11,7 @@ import { Immutable } from '../../common/endpoint/types';
 import { initialPolicyDetailsState, policyDetailsReducer } from './store/policy_details/reducer';
 import { policyDetailsMiddlewareFactory } from './store/policy_details/middleware';
 import { CoreStart } from '../../../../../src/core/public';
-import { StartPlugins } from '../plugin';
+import { StartPlugins } from '../types';
 import { substateMiddlewareFactory } from '../common/store';
 
 export class EndpointPolicyDetails {

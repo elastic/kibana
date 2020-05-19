@@ -12,7 +12,7 @@ import { AlertListState } from '../../common/endpoint_alerts/types';
 import { alertMiddlewareFactory } from './store/middleware';
 import { substateMiddlewareFactory } from '../common/store';
 import { CoreStart } from '../../../../../src/core/public';
-import { StartPlugins } from '../plugin';
+import { StartPlugins } from '../types';
 
 export class EndpointAlerts {
   public setup() {}

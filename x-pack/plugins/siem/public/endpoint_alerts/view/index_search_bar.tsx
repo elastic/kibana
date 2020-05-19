@@ -13,7 +13,7 @@ import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { urlFromQueryParams } from './url_from_query_params';
 import { useAlertListSelector } from './hooks/use_alerts_selector';
 import * as selectors from '../store/selectors';
-import { StartServices } from '../../plugin';
+import { StartServices } from '../../types';
 import { clone } from '../models/index_pattern';
 
 export const AlertIndexSearchBar = memo(() => {

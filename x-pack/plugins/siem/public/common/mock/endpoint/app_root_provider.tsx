@@ -14,7 +14,7 @@ import { Store } from 'redux';
 import { EuiThemeProvider } from '../../../../../../legacy/common/eui_styled_components';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { RouteCapture } from '../../components/endpoint/route_capture';
-import { StartPlugins } from '../../../plugin';
+import { StartPlugins } from '../../../types';
 import { CoreStart } from '../../../../../../../src/core/public';
 
 /**

@@ -10,7 +10,7 @@ import { render as reactRender, RenderOptions, RenderResult } from '@testing-lib
 import { Store } from 'redux';
 
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { StartPlugins } from '../../../plugin';
+import { StartPlugins } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
 import { MiddlewareActionSpyHelper, createSpyMiddleware } from '../../store/test_utils';
 import { apolloClientObservable } from '../test_providers';

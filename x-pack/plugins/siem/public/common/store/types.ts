@@ -15,7 +15,7 @@ import {
 import { CoreStart } from '../../../../../../src/core/public';
 import { Immutable } from '../../../common/endpoint_alerts/types';
 import { State } from './reducer';
-import { StartPlugins } from '../../plugin';
+import { StartPlugins } from '../../types';
 import { AppAction } from './actions';
 
 export type KueryFilterQueryKind = 'kuery' | 'lucene';
