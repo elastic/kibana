@@ -20,6 +20,7 @@ import {
   exportListItemRoute,
   findExceptionListItemRoute,
   findExceptionListRoute,
+  findListRoute,
   importListItemRoute,
   patchListItemRoute,
   patchListRoute,
@@ -41,6 +42,7 @@ export const initRoutes = (router: IRouter): void => {
   updateListRoute(router);
   deleteListRoute(router);
   patchListRoute(router);
+  findListRoute(router);
 
   // list items
   createListItemRoute(router);

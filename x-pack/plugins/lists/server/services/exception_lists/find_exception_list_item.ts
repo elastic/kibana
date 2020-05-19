@@ -8,8 +8,13 @@ import { SavedObjectsClientContract } from 'kibana/server';
 
 import {
   ExceptionListSoSchema,
+  FilterOrUndefined,
   FoundExceptionListItemSchema,
   ListId,
+  PageOrUndefined,
+  PerPageOrUndefined,
+  SortFieldOrUndefined,
+  SortOrderOrUndefined,
 } from '../../../common/schemas';
 import { SavedObjectType } from '../../saved_objects';
 
@@ -21,11 +26,11 @@ interface FindExceptionListItemOptions {
   listId: ListId;
   namespaceType: NamespaceType;
   savedObjectsClient: SavedObjectsClientContract;
-  filter: string | undefined;
-  perPage: number | undefined;
-  page: number | undefined;
-  sortField: string | undefined;
-  sortOrder: string | undefined;
+  filter: FilterOrUndefined;
+  perPage: PerPageOrUndefined;
+  page: PageOrUndefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
 }
 
 export const findExceptionListItem = async ({
@@ -66,7 +71,7 @@ export const getExceptionListItemFilter = ({
   savedObjectType,
 }: {
   listId: ListId;
-  filter: string | undefined;
+  filter: FilterOrUndefined;
   savedObjectType: SavedObjectType;
 }): string => {
   if (filter == null) {

@@ -97,8 +97,29 @@ export const itemIdOrUndefined = t.union([item_id, t.undefined]);
 export type ItemIdOrUndefined = t.TypeOf<typeof itemIdOrUndefined>;
 
 export const per_page = t.number; // TODO: Change this out for PositiveNumber from siem
+export type PerPage = t.TypeOf<typeof per_page>;
+
+export const perPageOrUndefined = t.union([per_page, t.undefined]);
+export type PerPageOrUndefined = t.TypeOf<typeof perPageOrUndefined>;
+
 export const total = t.number; // TODO: Change this out for PositiveNumber from siem
+export const totalUndefined = t.union([total, t.undefined]);
+export type TotalOrUndefined = t.TypeOf<typeof totalUndefined>;
+
 export const page = t.number; // TODO: Change this out for PositiveNumber from siem
+export type Page = t.TypeOf<typeof page>;
+
+export const pageOrUndefined = t.union([page, t.undefined]);
+export type PageOrUndefined = t.TypeOf<typeof pageOrUndefined>;
+
 export const sort_field = t.string;
+export const sortFieldOrUndefined = t.union([sort_field, t.undefined]);
+export type SortFieldOrUndefined = t.TypeOf<typeof sortFieldOrUndefined>;
+
 export const sort_order = t.keyof({ asc: null, desc: null });
+export const sortOrderOrUndefined = t.union([sort_order, t.undefined]);
+export type SortOrderOrUndefined = t.TypeOf<typeof sortOrderOrUndefined>;
+
 export const filter = t.string;
+export const filterOrUndefined = t.union([filter, t.undefined]);
+export type FilterOrUndefined = t.TypeOf<typeof filterOrUndefined>;

@@ -12,7 +12,7 @@ import { filter, sort_field, sort_order } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
 import { StringToPositiveNumber } from '../types/string_to_positive_number';
 
-export const findExceptionListSchema = t.exact(
+export const findListSchema = t.exact(
   t.partial({
     filter, // defaults to undefined if not set during decode
     page: StringToPositiveNumber, // defaults to undefined if not set during decode
@@ -22,8 +22,6 @@ export const findExceptionListSchema = t.exact(
   })
 );
 
-export type FindExceptionListSchemaPartial = t.TypeOf<typeof findExceptionListSchema>;
+export type FindListSchemaPartial = t.TypeOf<typeof findListSchema>;
 
-export type FindExceptionListSchema = RequiredKeepUndefined<
-  t.TypeOf<typeof findExceptionListSchema>
->;
+export type FindListSchema = RequiredKeepUndefined<t.TypeOf<typeof findListSchema>>;

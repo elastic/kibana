@@ -8,8 +8,9 @@
 
 import * as t from 'io-ts';
 
-import { filter, list_id, page, per_page, sort_field, sort_order } from '../common/schemas';
+import { filter, list_id, sort_field, sort_order } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
+import { StringToPositiveNumber } from '../types/string_to_positive_number';
 
 export const findExceptionListItemSchema = t.intersection([
   t.exact(
@@ -20,8 +21,8 @@ export const findExceptionListItemSchema = t.intersection([
   t.exact(
     t.partial({
       filter, // defaults to undefined if not set during decode
-      page, // defaults to undefined if not set during decode
-      per_page, // defaults to undefined if not set during decode
+      page: StringToPositiveNumber, // defaults to undefined if not set during decode
+      per_page: StringToPositiveNumber, // defaults to undefined if not set during decode
       sort_field, // defaults to undefined if not set during decode
       sort_order, // defaults to undefined if not set during decode
     })

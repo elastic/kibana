@@ -6,11 +6,17 @@
 
 import { APICaller } from 'kibana/server';
 
-import { ListItemArraySchema, ListItemSchema, ListSchema } from '../../../common/schemas';
+import {
+  FoundListSchema,
+  ListItemArraySchema,
+  ListItemSchema,
+  ListSchema,
+} from '../../../common/schemas';
 import { ConfigType } from '../../config';
 import {
   createList,
   deleteList,
+  findList,
   getList,
   getListIndex,
   getListTemplate,
@@ -52,6 +58,7 @@ import {
   DeleteListItemOptions,
   DeleteListOptions,
   ExportListItemsToStreamOptions,
+  FindListOptions,
   GetListItemByValueOptions,
   GetListItemOptions,
   GetListItemsByValueOptions,
@@ -408,6 +415,26 @@ export class ListClient {
       listItemIndex,
       type,
       value,
+    });
+  };
+
+  public findList = async ({
+    filter,
+    perPage,
+    page,
+    sortField,
+    sortOrder,
+  }: FindListOptions): Promise<FoundListSchema> => {
+    const { callCluster } = this;
+    const listIndex = this.getListIndex();
+    return findList({
+      callCluster,
+      filter,
+      listIndex,
+      page,
+      perPage,
+      sortField,
+      sortOrder,
     });
   };
 }
