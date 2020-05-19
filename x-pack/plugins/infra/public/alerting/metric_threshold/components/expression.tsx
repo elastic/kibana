@@ -206,7 +206,6 @@ export const Expressions: React.FC<Props> = props => {
         convertKueryToElasticSearchQuery(md.currentOptions.filterQuery, derivedIndexPattern) || ''
       );
     } else if (md && md.currentOptions?.groupBy && md.series) {
-      // const filter = `${md.currentOptions?.groupBy}: "${md.series.id}"`;
       const { groupBy } = md.currentOptions;
       const filter = Array.isArray(groupBy)
         ? groupBy.map((field, index) => `${field}: "${md.series?.keys?.[index]}"`).join(' and ')
