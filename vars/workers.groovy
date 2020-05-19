@@ -59,7 +59,6 @@ def base(Map params, Closure closure) {
         checkout scm
       }
 
-      def checkoutInfo
       dir("kibana") {
         checkoutInfo = getCheckoutInfo()
       }
