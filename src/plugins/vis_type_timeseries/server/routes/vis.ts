@@ -45,9 +45,12 @@ export const visDataRoutes = (
         const savedObjectId =
           (typeof request.body === 'object' && (request.body as any).savedObjectId) ||
           'unavailable';
-        framework.logger.warn(
+        framework.logger.error(
           `Request validation error: ${error.message} (saved object id: ${savedObjectId}). This most likely means your TSVB visualization contains outdated configuration. You can report this problem under https://github.com/elastic/kibana/issues/new?template=Bug_report.md`
         );
+        return response.badRequest({
+          body: error.message,
+        });
       }
 
       try {
