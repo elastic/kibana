@@ -14,16 +14,16 @@
   - [4.3.1 Idempotent migrations performed without coordination](#431-idempotent-migrations-performed-without-coordination)
     - [4.3.1.1 Restrictions](#4311-restrictions)
     - [4.3.1.2 Algorithm](#4312-algorithm)
-  - [4.4 Minimize data loss with mixed Kibana versions](#44-minimize-data-loss-with-mixed-kibana-versions)
   - [4.5 Changes in 8.0](#45-changes-in-80)
     - [4.5.1 Migration algorithm (8.0):](#451-migration-algorithm-80)
-    - [4.5.2 Minimizing data loss (8.0)](#452-minimizing-data-loss-80)
+    - [4.5.2 Minimizing data loss with mixed Kibana versions (8.0)](#452-minimizing-data-loss-with-mixed-kibana-versions-80)
 - [5. Alternatives](#5-alternatives)
 - [5.1 Rolling upgrades](#51-rolling-upgrades)
   - [5.2 Single node migrations coordinated through a lease/lock](#52-single-node-migrations-coordinated-through-a-leaselock)
     - [5.2.1 Migration algorithm](#521-migration-algorithm)
     - [5.2.2 Document lock algorithm](#522-document-lock-algorithm)
     - [5.2.3 Checking for "weak lease" expiry](#523-checking-for-weak-lease-expiry)
+  - [5.3 Minimize data loss with mixed Kibana versions during 7.x](#53-minimize-data-loss-with-mixed-kibana-versions-during-7x)
 - [6. How we teach this](#6-how-we-teach-this)
 - [Unresolved questions](#unresolved-questions)
 
@@ -224,63 +224,6 @@ matter which node’s writes win.
 > an acceptable limitation. In 8.x we can ensure that only the latest node
 > completes the migration. 
 
-## 4.4 Minimize data loss with mixed Kibana versions
-When multiple versions of Kibana are running at the same time, writes from the
-outdated node can end up either in the outdated Kibana index, the newly
-migrated index, or both. New documents added (and some updates) into the old
-index while a migration is in-progress will be lost. Writes that end up in the
-new index will be in an outdated format. This could cause queries on the data
-to only return a subset of the results which leads to incorrect results or
-silent data loss.
-
-Any in-progress writes such as a bulk operation will continue to run even
-after an index was set to read-only or an alias had been removed. There are
-also certain failure scenarios under which ClusterState (such as aliases or
-index settings) remains inconsistent between nodes for an unbounded
-amount of time. Since Kibana cannot rely on Elasticsearch scripting support
-being enabled, we don't have a mechanism to guarantee that there would be no
-data loss. Instead, we aim to minimize it as much as possible.
-
-To minimize data loss we need to implement a “guard” which will prevent old
-nodes and new nodes from writing at the same time. To perform a rollback for a
-failed migration, this guard will have to be removed. By locating this state
-in the backup snapshot taken before an upgrade, rolling back to the previous
-snapshot will automatically remove the guard.
-
-**7.x Minimize data loss when creating new indices**
-
-Preventing data loss from mixed 7.x versions, introduces two additional steps
-to rollback to a previous version without a snapshot:
-1. (existing) Point the `.kibana` alias to the previous Kibana index `.kibana_n-1`
-2. (existing) Delete `.kibana_n`
-3. (new) Enable writes on `.kibana_n-1`
-4. (new) Delete the dummy "version lock" document from `.kibana_n-1`
-
-Since our documentation and server logs have implicitly encouraged users to
-rollback without using snapshots, many users might have to rely on these
-additional migration steps to perform a rollback. Since even the existing
-steps are error prone, introducing more steps will likely introduce more
-problems than what it solves.
-
-<details>
-  <summary><s>Minimize data loss with mixed 7.x versions</s></summary>
-  
-  1. All future versions of Kibana 7.x will use the `.kibana_saved_objects`
-   alias to locate the current index. If `.kibana_saved_objects` doesn't
-   exist, newer versions will fallback to reading `.kibana`.
-  2. All future versions of Kibana will locate the index that
-     `.kibana_saved_objects` points to and then read and write directly from
-     the _index_ instead of the alias.
-  3. Before starting a migration:
-    1. Write a new dummy "version lock" document to the `.kibana` index with a
-      `migrationVersion` set to the current version of Kibana. If an outdated
-      node is started up after a migration was started it will detect that
-      newer documents are present in the index and refuse to start up.
-    2. Set the outdated index to read-only. Since `.kibana` is never advanced,
-      it will be pointing to a read-only index which prevent writes from
-      6.8+ releases which are already online.
-</details>
-
 ## 4.5 Changes in 8.0
 1. Migrations will be in-place and re-use the same index for minor and patch
    upgrades. 
@@ -335,10 +278,30 @@ Drawbacks:
 - It’s impossible to provide read-only functionality for outdated nodes which
   means we can't achieve goal (2.7).
 
-### 4.5.2 Minimizing data loss (8.0)
-See [4.4 Minimize data loss with mixed Kibana
-versions](#44-minimize-data-loss-with-mixed-kibana-versions) for a background
-discussion around minimizing data loss.
+### 4.5.2 Minimizing data loss with mixed Kibana versions (8.0)
+When multiple versions of Kibana are running at the same time, writes from the
+outdated node can result in outdated documents being written to the Kibana
+index. Since these outdated documents might have different fields, queries
+might only return a subset of the results which leads to incorrect results and
+even data loss.
+
+To prevent data loss we need to implement an index-wide “guard” which will
+prevent any writes from outdated nodes. The index-wide building blocks which
+Elasticsearch provides such as aliases or read-only indices are located inside
+Elasticsearch's ClusterState. But, there are certain failure scenarios under
+which ClusterState could remain inconsistent between nodes for an unbounded
+amount of time. In addition, any in-progress writes such as a bulk operation
+will continue to run even after an index was set to read-only or an alias had
+been removed.
+
+Since Elasticsearch doesn't expose the required building blocks, Kibana cannot
+guarantee that there would be no data loss. Instead, we aim to minimize it as
+much as possible.
+
+To perform a rollback for a failed migration, any "guards" put in place by
+newer Kibana nodes will have to be removed. By locating this state in the
+backup snapshot taken before an upgrade, rolling back to the previous snapshot
+will automatically remove the guard.
 
 1. Disable `action.auto_create_index` for the Kibana system indices.
 2. If a node detects that the `.kibana` index requires a migration it does the
@@ -507,6 +470,43 @@ lease, but a lease will never expire prematurely.
 
 Any node that detects an expired lease can release that lease by setting the
 expired node’s `hasLease = false`. It can then attempt to acquire its lease.
+
+## 5.3 Minimize data loss with mixed Kibana versions during 7.x
+When multiple versions of Kibana are running at the same time, writes from the
+outdated node can end up either in the outdated Kibana index, the newly
+migrated index, or both. New documents added (and some updates) into the old
+index while a migration is in-progress will be lost. Writes that end up in the
+new index will be in an outdated format. This could cause queries on the data
+to only return a subset of the results which leads to incorrect results or
+silent data loss.
+
+Minimizing data loss from mixed 7.x versions, introduces two additional steps
+to rollback to a previous version without a snapshot:
+1. (existing) Point the `.kibana` alias to the previous Kibana index `.kibana_n-1`
+2. (existing) Delete `.kibana_n`
+3. (new) Enable writes on `.kibana_n-1`
+4. (new) Delete the dummy "version lock" document from `.kibana_n-1`
+
+Since our documentation and server logs have implicitly encouraged users to
+rollback without using snapshots, many users might have to rely on these
+additional migration steps to perform a rollback. Since even the existing
+steps are error prone, introducing more steps will likely introduce more
+problems than what it solves. 
+
+1. All future versions of Kibana 7.x will use the `.kibana_saved_objects`
+  alias to locate the current index. If `.kibana_saved_objects` doesn't
+  exist, newer versions will fallback to reading `.kibana`.
+2. All future versions of Kibana will locate the index that
+    `.kibana_saved_objects` points to and then read and write directly from
+    the _index_ instead of the alias.
+3. Before starting a migration:
+  1. Write a new dummy "version lock" document to the `.kibana` index with a
+    `migrationVersion` set to the current version of Kibana. If an outdated
+    node is started up after a migration was started it will detect that
+    newer documents are present in the index and refuse to start up.
+  2. Set the outdated index to read-only. Since `.kibana` is never advanced,
+    it will be pointing to a read-only index which prevent writes from
+    6.8+ releases which are already online.
 
 # 6. How we teach this
 1. Update documentation and server logs to start educating users to depend on
