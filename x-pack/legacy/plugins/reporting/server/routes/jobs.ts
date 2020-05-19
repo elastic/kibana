@@ -7,10 +7,11 @@
 import Boom from 'boom';
 import { IRouter, IBasePath } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
+import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
-import { ListQuery, Logger } from '../../types';
+import { LevelLogger as Logger } from '../lib';
 import { jobsQueryFactory } from '../lib/jobs_query';
-import { ReportingCore, ReportingSetupDeps } from '../types';
+import { ReportingSetupDeps } from '../types';
 import {
   deleteJobResponseHandlerFactory,
   downloadJobResponseHandlerFactory,
@@ -18,6 +19,11 @@ import {
 import { makeRequestFacade } from './lib/make_request_facade';
 import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';
 
+interface ListQuery {
+  page: string;
+  size: string;
+  ids?: string; // optional field forbids us from extending RequestQuery
+}
 const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
 
 export async function registerJobInfoRoutes(
@@ -75,7 +81,7 @@ export async function registerJobInfoRoutes(
       const count = await jobsQuery.count(jobTypes, username);
 
       return res.ok({
-        body: count,
+        body: count.toString(),
         headers: {
           'content-type': 'text/plain',
         },

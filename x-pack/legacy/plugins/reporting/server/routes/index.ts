@@ -5,10 +5,11 @@
  */
 
 import { IRouter, IBasePath } from 'src/core/server';
-import { Logger } from '../../types';
-import { ReportingCore, ReportingSetupDeps } from '../types';
+import { LevelLogger as Logger } from '../lib';
+import { ReportingSetupDeps } from '../types';
 import { registerJobGenerationRoutes } from './generation';
 import { registerJobInfoRoutes } from './jobs';
+import { ReportingCore } from '..';
 
 export function registerRoutes(
   reporting: ReportingCore,

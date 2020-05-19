@@ -9,8 +9,8 @@ import Boom from 'boom';
 import { errors as elasticsearchErrors } from 'elasticsearch';
 import { ElasticsearchServiceSetup } from 'kibana/server';
 import { get } from 'lodash';
-import { JobSource } from '../../types';
-import { ReportingConfig } from '../types';
+import { ReportingConfig } from '../';
+import { JobSource } from '../types';
 
 const esErrors = elasticsearchErrors as Record<string, any>;
 const defaultSize = 10;

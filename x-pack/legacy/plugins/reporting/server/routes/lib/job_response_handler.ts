@@ -6,10 +6,10 @@
 
 import Boom from 'boom';
 import { ElasticsearchServiceSetup } from 'kibana/server';
+import { ReportingConfig } from '../../';
 import { WHITELISTED_JOB_CONTENT_TYPES } from '../../../common/constants';
-import { ExportTypesRegistry } from '../../../types';
+import { ExportTypesRegistry } from '../../lib/export_types_registry';
 import { jobsQueryFactory } from '../../lib/jobs_query';
-import { ReportingConfig } from '../../types';
 import { getDocumentPayloadFactory } from './get_document_payload';
 
 interface JobResponseHandlerParams {

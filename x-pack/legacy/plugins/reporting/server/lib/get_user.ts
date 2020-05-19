@@ -5,8 +5,8 @@
  */
 
 import { KibanaRequest } from '../../../../../../src/core/server';
-import { Logger } from '../../types';
 import { ReportingSetupDeps } from '../types';
+import { LevelLogger as Logger } from './level_logger';
 
 export function getUserFactory(security: ReportingSetupDeps['security'], logger: Logger) {
   return (request: KibanaRequest) => {

@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from 'lodash';
 import { checkLicense } from './check_license';
 import { ILicense } from '../../../../../plugins/licensing/server';
-import { ExportTypesRegistry } from '../../types';
+import { ExportTypesRegistry } from './export_types_registry';
 
 describe('check_license', function() {
   let exportTypesRegistry: ExportTypesRegistry;

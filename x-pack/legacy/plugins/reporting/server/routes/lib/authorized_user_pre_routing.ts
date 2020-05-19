@@ -8,9 +8,10 @@ import Boom from 'boom';
 import { KibanaRequest } from 'src/core/server';
 import { AuthenticatedUser } from '../../../../../../plugins/security/server';
 import { ReportingConfig } from '../../../server';
-import { Logger } from '../../../types';
+import { LevelLogger as Logger } from '../../../server/lib';
 import { getUserFactory } from '../../lib/get_user';
 import { ReportingSetupDeps } from '../../types';
+
 const superuserRole = 'superuser';
 
 export type PreRoutingFunction = (

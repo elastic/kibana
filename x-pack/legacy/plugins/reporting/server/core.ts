@@ -8,28 +8,27 @@ import * as Rx from 'rxjs';
 import { first, mapTo } from 'rxjs/operators';
 import {
   ElasticsearchServiceSetup,
-  IUiSettingsClient,
   KibanaRequest,
-  SavedObjectsClient,
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
   IRouter,
   IBasePath,
+  SavedObjectsClientContract,
 } from 'src/core/server';
+import { ReportingPluginSpecOptions } from '../';
 // @ts-ignore no module definition
 import { mirrorPluginStatus } from '../../../server/lib/mirror_plugin_status';
 import { ILicense } from '../../../../plugins/licensing/server';
 import { XPackMainPlugin } from '../../xpack_main/server/xpack_main';
-import { EnqueueJobFn, ESQueueInstance, ReportingPluginSpecOptions, ServerFacade } from '../types';
+import { screenshotsObservableFactory } from '../export_types/common/lib/screenshots';
+import { ServerFacade, ScreenshotsObservableFn } from '../server/types';
+import { ReportingConfig } from './';
 import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
-import { ReportingConfig, ReportingConfigType } from './config';
-import { LevelLogger, getExportTypesRegistry, checkLicense } from './lib';
+import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
+import { ESQueueInstance } from './lib/create_queue';
+import { EnqueueJobFn } from './lib/enqueue_job';
 import { registerRoutes } from './routes';
 import { ReportingSetupDeps } from './types';
-import {
-  screenshotsObservableFactory,
-  ScreenshotsObservableFn,
-} from '../export_types/common/lib/screenshots';
 
 interface ReportingInternalSetup {
   browserDriverFactory: HeadlessChromiumDriverFactory;
@@ -43,8 +42,6 @@ interface ReportingInternalStart {
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
 }
-
-export { ReportingConfig, ReportingConfigType };
 
 export class ReportingCore {
   pluginSetupDeps?: ReportingInternalSetup;
@@ -89,11 +86,11 @@ export class ReportingCore {
     return this.exportTypesRegistry;
   }
 
-  public async getEsqueue(): Promise<ESQueueInstance> {
+  public async getEsqueue() {
     return (await this.getPluginStartDeps()).esqueue;
   }
 
-  public async getEnqueueJob(): Promise<EnqueueJobFn> {
+  public async getEnqueueJob() {
     return (await this.getPluginStartDeps()).enqueueJob;
   }
 
@@ -113,32 +110,30 @@ export class ReportingCore {
   /*
    * Outside dependencies
    */
-  private async getPluginSetupDeps(): Promise<ReportingInternalSetup> {
+  private async getPluginSetupDeps() {
     if (this.pluginSetupDeps) {
       return this.pluginSetupDeps;
     }
     return await this.pluginSetup$.pipe(first()).toPromise();
   }
 
-  private async getPluginStartDeps(): Promise<ReportingInternalStart> {
+  private async getPluginStartDeps() {
     if (this.pluginStartDeps) {
       return this.pluginStartDeps;
     }
     return await this.pluginStart$.pipe(first()).toPromise();
   }
 
-  public async getElasticsearchService(): Promise<ElasticsearchServiceSetup> {
+  public async getElasticsearchService() {
     return (await this.getPluginSetupDeps()).elasticsearch;
   }
 
-  public async getSavedObjectsClient(fakeRequest: KibanaRequest): Promise<SavedObjectsClient> {
+  public async getSavedObjectsClient(fakeRequest: KibanaRequest) {
     const { savedObjects } = await this.getPluginStartDeps();
-    return savedObjects.getScopedClient(fakeRequest) as SavedObjectsClient;
+    return savedObjects.getScopedClient(fakeRequest) as SavedObjectsClientContract;
   }
 
-  public async getUiSettingsServiceFactory(
-    savedObjectsClient: SavedObjectsClient
-  ): Promise<IUiSettingsClient> {
+  public async getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
     const { uiSettings: uiSettingsService } = await this.getPluginStartDeps();
     const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
     return scopedUiSettingsService;

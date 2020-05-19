@@ -6,14 +6,15 @@
 
 import { IRouter, IBasePath } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
+import { ReportingCore } from '../';
 import { API_BASE_GENERATE_V1 } from '../../common/constants';
 import { createJobFactory, executeJobFactory } from '../../export_types/csv_from_savedobject';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
 import { JobDocPayloadPanelCsv } from '../../export_types/csv_from_savedobject/types';
-import { JobDocOutput, Logger } from '../../types';
-import { ReportingCore, ReportingSetupDeps } from '../types';
 import { isoStringValidate } from '../lib/iso_string_validate';
 import { makeRequestFacade } from './lib/make_request_facade';
+import { LevelLogger as Logger } from '../lib';
+import { JobDocOutput, ReportingSetupDeps } from '../types';
 
 /*
  * This function registers API Endpoints for immediate Reporting jobs. The API inputs are:

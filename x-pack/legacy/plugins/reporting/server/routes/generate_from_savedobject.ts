@@ -7,13 +7,14 @@
 import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
 import { IRouter, IBasePath } from 'src/core/server';
+import { isoStringValidate } from '../lib/iso_string_validate';
+import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types';
+import { ReportingCore } from '../';
 import { API_BASE_GENERATE_V1, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../common/constants';
 import { getJobParamsFromRequest } from '../../export_types/csv_from_savedobject/server/lib/get_job_params_from_request';
-import { Logger } from '../../types';
-import { ReportingCore, ReportingSetupDeps } from '../types';
-import { isoStringValidate } from '../lib/iso_string_validate';
+import { LevelLogger as Logger } from '../lib';
+import { ReportingSetupDeps } from '../types';
 import { makeRequestFacade } from './lib/make_request_facade';
-import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types';
 
 /*
  * This function registers API Endpoints for queuing Reporting jobs. The API inputs are:

@@ -5,8 +5,15 @@
  */
 
 import { ILicense } from '../../../../../plugins/licensing/server';
-import { LicenseCheckResult } from '../types';
-import { ExportTypesRegistry, ExportTypeDefinition } from '../../types';
+import { ExportTypeDefinition } from '../types';
+import { ExportTypesRegistry } from './export_types_registry';
+
+export interface LicenseCheckResult {
+  showLinks: boolean;
+  enableLinks: boolean;
+  message?: string;
+  jobTypes?: string[];
+}
 
 const messages = {
   getUnavailable: () => {

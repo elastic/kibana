@@ -5,7 +5,11 @@
  */
 
 import { KibanaRequest, IBasePath, RequestHandlerContext } from 'src/core/server';
-import { RequestFacade, ReportingRequestPayload, ReportingRequestQuery } from '../../../types';
+import {
+  RequestFacade,
+  ReportingRequestPayload,
+  ReportingRequestQuery,
+} from '../../../server/types';
 
 export function makeRequestFacade(
   context: RequestHandlerContext,

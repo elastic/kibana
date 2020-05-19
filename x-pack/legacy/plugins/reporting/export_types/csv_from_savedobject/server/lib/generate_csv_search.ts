@@ -4,20 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IUiSettingsClient, KibanaRequest } from '../../../../../../../../src/core/server';
+import { IUiSettingsClient } from '../../../../../../../../src/core/server';
 import {
   esQuery,
   EsQueryConfig,
   Filter,
   IIndexPattern,
   Query,
-  // Reporting uses an unconventional directory structure so the linter marks this as a violation, server files should
-  // be moved under reporting/server/
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../../../src/plugins/data/server';
-import { CancellationToken } from '../../../../common/cancellation_token';
+import { CancellationToken } from '../../../../../../../plugins/reporting/common';
 import { ReportingCore } from '../../../../server';
-import { Logger, RequestFacade } from '../../../../types';
+import { LevelLogger } from '../../../../server/lib';
+import { RequestFacade } from '../../../../server/types';
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import {
   CsvResultFromSearch,
@@ -25,13 +23,7 @@ import {
   JobParamsDiscoverCsv,
   SearchRequest,
 } from '../../../csv/types';
-import {
-  IndexPatternField,
-  QueryFilter,
-  SavedSearchObjectAttributes,
-  SearchPanel,
-  SearchSource,
-} from '../../types';
+import { IndexPatternField, QueryFilter, SearchPanel, SearchSource } from '../../types';
 import { getDataSource } from './get_data_source';
 import { getFilters } from './get_filters';
 
@@ -58,15 +50,13 @@ const getUiSettings = async (config: IUiSettingsClient) => {
 export async function generateCsvSearch(
   req: RequestFacade,
   reporting: ReportingCore,
-  logger: Logger,
+  logger: LevelLogger,
   searchPanel: SearchPanel,
   jobParams: JobParamsDiscoverCsv
 ): Promise<CsvResultFromSearch> {
-  const savedObjectsClient = await reporting.getSavedObjectsClient(
-    KibanaRequest.from(req.getRawRequest())
-  );
+  const savedObjectsClient = req.getSavedObjectsClient();
   const { indexPatternSavedObjectId, timerange } = searchPanel;
-  const savedSearchObjectAttr = searchPanel.attributes as SavedSearchObjectAttributes;
+  const savedSearchObjectAttr = searchPanel.attributes;
   const { indexPatternSavedObject } = await getDataSource(
     savedObjectsClient,
     indexPatternSavedObjectId
@@ -155,9 +145,7 @@ export async function generateCsvSearch(
 
   const config = reporting.getConfig();
   const elasticsearch = await reporting.getElasticsearchService();
-  const { callAsCurrentUser } = elasticsearch.dataClient.asScoped(
-    KibanaRequest.from(req.getRawRequest())
-  );
+  const { callAsCurrentUser } = elasticsearch.dataClient.asScoped(req.getRawRequest());
   const callCluster = (...params: [string, object]) => callAsCurrentUser(...params);
   const uiSettings = await getUiSettings(uiConfig);
 

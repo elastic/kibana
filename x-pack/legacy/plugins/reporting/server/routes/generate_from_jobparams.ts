@@ -8,11 +8,12 @@ import boom from 'boom';
 import rison from 'rison-node';
 import { IRouter, IBasePath } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
-import { API_BASE_URL } from '../../common/constants';
-import { Logger } from '../../types';
-import { ReportingCore, ReportingSetupDeps } from '../types';
-import { makeRequestFacade } from './lib/make_request_facade';
 import { HandlerErrorFunction, HandlerFunction } from './types';
+import { ReportingCore } from '../';
+import { API_BASE_URL } from '../../common/constants';
+import { LevelLogger as Logger } from '../lib';
+import { ReportingSetupDeps } from '../types';
+import { makeRequestFacade } from './lib/make_request_facade';
 
 const BASE_GENERATE = `${API_BASE_URL}/generate`;
 

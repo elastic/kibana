@@ -5,7 +5,7 @@
  */
 
 import { kibanaResponseFactory } from 'src/core/server';
-import { JobDocPayload, RequestFacade } from '../../types';
+import { JobDocPayload, RequestFacade } from '../types';
 
 export type HandlerFunction = (
   exportType: string,
