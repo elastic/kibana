@@ -56,7 +56,11 @@ export async function getErrorRate({
       histogram: {
         field: '@timestamp',
         min_doc_count: 0,
-        interval: bucketSize
+        interval: bucketSize,
+        extended_bounds: {
+          min: start,
+          max: end
+        }
       },
       aggs: {
         processorEventCount: {
@@ -83,13 +87,17 @@ export async function getErrorRate({
 
   const resp = await client.search(params);
   return resp.aggregations?.count.buckets.map(histogram => {
-    const transactionCount =
-      histogram.processorEventCount.buckets.find(
-        event => event.key === 'transaction'
-      )?.doc_count || 1;
-    const errorCount =
-      histogram.processorEventCount.buckets.find(event => event.key === 'error')
-        ?.doc_count || 0;
-    return { x: histogram.key, y: (errorCount * 100) / transactionCount };
+    const {
+      transaction: transactionCount = 1,
+      error: errorCount = 0
+    } = histogram.processorEventCount.buckets.reduce(
+      (acc, { key, doc_count }) => ({ ...acc, [key]: doc_count }),
+      {} as { transaction?: number; error?: number }
+    );
+
+    return {
+      x: histogram.key,
+      y: errorCount / transactionCount
+    };
   });
 }

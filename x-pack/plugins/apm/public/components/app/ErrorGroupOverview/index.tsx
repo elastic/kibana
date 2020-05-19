@@ -11,8 +11,10 @@ import {
   EuiSpacer,
   EuiTitle
 } from '@elastic/eui';
+import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+import { Maybe } from '../../../../typings/common';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
@@ -21,10 +23,14 @@ import { useTrackPageview } from '../../../../../observability/public';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
+// @ts-ignore
 import CustomPlot from '../../shared/charts/CustomPlot';
+import { unit } from '../../../style/variables';
+import { asPercent } from '../../../utils/formatters';
 
 const ErrorGroupOverview: React.FC = () => {
   const { urlParams, uiFilters } = useUrlParams();
+  const [errorRateTime, setErrorRateTime] = useState();
 
   const { serviceName, start, end, sortField, sortDirection } = urlParams;
 
@@ -63,7 +69,6 @@ const ErrorGroupOverview: React.FC = () => {
       });
     }
   }, [serviceName, start, end, uiFilters]);
-  console.log('### caue: erroRateData', erroRateData);
 
   const { data: errorGroupListData } = useFetcher(() => {
     const normalizedSortDirection = sortDirection === 'asc' ? 'asc' : 'desc';
@@ -109,6 +114,10 @@ const ErrorGroupOverview: React.FC = () => {
     return null;
   }
 
+  const tickFormatY = (y: Maybe<number>) => {
+    return numeral(y || 0).format('0 %');
+  };
+
   return (
     <>
       <EuiSpacer />
@@ -116,7 +125,7 @@ const ErrorGroupOverview: React.FC = () => {
         <EuiFlexItem grow={1}>
           <LocalUIFilters {...localUIFiltersConfig} />
         </EuiFlexItem>
-        <EuiFlexItem grow={5}>
+        <EuiFlexItem grow={7}>
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiPanel>
@@ -133,27 +142,36 @@ const ErrorGroupOverview: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiPanel>
-                {/* <EuiTitle size="xs">
-                  <span>{tpmLabel(transactionType)}</span> */}
-                {/* </EuiTitle>
-                <TransactionLineChart
-                  series={tpmSeries}
-                  tickFormatY={this.getTPMFormatter}
-                  formatTooltipValue={this.getTPMTooltipFormatter}
-                  truncateLegends
-                /> */}
+                <EuiTitle size="xs">
+                  <span>
+                    {i18n.translate(
+                      'xpack.apm.serviceDetails.metrics.errorRateChartTitle',
+                      {
+                        defaultMessage: 'Error Rate'
+                      }
+                    )}
+                  </span>
+                </EuiTitle>
                 {erroRateData && (
                   <CustomPlot
                     series={[
-                      { data: erroRateData, type: 'line', color: '#f5a700' }
+                      {
+                        data: erroRateData,
+                        type: 'line',
+                        color: '#f5a700',
+                        hideLegend: true,
+                        title: 'Rate'
+                      }
                     ]}
-                    // onHover={combinedOnHover}
-                    // tickFormatY={tickFormatY}
-                    // formatTooltipValue={formatTooltipValue}
-                    // yMax={yMax}
-                    // height={height}
-                    // truncateLegends={truncateLegends}
-                    // {...(stacked ? { stackBy: 'y' } : {})}
+                    onHover={(time: number) => {
+                      setErrorRateTime(time);
+                    }}
+                    hoverX={errorRateTime}
+                    tickFormatY={tickFormatY}
+                    formatTooltipValue={({ y }: { y: number }) => {
+                      return asPercent(y, 1);
+                    }}
+                    height={unit * 10}
                   />
                 )}
               </EuiPanel>
