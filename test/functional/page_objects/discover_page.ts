@@ -129,6 +129,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       await testSubjects.click('discoverOpenButton');
     }
 
+    public async clickResetSavedSearchButton() {
+      await testSubjects.moveMouseTo('resetSavedSearch');
+      await testSubjects.click('resetSavedSearch');
+      await header.waitUntilLoadingHasFinished();
+    }
+
     public async closeLoadSavedSearchPanel() {
       await testSubjects.click('euiFlyoutCloseButton');
     }
