@@ -7,12 +7,12 @@
 import fs from 'fs';
 import path from 'path';
 import { promisify } from 'util';
-import { LevelLogger as Logger } from '../lib/level_logger';
-// @ts-ignore
-import { extract } from './extract';
+import { LevelLogger } from '../lib';
+import { BrowserDownload } from './';
 // @ts-ignore
 import { md5 } from './download/checksum';
-import { BrowserDownload } from './types';
+// @ts-ignore
+import { extract } from './extract';
 
 const chmod = promisify(fs.chmod);
 
@@ -28,7 +28,7 @@ interface PathResponse {
  * archive. If there is an error extracting the archive an `ExtractError` is thrown
  */
 export async function installBrowser(
-  logger: Logger,
+  logger: LevelLogger,
   browser: BrowserDownload,
   installsPath: string
 ): Promise<PathResponse> {
