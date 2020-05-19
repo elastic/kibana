@@ -5,23 +5,24 @@
  */
 
 import { get } from 'lodash';
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { ReportingConfig } from '../';
 import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
-import { ESCallCluster, ExportTypesRegistry } from '../../types';
-import { ReportingConfig } from '../types';
-import { decorateRangeStats } from './decorate_range_stats';
-import { getExportTypesHandler } from './get_export_type_handler';
+import { ExportTypesRegistry } from '../lib/export_types_registry';
 import {
   AggregationResultBuckets,
+  AppCounts,
   FeatureAvailabilityMap,
   JobTypes,
   KeyCountBucket,
+  LayoutCounts,
   RangeStats,
   ReportingUsageType,
   SearchResponse,
   StatusByAppBucket,
-  AppCounts,
-  LayoutCounts,
 } from './types';
+import { decorateRangeStats } from './decorate_range_stats';
+import { getExportTypesHandler } from './get_export_type_handler';
 
 type XPackInfo = XPackMainPlugin['info'];
 
@@ -123,7 +124,7 @@ async function handleResponse(response: SearchResponse): Promise<Partial<RangeSt
 export async function getReportingUsage(
   config: ReportingConfig,
   xpackMainInfo: XPackInfo,
-  callCluster: ESCallCluster,
+  callCluster: CallCluster,
   exportTypesRegistry: ExportTypesRegistry
 ) {
   const reportingIndex = config.get('index');
