@@ -59,7 +59,11 @@ def base(Map params, Closure closure) {
         checkout scm
       }
 
-      checkoutInfo = getCheckoutInfo()
+      def checkoutInfo
+      dir("kibana") {
+        checkoutInfo = getCheckoutInfo()
+      }
+
       ciStats.reportGitInfo(
         checkoutInfo.branch,
         checkoutInfo.commit,
