@@ -364,19 +364,6 @@ export class EndpointDocGenerator {
     };
   }
 
-  private createNode(id: string, events: Event[]): TreeNode {
-    const relatedEvents: Event[] = [];
-    const lifecycle: Event[] = [];
-    events.forEach(event => {
-      if (event.event.category === 'process') {
-        lifecycle.push(event);
-      } else {
-        relatedEvents.push(event);
-      }
-    });
-    return { id, lifecycle, relatedEvents };
-  }
-
   /**
    * This generates a full resolver tree and keeps the entire tree in memory. This is useful for tests that want
    * to compare results from elasticsearch with the actual events created by this generator. Because all the events
@@ -386,9 +373,24 @@ export class EndpointDocGenerator {
    * @returns a Tree structure that makes accessing specific events easier
    */
   public generateTree(options: TreeOptions = {}): Tree {
-    const getEntityID = (event: Event) => {
-      return event.process.entity_id;
+    const addEventToMap = (nodeMap: Map<string, TreeNode>, event: Event) => {
+      const nodeId = event.process.entity_id;
+      // if a node already exists for the entity_id we'll use that one, otherwise let's create a new empty node
+      // and add the event to the right array.
+      let node = nodeMap.get(nodeId);
+      if (!node) {
+        node = { id: nodeId, lifecycle: [], relatedEvents: [] };
+      }
+
+      // place the event in the right array depending on its category
+      if (event.event.category === 'process') {
+        node.lifecycle.push(event);
+      } else {
+        node.relatedEvents.push(event);
+      }
+      return nodeMap.set(nodeId, node);
     };
+
     const ancestry = this.createAlertEventAncestry(
       options.ancestors,
       options.relatedEvents,
@@ -396,15 +398,13 @@ export class EndpointDocGenerator {
       options.percentTerminated
     );
 
-    const ancestryNodes: Map<string, TreeNode> = new Map();
-    Object.entries(
-      // create a mapping of entity_id -> lifecycle and related events
-      // slice gets everything by the last item which is an alert
-      _.groupBy(ancestry.slice(0, -1), getEntityID)
-      // for each entry in the map lets create a tree node
-    ).forEach(([id, events]) => {
-      ancestryNodes.set(id, this.createNode(id, events));
-    });
+    // create a mapping of entity_id -> lifecycle and related events
+    const ancestryNodes: Map<string, TreeNode> = _.reduce(
+      // slice gets everything but the last item which is an alert
+      ancestry.slice(0, -1),
+      addEventToMap,
+      new Map()
+    );
 
     const alert = ancestry[ancestry.length - 1];
     const origin = ancestryNodes.get(alert.process.entity_id);
@@ -425,10 +425,7 @@ export class EndpointDocGenerator {
       )
     );
 
-    const childrenNodes: Map<string, TreeNode> = new Map();
-    Object.entries(_.groupBy(children, getEntityID)).forEach(([id, events]) => {
-      childrenNodes.set(id, this.createNode(id, events));
-    });
+    const childrenNodes: Map<string, TreeNode> = _.reduce(children, addEventToMap, new Map());
 
     return {
       children: childrenNodes,
