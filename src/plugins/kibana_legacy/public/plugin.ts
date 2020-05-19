@@ -27,6 +27,7 @@ import {
 import { Observable } from 'rxjs';
 import { ConfigSchema } from '../config';
 import { getDashboardConfig } from './dashboard_config';
+import { setStoredNavLinks } from './set_stored_navlinks';
 
 interface ForwardDefinition {
   legacyAppId: string;
@@ -121,7 +122,10 @@ export class KibanaLegacyPlugin {
     };
   }
 
-  public start({ application }: CoreStart) {
+  public start(core: CoreStart) {
+    // Set stored nav links for new platform apps. This is a workaround only necessary as long as
+    // these apps are part of the legacy platform.
+    setStoredNavLinks(core);
     return {
       /**
        * @deprecated
@@ -134,7 +138,9 @@ export class KibanaLegacyPlugin {
        */
       getForwards: () => this.forwards,
       config: this.initializerContext.config.get(),
-      dashboardConfig: getDashboardConfig(!application.capabilities.dashboard.showWriteControls),
+      dashboardConfig: getDashboardConfig(
+        !core.application.capabilities.dashboard.showWriteControls
+      ),
     };
   }
 }
