@@ -28,7 +28,6 @@ import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
 import { TypesStart, VisType, VisTypeAlias } from '../vis_types';
 import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
-import { EMBEDDABLE_ORIGINATING_APP_PARAM } from '../../../embeddable/public';
 
 interface TypeSelectionProps {
   isOpen: boolean;
@@ -40,7 +39,7 @@ interface TypeSelectionProps {
   savedObjects: SavedObjectsStart;
   usageCollection?: UsageCollectionSetup;
   application: ApplicationStart;
-  redirectState: unknown;
+  redirectState?: unknown;
   outsideVisualizeApp?: boolean;
 }
 

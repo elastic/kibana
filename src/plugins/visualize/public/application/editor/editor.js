@@ -29,10 +29,8 @@ import { makeStateful, useVisualizeAppState } from './lib';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
-import { EMBEDDABLE_ORIGINATING_APP_PARAM } from '../../../../embeddable/public';
-
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
-import { unhashUrl, removeQueryParam } from '../../../../kibana_utils/public';
+import { unhashUrl } from '../../../../kibana_utils/public';
 import { MarkdownSimple, toMountPoint } from '../../../../kibana_react/public';
 import {
   addFatalError,
@@ -73,7 +71,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
     I18nContext,
     setActiveUrl,
     visualizations,
-    dashboard,
+    scopedHistory,
   } = getServices();
 
   const {
@@ -112,10 +110,11 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
       localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
   };
 
-  const originatingApp = $route.current.params[EMBEDDABLE_ORIGINATING_APP_PARAM];
-  removeQueryParam(history, EMBEDDABLE_ORIGINATING_APP_PARAM);
-
-  $scope.getOriginatingApp = () => originatingApp;
+  const { embeddableOriginatingApp } = scopedHistory().fetchLocationState();
+  if (embeddableOriginatingApp) {
+    scopedHistory().removeFromLocationState(['embeddableOriginatingApp']);
+  }
+  $scope.getOriginatingApp = () => embeddableOriginatingApp;
 
   const visStateToEditorState = () => {
     const savedVisState = visualizations.convertFromSerializedVis(vis.serialize());
@@ -675,17 +674,10 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
               // Manually insert a new url so the back button will open the saved visualization.
               history.replace(appPath);
               setActiveUrl(appPath);
-              const lastAppType = $scope.getOriginatingApp();
-
-              if (lastAppType === 'dashboards') {
-                const savedVisId = firstSave || savedVis.copyOnSave ? savedVis.id : '';
-                dashboard.addEmbeddableToDashboard({
-                  embeddableId: savedVisId,
-                  embeddableType: VISUALIZE_EMBEDDABLE_TYPE,
-                });
-              } else {
-                application.navigateToApp(lastAppType);
-              }
+              const savedVisId = firstSave || savedVis.copyOnSave ? savedVis.id : '';
+              application.navigateToApp($scope.getOriginatingApp(), {
+                state: { id: savedVisId, type: VISUALIZE_EMBEDDABLE_TYPE },
+              });
             } else if (savedVis.id === $route.current.params.id) {
               chrome.docTitle.change(savedVis.lastSavedTitle);
               chrome.setBreadcrumbs($injector.invoke(getEditBreadcrumbs));

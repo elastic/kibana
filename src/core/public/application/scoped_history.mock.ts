@@ -32,6 +32,8 @@ const createMock = ({
     block: jest.fn(),
     createHref: jest.fn(),
     createSubHistory: jest.fn(),
+    fetchLocationState: jest.fn(),
+    removeFromLocationState: jest.fn(),
     go: jest.fn(),
     goBack: jest.fn(),
     goForward: jest.fn(),

@@ -26,7 +26,6 @@ import {
   EmbeddableOutput,
   ErrorEmbeddable,
   IContainer,
-  EMBEDDABLE_ORIGINATING_APP_PARAM,
 } from '../../../embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { VisualizeEmbeddable, VisualizeInput, VisualizeOutput } from './visualize_embeddable';

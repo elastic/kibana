@@ -73,7 +73,7 @@ import { getDashboardTitle } from './dashboard_strings';
 import { DashboardAppScope } from './dashboard_app';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { RenderDeps } from './application';
-import { IKbnUrlStateStorage, removeQueryParam, unhashUrl } from '../../../kibana_utils/public';
+import { IKbnUrlStateStorage, unhashUrl } from '../../../kibana_utils/public';
 import {
   addFatalError,
   AngularHttpError,
@@ -91,6 +91,11 @@ export interface DashboardAppControllerDependencies extends RenderDeps {
   history: History;
   kbnUrlStateStorage: IKbnUrlStateStorage;
   navigation: NavigationStart;
+}
+
+export interface DashboardIncomingState {
+  type: string;
+  id: string;
 }
 
 export class DashboardAppController {
@@ -111,6 +116,7 @@ export class DashboardAppController {
     embeddable,
     share,
     dashboardCapabilities,
+    scopedHistory,
     embeddableCapabilities: { visualizeCapabilities, mapsCapabilities },
     data: { query: queryService },
     core: {
@@ -398,15 +404,14 @@ export class DashboardAppController {
               refreshDashboardContainer();
             });
 
-            // This code needs to be replaced with a better mechanism for adding new embeddables of
-            // any type from the add panel. Likely this will happen via creating a visualization "inline",
-            // without navigating away from the UX.
-            if ($routeParams[DashboardConstants.ADD_EMBEDDABLE_TYPE]) {
-              const type = $routeParams[DashboardConstants.ADD_EMBEDDABLE_TYPE];
-              const id = $routeParams[DashboardConstants.ADD_EMBEDDABLE_ID];
-              container.addNewEmbeddable<SavedObjectEmbeddableInput>(type, { savedObjectId: id });
-              removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_TYPE);
-              removeQueryParam(history, DashboardConstants.ADD_EMBEDDABLE_ID);
+            const incomingState = scopedHistory().fetchLocationState<DashboardIncomingState>();
+            if (incomingState) {
+              scopedHistory().removeFromLocationState(Object.keys(incomingState));
+              if (incomingState.id) {
+                container.addNewEmbeddable<SavedObjectEmbeddableInput>(incomingState.type, {
+                  savedObjectId: incomingState.id,
+                });
+              }
             }
           }
 

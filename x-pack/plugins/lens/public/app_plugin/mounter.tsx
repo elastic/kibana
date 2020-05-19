@@ -58,16 +58,10 @@ export async function mountApp(
       routeProps.history.push(`/edit/${id}`);
     } else if (!!originatingApp && id && returnToOrigin) {
       routeProps.history.push(`/edit/${id}`);
-
-      if (originatingApp === 'dashboards') {
-        const addLensId = newlyCreated ? id : '';
-        startDependencies.dashboard.addEmbeddableToDashboard({
-          embeddableId: addLensId,
-          embeddableType: LENS_EMBEDDABLE_TYPE,
-        });
-      } else {
-        coreStart.application.navigateToApp(originatingApp);
-      }
+      const state = { id: newlyCreated ? id : '', type: LENS_EMBEDDABLE_TYPE };
+      coreStart.application.navigateToApp(originatingApp, {
+        state,
+      });
     }
   };
 

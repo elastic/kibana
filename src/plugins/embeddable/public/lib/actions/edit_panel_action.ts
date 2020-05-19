@@ -24,7 +24,7 @@ import { take } from 'rxjs/operators';
 import { ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
-import { EMBEDDABLE_ORIGINATING_APP_PARAM, IEmbeddable } from '../..';
+import { IEmbeddable } from '../..';
 
 export const ACTION_EDIT_PANEL = 'editPanel';
 
@@ -114,10 +114,7 @@ export class EditPanelAction implements Action<ActionContext> {
   }
 
   public async getHref({ embeddable }: ActionContext): Promise<string> {
-    let editUrl = embeddable ? embeddable.getOutput().editUrl : undefined;
-    if (editUrl && this.currentAppId) {
-      editUrl += `?${EMBEDDABLE_ORIGINATING_APP_PARAM}=${this.currentAppId}`;
-    }
+    const editUrl = embeddable ? embeddable.getOutput().editUrl : undefined;
     return editUrl ? editUrl : '';
   }
 }

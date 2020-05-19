@@ -28,6 +28,7 @@ import {
   Href,
   Action,
 } from 'history';
+import { cloneDeep } from 'lodash';
 
 /**
  * A wrapper around a `History` instance that is scoped to a particular base path of the history stack. Behaves
@@ -119,7 +120,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
    */
   public fetchLocationState<T extends unknown = unknown>(): T {
     this.verifyActive();
-    return this.parentLocationState as T;
+    return cloneDeep(this.parentLocationState) as T;
   }
 
   /**
