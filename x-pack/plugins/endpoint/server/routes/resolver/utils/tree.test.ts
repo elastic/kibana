@@ -22,7 +22,7 @@ describe('Tree', () => {
         })
         .map(event => {
           return {
-            id: event.process.entity_id,
+            entityID: event.process.entity_id,
             // The generator returns Events, but the tree needs a ResolverEvent
             lifecycle: [event as ResolverEvent],
           };
@@ -31,7 +31,7 @@ describe('Tree', () => {
     };
 
     it('adds ancestors to the tree', () => {
-      const tree = new Tree(ancestorInfo.ancestors[0].id, { ancestry: ancestorInfo });
+      const tree = new Tree(ancestorInfo.ancestors[0].entityID, { ancestry: ancestorInfo });
       const ids = tree.ids();
       ids.forEach(id => {
         const foundAncestor = ancestorInfo.ancestors.find(
@@ -47,7 +47,7 @@ describe('Tree', () => {
     it('adds related events to the tree', () => {
       const root = generator.generateEvent();
       const events: ResolverRelatedEvents = {
-        id: root.process.entity_id,
+        entityID: root.process.entity_id,
         events: Array.from(generator.relatedEventsGenerator(root)),
         nextEvent: null,
       };

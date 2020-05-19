@@ -90,9 +90,9 @@ export interface ResolverTree {
    * Origin of the tree. This is in the middle of the tree. Typically this would be the same
    * process node that generated an alert.
    */
-  id: string;
+  entityID: string;
   children: ResolverChildren;
-  relatedEvents: Omit<ResolverRelatedEvents, 'id'>;
+  relatedEvents: Omit<ResolverRelatedEvents, 'entityID'>;
   ancestry: ResolverAncestry;
   lifecycle: ResolverEvent[];
   stats: ResolverNodeStats;
@@ -102,7 +102,7 @@ export interface ResolverTree {
  * The lifecycle events (start, end etc) for a node nodes.
  */
 export interface LifecycleNode {
-  id: string;
+  entityID: string;
   lifecycle: ResolverEvent[];
   /**
    * stats are only set when the entire tree is being fetched
@@ -129,7 +129,7 @@ export interface ResolverAncestry {
  * Response structure for the related events route.
  */
 export interface ResolverRelatedEvents {
-  id: string;
+  entityID: string;
   events: ResolverEvent[];
   nextEvent: string | null;
 }

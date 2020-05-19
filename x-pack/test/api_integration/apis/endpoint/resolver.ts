@@ -10,6 +10,9 @@ import {
   LifecycleNode,
   ResolverAncestry,
   ResolverEvent,
+  ResolverRelatedEvents,
+  ResolverChildren,
+  ResolverTree,
 } from '../../../../plugins/endpoint/common/types';
 import { parentEntityId } from '../../../../plugins/endpoint/common/models/event';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -23,7 +26,7 @@ import { Options, GeneratedTrees } from '../../services/resolver';
  * @param nodeMap a map of entity_ids to nodes to look for the passed in `node`
  */
 const expectLifecycleNodeInMap = (node: LifecycleNode, nodeMap: Map<string, TreeNode>) => {
-  const genNode = nodeMap.get(node.id);
+  const genNode = nodeMap.get(node.entityID);
   expect(genNode).to.be.ok();
   compareArrays(genNode!.lifecycle, node.lifecycle, true);
 };
@@ -57,7 +60,7 @@ const verifyAncestryFromOrigin = (
  */
 const verifyAncestry = (ancestors: LifecycleNode[], tree: Tree, verifyLastParent: boolean) => {
   // group the ancestors by their entity_id mapped to a lifecycle node
-  const groupedAncestors = _.groupBy(ancestors, ancestor => ancestor.id);
+  const groupedAncestors = _.groupBy(ancestors, ancestor => ancestor.entityID);
   // group by parent entity_id
   const groupedAncestorsParent = _.groupBy(ancestors, ancestor =>
     parentEntityId(ancestor.lifecycle[0])
@@ -91,7 +94,7 @@ const verifyChildren = (
   childrenPerParent?: number
 ) => {
   // group the children by their entity_id mapped to a child node
-  const groupedChildren = _.groupBy(children, child => child.id);
+  const groupedChildren = _.groupBy(children, child => child.entityID);
   // make sure each child is unique
   expect(Object.keys(groupedChildren).length).to.eql(children.length);
   if (numberOfParents !== undefined) {
@@ -170,42 +173,42 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         const cursor = 'eyJ0aW1lc3RhbXAiOjE1ODE0NTYyNTUwMDAsImV2ZW50SUQiOiI5NDA0MyJ9';
 
         it('should return details for the root node', async () => {
-          const { body } = await supertest
+          const { body }: { body: ResolverRelatedEvents } = await supertest
             .get(`/api/endpoint/resolver/${entityID}/events?legacyEndpointID=${endpointID}`)
             .expect(200);
           expect(body.events.length).to.eql(1);
-          expect(body.id).to.eql(entityID);
+          expect(body.entityID).to.eql(entityID);
           expect(body.nextEvent).to.eql(null);
         });
 
         it('returns no values when there is no more data', async () => {
-          const { body } = await supertest
+          const { body }: { body: ResolverRelatedEvents } = await supertest
             // after is set to the document id of the last event so there shouldn't be any more after it
             .get(
               `/api/endpoint/resolver/${entityID}/events?legacyEndpointID=${endpointID}&afterEvent=${cursor}`
             )
             .expect(200);
           expect(body.events).be.empty();
-          expect(body.id).to.eql(entityID);
+          expect(body.entityID).to.eql(entityID);
           expect(body.nextEvent).to.eql(null);
         });
 
         it('should return the first page of information when the cursor is invalid', async () => {
-          const { body } = await supertest
+          const { body }: { body: ResolverRelatedEvents } = await supertest
             .get(
               `/api/endpoint/resolver/${entityID}/events?legacyEndpointID=${endpointID}&afterEvent=blah`
             )
             .expect(200);
-          expect(body.id).to.eql(entityID);
+          expect(body.entityID).to.eql(entityID);
           expect(body.nextEvent).to.eql(null);
         });
 
         it('should return no results for an invalid endpoint ID', async () => {
-          const { body } = await supertest
+          const { body }: { body: ResolverRelatedEvents } = await supertest
             .get(`/api/endpoint/resolver/${entityID}/events?legacyEndpointID=foo`)
             .expect(200);
           expect(body.nextEvent).to.eql(null);
-          expect(body.id).to.eql(entityID);
+          expect(body.entityID).to.eql(entityID);
           expect(body.events).to.be.empty();
         });
 
@@ -218,13 +221,15 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
 
       describe('endpoint events', () => {
         it('should not find any events', async () => {
-          const { body } = await supertest.get(`/api/endpoint/resolver/5555/events`).expect(200);
+          const { body }: { body: ResolverRelatedEvents } = await supertest
+            .get(`/api/endpoint/resolver/5555/events`)
+            .expect(200);
           expect(body.nextEvent).to.eql(null);
           expect(body.events).to.be.empty();
         });
 
         it('should return details for the root node', async () => {
-          const { body } = await supertest
+          const { body }: { body: ResolverRelatedEvents } = await supertest
             .get(`/api/endpoint/resolver/${tree.origin.id}/events`)
             .expect(200);
           expect(body.events.length).to.eql(4);
@@ -233,7 +238,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         });
 
         it('should return paginated results for the root node', async () => {
-          let { body } = await supertest
+          let { body }: { body: ResolverRelatedEvents } = await supertest
             .get(`/api/endpoint/resolver/${tree.origin.id}/events?events=2`)
             .expect(200);
           expect(body.events.length).to.eql(2);
@@ -259,7 +264,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         });
 
         it('should return the first page of information when the cursor is invalid', async () => {
-          const { body } = await supertest
+          const { body }: { body: ResolverRelatedEvents } = await supertest
             .get(`/api/endpoint/resolver/${tree.origin.id}/events?afterEvent=blah`)
             .expect(200);
           expect(body.events.length).to.eql(4);
@@ -275,7 +280,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         const entityID = '94042';
 
         it('should return details for the root node', async () => {
-          const { body } = await supertest
+          const { body }: { body: ResolverAncestry } = await supertest
             .get(
               `/api/endpoint/resolver/${entityID}/ancestry?legacyEndpointID=${endpointID}&ancestors=5`
             )
@@ -285,14 +290,14 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         });
 
         it('should have a populated next parameter', async () => {
-          const { body } = await supertest
+          const { body }: { body: ResolverAncestry } = await supertest
             .get(`/api/endpoint/resolver/${entityID}/ancestry?legacyEndpointID=${endpointID}`)
             .expect(200);
           expect(body.nextAncestor).to.eql('94041');
         });
 
         it('should handle an ancestors param request', async () => {
-          let { body } = await supertest
+          let { body }: { body: ResolverAncestry } = await supertest
             .get(`/api/endpoint/resolver/${entityID}/ancestry?legacyEndpointID=${endpointID}`)
             .expect(200);
           const next = body.nextAncestor;
@@ -313,7 +318,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         };
 
         it('should return details for the root node', async () => {
-          const { body } = await supertest
+          const { body }: { body: ResolverAncestry } = await supertest
             .get(`/api/endpoint/resolver/${tree.origin.id}/ancestry?ancestors=9`)
             .expect(200);
           // the tree we generated had 5 ancestors + 1 origin node
@@ -324,7 +329,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         });
 
         it('should handle an invalid id', async () => {
-          const { body } = await supertest
+          const { body }: { body: ResolverAncestry } = await supertest
             .get(`/api/endpoint/resolver/alskdjflasj/ancestry`)
             .expect(200);
           expect(body.ancestors).to.be.empty();
@@ -332,7 +337,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         });
 
         it('should have a populated next parameter', async () => {
-          const { body } = await supertest
+          const { body }: { body: ResolverAncestry } = await supertest
             .get(`/api/endpoint/resolver/${tree.origin.id}/ancestry?ancestors=2`)
             .expect(200);
           // it should have 2 ancestors + 1 origin
@@ -346,7 +351,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         });
 
         it('should handle multiple ancestor requests', async () => {
-          let { body } = await supertest
+          let { body }: { body: ResolverAncestry } = await supertest
             .get(`/api/endpoint/resolver/${tree.origin.id}/ancestry?ancestors=3`)
             .expect(200);
           expect(body.ancestors.length).to.eql(4);
@@ -371,7 +376,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         const cursor = 'eyJ0aW1lc3RhbXAiOjE1ODE0NTYyNTUwMDAsImV2ZW50SUQiOiI5NDA0MiJ9';
 
         it('returns child process lifecycle events', async () => {
-          const { body } = await supertest
+          const { body }: { body: ResolverChildren } = await supertest
             .get(`/api/endpoint/resolver/${entityID}/children?legacyEndpointID=${endpointID}`)
             .expect(200);
           expect(body.childNodes.length).to.eql(1);
@@ -380,7 +385,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         });
 
         it('returns multiple levels of child process lifecycle events', async () => {
-          const { body } = await supertest
+          const { body }: { body: ResolverChildren } = await supertest
             .get(
               `/api/endpoint/resolver/93802/children?legacyEndpointID=${endpointID}&generations=1`
             )
@@ -404,7 +409,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         });
 
         it('returns the first page of information when the cursor is invalid', async () => {
-          const { body } = await supertest
+          const { body }: { body: ResolverChildren } = await supertest
             .get(
               `/api/endpoint/resolver/${entityID}/children?legacyEndpointID=${endpointID}&afterChild=blah`
             )
@@ -424,13 +429,15 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         });
 
         it('returns empty events without a matching entity id', async () => {
-          const { body } = await supertest.get(`/api/endpoint/resolver/5555/children`).expect(200);
+          const { body }: { body: ResolverChildren } = await supertest
+            .get(`/api/endpoint/resolver/5555/children`)
+            .expect(200);
           expect(body.nextChild).to.eql(null);
           expect(body.childNodes).to.be.empty();
         });
 
         it('returns empty events with an invalid endpoint id', async () => {
-          const { body } = await supertest
+          const { body }: { body: ResolverChildren } = await supertest
             .get(`/api/endpoint/resolver/${entityID}/children?legacyEndpointID=foo`)
             .expect(200);
           expect(body.nextChild).to.eql(null);
@@ -440,7 +447,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
 
       describe('endpoint events', () => {
         it('returns all children for the origin', async () => {
-          const { body } = await supertest
+          const { body }: { body: ResolverChildren } = await supertest
             .get(`/api/endpoint/resolver/${tree.origin.id}/children?children=100`)
             .expect(200);
           // there are 2 levels in the children part of the tree and 3 nodes for each =
@@ -451,7 +458,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         });
 
         it('returns a single generation of children', async () => {
-          const { body } = await supertest
+          const { body }: { body: ResolverChildren } = await supertest
             .get(`/api/endpoint/resolver/${tree.origin.id}/children?generations=1`)
             .expect(200);
           expect(body.childNodes.length).to.eql(3);
@@ -459,7 +466,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         });
 
         it('paginates the children of the origin node', async () => {
-          let { body } = await supertest
+          let { body }: { body: ResolverChildren } = await supertest
             .get(`/api/endpoint/resolver/${tree.origin.id}/children?generations=1&children=1`)
             .expect(200);
           expect(body.childNodes.length).to.eql(1);
@@ -478,7 +485,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         });
 
         it('paginates the children of different nodes', async () => {
-          let { body } = await supertest
+          let { body }: { body: ResolverChildren } = await supertest
             .get(`/api/endpoint/resolver/${tree.origin.id}/children?generations=2&children=2`)
             .expect(200);
           // it should return 4 nodes total, 2 for each level
@@ -505,7 +512,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           // get the 1 child of the origin of the tree's last child
           ({ body } = await supertest
             .get(
-              `/api/endpoint/resolver/${firstChild.id}/children?generations=1&children=10&afterChild=${firstChild.nextChild}`
+              `/api/endpoint/resolver/${firstChild.entityID}/children?generations=1&children=10&afterChild=${firstChild.nextChild}`
             )
             .expect(200));
           expect(body.childNodes.length).to.be(1);
@@ -520,7 +527,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
         const endpointID = '5a0c957f-b8e7-4538-965e-57e8bb86ad3a';
 
         it('returns ancestors, events, children, and current process lifecycle', async () => {
-          const { body } = await supertest
+          const { body }: { body: ResolverTree } = await supertest
             .get(`/api/endpoint/resolver/93933?legacyEndpointID=${endpointID}`)
             .expect(200);
           expect(body.ancestry.nextAncestor).to.equal(null);
@@ -534,7 +541,7 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
 
       describe('endpoint events', () => {
         it('returns a tree', async () => {
-          const { body } = await supertest
+          const { body }: { body: ResolverTree } = await supertest
             .get(
               `/api/endpoint/resolver/${tree.origin.id}?children=100&generations=3&ancestors=5&events=4`
             )

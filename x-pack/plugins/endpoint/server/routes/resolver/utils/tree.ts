@@ -16,7 +16,7 @@ import {
 import { createTree } from './node';
 
 interface Node {
-  id: string;
+  entityID: string;
   lifecycle: ResolverEvent[];
   stats?: ResolverNodeStats;
 }
@@ -122,11 +122,11 @@ export class Tree {
 
     // the ancestry info holds the lifecycle events for the root of the tree too, so we need to pull that out
     ancestorInfo.ancestors.forEach(node => {
-      if (node.id === this.id) {
+      if (node.entityID === this.id) {
         this.tree.lifecycle = node.lifecycle;
         return;
       }
-      this.cache.set(node.id, node);
+      this.cache.set(node.entityID, node);
       this.tree.ancestry.ancestors.push(node);
     });
   }
@@ -152,7 +152,7 @@ export class Tree {
     this.tree.children = children;
 
     children.childNodes.forEach(child => {
-      this.cache.set(child.id, child);
+      this.cache.set(child.entityID, child);
     });
   }
 }

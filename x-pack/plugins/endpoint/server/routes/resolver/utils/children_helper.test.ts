@@ -24,7 +24,7 @@ function findParents(events: ResolverEvent[]): ResolverEvent[] {
 
 function findNode(tree: ResolverChildren, id: string) {
   return tree.childNodes.find(node => {
-    return node.id === id;
+    return node.entityID === id;
   });
 }
 
