@@ -6,13 +6,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Observable } from 'rxjs';
-import {
-  DocLinksStart,
-  HttpSetup,
-  ToastsSetup,
-  IUiSettingsClient,
-  AppMountParameters,
-} from 'kibana/public';
+import { DocLinksStart, HttpSetup, ToastsSetup, IUiSettingsClient } from 'kibana/public';
 
 import { Router, Switch, Route, Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
 
@@ -20,7 +14,10 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { RegisterManagementAppArgs } from '../../../../../src/plugins/management/public';
+import {
+  RegisterManagementAppArgs,
+  ManagementAppMountParams,
+} from '../../../../../src/plugins/management/public';
 
 import { LicenseStatus } from '../../common/types/license_status';
 import { WatchStatus } from './sections/watch_status/components/watch_status';
@@ -45,7 +42,7 @@ export interface AppDeps {
   createTimeBuckets: () => any;
   licenseStatus$: Observable<LicenseStatus>;
   setBreadcrumbs: Parameters<RegisterManagementAppArgs['mount']>[0]['setBreadcrumbs'];
-  history: AppMountParameters['history'];
+  history: ManagementAppMountParams['history'];
 }
 
 export const App = (deps: AppDeps) => {

@@ -41,7 +41,7 @@ export const EmptyList: FunctionComponent = () => {
             </p>
           }
           actions={
-            <EuiButton href={`#${BASE_PATH}/create`} iconType="plusInCircle" fill>
+            <EuiButton href={`/create`} iconType="plusInCircle" fill>
               {i18n.translate('xpack.ingestPipelines.list.table.emptyPrompt.createButtonLabel', {
                 defaultMessage: 'Create a pipeline',
               })}

@@ -21,6 +21,8 @@ import { rolesManagementApp } from './roles';
 import { apiKeysManagementApp } from './api_keys';
 import { roleMappingsManagementApp } from './role_mappings';
 
+const mockSection = { registerApp: jest.fn() };
+
 describe('ManagementService', () => {
   describe('setup()', () => {
     it('properly registers security section and its applications', () => {
@@ -28,7 +30,6 @@ describe('ManagementService', () => {
       const { authc } = securityMock.createSetup();
       const license = licenseMock.create();
 
-      const mockSection = { registerApp: jest.fn() };
       const managementSetup: ManagementSetup = {
         sections: {
           register: jest.fn(),

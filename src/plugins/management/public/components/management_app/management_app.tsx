@@ -19,7 +19,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
 import { AppMountContext, AppMountParameters, ChromeBreadcrumb } from 'kibana/public';
-import { I18nProvider } from '@kbn/i18n/src/react';
+import { I18nProvider } from '@kbn/i18n/react';
 import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { ManagementStart } from '../../types';
 import { ManagementSection } from '../../utils';

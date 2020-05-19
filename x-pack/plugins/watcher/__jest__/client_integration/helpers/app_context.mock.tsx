@@ -7,12 +7,13 @@
 import React from 'react';
 import { of } from 'rxjs';
 import { ComponentType } from 'enzyme';
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory } from 'src/core/public';
 import {
   docLinksServiceMock,
   uiSettingsServiceMock,
   notificationServiceMock,
   httpServiceMock,
+  scopedHistoryMock,
 } from '../../../../../../src/core/public/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AppContextProvider } from '../../../public/application/app_context';
@@ -40,7 +41,7 @@ export const mockContextValue = {
   } as any,
   // For our test harness, we don't use this mocked out http service
   http: httpServiceMock.createSetupContract(),
-  history: {} as ScopedHistory,
+  history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
 };
 
 export const withAppContext = (Component: ComponentType<any>) => (props: any) => {
