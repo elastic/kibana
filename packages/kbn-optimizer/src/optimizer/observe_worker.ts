@@ -22,9 +22,16 @@ import { Readable } from 'stream';
 import { inspect } from 'util';
 
 import * as Rx from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { map, filter, takeUntil } from 'rxjs/operators';
 
-import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle } from '../common';
+import {
+  isWorkerMsg,
+  WorkerPongMsg,
+  isWorkerPing,
+  WorkerConfig,
+  WorkerMsg,
+  Bundle,
+} from '../common';
 
 import { OptimizerConfig } from './optimizer_config';
 
@@ -146,6 +153,17 @@ export function observeWorker(
       observeStdio$(proc.stderr, 'stderr'),
       Rx.fromEvent<[unknown]>(proc, 'message')
         .pipe(
+          // filter out ping messages so they don't end up in the general message stream
+          filter(([msg]) => {
+            if (!isWorkerPing(msg)) {
+              return true;
+            }
+
+            const pong: WorkerPongMsg = { type: 'pong' };
+            proc.send(pong);
+            return false;
+          }),
+
           // validate the messages from the process
           map(([msg]) => {
             if (!isWorkerMsg(msg)) {
