@@ -44,6 +44,7 @@ export function VisualizeListingController($scope, createNewVis, kbnUrlStateStor
     toastNotifications,
     visualizations,
     core: { docLinks, savedObjects, uiSettings, application },
+    savedObjects: savedObjectsPublic,
   } = getServices();
 
   chrome.docTitle.change(
@@ -121,7 +122,7 @@ export function VisualizeListingController($scope, createNewVis, kbnUrlStateStor
   this.fetchItems = filter => {
     const isLabsEnabled = uiSettings.get('visualize:enableLabs');
     return savedVisualizations
-      .findListItems(filter, uiSettings.get('savedObjects:listingLimit'))
+      .findListItems(filter, savedObjectsPublic.settings.getListingLimit())
       .then(result => {
         this.totalItems = result.total;
 
@@ -154,7 +155,8 @@ export function VisualizeListingController($scope, createNewVis, kbnUrlStateStor
     },
   ]);
 
-  this.listingLimit = uiSettings.get('savedObjects:listingLimit');
+  this.listingLimit = savedObjectsPublic.settings.getListingLimit();
+  this.initialPageSize = savedObjectsPublic.settings.getPerPage();
 
   addHelpMenuToAppChrome(chrome, docLinks);
 

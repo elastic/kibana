@@ -188,6 +188,13 @@ storiesOf('app/ServiceMap/Cytoscape', module)
         },
         {
           data: {
+            id: 'dotNet',
+            'service.name': 'dotNet service',
+            'agent.name': 'dotNet'
+          }
+        },
+        {
+          data: {
             id: 'go',
             'service.name': 'go service',
             'agent.name': 'go'

@@ -13,7 +13,8 @@ import { DatatableProps } from './expression';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { IFieldFormat } from '../../../../../src/plugins/data/public';
 import { IAggType } from 'src/plugins/data/public';
-const executeTriggerActions = jest.fn();
+const onClickValue = jest.fn();
+import { EmptyPlaceholder } from '../shared_components';
 
 function sampleArgs() {
   const data: LensMultiTable = {
@@ -22,11 +23,11 @@ function sampleArgs() {
       l1: {
         type: 'kibana_datatable',
         columns: [
-          { id: 'a', name: 'a', meta: { type: 'count' } },
+          { id: 'a', name: 'a', meta: { type: 'terms' } },
           { id: 'b', name: 'b', meta: { type: 'date_histogram', aggConfigParams: { field: 'b' } } },
-          { id: 'c', name: 'c', meta: { type: 'cardinality' } },
+          { id: 'c', name: 'c', meta: { type: 'count' } },
         ],
-        rows: [{ a: 10110, b: 1588024800000, c: 3 }],
+        rows: [{ a: 'shoes', b: 1588024800000, c: 3 }],
       },
     },
   };
@@ -66,7 +67,7 @@ describe('datatable_expression', () => {
             data={data}
             args={args}
             formatFactory={x => x as IFieldFormat}
-            executeTriggerActions={executeTriggerActions}
+            onClickValue={onClickValue}
             getType={jest.fn()}
           />
         )
@@ -87,7 +88,7 @@ describe('datatable_expression', () => {
           }}
           args={args}
           formatFactory={x => x as IFieldFormat}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
           getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
         />
       );
@@ -97,18 +98,16 @@ describe('datatable_expression', () => {
         .first()
         .simulate('click');
 
-      expect(executeTriggerActions).toHaveBeenCalledWith('VALUE_CLICK_TRIGGER', {
-        data: {
-          data: [
-            {
-              column: 0,
-              row: 0,
-              table: data.tables.l1,
-              value: 10110,
-            },
-          ],
-          negate: true,
-        },
+      expect(onClickValue).toHaveBeenCalledWith({
+        data: [
+          {
+            column: 0,
+            row: 0,
+            table: data.tables.l1,
+            value: 'shoes',
+          },
+        ],
+        negate: true,
         timeFieldName: undefined,
       });
     });
@@ -127,7 +126,7 @@ describe('datatable_expression', () => {
           }}
           args={args}
           formatFactory={x => x as IFieldFormat}
-          executeTriggerActions={executeTriggerActions}
+          onClickValue={onClickValue}
           getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
         />
       );
@@ -137,20 +136,44 @@ describe('datatable_expression', () => {
         .at(3)
         .simulate('click');
 
-      expect(executeTriggerActions).toHaveBeenCalledWith('VALUE_CLICK_TRIGGER', {
-        data: {
-          data: [
-            {
-              column: 1,
-              row: 0,
-              table: data.tables.l1,
-              value: 1588024800000,
-            },
-          ],
-          negate: false,
-        },
+      expect(onClickValue).toHaveBeenCalledWith({
+        data: [
+          {
+            column: 1,
+            row: 0,
+            table: data.tables.l1,
+            value: 1588024800000,
+          },
+        ],
+        negate: false,
         timeFieldName: 'b',
       });
+    });
+
+    test('it shows emptyPlaceholder for undefined bucketed data', () => {
+      const { args, data } = sampleArgs();
+      const emptyData: LensMultiTable = {
+        ...data,
+        tables: {
+          l1: {
+            ...data.tables.l1,
+            rows: [{ a: undefined, b: undefined, c: 0 }],
+          },
+        },
+      };
+
+      const component = shallow(
+        <DatatableComponent
+          data={emptyData}
+          args={args}
+          formatFactory={x => x as IFieldFormat}
+          onClickValue={onClickValue}
+          getType={jest.fn(type =>
+            type === 'count' ? ({ type: 'metrics' } as IAggType) : ({ type: 'buckets' } as IAggType)
+          )}
+        />
+      );
+      expect(component.find(EmptyPlaceholder).prop('icon')).toEqual('visTable');
     });
   });
 });

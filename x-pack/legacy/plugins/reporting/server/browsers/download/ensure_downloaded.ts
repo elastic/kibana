@@ -6,9 +6,8 @@
 
 import { existsSync } from 'fs';
 import { resolve as resolvePath } from 'path';
+import { BrowserDownload, chromium } from '../';
 import { BROWSER_TYPE } from '../../../common/constants';
-import { chromium } from '../index';
-import { BrowserDownload } from '../types';
 import { md5 } from './checksum';
 import { clean } from './clean';
 import { download } from './download';
