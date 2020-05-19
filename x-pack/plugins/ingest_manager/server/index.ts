@@ -12,7 +12,7 @@ export {
   IngestManagerSetupDeps,
   IngestManagerStartContract,
 } from './plugin';
-
+export { ApmNodeAgent } from './types';
 export const config = {
   exposeToBrowser: {
     epm: true,

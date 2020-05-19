@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import apm from 'elastic-apm-node';
 import { CallESAsCurrentUser, ElasticsearchAssetType } from '../../../../types';
 import * as Registry from '../../registry';
 
@@ -12,6 +13,7 @@ export async function installILMPolicy(
   pkgVersion: string,
   callCluster: CallESAsCurrentUser
 ) {
+  const span = apm.startSpan(`installILMPolicy ${pkgName} ${pkgVersion}`);
   const ilmPaths = await Registry.getArchiveInfo(
     pkgName,
     pkgVersion,
@@ -35,6 +37,7 @@ export async function installILMPolicy(
       }
     })
   );
+  if (span) span.end();
 }
 const isILMPolicy = ({ path }: Registry.ArchiveEntry) => {
   const pathParts = Registry.pathParts(path);

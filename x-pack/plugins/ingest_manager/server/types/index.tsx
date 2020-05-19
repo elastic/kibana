@@ -5,6 +5,9 @@
  */
 import { ScopedClusterClient } from 'src/core/server';
 
+import apmNodeAgent from 'elastic-apm-node';
+export type ApmNodeAgent = typeof apmNodeAgent;
+
 export {
   // Object types
   Agent,

@@ -14,6 +14,7 @@ import {
   SavedObjectsServiceStart,
   HttpServiceSetup,
 } from 'kibana/server';
+import apmNodeAgent from 'elastic-apm-node';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import {
   EncryptedSavedObjectsPluginStart,
@@ -55,6 +56,7 @@ import {
 } from './services';
 import { getAgentStatusById } from './services/agents';
 import { CloudSetup } from '../../cloud/server';
+import { ApmNodeAgent } from './types';
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
@@ -76,6 +78,7 @@ export interface IngestManagerAppContext {
   cloud?: CloudSetup;
   logger?: Logger;
   httpSetup?: HttpServiceSetup;
+  apm?: ApmNodeAgent;
 }
 
 export type IngestManagerSetupContract = void;
@@ -115,8 +118,42 @@ export class IngestManagerPlugin
   private isProductionMode: boolean;
   private kibanaVersion: string;
   private httpSetup: HttpServiceSetup | undefined;
-
+  private apm: ApmNodeAgent | undefined;
   constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.apm = apmNodeAgent;
+    // disabled because it caused a crash with Error "don't call .start() twice";
+    // apmNodeAgent.start({
+    //   // Override service name from package.json
+    //   // Allowed characters: a-z, A-Z, 0-9, -, _, and space
+    //   // serviceName: '',
+    //   // Use if APM Server requires a token
+    //   // secretToken: '',
+    //   // Set custom APM Server URL (default: http://localhost:8200)
+    //   // serverUrl: '',
+    // });
+    // Trace: kibana/src/apm.js exports
+    //   at module.exports (/Users/jfsiii/work/kibana/src/apm.js:92:11)
+    //   at Object.<anonymous> (/Users/jfsiii/work/kibana/src/cli/index.js:21:18)
+    //   at Module._compile (internal/modules/cjs/loader.js:778:30)
+    //   at Object.Module._extensions..js (internal/modules/cjs/loader.js:789:10)
+    //   at Module.load (internal/modules/cjs/loader.js:653:32)
+    //   at tryModuleLoad (internal/modules/cjs/loader.js:593:12)
+    //   at Function.Module._load (internal/modules/cjs/loader.js:585:3)
+    //   at Function.Module.runMain (internal/modules/cjs/loader.js:831:12)
+    //   at startup (internal/bootstrap/node.js:283:19)
+    //   at bootstrapNodeJSCore (internal/bootstrap/node.js:623:3)
+    // starting elastic-apm-node with { active: false,
+    //   serverUrl:
+    //   'https://f1542b814f674090afd914960583265f.apm.us-central1.gcp.cloud.es.io:443',
+    //   secretToken: 'R0Gjg46pE9K9wGestd',
+    //   globalLabels:
+    //   { kibana_uuid: '5b2de169-2785-441b-ae8c-186a1936b17d',
+    //     git_rev: '07e57fbfc0f' },
+    //   breakdownMetrics: true,
+    //   centralConfig: false,
+    //   logUncaughtExceptions: true,
+    //   serviceName: 'kibana-8_0_0' }
+
     this.config$ = this.initializerContext.config.create<IngestManagerConfigType>();
     this.isProductionMode = this.initializerContext.env.mode.prod;
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
@@ -213,6 +250,7 @@ export class IngestManagerPlugin
       httpSetup: this.httpSetup,
       cloud: this.cloud,
       logger: this.logger,
+      apm: this.apm,
     });
     licenseService.start(this.licensing$);
     return {

@@ -38,7 +38,7 @@ export function getApmConfig(appMetadata) {
    * we use the injected app metadata from the server to extract the
    * app URL path to be used for page-load transaction
    */
-  const navLink = appMetadata.getNavLink();
+  const navLink = appMetadata?.getNavLink && appMetadata.getNavLink();
   const pageUrl = navLink ? navLink.toJSON().url : appMetadata._url;
 
   const config = {

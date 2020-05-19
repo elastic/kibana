@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import apm from 'elastic-apm-node';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import { Installation, InstallationStatus, PackageInfo, KibanaAssetType } from '../../../types';
@@ -72,6 +72,7 @@ export async function getPackageInfo(options: {
   pkgVersion: string;
 }): Promise<PackageInfo> {
   const { savedObjectsClient, pkgName, pkgVersion } = options;
+  const fnTrans = apm?.startSpan('getPackageInfo');
   const [item, savedObject, latestPackage, assets] = await Promise.all([
     Registry.fetchInfo(pkgName, pkgVersion),
     getInstallationObject({ savedObjectsClient, pkgName }),
@@ -89,6 +90,7 @@ export async function getPackageInfo(options: {
     title: item.title || nameAsTitle(item.name),
     assets: Registry.groupPathsByService(assets || []),
   };
+  if (fnTrans) fnTrans.end();
   return createInstallableFrom(updated, savedObject);
 }
 

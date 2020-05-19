@@ -7,6 +7,7 @@
 import url from 'url';
 import uuid from 'uuid';
 import { SavedObjectsClientContract } from 'src/core/server';
+import apm from 'elastic-apm-node';
 import { CallESAsCurrentUser } from '../types';
 import { agentConfigService } from './agent_config';
 import { outputService } from './output';
@@ -34,6 +35,8 @@ export async function setupIngestManager(
   soClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
 ) {
+  const setupTrans = apm?.startTransaction('setupIngestManager', 'Ingest Manager');
+  const spanA = setupTrans?.startSpan('ensure*');
   const [installedPackages, defaultOutput, config] = await Promise.all([
     // packages installed by default
     ensureInstalledDefaultPackages(soClient, callCluster),
@@ -67,9 +70,12 @@ export async function setupIngestManager(
       return Promise.reject(e);
     }),
   ]);
+  if (spanA) spanA.end();
 
   // ensure default packages are added to the default conifg
+  const spanB = setupTrans?.startSpan(`agentConfigService.get ${config.id}`);
   const configWithDatasource = await agentConfigService.get(soClient, config.id, true);
+  if (spanB) spanB.end();
   if (!configWithDatasource) {
     throw new Error('Config not found');
   }
@@ -95,6 +101,7 @@ export async function setupIngestManager(
       await addPackageToConfig(soClient, installedPackage, configWithDatasource, defaultOutput);
     }
   }
+  if (setupTrans) setupTrans.end('success');
 }
 
 export async function setupFleet(

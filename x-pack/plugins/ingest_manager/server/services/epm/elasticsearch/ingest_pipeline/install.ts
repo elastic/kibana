@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import apm from 'elastic-apm-node';
 import {
   AssetReference,
   Dataset,
@@ -25,6 +26,7 @@ export const installPipelines = async (
   callCluster: CallESAsCurrentUser
 ) => {
   const datasets = registryPackage.datasets;
+  const span = apm.startSpan(`installPipelines ${registryPackage.name} ${registryPackage.version}`);
   if (datasets) {
     const pipelines = datasets.reduce<Array<Promise<AssetReference[]>>>((acc, dataset) => {
       if (dataset.ingest_pipeline) {
@@ -39,7 +41,7 @@ export const installPipelines = async (
       }
       return acc;
     }, []);
-    return Promise.all(pipelines).then(results => results.flat());
+    return Promise.all(pipelines).then(results => (span && span.end()) || results.flat());
   }
   return [];
 };

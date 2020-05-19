@@ -86,10 +86,13 @@ function getConfig(serviceName) {
 const isKibanaDistributable = Boolean(build && build.distributable === true);
 
 module.exports = function(serviceName = name) {
+  console.log('process.env.ELASTIC_APM_ACTIVE', process.env.ELASTIC_APM_ACTIVE);
   if (process.env.kbnWorkerType === 'optmzr') return;
+  // if (process.env.ELASTIC_APM_ACTIVE !== 'true') return;
 
   const conf = getConfig(serviceName);
-
+  console.trace('kibana/src/apm.js exports');
+  console.log('starting elastic-apm-node with', conf);
   require('elastic-apm-node').start(conf);
 };
 

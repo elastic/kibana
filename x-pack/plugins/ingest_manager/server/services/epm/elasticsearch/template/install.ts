@@ -5,6 +5,7 @@
  */
 
 import Boom from 'boom';
+import apm from 'elastic-apm-node';
 import { Dataset, RegistryPackage, ElasticsearchAssetType, TemplateRef } from '../../../../types';
 import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
@@ -18,6 +19,7 @@ export const installTemplates = async (
   pkgName: string,
   pkgVersion: string
 ): Promise<TemplateRef[]> => {
+  const span = apm.startSpan(`installTemplates ${pkgName} ${pkgVersion}`);
   // install any pre-built index template assets,
   // atm, this is only the base package's global index templates
   // Install component templates first, as they are used by the index templates
@@ -39,8 +41,11 @@ export const installTemplates = async (
     }, []);
 
     const res = await Promise.all(installTemplatePromises);
-    return res.flat();
+    const flat = res.flat();
+    if (span) span.end();
+    return flat;
   }
+  if (span) span.end();
   return [];
 };
 
@@ -49,6 +54,7 @@ const installPreBuiltTemplates = async (
   pkgVersion: string,
   callCluster: CallESAsCurrentUser
 ) => {
+  const span = apm.startSpan(`installPreBuiltTemplates ${pkgName} ${pkgVersion}`);
   const templatePaths = await Registry.getArchiveInfo(
     pkgName,
     pkgVersion,
@@ -86,6 +92,7 @@ const installPreBuiltTemplates = async (
     return callCluster('transport.request', callClusterParams);
   });
   try {
+    if (span) span.end();
     return await Promise.all(templateInstallPromises);
   } catch (e) {
     throw new Boom(`Error installing prebuilt index templates ${e.message}`, {
@@ -99,6 +106,7 @@ const installPreBuiltComponentTemplates = async (
   pkgVersion: string,
   callCluster: CallESAsCurrentUser
 ) => {
+  const span = apm.startSpan(`installPreBuiltComponentTemplates ${pkgName} ${pkgVersion}`);
   const templatePaths = await Registry.getArchiveInfo(
     pkgName,
     pkgVersion,
@@ -126,7 +134,9 @@ const installPreBuiltComponentTemplates = async (
     return callCluster('transport.request', callClusterParams);
   });
   try {
-    return await Promise.all(templateInstallPromises);
+    const value = await Promise.all(templateInstallPromises);
+    if (span) span.end();
+    return value;
   } catch (e) {
     throw new Boom(`Error installing prebuilt component templates ${e.message}`, {
       statusCode: 400,

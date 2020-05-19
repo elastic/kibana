@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import apm from 'elastic-apm-node';
 import { SavedObjectsClientContract } from 'src/core/server';
 import {
   INDEX_PATTERN_SAVED_OBJECT_TYPE,
@@ -82,6 +83,7 @@ export async function installIndexPatterns(
   pkgVersion?: string
 ) {
   // get all user installed packages
+  const span = apm.startSpan('installIndexPatterns');
   const installedPackages = await getPackageKeysByStatus(
     savedObjectsClient,
     InstallationStatus.installed
@@ -129,6 +131,7 @@ export async function installIndexPatterns(
       overwrite: true,
     });
   });
+  if (span) span.end();
 }
 
 // loops through all given packages and returns an array

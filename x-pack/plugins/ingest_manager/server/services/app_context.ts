@@ -9,6 +9,7 @@ import { SavedObjectsServiceStart, HttpServiceSetup, Logger } from 'src/core/ser
 import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { IngestManagerConfigType } from '../../common';
+import { ApmNodeAgent } from '../types';
 import { IngestManagerAppContext } from '../plugin';
 import { CloudSetup } from '../../../cloud/server';
 
@@ -23,6 +24,7 @@ class AppContextService {
   private cloud?: CloudSetup;
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
+  private apm?: ApmNodeAgent;
 
   public async start(appContext: IngestManagerAppContext) {
     this.encryptedSavedObjects = appContext.encryptedSavedObjects;
@@ -100,6 +102,10 @@ class AppContextService {
       throw new Error('Kibana version is not set.');
     }
     return this.kibanaVersion;
+  }
+
+  public getApm() {
+    return this.apm;
   }
 }
 
