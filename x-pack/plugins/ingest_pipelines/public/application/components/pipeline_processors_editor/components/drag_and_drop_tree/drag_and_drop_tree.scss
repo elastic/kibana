@@ -25,14 +25,17 @@ $minItemHeight: 65px;
   }
 
   &__droppableContainer {
-    padding: $euiSizeS $euiSizeS $euiSize $euiSizeS;
+    padding-top: $euiSizeS;
+    padding-right: $euiSizeS;
+    // Make up a bit of padding on bottom because of how the draggable container is styled
+    padding-bottom: $euiSize;
+    padding-left: $euiSizeS;
   }
 
   &__draggableContainer {
-    padding: $euiSizeS $euiSizeS 0px $euiSizeS;
-
-    &--last {
-      padding: $euiSizeS;
-    }
+    padding-top: $euiSize;
+    padding-right: $euiSizeS;
+    padding-bottom: 0;
+    padding-left: $euiSizeS;
   }
 }
