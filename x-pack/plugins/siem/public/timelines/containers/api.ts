@@ -97,7 +97,6 @@ export const persistTimeline = async ({
 
 export const importTimelines = async ({
   fileToImport,
-  overwrite = false,
   signal,
 }: ImportDataProps): Promise<ImportDataResponse> => {
   const formData = new FormData();
@@ -106,14 +105,12 @@ export const importTimelines = async ({
   return KibanaServices.get().http.fetch<ImportDataResponse>(`${TIMELINE_IMPORT_URL}`, {
     method: 'POST',
     headers: { 'Content-Type': undefined },
-    query: { overwrite },
     body: formData,
     signal,
   });
 };
 
 export const exportSelectedTimeline: ExportSelectedData = async ({
-  excludeExportDetails = false,
   filename = `timelines_export.ndjson`,
   ids = [],
   signal,
@@ -123,7 +120,6 @@ export const exportSelectedTimeline: ExportSelectedData = async ({
     method: 'POST',
     body,
     query: {
-      exclude_export_details: excludeExportDetails,
       file_name: filename,
     },
     signal,
