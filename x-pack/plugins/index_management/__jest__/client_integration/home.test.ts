@@ -53,6 +53,7 @@ describe('<IndexManagementHome />', () => {
       // Note: this test modifies the shared location.hash state, we put it back the way it was
       actions.clickIncludeHiddenIndicesToggle();
       expect(actions.getIncludeHiddenIndicesToggleStatus()).toBe(true);
+      expect(window.location.hash.includes('includeHidden=true')).toBe(true);
     });
 
     test('should set the correct app title', () => {
