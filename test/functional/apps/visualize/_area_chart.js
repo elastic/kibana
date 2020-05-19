@@ -68,7 +68,11 @@ export default function ({ getService, getPageObjects }) {
       await initAreaChart();
     });
 
-    it('should save and load with special characters', async function () {
+    after(async function() {
+      await security.testUser.restoreDefaults();
+    });
+
+    it('should save and load with special characters', async function() {
       const vizNamewithSpecialChars = vizName1 + '/?&=%';
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(
         vizNamewithSpecialChars
@@ -289,7 +293,6 @@ export default function ({ getService, getPageObjects }) {
         const url = await browser.getCurrentUrl();
         const embedUrl = url.split('/visualize/').pop().replace('embed=true', '');
         await PageObjects.common.navigateToUrl('visualize', embedUrl);
-        await security.testUser.restoreDefaults();
       });
     });
 
