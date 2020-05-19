@@ -26,6 +26,7 @@ import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternSettings } from './lib/get_index_pattern_settings';
+import { schema } from '@kbn/config-schema';
 
 const ROOT = `/${GIS_API_PATH}`;
 
@@ -66,7 +67,14 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
   router.get(
     {
       path: `${ROOT}/${EMS_FILES_API_PATH}/${EMS_FILES_DEFAULT_JSON_PATH}`,
-      validate: false,
+      validate: {
+        query: schema.object({
+          id: schema.maybe(schema.string()),
+          x: schema.maybe(schema.number()),
+          y: schema.maybe(schema.number()),
+          z: schema.maybe(schema.number()),
+        }),
+      },
     },
     async (con, request, { ok, badRequest }) => {
       if (!checkEMSProxyEnabled()) {
@@ -244,7 +252,11 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
   router.get(
     {
       path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_RASTER_STYLE_PATH}`,
-      validate: false,
+      validate: {
+        query: schema.object({
+          id: schema.maybe(schema.string()),
+        }),
+      },
     },
     async (con, request, { ok, badRequest }) => {
       if (!checkEMSProxyEnabled()) {
@@ -276,7 +288,11 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
   router.get(
     {
       path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_VECTOR_STYLE_PATH}`,
-      validate: false,
+      validate: {
+        query: schema.object({
+          id: schema.maybe(schema.string()),
+        }),
+      },
     },
     async (con, request, { ok, badRequest }) => {
       if (!checkEMSProxyEnabled()) {
@@ -321,7 +337,12 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
   router.get(
     {
       path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_VECTOR_SOURCE_PATH}`,
-      validate: false,
+      validate: {
+        query: schema.object({
+          id: schema.maybe(schema.string()),
+          sourceId: schema.maybe(schema.string()),
+        }),
+      },
     },
     async (con, request, { ok, badRequest }) => {
       if (!checkEMSProxyEnabled()) {
@@ -355,7 +376,15 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
   router.get(
     {
       path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_VECTOR_TILE_PATH}`,
-      validate: false,
+      validate: {
+        query: schema.object({
+          id: schema.maybe(schema.string()),
+          sourceId: schema.maybe(schema.string()),
+          x: schema.maybe(schema.number()),
+          y: schema.maybe(schema.number()),
+          z: schema.maybe(schema.number()),
+        }),
+      },
     },
     async (con, request, { ok, badRequest }) => {
       if (!checkEMSProxyEnabled()) {
@@ -409,7 +438,11 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
   router.get(
     {
       path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_SPRITES_PATH}/{id}/sprite{scaling?}.{extension}`,
-      validate: false,
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
     },
     async (con, request, { ok, badRequest }) => {
       if (!checkEMSProxyEnabled()) {
@@ -451,7 +484,11 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
   router.get(
     {
       path: `/${INDEX_SETTINGS_API_PATH}`,
-      validate: false,
+      validate: {
+        query: schema.object({
+          indexPatternTitle: schema.string(),
+        }),
+      },
     },
     async (con, request, response) => {
       const { query } = request;
@@ -465,8 +502,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       }
 
       try {
-        const resp = await context.core.elasticsearch.adminClient.callAsInternalUser(
-          request,
+        const resp = await con.core.elasticsearch.dataClient.callAsCurrentUser(
           'indices.getSettings',
           {
             index: query.indexPatternTitle,
