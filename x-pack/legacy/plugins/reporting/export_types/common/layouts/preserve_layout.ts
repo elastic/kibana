@@ -3,15 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import path from 'path';
-import { LayoutTypes } from '../constants';
 import {
   getDefaultLayoutSelectors,
   Layout,
   LayoutSelectorDictionary,
+  LayoutTypes,
   PageSizeParams,
   Size,
-} from './layout';
+} from './';
 
 // We use a zoom of two to bump up the resolution of the screenshot a bit.
 const ZOOM: number = 2;

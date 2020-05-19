@@ -48,6 +48,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
                   state: [],
                   context: [],
                 },
+                producer: 'alerting',
               });
               break;
             default:

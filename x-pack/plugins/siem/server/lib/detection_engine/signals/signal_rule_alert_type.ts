@@ -50,6 +50,7 @@ export const signalRulesAlertType = ({
     validate: {
       params: signalParamsSchema(),
     },
+    producer: 'siem',
     async executor({ previousStartedAt, alertId, services, params }) {
       const {
         anomalyThreshold,

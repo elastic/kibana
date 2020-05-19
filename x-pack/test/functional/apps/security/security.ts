@@ -67,7 +67,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('logging out of a non-default space redirects to the login page at the server root', async () => {
-          await PageObjects.security.login(null, null, {
+          await PageObjects.security.login(undefined, undefined, {
             expectSpaceSelector: true,
           });
 

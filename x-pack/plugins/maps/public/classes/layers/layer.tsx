@@ -19,9 +19,7 @@ import {
   MIN_ZOOM,
   SOURCE_DATA_ID_ORIGIN,
 } from '../../../common/constants';
-// @ts-ignore
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { copyPersistentState } from '../../reducers/util.js';
+import { copyPersistentState } from '../../reducers/util';
 import {
   LayerDescriptor,
   MapExtent,

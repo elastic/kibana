@@ -155,9 +155,9 @@ describe('SavedObjectsTable', () => {
           meta: {
             title: `MyIndexPattern*`,
             icon: 'indexPatternApp',
-            editUrl: '#/management/kibana/index_patterns/1',
+            editUrl: '#/management/kibana/indexPatterns/patterns/1',
             inAppUrl: {
-              path: '/management/kibana/index_patterns/1',
+              path: '/management/kibana/indexPatterns/patterns/1',
               uiCapabilitiesPath: 'management.kibana.index_patterns',
             },
           },
@@ -196,7 +196,7 @@ describe('SavedObjectsTable', () => {
             icon: 'visualizeApp',
             editUrl: '#/management/kibana/objects/savedVisualizations/4',
             inAppUrl: {
-              path: '/visualize/edit/4',
+              path: '/edit/4',
               uiCapabilitiesPath: 'visualize.show',
             },
           },
