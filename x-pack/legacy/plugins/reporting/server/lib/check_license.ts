@@ -22,7 +22,7 @@ const makeManagementFeature = (
 ) => {
   return {
     id: 'management',
-    checkLicense: (license: ILicense | undefined) => {
+    checkLicense: (license?: ILicense) => {
       if (!license || !license.type) {
         return {
           showLinks: true,
@@ -57,7 +57,7 @@ const makeExportTypeFeature = (
 ) => {
   return {
     id: exportType.id,
-    checkLicense: (license: ILicense | undefined) => {
+    checkLicense: (license?: ILicense) => {
       if (!license || !license.type) {
         return {
           showLinks: true,
