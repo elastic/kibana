@@ -14,15 +14,16 @@
   - [4.3.1 Idempotent migrations performed without coordination](#431-idempotent-migrations-performed-without-coordination)
     - [4.3.1.1 Restrictions](#4311-restrictions)
     - [4.3.1.2 Algorithm](#4312-algorithm)
-  - [4.3.2 Single node migrations coordinated through a lease/lock](#432-single-node-migrations-coordinated-through-a-leaselock)
-    - [4.3.2.2 Migration algorithm](#4322-migration-algorithm)
-    - [4.3.2.3 Document lock algorithm](#4323-document-lock-algorithm)
-    - [4.3.2.4 Checking for "weak lease" expiry](#4324-checking-for-weak-lease-expiry)
   - [4.4 Minimize data loss with mixed Kibana versions](#44-minimize-data-loss-with-mixed-kibana-versions)
   - [4.5 Changes in 8.0](#45-changes-in-80)
     - [4.5.1 Migration algorithm (8.0):](#451-migration-algorithm-80)
     - [4.5.2 Minimizing data loss (8.0)](#452-minimizing-data-loss-80)
 - [5. Alternatives](#5-alternatives)
+- [5.1 Rolling upgrades](#51-rolling-upgrades)
+  - [5.2 Single node migrations coordinated through a lease/lock](#52-single-node-migrations-coordinated-through-a-leaselock)
+    - [5.2.1 Migration algorithm](#521-migration-algorithm)
+    - [5.2.2 Document lock algorithm](#522-document-lock-algorithm)
+    - [5.2.3 Checking for "weak lease" expiry](#523-checking-for-weak-lease-expiry)
 - [6. How we teach this](#6-how-we-teach-this)
 - [Unresolved questions](#unresolved-questions)
 
@@ -175,15 +176,16 @@ recover automatically once these external conditions are resolved. There are
 two broad approaches to solving this problem based on whether or not
 migrations are idempotent: 
 
-| Idempotent migrations |Description                                                      |
-| --------------------- | --------------------------------------------------------------- |
-| Yes                   | 3.3.1 Idempotent migrations performed without coordination      |
-| No                    | 3.3.2 Single node migrations coordinated through a lease / lock |
+| Idempotent migrations |Description                                                |
+| --------------------- | --------------------------------------------------------- |
+| Yes                   | Idempotent migrations performed without coordination      |
+| No                    | Single node migrations coordinated through a lease / lock |
 
-Because idempotent migrations don't require coordination, solution (4.3.1) is
-significantly less complex and it will never require manual intervention to
-retry. We, therefore, prefer this solution, even though it introduces new
-restrictions on migrations (4.3.1.1).
+Idempotent migrations don't require coordination making the algorithm
+significantly less complex and will never require manual intervention to
+retry. We, therefore, prefer this solution, even though it introduces
+restrictions on migrations (4.3.1.1). For other alternatives that were
+considered see section [(5)](#5-alternatives).
 
 ## 4.3.1 Idempotent migrations performed without coordination
 
@@ -220,148 +222,7 @@ matter which node’s writes win.
 > attempts to simultaneously migrate a 7.6.0 index the result will be an
 > inconsistent state. This is an unlikely scenario in practise and therefore
 > an acceptable limitation. In 8.x we can ensure that only the latest node
-> completes the migration.
-
-## 4.3.2 Single node migrations coordinated through a lease/lock
-
-<details>
-  <summary>It's impossible to guarantee that a single node performs the
-  migration and automatically retry failed migrations.</summary>
-  
-Coordination should ensure that only one Kibana node performs the migration at
-a given time which can be achived with a distributed lock built on top of
-Elasticsearch. For the Kibana cluster to be able to retry a failed migration,
-requires a specialized lock which expires after a given amount of inactivity.
-We will refer to such expiring locks as a "lease".
-
-If a Kibana process stalls, it is possible that the process' lease has expired
-but the process doesn't yet recognize this and continues the migration. To
-prevent this from causing data loss each lease should be accompanied by a
-"guard" that prevents all writes after the lease has expired. See
-[how to do distributed
-locking](https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html)
-for an in-depth discussion.
-
-Elasticsearch doesn't provide any building blocks for constructing such a guard.
-</details>
-
-However, we can implement a lock (that never expires) with strong
-data-consistency guarantees. Because there’s no expiration, a failure between
-obtaining the lock and releasing it will require manual intervention. Instead
-of trying to accomplish the entire migration after obtaining a lock, we can
-only perform the last step of the migration process, moving the aliases, with
-a lock. A permanent failure in only this last step is not impossible, but very
-unlikely.
-
-### 4.3.2.2 Migration algorithm
-1. Obtain a document lock (see [4.3.2.3 Document lock
-   algorithm](#4323-document-lock-algorithm)). Convert the lock into a "weak
-   lease" by expiring locks for nodes which aren't active (see [4.3.2.4
-   Checking for lease expiry](#4324-checking-for-lease-expiry)). This "weak
-   lease" doesn't require strict guarantees since it's only used to prevent
-   multiple Kibana nodes from performing a migration in parallel to reduce the
-   load on Elasticsearch.
-2. Migrate data into a new process specific index (we could use the process
-   UUID that’s used in the lease document like
-   `.kibana_3ef25ff1-090a-4335-83a0-307a47712b4e`).
-3. Obtain a document lock (see [4.3.2.3 Document lock
-   algorithm](#4323-document-lock-algorithm)).
-4. Finish the migration by pointing `.kibana` →
-   `.kibana_3ef25ff1-090a-4335-83a0-307a47712b4e`. This automatically releases
-   the document lock (and any leases) because the new index will contain an
-   empty `kibana_cluster_state`.
-
-If a process crashes or is stopped after (3) but before (4) the lock will have
-to be manually removed by deleting the `kibana_cluster_state` document from
-`.kibana` or restoring from a snapshot. 
-
-### 4.3.2.3 Document lock algorithm
-To improve on the existing Saved Objects migrations lock, a locking algorithm
-needs to satisfy the following requirements:
-- Must guarantee that only a single node can obtain the lock. Since we can
-  only provide strong data-consistency guarantees on the document level in
-  Elasticsearch our locking mechanism needs to be based on a document.
-- Manually removing the lock
-  - shouldn't have any risk of accidentally causing data loss.
-  - can be done with a single command that's always the same (shouldn’t
-    require trying to find `n` for removing the correct `.kibana_n` index).
-- Must be easy to retrieve the lock/cluster state to aid in debugging or to
-  provide visibility. 
-
-Algorithm:
-1. Node reads `kibana_cluster_state` lease document from `.kibana`
-2. It sends a heartbeat every `heartbeat_interval` seconds by sending an
-   update operation that adds it’s UUID to the `nodes` array and sets the
-   `lastSeen` value to the current local node time. If the update fails due to
-   a version conflict the update operation is retried after a random delay by
-   fetching the document again and attempting the update operation once more.
-3. To obtain a lease, a node:
-    1. Fetches the `kibana_cluster_state` document
-    2. If all the nodes’ `hasLock === false` it sets it’s own `hasLock` to
-       true and attempts to write the document. If the update fails
-       (presumably because of another node’s heartbeat update) it restarts the
-       process from (3)(a)
-    3. If another nodes’ `hasLock === true` the node failed to acquire a
-       lock and waits until the active lock has expired before attempting to
-       obtain a lock again. 
-4. Once a node is done with its lock, it releases it by fetching and then
-   updating `hasLock = false`. The fetch + update operations are retried until
-   this node’s `hasLock === false`.
-
-Each machine writes a `UUID` to a file, so a single machine may have multiple
-processes with the same Kibana `UUID`, so we should rather generate a new UUID
-just for the lifetime of this process. 
-
-`KibanaClusterState` document format:
-```js
-  nodes: {
-    "852bd94e-5121-47f3-a321-e09d9db8d16e": {
-      version: "7.6.0",
-      lastSeen: [ 1114793, 555149266 ], // hrtime() big int timestamp
-      hasLease: true,
-      hasLock: false,
-    },
-    "8d975c5b-cbf6-4418-9afb-7aa3ea34ac90": {
-      version: "7.6.0",
-      lastSeen: [ 1114862, 841295591 ],
-      hasLease: false,
-      hasLock: false,
-    },
-    "3ef25ff1-090a-4335-83a0-307a47712b4e": {
-      version: "7.6.0",
-      lastSeen: [ 1114877, 611368546 ],
-      hasLease: false,
-      hasLock: false,
-    },
-  },
-  oplog: [
-    {op: 'ACQUIRE_LOCK', node: '852bd94e...', timestamp: '2020-04-20T11:58:56.176Z'}
-  ]
-}
-```
-
-### 4.3.2.4 Checking for "weak lease" expiry
-The simplest way to check for lease expiry is to inspect the `lastSeen` value.
-If `lastSeen + expiry_timeout > now` the lock is considered expired. If there
-are clock drift or daylight savings time adjustments, there’s a risk that a
-node loses it’s lease before `expiry_timeout` has occurred. Since losing a
-lock prematurely will not lead to data loss it’s not critical that the
-expiry time is observed under all conditions.
-
-A slightly safer approach is to use a monotonically increasing clock
-(`process.hrtime()`) and relative time to determine expiry. Using a
-monotonically increasing clock guarantees that the clock will always increase
-even if the system time changes due to daylight savings time, NTP clock syncs,
-or manually setting the time. To check for expiry, other nodes poll the
-cluster state document. Once they see that the `lastSeen` value has increased,
-they capture the current hr time `current_hr_time` and starts waiting until
-`process.hrtime() - current_hr_time > expiry_timeout` if at that point
-`lastSeen` hasn’t been updated the lease is considered to have expired. This
-means other nodes can take up to `2*expiry_timeout` to recognize an expired
-lease, but a lease will never expire prematurely. 
-
-Any node that detects an expired lease can release that lease by setting the
-expired node’s `hasLease = false`. It can then attempt to acquire its lease. 
+> completes the migration. 
 
 ## 4.4 Minimize data loss with mixed Kibana versions
 When multiple versions of Kibana are running at the same time, writes from the
@@ -488,6 +349,7 @@ discussion around minimizing data loss.
    alias.
 
 # 5. Alternatives
+# 5.1 Rolling upgrades
 We considered implementing rolling upgrades to provide zero downtime
 migrations. However, this would introduce significant complexity for plugins:
 they will need to maintain up and down migration transformations and ensure
@@ -498,6 +360,152 @@ rolling-upgrades will slow down all development in Kibana. Since a predictable
 downtime window is sufficient for our users, we decided against trying to
 achieve zero downtime with rolling upgrades. See "Rolling upgrades" in
 https://github.com/elastic/kibana/issues/52202 for more information.
+
+## 5.2 Single node migrations coordinated through a lease/lock
+This alternative is a proposed algorithm for coordinating migrations so that
+these only happen on a single node and therefore don't have the restrictions
+found in [(4.3.1.1)](#4311-restrictions). We decided against this algorithm
+primarily because it is a lot more complex, but also because it could still
+require manual intervention to retry from certain unlikely edge cases.
+
+<details>
+  <summary>It's impossible to guarantee that a single node performs the
+  migration and automatically retry failed migrations.</summary>
+  
+Coordination should ensure that only one Kibana node performs the migration at
+a given time which can be achived with a distributed lock built on top of
+Elasticsearch. For the Kibana cluster to be able to retry a failed migration,
+requires a specialized lock which expires after a given amount of inactivity.
+We will refer to such expiring locks as a "lease".
+
+If a Kibana process stalls, it is possible that the process' lease has expired
+but the process doesn't yet recognize this and continues the migration. To
+prevent this from causing data loss each lease should be accompanied by a
+"guard" that prevents all writes after the lease has expired. See
+[how to do distributed
+locking](https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html)
+for an in-depth discussion.
+
+Elasticsearch doesn't provide any building blocks for constructing such a guard.
+</details>
+
+However, we can implement a lock (that never expires) with strong
+data-consistency guarantees. Because there’s no expiration, a failure between
+obtaining the lock and releasing it will require manual intervention. Instead
+of trying to accomplish the entire migration after obtaining a lock, we can
+only perform the last step of the migration process, moving the aliases, with
+a lock. A permanent failure in only this last step is not impossible, but very
+unlikely.
+
+### 5.2.1 Migration algorithm
+1. Obtain a document lock (see [5.2.2 Document lock
+   algorithm](#522-document-lock-algorithm)). Convert the lock into a "weak
+   lease" by expiring locks for nodes which aren't active (see [4.3.2.4
+   Checking for lease expiry](#4324-checking-for-lease-expiry)). This "weak
+   lease" doesn't require strict guarantees since it's only used to prevent
+   multiple Kibana nodes from performing a migration in parallel to reduce the
+   load on Elasticsearch.
+2. Migrate data into a new process specific index (we could use the process
+   UUID that’s used in the lease document like
+   `.kibana_3ef25ff1-090a-4335-83a0-307a47712b4e`).
+3. Obtain a document lock (see [5.2.2 Document lock
+   algorithm](#522-document-lock-algorithm)).
+4. Finish the migration by pointing `.kibana` →
+   `.kibana_3ef25ff1-090a-4335-83a0-307a47712b4e`. This automatically releases
+   the document lock (and any leases) because the new index will contain an
+   empty `kibana_cluster_state`.
+
+If a process crashes or is stopped after (3) but before (4) the lock will have
+to be manually removed by deleting the `kibana_cluster_state` document from
+`.kibana` or restoring from a snapshot. 
+
+### 5.2.2 Document lock algorithm
+To improve on the existing Saved Objects migrations lock, a locking algorithm
+needs to satisfy the following requirements:
+- Must guarantee that only a single node can obtain the lock. Since we can
+  only provide strong data-consistency guarantees on the document level in
+  Elasticsearch our locking mechanism needs to be based on a document.
+- Manually removing the lock
+  - shouldn't have any risk of accidentally causing data loss.
+  - can be done with a single command that's always the same (shouldn’t
+    require trying to find `n` for removing the correct `.kibana_n` index).
+- Must be easy to retrieve the lock/cluster state to aid in debugging or to
+  provide visibility. 
+
+Algorithm:
+1. Node reads `kibana_cluster_state` lease document from `.kibana`
+2. It sends a heartbeat every `heartbeat_interval` seconds by sending an
+   update operation that adds it’s UUID to the `nodes` array and sets the
+   `lastSeen` value to the current local node time. If the update fails due to
+   a version conflict the update operation is retried after a random delay by
+   fetching the document again and attempting the update operation once more.
+3. To obtain a lease, a node:
+    1. Fetches the `kibana_cluster_state` document
+    2. If all the nodes’ `hasLock === false` it sets it’s own `hasLock` to
+       true and attempts to write the document. If the update fails
+       (presumably because of another node’s heartbeat update) it restarts the
+       process from (3)(a)
+    3. If another nodes’ `hasLock === true` the node failed to acquire a
+       lock and waits until the active lock has expired before attempting to
+       obtain a lock again. 
+4. Once a node is done with its lock, it releases it by fetching and then
+   updating `hasLock = false`. The fetch + update operations are retried until
+   this node’s `hasLock === false`.
+
+Each machine writes a `UUID` to a file, so a single machine may have multiple
+processes with the same Kibana `UUID`, so we should rather generate a new UUID
+just for the lifetime of this process. 
+
+`KibanaClusterState` document format:
+```js
+  nodes: {
+    "852bd94e-5121-47f3-a321-e09d9db8d16e": {
+      version: "7.6.0",
+      lastSeen: [ 1114793, 555149266 ], // hrtime() big int timestamp
+      hasLease: true,
+      hasLock: false,
+    },
+    "8d975c5b-cbf6-4418-9afb-7aa3ea34ac90": {
+      version: "7.6.0",
+      lastSeen: [ 1114862, 841295591 ],
+      hasLease: false,
+      hasLock: false,
+    },
+    "3ef25ff1-090a-4335-83a0-307a47712b4e": {
+      version: "7.6.0",
+      lastSeen: [ 1114877, 611368546 ],
+      hasLease: false,
+      hasLock: false,
+    },
+  },
+  oplog: [
+    {op: 'ACQUIRE_LOCK', node: '852bd94e...', timestamp: '2020-04-20T11:58:56.176Z'}
+  ]
+}
+```
+
+### 5.2.3 Checking for "weak lease" expiry
+The simplest way to check for lease expiry is to inspect the `lastSeen` value.
+If `lastSeen + expiry_timeout > now` the lock is considered expired. If there
+are clock drift or daylight savings time adjustments, there’s a risk that a
+node loses it’s lease before `expiry_timeout` has occurred. Since losing a
+lock prematurely will not lead to data loss it’s not critical that the
+expiry time is observed under all conditions.
+
+A slightly safer approach is to use a monotonically increasing clock
+(`process.hrtime()`) and relative time to determine expiry. Using a
+monotonically increasing clock guarantees that the clock will always increase
+even if the system time changes due to daylight savings time, NTP clock syncs,
+or manually setting the time. To check for expiry, other nodes poll the
+cluster state document. Once they see that the `lastSeen` value has increased,
+they capture the current hr time `current_hr_time` and starts waiting until
+`process.hrtime() - current_hr_time > expiry_timeout` if at that point
+`lastSeen` hasn’t been updated the lease is considered to have expired. This
+means other nodes can take up to `2*expiry_timeout` to recognize an expired
+lease, but a lease will never expire prematurely. 
+
+Any node that detects an expired lease can release that lease by setting the
+expired node’s `hasLease = false`. It can then attempt to acquire its lease.
 
 # 6. How we teach this
 1. Update documentation and server logs to start educating users to depend on
