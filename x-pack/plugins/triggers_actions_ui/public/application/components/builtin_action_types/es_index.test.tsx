@@ -4,12 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { FunctionComponent } from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { act } from 'react-dom/test-utils';
 import { TypeRegistry } from '../../type_registry';
 import { registerBuiltInActionTypes } from './index';
 import { ActionTypeModel, ActionParamsProps } from '../../../types';
 import { IndexActionParams, EsIndexActionConnector } from './types';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
+jest.mock('../../../common/index_controls', () => ({
+  firstFieldOption: jest.fn(),
+  getFields: jest.fn(),
+  getIndexOptions: jest.fn(),
+  getIndexPatterns: jest.fn(),
+}));
 
 const ACTION_TYPE_ID = '.index';
 let actionTypeModel: ActionTypeModel;
@@ -91,13 +98,40 @@ describe('action params validation', () => {
 });
 
 describe('IndexActionConnectorFields renders', () => {
-  test('all connector fields is rendered', () => {
+  test('all connector fields is rendered', async () => {
     const mocks = coreMock.createSetup();
 
     expect(actionTypeModel.actionConnectorFields).not.toBeNull();
     if (!actionTypeModel.actionConnectorFields) {
       return;
     }
+
+    const { getIndexPatterns } = jest.requireMock('../../../common/index_controls');
+    getIndexPatterns.mockResolvedValueOnce([
+      {
+        id: 'indexPattern1',
+        attributes: {
+          title: 'indexPattern1',
+        },
+      },
+      {
+        id: 'indexPattern2',
+        attributes: {
+          title: 'indexPattern2',
+        },
+      },
+    ]);
+    const { getFields } = jest.requireMock('../../../common/index_controls');
+    getFields.mockResolvedValueOnce([
+      {
+        type: 'date',
+        name: 'test1',
+      },
+      {
+        type: 'text',
+        name: 'test2',
+      },
+    ]);
     const ConnectorFields = actionTypeModel.actionConnectorFields;
     const actionConnector = {
       secrets: {},
@@ -119,8 +153,38 @@ describe('IndexActionConnectorFields renders', () => {
         http={mocks.http}
       />
     );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
     expect(wrapper.find('[data-test-subj="connectorIndexesComboBox"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="indexRefreshCheckbox"]').length > 0).toBeTruthy();
+
+    const indexSearchBoxValue = wrapper.find('[data-test-subj="comboBoxSearchInput"]');
+    expect(indexSearchBoxValue.first().props().value).toEqual('');
+
+    const indexComboBox = wrapper.find('#indexConnectorSelectSearchBox');
+    indexComboBox.first().simulate('click');
+    const event = { target: { value: 'indexPattern1' } };
+    indexComboBox
+      .find('input')
+      .first()
+      .simulate('change', event);
+
+    const indexSearchBoxValueBeforeEnterData = wrapper.find(
+      '[data-test-subj="comboBoxSearchInput"]'
+    );
+    expect(indexSearchBoxValueBeforeEnterData.first().props().value).toEqual('indexPattern1');
+
+    const indexComboBoxClear = wrapper.find('[data-test-subj="comboBoxClearButton"]');
+    indexComboBoxClear.first().simulate('click');
+
+    const indexSearchBoxValueAfterEnterData = wrapper.find(
+      '[data-test-subj="comboBoxSearchInput"]'
+    );
+    expect(indexSearchBoxValueAfterEnterData.first().props().value).toEqual('indexPattern1');
   });
 });
 

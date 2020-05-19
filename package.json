@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "7.7.0",
+  "version": "7.7.1",
   "branch": "7.7",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -30,7 +30,8 @@
         "data/optimize",
         "built_assets",
         ".eslintcache",
-        ".node_binaries"
+        ".node_binaries",
+        "src/plugins/*/target"
       ]
     }
   },
@@ -193,7 +194,7 @@
     "inert": "^5.1.0",
     "inline-style": "^2.0.0",
     "joi": "^13.5.2",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "js-yaml": "3.13.1",
     "json-stable-stringify": "^1.0.1",
     "json-stringify-pretty-compact": "1.2.0",
@@ -203,7 +204,7 @@
     "leaflet-responsive-popup": "0.6.4",
     "leaflet-vega": "^0.8.6",
     "leaflet.heat": "0.2.0",
-    "less": "^2.7.3",
+    "less": "npm:@elastic/less@2.7.3-kibana",
     "less-loader": "5.0.0",
     "lodash": "npm:@elastic/lodash@3.10.1-kibana4",
     "lodash.clonedeep": "^4.5.0",

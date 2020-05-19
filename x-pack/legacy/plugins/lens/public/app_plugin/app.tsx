@@ -31,6 +31,7 @@ interface State {
   isLoading: boolean;
   isSaveModalVisible: boolean;
   indexPatternsForTopNav: IndexPatternInstance[];
+  isAddToDashMode?: boolean;
   persistedDoc?: Document;
   lastKnownDoc?: Document;
 
@@ -60,7 +61,7 @@ export function App({
   storage: IStorageWrapper;
   docId?: string;
   docStorage: SavedObjectStore;
-  redirectTo: (id?: string) => void;
+  redirectTo: (id?: string, isAddToDashMode?: boolean) => void;
   addToDashboardMode?: boolean;
 }) {
   const language =
@@ -71,6 +72,7 @@ export function App({
     return {
       isLoading: !!docId,
       isSaveModalVisible: false,
+      isAddToDashMode: addToDashboardMode,
       indexPatternsForTopNav: [],
       query: { query: '', language },
       dateRange: {
@@ -190,7 +192,7 @@ export function App({
 
   const { TopNavMenu } = npStart.plugins.navigation.ui;
 
-  const confirmButton = addToDashboardMode ? (
+  const confirmButton = state.isAddToDashMode ? (
     <FormattedMessage
       id="xpack.lens.app.saveAddToDashboard"
       defaultMessage="Save and add to dashboard"
@@ -368,7 +370,7 @@ export function App({
                     lastKnownDoc: newDoc,
                   }));
                   if (docId !== id) {
-                    redirectTo(id);
+                    redirectTo(id, state.isAddToDashMode);
                   }
                 })
                 .catch(e => {
@@ -385,7 +387,7 @@ export function App({
             }}
             onClose={() => setState(s => ({ ...s, isSaveModalVisible: false }))}
             title={lastKnownDoc.title || ''}
-            showCopyOnSave={!addToDashboardMode}
+            showCopyOnSave={!state.isAddToDashMode}
             objectType={i18n.translate('xpack.lens.app.saveModalType', {
               defaultMessage: 'Lens visualization',
             })}

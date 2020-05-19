@@ -413,6 +413,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
       stateContainer
     );
     vis.uiState = persistedState;
+    vis.uiState.on('reload', embeddableHandler.reload);
     $scope.uiState = persistedState;
     $scope.savedVis = savedVis;
     $scope.query = initialState.query;
@@ -560,6 +561,7 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
       $scope.eventEmitter.off('apply', _applyVis);
 
       unsubscribePersisted();
+      vis.uiState.off('reload', embeddableHandler.reload);
       unsubscribeStateUpdates();
 
       stopAllSyncing();
