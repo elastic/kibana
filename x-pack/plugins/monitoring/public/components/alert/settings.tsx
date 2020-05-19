@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 
 import { AlertPopoverConfigureThrottle } from './configure_throttle';
-import { AlertPopoverContext } from '../lib/context';
+import { AlertPopoverContext } from './lib';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface AlertPopoverSettingsProps {}

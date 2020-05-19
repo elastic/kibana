@@ -31,6 +31,7 @@ import _ from 'lodash';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
+import { AlertMenu } from '../../alert';
 
 const getNodeTooltip = node => {
   const { nodeTypeLabel, nodeTypeClass } = node;
@@ -56,7 +57,7 @@ const getNodeTooltip = node => {
 };
 
 const getSortHandler = type => item => _.get(item, [type, 'summary', 'lastVal']);
-const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
+const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, alerts) => {
   const cols = [];
 
   const cpuUsageColumnTitle = i18n.translate(
@@ -108,6 +109,15 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
         }
       }
 
+      let alertStatus = null;
+      if (alerts) {
+        alertStatus = (
+          <div>
+            <AlertMenu alerts={alerts} />
+          </div>
+        );
+      }
+
       return (
         <div>
           <div className="monTableCell__name">
@@ -118,6 +128,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
           </div>
           <div className="monTableCell__transportAddress">{extractIp(node.transport_address)}</div>
           {setupModeStatus}
+          {alertStatus}
         </div>
       );
     },
@@ -263,8 +274,17 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
 };
 
 export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsearch, ...props }) {
-  const { sorting, pagination, onTableChange, clusterUuid, setupMode, fetchMoreData } = props;
-  const columns = getColumns(showCgroupMetricsElasticsearch, setupMode, clusterUuid);
+  const {
+    sorting,
+    pagination,
+    onTableChange,
+    clusterUuid,
+    setupMode,
+    fetchMoreData,
+    alerts,
+  } = props;
+
+  const columns = getColumns(showCgroupMetricsElasticsearch, setupMode, clusterUuid, alerts);
 
   // Merge the nodes data with the setup data if enabled
   const nodes = props.nodes || [];

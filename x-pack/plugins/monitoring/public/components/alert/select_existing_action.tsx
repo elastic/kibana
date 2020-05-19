@@ -6,14 +6,14 @@
 import React, { Fragment } from 'react';
 import { EuiText, EuiLink, EuiSuperSelect, EuiFormRow } from '@elastic/eui';
 
-import { CommonBaseAlert } from '../../../../common/types';
-import { AlertPopoverContext } from '../lib/context';
-import { Legacy } from '../../../legacy_shims';
-import { ActionResult } from '../../../../../actions/common';
+import { CommonBaseAlert } from '../../../common/types';
+import { AlertPopoverContext } from './lib';
+import { Legacy } from '../../legacy_shims';
+import { ActionResult } from '../../../../actions/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ConnectorAddModal } from '../../../../../triggers_actions_ui/public/application/sections/action_connector_form/connector_add_modal';
+import { ConnectorAddModal } from '../../../../triggers_actions_ui/public/application/sections/action_connector_form/connector_add_modal';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ActionConnector } from '../../../../../triggers_actions_ui/public/types';
+import { ActionConnector } from '../../../../triggers_actions_ui/public/types';
 import { AlertPopoverConfigureNewAction } from './configure_new_action';
 
 interface AlertPopoverSelectExistingActionProps {

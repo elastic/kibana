@@ -24,7 +24,7 @@ import {
   ALERT_ACTION_TYPE_EMAIL,
 } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { AlertMessageTokenType, AlertClusterStateType, AlertSeverity } from './enums';
+import { AlertMessageTokenType, AlertClusterStateType, AlertSeverity } from '../../common/enums';
 import { fetchDefaultEmailAddress } from '../lib/alerts/fetch_default_email_address';
 import { fetchClusterState } from '../lib/alerts/fetch_cluster_state';
 

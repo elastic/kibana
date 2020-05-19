@@ -10,7 +10,7 @@ import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link'
 import { capitalize } from 'lodash';
 import { EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AlertPopover } from '../../alert/popover';
+import { AlertPopover } from '../../alert';
 
 const formatDateLocal = input => moment.tz(input, moment.tz.guess()).format('LL');
 

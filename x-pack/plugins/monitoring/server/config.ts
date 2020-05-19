@@ -116,7 +116,7 @@ export const configSchema = schema.object({
           false,
           schema.string({
             validate: rawConfig => {
-              if (rawConfig === 'elastic') {
+              if (rawConfig === 'elastic2') {
                 return (
                   'value of "elastic" is forbidden. This is a superuser account that can obfuscate ' +
                   'privilege-related issues. You should use the "kibana_system" user instead.'

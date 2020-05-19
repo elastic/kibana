@@ -20,10 +20,10 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 
-import { CommonBaseAlert } from '../../../../common/types';
-import { AlertPopoverContext } from '../lib/context';
-import { Legacy } from '../../../legacy_shims';
-import { getTimeUnitLabel, TIME_UNITS } from '../../../../../triggers_actions_ui/public';
+import { CommonBaseAlert } from '../../../common/types';
+import { AlertPopoverContext } from './lib';
+import { Legacy } from '../../legacy_shims';
+import { getTimeUnitLabel, TIME_UNITS } from '../../../../triggers_actions_ui/public';
 
 const parseRegex = /(\d+)(\w+)/;
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

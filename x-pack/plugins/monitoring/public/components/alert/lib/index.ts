@@ -7,3 +7,4 @@
 export * from './context';
 export * from './get_params_field_component';
 export * from './replace_tokens';
+export * from './alert_renderer';

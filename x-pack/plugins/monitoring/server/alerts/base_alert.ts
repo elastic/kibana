@@ -18,7 +18,7 @@ import {
   AlertInstance,
   AlertsClient,
 } from '../../../alerting/server';
-import { Alert, AlertAction } from '../../../alerting/common';
+import { Alert, AlertAction, RawAlertInstance } from '../../../alerting/common';
 import { ActionsClient } from '../../../actions/server';
 import { AlertState, AlertCluster, AlertMessage, AlertData } from './types';
 import { fetchAvailableCcs } from '../lib/alerts/fetch_available_ccs';
@@ -30,8 +30,9 @@ import {
   ALERT_ACTION_TYPE_EMAIL,
 } from '../../common/constants';
 import { MonitoringConfig } from '../config';
-import { AlertSeverity } from './enums';
+import { AlertSeverity } from '../../common/enums';
 import { ActionResult } from '../../../actions/common';
+import { CommonAlertFilter } from '../../common/types';
 
 const DEFAULT_SERVER_LOG_NAME = 'Monitoring: Write to Kibana log';
 const ALERTS_UPDATE_FIELDS = ['name', 'tags', 'schedule', 'params', 'throttle', 'actions'];
@@ -222,6 +223,35 @@ export class BaseAlert {
         actions,
       },
     })) as Alert;
+  }
+
+  public async getStates(
+    alertsClient: AlertsClient,
+    id: string,
+    filters: any[]
+  ): Promise<{ [instanceId: string]: RawAlertInstance }> {
+    const states = await alertsClient.getAlertState({ id });
+    if (!states || !states.alertInstances) {
+      return {};
+    }
+
+    return Object.keys(states.alertInstances).reduce(
+      (accum: { [instanceId: string]: RawAlertInstance }, instanceId) => {
+        if (!states.alertInstances) {
+          return accum;
+        }
+        const alertInstance: RawAlertInstance = states.alertInstances[instanceId];
+        if (alertInstance && this.filterAlertInstance(alertInstance, filters)) {
+          accum[instanceId] = alertInstance;
+        }
+        return accum;
+      },
+      {}
+    );
+  }
+
+  protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
+    return true;
   }
 
   protected async execute({ services, params, state }: AlertExecutorOptions): Promise<any> {

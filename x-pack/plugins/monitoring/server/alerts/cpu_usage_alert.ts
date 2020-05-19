@@ -26,14 +26,10 @@ import {
 } from '../../common/constants';
 import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { AlertMessageTokenType, AlertSeverity } from './enums';
-
-const RESOLVED_MESSAGE_TEXT = i18n.translate(
-  'xpack.monitoring.alerts.cpuUsage.email.message.resolved',
-  {
-    defaultMessage: 'This cluster alert has been resolved: ',
-  }
-);
+import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
+import { RawAlertInstance } from '../../../alerting/common';
+import { CommonAlertFilter, CommonAlertCpuUsageFilter } from '../../common/types';
+import { AlertsClient } from '../../../alerting/server';
 
 const RESOLVED = i18n.translate('xpack.monitoring.alerts.cpuUsage.resolved', {
   defaultMessage: 'resolved',
@@ -80,6 +76,37 @@ export class CpuUsageAlert extends BaseAlert {
         meta: stat,
       };
     });
+  }
+
+  public async getStates(alertsClient: AlertsClient, id: string, filters: any[]) {
+    const states = await super.getStates(alertsClient, id, filters);
+    return Object.keys(states).reduce((accum, stateType) => {
+      return {
+        ...accum,
+        [stateType]: {
+          ...states[stateType],
+          meta: {
+            ...states[stateType].meta,
+            metrics: ['node_cpu_metric'],
+          },
+        },
+      };
+    }, {});
+  }
+
+  protected filterAlertInstance(alertInstance: RawAlertInstance, filters: CommonAlertFilter[]) {
+    const state = (alertInstance.state as unknown) as AlertCpuUsageState;
+    if (filters && filters.length) {
+      for (const _filter of filters) {
+        const filter = _filter as CommonAlertCpuUsageFilter;
+        if (filter && filter.nodeUuid) {
+          if (state.nodeId !== filter.nodeUuid) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
   }
 
   protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertCpuUsageState {

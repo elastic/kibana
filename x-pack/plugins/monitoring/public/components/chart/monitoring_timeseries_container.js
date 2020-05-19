@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { AlertMenu } from '../alert';
 
 const zoomOutBtn = zoomInfo => {
   if (!zoomInfo || !zoomInfo.showZoomOutBtn()) {
@@ -66,6 +67,15 @@ export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }) {
     }),
   ].concat(series.map(item => `${item.metric.label}: ${item.metric.description}`));
 
+  let alertStatus = null;
+  if (series.alerts) {
+    alertStatus = (
+      <EuiFlexItem grow={false}>
+        <AlertMenu alerts={series.alerts} />
+      </EuiFlexItem>
+    );
+  }
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s" className="monRhythmChart__wrapper">
       <EuiFlexItem grow={false}>
@@ -86,6 +96,7 @@ export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }) {
               </h2>
             </EuiTitle>
           </EuiFlexItem>
+          {alertStatus}
           <EuiFlexItem grow={false}>
             <Fragment>
               <EuiIconTip

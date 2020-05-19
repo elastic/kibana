@@ -15,7 +15,12 @@ import { MonitoringViewBaseEuiTableController } from '../../';
 import { ElasticsearchNodes } from '../../../components';
 import { ajaxErrorHandlersProvider } from '../../../lib/ajax_error_handler';
 import { SetupModeRenderer } from '../../../components/renderers';
-import { ELASTICSEARCH_SYSTEM_ID, CODE_PATH_ELASTICSEARCH } from '../../../../common/constants';
+import {
+  ELASTICSEARCH_SYSTEM_ID,
+  CODE_PATH_ELASTICSEARCH,
+  ALERT_CPU_USAGE,
+} from '../../../../common/constants';
+import { AlertRenderer } from '../../../components/alert/lib';
 
 uiRoutes.when('/elasticsearch/nodes', {
   template,
@@ -97,13 +102,19 @@ uiRoutes.when('/elasticsearch/nodes', {
             render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
               <Fragment>
                 {flyoutComponent}
-                <ElasticsearchNodes
-                  clusterStatus={clusterStatus}
-                  clusterUuid={globalState.cluster_uuid}
-                  setupMode={setupMode}
-                  nodes={nodes}
-                  showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
-                  {...this.getPaginationTableProps(pagination)}
+                <AlertRenderer
+                  alertTypeIds={[ALERT_CPU_USAGE]}
+                  render={({ alerts }) => (
+                    <ElasticsearchNodes
+                      clusterStatus={clusterStatus}
+                      clusterUuid={globalState.cluster_uuid}
+                      setupMode={setupMode}
+                      nodes={nodes}
+                      alerts={alerts}
+                      showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
+                      {...this.getPaginationTableProps(pagination)}
+                    />
+                  )}
                 />
                 {bottomBarComponent}
               </Fragment>

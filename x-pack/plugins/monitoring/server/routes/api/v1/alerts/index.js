@@ -10,3 +10,4 @@ export * from './enable';
 export * from './update';
 export * from './get_actions';
 export * from './disable_action';
+export * from './status';

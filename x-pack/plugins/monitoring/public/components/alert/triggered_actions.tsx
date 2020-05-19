@@ -17,10 +17,10 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { AlertPopoverContext } from '../lib/context';
-import { ALERT_ACTION_TYPE_LOG, ALERT_ACTION_TYPE_EMAIL } from '../../../../common/constants';
-import { Legacy } from '../../../legacy_shims';
-import { AlertAction } from '../../../../../alerting/common';
+import { AlertPopoverContext } from './lib';
+import { ALERT_ACTION_TYPE_LOG, ALERT_ACTION_TYPE_EMAIL } from '../../../common/constants';
+import { Legacy } from '../../legacy_shims';
+import { AlertAction } from '../../../../alerting/common';
 import { AlertPopoverAddAction } from './add_action';
 import { AlertPopoverConfigureAction } from './configure_action';
 

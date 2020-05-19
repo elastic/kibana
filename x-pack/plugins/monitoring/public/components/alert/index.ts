@@ -5,3 +5,4 @@
  */
 
 export * from './popover';
+export * from './menu';

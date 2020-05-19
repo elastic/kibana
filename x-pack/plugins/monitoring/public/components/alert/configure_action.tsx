@@ -18,13 +18,12 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
-import { CommonBaseAlert } from '../../../../common/types';
-import { AlertPopoverContext } from '../lib/context';
-import { Legacy } from '../../../legacy_shims';
-import { AlertAction } from '../../../../../alerting/common';
+import { CommonBaseAlert } from '../../../common/types';
+import { AlertPopoverContext, getParamsFieldsComponent } from './lib';
+import { Legacy } from '../../legacy_shims';
+import { AlertAction } from '../../../../alerting/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IErrorObject } from '../../../../../triggers_actions_ui/public/types';
-import { getParamsFieldsComponent } from '../lib';
+import { IErrorObject } from '../../../../triggers_actions_ui/public/types';
 
 export interface AlertPopoverConfigureActionProps {
   action: AlertAction;

@@ -13,9 +13,9 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
-import { CommonBaseAlert } from '../../../../common/types';
-import { AlertPopoverContext } from '../lib/context';
-import { ALERT_ACTION_TYPE_EMAIL } from '../../../../common/constants';
+import { CommonBaseAlert } from '../../../common/types';
+import { AlertPopoverContext } from './lib';
+import { ALERT_ACTION_TYPE_EMAIL } from '../../../common/constants';
 import { AlertPopoverSelectExistingAction } from './select_existing_action';
 
 interface AlertPopoverAddActionProps {

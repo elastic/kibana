@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { UiSettingsServiceStart, ICustomClusterClient, Logger } from 'kibana/server';
-import { AlertClusterStateType, AlertMessageTokenType, AlertSeverity } from './enums';
+import { AlertClusterStateType, AlertMessageTokenType, AlertSeverity } from '../../common/enums';
 import { MonitoringConfig } from '../config';
 
 export interface AlertLicense {
