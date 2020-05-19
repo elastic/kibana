@@ -140,10 +140,6 @@ export const CANCEL = i18n.translate('xpack.siem.case.configureCases.cancelButto
   defaultMessage: 'Cancel',
 });
 
-export const SAVE_CHANGES = i18n.translate('xpack.siem.case.configureCases.saveChangesButton', {
-  defaultMessage: 'Save Changes',
-});
-
 export const WARNING_NO_CONNECTOR_TITLE = i18n.translate(
   'xpack.siem.case.configureCases.warningTitle',
   {
@@ -174,12 +170,5 @@ export const UPDATE_SELECTED_CONNECTOR = (connectorName: string): string => {
   return i18n.translate('xpack.siem.case.configureCases.updateSelectedConnector', {
     values: { connectorName },
     defaultMessage: 'Update { connectorName }',
-  });
-};
-
-export const UNSAVED_CHANGES = (unsavedChanges: number): string => {
-  return i18n.translate('xpack.siem.case.configureCases.unsavedChanges', {
-    values: { unsavedChanges },
-    defaultMessage: '{unsavedChanges} unsaved changes',
   });
 };

@@ -6,7 +6,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../../../../src/core/server';
-import { LegacyAPI } from '../plugin';
 import { FeatureRegistry } from '../feature_registry';
 
 /**
@@ -15,10 +14,9 @@ import { FeatureRegistry } from '../feature_registry';
 export interface RouteDefinitionParams {
   router: IRouter;
   featureRegistry: FeatureRegistry;
-  getLegacyAPI: () => LegacyAPI;
 }
 
-export function defineRoutes({ router, featureRegistry, getLegacyAPI }: RouteDefinitionParams) {
+export function defineRoutes({ router, featureRegistry }: RouteDefinitionParams) {
   router.get(
     {
       path: '/api/features',
@@ -37,7 +35,8 @@ export function defineRoutes({ router, featureRegistry, getLegacyAPI }: RouteDef
               request.query.ignoreValidLicenses ||
               !feature.validLicenses ||
               !feature.validLicenses.length ||
-              getLegacyAPI().xpackInfo.license.isOneOf(feature.validLicenses)
+              (context.licensing!.license.type &&
+                feature.validLicenses.includes(context.licensing!.license.type))
           )
           .sort(
             (f1, f2) =>

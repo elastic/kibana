@@ -9,5 +9,19 @@ export * from './reducer';
 export * from './selectors';
 
 import { createStore, getStore } from './store';
+import { SubstateMiddlewareFactory } from './types';
 
 export { createStore, getStore };
+
+export const substateMiddlewareFactory: SubstateMiddlewareFactory = (selector, middleware) => {
+  return api => {
+    const substateAPI = {
+      ...api,
+      // Return just the substate instead of global state.
+      getState() {
+        return selector(api.getState());
+      },
+    };
+    return middleware(substateAPI);
+  };
+};
