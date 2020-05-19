@@ -5,12 +5,13 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
-
 import {
-  LOG_ENTRIES_ITEM_PATH,
   logEntriesItemRequestRT,
+  logEntriesItemResponseRT,
+  LOG_ENTRIES_ITEM_PATH,
 } from '../../../../plugins/infra/common/http_api';
+import { decodeOrThrow } from '../../../../plugins/infra/common/runtime_types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
@@ -32,11 +33,12 @@ export default function({ getService }: FtrProviderContext) {
           logEntriesItemRequestRT.encode({
             sourceId: 'default',
             id: 'yT2Mg2YBh-opCxJv8Vqj',
+            index: 'filebeat-7.0.0-alpha1-2018.10.17',
           })
         )
         .expect(200);
 
-      const logItem = body.data;
+      const { data: logItem } = decodeOrThrow(logEntriesItemResponseRT)(body);
 
       expect(logItem).to.have.property('id', 'yT2Mg2YBh-opCxJv8Vqj');
       expect(logItem).to.have.property('index', 'filebeat-7.0.0-alpha1-2018.10.17');
