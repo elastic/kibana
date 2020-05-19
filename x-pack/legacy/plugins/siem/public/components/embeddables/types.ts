@@ -12,6 +12,7 @@ import {
 } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { inputsModel } from '../../store/inputs';
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
+import { ITooltipProperty } from '../../../../maps/public';
 
 export interface MapEmbeddableInput extends EmbeddableInput {
   filters: Filter[];
@@ -63,11 +64,6 @@ export interface LoadFeatureProps {
   featureId: number;
 }
 
-export interface FeatureProperty {
-  _propertyKey: string;
-  _rawValue: string | string[];
-}
-
 export interface FeatureGeometry {
   coordinates: [number];
   type: string;
@@ -79,7 +75,7 @@ export interface RenderTooltipContentParams {
   features: MapFeature[];
   isLocked: boolean;
   getLayerName(layerId: string): Promise<string>;
-  loadFeatureProperties({ layerId, featureId }: LoadFeatureProps): Promise<FeatureProperty[]>;
+  loadFeatureProperties({ layerId, featureId }: LoadFeatureProps): Promise<ITooltipProperty[]>;
   loadFeatureGeometry({ layerId, featureId }: LoadFeatureProps): FeatureGeometry;
 }
 
