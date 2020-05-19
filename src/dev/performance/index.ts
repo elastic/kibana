@@ -18,15 +18,14 @@
  */
 
 import { resolve } from 'path';
-import * as Fs from 'fs';
 import { REPO_ROOT, run, createFlagError } from '@kbn/dev-utils';
 import { readConfigFile } from '@kbn/test';
-import { navigateToKibana } from './tests/navigation';
+import { navigateToApp } from './navigation';
+import { ingestPerformanceMetrics } from './ingest_metrics';
 // @ts-ignore not TS yet
 import getUrl from '../../test_utils/get_url';
 
 const configPath = resolve(REPO_ROOT, 'x-pack/test/functional/config.js');
-const statsPath = resolve(REPO_ROOT, 'target/performance_stats');
 
 export function runTestsCli() {
   run(
@@ -38,22 +37,27 @@ export function runTestsCli() {
         throw createFlagError('Expect --kibana-url to be a string');
       }
 
-      const appConfig = {
-        url: kibanaUrl,
-        login: config.get('servers.kibana.username'),
-        password: config.get('servers.kibana.password'),
+      const headless = !flags.head;
+
+      const options = {
+        headless,
+        appConfig: {
+          url: kibanaUrl,
+          login: config.get('servers.kibana.username'),
+          password: config.get('servers.kibana.password'),
+        },
       };
 
-      const results = await navigateToKibana(log, appConfig);
-
-      Fs.mkdirSync(statsPath, { recursive: true });
-      Fs.writeFileSync(resolve(statsPath, 'login_page.json'), JSON.stringify(results, null, 2));
+      const responses = await navigateToApp(log, options);
+      ingestPerformanceMetrics(log, responses);
     },
     {
       flags: {
         string: ['kibana-url'],
+        boolean: ['head'],
         help: `
           --kibana-url       Url for Kibana we should connect to,
+          --head             Run pupeteer with graphical user interface,
         `,
       },
     }

@@ -19,21 +19,34 @@
 
 import _ from 'lodash';
 import puppeteer from 'puppeteer';
-import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
-import { resolve } from 'path';
+import { ToolingLog } from '@kbn/dev-utils';
+import { LoadingFinishedEvent, ResponseReceivedEvent } from './event';
 
-const statsPath = resolve(REPO_ROOT, 'target/performance_stats');
-
-export async function navigateToKibana(
+export async function navigateToApp(
   log: ToolingLog,
-  appConfig: { url: string; login: string; password: string }
+  options: { headless: boolean; appConfig: { url: string; login: string; password: string } }
 ) {
-  const browser = await puppeteer.launch({ headless: false });
-  const results: Array<{ url: any; time: any; size: string; eventSize: string }> = [];
-  const devToolsResponses = new Map();
+  const { headless, appConfig } = options;
+  const browser = await puppeteer.launch({ headless });
+  const devToolsResponses = new Map<string, any>();
+  const apps = [
+    'kibana',
+    'graph',
+    'logs',
+    'canvas',
+    'maps',
+    'timelion',
+    'metrics',
+    'apm',
+    'uptime',
+    'siem',
+    'dev_tools',
+    'monitoring',
+  ].map(app => `/app/${app}`);
 
-  for (const url of ['/login', '/app/kibana', '/app/graph']) {
+  for (const url of ['/login', ...apps]) {
     const page = await browser.newPage();
+    page.setCacheEnabled(false);
     page.setDefaultNavigationTimeout(0);
     const frameResponses = new Map();
     devToolsResponses.set(url, frameResponses);
@@ -41,30 +54,13 @@ export async function navigateToKibana(
     const client = await page.target().createCDPSession();
     await client.send('Network.enable');
 
-    client.on('Network.responseReceived', event => {
+    client.on('Network.responseReceived', (event: ResponseReceivedEvent) => {
       frameResponses.set(event.requestId, { responseRecieved: event });
     });
 
-    client.on('Network.loadingFinished', event => {
+    client.on('Network.loadingFinished', (event: LoadingFinishedEvent) => {
       frameResponses.get(event.requestId).loadingFinished = event;
-
-      // if (/^.*.[js|css]$/.test(response.url)) {
-      // const encodedBodyLength = event.encodedDataLength - response.encodedDataLength;
-      // results.push({
-      //   url: response.url,
-      //   time: response.timing ? response.timing.requestTime : 0,
-      //   size: (encodedBodyLength / 1024).toFixed(1),
-      //   eventSize: (event.encodedDataLength / 1024).toFixed(1),
-      // });
-      // }
     });
-
-    client.on(
-      'Network.responseReceived',
-      async ({ requestId, loaderId, timestamp, type, response, frameId }: any) => {
-        log.debug(response.url);
-      }
-    );
 
     const fullURL = appConfig.url + url;
     log.debug(`goto ${fullURL}`);
@@ -81,10 +77,9 @@ export async function navigateToKibana(
     }
 
     await page.close();
-    // clear dev tools responses
   }
 
   await browser.close();
 
-  return results;
+  return devToolsResponses;
 }
