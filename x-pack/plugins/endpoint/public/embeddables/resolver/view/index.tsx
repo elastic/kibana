@@ -57,7 +57,7 @@ export const Resolver = styled(
 
     const dispatch: (action: ResolverAction) => unknown = useDispatch();
     const { processToAdjacencyMap } = useSelector(selectors.processAdjacencies);
-
+    const relatedEvents = useSelector(selectors.relatedEvents);
     const { projectionMatrix, ref, onMouseDown } = useCamera();
     const isLoading = useSelector(selectors.isLoading);
     const hasError = useSelector(selectors.hasError);
@@ -116,6 +116,7 @@ export const Resolver = styled(
                   projectionMatrix={projectionMatrix}
                   event={processEvent}
                   adjacentNodeMap={adjacentNodeMap}
+                  relatedEvents={relatedEvents.get(processEvent)}
                 />
               );
             })}
