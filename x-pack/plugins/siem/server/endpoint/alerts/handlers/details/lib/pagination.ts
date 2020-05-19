@@ -15,8 +15,7 @@ import {
 } from '../../../../../../common/endpoint_alerts/types';
 import { AlertConstants } from '../../../../../../common/endpoint_alerts/alert_constants';
 import { EndpointConfigType } from '../../../../config';
-import { searchESForAlerts } from '../../lib';
-import { Pagination } from '../../lib/pagination';
+import { searchESForAlerts, Pagination, AlertId } from '../../lib';
 import { BASE_ALERTS_ROUTE } from '../../../routes';
 import { RequestHandlerContext } from '../../../../../../../../../src/core/server';
 import { Filter } from '../../../../../../../../../src/plugins/data/server';
@@ -66,7 +65,8 @@ export class AlertDetailsPagination extends Pagination<
 
   protected getUrlFromHits(hits: AlertHits): string | null {
     if (hits.length > 0) {
-      return `${BASE_ALERTS_ROUTE}/${hits[0]._id}`;
+      const id = new AlertId(hits[0]._index, hits[0]._id);
+      return `${BASE_ALERTS_ROUTE}/${id.toString()}`;
     }
     return null;
   }

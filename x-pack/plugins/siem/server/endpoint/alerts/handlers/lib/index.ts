@@ -18,6 +18,10 @@ import {
 } from '../../../../../common/endpoint_alerts/types';
 import { AlertConstants } from '../../../../../common/endpoint_alerts/alert_constants';
 
+export { AlertIdError } from './error';
+export { Pagination } from './pagination';
+export { AlertId } from './alert_id';
+
 function reverseSortDirection(order: AlertAPIOrdering): AlertAPIOrdering {
   if (order === 'asc') {
     return 'desc';

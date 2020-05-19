@@ -20,6 +20,7 @@ import {
 import { AlertConstants } from '../../../../../../common/endpoint_alerts/alert_constants';
 import { EndpointAppContext } from '../../../../types';
 import { AlertListPagination } from './pagination';
+import { AlertId } from '../../lib';
 
 export const getRequestData = async (
   request: KibanaRequest<unknown, AlertingIndexGetQueryResult, unknown>,
@@ -105,8 +106,9 @@ export async function mapToAlertResultList(
   const pagination: AlertListPagination = new AlertListPagination(config, reqCtx, reqData, hits);
 
   function mapHit(entry: AlertHits[0]): AlertData {
+    const alertId = new AlertId(entry._index, entry._id);
     return {
-      id: entry._id,
+      id: alertId.toString(),
       ...entry._source,
       prev: null,
       next: null,

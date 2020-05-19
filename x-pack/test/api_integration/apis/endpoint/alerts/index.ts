@@ -6,6 +6,7 @@
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { AlertData } from '../../../../../plugins/siem/common/endpoint_alerts/types';
+import { AlertId } from '../../../../../plugins/siem/server/endpoint/alerts/handlers/lib/index';
 
 /**
  * The number of alert documents in the es archive.
@@ -65,6 +66,7 @@ export default function({ getService }: FtrProviderContext) {
   const nextPrevPrefixOrder = 'order=desc';
   const nextPrevPrefixPageSize = 'page_size=10';
   const nextPrevPrefix = `${nextPrevPrefixQuery}&${nextPrevPrefixDateRange}&${nextPrevPrefixSort}&${nextPrevPrefixOrder}&${nextPrevPrefixPageSize}`;
+  const alertIndex = 'events-endpoint-1';
 
   let nullableEventId = '';
 
@@ -74,7 +76,7 @@ export default function({ getService }: FtrProviderContext) {
         await esArchiver.load('endpoint/alerts/api_feature');
         await esArchiver.load('endpoint/alerts/host_api_feature');
         const res = await es.search({
-          index: 'events-endpoint-1',
+          index: alertIndex,
           body: ES_QUERY_MISSING,
         });
         nullableEventId = res.hits.hits[0]._source.event.id;
@@ -377,35 +379,44 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       it('should return alert details by id, getting last alert', async () => {
-        const documentID = 'zbNm0HABdD75WLjLYgcB';
-        const prevDocumentID = '2rNm0HABdD75WLjLYgcU';
+        const documentID = new AlertId(alertIndex, 'zbNm0HABdD75WLjLYgcB');
+        const prevDocumentID = new AlertId(alertIndex, '2rNm0HABdD75WLjLYgcU');
         const { body } = await supertest
-          .get(`/api/endpoint/alerts/${documentID}`)
+          .get(`/api/endpoint/alerts/${documentID.toString()}`)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
-        expect(body.id).to.eql(documentID);
-        expect(body.prev).to.eql(`/api/endpoint/alerts/${prevDocumentID}`);
+        expect(body.id).to.eql(documentID.toString());
+        expect(body.prev).to.eql(`/api/endpoint/alerts/${prevDocumentID.toString()}`);
         expect(body.next).to.eql(null); // last alert, no more beyond this
         expect(body.state.host_metadata.host.id).to.eql(body.host.id);
       });
 
       it('should return alert details by id, getting first alert', async () => {
-        const documentID = 'p7Nm0HABdD75WLjLYghv';
-        const nextDocumentID = 'mbNm0HABdD75WLjLYgho';
+        const documentID = new AlertId(alertIndex, 'p7Nm0HABdD75WLjLYghv');
+        const nextDocumentID = new AlertId(alertIndex, 'mbNm0HABdD75WLjLYgho');
         const { body } = await supertest
-          .get(`/api/endpoint/alerts/${documentID}`)
+          .get(`/api/endpoint/alerts/${documentID.toString()}`)
           .set('kbn-xsrf', 'xxx')
           .expect(200);
-        expect(body.id).to.eql(documentID);
-        expect(body.next).to.eql(`/api/endpoint/alerts/${nextDocumentID}`);
+        expect(body.id).to.eql(documentID.toString());
+        expect(body.next).to.eql(`/api/endpoint/alerts/${nextDocumentID.toString()}`);
         expect(body.prev).to.eql(null); // first alert, no more before this
       });
 
       it('should return 404 when alert is not found', async () => {
+        const documentID = new AlertId(alertIndex, 'does-not-exit');
+
+        await supertest
+          .get(`/api/endpoint/alerts/${documentID.toString()}`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(404);
+      });
+
+      it('should return 400 when alert id is not valid', async () => {
         await supertest
           .get('/api/endpoint/alerts/does-not-exist')
           .set('kbn-xsrf', 'xxx')
-          .expect(404);
+          .expect(400);
       });
     });
   });

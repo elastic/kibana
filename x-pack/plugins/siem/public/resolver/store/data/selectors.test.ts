@@ -13,7 +13,7 @@ import {
   RelatedEventDataEntryWithStats,
   RelatedEventData,
 } from '../../types';
-import { ResolverEvent } from '../../../../../common/types';
+import { ResolverEvent } from '../../../../common/endpoint/types';
 import { relatedEventStats, relatedEvents } from './selectors';
 
 describe('resolver data selectors', () => {
