@@ -10,7 +10,11 @@ import { SavedObjectsFindOptions } from '../../../../../../src/core/server';
 import { UNAUTHENTICATED_USER } from '../../../common/constants';
 import { NoteSavedObject } from '../../../common/types/timeline/note';
 import { PinnedEventSavedObject } from '../../../common/types/timeline/pinned_event';
-import { SavedTimeline, TimelineSavedObject } from '../../../common/types/timeline';
+import {
+  SavedTimeline,
+  TimelineSavedObject,
+  TimelineTypeLiteralWithNull,
+} from '../../../common/types/timeline';
 import {
   ResponseTimeline,
   PageInfoTimeline,
@@ -18,6 +22,7 @@ import {
   ResponseFavoriteTimeline,
   TimelineResult,
   TimelineType,
+  TimelineStatus,
   Maybe,
 } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
@@ -50,7 +55,7 @@ export interface Timeline {
     pageInfo: PageInfoTimeline | null,
     search: string | null,
     sort: SortTimeline | null,
-    timelineType: TimelineType | null
+    timelineType: TimelineTypeLiteralWithNull
   ) => Promise<ResponseTimelines>;
 
   persistFavorite: (
@@ -63,7 +68,7 @@ export interface Timeline {
     timelineId: string | null,
     version: string | null,
     timeline: SavedTimeline,
-    timelineType?: TimelineType | null
+    timelineType?: TimelineTypeLiteralWithNull
   ) => Promise<ResponseTimeline>;
 
   deleteTimeline: (request: FrameworkRequest, timelineIds: string[]) => Promise<void>;
@@ -99,7 +104,10 @@ export const getTimelineByTemplateTimelineId = async (
 
 /** The filter here is able to handle the legacy data,
  * which has no timelineType exists in the savedObject */
-const getTimelineTypeFilter = (timelineType: string | null, includeDraft: boolean) => {
+const getTimelineTypeFilter = (
+  timelineType: TimelineTypeLiteralWithNull,
+  includeDraft: boolean
+) => {
   const typeFilter =
     timelineType === TimelineType.template
       ? `siem-ui-timeline.attributes.timelineType: ${TimelineType.template}` /** Show only whose timelineType exists and equals to "template" */
@@ -112,8 +120,8 @@ const getTimelineTypeFilter = (timelineType: string | null, includeDraft: boolea
    * which includes status === 'active' and
    * those status doesn't exists */
   const draftFilter = includeDraft
-    ? `siem-ui-timeline.attributes.status: draft`
-    : `not siem-ui-timeline.attributes.status: draft`;
+    ? `siem-ui-timeline.attributes.status: ${TimelineStatus.draft}`
+    : `not siem-ui-timeline.attributes.status: ${TimelineStatus.draft}`;
 
   return `${typeFilter} and ${draftFilter}`;
 };
@@ -124,7 +132,7 @@ export const getAllTimeline = async (
   pageInfo: PageInfoTimeline | null,
   search: string | null,
   sort: SortTimeline | null,
-  timelineType: TimelineType | null
+  timelineType: TimelineTypeLiteralWithNull
 ): Promise<ResponseTimelines> => {
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,
@@ -143,7 +151,7 @@ export const getAllTimeline = async (
 
 export const getDraftTimeline = async (
   request: FrameworkRequest,
-  timelineType: TimelineType | null
+  timelineType: TimelineTypeLiteralWithNull
 ): Promise<ResponseTimelines> => {
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,
