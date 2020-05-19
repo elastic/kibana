@@ -282,7 +282,8 @@ problems than what it solves.
 </details>
 
 ## 4.5 Changes in 8.0
-1. Migrations will be in-place and re-use the same index for minor upgrades.
+1. Migrations will be in-place and re-use the same index for minor and patch
+   upgrades. 
 2. Only allow breaking field mapping changes (which requires creating a new
    index) in a major.
 3. All update operations should use optimistic concurrency control.
@@ -330,7 +331,7 @@ Drawbacks:
 - It narrows the second restriction under (4.3.1) even further: migrations
   cannot rely on any state that could change as part of a migration because we
   can no longer use the previous index as a snapshot of unmigrated state.
-- We can’t automatically recover from a half-way done migration.
+- We can’t automatically perform a rollback from a half-way done migration.
 - It’s impossible to provide read-only functionality for outdated nodes which
   means we can't achieve goal (2.7).
 
