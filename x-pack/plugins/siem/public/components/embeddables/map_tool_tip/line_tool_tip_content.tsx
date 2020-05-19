@@ -7,6 +7,7 @@
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
+import { ITooltipProperty } from '../../../../../maps/public';
 import { SourceDestinationArrows } from '../../source_destination/source_destination_arrows';
 import {
   SUM_OF_CLIENT_BYTES,
@@ -16,7 +17,6 @@ import {
 } from '../map_config';
 
 import * as i18n from '../translations';
-import { ITooltipProperty } from '../../../../../../maps/public';
 
 const FlowBadge = (styled(EuiBadge)`
   height: 45px;
