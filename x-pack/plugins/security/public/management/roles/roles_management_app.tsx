@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HashRouter as Router, Route, Switch, useParams } from 'react-router-dom';
+import { Router, Route, Switch, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { StartServicesAccessor, FatalErrorsSetup } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
@@ -27,7 +27,7 @@ export const rolesManagementApp = Object.freeze({
       id: this.id,
       order: 20,
       title: i18n.translate('xpack.security.management.rolesTitle', { defaultMessage: 'Roles' }),
-      async mount({ basePath, element, setBreadcrumbs }) {
+      async mount({ basePath, element, setBreadcrumbs, history }) {
         const rolesBreadcrumbs = [
           {
             text: i18n.translate('xpack.security.roles.breadcrumb', { defaultMessage: 'Roles' }),
@@ -101,9 +101,9 @@ export const rolesManagementApp = Object.freeze({
 
         render(
           <i18nStart.Context>
-            <Router basename={basePath}>
+            <Router history={history}>
               <Switch>
-                <Route path="/" exact={true}>
+                <Route path={['/', '']} exact={true}>
                   <RolesGridPageWithBreadcrumbs />
                 </Route>
                 <Route path="/edit/:roleName?">

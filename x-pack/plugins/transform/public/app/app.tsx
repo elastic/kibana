@@ -6,7 +6,8 @@
 
 import React, { useContext, FC } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
+import { Router, Redirect, Route, Switch } from 'react-router-dom';
+import { AppMountParameters } from 'kibana/public';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -23,7 +24,7 @@ import { CloneTransformSection } from './sections/clone_transform';
 import { CreateTransformSection } from './sections/create_transform';
 import { TransformManagementSection } from './sections/transform_management';
 
-export const App: FC = () => {
+export const App: FC<{ history: AppMountParameters['history'] }> = ({ history }) => {
   const { apiError } = useContext(AuthorizationContext);
   if (apiError !== null) {
     return (
@@ -41,24 +42,21 @@ export const App: FC = () => {
 
   return (
     <div data-test-subj="transformApp">
-      <HashRouter>
+      <Router history={history}>
         <Switch>
           <Route
-            path={`${CLIENT_BASE_PATH}${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
+            path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
             component={CloneTransformSection}
           />
           <Route
-            path={`${CLIENT_BASE_PATH}${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
+            path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
             component={CreateTransformSection}
           />
-          <Route
-            exact
-            path={CLIENT_BASE_PATH + SECTION_SLUG.HOME}
-            component={TransformManagementSection}
-          />
-          <Redirect from={CLIENT_BASE_PATH} to={CLIENT_BASE_PATH + SECTION_SLUG.HOME} />
+          <Route exact path={`/${SECTION_SLUG.HOME}`} component={TransformManagementSection} />
+          <Redirect from="" to={`/${SECTION_SLUG.HOME}`} />
+          <Redirect from="/" to={`/${SECTION_SLUG.HOME}`} />
         </Switch>
-      </HashRouter>
+      </Router>
     </div>
   );
 };
@@ -70,7 +68,7 @@ export const renderApp = (element: HTMLElement, appDependencies: AppDependencies
     <KibanaContextProvider services={appDependencies}>
       <AuthorizationProvider privilegesEndpoint={`${API_BASE_PATH}privileges`}>
         <I18nContext>
-          <App />
+          <App history={appDependencies.history} />
         </I18nContext>
       </AuthorizationProvider>
     </KibanaContextProvider>,

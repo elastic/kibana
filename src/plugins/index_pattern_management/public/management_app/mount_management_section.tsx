@@ -19,7 +19,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { HashRouter, Switch, Route } from 'react-router-dom';
+import { Router, Switch, Route } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -61,7 +61,7 @@ export async function mountManagementSection(
 
   ReactDOM.render(
     <I18nProvider>
-      <HashRouter basename={params.basePath}>
+      <Router history={params.history}>
         <Switch>
           <Route path={['/create']}>
             <CreateIndexPatternWizardWithRouter
@@ -132,7 +132,7 @@ export async function mountManagementSection(
             />
           </Route>
         </Switch>
-      </HashRouter>
+      </Router>
     </I18nProvider>,
     params.element
   );

@@ -38,7 +38,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
         { defaultMessage: 'Watcher' }
       ),
       order: 3,
-      mount: async ({ element, setBreadcrumbs }) => {
+      mount: async ({ element, setBreadcrumbs, history }) => {
         const [core] = await getStartServices();
         const { i18n: i18nDep, docLinks, savedObjects } = core;
         const { boot } = await import('./application/boot');
@@ -58,6 +58,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           savedObjects: savedObjects.client,
           I18nContext: i18nDep.Context,
           createTimeBuckets: () => new TimeBuckets(uiSettings, data),
+          history,
         });
       },
     });

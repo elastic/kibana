@@ -97,7 +97,7 @@ export class UsersGridPage extends Component<Props, State> {
         </EuiFlexGroup>
       );
     }
-    const path = '#/management/security/';
+    const path = '/';
     const columns: Array<EuiBasicTableColumn<User>> = [
       {
         field: 'username',

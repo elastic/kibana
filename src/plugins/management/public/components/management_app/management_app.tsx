@@ -92,6 +92,7 @@ export const ManagementApp = ({ context, dependencies, history }: ManagementAppP
                         app={app}
                         setBreadcrumbs={setBreadcrumbs}
                         onAppMounted={onAppMounted}
+                        history={history.createSubHistory(app.basePath)}
                       />
                     )}
                   />

@@ -16,7 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { ReactElement } from 'react';
+import { AppMountParameters } from 'kibana/public';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import { ChromeBreadcrumb } from '../../../core/public/';
 
@@ -55,6 +57,7 @@ export interface ManagementAppMountParams {
   basePath: string; // base path for setting up your router
   element: HTMLElement; // element the section should render into
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  history: AppMountParameters['history'];
 }
 
 export interface CreateManagementItemArgs {

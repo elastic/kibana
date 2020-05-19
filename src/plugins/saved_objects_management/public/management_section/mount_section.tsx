@@ -19,7 +19,7 @@
 
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
-import { HashRouter, Switch, Route } from 'react-router-dom';
+import { Router, Switch, Route } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CoreSetup, Capabilities } from 'src/core/public';
@@ -44,7 +44,7 @@ export const mountManagementSection = async ({
   serviceRegistry,
 }: MountParams) => {
   const [coreStart, { data }, pluginStart] = await core.getStartServices();
-  const { element, basePath, setBreadcrumbs } = mountParams;
+  const { element, history, setBreadcrumbs } = mountParams;
   if (allowedObjectTypes === undefined) {
     allowedObjectTypes = await getAllowedTypes(coreStart.http);
   }
@@ -53,7 +53,7 @@ export const mountManagementSection = async ({
 
   ReactDOM.render(
     <I18nProvider>
-      <HashRouter basename={basePath}>
+      <Router history={history}>
         <Switch>
           <Route path={'/:service/:id'} exact={true}>
             <RedirectToHomeIfUnauthorized capabilities={capabilities}>
@@ -81,7 +81,7 @@ export const mountManagementSection = async ({
             </RedirectToHomeIfUnauthorized>
           </Route>
         </Switch>
-      </HashRouter>
+      </Router>
     </I18nProvider>,
     element
   );

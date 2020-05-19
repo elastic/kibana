@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HashRouter as Router, Route, Switch, useParams } from 'react-router-dom';
+import { Router, Route, Switch, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { StartServicesAccessor } from 'src/core/public';
 import { SecurityLicense } from '../../../security/public';
@@ -32,7 +32,7 @@ export const spacesManagementApp = Object.freeze({
       title: i18n.translate('xpack.spaces.displayName', {
         defaultMessage: 'Spaces',
       }),
-      async mount({ basePath, element, setBreadcrumbs }) {
+      async mount({ basePath, element, setBreadcrumbs, history }) {
         const [
           { notifications, i18n: i18nStart, application },
           { features },
@@ -108,9 +108,9 @@ export const spacesManagementApp = Object.freeze({
 
         render(
           <i18nStart.Context>
-            <Router basename={basePath}>
+            <Router history={history}>
               <Switch>
-                <Route path="/" exact>
+                <Route path={['', '/']} exact>
                   <SpacesGridPageWithBreadcrumbs />
                 </Route>
                 <Route path="/create">

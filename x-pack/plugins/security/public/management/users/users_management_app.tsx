@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HashRouter as Router, Route, Switch, useParams } from 'react-router-dom';
+import { Router, Route, Switch, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { StartServicesAccessor } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
@@ -25,7 +25,7 @@ export const usersManagementApp = Object.freeze({
       id: this.id,
       order: 10,
       title: i18n.translate('xpack.security.management.usersTitle', { defaultMessage: 'Users' }),
-      async mount({ basePath, element, setBreadcrumbs }) {
+      async mount({ basePath, element, setBreadcrumbs, history }) {
         const usersBreadcrumbs = [
           {
             text: i18n.translate('xpack.security.users.breadcrumb', { defaultMessage: 'Users' }),
@@ -87,9 +87,9 @@ export const usersManagementApp = Object.freeze({
 
         render(
           <i18nStart.Context>
-            <Router basename={basePath}>
+            <Router history={history}>
               <Switch>
-                <Route path="/" exact>
+                <Route path={['/', '']} exact>
                   <UsersGridPageWithBreadcrumbs />
                 </Route>
                 <Route path="/edit/:username?">

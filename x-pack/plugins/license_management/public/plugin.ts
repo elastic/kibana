@@ -48,7 +48,7 @@ export class LicenseManagementUIPlugin
       id: PLUGIN.id,
       title: PLUGIN.title,
       order: 0,
-      mount: async ({ element, setBreadcrumbs }) => {
+      mount: async ({ element, setBreadcrumbs, history }) => {
         const [core] = await getStartServices();
         const initialLicense = await plugins.licensing.license$.pipe(first()).toPromise();
 
@@ -72,6 +72,7 @@ export class LicenseManagementUIPlugin
           },
           services: {
             breadcrumbService: this.breadcrumbService,
+            history,
           },
           store: {
             initialLicense,

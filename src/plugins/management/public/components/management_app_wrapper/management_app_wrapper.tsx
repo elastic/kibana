@@ -19,7 +19,7 @@
 
 import React, { useEffect, createRef, useRef, RefObject } from 'react';
 
-import { ChromeBreadcrumb } from 'kibana/public';
+import { ChromeBreadcrumb, AppMountParameters } from 'kibana/public';
 import { ManagementApp } from '../../utils';
 import { Unmount } from '../../types';
 
@@ -27,12 +27,14 @@ interface ManagementSectionWrapperProps {
   app: ManagementApp;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   onAppMounted: (id: string) => void;
+  history: AppMountParameters['history'];
 }
 
 export const ManagementAppWrapper = ({
   app,
   setBreadcrumbs,
   onAppMounted,
+  history,
 }: ManagementSectionWrapperProps) => {
   const mountElementRef = useRef<RefObject<any>>();
   const { mount, basePath } = app;
@@ -46,6 +48,7 @@ export const ManagementAppWrapper = ({
         basePath,
         setBreadcrumbs,
         element: mountElementRef.current!.current,
+        history,
       });
 
       onAppMounted(app.id);
@@ -63,7 +66,7 @@ export const ManagementAppWrapper = ({
         }
       };
     }
-  }, [app.id, basePath, mount, onAppMounted, setBreadcrumbs]);
+  }, [app.id, basePath, history, mount, onAppMounted, setBreadcrumbs]);
 
   return <div ref={mountElementRef.current} />;
 };

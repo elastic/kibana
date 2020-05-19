@@ -28,6 +28,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { AppMountParameters } from 'kibana/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
@@ -45,7 +46,7 @@ import { IndexPatternManagementStart } from '../../plugin';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
 
-const columns = [
+const columns = (history: AppMountParameters['history']) => [
   {
     field: 'title',
     name: 'Pattern',
@@ -59,7 +60,7 @@ const columns = [
         }>;
       }
     ) => (
-      <EuiButtonEmpty size="xs" href={`#/management/kibana/indexPatterns/patterns/${index.id}`}>
+      <EuiButtonEmpty size="xs" onClick={() => history.push(`/patterns/${index.id}`)}>
         {name}
         {index.tags &&
           index.tags.map(({ key: tagKey, name: tagName }) => (
@@ -106,6 +107,7 @@ const title = i18n.translate('indexPatternManagement.indexPatternTable.title', {
 interface Props extends RouteComponentProps {
   getIndexPatternCreationOptions: IndexPatternManagementStart['creation']['getIndexPatternCreationOptions'];
   canSave: boolean;
+  history: AppMountParameters['history'];
   services: {
     savedObjectsClient: SavedObjectsClientContract;
     uiSettings: IUiSettingsClient;
@@ -195,7 +197,7 @@ export const IndexPatternTable = ({
         itemId="id"
         isSelectable={false}
         items={indexPatterns}
-        columns={columns}
+        columns={columns(history)}
         pagination={pagination}
         sorting={sorting}
         search={search}

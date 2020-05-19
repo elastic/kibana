@@ -6,16 +6,15 @@
 
 import React, { useEffect, useState } from 'react';
 import { Observable } from 'rxjs';
-import { DocLinksStart, HttpSetup, ToastsSetup, IUiSettingsClient } from 'kibana/public';
-
 import {
-  HashRouter,
-  Switch,
-  Route,
-  Redirect,
-  withRouter,
-  RouteComponentProps,
-} from 'react-router-dom';
+  DocLinksStart,
+  HttpSetup,
+  ToastsSetup,
+  IUiSettingsClient,
+  AppMountParameters,
+} from 'kibana/public';
+
+import { Router, Switch, Route, Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 
@@ -46,6 +45,7 @@ export interface AppDeps {
   createTimeBuckets: () => any;
   licenseStatus$: Observable<LicenseStatus>;
   setBreadcrumbs: Parameters<RegisterManagementAppArgs['mount']>[0]['setBreadcrumbs'];
+  history: AppMountParameters['history'];
 }
 
 export const App = (deps: AppDeps) => {
@@ -79,13 +79,13 @@ export const App = (deps: AppDeps) => {
     );
   }
   return (
-    <HashRouter>
+    <Router history={history}>
       <ShareRouter>
         <AppContextProvider value={deps}>
           <AppWithoutRouter />
         </AppContextProvider>
       </ShareRouter>
-    </HashRouter>
+    </Router>
   );
 };
 
