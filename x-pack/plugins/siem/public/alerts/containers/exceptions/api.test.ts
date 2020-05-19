@@ -183,7 +183,7 @@ describe('Exceptions Lists API', () => {
       fetchMock.mockResolvedValue(mockExceptionList);
     });
 
-    test('check parameter url, body when deleting rules', async () => {
+    test('check parameter url, body when deleting exception item', async () => {
       await deleteExceptionListById({ id: '1', signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists', {
         query: {
@@ -195,21 +195,21 @@ describe('Exceptions Lists API', () => {
     });
 
     test('happy path', async () => {
-      const ruleResp = await deleteExceptionListById({
+      const exceptionResponse = await deleteExceptionListById({
         id: '1',
         signal: abortCtrl.signal,
       });
-      expect(ruleResp).toEqual(mockExceptionList);
+      expect(exceptionResponse).toEqual(mockExceptionList);
     });
   });
 
   describe('deleteExceptionListItemById', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(mockExceptionList);
+      fetchMock.mockResolvedValue(mockExceptionItem);
     });
 
-    test('check parameter url, body when deleting rules', async () => {
+    test('check parameter url, body when deleting exception item', async () => {
       await deleteExceptionListItemById({ id: '1', signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/exception_lists/items', {
         query: {
@@ -221,11 +221,11 @@ describe('Exceptions Lists API', () => {
     });
 
     test('happy path', async () => {
-      const ruleResp = await deleteExceptionListItemById({
+      const exceptionResponse = await deleteExceptionListItemById({
         id: '1',
         signal: abortCtrl.signal,
       });
-      expect(ruleResp).toEqual(mockExceptionList);
+      expect(exceptionResponse).toEqual(mockExceptionItem);
     });
   });
 });

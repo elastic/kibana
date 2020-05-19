@@ -6,11 +6,7 @@
 
 import { KibanaServices } from '../../../common/lib/kibana';
 import { EXCEPTIONS_LIST_URL } from '../../../../common/constants';
-import {
-  ExceptionListItemSchema,
-  ExceptionListSchema,
-  AcknowledgeSchema,
-} from '../../../../../lists/common/schemas';
+import { ExceptionListItemSchema, ExceptionListSchema } from '../../../../../lists/common/schemas';
 import { AddExceptionListProps, AddExceptionListItemProps, ReturnExceptionItems } from './types';
 
 /**
@@ -126,8 +122,8 @@ export const deleteExceptionListById = async ({
 }: {
   id: string;
   signal: AbortSignal;
-}): Promise<AcknowledgeSchema> =>
-  KibanaServices.get().http.fetch<AcknowledgeSchema>(`${EXCEPTIONS_LIST_URL}`, {
+}): Promise<ExceptionListSchema> =>
+  KibanaServices.get().http.fetch<ExceptionListSchema>(`${EXCEPTIONS_LIST_URL}`, {
     method: 'DELETE',
     query: { id },
     signal,
@@ -147,8 +143,8 @@ export const deleteExceptionListItemById = async ({
 }: {
   id: string;
   signal: AbortSignal;
-}): Promise<AcknowledgeSchema> =>
-  KibanaServices.get().http.fetch<AcknowledgeSchema>(`${EXCEPTIONS_LIST_URL}/items`, {
+}): Promise<ExceptionListItemSchema> =>
+  KibanaServices.get().http.fetch<ExceptionListItemSchema>(`${EXCEPTIONS_LIST_URL}/items`, {
     method: 'DELETE',
     query: { id },
     signal,

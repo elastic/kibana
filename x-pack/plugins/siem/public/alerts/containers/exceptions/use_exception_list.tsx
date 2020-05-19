@@ -16,7 +16,7 @@ export type ReturnExceptionListAndItems = [boolean, ExceptionListAndItems | null
 /**
  * Hook for using to get an ExceptionList and it's items
  *
- * @param id desired ExceptionList ID (not rule_id)
+ * @param id desired ExceptionList ID (not list_id)
  *
  */
 export const useExceptionList = (id: string | undefined): ReturnExceptionListAndItems => {
