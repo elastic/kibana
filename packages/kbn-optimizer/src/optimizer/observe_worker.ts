@@ -24,9 +24,11 @@ import { inspect } from 'util';
 import * as Rx from 'rxjs';
 import { map, filter, takeUntil } from 'rxjs/operators';
 
-import { isWorkerMsg, isWorkerPing, WorkerConfig, WorkerMsg, Bundle } from '../common';
+import { isWorkerMsg, isWorkerPing, WorkerConfig, WorkerMsg, Bundle, ParentMsgs } from '../common';
 
 import { OptimizerConfig } from './optimizer_config';
+
+const parentMsgs = new ParentMsgs();
 
 export interface WorkerStdio {
   type: 'worker stdio';
@@ -152,8 +154,7 @@ export function observeWorker(
               return true;
             }
 
-            const pong: WorkerPongMsg = { type: 'pong' };
-            proc.send(pong);
+            proc.send(parentMsgs.pong());
             return false;
           }),
 
