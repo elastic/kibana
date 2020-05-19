@@ -5,9 +5,11 @@
  */
 
 import Hapi from 'hapi';
+import { ReportingConfig, ReportingCore } from '../';
 import { createMockReportingCore } from '../../test_helpers';
-import { Logger, ServerFacade } from '../../types';
-import { ReportingConfig, ReportingCore, ReportingSetupDeps } from '../types';
+import { LevelLogger as Logger } from '../lib';
+import { ReportingSetupDeps, ServerFacade } from '../types';
+import { registerJobGenerationRoutes } from './generation';
 
 jest.mock('./lib/authorized_user_pre_routing', () => ({
   authorizedUserPreRoutingFactory: () => () => ({}),
@@ -17,8 +19,6 @@ jest.mock('./lib/reporting_feature_pre_routing', () => ({
     jobTypes: ['unencodedJobType', 'base64EncodedJobType'],
   }),
 }));
-
-import { registerJobGenerationRoutes } from './generation';
 
 let mockServer: Hapi.Server;
 let mockReportingPlugin: ReportingCore;
