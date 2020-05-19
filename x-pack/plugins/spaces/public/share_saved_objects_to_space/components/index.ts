@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type GetSpacePurpose =
-  | 'any'
-  | 'copySavedObjectsIntoSpace'
-  | 'findSavedObjects'
-  | 'shareSavedObjectsIntoSpace';
+export { ShareSavedObjectsToSpaceFlyout } from './share_to_space_flyout';
