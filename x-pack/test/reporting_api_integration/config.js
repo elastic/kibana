@@ -6,15 +6,16 @@
 
 import { esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
 import { format as formatUrl } from 'url';
-import { ReportingAPIProvider } from '../services';
+import { ReportingAPIProvider } from './services';
 
 export default async function({ readConfigFile }) {
-  const apiConfig = await readConfigFile(require.resolve('../../api_integration/config.js'));
+  const apiConfig = await readConfigFile(require.resolve('../api_integration/config'));
+  const functionalConfig = await readConfigFile(require.resolve('../functional/config')); // Reporting API tests need a fully working UI
 
   return {
     servers: apiConfig.get('servers'),
-    junit: { reportName: 'X-Pack Reporting Generate API Integration Tests' },
-    testFiles: [require.resolve('../api/generate')],
+    junit: { reportName: 'X-Pack Reporting API Integration Tests' },
+    testFiles: [require.resolve('./reporting')],
     services: {
       ...apiConfig.get('services'),
       reportingAPI: ReportingAPIProvider,
@@ -22,18 +23,18 @@ export default async function({ readConfigFile }) {
     kbnTestServer: {
       ...apiConfig.get('kbnTestServer'),
       serverArgs: [
-        '--logging.events.log',
-        '["info","warning","error","fatal","optimize","reporting"]',
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+
         `--elasticsearch.hosts=${formatUrl(esTestConfig.getUrlParts())}`,
         `--elasticsearch.password=${kibanaServerTestUser.password}`,
         `--elasticsearch.username=${kibanaServerTestUser.username}`,
         `--logging.json=false`,
-        `--optimize.enabled=false`,
         `--server.maxPayloadBytes=1679958`,
         `--server.port=${kbnTestConfig.getPort()}`,
-        `--xpack.reporting.csv.enablePanelActionDownload=true`,
+        `--xpack.reporting.capture.maxAttempts=1`,
         `--xpack.reporting.csv.maxSizeBytes=2850`,
         `--xpack.reporting.queue.pollInterval=3000`,
+        `--xpack.security.session.idleTimeout=3600000`,
         `--xpack.spaces.enabled=false`,
       ],
     },
