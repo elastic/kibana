@@ -80,11 +80,9 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
 
         try {
           return response.ok({
-            body: await encryptedSavedObjects.getDecryptedAsInternalUser(
-              request.params.type,
-              request.params.id,
-              { namespace }
-            ),
+            body: await encryptedSavedObjects
+              .getClient()
+              .getDecryptedAsInternalUser(request.params.type, request.params.id, { namespace }),
           });
         } catch (err) {
           if (encryptedSavedObjects.isEncryptionError(err)) {

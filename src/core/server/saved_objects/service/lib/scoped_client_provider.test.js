@@ -168,7 +168,7 @@ test(`allows all wrappers to be excluded`, () => {
   expect(secondClientWrapperFactoryMock).not.toHaveBeenCalled();
 });
 
-test(`allows typed to be included`, () => {
+test(`allows hidden typed to be included`, () => {
   const defaultClient = Symbol();
   const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
   const clientProvider = new SavedObjectsClientProvider({

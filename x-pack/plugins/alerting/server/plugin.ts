@@ -200,14 +200,14 @@ export class AlertingPlugin {
       security,
     } = this;
 
-    const encryptedSavedObjectsPlugin = this.encryptedSavedObjects!.startWithHiddenTypes(['alert']);
+    const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient(['alert']);
 
     alertsClientFactory.initialize({
       alertTypeRegistry: alertTypeRegistry!,
       logger,
       taskManager: plugins.taskManager,
       securityPluginSetup: security,
-      encryptedSavedObjectsPlugin,
+      encryptedSavedObjectsClient,
       spaceIdToNamespace: this.spaceIdToNamespace,
       getSpaceId(request: KibanaRequest) {
         return spaces?.getSpaceId(request);
@@ -220,7 +220,7 @@ export class AlertingPlugin {
       getServices: this.getServicesFactory(core.savedObjects, core.elasticsearch),
       spaceIdToNamespace: this.spaceIdToNamespace,
       actionsPlugin: plugins.actions,
-      encryptedSavedObjectsPlugin,
+      encryptedSavedObjectsClient,
       getBasePath: this.getBasePath,
       eventLogger: this.eventLogger!,
     });
