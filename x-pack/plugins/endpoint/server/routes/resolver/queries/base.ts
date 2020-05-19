@@ -47,7 +47,7 @@ export abstract class ResolverQuery<T> implements MSearchQuery {
   /**
    * Builds a multi search representation for this query
    *
-   * @param ids a single more multiple (e.g. entity_id or unique_pid) to search for in the query
+   * @param ids a single or multiple unique id (e.g. entity_id for new events or unique_pid for legacy events) to search for in the query
    * @returns an array of header and body pairs that represents a multi search
    * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html
    * https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/msearch_examples.html
