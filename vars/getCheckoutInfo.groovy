@@ -1,9 +1,19 @@
-def call() {
-
+def call(branchOverride) {
   def repoInfo = [
-    branch: env.ghprbSourceBranch ?: params.branch_specifier ?: null,
+    branch: branchOverride ?: env.ghprbSourceBranch,
     targetBranch: env.ghprbTargetBranch,
   ]
+
+  if (repoInfo.branch == null) {
+    if (!(params.branch_specifier instanceof String)) {
+      throw new Exception(
+        "Unable to determine branch automatically, either pass a branch name to getCheckoutInfo() or use the branch_specifier param."
+      )
+    }
+
+    // strip prefix from the branch specifier to make it consistent with ghprbSourceBranch
+    repoInfo.branch = params.branch_specifier.replaceFirst(/^(refs\/heads\/|origin\/)/, "")
+  }
 
   repoInfo.commit = sh(
     script: "git rev-parse HEAD",

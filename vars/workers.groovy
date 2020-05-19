@@ -78,7 +78,7 @@ def base(Map params, Closure closure) {
       "PR_TARGET_BRANCH=${env.ghprbTargetBranch ?: ''}",
       "PR_AUTHOR=${env.ghprbPullAuthorLogin ?: ''}",
       "TEST_BROWSER_HEADLESS=1",
-      "GIT_BRANCH=${checkoutInfo.branch ?: ''}",
+      "GIT_BRANCH=${checkoutInfo.branch}",
     ]) {
       withCredentials([
         string(credentialsId: 'vault-addr', variable: 'VAULT_ADDR'),
