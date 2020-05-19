@@ -1257,6 +1257,7 @@ export class ScopedHistory<HistoryLocationState = unknown> implements History<Hi
         prependBasePath?: boolean | undefined;
     }) => string;
     createSubHistory: <SubHistoryLocationState = unknown>(basePath: string) => ScopedHistory<SubHistoryLocationState>;
+    fetchLocationState<T extends unknown = unknown>(): T;
     go: (n: number) => void;
     goBack: () => void;
     goForward: () => void;
@@ -1264,6 +1265,7 @@ export class ScopedHistory<HistoryLocationState = unknown> implements History<Hi
     listen: (listener: (location: Location<HistoryLocationState>, action: Action) => void) => UnregisterCallback;
     get location(): Location<HistoryLocationState>;
     push: (pathOrLocation: string | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
+    removeFromLocationState(keys: string[]): void;
     replace: (pathOrLocation: string | LocationDescriptorObject<HistoryLocationState>, state?: HistoryLocationState | undefined) => void;
     }
 
