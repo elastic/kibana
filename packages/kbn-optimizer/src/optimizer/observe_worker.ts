@@ -24,14 +24,7 @@ import { inspect } from 'util';
 import * as Rx from 'rxjs';
 import { map, filter, takeUntil } from 'rxjs/operators';
 
-import {
-  isWorkerMsg,
-  WorkerPongMsg,
-  isWorkerPing,
-  WorkerConfig,
-  WorkerMsg,
-  Bundle,
-} from '../common';
+import { isWorkerMsg, isWorkerPing, WorkerConfig, WorkerMsg, Bundle } from '../common';
 
 import { OptimizerConfig } from './optimizer_config';
 
