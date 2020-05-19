@@ -87,7 +87,6 @@ describe('createOrUpgradeSavedConfig()', () => {
   }, 30000);
 
   it('upgrades the previous version on each increment', async function() {
-    jest.setTimeout(30000);
     // ------------------------------------
     // upgrade to 5.4.0
     await createOrUpgradeSavedConfig({
@@ -211,5 +210,5 @@ describe('createOrUpgradeSavedConfig()', () => {
       '5.4.0': true,
       '5.4.0-rc1': true,
     });
-  });
+  }, 30000);
 });
