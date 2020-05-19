@@ -146,6 +146,7 @@ export class InfraLogEntriesDomain {
     const entries = documents.map(doc => {
       return {
         id: doc.id,
+        index: doc.index,
         cursor: doc.cursor,
         columns: configuration.logColumns.map(
           (column): LogColumn => {
@@ -248,9 +249,10 @@ export class InfraLogEntriesDomain {
   public async getLogItem(
     requestContext: RequestHandlerContext,
     id: string,
+    index: string,
     sourceConfiguration: InfraSourceConfiguration
   ): Promise<LogEntriesItem> {
-    const document = await this.adapter.getLogItem(requestContext, id, sourceConfiguration);
+    const document = await this.adapter.getLogItem(requestContext, id, index, sourceConfiguration);
     const defaultFields = [
       { field: '_index', value: document._index },
       { field: '_id', value: document._id },
@@ -337,6 +339,7 @@ export interface LogEntriesAdapter {
   getLogItem(
     requestContext: RequestHandlerContext,
     id: string,
+    index: string,
     source: InfraSourceConfiguration
   ): Promise<LogItemHit>;
 }
@@ -345,6 +348,7 @@ export type LogEntryQuery = JsonObject;
 
 export interface LogEntryDocument {
   id: string;
+  index: string;
   fields: Fields;
   highlights: Highlights;
   cursor: LogEntriesCursor;

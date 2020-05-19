@@ -76,6 +76,7 @@ export const logColumnRT = rt.union([logTimestampColumnRT, logFieldColumnRT, log
 
 export const logEntryRT = rt.type({
   id: rt.string,
+  index: rt.string,
   cursor: logEntriesCursorRT,
   columns: rt.array(logColumnRT),
   context: rt.union([

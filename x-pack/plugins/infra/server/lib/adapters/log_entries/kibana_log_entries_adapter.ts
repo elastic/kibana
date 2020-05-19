@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/no-empty-interface */
-
 import { timeMilliseconds } from 'd3-time';
 import * as runtimeTypes from 'io-ts';
 import { compact, first, get, has } from 'lodash';
@@ -195,13 +193,14 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   public async getLogItem(
     requestContext: RequestHandlerContext,
     id: string,
+    index: string,
     sourceConfiguration: InfraSourceConfiguration
   ) {
     const search = (searchOptions: object) =>
       this.framework.callWithRequest<LogItemHit, {}>(requestContext, 'search', searchOptions);
 
     const params = {
-      index: sourceConfiguration.logAlias,
+      index,
       terminate_after: 1,
       body: {
         size: 1,
@@ -240,6 +239,7 @@ function mapHitsToLogEntryDocuments(hits: SortedSearchHit[], fields: string[]): 
 
     return {
       id: hit._id,
+      index: hit._index,
       cursor: { time: hit.sort[0], tiebreaker: hit.sort[1] },
       fields: logFields,
       highlights: hit.highlight || {},
@@ -335,8 +335,9 @@ const LogSummaryDateRangeBucketRuntimeType = runtimeTypes.intersection([
   }),
 ]);
 
-export interface LogSummaryDateRangeBucket
-  extends runtimeTypes.TypeOf<typeof LogSummaryDateRangeBucketRuntimeType> {}
+export type LogSummaryDateRangeBucket = runtimeTypes.TypeOf<
+  typeof LogSummaryDateRangeBucketRuntimeType
+>;
 
 const LogSummaryResponseRuntimeType = runtimeTypes.type({
   aggregations: runtimeTypes.type({
@@ -346,5 +347,4 @@ const LogSummaryResponseRuntimeType = runtimeTypes.type({
   }),
 });
 
-export interface LogSummaryResponse
-  extends runtimeTypes.TypeOf<typeof LogSummaryResponseRuntimeType> {}
+export type LogSummaryResponse = runtimeTypes.TypeOf<typeof LogSummaryResponseRuntimeType>;
