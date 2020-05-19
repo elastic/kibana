@@ -6,14 +6,14 @@
 
 import { validateUrls } from '../../../../common/validate_urls';
 import { ReportingCore } from '../../../../server';
-import { cryptoFactory } from '../../../../server/lib/crypto';
+import { cryptoFactory } from '../../../../server/lib';
 import {
   ConditionalHeaders,
   CreateJobFactory,
   ESQueueCreateJobFn,
   Logger,
   RequestFacade,
-} from '../../../../types';
+} from '../../../../server/types';
 import { JobParamsPDF } from '../../types';
 // @ts-ignore untyped module
 import { compatibilityShimFactory } from './compatibility_shim';
