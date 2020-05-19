@@ -6,7 +6,8 @@
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
 import { createBrowserDriverFactory } from './browsers';
-import { ReportingCore, ReportingConfig } from './core';
+import { ReportingConfig } from './config';
+import { ReportingCore } from './core';
 import { createQueueFactory, enqueueJobFactory, LevelLogger, runValidations } from './lib';
 import { setFieldFormats } from './services';
 import { ReportingSetup, ReportingSetupDeps, ReportingStart, ReportingStartDeps } from './types';

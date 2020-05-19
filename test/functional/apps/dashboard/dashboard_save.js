@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-
 export default function({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
   const listingTable = getService('listingTable');
@@ -50,11 +48,7 @@ export default function({ getPageObjects, getService }) {
       await PageObjects.dashboard.cancelSave();
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
-      const countOfDashboards = await listingTable.searchAndGetItemsCount(
-        'dashboard',
-        dashboardName
-      );
-      expect(countOfDashboards).to.equal(1);
+      await listingTable.searchAndExpectItemsCount('dashboard', dashboardName, 1);
     });
 
     it('Saves on confirm duplicate title warning', async function() {
@@ -73,11 +67,7 @@ export default function({ getPageObjects, getService }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
-      const countOfDashboards = await listingTable.searchAndGetItemsCount(
-        'dashboard',
-        dashboardName
-      );
-      expect(countOfDashboards).to.equal(2);
+      await listingTable.searchAndExpectItemsCount('dashboard', dashboardName, 2);
     });
 
     it('Does not warn when you save an existing dashboard with the title it already has, and that title is a duplicate', async function() {
@@ -128,11 +118,7 @@ export default function({ getPageObjects, getService }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
-      const countOfDashboards = await listingTable.searchAndGetItemsCount(
-        'dashboard',
-        dashboardNameEnterKey
-      );
-      expect(countOfDashboards).to.equal(1);
+      await listingTable.searchAndExpectItemsCount('dashboard', dashboardNameEnterKey, 1);
     });
   });
 }

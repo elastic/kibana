@@ -52,8 +52,6 @@ exports[`MonitorList component MonitorListPagination component renders a no item
   }
 >
   <MonitorListComponent
-    getMonitorList={[MockFunction]}
-    lastRefresh={123}
     monitorList={
       Object {
         "list": Object {
@@ -65,6 +63,8 @@ exports[`MonitorList component MonitorListPagination component renders a no item
         "loading": false,
       }
     }
+    pageSize={10}
+    setPageSize={[MockFunction]}
   />
 </ContextProvider>
 `;
@@ -121,8 +121,6 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
   }
 >
   <MonitorListComponent
-    getMonitorList={[MockFunction]}
-    lastRefresh={123}
     monitorList={
       Object {
         "list": Object {
@@ -196,6 +194,8 @@ exports[`MonitorList component MonitorListPagination component renders the pagin
         "loading": false,
       }
     }
+    pageSize={10}
+    setPageSize={[MockFunction]}
   />
 </ContextProvider>
 `;
@@ -252,8 +252,6 @@ exports[`MonitorList component renders a no items message when no data is provid
   }
 >
   <MonitorListComponent
-    getMonitorList={[MockFunction]}
-    lastRefresh={123}
     monitorList={
       Object {
         "list": Object {
@@ -265,6 +263,8 @@ exports[`MonitorList component renders a no items message when no data is provid
         "loading": true,
       }
     }
+    pageSize={10}
+    setPageSize={[MockFunction]}
   />
 </ContextProvider>
 `;
@@ -321,8 +321,6 @@ exports[`MonitorList component renders error list 1`] = `
   }
 >
   <MonitorListComponent
-    getMonitorList={[MockFunction]}
-    lastRefresh={123}
     monitorList={
       Object {
         "error": [Error: foo message],
@@ -397,6 +395,8 @@ exports[`MonitorList component renders error list 1`] = `
         "loading": false,
       }
     }
+    pageSize={10}
+    setPageSize={[MockFunction]}
   />
 </ContextProvider>
 `;
@@ -453,8 +453,6 @@ exports[`MonitorList component renders loading state 1`] = `
   }
 >
   <MonitorListComponent
-    getMonitorList={[MockFunction]}
-    lastRefresh={123}
     monitorList={
       Object {
         "list": Object {
@@ -528,6 +526,8 @@ exports[`MonitorList component renders loading state 1`] = `
         "loading": true,
       }
     }
+    pageSize={10}
+    setPageSize={[MockFunction]}
   />
 </ContextProvider>
 `;
@@ -745,7 +745,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               scope="col"
             >
               <div
-                class="euiTableCellContent euiTableCellContent--alignCenter"
+                class="euiTableCellContent"
               >
                 <span
                   class="euiTableCellContent__text"
@@ -915,7 +915,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 TLS Certificate
               </div>
               <div
-                class="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span>
                   -
@@ -1092,7 +1092,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 TLS Certificate
               </div>
               <div
-                class="euiTableCellContent euiTableCellContent--alignCenter euiTableCellContent--overflowingContent"
+                class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <span>
                   -
@@ -1177,7 +1177,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
               <span
                 class="euiButtonEmpty__text"
               >
-                Rows per page: 25
+                Rows per page: 10
               </span>
             </span>
           </button>
@@ -1282,8 +1282,6 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
   }
 >
   <MonitorListComponent
-    getMonitorList={[MockFunction]}
-    lastRefresh={123}
     monitorList={
       Object {
         "list": Object {
@@ -1357,6 +1355,8 @@ exports[`MonitorList component shallow renders the monitor list 1`] = `
         "loading": false,
       }
     }
+    pageSize={10}
+    setPageSize={[MockFunction]}
   />
 </ContextProvider>
 `;

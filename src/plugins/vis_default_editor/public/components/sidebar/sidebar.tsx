@@ -177,7 +177,7 @@ function DefaultEditorSideBar({
         gutterSize="none"
         responsive={false}
       >
-        <EuiFlexItem>
+        <EuiFlexItem className="visEditorSidebar__formWrapper">
           <form
             className="visEditorSidebar__form"
             name="visualizeEditor"

@@ -16,7 +16,7 @@ export const AlertDropdown = () => {
   const manageAlertsLinkProps = useLinkProps(
     {
       app: 'kibana',
-      hash: 'management/kibana/triggersActions/alerts',
+      hash: 'management/insightsAndAlerting/triggersActions/alerts',
     },
     {
       hrefOnly: true,

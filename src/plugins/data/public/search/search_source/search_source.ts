@@ -75,6 +75,7 @@ import { CoreStart } from 'kibana/public';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/public';
+import { META_FIELDS_SETTING, DOC_HIGHLIGHT_SETTING } from '../../../common';
 import { IIndexPattern, ISearchGeneric, SearchRequest } from '../..';
 import { SearchSourceOptions, SearchSourceFields } from './types';
 import { FetchOptions, RequestFailure, getSearchParams, handleResponse } from '../fetch';
@@ -437,7 +438,10 @@ export class SearchSource {
 
     if (body._source) {
       // exclude source fields for this index pattern specified by the user
-      const filter = fieldWildcardFilter(body._source.excludes, uiSettings.get('metaFields'));
+      const filter = fieldWildcardFilter(
+        body._source.excludes,
+        uiSettings.get(META_FIELDS_SETTING)
+      );
       body.docvalue_fields = body.docvalue_fields.filter((docvalueField: any) =>
         filter(docvalueField.field)
       );
@@ -459,7 +463,7 @@ export class SearchSource {
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
     if (highlightAll && body.query) {
-      body.highlight = getHighlightRequest(body.query, uiSettings.get('doc_table:highlight'));
+      body.highlight = getHighlightRequest(body.query, uiSettings.get(DOC_HIGHLIGHT_SETTING));
       delete searchRequest.highlightAll;
     }
 

@@ -197,6 +197,28 @@ ruleTester.run('@kbn/eslint/no-restricted-paths', rule, {
 
   invalid: [
     {
+      code: 'export { b } from "../server/b.js"',
+      filename: path.join(__dirname, './files/no_restricted_paths/client/a.js'),
+      options: [
+        {
+          basePath: __dirname,
+          zones: [
+            {
+              target: 'files/no_restricted_paths/client/**/*',
+              from: 'files/no_restricted_paths/server/**/*',
+            },
+          ],
+        },
+      ],
+      errors: [
+        {
+          message: 'Unexpected path "../server/b.js" imported in restricted zone.',
+          line: 1,
+          column: 19,
+        },
+      ],
+    },
+    {
       code: 'import b from "../server/b.js"',
       filename: path.join(__dirname, './files/no_restricted_paths/client/a.js'),
       options: [

@@ -14,10 +14,6 @@ export class AlertConstants {
    */
   static INDEX_PATTERN_ROUTE = `${AlertConstants.BASE_API_URL}/index_pattern`;
   /**
-   * Alert's Index pattern
-   */
-  static ALERT_INDEX_NAME = 'events-endpoint-1';
-  /**
    * A paramter passed to Alert's Index Pattern.
    */
   static EVENT_DATASET = 'events';
