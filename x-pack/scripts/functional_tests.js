@@ -23,7 +23,6 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/detection_engine_api_integration/security_and_spaces/config.ts'),
   require.resolve('../test/detection_engine_api_integration/basic/config.ts'),
   require.resolve('../test/plugin_api_integration/config.ts'),
-  require.resolve('../test/plugin_functional/config'),
   require.resolve('../test/kerberos_api_integration/config'),
   require.resolve('../test/kerberos_api_integration/anonymous_access.config'),
   require.resolve('../test/saml_api_integration/config'),
