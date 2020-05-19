@@ -17,7 +17,7 @@ export async function getResponse(url: string): Promise<Response> {
       throw new Boom(response.statusText, { statusCode: response.status });
     }
   } catch (e) {
-    throw Boom.boomify(e);
+    throw new Boom(`Error connecting to package registry: ${e.message}`, { statusCode: 502 });
   }
 }
 
