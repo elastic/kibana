@@ -105,7 +105,6 @@ export class AlertingPlugin {
   private readonly telemetryLogger: Logger;
   private readonly kibanaIndex: Promise<string>;
   private eventLogger?: IEventLogger;
-  private encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'alerting');
@@ -127,7 +126,6 @@ export class AlertingPlugin {
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.spaces = plugins.spaces?.spacesService;
     this.security = plugins.security;
-    this.encryptedSavedObjects = plugins.encryptedSavedObjects;
 
     this.isESOUsingEphemeralEncryptionKey =
       plugins.encryptedSavedObjects.usingEphemeralEncryptionKey;
