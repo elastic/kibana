@@ -31,6 +31,7 @@ export const ToolbarWrapper = (props: Props) => {
     nodeType,
     accountId,
     region,
+    legend,
     customMetrics,
     changeCustomMetrics,
   } = useWaffleOptionsContext();
@@ -53,6 +54,7 @@ export const ToolbarWrapper = (props: Props) => {
         nodeType,
         region,
         accountId,
+        legend,
         customMetrics,
         changeCustomMetrics,
       })}
