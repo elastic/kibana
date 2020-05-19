@@ -14,12 +14,13 @@ export interface IField {
   canValueBeFormatted(): boolean;
   getLabel(): Promise<string>;
   getDataType(): Promise<string>;
-  createTooltipProperty(value: string | undefined): Promise<ITooltipProperty>;
+  createTooltipProperty(value: string | string[] | undefined): Promise<ITooltipProperty>;
   getSource(): IVectorSource;
   getOrigin(): FIELD_ORIGIN;
   isValid(): boolean;
   getOrdinalFieldMetaRequest(): Promise<unknown>;
   getCategoricalFieldMetaRequest(size: number): Promise<unknown>;
+  supportsFieldMeta(): boolean;
 }
 
 export class AbstractField implements IField {
@@ -59,7 +60,7 @@ export class AbstractField implements IField {
     return this._fieldName;
   }
 
-  async createTooltipProperty(value: string | undefined): Promise<ITooltipProperty> {
+  async createTooltipProperty(value: string | string[] | undefined): Promise<ITooltipProperty> {
     const label = await this.getLabel();
     return new TooltipProperty(this.getName(), label, value);
   }

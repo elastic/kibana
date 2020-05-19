@@ -9,6 +9,7 @@ import { Store } from 'redux';
 import { ResolverAction } from './store/actions';
 export { ResolverAction } from './store/actions';
 import { ResolverEvent } from '../../../common/types';
+import { eventType } from '../../../common/models/event';
 
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.
@@ -131,12 +132,59 @@ export type CameraState = {
 );
 
 /**
+ * This represents all the raw data (sans statistics, metadata, etc.)
+ * about a particular subject's related events
+ */
+export interface RelatedEventDataEntry {
+  relatedEvents: Array<{
+    relatedEvent: ResolverEvent;
+    relatedEventType: ReturnType<typeof eventType>;
+  }>;
+}
+
+/**
+ * Represents the status of the request for related event data, which will be either the data,
+ * a value indicating that it's still waiting for the data or an Error indicating the data can't be retrieved as expected
+ */
+export type RelatedEventDataResults =
+  | RelatedEventDataEntry
+  | 'waitingForRelatedEventData'
+  | 'error';
+
+/**
+ * This represents the raw related events data enhanced with statistics
+ * (e.g. counts of items grouped by their related event types)
+ */
+export type RelatedEventDataEntryWithStats = RelatedEventDataEntry & {
+  stats: Record<string, number>;
+};
+
+/**
+ * The status or value of any particular event's related events w.r.t. their valence to the current view.
+ * One of:
+ * `RelatedEventDataEntryWithStats` when results have been received and processed and are ready to display
+ * `waitingForRelatedEventData` when related events have been requested but have not yet matriculated
+ * `Error` when the request for any event encounters an error during service
+ */
+export type RelatedEventEntryWithStatsOrWaiting =
+  | RelatedEventDataEntryWithStats
+  | `waitingForRelatedEventData`
+  | 'error';
+
+/**
+ * This represents a Map that will return either a `RelatedEventDataEntryWithStats`
+ * or a `waitingForRelatedEventData` symbol when referenced with a unique event.
+ */
+export type RelatedEventData = Map<ResolverEvent, RelatedEventEntryWithStatsOrWaiting>;
+
+/**
  * State for `data` reducer which handles receiving Resolver data from the backend.
  */
 export interface DataState {
   readonly results: readonly ResolverEvent[];
   isLoading: boolean;
   hasError: boolean;
+  resultsEnrichedWithRelatedEventInfo: Map<ResolverEvent, RelatedEventDataResults>;
 }
 
 export type Vector2 = readonly [number, number];

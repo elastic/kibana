@@ -42,12 +42,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickClone();
       await PageObjects.dashboard.confirmClone();
       await PageObjects.dashboard.gotoDashboardLandingPage();
-      const countOfDashboards = await listingTable.searchAndGetItemsCount(
-        'dashboard',
-        clonedDashboardName
-      );
-
-      expect(countOfDashboards).to.equal(1);
+      await listingTable.searchAndExpectItemsCount('dashboard', clonedDashboardName, 1);
     });
 
     it('the copy should have all the same visualizations', async function() {
@@ -75,11 +70,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.dashboard.cancelClone();
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
-      const countOfDashboards = await listingTable.searchAndGetItemsCount(
-        'dashboard',
-        dashboardName
-      );
-      expect(countOfDashboards).to.equal(1);
+      await listingTable.searchAndExpectItemsCount('dashboard', dashboardName, 1);
     });
 
     it('Clones on confirm duplicate title warning', async function() {
@@ -92,11 +83,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.dashboard.waitForRenderComplete();
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
-      const countOfDashboards = await listingTable.searchAndGetItemsCount(
-        'dashboard',
-        dashboardName + ' Copy'
-      );
-      expect(countOfDashboards).to.equal(2);
+      await listingTable.searchAndExpectItemsCount('dashboard', dashboardName + ' Copy', 2);
     });
   });
 }
