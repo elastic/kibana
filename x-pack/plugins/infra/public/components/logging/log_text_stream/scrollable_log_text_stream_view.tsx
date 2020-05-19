@@ -51,7 +51,7 @@ interface ScrollableLogTextStreamViewProps {
   }) => any;
   loadNewerItems: () => void;
   reloadItems: () => void;
-  setFlyoutItem?: (id: string) => void;
+  setFlyoutItem?: (itemRef: { id: string; index: string }) => void;
   setFlyoutVisibility?: (visible: boolean) => void;
   setContextEntry?: (entry: LogEntry) => void;
   highlightedItem: string | null;
@@ -302,11 +302,11 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
     );
   }
 
-  private handleOpenFlyout = (id: string) => {
+  private handleOpenFlyout = (id: string, index: string) => {
     const { setFlyoutItem, setFlyoutVisibility } = this.props;
 
     if (setFlyoutItem && setFlyoutVisibility) {
-      setFlyoutItem(id);
+      setFlyoutItem({ id, index });
       setFlyoutVisibility(true);
     }
   };

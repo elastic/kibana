@@ -33,7 +33,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
   const {
     setFlyoutVisibility,
     flyoutVisible,
-    setFlyoutId,
+    setFlyoutRef,
     surroundingLogsId,
     setSurroundingLogsId,
     flyoutItem,
@@ -107,7 +107,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
               scale={textScale}
               target={targetPosition}
               wrap={textWrap}
-              setFlyoutItem={setFlyoutId}
+              setFlyoutItem={setFlyoutRef}
               setFlyoutVisibility={setFlyoutVisibility}
               setContextEntry={setContextEntry}
               highlightedItem={surroundingLogsId ? surroundingLogsId : null}

@@ -21,6 +21,7 @@ export enum FlyoutVisibility {
 
 export interface FlyoutOptionsUrlState {
   flyoutId?: string | null;
+  flyoutIndex?: string | null;
   flyoutVisibility?: string | null;
   surroundingLogsId?: string | null;
 }
@@ -28,7 +29,7 @@ export interface FlyoutOptionsUrlState {
 export const useLogFlyout = () => {
   const { sourceId } = useLogSourceContext();
   const [flyoutVisible, setFlyoutVisibility] = useState<boolean>(false);
-  const [flyoutId, setFlyoutId] = useState<string | null>(null);
+  const [flyoutRef, setFlyoutRef] = useState<{ id: string; index: string } | null>(null);
   const [flyoutItem, setFlyoutItem] = useState<LogEntriesItem | null>(null);
   const [surroundingLogsId, setSurroundingLogsId] = useState<string | null>(null);
 
@@ -36,10 +37,10 @@ export const useLogFlyout = () => {
     {
       cancelPreviousOn: 'creation',
       createPromise: async () => {
-        if (!flyoutId) {
+        if (!flyoutRef) {
           return;
         }
-        return await fetchLogEntriesItem({ sourceId, id: flyoutId });
+        return await fetchLogEntriesItem({ sourceId, id: flyoutRef.id, index: flyoutRef.index });
       },
       onResolve: response => {
         if (response) {
@@ -48,7 +49,7 @@ export const useLogFlyout = () => {
         }
       },
     },
-    [sourceId, flyoutId]
+    [sourceId, flyoutRef]
   );
 
   const isLoading = useMemo(() => {
@@ -56,16 +57,16 @@ export const useLogFlyout = () => {
   }, [loadFlyoutItemRequest.state]);
 
   useEffect(() => {
-    if (flyoutId) {
+    if (flyoutRef) {
       loadFlyoutItem();
     }
-  }, [loadFlyoutItem, flyoutId]);
+  }, [flyoutRef, loadFlyoutItem]);
 
   return {
     flyoutVisible,
     setFlyoutVisibility,
-    flyoutId,
-    setFlyoutId,
+    flyoutRef,
+    setFlyoutRef,
     surroundingLogsId,
     setSurroundingLogsId,
     isLoading,
@@ -79,8 +80,8 @@ export const WithFlyoutOptionsUrlState = () => {
   const {
     flyoutVisible,
     setFlyoutVisibility,
-    flyoutId,
-    setFlyoutId,
+    flyoutRef,
+    setFlyoutRef,
     surroundingLogsId,
     setSurroundingLogsId,
   } = useContext(LogFlyout.Context);
@@ -89,14 +90,15 @@ export const WithFlyoutOptionsUrlState = () => {
     <UrlStateContainer
       urlState={{
         flyoutVisibility: flyoutVisible ? FlyoutVisibility.visible : FlyoutVisibility.hidden,
-        flyoutId,
+        flyoutId: flyoutRef?.id ?? null,
+        flyoutIndex: flyoutRef?.index ?? null,
         surroundingLogsId,
       }}
       urlStateKey="flyoutOptions"
       mapToUrlState={mapToUrlState}
       onChange={newUrlState => {
-        if (newUrlState && newUrlState.flyoutId) {
-          setFlyoutId(newUrlState.flyoutId);
+        if (newUrlState && newUrlState.flyoutId && newUrlState.flyoutIndex) {
+          setFlyoutRef({ id: newUrlState.flyoutId, index: newUrlState.flyoutIndex });
         }
         if (newUrlState && newUrlState.surroundingLogsId) {
           setSurroundingLogsId(newUrlState.surroundingLogsId);
@@ -109,8 +111,8 @@ export const WithFlyoutOptionsUrlState = () => {
         }
       }}
       onInitialize={initialUrlState => {
-        if (initialUrlState && initialUrlState.flyoutId) {
-          setFlyoutId(initialUrlState.flyoutId);
+        if (initialUrlState && initialUrlState.flyoutId && initialUrlState.flyoutIndex) {
+          setFlyoutRef({ id: initialUrlState.flyoutId, index: initialUrlState.flyoutIndex });
         }
         if (initialUrlState && initialUrlState.surroundingLogsId) {
           setSurroundingLogsId(initialUrlState.surroundingLogsId);
@@ -130,12 +132,16 @@ const mapToUrlState = (value: any): FlyoutOptionsUrlState | undefined =>
   value
     ? {
         flyoutId: mapToFlyoutIdState(value.flyoutId),
+        flyoutIndex: mapToFlyoutIndexState(value.flyoutIndex),
         flyoutVisibility: mapToFlyoutVisibilityState(value.flyoutVisibility),
         surroundingLogsId: mapToSurroundingLogsIdState(value.surroundingLogsId),
       }
     : undefined;
 
 const mapToFlyoutIdState = (subject: any) => {
+  return subject && isString(subject) ? subject : undefined;
+};
+const mapToFlyoutIndexState = (subject: any) => {
   return subject && isString(subject) ? subject : undefined;
 };
 const mapToSurroundingLogsIdState = (subject: any) => {
