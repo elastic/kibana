@@ -14,7 +14,6 @@ import {
   nextTick,
 } from '../../../../../test_utils';
 import { IndexManagementHome } from '../../../public/application/sections/home'; // eslint-disable-line @kbn/eslint/no-restricted-paths
-// @ts-ignore
 import { BASE_PATH } from '../../../common/constants';
 import { indexManagementStore } from '../../../public/application/store'; // eslint-disable-line @kbn/eslint/no-restricted-paths
 import { TemplateDeserialized } from '../../../common';
