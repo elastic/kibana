@@ -13,8 +13,8 @@ import {
   SUM_OF_SERVER_BYTES,
   SUM_OF_SOURCE_BYTES,
 } from '../map_config';
-import { ITooltipProperty } from '../../../../../../maps/public';
-import { TooltipProperty } from '../../../../../../maps/public/classes/tooltips/tooltip_property';
+import { ITooltipProperty } from '../../../../../maps/public';
+import { TooltipProperty } from '../../../../../maps/public/layers/tooltips/tooltip_property';
 
 describe('LineToolTipContent', () => {
   const mockFeatureProps: ITooltipProperty[] = [
