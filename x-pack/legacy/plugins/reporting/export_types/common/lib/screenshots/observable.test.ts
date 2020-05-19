@@ -18,13 +18,16 @@ jest.mock('../../../../server/browsers/chromium/puppeteer', () => ({
 import * as Rx from 'rxjs';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { loggingServiceMock } from '../../../../../../../../src/core/server/mocks';
+import { HeadlessChromiumDriver } from '../../../../server/browsers';
 import { LevelLogger } from '../../../../server/lib';
+import {
+  CaptureConfig,
+  ConditionalHeaders,
+  ElementsPositionAndAttribute,
+} from '../../../../server/types';
 import { createMockBrowserDriverFactory, createMockLayoutInstance } from '../../../../test_helpers';
-import { ConditionalHeaders, HeadlessChromiumDriver } from '../../../../types';
-import { CaptureConfig } from '../../../../server/types';
 import * as contexts from './constants';
 import { screenshotsObservableFactory } from './observable';
-import { ElementsPositionAndAttribute } from './types';
 
 /*
  * Mocks

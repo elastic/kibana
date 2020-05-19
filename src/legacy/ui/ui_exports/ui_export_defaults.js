@@ -43,7 +43,5 @@ export const UI_EXPORT_DEFAULTS = {
     },
   })),
 
-  appExtensions: {
-    fieldFormatEditors: ['ui/field_editor/components/field_format_editor/register'],
-  },
+  appExtensions: {},
 };

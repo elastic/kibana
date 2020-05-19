@@ -16,7 +16,7 @@ import {
 import { IMitreEnterpriseAttack } from '../../../pages/detection_engine/rules/types';
 import { isMitreAttackInvalid } from '../mitre/helpers';
 import { OptionalFieldLabel } from '../optional_field_label';
-import { isUrlInvalid } from './helpers';
+import { isUrlInvalid } from '../../../../common/utils/validators';
 import * as I18n from './translations';
 
 const { emptyField } = fieldValidators;
