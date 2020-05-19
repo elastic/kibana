@@ -14,6 +14,7 @@ export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   const SAVED_OBJECT_WITH_SECRET_TYPE = 'saved-object-with-secret';
+  const HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE = 'hidden-saved-object-with-secret';
   const SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE =
     'saved-object-with-secret-and-multiple-spaces';
   const SAVED_OBJECT_WITHOUT_SECRET_TYPE = 'saved-object-without-secret';
@@ -438,7 +439,7 @@ export default function({ getService }: FtrProviderContext) {
     afterEach(async () => {
       await es.deleteByQuery({
         index: '.kibana',
-        q: `type:${SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE} OR type:${SAVED_OBJECT_WITHOUT_SECRET_TYPE}`,
+        q: `type:${SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE} OR type:${SAVED_OBJECT_WITH_SECRET_AND_MULTIPLE_SPACES_TYPE} OR type:${SAVED_OBJECT_WITHOUT_SECRET_TYPE}`,
         refresh: true,
       });
     });
@@ -448,6 +449,14 @@ export default function({ getService }: FtrProviderContext) {
         runTests(
           SAVED_OBJECT_WITH_SECRET_TYPE,
           () => '/api/saved_objects/',
+          (id, type) => generateRawId(id, type)
+        );
+      });
+
+      describe('hidden type with `single` namespace saved object', () => {
+        runTests(
+          HIDDEN_SAVED_OBJECT_WITH_SECRET_TYPE,
+          () => '/api/hidden_saved_objects/',
           (id, type) => generateRawId(id, type)
         );
       });
