@@ -22,9 +22,16 @@ import { BASE_PATH } from '../../../../common/constants';
 import { documentationService } from '../../services/documentation';
 import { IndexList } from './index_list';
 import { TemplateList } from './template_list';
+import { ComponentTemplateList } from './component_template_list';
 import { breadcrumbService } from '../../services/breadcrumbs';
 
-type Section = 'indices' | 'templates';
+export enum Section {
+  Indices = 'indices',
+  IndexTemplates = 'index_templates',
+  ComponentTemplates = 'component_templates',
+}
+
+export const homeSections = [Section.Indices, Section.IndexTemplates, Section.ComponentTemplates];
 
 interface MatchParams {
   section: Section;
@@ -38,15 +45,24 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
 }) => {
   const tabs = [
     {
-      id: 'indices' as Section,
+      id: Section.Indices,
       name: <FormattedMessage id="xpack.idxMgmt.home.indicesTabTitle" defaultMessage="Indices" />,
     },
     {
-      id: 'templates' as Section,
+      id: Section.IndexTemplates,
       name: (
         <FormattedMessage
           id="xpack.idxMgmt.home.indexTemplatesTabTitle"
           defaultMessage="Index Templates"
+        />
+      ),
+    },
+    {
+      id: Section.ComponentTemplates,
+      name: (
+        <FormattedMessage
+          id="xpack.idxMgmt.home.componentTemplatesTabTitle"
+          defaultMessage="Component Templates"
         />
       ),
     },
@@ -107,9 +123,22 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         <EuiSpacer size="m" />
 
         <Switch>
-          <Route exact path={`${BASE_PATH}indices`} component={IndexList} />
-          <Route exact path={`${BASE_PATH}indices/filter/:filter?`} component={IndexList} />
-          <Route exact path={`${BASE_PATH}templates/:templateName*`} component={TemplateList} />
+          <Route exact path={`${BASE_PATH}${Section.Indices}`} component={IndexList} />
+          <Route
+            exact
+            path={`${BASE_PATH}${Section.Indices}/filter/:filter?`}
+            component={IndexList}
+          />
+          <Route
+            exact
+            path={`${BASE_PATH}${Section.IndexTemplates}/:templateName*`}
+            component={TemplateList}
+          />
+          <Route
+            exact
+            path={`${BASE_PATH}${Section.ComponentTemplates}`}
+            component={ComponentTemplateList}
+          />
         </Switch>
       </EuiPageContent>
     </EuiPageBody>
