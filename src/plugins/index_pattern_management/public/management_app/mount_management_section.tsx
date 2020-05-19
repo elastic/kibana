@@ -111,6 +111,7 @@ export async function mountManagementSection(
                 savedObjectsClient: savedObjects.client,
                 setBreadcrumbs: params.setBreadcrumbs,
                 indexPatternManagement: indexPatternManagementStart as IndexPatternManagementStart,
+                painlessDocLink: docLinks.links.scriptedFields.painless,
               }}
             />
           </Route>

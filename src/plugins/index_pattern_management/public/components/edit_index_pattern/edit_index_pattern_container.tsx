@@ -43,6 +43,7 @@ interface EditIndexPatternContainerProps extends RouteComponentProps<{ id: strin
     savedObjectsClient: SavedObjectsClientContract;
     setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
     indexPatternManagement: IndexPatternManagementStart;
+    painlessDocLink: string;
   };
 }
 

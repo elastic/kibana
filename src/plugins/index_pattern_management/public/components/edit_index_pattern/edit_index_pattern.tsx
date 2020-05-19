@@ -56,6 +56,7 @@ interface EditIndexPatternProps extends RouteComponentProps {
     overlays: OverlayStart;
     savedObjectsClient: SavedObjectsClientContract;
     indexPatternManagement: IndexPatternManagementStart;
+    painlessDocLink: string;
   };
 }
 
@@ -246,6 +247,7 @@ export const EditIndexPattern = withRouter(
                 config={config}
                 services={{
                   indexPatternManagement: services.indexPatternManagement,
+                  painlessDocLink: services.painlessDocLink,
                 }}
                 history={history}
                 location={location}

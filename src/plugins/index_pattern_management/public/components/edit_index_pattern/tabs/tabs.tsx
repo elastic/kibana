@@ -47,6 +47,7 @@ interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   fields: IndexPatternField[];
   services: {
     indexPatternManagement: IndexPatternManagementStart;
+    painlessDocLink: string;
   };
 }
 
@@ -195,7 +196,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
                   },
                 }}
                 onRemoveField={refreshFilters}
-                painlessDocLink={'todo'}
+                painlessDocLink={services.painlessDocLink}
               />
             </Fragment>
           );
@@ -226,6 +227,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
       refreshFilters,
       scriptedFieldLanguageFilter,
       services.indexPatternManagement.list.getFieldInfo,
+      services.painlessDocLink,
     ]
   );
 
