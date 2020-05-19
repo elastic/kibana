@@ -17,4 +17,8 @@
  * under the License.
  */
 
-export * from '../../../../../examples/bfetch_explorer/server';
+import { DeveloperExamplesPlugin } from './plugin';
+
+export const plugin = () => new DeveloperExamplesPlugin();
+
+export { DeveloperExamplesSetup } from './plugin';

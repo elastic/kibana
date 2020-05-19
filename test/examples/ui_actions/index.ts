@@ -26,14 +26,12 @@ export default function ({
   loadTestFile,
 }: PluginFunctionalProviderContext) {
   const browser = getService('browser');
-  const appsMenu = getService('appsMenu');
   const PageObjects = getPageObjects(['common', 'header']);
 
   describe('ui actions explorer', function () {
     before(async () => {
       await browser.setWindowSize(1300, 900);
-      await PageObjects.common.navigateToApp('settings');
-      await appsMenu.clickLink('Ui Actions Explorer');
+      await PageObjects.common.navigateToApp('uiActionsExplorer');
     });
 
     loadTestFile(require.resolve('./ui_actions'));

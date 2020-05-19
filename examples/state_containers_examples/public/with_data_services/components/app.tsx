@@ -78,14 +78,7 @@ const {
   useContainer: useAppStateContainer,
 } = createStateContainerReactHelpers<ReduxLikeStateContainer<AppState>>();
 
-const App = ({
-  notifications,
-  http,
-  navigation,
-  data,
-  history,
-  kbnUrlStateStorage,
-}: StateDemoAppDeps) => {
+const App = ({ navigation, data, history, kbnUrlStateStorage }: StateDemoAppDeps) => {
   const appStateContainer = useAppStateContainer();
   const appState = useAppState();
 

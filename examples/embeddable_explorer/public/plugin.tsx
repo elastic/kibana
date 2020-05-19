@@ -16,12 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
 import { EmbeddableExamplesStart } from 'examples/embeddable_examples/public/plugin';
+import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '../../../src/core/public';
 import { UiActionsService } from '../../../src/plugins/ui_actions/public';
 import { EmbeddableStart } from '../../../src/plugins/embeddable/public';
 import { Start as InspectorStart } from '../../../src/plugins/inspector/public';
+import { DeveloperExamplesSetup } from '../../developer_examples/public';
+import img from './embeddables.png';
 
 interface StartDeps {
   uiActions: UiActionsService;
@@ -30,11 +31,16 @@ interface StartDeps {
   embeddableExamples: EmbeddableExamplesStart;
 }
 
+interface SetupDeps {
+  developerExamples: DeveloperExamplesSetup;
+}
+
 export class EmbeddableExplorerPlugin implements Plugin<void, void, {}, StartDeps> {
-  public setup(core: CoreSetup<StartDeps>) {
+  public setup(core: CoreSetup<StartDeps>, { developerExamples }: SetupDeps) {
     core.application.register({
       id: 'embeddableExplorer',
       title: 'Embeddable explorer',
+      navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
@@ -54,6 +60,22 @@ export class EmbeddableExplorerPlugin implements Plugin<void, void, {}, StartDep
           params.element
         );
       },
+    });
+
+    developerExamples.register({
+      appId: 'embeddableExplorer',
+      title: 'Embeddables',
+      description: `See how to build a "hello world" embeddable, an embeddable container, and how embeddable input and output is used.`,
+      links: [
+        {
+          label: 'README',
+          href: 'https://github.com/elastic/kibana/tree/master/src/plugins/embeddable/README.md',
+          iconType: 'logoGithub',
+          target: '_blank',
+          size: 's',
+        },
+      ],
+      image: img,
     });
   }
 

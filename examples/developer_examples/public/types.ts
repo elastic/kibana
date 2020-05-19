@@ -17,4 +17,18 @@
  * under the License.
  */
 
-export * from '../../../../../examples/bfetch_explorer/public';
+import { EuiListGroupItemProps } from '@elastic/eui';
+
+export interface ExampleDefinition {
+  /**
+   * The application id that is the landing page for the example.
+   */
+  appId: string;
+  title: string;
+  description: string;
+  image?: string;
+  /**
+   * Any additional links you want to show, for example to the github README.
+   */
+  links?: EuiListGroupItemProps[];
+}
