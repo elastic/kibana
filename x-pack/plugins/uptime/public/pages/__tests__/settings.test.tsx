@@ -8,24 +8,24 @@ import { isValidCertVal } from '../settings';
 
 describe('settings', () => {
   describe('isValidCertVal', () => {
-    it('identifies empty string', () => {
-      expect(isValidCertVal('')).toMatchInlineSnapshot(`"May not be blank."`);
+    it('handles NaN values', () => {
+      expect(isValidCertVal(NaN)).toMatchInlineSnapshot(`"Must be a number."`);
     });
 
-    it('identifies values less than 0', () => {
+    it('handles undefined', () => {
+      expect(isValidCertVal(undefined)).toMatchInlineSnapshot(`"Must be a number."`);
+    });
+
+    it('handles non-integer numbers', () => {
+      expect(isValidCertVal(23.5)).toMatchInlineSnapshot(`"Value must be an integer."`);
+    });
+
+    it('handles values less than 0', () => {
       expect(isValidCertVal(-1)).toMatchInlineSnapshot(`"Value must be greater than 0."`);
     });
 
-    it('identifies NaN values', () => {
-      expect(isValidCertVal(' ')).toMatchInlineSnapshot(`"Value must be greater than 0."`);
-    });
-
-    it('identifies non-integer numbers', () => {
-      expect(isValidCertVal('23.5')).toMatchInlineSnapshot(`"Value must be an integer."`);
-    });
-
-    it('allows valid integer strings', () => {
-      expect(isValidCertVal('45')).toBeUndefined();
+    it('handles 0', () => {
+      expect(isValidCertVal(0)).toMatchInlineSnapshot(`"Value must be greater than 0."`);
     });
 
     it('allows valid integer numbers', () => {

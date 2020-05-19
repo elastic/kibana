@@ -50,15 +50,14 @@ export interface SettingsFormProps {
   isDisabled: boolean;
 }
 
-export const isValidCertVal = (val: string | number) => {
-  if (val === '') {
-    return Translations.BLANK_STR;
+export const isValidCertVal = (val?: number): string | undefined => {
+  if (val === undefined || isNaN(val)) {
+    return Translations.settings.mustBeNumber;
   }
-  const number = typeof val === 'string' ? Number(val) : val;
-  if (number <= 0) {
+  if (val <= 0) {
     return VALUE_MUST_BE_GREATER_THAN_ZERO;
   }
-  if (!number || number % 1) {
+  if (val % 1) {
     return VALUE_MUST_BE_AN_INTEGER;
   }
 };
