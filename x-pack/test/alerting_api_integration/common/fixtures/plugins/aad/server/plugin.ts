@@ -13,16 +13,18 @@ import {
   IKibanaResponse,
 } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import { EncryptedSavedObjectsPluginSetup } from '../../../../../../../plugins/encrypted_saved_objects/server';
+import { EncryptedSavedObjectsPluginStart } from '../../../../../../../plugins/encrypted_saved_objects/server';
 import { SpacesPluginSetup } from '../../../../../../../plugins/spaces/server';
 
 interface FixtureSetupDeps {
   spaces?: SpacesPluginSetup;
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+}
+interface FixtureStartDeps {
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
 
-export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps> {
-  public setup(core: CoreSetup, { spaces, encryptedSavedObjects }: FixtureSetupDeps) {
+export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
+  public setup(core: CoreSetup<FixtureStartDeps>, { spaces }: FixtureSetupDeps) {
     core.http.createRouter().post(
       {
         path: '/api/check_aad',
@@ -41,12 +43,10 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps> {
       ): Promise<IKibanaResponse<any>> {
         try {
           let namespace: string | undefined;
-          const encryptedSavedObjectsWithAlert = encryptedSavedObjects.startWithHiddenTypes([
-            'alert',
-          ]);
           if (spaces && req.body.spaceId) {
             namespace = spaces.spacesService.spaceIdToNamespace(req.body.spaceId);
           }
+          const [, { encryptedSavedObjects }] = await core.getStartServices();
           await encryptedSavedObjects
             .getClient(['alert'])
             .getDecryptedAsInternalUser(req.body.type, req.body.id, {
