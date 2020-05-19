@@ -56,7 +56,7 @@ export function KbnAggTable(config, RecursionHelper) {
         self._saveAs(csv, self.csv.filename);
       };
 
-      self.toCsv = function(formatted) {
+      self.toCsv = function (formatted) {
         const rows = formatted ? $scope.rows : $scope.table.rows;
         const columns = formatted ? $scope.formattedColumns : $scope.table.columns;
         const nonAlphaNumRE = /[^a-zA-Z0-9]/;
@@ -72,11 +72,14 @@ export function KbnAggTable(config, RecursionHelper) {
         }
 
         let csvRows = [];
-        rows.map(row => {
+        rows.map((row) => {
           const rowArray = [];
           Object.entries(row).map(([k, v]) => {
-            const column = columns.find(c => c.id === k);
-            const columnIdx = columns.findIndex(c => c.id === k);
+            const column = columns.find((c) => c.id === k);
+
+            if (!column) return;
+
+            const columnIdx = columns.findIndex((c) => c.id === k);
             const formattedValue =
               formatted && column ? escape(column.formatter.convert(v)) : escape(v);
             rowArray.splice(columnIdx, 0, formattedValue);
@@ -116,7 +119,7 @@ export function KbnAggTable(config, RecursionHelper) {
 
           if (typeof $scope.dimensions === 'undefined') return;
 
-          const { buckets, metrics, splitColumn } = $scope.dimensions;
+          const { buckets, metrics, splitColumn, splitRow } = $scope.dimensions;
 
           $scope.formattedColumns = table.columns
             .map(function (col, i) {
@@ -124,8 +127,14 @@ export function KbnAggTable(config, RecursionHelper) {
               const isSplitColumn = splitColumn
                 ? splitColumn.find((splitColumn) => splitColumn.accessor === i)
                 : undefined;
+              const isSplitRow = splitRow
+                ? splitRow.find((splitRow) => splitRow.accessor === i)
+                : undefined;
               const dimension =
-                isBucket || isSplitColumn || metrics.find((metric) => metric.accessor === i);
+                isBucket ||
+                isSplitColumn ||
+                isSplitRow ||
+                metrics.find((metric) => metric.accessor === i);
 
               if (!dimension) return;
 
@@ -253,7 +262,7 @@ function addPercentageCol(columns, title, rows, insertAtIndex) {
     id: newId,
     formatter,
   });
-  const newRows = rows.map(row => ({
+  const newRows = rows.map((row) => ({
     [newId]: row[id] / sumTotal,
     ...row,
   }));
