@@ -25,10 +25,10 @@ type RegisterTreeItemsFunction = (id: string, entry: PrivateMapTreeEntry) => voi
 type UnregisterTreeItemsFunction = (id: string) => void;
 
 interface DragAndDropTreeContextValue {
-  setCurrentDragSelector: (serializedSelector: string | undefined) => void;
-  currentDragSelector?: string;
   registerTreeItems: RegisterTreeItemsFunction;
   unRegisterTreeItems: UnregisterTreeItemsFunction;
+  currentDragId?: string;
+  currentCombineTargetId?: string;
 }
 
 export interface OnDragEndArgs {
@@ -49,7 +49,8 @@ export const DragAndDropTreeProvider: FunctionComponent<Props> = ({ children, on
   const dragDirectionRef = useRef<{
     start?: { index: number; treeId: string };
   }>({});
-  const [currentDragSelector, setCurrentDragSelector] = useState<string | undefined>();
+  const [currentDragId, setCurrentDragId] = useState<string | undefined>();
+  const [currentCombineTargetId, setCurrentCombineTargetId] = useState<string | undefined>();
   const [privateTreeItemMap] = useState(() => new Map<string, PrivateMapTreeEntry>());
 
   const registerTreeItems = useCallback<RegisterTreeItemsFunction>(
@@ -69,15 +70,15 @@ export const DragAndDropTreeProvider: FunctionComponent<Props> = ({ children, on
   return (
     <DragAndDropTreeContext.Provider
       value={{
-        currentDragSelector,
-        setCurrentDragSelector,
+        currentDragId,
+        currentCombineTargetId,
         registerTreeItems,
         unRegisterTreeItems,
       }}
     >
       <EuiDragDropContext
         onBeforeCapture={({ draggableId: serializedSelector }) => {
-          setCurrentDragSelector(serializedSelector);
+          setCurrentDragId(serializedSelector);
         }}
         onDragStart={arg => {
           dragDirectionRef.current = {
@@ -94,6 +95,13 @@ export const DragAndDropTreeProvider: FunctionComponent<Props> = ({ children, on
             return;
           }
 
+          if (arg.combine) {
+            setCurrentCombineTargetId(arg.combine.draggableId);
+            return;
+          } else if (!arg.combine && currentCombineTargetId) {
+            setCurrentCombineTargetId(undefined);
+          }
+
           // Reset "start" if we have gone x-tree
           if (
             arg.destination &&
@@ -106,7 +114,8 @@ export const DragAndDropTreeProvider: FunctionComponent<Props> = ({ children, on
           }
         }}
         onDragEnd={arg => {
-          setCurrentDragSelector(undefined);
+          setCurrentDragId(undefined);
+          setCurrentCombineTargetId(undefined);
           const { start } = dragDirectionRef.current;
 
           const { source, destination, combine } = arg;

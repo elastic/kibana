@@ -5,6 +5,7 @@
  */
 
 import React, { FunctionComponent, memo, useRef, useEffect, useMemo } from 'react';
+import classNames from 'classnames';
 import { EuiDroppable, EuiSpacer } from '@elastic/eui';
 import uuid from 'uuid';
 
@@ -50,7 +51,12 @@ export const DragAndDropTreeUI: FunctionComponent<Props> = ({
   renderItem,
   baseSelector,
 }) => {
-  const { currentDragSelector, registerTreeItems, unRegisterTreeItems } = useDragDropContext();
+  const {
+    currentDragId,
+    currentCombineTargetId,
+    registerTreeItems,
+    unRegisterTreeItems,
+  } = useDragDropContext();
 
   const treeIdRef = useRef<string>();
   const readTreeId = () => {
@@ -74,7 +80,7 @@ export const DragAndDropTreeUI: FunctionComponent<Props> = ({
       const derived = { ...processor, flattenedIndex: getNextFlatTreeIndex(), selector, id };
       if (derived.onFailure) {
         derived.onFailure =
-          currentDragSelector !== id
+          currentDragId !== id
             ? derived.onFailure.map((p, idx) =>
                 deriveState(p, selector.concat([ON_FAILURE, String(idx)]))
               )
@@ -85,7 +91,7 @@ export const DragAndDropTreeUI: FunctionComponent<Props> = ({
 
     state.processors = processors.map((processor, idx) => deriveState(processor, [String(idx)]));
     return state;
-  }, [processors, currentDragSelector, treeId]);
+  }, [processors, currentDragId, treeId]);
 
   const droppableContent = derivedTreeState.processors.length ? (
     derivedTreeState.processors.map((processor, idx) => {
@@ -98,6 +104,7 @@ export const DragAndDropTreeUI: FunctionComponent<Props> = ({
           index={idx}
           processor={processor}
           treeId={readTreeId()}
+          isLastItem={derivedTreeState.processors.length - 1 === idx}
         />
       );
     })
@@ -113,10 +120,17 @@ export const DragAndDropTreeUI: FunctionComponent<Props> = ({
     return () => unRegisterTreeItems(treeId);
   }, [derivedTreeState, baseSelector, registerTreeItems, unRegisterTreeItems, treeId]);
 
+  const className = classNames({
+    pipelineProcessorsEditor__dragAndDropTree__droppableContainer: true,
+    'pipelineProcessorsEditor__dragAndDropTree__droppableContainer--combine': Boolean(
+      currentCombineTargetId
+    ),
+  });
+
   return (
     <div className="pipelineProcessorsEditor__dragAndDropTree">
       <EuiDroppable
-        className="pipelineProcessorsEditor__dragAndDropTree__droppableContainer"
+        className={className}
         type={DROPPABLE_TYPE}
         droppableId={treeId}
         isCombineEnabled

@@ -5,6 +5,7 @@
  */
 
 import React, { FunctionComponent, useState } from 'react';
+import classNames from 'classnames';
 
 import {
   EuiDraggable,
@@ -19,6 +20,7 @@ import {
 
 import { ProcessorInternal, ProcessorSelector } from '../../types';
 import { DerivedProcessor } from './drag_and_drop_tree';
+import { useDragDropContext } from './drag_and_drop_tree_provider';
 
 export interface TreeNodeComponentArgs {
   processor: ProcessorInternal;
@@ -32,6 +34,7 @@ export interface Props {
   baseSelector: ProcessorSelector;
   processor: import('./drag_and_drop_tree').DerivedProcessor;
   level: number;
+  isLastItem: boolean;
 }
 
 export const TreeNode: FunctionComponent<Props> = ({
@@ -40,15 +43,25 @@ export const TreeNode: FunctionComponent<Props> = ({
   level,
   treeId,
   baseSelector,
+  isLastItem,
 }) => {
+  const { currentCombineTargetId } = useDragDropContext();
+
+  const leftIndentation = level <= 0 ? undefined : 30 * level;
+
   const angleBracket =
     level > 0 ? (
       <EuiFlexItem
         className="pipelineProcessorsEditor__dragAndDropTree__itemAngleBracketContainer"
-        style={{ marginLeft: 30 * level + 'px' }}
+        style={{ marginLeft: leftIndentation + 'px' }}
         grow={false}
       >
         <div className="pipelineProcessorsEditor__dragAndDropTree__itemAngleBracket" />
+        {!isLastItem ? (
+          <div className="pipelineProcessorsEditor__dragAndDropTree__itemAngleBracketConnector" />
+        ) : (
+          undefined
+        )}
       </EuiFlexItem>
     ) : (
       undefined
@@ -68,12 +81,19 @@ export const TreeNode: FunctionComponent<Props> = ({
             baseSelector={baseSelector}
             processor={p as DerivedProcessor}
             level={level + 1}
+            isLastItem={processor.onFailure.length - 1 === idx}
           />
         );
       });
     }
     return;
   };
+
+  const panelClassName = classNames({
+    pipelineProcessorsEditor__dragAndDropTree__item: true,
+    'pipelineProcessorsEditor__dragAndDropTree__item--combine':
+      processor.id === currentCombineTargetId,
+  });
 
   return (
     <>
@@ -91,36 +111,40 @@ export const TreeNode: FunctionComponent<Props> = ({
               <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
                 {angleBracket}
                 <EuiFlexItem grow={1}>
-                  <EuiPanel
-                    className="pipelineProcessorsEditor__dragAndDropTree__item"
-                    paddingSize="s"
-                  >
-                    <EuiFlexGroup
-                      responsive={false}
-                      gutterSize="none"
-                      direction="column"
-                      alignItems="flexStart"
-                    >
-                      <EuiFlexItem grow={1}>
-                        <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-                          <EuiFlexItem grow={false}>
-                            <div {...provided.dragHandleProps}>
-                              <EuiIcon type="grab" />
-                            </div>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            {component({ processor, selector: processor.selector })}
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiPanel>
+                  <div className="pipelineProcessorsEditor__dragAndDropTree__itemSpacer">
+                    <EuiPanel className={panelClassName} paddingSize="s">
+                      <EuiFlexGroup
+                        responsive={false}
+                        gutterSize="none"
+                        direction="column"
+                        alignItems="flexStart"
+                      >
+                        <EuiFlexItem grow={1}>
+                          <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+                            <EuiFlexItem grow={false}>
+                              <div {...provided.dragHandleProps}>
+                                <EuiIcon type="grab" />
+                              </div>
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              {component({ processor, selector: processor.selector })}
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiPanel>
+                  </div>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
             {processor.onFailure?.length ? (
               <EuiFlexItem grow={true}>
-                <EuiFlexGroup gutterSize="none" responsive={false}>
+                <EuiFlexGroup
+                  style={{ marginLeft: (leftIndentation ?? 0) + 20 + 'px' }}
+                  alignItems="center"
+                  gutterSize="none"
+                  responsive={false}
+                >
                   <EuiFlexItem grow={false}>
                     <EuiButtonIcon
                       aria-label="TODO FIX"

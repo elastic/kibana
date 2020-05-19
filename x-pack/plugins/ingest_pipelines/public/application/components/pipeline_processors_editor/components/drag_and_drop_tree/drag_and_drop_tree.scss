@@ -9,6 +9,11 @@ $minItemHeight: 65px;
     // ability to center align children
     display: flex;
     min-height: $minItemHeight;
+
+    &--combine {
+      border-color: $euiColorPrimary !important;
+      border-width: 2px !important;
+    }
   }
 
 
@@ -21,7 +26,13 @@ $minItemHeight: 65px;
     width: 20px;
     border-bottom: $euiColorMediumShade 2px solid;
     border-left: $euiColorMediumShade 2px solid;
-    min-height: calc(#{$minItemHeight} / 2);
+    height: calc(#{$minItemHeight + 20} / 2);
+  }
+
+  &__itemAngleBracketConnector {
+    width: 20px;
+    border-left: $euiColorMediumShade 2px solid;
+    height: calc(#{$minItemHeight + 20} / 2);
   }
 
   &__droppableContainer {
@@ -30,10 +41,19 @@ $minItemHeight: 65px;
     // Make up a bit of padding on bottom because of how the draggable container is styled
     padding-bottom: $euiSize;
     padding-left: $euiSizeS;
+
+    &--combine {
+      background-color: $euiColorLightestShade !important;
+    }
+  }
+
+  &__itemSpacer {
+    padding-top: 10px;
+    padding-bottom: 10px;
   }
 
   &__draggableContainer {
-    padding-top: $euiSize;
+    padding-top: 0;
     padding-right: $euiSizeS;
     padding-bottom: 0;
     padding-left: $euiSizeS;
