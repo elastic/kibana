@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint-disable max-classes-per-file */
 
 import { IScopedClusterClient } from 'kibana/server';
 import { MSearchResponse } from 'elasticsearch';
@@ -39,6 +38,10 @@ export interface QueryInfo {
 
 /**
  * Executes a multi search within ES.
+ *
+ * More info on multi search here:
+ * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html
+ * https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/msearch_examples.html
  */
 export class MultiSearcher {
   constructor(private readonly client: IScopedClusterClient) {}
