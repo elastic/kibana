@@ -5,9 +5,12 @@
  */
 
 import expect from '@kbn/expect';
+import * as Rx from 'rxjs';
+import { filter, first, mapTo, switchMap, timeout } from 'rxjs/operators';
 // @ts-ignore no module definition
-import { indexTimestamp } from '../../../legacy/plugins/reporting/server/lib/esqueue/helpers/index_timestamp';
-import { FtrProviderContext } from '../ftr_provider_context';
+import { indexTimestamp } from '../../legacy/plugins/reporting/server/lib/esqueue/helpers/index_timestamp';
+import { services as xpackServices } from '../functional/services';
+import { FtrProviderContext } from './ftr_provider_context';
 
 interface PDFAppCounts {
   app: {
@@ -56,7 +59,13 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
             .get(downloadReportPath)
             .responseType('blob')
             .set('kbn-xsrf', 'xxx')) as any;
-          log.debug(`Report at path ${downloadReportPath} returned code ${response.statusCode}`);
+          if (response.statusCode === 503) {
+            log.debug(`Report at path ${downloadReportPath} is pending`);
+          } else if (response.statusCode === 200) {
+            log.debug(`Report at path ${downloadReportPath} is complete`);
+          } else {
+            log.debug(`Report at path ${downloadReportPath} returned code ${response.statusCode}`);
+          }
           if (response.statusCode !== JOB_IS_PENDING_CODE) {
             clearInterval(intervalId);
             resolve(response.statusCode);
@@ -120,9 +129,25 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
       };
     },
 
-    async deleteAllReportingIndexes() {
-      log.debug('ReportingAPI.deleteAllReportingIndexes');
-      await esSupertest.delete('/.reporting*').expect(200);
+    async deleteAllReports() {
+      log.debug('ReportingAPI.deleteAllReports');
+
+      // ignores 409 errs and keeps retrying
+      const deleted$ = Rx.interval(100).pipe(
+        switchMap(() =>
+          esSupertest
+            .post('/.reporting*/_delete_by_query')
+            .send({ query: { match_all: {} } })
+            .then(({ status }) => status)
+        ),
+        filter(status => status === 200),
+        mapTo(true),
+        first(),
+        timeout(5000)
+      );
+
+      const reportsDeleted = await deleted$.toPromise();
+      expect(reportsDeleted).to.be(true);
     },
 
     expectRecentPdfAppStats(stats: UsageStats, app: string, count: number) {
@@ -158,3 +183,8 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
     },
   };
 }
+
+export const services = {
+  ...xpackServices,
+  reportingAPI: ReportingAPIProvider,
+};
