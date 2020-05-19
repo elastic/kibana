@@ -175,7 +175,7 @@
     "deep-freeze-strict": "^1.1.1",
     "deepmerge": "^4.2.2",
     "del": "^5.1.0",
-    "elastic-apm-node": "^3.2.0",
+    "elastic-apm-node": "^3.6.0",
     "elasticsearch": "^16.7.0",
     "elasticsearch-browser": "^16.7.0",
     "execa": "^4.0.0",
