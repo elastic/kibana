@@ -816,7 +816,7 @@ export function getUiSettingDefaults() {
       }),
       value: 'v7',
       type: 'select',
-      options: ['v7', 'v8'],
+      options: ['v7', 'v8 (beta)'],
       description: i18n.translate('kbn.advancedSettings.themeVersionText', {
         defaultMessage: `Switch between the theme used for the current and next version of Kibana. A page refresh is required for the setting to be applied.`,
       }),
