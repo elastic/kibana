@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { NumeralFormat } from './numeral';
 import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
-import { FORMAT_PERCENT_DEFAULT_PATTERN_SETTINGS } from '../../';
+import { FORMAT_PERCENT_DEFAULT_PATTERN_SETTINGS } from '../../constants';
 
 export class PercentFormat extends NumeralFormat {
   static id = FIELD_FORMAT_IDS.PERCENT;

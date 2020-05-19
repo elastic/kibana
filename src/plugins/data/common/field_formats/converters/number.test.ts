@@ -18,7 +18,7 @@
  */
 
 import { NumberFormat } from './number';
-import { FORMAT_NUMBER_DEFAULT_PATTERN_SETTINGS } from '../../';
+import { FORMAT_NUMBER_DEFAULT_PATTERN_SETTINGS } from '../../constants';
 
 describe('NumberFormat', () => {
   const config: Record<string, any> = {};

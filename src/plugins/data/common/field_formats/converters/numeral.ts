@@ -24,7 +24,7 @@ import numeralLanguages from '@elastic/numeral/languages';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert } from '../types';
-import { FORMAT_NUMBER_DEFAULT_LOCALE_SETTINGS } from '../../';
+import { FORMAT_NUMBER_DEFAULT_LOCALE_SETTINGS } from '../../constants';
 
 const numeralInst = numeral();
 

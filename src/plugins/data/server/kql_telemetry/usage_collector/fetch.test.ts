@@ -22,6 +22,7 @@ import { APICaller } from 'kibana/server';
 
 jest.mock('../../../common', () => ({
   DEFAULT_QUERY_LANGUAGE: 'lucene',
+  SEARCH_QUERY_LANGUAGE_SETTINGS: 'search:queryLanguage',
 }));
 
 let fetch: ReturnType<typeof fetchProvider>;

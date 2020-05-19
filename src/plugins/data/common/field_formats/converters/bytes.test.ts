@@ -18,7 +18,7 @@
  */
 
 import { BytesFormat } from './bytes';
-import { FORMAT_BYTES_DEFAULT_PATTERN_SETTINGS } from '../../';
+import { FORMAT_BYTES_DEFAULT_PATTERN_SETTINGS } from '../../constants';
 
 describe('BytesFormat', () => {
   const config: Record<string, any> = {};

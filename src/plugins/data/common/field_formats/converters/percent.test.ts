@@ -18,7 +18,7 @@
  */
 
 import { PercentFormat } from './percent';
-import { FORMAT_PERCENT_DEFAULT_PATTERN_SETTINGS } from '../../';
+import { FORMAT_PERCENT_DEFAULT_PATTERN_SETTINGS } from '../../constants';
 
 describe('PercentFormat', () => {
   const config: Record<string, any> = {};
