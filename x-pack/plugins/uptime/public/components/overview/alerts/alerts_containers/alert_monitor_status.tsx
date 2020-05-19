@@ -21,13 +21,13 @@ interface Props {
   };
 }
 
-export const AlertMonitorStatus = ({
+export const AlertMonitorStatus: React.FC<Props> = ({
   autocomplete,
   enabled,
   numTimes,
   setAlertParams,
   timerange,
-}: Props) => {
+}) => {
   const { filters, locations } = useSelector(selectMonitorStatusAlert);
   return (
     <AlertMonitorStatusComponent
@@ -41,3 +41,6 @@ export const AlertMonitorStatus = ({
     />
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { AlertMonitorStatus as default };
