@@ -4,9 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/public';
+import {
+  Plugin,
+  CoreSetup,
+  CoreStart,
+  PluginInitializerContext,
+  DEFAULT_APP_CATEGORIES,
+} from 'src/core/public';
 import { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
 // @ts-ignore
+import { i18n } from '@kbn/i18n';
 import { MapView } from './inspector/views/map_view';
 import {
   setAutocompleteService,
@@ -40,10 +47,12 @@ import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
-import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import { APP_ICON, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
 import { MapsXPackConfig, MapsConfigType } from '../config';
+import { MapsConfigType } from './index';
+import { getAppTitle } from '../common/i18n_getters';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -129,6 +138,25 @@ export class MapsPlugin
     home.featureCatalogue.register(featureCatalogueEntry);
     visualizations.registerAlias(getMapsVisTypeAlias());
     embeddable.registerEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, new MapEmbeddableFactory());
+
+    core.application.register({
+      id: APP_ID,
+      title: getAppTitle(),
+      description: i18n.translate('xpack.maps.appDescription', {
+        defaultMessage: 'Maps application',
+      }),
+      order: 4000,
+      icon: 'plugins/maps/icon.svg',
+      euiIconType: APP_ICON,
+      category: DEFAULT_APP_CATEGORIES.kibana,
+      async mount(context, params) {
+        const [coreStart, startPlugins] = await core.getStartServices();
+        bindStartCoreAndPlugins(coreStart, startPlugins);
+        const { renderApp } = await import('./maps_router');
+        return renderApp(context, params);
+      },
+    });
+
     return {
       config,
     };
