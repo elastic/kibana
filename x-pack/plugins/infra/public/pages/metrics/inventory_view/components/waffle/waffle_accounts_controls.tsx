@@ -58,7 +58,10 @@ export const WaffleAccountsControls = (props: Props) => {
   );
 
   const button = (
-    <DropdownButton label="Account" onClick={showPopover}>
+    <DropdownButton
+      label={i18n.translate('xpack.infra.waffle.accountLabel', { defaultMessage: 'Account' })}
+      onClick={showPopover}
+    >
       {currentLabel
         ? currentLabel.name
         : i18n.translate('xpack.infra.waffle.accountAllTitle', {
