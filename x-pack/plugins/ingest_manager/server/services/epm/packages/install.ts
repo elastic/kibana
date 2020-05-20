@@ -50,17 +50,40 @@ export async function ensureInstalledDefaultPackages(
   savedObjectsClient: SavedObjectsClientContract,
   callCluster: CallESAsCurrentUser
 ): Promise<Installation[]> {
-  const installations = [];
   const span = apm.startSpan('ensureInstalledDefaultPackages');
-  for (const pkgName in DefaultPackages) {
-    if (!DefaultPackages.hasOwnProperty(pkgName)) continue;
-    const installation = await ensureInstalledPackage({
-      savedObjectsClient,
-      pkgName,
-      callCluster,
-    });
-    if (installation) installations.push(installation);
-  }
+  // ensure base package is installed first
+  const baseInstallation = await ensureInstalledPackage({
+    savedObjectsClient,
+    pkgName: DefaultPackages.base,
+    callCluster,
+  });
+
+  // don't include base package in list to install in parallel / any order
+  const defaultPackages = Object.keys(DefaultPackages).filter(key => key !== DefaultPackages.base);
+  const otherInstallations = await Promise.all(
+    defaultPackages.map(pkgName =>
+      ensureInstalledPackage({
+        savedObjectsClient,
+        pkgName,
+        callCluster,
+      })
+    )
+  );
+
+  // `ensureInstalledPackage` return Installation | undefined
+  // filter out any undefined values
+  // we need the `is Installation` guard because of some TS issues
+  // https://github.com/microsoft/TypeScript/issues/20707#issuecomment-351874491
+  // https://github.com/microsoft/TypeScript/issues/20812
+  // https://github.com/microsoft/TypeScript/issues/16069
+  //
+  // This may be fixed in TS 3.9 (we're on 3.7)
+  // https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-9.html#improvements-in-inference-and-promiseall
+  const installations = [baseInstallation, ...otherInstallations].filter(
+    (installation: Installation | undefined): installation is Installation => {
+      return installation !== undefined;
+    }
+  );
 
   if (span) span.end();
   return installations;
