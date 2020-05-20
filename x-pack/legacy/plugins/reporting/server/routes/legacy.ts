@@ -7,13 +7,14 @@
 import { Legacy } from 'kibana';
 import querystring from 'querystring';
 import { API_BASE_URL } from '../../common/constants';
-import { ServerFacade, ReportingResponseToolkit, Logger } from '../../types';
-import { ReportingCore, ReportingSetupDeps } from '../types';
+import { ReportingSetupDeps, ServerFacade } from '../types';
 import {
   getRouteConfigFactoryReportingPre,
   GetRouteConfigFactoryFn,
 } from './lib/route_config_factories';
 import { HandlerErrorFunction, HandlerFunction } from './types';
+import { ReportingCore } from '../core';
+import { LevelLogger } from '../lib';
 
 const getStaticFeatureConfig = (getRouteConfig: GetRouteConfigFactoryFn, featureId: string) =>
   getRouteConfig(() => featureId);
@@ -26,7 +27,7 @@ export function registerLegacy(
   plugins: ReportingSetupDeps,
   handler: HandlerFunction,
   handleError: HandlerErrorFunction,
-  logger: Logger
+  logger: LevelLogger
 ) {
   const config = reporting.getConfig();
   const getRouteConfig = getRouteConfigFactoryReportingPre(config, plugins, logger);
@@ -37,7 +38,7 @@ export function registerLegacy(
       path,
       method: 'POST',
       options: getStaticFeatureConfig(getRouteConfig, exportTypeId),
-      handler: async (request: Legacy.Request, h: ReportingResponseToolkit) => {
+      handler: async (request: Legacy.Request, h: Legacy.ResponseToolkit) => {
         const message = `The following URL is deprecated and will stop working in the next major version: ${request.url.path}`;
         logger.warn(message, ['deprecation']);
 

@@ -5,12 +5,12 @@
  */
 
 import events from 'events';
-import Puid from 'puid';
 import moment from 'moment';
-import { constants } from './constants';
-import { WorkerTimeoutError, UnspecifiedWorkerError } from './helpers/errors';
-import { CancellationToken } from '../../../common/cancellation_token';
+import Puid from 'puid';
+import { CancellationToken } from '../../../../../../plugins/reporting/common';
 import { Poller } from '../../../../../common/poller';
+import { constants } from './constants';
+import { UnspecifiedWorkerError, WorkerTimeoutError } from './helpers/errors';
 
 const puid = new Puid();
 

@@ -5,7 +5,7 @@
  */
 import { Logger } from '../../../../../src/core/server';
 import { RunContext } from '../../../../plugins/task_manager/server';
-import { EncryptedSavedObjectsPluginStart } from '../../../../plugins/encrypted_saved_objects/server';
+import { EncryptedSavedObjectsClient } from '../../../../plugins/encrypted_saved_objects/server';
 import { PluginStartContract as ActionsPluginStartContract } from '../../../../plugins/actions/server';
 import {
   AlertType,
@@ -21,7 +21,7 @@ export interface TaskRunnerContext {
   getServices: GetServicesFunction;
   actionsPlugin: ActionsPluginStartContract;
   eventLogger: IEventLogger;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   getBasePath: GetBasePathFunction;
 }
