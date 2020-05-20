@@ -1,0 +1,16 @@
+.processorsEditor__tree {
+  &__treeLeaf {
+    &__itemContainer {
+      min-height: 40px;
+      position: relative;
+    }
+    &__itemLeft {
+      margin-right: auto;
+    }
+    &__itemCenter {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+}

@@ -15,6 +15,8 @@ export {
   OnDragEndArgs,
 } from './drag_and_drop_tree';
 
+export { Tree } from './tree';
+
 export { PipelineProcessorsEditorItem } from './pipeline_processors_editor_item';
 
 export { ProcessorRemoveModal } from './processor_remove_modal';

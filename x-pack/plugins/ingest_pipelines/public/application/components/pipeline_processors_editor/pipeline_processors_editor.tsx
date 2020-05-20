@@ -18,6 +18,7 @@ import {
   ProcessorsTitleAndTestButton,
   OnFailureProcessorsTitle,
   DragAndDropTreeProvider,
+  Tree,
 } from './components';
 
 import { ProcessorInternal, ProcessorSelector } from './types';
@@ -103,10 +104,12 @@ export const PipelineProcessorsEditor: FunctionComponent<Props> = memo(
               className="processorsEditorContainer"
             >
               <EuiFlexItem grow={false}>
-                <DragAndDropTree
+                <Tree
+                  onAction={({ destination, source }) => {
+                    processorsDispatch({ type: 'moveProcessor', payload: { destination, source } });
+                  }}
                   baseSelector={PROCESSOR_STATE_SCOPE}
                   processors={processors}
-                  renderItem={renderTreeItem}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
