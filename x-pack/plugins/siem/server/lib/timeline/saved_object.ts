@@ -123,7 +123,12 @@ export const getAllTimeline = async (
     searchFields: onlyUserFavorite
       ? ['title', 'description', 'favorite.keySearch']
       : ['title', 'description'],
-    filter: getTimelineTypeFilter(timelineType),
+    /**
+     * CreateTemplateTimelineBtn
+     * Remove the comment here to enable template timeline and apply the change below
+     * filter: getTimelineTypeFilter(timelineType)
+     */
+    filter: getTimelineTypeFilter(TimelineType.default),
     sortField: sort != null ? sort.sortField : undefined,
     sortOrder: sort != null ? sort.sortOrder : undefined,
   };
