@@ -323,10 +323,9 @@ describe('Header', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find(`[data-test-subj="header-text-${columnHeader.id}"]`)).toHaveStyleRule(
-        'text-overflow',
-        'ellipsis'
-      );
+      expect(
+        wrapper.find(`[data-test-subj="header-text-${columnHeader.id}"]`).at(1)
+      ).toHaveStyleRule('text-overflow', 'ellipsis');
     });
   });
 
