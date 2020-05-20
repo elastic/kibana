@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestFacade } from '../../../../types';
-import { JobParamsPostPayloadPanelCsv, JobParamsPanelCsv } from '../../types';
+import { RequestFacade } from '../../../../server/types';
+import { JobParamsPanelCsv, JobParamsPostPayloadPanelCsv } from '../../types';
 
 export function getJobParamsFromRequest(
   request: RequestFacade,
