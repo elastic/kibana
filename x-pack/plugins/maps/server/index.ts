@@ -6,9 +6,9 @@
 import { PluginInitializerContext } from 'src/core/server';
 import { PluginConfigDescriptor } from 'kibana/server';
 import { MapsPlugin } from './plugin';
-import { configSchema, ConfigSchema } from '../config';
+import { configSchema, MapsXPackConfig } from '../config';
 
-export const config: PluginConfigDescriptor<ConfigSchema> = {
+export const config: PluginConfigDescriptor<MapsXPackConfig> = {
   exposeToBrowser: {
     enabled: true,
     showMapVisualizationTypes: true,

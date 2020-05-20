@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-let internalRepository;
-export const setInternalRepository = createInternalRepository => {
+import { ISavedObjectsRepository } from 'kibana/server';
+
+let internalRepository: ISavedObjectsRepository;
+export const setInternalRepository = (
+  createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository
+) => {
   internalRepository = createInternalRepository();
 };
 export const getInternalRepository = () => internalRepository;

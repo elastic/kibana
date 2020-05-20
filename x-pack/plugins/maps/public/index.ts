@@ -5,16 +5,8 @@
  */
 
 import { PluginInitializer } from 'kibana/public';
-import { PluginInitializerContext } from 'kibana/server';
+import { PluginInitializerContext } from 'kibana/public';
 import { MapsPlugin, MapsPluginSetup, MapsPluginStart } from './plugin';
-
-export interface MapsConfigType {
-  enabled: boolean;
-  showMapVisualizationTypes: boolean;
-  showMapsInspectorAdapter: boolean;
-  preserveDrawingBuffer: boolean;
-  enableVectorTiles: boolean;
-}
 
 // @ts-ignore
 export const plugin: PluginInitializer<MapsPluginSetup, MapsPluginStart> = (

@@ -16,7 +16,7 @@ import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects.js'
 import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
 import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, createMapPath } from '../common/constants';
 import { mapSavedObjects, mapsTelemetrySavedObjects } from './saved_objects';
-import { ConfigSchema } from '../../../../src/plugins/maps_legacy/config';
+import { MapsXPackConfig } from '../config';
 // @ts-ignore
 import { setInternalRepository } from './kibana_server_services';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
@@ -34,11 +34,11 @@ interface SetupDeps {
 }
 
 export class MapsPlugin implements Plugin {
-  readonly _initializerContext: PluginInitializerContext<ConfigSchema>;
+  readonly _initializerContext: PluginInitializerContext<MapsXPackConfig>;
   private readonly _logger: Logger;
   private readonly kibanaVersion: string;
 
-  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+  constructor(initializerContext: PluginInitializerContext<MapsXPackConfig>) {
     this._logger = initializerContext.logger.get();
     this._initializerContext = initializerContext;
     this.kibanaVersion = initializerContext.env.packageInfo.version;

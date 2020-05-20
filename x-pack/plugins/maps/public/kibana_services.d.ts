@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { IIndexPattern, DataPublicPluginStart } from 'src/plugins/data/public';
-import _ from 'lodash';
-import { MapsConfigType } from './index';
+import { MapsConfigType } from '../config';
 
 export function getLicenseId(): any;
 export function getInspector(): any;

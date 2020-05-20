@@ -43,8 +43,7 @@ import { VisualizationsSetup } from '../../../../src/plugins/visualizations/publ
 import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/public';
-import { ConfigSchema } from '../config';
-import { MapsConfigType } from './index';
+import { MapsXPackConfig, MapsConfigType } from '../config';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -114,9 +113,9 @@ export class MapsPlugin
       MapsPluginSetupDependencies,
       MapsPluginStartDependencies
     > {
-  readonly _initializerContext: PluginInitializerContext<ConfigSchema>;
+  readonly _initializerContext: PluginInitializerContext<MapsXPackConfig>;
 
-  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+  constructor(initializerContext: PluginInitializerContext<MapsXPackConfig>) {
     this._initializerContext = initializerContext;
   }
 

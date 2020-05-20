@@ -176,8 +176,10 @@ async function getIndexPatternSavedObjects(savedObjectsClient: SavedObjectsClien
 
 export async function getMapsTelemetry(config: any) {
   const savedObjectsClient = getInternalRepository();
+  // @ts-ignore
   const mapSavedObjects: MapSavedObject[] = await getMapSavedObjects(savedObjectsClient);
   const indexPatternSavedObjects: IIndexPattern[] = await getIndexPatternSavedObjects(
+    // @ts-ignore
     savedObjectsClient
   );
   const settings: SavedObjectAttribute = {

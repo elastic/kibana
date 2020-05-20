@@ -6,6 +6,14 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
+export interface MapsConfigType {
+  enabled: boolean;
+  showMapVisualizationTypes: boolean;
+  showMapsInspectorAdapter: boolean;
+  preserveDrawingBuffer: boolean;
+  enableVectorTiles: boolean;
+}
+
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   showMapVisualizationTypes: schema.boolean({ defaultValue: false }),
@@ -17,4 +25,4 @@ export const configSchema = schema.object({
   enableVectorTiles: schema.boolean({ defaultValue: false }),
 });
 
-export type ConfigSchema = TypeOf<typeof configSchema>;
+export type MapsXPackConfig = TypeOf<typeof configSchema>;
