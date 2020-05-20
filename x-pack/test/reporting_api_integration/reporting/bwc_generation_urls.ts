@@ -4,33 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as GenerationUrls from './generation_urls';
+import { FtrProviderContext } from '../ftr_provider_context';
+import * as GenerationUrls from '../generation_urls';
+import { OSS_DATA_ARCHIVE_PATH, OSS_KIBANA_ARCHIVE_PATH } from './constants';
 
-export default function({ getService }) {
+// eslint-disable-next-line import/no-default-export
+export default function({ getService }: FtrProviderContext) {
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('reportingAPI');
-  const usageAPI = getService('usageAPI');
 
   describe('BWC report generation urls', () => {
-    describe('Pre 6_2', () => {
-      before(async () => {
-        await reportingAPI.deleteAllReportingIndexes();
-      });
+    before(async () => {
+      await esArchiver.load(OSS_KIBANA_ARCHIVE_PATH);
+      await esArchiver.load(OSS_DATA_ARCHIVE_PATH);
 
+      await kibanaServer.uiSettings.update({
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await reportingAPI.deleteAllReports();
+    });
+
+    describe('Pre 6_2', () => {
       // The URL being tested was captured from release 6.4 and then the layout section was removed to test structure before
       // preserve_layout was introduced. See https://github.com/elastic/kibana/issues/23414
       it('job posted successfully', async () => {
         const path = await reportingAPI.postJob(GenerationUrls.PDF_PRINT_DASHBOARD_PRE_6_2);
         await reportingAPI.waitForJobToFinish(path);
-        const stats = await usageAPI.getUsageStats();
-        reportingAPI.expectCompletedReportCount(stats, 1);
       }).timeout(500000);
     });
 
     describe('6_2', () => {
-      before(async () => {
-        await reportingAPI.deleteAllReportingIndexes();
-      });
-
       // Might not be great test practice to lump all these jobs together but reporting takes awhile and it'll be
       // more efficient to post them all up front, then sequentially.
       it('multiple jobs posted', async () => {
@@ -41,11 +45,6 @@ export default function({ getService }) {
 
         await reportingAPI.expectAllJobsToFinishSuccessfully(reportPaths);
       }).timeout(1540000);
-
-      it('jobs completed successfully', async () => {
-        const stats = await usageAPI.getUsageStats();
-        reportingAPI.expectCompletedReportCount(stats, 3);
-      });
     });
 
     // 6.3 urls currently being tested as part of the "bwc_existing_indexes" test suite. Reports are time consuming,

@@ -7,8 +7,6 @@
 require('@kbn/plugin-helpers').babelRegister();
 
 require('@kbn/test').runTestsCli([
-  require.resolve('../test/reporting/configs/chromium_api.js'),
-  require.resolve('../test/reporting/configs/generate_api'),
   require.resolve('../test/functional/config.js'),
   require.resolve('../test/functional_with_es_ssl/config.ts'),
   require.resolve('../test/functional/config_security_basic.ts'),
@@ -50,4 +48,5 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/licensing_plugin/config.public'),
   require.resolve('../test/licensing_plugin/config.legacy'),
   require.resolve('../test/endpoint_api_integration_no_ingest/config.ts'),
+  require.resolve('../test/reporting_api_integration/config.js'),
 ]);
