@@ -973,16 +973,31 @@ export class DashboardAppController {
           });
 
           const checkboxes = [
-            [UrlParams.SHOW_TOP_MENU, 'topMenu', 'Top menu'],
-            [UrlParams.SHOW_QUERY_INPUT, 'query', 'Query'],
-            [UrlParams.SHOW_TIME_FILTER, 'timeFilter', 'Time filter'],
-            [UrlParams.SHOW_FILTER_BAR, 'filterBar', 'Filter bar'],
-          ].map(([urlParam, translationId, defaultMessage]) => ({
-            id: urlParam,
-            label: i18n.translate(`dashboard.embedUrlParamExtension.${translationId}`, {
-              defaultMessage,
-            }),
-          }));
+            {
+              id: UrlParams.SHOW_TOP_MENU,
+              label: i18n.translate('dashboard.embedUrlParamExtension.topMenu', {
+                defaultMessage: 'Top menu',
+              }),
+            },
+            {
+              id: UrlParams.SHOW_QUERY_INPUT,
+              label: i18n.translate('dashboard.embedUrlParamExtension.query', {
+                defaultMessage: 'Query',
+              }),
+            },
+            {
+              id: UrlParams.SHOW_TIME_FILTER,
+              label: i18n.translate('dashboard.embedUrlParamExtension.timeFilter', {
+                defaultMessage: 'Time filter',
+              }),
+            },
+            {
+              id: UrlParams.SHOW_FILTER_BAR,
+              label: i18n.translate('dashboard.embedUrlParamExtension.filterBar', {
+                defaultMessage: 'Filter bar',
+              }),
+            },
+          ];
 
           const handleChange = (param: string): void => {
             const urlParamsSelectedMapUpdate = {
