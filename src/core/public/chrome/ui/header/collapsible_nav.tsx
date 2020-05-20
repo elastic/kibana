@@ -196,9 +196,7 @@ export function CollapsibleNav({
               return {
                 ...hydratedLink,
                 'data-test-subj': 'collapsibleNavAppLink--recent',
-                onClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-                  closeNav();
-                },
+                onClick: closeNav,
               };
             })}
             maxWidth="none"
@@ -252,7 +250,7 @@ export function CollapsibleNav({
 
         {/* Things with no category (largely for custom plugins) */}
         {unknowns.map((link, i) => (
-          <EuiCollapsibleNavGroup key={i}>
+          <EuiCollapsibleNavGroup data-test-subj={`collapsibleNavGroup-noCategory`} key={i}>
             <EuiListGroup flush>
               <EuiListGroupItem color="text" size="s" {...readyForEUI(link, true)} />
             </EuiListGroup>

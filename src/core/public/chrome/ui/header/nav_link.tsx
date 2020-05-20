@@ -47,7 +47,7 @@ export function createEuiListItem({
   legacyMode,
   appId,
   basePath,
-  onClick,
+  onClick = () => {},
   navigateToApp,
   dataTestSubj,
 }: Props) {
@@ -58,6 +58,7 @@ export function createEuiListItem({
     href,
     /* Use href and onClick to support "open in new tab" and SPA navigation in the same link */
     onClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+      onClick();
       if (
         !legacyMode && // ignore when in legacy mode
         !legacy && // ignore links to legacy apps
@@ -67,9 +68,6 @@ export function createEuiListItem({
       ) {
         event.preventDefault();
         navigateToApp(id);
-        if (onClick) {
-          onClick();
-        }
       }
     },
     // Legacy apps use `active` property, NP apps should match the current app

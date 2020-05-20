@@ -34,6 +34,7 @@ const createSetupContractMock = (): jest.Mocked<ApplicationSetup> => ({
   register: jest.fn(),
   registerAppUpdater: jest.fn(),
   registerMountContext: jest.fn(),
+  getComponent: jest.fn().mockImplementation(() => null),
 });
 
 const createInternalSetupContractMock = (): jest.Mocked<InternalApplicationSetup> => ({

@@ -17,38 +17,46 @@
  * under the License.
  */
 
-// import { mount } from 'enzyme';
-// import React from 'react';
-// import { Header } from './header';
+import React from 'react';
+import { BehaviorSubject } from 'rxjs';
+import { NavType } from '.';
+import { httpServiceMock } from '../../../http/http_service.mock';
+import { applicationServiceMock } from '../../../mocks';
+import { Header } from './header';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-// function mockProps() {
-//   return {
-//     kibanaVersion: '1.0.0',
-//     // application: InternalApplicationStart,
-//     // appTitle$: Rx.Observable<string>,
-//     // badge$: Rx.Observable<ChromeBadge | undefined>,
-//     // breadcrumbs$: Rx.Observable<ChromeBreadcrumb[]>,
-//     // homeHref: string,
-//     // isVisible$: Rx.Observable<boolean>,
-//     // kibanaDocLink: string,
-//     // navLinks$: Rx.Observable<ChromeNavLink[]>,
-//     // recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>,
-//     // forceAppSwitcherNavigation$: Rx.Observable<boolean>,
-//     // helpExtension$: Rx.Observable<ChromeHelpExtension | undefined>,
-//     // helpSupportUrl$: Rx.Observable<string>,
-//     // legacyMode: boolean,
-//     // navControlsLeft$: Rx.Observable<readonly ChromeNavControl[]>,
-//     // navControlsRight$: Rx.Observable<readonly ChromeNavControl[]>,
-//     // basePath: HttpStart['basePath'],
-//     // isLocked$: Rx.Observable<boolean>,
-//     // navType$: Rx.Observable<NavType>,
-//     // onIsLockedUpdate: OnIsLockedUpdate,
-//   };
-// }
+function mockProps() {
+  const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+  const application = applicationServiceMock.createInternalStartContract();
+
+  return {
+    application,
+    kibanaVersion: '1.0.0',
+    appTitle$: new BehaviorSubject('test'),
+    badge$: new BehaviorSubject(undefined),
+    breadcrumbs$: new BehaviorSubject([]),
+    homeHref: '/',
+    isVisible$: new BehaviorSubject(true),
+    kibanaDocLink: '/docs',
+    navLinks$: new BehaviorSubject([]),
+    recentlyAccessed$: new BehaviorSubject([]),
+    forceAppSwitcherNavigation$: new BehaviorSubject(false),
+    helpExtension$: new BehaviorSubject(undefined),
+    helpSupportUrl$: new BehaviorSubject(''),
+    legacyMode: false,
+    navControlsLeft$: new BehaviorSubject([]),
+    navControlsRight$: new BehaviorSubject([]),
+    basePath: http.basePath,
+    isLocked$: new BehaviorSubject(false),
+    navType$: new BehaviorSubject('modern' as NavType),
+    loadingCount$: new BehaviorSubject(0),
+    onIsLockedUpdate: () => {},
+  };
+}
 
 // describe('Header', () => {
 //   it('renders an empty header', () => {
-//     const component = mount(<Header {...mockProps()} kibanaVersion="" />);
+//     const component = mountWithIntl(<Header {...mockProps()} />);
 //     expect(component).toMatchSnapshot();
 //   });
 // });
