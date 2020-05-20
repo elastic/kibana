@@ -396,8 +396,12 @@ export function XYChart({
           const rows = table.rows.filter(
             row =>
               xAccessor &&
-              row[xAccessor] &&
-              !(splitAccessor && !row[splitAccessor] && accessors.every(accessor => !row[accessor]))
+              typeof row[xAccessor] !== 'undefined' &&
+              !(
+                splitAccessor &&
+                typeof row[splitAccessor] === 'undefined' &&
+                accessors.every(accessor => typeof row[accessor] === 'undefined')
+              )
           );
 
           const seriesProps: SeriesSpec = {
