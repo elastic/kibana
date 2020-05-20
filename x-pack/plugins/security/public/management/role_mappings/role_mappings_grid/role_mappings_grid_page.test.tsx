@@ -138,7 +138,7 @@ describe('RoleMappingsGridPage', () => {
     const links = findTestSubject(wrapper, 'roleMappingRoles').find(EuiLink);
     expect(links).toHaveLength(1);
     expect(links.at(0).props()).toMatchObject({
-      href: '#/management/security/roles/edit/superuser',
+      href: '/edit/superuser',
     });
   });
 
@@ -274,7 +274,7 @@ describe('RoleMappingsGridPage', () => {
       Object {
         "children": <div>
           kibana_user
-           
+
           <EuiIcon
             className="eui-alignTop"
             color="warning"

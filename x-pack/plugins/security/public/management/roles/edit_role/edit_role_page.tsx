@@ -37,6 +37,7 @@ import {
   IHttpFetchError,
   NotificationsStart,
 } from 'src/core/public';
+import { ScopedHistory } from 'kibana/public';
 import { FeaturesPluginStart } from '../../../../../features/public';
 import { Feature } from '../../../../../features/common';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
@@ -65,6 +66,7 @@ import { IndicesAPIClient } from '../indices_api_client';
 import { RolesAPIClient } from '../roles_api_client';
 import { PrivilegesAPIClient } from '../privileges_api_client';
 import { KibanaPrivileges } from '../model';
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   action: 'edit' | 'clone';
@@ -82,6 +84,7 @@ interface Props {
   uiCapabilities: Capabilities;
   notifications: NotificationsStart;
   fatalErrors: FatalErrorsSetup;
+  history: ScopedHistory;
 }
 
 function useRunAsUsers(
@@ -283,6 +286,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   docLinks,
   uiCapabilities,
   notifications,
+  history,
 }) => {
   // We should keep the same mutable instance of Validator for every re-render since we'll
   // eventually enable validation after the first time user tries to save a role.
@@ -462,7 +466,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
 
   const getReturnToRoleListButton = () => {
     return (
-      <EuiButton onClick={backToRoleList} data-test-subj="roleFormReturnButton">
+      <EuiButton {...reactRouterNavigate(history, '')} data-test-subj="roleFormReturnButton">
         <FormattedMessage
           id="xpack.security.management.editRole.returnToRoleListButtonLabel"
           defaultMessage="Return to role list"
@@ -608,7 +612,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
 
         <EuiSpacer />
 
-        {getFormButtons()}
+        {getFormButtons(history)}
       </EuiForm>
     </div>
   );

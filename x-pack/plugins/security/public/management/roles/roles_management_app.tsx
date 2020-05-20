@@ -59,7 +59,13 @@ export const rolesManagementApp = Object.freeze({
         const rolesAPIClient = new RolesAPIClient(http);
         const RolesGridPageWithBreadcrumbs = () => {
           setBreadcrumbs(rolesBreadcrumbs);
-          return <RolesGridPage notifications={notifications} rolesAPIClient={rolesAPIClient} />;
+          return (
+            <RolesGridPage
+              notifications={notifications}
+              rolesAPIClient={rolesAPIClient}
+              history={history}
+            />
+          );
         };
 
         const EditRolePageWithBreadcrumbs = ({ action }: { action: 'edit' | 'clone' }) => {
@@ -95,6 +101,7 @@ export const rolesManagementApp = Object.freeze({
               docLinks={new DocumentationLinksService(docLinks)}
               uiCapabilities={application.capabilities}
               indexPatterns={data.indexPatterns}
+              history={history}
             />
           );
         };

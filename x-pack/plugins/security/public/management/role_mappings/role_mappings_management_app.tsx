@@ -70,7 +70,7 @@ export const roleMappingsManagementApp = Object.freeze({
           setBreadcrumbs([
             ...roleMappingsBreadcrumbs,
             name
-              ? { text: name, href: `#${basePath}/edit/${encodeURIComponent(name)}` }
+              ? { text: name, href: `/edit/${encodeURIComponent(name)}` }
               : {
                   text: i18n.translate('xpack.security.roleMappings.createBreadcrumb', {
                     defaultMessage: 'Create',
