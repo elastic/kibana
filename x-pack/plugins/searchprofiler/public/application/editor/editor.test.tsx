@@ -6,7 +6,7 @@
 import 'brace';
 import 'brace/mode/json';
 
-import { TestUtils } from '../../../../../../src/plugins/es_ui_shared/public';
+import { TestUtils } from 'src/plugins/es_ui_shared/public';
 import { Editor, Props } from '.';
 
 const { registerTestBed } = TestUtils;
