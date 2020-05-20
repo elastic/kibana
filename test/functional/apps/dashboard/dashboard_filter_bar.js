@@ -186,5 +186,21 @@ export default function({ getService, getPageObjects }) {
         expect(filterCount).to.equal(1);
       });
     });
+
+    describe('bad filters are loaded properly', function() {
+      before(async () => {
+        await filterBar.ensureFieldEditorModalIsClosed();
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.loadSavedDashboard('dashboard with bad filters');
+      });
+
+      it('bad filters are loaded in error mode', async function() {
+        const hasBadFieldFilter = await filterBar.hasFilter('baad-field', 'error', false);
+        expect(hasBadFieldFilter).to.be(true);
+
+        const hasBadIndexPatternFilter = await filterBar.hasFilter('name', 'error', false);
+        expect(hasBadIndexPatternFilter).to.be(true);
+      });
+    });
   });
 }

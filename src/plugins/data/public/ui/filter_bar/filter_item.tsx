@@ -61,6 +61,12 @@ class FilterItemUI extends Component<Props, State> {
       this.togglePopover();
     }
   };
+
+  private isDisabled(errorMessage?: string) {
+    const { disabled } = this.props.filter.meta;
+    return disabled || !!errorMessage;
+  }
+
   public render() {
     const { filter, id } = this.props;
     const { negate, disabled } = filter.meta;
@@ -70,27 +76,23 @@ class FilterItemUI extends Component<Props, State> {
     try {
       valueLabel = getDisplayValueFromFilter(filter, this.props.indexPatterns);
     } catch (e) {
-      errorMessage = valueLabel = this.props.intl.formatMessage(
-        {
-          id: 'data.filter.filterBar.labelErrorText',
-          defaultMessage: `Error: {errorMessage}`,
-        },
-        { errorMessage: e.message }
-      );
+      valueLabel = this.props.intl.formatMessage({
+        id: 'data.filter.filterBar.labelErrorText',
+        defaultMessage: `Error`,
+      });
+      errorMessage = e.message;
     }
     const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
     const dataTestSubjValue = filter.meta.value
       ? `filter-value-${!!errorMessage ? 'error' : valueLabel}`
       : '';
-    const dataTestSubjDisabled = `filter-${
-      this.props.filter.meta.disabled ? 'disabled' : 'enabled'
-    }`;
+    const dataTestSubjDisabled = `filter-${this.isDisabled(errorMessage) ? 'disabled' : 'enabled'}`;
     const dataTestSubjPinned = `filter-${isFilterPinned(filter) ? 'pinned' : 'unpinned'}`;
 
     const classes = classNames(
       'globalFilterItem',
       {
-        'globalFilterItem-isDisabled': disabled || !!errorMessage,
+        'globalFilterItem-isDisabled': this.isDisabled(errorMessage),
         'globalFilterItem-isInvalid': !!errorMessage,
         'globalFilterItem-isPinned': isFilterPinned(filter),
         'globalFilterItem-isExcluded': negate,
