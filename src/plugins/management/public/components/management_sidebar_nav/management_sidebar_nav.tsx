@@ -20,14 +20,17 @@
 import { EuiIcon, EuiSideNav, EuiSideNavItemType, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { AppMountParameters } from 'kibana/public';
 import { ManagementApp, ManagementSection } from '../../utils';
 
 import './_index.scss';
+
 import { ManagementItem } from '../../utils/management_item';
+import { reactRouterNavigate } from '../../../../kibana_react/public';
 
 interface ManagementSidebarNavProps {
   sections: ManagementSection[];
-  onManagementSectionSelected: (id: string, path: string) => void;
+  history: AppMountParameters['history'];
   selectedId: string;
 }
 
@@ -43,7 +46,7 @@ const navMenuLabel = i18n.translate('management.nav.menu', {
 export const ManagementSidebarNav = ({
   selectedId,
   sections,
-  onManagementSectionSelected,
+  history,
 }: ManagementSidebarNavProps) => {
   const HEADER_ID = 'stack-management-nav-header';
   const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);
@@ -72,7 +75,7 @@ export const ManagementSidebarNav = ({
       .filter(app => app.enabled)
       .map(app => ({
         ...createNavItem(app, {
-          onClick: () => onManagementSectionSelected(app.id, app.basePath),
+          ...reactRouterNavigate(history, app.basePath),
         }),
       }));
   };

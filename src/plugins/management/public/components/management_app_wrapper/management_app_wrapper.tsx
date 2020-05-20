@@ -40,7 +40,7 @@ export const ManagementAppWrapper = ({
   const { mount, basePath } = app;
   const unmount = useRef<Unmount>();
 
-  mountElementRef.current = createRef<HTMLDivElement>();
+  mountElementRef.current = createRef<HTMLElement>();
 
   useEffect(() => {
     if (mount && basePath) {
@@ -68,5 +68,5 @@ export const ManagementAppWrapper = ({
     }
   }, [app.id, basePath, history, mount, onAppMounted, setBreadcrumbs]);
 
-  return <div ref={mountElementRef.current} />;
+  return <main ref={mountElementRef.current} />;
 };

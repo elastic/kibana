@@ -46,16 +46,9 @@ export const ManagementApp = ({ context, dependencies, history }: ManagementAppP
   const [selectedId, setSelectedId] = useState<string>('');
   const [sections, setSections] = useState<ManagementSection[]>();
 
-  const onManagementSectionSelected = useCallback(
-    (id: string, path: string) => {
-      history.push(path);
-      window.scrollTo(0, 0);
-    },
-    [history]
-  );
-
   const onAppMounted = useCallback((id: string) => {
     setSelectedId(id);
+    window.scrollTo(0, 0);
   }, []);
 
   const setBreadcrumbs = useCallback(
@@ -77,11 +70,7 @@ export const ManagementApp = ({ context, dependencies, history }: ManagementAppP
     <I18nProvider>
       <Router history={history}>
         <EuiPage>
-          <ManagementSidebarNav
-            selectedId={selectedId}
-            sections={sections}
-            onManagementSectionSelected={onManagementSectionSelected}
-          />
+          <ManagementSidebarNav selectedId={selectedId} sections={sections} history={history} />
           <EuiPageBody restrictWidth={true} className="mgtPage__body">
             <Switch>
               {sections.map(section =>
