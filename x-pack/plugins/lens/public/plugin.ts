@@ -95,7 +95,8 @@ export class LensPlugin {
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
-        const { embeddableOriginatingApp } = params.history.fetchLocationState<LensIncomingState>();
+        const { embeddableOriginatingApp } =
+          params.history.fetchLocationState<LensIncomingState>() || {};
         if (embeddableOriginatingApp) {
           params.history.removeFromLocationState(['embeddableOriginatingApp']);
         }

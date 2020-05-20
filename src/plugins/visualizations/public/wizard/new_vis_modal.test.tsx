@@ -143,7 +143,7 @@ describe('NewVisModal', () => {
       );
     });
 
-    it('closes and redirects properly if visualization with aliasPath and addToDashboard in editorParams', () => {
+    it('closes and redirects properly if visualization with aliasPath and originatingApp in redirectState', () => {
       const onClose = jest.fn();
       const navigateToApp = jest.fn();
       const wrapper = mountWithIntl(
@@ -151,7 +151,8 @@ describe('NewVisModal', () => {
           isOpen={true}
           onClose={onClose}
           visTypesRegistry={visTypes}
-          editorParams={['foo=true', 'bar=42', 'embeddableOriginatingApp=notAnApp']}
+          editorParams={['foo=true', 'bar=42']}
+          redirectState={{ embeddableOriginatingApp: 'coolJestTestApp' }}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
           application={({ navigateToApp } as unknown) as ApplicationStart}
@@ -161,7 +162,8 @@ describe('NewVisModal', () => {
       const visButton = wrapper.find('button[data-test-subj="visType-visWithAliasUrl"]');
       visButton.simulate('click');
       expect(navigateToApp).toBeCalledWith('otherApp', {
-        path: '#/aliasUrl?embeddableOriginatingApp=notAnApp',
+        path: '#/aliasUrl',
+        state: { embeddableOriginatingApp: 'coolJestTestApp' },
       });
       expect(onClose).toHaveBeenCalled();
     });
