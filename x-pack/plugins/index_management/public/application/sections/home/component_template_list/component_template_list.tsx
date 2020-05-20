@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
+import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../../../../../common/constants/ui_metric';
 import { SectionLoading } from '../../../../shared_imports';
 import { useLoadComponentTemplates } from '../../../services/api';
 import { useServices } from '../../../app_context';
 import { EmptyPrompt } from './empty_prompt';
 import { ComponentTable } from './table';
+import { LoadError } from './error';
+import { ComponentTemplatesDeleteModal } from './delete_modal';
 
 interface MatchParams {
   templateName?: string;
@@ -28,10 +31,12 @@ export const ComponentTemplateList: React.FunctionComponent<RouteComponentProps<
 
   const { data, isLoading, error, sendRequest } = useLoadComponentTemplates();
 
+  const [componentTemplatesToDelete, setComponentTemplatesToDelete] = useState<string[]>([]);
+
   // Track component loaded
-  // useEffect(() => {
-  //   uiMetricService.trackMetric('loaded', UIM_TEMPLATE_LIST_LOAD);
-  // }, [uiMetricService]);
+  useEffect(() => {
+    uiMetricService.trackMetric('loaded', UIM_COMPONENT_TEMPLATE_LIST_LOAD);
+  }, [uiMetricService]);
 
   if (data?.length === 0) {
     return <EmptyPrompt />;
@@ -49,8 +54,32 @@ export const ComponentTemplateList: React.FunctionComponent<RouteComponentProps<
       </SectionLoading>
     );
   } else if (data?.length) {
-    content = <ComponentTable componentTemplates={data} onReloadClick={sendRequest} />;
+    content = (
+      <ComponentTable
+        componentTemplates={data}
+        onReloadClick={sendRequest}
+        onDeleteClick={setComponentTemplatesToDelete}
+      />
+    );
+  } else {
+    content = <LoadError onReloadClick={sendRequest} />;
   }
 
-  return <div data-test-subj="componentTemplateList">{content}</div>;
+  return (
+    <div data-test-subj="componentTemplateList">
+      {content}
+      {componentTemplatesToDelete?.length > 0 ? (
+        <ComponentTemplatesDeleteModal
+          callback={deleteResponse => {
+            if (deleteResponse?.hasDeletedComponentTemplates) {
+              // refetch the component templates
+              sendRequest();
+            }
+            setComponentTemplatesToDelete([]);
+          }}
+          componentTemplatesToDelete={componentTemplatesToDelete}
+        />
+      ) : null}
+    </div>
+  );
 };
