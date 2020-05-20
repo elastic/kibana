@@ -82,7 +82,7 @@ export function AlertIntegrations(props: Props) {
                   }
                 ),
                 href: plugin.core.http.basePath.prepend(
-                  '/app/kibana#/management/insightsAndAlerting/triggersActions/alerts'
+                  '/app/management/insightsAndAlerting/triggersActions/alerts'
                 ),
                 icon: 'tableOfContents'
               }

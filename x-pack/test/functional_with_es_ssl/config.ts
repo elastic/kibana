@@ -50,8 +50,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
     apps: {
       ...xpackFunctionalConfig.get('apps'),
       triggersActions: {
-        pathname: '/app/kibana',
-        hash: '/management/insightsAndAlerting/triggersActions',
+        pathname: '/app/management/insightsAndAlerting/triggersActions',
       },
     },
     esTestCluster: {
