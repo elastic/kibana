@@ -40,6 +40,7 @@ import {
 
 const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
   const basePath = getServices().getBasePath();
+
   const renderCards = () => {
     const apmData = {
       title: intl.formatMessage({
@@ -296,7 +297,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
             </strong>
             <EuiLink
               style={{ display: 'block', textAlign: 'center' }}
-              href="#/management/kibana/indexPatterns"
+              href={`${basePath}/app/management/kibana/indexPatterns`}
             >
               <FormattedMessage
                 id="home.addData.yourDataLink"

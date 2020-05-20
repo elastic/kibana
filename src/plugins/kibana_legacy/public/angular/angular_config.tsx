@@ -426,7 +426,11 @@ const $setupUrlOverflowHandling = (newPlatform: CoreStart, isLocalAngular: boole
                 values={{
                   storeInSessionStorageParam: <code>state:storeInSessionStorage</code>,
                   advancedSettingsLink: (
-                    <a href="#/management/kibana/settings">
+                    <a
+                      href={newPlatform.application.getUrlForApp('management', {
+                        path: 'kibana/settings',
+                      })}
+                    >
                       <FormattedMessage
                         id="kibana_legacy.bigUrlWarningNotificationMessage.advancedSettingsLinkText"
                         defaultMessage="advanced settings"

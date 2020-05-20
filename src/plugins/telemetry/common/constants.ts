@@ -49,7 +49,7 @@ export const LOCALSTORAGE_KEY = 'telemetry.data';
 /**
  * Link to Advanced Settings.
  */
-export const PATH_TO_ADVANCED_SETTINGS = 'kibana#/management/kibana/settings';
+export const PATH_TO_ADVANCED_SETTINGS = 'management/kibana/settings';
 
 /**
  * Link to the Elastic Telemetry privacy statement.

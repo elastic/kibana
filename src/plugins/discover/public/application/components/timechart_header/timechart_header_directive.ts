@@ -16,7 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { TimechartHeader } from './timechart_header';
 
-export { MANAGEMENT_BREADCRUMB } from './breadcrumbs';
-import { npStart } from 'ui/new_platform';
-export const management = npStart.plugins.management.legacy;
+export function createTimechartHeaderDirective(reactDirective: any) {
+  return reactDirective(TimechartHeader, [
+    ['from', { watchDepth: 'reference' }],
+    ['to', { watchDepth: 'reference' }],
+    ['options', { watchDepth: 'reference' }],
+    ['onChangeInterval', { watchDepth: 'reference' }],
+    ['stateInterval', { watchDepth: 'reference' }],
+    ['showScaledInfo', { watchDepth: 'reference' }],
+    ['bucketIntervalDescription', { watchDepth: 'reference' }],
+    ['bucketIntervalScale', { watchDepth: 'reference' }],
+  ]);
+}

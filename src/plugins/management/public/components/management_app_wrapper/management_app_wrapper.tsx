@@ -19,13 +19,13 @@
 
 import React, { useEffect, createRef, useRef, RefObject } from 'react';
 
-import { ChromeBreadcrumb, AppMountParameters } from 'kibana/public';
+import { ChromeBreadcrumb, AppMountParameters, ScopedHistory } from 'kibana/public';
 import { ManagementApp } from '../../utils';
 import { Unmount } from '../../types';
 
 interface ManagementSectionWrapperProps {
   app: ManagementApp;
-  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  setBreadcrumbs: (crumbs?: ChromeBreadcrumb[], history?: ScopedHistory) => void;
   onAppMounted: (id: string) => void;
   history: AppMountParameters['history'];
 }
@@ -40,13 +40,13 @@ export const ManagementAppWrapper = ({
   const { mount, basePath } = app;
   const unmount = useRef<Unmount>();
 
-  mountElementRef.current = createRef<HTMLDivElement>();
+  mountElementRef.current = createRef<HTMLElement>();
 
   useEffect(() => {
     if (mount && basePath) {
       const mountResult = mount({
         basePath,
-        setBreadcrumbs,
+        setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => setBreadcrumbs(crumbs, history),
         element: mountElementRef.current!.current,
         history,
       });
@@ -68,5 +68,5 @@ export const ManagementAppWrapper = ({
     }
   }, [app.id, basePath, history, mount, onAppMounted, setBreadcrumbs]);
 
-  return <div ref={mountElementRef.current} />;
+  return <main ref={mountElementRef.current} />;
 };

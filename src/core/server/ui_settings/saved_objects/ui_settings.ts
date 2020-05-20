@@ -38,7 +38,7 @@ export const uiSettingsType: SavedObjectsType = {
     importableAndExportable: true,
     getInAppUrl() {
       return {
-        path: `/app/kibana#/management/kibana/settings`,
+        path: `/app/management/kibana/settings`,
         uiCapabilitiesPath: 'advancedSettings.show',
       };
     },

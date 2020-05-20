@@ -17,5 +17,6 @@
  * under the License.
  */
 
+export { MANAGEMENT_BREADCRUMB } from './breadcrumbs';
 export { ManagementApp, RegisterManagementAppArgs } from './management_app';
 export { ManagementSection, RegisterManagementSectionArgs } from './management_section';

@@ -95,6 +95,7 @@ export class Plugin
             capabilities: core.application.capabilities,
             navigateToApp: core.application.navigateToApp,
             setBreadcrumbs: params.setBreadcrumbs,
+            history: params.history,
             actionTypeRegistry: this.actionTypeRegistry,
             alertTypeRegistry: this.alertTypeRegistry,
           });

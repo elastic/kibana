@@ -17,11 +17,5 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const MANAGEMENT_BREADCRUMB = Object.freeze({
-  text: i18n.translate('common.ui.stackManagement.breadcrumb', {
-    defaultMessage: 'Stack Management',
-  }),
-  href: '#/management',
-});
+export { TimechartHeader } from './timechart_header';
+export { createTimechartHeaderDirective } from './timechart_header_directive';

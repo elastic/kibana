@@ -61,7 +61,7 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
       <EuiLink
         color="text"
         href={kibana.services?.application?.getUrlForApp(
-          'kibana#/management/insightsAndAlerting/triggersActions/alerts'
+          'management/insightsAndAlerting/triggersActions/alerts'
         )}
       >
         <FormattedMessage

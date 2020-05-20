@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
+import { ScopedHistory } from 'kibana/public';
+
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ActionsConnectorsList } from './actions_connectors_list';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../../../src/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
@@ -66,6 +68,7 @@ describe('actions_connectors_list component empty', () => {
           'actions:delete': true,
         },
       },
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: actionTypeRegistry as any,
       alertTypeRegistry: {} as any,
@@ -171,6 +174,7 @@ describe('actions_connectors_list component with items', () => {
           'actions:delete': true,
         },
       },
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
         get() {
@@ -256,6 +260,7 @@ describe('actions_connectors_list component empty with show only capability', ()
           'actions:delete': false,
         },
       },
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
         get() {
@@ -341,6 +346,7 @@ describe('actions_connectors_list with show only capability', () => {
           'actions:delete': false,
         },
       },
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
         get() {
@@ -438,6 +444,7 @@ describe('actions_connectors_list component with disabled items', () => {
           'actions:delete': true,
         },
       },
+      history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
       setBreadcrumbs: jest.fn(),
       actionTypeRegistry: {
         get() {

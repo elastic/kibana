@@ -92,7 +92,7 @@ export const createEnsureDefaultIndexPattern = (core: CoreStart) => {
         core.application.navigateToApp('home');
       } else {
         window.location.href = core.http.basePath.prepend(
-          `/app/kibana#/management/kibana/indexPatterns?bannerMessage=${bannerMessage}`
+          `/app/management/kibana/indexPatterns?bannerMessage=${bannerMessage}`
         );
       }
 

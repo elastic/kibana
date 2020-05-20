@@ -17,11 +17,11 @@
  * under the License.
  */
 
-declare module 'ui/management' {
-  export const SidebarNav: React.FC<any>;
-  export const management: any; // TODO - properly provide types
-  export const MANAGEMENT_BREADCRUMB: {
-    text: string;
-    href: string;
-  };
-}
+import { i18n } from '@kbn/i18n';
+
+export const MANAGEMENT_BREADCRUMB = {
+  text: i18n.translate('management.breadcrumb', {
+    defaultMessage: 'Stack Management',
+  }),
+  href: '/',
+};

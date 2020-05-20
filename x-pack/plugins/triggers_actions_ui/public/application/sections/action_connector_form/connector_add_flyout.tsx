@@ -293,7 +293,7 @@ const UpgradeYourLicenseCallOut = ({ http }: { http: HttpSetup }) => (
     <EuiFlexGroup gutterSize="s" wrap={true}>
       <EuiFlexItem grow={false}>
         <EuiButton
-          href={`${http.basePath.get()}/app/kibana#${LICENSE_MANAGEMENT_BASE_PATH}`}
+          href={`${http.basePath.get()}/app/${LICENSE_MANAGEMENT_BASE_PATH}`}
           iconType="gear"
           target="_blank"
         >
