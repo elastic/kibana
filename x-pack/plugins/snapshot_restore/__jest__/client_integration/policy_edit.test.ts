@@ -114,6 +114,7 @@ describe('<PolicyEdit />', () => {
               ignoreUnavailable: true,
             },
             retention: {
+              ...POLICY_EDIT.retention,
               expireAfterValue: Number(EXPIRE_AFTER_VALUE),
               expireAfterUnit: EXPIRE_AFTER_UNIT,
             },
@@ -145,11 +146,10 @@ describe('<PolicyEdit />', () => {
 
         const expected = {
           ...POLICY_EDIT,
-          ...{
-            retention: {
-              expireAfterValue: Number(EXPIRE_AFTER_VALUE),
-              expireAfterUnit: TIME_UNITS.DAY, // default value
-            },
+          retention: {
+            ...POLICY_EDIT.retention,
+            expireAfterValue: Number(EXPIRE_AFTER_VALUE),
+            expireAfterUnit: TIME_UNITS.DAY, // default value
           },
         };
         expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
