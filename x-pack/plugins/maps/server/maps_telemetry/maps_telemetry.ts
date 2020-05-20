@@ -21,6 +21,7 @@ import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapSavedObject } from '../../common/map_saved_object_type';
 // @ts-ignore
 import { getInternalRepository } from '../kibana_server_services';
+import { MapsConfigType } from '../../config';
 
 interface IStats {
   [key: string]: {
@@ -174,7 +175,7 @@ async function getIndexPatternSavedObjects(savedObjectsClient: SavedObjectsClien
   return _.get(indexPatternSavedObjects, 'saved_objects', []);
 }
 
-export async function getMapsTelemetry(config: any) {
+export async function getMapsTelemetry(config: MapsConfigType) {
   const savedObjectsClient = getInternalRepository();
   // @ts-ignore
   const mapSavedObjects: MapSavedObject[] = await getMapSavedObjects(savedObjectsClient);

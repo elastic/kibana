@@ -8,10 +8,11 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getMapsTelemetry } from '../maps_telemetry';
 // @ts-ignore
 import { TELEMETRY_TYPE } from '../../../common/constants';
+import { MapsConfigType } from '../../../config';
 
 export function registerMapsUsageCollector(
   usageCollection: UsageCollectionSetup,
-  config: any
+  config: MapsConfigType
 ): void {
   if (!usageCollection) {
     return;
