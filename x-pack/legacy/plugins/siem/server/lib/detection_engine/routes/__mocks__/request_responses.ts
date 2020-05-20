@@ -254,9 +254,9 @@ export const getFindResultWithMultiHits = ({
 
 export const ruleStatusRequest = () =>
   requestMock.create({
-    method: 'get',
+    method: 'post',
     path: `${DETECTION_ENGINE_RULES_URL}/_find_statuses`,
-    query: { ids: ['someId'] },
+    body: { ids: ['someId'] },
   });
 
 export const getImportRulesRequest = (hapiStream?: HapiReadableStream) =>
