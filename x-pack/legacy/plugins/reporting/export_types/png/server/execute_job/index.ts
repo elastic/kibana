@@ -9,7 +9,8 @@ import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { PNG_JOB_TYPE } from '../../../../common/constants';
 import { ReportingCore } from '../../../../server';
-import { ESQueueWorkerExecuteFn, ExecuteJobFactory, JobDocOutput, Logger } from '../../../../types';
+import { LevelLogger } from '../../../../server/lib';
+import { ESQueueWorkerExecuteFn, ExecuteJobFactory, JobDocOutput } from '../../../../server/types';
 import {
   decryptJobHeaders,
   getConditionalHeaders,
@@ -23,7 +24,7 @@ type QueuedPngExecutorFactory = ExecuteJobFactory<ESQueueWorkerExecuteFn<JobDocP
 
 export const executeJobFactory: QueuedPngExecutorFactory = async function executeJobFactoryFn(
   reporting: ReportingCore,
-  parentLogger: Logger
+  parentLogger: LevelLogger
 ) {
   const config = reporting.getConfig();
   const encryptionKey = config.get('encryptionKey');

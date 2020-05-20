@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SecurityPluginSetup } from '../../../../../../plugins/security/server';
+import { TimelineType } from '../../../../common/types/timeline';
 
 import {
   serverMock,
@@ -80,7 +81,10 @@ describe('get draft timelines', () => {
           timeline: [],
         });
 
-        const response = await server.inject(getDraftTimelinesRequest(), context);
+        const response = await server.inject(
+          getDraftTimelinesRequest(TimelineType.default),
+          context
+        );
         expect(mockPersistTimeline).toHaveBeenCalled();
         expect(response.status).toEqual(200);
         expect(response.body).toEqual({
@@ -97,7 +101,10 @@ describe('get draft timelines', () => {
           timeline: [mockGetDraftTimelineValue],
         });
 
-        const response = await server.inject(getDraftTimelinesRequest(), context);
+        const response = await server.inject(
+          getDraftTimelinesRequest(TimelineType.default),
+          context
+        );
         expect(mockPersistTimeline).not.toHaveBeenCalled();
         expect(response.status).toEqual(200);
         expect(response.body).toEqual({
