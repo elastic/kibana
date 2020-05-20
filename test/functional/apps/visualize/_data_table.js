@@ -174,7 +174,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visEditor.clickBucket('Split rows');
       await PageObjects.visEditor.selectAggregation('Date Histogram');
       await PageObjects.visEditor.selectField('@timestamp');
-      await PageObjects.visEditor.setInterval('Daily');
+      await PageObjects.visEditor.setInterval('Day');
       await PageObjects.visEditor.clickGo();
       const data = await PageObjects.visChart.getTableVisData();
       log.debug(data.split('\n'));
@@ -196,7 +196,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.visEditor.clickBucket('Split rows');
       await PageObjects.visEditor.selectAggregation('Date Histogram');
       await PageObjects.visEditor.selectField('@timestamp');
-      await PageObjects.visEditor.setInterval('Daily');
+      await PageObjects.visEditor.setInterval('Day');
       await PageObjects.visEditor.clickGo();
       const data = await PageObjects.visChart.getTableVisData();
       expect(data.trim().split('\n')).to.be.eql([
