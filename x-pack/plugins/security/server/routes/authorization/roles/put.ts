@@ -5,6 +5,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SubFeaturePrivilegeConfig, Feature } from '../../../../../features/common';
+import { Role } from '../../../../common/model';
 import { RouteDefinitionParams } from '../../index';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
@@ -14,7 +16,40 @@ import {
   transformPutPayloadToElasticsearchRole,
 } from './model';
 
-export function definePutRolesRoutes({ router, authz, clusterClient }: RouteDefinitionParams) {
+const roleGrantsSubFeaturePrivileges = (features: Feature[], role: Role) => {
+  const subFeaturePrivileges: Record<string, SubFeaturePrivilegeConfig[]> = features.reduce(
+    (acc, feature) => {
+      return {
+        ...acc,
+        [feature.id]: feature.subFeatures
+          ?.map((sf) => sf.privilegeGroups.map((pg) => pg.privileges))
+          .flat(2),
+      };
+    },
+    {}
+  );
+
+  const hasAnySubFeaturePrivileges = (role.kibana ?? []).some((kibanaPrivilege) =>
+    Object.entries(kibanaPrivilege.feature ?? {}).some(([featureId, privileges]) => {
+      return (
+        subFeaturePrivileges.hasOwnProperty(featureId) &&
+        subFeaturePrivileges[featureId].some(({ id }) => {
+          return privileges.includes(id);
+        })
+      );
+    })
+  );
+
+  return hasAnySubFeaturePrivileges;
+};
+
+export function definePutRolesRoutes({
+  router,
+  authz,
+  clusterClient,
+  getFeatures,
+  getFeatureUsageService,
+}: RouteDefinitionParams) {
   router.put(
     {
       path: '/api/security/role/{name}',
@@ -46,9 +81,16 @@ export function definePutRolesRoutes({ router, authz, clusterClient }: RouteDefi
           rawRoles[name] ? rawRoles[name].applications : []
         );
 
-        await clusterClient
-          .asScoped(request)
-          .callAsCurrentUser('shield.putRole', { name: request.params.name, body });
+        const [features] = await Promise.all<Feature[]>([
+          getFeatures(),
+          clusterClient
+            .asScoped(request)
+            .callAsCurrentUser('shield.putRole', { name: request.params.name, body }),
+        ]);
+
+        if (roleGrantsSubFeaturePrivileges(features, request.body as Role)) {
+          getFeatureUsageService().recordSubFeaturePrivilegeUsage();
+        }
 
         return response.noContent();
       } catch (error) {

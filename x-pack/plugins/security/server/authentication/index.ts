@@ -17,6 +17,7 @@ import { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import { Authenticator, ProviderSession } from './authenticator';
 import { APIKeys, CreateAPIKeyParams, InvalidateAPIKeyParams } from './api_keys';
+import { SecurityFeatureUsageServiceStart } from '../feature_usage';
 
 export { canRedirectRequest } from './can_redirect_request';
 export { Authenticator, ProviderLoginAttempt } from './authenticator';
@@ -37,6 +38,7 @@ export {
 
 interface SetupAuthenticationParams {
   auditLogger: SecurityAuditLogger;
+  getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
   http: CoreSetup['http'];
   clusterClient: IClusterClient;
   config: ConfigType;
@@ -48,6 +50,7 @@ export type Authentication = UnwrapPromise<ReturnType<typeof setupAuthentication
 
 export async function setupAuthentication({
   auditLogger,
+  getFeatureUsageService,
   http,
   clusterClient,
   config,
@@ -86,6 +89,7 @@ export async function setupAuthentication({
 
   const authenticator = new Authenticator({
     auditLogger,
+    getFeatureUsageService,
     getCurrentUser,
     clusterClient,
     basePath: http.basePath,

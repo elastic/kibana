@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Feature } from '../../../features/server';
 import {
   CoreSetup,
   HttpResources,
@@ -23,6 +24,7 @@ import { defineIndicesRoutes } from './indices';
 import { defineUsersRoutes } from './users';
 import { defineRoleMappingRoutes } from './role_mapping';
 import { defineViewRoutes } from './views';
+import { SecurityFeatureUsageServiceStart } from '../feature_usage';
 
 /**
  * Describes parameters used to define HTTP routes.
@@ -37,6 +39,8 @@ export interface RouteDefinitionParams {
   authc: Authentication;
   authz: Authorization;
   license: SecurityLicense;
+  getFeatures: () => Promise<Feature[]>;
+  getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {

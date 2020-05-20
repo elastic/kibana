@@ -42,7 +42,9 @@ describe('Security Plugin', () => {
       (mockClusterClient as unknown) as jest.Mocked<ICustomClusterClient>
     );
 
-    mockDependencies = { licensing: { license$: of({}) } } as PluginSetupDependencies;
+    mockDependencies = ({
+      licensing: { license$: of({}), featureUsage: { register: jest.fn() } },
+    } as unknown) as PluginSetupDependencies;
   });
 
   describe('setup()', () => {

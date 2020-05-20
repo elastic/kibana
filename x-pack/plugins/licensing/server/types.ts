@@ -8,6 +8,8 @@ import { IClusterClient } from 'src/core/server';
 import { ILicense, LicenseStatus, LicenseType } from '../common/types';
 import { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
 
+export { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
+
 export interface ElasticsearchError extends Error {
   status?: number;
 }

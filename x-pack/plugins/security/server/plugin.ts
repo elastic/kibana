@@ -12,11 +12,15 @@ import {
   CoreSetup,
   Logger,
   PluginInitializerContext,
+  CoreStart,
 } from '../../../../src/core/server';
 import { deepFreeze } from '../../../../src/core/server';
 import { SpacesPluginSetup } from '../../spaces/server';
-import { PluginSetupContract as FeaturesSetupContract } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
+import {
+  PluginSetupContract as FeaturesSetupContract,
+  PluginStartContract as FeaturesStartContract,
+} from '../../features/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 
 import { Authentication, setupAuthentication } from './authentication';
 import { Authorization, setupAuthorization } from './authorization';
@@ -26,6 +30,7 @@ import { SecurityLicenseService, SecurityLicense } from '../common/licensing';
 import { setupSavedObjects } from './saved_objects';
 import { SecurityAuditLogger } from './audit';
 import { elasticsearchClientPlugin } from './elasticsearch_client_plugin';
+import { SecurityFeatureUsageService, SecurityFeatureUsageServiceStart } from './feature_usage';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
@@ -82,6 +87,11 @@ export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
 }
 
+export interface PluginStartDependencies {
+  features: FeaturesStartContract;
+  licensing: LicensingPluginStart;
+}
+
 /**
  * Represents Security Plugin instance that will be managed by the Kibana plugin system.
  */
@@ -90,6 +100,15 @@ export class Plugin {
   private clusterClient?: ICustomClusterClient;
   private spacesService?: SpacesService | symbol = Symbol('not accessed');
   private securityLicenseService?: SecurityLicenseService;
+
+  private featureUsageService?: SecurityFeatureUsageService;
+  private featureUsageServiceStart?: SecurityFeatureUsageServiceStart;
+  private readonly getFeatureUsageService = () => {
+    if (!this.featureUsageServiceStart) {
+      throw new Error(`featureUsageServiceStart is not registered!`);
+    }
+    return this.featureUsageServiceStart!;
+  };
 
   private legacyAPI?: LegacyAPI;
   private readonly getLegacyAPI = () => {
@@ -135,9 +154,13 @@ export class Plugin {
       license$: licensing.license$,
     });
 
+    this.featureUsageService = new SecurityFeatureUsageService();
+    this.featureUsageService.setup({ featureUsage: licensing.featureUsage });
+
     const auditLogger = new SecurityAuditLogger(() => this.getLegacyAPI().auditLogger);
     const authc = await setupAuthentication({
       auditLogger,
+      getFeatureUsageService: this.getFeatureUsageService,
       http: core.http,
       clusterClient: this.clusterClient,
       config,
@@ -175,6 +198,11 @@ export class Plugin {
       authc,
       authz,
       license,
+      getFeatures: () =>
+        (core.getStartServices() as Promise<
+          [CoreStart, PluginStartDependencies, unknown]
+        >).then(([, { features: featuresStart }]) => featuresStart.getFeatures()),
+      getFeatureUsageService: this.getFeatureUsageService,
     });
 
     return deepFreeze<SecurityPluginSetup>({
@@ -212,8 +240,11 @@ export class Plugin {
     });
   }
 
-  public start() {
+  public start(core: CoreStart, { licensing, features }: PluginStartDependencies) {
     this.logger.debug('Starting plugin');
+    this.featureUsageServiceStart = this.featureUsageService!.start({
+      featureUsage: licensing.featureUsage,
+    });
   }
 
   public stop() {
@@ -227,6 +258,14 @@ export class Plugin {
     if (this.securityLicenseService) {
       this.securityLicenseService.stop();
       this.securityLicenseService = undefined;
+    }
+
+    if (this.featureUsageService) {
+      this.featureUsageService = undefined;
+    }
+
+    if (this.featureUsageServiceStart) {
+      this.featureUsageServiceStart = undefined;
     }
   }
 
