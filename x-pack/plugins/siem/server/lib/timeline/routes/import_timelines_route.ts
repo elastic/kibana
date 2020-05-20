@@ -28,7 +28,7 @@ import {
 import { createTimelinesStreamFromNdJson } from '../create_timelines_stream_from_ndjson';
 
 import { ImportTimelinesPayloadSchemaRt } from './schemas/import_timelines_schema';
-import { buildFrameworkRequest, TimelinesStatus, TimelineStatusActions } from './utils/common';
+import { buildFrameworkRequest } from './utils/common';
 import {
   getTupleDuplicateErrorsAndUniqueTimeline,
   isBulkError,
@@ -40,6 +40,7 @@ import {
 } from './utils/import_timelines';
 import { createTimelines } from './utils/create_timelines';
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { CompareTimelineStatus, TimelineStatusActions } from './utils/compare_timeline_status';
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 
@@ -134,7 +135,7 @@ export const importTimelinesRoute = (
 
                     let newTimeline = null;
                     try {
-                      const timelineStatus = new TimelinesStatus({
+                      const timelineStatus = new CompareTimelineStatus({
                         timelineType,
                         timelineInput: {
                           id: savedObjectId,

@@ -14,7 +14,7 @@ import {
   mockGetTimelineValue,
 } from '../__mocks__/import_timelines';
 
-describe('TimelinesStatus', () => {
+describe('CompareTimelineStatus', () => {
   describe('timeline', () => {
     describe('given timeline exists', () => {
       const mockGetTimeline: jest.Mock = jest.fn();
@@ -45,9 +45,10 @@ describe('TimelinesStatus', () => {
             }),
           };
         });
-        const TimelinesStatus = jest.requireActual('./common').TimelinesStatus;
+        const CompareTimelineStatus = jest.requireActual('./compare_timeline_status')
+          .CompareTimelineStatus;
 
-        timelineObj = new TimelinesStatus({
+        timelineObj = new CompareTimelineStatus({
           timelineInput: {
             id: mockUniqueParsedObjects[0].savedObjectId,
             type: TimelineType.default,
@@ -123,9 +124,10 @@ describe('TimelinesStatus', () => {
             }),
           };
         });
-        const TimelinesStatus = jest.requireActual('./common').TimelinesStatus;
+        const CompareTimelineStatus = jest.requireActual('./compare_timeline_status')
+          .CompareTimelineStatus;
 
-        timelineObj = new TimelinesStatus({
+        timelineObj = new CompareTimelineStatus({
           timelineInput: {
             id: mockUniqueParsedObjects[0].savedObjectId,
             type: TimelineType.default,
@@ -196,9 +198,10 @@ describe('TimelinesStatus', () => {
             }),
           };
         });
-        const TimelinesStatus = jest.requireActual('./common').TimelinesStatus;
+        const CompareTimelineStatus = jest.requireActual('./compare_timeline_status')
+          .CompareTimelineStatus;
 
-        timelineObj = new TimelinesStatus({
+        timelineObj = new CompareTimelineStatus({
           timelineInput: {
             id: mockUniqueParsedObjects[0].savedObjectId,
             type: TimelineType.default,
@@ -279,9 +282,10 @@ describe('TimelinesStatus', () => {
             getTimelineByTemplateTimelineId: mockGetTemplateTimeline,
           };
         });
-        const TimelinesStatus = jest.requireActual('./common').TimelinesStatus;
+        const CompareTimelineStatus = jest.requireActual('./compare_timeline_status')
+          .CompareTimelineStatus;
 
-        timelineObj = new TimelinesStatus({
+        timelineObj = new CompareTimelineStatus({
           timelineInput: {
             id: mockUniqueParsedObjects[0].savedObjectId,
             type: TimelineType.default,

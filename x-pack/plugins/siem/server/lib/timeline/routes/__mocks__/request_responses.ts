@@ -4,15 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as rt from 'io-ts';
+import stream from 'stream';
+
 import {
   TIMELINE_DRAFT_URL,
   TIMELINE_EXPORT_URL,
   TIMELINE_IMPORT_URL,
   TIMELINE_URL,
 } from '../../../../../common/constants';
-import stream from 'stream';
-import { requestMock } from '../../../detection_engine/routes/__mocks__';
 import { SavedTimeline, TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
+
+import { requestMock } from '../../../detection_engine/routes/__mocks__';
+
 import { updateTimelineSchema } from '../schemas/update_timelines_schema';
 import { createTimelineSchema } from '../schemas/create_timelines_schema';
 

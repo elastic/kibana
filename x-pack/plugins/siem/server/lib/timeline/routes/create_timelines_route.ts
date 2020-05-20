@@ -15,8 +15,9 @@ import { buildRouteValidation } from '../../../utils/build_validation/route_vali
 import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
 
 import { createTimelineSchema } from './schemas/create_timelines_schema';
-import { buildFrameworkRequest, TimelinesStatus, TimelineStatusActions } from './utils/common';
+import { buildFrameworkRequest } from './utils/common';
 import { createTimelines } from './utils/create_timelines';
+import { CompareTimelineStatus, TimelineStatusActions } from './utils/compare_timeline_status';
 
 export const createTimelinesRoute = (
   router: IRouter,
@@ -42,7 +43,7 @@ export const createTimelinesRoute = (
         const { timelineId, timeline, version } = request.body;
         const { templateTimelineId, templateTimelineVersion, timelineType } = timeline;
 
-        const timelineStatus = new TimelinesStatus({
+        const timelineStatus = new CompareTimelineStatus({
           timelineType: timelineType ?? TimelineType.default,
           timelineInput: {
             id: timelineId ?? null,
