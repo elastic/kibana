@@ -168,7 +168,7 @@ it('uses cache on second run and exist cleanly', async () => {
     repoRoot: MOCK_REPO_DIR,
     pluginScanDirs: [Path.resolve(MOCK_REPO_DIR, 'plugins')],
     maxWorkerCount: 1,
-    dist: true,
+    dist: false,
   });
 
   const msgs = await runOptimizer(config)
@@ -189,10 +189,6 @@ it('uses cache on second run and exist cleanly', async () => {
       "initializing",
       "initializing",
       "initialized",
-      "initialized",
-      "running",
-      "running",
-      "running",
       "success",
     ]
   `);
