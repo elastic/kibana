@@ -36,11 +36,11 @@ import { KueryFilterQueryKind } from '../../store/model';
 import { Note } from '../../lib/note';
 import moment from 'moment';
 import sinon from 'sinon';
-import { TimelineType } from '../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
 
-jest.mock('../../store/inputs/actions');
+jest.mock('../../../common/store/inputs/actions');
 jest.mock('../../store/timeline/actions');
-jest.mock('../../store/app/actions');
+jest.mock('../../../common/store/app/actions');
 jest.mock('uuid', () => {
   return {
     v1: jest.fn(() => 'uuid.v1()'),
@@ -299,8 +299,9 @@ describe('helpers', () => {
           columnId: '@timestamp',
           sortDirection: 'desc',
         },
+        status: TimelineStatus.draft,
         title: '',
-        timelineType: TimelineType.draft,
+        timelineType: TimelineType.default,
         templateTimelineId: null,
         templateTimelineVersion: null,
         version: '1',
@@ -396,8 +397,9 @@ describe('helpers', () => {
           columnId: '@timestamp',
           sortDirection: 'desc',
         },
+        status: TimelineStatus.draft,
         title: '',
-        timelineType: TimelineType.draft,
+        timelineType: TimelineType.default,
         templateTimelineId: null,
         templateTimelineVersion: null,
         version: '1',
@@ -517,7 +519,7 @@ describe('helpers', () => {
         },
         loadingEventIds: [],
         title: '',
-        timelineType: TimelineType.draft,
+        timelineType: TimelineType.default,
         templateTimelineId: null,
         templateTimelineVersion: null,
         noteIds: [],
@@ -535,6 +537,7 @@ describe('helpers', () => {
           columnId: '@timestamp',
           sortDirection: 'desc',
         },
+        status: TimelineStatus.draft,
         width: 1100,
         id: 'savedObject-1',
       });
@@ -685,7 +688,7 @@ describe('helpers', () => {
         },
         loadingEventIds: [],
         title: '',
-        timelineType: TimelineType.draft,
+        timelineType: TimelineType.default,
         templateTimelineId: null,
         templateTimelineVersion: null,
         noteIds: [],
@@ -703,6 +706,7 @@ describe('helpers', () => {
           columnId: '@timestamp',
           sortDirection: 'desc',
         },
+        status: TimelineStatus.draft,
         width: 1100,
         id: 'savedObject-1',
       });

@@ -29,12 +29,12 @@ import {
 } from 'rxjs/operators';
 
 import { esFilters, Filter, MatchAllFilter } from '../../../../../../src/plugins/data/public';
-import { TimelineType } from '../../../common/types/timeline';
-import { TimelineInput, ResponseTimeline, TimelineResult } from '../../graphql/types';
+import { TimelineStatus } from '../../../common/types/timeline';
+import { TimelineType, TimelineInput, ResponseTimeline, TimelineResult } from '../../graphql/types';
 import { AppApolloClient } from '../../lib/lib';
-import { addError } from '../app/actions';
-import { NotesById } from '../app/model';
-import { inputsModel } from '../inputs';
+import { addError } from '../../store/app/actions';
+import { NotesById } from '../../store/app/model';
+import { inputsModel } from '../../store/inputs';
 
 import {
   applyKqlFilterQuery,
@@ -148,10 +148,8 @@ export const createTimelineEpic = <State>(): Epic<
           return true;
         }
         if (action.type === createTimeline.type && isItAtimelineAction(timelineId)) {
-          if (timelineObj.timelineType !== 'draft') {
-            myEpicTimelineId.setTimelineVersion(null);
-            myEpicTimelineId.setTimelineId(null);
-          }
+          myEpicTimelineId.setTimelineVersion(null);
+          myEpicTimelineId.setTimelineId(null);
         } else if (action.type === addTimeline.type && isItAtimelineAction(timelineId)) {
           const addNewTimeline: TimelineModel = get('payload.timeline', action);
           myEpicTimelineId.setTimelineId(addNewTimeline.savedObjectId);
@@ -239,6 +237,7 @@ export const createTimelineEpic = <State>(): Epic<
                         ...savedTimeline,
                         savedObjectId: response.timeline.savedObjectId,
                         version: response.timeline.version,
+                        status: response.timeline.status ?? TimelineStatus.active,
                         timelineType: response.timeline.timelineType ?? TimelineType.default,
                         templateTimelineId: response.timeline.templateTimelineId ?? null,
                         templateTimelineVersion: response.timeline.templateTimelineVersion ?? null,
@@ -295,6 +294,7 @@ const timelineInput: TimelineInput = {
   dateRange: null,
   savedQueryId: null,
   sort: null,
+  status: null,
 };
 
 export const convertTimelineAsInput = (
