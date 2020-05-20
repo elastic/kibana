@@ -143,6 +143,8 @@ export interface TimelineInput {
   savedQueryId?: Maybe<string>;
 
   sort?: Maybe<SortTimelineInput>;
+
+  status?: Maybe<TimelineStatus>;
 }
 
 export interface ColumnHeaderInput {
@@ -340,9 +342,13 @@ export enum TlsFields {
   _id = '_id',
 }
 
+export enum TimelineStatus {
+  active = 'active',
+  draft = 'draft',
+}
+
 export enum TimelineType {
   default = 'default',
-  draft = 'draft',
   template = 'template',
 }
 
@@ -1954,6 +1960,8 @@ export interface TimelineResult {
 
   sort?: Maybe<SortTimelineResult>;
 
+  status?: Maybe<TimelineStatus>;
+
   title?: Maybe<string>;
 
   templateTimelineId?: Maybe<string>;
@@ -2237,7 +2245,7 @@ export interface GetAllTimelineQueryArgs {
 
   onlyUserFavorite?: Maybe<boolean>;
 
-  timelineType?: Maybe<string>;
+  timelineType?: Maybe<TimelineType>;
 }
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
@@ -4298,7 +4306,7 @@ export namespace GetAllTimeline {
     search?: Maybe<string>;
     sort?: Maybe<SortTimeline>;
     onlyUserFavorite?: Maybe<boolean>;
-    timelineType?: Maybe<string>;
+    timelineType?: Maybe<TimelineType>;
   };
 
   export type Query = {
