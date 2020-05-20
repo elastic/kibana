@@ -74,12 +74,22 @@ export const createFleetSetupHandler: RequestHandler<
 export const ingestManagerSetupHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
   const callCluster = context.core.elasticsearch.adminClient.callAsCurrentUser;
+  const logger = appContextService.getLogger();
   try {
     await setupIngestManager(soClient, callCluster);
     return response.ok({
       body: { isInitialized: true },
     });
   } catch (e) {
+    if (e.isBoom) {
+      logger.error(e.output.payload.message);
+      return response.customError({
+        statusCode: e.output.statusCode,
+        body: { message: e.output.payload.message },
+      });
+    }
+    logger.error(e.message);
+    logger.error(e.stack);
     return response.customError({
       statusCode: 500,
       body: { message: e.message },

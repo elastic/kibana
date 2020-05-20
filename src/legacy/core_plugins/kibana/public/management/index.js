@@ -21,7 +21,6 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import './sections';
 import uiRoutes from 'ui/routes';
 import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';

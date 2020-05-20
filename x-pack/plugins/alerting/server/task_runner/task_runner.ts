@@ -62,7 +62,7 @@ export class TaskRunner {
     // scoped with the API key to fetch the remaining data.
     const {
       attributes: { apiKey },
-    } = await this.context.encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<RawAlert>(
+    } = await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAlert>(
       'alert',
       alertId,
       { namespace }

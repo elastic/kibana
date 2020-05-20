@@ -4,6 +4,7 @@ exports[`AccessAgreementPage renders as expected when state is available 1`] = `
 <ReactMarkdown
   astPlugins={Array []}
   escapeHtml={true}
+  parserOptions={Object {}}
   plugins={Array []}
   rawSourcePos={false}
   renderers={Object {}}
@@ -11,20 +12,32 @@ exports[`AccessAgreementPage renders as expected when state is available 1`] = `
   sourcePos={false}
   transformLinkUri={[Function]}
 >
-  <div
-    key="root-1-1"
+  <Root
+    key="root-1-1-0"
   >
     <p
-      key="paragraph-1-1"
+      key="paragraph-1-1-0"
     >
-      This is 
+      <TextRenderer
+        key="text-1-1-0"
+        nodeKey="text-1-1-0"
+        value="This is "
+      >
+        This is 
+      </TextRenderer>
       <a
         href="../link"
-        key="link-1-9"
+        key="link-1-9-1"
       >
-        link
+        <TextRenderer
+          key="text-1-10-0"
+          nodeKey="text-1-10-0"
+          value="link"
+        >
+          link
+        </TextRenderer>
       </a>
     </p>
-  </div>
+  </Root>
 </ReactMarkdown>
 `;
