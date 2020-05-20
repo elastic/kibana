@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isObject, isNull, isUndefined } from 'lodash';
-import { RawValue } from './types';
+import { isNull, isObject, isUndefined } from 'lodash';
+import { RawValue } from '../../types';
 
 export function createFormatCsvValues(
   escapeValue: (value: RawValue, index: number, array: RawValue[]) => string,
