@@ -95,12 +95,15 @@ describe('data generator', () => {
 
   describe('creates a resolver tree structure', () => {
     let tree: Tree;
+    const ancestors = 3;
+    const childrenPerNode = 3;
+    const generations = 3;
     beforeEach(() => {
       tree = generator.generateTree({
         alwaysGenMaxChildrenPerNode: true,
-        ancestors: 3,
-        children: 3,
-        generations: 3,
+        ancestors,
+        children: childrenPerNode,
+        generations,
         percentTerminated: 100,
         percentWithRelated: 100,
         relatedEvents: 4,
@@ -108,30 +111,40 @@ describe('data generator', () => {
     });
 
     const eventInNode = (event: Event, node: TreeNode) => {
-      const inLifecycle = node.lifecycle.find(lifecycleEvent => {
-        return lifecycleEvent === event;
-      });
-
-      const inRelated = node.relatedEvents.find(relatedEvent => {
-        return relatedEvent === event;
-      });
+      const inLifecycle = node.lifecycle.includes(event);
+      const inRelated = node.relatedEvents.includes(event);
 
       return (inRelated || inLifecycle) && event.process.entity_id === node.id;
     };
 
-    it('has 2 lifecycle events for ancestors, children, and the origin', () => {
-      Array.from(tree.ancestry.values()).forEach(node => {
-        expect(node.lifecycle.length).toEqual(2);
-      });
+    it('has the right number of ancestors', () => {
+      expect(tree.ancestry.size).toEqual(ancestors);
+    });
 
-      Array.from(tree.children.values()).forEach(node => {
+    it('has the right number of total children', () => {
+      // the total number of children (not including the origin) = ((childrenPerNode^(generations + 1) - 1) / (childrenPerNode - 1)) - 1
+      // https://stackoverflow.com/questions/7842397/what-is-the-total-number-of-nodes-in-a-full-k-ary-tree-in-terms-of-the-number-o
+      const leaves = Math.pow(childrenPerNode, generations);
+      // last -1 is for the origin since it's not in the children map
+      const nodes = (childrenPerNode * leaves - 1) / (childrenPerNode - 1) - 1;
+      expect(tree.children.size).toEqual(nodes);
+    });
+
+    it('has 2 lifecycle events for ancestors, children, and the origin', () => {
+      for (const node of tree.ancestry.values()) {
         expect(node.lifecycle.length).toEqual(2);
-      });
+      }
+
+      for (const node of tree.children.values()) {
+        expect(node.lifecycle.length).toEqual(2);
+      }
 
       expect(tree.origin.lifecycle.length).toEqual(2);
     });
 
     it('has all events in one of the tree fields', () => {
+      expect(tree.allEvents.length).toBeGreaterThan(0);
+
       tree.allEvents.forEach(event => {
         if (event.event.kind === 'alert') {
           expect(event).toEqual(tree.alertEvent);
@@ -160,13 +173,13 @@ describe('data generator', () => {
     it('has the correct number of total events', () => {
       // starts at 1 because the alert is in the allEvents array
       let total = 1;
-      Array.from(tree.ancestry.values()).forEach(node => {
+      for (const node of tree.ancestry.values()) {
         total += nodeEventCount(node);
-      });
+      }
 
-      Array.from(tree.children.values()).forEach(node => {
+      for (const node of tree.children.values()) {
         total += nodeEventCount(node);
-      });
+      }
 
       total += nodeEventCount(tree.origin);
 

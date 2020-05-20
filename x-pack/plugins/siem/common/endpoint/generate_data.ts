@@ -399,18 +399,18 @@ export class EndpointDocGenerator {
     );
 
     // create a mapping of entity_id -> lifecycle and related events
-    const ancestryNodes: Map<string, TreeNode> = _.reduce(
-      // slice gets everything but the last item which is an alert
-      ancestry.slice(0, -1),
-      addEventToMap,
-      new Map()
-    );
+    // slice gets everything but the last item which is an alert
+    const ancestryNodes: Map<string, TreeNode> = ancestry
+      .slice(0, -1)
+      .reduce(addEventToMap, new Map());
 
     const alert = ancestry[ancestry.length - 1];
     const origin = ancestryNodes.get(alert.process.entity_id);
     if (!origin) {
       throw Error(`could not find origin while building tree: ${alert.process.entity_id}`);
     }
+
+    // remove the origin node from the ancestry array
     ancestryNodes.delete(alert.process.entity_id);
 
     const children = Array.from(
@@ -481,6 +481,9 @@ export class EndpointDocGenerator {
   /**
    * Creates an alert event and associated process ancestry. The alert event will always be the last event in the return array.
    * @param alertAncestors - number of ancestor generations to create
+   * @param relatedEventsPerNode - number of related events to add to each process node being created
+   * @param pctWithRelated - percent of ancestors that will have related events
+   * @param pctWithTerminated - percent of ancestors that will have termination events
    */
   public createAlertEventAncestry(
     alertAncestors = 3,
