@@ -7,7 +7,7 @@ import { get } from 'lodash/fp';
 import { Logger } from 'src/core/server';
 
 import { ListItemArraySchema } from '../../../../../lists/common/schemas/response';
-import { Type as ListValueType, type } from '../../../../../lists/common/schemas/common';
+import { type } from '../../../../../lists/common/schemas/common';
 import { ListClient } from '../../../../../lists/server';
 import { SignalSearchResponse, SearchTypes } from './types';
 import { RuleAlertParams } from '../types';
