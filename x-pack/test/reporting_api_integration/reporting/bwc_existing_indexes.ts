@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FtrProviderContext } from '../ftr_provider_context';
 import * as GenerationUrls from '../generation_urls';
 
 /**
@@ -14,19 +15,18 @@ import * as GenerationUrls from '../generation_urls';
  * a major change in a major release, we handle it properly.
  */
 
-export default function({ getService }) {
+// eslint-disable-next-line import/no-default-export
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const reportingAPI = getService('reportingAPI');
-  const usageAPI = getService('usageAPI');
 
   // FLAKY: https://github.com/elastic/kibana/issues/42725
   describe.skip('BWC report generation into existing indexes', () => {
-    let expectedCompletedReportCount;
-    let cleanupIndexAlias;
+    let cleanupIndexAlias: () => Promise<void>;
 
     describe('existing 6_2 index', () => {
       before('load data and add index alias', async () => {
-        await reportingAPI.deleteAllReportingIndexes();
+        await reportingAPI.deleteAllReports();
         await esArchiver.load('reporting/bwc/6_2');
 
         // The index name in the 6_2 archive.
@@ -35,9 +35,6 @@ export default function({ getService }) {
           ARCHIVED_REPORTING_INDEX
         );
 
-        const stats = await usageAPI.getUsageStats();
-        expectedCompletedReportCount = await reportingAPI.getCompletedReportCount(stats);
-
         await esArchiver.unload('reporting/bwc/6_2');
       });
 
@@ -45,34 +42,18 @@ export default function({ getService }) {
         await cleanupIndexAlias();
       });
 
-      // Might not be great test practice to lump all these jobs together but reporting takes awhile and it'll be
-      // more efficient to post them all up front, then sequentially.
       it('multiple jobs posted', async () => {
         const reportPaths = [];
         reportPaths.push(
           await reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3)
         );
         reportPaths.push(
-          await reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_DASHBOARD_FILTER_6_3)
-        );
-        reportPaths.push(
-          await reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_PIE_VISUALIZATION_6_3)
-        );
-        reportPaths.push(await reportingAPI.postJob(GenerationUrls.PDF_PRINT_DASHBOARD_6_3));
-        reportPaths.push(
           await reportingAPI.postJob(
             GenerationUrls.PDF_PRINT_PIE_VISUALIZATION_FILTER_AND_SAVED_SEARCH_6_3
           )
         );
-
         await reportingAPI.expectAllJobsToFinishSuccessfully(reportPaths);
       }).timeout(1540000);
-
-      it('jobs completed successfully', async () => {
-        const stats = await usageAPI.getUsageStats();
-        expectedCompletedReportCount += 5;
-        reportingAPI.expectCompletedReportCount(stats, expectedCompletedReportCount);
-      });
     });
   });
 }
