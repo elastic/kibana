@@ -16,6 +16,19 @@ export const configSchema = schema.object({
   maxTimelineImportExportSize: schema.number({ defaultValue: 10000 }),
   maxTimelineImportPayloadBytes: schema.number({ defaultValue: 10485760 }),
   [SIGNALS_INDEX_KEY]: schema.string({ defaultValue: DEFAULT_SIGNALS_INDEX }),
+  /**
+   * Host Endpoint Configuration
+   */
+  endpointResultListDefaultFirstPageIndex: schema.number({ defaultValue: 0 }),
+  endpointResultListDefaultPageSize: schema.number({ defaultValue: 10 }),
+
+  /**
+   * Alert Endpoint Configuration
+   */
+  alertResultListDefaultDateRange: schema.object({
+    from: schema.string({ defaultValue: 'now-15m' }),
+    to: schema.string({ defaultValue: 'now' }),
+  }),
 });
 
 export const createConfig$ = (context: PluginInitializerContext) =>
