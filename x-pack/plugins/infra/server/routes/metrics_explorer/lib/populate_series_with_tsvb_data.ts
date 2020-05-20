@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { union, uniq } from 'lodash';
+import { union, uniq, isArray, isString } from 'lodash';
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import {
@@ -38,9 +38,21 @@ export const populateSeriesWithTSVBData = (
   }
 
   // Set the filter for the group by or match everything
-  const filters: JsonObject[] = options.groupBy
-    ? [{ match: { [options.groupBy]: series.id } }]
+  const isGroupBySet =
+    Array.isArray(options.groupBy) && options.groupBy.length
+      ? true
+      : isString(options.groupBy)
+      ? true
+      : false;
+
+  const filters: JsonObject[] = isGroupBySet
+    ? isArray(options.groupBy)
+      ? options.groupBy
+          .filter(f => f)
+          .map((field, index) => ({ match: { [field as string]: series.keys?.[index] || '' } }))
+      : [{ match: { [options.groupBy as string]: series.id } }]
     : [];
+
   if (options.filterQuery) {
     try {
       const filterQuery = JSON.parse(options.filterQuery);
