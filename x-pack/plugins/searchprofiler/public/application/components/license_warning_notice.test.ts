@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TestUtils } from 'src/plugins/es_ui_shared/public';
+import { TestUtils } from '../../../../../../src/plugins/es_ui_shared/public';
 import { LicenseWarningNotice } from './license_warning_notice';
 
 const { registerTestBed } = TestUtils;
