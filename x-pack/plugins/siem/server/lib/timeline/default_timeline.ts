@@ -6,7 +6,7 @@
 
 import { Direction } from '../../graphql/types';
 import { defaultHeaders } from './default_timeline_headers';
-import { SavedTimeline, TimelineType } from '../../../common/types/timeline';
+import { SavedTimeline, TimelineType, TimelineStatus } from '../../../common/types/timeline';
 
 export const draftTimelineDefaults: SavedTimeline = {
   columns: defaultHeaders,
@@ -15,7 +15,7 @@ export const draftTimelineDefaults: SavedTimeline = {
   eventType: 'all',
   filters: [],
   kqlMode: 'filter',
-  timelineType: TimelineType.draft,
+  timelineType: TimelineType.default,
   kqlQuery: {
     filterQuery: null,
   },
@@ -24,4 +24,5 @@ export const draftTimelineDefaults: SavedTimeline = {
     columnId: '@timestamp',
     sortDirection: Direction.desc,
   },
+  status: TimelineStatus.draft,
 };
