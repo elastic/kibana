@@ -1427,11 +1427,6 @@
     "@types/node-jose" "1.1.0"
     node-jose "1.1.0"
 
-"@elastic/static-fs@1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@elastic/static-fs/-/static-fs-1.0.2.tgz#c1e5fea6a1b35abcd005cecf7880156ed0f273ae"
-  integrity sha512-0cZc5D9Wg6pJsc8Sa2ns1eOuxtXEidE7GBb2B0KZdJq9nZzUCxMyplURqT0Nr3i5XpoHb6ZEmxWsji86j1KjDw==
-
 "@elastic/ui-ace@0.2.3":
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/@elastic/ui-ace/-/ui-ace-0.2.3.tgz#5281aed47a79b7216c55542b0675e435692f20cd"
