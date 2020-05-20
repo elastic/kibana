@@ -979,7 +979,7 @@ export class DashboardAppController {
             [UrlParams.SHOW_FILTER_BAR, 'filterBar', 'Filter bar'],
           ].map(([urlParam, translationId, defaultMessage]) => ({
             id: urlParam,
-            label: i18n.translate(`share.urlPanel.${translationId}`, {
+            label: i18n.translate(`dashboard.embedUrlParamExtension.${translationId}`, {
               defaultMessage,
             }),
           }));
@@ -1010,7 +1010,7 @@ export class DashboardAppController {
               idToSelectedMap={(urlParamsSelectedMap as unknown) as EuiCheckboxGroupIdToSelectedMap}
               onChange={handleChange}
               legend={{
-                children: i18n.translate('share.urlPanel.include', {
+                children: i18n.translate('dashboard.embedUrlParamExtension.include', {
                   defaultMessage: 'Include',
                 }),
               }}
