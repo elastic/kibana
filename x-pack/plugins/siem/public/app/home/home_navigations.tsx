@@ -58,4 +58,11 @@ export const navTabs: SiemNavTab = {
     disabled: false,
     urlKey: 'case',
   },
+  [SiemPageName.management]: {
+    id: SiemPageName.management,
+    name: 'Management',
+    href: '#/management',
+    disabled: false,
+    urlKey: 'management',
+  },
 };

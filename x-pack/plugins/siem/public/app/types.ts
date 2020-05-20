@@ -24,6 +24,7 @@ export enum SiemPageName {
   detections = 'detections',
   timelines = 'timelines',
   case = 'case',
+  management = 'management',
 }
 
 export type SiemNavTabKey =
@@ -32,7 +33,8 @@ export type SiemNavTabKey =
   | SiemPageName.network
   | SiemPageName.detections
   | SiemPageName.timelines
-  | SiemPageName.case;
+  | SiemPageName.case
+  | SiemPageName.management;
 
 export type SiemNavTab = Record<SiemNavTabKey, NavTab>;
 

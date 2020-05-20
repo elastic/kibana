@@ -22,4 +22,11 @@ export enum CONSTANTS {
   unknown = 'unknown',
 }
 
-export type UrlStateType = 'case' | 'detections' | 'host' | 'network' | 'overview' | 'timeline';
+export type UrlStateType =
+  | 'case'
+  | 'detections'
+  | 'host'
+  | 'network'
+  | 'overview'
+  | 'timeline'
+  | 'management';
