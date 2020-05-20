@@ -34,7 +34,18 @@ const MOCK_REPO_DIR = Path.resolve(TMP_DIR, 'mock_repo');
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer(REPO_ROOT));
 
-let log: ToolingLog;
+const log = new ToolingLog({
+  level: 'error',
+  writeTo: {
+    write(chunk) {
+      if (chunk.endsWith('\n')) {
+        chunk = chunk.slice(0, -1);
+      }
+      // eslint-disable-next-line no-console
+      console.error(chunk);
+    },
+  },
+});
 
 beforeAll(async () => {
   await del(TMP_DIR);
@@ -42,19 +53,6 @@ beforeAll(async () => {
     cwd: MOCK_REPO_SRC,
     parents: true,
     deep: true,
-  });
-
-  log = new ToolingLog({
-    level: 'error',
-    writeTo: {
-      write(chunk) {
-        if (chunk.endsWith('\n')) {
-          chunk = chunk.slice(0, -1);
-        }
-        // eslint-disable-next-line no-console
-        console.error(chunk);
-      },
-    },
   });
 });
 
