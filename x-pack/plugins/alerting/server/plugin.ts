@@ -202,7 +202,9 @@ export class AlertingPlugin {
       security,
     } = this;
 
-    const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient(['alert']);
+    const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
+      includedHiddenTypes: ['alert'],
+    });
 
     alertsClientFactory.initialize({
       alertTypeRegistry: alertTypeRegistry!,
