@@ -6,8 +6,9 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { ReportingUsageStats } from '../services/reporting_api';
-import * as GenerationUrls from './generation_urls';
+import * as GenerationUrls from '../generation_urls';
+import { ReportingUsageStats } from '../services';
+import { OSS_DATA_ARCHIVE_PATH, OSS_KIBANA_ARCHIVE_PATH } from './constants';
 
 interface UsageStats {
   reporting: ReportingUsageStats;
@@ -16,12 +17,29 @@ interface UsageStats {
 // eslint-disable-next-line import/no-default-export
 export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('reportingAPI');
   const usageAPI = getService('usageAPI' as any); // NOTE Usage API service is not Typescript
 
   describe('reporting usage', () => {
-    before(() => reportingAPI.deleteAllReportingIndexes());
-    afterEach(() => reportingAPI.deleteAllReportingIndexes());
+    before(async () => {
+      await esArchiver.load(OSS_KIBANA_ARCHIVE_PATH);
+      await esArchiver.load(OSS_DATA_ARCHIVE_PATH);
+
+      await kibanaServer.uiSettings.update({
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await reportingAPI.deleteAllReports();
+    });
+
+    after(async () => {
+      await esArchiver.unload(OSS_KIBANA_ARCHIVE_PATH);
+      await esArchiver.unload(OSS_DATA_ARCHIVE_PATH);
+    });
+
+    afterEach(async () => {
+      await reportingAPI.deleteAllReports();
+    });
 
     describe('initial state', () => {
       let usage: UsageStats;
@@ -98,7 +116,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     describe('from new jobs posted', () => {
-      it('csv', async () => {
+      it('should handle csv', async () => {
         await reportingAPI.expectAllJobsToFinishSuccessfully(
           await Promise.all([
             reportingAPI.postJob(GenerationUrls.CSV_DISCOVER_KUERY_AND_FILTER_6_3),
@@ -114,7 +132,7 @@ export default function({ getService }: FtrProviderContext) {
         reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 0);
       });
 
-      it('preserve_layout pdf', async () => {
+      it('should handle preserve_layout pdf', async () => {
         await reportingAPI.expectAllJobsToFinishSuccessfully(
           await Promise.all([
             reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_DASHBOARD_FILTER_6_3),
@@ -131,7 +149,7 @@ export default function({ getService }: FtrProviderContext) {
         reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 2);
       });
 
-      it('print_layout pdf', async () => {
+      it('should handle print_layout pdf', async () => {
         await reportingAPI.expectAllJobsToFinishSuccessfully(
           await Promise.all([
             reportingAPI.postJob(GenerationUrls.PDF_PRINT_DASHBOARD_6_3),

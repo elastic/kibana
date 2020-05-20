@@ -23,7 +23,9 @@ interface SetupSavedObjectsParams {
   getStartServices: StartServicesAccessor;
 }
 
-export interface SavedObjectsSetup {
+export type SavedObjectsSetup = (includedHiddenTypes?: string[]) => EncryptedSavedObjectsClient;
+
+export interface EncryptedSavedObjectsClient {
   getDecryptedAsInternalUser: <T = unknown>(
     type: string,
     id: string,
@@ -54,33 +56,34 @@ export function setupSavedObjects({
       })
   );
 
-  const internalRepositoryAndTypeRegistryPromise = getStartServices().then(
-    ([core]) =>
-      [core.savedObjects.createInternalRepository(), core.savedObjects.getTypeRegistry()] as [
-        ISavedObjectsRepository,
-        ISavedObjectTypeRegistry
-      ]
-  );
-
-  return {
-    getDecryptedAsInternalUser: async <T = unknown>(
-      type: string,
-      id: string,
-      options?: SavedObjectsBaseOptions
-    ): Promise<SavedObject<T>> => {
-      const [internalRepository, typeRegistry] = await internalRepositoryAndTypeRegistryPromise;
-      const savedObject = await internalRepository.get(type, id, options);
-      return {
-        ...savedObject,
-        attributes: (await service.decryptAttributes(
-          {
-            type,
-            id,
-            namespace: typeRegistry.isSingleNamespace(type) ? options?.namespace : undefined,
-          },
-          savedObject.attributes as Record<string, unknown>
-        )) as T,
-      };
-    },
+  return (includedHiddenTypes?: string[]) => {
+    const internalRepositoryAndTypeRegistryPromise = getStartServices().then(
+      ([core]) =>
+        [
+          core.savedObjects.createInternalRepository(includedHiddenTypes),
+          core.savedObjects.getTypeRegistry(),
+        ] as [ISavedObjectsRepository, ISavedObjectTypeRegistry]
+    );
+    return {
+      getDecryptedAsInternalUser: async <T = unknown>(
+        type: string,
+        id: string,
+        options?: SavedObjectsBaseOptions
+      ): Promise<SavedObject<T>> => {
+        const [internalRepository, typeRegistry] = await internalRepositoryAndTypeRegistryPromise;
+        const savedObject = await internalRepository.get(type, id, options);
+        return {
+          ...savedObject,
+          attributes: (await service.decryptAttributes(
+            {
+              type,
+              id,
+              namespace: typeRegistry.isSingleNamespace(type) ? options?.namespace : undefined,
+            },
+            savedObject.attributes as Record<string, unknown>
+          )) as T,
+        };
+      },
+    };
   };
 }

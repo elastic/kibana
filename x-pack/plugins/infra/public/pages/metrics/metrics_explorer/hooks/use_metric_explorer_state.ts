@@ -30,7 +30,7 @@ export const useMetricsExplorerState = (
   derivedIndexPattern: IIndexPattern
 ) => {
   const [refreshSignal, setRefreshSignal] = useState(0);
-  const [afterKey, setAfterKey] = useState<string | null>(null);
+  const [afterKey, setAfterKey] = useState<string | null | Record<string, string | null>>(null);
   const {
     defaultViewState,
     options,
@@ -63,7 +63,7 @@ export const useMetricsExplorerState = (
   );
 
   const handleGroupByChange = useCallback(
-    (groupBy: string | null) => {
+    (groupBy: string | null | string[]) => {
       setAfterKey(null);
       setOptions({
         ...options,
