@@ -171,7 +171,7 @@ describe('datatable_expression', () => {
           data={emptyData}
           args={args}
           formatFactory={x => x as IFieldFormat}
-          onClickValue={onClickValue}
+          executeTriggerActions={executeTriggerActions}
           getType={jest.fn(type =>
             type === 'count' ? ({ type: 'metrics' } as IAggType) : ({ type: 'buckets' } as IAggType)
           )}

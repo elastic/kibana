@@ -16,6 +16,7 @@ import {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '../../../../../src/plugins/expressions/public';
+import { ValueClickTriggerContext } from '../../../../../src/plugins/embeddable/public';
 import { VisualizationContainer } from '../visualization_container';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
