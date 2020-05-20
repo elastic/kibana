@@ -124,17 +124,15 @@ export async function installPackage(options: {
   // see if some version of this package is already installed
   // TODO: calls to getInstallationObject, Registry.fetchInfo, and Registry.fetchFindLatestPackge
   // and be replaced by getPackageInfo after adjusting for it to not group/use archive assets
-  const getSoSpan = apmTrans?.startSpan(`getInstallationObject ${pkgName}`);
-  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-  if (getSoSpan) getSoSpan.end();
-
-  const regFetchInfoSpan = apmTrans?.startSpan('Registry.fetchInfo');
-  const registryPackageInfo = await Registry.fetchInfo(pkgName, pkgVersion);
-  if (regFetchInfoSpan) regFetchInfoSpan.end();
-
-  const regFetchFindLatestPackageSpan = apmTrans?.startSpan('Registry.fetchFindLatestPackage');
-  const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
-  if (regFetchFindLatestPackageSpan) regFetchFindLatestPackageSpan.end();
+  const pSpan1 = apmTrans?.startSpan(
+    `parallelize getInstallationObject, Registry.fetchInfo,Registry.fetchFindLatestPackage ${pkgName}`
+  );
+  const [installedPkg, registryPackageInfo, latestPackage] = await Promise.all([
+    getInstallationObject({ savedObjectsClient, pkgName }),
+    Registry.fetchInfo(pkgName, pkgVersion),
+    Registry.fetchFindLatestPackage(pkgName),
+  ]);
+  if (pSpan1) pSpan1.end();
 
   if (pkgVersion < latestPackage.version)
     throw Boom.badRequest('Cannot install or update to an out-of-date package');
@@ -152,7 +150,7 @@ export async function installPackage(options: {
     }
   }
 
-  const pSpan = apmTrans?.startSpan(
+  const pSpan2 = apmTrans?.startSpan(
     'parallel installKibanaAssets, installPipelines, installIndexPatterns, installILMPolicy'
   );
   const [installedKibanaAssets, installedPipelines] = await Promise.all([
@@ -170,7 +168,7 @@ export async function installPackage(options: {
     // per dataset and we should then save them
     installILMPolicy(pkgName, pkgVersion, callCluster),
   ]);
-  if (pSpan) pSpan.end();
+  if (pSpan2) pSpan2.end();
   // install or update the templates
   const tSpan = apmTrans?.startSpan(`await installTemplates ${pkgkey}`);
   const installedTemplates = await installTemplates(
