@@ -63,14 +63,10 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('shows or hides elements based on URL params', async () => {
-      const topMenuShown = await testSubjects.exists('top-nav');
-      expect(topMenuShown).to.be(false);
-      const queryInputShown = await testSubjects.exists('queryInput');
-      expect(queryInputShown).to.be(false);
-      const timeFilterShown = await testSubjects.exists('superDatePickerToggleQuickMenuButton');
-      expect(timeFilterShown).to.be(false);
-      const filterBarShown = await testSubjects.exists('showFilterActions');
-      expect(filterBarShown).to.be(true);
+      await testSubjects.missingOrFail('top-nav');
+      await testSubjects.missingOrFail('queryInput');
+      await testSubjects.missingOrFail('superDatePickerToggleQuickMenuButton');
+      await testSubjects.existOrFail('showFilterActions');
 
       const currentUrl = await browser.getCurrentUrl();
       const newUrl = [currentUrl].concat(urlParamExtensions).join('&');
@@ -78,16 +74,10 @@ export default function ({ getService, getPageObjects }) {
       const useTimeStamp = true;
       await browser.get(newUrl.toString(), useTimeStamp);
 
-      await retry.try(async () => {
-        const topMenuShown = await testSubjects.exists('top-nav');
-        expect(topMenuShown).to.be(true);
-        const queryInputShown = await testSubjects.exists('queryInput');
-        expect(queryInputShown).to.be(true);
-        const timeFilterShown = await testSubjects.exists('superDatePickerToggleQuickMenuButton');
-        expect(timeFilterShown).to.be(true);
-        const filterBarShown = await testSubjects.exists('showFilterActions');
-        expect(filterBarShown).to.be(false);
-      });
+      await testSubjects.existOrFail('top-nav');
+      await testSubjects.existOrFail('queryInput');
+      await testSubjects.existOrFail('superDatePickerToggleQuickMenuButton');
+      await testSubjects.missingOrFail('showFilterActions');
     });
 
     after(async function () {
