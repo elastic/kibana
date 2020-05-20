@@ -36,11 +36,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { esQuery, IndexPattern, Query } from '../../../../../../../plugins/data/public';
-import {
-  context as contextType,
-  KibanaReactContextValue,
-} from '../../../../../../kibana_react/public';
-import { IndexPatternManagmentContext } from '../../../../types';
+import { context as contextType } from '../../../../../../kibana_react/public';
+import { IndexPatternManagmentContextValue } from '../../../../types';
 import { ExecuteScript } from '../../types';
 
 interface TestScriptProps {
@@ -65,7 +62,7 @@ interface TestScriptState {
 export class TestScript extends Component<TestScriptProps, TestScriptState> {
   static contextType = contextType;
 
-  public readonly context!: KibanaReactContextValue<IndexPatternManagmentContext>;
+  declare readonly context: IndexPatternManagmentContextValue;
 
   defaultProps = {
     name: 'myScriptedField',

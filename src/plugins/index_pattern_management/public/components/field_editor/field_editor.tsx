@@ -59,7 +59,7 @@ import {
   ES_FIELD_TYPES,
   DataPublicPluginStart,
 } from '../../../../../plugins/data/public';
-import { context as contextType, KibanaReactContextValue } from '../../../../kibana_react/public';
+import { context as contextType } from '../../../../kibana_react/public';
 import {
   ScriptingDisabledCallOut,
   ScriptingWarningCallOut,
@@ -67,7 +67,7 @@ import {
 
 import { ScriptingHelpFlyout } from './components/scripting_help';
 import { FieldFormatEditor } from './components/field_format_editor';
-import { IndexPatternManagmentContext } from '../../types';
+import { IndexPatternManagmentContextValue } from '../../types';
 
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
 import { executeScript, isScriptValid } from './lib';
@@ -142,13 +142,11 @@ export interface FieldEdiorProps {
 export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState> {
   static contextType = contextType;
 
-  public readonly context!: KibanaReactContextValue<IndexPatternManagmentContext>;
+  declare readonly context: IndexPatternManagmentContextValue;
+
   supportedLangs: string[] = [];
   deprecatedLangs: string[] = [];
-  constructor(
-    props: FieldEdiorProps,
-    context: KibanaReactContextValue<IndexPatternManagmentContext>
-  ) {
+  constructor(props: FieldEdiorProps, context: IndexPatternManagmentContextValue) {
     super(props, context);
 
     const { field, indexPattern } = props;
@@ -175,7 +173,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     this.init(context);
   }
 
-  async init(context: KibanaReactContextValue<IndexPatternManagmentContext>) {
+  async init(context: IndexPatternManagmentContextValue) {
     const { http, notifications, data } = context.services;
     const { field } = this.state;
     const { indexPattern } = this.props;

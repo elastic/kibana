@@ -34,8 +34,8 @@ import { Header } from './components/header';
 import { TimeField } from './components/time_field';
 import { AdvancedOptions } from './components/advanced_options';
 import { ActionButtons } from './components/action_buttons';
-import { context, KibanaReactContextValue } from '../../../../../../kibana_react/public';
-import { IndexPatternManagmentContext } from '../../../../types';
+import { context } from '../../../../../../kibana_react/public';
+import { IndexPatternManagmentContextValue } from '../../../../types';
 import { IndexPatternCreationConfig } from '../../../..';
 
 interface StepTimeFieldProps {
@@ -67,7 +67,7 @@ interface TimeFieldConfig {
 export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldState> {
   static contextType = context;
 
-  public readonly context!: KibanaReactContextValue<IndexPatternManagmentContext>;
+  declare readonly context: IndexPatternManagmentContextValue;
 
   state = {
     error: '',

@@ -68,7 +68,7 @@ const filterPlaceholder = i18n.translate(
 );
 
 export function Tabs({ indexPattern, fields, history, location }: TabsProps) {
-  const { uiSettings, indexPatternManagementStart } = useKibana<
+  const { uiSettings, indexPatternManagementStart, docLinks } = useKibana<
     IndexPatternManagmentContext
   >().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
@@ -194,7 +194,7 @@ export function Tabs({ indexPattern, fields, history, location }: TabsProps) {
                   },
                 }}
                 onRemoveField={refreshFilters}
-                painlessDocLink={'todo'}
+                painlessDocLink={docLinks.links.scriptedFields.painless}
               />
             </Fragment>
           );
@@ -215,6 +215,7 @@ export function Tabs({ indexPattern, fields, history, location }: TabsProps) {
       }
     },
     [
+      docLinks.links.scriptedFields.painless,
       fieldFilter,
       fieldWildcardMatcherDecorated,
       fields,

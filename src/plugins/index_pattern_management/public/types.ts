@@ -30,6 +30,7 @@ import {
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ManagementAppMountParams } from '../../management/public';
 import { IndexPatternManagementStart } from './index';
+import { KibanaReactContextValue } from '../../kibana_react/public';
 
 export interface IndexPatternManagmentContext {
   chrome: ChromeStart;
@@ -44,3 +45,7 @@ export interface IndexPatternManagmentContext {
   indexPatternManagementStart: IndexPatternManagementStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
 }
+
+export type IndexPatternManagmentContextValue = KibanaReactContextValue<
+  IndexPatternManagmentContext
+>;

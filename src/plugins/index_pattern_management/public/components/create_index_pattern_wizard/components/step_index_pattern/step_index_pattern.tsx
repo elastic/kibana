@@ -34,13 +34,10 @@ import { LoadingIndices } from './components/loading_indices';
 import { StatusMessage } from './components/status_message';
 import { IndicesList } from './components/indices_list';
 import { Header } from './components/header';
-import {
-  context as contextType,
-  KibanaReactContextValue,
-} from '../../../../../../kibana_react/public';
+import { context as contextType } from '../../../../../../kibana_react/public';
 import { IndexPatternCreationConfig } from '../../../../../../../plugins/index_pattern_management/public';
 import { MatchedIndex } from '../../types';
-import { IndexPatternManagmentContext } from '../../../../types';
+import { IndexPatternManagmentContextValue } from '../../../../types';
 
 interface StepIndexPatternProps {
   allIndices: MatchedIndex[];
@@ -65,7 +62,7 @@ interface StepIndexPatternState {
 export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndexPatternState> {
   static contextType = contextType;
 
-  public readonly context!: KibanaReactContextValue<IndexPatternManagmentContext>;
+  declare readonly context: IndexPatternManagmentContextValue;
 
   state = {
     partialMatchedIndices: [],
@@ -81,10 +78,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   ILLEGAL_CHARACTERS = [...indexPatterns.ILLEGAL_CHARACTERS];
   lastQuery: string | undefined;
 
-  constructor(
-    props: StepIndexPatternProps,
-    context: KibanaReactContextValue<IndexPatternManagmentContext>
-  ) {
+  constructor(props: StepIndexPatternProps, context: IndexPatternManagmentContextValue) {
     super(props);
     const { indexPatternCreationType, initialQuery } = this.props;
 

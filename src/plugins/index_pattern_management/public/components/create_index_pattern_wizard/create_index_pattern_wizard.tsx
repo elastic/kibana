@@ -29,12 +29,12 @@ import { Header } from './components/header';
 import { LoadingState } from './components/loading_state';
 import { EmptyState } from './components/empty_state';
 
-import { context as contextType, KibanaReactContextValue } from '../../../../kibana_react/public';
+import { context as contextType } from '../../../../kibana_react/public';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
 import { MAX_SEARCH_SIZE } from './constants';
 import { ensureMinimumTime, getIndices } from './lib';
 import { IndexPatternCreationConfig } from '../..';
-import { IndexPatternManagmentContext } from '../../types';
+import { IndexPatternManagmentContextValue } from '../../types';
 import { MatchedIndex } from './types';
 
 interface CreateIndexPatternWizardState {
@@ -54,12 +54,9 @@ export class CreateIndexPatternWizard extends Component<
 > {
   static contextType = contextType;
 
-  public readonly context!: KibanaReactContextValue<IndexPatternManagmentContext>;
+  declare readonly context: IndexPatternManagmentContextValue;
 
-  constructor(
-    props: RouteComponentProps,
-    context: KibanaReactContextValue<IndexPatternManagmentContext>
-  ) {
+  constructor(props: RouteComponentProps, context: IndexPatternManagmentContextValue) {
     super(props);
 
     context.services.setBreadcrumbs(getCreateBreadcrumbs());
