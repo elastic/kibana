@@ -18,7 +18,7 @@ const TitleStyle = styled(EuiTitle)`
 
 const FlexGroupContainer = styled(EuiFlexGroup)`
   && {
-    @media only screen and (max-width: 574px) {
+    @media only screen and (max-width: 768px) {
       > :first-child {
         flex-basis: 40% !important;
       }
