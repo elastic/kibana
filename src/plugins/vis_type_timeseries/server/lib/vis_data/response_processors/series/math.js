@@ -91,21 +91,29 @@ export function mathAgg(resp, panel, series, meta) {
           // a safety check for the user
           const someNull = values(params).some(v => v == null);
           if (someNull) return [ts, null];
-          // calculate the result based on the user's script and return the value
-          const result = evaluate(mathMetric.script, {
-            params: {
-              ...params,
-              _index: index,
-              _timestamp: ts,
-              _all: all,
-              _interval: split.meta.bucketSize * 1000,
-            },
-          });
-          // if the result is an object (usually when the user is working with maps and functions) flatten the results and return the last value.
-          if (typeof result === 'object') {
-            return [ts, last(flatten(result.valueOf()))];
+          try {
+            // calculate the result based on the user's script and return the value
+            const result = evaluate(mathMetric.script, {
+              params: {
+                ...params,
+                _index: index,
+                _timestamp: ts,
+                _all: all,
+                _interval: split.meta.bucketSize * 1000,
+              },
+            });
+            // if the result is an object (usually when the user is working with maps and functions) flatten the results and return the last value.
+            if (typeof result === 'object') {
+              return [ts, last(flatten(result.valueOf()))];
+            }
+            return [ts, result];
+          } catch (e) {
+            if (e.message === 'Cannot divide by 0') {
+              // Drop division by zero errors and treat as null value
+              return [ts, null];
+            }
+            throw e;
           }
-          return [ts, result];
         });
         return {
           id: split.id,
