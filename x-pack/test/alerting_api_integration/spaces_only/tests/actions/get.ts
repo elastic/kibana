@@ -69,7 +69,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
         .expect(404, {
           statusCode: 404,
           error: 'Not Found',
-          message: `Saved object [actions/${createdAction.id}] not found`,
+          message: `Saved object [action/${createdAction.id}] not found`,
         });
     });
 
