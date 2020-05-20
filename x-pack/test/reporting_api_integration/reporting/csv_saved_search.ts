@@ -7,15 +7,16 @@
 import expect from '@kbn/expect';
 import supertest from 'supertest';
 import {
+  CSV_RESULT_DOCVALUE,
   CSV_RESULT_HUGE,
+  CSV_RESULT_NANOS,
   CSV_RESULT_SCRIPTED,
   CSV_RESULT_SCRIPTED_REQUERY,
   CSV_RESULT_SCRIPTED_RESORTED,
   CSV_RESULT_TIMEBASED,
   CSV_RESULT_TIMELESS,
-  CSV_RESULT_NANOS,
-  CSV_RESULT_DOCVALUE,
-} from './fixtures';
+} from '../fixtures';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 interface GenerateOpts {
   timerange?: {
@@ -27,9 +28,11 @@ interface GenerateOpts {
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: { getService: any }) {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertestSvc = getService('supertest');
+  const reportingAPI = getService('reportingAPI');
+
   const generateAPI = {
     getCsvFromSavedSearch: async (
       id: string,
@@ -45,6 +48,10 @@ export default function({ getService }: { getService: any }) {
 
   describe('Generation from Saved Search ID', () => {
     describe('Saved Search Features', () => {
+      after(async () => {
+        await reportingAPI.deleteAllReports();
+      });
+
       it('With filters and timebased data', async () => {
         // load test data that contains a saved search and documents
         await esArchiver.load('reporting/logs');
