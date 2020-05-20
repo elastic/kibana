@@ -36,8 +36,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { esQuery, IndexPattern, Query } from '../../../../../../data/public';
-import { SEARCH_QUERY_LANGUAGE_SETTINGS } from '../../../../../../data/common';
+import { esQuery, IndexPattern, Query, UI_SETTINGS } from '../../../../../../data/public';
 import { ExecuteScript } from '../../types';
 
 interface TestScriptProps {
@@ -243,7 +242,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
             showDatePicker={false}
             showQueryInput={true}
             query={{
-              language: this.props.uiSettings.get(SEARCH_QUERY_LANGUAGE_SETTINGS),
+              language: this.props.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE),
               query: '',
             }}
             onQuerySubmit={this.previewScript}

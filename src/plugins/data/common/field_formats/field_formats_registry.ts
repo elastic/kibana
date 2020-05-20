@@ -33,7 +33,7 @@ import { baseFormatters } from './constants/base_formatters';
 import { FieldFormat } from './field_format';
 import { SerializedFieldFormat } from '../../../expressions/common/types';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../types';
-import { FORMAT_DEFAULT_TYPE_MAP_SETTINGS } from '../';
+import { UI_SETTINGS } from '../';
 
 export class FieldFormatsRegistry {
   protected fieldFormats: Map<FieldFormatId, FieldFormatInstanceType> = new Map();
@@ -50,7 +50,7 @@ export class FieldFormatsRegistry {
     metaParamsOptions: Record<string, any> = {},
     defaultFieldConverters: FieldFormatInstanceType[] = baseFormatters
   ) {
-    const defaultTypeMap = getConfig(FORMAT_DEFAULT_TYPE_MAP_SETTINGS);
+    const defaultTypeMap = getConfig(UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP);
     this.register(defaultFieldConverters);
     this.parseDefaultTypeMap(defaultTypeMap);
     this.getConfig = getConfig;

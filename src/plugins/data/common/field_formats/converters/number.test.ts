@@ -18,12 +18,12 @@
  */
 
 import { NumberFormat } from './number';
-import { FORMAT_NUMBER_DEFAULT_PATTERN_SETTINGS } from '../../constants';
+import { UI_SETTINGS } from '../../constants';
 
 describe('NumberFormat', () => {
   const config: Record<string, any> = {};
 
-  config[FORMAT_NUMBER_DEFAULT_PATTERN_SETTINGS] = '0,0.[000]';
+  config[UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN] = '0,0.[000]';
 
   const getConfig = (key: string) => config[key];
 

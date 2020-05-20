@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { TIMEPICKER_QUICK_RANGES_SETTINGS } from '../../../../../src/plugins/data/common';
+import { UI_SETTINGS } from '../../../../../src/plugins/data/public';
 
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
@@ -97,7 +97,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       ]`;
 
       await kibanaServer.uiSettings.update({
-        [TIMEPICKER_QUICK_RANGES_SETTINGS]: SAMPLE_DATA_RANGE,
+        [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: SAMPLE_DATA_RANGE,
       });
       // refresh page to make sure ui settings update is picked up
       await browser.refresh();

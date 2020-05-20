@@ -34,7 +34,7 @@ import {
   isFilterPinned,
   compareFilters,
   COMPARE_ALL_OPTIONS,
-  FILTERS_PINNED_BY_DEFAULT_SETTINGS,
+  UI_SETTINGS,
 } from '../../../common';
 
 export class FilterManager {
@@ -130,7 +130,7 @@ export class FilterManager {
 
   public addFilters(
     filters: Filter[] | Filter,
-    pinFilterStatus: boolean = this.uiSettings.get(FILTERS_PINNED_BY_DEFAULT_SETTINGS)
+    pinFilterStatus: boolean = this.uiSettings.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT)
   ) {
     if (!Array.isArray(filters)) {
       filters = [filters];
@@ -158,7 +158,7 @@ export class FilterManager {
 
   public setFilters(
     newFilters: Filter[],
-    pinFilterStatus: boolean = this.uiSettings.get(FILTERS_PINNED_BY_DEFAULT_SETTINGS)
+    pinFilterStatus: boolean = this.uiSettings.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT)
   ) {
     const store = pinFilterStatus ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE;
 

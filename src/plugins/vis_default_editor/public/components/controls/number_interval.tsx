@@ -23,7 +23,7 @@ import React, { useEffect, useCallback } from 'react';
 import { EuiFieldNumber, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { HISTOGRAM_MAX_BARS_SETTINGS } from '../../../../data/common';
+import { UI_SETTINGS } from '../../../../data/public';
 
 import { AggParamEditorProps } from '../agg_param_props';
 
@@ -39,7 +39,7 @@ const label = (
         <FormattedMessage
           id="visDefaultEditor.controls.numberInterval.minimumIntervalTooltip"
           defaultMessage="Interval will be automatically scaled in the event that the provided value creates more buckets than specified by Advanced Setting's {histogramMaxBars}"
-          values={{ histogramMaxBars: HISTOGRAM_MAX_BARS_SETTINGS }}
+          values={{ histogramMaxBars: UI_SETTINGS.HISTOGRAM_MAX_BARS }}
         />
       }
       type="questionInCircle"

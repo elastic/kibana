@@ -17,13 +17,15 @@
  * under the License.
  */
 import { AbstractSearchRequest } from './abstract_request';
-import { SEARCH_INCLUDE_FROZEN_SETTINGS } from '../../../../../data/common';
+import { UI_SETTINGS } from '../../../../../data/public';
 
 const SEARCH_METHOD = 'search';
 
 export class SingleSearchRequest extends AbstractSearchRequest {
   async search([{ body, index }]) {
-    const includeFrozen = await this.req.getUiSettingsService().get(SEARCH_INCLUDE_FROZEN_SETTINGS);
+    const includeFrozen = await this.req
+      .getUiSettingsService()
+      .get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
     const resp = await this.callWithRequest(this.req, SEARCH_METHOD, {
       ignore_throttled: !includeFrozen,
       body,

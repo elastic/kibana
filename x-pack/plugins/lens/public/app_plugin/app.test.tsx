@@ -18,8 +18,8 @@ import {
   FilterManager,
   IFieldType,
   IIndexPattern,
+  UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
-import { SEARCH_QUERY_LANGUAGE_SETTINGS } from '../../../../../src/plugins/data/common';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 const dataStartMock = dataPluginMock.createStartContract();
 
@@ -180,7 +180,7 @@ describe('Lens App', () => {
       jest.fn(type => {
         if (type === 'timepicker:timeDefaults') {
           return { from: 'now-7d', to: 'now' };
-        } else if (type === SEARCH_QUERY_LANGUAGE_SETTINGS) {
+        } else if (type === UI_SETTINGS.SEARCH_QUERY_LANGUAGE) {
           return 'kuery';
         } else {
           return [];

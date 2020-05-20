@@ -20,12 +20,7 @@
 import { Subscription } from 'rxjs';
 import { FilterManager } from '../filter_manager';
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
-import {
-  Filter,
-  FilterStateStore,
-  TIMEPICKER_REFRESH_INTERVAL_DEFAULTS_SETTINGS,
-  FILTERS_PINNED_BY_DEFAULT_SETTINGS,
-} from '../../../common';
+import { Filter, FilterStateStore, UI_SETTINGS } from '../../../common';
 import { coreMock } from '../../../../../core/public/mocks';
 import { BaseStateContainer, createStateContainer, Storage } from '../../../../kibana_utils/public';
 import { QueryService, QueryStart } from '../query_service';
@@ -51,11 +46,11 @@ const startMock = coreMock.createStart();
 
 setupMock.uiSettings.get.mockImplementation((key: string) => {
   switch (key) {
-    case FILTERS_PINNED_BY_DEFAULT_SETTINGS:
+    case UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT:
       return true;
     case 'timepicker:timeDefaults':
       return { from: 'now-15m', to: 'now' };
-    case TIMEPICKER_REFRESH_INTERVAL_DEFAULTS_SETTINGS:
+    case UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS:
       return { pause: false, value: 0 };
     default:
       throw new Error(`sync_query test: not mocked uiSetting: ${key}`);

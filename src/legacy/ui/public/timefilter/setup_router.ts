@@ -21,11 +21,15 @@ import _ from 'lodash';
 import { IScope } from 'angular';
 import moment from 'moment';
 import chrome from 'ui/chrome';
-import { RefreshInterval, TimeRange, TimefilterContract } from 'src/plugins/data/public';
 import { Subscription } from 'rxjs';
 import { fatalError } from 'ui/notify/fatal_error';
 import { subscribeWithScope } from '../../../../plugins/kibana_legacy/public';
-import { TIMEPICKER_REFRESH_INTERVAL_DEFAULTS_SETTINGS } from '../../../../plugins/data/common';
+import {
+  RefreshInterval,
+  TimeRange,
+  TimefilterContract,
+  UI_SETTINGS,
+} from '../../../../plugins/data/public';
 
 // TODO
 // remove everything underneath once globalState is no longer an angular service
@@ -39,7 +43,7 @@ export function getTimefilterConfig() {
   const settings = chrome.getUiSettingsClient();
   return {
     timeDefaults: settings.get('timepicker:timeDefaults'),
-    refreshIntervalDefaults: settings.get(TIMEPICKER_REFRESH_INTERVAL_DEFAULTS_SETTINGS),
+    refreshIntervalDefaults: settings.get(UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS),
   };
 }
 

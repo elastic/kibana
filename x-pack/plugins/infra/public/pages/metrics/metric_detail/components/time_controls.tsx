@@ -6,7 +6,7 @@
 
 import { EuiSuperDatePicker, OnRefreshChangeProps, OnTimeChangeProps } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { TIMEPICKER_QUICK_RANGES_SETTINGS } from '../../../../../../../../src/plugins/data/common';
+import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
 import { euiStyled } from '../../../../../../observability/public';
 import { MetricsTimeInput } from '../hooks/use_metrics_time';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
@@ -23,7 +23,7 @@ interface MetricsTimeControlsProps {
 }
 
 export const MetricsTimeControls = (props: MetricsTimeControlsProps) => {
-  const [timepickerQuickRanges] = useKibanaUiSetting(TIMEPICKER_QUICK_RANGES_SETTINGS);
+  const [timepickerQuickRanges] = useKibanaUiSetting(UI_SETTINGS.TIMEPICKER_QUICK_RANGES);
   const {
     onChangeTimeRange,
     onRefresh,

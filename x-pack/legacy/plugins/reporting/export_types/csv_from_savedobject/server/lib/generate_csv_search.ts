@@ -11,16 +11,12 @@ import {
   Filter,
   IIndexPattern,
   Query,
+  UI_SETTINGS,
 } from '../../../../../../../../src/plugins/data/server';
 import {
-  QUERY_STRING_OPTIONS_SETTINGS,
-  QUERY_ALLOW_LEADING_WILDCARDS_SETTINGS,
-  COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_SETTINGS,
-} from '../../../../../../../../src/plugins/data/common';
-import {
-  CSV_SEPARATOR_SETTINGS,
-  CSV_QUOTE_VALUES_SETTINGS,
-} from '../../../../../../../../src/plugins/share/common/constants';
+  CSV_SEPARATOR_SETTING,
+  CSV_QUOTE_VALUES_SETTING,
+} from '../../../../../../../../src/plugins/share/server';
 import { CancellationToken } from '../../../../../../../plugins/reporting/common';
 import { ReportingCore } from '../../../../server';
 import { LevelLogger } from '../../../../server/lib';
@@ -44,9 +40,9 @@ import { getFilters } from './get_filters';
 
 const getEsQueryConfig = async (config: IUiSettingsClient) => {
   const configs = await Promise.all([
-    config.get(QUERY_ALLOW_LEADING_WILDCARDS_SETTINGS),
-    config.get(QUERY_STRING_OPTIONS_SETTINGS),
-    config.get(COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_SETTINGS),
+    config.get(UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS),
+    config.get(UI_SETTINGS.QUERY_STRING_OPTIONS),
+    config.get(UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX),
   ]);
   const [allowLeadingWildcards, queryStringOptions, ignoreFilterIfFieldNotInIndex] = configs;
   return {
@@ -58,8 +54,8 @@ const getEsQueryConfig = async (config: IUiSettingsClient) => {
 
 const getUiSettings = async (config: IUiSettingsClient) => {
   const configs = await Promise.all([
-    config.get(CSV_SEPARATOR_SETTINGS),
-    config.get(CSV_QUOTE_VALUES_SETTINGS),
+    config.get(CSV_SEPARATOR_SETTING),
+    config.get(CSV_QUOTE_VALUES_SETTING),
   ]);
   const [separator, quoteValues] = configs;
   return { separator, quoteValues };

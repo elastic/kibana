@@ -19,10 +19,7 @@
 
 import { getSearchParams } from './get_search_params';
 import { IUiSettingsClient } from 'kibana/public';
-import {
-  COURIER_MAX_CONCURRENT_SHARD_REQUESTS_SETTINGS,
-  SEARCH_INCLUDE_FROZEN_SETTINGS,
-} from '../../../common';
+import { UI_SETTINGS } from '../../../common';
 
 function getConfigStub(config: any = {}) {
   return {
@@ -44,21 +41,21 @@ describe('getSearchParams', () => {
   });
 
   test('includes ignore_throttled according to search:includeFrozen', () => {
-    let config = getConfigStub({ [SEARCH_INCLUDE_FROZEN_SETTINGS]: true });
+    let config = getConfigStub({ [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: true });
     let searchParams = getSearchParams(config);
     expect(searchParams.ignore_throttled).toBe(false);
 
-    config = getConfigStub({ [SEARCH_INCLUDE_FROZEN_SETTINGS]: false });
+    config = getConfigStub({ [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: false });
     searchParams = getSearchParams(config);
     expect(searchParams.ignore_throttled).toBe(true);
   });
 
   test('includes max_concurrent_shard_requests according to courier:maxConcurrentShardRequests', () => {
-    let config = getConfigStub({ [COURIER_MAX_CONCURRENT_SHARD_REQUESTS_SETTINGS]: 0 });
+    let config = getConfigStub({ [UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS]: 0 });
     let searchParams = getSearchParams(config);
     expect(searchParams.max_concurrent_shard_requests).toBe(undefined);
 
-    config = getConfigStub({ [COURIER_MAX_CONCURRENT_SHARD_REQUESTS_SETTINGS]: 5 });
+    config = getConfigStub({ [UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS]: 5 });
     searchParams = getSearchParams(config);
     expect(searchParams.max_concurrent_shard_requests).toBe(5);
   });

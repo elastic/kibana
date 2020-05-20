@@ -18,16 +18,13 @@
  */
 
 import { IUiSettingsClient } from '../../../../../core/public';
-import {
-  COURIER_SET_REQUEST_PREFERENCE_SETTINGS,
-  COURIER_CUSTOM_REQUEST_PREFERENCE_SETTINGS,
-} from '../../../common';
+import { UI_SETTINGS } from '../../../common';
 
 const defaultSessionId = `${Date.now()}`;
 
 export function getEsPreference(uiSettings: IUiSettingsClient, sessionId = defaultSessionId) {
-  const setPreference = uiSettings.get(COURIER_SET_REQUEST_PREFERENCE_SETTINGS);
+  const setPreference = uiSettings.get(UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE);
   if (setPreference === 'sessionId') return `${sessionId}`;
-  const customPreference = uiSettings.get(COURIER_CUSTOM_REQUEST_PREFERENCE_SETTINGS);
+  const customPreference = uiSettings.get(UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE);
   return setPreference === 'custom' ? customPreference : undefined;
 }

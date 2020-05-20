@@ -29,8 +29,7 @@ import { PanelConfig } from './panel_config';
 import { createBrushHandler } from '../lib/create_brush_handler';
 import { fetchFields } from '../lib/fetch_fields';
 import { extractIndexPatterns } from '../../../../../plugins/vis_type_timeseries/common/extract_index_patterns';
-import { esKuery } from '../../../../../plugins/data/public';
-import { QUERY_ALLOW_LEADING_WILDCARDS_SETTINGS } from '../../../../../plugins/data/common';
+import { esKuery, UI_SETTINGS } from '../../../../../plugins/data/public';
 import { getSavedObjectsClient, getUISettings, getDataStart, getCoreStart } from '../../services';
 
 import { CoreStartContextProvider } from '../contexts/query_input_bar_context';
@@ -91,7 +90,7 @@ export class VisEditor extends Component {
     if (filterQuery && filterQuery.language === 'kuery') {
       try {
         const queryOptions = this.coreContext.uiSettings.get(
-          QUERY_ALLOW_LEADING_WILDCARDS_SETTINGS
+          UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS
         );
         esKuery.fromKueryExpression(filterQuery.query, { allowLeadingWildcards: queryOptions });
       } catch (error) {

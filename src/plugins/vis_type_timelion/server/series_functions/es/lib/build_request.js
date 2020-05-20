@@ -21,7 +21,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import { buildAggBody } from './agg_body';
 import createDateAgg from './create_date_agg';
-import { SEARCH_INCLUDE_FROZEN_SETTINGS } from '../../../../../data/common';
+import { UI_SETTINGS } from '../../../../../data/public';
 
 export default function buildRequest(config, tlConfig, scriptedFields, timeout) {
   const bool = { must: [] };
@@ -79,7 +79,7 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
 
   const request = {
     index: config.index,
-    ignore_throttled: !tlConfig.settings[SEARCH_INCLUDE_FROZEN_SETTINGS],
+    ignore_throttled: !tlConfig.settings[UI_SETTINGS.SEARCH_INCLUDE_FROZEN],
     body: {
       query: {
         bool: bool,

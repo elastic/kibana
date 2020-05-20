@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export const VISUALIZE_ENABLE_LABS_SETTINGS = 'visualize:enableLabs';
+export const VISUALIZE_ENABLE_LABS_SETTING = 'visualize:enableLabs';

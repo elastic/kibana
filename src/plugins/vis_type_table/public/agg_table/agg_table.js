@@ -17,7 +17,7 @@
  * under the License.
  */
 import _ from 'lodash';
-import { CSV_SEPARATOR_SETTINGS, CSV_QUOTE_VALUES_SETTINGS } from '../../../share/common/constants';
+import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../../../share/public';
 import aggTableTemplate from './agg_table.html';
 import { getFormatService } from '../services';
 import { i18n } from '@kbn/i18n';
@@ -48,8 +48,8 @@ export function KbnAggTable(config, RecursionHelper) {
 
       self._saveAs = require('@elastic/filesaver').saveAs;
       self.csv = {
-        separator: config.get(CSV_SEPARATOR_SETTINGS),
-        quoteValues: config.get(CSV_QUOTE_VALUES_SETTINGS),
+        separator: config.get(CSV_SEPARATOR_SETTING),
+        quoteValues: config.get(CSV_QUOTE_VALUES_SETTING),
       };
 
       self.exportAsCsv = function(formatted) {

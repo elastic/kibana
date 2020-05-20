@@ -28,7 +28,7 @@ import { dataPluginMock } from '../../mocks';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { stubIndexPatternWithFields } from '../../stubs';
-import { HISTORY_LIMIT_SETTINGS, TIMEPICKER_QUICK_RANGES_SETTINGS } from '../../../common';
+import { UI_SETTINGS } from '../../../common';
 const startMock = coreMock.createStart();
 
 const mockTimeHistory = {
@@ -39,7 +39,7 @@ const mockTimeHistory = {
 
 startMock.uiSettings.get.mockImplementation((key: string) => {
   switch (key) {
-    case TIMEPICKER_QUICK_RANGES_SETTINGS:
+    case UI_SETTINGS.TIMEPICKER_QUICK_RANGES:
       return [
         {
           from: 'now/d',
@@ -49,7 +49,7 @@ startMock.uiSettings.get.mockImplementation((key: string) => {
       ];
     case 'dateFormat':
       return 'MMM D, YYYY @ HH:mm:ss.SSS';
-    case HISTORY_LIMIT_SETTINGS:
+    case UI_SETTINGS.HISTORY_LIMIT:
       return 10;
     case 'timepicker:timeDefaults':
       return {

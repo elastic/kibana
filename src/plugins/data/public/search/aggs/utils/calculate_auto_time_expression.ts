@@ -19,12 +19,7 @@
 import moment from 'moment';
 import { IUiSettingsClient } from 'src/core/public';
 import { TimeBuckets } from '../buckets/lib/time_buckets';
-import {
-  toAbsoluteDates,
-  TimeRange,
-  HISTOGRAM_BAR_TARGET_SETTINGS,
-  HISTOGRAM_MAX_BARS_SETTINGS,
-} from '../../../../common';
+import { toAbsoluteDates, TimeRange, UI_SETTINGS } from '../../../../common';
 
 export function getCalculateAutoTimeExpression(uiSettings: IUiSettingsClient) {
   return function calculateAutoTimeExpression(range: TimeRange) {
@@ -34,8 +29,8 @@ export function getCalculateAutoTimeExpression(uiSettings: IUiSettingsClient) {
     }
 
     const buckets = new TimeBuckets({
-      [HISTOGRAM_MAX_BARS_SETTINGS]: uiSettings.get(HISTOGRAM_MAX_BARS_SETTINGS),
-      [HISTOGRAM_BAR_TARGET_SETTINGS]: uiSettings.get(HISTOGRAM_BAR_TARGET_SETTINGS),
+      'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+      'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
       dateFormat: uiSettings.get('dateFormat'),
       'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
     });

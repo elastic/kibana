@@ -22,7 +22,7 @@ import { schema } from '@kbn/config-schema';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
 import { createRoutes } from './routes/create_routes';
 import { url } from './saved_objects';
-import { CSV_SEPARATOR_SETTINGS, CSV_QUOTE_VALUES_SETTINGS } from '../common/constants';
+import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../common/constants';
 
 export class SharePlugin implements Plugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
@@ -31,7 +31,7 @@ export class SharePlugin implements Plugin {
     createRoutes(core, this.initializerContext.logger.get());
     core.savedObjects.registerType(url);
     core.uiSettings.register({
-      [CSV_SEPARATOR_SETTINGS]: {
+      [CSV_SEPARATOR_SETTING]: {
         name: i18n.translate('share.advancedSettings.csv.separatorTitle', {
           defaultMessage: 'CSV separator',
         }),
@@ -41,7 +41,7 @@ export class SharePlugin implements Plugin {
         }),
         schema: schema.string(),
       },
-      [CSV_QUOTE_VALUES_SETTINGS]: {
+      [CSV_QUOTE_VALUES_SETTING]: {
         name: i18n.translate('share.advancedSettings.csv.quoteValuesTitle', {
           defaultMessage: 'Quote CSV values',
         }),

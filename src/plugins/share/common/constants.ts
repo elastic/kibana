@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export const CSV_SEPARATOR_SETTINGS = 'csv:separator';
-export const CSV_QUOTE_VALUES_SETTINGS = 'csv:quoteValues';
+export const CSV_SEPARATOR_SETTING = 'csv:separator';
+export const CSV_QUOTE_VALUES_SETTING = 'csv:quoteValues';

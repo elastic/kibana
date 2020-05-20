@@ -19,10 +19,7 @@
 
 import { getMSearchParams } from './get_msearch_params';
 import { IUiSettingsClient } from '../../../../../core/public';
-import {
-  COURIER_MAX_CONCURRENT_SHARD_REQUESTS_SETTINGS,
-  SEARCH_INCLUDE_FROZEN_SETTINGS,
-} from '../../../common';
+import { UI_SETTINGS } from '../../../common';
 
 function getConfigStub(config: any = {}) {
   return {
@@ -38,29 +35,29 @@ describe('getMSearchParams', () => {
   });
 
   test('includes ignore_throttled according to search:includeFrozen', () => {
-    let config = getConfigStub({ [SEARCH_INCLUDE_FROZEN_SETTINGS]: true });
+    let config = getConfigStub({ [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: true });
     let msearchParams = getMSearchParams(config);
     expect(msearchParams.ignore_throttled).toBe(false);
 
-    config = getConfigStub({ [SEARCH_INCLUDE_FROZEN_SETTINGS]: false });
+    config = getConfigStub({ [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: false });
     msearchParams = getMSearchParams(config);
     expect(msearchParams.ignore_throttled).toBe(true);
   });
 
   test('includes max_concurrent_shard_requests according to courier:maxConcurrentShardRequests if greater than 0', () => {
-    let config = getConfigStub({ [COURIER_MAX_CONCURRENT_SHARD_REQUESTS_SETTINGS]: 0 });
+    let config = getConfigStub({ [UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS]: 0 });
     let msearchParams = getMSearchParams(config);
     expect(msearchParams.max_concurrent_shard_requests).toBe(undefined);
 
-    config = getConfigStub({ [COURIER_MAX_CONCURRENT_SHARD_REQUESTS_SETTINGS]: 5 });
+    config = getConfigStub({ [UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS]: 5 });
     msearchParams = getMSearchParams(config);
     expect(msearchParams.max_concurrent_shard_requests).toBe(5);
   });
 
   test('does not include other search params that are included in the msearch header or body', () => {
     const config = getConfigStub({
-      [SEARCH_INCLUDE_FROZEN_SETTINGS]: false,
-      [COURIER_MAX_CONCURRENT_SHARD_REQUESTS_SETTINGS]: 5,
+      [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: false,
+      [UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS]: 5,
     });
     const msearchParams = getMSearchParams(config);
     expect(msearchParams.hasOwnProperty('ignore_unavailable')).toBe(false);

@@ -19,7 +19,7 @@ import {
   ESSearchRequest,
   ESSearchResponse
 } from '../../../typings/elasticsearch';
-import { SEARCH_INCLUDE_FROZEN_SETTINGS } from '../../../../../../src/plugins/data/common';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import { APMRequestHandlerContext } from '../../routes/typings';
@@ -96,7 +96,7 @@ async function getParamsForSearchRequest(
       savedObjectsClient: context.core.savedObjects.client,
       config: context.config
     }),
-    uiSettings.client.get(SEARCH_INCLUDE_FROZEN_SETTINGS)
+    uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN)
   ]);
 
   // Get indices for legacy data filter (only those which apply)

@@ -20,7 +20,7 @@
 import { IUiSettingsClient } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { PersistedLog } from '../persisted_log';
-import { HISTORY_LIMIT_SETTINGS } from '../../../common';
+import { UI_SETTINGS } from '../../../common';
 
 export function getQueryLog(
   uiSettings: IUiSettingsClient,
@@ -31,7 +31,7 @@ export function getQueryLog(
   return new PersistedLog(
     `typeahead:${appName}-${language}`,
     {
-      maxLength: uiSettings.get(HISTORY_LIMIT_SETTINGS),
+      maxLength: uiSettings.get(UI_SETTINGS.HISTORY_LIMIT),
       filterDuplicates: true,
     },
     storage

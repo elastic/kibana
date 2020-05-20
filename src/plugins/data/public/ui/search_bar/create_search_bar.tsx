@@ -27,7 +27,7 @@ import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
 import { DataPublicPluginStart } from '../../types';
-import { Filter, Query, TimeRange, SEARCH_QUERY_LANGUAGE_SETTINGS } from '../../../common';
+import { Filter, Query, TimeRange, UI_SETTINGS } from '../../../common';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
@@ -126,7 +126,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
       query: '',
       language:
         storage.get('kibana.userQueryLanguage') ||
-        core.uiSettings.get(SEARCH_QUERY_LANGUAGE_SETTINGS),
+        core.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE),
     };
     const [query, setQuery] = useState<Query>(props.query || defaultQuery);
 

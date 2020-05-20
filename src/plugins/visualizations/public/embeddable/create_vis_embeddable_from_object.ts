@@ -29,7 +29,7 @@ import {
   getCapabilities,
 } from '../services';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
-import { VISUALIZE_ENABLE_LABS_SETTINGS } from '../../common/constants';
+import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 
 export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDeps) => async (
   vis: Vis,
@@ -45,7 +45,7 @@ export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDe
     const editUrl = visId
       ? getHttp().basePath.prepend(`/app/visualize${savedVisualizations.urlFor(visId)}`)
       : '';
-    const isLabsEnabled = getUISettings().get<boolean>(VISUALIZE_ENABLE_LABS_SETTINGS);
+    const isLabsEnabled = getUISettings().get<boolean>(VISUALIZE_ENABLE_LABS_SETTING);
 
     if (!isLabsEnabled && vis.type.stage === 'experimental') {
       return new DisabledLabEmbeddable(vis.title, input);

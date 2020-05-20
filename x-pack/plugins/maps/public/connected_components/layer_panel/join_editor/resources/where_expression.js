@@ -8,7 +8,7 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiExpression, EuiFormHelpText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SEARCH_QUERY_LANGUAGE_SETTINGS } from '../../../../../../../../src/plugins/data/common';
+import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
 import { getUiSettings, getData } from '../../../../kibana_services';
 
 export class WhereExpression extends Component {
@@ -80,7 +80,7 @@ export class WhereExpression extends Component {
             query={
               whereQuery
                 ? whereQuery
-                : { language: getUiSettings().get(SEARCH_QUERY_LANGUAGE_SETTINGS), query: '' }
+                : { language: getUiSettings().get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE), query: '' }
             }
             onQuerySubmit={this._onQueryChange}
             indexPatterns={[indexPattern]}

@@ -27,8 +27,8 @@ import {
   Query,
   esQuery,
   esKuery,
+  UI_SETTINGS,
 } from '../../../../../../../src/plugins/data/public';
-import { QUERY_STRING_OPTIONS_SETTINGS } from '../../../../../../../src/plugins/data/common';
 import { SavedSearchSavedObject } from '../../../../common/types/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
@@ -255,7 +255,7 @@ export const Page: FC = () => {
       qry = esKuery.toElasticsearchQuery(ast, currentIndexPattern);
     } else {
       qry = esQuery.luceneStringToDsl(qryString);
-      esQuery.decorateQuery(qry, kibanaConfig.get(QUERY_STRING_OPTIONS_SETTINGS));
+      esQuery.decorateQuery(qry, kibanaConfig.get(UI_SETTINGS.QUERY_STRING_OPTIONS));
     }
 
     return {

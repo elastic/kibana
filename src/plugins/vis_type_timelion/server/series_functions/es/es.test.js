@@ -30,7 +30,7 @@ import _ from 'lodash';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import invoke from '../helpers/invoke_series_fn.js';
-import { SEARCH_INCLUDE_FROZEN_SETTINGS } from '../../../../data/common';
+import { UI_SETTINGS } from '../../../../data/public';
 
 function stubRequestAndServer(response, indexPatternSavedObjects = []) {
   return {
@@ -217,14 +217,14 @@ describe('es', () => {
 
       it('sets ignore_throttled=true on the request', () => {
         config.index = 'beer';
-        tlConfig.settings[SEARCH_INCLUDE_FROZEN_SETTINGS] = false;
+        tlConfig.settings[UI_SETTINGS.SEARCH_INCLUDE_FROZEN] = false;
         const request = fn(config, tlConfig, emptyScriptedFields);
 
         expect(request.ignore_throttled).to.equal(true);
       });
 
       it('sets no timeout if elasticsearch.shardTimeout is set to 0', () => {
-        tlConfig.settings[SEARCH_INCLUDE_FROZEN_SETTINGS] = true;
+        tlConfig.settings[UI_SETTINGS.SEARCH_INCLUDE_FROZEN] = true;
         config.index = 'beer';
         const request = fn(config, tlConfig, emptyScriptedFields);
 

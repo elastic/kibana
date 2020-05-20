@@ -7,7 +7,7 @@
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { LicenseState, verifyApiAccess } from '../lib/license_state';
-import { SEARCH_INCLUDE_FROZEN_SETTINGS } from '../../../../../src/plugins/data/common';
+import { UI_SETTINGS } from '../../../../../src/plugins/data/public';
 
 export function registerSearchRoute({
   router,
@@ -40,7 +40,7 @@ export function registerSearchRoute({
         response
       ) => {
         verifyApiAccess(licenseState);
-        const includeFrozen = await uiSettings.get<boolean>(SEARCH_INCLUDE_FROZEN_SETTINGS);
+        const includeFrozen = await uiSettings.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
         try {
           return response.ok({
             body: {

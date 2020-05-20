@@ -61,6 +61,7 @@
 |  [fieldFormats](./kibana-plugin-plugins-data-server.fieldformats.md) |  |
 |  [indexPatterns](./kibana-plugin-plugins-data-server.indexpatterns.md) |  |
 |  [search](./kibana-plugin-plugins-data-server.search.md) |  |
+|  [UI\_SETTINGS](./kibana-plugin-plugins-data-server.ui_settings.md) |  |
 
 ## Type Aliases
 

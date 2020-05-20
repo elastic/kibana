@@ -6,11 +6,11 @@
 
 import { IUiSettingsClient } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { TimefilterContract, TimeRange } from '../../../../../../src/plugins/data/public';
 import {
-  HISTOGRAM_BAR_TARGET_SETTINGS,
-  HISTOGRAM_MAX_BARS_SETTINGS,
-} from '../../../../../../src/plugins/data/common';
+  TimefilterContract,
+  TimeRange,
+  UI_SETTINGS,
+} from '../../../../../../src/plugins/data/public';
 import { getBoundsRoundedToInterval, TimeBuckets, TimeRangeBounds } from '../util/time_buckets';
 import { ExplorerJob, OverallSwimlaneData, SwimlaneData } from '../explorer/explorer_utils';
 import { VIEW_BY_JOB_LABEL } from '../explorer/explorer_constants';
@@ -29,8 +29,8 @@ export class ExplorerService {
     private mlResultsService: MlResultsService
   ) {
     this.timeBuckets = new TimeBuckets({
-      [HISTOGRAM_MAX_BARS_SETTINGS]: uiSettings.get(HISTOGRAM_MAX_BARS_SETTINGS),
-      [HISTOGRAM_BAR_TARGET_SETTINGS]: uiSettings.get(HISTOGRAM_BAR_TARGET_SETTINGS),
+      'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+      'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
       dateFormat: uiSettings.get('dateFormat'),
       'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
     });

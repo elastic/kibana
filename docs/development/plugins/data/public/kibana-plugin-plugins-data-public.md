@@ -114,6 +114,7 @@
 |  [SearchBar](./kibana-plugin-plugins-data-public.searchbar.md) |  |
 |  [SYNC\_SEARCH\_STRATEGY](./kibana-plugin-plugins-data-public.sync_search_strategy.md) |  |
 |  [syncQueryStateWithUrl](./kibana-plugin-plugins-data-public.syncquerystatewithurl.md) | Helper to setup syncing of global data with the URL |
+|  [UI\_SETTINGS](./kibana-plugin-plugins-data-public.ui_settings.md) |  |
 
 ## Type Aliases
 

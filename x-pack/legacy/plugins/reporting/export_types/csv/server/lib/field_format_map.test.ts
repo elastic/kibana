@@ -9,11 +9,8 @@ import expect from '@kbn/expect';
 import {
   fieldFormats,
   FieldFormatsGetConfigFn,
+  UI_SETTINGS,
 } from '../../../../../../../../src/plugins/data/server';
-import {
-  FORMAT_DEFAULT_TYPE_MAP_SETTINGS,
-  FORMAT_NUMBER_DEFAULT_PATTERN_SETTINGS,
-} from '../../../../../../../../src/plugins/data/common';
 import { fieldFormatMapFactory } from './field_format_map';
 
 type ConfigValue = { number: { id: string; params: {} } } | string;
@@ -32,10 +29,10 @@ describe('field format map', function() {
     },
   };
   const configMock: Record<string, ConfigValue> = {};
-  configMock[FORMAT_DEFAULT_TYPE_MAP_SETTINGS] = {
+  configMock[UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP] = {
     number: { id: 'number', params: {} },
   };
-  configMock[FORMAT_NUMBER_DEFAULT_PATTERN_SETTINGS] = '0,0.[000]';
+  configMock[UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN] = '0,0.[000]';
   const getConfig = ((key: string) => configMock[key]) as FieldFormatsGetConfigFn;
   const testValue = '4000';
 

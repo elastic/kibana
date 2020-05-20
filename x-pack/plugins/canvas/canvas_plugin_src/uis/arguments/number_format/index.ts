@@ -11,12 +11,7 @@ import { templateFromReactComponent } from '../../../../public/lib/template_from
 import { ArgumentFactory } from '../../../../types/arguments';
 import { ArgumentStrings } from '../../../../i18n';
 import { SetupInitializer } from '../../../plugin';
-import {
-  FORMAT_NUMBER_DEFAULT_PATTERN_SETTINGS,
-  FORMAT_PERCENT_DEFAULT_PATTERN_SETTINGS,
-  FORMAT_BYTES_DEFAULT_PATTERN_SETTINGS,
-  FORMAT_CURRENCY_DEFAULT_PATTERN_SETTINGS,
-} from '../../../../../../../src/plugins/data/common';
+import { UI_SETTINGS } from '../../../../../../../src/plugins/data/public';
 
 const { NumberFormat: strings } = ArgumentStrings;
 
@@ -25,11 +20,11 @@ export const numberFormatInitializer: SetupInitializer<ArgumentFactory<Component
   plugins
 ) => {
   const formatMap = {
-    NUMBER: core.uiSettings.get(FORMAT_NUMBER_DEFAULT_PATTERN_SETTINGS),
-    PERCENT: core.uiSettings.get(FORMAT_PERCENT_DEFAULT_PATTERN_SETTINGS),
-    CURRENCY: core.uiSettings.get(FORMAT_CURRENCY_DEFAULT_PATTERN_SETTINGS),
+    NUMBER: core.uiSettings.get(UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN),
+    PERCENT: core.uiSettings.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN),
+    CURRENCY: core.uiSettings.get(UI_SETTINGS.FORMAT_CURRENCY_DEFAULT_PATTERN),
     DURATION: '00:00:00',
-    BYTES: core.uiSettings.get(FORMAT_BYTES_DEFAULT_PATTERN_SETTINGS),
+    BYTES: core.uiSettings.get(UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN),
   };
 
   const numberFormats = [

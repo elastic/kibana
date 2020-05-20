@@ -5,10 +5,7 @@
  */
 
 import { Moment } from 'moment';
-import {
-  HISTOGRAM_BAR_TARGET_SETTINGS,
-  HISTOGRAM_MAX_BARS_SETTINGS,
-} from '../../../../../../src/plugins/data/common';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 
 export interface TimeRangeBounds {
   min?: Moment;
@@ -22,8 +19,8 @@ export declare interface TimeBucketsInterval {
 }
 
 export interface TimeBucketsConfig {
-  [HISTOGRAM_MAX_BARS_SETTINGS]: number;
-  [HISTOGRAM_BAR_TARGET_SETTINGS]: number;
+  'histogram:maxBars': number;
+  'histogram:barTarget': number;
   dateFormat: string;
   'dateFormat:scaled': string[][];
 }

@@ -9,8 +9,11 @@ import { shallow } from 'enzyme';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { esFilters, FilterManager } from '../../../../../../../../src/plugins/data/public';
-import { FILTERS_PINNED_BY_DEFAULT_SETTINGS } from '../../../../../../../../src/plugins/data/common';
+import {
+  esFilters,
+  FilterManager,
+  UI_SETTINGS,
+} from '../../../../../../../../src/plugins/data/public';
 import { SeverityBadge } from '../severity_badge';
 
 import * as i18n from './translations';
@@ -30,7 +33,7 @@ import { ListItems } from './types';
 const setupMock = coreMock.createSetup();
 const uiSettingsMock = (pinnedByDefault: boolean) => (key: string) => {
   switch (key) {
-    case FILTERS_PINNED_BY_DEFAULT_SETTINGS:
+    case UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT:
       return pinnedByDefault;
     default:
       throw new Error(`Unexpected uiSettings key in FilterManager mock: ${key}`);

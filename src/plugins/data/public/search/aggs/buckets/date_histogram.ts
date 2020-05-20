@@ -31,12 +31,7 @@ import { dateHistogramInterval, TimeRange } from '../../../../common';
 import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
 
-import {
-  FIELD_FORMAT_IDS,
-  KBN_FIELD_TYPES,
-  HISTOGRAM_BAR_TARGET_SETTINGS,
-  HISTOGRAM_MAX_BARS_SETTINGS,
-} from '../../../../common';
+import { FIELD_FORMAT_IDS, KBN_FIELD_TYPES, UI_SETTINGS } from '../../../../common';
 import { TimefilterContract } from '../../../query';
 import { QuerySetup } from '../../../query/query_service';
 import { GetInternalStartServicesFn } from '../../../types';
@@ -130,8 +125,8 @@ export const getDateHistogramBucketAgg = ({
 
               const { timefilter } = query.timefilter;
               buckets = new TimeBuckets({
-                [HISTOGRAM_MAX_BARS_SETTINGS]: uiSettings.get(HISTOGRAM_MAX_BARS_SETTINGS),
-                [HISTOGRAM_BAR_TARGET_SETTINGS]: uiSettings.get(HISTOGRAM_BAR_TARGET_SETTINGS),
+                'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+                'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
                 dateFormat: uiSettings.get('dateFormat'),
                 'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
               });

@@ -18,31 +18,33 @@
  */
 
 export const DEFAULT_QUERY_LANGUAGE = 'kuery';
-export const META_FIELDS_SETTING = 'metaFields';
-export const DOC_HIGHLIGHT_SETTING = 'doc_table:highlight';
-export const QUERY_STRING_OPTIONS_SETTINGS = 'query:queryString:options';
-export const QUERY_ALLOW_LEADING_WILDCARDS_SETTINGS = 'query:allowLeadingWildcards';
-export const SEARCH_QUERY_LANGUAGE_SETTINGS = 'search:queryLanguage';
-export const SORT_OPTIONS_SETTINGS = 'sort:options';
-export const COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_SETTINGS =
-  'courier:ignoreFilterIfFieldNotInIndex';
-export const COURIER_SET_REQUEST_PREFERENCE_SETTINGS = 'courier:setRequestPreference';
-export const COURIER_CUSTOM_REQUEST_PREFERENCE_SETTINGS = 'courier:customRequestPreference';
-export const COURIER_MAX_CONCURRENT_SHARD_REQUESTS_SETTINGS = 'courier:maxConcurrentShardRequests';
-export const COURIER_BATCH_SEARCHES_SETTINGS = 'courier:batchSearches';
-export const SEARCH_INCLUDE_FROZEN_SETTINGS = 'search:includeFrozen';
-export const HISTOGRAM_BAR_TARGET_SETTINGS = 'histogram:barTarget';
-export const HISTOGRAM_MAX_BARS_SETTINGS = 'histogram:maxBars';
-export const HISTORY_LIMIT_SETTINGS = 'history:limit';
-export const SHORT_DOTS_ENABLE_SETTINGS = 'shortDots:enable';
-export const FORMAT_DEFAULT_TYPE_MAP_SETTINGS = 'format:defaultTypeMap';
-export const FORMAT_NUMBER_DEFAULT_PATTERN_SETTINGS = 'format:number:defaultPattern';
-export const FORMAT_PERCENT_DEFAULT_PATTERN_SETTINGS = 'format:percent:defaultPattern';
-export const FORMAT_BYTES_DEFAULT_PATTERN_SETTINGS = 'format:bytes:defaultPattern';
-export const FORMAT_CURRENCY_DEFAULT_PATTERN_SETTINGS = 'format:currency:defaultPattern';
-export const FORMAT_NUMBER_DEFAULT_LOCALE_SETTINGS = 'format:number:defaultLocale';
-export const TIMEPICKER_REFRESH_INTERVAL_DEFAULTS_SETTINGS = 'timepicker:refreshIntervalDefaults';
-export const TIMEPICKER_QUICK_RANGES_SETTINGS = 'timepicker:quickRanges';
-export const INDEXPATTERN_PLACEHOLDER_SETTINGS = 'indexPattern:placeholder';
-export const FILTERS_PINNED_BY_DEFAULT_SETTINGS = 'filters:pinnedByDefault';
-export const FILTERS_EDITOR_SUGGEST_VALUES_SETTINGS = 'filterEditor:suggestValues';
+
+export const UI_SETTINGS = {
+  META_FIELDS: 'metaFields',
+  DOC_HIGHLIGHT: 'doc_table:highlight',
+  QUERY_STRING_OPTIONS: 'query:queryString:options',
+  QUERY_ALLOW_LEADING_WILDCARDS: 'query:allowLeadingWildcards',
+  SEARCH_QUERY_LANGUAGE: 'search:queryLanguage',
+  SORT_OPTIONS: 'sort:options',
+  COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: 'courier:ignoreFilterIfFieldNotInIndex',
+  COURIER_SET_REQUEST_PREFERENCE: 'courier:setRequestPreference',
+  COURIER_CUSTOM_REQUEST_PREFERENCE: 'courier:customRequestPreference',
+  COURIER_MAX_CONCURRENT_SHARD_REQUESTS: 'courier:maxConcurrentShardRequests',
+  COURIER_BATCH_SEARCHES: 'courier:batchSearches',
+  SEARCH_INCLUDE_FROZEN: 'search:includeFrozen',
+  HISTOGRAM_BAR_TARGET: 'histogram:barTarget',
+  HISTOGRAM_MAX_BARS: 'histogram:maxBars',
+  HISTORY_LIMIT: 'history:limit',
+  SHORT_DOTS_ENABLE: 'shortDots:enable',
+  FORMAT_DEFAULT_TYPE_MAP: 'format:defaultTypeMap',
+  FORMAT_NUMBER_DEFAULT_PATTERN: 'format:number:defaultPattern',
+  FORMAT_PERCENT_DEFAULT_PATTERN: 'format:percent:defaultPattern',
+  FORMAT_BYTES_DEFAULT_PATTERN: 'format:bytes:defaultPattern',
+  FORMAT_CURRENCY_DEFAULT_PATTERN: 'format:currency:defaultPattern',
+  FORMAT_NUMBER_DEFAULT_LOCALE: 'format:number:defaultLocale',
+  TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: 'timepicker:refreshIntervalDefaults',
+  TIMEPICKER_QUICK_RANGES: 'timepicker:quickRanges',
+  INDEXPATTERN_PLACEHOLDER: 'indexPattern:placeholder',
+  FILTERS_PINNED_BY_DEFAULT: 'filters:pinnedByDefault',
+  FILTERS_EDITOR_SUGGEST_VALUES: 'filterEditor:suggestValues',
+};

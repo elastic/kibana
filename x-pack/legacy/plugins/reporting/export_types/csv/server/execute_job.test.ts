@@ -8,7 +8,7 @@ import nodeCrypto from '@elastic/node-crypto';
 // @ts-ignore
 import Puid from 'puid';
 import sinon from 'sinon';
-import { fieldFormats } from '../../../../../../../src/plugins/data/server';
+import { fieldFormats, UI_SETTINGS } from '../../../../../../../src/plugins/data/server';
 import { CancellationToken } from '../../../../../../plugins/reporting/common';
 import { CSV_BOM_CHARS } from '../../../common/constants';
 import { LevelLogger } from '../../../server/lib';
@@ -16,11 +16,10 @@ import { setFieldFormats } from '../../../server/services';
 import { createMockReportingCore } from '../../../test_helpers';
 import { JobDocPayloadDiscoverCsv } from '../types';
 import { executeJobFactory } from './execute_job';
-import { FORMAT_DEFAULT_TYPE_MAP_SETTINGS } from '../../../../../../../src/plugins/data/common';
 import {
-  CSV_SEPARATOR_SETTINGS,
-  CSV_QUOTE_VALUES_SETTINGS,
-} from '../../../../../../../src/plugins/share/common/constants';
+  CSV_SEPARATOR_SETTING,
+  CSV_QUOTE_VALUES_SETTING,
+} from '../../../../../../../src/plugins/share/server';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(() => resolve(), ms));
 
@@ -96,13 +95,13 @@ describe('CSV Execute Job', function() {
       .stub(clusterStub, 'callAsCurrentUser')
       .resolves(defaultElasticsearchResponse);
 
-    mockUiSettingsClient.get.withArgs(CSV_SEPARATOR_SETTINGS).returns(',');
-    mockUiSettingsClient.get.withArgs(CSV_QUOTE_VALUES_SETTINGS).returns(true);
+    mockUiSettingsClient.get.withArgs(CSV_SEPARATOR_SETTING).returns(',');
+    mockUiSettingsClient.get.withArgs(CSV_QUOTE_VALUES_SETTING).returns(true);
 
     setFieldFormats({
       fieldFormatServiceFactory() {
         const uiConfigMock = {};
-        (uiConfigMock as any)[FORMAT_DEFAULT_TYPE_MAP_SETTINGS] = {
+        (uiConfigMock as any)[UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP] = {
           _default_: { id: 'string', params: {} },
         };
 
@@ -750,7 +749,7 @@ describe('CSV Execute Job', function() {
     });
 
     it('should use custom uiSettings csv:separator for header', async function() {
-      mockUiSettingsClient.get.withArgs(CSV_SEPARATOR_SETTINGS).returns(';');
+      mockUiSettingsClient.get.withArgs(CSV_SEPARATOR_SETTING).returns(';');
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
@@ -762,7 +761,7 @@ describe('CSV Execute Job', function() {
     });
 
     it('should escape column headers if uiSettings csv:quoteValues is true', async function() {
-      mockUiSettingsClient.get.withArgs(CSV_QUOTE_VALUES_SETTINGS).returns(true);
+      mockUiSettingsClient.get.withArgs(CSV_QUOTE_VALUES_SETTING).returns(true);
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = getJobDocPayload({
         headers: encryptedHeaders,
@@ -774,7 +773,7 @@ describe('CSV Execute Job', function() {
     });
 
     it(`shouldn't escape column headers if uiSettings csv:quoteValues is false`, async function() {
-      mockUiSettingsClient.get.withArgs(CSV_QUOTE_VALUES_SETTINGS).returns(false);
+      mockUiSettingsClient.get.withArgs(CSV_QUOTE_VALUES_SETTING).returns(false);
       const executeJob = await executeJobFactory(mockReportingPlugin, mockLogger);
       const jobParams = getJobDocPayload({
         headers: encryptedHeaders,

@@ -38,10 +38,7 @@ import { Toast } from 'src/core/public';
 import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
 import { useKibana, toMountPoint } from '../../../../kibana_react/public';
 import { QueryStringInput } from './query_string_input';
-import {
-  doesKueryExpressionHaveLuceneSyntaxError,
-  TIMEPICKER_QUICK_RANGES_SETTINGS,
-} from '../../../common';
+import { doesKueryExpressionHaveLuceneSyntaxError, UI_SETTINGS } from '../../../common';
 import { PersistedLog, getQueryLog } from '../../query';
 
 interface Props {
@@ -258,7 +255,7 @@ export function QueryBarTopRow(props: Props) {
     }
 
     const commonlyUsedRanges = uiSettings!
-      .get(TIMEPICKER_QUICK_RANGES_SETTINGS)
+      .get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
       .map(({ from, to, display }: { from: string; to: string; display: string }) => {
         return {
           start: from,

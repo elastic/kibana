@@ -7,7 +7,7 @@
 import { openSans } from '../../../common/lib/fonts';
 import { ViewStrings } from '../../../i18n';
 import { SetupInitializer } from '../../plugin';
-import { FORMAT_NUMBER_DEFAULT_PATTERN_SETTINGS } from '../../../../../../src/plugins/data/common';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 
 const { Metric: strings } = ViewStrings;
 
@@ -23,7 +23,7 @@ export const metricInitializer: SetupInitializer<unknown> = (core, plugin) => {
         displayName: strings.getMetricFormatDisplayName(),
         help: strings.getMetricFormatHelp(),
         argType: 'numberFormat',
-        default: `"${core.uiSettings.get(FORMAT_NUMBER_DEFAULT_PATTERN_SETTINGS)}"`,
+        default: `"${core.uiSettings.get(UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN)}"`,
       },
       {
         name: '_',

@@ -18,7 +18,7 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context.d';
-import { FORMAT_BYTES_DEFAULT_PATTERN_SETTINGS } from '../../../../src/plugins/data/common';
+import { UI_SETTINGS } from '../../../../src/plugins/data/public';
 
 // eslint-disable-next-line @typescript-eslint/no-namespace, import/no-default-export
 export default function({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
@@ -38,7 +38,7 @@ export default function({ getService, getPageObjects, loadTestFile }: FtrProvide
       await esArchiver.load('visualize');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
-        [FORMAT_BYTES_DEFAULT_PATTERN_SETTINGS]: '0,0.[000]b',
+        [UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
       });
       isOss = await PageObjects.common.isOss();
     });

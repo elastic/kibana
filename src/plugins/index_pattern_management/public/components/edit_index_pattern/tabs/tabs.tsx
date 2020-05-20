@@ -32,8 +32,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { fieldWildcardMatcher } from '../../../../../kibana_utils/public';
 import { IndexPatternManagementStart } from '../../../../../index_pattern_management/public';
-import { IndexPattern, IndexPatternField } from '../../../../../data/public';
-import { META_FIELDS_SETTING } from '../../../../../data/common';
+import { IndexPattern, IndexPatternField, UI_SETTINGS } from '../../../../../data/public';
 import { createEditIndexPatternPageStateContainer } from '../edit_index_pattern_state_container';
 import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from '../constants';
 import { SourceFiltersTable } from '../source_filters_table';
@@ -106,7 +105,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
   }, [indexPattern, indexPattern.fields, refreshFilters]);
 
   const fieldWildcardMatcherDecorated = useCallback(
-    (filters: string[]) => fieldWildcardMatcher(filters, config.get(META_FIELDS_SETTING)),
+    (filters: string[]) => fieldWildcardMatcher(filters, config.get(UI_SETTINGS.META_FIELDS)),
     [config]
   );
 
