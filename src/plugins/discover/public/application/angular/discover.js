@@ -322,10 +322,6 @@ function discoverController(
     }
   );
 
-  $scope.intervalEnabled = function(interval) {
-    return interval.val !== 'custom';
-  };
-
   let abortController;
   $scope.$on('$destroy', () => {
     if (abortController) abortController.abort();
@@ -616,24 +612,6 @@ function discoverController(
   $scope.state.index = $scope.indexPattern.id;
   $scope.state.sort = getSortArray($scope.state.sort, $scope.indexPattern);
 
-  $scope.getBucketIntervalToolTipText = () => {
-    return i18n.translate('discover.bucketIntervalTooltip', {
-      defaultMessage:
-        'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}',
-      values: {
-        bucketsDescription:
-          $scope.bucketInterval.scale > 1
-            ? i18n.translate('discover.bucketIntervalTooltip.tooLargeBucketsText', {
-                defaultMessage: 'buckets that are too large',
-              })
-            : i18n.translate('discover.bucketIntervalTooltip.tooManyBucketsText', {
-                defaultMessage: 'too many buckets',
-              }),
-        bucketIntervalDescription: $scope.bucketInterval.description,
-      },
-    });
-  };
-
   $scope.opts = {
     // number of records to fetch, then paginate through
     sampleSize: config.get(SAMPLE_SIZE_SETTING),
@@ -683,12 +661,12 @@ function discoverController(
           error => addFatalError(core.fatalErrors, error)
         )
       );
-      //Handling change oft the histogram interval
-      $scope.$watch('state.interval', function(newInterval, oldInterval) {
-        if (newInterval !== oldInterval) {
-          setAppState({ interval: newInterval });
+
+      $scope.changeInterval = interval => {
+        if (interval) {
+          setAppState({ interval });
         }
-      });
+      };
 
       $scope.$watchMulti(
         ['rows', 'fetchStatus'],
@@ -941,6 +919,7 @@ function discoverController(
 
   $scope.resetQuery = function() {
     history.push(`/${encodeURIComponent($route.current.params.id)}`);
+    $route.reload();
   };
 
   $scope.newQuery = function() {

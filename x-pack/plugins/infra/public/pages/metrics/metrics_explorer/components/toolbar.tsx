@@ -37,7 +37,7 @@ interface Props {
   defaultViewState: MetricExplorerViewState;
   onRefresh: () => void;
   onTimeChange: (start: string, end: string) => void;
-  onGroupByChange: (groupBy: string | null) => void;
+  onGroupByChange: (groupBy: string | null | string[]) => void;
   onFilterQuerySubmit: (query: string) => void;
   onMetricsChange: (metrics: MetricsExplorerMetric[]) => void;
   onAggregationChange: (aggregation: MetricsExplorerAggregation) => void;

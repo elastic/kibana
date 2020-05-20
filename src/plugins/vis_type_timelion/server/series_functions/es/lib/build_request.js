@@ -39,7 +39,7 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
 
   // Use the kibana filter bar filters
   if (config.kibana) {
-    bool.filter = _.get(tlConfig, 'request.payload.extended.es.filter');
+    bool.filter = _.get(tlConfig, 'request.body.extended.es.filter');
   }
 
   const aggs = {
