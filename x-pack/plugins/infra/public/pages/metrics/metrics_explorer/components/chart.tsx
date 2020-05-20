@@ -36,6 +36,7 @@ import { getChartTheme } from './helpers/get_chart_theme';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 import { calculateDomain } from './helpers/calculate_domain';
 import { useKibana, useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public';
+import { ChartTitle } from './chart_title';
 
 interface Props {
   title?: string | null;
@@ -92,16 +93,17 @@ export const MetricsExplorerChart = ({
     chartOptions.yAxisMode === MetricsExplorerYAxisMode.fromZero
       ? { ...dataDomain, min: 0 }
       : dataDomain;
+
   return (
     <div style={{ padding: 24 }}>
       {options.groupBy ? (
         <EuiTitle size="xs">
           <EuiFlexGroup alignItems="center">
-            <ChartTitle>
+            <ChartTitleContainer>
               <EuiToolTip content={title} anchorClassName="metricsExplorerTitleAnchor">
-                <span>{title}</span>
+                <ChartTitle series={series} />
               </EuiToolTip>
-            </ChartTitle>
+            </ChartTitleContainer>
             <EuiFlexItem grow={false}>
               <MetricsExplorerChartContextMenu
                 timeRange={timeRange}
@@ -170,7 +172,7 @@ export const MetricsExplorerChart = ({
   );
 };
 
-const ChartTitle = euiStyled.div`
+const ChartTitleContainer = euiStyled.div`
   width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
