@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { PollerOptions } from '..';
+import { PollerOptions } from './types';
 
 // @TODO Maybe move to observables someday
 export class Poller {

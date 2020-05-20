@@ -232,12 +232,14 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       preconfiguredActions,
     } = this;
 
+    const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient();
+
     actionExecutor!.initialize({
       logger,
       eventLogger: this.eventLogger!,
       spaces: this.spaces,
       getServices: this.getServicesFactory(core.savedObjects, core.elasticsearch),
-      encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
+      encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
       preconfiguredActions,
     });
@@ -245,7 +247,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     taskRunnerFactory!.initialize({
       logger,
       actionTypeRegistry: actionTypeRegistry!,
-      encryptedSavedObjectsPlugin: plugins.encryptedSavedObjects,
+      encryptedSavedObjectsClient,
       getBasePath: this.getBasePath,
       spaceIdToNamespace: this.spaceIdToNamespace,
       getScopedSavedObjectsClient: core.savedObjects.getScopedClient,

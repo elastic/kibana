@@ -19,11 +19,13 @@ import { NoData } from '../../../../components/empty_states/no_data';
 import { MetricsExplorerChart } from './chart';
 import { SourceQuery } from '../../../../graphql/types';
 
+type stringOrNull = string | null;
+
 interface Props {
   loading: boolean;
   options: MetricsExplorerOptions;
   chartOptions: MetricsExplorerChartOptions;
-  onLoadMore: (afterKey: string | null) => void;
+  onLoadMore: (afterKey: stringOrNull | Record<string, stringOrNull>) => void;
   onRefetch: () => void;
   onFilter: (filter: string) => void;
   onTimeChange: (start: string, end: string) => void;
@@ -74,6 +76,8 @@ export const MetricsExplorerCharts = ({
     );
   }
 
+  const and = i18n.translate('xpack.infra.metricsExplorer.andLabel', { defaultMessage: '" and "' });
+
   return (
     <div style={{ width: '100%' }}>
       <EuiFlexGrid gutterSize="s" columns={data.series.length === 1 ? 1 : 3}>
@@ -105,7 +109,9 @@ export const MetricsExplorerCharts = ({
                 values={{
                   length: data.series.length,
                   total: data.pageInfo.total,
-                  groupBy: options.groupBy,
+                  groupBy: Array.isArray(options.groupBy)
+                    ? options.groupBy.join(and)
+                    : options.groupBy,
                 }}
               />
             </p>
