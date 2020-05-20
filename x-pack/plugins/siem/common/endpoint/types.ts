@@ -6,11 +6,17 @@
 
 import { Datasource, NewDatasource } from '../../../ingest_manager/common';
 
+export interface AppLocationState {
+  isTabChange?: boolean;
+  prevPath?: string;
+}
+
 export interface AppLocation {
   pathname: string;
   search: string;
   hash: string;
   key?: string;
+  state?: AppLocationState;
 }
 
 /**

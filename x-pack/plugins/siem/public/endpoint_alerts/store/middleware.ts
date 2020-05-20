@@ -18,7 +18,7 @@ import {
   apiQueryParams,
   hasSelectedAlert,
   uiQueryParams,
-  hasSelectedAlertDetailsTab,
+  isAlertPageTabChange,
 } from './selectors';
 import { Immutable } from '../../../common/endpoint/types';
 
@@ -45,31 +45,22 @@ export const alertMiddlewareFactory: ImmutableMiddlewareFactory<Immutable<AlertL
   return api => next => async action => {
     next(action);
     const state = api.getState();
-    if (
-      action.type === 'userChangedUrl' &&
-      isOnAlertPage(state) &&
-      !hasSelectedAlertDetailsTab(state)
-    ) {
+    if (action.type === 'userChangedUrl' && isOnAlertPage(state) && !isAlertPageTabChange(state)) {
       const patterns = await fetchIndexPatterns();
       api.dispatch({ type: 'serverReturnedSearchBarIndexPatterns', payload: patterns });
 
-      const response: AlertResultList = await coreStart.http.get(`/api/endpoint/alerts`, {
+      const listResponse: AlertResultList = await coreStart.http.get(`/api/endpoint/alerts`, {
         query: cloneHttpFetchQuery(apiQueryParams(state)),
       });
-      api.dispatch({ type: 'serverReturnedAlertsData', payload: response });
-    }
+      api.dispatch({ type: 'serverReturnedAlertsData', payload: listResponse });
 
-    if (
-      action.type === 'userChangedUrl' &&
-      isOnAlertPage(state) &&
-      hasSelectedAlert(state) &&
-      !hasSelectedAlertDetailsTab(state)
-    ) {
-      const uiParams = uiQueryParams(state);
-      const response: AlertDetails = await coreStart.http.get(
-        `/api/endpoint/alerts/${uiParams.selected_alert}`
-      );
-      api.dispatch({ type: 'serverReturnedAlertDetailsData', payload: response });
+      if (hasSelectedAlert(state)) {
+        const uiParams = uiQueryParams(state);
+        const detailsResponse: AlertDetails = await coreStart.http.get(
+          `/api/endpoint/alerts/${uiParams.selected_alert}`
+        );
+        api.dispatch({ type: 'serverReturnedAlertDetailsData', payload: detailsResponse });
+      }
     }
   };
 };

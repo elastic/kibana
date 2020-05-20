@@ -72,13 +72,18 @@ const AlertDetailsOverviewComponent = memo(() => {
   }, [alertDetailsData]);
 
   const activeTab = useMemo(
-    () => tabs.find(({ id }) => (alertDetailsTabId ? id === alertDetailsTabId : true)),
+    () => (alertDetailsTabId ? tabs.find(({ id }) => id === alertDetailsTabId) : tabs[0]),
     [alertDetailsTabId, tabs]
   );
 
   const handleTabClick = (clickedTab: EuiTabbedContentTab): void => {
     if (clickedTab.id !== alertDetailsTabId) {
-      history.push(urlFromQueryParams({ ...queryParams, active_details_tab: clickedTab.id }));
+      const locationObject = urlFromQueryParams({
+        ...queryParams,
+        active_details_tab: clickedTab.id,
+      });
+      locationObject.state = { isTabChange: true };
+      history.push(locationObject);
     }
   };
 

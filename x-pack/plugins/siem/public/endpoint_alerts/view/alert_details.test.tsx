@@ -64,7 +64,7 @@ describe('when the alert details flyout is open', () => {
           reactTestingLibrary.act(() => {
             history.push({
               ...history.location,
-              search: '?active_details_tab=overviewResolver&&selected_alert=1',
+              search: '?selected_alert=1&active_details_tab=overviewResolver',
             });
           });
         });

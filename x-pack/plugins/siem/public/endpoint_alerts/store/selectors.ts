@@ -48,6 +48,13 @@ export const isOnAlertPage = (state: Immutable<AlertListState>): boolean => {
 };
 
 /**
+ * Returns a boolean based on whether or not the user navigated within the alerts page
+ */
+export const isAlertPageTabChange = (state: Immutable<AlertListState>): boolean => {
+  return isOnAlertPage(state) && !!state.location?.state?.isTabChange;
+};
+
+/**
  * Returns the query object received from parsing the browsers URL query params.
  * Used to calculate urls for links and such.
  */
@@ -173,13 +180,6 @@ export const apiQueryParams: (
 export const hasSelectedAlert: (state: Immutable<AlertListState>) => boolean = createSelector(
   uiQueryParams,
   ({ selected_alert: selectedAlert }) => selectedAlert !== undefined
-);
-
-export const hasSelectedAlertDetailsTab: (
-  state: Immutable<AlertListState>
-) => boolean = createSelector(
-  uiQueryParams,
-  ({ active_details_tab: activeDetailsTab }) => activeDetailsTab !== undefined
 );
 
 export const selectedAlertDetailsTabId: (
