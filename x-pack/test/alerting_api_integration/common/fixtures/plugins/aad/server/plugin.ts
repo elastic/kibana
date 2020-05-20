@@ -48,7 +48,9 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           }
           const [, { encryptedSavedObjects }] = await core.getStartServices();
           await encryptedSavedObjects
-            .getClient(['alert'])
+            .getClient({
+              includedHiddenTypes: ['alert'],
+            })
             .getDecryptedAsInternalUser(req.body.type, req.body.id, {
               namespace,
             });
