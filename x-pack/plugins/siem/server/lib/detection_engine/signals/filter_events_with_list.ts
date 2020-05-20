@@ -7,7 +7,7 @@ import { get } from 'lodash/fp';
 import { Logger } from 'src/core/server';
 
 import { ListItemArraySchema } from '../../../../../lists/common/schemas/response';
-import { Type as ListValueType } from '../../../../../lists/common/schemas/common';
+import { Type as ListValueType, type } from '../../../../../lists/common/schemas/common';
 import { ListClient } from '../../../../../lists/server';
 import { SignalSearchResponse, SearchTypes } from './types';
 import { RuleAlertParams } from '../types';
@@ -38,6 +38,12 @@ export const filterEventsAgainstList = async ({
       if (exceptionItem.values == null || exceptionItem.values.length === 0) {
         throw new Error('Malformed exception list provided');
       }
+      if (!type.is(exceptionItem.values[0].name)) {
+        throw new Error(`Unsupported list type used, please use one of ${type.keys}`);
+      }
+      if (!exceptionItem.values[0].id) {
+        throw new Error(`Missing list id for exception on field ${exceptionItem.field}`);
+      }
       // acquire the list values we are checking for.
       const valuesOfGivenType = eventSearchResult.hits.hits.reduce((acc, searchResultItem) => {
         const valueField = get(exceptionItem.field, searchResultItem._source);
@@ -48,8 +54,8 @@ export const filterEventsAgainstList = async ({
       }, new Set<string>());
 
       const listSignals: ListItemArraySchema = await listClient.getListItemByValues({
-        listId: exceptionItem.values[0].id ?? '',
-        type: exceptionItem.values[0].name as ListValueType, // bad, I know, I'll write a typeguard later.
+        listId: exceptionItem.values[0].id,
+        type: exceptionItem.values[0].name,
         value: [...valuesOfGivenType],
       });
 
