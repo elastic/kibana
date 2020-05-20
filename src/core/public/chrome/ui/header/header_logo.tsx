@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import Url from 'url';
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiHeaderLogo } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { useObservable } from 'react-use';
-import * as Rx from 'rxjs';
+import { Observable } from 'rxjs';
+import Url from 'url';
 import { ChromeNavLink } from '../..';
 
 function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
@@ -87,8 +87,8 @@ function onClick(
 
 interface Props {
   href: string;
-  navLinks$: Rx.Observable<ChromeNavLink[]>;
-  forceNavigation$: Rx.Observable<boolean>;
+  navLinks$: Observable<ChromeNavLink[]>;
+  forceNavigation$: Observable<boolean>;
   navigateToApp: (appId: string) => void;
 }
 

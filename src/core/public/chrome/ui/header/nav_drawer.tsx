@@ -17,26 +17,26 @@
  * under the License.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 // @ts-ignore
-import { EuiNavDrawer, EuiHorizontalRule, EuiNavDrawerGroup } from '@elastic/eui';
-import * as Rx from 'rxjs';
+import { EuiHorizontalRule, EuiNavDrawer, EuiNavDrawerGroup } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { useObservable } from 'react-use';
-import { OnIsLockedUpdate } from './';
-import { RecentLinks } from './recent_links';
-import { HttpStart } from '../../../http';
+import { Observable } from 'rxjs';
+import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../../..';
 import { InternalApplicationStart } from '../../../application/types';
-import { createRecentNavLink, createEuiListItem } from './nav_link';
-import { ChromeNavLink, CoreStart, ChromeRecentlyAccessedHistoryItem } from '../../..';
+import { HttpStart } from '../../../http';
+import { OnIsLockedUpdate } from './';
+import { createEuiListItem, createRecentNavLink } from './nav_link';
+import { RecentLinks } from './recent_links';
 
 export interface Props {
   appId$: InternalApplicationStart['currentAppId$'];
   basePath: HttpStart['basePath'];
   isLocked?: boolean;
   legacyMode: boolean;
-  navLinks$: Rx.Observable<ChromeNavLink[]>;
-  recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
+  navLinks$: Observable<ChromeNavLink[]>;
+  recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
   navigateToApp: CoreStart['application']['navigateToApp'];
   onIsLockedUpdate?: OnIsLockedUpdate;
 }

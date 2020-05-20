@@ -17,17 +17,16 @@
  * under the License.
  */
 
+import { EuiHeaderBreadcrumbs } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
-import * as Rx from 'rxjs';
-
-import { EuiHeaderBreadcrumbs } from '@elastic/eui';
 import { useObservable } from 'react-use';
+import { Observable } from 'rxjs';
 import { ChromeBreadcrumb } from '../../chrome_service';
 
 interface Props {
-  appTitle$: Rx.Observable<string>;
-  breadcrumbs$: Rx.Observable<ChromeBreadcrumb[]>;
+  appTitle$: Observable<string>;
+  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
 }
 
 export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$ }: Props) {

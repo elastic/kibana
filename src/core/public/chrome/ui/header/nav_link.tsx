@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiImage } from '@elastic/eui';
-import { ChromeNavLink, CoreStart, ChromeRecentlyAccessedHistoryItem } from '../../..';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../../..';
 import { HttpStart } from '../../../http';
 import { relativeToAbsolute } from '../../nav_links/to_nav_link';
 

@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import React from 'react';
 import { EuiHeaderSectionItem } from '@elastic/eui';
-import * as Rx from 'rxjs';
+import React from 'react';
 import { useObservable } from 'react-use';
+import { Observable } from 'rxjs';
 import { ChromeNavControl } from '../../nav_controls';
 import { HeaderExtension } from './header_extension';
 
 interface Props {
-  navControls$: Rx.Observable<readonly ChromeNavControl[]>;
+  navControls$: Observable<readonly ChromeNavControl[]>;
   side: 'left' | 'right';
 }
 

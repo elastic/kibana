@@ -32,7 +32,8 @@ import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
 import React, { createRef, useState } from 'react';
 import { useObservable } from 'react-use';
-import * as Rx from 'rxjs';
+import { Observable } from 'rxjs';
+import { LoadingIndicator } from '../';
 import {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -51,28 +52,27 @@ import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderLogo } from './header_logo';
 import { HeaderNavControls } from './header_nav_controls';
 import { NavDrawer } from './nav_drawer';
-import { LoadingIndicator } from '../';
 
 export interface HeaderProps {
   kibanaVersion: string;
   application: InternalApplicationStart;
-  appTitle$: Rx.Observable<string>;
-  badge$: Rx.Observable<ChromeBadge | undefined>;
-  breadcrumbs$: Rx.Observable<ChromeBreadcrumb[]>;
+  appTitle$: Observable<string>;
+  badge$: Observable<ChromeBadge | undefined>;
+  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   homeHref: string;
-  isVisible$: Rx.Observable<boolean>;
+  isVisible$: Observable<boolean>;
   kibanaDocLink: string;
-  navLinks$: Rx.Observable<ChromeNavLink[]>;
-  recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
-  forceAppSwitcherNavigation$: Rx.Observable<boolean>;
-  helpExtension$: Rx.Observable<ChromeHelpExtension | undefined>;
-  helpSupportUrl$: Rx.Observable<string>;
+  navLinks$: Observable<ChromeNavLink[]>;
+  recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
+  forceAppSwitcherNavigation$: Observable<boolean>;
+  helpExtension$: Observable<ChromeHelpExtension | undefined>;
+  helpSupportUrl$: Observable<string>;
   legacyMode: boolean;
-  navControlsLeft$: Rx.Observable<readonly ChromeNavControl[]>;
-  navControlsRight$: Rx.Observable<readonly ChromeNavControl[]>;
+  navControlsLeft$: Observable<readonly ChromeNavControl[]>;
+  navControlsRight$: Observable<readonly ChromeNavControl[]>;
   basePath: HttpStart['basePath'];
-  isLocked$: Rx.Observable<boolean>;
-  navType$: Rx.Observable<NavType>;
+  isLocked$: Observable<boolean>;
+  navType$: Observable<NavType>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   onIsLockedUpdate: OnIsLockedUpdate;
 }

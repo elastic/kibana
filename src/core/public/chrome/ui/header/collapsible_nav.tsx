@@ -30,15 +30,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
 import React, { useRef } from 'react';
-import * as Rx from 'rxjs';
 import { useObservable } from 'react-use';
-import { AppCategory } from '../../../../types';
-import { OnIsLockedUpdate } from './';
+import * as Rx from 'rxjs';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
-import { createRecentNavLink, createEuiListItem } from './nav_link';
-import { HttpStart } from '../../../http';
+import { AppCategory } from '../../../../types';
 import { InternalApplicationStart } from '../../../application/types';
+import { HttpStart } from '../../../http';
+import { OnIsLockedUpdate } from './';
 import './collapsible_nav.scss';
+import { createEuiListItem, createRecentNavLink } from './nav_link';
 
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;

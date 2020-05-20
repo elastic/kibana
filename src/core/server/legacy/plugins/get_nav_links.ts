@@ -38,7 +38,6 @@ function legacyAppToNavLink(spec: LegacyAppSpec): LegacyNavLink {
     euiIconType: spec.euiIconType,
     url: spec.url || `/app/${spec.id}`,
     linkToLastSubUrl: spec.linkToLastSubUrl ?? true,
-    href: undefined,
   };
 }
 
@@ -57,7 +56,6 @@ function legacyLinkToNavLink(spec: LegacyNavLinkSpec): LegacyNavLink {
     hidden: spec.hidden ?? false,
     disabled: spec.disabled ?? false,
     tooltip: spec.tooltip ?? '',
-    href: undefined,
   };
 }
 

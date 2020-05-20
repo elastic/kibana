@@ -18,12 +18,17 @@
  */
 
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { NavType } from '.';
 import { httpServiceMock } from '../../../http/http_service.mock';
 import { applicationServiceMock } from '../../../mocks';
 import { Header } from './header';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+
+interface LocalStore {
+  [key: string]: string;
+}
 
 function mockProps() {
   const http = httpServiceMock.createSetupContract({ basePath: '/test' });
@@ -54,9 +59,55 @@ function mockProps() {
   };
 }
 
-// describe('Header', () => {
-//   it('renders an empty header', () => {
-//     const component = mountWithIntl(<Header {...mockProps()} />);
-//     expect(component).toMatchSnapshot();
-//   });
-// });
+describe('Header', () => {
+  beforeAll(() => {
+    const STORE: LocalStore = {};
+    Object.defineProperty(window, 'localStorage', {
+      value: {
+        getItem: (key: string) => {
+          return STORE[key] || null;
+        },
+        setItem: (key: string, value: any) => {
+          STORE[key] = value.toString();
+        },
+      },
+    });
+  });
+
+  it('renders', () => {
+    const isVisible$ = new BehaviorSubject(false);
+    const breadcrumbs$ = new BehaviorSubject([{ text: 'test' }]);
+    const isLocked$ = new BehaviorSubject(false);
+    const navType$ = new BehaviorSubject('modern' as NavType);
+    const navLinks$ = new BehaviorSubject([
+      { id: 'kibana', title: 'kibana', baseUrl: '', legacy: false },
+    ]);
+    const recentlyAccessed$ = new BehaviorSubject([
+      { link: '', label: 'dashboard', id: 'dashboard' },
+    ]);
+    const component = mountWithIntl(
+      <Header
+        {...mockProps()}
+        isVisible$={isVisible$}
+        breadcrumbs$={breadcrumbs$}
+        navLinks$={navLinks$}
+        recentlyAccessed$={recentlyAccessed$}
+        isLocked$={isLocked$}
+        navType$={navType$}
+      />
+    );
+    expect(component).toMatchSnapshot();
+
+    act(() => isVisible$.next(true));
+    component.update();
+    expect(component).toMatchSnapshot();
+
+    act(() => isLocked$.next(true));
+    component.update();
+    expect(component).toMatchSnapshot();
+
+    act(() => navType$.next('legacy' as NavType));
+    component.update();
+    expect(component).toMatchSnapshot();
+  });
+});

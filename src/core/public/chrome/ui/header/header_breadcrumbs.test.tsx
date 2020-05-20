@@ -19,9 +19,9 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
-import { act } from 'react-dom/test-utils';
 
 describe('HeaderBreadcrumbs', () => {
   it('renders updates to the breadcrumbs$ observable', () => {
