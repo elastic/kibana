@@ -110,9 +110,9 @@ function VisualizeAppController($scope, $route, $injector, $timeout, kbnUrlState
       localStorage.get('kibana.userQueryLanguage') || uiSettings.get('search:queryLanguage'),
   };
 
-  const { embeddableOriginatingApp } = scopedHistory().fetchLocationState() || {};
+  const { embeddableOriginatingApp } = scopedHistory().location.state || {};
   if (embeddableOriginatingApp) {
-    scopedHistory().removeFromLocationState(['embeddableOriginatingApp']);
+    delete scopedHistory().location.state.embeddableOriginatingApp;
   }
   $scope.getOriginatingApp = () => embeddableOriginatingApp;
 
