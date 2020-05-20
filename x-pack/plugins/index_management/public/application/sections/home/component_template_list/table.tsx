@@ -21,9 +21,14 @@ interface ComponentTemplate {
 export interface Props {
   componentTemplates: ComponentTemplate[];
   onReloadClick: () => void;
+  onDeleteClick: (componentTemplateName: string[]) => void;
 }
 
-export const ComponentTable: FunctionComponent<Props> = ({ componentTemplates, onReloadClick }) => {
+export const ComponentTable: FunctionComponent<Props> = ({
+  componentTemplates,
+  onReloadClick,
+  onDeleteClick,
+}) => {
   const [selection, setSelection] = useState<ComponentTemplate[]>([]);
 
   const tableProps: EuiInMemoryTableProps<ComponentTemplate> = {
@@ -46,11 +51,10 @@ export const ComponentTable: FunctionComponent<Props> = ({ componentTemplates, o
     },
     search: {
       toolsLeft:
-        // TODO placeholder for now
         selection.length > 0 ? (
           <EuiButton
             data-test-subj="deleteComponentTemplatexButton"
-            onClick={() => {}}
+            onClick={() => onDeleteClick(selection.map(({ name }) => name))}
             color="danger"
           >
             <FormattedMessage
@@ -162,8 +166,7 @@ export const ComponentTable: FunctionComponent<Props> = ({ componentTemplates, o
             type: 'icon',
             icon: 'trash',
             color: 'danger',
-            // TODO placeholder for now
-            onClick: ({ name }) => {},
+            onClick: ({ name }) => onDeleteClick([name]),
           },
         ],
       },
