@@ -49,6 +49,7 @@ export function initDashboardApp(app, deps) {
       ['listingLimit', { watchDepth: 'reference' }],
       ['hideWriteControls', { watchDepth: 'reference' }],
       ['initialFilter', { watchDepth: 'reference' }],
+      ['initialPageSize', { watchDepth: 'reference' }],
     ]);
   });
 
@@ -108,7 +109,8 @@ export function initDashboardApp(app, deps) {
             kbnUrlStateStorage
           );
 
-          $scope.listingLimit = deps.uiSettings.get('savedObjects:listingLimit');
+          $scope.listingLimit = deps.savedObjects.settings.getListingLimit();
+          $scope.initialPageSize = deps.savedObjects.settings.getPerPage();
           $scope.create = () => {
             history.push(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
           };

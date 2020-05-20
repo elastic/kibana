@@ -9,14 +9,15 @@ import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
 import { CLIENT_ALERT_TYPES } from '../../../common/constants';
 import { TlsTranslations } from './translations';
 import { AlertTypeInitializer } from '.';
-import { AlertTls } from '../../components/overview/alerts/alerts_containers/alert_tls';
 
 const { name, defaultActionMessage } = TlsTranslations;
 
 export const initTlsAlertType: AlertTypeInitializer = (): AlertTypeModel => ({
   id: CLIENT_ALERT_TYPES.TLS,
   iconClass: 'uptimeApp',
-  alertParamsExpression: () => <AlertTls />,
+  alertParamsExpression: React.lazy(() =>
+    import('../../components/overview/alerts/alerts_containers/alert_tls')
+  ),
   name,
   validate: () => ({ errors: {} }),
   defaultActionMessage,

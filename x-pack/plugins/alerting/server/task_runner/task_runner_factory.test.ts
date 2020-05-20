@@ -56,7 +56,7 @@ describe('Task Runner Factory', () => {
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> = {
     getServices: jest.fn().mockReturnValue(services),
     actionsPlugin: actionsMock.createStart(),
-    encryptedSavedObjectsPlugin,
+    encryptedSavedObjectsClient: encryptedSavedObjectsPlugin.getClient(),
     logger: loggingServiceMock.create().get(),
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
     getBasePath: jest.fn().mockReturnValue(undefined),

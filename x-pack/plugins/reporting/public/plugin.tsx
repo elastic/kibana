@@ -17,17 +17,16 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/public';
-import { ManagementSetup } from 'src/plugins/management/public';
 import { UiActionsSetup } from 'src/plugins/ui_actions/public';
-import { JobId, JobStatusBuckets } from '../';
 import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
+import { ManagementSectionId, ManagementSetup } from '../../../../src/plugins/management/public';
 import { SharePluginSetup } from '../../../../src/plugins/share/public';
 import { LicensingPluginSetup } from '../../licensing/public';
-import { ConfigType } from '../common/types';
+import { ConfigType, JobId, JobStatusBuckets } from '../common/types';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../constants';
 import { getGeneralErrorToast } from './components';
 import { ReportListing } from './components/report_listing';
@@ -117,10 +116,10 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
       category: FeatureCatalogueCategory.ADMIN,
     });
 
-    management.sections.getSection('kibana')!.registerApp({
+    management.sections.getSection(ManagementSectionId.InsightsAndAlerting).registerApp({
       id: 'reporting',
       title: this.title,
-      order: 15,
+      order: 1,
       mount: async params => {
         const [start] = await getStartServices();
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
