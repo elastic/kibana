@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StartServices } from '../../../plugin';
+import { StartServices } from '../../../types';
 import { IndexPatternSavedObject, IndexPatternSavedObjectAttributes } from '../types';
 
 /**

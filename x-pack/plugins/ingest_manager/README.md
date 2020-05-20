@@ -28,7 +28,7 @@ One common development workflow is:
   ```
 - Start Kibana in another shell
   ```
-  yarn start --xpack.ingestManager.enabled=true --no-base-path --xpack.endpoint.enabled=true
+  yarn start --xpack.ingestManager.enabled=true --no-base-path
   ```
 
 This plugin follows the `common`, `server`, `public` structure from the [Architecture Style Guide

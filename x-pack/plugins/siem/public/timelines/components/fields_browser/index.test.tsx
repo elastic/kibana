@@ -148,7 +148,7 @@ describe('StatefulFieldsBrowser', () => {
 
       wrapper.update();
       expect(
-        wrapper.find(`.field-browser-category-pane-auditd-${timelineId}`).first()
+        wrapper.find(`.field-browser-category-pane-auditd-${timelineId}`).at(1)
       ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
     });
 
@@ -174,7 +174,7 @@ describe('StatefulFieldsBrowser', () => {
         .first()
         .simulate('click');
       expect(
-        wrapper.find(`.field-browser-category-pane-cloud-${timelineId}`).first()
+        wrapper.find(`.field-browser-category-pane-cloud-${timelineId}`).at(1)
       ).toHaveStyleRule('font-weight', 'normal', { modifier: '.euiText' });
       wrapper
         .find('[data-test-subj="field-search"]')
@@ -184,7 +184,7 @@ describe('StatefulFieldsBrowser', () => {
       jest.runOnlyPendingTimers();
       wrapper.update();
       expect(
-        wrapper.find(`.field-browser-category-pane-cloud-${timelineId}`).first()
+        wrapper.find(`.field-browser-category-pane-cloud-${timelineId}`).at(1)
       ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
     });
   });

@@ -130,7 +130,10 @@ export const WaffleGroupByControls = class extends React.PureComponent<Props, St
       );
 
     const button = (
-      <DropdownButton label="Group By" onClick={this.handleToggle}>
+      <DropdownButton
+        label={i18n.translate('xpack.infra.waffle.groupByLabel', { defaultMessage: 'Group by' })}
+        onClick={this.handleToggle}
+      >
         {buttonBody}
       </DropdownButton>
     );
