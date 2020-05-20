@@ -20,7 +20,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { BASE_PATH } from '../../common/constants';
 import { getFatalErrors } from './services/notifications';
 import { SectionError } from './components';
 import { routing } from './services/routing';

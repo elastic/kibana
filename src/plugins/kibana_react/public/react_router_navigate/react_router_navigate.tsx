@@ -30,18 +30,17 @@ const isModifiedEvent = (event: any) =>
 
 const isLeftClickEvent = (event: any) => event.button === 0;
 
-export const reactRouterNavigate = (history: ScopedHistory, to: string | LocationObject) => {
-  const toAsObject = typeof to === 'string' ? { pathname: to } : to;
-  return {
-    href: history.createHref(toAsObject),
-    onClick: reactRouterOnClickHandler(history, toAsObject),
-  };
-};
+export const toLocationObject = (to: string | LocationObject) =>
+  typeof to === 'string' ? { pathname: to } : to;
 
-export const reactRouterOnClickHandler = (
-  history: ScopedHistory,
-  locationObject: LocationObject
-) => (event: any) => {
+export const reactRouterNavigate = (history: ScopedHistory, to: string | LocationObject) => ({
+  href: history.createHref(toLocationObject(to)),
+  onClick: reactRouterOnClickHandler(history, toLocationObject(to)),
+});
+
+export const reactRouterOnClickHandler = (history: ScopedHistory, to: string | LocationObject) => (
+  event: any
+) => {
   if (event.defaultPrevented) {
     return;
   }
@@ -56,5 +55,5 @@ export const reactRouterOnClickHandler = (
 
   // prevents page reload
   event.preventDefault();
-  history.push(locationObject);
+  history.push(toLocationObject(to));
 };

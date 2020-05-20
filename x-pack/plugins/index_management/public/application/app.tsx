@@ -18,7 +18,6 @@ import { useServices } from './app_context';
 export const App = ({ history }: { history: ScopedHistory }) => {
   const { uiMetricService } = useServices();
   useEffect(() => uiMetricService.trackMetric('loaded', UIM_APP_LOAD), [uiMetricService]);
-  console.log('3 - app');
 
   return (
     <Router history={history}>

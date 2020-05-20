@@ -8,18 +8,21 @@ import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiInMemoryTable, EuiIcon, EuiButton, EuiLink, EuiBasicTableColumn } from '@elastic/eui';
+import { ScopedHistory } from 'kibana/public';
 import { TemplateListItem, IndexTemplateFormatVersion } from '../../../../../../common';
-import { BASE_PATH, UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
+import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import { TemplateDeleteModal } from '../../../../components';
 import { useServices } from '../../../../app_context';
 import { getTemplateDetailsLink } from '../../../../services/routing';
 import { SendRequestResponse } from '../../../../../shared_imports';
+import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   templates: TemplateListItem[];
   reload: () => Promise<SendRequestResponse>;
   editTemplate: (name: string, formatVersion: IndexTemplateFormatVersion) => void;
   cloneTemplate: (name: string, formatVersion: IndexTemplateFormatVersion) => void;
+  history: ScopedHistory;
 }
 
 export const TemplateTable: React.FunctionComponent<Props> = ({
@@ -27,6 +30,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
   reload,
   editTemplate,
   cloneTemplate,
+  history,
 }) => {
   const { uiMetricService } = useServices();
   const [selection, setSelection] = useState<TemplateListItem[]>([]);
@@ -239,11 +243,11 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         />
       </EuiButton>,
       <EuiButton
-        href={`#${BASE_PATH}create_template`}
         fill
         iconType="plusInCircle"
         data-test-subj="createTemplateButton"
         key="createTemplateButton"
+        {...reactRouterNavigate(history, '/create_template')}
       >
         <FormattedMessage
           id="xpack.idxMgmt.templateList.table.createTemplatesButtonLabel"

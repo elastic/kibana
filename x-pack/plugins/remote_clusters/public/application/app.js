@@ -8,7 +8,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route, Redirect, withRouter } from 'react-router-dom';
 
-import { CRUD_APP_BASE_PATH, UIM_APP_LOAD } from './constants';
+import { UIM_APP_LOAD } from './constants';
 import { registerRouter, setUserHasLeftApp, trackUiMetric, METRIC_TYPE } from './services';
 import { RemoteClusterList, RemoteClusterAdd, RemoteClusterEdit } from './sections';
 
@@ -47,11 +47,12 @@ class AppComponent extends Component {
     return (
       <div>
         <Switch>
-          <Redirect exact from={`${CRUD_APP_BASE_PATH}`} to={`${CRUD_APP_BASE_PATH}/list`} />
-          <Route exact path={`${CRUD_APP_BASE_PATH}/list`} component={RemoteClusterList} />
-          <Route exact path={`${CRUD_APP_BASE_PATH}/add`} component={RemoteClusterAdd} />
-          <Route exact path={`${CRUD_APP_BASE_PATH}/edit/:name`} component={RemoteClusterEdit} />
-          <Redirect from={`${CRUD_APP_BASE_PATH}/:anything`} to={`${CRUD_APP_BASE_PATH}/list`} />
+          <Redirect exact from="" to="/list" />
+          <Redirect exact from="/" to="/list" />
+          <Route exact path={`/list`} component={RemoteClusterList} />
+          <Route exact path={`/add`} component={RemoteClusterAdd} />
+          <Route exact path={`/edit/:name`} component={RemoteClusterEdit} />
+          <Redirect from={`/:anything`} to="/list" />
         </Switch>
       </div>
     );

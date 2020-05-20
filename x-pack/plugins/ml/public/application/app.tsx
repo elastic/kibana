@@ -7,7 +7,7 @@
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 
-import { AppMountParameters, CoreStart } from 'kibana/public';
+import { AppMountParameters, CoreStart, ScopedHistory } from 'kibana/public';
 
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
@@ -23,15 +23,17 @@ type MlDependencies = MlSetupDependencies & MlStartDependencies;
 interface AppProps {
   coreStart: CoreStart;
   deps: MlDependencies;
+  history: ScopedHistory;
 }
 
 const localStorage = new Storage(window.localStorage);
 
-const App: FC<AppProps> = ({ coreStart, deps }) => {
+const App: FC<AppProps> = ({ coreStart, deps, history }) => {
   const pageDeps = {
     indexPatterns: deps.data.indexPatterns,
     config: coreStart.uiSettings!,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
+    history,
   };
   const services = {
     appName: 'ML',
@@ -80,7 +82,10 @@ export const renderApp = (
 
   appMountParams.onAppLeave(actions => actions.default());
 
-  ReactDOM.render(<App coreStart={coreStart} deps={deps} />, appMountParams.element);
+  ReactDOM.render(
+    <App coreStart={coreStart} deps={deps} history={appMountParams.history} />,
+    appMountParams.element
+  );
 
   return () => {
     mlLicense.unsubscribe();

@@ -28,7 +28,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { AppMountParameters, ScopedHistory } from 'kibana/public';
+import { ScopedHistory } from 'kibana/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';

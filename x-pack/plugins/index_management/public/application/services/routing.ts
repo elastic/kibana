@@ -3,11 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { BASE_PATH } from '../../../common/constants';
 import { IndexTemplateFormatVersion } from '../../../common';
 
 export const getTemplateListLink = () => {
-  return `${BASE_PATH}templates`;
+  return `/templates`;
 };
 
 // Need to add some additonal encoding/decoding logic to work with React Router
@@ -17,22 +16,20 @@ export const getTemplateDetailsLink = (
   formatVersion: IndexTemplateFormatVersion,
   withHash = false
 ) => {
-  const baseUrl = `${BASE_PATH}templates/${encodeURIComponent(
-    encodeURIComponent(name)
-  )}?v=${formatVersion}`;
+  const baseUrl = `/templates/${encodeURIComponent(encodeURIComponent(name))}?v=${formatVersion}`;
   const url = withHash ? `#${baseUrl}` : baseUrl;
   return encodeURI(url);
 };
 
 export const getTemplateEditLink = (name: string, formatVersion: IndexTemplateFormatVersion) => {
   return encodeURI(
-    `${BASE_PATH}edit_template/${encodeURIComponent(encodeURIComponent(name))}?v=${formatVersion}`
+    `/edit_template/${encodeURIComponent(encodeURIComponent(name))}?v=${formatVersion}`
   );
 };
 
 export const getTemplateCloneLink = (name: string, formatVersion: IndexTemplateFormatVersion) => {
   return encodeURI(
-    `${BASE_PATH}clone_template/${encodeURIComponent(encodeURIComponent(name))}?v=${formatVersion}`
+    `/clone_template/${encodeURIComponent(encodeURIComponent(name))}?v=${formatVersion}`
   );
 };
 

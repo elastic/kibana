@@ -112,7 +112,6 @@ export const renderApp = (
   { element, history }: AppMountParameters,
   config: ConfigSchema
 ) => {
-  // resetHistory();
   ReactDOM.render(
     <ApmAppRoot
       core={core}

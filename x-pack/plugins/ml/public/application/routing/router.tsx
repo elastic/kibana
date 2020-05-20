@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 import { Router, Route, RouteProps } from 'react-router-dom';
 import { Location } from 'history';
 
-import { IUiSettingsClient, ChromeStart } from 'kibana/public';
+import { IUiSettingsClient, ChromeStart, ScopedHistory } from 'kibana/public';
 import { ChromeBreadcrumb } from 'kibana/public';
 import { IndexPatternsContract } from 'src/plugins/data/public';
 import { MlContext, MlContextValue } from '../contexts/ml';
@@ -35,6 +35,7 @@ interface PageDependencies {
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
   indexPatterns: IndexPatternsContract;
   config: IUiSettingsClient;
+  history: ScopedHistory;
 }
 
 export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children }) => {
