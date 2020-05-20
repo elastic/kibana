@@ -36,7 +36,7 @@ export async function mountManagementSection(
 
   breadcrumbService.setup(setBreadcrumbs);
   documentationService.setup(docLinks);
-  console.log('1 before render app', history);
+
   const appDependencies: AppDependencies = {
     core: {
       fatalErrors,

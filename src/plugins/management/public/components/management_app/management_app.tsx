@@ -27,7 +27,7 @@ import {
 import { I18nProvider } from '@kbn/i18n/react';
 import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { ManagementStart } from '../../types';
-import { ManagementSection } from '../../utils';
+import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
 
 import { ManagementLandingPage } from '../langing';
 import { ManagementSidebarNav } from '../management_sidebar_nav';
@@ -59,15 +59,18 @@ export const ManagementApp = ({ context, dependencies, history }: ManagementAppP
   }, []);
 
   const setBreadcrumbs = useCallback(
-    (crumbs: ChromeBreadcrumb[] = [], appHistory: ScopedHistory) => {
-      context.core.chrome.setBreadcrumbs(
-        crumbs.map(item => ({
-          ...item,
-          ...(item.href ? reactRouterNavigate(appHistory, item.href) : {}),
-        }))
-      );
+    (crumbs: ChromeBreadcrumb[] = [], appHistory?: ScopedHistory) => {
+      const wrapBreadcrumb = (item: ChromeBreadcrumb, scopedHistory: ScopedHistory) => ({
+        ...item,
+        ...(item.href ? reactRouterNavigate(scopedHistory, item.href) : {}),
+      });
+
+      context.core.chrome.setBreadcrumbs([
+        wrapBreadcrumb(MANAGEMENT_BREADCRUMB, history),
+        ...crumbs.map(item => wrapBreadcrumb(item, appHistory || history)),
+      ]);
     },
-    [context.core.chrome]
+    [context.core.chrome, history]
   );
 
   useEffect(() => {
@@ -102,7 +105,12 @@ export const ManagementApp = ({ context, dependencies, history }: ManagementAppP
               )}
               <Route
                 path={'/'}
-                component={() => <ManagementLandingPage version={dependencies.kibanaVersion} />}
+                component={() => (
+                  <ManagementLandingPage
+                    version={dependencies.kibanaVersion}
+                    setBreadcrumbs={setBreadcrumbs}
+                  />
+                )}
               />
             </Switch>
           </EuiPageBody>

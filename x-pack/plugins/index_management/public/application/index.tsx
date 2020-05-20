@@ -25,7 +25,7 @@ export const renderApp = (
   const { i18n } = core;
   const { Context: I18nContext } = i18n;
   const { services, history } = dependencies;
-  console.log('2 before render', history);
+
   render(
     <I18nContext>
       <Provider store={indexManagementStore(services)}>

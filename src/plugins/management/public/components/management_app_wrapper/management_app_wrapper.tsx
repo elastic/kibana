@@ -25,7 +25,7 @@ import { Unmount } from '../../types';
 
 interface ManagementSectionWrapperProps {
   app: ManagementApp;
-  setBreadcrumbs: (crumbs: ChromeBreadcrumb[], history: ScopedHistory) => void;
+  setBreadcrumbs: (crumbs?: ChromeBreadcrumb[], history?: ScopedHistory) => void;
   onAppMounted: (id: string) => void;
   history: AppMountParameters['history'];
 }

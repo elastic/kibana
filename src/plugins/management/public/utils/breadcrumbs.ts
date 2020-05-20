@@ -17,6 +17,11 @@
  * under the License.
  */
 
-export { MANAGEMENT_BREADCRUMB } from './breadcrumbs';
-import { npStart } from 'ui/new_platform';
-export const management = npStart.plugins.management.legacy;
+import { i18n } from '@kbn/i18n';
+
+export const MANAGEMENT_BREADCRUMB = {
+  text: i18n.translate('management.breadcrumb', {
+    defaultMessage: 'Stack Management',
+  }),
+  href: '/',
+};
