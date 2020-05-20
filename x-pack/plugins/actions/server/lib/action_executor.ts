@@ -14,7 +14,7 @@ import {
   PreConfiguredAction,
   Services,
 } from '../types';
-import { EncryptedSavedObjectsPluginStart } from '../../../encrypted_saved_objects/server';
+import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { SpacesServiceSetup } from '../../../spaces/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
@@ -23,7 +23,7 @@ export interface ActionExecutorContext {
   logger: Logger;
   spaces?: SpacesServiceSetup;
   getServices: GetServicesFunction;
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
   preconfiguredActions: PreConfiguredAction[];
@@ -72,7 +72,7 @@ export class ActionExecutor {
     const {
       spaces,
       getServices,
-      encryptedSavedObjectsPlugin,
+      encryptedSavedObjectsClient,
       actionTypeRegistry,
       eventLogger,
       preconfiguredActions,
@@ -84,7 +84,7 @@ export class ActionExecutor {
 
     const { actionTypeId, name, config, secrets } = await getActionInfo(
       services,
-      encryptedSavedObjectsPlugin,
+      encryptedSavedObjectsClient,
       preconfiguredActions,
       actionId,
       namespace.namespace
@@ -196,7 +196,7 @@ interface ActionInfo {
 
 async function getActionInfo(
   services: Services,
-  encryptedSavedObjectsPlugin: EncryptedSavedObjectsPluginStart,
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
   preconfiguredActions: PreConfiguredAction[],
   actionId: string,
   namespace: string | undefined
@@ -222,7 +222,7 @@ async function getActionInfo(
 
   const {
     attributes: { secrets },
-  } = await encryptedSavedObjectsPlugin.getDecryptedAsInternalUser<RawAction>('action', actionId, {
+  } = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>('action', actionId, {
     namespace: namespace === 'default' ? undefined : namespace,
   });
 
