@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import _ from 'lodash';
 import uuid from 'uuid';
 import seedrandom from 'seedrandom';
 import {
@@ -425,7 +424,7 @@ export class EndpointDocGenerator {
       )
     );
 
-    const childrenNodes: Map<string, TreeNode> = _.reduce(children, addEventToMap, new Map());
+    const childrenNodes: Map<string, TreeNode> = children.reduce(addEventToMap, new Map());
 
     return {
       children: childrenNodes,
