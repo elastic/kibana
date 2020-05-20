@@ -239,7 +239,7 @@ describe('es', () => {
             to: 5,
           },
           request: {
-            payload: {
+            body: {
               extended: {
                 es: {
                   filter: {
@@ -258,7 +258,7 @@ describe('es', () => {
         });
       });
 
-      it('adds the contents of payload.extended.es.filter to a filter clause of the bool', () => {
+      it('adds the contents of body.extended.es.filter to a filter clause of the bool', () => {
         config.kibana = true;
         const request = fn(config, tlConfig, emptyScriptedFields);
         const filter = request.body.query.bool.filter.bool;
