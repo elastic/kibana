@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { INSTRUCTION_VARIANT } from '../../../../../../src/plugins/home/server';
+import { INSTRUCTION_VARIANT } from '../../../../../src/plugins/home/server';
 
 import {
   createNodeAgentInstructions,
@@ -16,9 +16,9 @@ import {
   createJsAgentInstructions,
   createGoAgentInstructions,
   createJavaAgentInstructions,
-  createDotNetAgentInstructions,
-} from '../instructions/apm_agent_instructions';
-import { CloudSetup } from '../../../../cloud/server';
+  createDotNetAgentInstructions
+} from '../../../../../src/plugins/apm_oss/server';
+import { CloudSetup } from '../../../cloud/server';
 
 export function createElasticCloudInstructions(cloudSetup?: CloudSetup) {
   const apmServerUrl = cloudSetup?.apm.url;
