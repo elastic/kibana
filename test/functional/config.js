@@ -84,8 +84,7 @@ export default async function({ readConfigFile }) {
         hash: '/list',
       },
       settings: {
-        pathname: '/app/kibana',
-        hash: '/management',
+        pathname: '/app/management',
       },
       timelion: {
         pathname: '/app/timelion',
