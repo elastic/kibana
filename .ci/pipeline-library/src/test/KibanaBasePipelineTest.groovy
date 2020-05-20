@@ -19,7 +19,7 @@ class KibanaBasePipelineTest extends BasePipelineTest {
     env.BUILD_ID = '1'
     env.BUILD_DISPLAY_NAME = "#${env.BUILD_ID}"
 
-    env.JENKINS_URL = 'http://jenkins.localhost:8080/'
+    env.JENKINS_URL = 'http://jenkins.localhost:8080'
     env.BUILD_URL = "${env.JENKINS_URL}/job/elastic+kibana+${env.BRANCH_NAME}/${env.BUILD_ID}/"
 
     env.JOB_BASE_NAME = "elastic / kibana # ${env.BRANCH_NAME}"
@@ -37,6 +37,10 @@ class KibanaBasePipelineTest extends BasePipelineTest {
       env: env,
       params: params,
     ])
+
+    ['withGithubCredentials'].each {
+      helper.registerAllowedMethod(it, [Closure.class], null)
+    }
 
     helper.registerAllowedMethod('slackSend', [Map.class], null)
   }
@@ -61,14 +65,28 @@ class KibanaBasePipelineTest extends BasePipelineTest {
     binding.setVariable(variableName, variableValue)
   }
 
+  def fnMock(String name) {
+    return helper.callStack.find { it.methodName == name }
+  }
+
   void mockFailureBuild() {
     props([
       buildUtils: [ getBuildStatus: { "FAILURE" } ],
+      jenkinsApi: [ getFailedSteps: { [
+        [
+          displayName: "Check out from version control",
+          logs: "http://jenkins.localhost:8080",
+        ],
+        [
+          displayName: "Execute test task",
+          logs: "http://jenkins.localhost:8080",
+        ],
+      ] } ],
       testUtils: [
         getFailures: {
           return [
             [
-              url            : Mocks.TEST_FAILURE_URL,
+              url: Mocks.TEST_FAILURE_URL,
               fullDisplayName: Mocks.TEST_FAILURE_NAME,
             ]
           ]
