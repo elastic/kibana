@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './api';
-export * from './persist_exception_list';
-export * from './persist_exception_item';
-export * from './types';
-export * from './use_exception_list';
+export {
+  useExceptionList,
+  usePersistExceptionItem,
+  usePersistExceptionList,
+  mockExceptionItem,
+  mockExceptionList,
+  mockNewExceptionItem,
+  mockNewExceptionList,
+} from '../../lists/public';
