@@ -19,15 +19,15 @@ const stepNamesMap: { [key: number]: string } = {
     defaultMessage: 'Logistics',
   }),
   2: i18n.translate('xpack.idxMgmt.templateForm.steps.settingsStepName', {
-    defaultMessage: 'Index settings',
+    defaultMessage: 'Settings / Mappings / Aliases',
   }),
-  3: i18n.translate('xpack.idxMgmt.templateForm.steps.mappingsStepName', {
-    defaultMessage: 'Mappings',
-  }),
-  4: i18n.translate('xpack.idxMgmt.templateForm.steps.aliasesStepName', {
-    defaultMessage: 'Aliases',
-  }),
-  5: i18n.translate('xpack.idxMgmt.templateForm.steps.summaryStepName', {
+  // 3: i18n.translate('xpack.idxMgmt.templateForm.steps.mappingsStepName', {
+  //   defaultMessage: 'Mappings',
+  // }),
+  // 4: i18n.translate('xpack.idxMgmt.templateForm.steps.aliasesStepName', {
+  //   defaultMessage: 'Aliases',
+  // }),
+  3: i18n.translate('xpack.idxMgmt.templateForm.steps.summaryStepName', {
     defaultMessage: 'Review template',
   }),
 };
@@ -37,7 +37,7 @@ export const TemplateSteps: React.FunctionComponent<Props> = ({
   updateCurrentStep,
   isCurrentStepValid,
 }) => {
-  const steps = [1, 2, 3, 4, 5].map((step) => {
+  const steps = [1, 2, 3].map((step) => {
     return {
       title: stepNamesMap[step],
       isComplete: currentStep > step,

@@ -17,7 +17,14 @@ import {
 import { serializers } from '../../../shared_imports';
 import { TemplateDeserialized, DEFAULT_INDEX_TEMPLATE_VERSION_FORMAT } from '../../../../common';
 import { TemplateSteps } from './template_steps';
-import { StepAliases, StepLogistics, StepMappings, StepSettings, StepReview } from './steps';
+import {
+  StepAliases,
+  StepLogistics,
+  StepMappings,
+  StepSettings,
+  StepSettingsMappingsAliases,
+  StepReview,
+} from './steps';
 import { StepProps, DataGetterFunc } from './types';
 import { SectionError } from '../section_error';
 
@@ -40,10 +47,11 @@ const defaultValidation = { isValid: true };
 
 const stepComponentMap: { [key: number]: React.FunctionComponent<StepProps> } = {
   1: StepLogistics,
-  2: StepSettings,
-  3: StepMappings,
-  4: StepAliases,
-  5: StepReview,
+  2: StepSettingsMappingsAliases,
+  // 2: StepSettings,
+  // 3: StepMappings,
+  // 4: StepAliases,
+  3: StepReview,
 };
 
 export const TemplateForm: React.FunctionComponent<Props> = ({
@@ -67,8 +75,8 @@ export const TemplateForm: React.FunctionComponent<Props> = ({
     1: defaultValidation,
     2: defaultValidation,
     3: defaultValidation,
-    4: defaultValidation,
-    5: defaultValidation,
+    // 4: defaultValidation,
+    // 5: defaultValidation,
   });
 
   const template = useRef<TemplateDeserialized>(defaultValue);

@@ -9,3 +9,4 @@ export { StepAliases } from './step_aliases';
 export { StepMappings } from './step_mappings';
 export { StepSettings } from './step_settings';
 export { StepReview } from './step_review';
+export { StepSettingsMappingsAliases } from './step_settings_mappings_aliases';
