@@ -28,7 +28,11 @@ import {
 import { createTimelinesStreamFromNdJson } from '../create_timelines_stream_from_ndjson';
 
 import { ImportTimelinesPayloadSchemaRt } from './schemas/import_timelines_schema';
-import { buildFrameworkRequest } from './utils/common';
+import {
+  buildFrameworkRequest,
+  CompareTimelinesStatus,
+  TimelineStatusActions,
+} from './utils/common';
 import {
   getTupleDuplicateErrorsAndUniqueTimeline,
   isBulkError,
@@ -40,7 +44,6 @@ import {
 } from './utils/import_timelines';
 import { createTimelines } from './utils/create_timelines';
 import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
-import { CompareTimelineStatus, TimelineStatusActions } from './utils/compare_timeline_status';
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
 
@@ -128,6 +131,7 @@ export const importTimelinesRoute = (
                       timelineType = TimelineType.default,
                       version = null,
                     } = parsedTimeline;
+
                     const parsedTimelineObject = omit(
                       timelineSavedObjectOmittedFields,
                       parsedTimeline
@@ -135,7 +139,14 @@ export const importTimelinesRoute = (
 
                     let newTimeline = null;
                     try {
-                      const timelineStatus = new CompareTimelineStatus({
+                      const {
+                        isCreatableViaImport,
+                        isUpdatableViaImport,
+                        isHandlingTemplateTimeline,
+                        timelineInput,
+                        checkIsFailureCases,
+                        init: initTimelineStatus,
+                      } = new CompareTimelinesStatus({
                         timelineType,
                         timelineInput: {
                           id: savedObjectId,
@@ -149,14 +160,7 @@ export const importTimelinesRoute = (
                         },
                         frameworkRequest,
                       });
-
-                      const {
-                        isCreatableViaImport,
-                        isUpdatableViaImport,
-                        isHandlingTemplateTimeline,
-                      } = await timelineStatus.init();
-                      const timelineInput = timelineStatus.getTimelineInput();
-
+                      await initTimelineStatus();
                       if (isCreatableViaImport) {
                         // create timeline / template timeline
                         newTimeline = await createTimelines(
@@ -184,7 +188,7 @@ export const importTimelinesRoute = (
                       }
 
                       if (!isHandlingTemplateTimeline) {
-                        const errorMessage = timelineStatus.checkIsFailureCases(
+                        const errorMessage = checkIsFailureCases(
                           TimelineStatusActions.createViaImport
                         );
                         const message =
@@ -200,7 +204,6 @@ export const importTimelinesRoute = (
                           })
                         );
                       }
-
                       if (isUpdatableViaImport) {
                         // update template timeline
                         newTimeline = await createTimelines(
@@ -218,7 +221,7 @@ export const importTimelinesRoute = (
                           status_code: 200,
                         });
                       } else {
-                        const errorMessage = timelineStatus.checkIsFailureCases(
+                        const errorMessage = checkIsFailureCases(
                           TimelineStatusActions.updateViaImport
                         );
                         const message =

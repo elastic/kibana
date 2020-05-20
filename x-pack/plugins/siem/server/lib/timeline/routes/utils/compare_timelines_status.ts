@@ -3,15 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { TimelineTypeLiteralWithNull, TimelineType } from '../../../../../common/types/timeline';
 
+import { TimelineTypeLiteralWithNull, TimelineType } from '../../../../../common/types/timeline';
+import { FrameworkRequest } from '../../../framework';
+
+import { TimelineStatusActions, TimelineStatusAction } from './common';
 import { TimelineObject } from './timeline_object';
 import {
   checkIsCreateFailureCases,
-  checkIsCreateViaImportFailureCases,
   checkIsUpdateFailureCases,
+  checkIsCreateViaImportFailureCases,
 } from './failure_cases';
-import { FrameworkRequest } from '../../../framework';
 
 interface GivenTimelineInput {
   id: string | null;
@@ -19,35 +21,24 @@ interface GivenTimelineInput {
   version: string | number | null;
 }
 
-export enum TimelineStatusActions {
-  create = 'create',
-  createViaImport = 'createViaImport',
-  update = 'update',
-  updateViaImport = 'updateViaImport',
+interface TimelinesStatusProps {
+  timelineType: TimelineTypeLiteralWithNull;
+  timelineInput: GivenTimelineInput;
+  templateTimelineInput: GivenTimelineInput;
+  frameworkRequest: FrameworkRequest;
 }
 
-export type TimelineStatusAction =
-  | TimelineStatusActions.create
-  | TimelineStatusActions.createViaImport
-  | TimelineStatusActions.update
-  | TimelineStatusActions.updateViaImport;
-
-export class CompareTimelineStatus {
-  public timelineObject: TimelineObject;
-  public templateTimelineObject: TimelineObject;
-  private timelineType: TimelineTypeLiteralWithNull;
+export class CompareTimelinesStatus {
+  public readonly timelineObject: TimelineObject;
+  public readonly templateTimelineObject: TimelineObject;
+  private readonly timelineType: TimelineTypeLiteralWithNull;
 
   constructor({
     timelineType = TimelineType.default,
     timelineInput,
     templateTimelineInput,
     frameworkRequest,
-  }: {
-    timelineType: TimelineTypeLiteralWithNull;
-    timelineInput: GivenTimelineInput;
-    templateTimelineInput: GivenTimelineInput;
-    frameworkRequest: FrameworkRequest;
-  }) {
+  }: TimelinesStatusProps) {
     this.timelineObject = new TimelineObject({
       id: timelineInput.id,
       type: timelineInput.type,
@@ -65,34 +56,34 @@ export class CompareTimelineStatus {
     this.timelineType = timelineType ?? TimelineType.default;
   }
 
-  private isCreatable() {
+  public get isCreatable() {
     return (
-      (this.timelineObject.isCreatable() && !this.isHandlingTemplateTimeline()) ||
-      (this.templateTimelineObject.isCreatable() &&
-        this.timelineObject.isCreatable() &&
-        this.isHandlingTemplateTimeline())
+      (this.timelineObject.isCreatable && !this.isHandlingTemplateTimeline) ||
+      (this.templateTimelineObject.isCreatable &&
+        this.timelineObject.isCreatable &&
+        this.isHandlingTemplateTimeline)
     );
   }
 
-  private isCreatableViaImport() {
-    return this.isCreatable();
+  public get isCreatableViaImport() {
+    return this.isCreatable;
   }
 
-  private isUpdatable() {
+  public get isUpdatable() {
     return (
-      (this.timelineObject.isUpdatable() && !this.isHandlingTemplateTimeline()) ||
-      (this.templateTimelineObject.isUpdatable() && this.isHandlingTemplateTimeline())
+      (this.timelineObject.isUpdatable && !this.isHandlingTemplateTimeline) ||
+      (this.templateTimelineObject.isUpdatable && this.isHandlingTemplateTimeline)
     );
   }
 
-  private isUpdatableViaImport() {
+  public get isUpdatableViaImport() {
     return (
-      (this.timelineObject.isUpdatableViaImport() && !this.isHandlingTemplateTimeline()) ||
-      (this.templateTimelineObject.isUpdatableViaImport() && this.isHandlingTemplateTimeline())
+      (this.timelineObject.isUpdatableViaImport && !this.isHandlingTemplateTimeline) ||
+      (this.templateTimelineObject.isUpdatableViaImport && this.isHandlingTemplateTimeline)
     );
   }
 
-  private getFailureChecker(action?: TimelineStatusAction) {
+  public getFailureChecker(action?: TimelineStatusAction) {
     if (action === TimelineStatusActions.create) {
       return checkIsCreateFailureCases;
     } else if (action === TimelineStatusActions.createViaImport) {
@@ -104,21 +95,21 @@ export class CompareTimelineStatus {
 
   public checkIsFailureCases(action?: TimelineStatusAction) {
     const failureChecker = this.getFailureChecker(action);
-    const version = this.templateTimelineObject.getVersion();
+    const version = this.templateTimelineObject.getVersion;
     return failureChecker(
-      this.isHandlingTemplateTimeline(),
-      this.timelineObject.getVersion()?.toString() ?? null,
+      this.isHandlingTemplateTimeline,
+      this.timelineObject.getVersion?.toString() ?? null,
       version != null && typeof version === 'string' ? parseInt(version, 10) : version,
       this.timelineObject.data,
       this.templateTimelineObject.data
     );
   }
 
-  public getTemplateTimelineInput() {
+  public get templateTimelineInput() {
     return this.templateTimelineObject;
   }
 
-  public getTimelineInput() {
+  public get timelineInput() {
     return this.timelineObject;
   }
 
@@ -129,18 +120,11 @@ export class CompareTimelineStatus {
     ]);
   }
 
-  public isHandlingTemplateTimeline() {
+  public get isHandlingTemplateTimeline() {
     return this.timelineType === TimelineType.template;
   }
 
   public async init() {
     await this.getTimelines();
-    return {
-      isCreatable: this.isCreatable(),
-      isCreatableViaImport: this.isCreatableViaImport(),
-      isUpdatable: this.isUpdatable(),
-      isUpdatableViaImport: this.isUpdatableViaImport(),
-      isHandlingTemplateTimeline: this.isHandlingTemplateTimeline(),
-    };
   }
 }

@@ -17,9 +17,12 @@ import { transformError, buildSiemResponse } from '../../detection_engine/routes
 import { FrameworkRequest } from '../../framework';
 
 import { updateTimelineSchema } from './schemas/update_timelines_schema';
-import { buildFrameworkRequest } from './utils/common';
+import {
+  buildFrameworkRequest,
+  CompareTimelinesStatus,
+  TimelineStatusActions,
+} from './utils/common';
 import { createTimelines } from './utils/create_timelines';
-import { CompareTimelineStatus, TimelineStatusActions } from './utils/compare_timeline_status';
 
 export const updateTimelinesRoute = (
   router: IRouter,
@@ -45,7 +48,11 @@ export const updateTimelinesRoute = (
         const { timelineId, timeline, version } = request.body;
         const { templateTimelineId, templateTimelineVersion, timelineType } = timeline;
 
-        const timelineStatus = new CompareTimelineStatus({
+        const {
+          isUpdatable,
+          checkIsFailureCases,
+          init: initTimelineStatus,
+        } = new CompareTimelinesStatus({
           timelineType: timelineType ?? TimelineType.default,
           timelineInput: {
             id: timelineId,
@@ -59,8 +66,7 @@ export const updateTimelinesRoute = (
           },
           frameworkRequest,
         });
-
-        const { isUpdatable } = await timelineStatus.init();
+        await initTimelineStatus();
 
         if (isUpdatable) {
           const updatedTimeline = await createTimelines(
@@ -77,7 +83,7 @@ export const updateTimelinesRoute = (
             },
           });
         } else {
-          const error = timelineStatus.checkIsFailureCases(TimelineStatusActions.update);
+          const error = checkIsFailureCases(TimelineStatusActions.update);
           return siemResponse.error(
             error || {
               statusCode: 405,

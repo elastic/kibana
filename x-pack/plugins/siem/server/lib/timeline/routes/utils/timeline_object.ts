@@ -11,6 +11,13 @@ import {
 import { getTimeline, getTemplateTimeline } from './create_timelines';
 import { FrameworkRequest } from '../../../framework';
 
+interface TimelineObjectProps {
+  id: string | null;
+  type: TimelineTypeLiteralWithNull;
+  version: string | number | null;
+  frameworkRequest: FrameworkRequest;
+}
+
 export class TimelineObject {
   private id: string | null;
   private type: TimelineTypeLiteralWithNull;
@@ -19,17 +26,7 @@ export class TimelineObject {
 
   public data: TimelineSavedObject | null;
 
-  constructor({
-    id,
-    type = TimelineType.default,
-    version,
-    frameworkRequest,
-  }: {
-    id: string | null;
-    type: TimelineTypeLiteralWithNull;
-    version: string | number | null;
-    frameworkRequest: FrameworkRequest;
-  }) {
+  constructor({ id, type = TimelineType.default, version, frameworkRequest }: TimelineObjectProps) {
     this.id = id;
     this.type = type;
 
@@ -49,23 +46,23 @@ export class TimelineObject {
     return this.data;
   }
 
-  public isExists() {
+  public get isExists() {
     return this.id != null && this.data != null;
   }
 
-  public isUpdatable() {
-    return this.id != null && this.isExists() && !this.isVersionConflict();
+  public get isUpdatable() {
+    return this.isExists && !this.isVersionConflict();
   }
 
-  public isCreatable() {
-    return !this.isExists();
+  public get isCreatable() {
+    return !this.isExists;
   }
 
-  public isUpdatableViaImport() {
-    return this.type === TimelineType.template && this.isUpdatable();
+  public get isUpdatableViaImport() {
+    return this.type === TimelineType.template && this.isUpdatable;
   }
 
-  public getVersion() {
+  public get getVersion() {
     return this.version;
   }
 
@@ -73,9 +70,9 @@ export class TimelineObject {
     let isVersionConflict = false;
     const existingVersion =
       this.type === TimelineType.template ? this.data?.templateTimelineVersion : this.data?.version;
-    if (this.isExists() && this.version != null) {
+    if (this.isExists && this.version != null) {
       isVersionConflict = !(this.version === existingVersion);
-    } else if (this.isExists() && this.version == null) {
+    } else if (this.isExists && this.version == null) {
       isVersionConflict = true;
     }
     return isVersionConflict;
