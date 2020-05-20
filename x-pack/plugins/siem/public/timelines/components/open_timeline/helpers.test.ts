@@ -11,14 +11,14 @@ import {
   mockTimelineResult,
   mockTimelineModel,
 } from '../../../common/mock/timeline_results';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { timelineDefaults } from '../../store/timeline/defaults';
 import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../../common/store/inputs/actions';
 import {
   setKqlFilterQueryDraft as dispatchSetKqlFilterQueryDraft,
   applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
   addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
-} from '../../../timelines/store/timeline/actions';
+} from '../../store/timeline/actions';
 import {
   addNotes as dispatchAddNotes,
   updateNote as dispatchUpdateNote,
@@ -36,10 +36,10 @@ import { KueryFilterQueryKind } from '../../../common/store/model';
 import { Note } from '../../../common/lib/note';
 import moment from 'moment';
 import sinon from 'sinon';
-import { TimelineType } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
 jest.mock('../../../common/store/inputs/actions');
-jest.mock('../../../timelines/store/timeline/actions');
+jest.mock('../../store/timeline/actions');
 jest.mock('../../../common/store/app/actions');
 jest.mock('uuid', () => {
   return {
@@ -299,6 +299,7 @@ describe('helpers', () => {
           columnId: '@timestamp',
           sortDirection: 'desc',
         },
+        status: TimelineStatus.draft,
         title: '',
         timelineType: TimelineType.default,
         templateTimelineId: null,
@@ -396,6 +397,7 @@ describe('helpers', () => {
           columnId: '@timestamp',
           sortDirection: 'desc',
         },
+        status: TimelineStatus.draft,
         title: '',
         timelineType: TimelineType.default,
         templateTimelineId: null,
@@ -404,6 +406,7 @@ describe('helpers', () => {
         width: 1100,
       });
     });
+
     test('should merge columns when event.action is deleted without two extra column names of user.name', () => {
       const timeline = {
         savedObjectId: 'savedObject-1',
@@ -416,38 +419,80 @@ describe('helpers', () => {
         savedObjectId: 'savedObject-1',
         columns: [
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: '@timestamp',
+            placeholder: undefined,
+            type: undefined,
             width: 190,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'message',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'event.category',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'host.name',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'source.ip',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'destination.ip',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
           {
+            aggregatable: undefined,
+            category: undefined,
             columnHeaderType: 'not-filtered',
+            description: undefined,
+            example: undefined,
             id: 'user.name',
+            placeholder: undefined,
+            type: undefined,
             width: 180,
           },
         ],
@@ -492,6 +537,7 @@ describe('helpers', () => {
           columnId: '@timestamp',
           sortDirection: 'desc',
         },
+        status: TimelineStatus.draft,
         width: 1100,
         id: 'savedObject-1',
       });
@@ -660,6 +706,7 @@ describe('helpers', () => {
           columnId: '@timestamp',
           sortDirection: 'desc',
         },
+        status: TimelineStatus.draft,
         width: 1100,
         id: 'savedObject-1',
       });

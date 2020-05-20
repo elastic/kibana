@@ -28,9 +28,18 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 
-import { esFilters, Filter, MatchAllFilter } from '../../../../../../../src/plugins/data/public';
-import { TimelineType } from '../../../../common/types/timeline';
-import { TimelineInput, ResponseTimeline, TimelineResult } from '../../../graphql/types';
+import {
+  esFilters,
+  Filter,
+  MatchAllFilter,
+} from '../../../../../../.../../../src/plugins/data/public';
+import { TimelineStatus } from '../../../../common/types/timeline';
+import {
+  TimelineType,
+  TimelineInput,
+  ResponseTimeline,
+  TimelineResult,
+} from '../../../graphql/types';
 import { AppApolloClient } from '../../../common/lib/lib';
 import { addError } from '../../../common/store/app/actions';
 import { NotesById } from '../../../common/store/app/model';
@@ -148,8 +157,8 @@ export const createTimelineEpic = <State>(): Epic<
           return true;
         }
         if (action.type === createTimeline.type && isItAtimelineAction(timelineId)) {
-          myEpicTimelineId.setTimelineId(null);
           myEpicTimelineId.setTimelineVersion(null);
+          myEpicTimelineId.setTimelineId(null);
         } else if (action.type === addTimeline.type && isItAtimelineAction(timelineId)) {
           const addNewTimeline: TimelineModel = get('payload.timeline', action);
           myEpicTimelineId.setTimelineId(addNewTimeline.savedObjectId);
@@ -237,6 +246,7 @@ export const createTimelineEpic = <State>(): Epic<
                         ...savedTimeline,
                         savedObjectId: response.timeline.savedObjectId,
                         version: response.timeline.version,
+                        status: response.timeline.status ?? TimelineStatus.active,
                         timelineType: response.timeline.timelineType ?? TimelineType.default,
                         templateTimelineId: response.timeline.templateTimelineId ?? null,
                         templateTimelineVersion: response.timeline.templateTimelineVersion ?? null,
@@ -293,6 +303,7 @@ const timelineInput: TimelineInput = {
   dateRange: null,
   savedQueryId: null,
   sort: null,
+  status: null,
 };
 
 export const convertTimelineAsInput = (

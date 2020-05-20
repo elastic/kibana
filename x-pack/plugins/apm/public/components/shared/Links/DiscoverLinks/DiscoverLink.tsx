@@ -11,7 +11,7 @@ import url from 'url';
 import rison, { RisonValue } from 'rison-node';
 import { useLocation } from '../../../../hooks/useLocation';
 import { getTimepickerRisonData } from '../rison_helpers';
-import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../common/index_pattern_constants';
+import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../../../../src/plugins/apm_oss/public';
 import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
 import { AppMountContextBasePath } from '../../../../context/ApmPluginContext';
 
@@ -50,8 +50,8 @@ export const getDiscoverHref = ({
   };
 
   const href = url.format({
-    pathname: basePath.prepend('/app/kibana'),
-    hash: `/discover?_g=${rison.encode(risonQuery._g)}&_a=${rison.encode(
+    pathname: basePath.prepend('/app/discover'),
+    hash: `/?_g=${rison.encode(risonQuery._g)}&_a=${rison.encode(
       risonQuery._a as RisonValue
     )}`
   });

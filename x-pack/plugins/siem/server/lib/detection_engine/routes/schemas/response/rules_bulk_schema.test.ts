@@ -12,8 +12,8 @@ import { RulesBulkSchema, rulesBulkSchema } from './rules_bulk_schema';
 import { RulesSchema } from './rules_schema';
 import { ErrorSchema } from './error_schema';
 import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../../feature_flags';
-import { exactCheck } from '../../../../../utils/build_validation/exact_check';
-import { foldLeftRight, getPaths } from '../../../../../utils/build_validation/__mocks__/utils';
+import { exactCheck } from '../../../../../../common/exact_check';
+import { foldLeftRight, getPaths } from '../../../../../../common/test_utils';
 
 describe('prepackaged_rule_schema', () => {
   beforeAll(() => {

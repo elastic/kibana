@@ -48,6 +48,7 @@ const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
   indexPatterns?: IIndexPattern[];
+  editPath: string;
   editUrl: string;
   editable: boolean;
   deps: VisualizeEmbeddableFactoryDeps;
@@ -64,6 +65,8 @@ export interface VisualizeInput extends EmbeddableInput {
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
+  editPath: string;
+  editApp: string;
   editUrl: string;
   indexPatterns?: IIndexPattern[];
   visTypeName: string;
@@ -92,7 +95,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
   constructor(
     timefilter: TimefilterContract,
-    { vis, editUrl, indexPatterns, editable, deps }: VisualizeEmbeddableConfiguration,
+    { vis, editPath, editUrl, indexPatterns, editable, deps }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
     parent?: IContainer
   ) {
@@ -100,6 +103,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       initialInput,
       {
         defaultTitle: vis.title,
+        editPath,
+        editApp: 'visualize',
         editUrl,
         indexPatterns,
         editable,
@@ -259,8 +264,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
             event.name === 'brush' ? VIS_EVENT_TO_TRIGGER.brush : VIS_EVENT_TO_TRIGGER.filter;
           const context = {
             embeddable: this,
-            timeFieldName: this.vis.data.indexPattern!.timeFieldName!,
-            data: event.data,
+            data: { timeFieldName: this.vis.data.indexPattern?.timeFieldName!, ...event.data },
           };
 
           getUiActions()

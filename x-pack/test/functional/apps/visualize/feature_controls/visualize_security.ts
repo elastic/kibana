@@ -12,6 +12,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const config = getService('config');
   const PageObjects = getPageObjects([
     'common',
+    'error',
     'visualize',
     'header',
     'security',
@@ -92,7 +93,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can view existing Visualization`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', '/visualize/edit/i-exist', {
+        await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -102,7 +103,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('can save existing Visualization', async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', '/visualize/edit/i-exist', {
+        await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -216,7 +217,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can view existing Visualization`, async () => {
-        await PageObjects.common.navigateToActualUrl('visualize', '/visualize/edit/i-exist', {
+        await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -226,7 +227,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can't save existing Visualization`, async () => {
-        await PageObjects.common.navigateToActualUrl('visualize', '/visualize/edit/i-exist', {
+        await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -329,7 +330,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can view existing Visualization`, async () => {
-        await PageObjects.common.navigateToActualUrl('visualize', '/visualize/edit/i-exist', {
+        await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -337,7 +338,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`can't save existing Visualization`, async () => {
-        await PageObjects.common.navigateToActualUrl('visualize', '/visualize/edit/i-exist', {
+        await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
@@ -408,10 +409,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.security.login(
           'no_visualize_privileges_user',
           'no_visualize_privileges_user-password',
-          {
-            expectSpaceSelector: false,
-            shouldLoginIfPrompted: false,
-          }
+          { expectSpaceSelector: false }
         );
       });
 
@@ -421,20 +419,20 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('no_visualize_privileges_user');
       });
 
-      it(`landing page redirects to home page`, async () => {
+      it(`landing page shows 404`, async () => {
         await PageObjects.common.navigateToActualUrl('visualize', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
+        await PageObjects.error.expectNotFound();
       });
 
-      it(`edit page redirects to home page`, async () => {
-        await PageObjects.common.navigateToActualUrl('visualize', '/visualize/edit/i-exist', {
+      it(`edit page shows 404`, async () => {
+        await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.existOrFail('homeApp', { timeout: config.get('timeouts.waitFor') });
+        await PageObjects.error.expectNotFound();
       });
     });
   });

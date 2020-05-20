@@ -1,3 +1,10 @@
+.dscAppWrapper {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
 discover-app {
   flex-grow: 1;
 }

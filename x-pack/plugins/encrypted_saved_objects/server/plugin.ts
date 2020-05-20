@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Logger,
-  SavedObjectsBaseOptions,
-  PluginInitializerContext,
-  CoreSetup,
-} from 'src/core/server';
+import { Logger, PluginInitializerContext, CoreSetup } from 'src/core/server';
 import { first } from 'rxjs/operators';
+import { SecurityPluginSetup } from '../../security/server';
 import { createConfig$ } from './config';
 import {
   EncryptedSavedObjectsService,
@@ -20,14 +16,19 @@ import {
 import { EncryptedSavedObjectsAuditLogger } from './audit';
 import { SavedObjectsSetup, setupSavedObjects } from './saved_objects';
 
+export interface PluginsSetup {
+  security?: SecurityPluginSetup;
+}
+
 export interface EncryptedSavedObjectsPluginSetup {
   registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => void;
   __legacyCompat: { registerLegacyAPI: (legacyAPI: LegacyAPI) => void };
   usingEphemeralEncryptionKey: boolean;
 }
 
-export interface EncryptedSavedObjectsPluginStart extends SavedObjectsSetup {
+export interface EncryptedSavedObjectsPluginStart {
   isEncryptionError: (error: Error) => boolean;
+  getClient: SavedObjectsSetup;
 }
 
 /**
@@ -59,7 +60,10 @@ export class Plugin {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(core: CoreSetup): Promise<EncryptedSavedObjectsPluginSetup> {
+  public async setup(
+    core: CoreSetup,
+    deps: PluginsSetup
+  ): Promise<EncryptedSavedObjectsPluginSetup> {
     const { config, usingEphemeralEncryptionKey } = await createConfig$(this.initializerContext)
       .pipe(first())
       .toPromise();
@@ -75,6 +79,7 @@ export class Plugin {
     this.savedObjectsSetup = setupSavedObjects({
       service,
       savedObjects: core.savedObjects,
+      security: deps.security,
       getStartServices: core.getStartServices,
     });
 
@@ -88,12 +93,9 @@ export class Plugin {
 
   public start() {
     this.logger.debug('Starting plugin');
-
     return {
       isEncryptionError: (error: Error) => error instanceof EncryptionError,
-      getDecryptedAsInternalUser: (type: string, id: string, options?: SavedObjectsBaseOptions) => {
-        return this.savedObjectsSetup.getDecryptedAsInternalUser(type, id, options);
-      },
+      getClient: (includedHiddenTypes?: string[]) => this.savedObjectsSetup(includedHiddenTypes),
     };
   }
 

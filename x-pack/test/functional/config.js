@@ -114,7 +114,7 @@ export default async function({ readConfigFile }) {
       },
       logstashPipelines: {
         pathname: '/app/kibana',
-        hash: '/management/logstash/pipelines',
+        hash: '/management/ingest/pipelines',
       },
       maps: {
         pathname: '/app/maps',
@@ -123,12 +123,12 @@ export default async function({ readConfigFile }) {
         pathname: '/app/graph',
       },
       grokDebugger: {
-        pathname: '/app/kibana',
-        hash: '/dev_tools/grokdebugger',
+        pathname: '/app/dev_tools',
+        hash: '/grokdebugger',
       },
       searchProfiler: {
-        pathname: '/app/kibana',
-        hash: '/dev_tools/searchprofiler',
+        pathname: '/app/dev_tools',
+        hash: '/searchprofiler',
       },
       spaceSelector: {
         pathname: '/',
@@ -155,7 +155,7 @@ export default async function({ readConfigFile }) {
       },
       rollupJob: {
         pathname: '/app/kibana',
-        hash: '/management/elasticsearch/rollup_jobs/',
+        hash: '/management/data/rollup_jobs/',
       },
       apiKeys: {
         pathname: '/app/kibana',
@@ -163,46 +163,46 @@ export default async function({ readConfigFile }) {
       },
       licenseManagement: {
         pathname: '/app/kibana',
-        hash: '/management/elasticsearch/license_management',
+        hash: '/management/stack/license_management',
       },
       indexManagement: {
         pathname: '/app/kibana',
-        hash: '/management/elasticsearch/index_management',
+        hash: '/management/data/index_management',
       },
       indexLifecycleManagement: {
         pathname: '/app/kibana',
-        hash: '/management/elasticsearch/index_lifecycle_management',
+        hash: '/management/data/index_lifecycle_management',
       },
       ingestPipelines: {
         pathname: '/app/kibana',
-        hash: '/management/elasticsearch/ingest_pipelines',
+        hash: '/management/ingest/ingest_pipelines',
       },
       snapshotRestore: {
         pathname: '/app/kibana',
-        hash: '/management/elasticsearch/snapshot_restore',
+        hash: '/management/data/snapshot_restore',
       },
       crossClusterReplication: {
         pathname: '/app/kibana',
-        hash: '/management/elasticsearch/cross_cluster_replication',
+        hash: '/management/data/cross_cluster_replication',
       },
       remoteClusters: {
         pathname: '/app/kibana',
-        hash: '/management/elasticsearch/remote_clusters',
+        hash: '/management/data/remote_clusters',
       },
       apm: {
         pathname: '/app/apm',
       },
       watcher: {
         pathname: '/app/kibana',
-        hash: '/management/elasticsearch/watcher/watches/',
+        hash: '/management/insightsAndAlerting/watcher/watches/',
       },
       transform: {
         pathname: '/app/kibana/',
-        hash: '/management/elasticsearch/transform',
+        hash: '/management/data/transform',
       },
       reporting: {
         pathname: '/app/kibana/',
-        hash: '/management/kibana/reporting',
+        hash: '/management/insightsAndAlerting/reporting',
       },
     },
 
