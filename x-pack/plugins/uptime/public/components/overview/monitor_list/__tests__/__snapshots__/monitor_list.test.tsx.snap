@@ -557,7 +557,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
   }
 }
 
-@media only screen and (max-width:574px) {
+@media only screen and (max-width:768px) {
   .c0.c0 > :first-child {
     -webkit-flex-basis: 40% !important;
     -ms-flex-preferred-size: 40% !important;
