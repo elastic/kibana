@@ -42,7 +42,7 @@ class MockProcess extends EventEmitter implements Process {
     super();
 
     this.connected = options.connected ?? true;
-    this.send = options.send === false ? undefined : jest.fn();
+    this.send = options.send === false ? undefined : options.send ?? jest.fn();
   }
 }
 
