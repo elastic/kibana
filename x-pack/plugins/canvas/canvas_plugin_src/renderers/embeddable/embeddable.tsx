@@ -112,6 +112,7 @@ export const embeddableRendererFactory = (core: CoreStart, plugins: StartDeps) =
         });
       } else {
         embeddablesRegistry[uniqueId].updateInput(input);
+        embeddablesRegistry[uniqueId].reload();
       }
     },
   });

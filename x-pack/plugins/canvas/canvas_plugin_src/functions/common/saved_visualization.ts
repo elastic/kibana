@@ -92,6 +92,7 @@ export function savedVisualization(): ExpressionFunctionDefinition<
           vis: visOptions,
         },
         embeddableType: EmbeddableTypes.visualization,
+        generated: Date.now(),
       };
     },
   };
