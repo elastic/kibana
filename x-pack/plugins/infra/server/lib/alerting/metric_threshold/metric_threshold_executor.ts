@@ -74,7 +74,7 @@ const getParsedFilterQuery: (
 export const getElasticsearchMetricQuery = (
   { metric, aggType, timeUnit, timeSize }: MetricExpressionParams,
   timefield: string,
-  groupBy?: string,
+  groupBy?: string | string[],
   filterQuery?: string
 ) => {
   if (aggType === Aggregators.COUNT && metric) {
@@ -126,15 +126,21 @@ export const getElasticsearchMetricQuery = (
         groupings: {
           composite: {
             size: 10,
-            sources: [
-              {
-                groupBy: {
-                  terms: {
-                    field: groupBy,
+            sources: Array.isArray(groupBy)
+              ? groupBy.map((field, index) => ({
+                  [`groupBy${index}`]: {
+                    terms: { field },
                   },
-                },
-              },
-            ],
+                }))
+              : [
+                  {
+                    groupBy0: {
+                      terms: {
+                        field: groupBy,
+                      },
+                    },
+                  },
+                ],
           },
           aggs: baseAggs,
         },
@@ -186,7 +192,7 @@ const getMetric: (
   params: MetricExpressionParams,
   index: string,
   timefield: string,
-  groupBy: string | undefined,
+  groupBy: string | undefined | string[],
   filterQuery: string | undefined
 ) => Promise<Record<string, number>> = async function(
   { callCluster },
@@ -213,11 +219,13 @@ const getMetric: (
         searchBody,
         bucketSelector,
         afterKeyHandler
-      )) as Array<Aggregation & { key: { groupBy: string } }>;
+      )) as Array<Aggregation & { key: Record<string, string> }>;
       return compositeBuckets.reduce(
         (result, bucket) => ({
           ...result,
-          [bucket.key.groupBy]: getCurrentValueFromAggregations(bucket, aggType),
+          [Object.values(bucket.key)
+            .map(value => value)
+            .join(', ')]: getCurrentValueFromAggregations(bucket, aggType),
         }),
         {}
       );
@@ -249,7 +257,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs, alertId: s
   async function({ services, params }: AlertExecutorOptions) {
     const { criteria, groupBy, filterQuery, sourceId, alertOnNoData } = params as {
       criteria: MetricExpressionParams[];
-      groupBy: string | undefined;
+      groupBy: string | undefined | string[];
       filterQuery: string | undefined;
       sourceId?: string;
       alertOnNoData: boolean;

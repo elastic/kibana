@@ -18,16 +18,15 @@ import {
   PluginInitializerContext,
 } from 'src/core/public';
 import { UiActionsSetup } from 'src/plugins/ui_actions/public';
-import { JobId, JobStatusBuckets } from '../';
-import { ManagementSetup, ManagementSectionId } from '../../../../src/plugins/management/public';
 import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
+import { ManagementSectionId, ManagementSetup } from '../../../../src/plugins/management/public';
 import { SharePluginSetup } from '../../../../src/plugins/share/public';
 import { LicensingPluginSetup } from '../../licensing/public';
-import { ConfigType } from '../common/types';
+import { ConfigType, JobId, JobStatusBuckets } from '../common/types';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../constants';
 import { getGeneralErrorToast } from './components';
 import { ReportListing } from './components/report_listing';

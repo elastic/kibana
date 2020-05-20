@@ -428,7 +428,7 @@ var apm = initApm({curlyOpen}
 See the [integration documentation]({docLink}) for more information.',
       values: {
         docLink:
-          '{config.docs.base_url}guide/en/apm/agent/rum-js/{config.docs.version}/framework-integrations.html',
+          '{config.docs.base_url}guide/en/apm/agent/rum-js/current/framework-integrations.html',
       },
     }),
   },
