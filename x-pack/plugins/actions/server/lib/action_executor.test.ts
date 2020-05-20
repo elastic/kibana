@@ -18,7 +18,7 @@ import { actionsMock } from '../mocks';
 const actionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false });
 const services = actionsMock.createServices();
 const savedObjectsClient = services.savedObjectsClient;
-const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.createStart();
+const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
 const executeParams = {
@@ -35,7 +35,7 @@ actionExecutor.initialize({
   spaces: spacesMock,
   getServices: () => services,
   actionTypeRegistry,
-  encryptedSavedObjectsPlugin,
+  encryptedSavedObjectsClient,
   eventLogger: eventLoggerMock.create(),
   preconfiguredActions: [],
 });
@@ -67,11 +67,11 @@ test('successfully executes', async () => {
     references: [],
   };
   savedObjectsClient.get.mockResolvedValueOnce(actionSavedObject);
-  encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
   await actionExecutor.execute(executeParams);
 
-  expect(encryptedSavedObjectsPlugin.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+  expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
     'action',
     '1',
     { namespace: 'some-namespace' }
@@ -108,7 +108,7 @@ test('provides empty config when config and / or secrets is empty', async () => 
     references: [],
   };
   savedObjectsClient.get.mockResolvedValueOnce(actionSavedObject);
-  encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
   await actionExecutor.execute(executeParams);
 
@@ -138,7 +138,7 @@ test('throws an error when config is invalid', async () => {
     references: [],
   };
   savedObjectsClient.get.mockResolvedValueOnce(actionSavedObject);
-  encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
   const result = await actionExecutor.execute(executeParams);
@@ -171,7 +171,7 @@ test('throws an error when params is invalid', async () => {
     references: [],
   };
   savedObjectsClient.get.mockResolvedValueOnce(actionSavedObject);
-  encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
   const result = await actionExecutor.execute(executeParams);
@@ -206,7 +206,7 @@ test('throws an error if actionType is not enabled', async () => {
     references: [],
   };
   savedObjectsClient.get.mockResolvedValueOnce(actionSavedObject);
-  encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
   actionTypeRegistry.ensureActionTypeEnabled.mockImplementationOnce(() => {
     throw new Error('not enabled for test');
@@ -240,7 +240,7 @@ test('should not throws an error if actionType is preconfigured', async () => {
     references: [],
   };
   savedObjectsClient.get.mockResolvedValueOnce(actionSavedObject);
-  encryptedSavedObjectsPlugin.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
   actionTypeRegistry.get.mockReturnValueOnce(actionType);
   actionTypeRegistry.ensureActionTypeEnabled.mockImplementationOnce(() => {
     throw new Error('not enabled for test');
@@ -269,7 +269,7 @@ test('throws an error when passing isESOUsingEphemeralEncryptionKey with value o
     spaces: spacesMock,
     getServices: () => services,
     actionTypeRegistry,
-    encryptedSavedObjectsPlugin,
+    encryptedSavedObjectsClient,
     eventLogger: eventLoggerMock.create(),
     preconfiguredActions: [],
   });

@@ -46,7 +46,7 @@ const renderUseMetricsExplorerDataHook = () => {
         source,
         derivedIndexPattern,
         timeRange,
-        afterKey: null as string | null,
+        afterKey: null as string | null | Record<string, string | null>,
         signal: 1,
       },
       wrapper,
