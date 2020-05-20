@@ -6,7 +6,7 @@
 
 import { cloneDeep, set } from 'lodash/fp';
 
-import { TimelineType } from '../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
 
 import {
   IS_OPERATOR,
@@ -100,6 +100,7 @@ const timelineByIdMock: TimelineById = {
       columnId: '@timestamp',
       sortDirection: Direction.desc,
     },
+    status: TimelineStatus.active,
     width: DEFAULT_TIMELINE_WIDTH,
     isSaving: false,
     version: null,
@@ -1131,6 +1132,7 @@ describe('Timeline', () => {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
           },
+          status: TimelineStatus.active,
           pinnedEventIds: {},
           pinnedEventsSaveObject: {},
           itemsPerPage: 25,
@@ -1226,6 +1228,7 @@ describe('Timeline', () => {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
           },
+          status: TimelineStatus.active,
           pinnedEventIds: {},
           pinnedEventsSaveObject: {},
           itemsPerPage: 25,
@@ -1427,6 +1430,7 @@ describe('Timeline', () => {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
           },
+          status: TimelineStatus.active,
           pinnedEventIds: {},
           pinnedEventsSaveObject: {},
           itemsPerPage: 25,
@@ -1522,6 +1526,7 @@ describe('Timeline', () => {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
           },
+          status: TimelineStatus.active,
           pinnedEventIds: {},
           pinnedEventsSaveObject: {},
           itemsPerPage: 25,
@@ -1712,6 +1717,7 @@ describe('Timeline', () => {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
           },
+          status: TimelineStatus.active,
           pinnedEventIds: {},
           pinnedEventsSaveObject: {},
           itemsPerPage: 50,
@@ -1791,6 +1797,7 @@ describe('Timeline', () => {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
           },
+          status: TimelineStatus.active,
           pinnedEventIds: {},
           pinnedEventsSaveObject: {},
           itemsPerPage: 25,
@@ -1894,6 +1901,7 @@ describe('Timeline', () => {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
           },
+          status: TimelineStatus.active,
           pinnedEventIds: {},
           pinnedEventsSaveObject: {},
           itemsPerPage: 25,

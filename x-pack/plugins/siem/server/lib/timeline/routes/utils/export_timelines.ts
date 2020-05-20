@@ -16,7 +16,7 @@ import {
   ExportedNotes,
   TimelineSavedObject,
   ExportTimelineNotFoundError,
-  TimelineType,
+  TimelineStatus,
 } from '../../../../../common/types/timeline';
 import { NoteSavedObject } from '../../../../../common/types/timeline/note';
 import { PinnedEventSavedObject } from '../../../../../common/types/timeline/pinned_event';
@@ -180,10 +180,8 @@ const getTimelinesFromObjects = async (
         ...acc,
         {
           ...myTimeline,
-          timelineType:
-            myTimeline.timelineType === TimelineType.draft
-              ? TimelineType.default
-              : myTimeline.timelineType,
+          status:
+            myTimeline.status === TimelineStatus.draft ? TimelineStatus.active : myTimeline.status,
           ...getGlobalEventNotesByTimelineId(timelineNotes),
           pinnedEventIds: getPinnedEventsIdsByTimelineId(timelinePinnedEventIds),
         },
