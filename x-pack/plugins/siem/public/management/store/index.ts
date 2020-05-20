@@ -5,3 +5,4 @@
  */
 
 export { managementReducer } from './reducer';
+export { managementMiddleware } from './middleware';

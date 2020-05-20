@@ -7,5 +7,17 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { SiemPageName } from '../app/types';
+import { PageView } from '../common/components/endpoint/page_view';
 
-export const getManagementRoutes = () => [<Route path={`:pageName(${SiemPageName.management})`} />];
+export const getManagementRoutes = () => [
+  <Route
+    path={`/:pageName(${SiemPageName.management})`}
+    render={() => {
+      return (
+        <PageView viewType="list" headerLeft="Test">
+          {'Its a test!'}
+        </PageView>
+      );
+    }}
+  />,
+];

@@ -7,5 +7,5 @@
 import { combineReducers } from 'redux';
 
 export const managementReducer = combineReducers({
-  ns1: () => {},
+  ns1: () => ({}),
 });

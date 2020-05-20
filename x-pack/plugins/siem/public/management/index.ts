@@ -4,16 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CoreStart } from 'kibana/public';
 import { managementReducer } from './store';
 import { getManagementRoutes } from './routes';
+import { StartPlugins } from '../types';
 
 export class Management {
   public setup() {}
 
-  public start() {
+  public start(core: CoreStart, plugins: StartPlugins) {
     return {
       routes: getManagementRoutes(),
-      store: { management: managementReducer },
+      store: {
+        initialState: {
+          management: {},
+        },
+        reducer: {
+          management: managementReducer,
+        },
+      },
     };
   }
 }
