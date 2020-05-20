@@ -167,3 +167,23 @@ test(`allows all wrappers to be excluded`, () => {
   expect(firstClientWrapperFactoryMock).not.toHaveBeenCalled();
   expect(secondClientWrapperFactoryMock).not.toHaveBeenCalled();
 });
+
+test(`allows hidden typed to be included`, () => {
+  const defaultClient = Symbol();
+  const defaultClientFactoryMock = jest.fn().mockReturnValue(defaultClient);
+  const clientProvider = new SavedObjectsClientProvider({
+    defaultClientFactory: defaultClientFactoryMock,
+    typeRegistry: typeRegistryMock.create(),
+  });
+  const request = Symbol();
+
+  const actualClient = clientProvider.getClient(request, {
+    includedHiddenTypes: ['task'],
+  });
+
+  expect(actualClient).toBe(defaultClient);
+  expect(defaultClientFactoryMock).toHaveBeenCalledWith({
+    request,
+    includedHiddenTypes: ['task'],
+  });
+});
