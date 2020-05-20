@@ -17,15 +17,17 @@
  * under the License.
  */
 
-export * from './bundle';
-export * from './bundle_cache';
-export * from './worker_config';
-export * from './worker_messages';
-export * from './parent_messages';
-export * from './compiler_messages';
-export * from './ts_helpers';
-export * from './rxjs_helpers';
-export * from './array_helpers';
-export * from './event_stream_helpers';
-export * from './disallowed_syntax_plugin';
-export * from './parse_path';
+export interface ParentPongMsg {
+  type: 'pong';
+}
+
+export const isParentPong = (value: any): value is ParentPongMsg =>
+  typeof value === 'object' && value && value.type === 'pong';
+
+export class ParentMsgs {
+  pong(): ParentPongMsg {
+    return {
+      type: 'pong',
+    };
+  }
+}
