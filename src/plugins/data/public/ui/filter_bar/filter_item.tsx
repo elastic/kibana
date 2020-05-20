@@ -70,10 +70,13 @@ class FilterItemUI extends Component<Props, State> {
     try {
       valueLabel = getDisplayValueFromFilter(filter, this.props.indexPatterns);
     } catch (e) {
-      errorMessage = valueLabel = this.props.intl.formatMessage({
-        id: 'data.filter.filterBar.labelErrorText',
-        defaultMessage: `Error: ${e.message}`,
-      });
+      errorMessage = valueLabel = this.props.intl.formatMessage(
+        {
+          id: 'data.filter.filterBar.labelErrorText',
+          defaultMessage: `Error: {errorMessage}`,
+        },
+        { errorMessage: e.message }
+      );
     }
     const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
     const dataTestSubjValue = filter.meta.value
