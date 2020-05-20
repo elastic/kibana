@@ -18,7 +18,12 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
-import { AppMountContext, AppMountParameters, ChromeBreadcrumb } from 'kibana/public';
+import {
+  AppMountContext,
+  AppMountParameters,
+  ChromeBreadcrumb,
+  ScopedHistory,
+} from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { ManagementStart } from '../../types';
@@ -27,6 +32,8 @@ import { ManagementSection } from '../../utils';
 import { ManagementLandingPage } from '../langing';
 import { ManagementSidebarNav } from '../management_sidebar_nav';
 import { ManagementAppWrapper } from '../management_app_wrapper';
+
+import { reactRouterNavigate } from '../../../../kibana_react/public';
 
 import './_management_app.scss';
 
@@ -52,8 +59,13 @@ export const ManagementApp = ({ context, dependencies, history }: ManagementAppP
   }, []);
 
   const setBreadcrumbs = useCallback(
-    (crumbs: ChromeBreadcrumb[]) => {
-      context.core.chrome.setBreadcrumbs(crumbs);
+    (crumbs: ChromeBreadcrumb[] = [], appHistory: ScopedHistory) => {
+      context.core.chrome.setBreadcrumbs(
+        crumbs.map(item => ({
+          ...item,
+          ...(item.href ? reactRouterNavigate(appHistory, item.href) : {}),
+        }))
+      );
     },
     [context.core.chrome]
   );
