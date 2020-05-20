@@ -319,7 +319,7 @@
     "react-dom": "^16.12.0",
     "react-dropzone": "^4.2.9",
     "react-fast-compare": "^2.0.4",
-    "react-markdown": "^3.4.1",
+    "react-markdown": "^4.3.1",
     "react-moment-proptypes": "^1.7.0",
     "react-portal": "^3.2.0",
     "react-redux": "^7.1.3",
