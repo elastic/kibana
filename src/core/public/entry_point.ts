@@ -34,10 +34,10 @@ const injectedMetadata = JSON.parse(
 );
 
 /**
- * If APM RUM agent is enabled while starting the server,
- * `apmConfig` would be populated with relavant configuration
+ * `apmConfig` would be populated with relavant APM RUM agent
+ * configuration if server is started with `ELASTIC_APM_ACTIVE=true`
  */
-if (injectedMetadata.vars.apmConfig != null) {
+if (process.env.IS_KIBANA_DISTRIBUTABLE !== 'true' && injectedMetadata.vars.apmConfig != null) {
   // @ts-ignore
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { init } = require('@elastic/apm-rum');
