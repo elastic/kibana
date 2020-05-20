@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { DefaultEditorController } from '../../../../vis_default_editor/public';
+
 export function initVisEditorDirective(app, deps) {
   app.directive('visualizationEditor', function($timeout) {
     return {
@@ -32,7 +34,7 @@ export function initVisEditorDirective(app, deps) {
         eventEmitter: '=',
       },
       link: function($scope, element) {
-        const Editor = $scope.vis.type.editor || deps.DefaultVisualizationEditor;
+        const Editor = $scope.vis.type.editor || DefaultEditorController;
         const editor = new Editor(
           element[0],
           $scope.vis,
