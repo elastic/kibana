@@ -21,12 +21,7 @@ import React, { Component } from 'react';
 import { EuiPanel, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  indexPatterns,
-  DataPublicPluginStart,
-  IndexPatternAttributes,
-} from '../../../../../../../plugins/data/public';
-import { SavedObjectsClientContract, IUiSettingsClient } from '../../../../../../../core/public';
+import { indexPatterns, IndexPatternAttributes } from '../../../../../../../plugins/data/public';
 import { MAX_SEARCH_SIZE } from '../../constants';
 import {
   getIndices,
@@ -39,18 +34,20 @@ import { LoadingIndices } from './components/loading_indices';
 import { StatusMessage } from './components/status_message';
 import { IndicesList } from './components/indices_list';
 import { Header } from './components/header';
+import {
+  context as contextType,
+  KibanaReactContextValue,
+} from '../../../../../../kibana_react/public';
 import { IndexPatternCreationConfig } from '../../../../../../../plugins/index_pattern_management/public';
 import { MatchedIndex } from '../../types';
+import { IndexPatternManagmentContext } from '../../../../types';
 
 interface StepIndexPatternProps {
   allIndices: MatchedIndex[];
   isIncludingSystemIndices: boolean;
-  esService: DataPublicPluginStart['search']['__LEGACY']['esClient'];
-  savedObjectsClient: SavedObjectsClientContract;
   indexPatternCreationType: IndexPatternCreationConfig;
   goToNextStep: (query: string) => void;
   initialQuery?: string;
-  uiSettings: IUiSettingsClient;
 }
 
 interface StepIndexPatternState {
@@ -66,6 +63,10 @@ interface StepIndexPatternState {
 }
 
 export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndexPatternState> {
+  static contextType = contextType;
+
+  public readonly context!: KibanaReactContextValue<IndexPatternManagmentContext>;
+
   state = {
     partialMatchedIndices: [],
     exactMatchedIndices: [],
@@ -80,11 +81,14 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   ILLEGAL_CHARACTERS = [...indexPatterns.ILLEGAL_CHARACTERS];
   lastQuery: string | undefined;
 
-  constructor(props: StepIndexPatternProps) {
+  constructor(
+    props: StepIndexPatternProps,
+    context: KibanaReactContextValue<IndexPatternManagmentContext>
+  ) {
     super(props);
     const { indexPatternCreationType, initialQuery } = this.props;
 
-    this.state.query = initialQuery || props.uiSettings.get('indexPattern:placeholder');
+    this.state.query = initialQuery || context.services.uiSettings.get('indexPattern:placeholder');
     this.state.indexPatternName = indexPatternCreationType.getIndexPatternName();
   }
 
@@ -97,7 +101,9 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   }
 
   fetchExistingIndexPatterns = async () => {
-    const { savedObjects } = await this.props.savedObjectsClient.find<IndexPatternAttributes>({
+    const { savedObjects } = await this.context.services.savedObjects.client.find<
+      IndexPatternAttributes
+    >({
       type: 'index-pattern',
       fields: ['title'],
       perPage: 10000,
@@ -111,7 +117,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   };
 
   fetchIndices = async (query: string) => {
-    const { esService, indexPatternCreationType } = this.props;
+    const { indexPatternCreationType } = this.props;
     const { existingIndexPatterns } = this.state;
 
     if ((existingIndexPatterns as string[]).includes(query)) {
@@ -123,7 +129,12 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
 
     if (query.endsWith('*')) {
       const exactMatchedIndices = await ensureMinimumTime(
-        getIndices(esService, indexPatternCreationType, query, MAX_SEARCH_SIZE)
+        getIndices(
+          this.context.services.data.search.__LEGACY.esClient,
+          indexPatternCreationType,
+          query,
+          MAX_SEARCH_SIZE
+        )
       );
       // If the search changed, discard this state
       if (query !== this.lastQuery) {
@@ -134,8 +145,18 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     }
 
     const [partialMatchedIndices, exactMatchedIndices] = await ensureMinimumTime([
-      getIndices(esService, indexPatternCreationType, `${query}*`, MAX_SEARCH_SIZE),
-      getIndices(esService, indexPatternCreationType, query, MAX_SEARCH_SIZE),
+      getIndices(
+        this.context.services.data.search.__LEGACY.esClient,
+        indexPatternCreationType,
+        `${query}*`,
+        MAX_SEARCH_SIZE
+      ),
+      getIndices(
+        this.context.services.data.search.__LEGACY.esClient,
+        indexPatternCreationType,
+        query,
+        MAX_SEARCH_SIZE
+      ),
     ]);
 
     // If the search changed, discard this state

@@ -18,13 +18,12 @@
  */
 
 import React from 'react';
+import { SavedObjectsFindResponsePublic } from 'kibana/public';
 import { StepIndexPattern } from '../step_index_pattern';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { Header } from './components/header';
 import { IndexPatternCreationConfig } from '../../../../../../../plugins/index_pattern_management/public';
-import { coreMock } from '../../../../../../../core/public/mocks';
-import { dataPluginMock } from '../../../../../../../plugins/data/public/mocks';
-import { SavedObjectsFindResponsePublic } from 'src/core/public';
+import { mockManagementPlugin } from '../../../../mocks';
+import { createComponentWithContext } from '../../../test_utils';
 
 jest.mock('../../lib/ensure_minimum_time', () => ({
   ensureMinimumTime: async (promises: Array<Promise<any>>) =>
@@ -53,37 +52,40 @@ const allIndices = [
 
 const goToNextStep = () => {};
 
-const savedObjectClient = coreMock.createStart().savedObjects.client;
-savedObjectClient.find = () =>
-  new Promise<SavedObjectsFindResponsePublic<any>>(() => ({ savedObjects: [] }));
+const mockContext = mockManagementPlugin.createIndexPatternManagmentContext();
 
-const uiSettings = coreMock.createSetup().uiSettings;
-uiSettings.get.mockReturnValue('');
-
-const createComponent = (props?: Record<string, any>) => {
-  return shallowWithI18nProvider(
-    <StepIndexPattern
-      allIndices={allIndices}
-      isIncludingSystemIndices={false}
-      esService={dataPluginMock.createStartContract().search.__LEGACY.esClient}
-      savedObjectsClient={savedObjectClient as any}
-      goToNextStep={goToNextStep}
-      indexPatternCreationType={mockIndexPatternCreationType}
-      uiSettings={uiSettings}
-      {...props}
-    />
-  );
-};
+mockContext.savedObjects.client.find = async () =>
+  Promise.resolve(({ savedObjects: [] } as unknown) as SavedObjectsFindResponsePublic<any>);
+mockContext.uiSettings.get.mockReturnValue('');
 
 describe('StepIndexPattern', () => {
   it('renders the loading state', () => {
-    const component = createComponent();
+    const component = createComponentWithContext(
+      StepIndexPattern,
+      {
+        allIndices,
+        isIncludingSystemIndices: false,
+        goToNextStep,
+        indexPatternCreationType: mockIndexPatternCreationType,
+      },
+      mockContext
+    );
     component.setState({ isLoadingIndices: true });
     expect(component.find('[data-test-subj="createIndexPatternStep1Loading"]')).toMatchSnapshot();
   });
 
   it('renders indices which match the initial query', async () => {
-    const component = createComponent({ initialQuery: 'kibana' });
+    const component = createComponentWithContext(
+      StepIndexPattern,
+      {
+        allIndices,
+        isIncludingSystemIndices: false,
+        goToNextStep,
+        indexPatternCreationType: mockIndexPatternCreationType,
+        initialQuery: 'kibana',
+      },
+      mockContext
+    );
 
     // Ensure all promises resolve
     await new Promise(resolve => process.nextTick(resolve));
@@ -96,7 +98,16 @@ describe('StepIndexPattern', () => {
   });
 
   it('renders errors when input is invalid', async () => {
-    const component = createComponent();
+    const component = createComponentWithContext(
+      StepIndexPattern,
+      {
+        allIndices,
+        isIncludingSystemIndices: false,
+        goToNextStep,
+        indexPatternCreationType: mockIndexPatternCreationType,
+      },
+      mockContext
+    );
     const instance = component.instance() as StepIndexPattern;
     instance.onQueryChanged({ target: { value: '?' } } as React.ChangeEvent<HTMLInputElement>);
 
@@ -110,7 +121,16 @@ describe('StepIndexPattern', () => {
   });
 
   it('renders matching indices when input is valid', async () => {
-    const component = createComponent();
+    const component = createComponentWithContext(
+      StepIndexPattern,
+      {
+        allIndices,
+        isIncludingSystemIndices: false,
+        goToNextStep,
+        indexPatternCreationType: mockIndexPatternCreationType,
+      },
+      mockContext
+    );
     const instance = component.instance() as StepIndexPattern;
     instance.onQueryChanged({ target: { value: 'k' } } as React.ChangeEvent<HTMLInputElement>);
 
@@ -125,20 +145,47 @@ describe('StepIndexPattern', () => {
   });
 
   it('appends a wildcard automatically to queries', async () => {
-    const component = createComponent();
+    const component = createComponentWithContext(
+      StepIndexPattern,
+      {
+        allIndices,
+        isIncludingSystemIndices: false,
+        goToNextStep,
+        indexPatternCreationType: mockIndexPatternCreationType,
+      },
+      mockContext
+    );
     const instance = component.instance() as StepIndexPattern;
     instance.onQueryChanged({ target: { value: 'k' } } as React.ChangeEvent<HTMLInputElement>);
     expect(component.state('query')).toBe('k*');
   });
 
   it('disables the next step if the index pattern exists', async () => {
-    const component = createComponent();
+    const component = createComponentWithContext(
+      StepIndexPattern,
+      {
+        allIndices,
+        isIncludingSystemIndices: false,
+        goToNextStep,
+        indexPatternCreationType: mockIndexPatternCreationType,
+      },
+      mockContext
+    );
     component.setState({ indexPatternExists: true });
     expect(component.find(Header).prop('isNextStepDisabled')).toBe(true);
   });
 
   it('ensures the response of the latest request is persisted', async () => {
-    const component = createComponent();
+    const component = createComponentWithContext(
+      StepIndexPattern,
+      {
+        allIndices,
+        isIncludingSystemIndices: false,
+        goToNextStep,
+        indexPatternCreationType: mockIndexPatternCreationType,
+      },
+      mockContext
+    );
     const instance = component.instance() as StepIndexPattern;
     instance.onQueryChanged({ target: { value: 'e' } } as React.ChangeEvent<HTMLInputElement>);
     instance.lastQuery = 'k';

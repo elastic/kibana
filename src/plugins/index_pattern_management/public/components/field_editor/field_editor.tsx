@@ -19,7 +19,6 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import { intersection, union, get } from 'lodash';
-import { HttpStart, DocLinksStart, NotificationsStart, IUiSettingsClient } from 'src/core/public';
 
 import {
   EuiBasicTable,
@@ -60,6 +59,7 @@ import {
   ES_FIELD_TYPES,
   DataPublicPluginStart,
 } from '../../../../../plugins/data/public';
+import { context as contextType, KibanaReactContextValue } from '../../../../kibana_react/public';
 import {
   ScriptingDisabledCallOut,
   ScriptingWarningCallOut,
@@ -67,7 +67,7 @@ import {
 
 import { ScriptingHelpFlyout } from './components/scripting_help';
 import { FieldFormatEditor } from './components/field_format_editor';
-import { IndexPatternManagementStart } from '../../plugin';
+import { IndexPatternManagmentContext } from '../../types';
 
 import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
 import { executeScript, isScriptValid } from './lib';
@@ -135,23 +135,21 @@ export interface FieldEdiorProps {
   indexPattern: IndexPattern;
   field: IndexPatternField;
   services: {
-    http: HttpStart;
-    fieldFormatEditors: IndexPatternManagementStart['fieldFormatEditors'];
     redirectAway: () => void;
-    docLinksScriptedFields: DocLinksStart['links']['scriptedFields'];
-    fieldFormats: DataPublicPluginStart['fieldFormats'];
-    toasts: NotificationsStart['toasts'];
-    uiSettings: IUiSettingsClient;
-    SearchBar: DataPublicPluginStart['ui']['SearchBar'];
-    indexPatterns: DataPublicPluginStart['indexPatterns'];
   };
 }
 
 export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState> {
+  static contextType = contextType;
+
+  public readonly context!: KibanaReactContextValue<IndexPatternManagmentContext>;
   supportedLangs: string[] = [];
   deprecatedLangs: string[] = [];
-  constructor(props: FieldEdiorProps) {
-    super(props);
+  constructor(
+    props: FieldEdiorProps,
+    context: KibanaReactContextValue<IndexPatternManagmentContext>
+  ) {
+    super(props, context);
 
     const { field, indexPattern } = props;
 
@@ -174,15 +172,15 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     };
     this.supportedLangs = getSupportedScriptingLanguages();
     this.deprecatedLangs = getDeprecatedScriptingLanguages();
-    this.init();
+    this.init(context);
   }
 
-  async init() {
-    const { http, toasts } = this.props.services;
+  async init(context: KibanaReactContextValue<IndexPatternManagmentContext>) {
+    const { http, notifications, data } = context.services;
     const { field } = this.state;
     const { indexPattern } = this.props;
 
-    const enabledLangs = await getEnabledScriptingLanguages(http, toasts);
+    const enabledLangs = await getEnabledScriptingLanguages(http, notifications.toasts);
     const scriptingLangs = intersection(
       enabledLangs,
       union(this.supportedLangs, this.deprecatedLangs)
@@ -192,7 +190,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const fieldTypes = get(FIELD_TYPES_BY_LANG, field.lang || '', DEFAULT_FIELD_TYPES);
     field.type = fieldTypes.includes(field.type) ? field.type : fieldTypes[0];
 
-    const DefaultFieldFormat = this.props.services.fieldFormats.getDefaultType(
+    const DefaultFieldFormat = data.fieldFormats.getDefaultType(
       field.type as KBN_FIELD_TYPES,
       field.esTypes as ES_FIELD_TYPES[]
     );
@@ -207,7 +205,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       fieldTypeFormats: getFieldTypeFormatsList(
         field,
         DefaultFieldFormat as FieldFormatInstanceType,
-        this.props.services.fieldFormats
+        data.fieldFormats
       ),
       fieldFormatId: get(indexPattern, ['fieldFormatMap', field.name, 'type', 'id']),
       fieldFormatParams: field.format.params(),
@@ -221,22 +219,16 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   };
 
   onTypeChange = (type: KBN_FIELD_TYPES) => {
-    const { uiSettings } = this.props.services;
+    const { uiSettings, data } = this.context.services;
     const { field } = this.state;
-    const DefaultFieldFormat = this.props.services.fieldFormats.getDefaultType(
-      type
-    ) as FieldFormatInstanceType;
+    const DefaultFieldFormat = data.fieldFormats.getDefaultType(type) as FieldFormatInstanceType;
 
     field.type = type;
 
     field.format = new DefaultFieldFormat(null, key => uiSettings.get(key));
 
     this.setState({
-      fieldTypeFormats: getFieldTypeFormatsList(
-        field,
-        DefaultFieldFormat,
-        this.props.services.fieldFormats
-      ),
+      fieldTypeFormats: getFieldTypeFormatsList(field, DefaultFieldFormat, data.fieldFormats),
       fieldFormatId: DefaultFieldFormat.id,
       fieldFormatParams: field.format.params(),
     });
@@ -255,9 +247,9 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
   onFormatChange = (formatId: string, params?: any) => {
     const { field, fieldTypeFormats } = this.state;
-    const { uiSettings, fieldFormats } = this.props.services;
+    const { uiSettings, data } = this.context.services;
 
-    const FieldFormat = fieldFormats.getType(
+    const FieldFormat = data.fieldFormats.getType(
       formatId || (fieldTypeFormats[0] as InitialFieldTypeFormat).defaultFieldFormat.id
     ) as FieldFormatInstanceType;
 
@@ -369,7 +361,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
                   painlessLink: (
                     <EuiLink
                       target="_blank"
-                      href={this.props.services.docLinksScriptedFields.painless}
+                      href={this.context.services.docLinks.links.scriptedFields.painless}
                     >
                       <FormattedMessage
                         id="indexPatternManagement.warningLabel.painlessLinkLabel"
@@ -477,7 +469,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
   renderFormat() {
     const { field, fieldTypeFormats, fieldFormatId, fieldFormatParams } = this.state;
-    const { fieldFormatEditors } = this.props.services;
+    const { indexPatternManagementStart } = this.context.services;
     const defaultFormat = (fieldTypeFormats[0] as InitialFieldTypeFormat).defaultFieldFormat.title;
 
     const label = defaultFormat ? (
@@ -521,7 +513,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             fieldFormat={field.format}
             fieldFormatId={fieldFormatId}
             fieldFormatParams={fieldFormatParams}
-            fieldFormatEditors={fieldFormatEditors}
+            fieldFormatEditors={indexPatternManagementStart.fieldFormatEditors}
             onChange={this.onFormatParamsChange}
             onError={this.onFormatParamsError}
           />
@@ -748,10 +740,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     return (
       <Fragment>
         <ScriptingDisabledCallOut isVisible={!scriptingLangs.length} />
-        <ScriptingWarningCallOut
-          isVisible
-          docLinksScriptedFields={this.props.services.docLinksScriptedFields}
-        />
+        <ScriptingWarningCallOut isVisible />
         <ScriptingHelpFlyout
           isVisible={showScriptingHelp}
           onClose={this.hideScriptingHelp}
@@ -760,10 +749,6 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           name={field.name}
           script={field.script}
           executeScript={executeScript}
-          http={this.props.services.http}
-          docLinksScriptedFields={this.props.services.docLinksScriptedFields}
-          uiSettings={this.props.services.uiSettings}
-          SearchBar={this.props.services.SearchBar}
         />
       </Fragment>
     );
@@ -781,7 +766,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           defaultMessage: "Deleted '{fieldName}'",
           values: { fieldName: field.name },
         });
-        this.props.services.toasts.addSuccess(message);
+        this.context.services.notifications.toasts.addSuccess(message);
         redirectAway();
       });
     } else {
@@ -804,7 +789,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         lang: field.lang as string,
         script: field.script as string,
         indexPatternTitle: indexPattern.title,
-        http: this.props.services.http,
+        http: this.context.services.http,
       });
 
       if (!isValid) {
@@ -836,7 +821,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         defaultMessage: "Saved '{fieldName}'",
         values: { fieldName: field.name },
       });
-      this.props.services.toasts.addSuccess(message);
+      this.context.services.notifications.toasts.addSuccess(message);
       redirectAway();
     });
   };

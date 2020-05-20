@@ -31,9 +31,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fieldWildcardMatcher } from '../../../../../kibana_utils/public';
-import { IndexPatternManagementStart } from '../../../../../index_pattern_management/public';
-import { IndexPattern, IndexPatternField } from '../../../../../data/public';
-import { META_FIELDS_SETTING } from '../../../../../data/common';
+import { IndexPattern, IndexPatternField } from '../../../../../../plugins/data/public';
+import { useKibana } from '../../../../../../plugins/kibana_react/public';
+import { IndexPatternManagmentContext } from '../../../types';
 import { createEditIndexPatternPageStateContainer } from '../edit_index_pattern_state_container';
 import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from '../constants';
 import { SourceFiltersTable } from '../source_filters_table';
@@ -43,12 +43,7 @@ import { getTabs, getPath, convertToEuiSelectOption } from './utils';
 
 interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   indexPattern: IndexPattern;
-  config: Record<string, any>;
   fields: IndexPatternField[];
-  services: {
-    indexPatternManagement: IndexPatternManagementStart;
-    painlessDocLink: string;
-  };
 }
 
 const searchAriaLabel = i18n.translate(
@@ -72,7 +67,10 @@ const filterPlaceholder = i18n.translate(
   }
 );
 
-export function Tabs({ config, indexPattern, fields, services, history, location }: TabsProps) {
+export function Tabs({ indexPattern, fields, history, location }: TabsProps) {
+  const { uiSettings, indexPatternManagementStart } = useKibana<
+    IndexPatternManagmentContext
+  >().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string>('');
   const [scriptedFieldLanguageFilter, setScriptedFieldLanguageFilter] = useState<string>('');
@@ -106,8 +104,8 @@ export function Tabs({ config, indexPattern, fields, services, history, location
   }, [indexPattern, indexPattern.fields, refreshFilters]);
 
   const fieldWildcardMatcherDecorated = useCallback(
-    (filters: string[]) => fieldWildcardMatcher(filters, config.get(META_FIELDS_SETTING)),
-    [config]
+    (filters: string[]) => fieldWildcardMatcher(filters, uiSettings.get('metaFields')),
+    [uiSettings]
   );
 
   const getFilterSection = useCallback(
@@ -175,7 +173,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
                   redirectToRoute: (field: IndexPatternField) => {
                     history.push(getPath(field));
                   },
-                  getFieldInfo: services.indexPatternManagement.list.getFieldInfo,
+                  getFieldInfo: indexPatternManagementStart.list.getFieldInfo,
                 }}
               />
             </Fragment>
@@ -196,7 +194,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
                   },
                 }}
                 onRemoveField={refreshFilters}
-                painlessDocLink={services.painlessDocLink}
+                painlessDocLink={'todo'}
               />
             </Fragment>
           );
@@ -223,17 +221,16 @@ export function Tabs({ config, indexPattern, fields, services, history, location
       getFilterSection,
       history,
       indexPattern,
+      indexPatternManagementStart.list.getFieldInfo,
       indexedFieldTypeFilter,
       refreshFilters,
       scriptedFieldLanguageFilter,
-      services.indexPatternManagement.list.getFieldInfo,
-      services.painlessDocLink,
     ]
   );
 
   const euiTabs: EuiTabbedContentTab[] = useMemo(
     () =>
-      getTabs(indexPattern, fieldFilter, services.indexPatternManagement.list).map(
+      getTabs(indexPattern, fieldFilter, indexPatternManagementStart.list).map(
         (tab: Pick<EuiTabbedContentTab, 'name' | 'id'>) => {
           return {
             ...tab,
@@ -241,7 +238,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
           };
         }
       ),
-    [fieldFilter, getContent, indexPattern, services.indexPatternManagement.list]
+    [fieldFilter, getContent, indexPattern, indexPatternManagementStart.list]
   );
 
   const [selectedTabId, setSelectedTabId] = useState(euiTabs[0].id);
@@ -253,7 +250,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
       setCurrentTab,
       getCurrentTab,
     } = createEditIndexPatternPageStateContainer({
-      useHashedUrl: config.get('state:storeInSessionStorage'),
+      useHashedUrl: uiSettings.get('state:storeInSessionStorage'),
       defaultTab: TAB_INDEXED_FIELDS,
     });
 
@@ -267,7 +264,7 @@ export function Tabs({ config, indexPattern, fields, services, history, location
     return () => {
       stopSyncingState();
     };
-  }, [config]);
+  }, [uiSettings]);
 
   return (
     <EuiTabbedContent

@@ -32,16 +32,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  SavedObjectsClientContract,
-  IUiSettingsClient,
-  ChromeDocTitle,
-} from '../../../../../core/public';
-import { ManagementAppMountParams } from '../../../../management/public';
+import { useKibana } from '../../../../../plugins/kibana_react/public';
+import { IndexPatternManagmentContext } from '../../types';
 import { CreateButton } from '../create_button';
 import { CreateIndexPatternPrompt } from '../create_index_pattern_prompt';
 import { IndexPatternTableItem, IndexPatternCreationOption } from '../types';
-import { IndexPatternManagementStart } from '../../plugin';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
 
@@ -104,51 +99,46 @@ const title = i18n.translate('indexPatternManagement.indexPatternTable.title', {
 });
 
 interface Props extends RouteComponentProps {
-  getIndexPatternCreationOptions: IndexPatternManagementStart['creation']['getIndexPatternCreationOptions'];
   canSave: boolean;
-  services: {
-    savedObjectsClient: SavedObjectsClientContract;
-    uiSettings: IUiSettingsClient;
-    setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
-    indexPatternManagement: IndexPatternManagementStart;
-    docTitle: ChromeDocTitle;
-  };
 }
 
-export const IndexPatternTable = ({
-  getIndexPatternCreationOptions,
-  canSave,
-  history,
-  services,
-}: Props) => {
+export const IndexPatternTable = ({ canSave, history }: Props) => {
+  const {
+    setBreadcrumbs,
+    savedObjects,
+    uiSettings,
+    indexPatternManagementStart,
+    chrome,
+  } = useKibana<IndexPatternManagmentContext>().services;
   const [showFlyout, setShowFlyout] = useState(false);
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
 
-  services.setBreadcrumbs(getListBreadcrumbs());
+  setBreadcrumbs(getListBreadcrumbs());
 
   useEffect(() => {
     (async function() {
-      const options = await getIndexPatternCreationOptions(history.push);
+      const options = await indexPatternManagementStart.creation.getIndexPatternCreationOptions(
+        history.push
+      );
       const gettedIndexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
-        services.savedObjectsClient,
-        services.uiSettings.get('defaultIndex'),
-        services.indexPatternManagement
+        savedObjects.client,
+        uiSettings.get('defaultIndex'),
+        indexPatternManagementStart
       );
       setCreationOptions(options);
       setIndexPatterns(gettedIndexPatterns);
       setShowFlyout(gettedIndexPatterns.length === 0);
     })();
   }, [
-    getIndexPatternCreationOptions,
     history.push,
     indexPatterns.length,
-    services.indexPatternManagement,
-    services.savedObjectsClient,
-    services.uiSettings,
+    indexPatternManagementStart,
+    uiSettings,
+    savedObjects.client,
   ]);
 
-  services.docTitle.change(title);
+  chrome.docTitle.change(title);
 
   const createButton = canSave ? (
     <CreateButton options={creationOptions}>

@@ -17,9 +17,6 @@
  * under the License.
  */
 
-import React from 'react';
-
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import {
   IndexPattern,
   IndexPatternField,
@@ -27,12 +24,12 @@ import {
   FieldFormatInstanceType,
 } from 'src/plugins/data/public';
 
-import { coreMock } from '../../../../../core/public/mocks';
-
 jest.mock('brace/mode/groovy', () => ({}));
 
-import { FieldEdiorProps, FieldEditor } from './field_editor';
-import { dataPluginMock } from '../../../../data/public/mocks';
+import { FieldEditor } from './field_editor';
+
+import { mockManagementPlugin } from '../../mocks';
+import { createComponentWithContext } from '../test_utils';
 
 jest.mock('@elastic/eui', () => ({
   EuiBasicTable: 'eui-basic-table',
@@ -99,50 +96,35 @@ const field = {
 };
 
 describe('FieldEditor', () => {
-  const dataStartServices = dataPluginMock.createStartContract();
-  const coreStartServices = coreMock.createStart();
-
   let indexPattern: IndexPattern;
 
-  const services: FieldEdiorProps['services'] = ({
-    Field: () => {},
-    getConfig: () => {},
-    fieldFormatEditors: [],
-    redirectAway: () => {},
-    docLinksScriptedFields: {},
-    fieldFormats: dataStartServices.fieldFormats,
-    toasts: coreStartServices.notifications.toasts,
-    http: {},
-    uiSettings: {},
-    SearchBar: dataStartServices.ui.SearchBar,
-    indexPatterns: dataStartServices.indexPatterns,
-  } as unknown) as FieldEdiorProps['services'];
+  const mockContext = mockManagementPlugin.createIndexPatternManagmentContext();
+  mockContext.data.fieldFormats.getDefaultType = jest.fn(
+    () => (({} as unknown) as FieldFormatInstanceType)
+  );
+  mockContext.data.fieldFormats.getByFieldType = jest.fn(fieldType => {
+    if (fieldType === 'number') {
+      return [({} as unknown) as FieldFormatInstanceType];
+    } else {
+      return [];
+    }
+  });
 
   beforeEach(() => {
     indexPattern = ({
       fields: fields as IIndexPatternFieldList,
     } as unknown) as IndexPattern;
-
-    services.fieldFormats.getDefaultType = jest.fn(
-      () => (({} as unknown) as FieldFormatInstanceType)
-    );
-
-    services.fieldFormats.getByFieldType = jest.fn(fieldType => {
-      if (fieldType === 'number') {
-        return [({} as unknown) as FieldFormatInstanceType];
-      } else {
-        return [];
-      }
-    });
   });
 
   it('should render create new scripted field correctly', async () => {
-    const component = shallowWithI18nProvider(
-      <FieldEditor
-        indexPattern={indexPattern}
-        field={(field as unknown) as IndexPatternField}
-        services={services}
-      />
+    const component = createComponentWithContext(
+      FieldEditor,
+      {
+        indexPattern,
+        field: (field as unknown) as IndexPatternField,
+        services: { redirectAway: () => {} },
+      },
+      mockContext
     );
 
     await new Promise(resolve => process.nextTick(resolve));
@@ -164,12 +146,14 @@ describe('FieldEditor', () => {
       return flds[name] as IndexPatternField;
     };
 
-    const component = shallowWithI18nProvider(
-      <FieldEditor
-        indexPattern={indexPattern}
-        field={(testField as unknown) as IndexPatternField}
-        services={services}
-      />
+    const component = createComponentWithContext(
+      FieldEditor,
+      {
+        indexPattern,
+        field: (testField as unknown) as IndexPatternField,
+        services: { redirectAway: () => {} },
+      },
+      mockContext
     );
 
     await new Promise(resolve => process.nextTick(resolve));
@@ -192,12 +176,14 @@ describe('FieldEditor', () => {
       return flds[name] as IndexPatternField;
     };
 
-    const component = shallowWithI18nProvider(
-      <FieldEditor
-        indexPattern={indexPattern}
-        field={(testField as unknown) as IndexPatternField}
-        services={services}
-      />
+    const component = createComponentWithContext(
+      FieldEditor,
+      {
+        indexPattern,
+        field: (testField as unknown) as IndexPatternField,
+        services: { redirectAway: () => {} },
+      },
+      mockContext
     );
 
     await new Promise(resolve => process.nextTick(resolve));
@@ -207,12 +193,14 @@ describe('FieldEditor', () => {
 
   it('should show conflict field warning', async () => {
     const testField = { ...field };
-    const component = shallowWithI18nProvider(
-      <FieldEditor
-        indexPattern={indexPattern}
-        field={(testField as unknown) as IndexPatternField}
-        services={services}
-      />
+    const component = createComponentWithContext(
+      FieldEditor,
+      {
+        indexPattern,
+        field: (testField as unknown) as IndexPatternField,
+        services: { redirectAway: () => {} },
+      },
+      mockContext
     );
 
     await new Promise(resolve => process.nextTick(resolve));
@@ -230,12 +218,14 @@ describe('FieldEditor', () => {
         text: ['index_name_3'],
       },
     };
-    const component = shallowWithI18nProvider(
-      <FieldEditor
-        indexPattern={indexPattern}
-        field={(testField as unknown) as IndexPatternField}
-        services={services}
-      />
+    const component = createComponentWithContext(
+      FieldEditor,
+      {
+        indexPattern,
+        field: (testField as unknown) as IndexPatternField,
+        services: { redirectAway: () => {} },
+      },
+      mockContext
     );
 
     await new Promise(resolve => process.nextTick(resolve));
