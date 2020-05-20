@@ -33,11 +33,11 @@ curl -X POST \
 ----
 
 For more information, the Kibana <<api,REST API reference>> provides information on how to use Kibana APIs,
-like required request headers and authentication options. 
+like required request headers and authentication options.
 
 // AGENT CONFIG API
 // GET --> Feature (APM) Read
-// CREAT/EDIT/DELETE --> Feature (APM) All
+// CREATE/EDIT/DELETE --> Feature (APM) All
 
 // ANNOTATION API
 // Feature (APM) All
@@ -365,6 +365,7 @@ The name of this index can be changed in your `config.yml` by editing `xpack.obs
 `tags`::
 (optional, array) Tags are used by the APM app to distinguish APM annotations from other annotations.
 Tags may have additional functionality in future releases. Defaults to `[apm]`.
+While you can add additional tags, you cannot remove the `apm` tag.
 
 [[apm-annotation-config-example]]
 ===== Example
