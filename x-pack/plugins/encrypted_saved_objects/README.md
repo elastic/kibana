@@ -68,7 +68,7 @@ router.get(
 ...
 ```
 
-5. Instancicate an EncryptedSavedObjects client so that you can interact with Saved Objects whose content has been encrypted.
+5. Instantiate an EncryptedSavedObjects client so that you can interact with Saved Objects whose content has been encrypted.
 
 ```typescript
 const esoClient = encryptedSavedObjects.getClient();

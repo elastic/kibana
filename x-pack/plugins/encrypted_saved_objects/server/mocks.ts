@@ -12,7 +12,6 @@ function createEncryptedSavedObjectsSetupMock() {
     registerType: jest.fn(),
     __legacyCompat: { registerLegacyAPI: jest.fn() },
     usingEphemeralEncryptionKey: true,
-    startWithHiddenTypes: jest.fn(),
   } as jest.Mocked<EncryptedSavedObjectsPluginSetup>;
 }
 
