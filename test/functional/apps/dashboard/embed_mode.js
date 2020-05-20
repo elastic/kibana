@@ -20,6 +20,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
+  const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -28,6 +29,13 @@ export default function ({ getService, getPageObjects }) {
   const globalNav = getService('globalNav');
 
   describe('embed mode', () => {
+    const urlParamExtensions = [
+      'show-top-menu=true',
+      'show-query-input=true',
+      'show-time-filter=true',
+      'hide-filter-bar=true',
+    ];
+
     before(async () => {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
@@ -54,9 +62,38 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    it('shows or hides elements based on URL params', async () => {
+      const topMenuShown = await testSubjects.exists('top-nav');
+      expect(topMenuShown).to.be(false);
+      const queryInputShown = await testSubjects.exists('queryInput');
+      expect(queryInputShown).to.be(false);
+      const timeFilterShown = await testSubjects.exists('superDatePickerToggleQuickMenuButton');
+      expect(timeFilterShown).to.be(false);
+      const filterBarShown = await testSubjects.exists('showFilterActions');
+      expect(filterBarShown).to.be(true);
+
+      const currentUrl = await browser.getCurrentUrl();
+      const newUrl = [currentUrl].concat(urlParamExtensions).join('&');
+      // Embed parameter only works on a hard refresh.
+      const useTimeStamp = true;
+      await browser.get(newUrl.toString(), useTimeStamp);
+
+      await retry.try(async () => {
+        const topMenuShown = await testSubjects.exists('top-nav');
+        expect(topMenuShown).to.be(true);
+        const queryInputShown = await testSubjects.exists('queryInput');
+        expect(queryInputShown).to.be(true);
+        const timeFilterShown = await testSubjects.exists('superDatePickerToggleQuickMenuButton');
+        expect(timeFilterShown).to.be(true);
+        const filterBarShown = await testSubjects.exists('showFilterActions');
+        expect(filterBarShown).to.be(false);
+      });
+    });
+
     after(async function () {
       const currentUrl = await browser.getCurrentUrl();
-      const newUrl = currentUrl.replace('&embed=true', '');
+      const replaceParams = ['', 'embed=true'].concat(urlParamExtensions).join('&');
+      const newUrl = currentUrl.replace(replaceParams, '');
       // First use the timestamp to cause a hard refresh so the new embed parameter works correctly.
       let useTimeStamp = true;
       await browser.get(newUrl.toString(), useTimeStamp);
