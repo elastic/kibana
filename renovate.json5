@@ -427,6 +427,14 @@
         ],
       },
       {
+        groupSlug: 'inquirer',
+        groupName: 'inquirer related packages',
+        packageNames: [
+          'inquirer',
+          '@types/inquirer',
+        ],
+      },
+      {
         groupSlug: 'intl-relativeformat',
         groupName: 'intl-relativeformat related packages',
         packageNames: [
@@ -681,6 +689,14 @@
         packageNames: [
           'node-forge',
           '@types/node-forge',
+        ],
+      },
+      {
+        groupSlug: 'node-sass',
+        groupName: 'node-sass related packages',
+        packageNames: [
+          'node-sass',
+          '@types/node-sass',
         ],
       },
       {
@@ -952,6 +968,22 @@
         ],
       },
       {
+        groupSlug: 'through2',
+        groupName: 'through2 related packages',
+        packageNames: [
+          'through2',
+          '@types/through2',
+        ],
+      },
+      {
+        groupSlug: 'through2-map',
+        groupName: 'through2-map related packages',
+        packageNames: [
+          'through2-map',
+          '@types/through2-map',
+        ],
+      },
+      {
         groupSlug: 'tinycolor2',
         groupName: 'tinycolor2 related packages',
         packageNames: [
@@ -1002,6 +1034,14 @@
           '(\\b|_)vega(\\b|_)',
         ],
         enabled: false,
+      },
+      {
+        groupSlug: 'vinyl',
+        groupName: 'vinyl related packages',
+        packageNames: [
+          'vinyl',
+          '@types/vinyl',
+        ],
       },
       {
         groupSlug: 'vinyl-fs',
