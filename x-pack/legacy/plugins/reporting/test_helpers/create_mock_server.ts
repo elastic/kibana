@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServerFacade } from '../types';
+import { ServerFacade } from '../server/types';
 
 export const createMockServer = (): ServerFacade => {
   const mockServer = {};

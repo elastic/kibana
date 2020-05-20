@@ -9,6 +9,7 @@ import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export { MonitoringConfig } from '../server';
 
 export interface MonitoringPluginDependencies {

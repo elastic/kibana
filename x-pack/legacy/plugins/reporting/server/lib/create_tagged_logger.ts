@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger } from '../../types';
+import { LevelLogger } from './level_logger';
 
-export function createTaggedLogger(logger: Logger, tags: string[]) {
+export function createTaggedLogger(logger: LevelLogger, tags: string[]) {
   return (msg: string, additionalTags = []) => {
     const allTags = [...tags, ...additionalTags];
 
