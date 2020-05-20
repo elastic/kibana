@@ -30,6 +30,7 @@ export function NodeDetailStatus({ stats, alerts }) {
   const metrics = [
     {
       label: 'Alerts',
+      className: alerts && Object.values(alerts).length ? 'monAlertStatus' : '',
       value: alerts ? Object.values(alerts).length : 0,
     },
     {

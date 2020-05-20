@@ -77,42 +77,50 @@ export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }) {
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" className="monRhythmChart__wrapper">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      className={`monRhythmChart__wrapper ${alertStatus ? 'monAlertChart' : ''}`}
+    >
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="s" tabIndex="0">
-              <h2>
-                {getTitle(series)}
-                {units ? ` (${units})` : ''}
-                <EuiScreenReaderOnly>
-                  <span>
-                    <FormattedMessage
-                      id="xpack.monitoring.chart.screenReaderUnaccessibleTitle"
-                      defaultMessage="This chart is not screen reader accessible"
-                    />
-                  </span>
-                </EuiScreenReaderOnly>
-              </h2>
-            </EuiTitle>
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="s" tabIndex="0">
+                  <h2>
+                    {getTitle(series)}
+                    {units ? ` (${units})` : ''}
+                    <EuiScreenReaderOnly>
+                      <span>
+                        <FormattedMessage
+                          id="xpack.monitoring.chart.screenReaderUnaccessibleTitle"
+                          defaultMessage="This chart is not screen reader accessible"
+                        />
+                      </span>
+                    </EuiScreenReaderOnly>
+                  </h2>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <Fragment>
+                  <EuiIconTip
+                    anchorClassName="eui-textRight eui-alignMiddle monChart__tooltipTrigger"
+                    type="iInCircle"
+                    position="right"
+                    content={<InfoTooltip series={series} bucketSize={bucketSize} />}
+                  />
+                  <EuiScreenReaderOnly>
+                    <span id={`monitoringChart${titleForAriaIds}`}>
+                      {seriesScreenReaderTextList.join('. ')}
+                    </span>
+                  </EuiScreenReaderOnly>
+                </Fragment>
+              </EuiFlexItem>
+              {zoomOutBtn(zoomInfo)}
+            </EuiFlexGroup>
           </EuiFlexItem>
           {alertStatus}
-          <EuiFlexItem grow={false}>
-            <Fragment>
-              <EuiIconTip
-                anchorClassName="eui-textRight eui-alignMiddle monChart__tooltipTrigger"
-                type="iInCircle"
-                position="right"
-                content={<InfoTooltip series={series} bucketSize={bucketSize} />}
-              />
-              <EuiScreenReaderOnly>
-                <span id={`monitoringChart${titleForAriaIds}`}>
-                  {seriesScreenReaderTextList.join('. ')}
-                </span>
-              </EuiScreenReaderOnly>
-            </Fragment>
-          </EuiFlexItem>
-          {zoomOutBtn(zoomInfo)}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem style={{ minHeight: '200px' }}>

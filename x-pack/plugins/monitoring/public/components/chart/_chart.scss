@@ -2,6 +2,10 @@
   user-select: none;
 }
 
+.monAlertChart {
+  border: dotted 2px red;
+}
+
 .monRhythmChart__wrapper .monRhythmChart__zoom {
   visibility: hidden;
   padding-right: $euiSizeM;

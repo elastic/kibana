@@ -109,15 +109,6 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
         }
       }
 
-      let alertStatus = null;
-      if (alerts) {
-        alertStatus = (
-          <div>
-            <AlertMenu alerts={alerts} />
-          </div>
-        );
-      }
-
       return (
         <div>
           <div className="monTableCell__name">
@@ -128,7 +119,6 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
           </div>
           <div className="monTableCell__transportAddress">{extractIp(node.transport_address)}</div>
           {setupModeStatus}
-          {alertStatus}
         </div>
       );
     },
@@ -141,6 +131,15 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
     field: 'isOnline',
     sortable: true,
     render: value => {
+      let alertStatus = null;
+      if (alerts) {
+        alertStatus = (
+          <div>
+            <AlertMenu alerts={alerts} />
+          </div>
+        );
+      }
+
       const status = value
         ? i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumn.onlineLabel', {
             defaultMessage: 'Online',
@@ -151,6 +150,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
       return (
         <div className="monTableCell__status">
           <NodeStatusIcon isOnline={value} status={status} /> {status}
+          {alertStatus}
         </div>
       );
     },
