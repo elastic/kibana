@@ -6,12 +6,15 @@
 
 import expect from '@kbn/expect';
 import supertest from 'supertest';
-import { JOB_PARAMS_RISON } from './fixtures';
+import { JOB_PARAMS_RISON } from '../fixtures';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: { getService: any }) {
+export default function({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertestSvc = getService('supertest');
+  const reportingAPI = getService('reportingAPI');
+
   const generateAPI = {
     getCsvFromParamsInPayload: async (jobParams: object = {}) => {
       return await supertestSvc
@@ -30,11 +33,13 @@ export default function({ getService }: { getService: any }) {
     before(async () => {
       await esArchiver.load('reporting/logs');
       await esArchiver.load('logstash_functional');
-    }); // prettier-ignore
+    });
+
     after(async () => {
       await esArchiver.unload('reporting/logs');
       await esArchiver.unload('logstash_functional');
-    }); // prettier-ignore
+      await reportingAPI.deleteAllReports();
+    });
 
     it('Rejects bogus jobParams', async () => {
       const { status: resStatus, text: resText } = (await generateAPI.getCsvFromParamsInPayload({
