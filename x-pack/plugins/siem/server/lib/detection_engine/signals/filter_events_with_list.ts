@@ -26,10 +26,13 @@ export const filterEventsAgainstList = async ({
   eventSearchResult,
 }: FilterEventsAgainstList): Promise<SignalSearchResponse> => {
   try {
-    if (exceptionsList == null) {
+    if (exceptionsList == null || exceptionsList.length === 0) {
       return eventSearchResult;
     }
 
+    // narrow unioned type to be single
+    const isStringableType = (val: SearchTypes) =>
+      ['string', 'number', 'boolean'].includes(typeof val);
     // grab the signals with values found in the given exception lists.
     const filteredHitsPromises = exceptionsList.map(async exceptionItem => {
       if (exceptionItem.values == null || exceptionItem.values.length === 0) {
@@ -38,11 +41,11 @@ export const filterEventsAgainstList = async ({
       // acquire the list values we are checking for.
       const valuesOfGivenType = eventSearchResult.hits.hits.reduce((acc, searchResultItem) => {
         const valueField = get(exceptionItem.field, searchResultItem._source);
-        if (valueField != null && !acc.has(valueField)) {
-          acc.add(valueField);
+        if (valueField != null && isStringableType(valueField) && !acc.has(valueField.toString())) {
+          acc.add(valueField.toString());
         }
         return acc;
-      }, new Set<SearchTypes>());
+      }, new Set<string>());
 
       const listSignals: ListItemArraySchema = await listClient.getListItemByValues({
         listId: exceptionItem.values[0].id ?? '',
