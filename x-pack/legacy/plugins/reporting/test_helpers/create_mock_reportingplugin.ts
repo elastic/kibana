@@ -12,6 +12,7 @@ jest.mock('../server/lib/create_queue');
 jest.mock('../server/lib/enqueue_job');
 jest.mock('../server/lib/validate');
 
+import * as Rx from 'rxjs';
 import { EventEmitter } from 'events';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { coreMock } from 'src/core/server/mocks';
@@ -24,6 +25,9 @@ const createMockSetupDeps = (setupMock?: any): ReportingSetupDeps => {
     security: setupMock.security,
     usageCollection: {} as any,
     __LEGACY: { plugins: { xpack_main: { status: new EventEmitter() } } } as any,
+    licensing: {
+      license$: Rx.of({ isAvailable: true, isActive: true, type: 'basic' }),
+    } as any,
   };
 };
 
