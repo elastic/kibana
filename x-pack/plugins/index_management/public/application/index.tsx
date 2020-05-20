@@ -10,7 +10,9 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import { CoreStart } from '../../../../../src/core/public';
 
+import { API_BASE_PATH } from '../../common';
 import { AppContextProvider, AppDependencies } from './app_context';
+import { ComponentTemplatesProvider } from './components';
 import { App } from './app';
 import { indexManagementStore } from './store';
 
@@ -30,7 +32,11 @@ export const renderApp = (
     <I18nContext>
       <Provider store={indexManagementStore(services)}>
         <AppContextProvider value={dependencies}>
-          <App />
+          <ComponentTemplatesProvider
+            value={{ httpClient: services.httpService.httpClient, apiBasePath: API_BASE_PATH }}
+          >
+            <App />
+          </ComponentTemplatesProvider>
         </AppContextProvider>
       </Provider>
     </I18nContext>,

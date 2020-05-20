@@ -15,8 +15,8 @@ import {
   EuiButton,
   EuiLink,
   EuiBasicTableColumn,
-  EuiButtonEmpty,
-  EuiIconTip,
+  EuiToolTip,
+  EuiBadge,
 } from '@elastic/eui';
 import { TemplateListItem, IndexTemplateFormatVersion } from '../../../../../../common';
 import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
@@ -65,11 +65,8 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
             {item._kbnMeta.formatVersion === 1 && (
               <>
                 &nbsp;
-                <EuiIconTip
+                <EuiToolTip
                   aria-label="Deprecated index template format"
-                  size="m"
-                  type="alert"
-                  color="warning"
                   position="top"
                   content={
                     <p>
@@ -79,7 +76,9 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
                       Use the table row actions to convert it to the new format.
                     </p>
                   }
-                />
+                >
+                  <EuiBadge color="hollow">legacy</EuiBadge>
+                </EuiToolTip>
               </>
             )}
           </>

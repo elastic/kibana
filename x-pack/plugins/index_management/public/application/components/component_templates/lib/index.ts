@@ -5,3 +5,5 @@
  */
 
 export * from './api';
+
+export * from './use_request';

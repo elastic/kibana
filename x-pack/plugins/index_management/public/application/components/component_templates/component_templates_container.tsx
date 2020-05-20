@@ -5,8 +5,8 @@
  */
 import React, { useEffect } from 'react';
 
-import { ComponentTemplateDeserialized } from '../../../../common';
-import { useComponentTemplates } from './lib';
+import { ComponentTemplateDeserialized } from './types';
+import { useApi } from './component_templates_context';
 import { ComponentTemplates } from './component_templates';
 
 interface Props {
@@ -14,7 +14,7 @@ interface Props {
 }
 
 export const ComponentTemplatesContainer = React.memo(({ onComponents }: Props) => {
-  const { data, isLoading } = useComponentTemplates();
+  const { data, isLoading } = useApi().useComponentTemplates();
 
   useEffect(() => {
     if (onComponents !== undefined && Array.isArray(data)) {

@@ -5,9 +5,7 @@
  */
 import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import {
-  EuiText,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiTitle,
@@ -16,11 +14,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
-  EuiPopover,
-  EuiButton,
-  EuiContextMenu,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
 } from '@elastic/eui';
 
 import { ComponentTemplateSerialized } from '../../../../common';
