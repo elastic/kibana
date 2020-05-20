@@ -59,6 +59,7 @@ import {
 } from '../../kibana_legacy/public';
 import { createDiscoverSidebarDirective } from './application/components/sidebar';
 import { createHitsCounterDirective } from '././application/components/hits_counter';
+import { createTimechartHeaderDirective } from './application/components/timechart_header';
 import { DiscoverStartPlugins } from './plugin';
 import { getScopedHistory } from './kibana_services';
 
@@ -154,6 +155,7 @@ export function initializeInnerAngularModule(
     .directive('renderComplete', createRenderCompleteDirective)
     .directive('discoverSidebar', createDiscoverSidebarDirective)
     .directive('hitsCounter', createHitsCounterDirective)
+    .directive('timechartHeader', createTimechartHeaderDirective)
     .service('debounce', ['$timeout', DebounceProviderTimeout]);
 }
 

@@ -433,7 +433,7 @@ export default function({ getService, getPageObjects }) {
         log.debug('Click Date Histogram');
         await PageObjects.visEditor.selectAggregation('Date Histogram');
         await PageObjects.visEditor.selectField('@timestamp');
-        await PageObjects.visEditor.setInterval('Yearly');
+        await PageObjects.visEditor.setInterval('Year');
         await PageObjects.visEditor.clickGo();
         // This svg area is composed by 7 years (2013 - 2019).
         // 7 points are used to draw the upper line (usually called y1)
@@ -456,7 +456,7 @@ export default function({ getService, getPageObjects }) {
         log.debug('Click Date Histogram');
         await PageObjects.visEditor.selectAggregation('Date Histogram');
         await PageObjects.visEditor.selectField('@timestamp');
-        await PageObjects.visEditor.setInterval('Monthly');
+        await PageObjects.visEditor.setInterval('Month');
         await PageObjects.visEditor.clickGo();
         // This svg area is composed by 67 months 3 (2013) + 5 * 12 + 4 (2019)
         // 67 points are used to draw the upper line (usually called y1)
