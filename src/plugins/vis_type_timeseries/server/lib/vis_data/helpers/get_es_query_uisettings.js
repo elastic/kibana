@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { UI_SETTINGS } from '../../../../../data/public';
+import { UI_SETTINGS } from '../../../../../data/server';
 
 export async function getEsQueryConfig(req) {
   const uiSettings = req.getUiSettingsService();

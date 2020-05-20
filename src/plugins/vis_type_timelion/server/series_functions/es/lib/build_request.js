@@ -21,7 +21,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import { buildAggBody } from './agg_body';
 import createDateAgg from './create_date_agg';
-import { UI_SETTINGS } from '../../../../../data/public';
+import { UI_SETTINGS } from '../../../../../data/server';
 
 export default function buildRequest(config, tlConfig, scriptedFields, timeout) {
   const bool = { must: [] };

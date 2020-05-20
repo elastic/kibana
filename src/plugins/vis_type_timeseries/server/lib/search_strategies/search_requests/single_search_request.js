@@ -17,7 +17,7 @@
  * under the License.
  */
 import { AbstractSearchRequest } from './abstract_request';
-import { UI_SETTINGS } from '../../../../../data/public';
+import { UI_SETTINGS } from '../../../../../data/server';
 
 const SEARCH_METHOD = 'search';
 

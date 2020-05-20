@@ -30,7 +30,7 @@ import _ from 'lodash';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import invoke from '../helpers/invoke_series_fn.js';
-import { UI_SETTINGS } from '../../../../data/public';
+import { UI_SETTINGS } from '../../../../data/server';
 
 function stubRequestAndServer(response, indexPatternSavedObjects = []) {
   return {

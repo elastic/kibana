@@ -17,7 +17,7 @@
  * under the License.
  */
 import { SingleSearchRequest } from './single_search_request';
-import { UI_SETTINGS } from '../../../../../data/public';
+import { UI_SETTINGS } from '../../../../../data/server';
 
 describe('SingleSearchRequest', () => {
   let searchRequest;

@@ -17,7 +17,7 @@
  * under the License.
  */
 import { MultiSearchRequest } from './multi_search_request';
-import { UI_SETTINGS } from '../../../../../data/public';
+import { UI_SETTINGS } from '../../../../../data/server';
 
 describe('MultiSearchRequest', () => {
   let searchRequest;
