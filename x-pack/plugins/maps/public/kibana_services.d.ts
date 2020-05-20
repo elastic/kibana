@@ -5,6 +5,7 @@
  */
 import { IIndexPattern, DataPublicPluginStart } from 'src/plugins/data/public';
 import { MapsConfigType } from '../config';
+import { MapsLegacyConfigType } from '../../../../src/plugins/maps_legacy/public';
 
 export function getLicenseId(): any;
 export function getInspector(): any;
@@ -30,7 +31,7 @@ export function getCore(): any;
 export function getNavigation(): any;
 export function getCoreI18n(): any;
 export function getSearchService(): DataPublicPluginStart['search'];
-export function getKibanaCommonConfig(): any;
+export function getKibanaCommonConfig(): MapsLegacyConfigType;
 export function getMapAppConfig(): MapsConfigType;
 export function getIsEmsEnabled(): any;
 export function getEmsFontLibraryUrl(): any;
@@ -40,7 +41,7 @@ export function getEmsTileApiUrl(): any;
 export function getEmsLandingPageUrl(): any;
 export function getRegionmapLayers(): any;
 export function getTilemap(): any;
-export function getKibanaVersion(): any;
+export function getKibanaVersion(): string;
 export function getEnabled(): boolean;
 export function getShowMapVisualizationTypes(): boolean;
 export function getShowMapsInspectorAdapter(): boolean;
@@ -70,6 +71,6 @@ export function setCore(args: unknown): void;
 export function setNavigation(args: unknown): void;
 export function setCoreI18n(args: unknown): void;
 export function setSearchService(args: DataPublicPluginStart['search']): void;
-export function setKibanaCommonConfig(args: unknown): void;
-export function setMapAppConfig(args: MapsConfigType): void;
-export function setKibanaVersion(args: unknown): void;
+export function setKibanaCommonConfig(config: MapsLegacyConfigType): void;
+export function setMapAppConfig(config: MapsConfigType): void;
+export function setKibanaVersion(version: string): void;
