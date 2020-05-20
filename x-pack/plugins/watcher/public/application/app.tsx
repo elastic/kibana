@@ -24,7 +24,6 @@ import { WatchStatus } from './sections/watch_status/components/watch_status';
 import { WatchEdit } from './sections/watch_edit/components/watch_edit';
 import { WatchList } from './sections/watch_list/components/watch_list';
 import { registerRouter } from './lib/navigation';
-import { BASE_PATH } from './constants';
 import { AppContextProvider } from './app_context';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 
@@ -89,14 +88,11 @@ export const App = (deps: AppDeps) => {
 // Export this so we can test it with a different router.
 export const AppWithoutRouter = () => (
   <Switch>
-    <Route exact path={`${BASE_PATH}watches`} component={WatchList} />
-    <Route exact path={`${BASE_PATH}watches/watch/:id/status`} component={WatchStatus} />
-    <Route exact path={`${BASE_PATH}watches/watch/:id/edit`} component={WatchEdit} />
-    <Route
-      exact
-      path={`${BASE_PATH}watches/new-watch/:type(json|threshold)`}
-      component={WatchEdit}
-    />
-    <Redirect from={BASE_PATH} to={`${BASE_PATH}watches`} />
+    <Route exact path="/watches" component={WatchList} />
+    <Route exact path="/watches/watch/:id/status" component={WatchStatus} />
+    <Route exact path="/watches/watch/:id/edit" component={WatchEdit} />
+    <Route exact path="/watches/new-watch/:type(json|threshold)" component={WatchEdit} />
+    <Redirect exact from="/" to="/watches" />
+    <Redirect exact from="" to="/watches" />
   </Switch>
 );

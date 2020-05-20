@@ -5,6 +5,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
+import { ScopedHistory } from 'kibana/public';
 import { CoreStart } from '../../../../../src/core/public';
 
 import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
@@ -27,6 +28,7 @@ export interface AppDependencies {
     httpService: HttpService;
     notificationService: NotificationService;
   };
+  history: ScopedHistory;
 }
 
 export const AppContextProvider = ({

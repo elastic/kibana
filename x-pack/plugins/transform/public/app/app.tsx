@@ -7,7 +7,7 @@
 import React, { useContext, FC } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Redirect, Route, Switch } from 'react-router-dom';
-import { AppMountParameters } from 'kibana/public';
+import { ScopedHistory } from 'kibana/public';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -24,7 +24,7 @@ import { CloneTransformSection } from './sections/clone_transform';
 import { CreateTransformSection } from './sections/create_transform';
 import { TransformManagementSection } from './sections/transform_management';
 
-export const App: FC<{ history: AppMountParameters['history'] }> = ({ history }) => {
+export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
   const { apiError } = useContext(AuthorizationContext);
   if (apiError !== null) {
     return (

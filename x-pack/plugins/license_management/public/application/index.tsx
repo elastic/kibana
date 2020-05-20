@@ -7,7 +7,6 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router } from 'react-router-dom';
-import { AppMountParameters } from 'kibana/public';
 
 import { AppDependencies } from './app_context';
 import { AppProviders } from './app_providers';
@@ -15,7 +14,7 @@ import { AppProviders } from './app_providers';
 import { App } from './app.container';
 
 const AppWithRouter = (props: { [key: string]: any }) => (
-  <Router history={props.history as AppMountParameters['history']}>
+  <Router history={props.history}>
     <App {...props} />
   </Router>
 );

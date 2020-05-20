@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
-import { I18nStart, AppMountParameters } from 'kibana/public';
+import { I18nStart, ScopedHistory } from 'kibana/public';
 import { UnmountCallback } from 'src/core/public';
 
 import { App } from './app';
@@ -16,7 +16,7 @@ import { indexLifecycleManagementStore } from './store';
 export const renderApp = (
   element: Element,
   I18nContext: I18nStart['Context'],
-  history: AppMountParameters['history']
+  history: ScopedHistory
 ): UnmountCallback => {
   render(
     <I18nContext>

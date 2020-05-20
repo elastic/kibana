@@ -17,40 +17,44 @@
  * under the License.
  */
 
-import React from 'react';
-import { EuiButton, EuiButtonProps } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
+import { ScopedHistory } from 'kibana/public';
 
-type EuiButtonReactRouterProps = EuiButtonProps & {
-  to: string;
-  children: React.ReactNode;
-};
+interface LocationObject {
+  pathname?: string;
+  search?: string;
+  hash?: string;
+}
 
 const isModifiedEvent = (event: any) =>
   !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 
 const isLeftClickEvent = (event: any) => event.button === 0;
 
-export function EuiButtonReactRouter({ to, ...props }: EuiButtonReactRouterProps) {
-  const history = useHistory();
+export const reactRouterNavigate = (history: ScopedHistory, to: string | LocationObject) => {
+  const toAsObject = typeof to === 'string' ? { pathname: to } : to;
+  return {
+    href: history.createHref(toAsObject),
+    onClick: reactRouterOnClickHandler(history, toAsObject),
+  };
+};
 
-  function onClick(event: any) {
-    if (event.defaultPrevented) {
-      return;
-    }
-
-    if (event.target.getAttribute('target')) {
-      return;
-    }
-
-    if (isModifiedEvent(event) || !isLeftClickEvent(event)) {
-      return;
-    }
-
-    // prevents page reload
-    event.preventDefault();
-    history.push(to);
+export const reactRouterOnClickHandler = (
+  history: ScopedHistory,
+  locationObject: LocationObject
+) => (event: any) => {
+  if (event.defaultPrevented) {
+    return;
   }
 
-  return <EuiButton {...props} href={to} onClick={onClick} />; // eslint-disable-line
-}
+  if (event.target.getAttribute('target')) {
+    return;
+  }
+
+  if (isModifiedEvent(event) || !isLeftClickEvent(event)) {
+    return;
+  }
+
+  // prevents page reload
+  event.preventDefault();
+  history.push(locationObject);
+};

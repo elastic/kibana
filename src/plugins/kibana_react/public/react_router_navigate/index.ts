@@ -17,6 +17,4 @@
  * under the License.
  */
 
-export { EuiLinkReactRouter } from './eui_link_react_router';
-export { EuiButtonReactRouter } from './eui_button_react_router';
-export { EuiButtonEmptyReactRouter } from './eui_button_empty_react_router';
+export { reactRouterNavigate, reactRouterOnClickHandler } from './react_router_navigate';

@@ -23,7 +23,7 @@ export async function mountManagementSection(
   config: ClientConfigType,
   params: ManagementAppMountParams
 ) {
-  const { element, setBreadcrumbs } = params;
+  const { element, setBreadcrumbs, history } = params;
   const [core] = await coreSetup.getStartServices();
   const {
     docLinks,
@@ -44,5 +44,5 @@ export async function mountManagementSection(
     },
   };
 
-  return renderApp(element, appDependencies);
+  return renderApp(element, appDependencies, history);
 }

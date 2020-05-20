@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HashRouter } from 'react-router-dom';
+import { Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
 
 import { App } from './app';
@@ -15,14 +15,14 @@ import { AppContextProvider } from './app_context';
 
 import './_hacks.scss';
 
-export const renderApp = (elem, I18nContext, appDependencies) => {
+export const renderApp = (elem, I18nContext, appDependencies, history) => {
   render(
     <I18nContext>
       <Provider store={remoteClustersStore}>
         <AppContextProvider context={appDependencies}>
-          <HashRouter>
+          <Router history={history}>
             <App />
-          </HashRouter>
+          </Router>
         </AppContextProvider>
       </Provider>
     </I18nContext>,

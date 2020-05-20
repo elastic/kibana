@@ -13,10 +13,7 @@ import {
   EuiInMemoryTableProps,
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
-import {
-  EuiButtonReactRouter,
-  EuiLinkReactRouter,
-} from '../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 
 import { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
@@ -86,17 +83,17 @@ export const PipelineTable: FunctionComponent<Props> = ({
             defaultMessage: 'Reload',
           })}
         </EuiButton>,
-        <EuiButtonReactRouter
-          to="/create"
+        <EuiButton
           fill
           iconType="plusInCircle"
           data-test-subj="createPipelineButton"
           key="createPipelineButton"
+          {...reactRouterNavigate(history, '/create')}
         >
           {i18n.translate('xpack.ingestPipelines.list.table.createPipelineButtonLabel', {
             defaultMessage: 'Create a pipeline here',
           })}
-        </EuiButtonReactRouter>,
+        </EuiButton>,
       ],
       box: {
         incremental: true,
@@ -114,12 +111,12 @@ export const PipelineTable: FunctionComponent<Props> = ({
         }),
         sortable: true,
         render: (name: string) => (
-          <EuiLinkReactRouter
-            to={{ pathname: '/', search: `pipeline=${name}` }}
+          <EuiLink
             data-test-subj="pipelineDetailsLink"
+            {...reactRouterNavigate(history, { pathname: '/', search: `pipeline=${name}` })}
           >
             {name}
-          </EuiLinkReactRouter>
+          </EuiLink>
         ),
       },
       {

@@ -6,22 +6,23 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HashRouter } from 'react-router-dom';
+import { Router } from 'react-router-dom';
+import { ScopedHistory } from 'kibana/public';
 
 import { App } from './app';
 import { AppProviders } from './app_providers';
 import { AppDependencies } from './app_context';
 
-const AppWithRouter = () => (
-  <HashRouter>
+const AppWithRouter = ({ history }: { history: ScopedHistory }) => (
+  <Router history={history}>
     <App />
-  </HashRouter>
+  </Router>
 );
 
-export const renderApp = (elem: Element, dependencies: AppDependencies) => {
+export const renderApp = (elem: Element, dependencies: AppDependencies, history: ScopedHistory) => {
   render(
     <AppProviders appDependencies={dependencies}>
-      <AppWithRouter />
+      <AppWithRouter history={history} />
     </AppProviders>,
     elem
   );

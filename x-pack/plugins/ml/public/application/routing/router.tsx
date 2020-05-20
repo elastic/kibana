@@ -5,7 +5,7 @@
  */
 
 import React, { FC } from 'react';
-import { HashRouter, Route, RouteProps } from 'react-router-dom';
+import { Router, Route, RouteProps } from 'react-router-dom';
 import { Location } from 'history';
 
 import { IUiSettingsClient, ChromeStart } from 'kibana/public';
@@ -47,7 +47,7 @@ export const MlRouter: FC<{ pageDeps: PageDependencies }> = ({ pageDeps }) => {
   const setBreadcrumbs = pageDeps.setBreadcrumbs;
 
   return (
-    <HashRouter>
+    <Router history={pageDeps.history}>
       <div className="ml-app">
         {Object.entries(routes).map(([name, route]) => (
           <Route
@@ -63,6 +63,6 @@ export const MlRouter: FC<{ pageDeps: PageDependencies }> = ({ pageDeps }) => {
           />
         ))}
       </div>
-    </HashRouter>
+    </Router>
   );
 };

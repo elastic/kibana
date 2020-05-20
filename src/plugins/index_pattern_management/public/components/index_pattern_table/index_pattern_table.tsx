@@ -19,6 +19,7 @@
 
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,12 +28,12 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { AppMountParameters } from 'kibana/public';
+import { AppMountParameters, ScopedHistory } from 'kibana/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmptyReactRouter } from '../../../../kibana_react/public';
+import { reactRouterNavigate } from '../../../../kibana_react/public';
 import {
   SavedObjectsClientContract,
   IUiSettingsClient,
@@ -46,7 +47,7 @@ import { IndexPatternManagementStart } from '../../plugin';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
 
-const columns = [
+const columns = (history: ScopedHistory) => [
   {
     field: 'title',
     name: 'Pattern',
@@ -60,7 +61,7 @@ const columns = [
         }>;
       }
     ) => (
-      <EuiButtonEmptyReactRouter size="xs" to={`/patterns/${index.id}`}>
+      <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `/patterns/${index.id}`)}>
         {name}
         {index.tags &&
           index.tags.map(({ key: tagKey, name: tagName }) => (
@@ -68,7 +69,7 @@ const columns = [
               {tagName}
             </EuiBadge>
           ))}
-      </EuiButtonEmptyReactRouter>
+      </EuiButtonEmpty>
     ),
     dataType: 'string' as const,
     sortable: ({ sort }: { sort: string }) => sort,
@@ -107,7 +108,7 @@ const title = i18n.translate('indexPatternManagement.indexPatternTable.title', {
 interface Props extends RouteComponentProps {
   getIndexPatternCreationOptions: IndexPatternManagementStart['creation']['getIndexPatternCreationOptions'];
   canSave: boolean;
-  history: AppMountParameters['history'];
+  history: ScopedHistory;
   services: {
     savedObjectsClient: SavedObjectsClientContract;
     uiSettings: IUiSettingsClient;
@@ -197,7 +198,7 @@ export const IndexPatternTable = ({
         itemId="id"
         isSelectable={false}
         items={indexPatterns}
-        columns={columns}
+        columns={columns(history)}
         pagination={pagination}
         sorting={sorting}
         search={search}

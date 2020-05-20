@@ -25,7 +25,7 @@ export * from './ui_settings';
 export * from './field_icon';
 export * from './table_list_view';
 export * from './split_panel';
-export * from './eui_link_react_router';
+export * from './react_router_navigate';
 export { ValidatedDualRange, Value } from './validated_range';
 export * from './notifications';
 export { Markdown, MarkdownSimple } from './markdown';

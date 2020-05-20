@@ -191,24 +191,13 @@ class AppComponent extends Component<RouteComponentProps & AppProps, AppState> {
     return (
       <div>
         <Switch>
-          <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}/follower_indices`} />
-          <Route
-            exact
-            path={`${BASE_PATH}/auto_follow_patterns/add`}
-            component={AutoFollowPatternAdd}
-          />
-          <Route
-            exact
-            path={`${BASE_PATH}/auto_follow_patterns/edit/:id`}
-            component={AutoFollowPatternEdit}
-          />
-          <Route exact path={`${BASE_PATH}/follower_indices/add`} component={FollowerIndexAdd} />
-          <Route
-            exact
-            path={`${BASE_PATH}/follower_indices/edit/:id`}
-            component={FollowerIndexEdit}
-          />
-          <Route exact path={`${BASE_PATH}/:section`} component={CrossClusterReplicationHome} />
+          <Redirect exact from="/" to="/follower_indices" />
+          <Redirect exact from="" to="/follower_indices" />
+          <Route exact path="/auto_follow_patterns/add" component={AutoFollowPatternAdd} />
+          <Route exact path="/auto_follow_patterns/edit/:id" component={AutoFollowPatternEdit} />
+          <Route exact path="/follower_indices/add" component={FollowerIndexAdd} />
+          <Route exact path="/follower_indices/edit/:id" component={FollowerIndexEdit} />
+          <Route exact path="/:section" component={CrossClusterReplicationHome} />
         </Switch>
       </div>
     );

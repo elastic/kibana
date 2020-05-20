@@ -9,6 +9,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import styled from 'styled-components';
+import { ScopedHistory } from 'kibana/public';
 import { CoreStart, AppMountParameters } from '../../../../../src/core/public';
 import { ApmPluginSetupDeps } from '../plugin';
 import { ApmPluginContext } from '../context/ApmPluginContext';
@@ -24,7 +25,7 @@ import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
 import { APMIndicesPermission } from '../components/app/APMIndicesPermission';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
 import { routes } from '../components/app/Main/route_config';
-import { history, resetHistory } from '../utils/history';
+// import { history, resetHistory } from '../utils/history';
 import { ConfigSchema } from '..';
 import 'react-vis/dist/style.css';
 
@@ -58,7 +59,7 @@ const ApmAppRoot = ({
 }: {
   core: CoreStart;
   deps: ApmPluginSetupDeps;
-  routerHistory: typeof history;
+  routerHistory: ScopedHistory;
   config: ConfigSchema;
 }) => {
   const i18nCore = core.i18n;
@@ -108,10 +109,10 @@ const ApmAppRoot = ({
 export const renderApp = (
   core: CoreStart,
   deps: ApmPluginSetupDeps,
-  { element }: AppMountParameters,
+  { element, history }: AppMountParameters,
   config: ConfigSchema
 ) => {
-  resetHistory();
+  // resetHistory();
   ReactDOM.render(
     <ApmAppRoot
       core={core}

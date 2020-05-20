@@ -7,7 +7,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
-import { I18nStart, AppMountParameters } from 'kibana/public';
+import { I18nStart, ScopedHistory } from 'kibana/public';
 import { UnmountCallback } from 'src/core/public';
 
 import { init as initBreadcrumbs, SetBreadcrumbs } from './services/breadcrumbs';
@@ -18,7 +18,7 @@ import { ccrStore } from './store';
 const renderApp = (
   element: Element,
   I18nContext: I18nStart['Context'],
-  history: AppMountParameters['history']
+  history: ScopedHistory
 ): UnmountCallback => {
   render(
     <I18nContext>
@@ -47,7 +47,7 @@ export async function mountApp({
   I18nContext: I18nStart['Context'];
   ELASTIC_WEBSITE_URL: string;
   DOC_LINK_VERSION: string;
-  history: AppMountParameters['history'];
+  history: ScopedHistory;
 }): Promise<UnmountCallback> {
   // Import and initialize additional services here instead of in plugin.ts to reduce the size of the
   // initial bundle as much as possible.
