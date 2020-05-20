@@ -19,6 +19,7 @@ import { PackageInfo, NewDatasource, DatasourceInput } from '../../../types';
 import { Loading } from '../../../components';
 import { DatasourceValidationResults, validationHasErrors } from './services';
 import { DatasourceInputPanel } from './components';
+import { IngestManagerEndpointConfiguration } from '../../../../../../../endpoint/public/common/ingest_manager_endpoint_configuration';
 
 export const StepConfigureDatasource: React.FunctionComponent<{
   packageInfo: PackageInfo;
@@ -26,7 +27,15 @@ export const StepConfigureDatasource: React.FunctionComponent<{
   updateDatasource: (fields: Partial<NewDatasource>) => void;
   validationResults: DatasourceValidationResults;
   submitAttempted: boolean;
-}> = ({ packageInfo, datasource, updateDatasource, validationResults, submitAttempted }) => {
+  editMode: boolean;
+}> = ({
+  packageInfo,
+  datasource,
+  updateDatasource,
+  validationResults,
+  submitAttempted,
+  editMode = false,
+}) => {
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
   // Configure inputs (and their streams)
@@ -72,17 +81,11 @@ export const StepConfigureDatasource: React.FunctionComponent<{
           body={
             <EuiText>
               <p>
-                {datasource.package?.name === 'endpoint' ? (
-                  <FormattedMessage
-                    id="xpack.ingestManager.createDatasource.stepConfigure.endpointConfigOptionsMessage"
-                    defaultMessage="endpoint nothing to configure"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.ingestManager.createDatasource.stepConfigure.noConfigOptionsMessage"
-                    defaultMessage="Nothing to configure"
-                  />
-                )}
+                <IngestManagerEndpointConfiguration />
+                <FormattedMessage
+                  id="xpack.ingestManager.createDatasource.stepConfigure.noConfigOptionsMessage"
+                  defaultMessage="Nothingconfigure"
+                />
               </p>
             </EuiText>
           }
@@ -106,6 +109,7 @@ export const StepConfigureDatasource: React.FunctionComponent<{
             color="danger"
           >
             <p>
+              <IngestManagerEndpointConfiguration />
               <FormattedMessage
                 id="xpack.ingestManager.createDatasource.stepConfigure.validationErrorText"
                 defaultMessage="Please fix the above errors before continuing"
