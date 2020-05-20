@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Root } from 'joi';
 import { resolve } from 'path';
 import { Server } from 'src/legacy/server/kbn_server';
 import { KibanaRequest, LegacyRequest } from '../../../../src/core/server';
-// @ts-ignore
-import { AuditLogger } from '../../server/lib/audit_logger';
 // @ts-ignore
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { AuthenticatedUser, SecurityPluginSetup } from '../../../plugins/security/server';
@@ -33,20 +30,8 @@ function getSecurityPluginSetup(server: Server) {
 export const security = (kibana: Record<string, any>) =>
   new kibana.Plugin({
     id: 'security',
-    configPrefix: 'xpack.security',
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch', 'xpack_main'],
-
-    // This config is only used by `AuditLogger` and should be removed as soon as `AuditLogger`
-    // is migrated to Kibana Platform.
-    config(Joi: Root) {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-        audit: Joi.object({ enabled: Joi.boolean().default(false) }).default(),
-      })
-        .unknown()
-        .default();
-    },
+    require: ['kibana', 'xpack_main'],
 
     uiExports: {
       hacks: ['plugins/security/hacks/legacy'],
@@ -66,11 +51,6 @@ export const security = (kibana: Record<string, any>) =>
 
     async init(server: Server) {
       const securityPlugin = getSecurityPluginSetup(server);
-
-      const xpackInfo = server.plugins.xpack_main.info;
-      securityPlugin.__legacyCompat.registerLegacyAPI({
-        auditLogger: new AuditLogger(server, 'security', server.config(), xpackInfo),
-      });
 
       server.expose({
         getUser: async (request: LegacyRequest) =>

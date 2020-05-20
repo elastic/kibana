@@ -24,7 +24,7 @@ import { ConfigSchema, createConfig } from './config';
 import { defineRoutes } from './routes';
 import { SecurityLicenseService, SecurityLicense } from '../common/licensing';
 import { setupSavedObjects } from './saved_objects';
-import { SecurityAuditLogger } from './audit';
+import { AuditLogger, AuditService, SecurityAuditLogger } from './audit';
 import { elasticsearchClientPlugin } from './elasticsearch_client_plugin';
 
 export type SpacesService = Pick<
@@ -33,16 +33,6 @@ export type SpacesService = Pick<
 >;
 
 export type FeaturesService = Pick<FeaturesSetupContract, 'getFeatures'>;
-
-/**
- * Describes a set of APIs that is available in the legacy platform only and required by this plugin
- * to function properly.
- */
-export interface LegacyAPI {
-  auditLogger: {
-    log: (eventType: string, message: string, data?: Record<string, unknown>) => void;
-  };
-}
 
 /**
  * Describes public Security plugin contract returned at the `setup` stage.
@@ -61,6 +51,8 @@ export interface SecurityPluginSetup {
   authz: Pick<Authorization, 'actions' | 'checkPrivilegesWithRequest' | 'mode'>;
   license: SecurityLicense;
 
+  audit: { getLogger: (id: string) => AuditLogger };
+
   /**
    * If Spaces plugin is available it's supposed to register its SpacesService with Security plugin
    * so that Security can get space ID from the URL or namespace. We can't declare optional dependency
@@ -72,7 +64,6 @@ export interface SecurityPluginSetup {
   registerSpacesService: (service: SpacesService) => void;
 
   __legacyCompat: {
-    registerLegacyAPI: (legacyAPI: LegacyAPI) => void;
     registerPrivilegesWithCluster: () => void;
   };
 }
@@ -90,14 +81,7 @@ export class Plugin {
   private clusterClient?: ICustomClusterClient;
   private spacesService?: SpacesService | symbol = Symbol('not accessed');
   private securityLicenseService?: SecurityLicenseService;
-
-  private legacyAPI?: LegacyAPI;
-  private readonly getLegacyAPI = () => {
-    if (!this.legacyAPI) {
-      throw new Error('Legacy API is not registered!');
-    }
-    return this.legacyAPI;
-  };
+  private readonly auditService = new AuditService(this.initializerContext.logger.get('audit'));
 
   private readonly getSpacesService = () => {
     // Changing property value from Symbol to undefined denotes the fact that property was accessed.
@@ -115,7 +99,7 @@ export class Plugin {
   public async setup(core: CoreSetup, { features, licensing }: PluginSetupDependencies) {
     const [config, legacyConfig] = await combineLatest([
       this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
-        map((rawConfig) =>
+        map(rawConfig =>
           createConfig(rawConfig, this.initializerContext.logger.get('config'), {
             isTLSEnabled: core.http.isTlsEnabled,
           })
@@ -135,7 +119,9 @@ export class Plugin {
       license$: licensing.license$,
     });
 
-    const auditLogger = new SecurityAuditLogger(() => this.getLegacyAPI().auditLogger);
+    const audit = this.auditService.setup({ license, config: config.audit });
+    const auditLogger = new SecurityAuditLogger(audit.getLogger());
+
     const authc = await setupAuthentication({
       auditLogger,
       http: core.http,
@@ -196,7 +182,7 @@ export class Plugin {
 
       license,
 
-      registerSpacesService: (service) => {
+      registerSpacesService: service => {
         if (this.wasSpacesServiceAccessed()) {
           throw new Error('Spaces service has been accessed before registration.');
         }
@@ -205,8 +191,6 @@ export class Plugin {
       },
 
       __legacyCompat: {
-        registerLegacyAPI: (legacyAPI: LegacyAPI) => (this.legacyAPI = legacyAPI),
-
         registerPrivilegesWithCluster: async () => await authz.registerPrivilegesWithCluster(),
       },
     });
@@ -228,6 +212,8 @@ export class Plugin {
       this.securityLicenseService.stop();
       this.securityLicenseService = undefined;
     }
+
+    this.auditService.stop();
   }
 
   private wasSpacesServiceAccessed() {

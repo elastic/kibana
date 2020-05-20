@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SecurityAuditLogger } from './audit_logger';
+import { SecurityAuditLogger } from './security_audit_logger';
 
 export const securityAuditLoggerMock = {
   create() {
