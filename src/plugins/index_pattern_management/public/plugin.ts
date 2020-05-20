@@ -71,7 +71,7 @@ export class IndexPatternManagementPlugin
       throw new Error('`kibana` management section not found.');
     }
 
-    const newAppPath = `kibana#/management/kibana/${IPM_APP_ID}`;
+    const newAppPath = `management/kibana/${IPM_APP_ID}`;
     const legacyPatternsPath = 'management/kibana/index_patterns';
 
     kibanaLegacy.forwardApp('management/kibana/index_pattern', newAppPath, path => '/create');

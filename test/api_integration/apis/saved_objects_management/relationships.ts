@@ -86,7 +86,7 @@ export default function({ getService }: FtrProviderContext) {
                 '/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path:
-                  '/app/kibana#/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                  '/app/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'management.kibana.index_patterns',
               },
             },
@@ -127,7 +127,7 @@ export default function({ getService }: FtrProviderContext) {
                 '/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path:
-                  '/app/kibana#/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                  '/app/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'management.kibana.index_patterns',
               },
             },

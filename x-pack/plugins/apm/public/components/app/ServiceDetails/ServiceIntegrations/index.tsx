@@ -92,7 +92,7 @@ export class ServiceIntegrations extends React.Component<Props, State> {
         ),
         icon: 'watchesApp',
         href: core.http.basePath.prepend(
-          '/app/kibana#/management/insightsAndAlerting/watcher'
+          '/app/management/insightsAndAlerting/watcher'
         ),
         target: '_blank',
         onClick: () => this.closePopover()
