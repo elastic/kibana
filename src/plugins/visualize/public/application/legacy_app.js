@@ -211,22 +211,16 @@ export function initVisualizeApp(app, deps) {
                   mapping: {
                     visualization: VisualizeConstants.LANDING_PAGE_PATH,
                     search: {
-                      app: 'kibana',
-                      path:
-                        '#/management/kibana/objects/savedVisualizations/' +
-                        $route.current.params.id,
+                      app: 'management',
+                      path: 'kibana/objects/savedVisualizations/' + $route.current.params.id,
                     },
                     'index-pattern': {
-                      app: 'kibana',
-                      path:
-                        '#/management/kibana/objects/savedVisualizations/' +
-                        $route.current.params.id,
+                      app: 'management',
+                      path: 'kibana/objects/savedVisualizations/' + $route.current.params.id,
                     },
                     'index-pattern-field': {
-                      app: 'kibana',
-                      path:
-                        '#/management/kibana/objects/savedVisualizations/' +
-                        $route.current.params.id,
+                      app: 'management',
+                      path: 'kibana/objects/savedVisualizations/' + $route.current.params.id,
                     },
                   },
                   toastNotifications,
