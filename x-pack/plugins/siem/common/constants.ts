@@ -79,11 +79,6 @@ export const INTERNAL_RULE_ALERT_ID_KEY = `${INTERNAL_IDENTIFIER}_rule_alert_id`
 export const INTERNAL_IMMUTABLE_KEY = `${INTERNAL_IDENTIFIER}_immutable`;
 
 /**
- * Lists routes
- */
-export const EXCEPTIONS_LIST_URL = '/api/exception_lists';
-
-/**
  * Detection engine routes
  */
 export const DETECTION_ENGINE_URL = '/api/detection_engine';
