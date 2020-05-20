@@ -8,9 +8,9 @@ import Boom from 'boom';
 import { Legacy } from 'kibana';
 import { AuthenticatedUser } from '../../../../../../plugins/security/server';
 import { ReportingConfig } from '../../../server';
-import { Logger } from '../../../types';
+import { LevelLogger as Logger } from '../../../server/lib';
+import { ReportingSetupDeps } from '../../../server/types';
 import { getUserFactory } from '../../lib/get_user';
-import { ReportingSetupDeps } from '../../types';
 
 const superuserRole = 'superuser';
 
