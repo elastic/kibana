@@ -6,7 +6,7 @@
 
 import sinon, { stub } from 'sinon';
 import { NotificationsStart } from 'src/core/public';
-import { SourceJob, JobSummary } from '../../index.d';
+import { JobSummary, SourceJob } from '../../common/types';
 import { ReportingAPIClient } from './reporting_api_client';
 import { ReportingNotifierStreamHandler } from './stream_handler';
 

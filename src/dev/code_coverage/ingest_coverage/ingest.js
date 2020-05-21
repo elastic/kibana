@@ -20,7 +20,7 @@
 const { Client } = require('@elastic/elasticsearch');
 import { createFailError } from '@kbn/dev-utils';
 import chalk from 'chalk';
-import { green, always } from './utils';
+import { green, always, pretty } from './utils';
 import { fromNullable } from './either';
 import { COVERAGE_INDEX, TOTALS_INDEX } from './constants';
 
@@ -97,7 +97,4 @@ function color(whichColor) {
   return function colorInner(x) {
     return chalk[whichColor].bgWhiteBright(x);
   };
-}
-function pretty(x) {
-  return JSON.stringify(x, null, 2);
 }

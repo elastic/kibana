@@ -72,14 +72,6 @@ export const security = (kibana: Record<string, any>) =>
         auditLogger: new AuditLogger(server, 'security', server.config(), xpackInfo),
       });
 
-      // Legacy xPack Info endpoint returns whatever we return in a callback for `registerLicenseCheckResultsGenerator`
-      // and the result is consumed by the legacy plugins all over the place, so we should keep it here for now. We assume
-      // that when legacy callback is called license has been already propagated to the new platform security plugin and
-      // features are up to date.
-      xpackInfo
-        .feature(this.id)
-        .registerLicenseCheckResultsGenerator(() => securityPlugin.license.getFeatures());
-
       server.expose({
         getUser: async (request: LegacyRequest) =>
           securityPlugin.authc.getCurrentUser(KibanaRequest.from(request)),

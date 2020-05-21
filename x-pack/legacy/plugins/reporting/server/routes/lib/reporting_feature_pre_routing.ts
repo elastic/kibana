@@ -6,8 +6,9 @@
 
 import Boom from 'boom';
 import { Legacy } from 'kibana';
-import { Logger } from '../../../types';
-import { ReportingConfig, ReportingSetupDeps } from '../../types';
+import { ReportingConfig } from '../../';
+import { LevelLogger as Logger } from '../../lib';
+import { ReportingSetupDeps } from '../../types';
 
 export type GetReportingFeatureIdFn = (request: Legacy.Request) => string;
 
