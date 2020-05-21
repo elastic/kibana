@@ -533,27 +533,47 @@ exports[`MonitorList component renders loading state 1`] = `
 `;
 
 exports[`MonitorList component renders the monitor list 1`] = `
-.c2 {
+.c3 {
   padding-left: 17px;
 }
 
-.c4 {
+.c5 {
   padding-top: 12px;
 }
 
-.c0 {
+.c1 {
   margin-left: auto;
 }
 
-.c3 {
+.c4 {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 @media (max-width:574px) {
-  .c1 {
+  .c2 {
     min-width: 230px;
+  }
+}
+
+@media only screen and (max-width:768px) {
+  .c0.c0 > :first-child {
+    -webkit-flex-basis: 40% !important;
+    -ms-flex-preferred-size: 40% !important;
+    flex-basis: 40% !important;
+  }
+
+  .c0.c0 > :nth-child(2) {
+    -webkit-order: 3;
+    -ms-flex-order: 3;
+    order: 3;
+  }
+
+  .c0.c0 > :nth-child(3) {
+    -webkit-flex-basis: 60% !important;
+    -ms-flex-preferred-size: 60% !important;
+    flex-basis: 60% !important;
   }
 }
 
@@ -561,7 +581,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
   class="euiPanel euiPanel--paddingMedium"
 >
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive c0"
   >
     <div
       class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -649,7 +669,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
       class="euiFlexItem"
     >
       <h5
-        class="euiTitle euiTitle--xsmall c0"
+        class="euiTitle euiTitle--xsmall c1"
       >
         <a
           data-test-subj="uptimeCertificatesLink"
@@ -803,7 +823,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <div
-                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow c1"
+                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow c2"
                 >
                   <div
                     class="euiFlexItem euiFlexItem--flexGrow1"
@@ -830,7 +850,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                       </div>
                     </div>
                     <span
-                      class="c2"
+                      class="c3"
                     >
                       <span
                         class="euiToolTipAnchor"
@@ -895,7 +915,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <button
-                  class="euiLink euiLink--text c3"
+                  class="euiLink euiLink--text c4"
                   type="button"
                 >
                    
@@ -980,7 +1000,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <div
-                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow c1"
+                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow c2"
                 >
                   <div
                     class="euiFlexItem euiFlexItem--flexGrow1"
@@ -1007,7 +1027,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                       </div>
                     </div>
                     <span
-                      class="c2"
+                      class="c3"
                     >
                       <span
                         class="euiToolTipAnchor"
@@ -1072,7 +1092,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
                 class="euiTableCellContent euiTableCellContent--overflowingContent"
               >
                 <button
-                  class="euiLink euiLink--text c3"
+                  class="euiLink euiLink--text c4"
                   type="button"
                 >
                    
@@ -1195,7 +1215,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
         >
           <button
             aria-label="A disabled pagination button indicating that there cannot be any further navigation in the monitors list."
-            class="euiButtonIcon euiButtonIcon--text c4"
+            class="euiButtonIcon euiButtonIcon--text c5"
             data-test-subj="xpack.uptime.monitorList.prevButton"
             disabled=""
             type="button"
@@ -1212,7 +1232,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
         >
           <button
             aria-label="A disabled pagination button indicating that there cannot be any further navigation in the monitors list."
-            class="euiButtonIcon euiButtonIcon--text c4"
+            class="euiButtonIcon euiButtonIcon--text c5"
             data-test-subj="xpack.uptime.monitorList.nextButton"
             disabled=""
             type="button"

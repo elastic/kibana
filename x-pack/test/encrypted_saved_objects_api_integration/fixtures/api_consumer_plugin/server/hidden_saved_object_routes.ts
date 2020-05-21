@@ -26,7 +26,9 @@ export function registerHiddenSORoutes(
       try {
         return response.ok({
           body: await encryptedSavedObjects
-            .getClient([request.params.type])
+            .getClient({
+              includedHiddenTypes: [request.params.type],
+            })
             .getDecryptedAsInternalUser(request.params.type, request.params.id, { namespace }),
         });
       } catch (err) {
