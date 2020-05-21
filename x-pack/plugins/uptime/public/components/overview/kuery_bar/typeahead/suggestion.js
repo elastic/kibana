@@ -119,7 +119,10 @@ function Suggestion(props) {
       onMouseEnter={props.onMouseEnter}
     >
       <Icon type={props.suggestion.type}>
-        <EuiIcon type={getEuiIconType(props.suggestion.type)} />
+        <EuiIcon
+          data-test-subj={`typeahead.suggestion.${props.index}`}
+          type={getEuiIconType(props.suggestion.type)}
+        />
       </Icon>
       <TextValue>{props.suggestion.text}</TextValue>
       <Description>{props.suggestion.description}</Description>
@@ -133,6 +136,7 @@ Suggestion.propTypes = {
   selected: PropTypes.bool,
   suggestion: PropTypes.object.isRequired,
   innerRef: PropTypes.func.isRequired,
+  index: PropTypes.number.isRequired,
 };
 
 export default Suggestion;
