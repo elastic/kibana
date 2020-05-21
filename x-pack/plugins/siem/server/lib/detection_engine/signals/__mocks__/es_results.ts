@@ -110,6 +110,9 @@ export const sampleDocWithSortId = (someUuid: string = sampleIdGuid): SignalSour
   _source: {
     someKey: 'someValue',
     '@timestamp': '2020-04-20T21:27:45+0000',
+    source: {
+      ip: '127.0.0.1',
+    },
   },
   sort: ['1234567891111'],
 });
