@@ -9,7 +9,6 @@ import { PluginInitializerContext } from 'kibana/public';
 import { MapsPlugin, MapsPluginSetup, MapsPluginStart } from './plugin';
 import { MapsXPackConfig } from '../config';
 
-// @ts-ignore
 export const plugin: PluginInitializer<MapsPluginSetup, MapsPluginStart> = (
   initContext: PluginInitializerContext<MapsXPackConfig>
 ) => {
