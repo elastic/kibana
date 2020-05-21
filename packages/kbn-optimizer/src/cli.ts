@@ -70,8 +70,11 @@ run(
       throw createFlagError('expected --no-inspect-workers to have no value');
     }
 
-    const maxWorkerCount = flags.workers ? Number.parseInt(String(flags.workers), 10) : undefined;
-    if (maxWorkerCount !== undefined && (!Number.isFinite(maxWorkerCount) || maxWorkerCount < 1)) {
+    const maxActiveWorkers = flags.workers ? Number.parseInt(String(flags.workers), 10) : undefined;
+    if (
+      maxActiveWorkers !== undefined &&
+      (!Number.isFinite(maxActiveWorkers) || maxActiveWorkers < 1)
+    ) {
       throw createFlagError('expected --workers to be a number greater than 0');
     }
 
@@ -90,7 +93,7 @@ run(
     const config = OptimizerConfig.create({
       repoRoot: REPO_ROOT,
       watch,
-      maxWorkerCount,
+      maxActiveWorkers,
       oss,
       dist,
       cache,

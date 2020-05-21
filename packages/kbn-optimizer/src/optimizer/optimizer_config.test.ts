@@ -33,7 +33,8 @@ jest.spyOn(Os, 'cpus').mockReturnValue(['foo'] as any);
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
 beforeEach(() => {
-  delete process.env.KBN_OPTIMIZER_MAX_WORKERS;
+  delete process.env.KBN_OPTIMIZER_MAX_ACTIVE_WORKERS;
+  delete process.env.KBN_OPTIMIZER_TARGET_MODULES_PER_WORKER;
   delete process.env.KBN_OPTIMIZER_NO_CACHE;
   jest.clearAllMocks();
 });
@@ -72,13 +73,22 @@ describe('OptimizerConfig::parseOptions()', () => {
     ).toThrowErrorMatchingInlineSnapshot(`"extraPluginScanDirs must all be absolute paths"`);
   });
 
-  it('validates that maxWorkerCount is a number', () => {
+  it('validates that maxActiveWorkers is a number', () => {
     expect(() => {
       OptimizerConfig.parseOptions({
         repoRoot: REPO_ROOT,
-        maxWorkerCount: NaN,
+        maxActiveWorkers: NaN,
       });
-    }).toThrowErrorMatchingInlineSnapshot(`"worker count must be a number"`);
+    }).toThrowErrorMatchingInlineSnapshot(`"max worker count must be a number"`);
+  });
+
+  it('validates that targetModulesPerWorker is a number', () => {
+    expect(() => {
+      OptimizerConfig.parseOptions({
+        repoRoot: REPO_ROOT,
+        targetModulesPerWorker: NaN,
+      });
+    }).toThrowErrorMatchingInlineSnapshot(`"max modules per worker must be a number"`);
   });
 
   it('applies defaults', () => {
@@ -92,7 +102,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "dist": false,
         "includeCoreBundle": false,
         "inspectWorkers": false,
-        "maxWorkerCount": 2,
+        "maxActiveWorkers": 2,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
           <absolute path>/src/plugins,
@@ -102,6 +112,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         ],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
+        "targetModulesPerWorker": 3000,
         "watch": false,
       }
     `);
@@ -117,7 +128,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "dist": false,
         "includeCoreBundle": false,
         "inspectWorkers": false,
-        "maxWorkerCount": 2,
+        "maxActiveWorkers": 2,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
           <absolute path>/src/plugins,
@@ -127,6 +138,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         ],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
+        "targetModulesPerWorker": 3000,
         "watch": false,
       }
     `);
@@ -142,7 +154,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "dist": false,
         "includeCoreBundle": false,
         "inspectWorkers": false,
-        "maxWorkerCount": 2,
+        "maxActiveWorkers": 2,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
           <absolute path>/src/plugins,
@@ -154,6 +166,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         ],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
+        "targetModulesPerWorker": 3000,
         "watch": false,
       }
     `);
@@ -169,7 +182,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "dist": false,
         "includeCoreBundle": false,
         "inspectWorkers": false,
-        "maxWorkerCount": 2,
+        "maxActiveWorkers": 2,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
           <absolute path>/src/plugins,
@@ -178,6 +191,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         ],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
+        "targetModulesPerWorker": 3000,
         "watch": false,
       }
     `);
@@ -193,7 +207,7 @@ describe('OptimizerConfig::parseOptions()', () => {
         "dist": false,
         "includeCoreBundle": false,
         "inspectWorkers": false,
-        "maxWorkerCount": 2,
+        "maxActiveWorkers": 2,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [
           <absolute path>/x/y/z,
@@ -201,11 +215,12 @@ describe('OptimizerConfig::parseOptions()', () => {
         ],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
+        "targetModulesPerWorker": 3000,
         "watch": false,
       }
     `);
 
-    process.env.KBN_OPTIMIZER_MAX_WORKERS = '100';
+    process.env.KBN_OPTIMIZER_MAX_ACTIVE_WORKERS = '100';
     expect(
       OptimizerConfig.parseOptions({
         repoRoot: REPO_ROOT,
@@ -217,11 +232,34 @@ describe('OptimizerConfig::parseOptions()', () => {
         "dist": false,
         "includeCoreBundle": false,
         "inspectWorkers": false,
-        "maxWorkerCount": 100,
+        "maxActiveWorkers": 100,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
+        "targetModulesPerWorker": 3000,
+        "watch": false,
+      }
+    `);
+
+    process.env.KBN_OPTIMIZER_TARGET_MODULES_PER_WORKER = '100';
+    expect(
+      OptimizerConfig.parseOptions({
+        repoRoot: REPO_ROOT,
+        pluginScanDirs: [],
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "cache": true,
+        "dist": false,
+        "includeCoreBundle": false,
+        "inspectWorkers": false,
+        "maxActiveWorkers": 100,
+        "pluginPaths": Array [],
+        "pluginScanDirs": Array [],
+        "profileWebpack": false,
+        "repoRoot": <absolute path>,
+        "targetModulesPerWorker": 100,
         "watch": false,
       }
     `);
@@ -238,11 +276,12 @@ describe('OptimizerConfig::parseOptions()', () => {
         "dist": false,
         "includeCoreBundle": false,
         "inspectWorkers": false,
-        "maxWorkerCount": 100,
+        "maxActiveWorkers": 100,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
+        "targetModulesPerWorker": 100,
         "watch": false,
       }
     `);
@@ -259,11 +298,12 @@ describe('OptimizerConfig::parseOptions()', () => {
         "dist": false,
         "includeCoreBundle": false,
         "inspectWorkers": false,
-        "maxWorkerCount": 100,
+        "maxActiveWorkers": 100,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
+        "targetModulesPerWorker": 100,
         "watch": false,
       }
     `);
@@ -281,11 +321,12 @@ describe('OptimizerConfig::parseOptions()', () => {
         "dist": false,
         "includeCoreBundle": false,
         "inspectWorkers": false,
-        "maxWorkerCount": 100,
+        "maxActiveWorkers": 100,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
+        "targetModulesPerWorker": 100,
         "watch": false,
       }
     `);
@@ -303,11 +344,12 @@ describe('OptimizerConfig::parseOptions()', () => {
         "dist": false,
         "includeCoreBundle": false,
         "inspectWorkers": false,
-        "maxWorkerCount": 100,
+        "maxActiveWorkers": 100,
         "pluginPaths": Array [],
         "pluginScanDirs": Array [],
         "profileWebpack": false,
         "repoRoot": <absolute path>,
+        "targetModulesPerWorker": 100,
         "watch": false,
       }
     `);
@@ -341,7 +383,8 @@ describe('OptimizerConfig::create()', () => {
     jest.spyOn(OptimizerConfig, 'parseOptions').mockImplementation((): any => ({
       cache: Symbol('parsed cache'),
       dist: Symbol('parsed dist'),
-      maxWorkerCount: Symbol('parsed max worker count'),
+      maxActiveWorkers: Symbol('parsed max active workers'),
+      targetModulesPerWorker: Symbol('parsed target modules per worker'),
       pluginPaths: Symbol('parsed plugin paths'),
       pluginScanDirs: Symbol('parsed plugin scan dirs'),
       repoRoot: Symbol('parsed repo root'),
@@ -365,10 +408,11 @@ describe('OptimizerConfig::create()', () => {
         "cache": Symbol(parsed cache),
         "dist": Symbol(parsed dist),
         "inspectWorkers": Symbol(parsed inspect workers),
-        "maxWorkerCount": Symbol(parsed max worker count),
+        "maxActiveWorkers": Symbol(parsed max active workers),
         "plugins": Symbol(new platform plugins),
         "profileWebpack": Symbol(parsed profile webpack),
         "repoRoot": Symbol(parsed repo root),
+        "targetModulesPerWorker": Symbol(parsed target modules per worker),
         "watch": Symbol(parsed watch),
       }
     `);
@@ -385,7 +429,7 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          7,
+          8,
         ],
         "results": Array [
           Object {
@@ -408,7 +452,7 @@ describe('OptimizerConfig::create()', () => {
           [Window],
         ],
         "invocationCallOrder": Array [
-          8,
+          9,
         ],
         "results": Array [
           Object {

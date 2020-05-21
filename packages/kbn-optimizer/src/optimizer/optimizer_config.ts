@@ -40,7 +40,15 @@ interface Options {
   /** enable to run the optimizer in watch mode */
   watch?: boolean;
   /** the maximum number of workers that will be created */
-  maxWorkerCount?: number;
+  maxActiveWorkers?: number;
+  /**
+   * the number of bundles we aim to assign to each worker,
+   * this may cause more workers than maxActiveWorkers to be
+   * created but we will still only run up to maxActiveWorkers
+   * workers at any time (additional worker configs won't be
+   * run until active worker count drops below maxActiveWorkers)
+   */
+  targetModulesPerWorker?: number;
   /** set to false to disabling writing/reading of caches */
   cache?: boolean;
   /** build assets suitable for use in the distributable */
@@ -68,7 +76,8 @@ interface Options {
 interface ParsedOptions {
   repoRoot: string;
   watch: boolean;
-  maxWorkerCount: number;
+  maxActiveWorkers: number;
+  targetModulesPerWorker: number;
   profileWebpack: boolean;
   cache: boolean;
   dist: boolean;
@@ -122,18 +131,26 @@ export class OptimizerConfig {
       throw new TypeError('pluginPaths must all be absolute paths');
     }
 
-    const maxWorkerCount = process.env.KBN_OPTIMIZER_MAX_WORKERS
-      ? parseInt(process.env.KBN_OPTIMIZER_MAX_WORKERS, 10)
-      : options.maxWorkerCount ?? pickMaxWorkerCount(dist);
-    if (typeof maxWorkerCount !== 'number' || !Number.isFinite(maxWorkerCount)) {
-      throw new TypeError('worker count must be a number');
+    const maxActiveWorkers = process.env.KBN_OPTIMIZER_MAX_ACTIVE_WORKERS
+      ? parseInt(process.env.KBN_OPTIMIZER_MAX_ACTIVE_WORKERS, 10)
+      : options.maxActiveWorkers ?? pickMaxWorkerCount(dist);
+    if (typeof maxActiveWorkers !== 'number' || !Number.isFinite(maxActiveWorkers)) {
+      throw new TypeError('max worker count must be a number');
+    }
+
+    const targetModulesPerWorker = process.env.KBN_OPTIMIZER_TARGET_MODULES_PER_WORKER
+      ? parseInt(process.env.KBN_OPTIMIZER_TARGET_MODULES_PER_WORKER, 10)
+      : options.targetModulesPerWorker ?? 3000;
+    if (typeof targetModulesPerWorker !== 'number' || !Number.isFinite(targetModulesPerWorker)) {
+      throw new TypeError('max modules per worker must be a number');
     }
 
     return {
       watch,
       dist,
       repoRoot,
-      maxWorkerCount,
+      maxActiveWorkers,
+      targetModulesPerWorker,
       profileWebpack,
       cache,
       pluginScanDirs,
@@ -169,7 +186,8 @@ export class OptimizerConfig {
       options.inspectWorkers,
       plugins,
       options.repoRoot,
-      options.maxWorkerCount,
+      options.maxActiveWorkers,
+      options.targetModulesPerWorker,
       options.dist,
       options.profileWebpack
     );
@@ -182,7 +200,8 @@ export class OptimizerConfig {
     public readonly inspectWorkers: boolean,
     public readonly plugins: KibanaPlatformPlugin[],
     public readonly repoRoot: string,
-    public readonly maxWorkerCount: number,
+    public readonly maxActiveWorkers: number,
+    public readonly targetModulesPerWorker: number,
     public readonly dist: boolean,
     public readonly profileWebpack: boolean
   ) {}
