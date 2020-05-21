@@ -34,11 +34,11 @@ import {
   toggleFilterDisabled,
   getIndexPatternFromFilter,
 } from '../../../common';
+import { getIndexPatterns } from '../../services';
 
 interface Props {
   id: string;
   filter: Filter;
-  allIndexPatterns: IIndexPattern[];
   indexPatterns: IIndexPattern[];
   className?: string;
   onUpdate: (filter: Filter) => void;
@@ -59,12 +59,27 @@ const FILTER_ITEM_ERROR = 'error';
 
 interface State {
   isPopoverOpen: boolean;
+  indexPatternExists?: boolean;
 }
 
 class FilterItemUI extends Component<Props, State> {
   public state = {
     isPopoverOpen: false,
+    indexPatternExists: undefined,
   };
+
+  componentDidMount() {
+    const { filter } = this.props;
+    if (filter.meta.index) {
+      getIndexPatterns()
+        .get(filter.meta.index)
+        .then(indexPattern => {
+          this.setState({
+            indexPatternExists: !!indexPattern,
+          });
+        });
+    }
+  }
 
   private handleBadgeClick = (e: MouseEvent<HTMLInputElement>) => {
     if (e.shiftKey) {
@@ -228,8 +243,7 @@ class FilterItemUI extends Component<Props, State> {
         label.message = e.message;
       }
     } else {
-      const indexPatternExists = getIndexPatternFromFilter(filter, this.props.allIndexPatterns);
-      if (indexPatternExists) {
+      if (this.state.indexPatternExists) {
         label.status = FILTER_ITEM_WARNING;
         label.title = this.props.intl.formatMessage({
           id: 'data.filter.filterBar.labelWarningText',
@@ -267,7 +281,9 @@ class FilterItemUI extends Component<Props, State> {
   }
 
   public render() {
-    if (!this.props.allIndexPatterns.length) return null;
+    // Don't render until we know if the index pattern is valid
+    if (this.state.indexPatternExists === undefined) return null;
+
     const { filter, id } = this.props;
     const { negate, disabled } = filter.meta;
 

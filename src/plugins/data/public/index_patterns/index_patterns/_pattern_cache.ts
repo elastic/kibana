@@ -20,7 +20,6 @@
 import { IndexPattern } from './index_pattern';
 
 interface PatternCache {
-  getAll: () => IndexPattern[];
   get: (id: string) => IndexPattern;
   set: (id: string, value: IndexPattern) => IndexPattern;
   clear: (id: string) => void;
@@ -30,9 +29,6 @@ interface PatternCache {
 export function createIndexPatternCache(): PatternCache {
   const vals: Record<string, any> = {};
   const cache: PatternCache = {
-    getAll: () => {
-      return Object.values(vals);
-    },
     get: (id: string) => {
       return vals[id];
     },
