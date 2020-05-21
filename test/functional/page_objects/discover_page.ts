@@ -36,7 +36,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
   class DiscoverPage {
     public async getChartTimespan() {
-      const el = await find.byCssSelector('.small > label[for="dscResultsIntervalSelector"]');
+      const el = await find.byCssSelector('[data-test-subj="discoverIntervalDateRange"]');
       return await el.getVisibleText();
     }
 
@@ -168,9 +168,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return selectedOption.getVisibleText();
     }
 
-    public async getChartIntervalScaledToDesc() {
+    public async getChartIntervalWarningIcon() {
       await header.waitUntilLoadingHasFinished();
-      return await testSubjects.getVisibleText('discoverIntervalSelectScaledToDesc');
+      return await find.existsByCssSelector('.euiToolTipAnchor');
     }
 
     public async setChartInterval(interval: string) {

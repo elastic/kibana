@@ -86,7 +86,7 @@ describe('getCategoryColumns', () => {
     );
 
     expect(
-      wrapper.find(`.field-browser-category-pane-${selectedCategoryId}-${timelineId}`).first()
+      wrapper.find(`.field-browser-category-pane-${selectedCategoryId}-${timelineId}`).at(1)
     ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
   });
 
@@ -109,7 +109,7 @@ describe('getCategoryColumns', () => {
     );
 
     expect(
-      wrapper.find(`.field-browser-category-pane-${notTheSelectedCategoryId}-${timelineId}`).first()
+      wrapper.find(`.field-browser-category-pane-${notTheSelectedCategoryId}-${timelineId}`).at(1)
     ).toHaveStyleRule('font-weight', 'normal', { modifier: '.euiText' });
   });
 
