@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { TimelineTypeLiteral, TimelineType } from '../../../../common/types/timeline';
 
 export const DEFAULT_TIMELINE_TITLE = i18n.translate('xpack.siem.timeline.defaultTimelineTitle', {
   defaultMessage: 'None',
@@ -17,12 +18,11 @@ export const DEFAULT_TIMELINE_DESCRIPTION = i18n.translate(
   }
 );
 
-export const SEARCH_BOX_TIMELINE_PLACEHOLDER = i18n.translate(
-  'xpack.siem.timeline.searchBoxPlaceholder',
-  {
-    defaultMessage: 'e.g. timeline name or description',
-  }
-);
+export const SEARCH_BOX_TIMELINE_PLACEHOLDER = (timelineType: TimelineTypeLiteral) =>
+  i18n.translate('xpack.siem.timeline.searchBoxPlaceholder', {
+    values: { timeline: timelineType === TimelineType.template ? 'Template timeline' : 'Timeline' },
+    defaultMessage: 'e.g. {timeline} name or description',
+  });
 
 export const INSERT_TIMELINE = i18n.translate('xpack.siem.insert.timeline.insertTimelineButton', {
   defaultMessage: 'Insert timeline link',

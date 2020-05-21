@@ -22,7 +22,6 @@ import { ListProps } from 'react-virtualized';
 import styled from 'styled-components';
 
 import {
-  TimelineType,
   TimelineTypeLiteralWithNull,
   TimelineTypeLiteral,
 } from '../../../../../common/types/timeline';
@@ -33,7 +32,6 @@ import { isUntitled } from '../../open_timeline/helpers';
 import * as i18nTimeline from '../../open_timeline/translations';
 import { OpenTimelineResult } from '../../open_timeline/types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-
 import * as i18n from '../translations';
 
 const MyEuiFlexItem = styled(EuiFlexItem)`
@@ -70,7 +68,7 @@ const EuiSelectableContainer = styled.div<{ isLoading: boolean }>`
   }
 `;
 
-const ORIGINAL_PAGE_SIZE = 50;
+export const ORIGINAL_PAGE_SIZE = 50;
 const POPOVER_HEIGHT = 260;
 const TIMELINE_ITEM_HEIGHT = 50;
 
@@ -81,7 +79,7 @@ export interface GetSelectableOptions {
   searchTimelineValue: string;
 }
 
-interface SelectableTimelineProps {
+export interface SelectableTimelineProps {
   hideUntitled?: boolean;
   getSelectableOptions: ({
     timelines,
@@ -94,6 +92,15 @@ interface SelectableTimelineProps {
   timelineType: TimelineTypeLiteral;
 }
 
+export interface SearchProps {
+  'data-test-subj'?: string;
+  isLoading: boolean;
+  placeholder: string;
+  onSearch: (arg: string) => void;
+  incremental: boolean;
+  inputRef: (arg: HTMLElement) => void;
+}
+
 const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   hideUntitled = false,
   getSelectableOptions,
@@ -103,7 +110,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
 }) => {
   const [pageSize, setPageSize] = useState(ORIGINAL_PAGE_SIZE);
   const [heightTrigger, setHeightTrigger] = useState(0);
-  const [searchTimelineValue, setSearchTimelineValue] = useState('');
+  const [searchTimelineValue, setSearchTimelineValue] = useState<string>('');
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [searchRef, setSearchRef] = useState<HTMLElement | null>(null);
   const { fetchAllTimeline, timelines, loading, totalCount: timelineCount } = useGetAllTimeline();
@@ -226,6 +233,17 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
     [searchRef, onlyFavorites, handleOnToggleOnlyFavorites]
   );
 
+  const searchProps: SearchProps = {
+    'data-test-subj': 'timeline-super-select-search-box',
+    isLoading: loading,
+    placeholder: i18n.SEARCH_BOX_TIMELINE_PLACEHOLDER(timelineType),
+    onSearch: onSearchTimeline,
+    incremental: false,
+    inputRef: (ref: HTMLElement) => {
+      setSearchRef(ref);
+    },
+  };
+
   useEffect(() => {
     fetchAllTimeline({
       pageInfo: {
@@ -245,6 +263,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   return (
     <EuiSelectableContainer isLoading={loading}>
       <EuiSelectable
+        data-test-subj="selectable-input"
         height={POPOVER_HEIGHT}
         isLoading={loading && timelines.length === 0}
         listProps={{
@@ -261,22 +280,13 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
         renderOption={renderTimelineOption}
         onChange={handleTimelineChange}
         searchable
-        searchProps={{
-          'data-test-subj': 'timeline-super-select-search-box',
-          isLoading: loading,
-          placeholder: i18n.SEARCH_BOX_TIMELINE_PLACEHOLDER,
-          onSearch: onSearchTimeline,
-          incremental: false,
-          inputRef: (ref: HTMLElement) => {
-            setSearchRef(ref);
-          },
-        }}
+        searchProps={searchProps}
         singleSelection={true}
         options={getSelectableOptions({
           timelines,
           onlyFavorites,
           searchTimelineValue,
-          timelineType: TimelineType.default,
+          timelineType,
         })}
       >
         {(list, search) => (
