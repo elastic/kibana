@@ -152,7 +152,7 @@ export class MapsPlugin
       async mount(context, params) {
         const [coreStart, startPlugins] = await core.getStartServices();
         bindStartCoreAndPlugins(coreStart, startPlugins);
-        const { renderApp } = await import('./maps_router');
+        const { renderApp } = await import('./routing/maps_router');
         return renderApp(context, params);
       },
     });
