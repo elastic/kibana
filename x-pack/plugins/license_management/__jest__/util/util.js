@@ -8,12 +8,11 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 
-import { TestUtils } from '../../../../../src/plugins/es_ui_shared/public';
+import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
 import { httpServiceMock } from '../../../../../src/core/public/mocks';
 import { licenseManagementStore } from '../../public/application/store/store';
 import { AppContextProvider } from '../../public/application/app_context';
 
-const { mountWithIntl } = TestUtils;
 const highExpirationMillis = new Date('October 13, 2099 00:00:00Z').getTime();
 
 const appDependencies = {

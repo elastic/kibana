@@ -6,11 +6,9 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { TestUtils } from 'src/plugins/es_ui_shared/public';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { httpServiceMock } from '../../../../src/core/public/mocks';
-
-const { mountWithIntl } = TestUtils;
 
 // @ts-ignore
 import { uploadLicense } from '../public/application/store/actions/upload_license';
