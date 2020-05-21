@@ -237,16 +237,23 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes,
     });
+
     const getScopedSavedObjectsClient = (request: KibanaRequest) =>
       core.savedObjects.getScopedClient(request, {
         includedHiddenTypes,
       });
 
+    const getScopedSavedObjectsClientWithoutAccessToActions = (request: KibanaRequest) =>
+      core.savedObjects.getScopedClient(request);
+
     actionExecutor!.initialize({
       logger,
       eventLogger: this.eventLogger!,
       spaces: this.spaces,
-      getServices: this.getServicesFactory(getScopedSavedObjectsClient, core.elasticsearch),
+      getServices: this.getServicesFactory(
+        getScopedSavedObjectsClientWithoutAccessToActions,
+        core.elasticsearch
+      ),
       encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
       preconfiguredActions,
