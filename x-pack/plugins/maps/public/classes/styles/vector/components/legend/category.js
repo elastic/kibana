@@ -32,7 +32,7 @@ export function Category({ styleName, label, color, isLinesOnly, isPointsOnly, s
 
   return (
     <EuiFlexGroup direction="row" gutterSize="none">
-      <EuiFlexItem className={'mapLegendIconPreview'} grow={false}>
+      <EuiFlexItem className="mapLegendIconPreview" grow={false}>
         {renderIcon()}
       </EuiFlexItem>
       <EuiFlexItem>

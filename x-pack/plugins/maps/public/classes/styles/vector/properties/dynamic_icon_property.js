@@ -6,12 +6,9 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { getOtherCategoryLabel, assignCategoriesToPalette } from '../style_util';
+import { assignCategoriesToPalette } from '../style_util';
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { getIconPalette, getMakiIconId, getMakiSymbolAnchor } from '../symbol_utils';
-
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, EuiTextColor } from '@elastic/eui';
-import { Category } from '../components/legend/category';
 import { BreakedLegend } from './components/breaked_legend';
 
 export class DynamicIconProperty extends DynamicStyleProperty {
@@ -54,7 +51,7 @@ export class DynamicIconProperty extends DynamicStyleProperty {
       }
 
       return {
-        fallback:
+        fallbackSymbolId:
           this._options.customIconStops.length > 0 ? this._options.customIconStops[0].icon : null,
         stops,
       };
@@ -104,65 +101,21 @@ export class DynamicIconProperty extends DynamicStyleProperty {
     return this._field && this._field.isValid();
   }
 
-  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }) {
+  renderLegendDetailRow({ isPointsOnly, isLinesOnly }) {
+    const { stops, fallbackSymbolId } = this._getPaletteStops();
+
     return (
       <BreakedLegend
         style={this}
         isPointsOnly={isPointsOnly}
         isLinesOnly={isLinesOnly}
-        symbolId={symbolId}
+        stops={stops}
+        symbolId={null}
+        color={'grey'}
+        useFallback={!!fallbackSymbolId}
+        fallbackSymbolId={fallbackSymbolId}
+        fallbackColor={null}
       />
-    );
-  }
-
-  renderBreakedLegend({ fieldLabel, isPointsOnly, isLinesOnly }) {
-    const categories = [];
-    const { stops, fallback } = this._getPaletteStops();
-    stops.map(({ stop, style }, index) => {
-      categories.push(
-        <Category
-          key={index}
-          styleName={this.getStyleName()}
-          label={this.formatField(stop)}
-          color="grey"
-          isLinesOnly={isLinesOnly}
-          isPointsOnly={isPointsOnly}
-          symbolId={style}
-        />
-      );
-    });
-
-    if (fallback) {
-      categories.push(
-        <Category
-          key="fallbackCategory"
-          styleName={this.getStyleName()}
-          label={<EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>}
-          color="grey"
-          isLinesOnly={isLinesOnly}
-          isPointsOnly={isPointsOnly}
-          symbolId={fallback}
-        />
-      );
-    }
-
-    return (
-      <div>
-        <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiToolTip position="top" title={this.getDisplayStyleName()} content={fieldLabel}>
-              <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: '180px' }}>
-                <small>
-                  <strong>{fieldLabel}</strong>
-                </small>
-              </EuiText>
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexGroup direction="column" gutterSize="none">
-          {categories}
-        </EuiFlexGroup>
-      </div>
     );
   }
 }

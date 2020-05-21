@@ -39,36 +39,45 @@ exports[`categorical Should render categorical legend with breaks from default 1
     direction="column"
     gutterSize="none"
   >
-    <Category
-      color="#54B399"
-      isLinesOnly={false}
-      isPointsOnly={true}
-      key="0"
-      label="US_format"
-      styleName="lineColor"
-    />
-    <Category
-      color="#6092C0"
-      isLinesOnly={false}
-      isPointsOnly={true}
-      key="1"
-      label="CN_format"
-      styleName="lineColor"
-    />
-    <Category
-      color="#D36086"
-      isLinesOnly={false}
-      isPointsOnly={true}
-      key="fallbackCategory"
-      label={
-        <EuiTextColor
-          color="secondary"
-        >
-          Other
-        </EuiTextColor>
-      }
-      styleName="lineColor"
-    />
+    <EuiFlexItem
+      key="US"
+    >
+      <Category
+        color="#54B399"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="US_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="CN"
+    >
+      <Category
+        color="#6092C0"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="CN_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="__fallbackCategory__"
+    >
+      <Category
+        color="#D36086"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label={
+          <EuiTextColor
+            color="secondary"
+          >
+            Other
+          </EuiTextColor>
+        }
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
   </EuiFlexGroup>
 </div>
 `;
@@ -110,22 +119,28 @@ exports[`ordinal Should render custom ordinal legend with breaks 1`] = `
     direction="column"
     gutterSize="none"
   >
-    <Category
-      color="#FF0000"
-      isLinesOnly={false}
-      isPointsOnly={true}
+    <EuiFlexItem
       key="0"
-      label="0_format"
-      styleName="lineColor"
-    />
-    <Category
-      color="#00FF00"
-      isLinesOnly={false}
-      isPointsOnly={true}
-      key="1"
-      label="10_format"
-      styleName="lineColor"
-    />
+    >
+      <Category
+        color="#FF0000"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="0_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="10"
+    >
+      <Category
+        color="#00FF00"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="10_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
   </EuiFlexGroup>
 </div>
 `;
@@ -167,14 +182,17 @@ exports[`ordinal Should render only single band of last color when delta is 0 1`
     direction="column"
     gutterSize="none"
   >
-    <Category
-      color="#072f6b"
-      isLinesOnly={false}
-      isPointsOnly={true}
-      key="0"
-      label="100_format"
-      styleName="lineColor"
-    />
+    <EuiFlexItem
+      key="100"
+    >
+      <Category
+        color="#072f6b"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="100_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
   </EuiFlexGroup>
 </div>
 `;
@@ -216,70 +234,94 @@ exports[`ordinal Should render ordinal legend as bands 1`] = `
     direction="column"
     gutterSize="none"
   >
-    <Category
-      color="#f7faff"
-      isLinesOnly={false}
-      isPointsOnly={true}
+    <EuiFlexItem
       key="0"
-      label="0_format"
-      styleName="lineColor"
-    />
-    <Category
-      color="#ddeaf7"
-      isLinesOnly={false}
-      isPointsOnly={true}
-      key="1"
-      label="13_format"
-      styleName="lineColor"
-    />
-    <Category
-      color="#c5daee"
-      isLinesOnly={false}
-      isPointsOnly={true}
-      key="2"
-      label="25_format"
-      styleName="lineColor"
-    />
-    <Category
-      color="#9dc9e0"
-      isLinesOnly={false}
-      isPointsOnly={true}
-      key="3"
-      label="38_format"
-      styleName="lineColor"
-    />
-    <Category
-      color="#6aadd5"
-      isLinesOnly={false}
-      isPointsOnly={true}
-      key="4"
-      label="50_format"
-      styleName="lineColor"
-    />
-    <Category
-      color="#4191c5"
-      isLinesOnly={false}
-      isPointsOnly={true}
-      key="5"
-      label="63_format"
-      styleName="lineColor"
-    />
-    <Category
-      color="#2070b4"
-      isLinesOnly={false}
-      isPointsOnly={true}
-      key="6"
-      label="75_format"
-      styleName="lineColor"
-    />
-    <Category
-      color="#072f6b"
-      isLinesOnly={false}
-      isPointsOnly={true}
-      key="7"
-      label="88_format"
-      styleName="lineColor"
-    />
+    >
+      <Category
+        color="#f7faff"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="0_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="13"
+    >
+      <Category
+        color="#ddeaf7"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="13_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="25"
+    >
+      <Category
+        color="#c5daee"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="25_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="38"
+    >
+      <Category
+        color="#9dc9e0"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="38_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="50"
+    >
+      <Category
+        color="#6aadd5"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="50_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="63"
+    >
+      <Category
+        color="#4191c5"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="63_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="75"
+    >
+      <Category
+        color="#2070b4"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="75_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="88"
+    >
+      <Category
+        color="#072f6b"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="88_format"
+        styleName="lineColor"
+      />
+    </EuiFlexItem>
   </EuiFlexGroup>
 </div>
 `;

@@ -4,28 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import React from 'react';
 
 export function VectorStyleLegend({ isLinesOnly, isPointsOnly, styles, symbolId }) {
-  const rows = styles.map(style => {
-    return style.renderLegendDetailRow({
+  const legendRows = [];
+  for (let i = 0; i < styles.length; i++) {
+    const row = styles[i].renderLegendDetailRow({
       isLinesOnly,
       isPointsOnly,
       symbolId,
     });
-  });
 
-  const filtered = rows.filter(row => row !== null);
+    if (row !== 0) {
+      legendRows.push(
+        <div key={styles[i].getStyleName()} className="vectorStyleLegendSpacer">
+          {row}
+        </div>
+      );
+    }
+  }
 
-  return filtered.map((row, index) => {
-    const separator = index < filtered.length - 1 ? <EuiSpacer size={'s'} /> : null;
-
-    return (
-      <Fragment key={index}>
-        {row}
-        {separator}
-      </Fragment>
-    );
-  });
+  return legendRows;
 }

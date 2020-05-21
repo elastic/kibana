@@ -5,7 +5,7 @@
  */
 
 import { DynamicStyleProperty } from './dynamic_style_property';
-import { getOtherCategoryLabel, makeMbClampedNumberExpression, dynamicRound } from '../style_util';
+import { makeMbClampedNumberExpression, dynamicRound } from '../style_util';
 import {
   getOrdinalMbColorRampStops,
   getColorPalette,
@@ -14,8 +14,6 @@ import {
 } from '../../color_utils';
 import { ColorGradient } from '../../components/color_gradient';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, EuiTextColor } from '@elastic/eui';
-import { Category } from '../components/legend/category';
 import { COLOR_MAP_TYPE } from '../../../../../common/constants';
 import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
 import { BreakedLegend } from './components/breaked_legend';
@@ -97,17 +95,6 @@ export class DynamicColorProperty extends DynamicStyleProperty {
 
   supportsMbFeatureState() {
     return true;
-  }
-
-  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }) {
-    return (
-      <BreakedLegend
-        style={this}
-        isPointsOnly={isPointsOnly}
-        isLinesOnly={isLinesOnly}
-        symbolId={symbolId}
-      />
-    );
   }
 
   _getMbColor() {
@@ -305,55 +292,20 @@ export class DynamicColorProperty extends DynamicStyleProperty {
     }
   }
 
-  renderBreakedLegend({ fieldLabel, isPointsOnly, isLinesOnly, symbolId }) {
-    const categories = [];
+  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }) {
     const { stops, defaultColor } = this._getColorStops();
-
-    stops.map(({ stop, color }, index) => {
-      categories.push(
-        <Category
-          key={index}
-          styleName={this.getStyleName()}
-          label={this.formatField(stop)}
-          color={color}
-          isLinesOnly={isLinesOnly}
-          isPointsOnly={isPointsOnly}
-          symbolId={symbolId}
-        />
-      );
-    });
-
-    if (defaultColor) {
-      categories.push(
-        <Category
-          key="fallbackCategory"
-          styleName={this.getStyleName()}
-          label={<EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>}
-          color={defaultColor}
-          isLinesOnly={isLinesOnly}
-          isPointsOnly={isPointsOnly}
-          symbolId={symbolId}
-        />
-      );
-    }
-
     return (
-      <div>
-        <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiToolTip position="top" title={this.getDisplayStyleName()} content={fieldLabel}>
-              <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: '180px' }}>
-                <small>
-                  <strong>{fieldLabel}</strong>
-                </small>
-              </EuiText>
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexGroup direction="column" gutterSize="none">
-          {categories}
-        </EuiFlexGroup>
-      </div>
+      <BreakedLegend
+        style={this}
+        isPointsOnly={isPointsOnly}
+        isLinesOnly={isLinesOnly}
+        stops={stops}
+        symbolId={symbolId}
+        color={null}
+        useFallback={!!defaultColor}
+        fallbackSymbolId={null}
+        fallbackColor={defaultColor}
+      />
     );
   }
 }

@@ -37,39 +37,30 @@ exports[`Should render categorical legend with breaks 1`] = `
     direction="column"
     gutterSize="none"
   >
-    <Category
-      color="grey"
-      isLinesOnly={false}
-      isPointsOnly={true}
-      key="0"
-      label="US_format"
-      styleName="icon"
-      symbolId="circle"
-    />
-    <Category
-      color="grey"
-      isLinesOnly={false}
-      isPointsOnly={true}
-      key="1"
-      label="CN_format"
-      styleName="icon"
-      symbolId="marker"
-    />
-    <Category
-      color="grey"
-      isLinesOnly={false}
-      isPointsOnly={true}
-      key="fallbackCategory"
-      label={
-        <EuiTextColor
-          color="secondary"
-        >
-          Other
-        </EuiTextColor>
-      }
-      styleName="icon"
-      symbolId="square"
-    />
+    <EuiFlexItem
+      key="US"
+    >
+      <Category
+        color="grey"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="US_format"
+        styleName="icon"
+        symbolId="circle"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="CN"
+    >
+      <Category
+        color="grey"
+        isLinesOnly={false}
+        isPointsOnly={true}
+        label="CN_format"
+        styleName="icon"
+        symbolId="marker"
+      />
+    </EuiFlexItem>
   </EuiFlexGroup>
 </div>
 `;
