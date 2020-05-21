@@ -55,6 +55,14 @@ const addTimelineToLocalStorage = (id: string, timeline: TimelineModel) => {
   );
 };
 
+const filterPageTimelines = (id: string) => {
+  if (isPageTimeline(id)) {
+    return true;
+  }
+
+  return false;
+};
+
 export const createTimelineLocalStorageEpic = <State>(): Epic<
   Action,
   Action,
@@ -67,15 +75,7 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
     action$.pipe(
       ofType(createTimeline.type),
       withLatestFrom(timeline$),
-      filter(([action]) => {
-        const timelineId: string = get('payload.id', action);
-
-        if (isPageTimeline(timelineId)) {
-          return true;
-        }
-
-        return false;
-      }),
+      filter(([action]) => filterPageTimelines(get('payload.id', action))),
       tap(([action]) => {
         const storageTimelines = getAllTimelinesFromLocalStorage();
         const timelineId: string = get('payload.id', action);
@@ -97,6 +97,7 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
     ),
     action$.pipe(
       ofType(removeColumn.type),
+      filter(action => filterPageTimelines(get('payload.id', action))),
       tap(action => {
         const storageTimelines = getAllTimelinesFromLocalStorage();
         const timelineId: string = get('payload.id', action);
@@ -109,6 +110,7 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
     ),
     action$.pipe(
       ofType(upsertColumn.type),
+      filter(action => filterPageTimelines(get('payload.id', action))),
       tap(action => {
         const storageTimelines = getAllTimelinesFromLocalStorage();
         const timelineId: string = get('payload.id', action);
