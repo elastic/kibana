@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { NotificationsStart } from 'src/core/public';
+import { NotificationsStart, ScopedHistory } from 'src/core/public';
 import { RoleMapping, Role } from '../../../../common/model';
 import { EmptyPrompt } from './empty_prompt';
 import {
@@ -33,18 +33,20 @@ import {
   PermissionDenied,
   SectionLoading,
 } from '../components';
-import { getCreateRoleMappingHref, getEditRoleMappingHref } from '../../management_urls';
+import { EDIT_ROLES_PATH, getEditRoleMappingHref } from '../../management_urls';
 import { DocumentationLinksService } from '../documentation_links';
 import { RoleMappingsAPIClient } from '../role_mappings_api_client';
 import { RoleTableDisplay } from '../../role_table_display';
 import { RolesAPIClient } from '../../roles';
 import { EnabledBadge, DisabledBadge } from '../../badges';
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   roleMappingsAPI: PublicMethodsOf<RoleMappingsAPIClient>;
   notifications: NotificationsStart;
   docLinks: DocumentationLinksService;
+  history: ScopedHistory;
 }
 
 interface State {
@@ -160,7 +162,10 @@ export class RoleMappingsGridPage extends Component<Props, State> {
             </EuiText>
           </EuiPageContentHeaderSection>
           <EuiPageContentHeaderSection>
-            <EuiButton data-test-subj="createRoleMappingButton" href={getCreateRoleMappingHref()}>
+            <EuiButton
+              data-test-subj="createRoleMappingButton"
+              {...reactRouterNavigate(this.props.history, EDIT_ROLES_PATH)}
+            >
               <FormattedMessage
                 id="xpack.security.management.roleMappings.createRoleMappingButtonLabel"
                 defaultMessage="Create role mapping"
@@ -294,7 +299,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
         render: (roleMappingName: string) => {
           return (
             <EuiLink
-              href={getEditRoleMappingHref(roleMappingName)}
+              {...reactRouterNavigate(this.props.history, getEditRoleMappingHref(roleMappingName))}
               data-test-subj="roleMappingName"
             >
               {roleMappingName}
@@ -327,7 +332,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
             const role: Role | string =
               this.state.roles?.find(r => r.name === rolename) ?? rolename;
 
-            return <RoleTableDisplay role={role} key={rolename} />;
+            return <RoleTableDisplay role={role} key={rolename} history={this.props.history} />;
           });
           return <div data-test-subj="roleMappingRoles">{roleLinks}</div>;
         },
@@ -371,7 +376,10 @@ export class RoleMappingsGridPage extends Component<Props, State> {
                     iconType="pencil"
                     color="primary"
                     data-test-subj={`editRoleMappingButton-${record.name}`}
-                    href={getEditRoleMappingHref(record.name)}
+                    {...reactRouterNavigate(
+                      this.props.history,
+                      getEditRoleMappingHref(record.name)
+                    )}
                   />
                 </EuiToolTip>
               );

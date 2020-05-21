@@ -26,13 +26,13 @@ export const roleMappingsManagementApp = Object.freeze({
       title: i18n.translate('xpack.security.management.roleMappingsTitle', {
         defaultMessage: 'Role Mappings',
       }),
-      async mount({ basePath, element, setBreadcrumbs, history }) {
+      async mount({ element, setBreadcrumbs, history }) {
         const roleMappingsBreadcrumbs = [
           {
             text: i18n.translate('xpack.security.roleMapping.breadcrumb', {
               defaultMessage: 'Role Mappings',
             }),
-            href: `#${basePath}`,
+            href: `/`,
           },
         ];
 
@@ -60,6 +60,7 @@ export const roleMappingsManagementApp = Object.freeze({
               rolesAPIClient={new RolesAPIClient(http)}
               roleMappingsAPI={roleMappingsAPIClient}
               docLinks={dockLinksService}
+              history={history}
             />
           );
         };
@@ -85,6 +86,7 @@ export const roleMappingsManagementApp = Object.freeze({
               rolesAPIClient={new RolesAPIClient(http)}
               notifications={notifications}
               docLinks={dockLinksService}
+              history={history}
             />
           );
         };

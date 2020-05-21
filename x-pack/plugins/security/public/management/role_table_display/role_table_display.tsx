@@ -6,14 +6,17 @@
 
 import React from 'react';
 import { EuiLink, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { ScopedHistory } from 'kibana/public';
 import { Role, isRoleDeprecated, getExtendedRoleDeprecationNotice } from '../../../common/model';
 import { getEditRoleHref } from '../management_urls';
+import { reactRouterNavigate } from '../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   role: Role | string;
+  history: ScopedHistory;
 }
 
-export const RoleTableDisplay = ({ role }: Props) => {
+export const RoleTableDisplay = ({ role, history }: Props) => {
   let content;
   let href;
   if (typeof role === 'string') {
@@ -35,5 +38,6 @@ export const RoleTableDisplay = ({ role }: Props) => {
     content = <div>{role.name}</div>;
     href = getEditRoleHref(role.name);
   }
-  return <EuiLink href={href}>{content}</EuiLink>;
+
+  return <EuiLink {...reactRouterNavigate(history, href)}>{content}</EuiLink>;
 };

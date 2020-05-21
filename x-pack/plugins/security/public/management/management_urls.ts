@@ -11,12 +11,9 @@ export const EDIT_ROLES_PATH = `/edit`;
 export const CLONE_ROLES_PATH = `/clone`;
 export const USERS_PATH = `../users`;
 export const EDIT_USERS_PATH = `${USERS_PATH}/edit`;
-export const ROLE_MAPPINGS_PATH = `../role_mappings`;
-const CREATE_ROLE_MAPPING_PATH = `${ROLE_MAPPINGS_PATH}/edit`;
 
-export const getEditRoleHref = (roleName: string) => `/edit/${encodeURIComponent(roleName)}`;
-
-export const getCreateRoleMappingHref = () => `${CREATE_ROLE_MAPPING_PATH}`;
+export const getEditRoleHref = (roleName: string) =>
+  `../roles/edit/${encodeURIComponent(roleName)}`;
 
 export const getEditRoleMappingHref = (roleMappingName: string) =>
-  `${CREATE_ROLE_MAPPING_PATH}/${encodeURIComponent(roleMappingName)}`;
+  `${EDIT_ROLES_PATH}/${encodeURIComponent(roleMappingName)}`;

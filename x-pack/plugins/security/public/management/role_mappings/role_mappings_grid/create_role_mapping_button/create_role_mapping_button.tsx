@@ -7,15 +7,21 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getCreateRoleMappingHref } from '../../../management_urls';
+import { withRouter } from 'react-router-dom';
+import { EDIT_ROLES_PATH } from '../../../management_urls';
+import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 
-export const CreateRoleMappingButton = () => {
+export const CreateRoleMappingButton = withRouter(({ history }) => {
   return (
-    <EuiButton data-test-subj="createRoleMappingButton" href={getCreateRoleMappingHref()} fill>
+    <EuiButton
+      data-test-subj="createRoleMappingButton"
+      {...reactRouterNavigate(history, EDIT_ROLES_PATH)}
+      fill
+    >
       <FormattedMessage
         id="xpack.security.management.roleMappings.createRoleMappingButton"
         defaultMessage="Create role mapping"
       />
     </EuiButton>
   );
-};
+});
