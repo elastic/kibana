@@ -3,110 +3,193 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { SecurityAuditLogger } from './audit_logger';
+import { AuditLogger } from './audit_service';
+import {
+  LICENSE_TYPE_STANDARD,
+  LICENSE_TYPE_BASIC,
+  LICENSE_TYPE_GOLD,
+} from '../../../../legacy/common/constants';
 
-const createMockAuditLogger = () => {
-  return {
-    log: jest.fn(),
+const createMockConfig = (settings) => {
+  const mockConfig = {
+    get: jest.fn(),
   };
+
+  mockConfig.get.mockImplementation((key) => {
+    return settings[key];
+  });
+
+  return mockConfig;
 };
 
-describe(`#savedObjectsAuthorizationFailure`, () => {
-  test('logs via auditLogger', () => {
-    const auditLogger = createMockAuditLogger();
-    const securityAuditLogger = new SecurityAuditLogger(() => auditLogger);
-    const username = 'foo-user';
-    const action = 'foo-action';
-    const types = ['foo-type-1', 'foo-type-2'];
-    const spaceIds = ['foo-space', 'bar-space'];
-    const missing = [
-      {
-        spaceId: 'foo-space',
-        privilege: `saved_object:${types[0]}/${action}`,
+const mockLicenseInfo = {
+  isAvailable: () => true,
+  feature: () => {
+    return {
+      registerLicenseCheckResultsGenerator: () => {
+        return;
       },
-      {
-        spaceId: 'foo-space',
-        privilege: `saved_object:${types[1]}/${action}`,
-      },
-    ];
-    const args = {
-      foo: 'bar',
-      baz: 'quz',
     };
+  },
+  license: {
+    isActive: () => true,
+    isOneOf: () => true,
+    getType: () => LICENSE_TYPE_STANDARD,
+  },
+};
 
-    securityAuditLogger.savedObjectsAuthorizationFailure(
-      username,
-      action,
-      types,
-      spaceIds,
-      missing,
-      args
-    );
+const mockConfig = createMockConfig({
+  'xpack.security.enabled': true,
+  'xpack.security.audit.enabled': true,
+});
 
-    expect(auditLogger.log).toHaveBeenCalledWith(
-      'saved_objects_authorization_failure',
-      expect.any(String),
-      {
-        username,
-        action,
-        types,
-        spaceIds,
-        missing,
-        args,
-      }
-    );
-    expect(auditLogger.log.mock.calls[0][1]).toMatchInlineSnapshot(
-      `"foo-user unauthorized to [foo-action] [foo-type-1,foo-type-2] in [foo-space,bar-space]: missing [(foo-space)saved_object:foo-type-1/foo-action,(foo-space)saved_object:foo-type-2/foo-action]"`
-    );
+test(`calls server.log with 'info', audit', pluginId and eventType as tags`, () => {
+  const mockServer = {
+    logWithMetadata: jest.fn(),
+  };
+
+  const pluginId = 'foo';
+  const auditLogger = new AuditLogger(mockServer, pluginId, mockConfig, mockLicenseInfo);
+
+  const eventType = 'bar';
+  auditLogger.log(eventType, '');
+  expect(mockServer.logWithMetadata).toHaveBeenCalledTimes(1);
+  expect(mockServer.logWithMetadata).toHaveBeenCalledWith(
+    ['info', 'audit', pluginId, eventType],
+    expect.anything(),
+    expect.anything()
+  );
+});
+
+test(`calls server.log with message`, () => {
+  const mockServer = {
+    logWithMetadata: jest.fn(),
+  };
+  const auditLogger = new AuditLogger(mockServer, 'foo', mockConfig, mockLicenseInfo);
+
+  const message = 'summary of what happened';
+  auditLogger.log('bar', message);
+  expect(mockServer.logWithMetadata).toHaveBeenCalledTimes(1);
+  expect(mockServer.logWithMetadata).toHaveBeenCalledWith(
+    expect.anything(),
+    message,
+    expect.anything()
+  );
+});
+
+test(`calls server.log with metadata `, () => {
+  const mockServer = {
+    logWithMetadata: jest.fn(),
+  };
+
+  const auditLogger = new AuditLogger(mockServer, 'foo', mockConfig, mockLicenseInfo);
+
+  const data = {
+    foo: 'yup',
+    baz: 'nah',
+  };
+
+  auditLogger.log('bar', 'summary of what happened', data);
+  expect(mockServer.logWithMetadata).toHaveBeenCalledTimes(1);
+  expect(mockServer.logWithMetadata).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
+    eventType: 'bar',
+    foo: data.foo,
+    baz: data.baz,
   });
 });
 
-describe(`#savedObjectsAuthorizationSuccess`, () => {
-  test('logs via auditLogger', () => {
-    const auditLogger = createMockAuditLogger();
-    const securityAuditLogger = new SecurityAuditLogger(() => auditLogger);
-    const username = 'foo-user';
-    const action = 'foo-action';
-    const types = ['foo-type-1', 'foo-type-2'];
-    const spaceIds = ['foo-space', 'bar-space'];
-    const args = {
-      foo: 'bar',
-      baz: 'quz',
-    };
+test(`does not call server.log for license level < Standard`, () => {
+  const mockServer = {
+    logWithMetadata: jest.fn(),
+  };
+  const mockLicenseInfo = {
+    isAvailable: () => true,
+    feature: () => {
+      return {
+        registerLicenseCheckResultsGenerator: () => {
+          return;
+        },
+      };
+    },
+    license: {
+      isActive: () => true,
+      isOneOf: () => false,
+      getType: () => LICENSE_TYPE_BASIC,
+    },
+  };
 
-    securityAuditLogger.savedObjectsAuthorizationSuccess(username, action, types, spaceIds, args);
-
-    expect(auditLogger.log).toHaveBeenCalledWith(
-      'saved_objects_authorization_success',
-      expect.any(String),
-      {
-        username,
-        action,
-        types,
-        spaceIds,
-        args,
-      }
-    );
-    expect(auditLogger.log.mock.calls[0][1]).toMatchInlineSnapshot(
-      `"foo-user authorized to [foo-action] [foo-type-1,foo-type-2] in [foo-space,bar-space]"`
-    );
-  });
+  const auditLogger = new AuditLogger(mockServer, 'foo', mockConfig, mockLicenseInfo);
+  auditLogger.log('bar', 'what happened');
+  expect(mockServer.logWithMetadata).toHaveBeenCalledTimes(0);
 });
 
-describe(`#accessAgreementAcknowledged`, () => {
-  test('logs via auditLogger', () => {
-    const auditLogger = createMockAuditLogger();
-    const securityAuditLogger = new SecurityAuditLogger(() => auditLogger);
-    const username = 'foo-user';
-    const provider = { type: 'saml', name: 'saml1' };
+test(`does not call server.log if security is not enabled`, () => {
+  const mockServer = {
+    logWithMetadata: jest.fn(),
+  };
 
-    securityAuditLogger.accessAgreementAcknowledged(username, provider);
-
-    expect(auditLogger.log).toHaveBeenCalledTimes(1);
-    expect(auditLogger.log).toHaveBeenCalledWith(
-      'access_agreement_acknowledged',
-      'foo-user acknowledged access agreement (saml/saml1).',
-      { username, provider }
-    );
+  const mockConfig = createMockConfig({
+    'xpack.security.enabled': false,
+    'xpack.security.audit.enabled': true,
   });
+
+  const auditLogger = new AuditLogger(mockServer, 'foo', mockConfig, mockLicenseInfo);
+  auditLogger.log('bar', 'what happened');
+  expect(mockServer.logWithMetadata).toHaveBeenCalledTimes(0);
+});
+
+test(`does not call server.log if security audit logging is not enabled`, () => {
+  const mockServer = {
+    logWithMetadata: jest.fn(),
+  };
+
+  const mockConfig = createMockConfig({
+    'xpack.security.enabled': true,
+  });
+
+  const auditLogger = new AuditLogger(mockServer, 'foo', mockConfig, mockLicenseInfo);
+  auditLogger.log('bar', 'what happened');
+  expect(mockServer.logWithMetadata).toHaveBeenCalledTimes(0);
+});
+
+test(`calls server.log after basic -> gold upgrade`, () => {
+  const mockServer = {
+    logWithMetadata: jest.fn(),
+  };
+
+  const endLicenseInfo = {
+    isAvailable: () => true,
+    license: {
+      isActive: () => true,
+      isOneOf: () => true,
+      getType: () => LICENSE_TYPE_GOLD,
+    },
+  };
+
+  let licenseCheckResultsGenerator;
+
+  const startLicenseInfo = {
+    isAvailable: () => true,
+    feature: () => {
+      return {
+        registerLicenseCheckResultsGenerator: (fn) => {
+          licenseCheckResultsGenerator = fn;
+        },
+      };
+    },
+    license: {
+      isActive: () => true,
+      isOneOf: () => false,
+      getType: () => LICENSE_TYPE_BASIC,
+    },
+  };
+
+  const auditLogger = new AuditLogger(mockServer, 'foo', mockConfig, startLicenseInfo);
+  auditLogger.log('bar', 'what happened');
+  expect(mockServer.logWithMetadata).toHaveBeenCalledTimes(0);
+
+  // change basic to gold
+  licenseCheckResultsGenerator(endLicenseInfo);
+  auditLogger.log('bar', 'what happened');
+  expect(mockServer.logWithMetadata).toHaveBeenCalledTimes(1);
 });

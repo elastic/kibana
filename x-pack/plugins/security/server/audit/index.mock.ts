@@ -5,6 +5,7 @@
  */
 
 import { SecurityAuditLogger } from './security_audit_logger';
+import { AuditService } from './audit_service';
 
 export const securityAuditLoggerMock = {
   create() {
@@ -13,5 +14,13 @@ export const securityAuditLoggerMock = {
       savedObjectsAuthorizationSuccess: jest.fn(),
       accessAgreementAcknowledged: jest.fn(),
     } as unknown) as jest.Mocked<SecurityAuditLogger>;
+  },
+};
+
+export const auditServiceMock = {
+  create() {
+    return {
+      getLogger: jest.fn(),
+    } as jest.Mocked<ReturnType<AuditService['setup']>>;
   },
 };

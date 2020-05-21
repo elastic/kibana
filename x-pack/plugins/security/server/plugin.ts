@@ -99,7 +99,7 @@ export class Plugin {
   public async setup(core: CoreSetup, { features, licensing }: PluginSetupDependencies) {
     const [config, legacyConfig] = await combineLatest([
       this.initializerContext.config.create<TypeOf<typeof ConfigSchema>>().pipe(
-        map(rawConfig =>
+        map((rawConfig) =>
           createConfig(rawConfig, this.initializerContext.logger.get('config'), {
             isTLSEnabled: core.http.isTlsEnabled,
           })
@@ -182,7 +182,7 @@ export class Plugin {
 
       license,
 
-      registerSpacesService: service => {
+      registerSpacesService: (service) => {
         if (this.wasSpacesServiceAccessed()) {
           throw new Error('Spaces service has been accessed before registration.');
         }
