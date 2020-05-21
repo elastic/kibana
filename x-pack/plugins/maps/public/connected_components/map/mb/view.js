@@ -25,8 +25,7 @@ import { DrawControl } from './draw_control';
 import { TooltipControl } from './tooltip_control';
 import { clampToLatBounds, clampToLonBounds } from '../../../elasticsearch_geo_utils';
 import { getInitialView } from './get_initial_view';
-
-import { getInjectedVarFunc } from '../../../kibana_services';
+import { getPreserveDrawingBuffer } from '../../../kibana_services';
 
 mapboxgl.workerUrl = mbWorkerUrl;
 mapboxgl.setRTLTextPlugin(mbRtlPlugin);
@@ -130,7 +129,7 @@ export class MBMapContainer extends React.Component {
         container: this.refs.mapContainer,
         style: mbStyle,
         scrollZoom: this.props.scrollZoom,
-        preserveDrawingBuffer: getInjectedVarFunc()('preserveDrawingBuffer', false),
+        preserveDrawingBuffer: getPreserveDrawingBuffer(),
         interactive: !this.props.disableInteractive,
         maxZoom: this.props.settings.maxZoom,
         minZoom: this.props.settings.minZoom,
