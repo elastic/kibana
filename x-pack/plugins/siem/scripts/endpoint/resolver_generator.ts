@@ -14,6 +14,33 @@ import { default as policyMapping } from './policy_mapping.json';
 
 main();
 
+async function deleteIndices(indices: string[], client: Client) {
+  const handleErr = (err: unknown) => {
+    if (err instanceof ResponseError && err.statusCode !== 404) {
+      // eslint-disable-next-line no-console
+      console.log(JSON.stringify(err, null, 2));
+      // eslint-disable-next-line no-process-exit
+      process.exit(1);
+    }
+  };
+
+  for (const index of indices) {
+    try {
+      // The index could be a data stream so let's try deleting that first
+      // The ES client in Kibana doesn't support data streams yet so we need to make a raw request to the ES route
+      await client.transport.request({ method: 'DELETE', path: `_data_stream/${index}` });
+    } catch (err) {
+      handleErr(err);
+    }
+
+    try {
+      await client.indices.delete({ index });
+    } catch (err) {
+      handleErr(err);
+    }
+  }
+}
+
 async function main() {
   const argv = yargs.help().options({
     seed: {
@@ -134,18 +161,10 @@ async function main() {
   }
   const client = new Client(clientOptions);
   if (argv.delete) {
-    try {
-      await client.indices.delete({
-        index: [argv.eventIndex, argv.metadataIndex, argv.alertIndex, argv.policyIndex],
-      });
-    } catch (err) {
-      if (err instanceof ResponseError && err.statusCode !== 404) {
-        // eslint-disable-next-line no-console
-        console.log(err);
-        // eslint-disable-next-line no-process-exit
-        process.exit(1);
-      }
-    }
+    await deleteIndices(
+      [argv.eventIndex, argv.metadataIndex, argv.alertIndex, argv.policyIndex],
+      client
+    );
   }
 
   const pipeline = {
