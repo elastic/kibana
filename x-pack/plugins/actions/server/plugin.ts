@@ -250,6 +250,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       logger,
       eventLogger: this.eventLogger!,
       spaces: this.spaces,
+      getScopedSavedObjectsClient,
       getServices: this.getServicesFactory(
         getScopedSavedObjectsClientWithoutAccessToActions,
         core.elasticsearch
