@@ -11,17 +11,7 @@ jest.mock('@elastic/ems-client');
 
 describe('default use without proxy', () => {
   beforeEach(() => {
-    require('./kibana_services').getInjectedVarFunc = () => key => {
-      if (key === 'proxyElasticMapsServiceInMaps') {
-        return false;
-      } else if (key === 'isEmsEnabled') {
-        return true;
-      } else if (key === 'emsFileApiUrl') {
-        return 'https://file-api';
-      } else if (key === 'emsTileApiUrl') {
-        return 'https://tile-api';
-      }
-    };
+    require('./kibana_services').getProxyElasticMapsServiceInMaps = () => false;
     require('./kibana_services').getLicenseId = () => {
       return 'foobarlicenseid';
     };

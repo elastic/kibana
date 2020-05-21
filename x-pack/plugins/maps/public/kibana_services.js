@@ -36,12 +36,6 @@ export const getFileUploadComponent = () => {
   return fileUploadPlugin.JsonUploadAndParse;
 };
 
-let getInjectedVar;
-export const setInjectedVarFunc = getInjectedVarFunc => {
-  getInjectedVar = getInjectedVarFunc;
-};
-export const getInjectedVarFunc = () => getInjectedVar;
-
 let uiSettings;
 export const setUiSettings = coreUiSettings => (uiSettings = coreUiSettings);
 export const getUiSettings = () => uiSettings;
@@ -141,15 +135,33 @@ let dataSearchService;
 export const setSearchService = searchService => (dataSearchService = searchService);
 export const getSearchService = () => dataSearchService;
 
-let mapConfig;
-export const setMapConfig = config => (mapConfig = config);
-export const getMapConfig = () => mapConfig;
+let kibanaVersion;
+export const setKibanaVersion = version => (kibanaVersion = version);
+export const getKibanaVersion = () => kibanaVersion;
 
-export const getIsEmsEnabled = () => getMapConfig().includeElasticMapsService;
-export const getEmsFontLibraryUrl = () => getMapConfig().emsFontLibraryUrl;
-export const getEmsTileLayerId = () => getMapConfig().emsTileLayerId;
-export const getEmsFileApiUrl = () => getMapConfig().emsFileApiUrl;
-export const getEmsTileApiUrl = () => getMapConfig().emsTileApiUrl;
-export const getEmsLandingPageUrl = () => getMapConfig().emsLandingPageUrl;
-export const getRegionmapLayers = () => _.get(getMapConfig(), 'regionmap.layers', []);
-export const getTilemap = () => _.get(getMapConfig(), 'tilemap', []);
+// xpack.maps.* kibana.yml settings from this plugin
+let mapAppConfig;
+export const setMapAppConfig = config => (mapAppConfig = config);
+export const getMapAppConfig = () => mapAppConfig;
+
+export const getEnabled = () => getMapAppConfig().enabled;
+export const getShowMapVisualizationTypes = () => getMapAppConfig().showMapVisualizationTypes;
+export const getShowMapsInspectorAdapter = () => getMapAppConfig().showMapsInspectorAdapter;
+export const getPreserveDrawingBuffer = () => getMapAppConfig().preserveDrawingBuffer;
+export const getEnableVectorTiles = () => getMapAppConfig().enableVectorTiles;
+
+// map.* kibana.yml settings from maps_legacy plugin that are shared between OSS map visualizations and maps app
+let kibanaCommonConfig;
+export const setKibanaCommonConfig = config => (kibanaCommonConfig = config);
+export const getKibanaCommonConfig = () => kibanaCommonConfig;
+
+export const getIsEmsEnabled = () => getKibanaCommonConfig().includeElasticMapsService;
+export const getEmsFontLibraryUrl = () => getKibanaCommonConfig().emsFontLibraryUrl;
+export const getEmsTileLayerId = () => getKibanaCommonConfig().emsTileLayerId;
+export const getEmsFileApiUrl = () => getKibanaCommonConfig().emsFileApiUrl;
+export const getEmsTileApiUrl = () => getKibanaCommonConfig().emsTileApiUrl;
+export const getEmsLandingPageUrl = () => getKibanaCommonConfig().emsLandingPageUrl;
+export const getProxyElasticMapsServiceInMaps = () =>
+  getKibanaCommonConfig().proxyElasticMapsServiceInMaps;
+export const getRegionmapLayers = () => _.get(getKibanaCommonConfig(), 'regionmap.layers', []);
+export const getTilemap = () => _.get(getKibanaCommonConfig(), 'tilemap', []);
