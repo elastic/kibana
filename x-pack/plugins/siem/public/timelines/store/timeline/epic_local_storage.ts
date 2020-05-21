@@ -15,8 +15,10 @@ import { TimelineEpicDependencies } from './epic';
 import { isNotNull } from './helpers';
 import { TimelineModel, ColumnHeaderOptions } from './model';
 
+const timelinePageIds = ['alerts-table', 'signals-page'];
+
 const isPageTimeline = (timelineId: string | undefined) =>
-  timelineId && timelineId.toLowerCase() === 'alerts-table';
+  timelineId && timelinePageIds.includes(timelineId);
 
 const removeColumnFromTimeline = (timeline: TimelineModel, columnId: string): TimelineModel => {
   return { ...timeline, columns: timeline.columns.filter(column => column.id !== columnId) };
@@ -80,7 +82,7 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
         const timelineId: string = get('payload.id', action);
         const timeline: TimelineModel = get('payload', action);
 
-        if (isEmpty(storageTimelines)) {
+        if (isEmpty(storageTimelines) || isEmpty(storageTimelines[timelineId])) {
           addTimelineToLocalStorage(timelineId, timeline);
         }
       }),
