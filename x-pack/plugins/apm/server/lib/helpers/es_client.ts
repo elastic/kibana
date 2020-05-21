@@ -19,7 +19,7 @@ import {
   ESSearchRequest,
   ESSearchResponse
 } from '../../../typings/elasticsearch';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/server';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import { APMRequestHandlerContext } from '../../routes/typings';

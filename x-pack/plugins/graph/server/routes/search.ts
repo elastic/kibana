@@ -7,7 +7,7 @@
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { LicenseState, verifyApiAccess } from '../lib/license_state';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/public';
+import { UI_SETTINGS } from '../../../../../src/plugins/data/server';
 
 export function registerSearchRoute({
   router,
