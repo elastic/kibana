@@ -12,7 +12,6 @@ import {
   getHexColorRangeStrings,
   GRADIENT_INTERVALS,
 } from '../../color_utils';
-import { ColorGradient } from '../../components/color_gradient';
 import React from 'react';
 import { COLOR_MAP_TYPE } from '../../../../../common/constants';
 import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
@@ -234,14 +233,6 @@ export class DynamicColorProperty extends DynamicStyleProperty {
 
     mbStops.push(defaultColor); //last color is default color
     return ['match', ['to-string', ['get', this._field.getName()]], ...mbStops];
-  }
-
-  renderRangeLegendHeader() {
-    if (this._options.color) {
-      return <ColorGradient colorRampName={this._options.color} />;
-    } else {
-      return null;
-    }
   }
 
   _getColorRampStops() {
