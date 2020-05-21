@@ -28,7 +28,10 @@ class KibanaBasePipelineTest extends BasePipelineTest {
     env.WORKSPACE = 'WS'
 
     props([
-      buildUtils: [ getBuildStatus: { "SUCCESS" } ],
+      buildUtils: [
+        getBuildStatus: { "SUCCESS" },
+        printStacktrace: { ex -> print ex },
+      ],
       jenkinsApi: [ getFailedSteps: { [] } ],
       testUtils: [ getFailures: { [] } ],
     ])
@@ -71,7 +74,10 @@ class KibanaBasePipelineTest extends BasePipelineTest {
 
   void mockFailureBuild() {
     props([
-      buildUtils: [ getBuildStatus: { "FAILURE" } ],
+      buildUtils: [
+        getBuildStatus: { "FAILURE" },
+        printStacktrace: { ex -> print ex },
+      ],
       jenkinsApi: [ getFailedSteps: { [
         [
           displayName: "Check out from version control",
