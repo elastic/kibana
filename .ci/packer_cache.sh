@@ -3,6 +3,7 @@
 set -e
 
 branch="$(git rev-parse --abbrev-ref HEAD 2> /dev/null)"
+branch="master" # TODO remove
 
 # run setup script that gives us node, yarn, and bootstraps the project
 source src/dev/ci_setup/setup.sh;
