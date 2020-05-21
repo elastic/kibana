@@ -130,6 +130,7 @@ export CYPRESS_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudf
 
 export CHECKS_REPORTER_ACTIVE=false
 
+export DETECT_CHROMEDRIVER_VERSION=true
 export CHROMEDRIVER_FORCE_DOWNLOAD=true
 
 ### only run on pr jobs for elastic/kibana, checks-reporter doesn't work for other repos
