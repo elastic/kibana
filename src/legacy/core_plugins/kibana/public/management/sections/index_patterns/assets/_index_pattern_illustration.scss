@@ -1,14 +1,11 @@
+$lightShadow: #ECF0F6;
 
 .indexPatternIllustration {
-  &__background {
-    fill: lightOrDarkTheme($euiColorLightestShade, $euiColorLightShade);
+  &__verticalStripes {
+    fill: lightOrDarkTheme($euiColorEmptyShade, $euiColorFullShade);
   }
 
   &__dots {
-    fill: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
-  }
-
-  &__speed {
-    fill: lightOrDarkTheme($euiColorLightShade, $euiColorMediumShade);
+    fill: lightOrDarkTheme($lightShadow, $euiShadowColor);
   }
 }
