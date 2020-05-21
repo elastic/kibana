@@ -33,6 +33,7 @@ export const ToolbarWrapper = (props: Props) => {
     accountId,
     view,
     region,
+    legend,
     sort,
     customMetrics,
     changeCustomMetrics,
@@ -59,6 +60,7 @@ export const ToolbarWrapper = (props: Props) => {
         nodeType,
         region,
         accountId,
+        legend,
         customMetrics,
         changeCustomMetrics,
       })}

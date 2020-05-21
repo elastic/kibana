@@ -21,24 +21,21 @@ import {
   GIS_API_PATH,
   EMS_SPRITES_PATH,
   INDEX_SETTINGS_API_PATH,
-} from '../../../../plugins/maps/common/constants';
+} from '../common/constants';
 import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternSettings } from './lib/get_index_pattern_settings';
-
-import Boom from 'boom';
+import { schema } from '@kbn/config-schema';
 
 const ROOT = `/${GIS_API_PATH}`;
 
-export function initRoutes(server, licenseUid, mapConfig) {
-  const serverConfig = server.config();
-
+export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
   let emsClient;
   if (mapConfig.includeElasticMapsService) {
     emsClient = new EMSClient({
       language: i18n.getLocale(),
-      appVersion: serverConfig.get('pkg.version'),
+      appVersion: kbnVersion,
       appName: EMS_APP_NAME,
       fileApiUrl: mapConfig.emsFileApiUrl,
       tileApiUrl: mapConfig.emsTileApiUrl,
@@ -67,15 +64,25 @@ export function initRoutes(server, licenseUid, mapConfig) {
     };
   }
 
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/${EMS_FILES_API_PATH}/${EMS_FILES_DEFAULT_JSON_PATH}`,
-    handler: async request => {
-      const { server } = request;
-      checkEMSProxyConfig(server);
+  router.get(
+    {
+      path: `${ROOT}/${EMS_FILES_API_PATH}/${EMS_FILES_DEFAULT_JSON_PATH}`,
+      validate: {
+        query: schema.object({
+          id: schema.maybe(schema.string()),
+          x: schema.maybe(schema.number()),
+          y: schema.maybe(schema.number()),
+          z: schema.maybe(schema.number()),
+        }),
+      },
+    },
+    async (con, request, { ok, badRequest }) => {
+      if (!checkEMSProxyEnabled()) {
+        return badRequest('map.proxyElasticMapsServiceInMaps disabled');
+      }
 
       if (!request.query.id) {
-        server.log('warning', 'Must supply id parameters to retrieve EMS file');
+        logger.warn('Must supply id parameters to retrieve EMS file');
         return null;
       }
 
@@ -87,20 +94,24 @@ export function initRoutes(server, licenseUid, mapConfig) {
 
       try {
         const file = await fetch(layer.getDefaultFormatUrl());
-        return await file.json();
+        const fileJson = await file.json();
+        return ok({ body: fileJson });
       } catch (e) {
-        server.log('warning', `Cannot connect to EMS for file, error: ${e.message}`);
-        throw Boom.badRequest(`Cannot connect to EMS`);
+        logger.warn(`Cannot connect to EMS for file, error: ${e.message}`);
+        return badRequest(`Cannot connect to EMS`);
       }
-    },
-  });
+    }
+  );
 
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_RASTER_TILE_PATH}`,
-    handler: async (request, h) => {
-      const { server } = request;
-      checkEMSProxyConfig(server);
+  router.get(
+    {
+      path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_RASTER_TILE_PATH}`,
+      validate: false,
+    },
+    async (con, request, { ok, badRequest }) => {
+      if (!checkEMSProxyEnabled()) {
+        return badRequest('map.proxyElasticMapsServiceInMaps disabled');
+      }
 
       if (
         !request.query.id ||
@@ -108,7 +119,7 @@ export function initRoutes(server, licenseUid, mapConfig) {
         typeof parseInt(request.query.y, 10) !== 'number' ||
         typeof parseInt(request.query.z, 10) !== 'number'
       ) {
-        server.log('warning', 'Must supply id/x/y/z parameters to retrieve EMS raster tile');
+        logger.warn('Must supply id/x/y/z parameters to retrieve EMS raster tile');
         return null;
       }
 
@@ -124,16 +135,19 @@ export function initRoutes(server, licenseUid, mapConfig) {
         .replace('{y}', request.query.y)
         .replace('{z}', request.query.z);
 
-      return await proxyResource(h, { url, contentType: 'image/png' });
-    },
-  });
+      return await proxyResource({ url, contentType: 'image/png' }, { ok, badRequest });
+    }
+  );
 
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/${EMS_CATALOGUE_PATH}`,
-    handler: async request => {
-      const { server } = request;
-      checkEMSProxyConfig(server);
+  router.get(
+    {
+      path: `${ROOT}/${EMS_CATALOGUE_PATH}`,
+      validate: false,
+    },
+    async (con, request, { ok, badRequest }) => {
+      if (!checkEMSProxyEnabled()) {
+        return badRequest('map.proxyElasticMapsServiceInMaps disabled');
+      }
 
       const main = await emsClient.getMainManifest();
       const proxiedManifest = {
@@ -155,16 +169,21 @@ export function initRoutes(server, licenseUid, mapConfig) {
           manifest: `${GIS_API_PATH}/${EMS_FILES_CATALOGUE_PATH}`,
         });
       }
-      return proxiedManifest;
-    },
-  });
+      return ok({
+        body: proxiedManifest,
+      });
+    }
+  );
 
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/${EMS_FILES_CATALOGUE_PATH}/{emsVersion}/manifest`,
-    handler: async request => {
-      const { server } = request;
-      checkEMSProxyConfig(server);
+  router.get(
+    {
+      path: `${ROOT}/${EMS_FILES_CATALOGUE_PATH}/{emsVersion}/manifest`,
+      validate: false,
+    },
+    async (con, request, { ok, badRequest }) => {
+      if (!checkEMSProxyEnabled()) {
+        return badRequest('map.proxyElasticMapsServiceInMaps disabled');
+      }
 
       const file = await emsClient.getDefaultFileManifest();
       const layers = file.layers.map(layer => {
@@ -180,16 +199,21 @@ export function initRoutes(server, licenseUid, mapConfig) {
         return newLayer;
       });
       //rewrite
-      return { layers };
-    },
-  });
+      return ok({
+        body: layers,
+      });
+    }
+  );
 
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/${EMS_TILES_CATALOGUE_PATH}/{emsVersion}/manifest`,
-    handler: async request => {
-      const { server } = request;
-      checkEMSProxyConfig(server);
+  router.get(
+    {
+      path: `${ROOT}/${EMS_TILES_CATALOGUE_PATH}/{emsVersion}/manifest`,
+      validate: false,
+    },
+    async (con, request, { ok, badRequest }) => {
+      if (!checkEMSProxyEnabled()) {
+        return badRequest('map.proxyElasticMapsServiceInMaps disabled');
+      }
 
       const tilesManifest = await emsClient.getDefaultTMSManifest();
       const newServices = tilesManifest.services.map(service => {
@@ -217,21 +241,30 @@ export function initRoutes(server, licenseUid, mapConfig) {
         return newService;
       });
 
-      return {
-        services: newServices,
-      };
-    },
-  });
+      return ok({
+        body: {
+          services: newServices,
+        },
+      });
+    }
+  );
 
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_RASTER_STYLE_PATH}`,
-    handler: async request => {
-      const { server } = request;
-      checkEMSProxyConfig(server);
+  router.get(
+    {
+      path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_RASTER_STYLE_PATH}`,
+      validate: {
+        query: schema.object({
+          id: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    async (con, request, { ok, badRequest }) => {
+      if (!checkEMSProxyEnabled()) {
+        return badRequest('map.proxyElasticMapsServiceInMaps disabled');
+      }
 
       if (!request.query.id) {
-        server.log('warning', 'Must supply id parameter to retrieve EMS raster style');
+        logger.warn('Must supply id parameter to retrieve EMS raster style');
         return null;
       }
 
@@ -243,22 +276,31 @@ export function initRoutes(server, licenseUid, mapConfig) {
       const style = await tmsService.getDefaultRasterStyle();
 
       const newUrl = `${EMS_TILES_RASTER_TILE_PATH}?id=${request.query.id}&x={x}&y={y}&z={z}`;
-      return {
-        ...style,
-        tiles: [newUrl],
-      };
-    },
-  });
+      return ok({
+        body: {
+          ...style,
+          tiles: [newUrl],
+        },
+      });
+    }
+  );
 
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_VECTOR_STYLE_PATH}`,
-    handler: async request => {
-      const { server } = request;
-      checkEMSProxyConfig(server);
+  router.get(
+    {
+      path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_VECTOR_STYLE_PATH}`,
+      validate: {
+        query: schema.object({
+          id: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    async (con, request, { ok, badRequest }) => {
+      if (!checkEMSProxyEnabled()) {
+        return badRequest('map.proxyElasticMapsServiceInMaps disabled');
+      }
 
       if (!request.query.id) {
-        server.log('warning', 'Must supply id parameter to retrieve EMS vector style');
+        logger.warn('Must supply id parameter to retrieve EMS vector style');
         return null;
       }
 
@@ -281,27 +323,34 @@ export function initRoutes(server, licenseUid, mapConfig) {
 
       const spritePath = `${EMS_SPRITES_PATH}/${request.query.id}/sprite`;
 
-      return {
-        ...vectorStyle,
-        glyphs: `${EMS_GLYPHS_PATH}/{fontstack}/{range}`,
-        sprite: spritePath,
-        sources: newSources,
-      };
-    },
-  });
+      return ok({
+        body: {
+          ...vectorStyle,
+          glyphs: `${EMS_GLYPHS_PATH}/{fontstack}/{range}`,
+          sprite: spritePath,
+          sources: newSources,
+        },
+      });
+    }
+  );
 
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_VECTOR_SOURCE_PATH}`,
-    handler: async request => {
-      const { server } = request;
-      checkEMSProxyConfig(server);
+  router.get(
+    {
+      path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_VECTOR_SOURCE_PATH}`,
+      validate: {
+        query: schema.object({
+          id: schema.maybe(schema.string()),
+          sourceId: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    async (con, request, { ok, badRequest }) => {
+      if (!checkEMSProxyEnabled()) {
+        return badRequest('map.proxyElasticMapsServiceInMaps disabled');
+      }
 
       if (!request.query.id || !request.query.sourceId) {
-        server.log(
-          'warning',
-          'Must supply id and sourceId parameter to retrieve EMS vector source'
-        );
+        logger.warn('Must supply id and sourceId parameter to retrieve EMS vector source');
         return null;
       }
 
@@ -315,19 +364,32 @@ export function initRoutes(server, licenseUid, mapConfig) {
       const sourceManifest = vectorStyle.sources[request.query.sourceId];
 
       const newUrl = `${EMS_TILES_VECTOR_TILE_PATH}?id=${request.query.id}&sourceId=${request.query.sourceId}&x={x}&y={y}&z={z}`;
-      return {
-        ...sourceManifest,
-        tiles: [newUrl],
-      };
-    },
-  });
+      return ok({
+        body: {
+          ...sourceManifest,
+          tiles: [newUrl],
+        },
+      });
+    }
+  );
 
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_VECTOR_TILE_PATH}`,
-    handler: async (request, h) => {
-      const { server } = request;
-      checkEMSProxyConfig(server);
+  router.get(
+    {
+      path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_VECTOR_TILE_PATH}`,
+      validate: {
+        query: schema.object({
+          id: schema.maybe(schema.string()),
+          sourceId: schema.maybe(schema.string()),
+          x: schema.maybe(schema.number()),
+          y: schema.maybe(schema.number()),
+          z: schema.maybe(schema.number()),
+        }),
+      },
+    },
+    async (con, request, { ok, badRequest }) => {
+      if (!checkEMSProxyEnabled()) {
+        return badRequest('map.proxyElasticMapsServiceInMaps disabled');
+      }
 
       if (
         !request.query.id ||
@@ -336,10 +398,7 @@ export function initRoutes(server, licenseUid, mapConfig) {
         typeof parseInt(request.query.y, 10) !== 'number' ||
         typeof parseInt(request.query.z, 10) !== 'number'
       ) {
-        server.log(
-          'warning',
-          'Must supply id/sourceId/x/y/z parameters to retrieve EMS vector tile'
-        );
+        logger.warn('Must supply id/sourceId/x/y/z parameters to retrieve EMS vector tile');
         return null;
       }
 
@@ -355,33 +414,43 @@ export function initRoutes(server, licenseUid, mapConfig) {
         .replace('{y}', request.query.y)
         .replace('{z}', request.query.z);
 
-      return await proxyResource(h, { url });
-    },
-  });
+      return await proxyResource({ url }, { ok, badRequest });
+    }
+  );
 
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_GLYPHS_PATH}/{fontstack}/{range}`,
-    handler: async (request, h) => {
-      const { server } = request;
-      checkEMSProxyConfig(server);
+  router.get(
+    {
+      path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_GLYPHS_PATH}/{fontstack}/{range}`,
+      validate: false,
+    },
+    async (con, request, { ok, badRequest }) => {
+      if (!checkEMSProxyEnabled()) {
+        return badRequest('map.proxyElasticMapsServiceInMaps disabled');
+      }
       const url = mapConfig.emsFontLibraryUrl
         .replace('{fontstack}', request.params.fontstack)
         .replace('{range}', request.params.range);
 
-      return await proxyResource(h, { url });
-    },
-  });
+      return await proxyResource({ url }, { ok, badRequest });
+    }
+  );
 
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_SPRITES_PATH}/{id}/sprite{scaling?}.{extension}`,
-    handler: async (request, h) => {
-      const { server } = request;
-      checkEMSProxyConfig(server);
+  router.get(
+    {
+      path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_SPRITES_PATH}/{id}/sprite{scaling?}.{extension}`,
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (con, request, { ok, badRequest }) => {
+      if (!checkEMSProxyEnabled()) {
+        return badRequest('map.proxyElasticMapsServiceInMaps disabled');
+      }
 
       if (!request.params.id) {
-        server.log('warning', 'Must supply id parameter to retrieve EMS vector source sprite');
+        logger.warn('Must supply id parameter to retrieve EMS vector source sprite');
         return null;
       }
 
@@ -398,70 +467,92 @@ export function initRoutes(server, licenseUid, mapConfig) {
       } else if (request.params.extension === 'png') {
         proxyPathUrl = await tmsService.getSpriteSheetPngPath(isRetina);
       } else {
-        server.log('warning', `Must have png or json extension for spritesheet`);
+        logger.warn(`Must have png or json extension for spritesheet`);
         return null;
       }
 
-      return await proxyResource(h, {
-        url: proxyPathUrl,
-        contentType: request.params.extension === 'png' ? 'image/png' : '',
-      });
-    },
-  });
+      return await proxyResource(
+        {
+          url: proxyPathUrl,
+          contentType: request.params.extension === 'png' ? 'image/png' : '',
+        },
+        { ok, badRequest }
+      );
+    }
+  );
 
-  server.route({
-    method: 'GET',
-    path: `/${INDEX_SETTINGS_API_PATH}`,
-    handler: async (request, h) => {
-      const { server, query } = request;
+  router.get(
+    {
+      path: `/${INDEX_SETTINGS_API_PATH}`,
+      validate: {
+        query: schema.object({
+          indexPatternTitle: schema.string(),
+        }),
+      },
+    },
+    async (con, request, response) => {
+      const { query } = request;
 
       if (!query.indexPatternTitle) {
-        server.log('warning', `Required query parameter 'indexPatternTitle' not provided.`);
-        return h.response().code(400);
+        logger.warn(`Required query parameter 'indexPatternTitle' not provided.`);
+        return response.custom({
+          body: `Required query parameter 'indexPatternTitle' not provided.`,
+          statusCode: 400,
+        });
       }
 
-      const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
       try {
-        const resp = await callWithRequest(request, 'indices.getSettings', {
-          index: query.indexPatternTitle,
+        const resp = await con.core.elasticsearch.dataClient.callAsCurrentUser(
+          'indices.getSettings',
+          {
+            index: query.indexPatternTitle,
+          }
+        );
+        const indexPatternSettings = getIndexPatternSettings(resp);
+        return response.ok({
+          body: indexPatternSettings,
         });
-        return getIndexPatternSettings(resp);
       } catch (error) {
-        server.log(
-          'warning',
+        logger.warn(
           `Cannot load index settings for index pattern '${query.indexPatternTitle}', error: ${error.message}.`
         );
-        return h.response().code(400);
+        response.custom({
+          body: 'Error loading index settings',
+          statusCode: 400,
+        });
       }
-    },
-  });
+    }
+  );
 
-  function checkEMSProxyConfig(server) {
-    if (!mapConfig.proxyElasticMapsServiceInMaps) {
-      server.log(
-        'warning',
+  function checkEMSProxyEnabled() {
+    const proxyEMSInMaps = mapConfig.proxyElasticMapsServiceInMaps;
+    if (!proxyEMSInMaps) {
+      logger.warn(
         `Cannot load content from EMS when map.proxyElasticMapsServiceInMaps is turned off`
       );
-      throw Boom.notFound();
     }
+    return proxyEMSInMaps;
   }
 
-  async function proxyResource(h, { url, contentType }) {
+  async function proxyResource({ url, contentType }, { ok, badRequest }) {
     try {
       const resource = await fetch(url);
       const arrayBuffer = await resource.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      let response = h.response(buffer);
-      response = response.bytes(buffer.length);
-      response = response.header('Content-Disposition', 'inline');
+      const bufferedResponse = Buffer.from(arrayBuffer);
+      const headers = {
+        'Content-Disposition': 'inline',
+      };
       if (contentType) {
-        response = response.header('Content-type', contentType);
+        headers['Content-type'] = contentType;
       }
-      response = response.encoding('binary');
-      return response;
+
+      return ok({
+        body: bufferedResponse,
+        headers,
+      });
     } catch (e) {
-      server.log('warning', `Cannot connect to EMS for resource, error: ${e.message}`);
-      throw Boom.badRequest(`Cannot connect to EMS`);
+      logger.warn(`Cannot connect to EMS for resource, error: ${e.message}`);
+      return badRequest(`Cannot connect to EMS`);
     }
   }
 }
