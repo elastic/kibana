@@ -499,7 +499,7 @@ const ProcessEventDotComponents = React.memo(
               {descriptionText}
             </div>
             <div
-              className={magFactorX >= 2 ? 'euiButton' : 'euiButton euiButton--small'}
+              className={magFactorX >= 1.5 ? 'euiButton' : 'euiButton euiButton--small'}
               data-test-subject="nodeLabel"
               id={labelId}
               style={{
@@ -522,7 +522,7 @@ const ProcessEventDotComponents = React.memo(
                 </span>
               </span>
             </div>
-            {magFactorX >= 2 && (
+            {magFactorX >= 1.5 && (
               <EuiFlexGroup justifyContent="flexStart" gutterSize="xs">
                 <EuiFlexItem grow={false} className="related-dropdown">
                   <NodeSubMenu
@@ -578,7 +578,7 @@ export const ProcessEventDot = styled(ProcessEventDotComponents)`
   }
 
   & .related-dropdown {
-    width: 4.5em;
+    width: 8em;
   }
   & .euiSelectableList-bordered {
     border-top-right-radius: 0px;

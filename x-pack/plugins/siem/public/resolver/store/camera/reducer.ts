@@ -19,7 +19,7 @@ import { scaleToZoom } from './scale_to_zoom';
  */
 export function cameraInitialState(): CameraState {
   const state: CameraState = {
-    scalingFactor: scaleToZoom(1), // Defaulted to 1 to 1 scale
+    scalingFactor: scaleToZoom(1.5), // Defaulted to 1 to 1 scale
     rasterSize: [0, 0] as const,
     translationNotCountingCurrentPanning: [0, 0] as const,
     latestFocusedWorldCoordinates: null,
