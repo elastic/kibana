@@ -27,7 +27,7 @@ export const StepConfigureDatasource: React.FunctionComponent<{
   updateDatasource: (fields: Partial<NewDatasource>) => void;
   validationResults: DatasourceValidationResults;
   submitAttempted: boolean;
-  editMode: boolean;
+  editMode?: boolean;
 }> = ({
   packageInfo,
   datasource,
