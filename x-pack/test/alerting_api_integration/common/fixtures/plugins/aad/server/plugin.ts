@@ -19,7 +19,6 @@ import { SpacesPluginSetup } from '../../../../../../../plugins/spaces/server';
 interface FixtureSetupDeps {
   spaces?: SpacesPluginSetup;
 }
-
 interface FixtureStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
@@ -44,12 +43,14 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       ): Promise<IKibanaResponse<any>> {
         try {
           let namespace: string | undefined;
-          const [, { encryptedSavedObjects }] = await core.getStartServices();
           if (spaces && req.body.spaceId) {
             namespace = spaces.spacesService.spaceIdToNamespace(req.body.spaceId);
           }
+          const [, { encryptedSavedObjects }] = await core.getStartServices();
           await encryptedSavedObjects
-            .getClient()
+            .getClient({
+              includedHiddenTypes: ['alert'],
+            })
             .getDecryptedAsInternalUser(req.body.type, req.body.id, {
               namespace,
             });

@@ -17,10 +17,17 @@
  * under the License.
  */
 
-export { DefaultEditorController } from './default_editor_controller';
-export { useValidation } from './components/controls/utils';
-export { RangesParamEditor, RangeValues } from './components/controls/ranges';
-export * from './editor_size';
-export * from './vis_options_props';
-export * from './utils';
-export { ISchemas, Schemas, Schema } from './schemas';
+export interface ParentPongMsg {
+  type: 'pong';
+}
+
+export const isParentPong = (value: any): value is ParentPongMsg =>
+  typeof value === 'object' && value && value.type === 'pong';
+
+export class ParentMsgs {
+  pong(): ParentPongMsg {
+    return {
+      type: 'pong',
+    };
+  }
+}
