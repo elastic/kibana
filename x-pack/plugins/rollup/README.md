@@ -1,4 +1,7 @@
+# Rollup
+
 ## Summary
+
 Welcome to the Kibana rollup plugin! This plugin provides Kibana support for [Elasticsearch's rollup feature](https://www.elastic.co/guide/en/elasticsearch/reference/current/xpack-rollup.html). Please refer to the Elasticsearch documentation to understand rollup indices and how to create rollup jobs.
 
 This plugin allows Kibana to:
@@ -10,11 +13,24 @@ This plugin allows Kibana to:
 
 The rest of this doc dives into the implementation details of each of the above functionality.
 
+## Quick steps for testing
+
+The pattern for creating a rollup job and rollup index pattern is:
+
+* Install sample data (web logs is a good one).
+* Create a rollup job with an index pattern that captures this index (e.g. `k*`).
+* Set frequency to "minute". Clear the latency buffer field.
+* Select the time field which is the same time field selected in the installed index pattern (`timestamp` without an `@` in the case of web logs).
+* Select a few terms, histogram, and metrics fields.
+* Create and start the rollup job. Wait a minute for the job to run. You should see the numbers for documents and pages processed change in the detail panel.
+* Create a rollup index pattern in the Index Patterns app.
+* Now you can create visualizations using this index pattern.
+
 ---
 
 ## Create and manage rollup jobs
 
-The most straight forward part of this plugin! A new app called Rollup Jobs is registered in the Management section and follows a typical CRUD UI pattern. This app allows users to create, start, stop, clone, and delete rollup jobs. There is no way to edit an existing rollup job; instead, the UI offers a cloning ability. The client-side portion of this app lives in [public/crud_app](public/crud_app) and uses endpoints registered in [(server/routes/api/jobs](server/routes/api/jobs).
+The most straight forward part of this plugin! A new app called Rollup Jobs is registered in the Management section and follows a typical CRUD UI pattern. This app allows users to create, start, stop, clone, and delete rollup jobs. There is no way to edit an existing rollup job; instead, the UI offers a cloning ability. The client-side portion of this app lives in [public/crud_app](public/crud_app) and uses endpoints registered in [server/routes/api/jobs](server/routes/api/jobs).
 
 Refer to the [Elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/rollup-getting-started.html) to understand rollup indices and how to create rollup jobs.
 
