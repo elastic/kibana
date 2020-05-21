@@ -8,7 +8,7 @@ import { Action } from 'redux';
 import { merge } from 'rxjs';
 import { map, filter, ignoreElements, tap, withLatestFrom } from 'rxjs/operators';
 import { Epic, ofType } from 'redux-observable';
-import { get } from 'lodash/fp';
+import { get, isEmpty } from 'lodash/fp';
 
 import { createTimeline, updateTimeline, removeColumn, upsertColumn } from './actions';
 import { TimelineEpicDependencies } from './epic';
@@ -27,6 +27,21 @@ const addColumnToTimeline = (
   column: ColumnHeaderOptions
 ): TimelineModel => {
   return { ...timeline, columns: [...timeline.columns, column] };
+};
+
+const getAllTimelinesFromLocalStorage = () => {
+  return JSON.parse(localStorage.getItem('timelines') ?? `{}`);
+};
+
+const addTimelineToLocalStorage = (id: string, timeline: TimelineModel) => {
+  const timelines = getAllTimelinesFromLocalStorage();
+  localStorage.setItem(
+    'timelines',
+    JSON.stringify({
+      ...timelines,
+      [id]: timeline,
+    })
+  );
 };
 
 export const createTimelineLocalStorageEpic = <State>(): Epic<
@@ -51,7 +66,7 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
     action$.pipe(
       ofType(createTimeline.type),
       withLatestFrom(timeline$),
-      filter(([action, timeline]) => {
+      filter(([action]) => {
         const timelineId: string = get('payload.id', action);
 
         if (isPageTimeline(timelineId)) {
@@ -60,21 +75,17 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
 
         return false;
       }),
-      tap(([action, timeline]) => {
-        const storageTimelines = localStorage.getItem('timelines');
+      tap(([action]) => {
+        const storageTimelines = getAllTimelinesFromLocalStorage();
         const timelineId: string = get('payload.id', action);
+        const timeline: TimelineModel = get('payload', action);
 
-        if (!storageTimelines) {
-          localStorage.setItem(
-            'timelines',
-            JSON.stringify({
-              [timelineId]: action.payload,
-            })
-          );
+        if (isEmpty(storageTimelines)) {
+          addTimelineToLocalStorage(timelineId, timeline);
         }
       }),
       map(([action, timeline]) => {
-        const storageTimelines = JSON.parse(localStorage.getItem('timelines') ?? '');
+        const storageTimelines = getAllTimelinesFromLocalStorage();
         const timelineId: string = get('payload.id', action);
 
         return updateTimeline({
@@ -86,30 +97,24 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
     action$.pipe(
       ofType(removeColumn.type),
       tap(action => {
-        const storageTimelines = JSON.parse(localStorage.getItem('timelines') ?? '');
+        const storageTimelines = getAllTimelinesFromLocalStorage();
         const timelineId: string = get('payload.id', action);
         const columnId: string = get('payload.columnId', action);
         const modifiedTimeline = removeColumnFromTimeline(storageTimelines[timelineId], columnId);
 
-        localStorage.setItem(
-          'timelines',
-          JSON.stringify({ ...storageTimelines, [timelineId]: modifiedTimeline })
-        );
+        addTimelineToLocalStorage(timelineId, modifiedTimeline);
       }),
       ignoreElements()
     ),
     action$.pipe(
       ofType(upsertColumn.type),
       tap(action => {
-        const storageTimelines = JSON.parse(localStorage.getItem('timelines') ?? '');
+        const storageTimelines = getAllTimelinesFromLocalStorage();
         const timelineId: string = get('payload.id', action);
         const column: ColumnHeaderOptions = get('payload.column', action);
         const modifiedTimeline = addColumnToTimeline(storageTimelines[timelineId], column);
 
-        localStorage.setItem(
-          'timelines',
-          JSON.stringify({ ...storageTimelines, [timelineId]: modifiedTimeline })
-        );
+        addTimelineToLocalStorage(timelineId, modifiedTimeline);
       }),
       ignoreElements()
     )
