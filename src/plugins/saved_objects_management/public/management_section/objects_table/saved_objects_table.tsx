@@ -748,6 +748,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             onExport={this.onExport}
             canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
             onDelete={this.onDelete}
+            onActionRefresh={this.refreshData}
             goInspectObject={this.props.goInspectObject}
             pageIndex={page}
             pageSize={perPage}

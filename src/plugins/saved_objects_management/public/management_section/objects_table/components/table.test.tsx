@@ -50,6 +50,7 @@ const defaultProps: TableProps = {
   },
   filterOptions: [{ value: 2 }],
   onDelete: () => {},
+  onActionRefresh: () => {},
   onExport: () => {},
   goInspectObject: () => {},
   canGoInApp: () => true,

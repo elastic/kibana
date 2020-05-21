@@ -54,6 +54,7 @@ export interface TableProps {
   filterOptions: any[];
   canDelete: boolean;
   onDelete: () => void;
+  onActionRefresh: () => void;
   onExport: (includeReferencesDeep: boolean) => void;
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   pageIndex: number;
@@ -139,6 +140,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       filterOptions,
       selectionConfig: selection,
       onDelete,
+      onActionRefresh,
       selectedSavedObjects,
       onTableChange,
       goInspectObject,
@@ -274,6 +276,10 @@ export class Table extends PureComponent<TableProps, TableState> {
                   this.setState({
                     activeAction: undefined,
                   });
+                  const { refreshOnFinish = () => false } = action;
+                  if (refreshOnFinish()) {
+                    onActionRefresh();
+                  }
                 });
 
                 if (action.euiAction.onClick) {
