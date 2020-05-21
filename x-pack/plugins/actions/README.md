@@ -28,9 +28,9 @@ Table of Contents
   - [RESTful API](#restful-api)
     - [`POST /api/action`: Create action](#post-apiaction-create-action)
     - [`DELETE /api/actions/{id}`: Delete action](#delete-apiactionid-delete-action)
-    - [`GET /api/actions/_getAll`: Get all actions](#get-apiactiongetall-get-all-actions)
+    - [`GET /api/actions`: Get all actions](#get-apiactiongetall-get-all-actions)
     - [`GET /api/actions/{id}`: Get action](#get-apiactionid-get-action)
-    - [`GET /api/actions/types`: List action types](#get-apiactiontypes-list-action-types)
+    - [`GET /api/actions/list_action_types`: List action types](#get-apiactiontypes-list-action-types)
     - [`PUT /api/actions/{id}`: Update action](#put-apiactionid-update-action)
     - [`POST /api/actions/{id}/_execute`: Execute action](#post-apiactionidexecute-execute-action)
   - [Firing actions](#firing-actions)
@@ -182,7 +182,7 @@ Params:
 | -------- | --------------------------------------------- | ------ |
 | id       | The id of the action you're trying to delete. | string |
 
-### `GET /api/actions/_getAll`: Get all actions
+### `GET /api/actions`: Get all actions
 
 No parameters.
 
@@ -198,7 +198,7 @@ Params:
 | -------- | ------------------------------------------ | ------ |
 | id       | The id of the action you're trying to get. | string |
 
-### `GET /api/actions/types`: List action types
+### `GET /api/actions/list_action_types`: List action types
 
 No parameters.
 

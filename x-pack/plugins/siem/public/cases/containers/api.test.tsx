@@ -88,7 +88,7 @@ describe('Case Configuration API', () => {
     });
     test('check url, method, signal', async () => {
       await getActionLicense(abortCtrl.signal);
-      expect(fetchMock).toHaveBeenCalledWith(`/api/actions/types`, {
+      expect(fetchMock).toHaveBeenCalledWith(`/api/actions/list_action_types`, {
         method: 'GET',
         signal: abortCtrl.signal,
       });
