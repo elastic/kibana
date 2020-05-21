@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import { Plugin, CoreStart, CoreSetup } from 'src/core/public';
 // @ts-ignore
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
@@ -55,7 +56,12 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
         return reactDirective(wrapInI18nContext(MapListing));
       });
 
-    bindNpSetupCoreAndPlugins(core, np);
+    // @ts-ignore
+    const config = _.get(np, 'maps.config', {});
+    // @ts-ignore
+    const kibanaVersion = core.injectedMetadata.getKibanaVersion();
+    // @ts-ignore
+    bindNpSetupCoreAndPlugins(core, np, config, kibanaVersion);
   }
 
   public start(core: CoreStart, plugins: MapsPluginStartDependencies) {
