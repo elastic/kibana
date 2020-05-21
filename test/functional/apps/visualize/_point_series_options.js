@@ -190,6 +190,38 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
+    describe('show values on chart', () => {
+      before(async () => {
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickVerticalBarChart();
+        await PageObjects.visualize.clickNewSearch();
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        log.debug('Bucket = X-axis');
+        await PageObjects.visEditor.clickBucket('X-axis');
+        log.debug('Aggregation = Terms');
+        await PageObjects.visEditor.selectAggregation('Terms');
+        log.debug('Field = geo.src');
+        await PageObjects.visEditor.selectField('geo.src');
+        await PageObjects.visEditor.clickGo();
+        log.debug('Open Options tab');
+        await PageObjects.visEditor.clickOptionsTab();
+      });
+
+      it('should show values on bar chart', async () => {
+        await PageObjects.visEditor.toggleValuesOnChart();
+        await PageObjects.visEditor.clickGo();
+        const values = await PageObjects.visChart.getChartValues();
+        expect(values).to.eql(['2,592', '2,373', '1,194', '489', '415']);
+      });
+
+      it('should hide values on bar chart', async () => {
+        await PageObjects.visEditor.toggleValuesOnChart();
+        await PageObjects.visEditor.clickGo();
+        const values = await PageObjects.visChart.getChartValues();
+        expect(values.length).to.be(0);
+      });
+    });
+
     describe('custom labels and axis titles', function() {
       const visName = 'Visualization Point Series Test';
       const customLabel = 'myLabel';

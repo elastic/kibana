@@ -324,7 +324,7 @@ describe('Header', () => {
       );
 
       expect(
-        wrapper.find(`[data-test-subj="header-text-${columnHeader.id}"]`).at(0)
+        wrapper.find(`[data-test-subj="header-text-${columnHeader.id}"]`).at(1)
       ).toHaveStyleRule('text-overflow', 'ellipsis');
     });
   });

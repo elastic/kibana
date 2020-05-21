@@ -41,8 +41,10 @@ import {
   hideViewControl,
   setHiddenLayers,
   setMapSettings,
-} from '../actions/map_actions';
-import { setReadOnly, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions/ui_actions';
+  setReadOnly,
+  setIsLayerTOCOpen,
+  setOpenTOCDetails,
+} from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
   getInspectorAdapters,
