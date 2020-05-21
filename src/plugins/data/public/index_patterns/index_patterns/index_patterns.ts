@@ -93,6 +93,12 @@ export class IndexPatternsService {
     ).savedObjects;
   }
 
+  getAll = async (refresh: boolean = false) => {
+    const allIds = await this.getIds(refresh);
+    await Promise.all(allIds.map(id => this.get(id)));
+    return indexPatternCache.getAll();
+  };
+
   getIds = async (refresh: boolean = false) => {
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();

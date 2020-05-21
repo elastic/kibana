@@ -20,7 +20,7 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { FilterEditor } from './filter_editor';
 import { FilterItem } from './filter_item';
@@ -37,6 +37,7 @@ import {
   toggleFilterNegated,
   unpinFilter,
 } from '../../../common';
+import { getIndexPatterns } from '../../services';
 
 interface Props {
   filters: Filter[];
@@ -48,7 +49,20 @@ interface Props {
 
 function FilterBarUI(props: Props) {
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
+  const [allIndexPatterns, setAllIndexPatterns] = useState<IIndexPattern[]>([]);
   const kibana = useKibana();
+
+  useEffect(() => {
+    /**
+     * Filters may be applied from an index pattern other than the active index patterns list provided.
+     * Retrieve the actual index pattern from the filter for validation.
+     */
+    getIndexPatterns()
+      .getAll()
+      .then(ip => {
+        setAllIndexPatterns(ip);
+      });
+  }, []);
 
   const uiSettings = kibana.services.uiSettings;
   if (!uiSettings) return null;
@@ -68,6 +82,7 @@ function FilterBarUI(props: Props) {
           onUpdate={newFilter => onUpdate(i, newFilter)}
           onRemove={() => onRemove(i)}
           indexPatterns={props.indexPatterns}
+          allIndexPatterns={allIndexPatterns}
           uiSettings={uiSettings!}
         />
       </EuiFlexItem>

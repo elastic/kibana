@@ -32,11 +32,13 @@ import {
   toggleFilterNegated,
   toggleFilterPinned,
   toggleFilterDisabled,
+  getIndexPatternFromFilter,
 } from '../../../common';
 
 interface Props {
   id: string;
   filter: Filter;
+  allIndexPatterns: IIndexPattern[];
   indexPatterns: IIndexPattern[];
   className?: string;
   onUpdate: (filter: Filter) => void;
@@ -44,6 +46,16 @@ interface Props {
   intl: InjectedIntl;
   uiSettings: IUiSettingsClient;
 }
+
+interface LabelOptions {
+  title: string;
+  status: string;
+  message?: string;
+}
+
+const FILTER_ITEM_OK = '';
+const FILTER_ITEM_WARNING = 'warn';
+const FILTER_ITEM_ERROR = 'error';
 
 interface State {
   isPopoverOpen: boolean;
@@ -62,57 +74,46 @@ class FilterItemUI extends Component<Props, State> {
     }
   };
 
-  private isDisabled(errorMessage?: string) {
-    const { disabled } = this.props.filter.meta;
-    return disabled || !!errorMessage;
+  private isValidLabel(labelConfig: LabelOptions) {
+    return labelConfig.status === FILTER_ITEM_OK;
   }
 
-  public render() {
-    const { filter, id } = this.props;
-    const { negate, disabled } = filter.meta;
-    let errorMessage: string | undefined;
+  private isDisabled(labelConfig: LabelOptions) {
+    const { disabled } = this.props.filter.meta;
+    return disabled || !this.isValidLabel(labelConfig);
+  }
 
-    let valueLabel;
-    try {
-      valueLabel = getDisplayValueFromFilter(filter, this.props.indexPatterns);
-    } catch (e) {
-      valueLabel = this.props.intl.formatMessage({
-        id: 'data.filter.filterBar.labelErrorText',
-        defaultMessage: `Error`,
-      });
-      errorMessage = e.message;
-    }
-    const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
-    const dataTestSubjValue = filter.meta.value
-      ? `filter-value-${!!errorMessage ? 'error' : valueLabel}`
-      : '';
-    const dataTestSubjDisabled = `filter-${this.isDisabled(errorMessage) ? 'disabled' : 'enabled'}`;
-    const dataTestSubjPinned = `filter-${isFilterPinned(filter) ? 'pinned' : 'unpinned'}`;
-
-    const classes = classNames(
+  private getClasses(negate: boolean, labelConfig: LabelOptions) {
+    const { filter } = this.props;
+    return classNames(
       'globalFilterItem',
       {
-        'globalFilterItem-isDisabled': this.isDisabled(errorMessage),
-        'globalFilterItem-isInvalid': !!errorMessage,
+        'globalFilterItem-isDisabled': this.isDisabled(labelConfig),
+        'globalFilterItem-isError': labelConfig.status === FILTER_ITEM_ERROR,
+        'globalFilterItem-isWarning': labelConfig.status === FILTER_ITEM_WARNING,
         'globalFilterItem-isPinned': isFilterPinned(filter),
         'globalFilterItem-isExcluded': negate,
       },
       this.props.className
     );
+  }
 
-    const badge = (
-      <FilterView
-        filter={filter}
-        valueLabel={valueLabel}
-        errorMessage={errorMessage}
-        className={classes}
-        iconOnClick={() => this.props.onRemove()}
-        onClick={this.handleBadgeClick}
-        data-test-subj={`filter ${dataTestSubjDisabled} ${dataTestSubjKey} ${dataTestSubjValue} ${dataTestSubjPinned}`}
-      />
-    );
+  private getDataTestSubj(labelConfig: LabelOptions) {
+    const { filter } = this.props;
+    const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
+    const dataTestSubjValue = filter.meta.value
+      ? `filter-value-${this.isValidLabel(labelConfig) ? labelConfig.title : labelConfig.status}`
+      : '';
+    const dataTestSubjDisabled = `filter-${
+      this.isValidLabel(labelConfig) ? 'enabled' : 'disabled'
+    }`;
+    const dataTestSubjPinned = `filter-${isFilterPinned(filter) ? 'pinned' : 'unpinned'}`;
+    return `filter ${dataTestSubjDisabled} ${dataTestSubjKey} ${dataTestSubjValue} ${dataTestSubjPinned}`;
+  }
 
-    const panelTree = [
+  private getPanels(negate: boolean, disabled: boolean) {
+    const { filter } = this.props;
+    return [
       {
         id: 0,
         items: [
@@ -205,6 +206,84 @@ class FilterItemUI extends Component<Props, State> {
         ),
       },
     ];
+  }
+
+  private getValueLabel(): LabelOptions {
+    const { filter } = this.props;
+    const label = {
+      title: '',
+      message: '',
+      status: FILTER_ITEM_OK,
+    };
+    const validIndexPattern = getIndexPatternFromFilter(filter, this.props.indexPatterns);
+    if (validIndexPattern) {
+      try {
+        label.title = getDisplayValueFromFilter(filter, this.props.indexPatterns);
+      } catch (e) {
+        label.status = FILTER_ITEM_ERROR;
+        label.title = this.props.intl.formatMessage({
+          id: 'data.filter.filterBar.labelErrorText',
+          defaultMessage: `Error`,
+        });
+        label.message = e.message;
+      }
+    } else {
+      const indexPatternExists = getIndexPatternFromFilter(filter, this.props.allIndexPatterns);
+      if (indexPatternExists) {
+        label.status = FILTER_ITEM_WARNING;
+        label.title = this.props.intl.formatMessage({
+          id: 'data.filter.filterBar.labelWarningText',
+          defaultMessage: `Warning`,
+        });
+        label.message = this.props.intl.formatMessage(
+          {
+            id: 'data.filter.filterBar.labelWarningInfo',
+            defaultMessage:
+              'Filter for index pattern {indexPattern} is not applicable to current view',
+          },
+          {
+            indexPattern: filter.meta.index,
+          }
+        );
+      } else {
+        label.status = FILTER_ITEM_ERROR;
+        label.title = this.props.intl.formatMessage({
+          id: 'data.filter.filterBar.labelErrorText',
+          defaultMessage: `Error`,
+        });
+        label.message = this.props.intl.formatMessage(
+          {
+            id: 'data.filter.filterBar.labelErrorInfo',
+            defaultMessage: 'Index pattern {indexPattern} not found',
+          },
+          {
+            indexPattern: filter.meta.index,
+          }
+        );
+      }
+    }
+
+    return label;
+  }
+
+  public render() {
+    if (!this.props.allIndexPatterns.length) return null;
+    const { filter, id } = this.props;
+    const { negate, disabled } = filter.meta;
+
+    const valueLabelConfig = this.getValueLabel();
+
+    const badge = (
+      <FilterView
+        filter={filter}
+        valueLabel={valueLabelConfig.title}
+        errorMessage={valueLabelConfig.message}
+        className={this.getClasses(negate, valueLabelConfig)}
+        iconOnClick={() => this.props.onRemove()}
+        onClick={this.handleBadgeClick}
+        data-test-subj={this.getDataTestSubj(valueLabelConfig)}
+      />
+    );
 
     return (
       <EuiPopover
@@ -218,7 +297,7 @@ class FilterItemUI extends Component<Props, State> {
         withTitle={true}
         panelPaddingSize="none"
       >
-        <EuiContextMenu initialPanelId={0} panels={panelTree} />
+        <EuiContextMenu initialPanelId={0} panels={this.getPanels(negate, disabled)} />
       </EuiPopover>
     );
   }

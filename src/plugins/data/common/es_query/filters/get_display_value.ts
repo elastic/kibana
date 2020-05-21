@@ -45,15 +45,7 @@ function getValueFormatter(indexPattern?: IIndexPattern, key?: string) {
 
 export function getDisplayValueFromFilter(filter: Filter, indexPatterns: IIndexPattern[]): string {
   const indexPattern = getIndexPatternFromFilter(filter, indexPatterns);
-
-  if (!indexPattern) {
-    throw new Error(
-      i18n.translate('data.filter.filterBar.indexNotFound', {
-        defaultMessage: 'Index pattern {indexPattern} not found',
-        values: { indexPattern: filter.meta.index },
-      })
-    );
-  }
+  if (!indexPattern) return '';
 
   if (typeof filter.meta.value === 'function') {
     const valueFormatter: any = getValueFormatter(indexPattern, filter.meta.key);
