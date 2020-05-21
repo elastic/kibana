@@ -204,7 +204,8 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
                     label={i18n.translate(
                       'xpack.ml.dataframe.analyticsList.deleteDestinationIndexTitle',
                       {
-                        defaultMessage: 'Delete destination index',
+                        defaultMessage: 'Delete destination index {indexName}',
+                        values: { indexName },
                       }
                     )}
                     checked={deleteTargetIndex}
@@ -216,9 +217,10 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
                 {userCanDeleteIndex && indexPatternExists && (
                   <EuiSwitch
                     label={i18n.translate(
-                      'xpack.ml.dataframe.analyticsList.deleteTargetIndexTitle',
+                      'xpack.ml.dataframe.analyticsList.deleteTargetIndexPatternTitle',
                       {
-                        defaultMessage: 'Delete index pattern',
+                        defaultMessage: 'Delete index pattern {indexPattern}',
+                        values: { indexPattern: indexName },
                       }
                     )}
                     checked={deleteIndexPattern}
