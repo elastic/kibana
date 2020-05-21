@@ -26,7 +26,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment-timezone';
-import { NotificationsStart } from 'src/core/public';
+import { ApplicationStart, NotificationsStart } from 'src/core/public';
 import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/public';
 import { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
 import { APIKeysAPIClient } from '../api_keys_api_client';
@@ -40,6 +40,7 @@ interface Props {
   notifications: NotificationsStart;
   docLinks: DocumentationLinksService;
   apiKeysAPIClient: PublicMethodsOf<APIKeysAPIClient>;
+  getUrlForApp: ApplicationStart['getUrlForApp'];
 }
 
 interface State {
@@ -137,7 +138,11 @@ export class APIKeysGridPage extends Component<Props, State> {
     if (!isLoadingTable && apiKeys && apiKeys.length === 0) {
       return (
         <EuiPageContent>
-          <EmptyPrompt isAdmin={isAdmin} docLinks={this.props.docLinks} />
+          <EmptyPrompt
+            isAdmin={isAdmin}
+            docLinks={this.props.docLinks}
+            getUrlForApp={this.props.getUrlForApp}
+          />
         </EuiPageContent>
       );
     }

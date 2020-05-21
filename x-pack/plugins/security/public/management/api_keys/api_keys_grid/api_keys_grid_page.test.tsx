@@ -67,6 +67,7 @@ describe('APIKeysGridPage', () => {
   const getViewProperties = () => {
     const { docLinks, notifications } = coreMock.createStart();
     return {
+      getUrlForApp: (id: string) => id,
       docLinks: new DocumentationLinksService(docLinks),
       notifications,
       apiKeysAPIClient: apiClientMock,
