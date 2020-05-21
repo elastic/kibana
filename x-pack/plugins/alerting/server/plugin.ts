@@ -164,7 +164,7 @@ export class AlertingPlugin {
       });
     }
 
-    core.http.registerRouteHandlerContext('alerting', this.createRouteHandlerContext());
+    core.http.registerRouteHandlerContext('alerting', this.createRouteHandlerContext(core));
 
     // Routes
     const router = core.http.createRouter();
@@ -237,20 +237,20 @@ export class AlertingPlugin {
             `Unable to create alerts client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
           );
         }
-        return alertsClientFactory!.create(request, core.savedObjects.getScopedClient(request));
+        return alertsClientFactory!.create(request, core.savedObjects);
       },
     };
   }
 
-  private createRouteHandlerContext = (): IContextProvider<
-    RequestHandler<unknown, unknown, unknown>,
-    'alerting'
-  > => {
+  private createRouteHandlerContext = (
+    core: CoreSetup
+  ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'alerting'> => {
     const { alertTypeRegistry, alertsClientFactory } = this;
     return async function alertsRouteHandlerContext(context, request) {
+      const [{ savedObjects }] = await core.getStartServices();
       return {
         getAlertsClient: () => {
-          return alertsClientFactory!.create(request, context.core.savedObjects.client);
+          return alertsClientFactory!.create(request, savedObjects);
         },
         listTypes: alertTypeRegistry!.list.bind(alertTypeRegistry!),
       };

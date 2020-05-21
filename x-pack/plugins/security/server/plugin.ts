@@ -58,7 +58,10 @@ export interface SecurityPluginSetup {
     | 'grantAPIKeyAsInternalUser'
     | 'invalidateAPIKeyAsInternalUser'
   >;
-  authz: Pick<Authorization, 'actions' | 'checkPrivilegesWithRequest' | 'mode'>;
+  authz: Pick<
+    Authorization,
+    'actions' | 'checkPrivilegesWithRequest' | 'checkPrivilegesDynamicallyWithRequest' | 'mode'
+  >;
   license: SecurityLicense;
 
   /**
@@ -191,6 +194,7 @@ export class Plugin {
       authz: {
         actions: authz.actions,
         checkPrivilegesWithRequest: authz.checkPrivilegesWithRequest,
+        checkPrivilegesDynamicallyWithRequest: authz.checkPrivilegesDynamicallyWithRequest,
         mode: authz.mode,
       },
 
