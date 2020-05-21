@@ -82,7 +82,7 @@ export const StepConfigureDatasource: React.FunctionComponent<{
             <EuiText>
               <p>
                 {datasource.package?.name === 'endpoint' ? (
-                  <EndpointConfiguration />
+                  <EndpointConfiguration editMode={editMode} />
                 ) : (
                   <FormattedMessage
                     id="xpack.ingestManager.createDatasource.stepConfigure.noConfigOptionsMessage"
