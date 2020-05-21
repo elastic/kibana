@@ -114,10 +114,6 @@ export function placePanelBeside({
   currentPanels,
   placeBesideId,
 }: IPanelPlacementBesideArgs): Omit<GridData, 'i'> {
-  // const clonedPanels = _.cloneDeep(currentPanels);
-  if (!placeBesideId) {
-    throw new Error('Place beside method called without placeBesideId');
-  }
   const panelToPlaceBeside = currentPanels[placeBesideId];
   if (!panelToPlaceBeside) {
     throw new PanelNotFoundError();
@@ -130,10 +126,11 @@ export function placePanelBeside({
 
   const possiblePlacementDirections: IplacementDirection[] = [
     { grid: { x: beside.x + beside.w, y: beside.y, w: width, h: height }, fits: true }, // right
-    { grid: { x: beside.x - width, y: beside.y, w: width, h: height }, fits: true }, // left
+    { grid: { x: 0, y: beside.y + beside.h, w: width, h: height }, fits: true }, // left side of next row
     { grid: { x: beside.x, y: beside.y + beside.h, w: width, h: height }, fits: true }, // bottom
   ];
 
+  // first, we check if there is place around the current panel
   for (const direction of possiblePlacementDirections) {
     if (
       direction.grid.x >= 0 &&
@@ -156,13 +153,63 @@ export function placePanelBeside({
     }
   }
   // if we get here that means there is no blank space around the panel we are placing beside. This means it's time to mess up the dashboard's groove. Fun!
-  const [, , bottomPlacement] = possiblePlacementDirections;
-  for (const currentPanelGrid of otherPanels) {
-    if (bottomPlacement.grid.y <= currentPanelGrid.y) {
-      const movedPanel = _.cloneDeep(currentPanels[currentPanelGrid.i]);
-      movedPanel.gridData.y = movedPanel.gridData.y + bottomPlacement.grid.h;
-      currentPanels[currentPanelGrid.i] = movedPanel;
+  /**
+   * 1. sort the panels in the grid
+   * 2. find the best placement for the cloned panel
+   * 3. reposition the panels after the cloned panel in the grid
+   */
+  const grid = otherPanels.sort((a: GridData, b: GridData) => {
+    if (a.y < b.y) {
+      return -1;
+    }
+    if (a.y > b.y) {
+      return 1;
+    }
+    // a.y === b.y
+    if (a.x <= b.x) {
+      return -1;
+    }
+    return 1;
+  });
+  let position = 0;
+  for (position = 0; position < grid.length; position++) {
+    if (beside.i === grid[position].i) {
+      break;
     }
   }
-  return bottomPlacement.grid;
+  const [rightPlacement, bottomLeftPlacement] = possiblePlacementDirections;
+  // place to the right if there is space
+  if (rightPlacement.grid.x + rightPlacement.grid.w <= DASHBOARD_GRID_COLUMN_COUNT) {
+    let originalPositionInTheGrid = grid[position + 1].i;
+    const diff =
+      rightPlacement.grid.y +
+      rightPlacement.grid.h -
+      currentPanels[originalPositionInTheGrid].gridData.y;
+
+    for (let j = position + 1; j < grid.length; j++) {
+      originalPositionInTheGrid = grid[j].i;
+      const movedPanel = _.cloneDeep(currentPanels[originalPositionInTheGrid]);
+      movedPanel.gridData.y = movedPanel.gridData.y + diff;
+      currentPanels[originalPositionInTheGrid] = movedPanel;
+    }
+    return rightPlacement.grid;
+  } else {
+    // no space, place in the next row leftmost AND move all the subsequent panels
+    const diff = bottomLeftPlacement.grid.h;
+    for (let j = position + 1; j < grid.length; j++) {
+      const originalPositionInTheGrid = grid[position].i;
+      const movedPanel = currentPanels[originalPositionInTheGrid];
+      if (
+        movedPanel.gridData.y === bottomLeftPlacement.grid.y &&
+        movedPanel.gridData.x > bottomLeftPlacement.grid.x + bottomLeftPlacement.grid.w
+      ) {
+        // panel is in the same row, right to the cloned panel
+        continue;
+      }
+      movedPanel.gridData.y = movedPanel.gridData.y + diff;
+      currentPanels[originalPositionInTheGrid] = movedPanel;
+    }
+    return bottomLeftPlacement.grid;
+  }
+  return bottomLeftPlacement.grid;
 }
