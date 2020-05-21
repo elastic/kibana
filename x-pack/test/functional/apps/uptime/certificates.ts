@@ -15,14 +15,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');
 
   // FLAKY: https://github.com/elastic/kibana/issues/66869
-  describe.skip('certificates', function() {
-    beforeEach(async () => {
-      await uptime.goToRoot(true);
+  describe('certificates', function() {
+    before(async () => {
       await makeCheck({ es, tls: true });
-      await uptimeService.navigation.refreshApp();
+      await uptime.goToRoot(true);
+    });
+
+    beforeEach(async () => {
+      await makeCheck({ es, tls: true });
     });
 
     it('can navigate to cert page', async () => {
+      await uptimeService.cert.isUptimeDataMissing();
       await uptimeService.cert.hasViewCertButton();
       await uptimeService.navigation.goToCertificates();
     });
@@ -30,6 +34,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('page', () => {
       beforeEach(async () => {
         await uptimeService.navigation.goToCertificates();
+        await uptimeService.navigation.refreshApp();
       });
 
       it('displays certificates', async () => {
