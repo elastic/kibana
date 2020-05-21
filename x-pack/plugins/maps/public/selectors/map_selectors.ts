@@ -300,7 +300,7 @@ export const getLayerList = createSelector(
   }
 );
 
-export function getLayerById(layerId: string, state: MapStoreState): ILayer | undefined {
+export function getLayerById(layerId: string | null, state: MapStoreState): ILayer | undefined {
   return getLayerList(state).find(layer => {
     return layerId === layer.getId();
   });

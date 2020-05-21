@@ -72,7 +72,7 @@ export function cancelAllInFlightRequests() {
   };
 }
 
-export function updateStyleMeta(layerId: string) {
+export function updateStyleMeta(layerId: string | null) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const layer = getLayerById(layerId, getState());
     if (!layer) {
@@ -143,7 +143,7 @@ export function syncDataForLayer(layer: ILayer) {
   };
 }
 
-export function syncDataForLayerId(layerId: string) {
+export function syncDataForLayerId(layerId: string | null) {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
     const layer = getLayerById(layerId, getState());
     if (layer) {

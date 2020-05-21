@@ -79,6 +79,7 @@ export interface ILayer {
   }): ReactElement<any> | null;
   getInFlightRequestTokens(): symbol[];
   getPrevRequestToken(dataId: string): symbol | undefined;
+  destroy: () => void;
 }
 export type Footnote = {
   icon: ReactElement<any>;
