@@ -17,7 +17,6 @@ import { actionsMock } from '../mocks';
 
 const actionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false });
 const services = actionsMock.createServices();
-const savedObjectsClient = services.savedObjectsClient;
 const savedObjectsClientWithHidden = savedObjectsClientMock.create();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 const actionTypeRegistry = actionTypeRegistryMock.create();
