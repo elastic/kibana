@@ -22,7 +22,7 @@ import { Store } from 'redux';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '../enzyme_helpers';
 import { WithMemoryRouter, WithRoute, WithStore } from '../helpers';
 import { MemoryRouterConfig } from './types';
 
