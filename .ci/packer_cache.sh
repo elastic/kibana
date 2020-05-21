@@ -41,10 +41,8 @@ tar -cf "$HOME/.kibana/bootstrap_cache/$branch.tar" \
   node_modules \
   packages/*/node_modules \
   x-pack/node_modules \
-  x-pack/legacy/plugins/*/node_modules \
   x-pack/legacy/plugins/reporting/.chromium \
   test/plugin_functional/plugins/*/node_modules \
-  examples/*/node_modules \
   .es \
   .chromedriver \
   .geckodriver;
