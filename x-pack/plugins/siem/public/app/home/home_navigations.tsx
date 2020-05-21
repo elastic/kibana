@@ -60,8 +60,8 @@ export const navTabs: SiemNavTab = {
   },
   [SiemPageName.management]: {
     id: SiemPageName.management,
-    name: 'Management',
-    href: '#/management',
+    name: i18n.MANAGEMENT,
+    href: '#/management', // FIXME: provider getter function for this
     disabled: false,
     urlKey: 'management',
   },

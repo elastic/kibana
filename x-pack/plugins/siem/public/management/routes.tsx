@@ -8,6 +8,7 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 import { SiemPageName } from '../app/types';
 import { PageView } from '../common/components/endpoint/page_view';
+import { SpyRoute } from '../common/utils/route/spy_routes';
 
 export const getManagementRoutes = () => [
   <Route
@@ -16,6 +17,7 @@ export const getManagementRoutes = () => [
       return (
         <PageView viewType="list" headerLeft="Test">
           {'Its a test!'}
+          <SpyRoute />
         </PageView>
       );
     }}
