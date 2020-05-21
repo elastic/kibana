@@ -15,7 +15,10 @@ import { Immutable } from '../../common/endpoint/types';
 import { AlertListState } from '../../common/endpoint_alerts/types';
 import { AppAction } from '../common/store/actions';
 import { HostState } from '../endpoint_hosts/types';
-import { PolicyDetailsState, PolicyListState } from '../endpoint_policy/types';
+
+// FIXME: cleanup
+// import { PolicyDetailsState, PolicyListState } from '../management/pages/policy/types';
+import { ManagementState } from '../management/types';
 
 export enum SiemPageName {
   overview = 'overview',
@@ -41,7 +44,7 @@ export type SiemNavTab = Record<SiemNavTabKey, NavTab>;
 export interface SecuritySubPluginStore<K extends SecuritySubPluginKeyStore, T> {
   initialState: Record<K, T>;
   reducer: Record<K, Reducer<T, AnyAction>>;
-  middleware?: Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>;
+  middleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>;
 }
 
 export interface SecuritySubPlugin {
@@ -54,8 +57,9 @@ type SecuritySubPluginKeyStore =
   | 'timeline'
   | 'hostList'
   | 'alertList'
-  | 'policyDetails'
-  | 'policyList';
+  | 'management';
+// | 'policyDetails'
+// | 'policyList';
 export interface SecuritySubPluginWithStore<K extends SecuritySubPluginKeyStore, T>
   extends SecuritySubPlugin {
   store: SecuritySubPluginStore<K, T>;
@@ -69,8 +73,12 @@ export interface SecuritySubPlugins extends SecuritySubPlugin {
       timeline: TimelineState;
       alertList: Immutable<AlertListState>;
       hostList: Immutable<HostState>;
-      policyDetails: Immutable<PolicyDetailsState>;
-      policyList: Immutable<PolicyListState>;
+
+      management: ManagementState;
+
+      // FIXME: cleanup
+      // policyDetails: Immutable<PolicyDetailsState>;
+      // policyList: Immutable<PolicyListState>;
     };
     reducer: {
       hosts: Reducer<HostsState, AnyAction>;
@@ -78,8 +86,10 @@ export interface SecuritySubPlugins extends SecuritySubPlugin {
       timeline: Reducer<TimelineState, AnyAction>;
       alertList: ImmutableReducer<AlertListState, AppAction>;
       hostList: ImmutableReducer<HostState, AppAction>;
-      policyDetails: ImmutableReducer<PolicyDetailsState, AppAction>;
-      policyList: ImmutableReducer<PolicyListState, AppAction>;
+
+      // FIXME: cleanup
+      // policyDetails: ImmutableReducer<PolicyDetailsState, AppAction>;
+      // policyList: ImmutableReducer<PolicyListState, AppAction>;
     };
     middlewares: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>;
   };

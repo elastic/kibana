@@ -25,9 +25,9 @@ import {
 } from '../../../common/constants';
 import { networkModel } from '../../network/store';
 import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
-import { initialPolicyListState } from '../../endpoint_policy/store/policy_list/reducer';
+import { initialPolicyListState } from '../../management/pages/policy/store/policy_list/reducer';
 import { initialAlertListState } from '../../endpoint_alerts/store/reducer';
-import { initialPolicyDetailsState } from '../../endpoint_policy/store/policy_details/reducer';
+import { initialPolicyDetailsState } from '../../management/pages/policy/store/policy_details/reducer';
 import { initialHostListState } from '../../endpoint_hosts/store/reducer';
 
 const policyList = initialPolicyListState();

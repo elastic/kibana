@@ -7,19 +7,14 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { SiemPageName } from '../app/types';
-import { PageView } from '../common/components/endpoint/page_view';
-import { SpyRoute } from '../common/utils/route/spy_routes';
+import { ManagementContainer } from './pages';
 
+const MANAGEMENT_ROOT_PATH = `/:pageName(${SiemPageName.management})`;
+
+/**
+ * Returns the React Router Routes for the management area
+ */
 export const getManagementRoutes = () => [
-  <Route
-    path={`/:pageName(${SiemPageName.management})`}
-    render={() => {
-      return (
-        <PageView viewType="list" headerLeft="Test">
-          {'Its a test!'}
-          <SpyRoute />
-        </PageView>
-      );
-    }}
-  />,
+  // Mounts the Management interface on `/management`
+  <Route path={MANAGEMENT_ROOT_PATH} component={ManagementContainer} />,
 ];

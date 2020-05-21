@@ -65,12 +65,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const timelinesSubPlugin = new (await import('./timelines')).Timelines();
       const endpointAlertsSubPlugin = new (await import('./endpoint_alerts')).EndpointAlerts();
       const endpoitHostsSubPlugin = new (await import('./endpoint_hosts')).EndpointHosts();
-      const endpointPolicyListSubPlugin = new (
-        await import('./endpoint_policy/list')
-      ).EndpointPolicyList();
-      const endpointPolicyDetailsSubPlugin = new (
-        await import('./endpoint_policy/details')
-      ).EndpointPolicyDetails();
+
+      // FIXME: cleanup
+      // const endpointPolicyListSubPlugin = new (
+      //   await import('./management/pages/policy/list')
+      // ).EndpointPolicyList();
+      // const endpointPolicyDetailsSubPlugin = new (
+      //   await import('./management/pages/policy/details')
+      // ).EndpointPolicyDetails();
 
       const managementSubPlugin = new (await import('./management')).Management();
 
@@ -82,11 +84,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const timelinesStart = timelinesSubPlugin.start();
       const endpointAlertsStart = endpointAlertsSubPlugin.start(coreStart, startPlugins);
       const endpointHostsStart = endpoitHostsSubPlugin.start(coreStart, startPlugins);
-      const endpointPolicyListStart = endpointPolicyListSubPlugin.start(coreStart, startPlugins);
-      const endpointPolicyDetailsStart = endpointPolicyDetailsSubPlugin.start(
-        coreStart,
-        startPlugins
-      );
+
+      // FIXME: cleanup
+      // const endpointPolicyListStart = endpointPolicyListSubPlugin.start(coreStart, startPlugins);
+      // const endpointPolicyDetailsStart = endpointPolicyDetailsSubPlugin.start(
+      //   coreStart,
+      //   startPlugins
+      // );
+
       const managementSubPluginStart = managementSubPlugin.start(coreStart, startPlugins);
 
       return renderApp(services, params, {
@@ -99,8 +104,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           ...timelinesStart.routes,
           ...endpointAlertsStart.routes,
           ...endpointHostsStart.routes,
-          ...endpointPolicyListStart.routes,
-          ...endpointPolicyDetailsStart.routes,
+
+          // FIXME: cleanup
+          // ...endpointPolicyListStart.routes,
+          // ...endpointPolicyDetailsStart.routes,
 
           ...managementSubPluginStart.routes,
         ],
@@ -111,8 +118,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ...timelinesStart.store.initialState,
             ...endpointAlertsStart.store.initialState,
             ...endpointHostsStart.store.initialState,
-            ...endpointPolicyListStart.store.initialState,
-            ...endpointPolicyDetailsStart.store.initialState,
+
+            // FIXME: cleanup
+            // ...endpointPolicyListStart.store.initialState,
+            // ...endpointPolicyDetailsStart.store.initialState,
 
             ...managementSubPluginStart.store.initialState,
           },
@@ -122,24 +131,24 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ...timelinesStart.store.reducer,
             ...endpointAlertsStart.store.reducer,
             ...endpointHostsStart.store.reducer,
-            ...endpointPolicyListStart.store.reducer,
-            ...endpointPolicyDetailsStart.store.reducer,
+
+            // FIXME: cleanup
+            // ...endpointPolicyListStart.store.reducer,
+            // ...endpointPolicyDetailsStart.store.reducer,
 
             ...managementSubPluginStart.store.reducer,
           },
           middlewares: [
-            ...(endpointAlertsStart.store.middleware != null
-              ? [endpointAlertsStart.store.middleware]
-              : []),
-            ...(endpointHostsStart.store.middleware != null
-              ? [endpointHostsStart.store.middleware]
-              : []),
-            ...(endpointPolicyListStart.store.middleware != null
-              ? [endpointPolicyListStart.store.middleware]
-              : []),
-            ...(endpointPolicyDetailsStart.store.middleware != null
-              ? [endpointPolicyDetailsStart.store.middleware]
-              : []),
+            ...(endpointAlertsStart.store.middleware ?? []),
+            ...(endpointHostsStart.store.middleware ?? []),
+            ...(managementSubPluginStart.store.middleware ?? []),
+
+            // ...(endpointPolicyListStart.store.middleware != null
+            //   ? [endpointPolicyListStart.store.middleware]
+            //   : []),
+            // ...(endpointPolicyDetailsStart.store.middleware != null
+            //   ? [endpointPolicyDetailsStart.store.middleware]
+            //   : []),
           ],
         },
       });

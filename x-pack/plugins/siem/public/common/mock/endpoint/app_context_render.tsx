@@ -16,8 +16,8 @@ import { MiddlewareActionSpyHelper, createSpyMiddleware } from '../../store/test
 import { apolloClientObservable } from '../test_providers';
 import { createStore, State, substateMiddlewareFactory } from '../../store';
 import { hostMiddlewareFactory } from '../../../endpoint_hosts/store/middleware';
-import { policyListMiddlewareFactory } from '../../../endpoint_policy/store/policy_list/middleware';
-import { policyDetailsMiddlewareFactory } from '../../../endpoint_policy/store/policy_details/middleware';
+import { policyListMiddlewareFactory } from '../../../management/pages/policy/store/policy_list/middleware';
+import { policyDetailsMiddlewareFactory } from '../../../management/pages/policy/store/policy_details/middleware';
 import { alertMiddlewareFactory } from '../../../endpoint_alerts/store/middleware';
 import { AppRootProvider } from './app_root_provider';
 import { SUB_PLUGINS_REDUCER, mockGlobalState } from '..';

@@ -18,14 +18,17 @@ import {
   EndpointAlertsPluginReducer,
 } from '../../endpoint_alerts/store';
 import { EndpointHostsPluginState, EndpointHostsPluginReducer } from '../../endpoint_hosts/store';
-import {
-  EndpointPolicyDetailsStatePluginState,
-  EndpointPolicyDetailsStatePluginReducer,
-} from '../../endpoint_policy/store/policy_details';
-import {
-  EndpointPolicyListStatePluginState,
-  EndpointPolicyListStatePluginReducer,
-} from '../../endpoint_policy/store/policy_list';
+
+// FIXME: cleanup
+// import {
+//   EndpointPolicyDetailsStatePluginState,
+//   EndpointPolicyDetailsStatePluginReducer,
+// } from '../../management/pages/policy/store/policy_details';
+// import {
+//   EndpointPolicyListStatePluginState,
+//   EndpointPolicyListStatePluginReducer,
+// } from '../../management/pages/policy/store/policy_list';
+import { ManagementPluginReducer, ManagementPluginState } from '../../management/types';
 
 export interface State
   extends HostsPluginState,
@@ -33,8 +36,8 @@ export interface State
     TimelinePluginState,
     EndpointAlertsPluginState,
     EndpointHostsPluginState,
-    EndpointPolicyDetailsStatePluginState,
-    EndpointPolicyListStatePluginState {
+    ManagementPluginState {
+  // EndpointPolicyListStatePluginState // EndpointPolicyDetailsStatePluginState, // FIXME: cleanup
   app: AppState;
   dragAndDrop: DragAndDropState;
   inputs: InputsState;
@@ -51,15 +54,21 @@ type SubPluginsInitState = HostsPluginState &
   TimelinePluginState &
   EndpointAlertsPluginState &
   EndpointHostsPluginState &
-  EndpointPolicyDetailsStatePluginState &
-  EndpointPolicyListStatePluginState;
+  ManagementPluginState;
+
+// FIXME: cleanup
+// EndpointPolicyDetailsStatePluginState &
+// EndpointPolicyListStatePluginState;
+
 export type SubPluginsInitReducer = HostsPluginReducer &
   NetworkPluginReducer &
   TimelinePluginReducer &
   EndpointAlertsPluginReducer &
   EndpointHostsPluginReducer &
-  EndpointPolicyDetailsStatePluginReducer &
-  EndpointPolicyListStatePluginReducer;
+  ManagementPluginReducer;
+
+// EndpointPolicyDetailsStatePluginReducer &
+// EndpointPolicyListStatePluginReducer;
 
 export const createInitialState = (pluginsInitState: SubPluginsInitState): State => ({
   ...initialState,

@@ -5,23 +5,29 @@
  */
 
 import { CoreStart } from 'kibana/public';
-import { managementReducer } from './store';
+import { managementReducer, getManagementInitialState } from './store';
 import { getManagementRoutes } from './routes';
 import { StartPlugins } from '../types';
+import { MANAGEMENT_GLOBAL_STORE_NAMESPACE } from './store/constants';
+import { managementMiddlewareFactory } from './store/middleware';
 
 export class Management {
   public setup() {}
 
   public start(core: CoreStart, plugins: StartPlugins) {
+    // wrap the Management middleware so that it is called with only the
+    // management state (and not the app global state)
+
     return {
       routes: getManagementRoutes(),
       store: {
         initialState: {
-          management: {},
+          [MANAGEMENT_GLOBAL_STORE_NAMESPACE]: getManagementInitialState(),
         },
         reducer: {
-          management: managementReducer,
+          [MANAGEMENT_GLOBAL_STORE_NAMESPACE]: managementReducer,
         },
+        middleware: managementMiddlewareFactory(core, plugins),
       },
     };
   }
