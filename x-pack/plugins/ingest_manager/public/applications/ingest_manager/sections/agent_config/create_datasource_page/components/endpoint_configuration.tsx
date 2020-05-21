@@ -4,9 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export const IngestManagerEndpointConfiguration = memo(() => {
-  return <p>hallo</p>;
-});
+export const EndpointConfiguration = () => {
+  return (
+    <FormattedMessage
+      id="xpack.ingestManager.createDatasource.stepConfigure.endpointConfiguration"
+      defaultMessage="See security app policy tab for additional configuration"
+    />
+  );
+};

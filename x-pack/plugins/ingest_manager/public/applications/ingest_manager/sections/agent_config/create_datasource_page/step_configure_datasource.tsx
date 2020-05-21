@@ -19,7 +19,7 @@ import { PackageInfo, NewDatasource, DatasourceInput } from '../../../types';
 import { Loading } from '../../../components';
 import { DatasourceValidationResults, validationHasErrors } from './services';
 import { DatasourceInputPanel } from './components';
-import { IngestManagerEndpointConfiguration } from '../../../../../../../endpoint/public/common/ingest_manager_endpoint_configuration';
+import { EndpointConfiguration } from './components/endpoint_configuration';
 
 export const StepConfigureDatasource: React.FunctionComponent<{
   packageInfo: PackageInfo;
@@ -81,11 +81,14 @@ export const StepConfigureDatasource: React.FunctionComponent<{
           body={
             <EuiText>
               <p>
-                <IngestManagerEndpointConfiguration />
-                <FormattedMessage
-                  id="xpack.ingestManager.createDatasource.stepConfigure.noConfigOptionsMessage"
-                  defaultMessage="Nothingconfigure"
-                />
+                {datasource.package?.name === 'endpoint' ? (
+                  <EndpointConfiguration />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ingestManager.createDatasource.stepConfigure.noConfigOptionsMessage"
+                    defaultMessage="Nothing to configure"
+                  />
+                )}
               </p>
             </EuiText>
           }
@@ -109,7 +112,6 @@ export const StepConfigureDatasource: React.FunctionComponent<{
             color="danger"
           >
             <p>
-              <IngestManagerEndpointConfiguration />
               <FormattedMessage
                 id="xpack.ingestManager.createDatasource.stepConfigure.validationErrorText"
                 defaultMessage="Please fix the above errors before continuing"
