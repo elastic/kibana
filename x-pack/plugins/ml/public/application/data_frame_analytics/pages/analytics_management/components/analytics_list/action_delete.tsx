@@ -16,7 +16,8 @@ import {
   EuiFlexItem,
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
-import { IndexPatternAttributes } from 'src/plugins/data/common';
+import { IIndexPattern } from 'src/plugins/data/common';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   deleteAnalytics,
   deleteAnalyticsAndTargetIndex,
@@ -26,9 +27,8 @@ import {
   checkPermission,
   createPermissionFailureMessage,
 } from '../../../../../capabilities/check_capabilities';
-import { useMlKibana } from '../../../../../../../public/application/contexts/kibana';
+import { useMlKibana } from '../../../../../contexts/kibana';
 import { isDataFrameAnalyticsRunning, DataFrameAnalyticsListRow } from './common';
-import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 interface DeleteActionProps {
   item: DataFrameAnalyticsListRow;
@@ -44,79 +44,77 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
   const [userCanDeleteIndex, setUserCanDeleteIndex] = useState<boolean>(false);
   const [indexPatternExists, setIndexPatternExists] = useState<boolean>(false);
 
-  const { savedObjects } = useMlKibana().services;
+  const { savedObjects, notifications } = useMlKibana().services;
+  const { toasts } = notifications;
   const savedObjectsClient = savedObjects.client;
 
   const indexName = item.config.dest.index;
 
-  // Check if an index pattern exists corresponding to current DFA job
-  // if pattern does exist, show it to user
-  useEffect(() => {
-    const toastNotifications = getToastNotifications();
-
-    const checkIndexPatternExists = async () => {
-      try {
-        const response = await savedObjectsClient.find<IndexPatternAttributes>({
-          type: 'index-pattern',
-          perPage: 10,
-          search: `"${indexName}"`,
-          searchFields: ['title'],
-          fields: ['title'],
-        });
-        const ip = response.savedObjects.find(
-          obj => obj.attributes.title.toLowerCase() === indexName.toLowerCase()
-        );
-        if (ip !== undefined) {
-          setIndexPatternExists(true);
-        }
-      } catch (error) {
-        toastNotifications.addDanger(
-          i18n.translate(
-            'xpack.ml.dataframe.analyticsList.errorWithCheckingIfIndexPatternExistsNotificationErrorMessage',
-            {
-              defaultMessage: 'An error occurred checking if index pattern ${indexPattern} exists',
-              values: { indexPattern: indexName, error: JSON.stringify(error) },
-            }
-          )
-        );
+  const checkIndexPatternExists = async () => {
+    try {
+      const response = await savedObjectsClient.find<IIndexPattern>({
+        type: 'index-pattern',
+        perPage: 10,
+        search: `"${indexName}"`,
+        searchFields: ['title'],
+        fields: ['title'],
+      });
+      const ip = response.savedObjects.find(
+        obj => obj.attributes.title.toLowerCase() === indexName.toLowerCase()
+      );
+      if (ip !== undefined) {
+        setIndexPatternExists(true);
       }
-    };
+    } catch (error) {
+      toasts.addDanger(
+        i18n.translate(
+          'xpack.ml.dataframe.analyticsList.errorWithCheckingIfIndexPatternExistsNotificationErrorMessage',
+          {
+            defaultMessage: 'An error occurred checking if index pattern ${indexPattern} exists',
+            values: { indexPattern: indexName, error: JSON.stringify(error) },
+          }
+        )
+      );
+    }
+  };
+  const checkUserIndexPermission = () => {
+    try {
+      const userCanDelete = checkUserCanDeleteIndex(indexName);
+      if (userCanDelete) {
+        setUserCanDeleteIndex(true);
+      }
+    } catch (error) {
+      toasts.addDanger(
+        i18n.translate(
+          'xpack.ml.dataframe.analyticsList.errorWithCheckingIfUserCanDeleteIndexNotificationErrorMessage',
+          {
+            defaultMessage: 'An error occurred checking if user can delete ${destinationIndex}',
+            values: { destinationIndex: indexName, error: JSON.stringify(error) },
+          }
+        )
+      );
+    }
+  };
 
+  useEffect(() => {
+    // Check if an index pattern exists corresponding to current DFA job
+    // if pattern does exist, show it to user
     checkIndexPatternExists();
-  }, []);
 
-  // Check if an user has permission to delete the index & index pattern
-  useEffect(() => {
-    const toastNotifications = getToastNotifications();
-
-    const doCheck = async () => {
-      try {
-        const userCanDelete = checkUserCanDeleteIndex(indexName);
-        if (userCanDelete) {
-          setUserCanDeleteIndex(true);
-        }
-      } catch (error) {
-        toastNotifications.addDanger(
-          i18n.translate(
-            'xpack.ml.dataframe.analyticsList.errorWithCheckingIfUserCanDeleteIndexNotificationErrorMessage',
-            {
-              defaultMessage: 'An error occurred checking if user can delete ${destinationIndex}',
-              values: { destinationIndex: indexName, error: JSON.stringify(error) },
-            }
-          )
-        );
-      }
-    };
-
-    doCheck();
+    // Check if an user has permission to delete the index & index pattern
+    checkUserIndexPermission();
   }, []);
 
   const closeModal = () => setModalVisible(false);
   const deleteAndCloseModal = () => {
     setModalVisible(false);
 
-    if (deleteTargetIndex) {
-      deleteAnalyticsAndTargetIndex(item);
+    if (userCanDeleteIndex && deleteTargetIndex) {
+      deleteAnalyticsAndTargetIndex(
+        item,
+        deleteTargetIndex,
+        indexPatternExists && deleteIndexPattern
+      );
     } else {
       deleteAnalytics(item);
     }
@@ -190,23 +188,25 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
             buttonColor="danger"
           >
             <p>
-              {i18n.translate('xpack.ml.dataframe.analyticsList.deleteModalBody', {
-                defaultMessage: `Are you sure you want to delete this analytics job?`,
-              })}
+              <FormattedMessage
+                id="xpack.ml.dataframe.analyticsList.deleteAnalytics.deleteModalBody"
+                defaultMessage="Are you sure you want to delete this analytics job?"
+              />
             </p>
+
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
                 {userCanDeleteIndex && (
                   <EuiSwitch
                     style={{ paddingBottom: 10 }}
                     label={i18n.translate(
-                      'xpack.ml.dataframe.analyticsList.deleteTargetIndexTitle',
+                      'xpack.ml.dataframe.analyticsList.deleteDestinationIndexTitle',
                       {
                         defaultMessage: 'Delete destination index',
                       }
                     )}
                     checked={deleteTargetIndex}
-                    onChange={e => toggleDeleteTargetIndex(!deleteTargetIndex)}
+                    onChange={() => toggleDeleteTargetIndex(!deleteTargetIndex)}
                   />
                 )}
               </EuiFlexItem>
@@ -220,7 +220,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
                       }
                     )}
                     checked={deleteIndexPattern}
-                    onChange={e => toggleDeleteIndexPattern(!deleteIndexPattern)}
+                    onChange={() => toggleDeleteIndexPattern(!deleteIndexPattern)}
                   />
                 )}
               </EuiFlexItem>

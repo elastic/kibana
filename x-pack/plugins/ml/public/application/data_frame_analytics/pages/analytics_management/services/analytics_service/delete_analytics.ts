@@ -12,7 +12,6 @@ import {
   isDataFrameAnalyticsFailed,
   DataFrameAnalyticsListRow,
 } from '../../components/analytics_list/common';
-
 export const deleteAnalytics = async (d: DataFrameAnalyticsListRow) => {
   const toastNotifications = getToastNotifications();
   try {
@@ -38,22 +37,57 @@ export const deleteAnalytics = async (d: DataFrameAnalyticsListRow) => {
   refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.REFRESH);
 };
 
-export const deleteAnalyticsAndTargetIndex = async (d: DataFrameAnalyticsListRow) => {
+export const deleteAnalyticsAndTargetIndex = async (
+  d: DataFrameAnalyticsListRow,
+  deleteTargetIndex: boolean,
+  deleteTargetPattern: boolean
+) => {
   const toastNotifications = getToastNotifications();
+  const destinationIndex = d.config.dest.index;
   try {
     if (isDataFrameAnalyticsFailed(d.stats.state)) {
       await ml.dataFrameAnalytics.stopDataFrameAnalytics(d.config.id, true);
     }
-    await ml.dataFrameAnalytics.deleteDataFrameAnalyticsAndTargetIndex(
+    const status = await ml.dataFrameAnalytics.deleteDataFrameAnalyticsAndTargetIndex(
       d.config.id,
-      d.config.dest.index
+      deleteTargetIndex,
+      deleteTargetPattern
     );
-    toastNotifications.addSuccess(
-      i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsSuccessMessage', {
-        defaultMessage: 'Request to delete data frame analytics {analyticsId} acknowledged.',
-        values: { analyticsId: d.config.id },
-      })
-    );
+    if (status.acknowledged) {
+      toastNotifications.addSuccess(
+        i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsSuccessMessage', {
+          defaultMessage: 'Request to delete data frame analytics {analyticsId} acknowledged.',
+          values: { analyticsId: d.config.id },
+        })
+      );
+    }
+
+    if (status.deleteTargetIndexAcknowledged) {
+      toastNotifications.addSuccess(
+        i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexSuccessMessage', {
+          defaultMessage: 'Request to delete destination index {destinationIndex} acknowledged.',
+          values: { destinationIndex },
+        })
+      );
+    }
+
+    if (status.deleteIndexPatternAcknowledged) {
+      toastNotifications.addSuccess(
+        i18n.translate(
+          'xpack.ml.dataframe.analyticsList.deleteAnalyticsWithIndexPatternSuccessMessage',
+          {
+            defaultMessage: 'Request to delete index pattern {destinationIndex} acknowledged.',
+            values: { destinationIndex },
+          }
+        )
+      );
+    }
+
+    if (Array.isArray(status.errors)) {
+      status.errors.map(error => {
+        toastNotifications.addDanger(error.msg);
+      });
+    }
   } catch (e) {
     toastNotifications.addDanger(
       i18n.translate('xpack.ml.dataframe.analyticsList.deleteAnalyticsErrorMessage', {

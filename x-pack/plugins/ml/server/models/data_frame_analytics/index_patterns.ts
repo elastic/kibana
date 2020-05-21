@@ -4,29 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APICaller, SavedObjectsClientContract } from 'kibana/server';
-import { IndexPatternAttributes } from 'src/plugins/data/server';
-// import { findObjectByTitle } from 'src/plugins/saved_objects/';
-import { mlLog } from '../../client/log';
-export const SAVED_OBJECT_TYPES = {
-  DASHBOARD: 'dashboard',
-  SEARCH: 'search',
-  VISUALIZATION: 'visualization',
-};
+import { SavedObjectsClientContract } from 'kibana/server';
+import { IIndexPattern } from 'src/plugins/data/server';
 
 export class IndexPatternHandler {
-  modulesDir = `${__dirname}/modules`;
-  indexPatternName: string = '';
-  indexPatternId: string | undefined = undefined;
-
-  constructor(
-    private callAsCurrentUser: APICaller,
-    private savedObjectsClient: SavedObjectsClientContract
-  ) {}
+  constructor(private savedObjectsClient: SavedObjectsClientContract) {}
   // returns a id based on an index pattern name
   async getIndexPatternId(indexName: string) {
     try {
-      const response = await this.savedObjectsClient.find<IndexPatternAttributes>({
+      const response = await this.savedObjectsClient.find<IIndexPattern>({
         type: 'index-pattern',
         perPage: 10,
         search: `"${indexName}"`,
@@ -40,12 +26,15 @@ export class IndexPatternHandler {
 
       return ip !== undefined ? ip.id : undefined;
     } catch (error) {
-      mlLog.warn(`Error loading index patterns, ${error}`);
-      return;
+      throw error;
     }
   }
 
   async deleteIndexPatternById(indexId: string) {
-    return await this.savedObjectsClient.delete('index-pattern', indexId);
+    try {
+      return await this.savedObjectsClient.delete('index-pattern', indexId);
+    } catch (error) {
+      throw error;
+    }
   }
 }

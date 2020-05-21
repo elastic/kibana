@@ -32,6 +32,16 @@ interface GetDataFrameAnalyticsResponse {
   data_frame_analytics: DataFrameAnalyticsConfig[];
 }
 
+export interface DeleteDataFrameAnalyticsWithIndexError {
+  msg: string;
+}
+interface DeleteDataFrameAnalyticsWithIndexReponse {
+  acknowledged: boolean;
+  deleteTargetIndexAcknowledged: boolean;
+  deleteIndexPatternAcknowledged: boolean;
+  errors: DeleteDataFrameAnalyticsWithIndexError[];
+}
+
 export const dataFrameAnalytics = {
   getDataFrameAnalytics(analyticsId?: string) {
     const analyticsIdString = analyticsId !== undefined ? `/${analyticsId}` : '';
@@ -86,10 +96,14 @@ export const dataFrameAnalytics = {
       method: 'DELETE',
     });
   },
-  deleteDataFrameAnalyticsAndTargetIndex(analyticsId: string, destinationIndex: string) {
-    return http<any>({
+  deleteDataFrameAnalyticsAndTargetIndex(
+    analyticsId: string,
+    deleteTargetIndex: boolean,
+    deleteIndexPattern: boolean
+  ) {
+    return http<DeleteDataFrameAnalyticsWithIndexReponse>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}`,
-      query: { destinationIndex },
+      query: { deleteTargetIndex, deleteIndexPattern },
       method: 'DELETE',
     });
   },

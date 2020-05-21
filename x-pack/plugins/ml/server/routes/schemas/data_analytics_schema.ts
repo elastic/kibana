@@ -62,9 +62,10 @@ export const analyticsIdSchema = schema.object({
 
 export const analyticsIdIndexSchema = schema.object({
   /**
-   * Analytics ID
+   * Analytics Destination Index
    */
-  destinationIndex: schema.maybe(schema.string()),
+  deleteTargetIndex: schema.maybe(schema.boolean()),
+  deleteIndexPattern: schema.maybe(schema.boolean()),
 });
 
 export const stopsDataFrameAnalyticsJobQuerySchema = schema.object({

@@ -5,6 +5,7 @@
  */
 
 import { RequestHandlerContext } from 'kibana/server';
+import { i18n } from '@kbn/i18n';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
 import { RouteInitialization } from '../types';
@@ -19,54 +20,44 @@ import {
 import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
 
 function getIndexPatternId(context: RequestHandlerContext, patternName: string) {
-  const iph = new IndexPatternHandler(
-    context.ml!.mlClient.callAsCurrentUser,
-    context.core.savedObjects.client
-  );
+  const iph = new IndexPatternHandler(context.core.savedObjects.client);
   return iph.getIndexPatternId(patternName);
 }
 
 function deleteIndexPatternById(context: RequestHandlerContext, indexPatternId: string) {
-  const iph = new IndexPatternHandler(
-    context.ml!.mlClient.callAsCurrentUser,
-    context.core.savedObjects.client
-  );
+  const iph = new IndexPatternHandler(context.core.savedObjects.client);
   return iph.deleteIndexPatternById(indexPatternId);
 }
 
-async function userCanDeleteIndex(
-  context: RequestHandlerContext,
-  destinationIndex: string
-): Promise<boolean> {
-  let privilege;
-  try {
-    privilege = await context.ml!.mlClient.callAsCurrentUser('transport.request', {
-      method: 'POST',
-      path: '/_security/user/_has_privileges',
-      body: {
-        index: [
-          {
-            names: [destinationIndex], // uses wildcard
-            privileges: ['delete_index'],
-          },
-        ],
-      },
-      ignoreUnavailable: true, // we allow 404 incase the user shutdown security in-between the check and now
-    });
-    return privilege.index[destinationIndex].delete_index === true;
-  } catch (err) {
-    if (
-      err.message === 'no handler found for uri [/_security/user/_has_privileges] and method [POST]'
-    ) {
-      return err;
-    }
-    throw err;
-  }
-}
 /**
  * Routes for the data frame analytics
  */
 export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitialization) {
+  async function userCanDeleteIndex(
+    context: RequestHandlerContext,
+    destinationIndex: string
+  ): Promise<boolean> {
+    if (!mlLicense.isSecurityEnabled()) {
+      return true;
+    }
+    let privilege;
+    try {
+      privilege = await context.ml!.mlClient.callAsCurrentUser('ml.privilegeCheck', {
+        body: {
+          index: [
+            {
+              names: [destinationIndex], // uses wildcard
+              privileges: ['delete_index'],
+            },
+          ],
+        },
+      });
+      return privilege.index[destinationIndex].delete_index === true;
+    } catch (err) {
+      throw err;
+    }
+  }
+
   /**
    * @apiGroup DataFrameAnalytics
    *
@@ -323,7 +314,6 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
   router.delete(
     {
       path: '/api/ml/data_frame/analytics/{analyticsId}',
-      // validate: false,
       validate: {
         params: analyticsIdSchema,
         query: analyticsIdIndexSchema,
@@ -335,36 +325,93 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
       try {
         const { analyticsId } = request.params;
+        const { deleteTargetIndex, deleteIndexPattern } = request.query;
+        const errorsEncountered = [];
+        let destinationIndex: string | undefined;
+        let deleteTargetIndexAcknowledged: boolean = false;
+        let deleteIndexPatternAcknowledged: boolean = false;
 
-        const { destinationIndex } = request.query;
-
-        // If user checks box to deleete the destinationIndex associcated with the job
-        if (destinationIndex) {
-          // Verify if user has privilege to delete the destination index
-
-          const userCanDeleteDestIndex = userCanDeleteIndex(context, destinationIndex);
-          // If user does have privilege to delete the index, then delete the index
-          if (userCanDeleteDestIndex) {
-            await context.ml!.mlClient.callAsCurrentUser('indices.delete', {
-              index: destinationIndex,
+        // Check if analyticsId is valid and get destination index
+        if (deleteTargetIndex || deleteIndexPattern) {
+          try {
+            const dfa = await context.ml!.mlClient.callAsCurrentUser('ml.getDataFrameAnalytics', {
+              analyticsId,
             });
+            if (Array.isArray(dfa.data_frame_analytics) && dfa.data_frame_analytics.length > 0) {
+              destinationIndex = dfa.data_frame_analytics[0].dest.index;
+            }
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
+
+          // If user checks box to delete the destinationIndex associated with the job
+          if (destinationIndex && deleteTargetIndex) {
+            // Verify if user has privilege to delete the destination index
+            const userCanDeleteDestIndex = await userCanDeleteIndex(context, destinationIndex);
+            // If user does have privilege to delete the index, then delete the index
+            if (userCanDeleteDestIndex) {
+              try {
+                await context.ml!.mlClient.callAsCurrentUser('indices.delete', {
+                  index: destinationIndex,
+                });
+                deleteTargetIndexAcknowledged = true;
+              } catch (deleteIndexError) {
+                errorsEncountered.push({
+                  msg: i18n.translate(
+                    'xpack.ml.dataframe.analyticsList.errorDeleteIndexNotificationErrorMessage',
+                    {
+                      defaultMessage:
+                        'An error occurred deleting destination index {destinationIndex}: {error}',
+                      values: {
+                        destinationIndex,
+                        error: JSON.stringify(deleteIndexError),
+                      },
+                    }
+                  ),
+                });
+              }
+            } else {
+              return response.forbidden();
+            }
+          }
+
+          // Delete the index pattern if there's an index pattern that matches the name of dest index
+          if (destinationIndex && deleteIndexPattern) {
+            try {
+              const indexPatternId = await getIndexPatternId(context, destinationIndex);
+              if (indexPatternId) {
+                await deleteIndexPatternById(context, indexPatternId);
+              }
+              deleteIndexPatternAcknowledged = true;
+            } catch (deleteIndexPatternError) {
+              errorsEncountered.push({
+                msg: i18n.translate(
+                  'xpack.ml.dataframe.analyticsList.errorDeleteIndexPatternNotificationErrorMessage',
+                  {
+                    defaultMessage:
+                      'An error occurred deleting index pattern {destinationIndex}: {error}',
+                    values: {
+                      destinationIndex,
+                      error: JSON.stringify(deleteIndexPatternError),
+                    },
+                  }
+                ),
+              });
+            }
           }
         }
+        // Grab the target index from the data frame analytics job id
+        // Delete the data frame analytics
+        let results = await context.ml!.mlClient.callAsCurrentUser('ml.deleteDataFrameAnalytics', {
+          analyticsId,
+        });
 
-        // Delete the dataframe analytics
-        const results = await context.ml!.mlClient.callAsCurrentUser(
-          'ml.deleteDataFrameAnalytics',
-          {
-            analyticsId,
-          }
-        );
-
-        // Delete the index pattern if there's an index pattern that matches the name of dest index
-        const indexPatternId = await getIndexPatternId(context, destinationIndex);
-
-        if (indexPatternId) {
-          const result = deleteIndexPatternById(context, indexPatternId);
-        }
+        results = {
+          ...results,
+          deleteTargetIndexAcknowledged,
+          deleteIndexPatternAcknowledged,
+          errors: errorsEncountered,
+        };
 
         return response.ok({
           body: results,
