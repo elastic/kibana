@@ -16,6 +16,8 @@ import {
   DefaultPackages,
   ElasticsearchAssetType,
   IngestAssetType,
+  RegistryPackage,
+  RegistrySearchResult,
 } from '../../../types';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import * as Registry from '../registry';
@@ -79,11 +81,7 @@ export async function ensureInstalledDefaultPackages(
   //
   // This may be fixed in TS 3.9 (we're on 3.7)
   // https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-9.html#improvements-in-inference-and-promiseall
-  const installations = [baseInstallation, ...otherInstallations].filter(
-    (installation: Installation | undefined): installation is Installation => {
-      return installation !== undefined;
-    }
-  );
+  const installations = [baseInstallation, ...otherInstallations].filter(notUndefined);
 
   if (span) span.end();
   return installations;
@@ -125,9 +123,15 @@ export async function installPackage(options: {
   // TODO: calls to getInstallationObject, Registry.fetchInfo, and Registry.fetchFindLatestPackge
   // and be replaced by getPackageInfo after adjusting for it to not group/use archive assets
   const pSpan1 = apmTrans?.startSpan(
-    `parallelize getInstallationObject, Registry.fetchInfo,Registry.fetchFindLatestPackage ${pkgName}`
+    `parallel getInstallationObject, Registry.fetchInfo,Registry.fetchFindLatestPackage ${pkgName}`
   );
-  const [installedPkg, registryPackageInfo, latestPackage] = await Promise.all([
+  // I believe this is also related to Promise.all and addressed in 3.9
+  // @ts-ignore
+  const [installedPkg, registryPackageInfo, latestPackage]: [
+    SavedObject<Installation> | undefined,
+    RegistryPackage,
+    RegistrySearchResult
+  ] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
     Registry.fetchInfo(pkgName, pkgVersion),
     Registry.fetchFindLatestPackage(pkgName),
@@ -136,9 +140,6 @@ export async function installPackage(options: {
 
   if (pkgVersion < latestPackage.version)
     throw Boom.badRequest('Cannot install or update to an out-of-date package');
-
-  const reinstall = pkgVersion === installedPkg?.attributes.version;
-  const { internal = false, removable = true } = registryPackageInfo;
 
   // delete the previous version's installation's SO kibana assets before installing new ones
   // in case some assets were removed in the new version
@@ -153,13 +154,15 @@ export async function installPackage(options: {
   const pSpan2 = apmTrans?.startSpan(
     'parallel installKibanaAssets, installPipelines, installIndexPatterns, installILMPolicy'
   );
-  const [installedKibanaAssets, installedPipelines] = await Promise.all([
+  const [installedKibanaAssets, installedPipelines, installedTemplates] = await Promise.all([
     installKibanaAssets({
       savedObjectsClient,
       pkgName,
       pkgVersion,
     }),
     installPipelines(registryPackageInfo, callCluster),
+    // install or update the templates
+    installTemplates(registryPackageInfo, callCluster, pkgName, pkgVersion),
     // index patterns and ilm policies are not currently associated with a particular package
     // so we do not save them in the package saved object state.
     installIndexPatterns(savedObjectsClient, pkgName, pkgVersion),
@@ -169,15 +172,7 @@ export async function installPackage(options: {
     installILMPolicy(pkgName, pkgVersion, callCluster),
   ]);
   if (pSpan2) pSpan2.end();
-  // install or update the templates
-  const tSpan = apmTrans?.startSpan(`await installTemplates ${pkgkey}`);
-  const installedTemplates = await installTemplates(
-    registryPackageInfo,
-    callCluster,
-    pkgName,
-    pkgVersion
-  );
-  if (tSpan) tSpan.end();
+
   const toSaveESIndexPatterns = generateESIndexPatterns(registryPackageInfo.datasets);
 
   // get template refs to save
@@ -191,6 +186,7 @@ export async function installPackage(options: {
     const iSpan = apmTrans?.startSpan(`await updateCurrentWriteIndices ${pkgkey}`);
     await updateCurrentWriteIndices(callCluster, installedTemplates);
     if (iSpan) iSpan.end();
+    const reinstall = pkgVersion === installedPkg?.attributes.version;
     if (!reinstall) {
       try {
         // delete the previous version's installation's pipelines
@@ -209,11 +205,13 @@ export async function installPackage(options: {
       }
     }
   }
+
   const toSaveAssetRefs: AssetReference[] = [
     ...installedKibanaAssets,
     ...installedPipelines,
     ...installedTemplateRefs,
   ];
+  const { internal = false, removable = true } = registryPackageInfo;
   // Save references to installed assets in the package's saved object state
   const rSpan = apmTrans?.startSpan('saveInstallationReferences');
   const refs = await saveInstallationReferences({
@@ -298,23 +296,23 @@ async function installKibanaSavedObjects({
 }) {
   const isSameType = ({ path }: Registry.ArchiveEntry) =>
     assetType === Registry.pathParts(path).type;
-  let span = apm.startSpan('installKibanaSavedObjects getArchiveInfo');
+  const getInfoSpan = apm.startSpan('installKibanaSavedObjects getArchiveInfo');
   const paths = await Registry.getArchiveInfo(pkgName, pkgVersion, isSameType);
-  if (span) span.end();
-  span = apm.startSpan('installKibanaSavedObjects getObjects');
+  if (getInfoSpan) getInfoSpan.end();
+  const getObjSpan = apm.startSpan('installKibanaSavedObjects getObjects');
   const toBeSavedObjects = await Promise.all(paths.map(getObject));
-  if (span) span.end();
+  if (getObjSpan) getObjSpan.end();
 
   if (toBeSavedObjects.length === 0) {
     return [];
   } else {
-    span = apm.startSpan('installKibanaSavedObjects bulkCreate');
+    const bulkSpan = apm.startSpan('installKibanaSavedObjects bulkCreate');
     const createResults = await savedObjectsClient.bulkCreate(toBeSavedObjects, {
       overwrite: true,
     });
     const createdObjects = createResults.saved_objects;
     const installed = createdObjects.map(toAssetReference);
-    if (span) span.end();
+    if (bulkSpan) bulkSpan.end();
     return installed;
   }
 }
@@ -323,4 +321,8 @@ function toAssetReference({ id, type }: SavedObject) {
   const reference: AssetReference = { id, type: type as KibanaAssetType };
 
   return reference;
+}
+
+function notUndefined<T>(x: T | undefined): x is T {
+  return x !== undefined;
 }

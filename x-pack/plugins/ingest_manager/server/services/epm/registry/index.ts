@@ -6,6 +6,7 @@
 
 import { Response } from 'node-fetch';
 import { URL } from 'url';
+import { apm } from '../../../index';
 import {
   AssetParts,
   AssetsGroupedByServiceByType,
@@ -77,6 +78,7 @@ export async function getArchiveInfo(
   filter = (entry: ArchiveEntry): boolean => true
 ): Promise<string[]> {
   const paths: string[] = [];
+  const fnSpan = apm.startSpan(`getArchiveInfo ${pkgName} ${pkgVersion}`);
   const onEntry = (entry: ArchiveEntry) => {
     const { path, buffer } = entry;
     const { file } = pathParts(path);
@@ -87,8 +89,10 @@ export async function getArchiveInfo(
     }
   };
 
+  const span = apm.startSpan(`extract ${pkgName} ${pkgVersion}`);
   await extract(pkgName, pkgVersion, filter, onEntry);
-
+  if (span) span.end();
+  if (fnSpan) fnSpan.end();
   return paths;
 }
 
@@ -136,12 +140,16 @@ async function extract(
 async function getOrFetchArchiveBuffer(pkgName: string, pkgVersion: string): Promise<Buffer> {
   // assume .tar.gz for now. add support for .zip if/when we need it
   const key = `${pkgName}-${pkgVersion}.tar.gz`;
+  const fnSpan = apm.startSpan(`getOrFetchArchiveBuffer ${pkgName} ${pkgVersion}`);
   let buffer = cacheGet(key);
   if (!buffer) {
+    const span = apm.startSpan(`fetchArchiveBuffer ${pkgName} ${pkgVersion}`);
     buffer = await fetchArchiveBuffer(pkgName, pkgVersion);
+    if (span) span.end();
     cacheSet(key, buffer);
   }
 
+  if (fnSpan) fnSpan.end();
   if (buffer) {
     return buffer;
   } else {

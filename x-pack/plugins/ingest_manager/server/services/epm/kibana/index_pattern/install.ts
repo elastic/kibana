@@ -83,7 +83,7 @@ export async function installIndexPatterns(
   pkgVersion?: string
 ) {
   // get all user installed packages
-  const span = apm.startSpan('installIndexPatterns');
+  const fnSpan = apm.startSpan('installIndexPatterns');
   const installedPackages = await getPackageKeysByStatus(
     savedObjectsClient,
     InstallationStatus.installed
@@ -110,6 +110,7 @@ export async function installIndexPatterns(
     IndexPatternType.metrics,
     IndexPatternType.events,
   ];
+  const fSpan = apm.startSpan('installIndexPattern forEach');
   indexPatternTypes.forEach(async indexPatternType => {
     // if this is an update because a package is being unisntalled (no pkgkey argument passed) and no other packages are installed, remove the index pattern
     if (!pkgName && installedPackages.length === 0) {
@@ -131,7 +132,8 @@ export async function installIndexPatterns(
       overwrite: true,
     });
   });
-  if (span) span.end();
+  if (fSpan) fSpan.end();
+  if (fnSpan) fnSpan.end();
 }
 
 // loops through all given packages and returns an array

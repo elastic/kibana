@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { apm } from '../../../index';
 import { RegistryPackage } from '../../../types';
 import * as Registry from '../registry';
 import { cacheHas } from '../registry/cache';
@@ -56,6 +57,9 @@ export async function getAssetsData(
   filter = (path: string): boolean => true,
   datasetName?: string
 ): Promise<Registry.ArchiveEntry[]> {
+  const fnSpan = apm.startSpan(
+    `getAssetsData ${packageInfo.name} ${packageInfo.version} ${datasetName}`
+  );
   // TODO: Needs to be called to fill the cache but should not be required
   const pkgkey = packageInfo.name + '-' + packageInfo.version;
   if (!cacheHas(pkgkey)) await Registry.getArchiveInfo(packageInfo.name, packageInfo.version);
@@ -68,7 +72,7 @@ export async function getAssetsData(
 
     return { path: registryPath, buffer };
   });
-
+  if (fnSpan) fnSpan.end();
   return entries;
 }
 

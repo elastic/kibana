@@ -5,6 +5,7 @@
  */
 
 import { safeLoad } from 'js-yaml';
+import { apm } from '../../../index';
 import { RegistryPackage } from '../../../types';
 import { getAssetsData } from '../packages/assets';
 
@@ -245,11 +246,14 @@ export const loadFieldsFromYaml = async (
   datasetName?: string
 ): Promise<Field[]> => {
   // Fetch all field definition files
+  const fnSpan = apm.startSpan(`loadFieldsFromYaml ${pkg.name} ${pkg.version} ${datasetName}`);
   const fieldDefinitionFiles = await getAssetsData(pkg, isFields, datasetName);
-  return fieldDefinitionFiles.reduce<Field[]>((acc, file) => {
+  const fields = fieldDefinitionFiles.reduce<Field[]>((acc, file) => {
     // Make sure it is defined as it is optional. Should never happen.
     if (file.buffer) {
+      const span = apm.startSpan('js-yaml safeLoad');
       const tmpFields = safeLoad(file.buffer.toString());
+      if (span) span.end();
       // safeLoad() returns undefined for empty files, we don't want that
       if (tmpFields) {
         acc = acc.concat(tmpFields);
@@ -257,4 +261,6 @@ export const loadFieldsFromYaml = async (
     }
     return acc;
   }, []);
+  if (fnSpan) fnSpan.end();
+  return fields;
 };

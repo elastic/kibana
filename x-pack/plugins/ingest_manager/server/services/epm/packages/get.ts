@@ -26,6 +26,7 @@ export async function getPackages(
   } & Registry.SearchParams
 ) {
   const { savedObjectsClient } = options;
+  const fnSpan = apm.startSpan(`getPackages ${options.category}`);
   const registryItems = await Registry.fetchList({ category: options.category }).then(items => {
     return items.map(item =>
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) })
@@ -44,6 +45,7 @@ export async function getPackages(
       )
     )
     .sort(sortByName);
+  if (fnSpan) fnSpan.end();
   return packageList;
 }
 

@@ -92,8 +92,9 @@ const installPreBuiltTemplates = async (
     return callCluster('transport.request', callClusterParams);
   });
   try {
+    const value = await Promise.all(templateInstallPromises);
     if (span) span.end();
-    return await Promise.all(templateInstallPromises);
+    return value;
   } catch (e) {
     throw new Boom(`Error installing prebuilt index templates ${e.message}`, {
       statusCode: 400,
@@ -189,6 +190,7 @@ export async function installTemplate({
   dataset: Dataset;
   packageVersion: string;
 }): Promise<TemplateRef> {
+  const fnSpan = apm.startSpan(`installTemplate`);
   const mappings = generateMappings(processFields(fields));
   const templateName = generateTemplateName(dataset);
   let pipelineName;
@@ -218,7 +220,7 @@ export async function installTemplate({
   // which does not support v2 templates.
   // See src/core/server/elasticsearch/api_types.ts for available endpoints.
   await callCluster('transport.request', callClusterParams);
-
+  if (fnSpan) fnSpan.end();
   return {
     templateName,
     indexTemplate: template,
