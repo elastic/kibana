@@ -105,30 +105,28 @@ export default ({ getService }: FtrProviderContext) => {
       }
     });
 
-    describe('gets job summary with job ID supplied', function() {
+    describe('deletes job with ID supplied', function() {
       for (const testData of testDataList) {
-        describe('deletes job ID supplied', function() {
-          it(`${testData.testTitle}`, async () => {
-            const body = await runJobsDeleteRequest(
-              testData.user,
-              testData.requestBody,
-              testData.expected.responseCode
-            );
+        it(`${testData.testTitle}`, async () => {
+          const body = await runJobsDeleteRequest(
+            testData.user,
+            testData.requestBody,
+            testData.expected.responseCode
+          );
 
-            const expectedResponse = testData.expected.responseBody;
-            const expectedRspJobIds = Object.keys(expectedResponse).sort((a, b) =>
-              a.localeCompare(b)
-            );
-            const actualRspJobIds = Object.keys(body).sort((a, b) => a.localeCompare(b));
+          const expectedResponse = testData.expected.responseBody;
+          const expectedRspJobIds = Object.keys(expectedResponse).sort((a, b) =>
+            a.localeCompare(b)
+          );
+          const actualRspJobIds = Object.keys(body).sort((a, b) => a.localeCompare(b));
 
-            expect(actualRspJobIds).to.have.length(expectedRspJobIds.length);
-            expect(actualRspJobIds).to.eql(expectedRspJobIds);
+          expect(actualRspJobIds).to.have.length(expectedRspJobIds.length);
+          expect(actualRspJobIds).to.eql(expectedRspJobIds);
 
-            // check jobs no longer exist
-            for (const id of testData.requestBody.jobIds) {
-              await ml.api.waitForAnomalyDetectionJobNotToExist(id);
-            }
-          });
+          // check jobs no longer exist
+          for (const id of testData.requestBody.jobIds) {
+            await ml.api.waitForAnomalyDetectionJobNotToExist(id);
+          }
         });
       }
     });

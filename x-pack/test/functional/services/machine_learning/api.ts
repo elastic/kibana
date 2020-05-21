@@ -372,7 +372,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .then((res: any) => res.body);
 
       expect(startResponse)
-        .to.have.property('started')
+        .to.have.property('stopped')
         .eql(true, 'Response for start datafeed request should be acknowledged');
     },
 

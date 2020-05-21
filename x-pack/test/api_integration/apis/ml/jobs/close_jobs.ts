@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../common';
 import { USER } from '../../../../functional/services/machine_learning/security_common';
+import { JOB_STATE, DATAFEED_STATE } from '../../../../../plugins/ml/common/constants/states';
 import { MULTI_METRIC_JOB_CONFIG, SINGLE_METRIC_JOB_CONFIG, DATAFEED_CONFIG } from './common_jobs';
 
 // eslint-disable-next-line import/no-default-export
@@ -29,27 +30,45 @@ export default ({ getService }: FtrProviderContext) => {
       expected: {
         responseCode: 200,
         responseBody: {
-          [SINGLE_METRIC_JOB_CONFIG.job_id]: { deleted: true },
-          [MULTI_METRIC_JOB_CONFIG.job_id]: { deleted: true },
+          [SINGLE_METRIC_JOB_CONFIG.job_id]: { closed: true },
+          [MULTI_METRIC_JOB_CONFIG.job_id]: { closed: true },
         },
       },
     },
   ];
 
-  // const testDataListNegative = [
-  //   {
-  //     testTitle: 'as ML Unauthorized user',
-  //     user: USER.ML_UNAUTHORIZED,
-  //     requestBody: {
-  //       jobIds: [SINGLE_METRIC_JOB_CONFIG.job_id, MULTI_METRIC_JOB_CONFIG.job_id],
-  //     },
-  //     // Note that the jobs and datafeeds are loaded async so the actual error message is not deterministic.
-  //     expected: {
-  //       responseCode: 404,
-  //       error: 'Not Found',
-  //     },
-  //   },
-  // ];
+  const testDataListFailed = [
+    {
+      testTitle: 'as ML Poweruser',
+      user: USER.ML_POWERUSER,
+      requestBody: {
+        jobIds: [SINGLE_METRIC_JOB_CONFIG.job_id, MULTI_METRIC_JOB_CONFIG.job_id],
+      },
+      expected: {
+        responseCode: 200,
+
+        responseBody: {
+          [SINGLE_METRIC_JOB_CONFIG.job_id]: { closed: false, error: { statusCode: 409 } },
+          [MULTI_METRIC_JOB_CONFIG.job_id]: { closed: false, error: { statusCode: 409 } },
+        },
+      },
+    },
+  ];
+
+  const testDataListUnauthorized = [
+    {
+      testTitle: 'as ML Unauthorized user',
+      user: USER.ML_UNAUTHORIZED,
+      requestBody: {
+        jobIds: [SINGLE_METRIC_JOB_CONFIG.job_id, MULTI_METRIC_JOB_CONFIG.job_id],
+      },
+      // Note that the jobs and datafeeds are loaded async so the actual error message is not deterministic.
+      expected: {
+        responseCode: 404,
+        error: 'Not Found',
+      },
+    },
+  ];
 
   async function runCloseJobsRequest(
     user: USER,
@@ -79,41 +98,22 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('sets up jobs', async () => {
       for (const job of testSetupJobConfigs) {
+        const datafeedId = `datafeed-${job.job_id}`;
         await ml.api.createAnomalyDetectionJob(job);
+        await ml.api.openAnomalyDetectionJob(job.job_id);
         await ml.api.createDatafeed({
           ...DATAFEED_CONFIG,
-          datafeed_id: `datafeed-${job.job_id}`,
+          datafeed_id: datafeedId,
           job_id: job.job_id,
         });
+        await ml.api.startDatafeed(datafeedId, { start: '0' });
+        await ml.api.waitForDatafeedState(datafeedId, DATAFEED_STATE.STARTED);
       }
     });
 
-    // describe('rejects request', function() {
-    //   for (const testData of testDataListNegative) {
-    //     describe('fails to delete job ID supplied', function() {
-    //       it(`${testData.testTitle}`, async () => {
-    //         const body = await runCloseJobsRequest(
-    //           testData.user,
-    //           testData.requestBody,
-    //           testData.expected.responseCode
-    //         );
-
-    //         expect(body)
-    //           .to.have.property('error')
-    //           .eql(testData.expected.error);
-
-    //         // check jobs still exist
-    //         for (const id of testData.requestBody.jobIds) {
-    //           await ml.api.waitForAnomalyDetectionJobToExist(id);
-    //         }
-    //       });
-    //     });
-    //   }
-    // });
-
-    describe('gets job summary with job ID supplied', function() {
-      for (const testData of testDataList) {
-        describe('deletes job ID supplied', function() {
+    describe('rejects request', function() {
+      for (const testData of testDataListUnauthorized) {
+        describe('fails to close job ID supplied', function() {
           it(`${testData.testTitle}`, async () => {
             const body = await runCloseJobsRequest(
               testData.user,
@@ -121,20 +121,86 @@ export default ({ getService }: FtrProviderContext) => {
               testData.expected.responseCode
             );
 
-            const expectedResponse = testData.expected.responseBody;
-            const expectedRspJobIds = Object.keys(expectedResponse).sort((a, b) =>
-              a.localeCompare(b)
-            );
-            const actualRspJobIds = Object.keys(body).sort((a, b) => a.localeCompare(b));
+            expect(body)
+              .to.have.property('error')
+              .eql(testData.expected.error);
 
-            expect(actualRspJobIds).to.have.length(expectedRspJobIds.length);
-            expect(actualRspJobIds).to.eql(expectedRspJobIds);
-
-            // check jobs no longer exist
+            // ensure jobs are still open
             for (const id of testData.requestBody.jobIds) {
-              await ml.api.waitForAnomalyDetectionJobNotToExist(id);
+              await ml.api.waitForJobState(id, JOB_STATE.OPENED);
             }
           });
+        });
+      }
+    });
+
+    describe('close jobs fail because they are running', function() {
+      for (const testData of testDataListFailed) {
+        it(`${testData.testTitle}`, async () => {
+          const body = await runCloseJobsRequest(
+            testData.user,
+            testData.requestBody,
+            testData.expected.responseCode
+          );
+          const expectedResponse = testData.expected.responseBody;
+          const expectedRspJobIds = Object.keys(expectedResponse).sort((a, b) =>
+            a.localeCompare(b)
+          );
+          const actualRspJobIds = Object.keys(body).sort((a, b) => a.localeCompare(b));
+
+          expect(actualRspJobIds).to.have.length(expectedRspJobIds.length);
+          expect(actualRspJobIds).to.eql(expectedRspJobIds);
+
+          expectedRspJobIds.forEach(id => {
+            expect(body[id].closed).to.eql(testData.expected.responseBody[id].closed);
+            expect(body[id].error.statusCode).to.eql(
+              testData.expected.responseBody[id].error.statusCode
+            );
+          });
+
+          // ensure jobs are still open
+          for (const id of testData.requestBody.jobIds) {
+            await ml.api.waitForJobState(id, JOB_STATE.OPENED);
+          }
+        });
+      }
+    });
+
+    describe('stops datafeeds', function() {
+      it('stops datafeeds', async () => {
+        for (const job of testSetupJobConfigs) {
+          const datafeedId = `datafeed-${job.job_id}`;
+          await ml.api.stopDatafeed(datafeedId);
+          await ml.api.waitForDatafeedState(datafeedId, DATAFEED_STATE.STOPPED);
+        }
+      });
+    });
+
+    describe('close jobs succeed', function() {
+      for (const testData of testDataList) {
+        it(`${testData.testTitle}`, async () => {
+          const body = await runCloseJobsRequest(
+            testData.user,
+            testData.requestBody,
+            testData.expected.responseCode
+          );
+          const expectedResponse = testData.expected.responseBody;
+          const expectedRspJobIds = Object.keys(expectedResponse).sort((a, b) =>
+            a.localeCompare(b)
+          );
+          const actualRspJobIds = Object.keys(body).sort((a, b) => a.localeCompare(b));
+
+          expect(actualRspJobIds).to.have.length(expectedRspJobIds.length);
+          expect(actualRspJobIds).to.eql(expectedRspJobIds);
+
+          expectedRspJobIds.forEach(id => {
+            expect(body[id].closed).to.eql(testData.expected.responseBody[id].closed);
+          });
+
+          // ensure jobs are now closed
+          for (const id of testData.requestBody.jobIds) {
+            await ml.api.waitForJobState(id, JOB_STATE.CLOSED);
+          }
         });
       }
     });
