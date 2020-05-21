@@ -204,6 +204,11 @@ module.exports = {
                 errorMessage: `Plugins may only import from src/core/server and src/core/public.`,
               },
               {
+                target: ['(src|x-pack)/plugins/*/public/**/*'],
+                from: ['(src|x-pack)/plugins/*/server/**/*'],
+                errorMessage: `Public code can not import from server, use a common directory.`,
+              },
+              {
                 target: [
                   '(src|x-pack)/legacy/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
