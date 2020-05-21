@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CpuUsageAlert, ClusterStateAlert, LicenseExpirationAlert, BaseAlert } from './';
+import { CpuUsageAlert, ClusterHealthAlert, LicenseExpirationAlert, BaseAlert } from './';
 import {
-  ALERT_CLUSTER_STATE,
+  ALERT_CLUSTER_HEALTH,
   ALERT_LICENSE_EXPIRATION,
   ALERT_CPU_USAGE,
 } from '../../common/constants';
 import { AlertsClient } from '../../../alerting/server';
 
 const BY_TYPE = {
-  [ALERT_CLUSTER_STATE]: ClusterStateAlert,
+  [ALERT_CLUSTER_HEALTH]: ClusterHealthAlert,
   [ALERT_LICENSE_EXPIRATION]: LicenseExpirationAlert,
   [ALERT_CPU_USAGE]: CpuUsageAlert,
 };

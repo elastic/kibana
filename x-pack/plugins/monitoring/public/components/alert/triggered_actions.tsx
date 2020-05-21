@@ -25,10 +25,13 @@ import { AlertPopoverAddAction } from './add_action';
 import { AlertPopoverConfigureAction } from './configure_action';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface AlertPopoverTriggeredActionsProps {}
+interface AlertPopoverTriggeredActionsProps {
+  isEditMode: boolean;
+}
 export const AlertPopoverTriggeredActions: React.FC<AlertPopoverTriggeredActionsProps> = (
   props: AlertPopoverTriggeredActionsProps
 ) => {
+  const { isEditMode } = props;
   const context = React.useContext(AlertPopoverContext);
   const [actions, setActions] = React.useState(context.alert.rawAlert.actions);
   const [currentConfigureActionTypeId, setCurrentConfigureActionTypeId] = React.useState<
@@ -98,16 +101,20 @@ export const AlertPopoverTriggeredActions: React.FC<AlertPopoverTriggeredActions
             <EuiIcon type={icon} size="s" />
           </EuiFlexItem>
           <EuiFlexItem grow={5}>{message}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink onClick={() => setCurrentConfigureActionTypeId(action.actionTypeId)}>
-              <EuiText size="s">Configure</EuiText>
-            </EuiLink>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink onClick={() => disableAction(action)}>
-              <EuiText size="s">Disable</EuiText>
-            </EuiLink>
-          </EuiFlexItem>
+          {isEditMode ? (
+            <Fragment>
+              <EuiFlexItem grow={false}>
+                <EuiLink onClick={() => setCurrentConfigureActionTypeId(action.actionTypeId)}>
+                  <EuiText size="s">Configure</EuiText>
+                </EuiLink>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiLink onClick={() => disableAction(action)}>
+                  <EuiText size="s">Disable</EuiText>
+                </EuiLink>
+              </EuiFlexItem>
+            </Fragment>
+          ) : null}
         </EuiFlexGroup>
       </Fragment>
     );
@@ -117,40 +124,42 @@ export const AlertPopoverTriggeredActions: React.FC<AlertPopoverTriggeredActions
     );
   });
 
-  actionList.push(
-    <EuiListGroupItem
-      key="addAction"
-      label={
-        <Fragment>
-          <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexStart">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="listAdd" size="s" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiLink onClick={() => setShowAddAction(true)}>
-                <EuiText size="s">
-                  <p>Add action</p>
-                </EuiText>
-              </EuiLink>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          {showAddAction ? (
-            <Fragment>
-              <EuiSpacer size="s" />
-              <AlertPopoverAddAction
-                cancel={() => setShowAddAction(false)}
-                done={alert => {
-                  setActions(alert.rawAlert.actions);
-                  setShowAddAction(false);
-                }}
-              />
-            </Fragment>
-          ) : null}
-        </Fragment>
-      }
-      style={{ width: '100%', display: 'block' }}
-    />
-  );
+  if (isEditMode) {
+    actionList.push(
+      <EuiListGroupItem
+        key="addAction"
+        label={
+          <Fragment>
+            <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexStart">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="listAdd" size="s" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiLink onClick={() => setShowAddAction(true)}>
+                  <EuiText size="s">
+                    <p>Add action</p>
+                  </EuiText>
+                </EuiLink>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {showAddAction ? (
+              <Fragment>
+                <EuiSpacer size="s" />
+                <AlertPopoverAddAction
+                  cancel={() => setShowAddAction(false)}
+                  done={alert => {
+                    setActions(alert.rawAlert.actions);
+                    setShowAddAction(false);
+                  }}
+                />
+              </Fragment>
+            ) : null}
+          </Fragment>
+        }
+        style={{ width: '100%', display: 'block' }}
+      />
+    );
+  }
 
   let configureUi = null;
   if (currentConfigureActionTypeId) {

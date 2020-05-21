@@ -18,11 +18,13 @@ import {
 import { AlertPopoverConfigureThrottle } from './configure_throttle';
 import { AlertPopoverContext } from './lib';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface AlertPopoverSettingsProps {}
+interface AlertPopoverSettingsProps {
+  isEditMode: boolean;
+}
 export const AlertPopoverSettings: React.FC<AlertPopoverSettingsProps> = (
   props: AlertPopoverSettingsProps
 ) => {
+  const { isEditMode } = props;
   const context = React.useContext(AlertPopoverContext);
   const [activeConfigureSetting, setActiveConfigureSetting] = React.useState<string | null>(null);
 
@@ -55,11 +57,13 @@ export const AlertPopoverSettings: React.FC<AlertPopoverSettingsProps> = (
                   <p>Notify me every {context.alert.rawAlert.throttle}</p>
                 </EuiText>
               </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiLink onClick={() => setActiveConfigureSetting('throttle')}>
-                  <EuiText size="s">Configure</EuiText>
-                </EuiLink>
-              </EuiFlexItem>
+              {isEditMode ? (
+                <EuiFlexItem>
+                  <EuiLink onClick={() => setActiveConfigureSetting('throttle')}>
+                    <EuiText size="s">Configure</EuiText>
+                  </EuiLink>
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
             {activeConfigureSetting ? (
               <Fragment>

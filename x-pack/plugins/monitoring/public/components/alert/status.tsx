@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { EuiSpacer, EuiFlexItem, EuiFlexGroup, EuiTitle, EuiCallOut } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiTitle,
+  EuiCallOut,
+  EuiLink,
+  EuiText,
+} from '@elastic/eui';
 
 import { CommonAlertStatus, CommonActionDefaultParameters } from '../../../common/types';
 import { replaceTokens, AlertPopoverContext } from './lib';
@@ -27,6 +35,7 @@ export const AlertPopoverStatus: React.FC<AlertPopoverStatusProps> = (
   const [defaultParametersByAlertType, setDefaultParametersByAlertType] = React.useState<
     CommonActionDefaultParameters
   >({} as any);
+  const [isEditMode, setIsEditMode] = React.useState(false);
 
   React.useEffect(() => {
     (async () => {
@@ -90,11 +99,14 @@ export const AlertPopoverStatus: React.FC<AlertPopoverStatusProps> = (
       }}
     >
       <Fragment>
-        <EuiCallOut title={replaceTokens(firingState.state.ui.message)} color="warning">
+        <EuiCallOut
+          title={replaceTokens(firingState.state.ui.message)}
+          color={firingState.state.ui.severity}
+        >
           {nextStepsUi}
         </EuiCallOut>
         <EuiSpacer size="m" />
-        <AlertPopoverTriggeredActions />
+        <AlertPopoverTriggeredActions isEditMode={isEditMode} />
         <EuiSpacer size="s" />
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
@@ -104,7 +116,15 @@ export const AlertPopoverStatus: React.FC<AlertPopoverStatusProps> = (
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <AlertPopoverSettings />
+        <AlertPopoverSettings isEditMode={isEditMode} />
+        <EuiSpacer size="s" />
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiLink onClick={() => setIsEditMode(!isEditMode)}>
+              <EuiText size="s">{isEditMode ? 'Stop configuring' : 'Configure'}</EuiText>
+            </EuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </Fragment>
     </AlertPopoverContext.Provider>
   );

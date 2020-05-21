@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fetchClusterState } from './fetch_cluster_state';
+import { fetchClusterHealth } from './fetch_cluster_health';
 
-describe('fetchClusterState', () => {
-  it('should return the cluster state', async () => {
+describe('fetchClusterHealth', () => {
+  it('should return the cluster health', async () => {
     const status = 'green';
     const clusterUuid = 'sdfdsaj34434';
     const callCluster = jest.fn(() => ({
@@ -28,8 +28,8 @@ describe('fetchClusterState', () => {
     const clusters = [{ clusterUuid, clusterName: 'foo' }];
     const index = '.monitoring-es-*';
 
-    const state = await fetchClusterState(callCluster, clusters, index);
-    expect(state).toEqual([
+    const health = await fetchClusterHealth(callCluster, clusters, index);
+    expect(health).toEqual([
       {
         state: status,
         clusterUuid,

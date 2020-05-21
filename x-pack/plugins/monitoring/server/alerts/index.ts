@@ -6,6 +6,6 @@
 
 export { BaseAlert } from './base_alert';
 export { CpuUsageAlert } from './cpu_usage_alert';
-export { ClusterStateAlert } from './cluster_state_alert';
+export { ClusterHealthAlert } from './cluster_health_alert';
 export { LicenseExpirationAlert } from './license_expiration_alert';
 export { AlertsFactory } from './alerts_factory';

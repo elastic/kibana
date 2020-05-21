@@ -11,30 +11,21 @@ import {
   AlertCluster,
   AlertState,
   AlertMessage,
-  AlertMessageTimeToken,
   AlertMessageLinkToken,
-  AlertClusterStateState,
-  AlertClusterState,
+  AlertClusterHealth,
+  AlertClusterHealthState,
 } from './types';
 import { AlertInstance, AlertExecutorOptions } from '../../../alerting/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
-  ALERT_CLUSTER_STATE,
+  ALERT_CLUSTER_HEALTH,
   ALERT_ACTION_TYPE_LOG,
   ALERT_ACTION_TYPE_EMAIL,
 } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
-import { AlertMessageTokenType, AlertClusterStateType, AlertSeverity } from '../../common/enums';
+import { AlertMessageTokenType, AlertClusterHealthType, AlertSeverity } from '../../common/enums';
 import { fetchDefaultEmailAddress } from '../lib/alerts/fetch_default_email_address';
-import { fetchClusterState } from '../lib/alerts/fetch_cluster_state';
-
-const RESOLVED_SUBJECT = i18n.translate('xpack.monitoring.alerts.clusterStatus.resolvedSubject', {
-  defaultMessage: 'RESOLVED X-Pack Monitoring: Cluster Status',
-});
-
-const NEW_SUBJECT = i18n.translate('xpack.monitoring.alerts.clusterStatus.newSubject', {
-  defaultMessage: 'NEW X-Pack Monitoring: Cluster Status',
-});
+import { fetchClusterHealth } from '../lib/alerts/fetch_cluster_health';
 
 const RED_STATUS_MESSAGE = i18n.translate('xpack.monitoring.alerts.clusterStatus.redMessage', {
   defaultMessage: 'Allocate missing primary and replica shards',
@@ -47,9 +38,9 @@ const YELLOW_STATUS_MESSAGE = i18n.translate(
   }
 );
 
-export class ClusterStateAlert extends BaseAlert {
-  public type = ALERT_CLUSTER_STATE;
-  public label = 'Cluster state';
+export class ClusterHealthAlert extends BaseAlert {
+  public type = ALERT_CLUSTER_HEALTH;
+  public label = 'Cluster health';
 
   protected emailAddress: string = '';
 
@@ -72,29 +63,29 @@ export class ClusterStateAlert extends BaseAlert {
     if (availableCcs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, availableCcs);
     }
-    const clusterStates = await fetchClusterState(callCluster, clusters, esIndexPattern);
-    return clusterStates.map(clusterState => {
-      const shouldFire = clusterState.state !== AlertClusterStateType.Green;
+    const clustersHealth = await fetchClusterHealth(callCluster, clusters, esIndexPattern);
+    return clustersHealth.map(clusterHealth => {
+      const shouldFire = clusterHealth.health !== AlertClusterHealthType.Green;
       const severity =
-        clusterState.state === AlertClusterStateType.Red
+        clusterHealth.health === AlertClusterHealthType.Red
           ? AlertSeverity.Danger
           : AlertSeverity.Warning;
 
       return {
-        instanceKey: `${clusterState.clusterUuid}`,
-        clusterUuid: clusterState.clusterUuid,
+        instanceKey: `${clusterHealth.clusterUuid}`,
+        clusterUuid: clusterHealth.clusterUuid,
         shouldFire,
         severity,
-        meta: clusterState,
+        meta: clusterHealth,
       };
     });
   }
 
-  protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertClusterState {
-    const clusterState = item.meta as AlertClusterStateState;
+  protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertClusterHealthState {
+    const clusterHealth = item.meta as AlertClusterHealth;
     return {
       cluster,
-      state: clusterState.state,
+      health: clusterHealth.health,
       ui: {
         isFiring: false,
         message: null,
@@ -107,20 +98,20 @@ export class ClusterStateAlert extends BaseAlert {
   }
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
-    const clusterState = item.meta as AlertClusterStateState;
+    const clusterHealth = item.meta as AlertClusterHealth;
     if (!alertState.ui.isFiring) {
       return {
         text: i18n.translate('xpack.monitoring.alerts.clusterStatus.ui.resolvedMessage', {
-          defaultMessage: `Elasticsearch cluster status is green.`,
+          defaultMessage: `Elasticsearch cluster health is green.`,
         }),
       };
     }
 
     return {
       text: i18n.translate('xpack.monitoring.alerts.clusterStatus.ui.firingMessage', {
-        defaultMessage: `Elasticsearch cluster status is {status}.`,
+        defaultMessage: `Elasticsearch cluster health is {health}.`,
         values: {
-          status: clusterState.state,
+          health: clusterHealth.health,
         },
       }),
       nextSteps: [
@@ -129,7 +120,7 @@ export class ClusterStateAlert extends BaseAlert {
             defaultMessage: `{message}. #start_linkView now#end_link`,
             values: {
               message:
-                clusterState.state === AlertClusterStateType.Red
+                clusterHealth.health === AlertClusterHealthType.Red
                   ? RED_STATUS_MESSAGE
                   : YELLOW_STATUS_MESSAGE,
             },
@@ -153,17 +144,17 @@ export class ClusterStateAlert extends BaseAlert {
     item: AlertData,
     cluster: AlertCluster
   ) {
-    const clusterState = item.meta as AlertClusterStateState;
+    const clusterHealth = item.meta as AlertClusterHealth;
     if (!alertState.ui.isFiring) {
       instance.scheduleActions('default', {
         state: 'resolved',
-        clusterState: clusterState.state,
+        clusterHealth: clusterHealth.health,
         clusterName: cluster.clusterName,
       });
     } else {
       instance.scheduleActions('default', {
         state: 'firing',
-        clusterState: clusterState.state,
+        clusterHealth: clusterHealth.health,
         clusterName: cluster.clusterName,
         action: 'Allocate missing primary and replica shards.',
       });
@@ -175,11 +166,11 @@ export class ClusterStateAlert extends BaseAlert {
       case ALERT_ACTION_TYPE_EMAIL:
         return {
           subject: i18n.translate('xpack.monitoring.alerts.clusterStatus.emailSubject', {
-            defaultMessage: `Cluster status alert is {state} for {clusterName}. Current state is {clusterState}.`,
+            defaultMessage: `Cluster health alert is {state} for {clusterName}. Current health is {clusterHealth}.`,
             values: {
               state: '{{context.state}}',
               clusterName: '{{context.clusterName}}',
-              clusterState: '{{context.clusterState}}',
+              clusterHealth: '{{context.clusterHealth}}',
             },
           }),
           message: i18n.translate('xpack.monitoring.alerts.clusterStatus.emailMessage', {
@@ -192,10 +183,10 @@ export class ClusterStateAlert extends BaseAlert {
       case ALERT_ACTION_TYPE_LOG:
         return {
           message: i18n.translate('xpack.monitoring.alerts.clusterStatus.serverLog', {
-            defaultMessage: `Cluster status alert is {state} for {clusterName}. Current state is {clusterState}. {action}`,
+            defaultMessage: `Cluster health alert is {state} for {clusterName}. Current health is {clusterHealth}. {action}`,
             values: {
               state: '{{context.state}}',
-              clusterState: '{{context.clusterState}}',
+              clusterHealth: '{{context.clusterHealth}}',
               clusterName: '{{context.clusterName}}',
               action: '{{context.action}}',
             },

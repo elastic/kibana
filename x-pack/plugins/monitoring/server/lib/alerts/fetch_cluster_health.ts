@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { get } from 'lodash';
-import { AlertCluster, AlertClusterStateState } from '../../alerts/types';
+import { AlertCluster, AlertClusterHealth } from '../../alerts/types';
 
-export async function fetchClusterState(
+export async function fetchClusterHealth(
   callCluster: any,
   clusters: AlertCluster[],
   index: string
-): Promise<AlertClusterStateState[]> {
+): Promise<AlertClusterHealth[]> {
   const params = {
     index,
     filterPath: ['hits.hits._source.cluster_state.status', 'hits.hits._source.cluster_uuid'],
@@ -46,8 +46,8 @@ export async function fetchClusterState(
   const response = await callCluster('search', params);
   return get<any>(response, 'hits.hits', []).map((hit: any) => {
     return {
-      state: get(hit, '_source.cluster_state.status'),
+      health: get(hit, '_source.cluster_state.status'),
       clusterUuid: get(hit, '_source.cluster_uuid'),
-    };
+    } as AlertClusterHealth;
   });
 }

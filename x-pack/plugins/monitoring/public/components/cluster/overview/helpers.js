@@ -19,19 +19,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { AlertPopover } from '../../alert';
-
 export function HealthStatusIndicator(props) {
   const statusColorMap = {
     green: 'success',
     yellow: 'warning',
     red: 'danger',
   };
-
-  let alertStatus = null;
-  if (props.alert) {
-    alertStatus = <AlertPopover alert={props.alert} />;
-  }
 
   const statusColor = statusColorMap[props.status] || 'n/a';
 
@@ -46,7 +39,6 @@ export function HealthStatusIndicator(props) {
           />
         </EuiHealth>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>{alertStatus}</EuiFlexItem>
     </EuiFlexGroup>
   );
 }

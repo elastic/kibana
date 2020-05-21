@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export enum AlertClusterStateType {
+export enum AlertClusterHealthType {
   Green = 'green',
   Red = 'red',
   Yellow = 'yellow',

@@ -151,12 +151,27 @@ export class CpuUsageAlert extends BaseAlert {
     }
     return {
       text: i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.firingMessage', {
-        defaultMessage: `Node {nodeName} is reporting cpu usage of {cpuUsage}% at #absolute. #start_linkPlease investigate.#end_link`,
+        defaultMessage: `Node {nodeName} is reporting cpu usage of {cpuUsage}% at #absolute`,
         values: {
           nodeName: stat.nodeName,
           cpuUsage: stat.cpuUsage,
         },
       }),
+      nextSteps: [
+        {
+          text: i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.nextSteps.message1', {
+            defaultMessage: `#start_linkInvestigate node#end_link`,
+          }),
+          tokens: [
+            {
+              startToken: '#start_link',
+              endToken: '#end_link',
+              type: AlertMessageTokenType.Link,
+              url: `elasticsearch/nodes/${stat.nodeId}`,
+            } as AlertMessageLinkToken,
+          ],
+        },
+      ],
       tokens: [
         {
           startToken: '#absolute',
@@ -165,12 +180,6 @@ export class CpuUsageAlert extends BaseAlert {
           isRelative: false,
           timestamp: alertState.ui.triggeredMS,
         } as AlertMessageTimeToken,
-        {
-          startToken: '#start_link',
-          endToken: '#end_link',
-          type: AlertMessageTokenType.Link,
-          url: `/elasticsearch/nodes/${stat.nodeId}`,
-        } as AlertMessageLinkToken,
       ],
     };
   }
