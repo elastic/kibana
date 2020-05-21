@@ -8,6 +8,7 @@ import { PluginInitializerContext, CoreStart } from 'kibana/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export { MonitoringConfig } from '../server';
 
 export interface MonitoringPluginDependencies {

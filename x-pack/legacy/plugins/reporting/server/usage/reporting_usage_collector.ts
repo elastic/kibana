@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
 import { KIBANA_REPORTING_TYPE } from '../../common/constants';
-import { ReportingConfig, ReportingCore, ReportingSetupDeps } from '../../server/types';
-import { ESCallCluster, ExportTypesRegistry } from '../../types';
-import { getReportingUsage } from './get_reporting_usage';
+import { ReportingConfig, ReportingCore } from '../../server';
+import { ReportingSetupDeps } from '../../server/types';
+import { ExportTypesRegistry } from '../lib/export_types_registry';
 import { RangeStats } from './types';
+import { getReportingUsage } from './get_reporting_usage';
 
 type XPackInfo = XPackMainPlugin['info'];
 
@@ -29,7 +31,7 @@ export function getReportingUsageCollector(
 ) {
   return usageCollection.makeUsageCollector({
     type: KIBANA_REPORTING_TYPE,
-    fetch: (callCluster: ESCallCluster) =>
+    fetch: (callCluster: CallCluster) =>
       getReportingUsage(config, xpackMainInfo, callCluster, exportTypesRegistry),
     isReady,
 

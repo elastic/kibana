@@ -6,13 +6,13 @@
 
 import { validateUrls } from '../../../../common/validate_urls';
 import { ReportingCore } from '../../../../server';
-import { cryptoFactory } from '../../../../server/lib/crypto';
+import { cryptoFactory } from '../../../../server/lib';
 import {
   ConditionalHeaders,
   CreateJobFactory,
   ESQueueCreateJobFn,
   RequestFacade,
-} from '../../../../types';
+} from '../../../../server/types';
 import { JobParamsPNG } from '../../types';
 
 export const createJobFactory: CreateJobFactory<ESQueueCreateJobFn<

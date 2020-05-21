@@ -17,7 +17,6 @@
  * under the License.
  */
 
-// @ts-ignore
 import { EuiHorizontalRule, EuiNavDrawer, EuiNavDrawerGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -43,7 +42,7 @@ export interface Props {
 
 function NavDrawerRenderer(
   { isLocked, onIsLockedUpdate, basePath, legacyMode, navigateToApp, ...observables }: Props,
-  ref: React.Ref<HTMLElement>
+  ref: React.Ref<EuiNavDrawer>
 ) {
   const appId = useObservable(observables.appId$, '');
   const navLinks = useObservable(observables.navLinks$, []).filter(link => !link.hidden);

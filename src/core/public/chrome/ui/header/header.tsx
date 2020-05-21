@@ -23,7 +23,6 @@ import {
   EuiHeaderSectionItem,
   EuiHeaderSectionItemButton,
   EuiIcon,
-  // @ts-ignore
   EuiNavDrawer,
   EuiShowFor,
   htmlIdGenerator,
@@ -148,7 +147,7 @@ export function Header({
               // Delete this block
               <EuiShowFor sizes={['xs', 's']}>
                 <EuiHeaderSectionItem border="right">
-                  {renderMenuTrigger(() => navDrawerRef.current.toggleOpen())}
+                  {renderMenuTrigger(() => navDrawerRef.current?.toggleOpen())}
                 </EuiHeaderSectionItem>
               </EuiShowFor>
             )}

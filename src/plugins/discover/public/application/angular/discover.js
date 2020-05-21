@@ -75,6 +75,13 @@ import {
 } from '../../../../data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { addFatalError } from '../../../../kibana_legacy/public';
+import {
+  DEFAULT_COLUMNS_SETTING,
+  SAMPLE_SIZE_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
+  SEARCH_ON_PAGE_LOAD_SETTING,
+  DOC_HIDE_TIME_COLUMN_SETTING,
+} from '../../../common';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -314,10 +321,6 @@ function discoverController(
     }
   );
 
-  $scope.intervalEnabled = function(interval) {
-    return interval.val !== 'custom';
-  };
-
   let abortController;
   $scope.$on('$destroy', () => {
     if (abortController) abortController.abort();
@@ -554,7 +557,7 @@ function discoverController(
     const { searchFields, selectFields } = await getSharingDataFields(
       $scope.state.columns,
       $scope.indexPattern.timeFieldName,
-      config.get('doc_table:hideTimeColumn')
+      config.get(DOC_HIDE_TIME_COLUMN_SETTING)
     );
     searchSource.setField('fields', searchFields);
     searchSource.setField(
@@ -562,7 +565,7 @@ function discoverController(
       getSortForSearchSource(
         $scope.state.sort,
         $scope.indexPattern,
-        config.get('discover:sort:defaultOrder')
+        config.get(SORT_DEFAULT_ORDER_SETTING)
       )
     );
     searchSource.setField('highlight', null);
@@ -595,7 +598,9 @@ function discoverController(
       query,
       sort: getSortArray(savedSearch.sort, $scope.indexPattern),
       columns:
-        savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
+        savedSearch.columns.length > 0
+          ? savedSearch.columns
+          : config.get(DEFAULT_COLUMNS_SETTING).slice(),
       index: $scope.indexPattern.id,
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.getOwnField('filter')),
@@ -605,27 +610,9 @@ function discoverController(
   $scope.state.index = $scope.indexPattern.id;
   $scope.state.sort = getSortArray($scope.state.sort, $scope.indexPattern);
 
-  $scope.getBucketIntervalToolTipText = () => {
-    return i18n.translate('discover.bucketIntervalTooltip', {
-      defaultMessage:
-        'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}',
-      values: {
-        bucketsDescription:
-          $scope.bucketInterval.scale > 1
-            ? i18n.translate('discover.bucketIntervalTooltip.tooLargeBucketsText', {
-                defaultMessage: 'buckets that are too large',
-              })
-            : i18n.translate('discover.bucketIntervalTooltip.tooManyBucketsText', {
-                defaultMessage: 'too many buckets',
-              }),
-        bucketIntervalDescription: $scope.bucketInterval.description,
-      },
-    });
-  };
-
   $scope.opts = {
     // number of records to fetch, then paginate through
-    sampleSize: config.get('discover:sampleSize'),
+    sampleSize: config.get(SAMPLE_SIZE_SETTING),
     timefield: getTimeField(),
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.savedObjects.ip.list,
@@ -635,7 +622,7 @@ function discoverController(
     // A saved search is created on every page load, so we check the ID to see if we're loading a
     // previously saved search or if it is just transient
     return (
-      config.get('discover:searchOnPageLoad') ||
+      config.get(SEARCH_ON_PAGE_LOAD_SETTING) ||
       savedSearch.id !== undefined ||
       timefilter.getRefreshInterval().pause === false
     );
@@ -672,12 +659,12 @@ function discoverController(
           error => addFatalError(core.fatalErrors, error)
         )
       );
-      //Handling change oft the histogram interval
-      $scope.$watch('state.interval', function(newInterval, oldInterval) {
-        if (newInterval !== oldInterval) {
-          setAppState({ interval: newInterval });
+
+      $scope.changeInterval = interval => {
+        if (interval) {
+          setAppState({ interval });
         }
-      });
+      };
 
       $scope.$watchMulti(
         ['rows', 'fetchStatus'],
@@ -930,6 +917,7 @@ function discoverController(
 
   $scope.resetQuery = function() {
     history.push(`/${encodeURIComponent($route.current.params.id)}`);
+    $route.reload();
   };
 
   $scope.newQuery = function() {
@@ -946,7 +934,7 @@ function discoverController(
         getSortForSearchSource(
           $scope.state.sort,
           indexPattern,
-          config.get('discover:sort:defaultOrder')
+          config.get(SORT_DEFAULT_ORDER_SETTING)
         )
       )
       .setField('query', $scope.state.query || null)

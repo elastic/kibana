@@ -430,6 +430,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                   <a
                                     class="euiListGroupItem__button"
                                     href="/"
+                                    rel="noreferrer"
                                   >
                                     <div
                                       class="euiListGroupItem__icon"
@@ -512,6 +513,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                         class="euiListGroupItem__button"
                                         data-test-subj="collapsibleNavAppLink--recent"
                                         href="http://localhost/recent%201"
+                                        rel="noreferrer"
                                         title="recent 1"
                                       >
                                         <span
@@ -530,6 +532,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                         class="euiListGroupItem__button"
                                         data-test-subj="collapsibleNavAppLink--recent"
                                         href="http://localhost/recent%202"
+                                        rel="noreferrer"
                                         title="recent 2"
                                       >
                                         <span
@@ -583,7 +586,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                       class="euiFlexItem euiFlexItem--flexGrowZero"
                                     >
                                       <div
-                                        aria-hidden="true"
                                         data-euiicon-type="logoKibana"
                                       />
                                     </div>
@@ -624,6 +626,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           class="euiListGroupItem__button"
                                           data-test-subj="collapsibleNavAppLink"
                                           href="discover"
+                                          rel="noreferrer"
                                         >
                                           <span
                                             class="euiListGroupItem__label"
@@ -640,6 +643,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           class="euiListGroupItem__button"
                                           data-test-subj="collapsibleNavAppLink"
                                           href="visualize"
+                                          rel="noreferrer"
                                         >
                                           <span
                                             class="euiListGroupItem__label"
@@ -656,6 +660,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           class="euiListGroupItem__button"
                                           data-test-subj="collapsibleNavAppLink"
                                           href="dashboard"
+                                          rel="noreferrer"
                                         >
                                           <span
                                             class="euiListGroupItem__label"
@@ -702,7 +707,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                       class="euiFlexItem euiFlexItem--flexGrowZero"
                                     >
                                       <div
-                                        aria-hidden="true"
                                         data-euiicon-type="logoObservability"
                                       />
                                     </div>
@@ -743,6 +747,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           class="euiListGroupItem__button"
                                           data-test-subj="collapsibleNavAppLink"
                                           href="metrics"
+                                          rel="noreferrer"
                                         >
                                           <span
                                             class="euiListGroupItem__label"
@@ -759,6 +764,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           class="euiListGroupItem__button"
                                           data-test-subj="collapsibleNavAppLink"
                                           href="logs"
+                                          rel="noreferrer"
                                         >
                                           <span
                                             class="euiListGroupItem__label"
@@ -805,7 +811,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                       class="euiFlexItem euiFlexItem--flexGrowZero"
                                     >
                                       <div
-                                        aria-hidden="true"
                                         data-euiicon-type="logoSecurity"
                                       />
                                     </div>
@@ -846,6 +851,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           class="euiListGroupItem__button"
                                           data-test-subj="collapsibleNavAppLink"
                                           href="siem"
+                                          rel="noreferrer"
                                         >
                                           <span
                                             class="euiListGroupItem__label"
@@ -925,6 +931,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           class="euiListGroupItem__button"
                                           data-test-subj="collapsibleNavAppLink"
                                           href="monitoring"
+                                          rel="noreferrer"
                                         >
                                           <span
                                             class="euiListGroupItem__label"
@@ -958,6 +965,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                     class="euiListGroupItem__button"
                                     data-test-subj="collapsibleNavAppLink"
                                     href="canvas"
+                                    rel="noreferrer"
                                   >
                                     <span
                                       class="euiListGroupItem__label"
@@ -1070,6 +1078,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                     <a
                                       class="euiListGroupItem__button"
                                       href="/"
+                                      rel="noreferrer"
                                     >
                                       <div
                                         class="euiListGroupItem__icon"
@@ -1152,6 +1161,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           class="euiListGroupItem__button"
                                           data-test-subj="collapsibleNavAppLink--recent"
                                           href="http://localhost/recent%201"
+                                          rel="noreferrer"
                                           title="recent 1"
                                         >
                                           <span
@@ -1170,6 +1180,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           class="euiListGroupItem__button"
                                           data-test-subj="collapsibleNavAppLink--recent"
                                           href="http://localhost/recent%202"
+                                          rel="noreferrer"
                                           title="recent 2"
                                         >
                                           <span
@@ -1223,7 +1234,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                         class="euiFlexItem euiFlexItem--flexGrowZero"
                                       >
                                         <div
-                                          aria-hidden="true"
                                           data-euiicon-type="logoKibana"
                                         />
                                       </div>
@@ -1264,6 +1274,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                             class="euiListGroupItem__button"
                                             data-test-subj="collapsibleNavAppLink"
                                             href="discover"
+                                            rel="noreferrer"
                                           >
                                             <span
                                               class="euiListGroupItem__label"
@@ -1280,6 +1291,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                             class="euiListGroupItem__button"
                                             data-test-subj="collapsibleNavAppLink"
                                             href="visualize"
+                                            rel="noreferrer"
                                           >
                                             <span
                                               class="euiListGroupItem__label"
@@ -1296,6 +1308,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                             class="euiListGroupItem__button"
                                             data-test-subj="collapsibleNavAppLink"
                                             href="dashboard"
+                                            rel="noreferrer"
                                           >
                                             <span
                                               class="euiListGroupItem__label"
@@ -1342,7 +1355,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                         class="euiFlexItem euiFlexItem--flexGrowZero"
                                       >
                                         <div
-                                          aria-hidden="true"
                                           data-euiicon-type="logoObservability"
                                         />
                                       </div>
@@ -1383,6 +1395,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                             class="euiListGroupItem__button"
                                             data-test-subj="collapsibleNavAppLink"
                                             href="metrics"
+                                            rel="noreferrer"
                                           >
                                             <span
                                               class="euiListGroupItem__label"
@@ -1399,6 +1412,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                             class="euiListGroupItem__button"
                                             data-test-subj="collapsibleNavAppLink"
                                             href="logs"
+                                            rel="noreferrer"
                                           >
                                             <span
                                               class="euiListGroupItem__label"
@@ -1445,7 +1459,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                         class="euiFlexItem euiFlexItem--flexGrowZero"
                                       >
                                         <div
-                                          aria-hidden="true"
                                           data-euiicon-type="logoSecurity"
                                         />
                                       </div>
@@ -1486,6 +1499,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                             class="euiListGroupItem__button"
                                             data-test-subj="collapsibleNavAppLink"
                                             href="siem"
+                                            rel="noreferrer"
                                           >
                                             <span
                                               class="euiListGroupItem__label"
@@ -1565,6 +1579,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                             class="euiListGroupItem__button"
                                             data-test-subj="collapsibleNavAppLink"
                                             href="monitoring"
+                                            rel="noreferrer"
                                           >
                                             <span
                                               class="euiListGroupItem__label"
@@ -1598,6 +1613,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                       class="euiListGroupItem__button"
                                       data-test-subj="collapsibleNavAppLink"
                                       href="canvas"
+                                      rel="noreferrer"
                                     >
                                       <span
                                         class="euiListGroupItem__label"
@@ -1763,6 +1779,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                       className="euiListGroupItem__button"
                                       href="/"
                                       onClick={[Function]}
+                                      rel="noreferrer"
                                     >
                                       <EuiIcon
                                         className="euiListGroupItem__icon"
@@ -1963,6 +1980,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                             data-test-subj="collapsibleNavAppLink--recent"
                                             href="http://localhost/recent%201"
                                             onClick={[Function]}
+                                            rel="noreferrer"
                                             title="recent 1"
                                           >
                                             <span
@@ -1996,6 +2014,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                             data-test-subj="collapsibleNavAppLink--recent"
                                             href="http://localhost/recent%202"
                                             onClick={[Function]}
+                                            rel="noreferrer"
                                             title="recent 2"
                                           >
                                             <span
@@ -2052,7 +2071,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                 grow={false}
                               >
                                 <EuiIcon
-                                  aria-hidden="true"
                                   size="l"
                                   type="logoKibana"
                                 />
@@ -2126,12 +2144,10 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           className="euiFlexItem euiFlexItem--flexGrowZero"
                                         >
                                           <EuiIcon
-                                            aria-hidden="true"
                                             size="l"
                                             type="logoKibana"
                                           >
                                             <div
-                                              aria-hidden="true"
                                               data-euiicon-type="logoKibana"
                                               size="l"
                                             />
@@ -2237,6 +2253,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                                 data-test-subj="collapsibleNavAppLink"
                                                 href="discover"
                                                 onClick={[Function]}
+                                                rel="noreferrer"
                                               >
                                                 <span
                                                   className="euiListGroupItem__label"
@@ -2267,6 +2284,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                                 data-test-subj="collapsibleNavAppLink"
                                                 href="visualize"
                                                 onClick={[Function]}
+                                                rel="noreferrer"
                                               >
                                                 <span
                                                   className="euiListGroupItem__label"
@@ -2297,6 +2315,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                                 data-test-subj="collapsibleNavAppLink"
                                                 href="dashboard"
                                                 onClick={[Function]}
+                                                rel="noreferrer"
                                               >
                                                 <span
                                                   className="euiListGroupItem__label"
@@ -2339,7 +2358,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                 grow={false}
                               >
                                 <EuiIcon
-                                  aria-hidden="true"
                                   size="l"
                                   type="logoObservability"
                                 />
@@ -2413,12 +2431,10 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           className="euiFlexItem euiFlexItem--flexGrowZero"
                                         >
                                           <EuiIcon
-                                            aria-hidden="true"
                                             size="l"
                                             type="logoObservability"
                                           >
                                             <div
-                                              aria-hidden="true"
                                               data-euiicon-type="logoObservability"
                                               size="l"
                                             />
@@ -2516,6 +2532,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                                 data-test-subj="collapsibleNavAppLink"
                                                 href="metrics"
                                                 onClick={[Function]}
+                                                rel="noreferrer"
                                               >
                                                 <span
                                                   className="euiListGroupItem__label"
@@ -2546,6 +2563,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                                 data-test-subj="collapsibleNavAppLink"
                                                 href="logs"
                                                 onClick={[Function]}
+                                                rel="noreferrer"
                                               >
                                                 <span
                                                   className="euiListGroupItem__label"
@@ -2588,7 +2606,6 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                 grow={false}
                               >
                                 <EuiIcon
-                                  aria-hidden="true"
                                   size="l"
                                   type="logoSecurity"
                                 />
@@ -2662,12 +2679,10 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                           className="euiFlexItem euiFlexItem--flexGrowZero"
                                         >
                                           <EuiIcon
-                                            aria-hidden="true"
                                             size="l"
                                             type="logoSecurity"
                                           >
                                             <div
-                                              aria-hidden="true"
                                               data-euiicon-type="logoSecurity"
                                               size="l"
                                             />
@@ -2757,6 +2772,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                                 data-test-subj="collapsibleNavAppLink"
                                                 href="siem"
                                                 onClick={[Function]}
+                                                rel="noreferrer"
                                               >
                                                 <span
                                                   className="euiListGroupItem__label"
@@ -2939,6 +2955,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                                 data-test-subj="collapsibleNavAppLink"
                                                 href="monitoring"
                                                 onClick={[Function]}
+                                                rel="noreferrer"
                                               >
                                                 <span
                                                   className="euiListGroupItem__label"
@@ -2994,6 +3011,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                       data-test-subj="collapsibleNavAppLink"
                                       href="canvas"
                                       onClick={[Function]}
+                                      rel="noreferrer"
                                     >
                                       <span
                                         className="euiListGroupItem__label"
@@ -3728,6 +3746,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
                                       className="euiListGroupItem__button"
                                       href="/"
                                       onClick={[Function]}
+                                      rel="noreferrer"
                                     >
                                       <EuiIcon
                                         className="euiListGroupItem__icon"
@@ -4376,6 +4395,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                                   <a
                                     class="euiListGroupItem__button"
                                     href="/"
+                                    rel="noreferrer"
                                   >
                                     <div
                                       class="euiListGroupItem__icon"
@@ -4568,6 +4588,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                                     <a
                                       class="euiListGroupItem__button"
                                       href="/"
+                                      rel="noreferrer"
                                     >
                                       <div
                                         class="euiListGroupItem__icon"
@@ -4813,6 +4834,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                                       className="euiListGroupItem__button"
                                       href="/"
                                       onClick={[Function]}
+                                      rel="noreferrer"
                                     >
                                       <EuiIcon
                                         className="euiListGroupItem__icon"

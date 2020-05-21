@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
-
 export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['visualize', 'visEditor']);
   const listingTable = getService('listingTable');
@@ -37,8 +35,7 @@ export default function({ getService, getPageObjects }) {
         // type markdown is used for simplicity
         await PageObjects.visualize.createSimpleMarkdownViz(vizName);
         await PageObjects.visualize.gotoVisualizationLandingPage();
-        const visCount = await listingTable.getItemsCount('visualize');
-        expect(visCount).to.equal(1);
+        await listingTable.expectItemsCount('visualize', 1);
       });
 
       it('delete all viz', async function() {
@@ -46,12 +43,10 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.visualize.createSimpleMarkdownViz(vizName + '2');
         await PageObjects.visualize.gotoVisualizationLandingPage();
 
-        let visCount = await listingTable.getItemsCount('visualize');
-        expect(visCount).to.equal(3);
+        await listingTable.expectItemsCount('visualize', 3);
 
         await PageObjects.visualize.deleteAllVisualizations();
-        visCount = await listingTable.getItemsCount('visualize');
-        expect(visCount).to.equal(0);
+        await listingTable.expectItemsCount('visualize', 0);
       });
     });
 
@@ -69,38 +64,32 @@ export default function({ getService, getPageObjects }) {
 
       it('matches on the first word', async function() {
         await listingTable.searchForItemWithName('Hello');
-        const itemCount = await listingTable.getItemsCount('visualize');
-        expect(itemCount).to.equal(1);
+        await listingTable.expectItemsCount('visualize', 1);
       });
 
       it('matches the second word', async function() {
         await listingTable.searchForItemWithName('World');
-        const itemCount = await listingTable.getItemsCount('visualize');
-        expect(itemCount).to.equal(1);
+        await listingTable.expectItemsCount('visualize', 1);
       });
 
       it('matches the second word prefix', async function() {
         await listingTable.searchForItemWithName('Wor');
-        const itemCount = await listingTable.getItemsCount('visualize');
-        expect(itemCount).to.equal(1);
+        await listingTable.expectItemsCount('visualize', 1);
       });
 
       it('does not match mid word', async function() {
         await listingTable.searchForItemWithName('orld');
-        const itemCount = await listingTable.getItemsCount('visualize');
-        expect(itemCount).to.equal(0);
+        await listingTable.expectItemsCount('visualize', 0);
       });
 
       it('is case insensitive', async function() {
         await listingTable.searchForItemWithName('hello world');
-        const itemCount = await listingTable.getItemsCount('visualize');
-        expect(itemCount).to.equal(1);
+        await listingTable.expectItemsCount('visualize', 1);
       });
 
       it('is using AND operator', async function() {
         await listingTable.searchForItemWithName('hello banana');
-        const itemCount = await listingTable.getItemsCount('visualize');
-        expect(itemCount).to.equal(0);
+        await listingTable.expectItemsCount('visualize', 0);
       });
     });
   });

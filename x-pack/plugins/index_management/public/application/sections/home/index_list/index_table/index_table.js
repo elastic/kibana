@@ -8,6 +8,7 @@ import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
+import { parse } from 'query-string';
 
 import {
   EuiButton,
@@ -93,10 +94,18 @@ export class IndexTable extends Component {
       selectedIndicesMap: {},
     };
   }
+
   componentDidMount() {
     this.props.loadIndices();
     this.interval = setInterval(this.props.reloadIndices, REFRESH_RATE_INDEX_LIST);
-    const { filterChanged, filterFromURI } = this.props;
+    const {
+      filterChanged,
+      filterFromURI,
+      showHiddenIndicesChanged,
+      showHiddenIndices,
+      location,
+    } = this.props;
+
     if (filterFromURI) {
       const decodedFilter = decodeURIComponent(filterFromURI);
 
@@ -106,6 +115,13 @@ export class IndexTable extends Component {
       } catch (e) {
         this.setState({ filterError: e });
       }
+    }
+
+    // Check if the we have the includeHidden query param
+    const { includeHidden } = parse((location && location.search) || '');
+    const nextValue = includeHidden === 'true';
+    if (nextValue !== showHiddenIndices) {
+      showHiddenIndicesChanged(nextValue);
     }
   }
   componentWillUnmount() {
@@ -400,8 +416,8 @@ export class IndexTable extends Component {
   render() {
     const {
       filter,
-      showSystemIndices,
-      showSystemIndicesChanged,
+      showHiddenIndices,
+      showHiddenIndicesChanged,
       indices,
       loadIndices,
       indicesLoading,
@@ -459,13 +475,14 @@ export class IndexTable extends Component {
                       })}
                       <EuiFlexItem grow={false}>
                         <EuiSwitch
-                          id="checkboxShowSystemIndices"
-                          checked={showSystemIndices}
-                          onChange={event => showSystemIndicesChanged(event.target.checked)}
+                          id="checkboxShowHiddenIndices"
+                          data-test-subj="indexTableIncludeHiddenIndicesToggle"
+                          checked={showHiddenIndices}
+                          onChange={event => showHiddenIndicesChanged(event.target.checked)}
                           label={
                             <FormattedMessage
-                              id="xpack.idxMgmt.indexTable.systemIndicesSwitchLabel"
-                              defaultMessage="Include system indices"
+                              id="xpack.idxMgmt.indexTable.hiddenIndicesSwitchLabel"
+                              defaultMessage="Include hidden indices"
                             />
                           }
                         />
