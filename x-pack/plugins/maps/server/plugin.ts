@@ -23,7 +23,8 @@ import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/s
 import { emsBoundariesSpecProvider } from './tutorials/ems';
 // @ts-ignore
 import { initRoutes } from './routes';
-import { ILicense, LicensingPluginSetup } from '../../licensing/common/types';
+import { ILicense } from '../../licensing/common/types';
+import { LicensingPluginSetup } from '../../licensing/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 
 interface SetupDeps {
