@@ -13,7 +13,7 @@ import {
   PaginationParams,
   PaginatedResults,
 } from '../utils/pagination';
-import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { legacyEventIndexPattern } from './legacy_event_index_pattern';
 
 export abstract class ResolverQuery {

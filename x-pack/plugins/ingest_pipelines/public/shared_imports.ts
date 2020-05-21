@@ -42,13 +42,14 @@ export {
 } from '../../../../src/plugins/es_ui_shared/static/validators/string';
 
 export {
-  SectionLoading,
   WithPrivileges,
   AuthorizationProvider,
   SectionError,
   Error,
   useAuthorizationContext,
   NotAuthorizedSection,
-} from '../../../../src/plugins/es_ui_shared/public';
+} from '../../../../src/plugins/es_ui_shared/common';
+
+export { SectionLoading } from '../../../../src/plugins/es_ui_shared/public';
 
 export const useKibana = () => _useKibana<AppServices>();

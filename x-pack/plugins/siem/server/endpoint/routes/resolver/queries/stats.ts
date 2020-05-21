@@ -6,7 +6,7 @@
 import { SearchResponse } from 'elasticsearch';
 import { ResolverQuery } from './base';
 import { ResolverEvent } from '../../../../../common/endpoint/types';
-import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { PaginatedResults } from '../utils/pagination';
 
 export class StatsQuery extends ResolverQuery {

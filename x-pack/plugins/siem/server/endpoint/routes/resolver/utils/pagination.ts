@@ -7,7 +7,7 @@
 import { SearchResponse } from 'elasticsearch';
 import { ResolverEvent } from '../../../../../common/endpoint/types';
 import { entityId } from '../../../../../common/endpoint/models/event';
-import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 export interface PaginationParams {
   size: number;

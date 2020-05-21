@@ -11,7 +11,7 @@ import { taskManagerMock } from '../../../plugins/task_manager/server/task_manag
 import { KibanaRequest } from '../../../../src/core/server';
 import { loggingServiceMock, savedObjectsClientMock } from '../../../../src/core/server/mocks';
 import { encryptedSavedObjectsMock } from '../../../plugins/encrypted_saved_objects/server/mocks';
-import { AuthenticatedUser } from '../../../plugins/security/public';
+import { AuthenticatedUser } from '../../../plugins/security/common/model';
 import { securityMock } from '../../../plugins/security/server/mocks';
 
 jest.mock('./alerts_client');
