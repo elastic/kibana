@@ -752,7 +752,12 @@ describe('<SnapshotRestoreHome />', () => {
 
           const failure0 = failuresFound.at(0);
           const shardText = findTestSubject(failure0, 'shard').text();
-          const reasonText = findTestSubject(failure0, 'reason').text();
+          // EUI data-test-subj alteration to be updated (eui#3483)
+          // const reasonText = findTestSubject(failure0, 'reason').text();
+          const reasonText = failure0
+            .find('code')
+            .at(0)
+            .text();
           const [mockedFailure] = failure1.failures;
 
           expect(shardText).toBe(`Shard ${mockedFailure.shard_id}`);
