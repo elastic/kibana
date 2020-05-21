@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -76,16 +76,19 @@ const AlertDetailsOverviewComponent = memo(() => {
     [alertDetailsTabId, tabs]
   );
 
-  const handleTabClick = (clickedTab: EuiTabbedContentTab): void => {
-    if (clickedTab.id !== alertDetailsTabId) {
-      const locationObject = urlFromQueryParams({
-        ...queryParams,
-        active_details_tab: clickedTab.id,
-      });
-      locationObject.state = { isTabChange: true };
-      history.push(locationObject);
-    }
-  };
+  const handleTabClick = useCallback(
+    (clickedTab: EuiTabbedContentTab): void => {
+      if (clickedTab.id !== alertDetailsTabId) {
+        const locationObject = urlFromQueryParams({
+          ...queryParams,
+          active_details_tab: clickedTab.id,
+        });
+        locationObject.state = { isTabChange: true };
+        history.push(locationObject);
+      }
+    },
+    [alertDetailsTabId]
+  );
 
   return (
     <>

@@ -51,7 +51,7 @@ export const isOnAlertPage = (state: Immutable<AlertListState>): boolean => {
  * Returns a boolean based on whether or not the user navigated within the alerts page
  */
 export const isAlertPageTabChange = (state: Immutable<AlertListState>): boolean => {
-  return isOnAlertPage(state) && !!state.location?.state?.isTabChange;
+  return isOnAlertPage(state) && state.location?.state?.isTabChange === true;
 };
 
 /**

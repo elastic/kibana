@@ -6,6 +6,10 @@
 
 import { Datasource, NewDatasource } from '../../../ingest_manager/common';
 
+/**
+ * Object that allows you to maintain stateful information in the location object across navigation events
+ *
+ */
 export interface AppLocationState {
   isTabChange?: boolean;
   prevPath?: string;
