@@ -24,7 +24,6 @@ export interface IStyleProperty {
   getStyleName(): VECTOR_STYLES;
   getOptions(): StylePropertyOptions;
   renderRangeLegendHeader(): ReactElement<any> | null;
-  renderBreakedLegend(): ReactElement<any> | null;
   renderLegendDetailRow(legendProps: LegendProps): ReactElement<any> | null;
   renderFieldMetaPopover(
     onFieldMetaOptionsChange: (fieldMetaOptions: FieldMetaOptions) => void
@@ -69,10 +68,6 @@ export class AbstractStyleProperty implements IStyleProperty {
   }
 
   renderRangeLegendHeader() {
-    return null;
-  }
-
-  renderBreakedLegend() {
     return null;
   }
 

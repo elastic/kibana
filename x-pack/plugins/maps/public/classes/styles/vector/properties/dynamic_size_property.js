@@ -14,34 +14,7 @@ import {
 } from '../symbol_utils';
 import { VECTOR_STYLES } from '../../../../../common/constants';
 import _ from 'lodash';
-import { CircleIcon } from '../components/legend/circle_icon';
-import React, { Fragment } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
-
-function getLineWidthIcons() {
-  const defaultStyle = {
-    stroke: 'grey',
-    fill: 'none',
-    width: '12px',
-  };
-  return [
-    <CircleIcon style={{ ...defaultStyle, strokeWidth: '1px' }} />,
-    <CircleIcon style={{ ...defaultStyle, strokeWidth: '2px' }} />,
-    <CircleIcon style={{ ...defaultStyle, strokeWidth: '3px' }} />,
-  ];
-}
-
-function getSymbolSizeIcons() {
-  const defaultStyle = {
-    stroke: 'grey',
-    fill: 'grey',
-  };
-  return [
-    <CircleIcon style={{ ...defaultStyle, width: '4px' }} />,
-    <CircleIcon style={{ ...defaultStyle, width: '8px' }} />,
-    <CircleIcon style={{ ...defaultStyle, width: '12px' }} />,
-  ];
-}
+import React from 'react';
 
 export class DynamicSizeProperty extends DynamicStyleProperty {
   constructor(options, styleName, field, vectorLayer, getFieldFormatter, isSymbolizedAsIcon) {
@@ -164,43 +137,6 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
   }
 
   renderLegendDetailRow() {
-    const header = this.renderRangeLegendHeader();
-    if (!header) {
-      return null;
-    }
-    return <OrdinalLegend style={this} header={header} />;
-  }
-
-  renderRangeLegendHeader() {
-    let icons;
-    if (this.getStyleName() === VECTOR_STYLES.LINE_WIDTH) {
-      icons = getLineWidthIcons();
-    } else if (this.getStyleName() === VECTOR_STYLES.ICON_SIZE) {
-      icons = getSymbolSizeIcons();
-    } else {
-      return null;
-    }
-
-    return (
-      <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" alignItems="center">
-        {icons.map((icon, index) => {
-          const isLast = index === icons.length - 1;
-          let spacer;
-          if (!isLast) {
-            spacer = (
-              <EuiFlexItem>
-                <EuiHorizontalRule margin="xs" />
-              </EuiFlexItem>
-            );
-          }
-          return (
-            <Fragment key={index}>
-              <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
-              {spacer}
-            </Fragment>
-          );
-        })}
-      </EuiFlexGroup>
-    );
+    return <OrdinalLegend style={this} />;
   }
 }
