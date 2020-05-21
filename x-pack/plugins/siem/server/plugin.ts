@@ -191,7 +191,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
-    if (plugins.alerting != null && plugins.ml != null) {
+    if (plugins.alerting != null) {
       const signalRuleType = signalRulesAlertType({
         logger: this.logger,
         version: this.context.env.packageInfo.version,
