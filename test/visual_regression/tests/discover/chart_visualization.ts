@@ -72,18 +72,18 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         await takeSnapshot();
       });
 
-      it('should show correct data for chart interval Hourly', async function() {
-        await PageObjects.discover.setChartInterval('Hourly');
+      it('should show correct data for chart interval Hour', async function() {
+        await PageObjects.discover.setChartInterval('Hour');
         await takeSnapshot();
       });
 
-      it('should show correct data for chart interval Daily', async function() {
-        await PageObjects.discover.setChartInterval('Daily');
+      it('should show correct data for chart interval Day', async function() {
+        await PageObjects.discover.setChartInterval('Day');
         await takeSnapshot();
       });
 
-      it('should show correct data for chart interval Weekly', async function() {
-        await PageObjects.discover.setChartInterval('Weekly');
+      it('should show correct data for chart interval Week', async function() {
+        await PageObjects.discover.setChartInterval('Week');
         await takeSnapshot();
       });
 
