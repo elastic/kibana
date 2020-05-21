@@ -96,6 +96,11 @@ export function uiRenderMixin(kbnServer, server, config) {
             ? await uiSettings.get('theme:darkMode')
             : false;
 
+        const themeVersion =
+          !authEnabled || request.auth.isAuthenticated
+            ? await uiSettings.get('theme:version')
+            : 'v7';
+
         const buildHash = server.newPlatform.env.packageInfo.buildNum;
         const basePath = config.get('server.basePath');
 
@@ -114,12 +119,16 @@ export function uiRenderMixin(kbnServer, server, config) {
           `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
           ...(darkMode
             ? [
-                `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.darkCssDistFilename}`,
+                themeVersion === 'v7'
+                  ? `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.darkCssDistFilename}`
+                  : `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.darkV8CssDistFilename}`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
                 `${regularBundlePath}/dark_theme.style.css`,
               ]
             : [
-                `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`,
+                themeVersion === 'v7'
+                  ? `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`
+                  : `${regularBundlePath}/kbn-ui-shared-deps/${UiSharedDeps.lightV8CssDistFilename}`,
                 `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
                 `${regularBundlePath}/light_theme.style.css`,
               ]),
@@ -186,6 +195,7 @@ export function uiRenderMixin(kbnServer, server, config) {
         const bootstrap = new AppBootstrap({
           templateData: {
             darkMode,
+            themeVersion,
             jsDependencyPaths,
             styleSheetPaths,
             publicPathMap,
