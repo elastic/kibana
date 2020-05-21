@@ -3634,7 +3634,6 @@
     "visTypeTimeseries.unsupportedAgg.aggIsNotSupportedDescription": "{modelType} 集約はサポートされなくなりました。",
     "visTypeTimeseries.unsupportedAgg.aggIsTemporaryUnsupportedDescription": "{modelType} 集約は現在サポートされていません。",
     "visTypeTimeseries.unsupportedSplit.splitIsUnsupportedDescription": "{modelType} による分割はサポートされていません。",
-    "visTypeTimeseries.validateInterval.notifier.maxBucketsExceededErrorMessage": "バケットの最高数を超えました。{buckets} が {maxBuckets} を超えています。パネルオプションでより広い間隔を試してみてください。",
     "visTypeTimeseries.vars.variableNameAriaLabel": "変数名",
     "visTypeTimeseries.vars.variableNamePlaceholder": "変数名",
     "visTypeTimeseries.visEditorVisualization.applyChangesLabel": "変更を適用",
