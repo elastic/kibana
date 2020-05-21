@@ -312,6 +312,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
 
     /**
      * If you are writing new tests, you should rather look into getTableVisContent method instead.
+     * @deprecated Use getTableVisContent instead.
      */
     public async getTableVisData() {
       return await testSubjects.getVisibleText('paginated-table-body');
@@ -406,6 +407,17 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
             y: parseFloat(firstPoint[1]),
           };
         });
+    }
+
+    public async getChartValues() {
+      const elements = await find.allByCssSelector('.series.histogram text');
+      const values = await Promise.all(
+        elements.map(async element => {
+          const text = await element.getVisibleText();
+          return text;
+        })
+      );
+      return values;
     }
   }
 

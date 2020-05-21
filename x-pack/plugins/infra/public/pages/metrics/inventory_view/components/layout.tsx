@@ -32,6 +32,7 @@ export const Layout = () => {
   const {
     metric,
     groupBy,
+    sort,
     nodeType,
     accountId,
     region,
@@ -64,6 +65,7 @@ export const Layout = () => {
       ],
     } as InfraWaffleMapGradientLegend,
     metric,
+    sort,
     fields: source?.configuration?.fields,
     groupBy,
   };

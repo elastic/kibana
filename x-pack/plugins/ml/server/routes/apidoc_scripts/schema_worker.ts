@@ -44,9 +44,10 @@ export function postProcess(parsedFiles: any[]): void {
  */
 function updateBlockParameters(docEntries: DocEntry[], block: Block, paramsGroup: string): void {
   if (!block.local.parameter) {
-    block.local.parameter = {
-      fields: {},
-    };
+    block.local.parameter = {};
+  }
+  if (!block.local.parameter.fields) {
+    block.local.parameter.fields = {};
   }
 
   if (!block.local.parameter.fields![paramsGroup]) {

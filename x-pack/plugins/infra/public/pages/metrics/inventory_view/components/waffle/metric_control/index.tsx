@@ -132,7 +132,10 @@ export const WaffleMetricControls = ({
   }
 
   const button = (
-    <DropdownButton onClick={handleToggle} label="Metric">
+    <DropdownButton
+      onClick={handleToggle}
+      label={i18n.translate('xpack.infra.waffle.metriclabel', { defaultMessage: 'Metric' })}
+    >
       {currentLabel}
     </DropdownButton>
   );

@@ -10,7 +10,7 @@ import { Adapters } from 'src/plugins/inspector/public';
 import { TileLayer } from '../classes/layers/tile_layer/tile_layer';
 // @ts-ignore
 import { VectorTileLayer } from '../classes/layers/vector_tile_layer/vector_tile_layer';
-import { VectorLayer } from '../classes/layers/vector_layer/vector_layer';
+import { IVectorLayer, VectorLayer } from '../classes/layers/vector_layer/vector_layer';
 import { VectorStyle } from '../classes/styles/vector/vector_style';
 // @ts-ignore
 import { HeatmapLayer } from '../classes/layers/heatmap_layer/heatmap_layer';
@@ -51,8 +51,12 @@ import { Filter, TimeRange } from '../../../../../src/plugins/data/public';
 import { ISource } from '../classes/sources/source';
 import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
+import { ILayer } from '../classes/layers/layer';
 
-function createLayerInstance(layerDescriptor: LayerDescriptor, inspectorAdapters: Adapters) {
+function createLayerInstance(
+  layerDescriptor: LayerDescriptor,
+  inspectorAdapters: Adapters
+): ILayer {
   const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
 
   switch (layerDescriptor.type) {
@@ -296,6 +300,12 @@ export const getLayerList = createSelector(
   }
 );
 
+export function getLayerById(layerId: string, state: MapStoreState): ILayer | undefined {
+  return getLayerList(state).find(layer => {
+    return layerId === layer.getId();
+  });
+}
+
 export const getFittableLayers = createSelector(getLayerList, layerList => {
   return layerList.filter(layer => {
     // These are the only layer-types that implement bounding-box retrieval reliably
@@ -336,7 +346,11 @@ export const getMapColors = createSelector(
 );
 
 export const getSelectedLayerJoinDescriptors = createSelector(getSelectedLayer, selectedLayer => {
-  return selectedLayer.getJoins().map((join: IJoin) => {
+  if (!selectedLayer || !('getJoins' in selectedLayer)) {
+    return [];
+  }
+
+  return (selectedLayer as IVectorLayer).getJoins().map((join: IJoin) => {
     return join.toDescriptor();
   });
 });
