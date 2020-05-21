@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Logger,
-  SavedObjectsBaseOptions,
-  PluginInitializerContext,
-  CoreSetup,
-} from 'src/core/server';
+import { Logger, PluginInitializerContext, CoreSetup } from 'src/core/server';
 import { first } from 'rxjs/operators';
 import { SecurityPluginSetup } from '../../security/server';
 import { createConfig$ } from './config';
@@ -31,8 +26,9 @@ export interface EncryptedSavedObjectsPluginSetup {
   usingEphemeralEncryptionKey: boolean;
 }
 
-export interface EncryptedSavedObjectsPluginStart extends SavedObjectsSetup {
+export interface EncryptedSavedObjectsPluginStart {
   isEncryptionError: (error: Error) => boolean;
+  getClient: SavedObjectsSetup;
 }
 
 /**
@@ -97,12 +93,9 @@ export class Plugin {
 
   public start() {
     this.logger.debug('Starting plugin');
-
     return {
       isEncryptionError: (error: Error) => error instanceof EncryptionError,
-      getDecryptedAsInternalUser: (type: string, id: string, options?: SavedObjectsBaseOptions) => {
-        return this.savedObjectsSetup.getDecryptedAsInternalUser(type, id, options);
-      },
+      getClient: (includedHiddenTypes?: string[]) => this.savedObjectsSetup(includedHiddenTypes),
     };
   }
 

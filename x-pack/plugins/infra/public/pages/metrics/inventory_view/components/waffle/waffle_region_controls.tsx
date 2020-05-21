@@ -57,7 +57,10 @@ export const WaffleRegionControls = (props: Props) => {
   );
 
   const button = (
-    <DropdownButton onClick={showPopover} label="Region">
+    <DropdownButton
+      onClick={showPopover}
+      label={i18n.translate('xpack.infra.waffle.regionLabel', { defaultMessage: 'Region' })}
+    >
       {currentLabel ||
         i18n.translate('xpack.infra.waffle.region', {
           defaultMessage: 'All',

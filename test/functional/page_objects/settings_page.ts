@@ -52,7 +52,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async clickKibanaIndexPatterns() {
       log.debug('clickKibanaIndexPatterns link');
-      await testSubjects.click('index_patterns');
+      await testSubjects.click('indexPatterns');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -345,7 +345,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       await retry.try(async () => {
         const currentUrl = await browser.getCurrentUrl();
         log.info('currentUrl', currentUrl);
-        if (!currentUrl.match(/index_patterns\/.+\?/)) {
+        if (!currentUrl.match(/indexPatterns\/.+\?/)) {
           throw new Error('Index pattern not created');
         } else {
           log.debug('Index pattern created: ' + currentUrl);
