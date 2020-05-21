@@ -5,17 +5,22 @@
  */
 
 import { Action } from 'redux';
-import { map, filter, ignoreElements, tap, merge, withLatestFrom } from 'rxjs/operators';
+import { merge } from 'rxjs';
+import { map, filter, ignoreElements, tap, withLatestFrom } from 'rxjs/operators';
 import { Epic, ofType } from 'redux-observable';
 import { get } from 'lodash/fp';
 
-import { createTimeline, updateTimeline } from './actions';
+import { createTimeline, updateTimeline, removeColumn } from './actions';
 import { TimelineEpicDependencies } from './epic';
 import { isNotNull } from './helpers';
-import { TimelineModel } from './model';
+import { TimelineModel, ColumnHeaderOptions } from './model';
 
 const isPageTimeline = (timelineId: string | undefined) =>
   timelineId && timelineId.toLowerCase() === 'alerts-table';
+
+const removeColumnFromTimeline = (timeline: TimelineModel, columnId: string): TimelineModel => {
+  return { ...timeline, columns: timeline.columns.filter(column => column.id !== columnId) };
+};
 
 export const createTimelineLocalStorageEpic = <State>(): Epic<
   Action,
@@ -35,39 +40,56 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
 ) => {
   const timeline$ = state$.pipe(map(timelineByIdSelector), filter(isNotNull));
 
-  return action$.pipe(
-    ofType(createTimeline.type),
-    withLatestFrom(timeline$),
-    filter(([action, timeline]) => {
-      const timelineId: string = get('payload.id', action);
+  return merge(
+    action$.pipe(
+      ofType(createTimeline.type),
+      withLatestFrom(timeline$),
+      filter(([action, timeline]) => {
+        const timelineId: string = get('payload.id', action);
 
-      if (isPageTimeline(timelineId)) {
-        return true;
-      }
+        if (isPageTimeline(timelineId)) {
+          return true;
+        }
 
-      return false;
-    }),
-    tap(([action, timeline]) => {
-      const storageTimelines = localStorage.getItem('timelines');
-      const timelineId: string = get('payload.id', action);
+        return false;
+      }),
+      tap(([action, timeline]) => {
+        const storageTimelines = localStorage.getItem('timelines');
+        const timelineId: string = get('payload.id', action);
 
-      if (!storageTimelines) {
+        if (!storageTimelines) {
+          localStorage.setItem(
+            'timelines',
+            JSON.stringify({
+              [timelineId]: action.payload,
+            })
+          );
+        }
+      }),
+      map(([action, timeline]) => {
+        const storageTimelines = JSON.parse(localStorage.getItem('timelines') ?? '');
+        const timelineId: string = get('payload.id', action);
+
+        return updateTimeline({
+          id: timelineId,
+          timeline: { ...timeline[timelineId], ...storageTimelines[timelineId] },
+        });
+      })
+    ),
+    action$.pipe(
+      ofType(removeColumn.type),
+      tap(action => {
+        const storageTimelines = JSON.parse(localStorage.getItem('timelines') ?? '');
+        const timelineId: string = get('payload.id', action);
+        const columnId: string = get('payload.columnId', action);
+        const modifiedTimeline = removeColumnFromTimeline(storageTimelines[timelineId], columnId);
+
         localStorage.setItem(
           'timelines',
-          JSON.stringify({
-            [timelineId]: action.payload,
-          })
+          JSON.stringify({ ...storageTimelines, [timelineId]: modifiedTimeline })
         );
-      }
-    }),
-    map(([action, timeline]) => {
-      const storageTimelines = JSON.parse(localStorage.getItem('timelines') ?? '');
-      const timelineId: string = get('payload.id', action);
-
-      return updateTimeline({
-        id: timelineId,
-        timeline: { ...timeline[timelineId], ...storageTimelines[timelineId] },
-      });
-    })
+      }),
+      ignoreElements()
+    )
   );
 };
