@@ -113,17 +113,7 @@ export type RegistrySearchResults = RegistrySearchResult[];
 // from getPackageOutput at https://github.com/elastic/package-registry/blob/master/search.go
 export type RegistrySearchResult = Pick<
   RegistryPackage,
-  | 'name'
-  | 'title'
-  | 'version'
-  | 'description'
-  | 'type'
-  | 'icons'
-  | 'internal'
-  | 'download'
-  | 'path'
-  | 'datasets'
-  | 'datasources'
+  'name' | 'title' | 'version' | 'description' | 'type' | 'icons' | 'internal' | 'download' | 'path'
 >;
 
 export type ScreenshotItem = RegistryImage;
