@@ -117,6 +117,14 @@ export default function({ getService }: FtrProviderContext) {
           },
         ],
         version: 1,
+        on_failure: [
+          {
+            set: {
+              field: '_index',
+              value: 'failed-{{ _index }}',
+            },
+          },
+        ],
       };
 
       before(() => createPipeline({ body: PIPELINE, id: PIPELINE_ID }));
@@ -131,6 +139,23 @@ export default function({ getService }: FtrProviderContext) {
           .send({
             ...PIPELINE,
             description: 'updated test pipeline description',
+          })
+          .expect(200);
+
+        expect(body).to.eql({
+          acknowledged: true,
+        });
+      });
+
+      it('should allow optional fields to be removed', async () => {
+        const uri = `${API_BASE_PATH}/${PIPELINE_ID}`;
+
+        const { body } = await supertest
+          .put(uri)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            processors: PIPELINE.processors,
+            // removes description, version and on_failure
           })
           .expect(200);
 
@@ -320,6 +345,54 @@ export default function({ getService }: FtrProviderContext) {
           .send({
             pipeline: {
               description: 'test simulate pipeline description',
+              processors: [
+                {
+                  set: {
+                    field: 'field2',
+                    value: '_value',
+                  },
+                },
+              ],
+              version: 1,
+              on_failure: [
+                {
+                  set: {
+                    field: '_index',
+                    value: 'failed-{{ _index }}',
+                  },
+                },
+              ],
+            },
+            documents: [
+              {
+                _index: 'index',
+                _id: 'id',
+                _source: {
+                  foo: 'bar',
+                },
+              },
+              {
+                _index: 'index',
+                _id: 'id',
+                _source: {
+                  foo: 'rab',
+                },
+              },
+            ],
+          })
+          .expect(200);
+
+        // The simulate ES response is quite long and includes timestamps
+        // so for now, we just confirm the docs array is returned with the correct length
+        expect(body.docs?.length).to.eql(2);
+      });
+
+      it('should successfully simulate a pipeline with only required pipeline fields', async () => {
+        const { body } = await supertest
+          .post(`${API_BASE_PATH}/simulate`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            pipeline: {
               processors: [
                 {
                   set: {
