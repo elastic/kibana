@@ -39,8 +39,8 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
   const canDeleteDataFrameAnalytics: boolean = checkPermission('canDeleteDataFrameAnalytics');
 
   const [isModalVisible, setModalVisible] = useState(false);
-  const [deleteTargetIndex, toggleDeleteTargetIndex] = useState<boolean>(true);
-  const [deleteIndexPattern, toggleDeleteIndexPattern] = useState<boolean>(true);
+  const [deleteTargetIndex, setDeleteTargetIndex] = useState<boolean>(true);
+  const [deleteIndexPattern, setDeleteIndexPattern] = useState<boolean>(true);
   const [userCanDeleteIndex, setUserCanDeleteIndex] = useState<boolean>(false);
   const [indexPatternExists, setIndexPatternExists] = useState<boolean>(false);
 
@@ -120,6 +120,8 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
     }
   };
   const openModal = () => setModalVisible(true);
+  const toggleDeleteIndex = () => setDeleteTargetIndex(!deleteTargetIndex);
+  const toggleDeleteIndexPattern = () => setDeleteIndexPattern(!deleteIndexPattern);
 
   const buttonDeleteText = i18n.translate('xpack.ml.dataframe.analyticsList.deleteActionName', {
     defaultMessage: 'Delete',
@@ -206,7 +208,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
                       }
                     )}
                     checked={deleteTargetIndex}
-                    onChange={() => toggleDeleteTargetIndex(!deleteTargetIndex)}
+                    onChange={toggleDeleteIndex}
                   />
                 )}
               </EuiFlexItem>
@@ -220,7 +222,7 @@ export const DeleteAction: FC<DeleteActionProps> = ({ item }) => {
                       }
                     )}
                     checked={deleteIndexPattern}
-                    onChange={() => toggleDeleteIndexPattern(!deleteIndexPattern)}
+                    onChange={toggleDeleteIndexPattern}
                   />
                 )}
               </EuiFlexItem>
