@@ -162,9 +162,10 @@ export class Typeahead extends Component {
   render() {
     return (
       <ClickOutside onClickOutside={this.onClickOutside} style={{ position: 'relative' }}>
-        <div data-test-subj={this.props['data-test-subj']} style={{ position: 'relative' }}>
+        <div style={{ position: 'relative' }}>
           <EuiFieldSearch
             aria-label={this.props['aria-label']}
+            data-test-subj={this.props['data-test-subj']}
             fullWidth
             style={{
               backgroundImage: 'none',

@@ -54,6 +54,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       loadTestFile(require.resolve('./locations'));
       loadTestFile(require.resolve('./settings'));
       loadTestFile(require.resolve('./certificates'));
+      loadTestFile(require.resolve('./overview_generated'));
     });
     describe('with real-world data', () => {
       before(async () => {

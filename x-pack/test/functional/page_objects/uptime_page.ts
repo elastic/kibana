@@ -6,6 +6,9 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
+import { AutoSuggestInteraction } from '../services/uptime/types';
+
+const MONITOR_STATUS_ALERT_KUERY_BAR_ATTR = 'xpack.uptime.alerts.monitorStatus.filterBar';
 
 export function UptimePageProvider({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'timePicker']);
@@ -97,9 +100,40 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       return await commonService.getSnapshotCount();
     }
 
+    /**
+     * Simulate keyboard interaction with a kuery bar and suggestive type.
+     *
+     * @param kueryBar KueryBar components require a name, this param maps the
+     * kuery bar instance you're testing to the attribute it will render.
+     * @param interactions Series of keyboard commands for navigating autocomplete/suggest values.
+     *
+     */
+    public async useKueryBarAutocomplete(
+      kueryBar: 'overviewPage' | 'monitorStatusAlertFlyout',
+      interactions: AutoSuggestInteraction[]
+    ) {
+      let kueryBarAttribute: string;
+      if (kueryBar === 'overviewPage') {
+        kueryBarAttribute = 'xpack.uptime.filterBar';
+      } else if (kueryBar === 'monitorStatusAlertFlyout') {
+        kueryBarAttribute = MONITOR_STATUS_ALERT_KUERY_BAR_ATTR;
+      } else {
+        throw new Error(`invalid kuery bar attribute value: ${kueryBar}`);
+      }
+
+      const { setKueryBarText } = commonService;
+
+      for (const interaction of interactions) {
+        if (interaction.autocompleteText) {
+          await setKueryBarText(kueryBarAttribute, interaction.autocompleteText, false, false);
+        }
+        await commonService.executeKeyboardPresses(interaction);
+      }
+    }
+
     public async setAlertKueryBarText(filters: string) {
       const { setKueryBarText } = commonService;
-      await setKueryBarText('xpack.uptime.alerts.monitorStatus.filterBar', filters);
+      await setKueryBarText(MONITOR_STATUS_ALERT_KUERY_BAR_ATTR, filters);
     }
 
     public async setMonitorListPageSize(size: number): Promise<void> {

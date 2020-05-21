@@ -5,6 +5,7 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { AutoSuggestInteraction } from './types';
 
 export function UptimeCommonProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -33,10 +34,41 @@ export function UptimeCommonProvider({ getService }: FtrProviderContext) {
     async pageHasDataMissing() {
       return await testSubjects.find('data-missing', 5000);
     },
-    async setKueryBarText(attribute: string, value: string) {
+    /**
+     * This function is intended to simulate the user interacting with the
+     * auto-suggest capabilities of the search bar used throughout the Uptime app.
+     *
+     * It expects a series of interactions. An interaction consists of keys to press,
+     * and an optional suggestion to test for after the interaction concludes.
+     * @param interaction a set of interactions with the search bar
+     */
+    async executeKeyboardPresses(
+      interaction: Pick<AutoSuggestInteraction, 'keyPresses' | 'suggestionKey'>
+    ) {
+      for (let i = 0; i < interaction.keyPresses.length; i++) {
+        await browser.pressKeys(interaction.keyPresses[i]);
+      }
+      if (interaction.suggestionKey) {
+        await retry.try(async () => {
+          await testSubjects.existOrFail(`typeahead.suggestion.${interaction.suggestionKey}`);
+        });
+      }
+    },
+    async setKueryBarText(
+      attribute: string,
+      value: string,
+      shouldSubmit: boolean = true,
+      shouldOverwrite: boolean = true
+    ) {
       await testSubjects.click(attribute);
-      await testSubjects.setValue(attribute, value);
-      await browser.pressKeys(browser.keys.ENTER);
+      if (shouldOverwrite) {
+        await testSubjects.setValue(attribute, value);
+      } else {
+        await testSubjects.append(attribute, value);
+      }
+      if (shouldSubmit) {
+        await browser.pressKeys(browser.keys.ENTER);
+      }
     },
     async setFilterText(filterQuery: string) {
       await this.setKueryBarText('xpack.uptime.filterBar', filterQuery);
