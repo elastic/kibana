@@ -54,8 +54,8 @@ export KIBANA_PKG_BRANCH="$kbnBranch"
 ###
 ### Sets correct NODE_OPTIONS for CI
 ###
-CONFIG_DIR=${KIBANA_PATH_CONF:-"$KIBANA_DIR/config"}
-export NODE_OPTIONS="$(grep -v ^# < ${KIBANA_DIR}/node.ci.options | xargs) $NODE_OPTIONS"
+export KIBANA_CONFIG_DIR=${KIBANA_PATH_CONF:-"$KIBANA_DIR/config"}
+export NODE_OPTIONS="$(grep -v ^# < ${KIBANA_CONFIG_DIR}/node.ci.options | xargs) $NODE_OPTIONS"
 
 ###
 ### download node
