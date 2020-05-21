@@ -6,11 +6,11 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { Dispatch } from 'redux';
+// @ts-ignore
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { MapStoreState } from '../reducers/store';
-// @ts-ignore
 import {
   getLayerById,
   getDataFilters,
