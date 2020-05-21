@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
 
 import { App } from './app';
@@ -20,9 +19,7 @@ export const renderApp = (elem, I18nContext, appDependencies, history) => {
     <I18nContext>
       <Provider store={remoteClustersStore}>
         <AppContextProvider context={appDependencies}>
-          <Router history={history}>
-            <App />
-          </Router>
+          <App history={history} />
         </AppContextProvider>
       </Provider>
     </I18nContext>,

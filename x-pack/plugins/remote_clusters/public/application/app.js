@@ -6,7 +6,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Switch, Route, Redirect, withRouter } from 'react-router-dom';
+import { Switch, Route, Redirect, Router } from 'react-router-dom';
 
 import { UIM_APP_LOAD } from './constants';
 import { registerRouter, setUserHasLeftApp, trackUiMetric, METRIC_TYPE } from './services';
@@ -22,15 +22,16 @@ class AppComponent extends Component {
 
   constructor(...args) {
     super(...args);
+    setUserHasLeftApp(false);
     this.registerRouter();
   }
 
   registerRouter() {
     // Share the router with the app without requiring React or context.
-    const { history, location } = this.props;
+    const { history } = this.props;
     registerRouter({
       history,
-      route: { location },
+      route: { location: history.location },
     });
   }
 
@@ -45,18 +46,16 @@ class AppComponent extends Component {
 
   render() {
     return (
-      <div>
+      <Router history={this.props.history}>
         <Switch>
-          <Redirect exact from="" to="/list" />
-          <Redirect exact from="/" to="/list" />
-          <Route exact path={`/list`} component={RemoteClusterList} />
-          <Route exact path={`/add`} component={RemoteClusterAdd} />
-          <Route exact path={`/edit/:name`} component={RemoteClusterEdit} />
+          <Route exact path={[`/list`, '/', '']} component={RemoteClusterList} />
+          <Route path={[`/add`]} component={RemoteClusterAdd} />
+          <Route path={`/edit/:name`} component={RemoteClusterEdit} />
           <Redirect from={`/:anything`} to="/list" />
         </Switch>
-      </div>
+      </Router>
     );
   }
 }
 
-export const App = withRouter(AppComponent);
+export const App = AppComponent;

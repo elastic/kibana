@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { CRUD_APP_BASE_PATH } from '../../constants';
 import {
   addCluster as sendAddClusterRequest,
   getRouter,
@@ -108,7 +107,7 @@ export const addCluster = cluster => async dispatch => {
     // This will open the new job in the detail panel. Note that we're *not* showing a success toast
     // here, because it would partially obscure the detail panel.
     history.push({
-      pathname: `${CRUD_APP_BASE_PATH}/list`,
+      pathname: `/list`,
       search: `?cluster=${cluster.name}`,
     });
   }

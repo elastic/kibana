@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 
 import { toasts, fatalError } from '../../services/notification';
-import { CRUD_APP_BASE_PATH } from '../../constants';
 import { loadClusters } from './load_clusters';
 
 import {
@@ -95,7 +94,7 @@ export const editCluster = cluster => async dispatch => {
     // This will open the edited cluster in the detail panel. Note that we're *not* showing a success toast
     // here, because it would partially obscure the detail panel.
     history.push({
-      pathname: `${CRUD_APP_BASE_PATH}/list`,
+      pathname: `/list`,
       search: `?cluster=${cluster.name}`,
     });
   }
