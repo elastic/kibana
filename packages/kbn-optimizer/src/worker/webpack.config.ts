@@ -29,6 +29,8 @@ import webpackMerge from 'webpack-merge';
 // @ts-ignore
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
+import SpeedMeasurePlugin from 'speed-measure-webpack-plugin';
+
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 
 import { Bundle, WorkerConfig, parseDirPath, DisallowedSyntaxPlugin } from '../common';
@@ -348,5 +350,13 @@ export function getWebpackConfig(bundle: Bundle, worker: WorkerConfig) {
     },
   };
 
-  return webpackMerge(commonConfig, worker.dist ? distributableConfig : nonDistributableConfig);
+  const smp = new SpeedMeasurePlugin({
+    // outputTarget: 'build-perf-stat.txt',
+    outputFormat: 'human',
+  });
+  const finalConfig = webpackMerge(
+    commonConfig,
+    worker.dist ? distributableConfig : nonDistributableConfig
+  );
+  return smp.wrap(finalConfig);
 }
