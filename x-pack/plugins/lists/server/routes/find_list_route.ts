@@ -45,7 +45,6 @@ export const findListRoute = (router: IRouter): void => {
         const page = pageOrUndefined ?? 1;
         const perPage = perPageOrUndefined ?? 20;
         const filter = filterOrUndefined ?? '';
-        // TODO: Pass in sort_field and validate that within decode cursor as well
         const decodedCursor = decodeCursor({ cursor, page, perPage, sortField });
         if (decodedCursor == null) {
           return siemResponse.error({
