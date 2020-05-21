@@ -11,6 +11,7 @@ import { EndpointDocGenerator, Event } from '../../common/endpoint/generate_data
 import { default as eventMapping } from './event_mapping.json';
 import { default as alertMapping } from './alert_mapping.json';
 import { default as policyMapping } from './policy_mapping.json';
+import { default as metadataMapping } from './metadata_mapping.json';
 
 main();
 
@@ -200,6 +201,7 @@ async function main() {
   await createIndex(client, argv.alertIndex, alertMapping);
   await createIndex(client, argv.eventIndex, eventMapping);
   await createIndex(client, argv.policyIndex, policyMapping);
+  await createIndex(client, argv.metadataIndex, metadataMapping);
   if (argv.setupOnly) {
     // eslint-disable-next-line no-process-exit
     process.exit(0);
