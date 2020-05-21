@@ -66,7 +66,7 @@
     </div>
   </div>
 
-  <div class="visualize" ng-if="!chrome.getVisible()"/>
+  <div class="visualize" ng-if="!chrome.getVisible()"></div>
 
   <visualization-editor
     ng-if="chrome.getVisible()"
@@ -75,6 +75,6 @@
     time-range="timeRange"
     filters="globalFilters"
     class="visEditor__content"
-  />
+  ></visualization-editor>
 
 </visualize-app>
