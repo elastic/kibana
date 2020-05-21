@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import apm from 'elastic-apm-node';
+import { apm } from '../../../../index';
 import { Dataset, RegistryPackage, ElasticsearchAssetType, TemplateRef } from '../../../../types';
 import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';

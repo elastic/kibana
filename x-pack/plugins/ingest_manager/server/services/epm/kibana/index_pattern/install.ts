@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import apm from 'elastic-apm-node';
 import { SavedObjectsClientContract } from 'src/core/server';
+import { apm } from '../../../../index';
 import {
   INDEX_PATTERN_SAVED_OBJECT_TYPE,
   INDEX_PATTERN_PLACEHOLDER_SUFFIX,

@@ -7,7 +7,7 @@
 import url from 'url';
 import uuid from 'uuid';
 import { SavedObjectsClientContract } from 'src/core/server';
-import apm from 'elastic-apm-node';
+import { apm } from '../index';
 import { CallESAsCurrentUser } from '../types';
 import { agentConfigService } from './agent_config';
 import { outputService } from './output';

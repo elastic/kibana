@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import apm from 'elastic-apm-node';
+import { apm } from '../../../../index';
 import {
   AssetReference,
   Dataset,

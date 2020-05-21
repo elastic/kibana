@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import apm from 'elastic-apm-node';
 import Boom from 'boom';
 import fetch, { Response } from 'node-fetch';
+import { apm } from '../../../index';
 import { streamToString } from './streams';
 
 export async function getResponse(url: string): Promise<Response> {

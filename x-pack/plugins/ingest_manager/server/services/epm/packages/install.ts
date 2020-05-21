@@ -6,7 +6,7 @@
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import Boom from 'boom';
-import apm from 'elastic-apm-node';
+import { apm } from '../../../index';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   AssetReference,
