@@ -36,7 +36,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  const testDataListNegative = [
+  const testDataListUnauthorized = [
     {
       testTitle: 'as ML Unauthorized user',
       user: USER.ML_UNAUTHORIZED,
@@ -83,7 +83,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('rejects request', function() {
-      for (const testData of testDataListNegative) {
+      for (const testData of testDataListUnauthorized) {
         describe('fails to delete job ID supplied', function() {
           it(`${testData.testTitle}`, async () => {
             const body = await runJobsDeleteRequest(
