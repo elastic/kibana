@@ -18,10 +18,12 @@
  */
 
 import * as Rx from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { parseBundles, parseWorkerConfig, WorkerMsg, isWorkerMsg, WorkerMsgs } from '../common';
 
 import { runCompilers } from './run_compilers';
+import { observeParentOffline } from './observe_parent_offline';
 
 /**
  **
@@ -64,15 +66,6 @@ const exit = (code: number) => {
   }, 5000).unref();
 };
 
-// check for connected parent on an unref'd timer rather than listening
-// to "disconnect" since that listner prevents the process from exiting
-setInterval(() => {
-  if (!process.connected) {
-    // parent is gone
-    process.exit(0);
-  }
-}, 1000).unref();
-
 Rx.defer(() => {
   const workerConfig = parseWorkerConfig(process.argv[2]);
   const bundles = parseBundles(process.argv[3]);
@@ -81,20 +74,22 @@ Rx.defer(() => {
   process.env.BROWSERSLIST_ENV = workerConfig.browserslistEnv;
 
   return runCompilers(workerConfig, bundles);
-}).subscribe(
-  msg => {
-    send(msg);
-  },
-  error => {
-    if (isWorkerMsg(error)) {
-      send(error);
-    } else {
-      send(workerMsgs.error(error));
-    }
+})
+  .pipe(takeUntil(observeParentOffline(process, workerMsgs)))
+  .subscribe(
+    msg => {
+      send(msg);
+    },
+    error => {
+      if (isWorkerMsg(error)) {
+        send(error);
+      } else {
+        send(workerMsgs.error(error));
+      }
 
-    exit(1);
-  },
-  () => {
-    exit(0);
-  }
-);
+      exit(1);
+    },
+    () => {
+      exit(0);
+    }
+  );
