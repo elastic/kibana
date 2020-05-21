@@ -5,11 +5,10 @@
  */
 
 import Chance from 'chance';
-import { TestUtils } from 'src/plugins/es_ui_shared/public';
+import { getRandomString } from '../../../../../../test_utils';
 import { FollowerIndex } from '../../../../common/types';
 
 const chance = new Chance();
-const { getRandomString } = TestUtils;
 
 interface FollowerIndexMock {
   name: string;

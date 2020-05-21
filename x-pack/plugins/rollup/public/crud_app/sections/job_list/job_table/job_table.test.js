@@ -5,13 +5,11 @@
  */
 
 import { Pager } from '@elastic/eui';
-import { TestUtils } from '../../../../../../../../src/plugins/es_ui_shared/public';
 
+import { registerTestBed } from '../../../../../../../test_utils';
 import { getJobs, jobCount } from '../../../../../fixtures';
 import { rollupJobsStore } from '../../../store';
 import { JobTable } from './job_table';
-
-const { registerTestBed } = TestUtils;
 
 jest.mock('../../../../kibana_services', () => {
   const services = require.requireActual('../../../../kibana_services');

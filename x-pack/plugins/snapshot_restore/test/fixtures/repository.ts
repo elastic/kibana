@@ -3,11 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { TestUtils } from 'src/plugins/es_ui_shared/public';
+
+import { getRandomString } from '../../../../test_utils';
 import { RepositoryType } from '../../common/types';
 const defaultSettings: any = { chunkSize: '10mb', location: '/tmp/es-backups' };
-
-const { getRandomString } = TestUtils;
 
 interface Repository {
   name: string;

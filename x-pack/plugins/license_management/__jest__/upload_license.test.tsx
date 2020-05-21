@@ -6,9 +6,8 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-
 import { httpServiceMock } from '../../../../src/core/public/mocks';
+import { mountWithIntl } from '../../../test_utils/enzyme_helpers';
 
 // @ts-ignore
 import { uploadLicense } from '../public/application/store/actions/upload_license';

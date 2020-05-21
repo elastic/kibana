@@ -3,17 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { TestUtils } from 'src/plugins/es_ui_shared/public';
+
 import { setup as homeSetup } from './home.helpers';
 import { setup as repositoryAddSetup } from './repository_add.helpers';
 import { setup as repositoryEditSetup } from './repository_edit.helpers';
 import { setup as policyAddSetup } from './policy_add.helpers';
 import { setup as policyEditSetup } from './policy_edit.helpers';
 
-const { nextTick, getRandomString, findTestSubject } = TestUtils;
-type TestBed<T> = TestUtils.TestBed<T>;
-
-export { nextTick, getRandomString, findTestSubject, TestBed };
+export { nextTick, getRandomString, findTestSubject, TestBed } from '../../../../../test_utils';
 
 export { setupEnvironment } from './setup_environment';
 

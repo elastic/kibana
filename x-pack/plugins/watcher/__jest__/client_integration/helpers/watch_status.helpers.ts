@@ -5,16 +5,21 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { TestUtils } from 'src/plugins/es_ui_shared/public';
+
+import {
+  registerTestBed,
+  findTestSubject,
+  TestBed,
+  TestBedConfig,
+  nextTick,
+} from '../../../../../test_utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { WatchStatus } from '../../../public/application/sections/watch_status/components/watch_status';
 import { ROUTES } from '../../../common/constants';
 import { WATCH_ID } from './constants';
 import { withAppContext } from './app_context.mock';
 
-const { registerTestBed, findTestSubject, nextTick } = TestUtils;
-
-const testBedConfig: TestUtils.TestBedConfig = {
+const testBedConfig: TestBedConfig = {
   memoryRouter: {
     initialEntries: [`${ROUTES.API_ROOT}/watches/watch/${WATCH_ID}/status`],
     componentRoutePath: `${ROUTES.API_ROOT}/watches/watch/:id/status`,
@@ -24,7 +29,7 @@ const testBedConfig: TestUtils.TestBedConfig = {
 
 const initTestBed = registerTestBed(withAppContext(WatchStatus), testBedConfig);
 
-export interface WatchStatusTestBed extends TestUtils.TestBed<WatchStatusTestSubjects> {
+export interface WatchStatusTestBed extends TestBed<WatchStatusTestSubjects> {
   actions: {
     selectTab: (tab: 'execution history' | 'action statuses') => void;
     clickToggleActivationButton: () => void;

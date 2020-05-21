@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 /* eslint-disable @kbn/eslint/no-restricted-paths */
-import { TestUtils } from 'src/plugins/es_ui_shared/public';
+
+import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
 import { RepositoryEdit } from '../../../public/application/sections/repository_edit';
 import { WithAppDependencies } from './setup_environment';
 import { REPOSITORY_NAME } from './constant';
 
-const { registerTestBed } = TestUtils;
-
-const testBedConfig: TestUtils.TestBedConfig = {
+const testBedConfig: TestBedConfig = {
   memoryRouter: {
     initialEntries: [`/${REPOSITORY_NAME}`],
     componentRoutePath: '/:name',

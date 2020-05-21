@@ -7,15 +7,12 @@
 import { act } from 'react-dom/test-utils';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import axios from 'axios';
-
-import { TestUtils } from 'src/plugins/es_ui_shared/public';
-import defaultWatchJson from '../../public/application/models/watch/default_watch.json';
-import { getWatch } from '../../test/fixtures';
 import { setupEnvironment, pageHelpers, nextTick, wrapBodyResponse } from './helpers';
 import { WatchEditTestBed } from './helpers/watch_edit.helpers';
 import { WATCH } from './helpers/constants';
-
-const { getRandomString } = TestUtils;
+import defaultWatchJson from '../../public/application/models/watch/default_watch.json';
+import { getWatch } from '../../test/fixtures';
+import { getRandomString } from '../../../../test_utils';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 

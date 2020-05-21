@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TestUtils } from '../../../../../../../src/plugins/es_ui_shared/public';
+import { registerTestBed } from '../../../../../../test_utils';
 import { AutoFollowPatternEdit } from '../../../app/sections/auto_follow_pattern_edit';
 import { ccrStore } from '../../../app/store';
 import { routing } from '../../../app/services/routing';
 
 import { AUTO_FOLLOW_PATTERN_EDIT_NAME } from './constants';
-
-const { registerTestBed } = TestUtils;
 
 const testBedConfig = {
   store: ccrStore,

@@ -6,10 +6,8 @@
 import 'brace';
 import 'brace/mode/json';
 
-import { TestUtils } from 'src/plugins/es_ui_shared/public';
+import { registerTestBed } from '../../../../../test_utils';
 import { Editor, Props } from '.';
-
-const { registerTestBed } = TestUtils;
 
 describe('Editor Component', () => {
   it('renders', async () => {

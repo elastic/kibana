@@ -5,15 +5,19 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { TestUtils } from 'src/plugins/es_ui_shared/public';
 
 import { BASE_PATH } from '../../../common/constants';
+import {
+  registerTestBed,
+  TestBed,
+  TestBedConfig,
+  findTestSubject,
+  nextTick,
+} from '../../../../../test_utils';
 import { PipelinesList } from '../../../public/application/sections/pipelines_list';
 import { WithAppDependencies } from './setup_environment';
 
-const { registerTestBed, findTestSubject, nextTick } = TestUtils;
-
-const testBedConfig: TestUtils.TestBedConfig = {
+const testBedConfig: TestBedConfig = {
   memoryRouter: {
     initialEntries: [BASE_PATH],
     componentRoutePath: BASE_PATH,
@@ -23,11 +27,11 @@ const testBedConfig: TestUtils.TestBedConfig = {
 
 const initTestBed = registerTestBed(WithAppDependencies(PipelinesList), testBedConfig);
 
-export type PipelineListTestBed = TestUtils.TestBed<PipelineListTestSubjects> & {
+export type PipelineListTestBed = TestBed<PipelineListTestSubjects> & {
   actions: ReturnType<typeof createActions>;
 };
 
-const createActions = (testBed: TestUtils.TestBed) => {
+const createActions = (testBed: TestBed) => {
   const { find } = testBed;
 
   /**

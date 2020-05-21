@@ -5,15 +5,13 @@
  */
 
 import React from 'react';
-import { TestUtils } from '../../../../../../../src/plugins/es_ui_shared/public';
+import { registerTestBed } from '../../../../../../test_utils';
 import { rollupJobsStore } from '../../store';
 import { JobList } from './job_list';
 
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 const startMock = coreMock.createStart();
-
-const { registerTestBed } = TestUtils;
 
 jest.mock('../../services', () => {
   const services = require.requireActual('../../services');

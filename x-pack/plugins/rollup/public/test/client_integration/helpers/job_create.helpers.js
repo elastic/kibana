@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { TestUtils } from '../../../../../../../src/plugins/es_ui_shared/public';
+
+import { registerTestBed } from '../../../../../../test_utils';
 import { rollupJobsStore } from '../../../crud_app/store';
 import { JobCreate } from '../../../crud_app/sections';
 
@@ -11,7 +12,6 @@ import { JOB_TO_CREATE } from './constants';
 
 import { wrapComponent } from './setup_context';
 
-const { registerTestBed } = TestUtils;
 const initTestBed = registerTestBed(wrapComponent(JobCreate), { store: rollupJobsStore });
 
 export const setup = props => {

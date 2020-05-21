@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TestUtils } from 'src/plugins/es_ui_shared/public';
+import { TestBed, SetupFunc } from '../../../../../test_utils';
 
-export interface PolicyFormTestBed extends TestUtils.TestBed<PolicyFormTestSubjects> {
+export interface PolicyFormTestBed extends TestBed<PolicyFormTestSubjects> {
   actions: {
     clickNextButton: () => void;
     clickSubmitButton: () => void;
@@ -14,7 +14,7 @@ export interface PolicyFormTestBed extends TestUtils.TestBed<PolicyFormTestSubje
 }
 
 export const formSetup = async (
-  initTestBed: TestUtils.SetupFunc<PolicyFormTestSubjects>
+  initTestBed: SetupFunc<PolicyFormTestSubjects>
 ): Promise<PolicyFormTestBed> => {
   const testBed = await initTestBed();
 

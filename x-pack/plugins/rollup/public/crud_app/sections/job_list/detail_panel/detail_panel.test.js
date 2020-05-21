@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { TestUtils } from '../../../../../../../../src/plugins/es_ui_shared/public';
+
+import { registerTestBed } from '../../../../../../../test_utils';
 import { getJob } from '../../../../../fixtures';
 import { rollupJobsStore } from '../../../store';
 import { DetailPanel } from './detail_panel';
@@ -15,8 +16,6 @@ import {
   JOB_DETAILS_TAB_JSON,
   tabToHumanizedMap,
 } from '../../components';
-
-const { registerTestBed } = TestUtils;
 
 jest.mock('../../../../kibana_services', () => {
   const services = require.requireActual('../../../../kibana_services');

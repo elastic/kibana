@@ -24,7 +24,7 @@ jest.mock('lodash', () => ({
   debounce: (fn: any) => fn,
 }));
 
-import { TestUtils } from 'src/plugins/es_ui_shared/public';
+import { registerTestBed, TestBed } from '../../../../../../../../test_utils';
 import { LoadMappingsProvider } from './load_mappings_provider';
 
 const ComponentToTest = ({ onJson }: { onJson: () => void }) => (
@@ -37,15 +37,13 @@ const ComponentToTest = ({ onJson }: { onJson: () => void }) => (
   </LoadMappingsProvider>
 );
 
-const { registerTestBed } = TestUtils;
-
 const setup = (props: any) =>
   registerTestBed(ComponentToTest, {
     memoryRouter: { wrapComponent: false },
     defaultProps: props,
   })();
 
-const openModalWithJsonContent = ({ component, find }: TestUtils.TestBed) => (json: any) => {
+const openModalWithJsonContent = ({ component, find }: TestBed) => (json: any) => {
   act(() => {
     find('load-json-button').simulate('click');
   });
@@ -71,7 +69,7 @@ describe('<LoadMappingsProvider />', () => {
     };
 
     const onJson = jest.fn();
-    const testBed = setup({ onJson }) as TestUtils.TestBed;
+    const testBed = setup({ onJson }) as TestBed;
 
     // Open the modal and add the JSON
     openModalWithJsonContent(testBed)(mappingsToLoad);

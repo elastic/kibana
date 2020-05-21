@@ -3,17 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { TestUtils } from 'src/plugins/es_ui_shared/public';
+import { withAppContext } from './app_context.mock';
+import { registerTestBed, TestBed, TestBedConfig } from '../../../../../test_utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { WatchEdit } from '../../../public/application/sections/watch_edit/components/watch_edit';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { registerRouter } from '../../../public/application/lib/navigation';
 import { ROUTES, WATCH_TYPES } from '../../../common/constants';
-import { withAppContext } from './app_context.mock';
 
-const { registerTestBed } = TestUtils;
-
-const testBedConfig: TestUtils.TestBedConfig = {
+const testBedConfig: TestBedConfig = {
   memoryRouter: {
     onRouter: router => registerRouter(router),
     initialEntries: [`${ROUTES.API_ROOT}/watches/new-watch/${WATCH_TYPES.JSON}`],
@@ -24,7 +22,7 @@ const testBedConfig: TestUtils.TestBedConfig = {
 
 const initTestBed = registerTestBed(withAppContext(WatchEdit), testBedConfig);
 
-export interface WatchCreateJsonTestBed extends TestUtils.TestBed<WatchCreateJsonTestSubjects> {
+export interface WatchCreateJsonTestBed extends TestBed<WatchCreateJsonTestSubjects> {
   actions: {
     selectTab: (tab: 'edit' | 'simulate') => void;
     clickSubmitButton: () => void;

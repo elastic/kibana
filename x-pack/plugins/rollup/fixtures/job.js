@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TestUtils } from '../../../../src/plugins/es_ui_shared/public';
-
-const { getRandomString } = TestUtils;
+import { getRandomString } from '../../../test_utils';
 
 const initialValues = {
   dateHistogramField: 'timestamp',

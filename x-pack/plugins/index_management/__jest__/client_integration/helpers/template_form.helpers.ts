@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { TestUtils } from 'src/plugins/es_ui_shared/public';
+import { TestBed, SetupFunc, UnwrapPromise } from '../../../../../test_utils';
 import { TemplateDeserialized } from '../../../common';
 import { nextTick } from './index';
 
@@ -14,10 +14,10 @@ interface MappingField {
 
 // Look at the return type of formSetup and form a union between that type and the TestBed type.
 // This way we an define the formSetup return object and use that to dynamically define our type.
-export type TemplateFormTestBed = TestUtils.TestBed<TemplateFormTestSubjects> &
-  TestUtils.UnwrapPromise<ReturnType<typeof formSetup>>;
+export type TemplateFormTestBed = TestBed<TemplateFormTestSubjects> &
+  UnwrapPromise<ReturnType<typeof formSetup>>;
 
-export const formSetup = async (initTestBed: TestUtils.SetupFunc<TestSubjects>) => {
+export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
   const testBed = await initTestBed();
 
   // User actions

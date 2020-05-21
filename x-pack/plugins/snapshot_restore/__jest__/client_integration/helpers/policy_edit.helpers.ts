@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 /* eslint-disable @kbn/eslint/no-restricted-paths */
-import { TestUtils } from 'src/plugins/es_ui_shared/public';
+
+import { registerTestBed, TestBedConfig } from '../../../../../test_utils';
 import { PolicyEdit } from '../../../public/application/sections/policy_edit';
 import { WithAppDependencies } from './setup_environment';
 import { POLICY_NAME } from './constant';
 import { formSetup, PolicyFormTestSubjects } from './policy_form.helpers';
 
-const { registerTestBed } = TestUtils;
-
-const testBedConfig: TestUtils.TestBedConfig = {
+const testBedConfig: TestBedConfig = {
   memoryRouter: {
     initialEntries: [`/edit_policy/${POLICY_NAME}`],
     componentRoutePath: '/edit_policy/:name',
