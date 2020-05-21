@@ -9,17 +9,17 @@ import { DslQuery, EsQueryConfig } from 'src/plugins/data/common';
 import { Filter, Query, esQuery } from '../../../../../../src/plugins/data/server';
 
 export interface GetQueryFilterOptions {
-  query: string;
+  filter: string;
 }
 
 export interface GetQueryFilterReturn {
   bool: { must: DslQuery[]; filter: Filter[]; should: never[]; must_not: Filter[] };
 }
 
-export const getQueryFilter = ({ query }: GetQueryFilterOptions): GetQueryFilterReturn => {
+export const getQueryFilter = ({ filter }: GetQueryFilterOptions): GetQueryFilterReturn => {
   const kqlQuery: Query = {
     language: 'kuery',
-    query,
+    query: filter,
   };
   const config: EsQueryConfig = {
     allowLeadingWildcards: true,

@@ -7,10 +7,10 @@
 import { APICaller } from 'kibana/server';
 
 import {
-  FilterOrUndefined,
+  Filter,
   FoundListSchema,
-  PageOrUndefined,
-  PerPageOrUndefined,
+  Page,
+  PerPage,
   SearchEsListSchema,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
@@ -20,11 +20,15 @@ import { transformElasticToList } from '../utils/transform_elastic_to_list';
 import { scrollToStartPage } from './scroll_to_start_page';
 import { getQueryFilter } from './get_query_filter';
 import { getSortWithTieBreaker } from './get_sort_with_tie_breaker';
+import { encodeCursor } from './encode_decode_cursor';
+import { getSearchAfterWithTieBreaker } from './get_search_after_with_tie_breaker';
 
 interface FindListOptions {
-  filter: FilterOrUndefined;
-  perPage: PerPageOrUndefined;
-  page: PageOrUndefined;
+  filter: Filter;
+  currentIndexPosition: number;
+  searchAfter: string[] | undefined;
+  perPage: PerPage;
+  page: Page;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
   callCluster: APICaller;
@@ -33,28 +37,39 @@ interface FindListOptions {
 
 export const findList = async ({
   callCluster,
+  currentIndexPosition,
   filter,
   page,
   perPage,
+  searchAfter,
   sortField,
   listIndex,
   sortOrder,
 }: FindListOptions): Promise<FoundListSchema> => {
-  // TODO: Range checking and throwing errors if the ranges are wrong
-  const finalPage = page ?? 1;
-  const finalPerPage = perPage ?? 20;
+  const query = getQueryFilter({ filter });
+
   const scroll = await scrollToStartPage({
     callCluster,
+    currentIndexPosition,
     filter,
-    hopSize: 3,
+    hopSize: 100,
     index: listIndex,
-    page: finalPage,
-    perPage: finalPerPage,
+    page,
+    perPage,
+    searchAfter,
     sortField,
     sortOrder,
   });
+
+  const { count } = await callCluster('count', {
+    body: {
+      query,
+    },
+    ignoreUnavailable: true,
+    index: listIndex,
+  });
+
   if (scroll.validSearchAfterFound) {
-    const query = filter != null ? getQueryFilter({ query: filter }) : { match_all: {} };
     const response = await callCluster<SearchEsListSchema>('search', {
       body: {
         query,
@@ -65,19 +80,24 @@ export const findList = async ({
       index: listIndex,
       size: perPage,
     });
-    const data = transformElasticToList({ response });
     return {
-      data,
-      page: finalPage,
-      per_page: finalPerPage,
-      total: data.length,
+      cursor: encodeCursor({
+        page,
+        perPage,
+        searchAfter: getSearchAfterWithTieBreaker({ response, sortField }),
+      }),
+      data: transformElasticToList({ response }),
+      page,
+      per_page: perPage,
+      total: count,
     };
   } else {
     return {
+      cursor: encodeCursor({ page, perPage, searchAfter: undefined }),
       data: [],
-      page: 0,
-      per_page: 0,
-      total: 0,
+      page,
+      per_page: perPage,
+      total: count,
     };
   }
 };

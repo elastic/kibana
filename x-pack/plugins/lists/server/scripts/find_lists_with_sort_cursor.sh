@@ -11,8 +11,11 @@ set -e
 
 PAGE=${1-1}
 PER_PAGE=${2-20}
-FILTER=${3-type:ip}
-# Example: ./find_lists_with_filter.sh 1 20 type:ip
+SORT_FIELD=${3-name}
+SORT_ORDER=${4-asc}
+CURSOR=${5-invalid}
+
+# Example: ./find_lists_with_sort_cursor.sh 1 20 name asc <cursor>
 curl -s -k \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
- -X GET "${KIBANA_URL}${SPACE_URL}/api/lists/_find?page=${PAGE}&per_page=${PER_PAGE}&filter=${FILTER}" | jq .
+ -X GET "${KIBANA_URL}${SPACE_URL}/api/lists/_find?page=${PAGE}&per_page=${PER_PAGE}&sort_field=${SORT_FIELD}&sort_order=${SORT_ORDER}&cursor=${CURSOR}" | jq .

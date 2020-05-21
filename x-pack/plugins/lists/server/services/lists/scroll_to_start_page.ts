@@ -6,30 +6,30 @@
 
 import { APICaller } from 'kibana/server';
 
-import {
-  FilterOrUndefined,
-  SortFieldOrUndefined,
-  SortOrderOrUndefined,
-} from '../../../common/schemas';
+import { Filter, SortFieldOrUndefined, SortOrderOrUndefined } from '../../../common/schemas';
 
 import { calculateScrollMath } from './calculate_scroll_math';
 import { getSearchAfterScroll } from './get_search_after_scroll';
 
 interface ScrollToStartPageOptions {
   callCluster: APICaller;
-  filter: FilterOrUndefined;
+  filter: Filter;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
   page: number;
   perPage: number;
   hopSize: number;
   index: string;
+  currentIndexPosition: number;
+  searchAfter: string[] | undefined;
 }
 
 export const scrollToStartPage = async ({
   callCluster,
   filter,
   hopSize,
+  currentIndexPosition,
+  searchAfter,
   page,
   perPage,
   sortOrder,
@@ -37,26 +37,31 @@ export const scrollToStartPage = async ({
   index,
 }: ScrollToStartPageOptions): Promise<Scroll> => {
   const { hops, leftOverAfterHops } = calculateScrollMath({
+    currentIndexPosition,
     hopSize,
     page,
     perPage,
   });
 
-  if (hops === 0 && leftOverAfterHops === 0) {
+  if (hops === 0 && leftOverAfterHops === 0 && currentIndexPosition === 0) {
     // We want to use a valid searchAfter of undefined to start at the start of our list
     return {
       searchAfter: undefined,
       validSearchAfterFound: true,
     };
-  }
-  if (hops > 0) {
+  } else if (hops === 0 && leftOverAfterHops === 0 && currentIndexPosition > 0) {
+    return {
+      searchAfter,
+      validSearchAfterFound: true,
+    };
+  } else if (hops > 0) {
     const scroll = await getSearchAfterScroll({
       callCluster,
       filter,
       hopSize,
       hops,
       index,
-      searchAfter: undefined,
+      searchAfter,
       sortField,
       sortOrder,
     });
@@ -81,7 +86,7 @@ export const scrollToStartPage = async ({
       hopSize: leftOverAfterHops,
       hops: 1,
       index,
-      searchAfter: undefined,
+      searchAfter,
       sortField,
       sortOrder,
     });

@@ -39,7 +39,6 @@ export const deleteExceptionListRoute = (router: IRouter): void => {
             statusCode: 400,
           });
         } else {
-          // TODO: At the moment this will delete the list but we need to delete all the list items before deleting the list
           const deleted = await exceptionLists.deleteExceptionList({
             id,
             listId,

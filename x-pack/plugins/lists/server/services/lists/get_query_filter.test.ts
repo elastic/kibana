@@ -7,8 +7,8 @@
 import { getQueryFilter } from './get_query_filter';
 
 describe('get_query_filter', () => {
-  test('it should work with basic kuery', () => {
-    const esQuery = getQueryFilter({ query: 'type: ip' });
+  test('it should work with a basic kuery', () => {
+    const esQuery = getQueryFilter({ filter: 'type: ip' });
     expect(esQuery).toEqual({
       bool: {
         filter: [

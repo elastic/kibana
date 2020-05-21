@@ -14,6 +14,7 @@ import {
   validate,
 } from '../siem_server_deps';
 import { findListSchema, foundListSchema } from '../../common/schemas';
+import { decodeCursor } from '../services/lists/encode_decode_cursor';
 
 import { getListClient } from './utils';
 
@@ -33,24 +34,42 @@ export const findListRoute = (router: IRouter): void => {
       try {
         const lists = getListClient(context);
         const {
-          filter,
-          page,
-          per_page: perPage,
+          cursor,
+          filter: filterOrUndefined,
+          page: pageOrUndefined,
+          per_page: perPageOrUndefined,
           sort_field: sortField,
           sort_order: sortOrder,
         } = request.query;
-        const exceptionList = await lists.findList({
-          filter,
-          page,
-          perPage,
-          sortField,
-          sortOrder,
-        });
-        const [validated, errors] = validate(exceptionList, foundListSchema);
-        if (errors != null) {
-          return siemResponse.error({ body: errors, statusCode: 500 });
+
+        const page = pageOrUndefined ?? 1;
+        const perPage = perPageOrUndefined ?? 20;
+        const filter = filterOrUndefined ?? '';
+        // TODO: Pass in sort_field and validate that within decode cursor as well
+        const decodedCursor = decodeCursor({ cursor, page, perPage, sortField });
+        if (decodedCursor == null) {
+          return siemResponse.error({
+            body:
+              'input cursor is invalid encoded or referencing previous pages rather than newer pages',
+            statusCode: 400,
+          });
         } else {
-          return response.ok({ body: validated ?? {} });
+          const [currentIndexPosition, searchAfter] = decodedCursor;
+          const exceptionList = await lists.findList({
+            currentIndexPosition,
+            filter,
+            page,
+            perPage,
+            searchAfter,
+            sortField,
+            sortOrder,
+          });
+          const [validated, errors] = validate(exceptionList, foundListSchema);
+          if (errors != null) {
+            return siemResponse.error({ body: errors, statusCode: 500 });
+          } else {
+            return response.ok({ body: validated ?? {} });
+          }
         }
       } catch (err) {
         const error = transformError(err);

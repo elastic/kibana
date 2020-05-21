@@ -8,12 +8,13 @@
 
 import * as t from 'io-ts';
 
-import { page, per_page, total } from '../common/schemas';
+import { cursor, page, per_page, total } from '../common/schemas';
 
 import { listSchema } from './list_schema';
 
 export const foundListSchema = t.exact(
   t.type({
+    cursor,
     data: t.array(listSchema),
     page,
     per_page,

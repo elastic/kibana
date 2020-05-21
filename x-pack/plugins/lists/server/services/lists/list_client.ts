@@ -420,19 +420,23 @@ export class ListClient {
 
   public findList = async ({
     filter,
+    currentIndexPosition,
     perPage,
     page,
     sortField,
     sortOrder,
+    searchAfter,
   }: FindListOptions): Promise<FoundListSchema> => {
     const { callCluster } = this;
     const listIndex = this.getListIndex();
     return findList({
       callCluster,
+      currentIndexPosition,
       filter,
       listIndex,
       page,
       perPage,
+      searchAfter,
       sortField,
       sortOrder,
     });

@@ -11,14 +11,14 @@ import { APICaller } from 'kibana/server';
 import {
   Description,
   DescriptionOrUndefined,
-  FilterOrUndefined,
+  Filter,
   Id,
   IdOrUndefined,
   MetaOrUndefined,
   Name,
   NameOrUndefined,
-  PageOrUndefined,
-  PerPageOrUndefined,
+  Page,
+  PerPage,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
   Type,
@@ -117,9 +117,11 @@ export interface GetListItemsByValueOptions {
 }
 
 export interface FindListOptions {
-  filter: FilterOrUndefined;
-  perPage: PerPageOrUndefined;
-  page: PageOrUndefined;
+  currentIndexPosition: number;
+  filter: Filter;
+  perPage: PerPage;
+  page: Page;
+  searchAfter: string[] | undefined;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
 }

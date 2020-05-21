@@ -6,11 +6,7 @@
 
 import { APICaller } from 'kibana/server';
 
-import {
-  FilterOrUndefined,
-  SortFieldOrUndefined,
-  SortOrderOrUndefined,
-} from '../../../common/schemas';
+import { Filter, SortFieldOrUndefined, SortOrderOrUndefined } from '../../../common/schemas';
 
 import { getQueryFilter } from './get_query_filter';
 import { getSortWithTieBreaker } from './get_sort_with_tie_breaker';
@@ -22,7 +18,7 @@ import {
 
 interface GetSearchAfterOptions {
   callCluster: APICaller;
-  filter: FilterOrUndefined;
+  filter: Filter;
   hops: number;
   hopSize: number;
   searchAfter: string[] | undefined;
@@ -41,7 +37,7 @@ export const getSearchAfterScroll = async ({
   sortOrder,
   index,
 }: GetSearchAfterOptions): Promise<Scroll> => {
-  const query = filter != null ? getQueryFilter({ query: filter }) : { match_all: {} };
+  const query = getQueryFilter({ filter });
   let newSearchAfter = searchAfter;
   for (let i = 0; i < hops; ++i) {
     const response = await callCluster<PartialExceptTieBreaker>('search', {

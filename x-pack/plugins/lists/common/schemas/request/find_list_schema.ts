@@ -8,12 +8,13 @@
 
 import * as t from 'io-ts';
 
-import { filter, sort_field, sort_order } from '../common/schemas';
+import { cursor, filter, sort_field, sort_order } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
 import { StringToPositiveNumber } from '../types/string_to_positive_number';
 
 export const findListSchema = t.exact(
   t.partial({
+    cursor, // defaults to undefined if not set during decode
     filter, // defaults to undefined if not set during decode
     page: StringToPositiveNumber, // defaults to undefined if not set during decode
     per_page: StringToPositiveNumber, // defaults to undefined if not set during decode

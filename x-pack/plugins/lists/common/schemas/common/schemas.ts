@@ -121,5 +121,11 @@ export const sortOrderOrUndefined = t.union([sort_order, t.undefined]);
 export type SortOrderOrUndefined = t.TypeOf<typeof sortOrderOrUndefined>;
 
 export const filter = t.string;
+export type Filter = t.TypeOf<typeof filter>;
 export const filterOrUndefined = t.union([filter, t.undefined]);
 export type FilterOrUndefined = t.TypeOf<typeof filterOrUndefined>;
+
+export const cursor = t.string;
+export type Cursor = t.TypeOf<typeof cursor>;
+export const cursorOrUndefined = t.union([cursor, t.undefined]);
+export type CursorOrUndefined = t.TypeOf<typeof cursorOrUndefined>;
