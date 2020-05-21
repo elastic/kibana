@@ -67,8 +67,13 @@ export const filtersBucketAgg = new BucketAggType({
               return;
             }
 
-            const query = esQuery.buildEsQuery(aggConfig.getIndexPattern(), [input], [], config);
-
+            const esQueryConfigs = esQuery.getEsQueryConfig(config);
+            const query = esQuery.buildEsQuery(
+              aggConfig.getIndexPattern(),
+              [input],
+              [],
+              esQueryConfigs
+            );
             if (!query) {
               console.log('malformed filter agg params, missing "query" on input'); // eslint-disable-line no-console
               return;
