@@ -93,6 +93,7 @@ function generator({
 
   # Set some Kibana configuration defaults.
   COPY --chown=1000:0 config/kibana.yml /usr/share/kibana/config/kibana.yml
+  COPY --chown=1000:0 config/node.options /usr/share/kibana/config/node.options
 
   # Add the launcher/wrapper script. It knows how to interpret environment
   # variables and translate them to Kibana CLI options.
