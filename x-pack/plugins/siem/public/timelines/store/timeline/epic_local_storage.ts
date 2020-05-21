@@ -26,9 +26,18 @@ const removeColumnFromTimeline = (timeline: TimelineModel, columnId: string): Ti
 
 const addColumnToTimeline = (
   timeline: TimelineModel,
-  column: ColumnHeaderOptions
+  column: ColumnHeaderOptions,
+  index: number = 0
 ): TimelineModel => {
-  return { ...timeline, columns: [...timeline.columns, column] };
+  const timelineWithoutColumn = removeColumnFromTimeline(timeline, column.id);
+  return {
+    ...timelineWithoutColumn,
+    columns: [
+      ...timelineWithoutColumn.columns.slice(0, index),
+      column,
+      ...timelineWithoutColumn.columns.slice(index, timeline.columns.length),
+    ],
+  };
 };
 
 const getAllTimelinesFromLocalStorage = () => {
@@ -51,17 +60,7 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
   Action,
   State,
   TimelineEpicDependencies<State>
-> => (
-  action$,
-  state$,
-  {
-    selectAllTimelineQuery,
-    selectNotesByIdSelector,
-    timelineByIdSelector,
-    timelineTimeRangeSelector,
-    apolloClient$,
-  }
-) => {
+> => (action$, state$, { timelineByIdSelector }) => {
   const timeline$ = state$.pipe(map(timelineByIdSelector), filter(isNotNull));
 
   return merge(
@@ -114,7 +113,8 @@ export const createTimelineLocalStorageEpic = <State>(): Epic<
         const storageTimelines = getAllTimelinesFromLocalStorage();
         const timelineId: string = get('payload.id', action);
         const column: ColumnHeaderOptions = get('payload.column', action);
-        const modifiedTimeline = addColumnToTimeline(storageTimelines[timelineId], column);
+        const index: number = get('payload.index', action);
+        const modifiedTimeline = addColumnToTimeline(storageTimelines[timelineId], column, index);
 
         addTimelineToLocalStorage(timelineId, modifiedTimeline);
       }),
