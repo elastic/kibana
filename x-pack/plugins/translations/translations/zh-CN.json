@@ -14312,7 +14312,6 @@
     "xpack.siem.timeline.rangePicker.oneMonth": "1 个月",
     "xpack.siem.timeline.rangePicker.oneWeek": "1 周",
     "xpack.siem.timeline.rangePicker.oneYear": "1 年",
-    "xpack.siem.timeline.searchBoxPlaceholder": "例如时间线名称或描述",
     "xpack.siem.timeline.searchOrFilter.eventTypeAllEvent": "所有事件",
     "xpack.siem.timeline.searchOrFilter.eventTypeRawEvent": "原始事件",
     "xpack.siem.timeline.searchOrFilter.eventTypeSignalEvent": "信号事件",
