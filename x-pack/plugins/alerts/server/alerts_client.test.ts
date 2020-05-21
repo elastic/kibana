@@ -5,6 +5,7 @@
  */
 import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
+import { KibanaRequest } from 'kibana/server';
 import { AlertsClient, CreateOptions } from './alerts_client';
 import { savedObjectsClientMock, loggingServiceMock } from '../../../../src/core/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
@@ -17,13 +18,14 @@ import { actionsClientMock } from '../../actions/server/mocks';
 
 const taskManager = taskManagerMock.start();
 const alertTypeRegistry = alertTypeRegistryMock.create();
-const savedObjectsClient = savedObjectsClientMock.create();
+const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 
 const alertsClientParams = {
   taskManager,
   alertTypeRegistry,
-  savedObjectsClient,
+  unsecuredSavedObjectsClient,
+  request: {} as KibanaRequest,
   spaceId: 'default',
   namespace: 'default',
   getUserName: jest.fn(),
@@ -126,7 +128,7 @@ describe('create()', () => {
 
   test('creates an alert', async () => {
     const data = getMockData();
-    savedObjectsClient.create.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -168,7 +170,7 @@ describe('create()', () => {
       params: {},
       ownerId: null,
     });
-    savedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -208,10 +210,10 @@ describe('create()', () => {
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
-    expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.create.mock.calls[0]).toHaveLength(3);
-    expect(savedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
-    expect(savedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
           Object {
@@ -246,7 +248,7 @@ describe('create()', () => {
         "updatedBy": "elastic",
       }
     `);
-    expect(savedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
                                                                                                                   Object {
                                                                                                                     "references": Array [
                                                                                                                       Object {
@@ -277,11 +279,11 @@ describe('create()', () => {
                                                                           },
                                                                         ]
                                                 `);
-    expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.update.mock.calls[0]).toHaveLength(3);
-    expect(savedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
-    expect(savedObjectsClient.update.mock.calls[0][1]).toEqual('1');
-    expect(savedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toHaveLength(3);
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0][1]).toEqual('1');
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
                                                                                                                   Object {
                                                                                                                     "scheduledTaskId": "task-123",
                                                                                                                   }
@@ -314,7 +316,7 @@ describe('create()', () => {
         },
       ],
     });
-    savedObjectsClient.create.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -382,7 +384,7 @@ describe('create()', () => {
       params: {},
       ownerId: null,
     });
-    savedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -436,7 +438,7 @@ describe('create()', () => {
 
   test('creates a disabled alert', async () => {
     const data = getMockData({ enabled: false });
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
           id: '1',
@@ -448,7 +450,7 @@ describe('create()', () => {
         },
       ],
     });
-    savedObjectsClient.create.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -504,7 +506,7 @@ describe('create()', () => {
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
-    expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(taskManager.schedule).toHaveBeenCalledTimes(0);
   });
 
@@ -542,13 +544,13 @@ describe('create()', () => {
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test Error"`
     );
-    expect(savedObjectsClient.create).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
   test('throws error if create saved object fails', async () => {
     const data = getMockData();
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
           id: '1',
@@ -560,7 +562,7 @@ describe('create()', () => {
         },
       ],
     });
-    savedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
+    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test failure"`
     );
@@ -569,7 +571,7 @@ describe('create()', () => {
 
   test('attempts to remove saved object if scheduling failed', async () => {
     const data = getMockData();
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
           id: '1',
@@ -581,7 +583,7 @@ describe('create()', () => {
         },
       ],
     });
-    savedObjectsClient.create.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -610,12 +612,12 @@ describe('create()', () => {
       ],
     });
     taskManager.schedule.mockRejectedValueOnce(new Error('Test failure'));
-    savedObjectsClient.delete.mockResolvedValueOnce({});
+    unsecuredSavedObjectsClient.delete.mockResolvedValueOnce({});
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Test failure"`
     );
-    expect(savedObjectsClient.delete).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
                                                                                                                   Array [
                                                                                                                     "alert",
                                                                                                                     "1",
@@ -625,7 +627,7 @@ describe('create()', () => {
 
   test('returns task manager error if cleanup fails, logs to console', async () => {
     const data = getMockData();
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
           id: '1',
@@ -637,7 +639,7 @@ describe('create()', () => {
         },
       ],
     });
-    savedObjectsClient.create.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -666,7 +668,9 @@ describe('create()', () => {
       ],
     });
     taskManager.schedule.mockRejectedValueOnce(new Error('Task manager error'));
-    savedObjectsClient.delete.mockRejectedValueOnce(new Error('Saved object delete error'));
+    unsecuredSavedObjectsClient.delete.mockRejectedValueOnce(
+      new Error('Saved object delete error')
+    );
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Task manager error"`
     );
@@ -691,7 +695,7 @@ describe('create()', () => {
       apiKeysEnabled: true,
       result: { id: '123', api_key: 'abc' },
     });
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
           id: '1',
@@ -703,7 +707,7 @@ describe('create()', () => {
         },
       ],
     });
-    savedObjectsClient.create.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -744,7 +748,7 @@ describe('create()', () => {
       params: {},
       ownerId: null,
     });
-    savedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -761,7 +765,7 @@ describe('create()', () => {
     await alertsClient.create({ data });
 
     expect(alertsClientParams.createAPIKey).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       'alert',
       {
         actions: [
@@ -802,7 +806,7 @@ describe('create()', () => {
 
   test(`doesn't create API key for disabled alerts`, async () => {
     const data = getMockData({ enabled: false });
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
           id: '1',
@@ -814,7 +818,7 @@ describe('create()', () => {
         },
       ],
     });
-    savedObjectsClient.create.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -855,7 +859,7 @@ describe('create()', () => {
       params: {},
       ownerId: null,
     });
-    savedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -872,7 +876,7 @@ describe('create()', () => {
     await alertsClient.create({ data });
 
     expect(alertsClientParams.createAPIKey).not.toHaveBeenCalled();
-    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       'alert',
       {
         actions: [
@@ -929,7 +933,7 @@ describe('enable()', () => {
   beforeEach(() => {
     alertsClient = new AlertsClient(alertsClientParams);
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingAlert);
-    savedObjectsClient.get.mockResolvedValue(existingAlert);
+    unsecuredSavedObjectsClient.get.mockResolvedValue(existingAlert);
     alertsClientParams.createAPIKey.mockResolvedValue({
       apiKeysEnabled: false,
     });
@@ -950,13 +954,13 @@ describe('enable()', () => {
 
   test('enables an alert', async () => {
     await alertsClient.enable({ id: '1' });
-    expect(savedObjectsClient.get).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
     expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
     expect(alertsClientParams.createAPIKey).toHaveBeenCalled();
-    expect(savedObjectsClient.update).toHaveBeenCalledWith(
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
       {
@@ -984,7 +988,7 @@ describe('enable()', () => {
       },
       scope: ['alerting'],
     });
-    expect(savedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
       scheduledTaskId: 'task-123',
     });
   });
@@ -999,7 +1003,7 @@ describe('enable()', () => {
     });
 
     await alertsClient.enable({ id: '1' });
-    expect(savedObjectsClient.get).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
@@ -1018,7 +1022,7 @@ describe('enable()', () => {
     await alertsClient.enable({ id: '1' });
     expect(alertsClientParams.getUserName).not.toHaveBeenCalled();
     expect(alertsClientParams.createAPIKey).not.toHaveBeenCalled();
-    expect(savedObjectsClient.update).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
@@ -1029,7 +1033,7 @@ describe('enable()', () => {
     });
 
     await alertsClient.enable({ id: '1' });
-    expect(savedObjectsClient.update).toHaveBeenCalledWith(
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
       {
@@ -1050,7 +1054,7 @@ describe('enable()', () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
 
     await alertsClient.enable({ id: '1' });
-    expect(savedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
       'enable(): Failed to load API key to invalidate on alert 1: Fail'
     );
@@ -1058,45 +1062,47 @@ describe('enable()', () => {
 
   test('throws error when failing to load the saved object using SOC', async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
-    savedObjectsClient.get.mockRejectedValueOnce(new Error('Fail to get'));
+    unsecuredSavedObjectsClient.get.mockRejectedValueOnce(new Error('Fail to get'));
 
     await expect(alertsClient.enable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Fail to get"`
     );
     expect(alertsClientParams.getUserName).not.toHaveBeenCalled();
     expect(alertsClientParams.createAPIKey).not.toHaveBeenCalled();
-    expect(savedObjectsClient.update).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
   test('throws error when failing to update the first time', async () => {
-    savedObjectsClient.update.mockRejectedValueOnce(new Error('Fail to update'));
+    unsecuredSavedObjectsClient.update.mockRejectedValueOnce(new Error('Fail to update'));
 
     await expect(alertsClient.enable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Fail to update"`
     );
     expect(alertsClientParams.getUserName).toHaveBeenCalled();
     expect(alertsClientParams.createAPIKey).toHaveBeenCalled();
-    expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
   test('throws error when failing to update the second time', async () => {
-    savedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
       ...existingAlert,
       attributes: {
         ...existingAlert.attributes,
         enabled: true,
       },
     });
-    savedObjectsClient.update.mockRejectedValueOnce(new Error('Fail to update second time'));
+    unsecuredSavedObjectsClient.update.mockRejectedValueOnce(
+      new Error('Fail to update second time')
+    );
 
     await expect(alertsClient.enable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Fail to update second time"`
     );
     expect(alertsClientParams.getUserName).toHaveBeenCalled();
     expect(alertsClientParams.createAPIKey).toHaveBeenCalled();
-    expect(savedObjectsClient.update).toHaveBeenCalledTimes(2);
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(2);
     expect(taskManager.schedule).toHaveBeenCalled();
   });
 
@@ -1108,7 +1114,7 @@ describe('enable()', () => {
     );
     expect(alertsClientParams.getUserName).toHaveBeenCalled();
     expect(alertsClientParams.createAPIKey).toHaveBeenCalled();
-    expect(savedObjectsClient.update).toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
   });
 });
 
@@ -1136,17 +1142,17 @@ describe('disable()', () => {
 
   beforeEach(() => {
     alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValue(existingAlert);
+    unsecuredSavedObjectsClient.get.mockResolvedValue(existingAlert);
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedAlert);
   });
 
   test('disables an alert', async () => {
     await alertsClient.disable({ id: '1' });
-    expect(savedObjectsClient.get).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
-    expect(savedObjectsClient.update).toHaveBeenCalledWith(
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
       {
@@ -1170,11 +1176,11 @@ describe('disable()', () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
 
     await alertsClient.disable({ id: '1' });
-    expect(savedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
-    expect(savedObjectsClient.update).toHaveBeenCalledWith(
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
       {
@@ -1204,7 +1210,7 @@ describe('disable()', () => {
     });
 
     await alertsClient.disable({ id: '1' });
-    expect(savedObjectsClient.update).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
     expect(taskManager.remove).not.toHaveBeenCalled();
     expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
   });
@@ -1220,7 +1226,7 @@ describe('disable()', () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
 
     await alertsClient.disable({ id: '1' });
-    expect(savedObjectsClient.update).toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
     expect(taskManager.remove).toHaveBeenCalled();
     expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
@@ -1228,8 +1234,8 @@ describe('disable()', () => {
     );
   });
 
-  test('throws when savedObjectsClient update fails', async () => {
-    savedObjectsClient.update.mockRejectedValueOnce(new Error('Failed to update'));
+  test('throws when unsecuredSavedObjectsClient update fails', async () => {
+    unsecuredSavedObjectsClient.update.mockRejectedValueOnce(new Error('Failed to update'));
 
     await expect(alertsClient.disable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Failed to update"`
@@ -1257,7 +1263,7 @@ describe('disable()', () => {
 describe('muteAll()', () => {
   test('mutes an alert', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1267,7 +1273,7 @@ describe('muteAll()', () => {
     });
 
     await alertsClient.muteAll({ id: '1' });
-    expect(savedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
       muteAll: true,
       mutedInstanceIds: [],
       updatedBy: 'elastic',
@@ -1278,7 +1284,7 @@ describe('muteAll()', () => {
 describe('unmuteAll()', () => {
   test('unmutes an alert', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1288,7 +1294,7 @@ describe('unmuteAll()', () => {
     });
 
     await alertsClient.unmuteAll({ id: '1' });
-    expect(savedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith('alert', '1', {
       muteAll: false,
       mutedInstanceIds: [],
       updatedBy: 'elastic',
@@ -1299,7 +1305,7 @@ describe('unmuteAll()', () => {
 describe('muteInstance()', () => {
   test('mutes an alert instance', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1314,7 +1320,7 @@ describe('muteInstance()', () => {
     });
 
     await alertsClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
-    expect(savedObjectsClient.update).toHaveBeenCalledWith(
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
       {
@@ -1327,7 +1333,7 @@ describe('muteInstance()', () => {
 
   test('skips muting when alert instance already muted', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1341,12 +1347,12 @@ describe('muteInstance()', () => {
     });
 
     await alertsClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
-    expect(savedObjectsClient.update).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
   });
 
   test('skips muting when alert is muted', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1361,14 +1367,14 @@ describe('muteInstance()', () => {
     });
 
     await alertsClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
-    expect(savedObjectsClient.update).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
   });
 });
 
 describe('unmuteInstance()', () => {
   test('unmutes an alert instance', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1383,7 +1389,7 @@ describe('unmuteInstance()', () => {
     });
 
     await alertsClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
-    expect(savedObjectsClient.update).toHaveBeenCalledWith(
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
       {
@@ -1396,7 +1402,7 @@ describe('unmuteInstance()', () => {
 
   test('skips unmuting when alert instance not muted', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1410,12 +1416,12 @@ describe('unmuteInstance()', () => {
     });
 
     await alertsClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
-    expect(savedObjectsClient.update).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
   });
 
   test('skips unmuting when alert is muted', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1430,14 +1436,14 @@ describe('unmuteInstance()', () => {
     });
 
     await alertsClient.unmuteInstance({ alertId: '1', alertInstanceId: '2' });
-    expect(savedObjectsClient.update).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
   });
 });
 
 describe('get()', () => {
   test('calls saved objects client with given params', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1488,8 +1494,8 @@ describe('get()', () => {
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
-    expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
                                                                                                                   Array [
                                                                                                                     "alert",
                                                                                                                     "1",
@@ -1499,7 +1505,7 @@ describe('get()', () => {
 
   test(`throws an error when references aren't found`, async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1529,7 +1535,7 @@ describe('get()', () => {
 describe('getAlertState()', () => {
   test('calls saved objects client with given params', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1572,8 +1578,8 @@ describe('getAlertState()', () => {
     });
 
     await alertsClient.getAlertState({ id: '1' });
-    expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
                                                                                                                   Array [
                                                                                                                     "alert",
                                                                                                                     "1",
@@ -1586,7 +1592,7 @@ describe('getAlertState()', () => {
 
     const scheduledTaskId = 'task-123';
 
-    savedObjectsClient.get.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -1643,7 +1649,7 @@ describe('getAlertState()', () => {
 describe('find()', () => {
   test('calls saved objects client with given params', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.find.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
       total: 1,
       per_page: 10,
       page: 1,
@@ -1708,8 +1714,8 @@ describe('find()', () => {
         "total": 1,
       }
     `);
-    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
                                                                                                                   Array [
                                                                                                                     Object {
                                                                                                                       "type": "alert",
@@ -1759,8 +1765,8 @@ describe('delete()', () => {
 
   beforeEach(() => {
     alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValue(existingAlert);
-    savedObjectsClient.delete.mockResolvedValue({
+    unsecuredSavedObjectsClient.get.mockResolvedValue(existingAlert);
+    unsecuredSavedObjectsClient.delete.mockResolvedValue({
       success: true,
     });
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedAlert);
@@ -1769,13 +1775,13 @@ describe('delete()', () => {
   test('successfully removes an alert', async () => {
     const result = await alertsClient.delete({ id: '1' });
     expect(result).toEqual({ success: true });
-    expect(savedObjectsClient.delete).toHaveBeenCalledWith('alert', '1');
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('alert', '1');
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
     expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '123' });
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
-    expect(savedObjectsClient.get).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
   });
 
   test('falls back to SOC.get when getDecryptedAsInternalUser throws an error', async () => {
@@ -1783,10 +1789,10 @@ describe('delete()', () => {
 
     const result = await alertsClient.delete({ id: '1' });
     expect(result).toEqual({ success: true });
-    expect(savedObjectsClient.delete).toHaveBeenCalledWith('alert', '1');
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('alert', '1');
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
     expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
-    expect(savedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
       'delete(): Failed to load API key to invalidate on alert 1: Fail'
     );
@@ -1838,9 +1844,9 @@ describe('delete()', () => {
     );
   });
 
-  test('throws error when savedObjectsClient.get throws an error', async () => {
+  test('throws error when unsecuredSavedObjectsClient.get throws an error', async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
-    savedObjectsClient.get.mockRejectedValue(new Error('SOC Fail'));
+    unsecuredSavedObjectsClient.get.mockRejectedValue(new Error('SOC Fail'));
 
     await expect(alertsClient.delete({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"SOC Fail"`
@@ -1879,7 +1885,7 @@ describe('update()', () => {
 
   beforeEach(() => {
     alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValue(existingAlert);
+    unsecuredSavedObjectsClient.get.mockResolvedValue(existingAlert);
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingDecryptedAlert);
     alertTypeRegistry.get.mockReturnValue({
       id: '123',
@@ -1892,7 +1898,7 @@ describe('update()', () => {
   });
 
   test('updates given parameters', async () => {
-    savedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -2028,12 +2034,12 @@ describe('update()', () => {
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
-    expect(savedObjectsClient.get).not.toHaveBeenCalled();
-    expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.update.mock.calls[0]).toHaveLength(4);
-    expect(savedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
-    expect(savedObjectsClient.update.mock.calls[0][1]).toEqual('1');
-    expect(savedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toHaveLength(4);
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0][1]).toEqual('1');
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
           Object {
@@ -2080,7 +2086,7 @@ describe('update()', () => {
         "updatedBy": "elastic",
       }
     `);
-    expect(savedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
       Object {
         "references": Array [
           Object {
@@ -2105,7 +2111,7 @@ describe('update()', () => {
   });
 
   it('calls the createApiKey function', async () => {
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
           id: '1',
@@ -2121,7 +2127,7 @@ describe('update()', () => {
       apiKeysEnabled: true,
       result: { id: '123', api_key: 'abc' },
     });
-    savedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -2200,11 +2206,11 @@ describe('update()', () => {
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
-    expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.update.mock.calls[0]).toHaveLength(4);
-    expect(savedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
-    expect(savedObjectsClient.update.mock.calls[0][1]).toEqual('1');
-    expect(savedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toHaveLength(4);
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0][1]).toEqual('1');
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
           Object {
@@ -2235,7 +2241,7 @@ describe('update()', () => {
         "updatedBy": "elastic",
       }
     `);
-    expect(savedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
                                                 Object {
                                                   "references": Array [
                                                     Object {
@@ -2257,7 +2263,7 @@ describe('update()', () => {
         enabled: false,
       },
     });
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
           id: '1',
@@ -2269,7 +2275,7 @@ describe('update()', () => {
         },
       ],
     });
-    savedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -2349,11 +2355,11 @@ describe('update()', () => {
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
-    expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.update.mock.calls[0]).toHaveLength(4);
-    expect(savedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
-    expect(savedObjectsClient.update.mock.calls[0][1]).toEqual('1');
-    expect(savedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toHaveLength(4);
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0][1]).toEqual('1');
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
           Object {
@@ -2384,7 +2390,7 @@ describe('update()', () => {
         "updatedBy": "elastic",
       }
     `);
-    expect(savedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0][3]).toMatchInlineSnapshot(`
                                                 Object {
                                                   "references": Array [
                                                     Object {
@@ -2441,7 +2447,7 @@ describe('update()', () => {
 
   it('swallows error when invalidate API key throws', async () => {
     alertsClientParams.invalidateAPIKey.mockRejectedValueOnce(new Error('Fail'));
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
           id: '1',
@@ -2453,7 +2459,7 @@ describe('update()', () => {
         },
       ],
     });
-    savedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -2510,7 +2516,7 @@ describe('update()', () => {
 
   it('swallows error when getDecryptedAsInternalUser throws', async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
           id: '1',
@@ -2530,7 +2536,7 @@ describe('update()', () => {
         },
       ],
     });
-    savedObjectsClient.update.mockResolvedValueOnce({
+    unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
@@ -2622,7 +2628,7 @@ describe('update()', () => {
         ],
       },
     });
-    expect(savedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
       'update(): Failed to load API key to invalidate on alert 1: Fail'
     );
@@ -2644,7 +2650,7 @@ describe('update()', () => {
         async executor() {},
         producer: 'alerting',
       });
-      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [
           {
             id: '1',
@@ -2682,7 +2688,7 @@ describe('update()', () => {
         params: {},
         ownerId: null,
       });
-      savedObjectsClient.update.mockResolvedValueOnce({
+      unsecuredSavedObjectsClient.update.mockResolvedValueOnce({
         id: alertId,
         type: 'alert',
         attributes: {
@@ -2774,7 +2780,7 @@ describe('update()', () => {
       expect(taskManager.runNow).not.toHaveBeenCalled();
     });
 
-    test('updating the alert should not wait for the rerun the task to complete', async (done) => {
+    test('updating the alert should not wait for the rerun the task to complete', async done => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
 
@@ -2876,7 +2882,7 @@ describe('updateApiKey()', () => {
 
   beforeEach(() => {
     alertsClient = new AlertsClient(alertsClientParams);
-    savedObjectsClient.get.mockResolvedValue(existingAlert);
+    unsecuredSavedObjectsClient.get.mockResolvedValue(existingAlert);
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingEncryptedAlert);
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
@@ -2886,11 +2892,11 @@ describe('updateApiKey()', () => {
 
   test('updates the API key for the alert', async () => {
     await alertsClient.updateApiKey({ id: '1' });
-    expect(savedObjectsClient.get).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
-    expect(savedObjectsClient.update).toHaveBeenCalledWith(
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
       {
@@ -2910,11 +2916,11 @@ describe('updateApiKey()', () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
 
     await alertsClient.updateApiKey({ id: '1' });
-    expect(savedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledWith('alert', '1');
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
-    expect(savedObjectsClient.update).toHaveBeenCalledWith(
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
       '1',
       {
@@ -2937,7 +2943,7 @@ describe('updateApiKey()', () => {
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
       'Failed to invalidate API Key: Fail'
     );
-    expect(savedObjectsClient.update).toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
   });
 
   test('swallows error when getting decrypted object throws', async () => {
@@ -2947,12 +2953,12 @@ describe('updateApiKey()', () => {
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
       'updateApiKey(): Failed to load API key to invalidate on alert 1: Fail'
     );
-    expect(savedObjectsClient.update).toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
     expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalled();
   });
 
-  test('throws when savedObjectsClient update fails', async () => {
-    savedObjectsClient.update.mockRejectedValueOnce(new Error('Fail'));
+  test('throws when unsecuredSavedObjectsClient update fails', async () => {
+    unsecuredSavedObjectsClient.update.mockRejectedValueOnce(new Error('Fail'));
 
     await expect(alertsClient.updateApiKey({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Fail"`
