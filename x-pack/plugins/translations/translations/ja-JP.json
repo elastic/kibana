@@ -14297,7 +14297,6 @@
     "xpack.siem.timeline.rangePicker.oneMonth": "1 か月",
     "xpack.siem.timeline.rangePicker.oneWeek": "1 週間",
     "xpack.siem.timeline.rangePicker.oneYear": "1 年",
-    "xpack.siem.timeline.searchBoxPlaceholder": "例：タイムライン名、または説明",
     "xpack.siem.timeline.searchOrFilter.eventTypeAllEvent": "すべてのイベント",
     "xpack.siem.timeline.searchOrFilter.eventTypeRawEvent": "未加工イベント",
     "xpack.siem.timeline.searchOrFilter.eventTypeSignalEvent": "シグナルイベント",

@@ -236,7 +236,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
   const searchProps: SearchProps = {
     'data-test-subj': 'timeline-super-select-search-box',
     isLoading: loading,
-    placeholder: i18n.SEARCH_BOX_TIMELINE_PLACEHOLDER(timelineType),
+    placeholder: useMemo(() => i18n.SEARCH_BOX_TIMELINE_PLACEHOLDER(timelineType), [timelineType]),
     onSearch: onSearchTimeline,
     incremental: false,
     inputRef: (ref: HTMLElement) => {
