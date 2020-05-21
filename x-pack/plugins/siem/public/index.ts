@@ -5,7 +5,8 @@
  */
 
 import { PluginInitializerContext } from '../../../../src/core/public';
-import { Plugin, PluginSetup, PluginStart } from './plugin';
+import { Plugin } from './plugin';
+import { PluginSetup, PluginStart } from './types';
 
 export const plugin = (context: PluginInitializerContext): Plugin => new Plugin(context);
 

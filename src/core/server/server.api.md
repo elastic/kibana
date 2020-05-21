@@ -1840,8 +1840,9 @@ export class SavedObjectsClient {
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 
 // @public
-export type SavedObjectsClientFactory = ({ request, }: {
+export type SavedObjectsClientFactory = ({ request, includedHiddenTypes, }: {
     request: KibanaRequest;
+    includedHiddenTypes?: string[];
 }) => SavedObjectsClientContract;
 
 // @public
@@ -1851,6 +1852,8 @@ export type SavedObjectsClientFactoryProvider = (repositoryFactory: SavedObjects
 export interface SavedObjectsClientProviderOptions {
     // (undocumented)
     excludedWrappers?: string[];
+    // (undocumented)
+    includedHiddenTypes?: string[];
 }
 
 // @public
@@ -2213,7 +2216,7 @@ export class SavedObjectsRepository {
     // Warning: (ae-forgotten-export) The symbol "KibanaMigrator" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    static createRepository(migrator: KibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, callCluster: APICaller, extraTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
+    static createRepository(migrator: KibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, callCluster: APICaller, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<{}>;
@@ -2233,8 +2236,8 @@ export class SavedObjectsRepository {
 
 // @public
 export interface SavedObjectsRepositoryFactory {
-    createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
-    createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
+    createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
+    createScopedRepository: (req: KibanaRequest, includedHiddenTypes?: string[]) => ISavedObjectsRepository;
 }
 
 // @public
@@ -2285,8 +2288,8 @@ export interface SavedObjectsServiceSetup {
 
 // @public
 export interface SavedObjectsServiceStart {
-    createInternalRepository: (extraTypes?: string[]) => ISavedObjectsRepository;
-    createScopedRepository: (req: KibanaRequest, extraTypes?: string[]) => ISavedObjectsRepository;
+    createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
+    createScopedRepository: (req: KibanaRequest, includedHiddenTypes?: string[]) => ISavedObjectsRepository;
     createSerializer: () => SavedObjectsSerializer;
     getScopedClient: (req: KibanaRequest, options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
     getTypeRegistry: () => ISavedObjectTypeRegistry;
