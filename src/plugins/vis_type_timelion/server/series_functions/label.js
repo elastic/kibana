@@ -48,19 +48,27 @@ export default new Chainable('label', {
   help: i18n.translate('timelion.help.functions.labelHelpText', {
     defaultMessage: 'Change the label of the series. Use %s to reference the existing label',
   }),
-  fn: async function labelFn(args) {
+  fn: function labelFn(args) {
     const config = args.byName;
     return alter(args, function(eachSeries) {
       if (config.regex) {
-        vm.runInNewContext(
-          `exec()`,
-          {
-            exec: () => {
-              eachSeries.label = eachSeries.label.replace(new RegExp(config.regex), config.label);
+        const timeout = 100;
+        try {
+          vm.runInNewContext(
+            `exec()`,
+            {
+              exec: () => {
+                eachSeries.label = eachSeries.label.replace(new RegExp(config.regex), config.label);
+              },
             },
-          },
-          { timeout: 100 }
-        );
+            { timeout }
+          );
+        } catch (err) {
+          if (err.message === 'Script execution timed out.') {
+            throw new Error(`Regular Expression evaluation took longer than ${timeout}ms`);
+          }
+          throw err;
+        }
       } else {
         eachSeries.label = config.label;
       }

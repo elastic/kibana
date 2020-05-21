@@ -49,13 +49,13 @@ describe('color.js', () => {
   });
 
   it('should handle more colors than number of series', async () => {
-    const colorsArg = '#000:#111:#222:#333:#444:#555';
+    const colorsArg = '#000:#111:#222:#333:#444:#555:#666';
     const numColors = colorsArg.split(':').length;
     expect(numColors).to.be.above(seriesList.list.length);
 
     const r = await invoke(fn, [seriesList, colorsArg]);
     const seriesColors = _.map(r.output.list, 'color');
-    expect(seriesColors).to.eql(['#000000', '#111111', '#222222', '#333333', '#444444']);
+    expect(seriesColors).to.eql(['#000000', '#111111', '#222222', '#333333', '#444444', '#555555']);
   });
 
   it('should work with series.length=1 and more colors', async () => {

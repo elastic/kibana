@@ -40,4 +40,26 @@ describe('label.js', () => {
       expect(r.output.list[0].label).to.equal('beerative');
     });
   });
+
+  it('throws an error if regexp is invalid', () => {
+    return invoke(fn, [seriesList, 'beer$1', Object.create(null)]).then(
+      () => {
+        throw new Error('Should have thrown an error');
+      },
+      err => {
+        expect(err.message).to.equal('Cannot convert object to primitive value');
+      }
+    );
+  });
+
+  it('throws an error if regex takes too long to evaluate', () => {
+    return invoke(fn, [seriesList, 'beer$1', '(/.+)+$']).then(
+      () => {
+        throw new Error('Should have thrown an error');
+      },
+      err => {
+        expect(err.message).to.equal('Regular Expression evaluation took longer than 100ms');
+      }
+    );
+  });
 });

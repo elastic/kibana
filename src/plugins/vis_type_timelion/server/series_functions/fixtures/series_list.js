@@ -28,5 +28,6 @@ export default function() {
     getSeries('All the same', buckets, [1, 1, 1, 1]),
     getSeries('Decimals', buckets, [3.1415926535, 2, 1.439, 0.3424235]),
     getSeries('PowerOfTen', buckets, [10, 100, 10, 1]),
+    getSeries(`${'/'.repeat(100)}/\n`, buckets, [0, 0, 0, 0]),
   ]);
 }
