@@ -183,7 +183,7 @@ describe('Signal detection rules, machine learning', () => {
     cy.get(DEFINITION_STEP)
       .eq(DEFINITION_TIMELINE)
       .invoke('text')
-      .should('eql', 'Default blank timeline');
+      .should('eql', 'None');
 
     cy.get(SCHEDULE_STEP)
       .eq(SCHEDULE_RUNS)
