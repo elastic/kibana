@@ -6,9 +6,8 @@
 
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { ReportingSetupDeps } from '../types';
-import { LevelLogger as Logger } from './level_logger';
 
-export function getUserFactory(security: ReportingSetupDeps['security'], logger: Logger) {
+export function getUserFactory(security: ReportingSetupDeps['security']) {
   return (request: KibanaRequest) => {
     return security?.authc.getCurrentUser(request) ?? null;
   };

@@ -202,8 +202,10 @@ export async function registerJobInfoRoutes(
 
       const response = await downloadResponseHandler(jobTypes, username, { docId });
 
-      return res.ok({
-        body: response.content,
+      return res.custom({
+        body:
+          typeof response.content === 'string' ? Buffer.from(response.content) : response.content,
+        statusCode: response.statusCode,
         headers: {
           ...response.headers,
           'content-type': response.contentType,

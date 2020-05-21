@@ -23,7 +23,7 @@ export const authorizedUserPreRoutingFactory = function authorizedUserPreRouting
   plugins: ReportingSetupDeps,
   logger: Logger
 ) {
-  const getUser = getUserFactory(plugins.security, logger);
+  const getUser = getUserFactory(plugins.security);
 
   return function authorizedUserPreRouting(request: KibanaRequest) {
     const user = getUser(request);
@@ -31,8 +31,9 @@ export const authorizedUserPreRoutingFactory = function authorizedUserPreRouting
     if (!user) {
       throw Boom.unauthorized(`Sorry, you aren't authenticated`);
     }
+    const allowedRoles = config.get('roles', 'allow') || [];
+    const authorizedRoles = [superuserRole, ...allowedRoles];
 
-    const authorizedRoles = [superuserRole, ...(config.get('roles', 'allow') as string[])];
     if (!user.roles.find(role => authorizedRoles.includes(role))) {
       throw Boom.forbidden(`Sorry, you don't have access to Reporting`);
     }
