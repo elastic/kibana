@@ -295,7 +295,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         if (await esSupertest.get(`/_ml/anomaly_detectors/${jobId}`).expect(404)) {
           return true;
         } else {
-          throw new Error(`expected anomaly detection job '${jobId}' to not exist`);
+          throw new Error(`expected anomaly detection job '${jobId}' not to exist`);
         }
       });
     },
@@ -373,7 +373,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
       expect(startResponse)
         .to.have.property('stopped')
-        .eql(true, 'Response for start datafeed request should be acknowledged');
+        .eql(true, 'Response for stop datafeed request should be acknowledged');
     },
 
     async createAndRunAnomalyDetectionLookbackJob(jobConfig: Job, datafeedConfig: Datafeed) {
