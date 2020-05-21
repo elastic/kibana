@@ -5,7 +5,18 @@
  */
 
 export interface AutoSuggestInteraction {
+  /**
+   * Text to prepend to typeahead interaction before navigating
+   * suggestions.
+   */
   autocompleteText?: string;
+  /**
+   * Suggestion key to assert for after interaction concludes.
+   */
   suggestionKey?: string;
+  /**
+   * Set of keypresses to enter for navigation of typeahead
+   * suggestions.
+   */
   keyPresses: string[];
 }
