@@ -84,7 +84,7 @@ import { ActionTimeline, TimelineById } from './types';
 import { persistTimeline } from '../../containers/api';
 import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';
 
-interface TimelineEpicDependencies<State> {
+export interface TimelineEpicDependencies<State> {
   timelineByIdSelector: (state: State) => TimelineById;
   timelineTimeRangeSelector: (state: State) => inputsModel.TimeRange;
   selectAllTimelineQuery: () => (state: State, id: string) => inputsModel.GlobalQuery;
