@@ -8,14 +8,15 @@ import { AnyAction, Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import { AddLayerPanel } from './view';
 import { FLYOUT_STATE, INDEXING_STAGE } from '../../reducers/ui';
-import { updateFlyout, updateIndexingStage } from '../../actions/ui_actions';
 import { getFlyoutDisplay, getIndexingStage } from '../../selectors/ui_selectors';
 import {
   setTransientLayer,
   addLayer,
   setSelectedLayer,
   removeTransientLayer,
-} from '../../actions/map_actions';
+  updateFlyout,
+  updateIndexingStage,
+} from '../../actions';
 import { MapStoreState } from '../../reducers/store';
 import { LayerDescriptor } from '../../../common/descriptor_types';
 
