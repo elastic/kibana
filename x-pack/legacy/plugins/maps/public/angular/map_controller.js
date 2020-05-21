@@ -97,7 +97,9 @@ const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 const app = uiModules.get(MAP_APP_PATH, []);
 
 // Init required services. Necessary while in legacy
-bindNpSetupCoreAndPlugins(npSetup.core, npSetup.plugins);
+const config = _.get(npSetup, 'plugins.maps.config', {});
+const kibanaVersion = npSetup.core.injectedMetadata.getKibanaVersion();
+bindNpSetupCoreAndPlugins(npSetup.core, npSetup.plugins, config, kibanaVersion);
 bindNpStartCoreAndPlugins(npStart.core, npStart.plugins);
 
 loadKbnTopNavDirectives(getNavigation().ui);
