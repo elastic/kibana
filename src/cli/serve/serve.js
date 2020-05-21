@@ -254,6 +254,7 @@ export default function(program) {
         basePath: opts.runExamples ? false : !!opts.basePath,
         optimize: !!opts.optimize,
         oss: !!opts.oss,
+        cache: !!opts.cache,
       },
       features: {
         isClusterModeSupported: CAN_CLUSTER,
