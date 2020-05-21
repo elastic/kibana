@@ -119,9 +119,7 @@ export const createConnector = ({
     configurationUtilities,
     executor = createConnectorExecutor({ api, createExternalService }),
   }: CreateActionTypeArgs): ActionType => ({
-    id: config.id,
-    name: config.name,
-    minimumLicenseRequired: 'platinum',
+    ...config,
     validate: {
       config: schema.object(validationSchema.config, {
         validate: curry(validate.config)(configurationUtilities),

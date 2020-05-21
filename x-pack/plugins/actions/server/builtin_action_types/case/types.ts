@@ -21,6 +21,7 @@ import {
   ExecutorSubActionGetIncidentParamsSchema,
   ExecutorSubActionHandshakeParamsSchema,
 } from './schema';
+import { LicenseType } from '../../../../../legacy/common/constants';
 
 export interface AnyParams {
   [index: string]: string | number | object | undefined | null;
@@ -51,6 +52,7 @@ export type Comment = TypeOf<typeof CommentSchema>;
 export interface ExternalServiceConfiguration {
   id: string;
   name: string;
+  minimumLicenseRequired: LicenseType;
 }
 
 export interface ExternalServiceCredentials {
