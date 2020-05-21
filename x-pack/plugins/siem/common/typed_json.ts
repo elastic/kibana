@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { JsonObject } from '../../../../src/plugins/kibana_utils/public';
+import { JsonObject } from '../../../../src/plugins/kibana_utils/common';
 
 export type ESQuery = ESRangeQuery | ESQueryStringQuery | ESMatchQuery | ESTermQuery | JsonObject;
 

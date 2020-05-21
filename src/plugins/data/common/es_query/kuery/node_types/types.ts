@@ -22,7 +22,7 @@
  */
 
 import { IIndexPattern } from '../../../index_patterns';
-import { JsonValue } from '../../../../../kibana_utils/public';
+import { JsonValue } from '../../../../../kibana_utils/common';
 import { KueryNode } from '..';
 
 export type FunctionName =

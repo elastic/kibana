@@ -5,7 +5,7 @@
  */
 
 import { of } from 'rxjs';
-import { licensingMock } from '../../../licensing/public/mocks';
+import { licensingMock } from '../../../licensing/common/mocks';
 import { SpacesLicenseService } from './license_service';
 import { LICENSE_TYPE, LicenseType } from '../../../licensing/common/types';
 
