@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const APM_STATIC_INDEX_PATTERN_ID = 'apm_static_index_pattern_id';
+export { syncUrlHashQueryParam } from './sync_url_hash_query_param.js';
