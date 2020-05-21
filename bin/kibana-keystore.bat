@@ -1,6 +1,6 @@
 @echo off
 
-SETLOCAL
+SETLOCAL ENABLEDELAYEDEXPANSION
 
 set SCRIPT_DIR=%~dp0
 for %%I in ("%SCRIPT_DIR%..") do set DIR=%%~dpfI
@@ -12,12 +12,16 @@ If Not Exist "%NODE%" (
   Exit /B 1
 )
 
-for /F "eol=# tokens=*" %%i in (%DIR%\config\node.options) do (
-  If [%NODE_OPTIONS%]==[] (
-    set NODE_OPTIONS="%%i"
-  )
-  else (
-    set NODE_OPTIONS="%%i %NODE_OPTIONS"
+set CONFIG_DIR=%KIBANA_PATH_CONF%
+If [%KIBANA_PATH_CONF%] == [] (
+  set CONFIG_DIR=%DIR%config
+)
+
+for /F "eol=# tokens=*" %%i in (%CONFIG_DIR%\node.options) do (
+  If [!NODE_OPTIONS!] == [] (
+    set "NODE_OPTIONS=%%i"
+  )	Else (
+    set "NODE_OPTIONS=!NODE_OPTIONS! %%i"
   )
 )
 
