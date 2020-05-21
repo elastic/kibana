@@ -14,7 +14,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
     it('should return 200 when creating an index action', async () => {
       // create action with no config
       await supertest
-        .post('/api/actions')
+        .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'An index action',

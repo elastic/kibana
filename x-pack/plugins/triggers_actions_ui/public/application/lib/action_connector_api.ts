@@ -23,7 +23,7 @@ export async function createActionConnector({
   http: HttpSetup;
   connector: Omit<ActionConnectorWithoutId, 'referencedByCount'>;
 }): Promise<ActionConnector> {
-  return await http.post(`${BASE_ACTION_API_PATH}`, {
+  return await http.post(`${BASE_ACTION_API_PATH}/action`, {
     body: JSON.stringify(connector),
   });
 }
@@ -37,7 +37,7 @@ export async function updateActionConnector({
   connector: Pick<ActionConnectorWithoutId, 'name' | 'config' | 'secrets'>;
   id: string;
 }): Promise<ActionConnector> {
-  return await http.put(`${BASE_ACTION_API_PATH}/${id}`, {
+  return await http.put(`${BASE_ACTION_API_PATH}/action/${id}`, {
     body: JSON.stringify({
       name: connector.name,
       config: connector.config,
@@ -55,7 +55,7 @@ export async function deleteActions({
 }): Promise<{ successes: string[]; errors: string[] }> {
   const successes: string[] = [];
   const errors: string[] = [];
-  await Promise.all(ids.map(id => http.delete(`${BASE_ACTION_API_PATH}/${id}`))).then(
+  await Promise.all(ids.map(id => http.delete(`${BASE_ACTION_API_PATH}/action/${id}`))).then(
     function(fulfilled) {
       successes.push(...fulfilled);
     },

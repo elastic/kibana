@@ -27,12 +27,12 @@ Table of Contents
     - [Example](#example)
   - [RESTful API](#restful-api)
     - [`POST /api/action`: Create action](#post-apiaction-create-action)
-    - [`DELETE /api/actions/{id}`: Delete action](#delete-apiactionid-delete-action)
+    - [`DELETE /api/actions/action/{id}`: Delete action](#delete-apiactionid-delete-action)
     - [`GET /api/actions`: Get all actions](#get-apiactiongetall-get-all-actions)
-    - [`GET /api/actions/{id}`: Get action](#get-apiactionid-get-action)
+    - [`GET /api/actions/action/{id}`: Get action](#get-apiactionid-get-action)
     - [`GET /api/actions/list_action_types`: List action types](#get-apiactiontypes-list-action-types)
-    - [`PUT /api/actions/{id}`: Update action](#put-apiactionid-update-action)
-    - [`POST /api/actions/{id}/_execute`: Execute action](#post-apiactionidexecute-execute-action)
+    - [`PUT /api/actions/action/{id}`: Update action](#put-apiactionid-update-action)
+    - [`POST /api/actions/action/{id}/_execute`: Execute action](#post-apiactionidexecute-execute-action)
   - [Firing actions](#firing-actions)
   - [Example](#example-1)
 - [Built-in Action Types](#built-in-action-types)
@@ -174,7 +174,7 @@ Payload:
 | config       | The configuration the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if config validation is defined. | object |
 | secrets      | The secrets the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if secrets validation is defined.      | object |
 
-### `DELETE /api/actions/{id}`: Delete action
+### `DELETE /api/actions/action/{id}`: Delete action
 
 Params:
 
@@ -190,7 +190,7 @@ Return all actions from saved objects merged with predefined list.
 Use the [saved objects API for find](https://www.elastic.co/guide/en/kibana/master/saved-objects-api-find.html) with the proprties: `type: 'action'` and `perPage: 10000`.
 List of predefined actions should be set up in Kibana.yaml.
 
-### `GET /api/actions/{id}`: Get action
+### `GET /api/actions/action/{id}`: Get action
 
 Params:
 
@@ -202,7 +202,7 @@ Params:
 
 No parameters.
 
-### `PUT /api/actions/{id}`: Update action
+### `PUT /api/actions/action/{id}`: Update action
 
 Params:
 
@@ -218,7 +218,7 @@ Payload:
 | config   | The configuration the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if config validation is defined. | object |
 | secrets  | The secrets the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if secrets validation is defined.      | object |
 
-### `POST /api/actions/{id}/_execute`: Execute action
+### `POST /api/actions/action/{id}/_execute`: Execute action
 
 Params:
 
