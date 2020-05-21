@@ -7,11 +7,18 @@ import { useKibana as _useKibana } from '../../../../src/plugins/kibana_react/pu
 import { AppServices } from './application';
 
 export {
+  AuthorizationProvider,
+  Error,
+  NotAuthorizedSection,
+  SectionError,
+  SectionLoading,
+  sendRequest,
   SendRequestConfig,
   SendRequestResponse,
-  UseRequestConfig,
-  sendRequest,
+  useAuthorizationContext,
   useRequest,
+  UseRequestConfig,
+  WithPrivileges,
 } from '../../../../src/plugins/es_ui_shared/public/';
 
 export {
@@ -40,16 +47,5 @@ export {
   isJSON,
   isEmptyString,
 } from '../../../../src/plugins/es_ui_shared/static/validators/string';
-
-export {
-  WithPrivileges,
-  AuthorizationProvider,
-  SectionError,
-  Error,
-  useAuthorizationContext,
-  NotAuthorizedSection,
-} from '../../../../src/plugins/es_ui_shared/public';
-
-export { SectionLoading } from '../../../../src/plugins/es_ui_shared/public';
 
 export const useKibana = () => _useKibana<AppServices>();

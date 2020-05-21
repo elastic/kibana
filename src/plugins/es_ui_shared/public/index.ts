@@ -47,15 +47,7 @@ export {
   expandLiteralStrings,
 } from './console_lang';
 
-export {
-  WithPrivileges,
-  NotAuthorizedSection,
-  AuthorizationProvider,
-  AuthorizationContext,
-  SectionError,
-  Error,
-  useAuthorizationContext,
-} from '../__packages_do_not_import__/authorization';
+export * from './authorization';
 
 /** dummy plugin, we just want esUiShared to have its own bundle */
 export function plugin() {
