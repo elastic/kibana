@@ -31,7 +31,7 @@ export const rolesManagementApp = Object.freeze({
         const rolesBreadcrumbs = [
           {
             text: i18n.translate('xpack.security.roles.breadcrumb', { defaultMessage: 'Roles' }),
-            href: `#${basePath}`,
+            href: `/`,
           },
         ];
 
@@ -74,7 +74,7 @@ export const rolesManagementApp = Object.freeze({
           setBreadcrumbs([
             ...rolesBreadcrumbs,
             action === 'edit' && roleName
-              ? { text: roleName, href: `#${basePath}/edit/${encodeURIComponent(roleName)}` }
+              ? { text: roleName, href: `/edit/${encodeURIComponent(roleName)}` }
               : {
                   text: i18n.translate('xpack.security.roles.createBreadcrumb', {
                     defaultMessage: 'Create',
