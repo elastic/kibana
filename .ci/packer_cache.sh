@@ -47,14 +47,15 @@ tar -cf "$HOME/.kibana/bootstrap_cache/$branch.tar" \
   .geckodriver;
 
 echo "Adding node_modules"
-find . -type d -name node_modules -not -path '*__fixtures__*' -prune -print0 | xargs -0I % tar -rf "$HOME/.kibana/bootstrap_cache/$branch.tar" "%";
+find . -type d -name node_modules -not -path '*__fixtures__*' -prune -print0 | xargs -0I % tar -rf "$HOME/.kibana/bootstrap_cache/$branch.tar" "%"
 
 echo "created $HOME/.kibana/bootstrap_cache/$branch.tar"
 
-if [ "$branch" == "master" ]; then
-  echo "Creating bootstrap cache for 7.x";
+# TODO un-comment
+# if [ "$branch" == "master" ]; then
+#   echo "Creating bootstrap cache for 7.x";
 
-  git clone https://github.com/elastic/kibana.git --branch 7.x --depth 1 /tmp/kibana-7.x
-  (cd /tmp/kibana-7.x && ./.ci/packer_cache.sh);
-  rm -rf /tmp/kibana-7.x;
-fi
+#   git clone https://github.com/elastic/kibana.git --branch 7.x --depth 1 /tmp/kibana-7.x
+#   (cd /tmp/kibana-7.x && ./.ci/packer_cache.sh);
+#   rm -rf /tmp/kibana-7.x;
+# fi
