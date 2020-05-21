@@ -29,27 +29,19 @@ import { mount, ReactWrapper, render, shallow } from 'enzyme';
 import React, { ReactElement, ValidationMap } from 'react';
 
 // Use fake component to extract `intl` property to use in tests.
-// Use a getter to avoid mounting at import time
-let intl: InjectedIntl;
-const getIntl = (): InjectedIntl => {
-  if (!intl) {
-    // Use fake component to extract `intl` property to use in tests.
-    ({ intl } = (mount(
-      <I18nProvider>
-        <br />
-      </I18nProvider>
-    ).find('IntlProvider') as ReactWrapper<{}, {}, import('react-intl').IntlProvider>)
-      .instance()
-      .getChildContext());
-  }
-  return intl;
-};
+const { intl } = (mount(
+  <I18nProvider>
+    <br />
+  </I18nProvider>
+).find('IntlProvider') as ReactWrapper<{}, {}, import('react-intl').IntlProvider>)
+  .instance()
+  .getChildContext();
 
 function getOptions(context = {}, childContextTypes: ValidationMap<any> = {}, props = {}) {
   return {
     context: {
       ...context,
-      intl: getIntl(),
+      intl,
     },
     childContextTypes: {
       ...childContextTypes,
@@ -63,7 +55,7 @@ function getOptions(context = {}, childContextTypes: ValidationMap<any> = {}, pr
  * When using React-Intl `injectIntl` on components, props.intl is required.
  */
 function nodeWithIntlProp<T>(node: ReactElement<T>): ReactElement<T & { intl: InjectedIntl }> {
-  return React.cloneElement<any>(node, { intl: getIntl() });
+  return React.cloneElement<any>(node, { intl });
 }
 
 /**
