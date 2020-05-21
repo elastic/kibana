@@ -126,8 +126,8 @@ export class AlertsClient {
   private readonly namespace?: string;
   private readonly taskManager: TaskManagerStartContract;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
-  private readonly request: KibanaRequest;
-  private readonly authorization?: SecurityPluginSetup['authz'];
+  // private readonly request: KibanaRequest;
+  // private readonly authorization?: SecurityPluginSetup['authz'];
   private readonly alertTypeRegistry: AlertTypeRegistry;
   private readonly createAPIKey: () => Promise<CreateAPIKeyResult>;
   private readonly invalidateAPIKey: (
@@ -139,8 +139,8 @@ export class AlertsClient {
   constructor({
     alertTypeRegistry,
     unsecuredSavedObjectsClient,
-    request,
-    authorization,
+    // request,
+    // authorization,
     taskManager,
     logger,
     spaceId,
@@ -158,8 +158,8 @@ export class AlertsClient {
     this.taskManager = taskManager;
     this.alertTypeRegistry = alertTypeRegistry;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
-    this.request = request;
-    this.authorization = authorization;
+    // this.request = request;
+    // this.authorization = authorization;
     this.createAPIKey = createAPIKey;
     this.invalidateAPIKey = invalidateAPIKey;
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
@@ -600,18 +600,18 @@ export class AlertsClient {
     }
   }
 
-  private async ensureAuthorized(alertTypeId: string, operation: string) {
-    if (this.authorization == null) {
-      return;
-    }
-    const checkPrivileges = this.authorization.checkPrivilegesDynamicallyWithRequest(this.request);
-    const { hasAllRequested } = await checkPrivileges(
-      this.authorization.actions.savedObject.get(alertTypeId, operation)
-    );
-    if (!hasAllRequested) {
-      throw Boom.forbidden(`Unable to ${operation} ${alertTypeId}`);
-    }
-  }
+  // private async ensureAuthorized(alertTypeId: string, operation: string) {
+  //   if (this.authorization == null) {
+  //     return;
+  //   }
+  //   const checkPrivileges = this.authorization.checkPrivilegesDynamicallyWithRequest(this.request);
+  //   const { hasAllRequested } = await checkPrivileges(
+  //     this.authorization.actions.savedObject.get(alertTypeId, operation)
+  //   );
+  //   if (!hasAllRequested) {
+  //     throw Boom.forbidden(`Unable to ${operation} ${alertTypeId}`);
+  //   }
+  // }
 
   private async scheduleAlert(id: string, alertTypeId: string) {
     return await this.taskManager.schedule({
