@@ -67,7 +67,7 @@ interface TimeFieldConfig {
 export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldState> {
   static contextType = context;
 
-  declare readonly context: IndexPatternManagmentContextValue;
+  public readonly context!: IndexPatternManagmentContextValue;
 
   state = {
     error: '',

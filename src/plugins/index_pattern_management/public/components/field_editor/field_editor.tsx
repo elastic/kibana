@@ -142,7 +142,7 @@ export interface FieldEdiorProps {
 export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState> {
   static contextType = contextType;
 
-  declare readonly context: IndexPatternManagmentContextValue;
+  public readonly context!: IndexPatternManagmentContextValue;
 
   supportedLangs: string[] = [];
   deprecatedLangs: string[] = [];

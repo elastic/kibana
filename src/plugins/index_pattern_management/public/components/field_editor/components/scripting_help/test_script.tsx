@@ -62,7 +62,7 @@ interface TestScriptState {
 export class TestScript extends Component<TestScriptProps, TestScriptState> {
   static contextType = contextType;
 
-  declare readonly context: IndexPatternManagmentContextValue;
+  public readonly context!: IndexPatternManagmentContextValue;
 
   defaultProps = {
     name: 'myScriptedField',

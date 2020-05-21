@@ -62,7 +62,7 @@ interface StepIndexPatternState {
 export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndexPatternState> {
   static contextType = contextType;
 
-  declare readonly context: IndexPatternManagmentContextValue;
+  public readonly context!: IndexPatternManagmentContextValue;
 
   state = {
     partialMatchedIndices: [],
@@ -79,7 +79,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   lastQuery: string | undefined;
 
   constructor(props: StepIndexPatternProps, context: IndexPatternManagmentContextValue) {
-    super(props);
+    super(props, context);
     const { indexPatternCreationType, initialQuery } = this.props;
 
     this.state.query = initialQuery || context.services.uiSettings.get('indexPattern:placeholder');

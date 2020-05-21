@@ -54,10 +54,10 @@ export class CreateIndexPatternWizard extends Component<
 > {
   static contextType = contextType;
 
-  declare readonly context: IndexPatternManagmentContextValue;
+  public readonly context!: IndexPatternManagmentContextValue;
 
   constructor(props: RouteComponentProps, context: IndexPatternManagmentContextValue) {
-    super(props);
+    super(props, context);
 
     context.services.setBreadcrumbs(getCreateBreadcrumbs());
 
