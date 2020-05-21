@@ -42,7 +42,7 @@ export const spacesManagementApp = Object.freeze({
             text: i18n.translate('xpack.spaces.management.breadcrumb', {
               defaultMessage: 'Spaces',
             }),
-            href: `#${basePath}`,
+            href: `/`,
           },
         ];
 
@@ -54,6 +54,8 @@ export const spacesManagementApp = Object.freeze({
               getFeatures={features.getFeatures}
               notifications={notifications}
               spacesManager={spacesManager}
+              history={history}
+              getUrlForApp={application.getUrlForApp}
               securityEnabled={securityLicense?.getFeatures().showLinks ?? false}
             />
           );
@@ -75,6 +77,8 @@ export const spacesManagementApp = Object.freeze({
               getFeatures={features.getFeatures}
               notifications={notifications}
               spacesManager={spacesManager}
+              history={history}
+              getUrlForApp={application.getUrlForApp}
               securityEnabled={securityLicense?.getFeatures().showLinks ?? false}
             />
           );
@@ -88,7 +92,7 @@ export const spacesManagementApp = Object.freeze({
               ...spacesBreadcrumbs,
               {
                 text: space.name,
-                href: `#${basePath}/edit/${encodeURIComponent(space.id)}`,
+                href: `/edit/${encodeURIComponent(space.id)}`,
               },
             ]);
           };
@@ -101,6 +105,8 @@ export const spacesManagementApp = Object.freeze({
               spacesManager={spacesManager}
               spaceId={spaceId}
               onLoadSpace={onLoadSpace}
+              history={history}
+              getUrlForApp={application.getUrlForApp}
               securityEnabled={securityLicense?.getFeatures().showLinks ?? false}
             />
           );

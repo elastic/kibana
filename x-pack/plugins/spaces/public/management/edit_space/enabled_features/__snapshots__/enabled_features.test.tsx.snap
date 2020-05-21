@@ -68,7 +68,7 @@ exports[`EnabledFeatures renders as expected 1`] = `
             values={
               Object {
                 "rolesLink": <ForwardRef
-                  href="#/management/security/roles"
+                  href="management"
                 >
                   <FormattedMessage
                     defaultMessage="Roles"

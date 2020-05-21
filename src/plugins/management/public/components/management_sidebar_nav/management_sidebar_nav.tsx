@@ -53,11 +53,7 @@ export const ManagementSidebarNav = ({
   const toggleOpenOnMobile = () => setIsSideNavOpenOnMobile(!isSideNavOpenOnMobile);
 
   const sectionsToNavItems = (managementSections: ManagementSection[]) => {
-    if (!managementSections) {
-      return undefined;
-    }
-
-    return (managementSections || [])
+    return managementSections
       .filter(section => section.getAppsEnabled())
       .map(section => ({
         ...createNavItem(section, {
@@ -67,11 +63,7 @@ export const ManagementSidebarNav = ({
   };
 
   const appsToNavItems = (managementApps: ManagementApp[]) => {
-    if (!managementApps) {
-      return undefined;
-    }
-
-    return (managementApps || [])
+    return managementApps
       .filter(app => app.enabled)
       .map(app => ({
         ...createNavItem(app, {

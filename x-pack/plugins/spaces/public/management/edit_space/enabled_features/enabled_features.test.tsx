@@ -36,6 +36,8 @@ const space: Space = {
 };
 
 describe('EnabledFeatures', () => {
+  const getUrlForApp = (appId: string) => appId;
+
   it(`renders as expected`, () => {
     expect(
       shallowWithIntl<EnabledFeatures>(
@@ -44,6 +46,7 @@ describe('EnabledFeatures', () => {
           space={space}
           securityEnabled={true}
           onChange={jest.fn()}
+          getUrlForApp={getUrlForApp}
         />
       )
     ).toMatchSnapshot();
@@ -58,6 +61,7 @@ describe('EnabledFeatures', () => {
         space={space}
         securityEnabled={true}
         onChange={changeHandler}
+        getUrlForApp={getUrlForApp}
       />
     );
 
@@ -92,6 +96,7 @@ describe('EnabledFeatures', () => {
         space={space}
         securityEnabled={true}
         onChange={changeHandler}
+        getUrlForApp={getUrlForApp}
       />
     );
 
