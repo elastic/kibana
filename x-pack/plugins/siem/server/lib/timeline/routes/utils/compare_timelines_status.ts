@@ -16,13 +16,13 @@ import {
 } from './failure_cases';
 
 interface GivenTimelineInput {
-  id: string | null;
+  id: string | null | undefined;
   type: TimelineTypeLiteralWithNull;
-  version: string | number | null;
+  version: string | number | null | undefined;
 }
 
 interface TimelinesStatusProps {
-  timelineType: TimelineTypeLiteralWithNull;
+  timelineType: TimelineTypeLiteralWithNull | undefined;
   timelineInput: GivenTimelineInput;
   templateTimelineInput: GivenTimelineInput;
   frameworkRequest: FrameworkRequest;

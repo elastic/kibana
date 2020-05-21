@@ -14,7 +14,6 @@ import { buildRouteValidation } from '../../../utils/build_validation/route_vali
 import { ConfigType } from '../../..';
 
 import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
-import { FrameworkRequest } from '../../framework';
 
 import { updateTimelineSchema } from './schemas/update_timelines_schema';
 import { buildFrameworkRequest, TimelineStatusActions } from './utils/common';
@@ -46,16 +45,16 @@ export const updateTimelinesRoute = (
         const { templateTimelineId, templateTimelineVersion, timelineType } = timeline;
 
         const compareTimelinesStatus = new CompareTimelinesStatus({
-          timelineType: timelineType ?? TimelineType.default,
+          timelineType,
           timelineInput: {
             id: timelineId,
             type: TimelineType.default,
             version,
           },
           templateTimelineInput: {
-            id: templateTimelineId ?? null,
+            id: templateTimelineId,
             type: TimelineType.template,
-            version: templateTimelineVersion ?? null,
+            version: templateTimelineVersion,
           },
           frameworkRequest,
         });
@@ -63,7 +62,7 @@ export const updateTimelinesRoute = (
         await compareTimelinesStatus.init();
         if (compareTimelinesStatus.isUpdatable) {
           const updatedTimeline = await createTimelines(
-            (frameworkRequest as unknown) as FrameworkRequest,
+            frameworkRequest,
             timeline,
             timelineId,
             version

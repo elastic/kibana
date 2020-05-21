@@ -12,9 +12,9 @@ import { getTimeline, getTemplateTimeline } from './create_timelines';
 import { FrameworkRequest } from '../../../framework';
 
 interface TimelineObjectProps {
-  id: string | null;
-  type: TimelineTypeLiteralWithNull;
-  version: string | number | null;
+  id: string | null | undefined;
+  type: TimelineTypeLiteralWithNull | undefined;
+  version: string | number | null | undefined;
   frameworkRequest: FrameworkRequest;
 }
 
@@ -26,7 +26,12 @@ export class TimelineObject {
 
   public data: TimelineSavedObject | null;
 
-  constructor({ id, type = TimelineType.default, version, frameworkRequest }: TimelineObjectProps) {
+  constructor({
+    id = null,
+    type = TimelineType.default,
+    version = null,
+    frameworkRequest,
+  }: TimelineObjectProps) {
     this.id = id;
     this.type = type;
 
@@ -47,7 +52,7 @@ export class TimelineObject {
   }
 
   public get isExists() {
-    return this.id != null && this.data != null;
+    return this.data != null;
   }
 
   public get isUpdatable() {
@@ -67,14 +72,14 @@ export class TimelineObject {
   }
 
   private isVersionConflict() {
-    let isVersionConflict = false;
+    const version = this.version;
     const existingVersion =
       this.type === TimelineType.template ? this.data?.templateTimelineVersion : this.data?.version;
-    if (this.isExists && this.version != null) {
-      isVersionConflict = !(this.version === existingVersion);
-    } else if (this.isExists && this.version == null) {
-      isVersionConflict = true;
+    if (this.isExists && version != null) {
+      return !(version === existingVersion);
+    } else if (this.isExists && version == null) {
+      return true;
     }
-    return isVersionConflict;
+    return false;
   }
 }

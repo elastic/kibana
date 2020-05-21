@@ -217,10 +217,10 @@ export const importTimelinesRoute = (
                         const errorMessage = compareTimelinesStatus.checkIsFailureCases(
                           TimelineStatusActions.updateViaImport
                         );
+
                         const message =
-                          errorMessage?.body != null
-                            ? errorMessage.body
-                            : `${timelineType} timeline ${TimelineStatusActions.updateViaImport} error`;
+                          errorMessage?.body ??
+                          `${timelineType} timeline ${TimelineStatusActions.updateViaImport} error`;
 
                         resolve(
                           createBulkErrorObject({

@@ -47,16 +47,16 @@ export const createTimelinesRoute = (
         const { templateTimelineId, templateTimelineVersion, timelineType } = timeline;
 
         const compareTimelinesStatus = new CompareTimelinesStatus({
-          timelineType: timelineType ?? TimelineType.default,
+          timelineType,
           timelineInput: {
-            id: timelineId ?? null,
+            id: timelineId,
             type: TimelineType.default,
-            version: version ?? null,
+            version,
           },
           templateTimelineInput: {
-            id: templateTimelineId ?? null,
+            id: templateTimelineId,
             type: TimelineType.template,
-            version: templateTimelineVersion ?? null,
+            version: templateTimelineVersion,
           },
           frameworkRequest,
         });
