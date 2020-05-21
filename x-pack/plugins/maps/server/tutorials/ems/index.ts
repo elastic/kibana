@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TutorialsCategory } from '../../../../../../../src/plugins/home/server';
+import { TutorialsCategory } from '../../../../../../src/plugins/home/server';
 
 export function emsBoundariesSpecProvider({
   emsLandingPageUrl,
