@@ -39,7 +39,7 @@ import {
   timelineSavedObjectOmittedFields,
 } from './utils/import_timelines';
 import { createTimelines, getTimeline, getTemplateTimeline } from './utils/create_timelines';
-import { TimelineType } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 import { checkIsFailureCases } from './utils/update_timelines';
 
 const CHUNK_PARSED_OBJECT_SIZE = 10;
@@ -152,7 +152,13 @@ export const importTimelinesRoute = (
                         // create timeline / template timeline
                         newTimeline = await createTimelines(
                           frameworkRequest,
-                          parsedTimelineObject,
+                          {
+                            ...parsedTimelineObject,
+                            status:
+                              parsedTimelineObject.status === TimelineStatus.draft
+                                ? TimelineStatus.active
+                                : parsedTimelineObject.status,
+                          },
                           null, // timelineSavedObjectId
                           null, // timelineVersion
                           pinnedEventIds,

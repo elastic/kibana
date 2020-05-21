@@ -6,8 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { SearchParams, SearchResponse } from 'elasticsearch';
+import { CancellationToken } from '../../../../../../../plugins/reporting/common';
+import { LevelLogger } from '../../../../server/lib';
 import { ScrollConfig } from '../../../../server/types';
-import { CancellationToken, Logger } from '../../../../types';
 
 async function parseResponse(request: SearchResponse<any>) {
   const response = await request;
@@ -35,7 +36,7 @@ async function parseResponse(request: SearchResponse<any>) {
   };
 }
 
-export function createHitIterator(logger: Logger) {
+export function createHitIterator(logger: LevelLogger) {
   return async function* hitIterator(
     scrollSettings: ScrollConfig,
     callEndpoint: Function,

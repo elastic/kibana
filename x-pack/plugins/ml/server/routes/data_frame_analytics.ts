@@ -245,7 +245,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense }: RouteInitializat
         body: dataAnalyticsEvaluateSchema,
       },
       options: {
-        tags: ['access:ml:canCreateDataFrameAnalytics'],
+        tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

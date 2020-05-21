@@ -7,7 +7,7 @@
 import DateMath from '@elastic/datemath';
 import { isEqual } from 'lodash';
 import { useEffect, useState } from 'react';
-import { HttpHandler } from 'target/types/core/public/http';
+import { HttpHandler } from 'src/core/public';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { SourceQuery } from '../../../../../common/graphql/types';
 import {
@@ -28,7 +28,7 @@ export function useMetricsExplorerData(
   source: SourceQuery.Query['source']['configuration'] | undefined,
   derivedIndexPattern: IIndexPattern,
   timerange: MetricsExplorerTimeOptions,
-  afterKey: string | null,
+  afterKey: string | null | Record<string, string | null>,
   signal: any,
   fetch?: HttpHandler
 ) {
@@ -60,6 +60,7 @@ export function useMetricsExplorerData(
             method: 'POST',
             body: JSON.stringify({
               forceInterval: options.forceInterval,
+              dropLastBucket: options.dropLastBucket != null ? options.dropLastBucket : true,
               metrics:
                 options.aggregation === 'count'
                   ? [{ aggregation: 'count' }]

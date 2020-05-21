@@ -19,7 +19,12 @@ export default function({ getService }: FtrProviderContext) {
   describe('Pipelines', function() {
     describe('Create', () => {
       const PIPELINE_ID = 'test_create_pipeline';
-      after(() => deletePipeline(PIPELINE_ID));
+      const REQUIRED_FIELDS_PIPELINE_ID = 'test_create_required_fields_pipeline';
+
+      after(() => {
+        deletePipeline(PIPELINE_ID);
+        deletePipeline(REQUIRED_FIELDS_PIPELINE_ID);
+      });
 
       it('should create a pipeline', async () => {
         const { body } = await supertest
@@ -44,6 +49,28 @@ export default function({ getService }: FtrProviderContext) {
               },
             ],
             version: 1,
+          })
+          .expect(200);
+
+        expect(body).to.eql({
+          acknowledged: true,
+        });
+      });
+
+      it('should create a pipeline with only required fields', async () => {
+        const { body } = await supertest
+          .post(API_BASE_PATH)
+          .set('kbn-xsrf', 'xxx')
+          // Excludes description, version and on_failure processors
+          .send({
+            name: REQUIRED_FIELDS_PIPELINE_ID,
+            processors: [
+              {
+                script: {
+                  source: 'ctx._type = null',
+                },
+              },
+            ],
           })
           .expect(200);
 

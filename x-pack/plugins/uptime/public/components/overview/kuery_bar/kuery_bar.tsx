@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { uniqueId, startsWith } from 'lodash';
 import { EuiCallOut } from '@elastic/eui';
 import styled from 'styled-components';
@@ -17,9 +17,10 @@ import {
   QuerySuggestion,
   DataPublicPluginSetup,
 } from '../../../../../../../src/plugins/data/public';
+import { useIndexPattern } from './use_index_pattern';
 
 const Container = styled.div`
-  margin-bottom: 10px;
+  margin-bottom: 4px;
 `;
 
 interface State {
@@ -36,24 +37,14 @@ interface Props {
   'aria-label': string;
   autocomplete: DataPublicPluginSetup['autocomplete'];
   'data-test-subj': string;
-  loadIndexPattern: () => void;
-  indexPattern: IIndexPattern | null;
-  loading: boolean;
 }
 
-export function KueryBarComponent({
+export function KueryBar({
   'aria-label': ariaLabel,
   autocomplete: autocompleteService,
   'data-test-subj': dataTestSubj,
-  loadIndexPattern,
-  indexPattern,
-  loading,
 }: Props) {
-  useEffect(() => {
-    if (!indexPattern) {
-      loadIndexPattern();
-    }
-  }, [indexPattern, loadIndexPattern]);
+  const { loading, index_pattern: indexPattern } = useIndexPattern();
 
   const [state, setState] = useState<State>({
     suggestions: [],
@@ -134,7 +125,7 @@ export function KueryBarComponent({
         queryExample=""
       />
 
-      {indexPatternMissing && (
+      {indexPatternMissing && !loading && (
         <EuiCallOut
           style={{ display: 'inline-block', marginTop: '10px' }}
           title={

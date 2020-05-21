@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
 import { DiscoverServerPlugin } from './plugin';
 
-export const plugin = (initContext: PluginInitializerContext) =>
-  new DiscoverServerPlugin(initContext);
+export const plugin = () => new DiscoverServerPlugin();

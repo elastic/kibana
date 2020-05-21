@@ -106,7 +106,7 @@ export function createSavedDashboardClass(
           refreshInterval: undefined,
         },
       });
-      this.getFullPath = () => `/app/kibana#${createDashboardEditUrl(String(this.id))}`;
+      this.getFullPath = () => `/app/dashboards#${createDashboardEditUrl(String(this.id))}`;
     }
 
     getQuery() {

@@ -10,13 +10,19 @@ import { SavedObjectsFindOptions } from '../../../../../../src/core/server';
 import { UNAUTHENTICATED_USER } from '../../../common/constants';
 import { NoteSavedObject } from '../../../common/types/timeline/note';
 import { PinnedEventSavedObject } from '../../../common/types/timeline/pinned_event';
-import { SavedTimeline, TimelineSavedObject, TimelineType } from '../../../common/types/timeline';
+import {
+  SavedTimeline,
+  TimelineSavedObject,
+  TimelineTypeLiteralWithNull,
+} from '../../../common/types/timeline';
 import {
   ResponseTimeline,
   PageInfoTimeline,
   SortTimeline,
   ResponseFavoriteTimeline,
   TimelineResult,
+  TimelineType,
+  TimelineStatus,
   Maybe,
 } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
@@ -25,6 +31,7 @@ import * as pinnedEvent from '../pinned_event/saved_object';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { pickSavedTimeline } from './pick_saved_timeline';
 import { timelineSavedObjectType } from './saved_object_mappings';
+import { draftTimelineDefaults } from './default_timeline';
 
 interface ResponseTimelines {
   timeline: TimelineSavedObject[];
@@ -48,7 +55,7 @@ export interface Timeline {
     pageInfo: PageInfoTimeline | null,
     search: string | null,
     sort: SortTimeline | null,
-    timelineType: string | null
+    timelineType: TimelineTypeLiteralWithNull
   ) => Promise<ResponseTimelines>;
 
   persistFavorite: (
@@ -61,7 +68,7 @@ export interface Timeline {
     timelineId: string | null,
     version: string | null,
     timeline: SavedTimeline,
-    timelineType?: TimelineType | null
+    timelineType?: TimelineTypeLiteralWithNull
   ) => Promise<ResponseTimeline>;
 
   deleteTimeline: (request: FrameworkRequest, timelineIds: string[]) => Promise<void>;
@@ -97,13 +104,26 @@ export const getTimelineByTemplateTimelineId = async (
 
 /** The filter here is able to handle the legacy data,
  * which has no timelineType exists in the savedObject */
-const getTimelineTypeFilter = (timelineType: string | null) => {
-  return timelineType === TimelineType.template
-    ? `siem-ui-timeline.attributes.timelineType: ${TimelineType.template}` /** Show only whose timelineType exists and equals to "template" */
-    : /** Show me every timeline whose timelineType is not "template".
-       * which includes timelineType === 'default' and
-       * those timelineType doesn't exists */
-      `not siem-ui-timeline.attributes.timelineType: ${TimelineType.template}`;
+const getTimelineTypeFilter = (
+  timelineType: TimelineTypeLiteralWithNull,
+  includeDraft: boolean
+) => {
+  const typeFilter =
+    timelineType === TimelineType.template
+      ? `siem-ui-timeline.attributes.timelineType: ${TimelineType.template}` /** Show only whose timelineType exists and equals to "template" */
+      : /** Show me every timeline whose timelineType is not "template".
+         * which includes timelineType === 'default' and
+         * those timelineType doesn't exists */
+        `not siem-ui-timeline.attributes.timelineType: ${TimelineType.template}`;
+
+  /** Show me every timeline whose status is not "draft".
+   * which includes status === 'active' and
+   * those status doesn't exists */
+  const draftFilter = includeDraft
+    ? `siem-ui-timeline.attributes.status: ${TimelineStatus.draft}`
+    : `not siem-ui-timeline.attributes.status: ${TimelineStatus.draft}`;
+
+  return `${typeFilter} and ${draftFilter}`;
 };
 
 export const getAllTimeline = async (
@@ -112,7 +132,7 @@ export const getAllTimeline = async (
   pageInfo: PageInfoTimeline | null,
   search: string | null,
   sort: SortTimeline | null,
-  timelineType: string | null
+  timelineType: TimelineTypeLiteralWithNull
 ): Promise<ResponseTimelines> => {
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,
@@ -122,9 +142,23 @@ export const getAllTimeline = async (
     searchFields: onlyUserFavorite
       ? ['title', 'description', 'favorite.keySearch']
       : ['title', 'description'],
-    filter: getTimelineTypeFilter(timelineType),
+    filter: getTimelineTypeFilter(timelineType, false),
     sortField: sort != null ? sort.sortField : undefined,
     sortOrder: sort != null ? sort.sortOrder : undefined,
+  };
+  return getAllSavedTimeline(request, options);
+};
+
+export const getDraftTimeline = async (
+  request: FrameworkRequest,
+  timelineType: TimelineTypeLiteralWithNull
+): Promise<ResponseTimelines> => {
+  const options: SavedObjectsFindOptions = {
+    type: timelineSavedObjectType,
+    perPage: 1,
+    filter: getTimelineTypeFilter(timelineType, true),
+    sortField: 'created',
+    sortOrder: 'desc',
   };
   return getAllSavedTimeline(request, options);
 };
@@ -255,6 +289,54 @@ export const persistTimeline = async (
     }
     throw err;
   }
+};
+
+const updatePartialSavedTimeline = async (
+  request: FrameworkRequest,
+  timelineId: string,
+  timeline: SavedTimeline
+) => {
+  const savedObjectsClient = request.context.core.savedObjects.client;
+  const currentSavedTimeline = await savedObjectsClient.get<SavedTimeline>(
+    timelineSavedObjectType,
+    timelineId
+  );
+
+  return savedObjectsClient.update(
+    timelineSavedObjectType,
+    timelineId,
+    pickSavedTimeline(
+      null,
+      {
+        ...timeline,
+        dateRange: currentSavedTimeline.attributes.dateRange,
+      },
+      request.user
+    )
+  );
+};
+
+export const resetTimeline = async (request: FrameworkRequest, timelineIds: string[]) => {
+  if (!timelineIds.length) {
+    return Promise.reject(new Error('timelineIds is empty'));
+  }
+
+  await Promise.all(
+    timelineIds.map(timelineId =>
+      Promise.all([
+        note.deleteNoteByTimelineId(request, timelineId),
+        pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
+      ])
+    )
+  );
+
+  const response = await Promise.all(
+    timelineIds.map(timelineId =>
+      updatePartialSavedTimeline(request, timelineId, draftTimelineDefaults)
+    )
+  );
+
+  return response;
 };
 
 export const deleteTimeline = async (request: FrameworkRequest, timelineIds: string[]) => {

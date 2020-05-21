@@ -17,7 +17,7 @@ import { encryptedSavedObjectsMock } from '../../../plugins/encrypted_saved_obje
 const taskManager = taskManagerMock.start();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const savedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjects = encryptedSavedObjectsMock.createStart();
+const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 
 const alertsClientParams = {
   taskManager,
@@ -29,7 +29,7 @@ const alertsClientParams = {
   createAPIKey: jest.fn(),
   invalidateAPIKey: jest.fn(),
   logger: loggingServiceMock.create().get(),
-  encryptedSavedObjectsPlugin: encryptedSavedObjects,
+  encryptedSavedObjectsClient: encryptedSavedObjects,
   preconfiguredActions: [],
 };
 
@@ -91,6 +91,7 @@ describe('create()', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
       async executor() {},
+      producer: 'alerting',
     });
   });
 
@@ -539,6 +540,7 @@ describe('create()', () => {
         }),
       },
       async executor() {},
+      producer: 'alerting',
     });
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
@@ -1896,6 +1898,7 @@ describe('update()', () => {
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
       async executor() {},
+      producer: 'alerting',
     });
   });
 
@@ -2438,6 +2441,7 @@ describe('update()', () => {
         }),
       },
       async executor() {},
+      producer: 'alerting',
     });
     await expect(
       alertsClient.update({
@@ -2669,6 +2673,7 @@ describe('update()', () => {
         actionGroups: [{ id: 'default', name: 'Default' }],
         defaultActionGroupId: 'default',
         async executor() {},
+        producer: 'alerting',
       });
       savedObjectsClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [
