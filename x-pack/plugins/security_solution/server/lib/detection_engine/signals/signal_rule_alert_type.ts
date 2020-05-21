@@ -9,6 +9,7 @@
 
 import { Logger, KibanaRequest } from 'src/core/server';
 import dateMath from '@elastic/datemath';
+import moment from 'moment';
 
 import {
   SIGNALS_ID,
@@ -127,6 +128,7 @@ export const signalRulesAlertType = ({
 
       const gap = getGapBetweenRuns({ previousStartedAt, interval, from, to });
       if (gap != null && gap.asMilliseconds() > 0) {
+        // console.log('GAP', gap.humanize());
         const gapString = gap.humanize();
         const gapMessage = buildRuleMessage(
           `${gapString} (${gap.asMilliseconds()}ms) has passed since last rule execution, and signals may have been missed.`,
@@ -240,9 +242,15 @@ export const signalRulesAlertType = ({
           // 'from' with the 'gap' - need to figure out
           // how to do datemath with moment.
           let calculatedFrom = from;
-          if (gap != null) {
-            const unit = from[from.length - 1]; // only seconds (s), minutes (m) or hours (h)
-            calculatedFrom = `now-${gap.add(dateMath.parse(from)?.toString())}${unit}`;
+          if (gap != null && previousStartedAt != null) {
+            // const unit = from[from.length - 1]; // only seconds (s), minutes (m) or hours (h)
+            // const parsedGap = moment(gap.asSeconds());
+            // console.log('gap', gap.humanize());
+            const tempNow = moment();
+            const newFrom = moment.duration(tempNow.diff(previousStartedAt));
+            // console.log('newFrom.asSeconds(): ', newFrom.asSeconds());
+            const parsed = parseInt(newFrom.asSeconds().toString(), 10);
+            calculatedFrom = `now-${parsed}s`;
           }
           const noReIndex = buildEventsSearchQuery({
             index: inputIndex,
