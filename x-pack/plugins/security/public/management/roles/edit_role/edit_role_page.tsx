@@ -54,7 +54,6 @@ import {
   RoleIndexPrivilege,
   getExtendedRoleDeprecationNotice,
 } from '../../../../common/model';
-import { ROLES_PATH } from '../../management_urls';
 import { RoleValidationResult, RoleValidator } from './validate_role';
 import { DeleteRoleButton } from './delete_role_button';
 import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
@@ -267,7 +266,8 @@ function useFeatures(
 }
 
 function backToRoleList() {
-  window.location.hash = ROLES_PATH;
+  // todo:  window.location.hash = ROLES_PATH;
+  // window.location.hash = '';
 }
 
 export const EditRolePage: FunctionComponent<Props> = ({
@@ -572,11 +572,8 @@ export const EditRolePage: FunctionComponent<Props> = ({
     <div className="editRolePage">
       <EuiForm {...formError}>
         {getFormTitle()}
-
         <EuiSpacer />
-
         <EuiText size="s">{description}</EuiText>
-
         {isRoleReserved && (
           <Fragment>
             <EuiSpacer size="s" />
@@ -590,7 +587,6 @@ export const EditRolePage: FunctionComponent<Props> = ({
             </EuiText>
           </Fragment>
         )}
-
         {isDeprecatedRole && (
           <Fragment>
             <EuiSpacer size="s" />
@@ -601,18 +597,12 @@ export const EditRolePage: FunctionComponent<Props> = ({
             />
           </Fragment>
         )}
-
         <EuiSpacer />
-
         {getRoleName()}
-
         {getElasticsearchPrivileges()}
-
         {getKibanaPrivileges()}
-
         <EuiSpacer />
-
-        {getFormButtons(history)}
+        {getFormButtons()}
       </EuiForm>
     </div>
   );
