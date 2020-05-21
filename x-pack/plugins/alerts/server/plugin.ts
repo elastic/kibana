@@ -240,10 +240,7 @@ export class AlertingPlugin {
             `Unable to create alerts client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
           );
         }
-        return alertsClientFactory!.create(
-          request,
-          this.getScopedClientWithAlertSavedObjectType(core.savedObjects, request)
-        );
+        return alertsClientFactory!.create(request, core.savedObjects);
       },
     };
   }
@@ -252,14 +249,11 @@ export class AlertingPlugin {
     core: CoreSetup
   ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'alerting'> => {
     const { alertTypeRegistry, alertsClientFactory } = this;
-    return async (context, request) => {
+    return async function alertsRouteHandlerContext(context, request) {
       const [{ savedObjects }] = await core.getStartServices();
       return {
         getAlertsClient: () => {
-          return alertsClientFactory!.create(
-            request,
-            this.getScopedClientWithAlertSavedObjectType(savedObjects, request)
-          );
+          return alertsClientFactory!.create(request, savedObjects);
         },
         listTypes: alertTypeRegistry!.list.bind(alertTypeRegistry!),
       };
@@ -270,7 +264,7 @@ export class AlertingPlugin {
     savedObjects: SavedObjectsServiceStart,
     elasticsearch: ElasticsearchServiceStart
   ): (request: KibanaRequest) => Services {
-    return (request) => ({
+    return request => ({
       callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
       savedObjectsClient: this.getScopedClientWithAlertSavedObjectType(savedObjects, request),
       getScopedCallCluster(clusterClient: IClusterClient) {

@@ -7,7 +7,7 @@
 import { PluginStartContract as ActionsPluginStartContract } from '../../actions/server';
 import { AlertsClient } from './alerts_client';
 import { AlertTypeRegistry, SpaceIdToNamespaceFunction } from './types';
-import { KibanaRequest, Logger, SavedObjectsClientContract } from '../../../../src/core/server';
+import { KibanaRequest, Logger, SavedObjectsServiceStart } from '../../../../src/core/server';
 import { InvalidateAPIKeyParams, SecurityPluginSetup } from '../../security/server';
 import { EncryptedSavedObjectsClient } from '../../encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../task_manager/server';
@@ -49,10 +49,7 @@ export class AlertsClientFactory {
     this.actions = options.actions;
   }
 
-  public create(
-    request: KibanaRequest,
-    savedObjectsClient: SavedObjectsClientContract
-  ): AlertsClient {
+  public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): AlertsClient {
     const { securityPluginSetup, actions } = this;
     const spaceId = this.getSpaceId(request);
     return new AlertsClient({
@@ -60,7 +57,12 @@ export class AlertsClientFactory {
       logger: this.logger,
       taskManager: this.taskManager,
       alertTypeRegistry: this.alertTypeRegistry,
-      savedObjectsClient,
+      unsecuredSavedObjectsClient: savedObjects.getScopedClient(request, {
+        excludedWrappers: ['security'],
+        includedHiddenTypes: ['alert', 'action'],
+      }),
+      authorization: this.securityPluginSetup?.authz,
+      request,
       namespace: this.spaceIdToNamespace(spaceId),
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
       async getUserName() {
