@@ -139,14 +139,7 @@ export const importTimelinesRoute = (
 
                     let newTimeline = null;
                     try {
-                      const {
-                        isCreatableViaImport,
-                        isUpdatableViaImport,
-                        isHandlingTemplateTimeline,
-                        timelineInput,
-                        checkIsFailureCases,
-                        init: initTimelineStatus,
-                      } = new CompareTimelinesStatus({
+                      const compareTimelinesStatus = new CompareTimelinesStatus({
                         timelineType,
                         timelineInput: {
                           id: savedObjectId,
@@ -160,8 +153,8 @@ export const importTimelinesRoute = (
                         },
                         frameworkRequest,
                       });
-                      await initTimelineStatus();
-                      if (isCreatableViaImport) {
+                      await compareTimelinesStatus.init();
+                      if (compareTimelinesStatus.isCreatableViaImport) {
                         // create timeline / template timeline
                         newTimeline = await createTimelines(
                           frameworkRequest,
@@ -174,8 +167,8 @@ export const importTimelinesRoute = (
                           },
                           null, // timelineSavedObjectId
                           null, // timelineVersion
-                          isHandlingTemplateTimeline ? null : pinnedEventIds,
-                          isHandlingTemplateTimeline
+                          compareTimelinesStatus.isHandlingTemplateTimeline ? null : pinnedEventIds,
+                          compareTimelinesStatus.isHandlingTemplateTimeline
                             ? globalNotes
                             : [...globalNotes, ...eventNotes],
                           [] // existing note ids
@@ -187,8 +180,8 @@ export const importTimelinesRoute = (
                         });
                       }
 
-                      if (!isHandlingTemplateTimeline) {
-                        const errorMessage = checkIsFailureCases(
+                      if (!compareTimelinesStatus.isHandlingTemplateTimeline) {
+                        const errorMessage = compareTimelinesStatus.checkIsFailureCases(
                           TimelineStatusActions.createViaImport
                         );
                         const message =
@@ -204,7 +197,7 @@ export const importTimelinesRoute = (
                           })
                         );
                       }
-                      if (isUpdatableViaImport) {
+                      if (compareTimelinesStatus.isUpdatableViaImport) {
                         // update template timeline
                         newTimeline = await createTimelines(
                           frameworkRequest,
@@ -213,7 +206,7 @@ export const importTimelinesRoute = (
                           version ?? null, // timelineVersion
                           null, // pinnedEventIds
                           globalNotes,
-                          timelineInput?.data?.noteIds ?? [] // existing note ids
+                          compareTimelinesStatus.timelineInput.data?.noteIds ?? [] // existing note ids
                         );
 
                         resolve({
@@ -221,7 +214,7 @@ export const importTimelinesRoute = (
                           status_code: 200,
                         });
                       } else {
-                        const errorMessage = checkIsFailureCases(
+                        const errorMessage = compareTimelinesStatus.checkIsFailureCases(
                           TimelineStatusActions.updateViaImport
                         );
                         const message =

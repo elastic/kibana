@@ -93,7 +93,7 @@ describe('update timelines', () => {
         await server.inject(mockRequest, context);
       });
 
-      test('should Check a if given timeline id exist', async () => {
+      test('should Check if given timeline id exist', async () => {
         expect(mockGetTimeline.mock.calls[0][1]).toEqual(updateTimelineWithTimelineId.timelineId);
       });
 
