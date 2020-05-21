@@ -27,7 +27,7 @@ import {
   StyleDescriptor,
 } from '../../../common/descriptor_types';
 import { Attribution, ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
-import { SyncContext } from '../../actions/map_actions';
+import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
 
 export interface ILayer {
@@ -38,7 +38,7 @@ export interface ILayer {
   getSourceDataRequest(): DataRequest | undefined;
   getSource(): ISource;
   getSourceForEditing(): ISource;
-  syncData(syncContext: SyncContext): void;
+  syncData(syncContext: DataRequestContext): void;
   supportsElasticsearchFilters(): boolean;
   supportsFitToBounds(): Promise<boolean>;
   getAttributions(): Promise<Attribution[]>;
@@ -77,6 +77,8 @@ export interface ILayer {
   }: {
     onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void;
   }): ReactElement<any> | null;
+  getInFlightRequestTokens(): symbol[];
+  getPrevRequestToken(dataId: string): symbol | undefined;
 }
 export type Footnote = {
   icon: ReactElement<any>;
@@ -414,7 +416,7 @@ export class AbstractLayer implements ILayer {
       : '';
   }
 
-  async syncData(syncContext: SyncContext) {
+  async syncData(syncContext: DataRequestContext) {
     // no-op by default
   }
 

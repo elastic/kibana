@@ -11,7 +11,7 @@ import { SOURCE_DATA_ID_ORIGIN, LAYER_TYPE } from '../../../../common/constants'
 import { VectorLayer, VectorLayerArguments } from '../vector_layer/vector_layer';
 import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
 import { ITiledSingleLayerVectorSource } from '../../sources/vector_source';
-import { SyncContext } from '../../../actions/map_actions';
+import { DataRequestContext } from '../../../actions';
 import { ISource } from '../../sources/source';
 import {
   VectorLayerDescriptor,
@@ -50,7 +50,12 @@ export class TiledVectorLayer extends VectorLayer {
     };
   }
 
-  async _syncMVTUrlTemplate({ startLoading, stopLoading, onLoadError, dataFilters }: SyncContext) {
+  async _syncMVTUrlTemplate({
+    startLoading,
+    stopLoading,
+    onLoadError,
+    dataFilters,
+  }: DataRequestContext) {
     const requestToken: symbol = Symbol(`layer-${this.getId()}-${SOURCE_DATA_ID_ORIGIN}`);
     const searchFilters: VectorSourceRequestMeta = this._getSearchFilters(
       dataFilters,
@@ -77,7 +82,7 @@ export class TiledVectorLayer extends VectorLayer {
     }
   }
 
-  async syncData(syncContext: SyncContext) {
+  async syncData(syncContext: DataRequestContext) {
     await this._syncSourceStyleMeta(syncContext, this._source, this._style);
     await this._syncSourceFormatters(syncContext, this._source, this._style);
     await this._syncMVTUrlTemplate(syncContext);
