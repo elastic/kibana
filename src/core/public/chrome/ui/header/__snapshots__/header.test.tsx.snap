@@ -2192,7 +2192,7 @@ exports[`Header renders 2`] = `
                 className="euiHeaderSectionItem euiHeaderSectionItem--borderRight header__toggleNavButtonSection"
               >
                 <ForwardRef
-                  aria-controls="ief2a89a1-9ab2-11ea-a255-b1da15b4d3ca"
+                  aria-controls="mockId"
                   aria-expanded={false}
                   aria-label="Toggle primary navigation"
                   aria-pressed={false}
@@ -2200,7 +2200,7 @@ exports[`Header renders 2`] = `
                   onClick={[Function]}
                 >
                   <button
-                    aria-controls="ief2a89a1-9ab2-11ea-a255-b1da15b4d3ca"
+                    aria-controls="mockId"
                     aria-expanded={false}
                     aria-label="Toggle primary navigation"
                     aria-pressed={false}
@@ -4452,7 +4452,7 @@ exports[`Header renders 2`] = `
       }
       closeNav={[Function]}
       homeHref="/"
-      id="ief2a89a1-9ab2-11ea-a255-b1da15b4d3ca"
+      id="mockId"
       isLocked={false}
       isOpen={false}
       legacyMode={false}
@@ -4610,7 +4610,7 @@ exports[`Header renders 2`] = `
       <EuiCollapsibleNav
         aria-label="Primary"
         data-test-subj="collapsibleNav"
-        id="ief2a89a1-9ab2-11ea-a255-b1da15b4d3ca"
+        id="mockId"
         isDocked={false}
         isOpen={false}
         onClose={[Function]}
@@ -6274,7 +6274,7 @@ exports[`Header renders 3`] = `
                 className="euiHeaderSectionItem euiHeaderSectionItem--borderRight header__toggleNavButtonSection"
               >
                 <ForwardRef
-                  aria-controls="ief2f92b1-9ab2-11ea-a255-b1da15b4d3ca"
+                  aria-controls="mockId"
                   aria-expanded={false}
                   aria-label="Toggle primary navigation"
                   aria-pressed={false}
@@ -6282,7 +6282,7 @@ exports[`Header renders 3`] = `
                   onClick={[Function]}
                 >
                   <button
-                    aria-controls="ief2f92b1-9ab2-11ea-a255-b1da15b4d3ca"
+                    aria-controls="mockId"
                     aria-expanded={false}
                     aria-label="Toggle primary navigation"
                     aria-pressed={false}
@@ -8534,7 +8534,7 @@ exports[`Header renders 3`] = `
       }
       closeNav={[Function]}
       homeHref="/"
-      id="ief2f92b1-9ab2-11ea-a255-b1da15b4d3ca"
+      id="mockId"
       isLocked={true}
       isOpen={false}
       legacyMode={false}
@@ -8692,7 +8692,7 @@ exports[`Header renders 3`] = `
       <EuiCollapsibleNav
         aria-label="Primary"
         data-test-subj="collapsibleNav"
-        id="ief2f92b1-9ab2-11ea-a255-b1da15b4d3ca"
+        id="mockId"
         isDocked={true}
         isOpen={false}
         onClose={[Function]}
@@ -8783,14 +8783,14 @@ exports[`Header renders 3`] = `
                             aria-label="Primary"
                             class="euiCollapsibleNav euiCollapsibleNav--isDocked"
                             data-test-subj="collapsibleNav"
-                            id="ief2a89a1-9ab2-11ea-a255-b1da15b4d3ca"
+                            id="mockId"
                           >
                             <div
                               class="euiFlexItem euiFlexItem--flexGrowZero"
                             >
                               <div
                                 class="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
-                                id="ief30a421-9ab2-11ea-a255-b1da15b4d3ca"
+                                id="mockId"
                                 style="max-height: 40vh;"
                               >
                                 <div
@@ -8832,7 +8832,7 @@ exports[`Header renders 3`] = `
                                 class="euiAccordion__triggerWrapper"
                               >
                                 <button
-                                  aria-controls="ief311951-9ab2-11ea-a255-b1da15b4d3ca"
+                                  aria-controls="mockId"
                                   aria-expanded="true"
                                   class="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
                                   type="button"
@@ -8856,7 +8856,7 @@ exports[`Header renders 3`] = `
                                       >
                                         <h3
                                           class="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
-                                          id="ief311951-9ab2-11ea-a255-b1da15b4d3ca__title"
+                                          id="mockId__title"
                                         >
                                           Recently viewed
                                         </h3>
@@ -8867,7 +8867,7 @@ exports[`Header renders 3`] = `
                               </div>
                               <div
                                 class="euiAccordion__childWrapper"
-                                id="ief311951-9ab2-11ea-a255-b1da15b4d3ca"
+                                id="mockId"
                               >
                                 <div>
                                   <div
@@ -8914,7 +8914,7 @@ exports[`Header renders 3`] = `
                               <div
                                 class="euiCollapsibleNavGroup"
                                 data-test-subj="collapsibleNavGroup-noCategory"
-                                id="ief31b591-9ab2-11ea-a255-b1da15b4d3ca"
+                                id="mockId"
                               >
                                 <div
                                   class="euiCollapsibleNavGroup__children"
@@ -8943,7 +8943,7 @@ exports[`Header renders 3`] = `
                               </div>
                               <div
                                 class="euiCollapsibleNavGroup eui-showFor--l eui-showFor--xl"
-                                id="ief31dca1-9ab2-11ea-a255-b1da15b4d3ca"
+                                id="mockId"
                               >
                                 <div
                                   class="euiCollapsibleNavGroup__children"
@@ -9017,14 +9017,14 @@ exports[`Header renders 3`] = `
                               aria-label="Primary"
                               class="euiCollapsibleNav euiCollapsibleNav--isDocked"
                               data-test-subj="collapsibleNav"
-                              id="ief2a89a1-9ab2-11ea-a255-b1da15b4d3ca"
+                              id="mockId"
                             >
                               <div
                                 class="euiFlexItem euiFlexItem--flexGrowZero"
                               >
                                 <div
                                   class="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
-                                  id="ief30a421-9ab2-11ea-a255-b1da15b4d3ca"
+                                  id="mockId"
                                   style="max-height: 40vh;"
                                 >
                                   <div
@@ -9066,7 +9066,7 @@ exports[`Header renders 3`] = `
                                   class="euiAccordion__triggerWrapper"
                                 >
                                   <button
-                                    aria-controls="ief311951-9ab2-11ea-a255-b1da15b4d3ca"
+                                    aria-controls="mockId"
                                     aria-expanded="true"
                                     class="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
                                     type="button"
@@ -9090,7 +9090,7 @@ exports[`Header renders 3`] = `
                                         >
                                           <h3
                                             class="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
-                                            id="ief311951-9ab2-11ea-a255-b1da15b4d3ca__title"
+                                            id="mockId__title"
                                           >
                                             Recently viewed
                                           </h3>
@@ -9101,7 +9101,7 @@ exports[`Header renders 3`] = `
                                 </div>
                                 <div
                                   class="euiAccordion__childWrapper"
-                                  id="ief311951-9ab2-11ea-a255-b1da15b4d3ca"
+                                  id="mockId"
                                 >
                                   <div>
                                     <div
@@ -9148,7 +9148,7 @@ exports[`Header renders 3`] = `
                                 <div
                                   class="euiCollapsibleNavGroup"
                                   data-test-subj="collapsibleNavGroup-noCategory"
-                                  id="ief31b591-9ab2-11ea-a255-b1da15b4d3ca"
+                                  id="mockId"
                                 >
                                   <div
                                     class="euiCollapsibleNavGroup__children"
@@ -9177,7 +9177,7 @@ exports[`Header renders 3`] = `
                                 </div>
                                 <div
                                   class="euiCollapsibleNavGroup eui-showFor--l eui-showFor--xl"
-                                  id="ief31dca1-9ab2-11ea-a255-b1da15b4d3ca"
+                                  id="mockId"
                                 >
                                   <div
                                     class="euiCollapsibleNavGroup__children"
@@ -9245,7 +9245,7 @@ exports[`Header renders 3`] = `
                       aria-label="Primary"
                       className="euiCollapsibleNav euiCollapsibleNav--isDocked"
                       data-test-subj="collapsibleNav"
-                      id="ief2a89a1-9ab2-11ea-a255-b1da15b4d3ca"
+                      id="mockId"
                     >
                       <EuiFlexItem
                         grow={false}
@@ -9274,7 +9274,7 @@ exports[`Header renders 3`] = `
                           >
                             <div
                               className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light eui-yScroll"
-                              id="ief30a421-9ab2-11ea-a255-b1da15b4d3ca"
+                              id="mockId"
                               style={
                                 Object {
                                   "maxHeight": "40vh",
@@ -9378,7 +9378,7 @@ exports[`Header renders 3`] = `
                                 >
                                   <h3
                                     className="euiCollapsibleNavGroup__title"
-                                    id="ief311951-9ab2-11ea-a255-b1da15b4d3ca__title"
+                                    id="mockId__title"
                                   >
                                     Recently viewed
                                   </h3>
@@ -9388,7 +9388,7 @@ exports[`Header renders 3`] = `
                           }
                           className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading"
                           data-test-subj="collapsibleNavGroup-recentlyViewed"
-                          id="ief311951-9ab2-11ea-a255-b1da15b4d3ca"
+                          id="mockId"
                           initialIsOpen={true}
                           onToggle={[Function]}
                           paddingSize="none"
@@ -9402,7 +9402,7 @@ exports[`Header renders 3`] = `
                               className="euiAccordion__triggerWrapper"
                             >
                               <button
-                                aria-controls="ief311951-9ab2-11ea-a255-b1da15b4d3ca"
+                                aria-controls="mockId"
                                 aria-expanded={true}
                                 className="euiAccordion__button euiAccordion__buttonReverse euiCollapsibleNavGroup__heading"
                                 onClick={[Function]}
@@ -9443,7 +9443,7 @@ exports[`Header renders 3`] = `
                                           >
                                             <h3
                                               className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
-                                              id="ief311951-9ab2-11ea-a255-b1da15b4d3ca__title"
+                                              id="mockId__title"
                                             >
                                               Recently viewed
                                             </h3>
@@ -9457,7 +9457,7 @@ exports[`Header renders 3`] = `
                             </div>
                             <div
                               className="euiAccordion__childWrapper"
-                              id="ief311951-9ab2-11ea-a255-b1da15b4d3ca"
+                              id="mockId"
                             >
                               <EuiResizeObserver
                                 onResize={[Function]}
@@ -9561,7 +9561,7 @@ exports[`Header renders 3`] = `
                             <div
                               className="euiCollapsibleNavGroup"
                               data-test-subj="collapsibleNavGroup-noCategory"
-                              id="ief31b591-9ab2-11ea-a255-b1da15b4d3ca"
+                              id="mockId"
                             >
                               <div
                                 className="euiCollapsibleNavGroup__children"
@@ -9618,7 +9618,7 @@ exports[`Header renders 3`] = `
                             >
                               <div
                                 className="euiCollapsibleNavGroup eui-showFor--l eui-showFor--xl"
-                                id="ief31dca1-9ab2-11ea-a255-b1da15b4d3ca"
+                                id="mockId"
                               >
                                 <div
                                   className="euiCollapsibleNavGroup__children"
