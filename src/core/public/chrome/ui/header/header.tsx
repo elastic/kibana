@@ -23,7 +23,6 @@ import {
   EuiHeaderSectionItem,
   EuiHeaderSectionItemButton,
   EuiIcon,
-  // @ts-ignore
   EuiNavDrawer,
   EuiShowFor,
   htmlIdGenerator,
@@ -167,7 +166,7 @@ export class Header extends Component<HeaderProps, State> {
         aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.toggleSideNavAriaLabel', {
           defaultMessage: 'Toggle side navigation',
         })}
-        onClick={() => this.navDrawerRef.current.toggleOpen()}
+        onClick={() => this.navDrawerRef.current?.toggleOpen()}
       >
         <EuiIcon type="apps" size="m" />
       </EuiHeaderSectionItemButton>
