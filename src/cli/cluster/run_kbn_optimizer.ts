@@ -35,6 +35,7 @@ export function runKbnOptimizer(opts: Record<string, any>, config: LegacyConfig)
     repoRoot: REPO_ROOT,
     watch: true,
     includeCoreBundle: true,
+    cache: !!opts.cache,
     oss: !!opts.oss,
     examples: !!opts.runExamples,
     pluginPaths: config.get('plugins.paths'),

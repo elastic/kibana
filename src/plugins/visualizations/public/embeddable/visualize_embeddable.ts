@@ -264,8 +264,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
             event.name === 'brush' ? VIS_EVENT_TO_TRIGGER.brush : VIS_EVENT_TO_TRIGGER.filter;
           const context = {
             embeddable: this,
-            timeFieldName: this.vis.data.indexPattern!.timeFieldName!,
-            data: event.data,
+            data: { timeFieldName: this.vis.data.indexPattern?.timeFieldName!, ...event.data },
           };
 
           getUiActions()

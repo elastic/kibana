@@ -6,7 +6,8 @@
 
 import { XPackInfo } from '../../../xpack_main/server/lib/xpack_info';
 import { XPackInfoLicense } from '../../../xpack_main/server/lib/xpack_info_license';
-import { ExportTypesRegistry, ExportTypeDefinition } from '../../types';
+import { ExportTypeDefinition } from '../types';
+import { ExportTypesRegistry } from './export_types_registry';
 
 interface LicenseCheckResult {
   showLinks: boolean;
