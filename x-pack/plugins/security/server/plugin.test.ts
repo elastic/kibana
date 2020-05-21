@@ -83,6 +83,7 @@ describe('Security Plugin', () => {
                     "version": "version:version",
                     "versionNumber": "version",
                   },
+                  "checkPrivilegesDynamicallyWithRequest": [Function],
                   "checkPrivilegesWithRequest": [Function],
                   "mode": Object {
                     "useRbacForRequest": [Function],
