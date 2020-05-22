@@ -11,7 +11,7 @@ export const mlBucketSpanResponse = {
     total: 1,
     successful: 1,
     skipped: 0,
-    failed: 0
+    failed: 0,
   },
   hits: {
     total: 192,
@@ -23,9 +23,9 @@ export const mlBucketSpanResponse = {
           'opbeans-go-request-high_mean_response_time_model_plot_1542636000000_900_0_29791_0',
         _score: 1.0,
         _source: {
-          bucket_span: 10
-        }
-      }
-    ]
-  }
+          bucket_span: 10,
+        },
+      },
+    ],
+  },
 };

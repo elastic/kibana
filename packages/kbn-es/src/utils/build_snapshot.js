@@ -25,7 +25,7 @@ const { createCliError } = require('../errors');
 const { findMostRecentlyChanged } = require('../utils');
 const { GRADLE_BIN } = require('../paths');
 
-const onceEvent = (emitter, event) => new Promise(resolve => emitter.once(event, resolve));
+const onceEvent = (emitter, event) => new Promise((resolve) => emitter.once(event, resolve));
 
 /**
  * Creates archive from source
@@ -59,13 +59,13 @@ exports.buildSnapshot = async ({ license, sourcePath, log, platform = os.platfor
   const stdout = readline.createInterface({ input: build.stdout });
   const stderr = readline.createInterface({ input: build.stderr });
 
-  stdout.on('line', line => log.debug(line));
-  stderr.on('line', line => log.error(line));
+  stdout.on('line', (line) => log.debug(line));
+  stderr.on('line', (line) => log.error(line));
 
   const [exitCode] = await Promise.all([
     Promise.race([
       onceEvent(build, 'exit'),
-      onceEvent(build, 'error').then(error => {
+      onceEvent(build, 'error').then((error) => {
         throw createCliError(`Error spawning gradle: ${error.message}`);
       }),
     ]),

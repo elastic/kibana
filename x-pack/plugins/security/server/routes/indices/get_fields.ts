@@ -34,7 +34,7 @@ export function defineGetFieldsRoutes({ router, clusterClient }: RouteDefinition
           body: Array.from(
             new Set(
               Object.values(indexMappings)
-                .map(indexMapping => Object.keys(indexMapping.mappings))
+                .map((indexMapping) => Object.keys(indexMapping.mappings))
                 .flat()
             )
           ),

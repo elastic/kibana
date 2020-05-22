@@ -70,12 +70,12 @@ export default new Datasource('graphite', {
       config.metric;
 
     return fetch(URL)
-      .then(function(resp) {
+      .then(function (resp) {
         return resp.json();
       })
-      .then(function(resp) {
-        const list = _.map(resp, function(series) {
-          const data = _.map(series.datapoints, function(point) {
+      .then(function (resp) {
+        const list = _.map(resp, function (series) {
+          const data = _.map(series.datapoints, function (point) {
             return [point[1] * 1000, point[0]];
           });
           return {
@@ -91,7 +91,7 @@ export default new Datasource('graphite', {
           list: list,
         };
       })
-      .catch(function(e) {
+      .catch(function (e) {
         throw e;
       });
   },

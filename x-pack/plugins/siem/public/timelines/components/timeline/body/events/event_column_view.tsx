@@ -83,7 +83,7 @@ export const EventColumnView = React.memo<Props>(
 
     const additionalActions = useMemo<JSX.Element[]>(() => {
       return (
-        timelineTypeContext.timelineActions?.map(action => (
+        timelineTypeContext.timelineActions?.map((action) => (
           <EventsTdContent key={action.id} textAlign="center">
             {action.getAction({ eventId: id, ecsData })}
           </EventsTdContent>

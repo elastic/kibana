@@ -66,7 +66,7 @@ export interface ReqOptions {
 }
 
 const delay = (ms: number) =>
-  new Promise(resolve => {
+  new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
 

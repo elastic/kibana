@@ -10,5 +10,5 @@ export function sortPipelines(pipelines, sort) {
     return pipelines;
   }
 
-  return sortByOrder(pipelines, pipeline => pipeline[sort.field], sort.direction);
+  return sortByOrder(pipelines, (pipeline) => pipeline[sort.field], sort.direction);
 }

@@ -116,13 +116,13 @@ export class Home extends Component {
     this._isMounted && this.setState({ isWelcomeEnabled: false });
   };
 
-  renderDirectories = category => {
+  renderDirectories = (category) => {
     const { addBasePath, directories } = this.props;
     return directories
-      .filter(directory => {
+      .filter((directory) => {
         return directory.showOnHomePage && directory.category === category;
       })
-      .map(directory => {
+      .map((directory) => {
         return (
           <EuiFlexItem className="homHome__synopsisItem" key={directory.id}>
             <Synopsis

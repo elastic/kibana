@@ -114,7 +114,7 @@ export const PipelineDeleteModal = ({
           </p>
 
           <ul>
-            {pipelinesToDelete.map(name => (
+            {pipelinesToDelete.map((name) => (
               <li key={name}>{name}</li>
             ))}
           </ul>

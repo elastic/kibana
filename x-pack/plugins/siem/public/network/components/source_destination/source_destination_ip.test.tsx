@@ -370,12 +370,7 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="source-label"]')
-        .first()
-        .text()
-    ).toEqual(i18n.SOURCE);
+    expect(wrapper.find('[data-test-subj="source-label"]').first().text()).toEqual(i18n.SOURCE);
   });
 
   test('it renders a `Destination` label when type is `destination` and (just) the destinationIp field is populated', () => {
@@ -424,12 +419,9 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="destination-label"]')
-        .first()
-        .text()
-    ).toEqual(i18n.DESTINATION);
+    expect(wrapper.find('[data-test-subj="destination-label"]').first().text()).toEqual(
+      i18n.DESTINATION
+    );
   });
 
   test('it renders a `Source` label when type is `source` (just) the sourcePort field is populated', () => {
@@ -478,12 +470,7 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="source-label"]')
-        .first()
-        .text()
-    ).toEqual(i18n.SOURCE);
+    expect(wrapper.find('[data-test-subj="source-label"]').first().text()).toEqual(i18n.SOURCE);
   });
 
   test('it renders a `Destination` label when type is `destination` and (just) the destinationPort field is populated', () => {
@@ -532,12 +519,9 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="destination-label"]')
-        .first()
-        .text()
-    ).toEqual(i18n.DESTINATION);
+    expect(wrapper.find('[data-test-subj="destination-label"]').first().text()).toEqual(
+      i18n.DESTINATION
+    );
   });
 
   test('it renders a `Source` label when type is `source` and both sourceIp and sourcePort are populated', () => {
@@ -587,12 +571,7 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="source-label"]')
-        .first()
-        .text()
-    ).toEqual(i18n.SOURCE);
+    expect(wrapper.find('[data-test-subj="source-label"]').first().text()).toEqual(i18n.SOURCE);
   });
 
   test('it renders a `Destination` label when type is `destination` and both destinationIp and destinationPort are populated', () => {
@@ -641,12 +620,9 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="destination-label"]')
-        .first()
-        .text()
-    ).toEqual(i18n.DESTINATION);
+    expect(wrapper.find('[data-test-subj="destination-label"]').first().text()).toEqual(
+      i18n.DESTINATION
+    );
   });
 
   test('it does NOT render a `Source` label when type is `source` and both sourceIp and sourcePort are empty', () => {
@@ -793,12 +769,9 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="draggable-content-source.ip"]')
-        .first()
-        .text()
-    ).toEqual('192.168.1.2');
+    expect(wrapper.find('[data-test-subj="draggable-content-source.ip"]').first().text()).toEqual(
+      '192.168.1.2'
+    );
   });
 
   test('it renders the expected source IP when type is `source`, but the length of the sourceIp and sourcePort arrays is different', () => {
@@ -847,12 +820,9 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="draggable-content-source.ip"]')
-        .first()
-        .text()
-    ).toEqual('192.168.1.2');
+    expect(wrapper.find('[data-test-subj="draggable-content-source.ip"]').first().text()).toEqual(
+      '192.168.1.2'
+    );
   });
 
   test('it renders the expected destination IP when type is `destination`, and both destinationIp and destinationPort are populated', () => {
@@ -902,10 +872,7 @@ describe('SourceDestinationIp', () => {
     );
 
     expect(
-      wrapper
-        .find('[data-test-subj="draggable-content-destination.ip"]')
-        .first()
-        .text()
+      wrapper.find('[data-test-subj="draggable-content-destination.ip"]').first().text()
     ).toEqual('10.1.2.3');
   });
 
@@ -956,10 +923,7 @@ describe('SourceDestinationIp', () => {
     );
 
     expect(
-      wrapper
-        .find('[data-test-subj="draggable-content-destination.ip"]')
-        .first()
-        .text()
+      wrapper.find('[data-test-subj="draggable-content-destination.ip"]').first().text()
     ).toEqual('10.1.2.3');
   });
 
@@ -1009,12 +973,9 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="draggable-content-source.port"]')
-        .first()
-        .text()
-    ).toEqual('9987');
+    expect(wrapper.find('[data-test-subj="draggable-content-source.port"]').first().text()).toEqual(
+      '9987'
+    );
   });
 
   test('it renders the expected destination port when type is `destination`, and both destinationIp and destinationPort are populated', () => {
@@ -1064,10 +1025,7 @@ describe('SourceDestinationIp', () => {
     );
 
     expect(
-      wrapper
-        .find('[data-test-subj="draggable-content-destination.port"]')
-        .first()
-        .text()
+      wrapper.find('[data-test-subj="draggable-content-destination.port"]').first().text()
     ).toEqual('80');
   });
 
@@ -1117,12 +1075,9 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="draggable-content-source.port"]')
-        .first()
-        .text()
-    ).toEqual('9987');
+    expect(wrapper.find('[data-test-subj="draggable-content-source.port"]').first().text()).toEqual(
+      '9987'
+    );
   });
 
   test('it renders the expected destination port when type is `destination`, and only destinationPort is populated', () => {
@@ -1173,10 +1128,7 @@ describe('SourceDestinationIp', () => {
     );
 
     expect(
-      wrapper
-        .find('[data-test-subj="draggable-content-destination.port"]')
-        .first()
-        .text()
+      wrapper.find('[data-test-subj="draggable-content-destination.port"]').first().text()
     ).toEqual('80');
   });
 
@@ -1327,10 +1279,7 @@ describe('SourceDestinationIp', () => {
     );
 
     expect(
-      wrapper
-        .find('[data-test-subj="draggable-content-source.geo.continent_name"]')
-        .first()
-        .text()
+      wrapper.find('[data-test-subj="draggable-content-source.geo.continent_name"]').first().text()
     ).toEqual('North America');
   });
 });
