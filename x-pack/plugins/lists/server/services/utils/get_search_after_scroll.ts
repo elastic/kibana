@@ -11,10 +11,7 @@ import { Filter, SortFieldOrUndefined, SortOrderOrUndefined } from '../../../com
 import { getQueryFilter } from './get_query_filter';
 import { getSortWithTieBreaker } from './get_sort_with_tie_breaker';
 import { getSourceWithTieBreaker } from './get_source_with_tie_breaker';
-import {
-  PartialExceptTieBreaker,
-  getSearchAfterWithTieBreaker,
-} from './get_search_after_with_tie_breaker';
+import { TieBreaker, getSearchAfterWithTieBreaker } from './get_search_after_with_tie_breaker';
 
 interface GetSearchAfterOptions {
   callCluster: APICaller;
@@ -27,7 +24,7 @@ interface GetSearchAfterOptions {
   sortOrder: SortOrderOrUndefined;
 }
 
-export const getSearchAfterScroll = async ({
+export const getSearchAfterScroll = async <T>({
   callCluster,
   filter,
   hopSize,
@@ -40,7 +37,7 @@ export const getSearchAfterScroll = async ({
   const query = getQueryFilter({ filter });
   let newSearchAfter = searchAfter;
   for (let i = 0; i < hops; ++i) {
-    const response = await callCluster<PartialExceptTieBreaker>('search', {
+    const response = await callCluster<TieBreaker<T>>('search', {
       body: {
         _source: getSourceWithTieBreaker({ sortField }),
         query,

@@ -6,27 +6,27 @@
 
 import { IRouter } from 'kibana/server';
 
-import { LIST_URL } from '../../common/constants';
+import { LIST_ITEM_URL } from '../../common/constants';
 import {
   buildRouteValidation,
   buildSiemResponse,
   transformError,
   validate,
 } from '../siem_server_deps';
-import { findListSchema, foundListSchema } from '../../common/schemas';
+import { findListItemSchema, foundListItemSchema } from '../../common/schemas';
 import { decodeCursor } from '../services/utils';
 
 import { getListClient } from './utils';
 
-export const findListRoute = (router: IRouter): void => {
+export const findListItemRoute = (router: IRouter): void => {
   router.get(
     {
       options: {
         tags: ['access:lists'],
       },
-      path: `${LIST_URL}/_find`,
+      path: `${LIST_ITEM_URL}/_find`,
       validate: {
-        query: buildRouteValidation(findListSchema),
+        query: buildRouteValidation(findListItemSchema),
       },
     },
     async (context, request, response) => {
@@ -36,6 +36,7 @@ export const findListRoute = (router: IRouter): void => {
         const {
           cursor,
           filter: filterOrUndefined,
+          list_id: listId,
           page: pageOrUndefined,
           per_page: perPageOrUndefined,
           sort_field: sortField,
@@ -55,26 +56,35 @@ export const findListRoute = (router: IRouter): void => {
           perPage,
           sortField,
         });
+
         if (!isValid) {
           return siemResponse.error({
             body: errorMessage,
             statusCode: 400,
           });
         } else {
-          const exceptionList = await lists.findList({
+          const exceptionList = await lists.findListItem({
             currentIndexPosition,
             filter,
+            listId,
             page,
             perPage,
             searchAfter,
             sortField,
             sortOrder,
           });
-          const [validated, errors] = validate(exceptionList, foundListSchema);
-          if (errors != null) {
-            return siemResponse.error({ body: errors, statusCode: 500 });
+          if (exceptionList == null) {
+            return siemResponse.error({
+              body: `list id: "${listId}" does not exist`,
+              statusCode: 404,
+            });
           } else {
-            return response.ok({ body: validated ?? {} });
+            const [validated, errors] = validate(exceptionList, foundListItemSchema);
+            if (errors != null) {
+              return siemResponse.error({ body: errors, statusCode: 500 });
+            } else {
+              return response.ok({ body: validated ?? {} });
+            }
           }
         }
       } catch (err) {

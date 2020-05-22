@@ -32,8 +32,7 @@ export interface EncodeCursorOptions {
 
 export const encodeCursor = ({ searchAfter, page, perPage }: EncodeCursorOptions): string => {
   const index = searchAfter != null ? page * perPage : 0;
-
-  const encodedCursor: ContextCursor = [index, searchAfter];
+  const encodedCursor = searchAfter != null ? [index, searchAfter] : [index];
   const scrollStringed = JSON.stringify(encodedCursor);
   return Buffer.from(scrollStringed).toString('base64');
 };
@@ -45,19 +44,33 @@ export interface DecodeCursorOptions {
   sortField: SortFieldOrUndefined;
 }
 
+export interface DecodeCursor {
+  cursor: ContextCursor;
+  isValid: boolean;
+  errorMessage: string;
+}
+
 export const decodeCursor = ({
   cursor,
   page,
   perPage,
   sortField,
-}: DecodeCursorOptions): ContextCursor | undefined => {
+}: DecodeCursorOptions): DecodeCursor => {
   if (cursor == null) {
-    return [0, undefined];
+    return {
+      cursor: [0, undefined],
+      errorMessage: '',
+      isValid: true,
+    };
   } else {
     const fromBuffer = Buffer.from(cursor, 'base64').toString('ascii');
     const parsed = parseOrUndefined(fromBuffer);
     if (parsed == null) {
-      return undefined;
+      return {
+        cursor: [0, undefined],
+        errorMessage: 'Error parsing JSON from base64 encoded cursor',
+        isValid: false,
+      };
     } else {
       const decodedCursor = contextCursor.decode(parsed);
       const checked = exactCheck(parsed, decodedCursor);
@@ -68,18 +81,37 @@ export const decodeCursor = ({
 
       const startPageIndex = (page - 1) * perPage;
       if (cursorOrUndefined == null) {
-        return undefined;
+        return {
+          cursor: [0, undefined],
+          errorMessage: 'Error decoding cursor structure',
+          isValid: false,
+        };
       } else {
         const [index, searchAfter] = cursorOrUndefined;
-        if (
-          searchAfter == null ||
-          index > startPageIndex ||
-          index < 0 ||
-          (searchAfter.length > 1 && sortField == null)
-        ) {
-          return undefined;
+        if (index < 0) {
+          return {
+            cursor: [0, undefined],
+            errorMessage: 'index of cursor cannot be less 0',
+            isValid: false,
+          };
+        } else if (index > startPageIndex) {
+          return {
+            cursor: [0, undefined],
+            errorMessage: `index: ${index} of cursor cannot be greater than the start page index: ${startPageIndex}`,
+            isValid: false,
+          };
+        } else if (searchAfter != null && searchAfter.length > 1 && sortField == null) {
+          return {
+            cursor: [0, undefined],
+            errorMessage: '',
+            isValid: false,
+          };
         } else {
-          return cursorOrUndefined;
+          return {
+            cursor: [index, searchAfter != null ? searchAfter : undefined],
+            errorMessage: '',
+            isValid: true,
+          };
         }
       }
     }

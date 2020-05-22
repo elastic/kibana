@@ -7,6 +7,7 @@
 import { APICaller } from 'kibana/server';
 
 import {
+  FoundListItemSchema,
   FoundListSchema,
   ListItemArraySchema,
   ListItemSchema,
@@ -27,6 +28,7 @@ import {
   deleteListItem,
   deleteListItemByValue,
   exportListItemsToStream,
+  findListItem,
   getListItem,
   getListItemByValue,
   getListItemByValues,
@@ -58,6 +60,7 @@ import {
   DeleteListItemOptions,
   DeleteListOptions,
   ExportListItemsToStreamOptions,
+  FindListItemOptions,
   FindListOptions,
   GetListItemByValueOptions,
   GetListItemOptions,
@@ -434,6 +437,34 @@ export class ListClient {
       currentIndexPosition,
       filter,
       listIndex,
+      page,
+      perPage,
+      searchAfter,
+      sortField,
+      sortOrder,
+    });
+  };
+
+  public findListItem = async ({
+    listId,
+    filter,
+    currentIndexPosition,
+    perPage,
+    page,
+    sortField,
+    sortOrder,
+    searchAfter,
+  }: FindListItemOptions): Promise<FoundListItemSchema | null> => {
+    const { callCluster } = this;
+    const listIndex = this.getListIndex();
+    const listItemIndex = this.getListItemIndex();
+    return findListItem({
+      callCluster,
+      currentIndexPosition,
+      filter,
+      listId,
+      listIndex,
+      listItemIndex,
       page,
       perPage,
       searchAfter,

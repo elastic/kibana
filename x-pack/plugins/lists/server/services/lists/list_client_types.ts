@@ -14,6 +14,7 @@ import {
   Filter,
   Id,
   IdOrUndefined,
+  ListId,
   MetaOrUndefined,
   Name,
   NameOrUndefined,
@@ -119,6 +120,17 @@ export interface GetListItemsByValueOptions {
 export interface FindListOptions {
   currentIndexPosition: number;
   filter: Filter;
+  perPage: PerPage;
+  page: Page;
+  searchAfter: string[] | undefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
+}
+
+export interface FindListItemOptions {
+  currentIndexPosition: number;
+  filter: Filter;
+  listId: ListId;
   perPage: PerPage;
   page: Page;
   searchAfter: string[] | undefined;

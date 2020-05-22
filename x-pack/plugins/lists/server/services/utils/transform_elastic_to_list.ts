@@ -8,13 +8,13 @@ import { SearchResponse } from 'elasticsearch';
 
 import { ListArraySchema, SearchEsListSchema } from '../../../common/schemas';
 
-export interface TransformElasticToListItemOptions {
+export interface TransformElasticToListOptions {
   response: SearchResponse<SearchEsListSchema>;
 }
 
 export const transformElasticToList = ({
   response,
-}: TransformElasticToListItemOptions): ListArraySchema => {
+}: TransformElasticToListOptions): ListArraySchema => {
   return response.hits.hits.map(hit => {
     return {
       id: hit._id,

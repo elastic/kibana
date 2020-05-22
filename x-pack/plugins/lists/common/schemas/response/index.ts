@@ -9,6 +9,7 @@ export * from './exception_list_schema';
 export * from './exception_list_item_schema';
 export * from './found_exception_list_item_schema';
 export * from './found_exception_list_schema';
+export * from './found_list_item_schema';
 export * from './found_list_schema';
 export * from './list_item_schema';
 export * from './list_schema';
