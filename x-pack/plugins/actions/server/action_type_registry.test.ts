@@ -41,7 +41,7 @@ beforeEach(() => {
   };
 });
 
-const executor: ExecutorType = async options => {
+const executor: ExecutorType = async (options) => {
   return { status: 'ok', actionId: options.actionId };
 };
 

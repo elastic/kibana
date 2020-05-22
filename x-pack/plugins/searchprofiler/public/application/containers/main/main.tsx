@@ -59,7 +59,7 @@ export const Main = () => {
     [dispatch]
   );
 
-  const onHighlight = useCallback(value => dispatch({ type: 'setHighlightDetails', value }), [
+  const onHighlight = useCallback((value) => dispatch({ type: 'setHighlightDetails', value }), [
     dispatch,
   ]);
 

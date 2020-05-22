@@ -32,11 +32,11 @@ describe('kibana_usage_collection', () => {
   const usageCollectors: Array<{ isReady: () => boolean }> = [];
 
   const usageCollection: jest.Mocked<UsageCollectionSetup> = {
-    makeStatsCollector: jest.fn().mockImplementation(opts => {
+    makeStatsCollector: jest.fn().mockImplementation((opts) => {
       usageCollectors.push(opts);
       return opts;
     }),
-    makeUsageCollector: jest.fn().mockImplementation(opts => {
+    makeUsageCollector: jest.fn().mockImplementation((opts) => {
       usageCollectors.push(opts);
       return opts;
     }),

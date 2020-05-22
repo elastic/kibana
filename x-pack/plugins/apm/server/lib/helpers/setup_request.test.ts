@@ -16,14 +16,14 @@ jest.mock('../settings/apm_indices/get_apm_indices', () => ({
     'apm_oss.spanIndices': 'apm-*',
     'apm_oss.transactionIndices': 'apm-*',
     'apm_oss.metricsIndices': 'apm-*',
-    apmAgentConfigurationIndex: 'apm-*'
-  })
+    apmAgentConfigurationIndex: 'apm-*',
+  }),
 }));
 
 jest.mock('../index_pattern/get_dynamic_index_pattern', () => ({
   getDynamicIndexPattern: async () => {
     return;
-  }
+  },
 }));
 
 function getMockRequest() {
@@ -31,32 +31,32 @@ function getMockRequest() {
     config: new Proxy(
       {},
       {
-        get: () => 'apm-*'
+        get: () => 'apm-*',
       }
     ) as APMConfig,
     params: {
       query: {
-        _debug: false
-      }
+        _debug: false,
+      },
     },
     core: {
       elasticsearch: {
         dataClient: {
           callAsCurrentUser: jest.fn(),
-          callAsInternalUser: jest.fn()
-        }
+          callAsInternalUser: jest.fn(),
+        },
       },
       uiSettings: {
         client: {
-          get: jest.fn().mockResolvedValue(false)
-        }
+          get: jest.fn().mockResolvedValue(false),
+        },
       },
       savedObjects: {
         client: {
-          get: jest.fn()
-        }
-      }
-    }
+          get: jest.fn(),
+        },
+      },
+    },
   } as unknown) as APMRequestHandlerContext & {
     core: {
       elasticsearch: {
@@ -79,7 +79,7 @@ function getMockRequest() {
   };
 
   const mockRequest = ({
-    url: ''
+    url: '',
   } as unknown) as KibanaRequest;
 
   return { mockContext, mockRequest };
@@ -98,11 +98,11 @@ describe('setupRequest', () => {
         foo: 'bar',
         query: {
           bool: {
-            filter: [{ range: { 'observer.version_major': { gte: 7 } } }]
-          }
-        }
+            filter: [{ range: { 'observer.version_major': { gte: 7 } } }],
+          },
+        },
       },
-      ignore_throttled: true
+      ignore_throttled: true,
     });
   });
 
@@ -111,7 +111,7 @@ describe('setupRequest', () => {
     const { internalClient } = await setupRequest(mockContext, mockRequest);
     await internalClient.search({
       index: 'apm-*',
-      body: { foo: 'bar' }
+      body: { foo: 'bar' },
     } as any);
     expect(
       mockContext.core.elasticsearch.dataClient.callAsInternalUser
@@ -121,11 +121,11 @@ describe('setupRequest', () => {
         foo: 'bar',
         query: {
           bool: {
-            filter: [{ range: { 'observer.version_major': { gte: 7 } } }]
-          }
-        }
+            filter: [{ range: { 'observer.version_major': { gte: 7 } } }],
+          },
+        },
       },
-      ignore_throttled: true
+      ignore_throttled: true,
     });
   });
 
@@ -136,7 +136,7 @@ describe('setupRequest', () => {
         const { client } = await setupRequest(mockContext, mockRequest);
         await client.search({
           index: 'apm-*',
-          body: { query: { bool: { filter: [{ term: 'someTerm' }] } } }
+          body: { query: { bool: { filter: [{ term: 'someTerm' }] } } },
         });
         const params =
           mockContext.core.elasticsearch.dataClient.callAsCurrentUser.mock
@@ -146,10 +146,10 @@ describe('setupRequest', () => {
             bool: {
               filter: [
                 { term: 'someTerm' },
-                { range: { 'observer.version_major': { gte: 7 } } }
-              ]
-            }
-          }
+                { range: { 'observer.version_major': { gte: 7 } } },
+              ],
+            },
+          },
         });
       });
 
@@ -163,9 +163,9 @@ describe('setupRequest', () => {
         expect(params.body).toEqual({
           query: {
             bool: {
-              filter: [{ range: { 'observer.version_major': { gte: 7 } } }]
-            }
-          }
+              filter: [{ range: { 'observer.version_major': { gte: 7 } } }],
+            },
+          },
         });
       });
 
@@ -175,17 +175,17 @@ describe('setupRequest', () => {
         await client.search(
           {
             index: 'apm-*',
-            body: { query: { bool: { filter: [{ term: 'someTerm' }] } } }
+            body: { query: { bool: { filter: [{ term: 'someTerm' }] } } },
           },
           {
-            includeLegacyData: true
+            includeLegacyData: true,
           }
         );
         const params =
           mockContext.core.elasticsearch.dataClient.callAsCurrentUser.mock
             .calls[0][1];
         expect(params.body).toEqual({
-          query: { bool: { filter: [{ term: 'someTerm' }] } }
+          query: { bool: { filter: [{ term: 'someTerm' }] } },
         });
       });
     });
@@ -196,8 +196,8 @@ describe('setupRequest', () => {
       await client.search({
         index: '.ml-*',
         body: {
-          query: { bool: { filter: [{ term: 'someTerm' }] } }
-        }
+          query: { bool: { filter: [{ term: 'someTerm' }] } },
+        },
       });
       const params =
         mockContext.core.elasticsearch.dataClient.callAsCurrentUser.mock
@@ -205,9 +205,9 @@ describe('setupRequest', () => {
       expect(params.body).toEqual({
         query: {
           bool: {
-            filter: [{ term: 'someTerm' }]
-          }
-        }
+            filter: [{ term: 'someTerm' }],
+          },
+        },
       });
     });
   });

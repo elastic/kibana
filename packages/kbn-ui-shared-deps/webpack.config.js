@@ -55,7 +55,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     path: UiSharedDeps.distDir,
     filename: '[name].js',
     sourceMapFilename: '[file].map',
-    devtoolModuleFilenameTemplate: info =>
+    devtoolModuleFilenameTemplate: (info) =>
       `kbn-ui-shared-deps/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
     library: '__kbnSharedDeps__',
   },
@@ -104,7 +104,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
       cacheGroups: {
         'kbn-ui-shared-deps.@elastic': {
           name: 'kbn-ui-shared-deps.@elastic',
-          test: m => m.resource && m.resource.includes('@elastic'),
+          test: (m) => m.resource && m.resource.includes('@elastic'),
           chunks: 'all',
           enforce: true,
         },

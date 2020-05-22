@@ -206,7 +206,7 @@ export class ClusterClientAdapter {
         page,
         per_page: perPage,
         total,
-        data: hits.map(hit => hit._source) as IEvent[],
+        data: hits.map((hit) => hit._source) as IEvent[],
       };
     } catch (err) {
       throw new Error(

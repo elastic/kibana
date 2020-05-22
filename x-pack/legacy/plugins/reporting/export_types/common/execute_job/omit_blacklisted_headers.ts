@@ -21,7 +21,7 @@ export const omitBlacklistedHeaders = <JobDocPayloadType>({
     (_value, header: string) =>
       header &&
       (KBN_SCREENSHOT_HEADER_BLACKLIST.includes(header) ||
-        KBN_SCREENSHOT_HEADER_BLACKLIST_STARTS_WITH_PATTERN.some(pattern =>
+        KBN_SCREENSHOT_HEADER_BLACKLIST_STARTS_WITH_PATTERN.some((pattern) =>
           header?.startsWith(pattern)
         ))
   );
