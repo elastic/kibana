@@ -72,7 +72,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
-              objectRemover.add(space.id, response.body.id, 'alert', isUndefined);
+              objectRemover.add(space.id, response.body.id, 'alert', undefined);
               expect(response.body).to.eql({
                 id: response.body.id,
                 name: 'abc',

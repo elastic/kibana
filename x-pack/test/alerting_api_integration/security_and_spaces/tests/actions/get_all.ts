@@ -40,7 +40,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .get(`${getUrlPrefix(space.id)}/api/actions`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {

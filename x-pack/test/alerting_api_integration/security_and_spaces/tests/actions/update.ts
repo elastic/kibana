@@ -146,7 +146,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
 
         it('should handle update action request appropriately when passing a null config', async () => {
           const response = await supertestWithoutAuth
-            .put(`${getUrlPrefix(space.id)}/api/actions/1`)
+            .put(`${getUrlPrefix(space.id)}/api/actions/action/1`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
@@ -254,7 +254,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
 
         it('should handle update action request appropriately when secrets are not valid', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',

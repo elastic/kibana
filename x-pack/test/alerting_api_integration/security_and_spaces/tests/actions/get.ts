@@ -24,7 +24,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should handle get action request appropriately', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}//action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',

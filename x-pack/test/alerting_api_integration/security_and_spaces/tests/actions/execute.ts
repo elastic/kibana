@@ -169,7 +169,7 @@ export default function({ getService }: FtrProviderContext) {
 
         it('should handle execute request appropriately after action is updated', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
