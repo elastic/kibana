@@ -6,11 +6,11 @@
 
 import path from 'path';
 import { EvaluateFn, SerializableOrJSHandle } from 'puppeteer';
-import { HeadlessChromiumDriver } from '../../../server/browsers';
 import { LevelLogger } from '../../../server/lib';
+import { HeadlessChromiumDriver } from '../../../server/browsers';
 import { CaptureConfig } from '../../../server/types';
-import { LayoutTypes } from '../constants';
-import { getDefaultLayoutSelectors, Layout, LayoutSelectorDictionary, Size } from './layout';
+import { getDefaultLayoutSelectors, LayoutSelectorDictionary, Size, LayoutTypes } from './';
+import { Layout } from './layout';
 
 export class PrintLayout extends Layout {
   public readonly selectors: LayoutSelectorDictionary = {

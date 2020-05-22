@@ -36,9 +36,7 @@ import {
 } from './context/query';
 import { callAfterBindingsWorkaround } from './context/helpers/call_after_bindings_workaround';
 
-const module = getAngularModule();
-
-module.directive('contextApp', function ContextApp() {
+getAngularModule().directive('contextApp', function ContextApp() {
   return {
     bindToController: true,
     controller: callAfterBindingsWorkaround(ContextAppController),

@@ -4,18 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EventEmitter } from 'events';
 import { get } from 'lodash';
-import {
-  ConditionalHeaders,
-  EnqueueJobFn,
-  ESQueueCreateJobFn,
-  Job,
-  Logger,
-  RequestFacade,
-} from '../../types';
+import { ConditionalHeaders, ESQueueCreateJobFn, RequestFacade } from '../../server/types';
 import { ReportingCore } from '../core';
 // @ts-ignore
 import { events as esqueueEvents } from './esqueue';
+import { LevelLogger } from './level_logger';
 
 interface ConfirmedJob {
   id: string;
@@ -24,7 +19,25 @@ interface ConfirmedJob {
   _primary_term: number;
 }
 
-export function enqueueJobFactory(reporting: ReportingCore, parentLogger: Logger): EnqueueJobFn {
+export type Job = EventEmitter & {
+  id: string;
+  toJSON: () => {
+    id: string;
+  };
+};
+
+export type EnqueueJobFn = <JobParamsType>(
+  exportTypeId: string,
+  jobParams: JobParamsType,
+  user: string,
+  headers: Record<string, string>,
+  request: RequestFacade
+) => Promise<Job>;
+
+export function enqueueJobFactory(
+  reporting: ReportingCore,
+  parentLogger: LevelLogger
+): EnqueueJobFn {
   const config = reporting.getConfig();
   const queueTimeout = config.get('queue', 'timeout');
   const browserType = config.get('capture', 'browser', 'type');

@@ -5,7 +5,7 @@
  */
 
 import { Filter, esFilters } from '../../../../../../../src/plugins/data/public';
-import { TimelineType } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 import { Direction } from '../../../graphql/types';
 import { convertTimelineAsInput } from './epic';
 import { TimelineModel } from './model';
@@ -148,6 +148,7 @@ describe('Epic Timeline', () => {
         showCheckboxes: false,
         showRowRenderers: true,
         sort: { columnId: '@timestamp', sortDirection: Direction.desc },
+        status: TimelineStatus.active,
         width: 1100,
         version: 'WzM4LDFd',
         id: '11169110-fc22-11e9-8ca9-072f15ce2685',
@@ -290,6 +291,7 @@ describe('Epic Timeline', () => {
         templateTimelineVersion: null,
         timelineType: TimelineType.default,
         title: 'saved',
+        status: TimelineStatus.active,
       });
     });
   });

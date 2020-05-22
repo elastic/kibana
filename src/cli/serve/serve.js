@@ -213,11 +213,13 @@ export default function(program) {
       .option('--dev', 'Run the server with development mode defaults')
       .option('--open', 'Open a browser window to the base url after the server is started')
       .option('--ssl', 'Run the dev server using HTTPS')
+      .option('--dist', 'Use production assets from kbn/optimizer')
       .option(
         '--no-base-path',
         "Don't put a proxy in front of the dev server, which adds a random basePath"
       )
       .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
+      .option('--no-cache', 'Disable the kbn/optimizer cache')
       .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode');
   }
 
@@ -253,6 +255,8 @@ export default function(program) {
         basePath: opts.runExamples ? false : !!opts.basePath,
         optimize: !!opts.optimize,
         oss: !!opts.oss,
+        cache: !!opts.cache,
+        dist: !!opts.dist,
       },
       features: {
         isClusterModeSupported: CAN_CLUSTER,
