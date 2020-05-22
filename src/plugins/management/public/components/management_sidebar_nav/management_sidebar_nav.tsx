@@ -54,8 +54,8 @@ export const ManagementSidebarNav = ({
 
   const sectionsToNavItems = (managementSections: ManagementSection[]) => {
     return managementSections
-      .filter(section => section.getAppsEnabled())
-      .map(section => ({
+      .filter((section) => section.getAppsEnabled())
+      .map((section) => ({
         ...createNavItem(section, {
           items: appsToNavItems(section.apps),
         }),
@@ -64,8 +64,8 @@ export const ManagementSidebarNav = ({
 
   const appsToNavItems = (managementApps: ManagementApp[]) => {
     return managementApps
-      .filter(app => app.enabled)
-      .map(app => ({
+      .filter((app) => app.enabled)
+      .map((app) => ({
         ...createNavItem(app, {
           ...reactRouterNavigate(history, app.basePath),
         }),

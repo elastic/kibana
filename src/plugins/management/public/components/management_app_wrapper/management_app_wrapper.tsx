@@ -54,7 +54,7 @@ export const ManagementAppWrapper = ({
       onAppMounted(app.id);
 
       if (mountResult instanceof Promise) {
-        mountResult.then(um => {
+        mountResult.then((um) => {
           unmount.current = um;
         });
       } else {

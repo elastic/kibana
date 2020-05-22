@@ -53,7 +53,7 @@ export const routes: BreadcrumbRoute[] = [
     path: '',
     render: renderAsRedirectTo('/services'),
     breadcrumb: 'APM',
-    name: RouteName.HOME
+    name: RouteName.HOME,
   },
   {
     exact: true,

@@ -67,7 +67,7 @@ export const ManagementApp = ({ context, dependencies, history }: ManagementAppP
 
       context.core.chrome.setBreadcrumbs([
         wrapBreadcrumb(MANAGEMENT_BREADCRUMB, history),
-        ...crumbs.map(item => wrapBreadcrumb(item, appHistory || history)),
+        ...crumbs.map((item) => wrapBreadcrumb(item, appHistory || history)),
       ]);
     },
     [context.core.chrome, history]
@@ -88,8 +88,8 @@ export const ManagementApp = ({ context, dependencies, history }: ManagementAppP
           <ManagementSidebarNav selectedId={selectedId} sections={sections} history={history} />
           <EuiPageBody restrictWidth={true} className="mgtPage__body">
             <Switch>
-              {sections.map(section =>
-                section.apps.map(app => (
+              {sections.map((section) =>
+                section.apps.map((app) => (
                   <Route
                     path={`${app.basePath}`}
                     component={() => (
