@@ -21,7 +21,7 @@ import { CASES } from '../urls/navigation';
 describe.skip('Cases connectors', () => {
   before(() => {
     cy.server();
-    cy.route('POST', '**/api/actions').as('createConnector');
+    cy.route('POST', '**/api/actions/action').as('createConnector');
     cy.route('POST', '**/api/cases/configure').as('saveConnector');
   });
 
