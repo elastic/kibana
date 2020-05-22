@@ -50,6 +50,19 @@ export const inventoryViewSavedObjectType: SavedObjectsType = {
           },
         },
       },
+      legend: {
+        properties: {
+          palette: {
+            type: 'keyword',
+          },
+          steps: {
+            type: 'long',
+          },
+          reverseColors: {
+            type: 'boolean',
+          },
+        },
+      },
       groupBy: {
         type: 'nested',
         properties: {

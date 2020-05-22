@@ -275,6 +275,18 @@ export function getUiSettingDefaults() {
       }),
       requiresPageReload: true,
     },
+    'theme:version': {
+      name: i18n.translate('kbn.advancedSettings.themeVersionTitle', {
+        defaultMessage: 'Theme version',
+      }),
+      value: 'v7',
+      type: 'select',
+      options: ['v7', 'v8 (beta)'],
+      description: i18n.translate('kbn.advancedSettings.themeVersionText', {
+        defaultMessage: `Switch between the theme used for the current and next version of Kibana. A page refresh is required for the setting to be applied.`,
+      }),
+      requiresPageReload: true,
+    },
     'notifications:banner': {
       name: i18n.translate('kbn.advancedSettings.notifications.bannerTitle', {
         defaultMessage: 'Custom banner notification',

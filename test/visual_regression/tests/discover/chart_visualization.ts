@@ -87,22 +87,22 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         await takeSnapshot();
       });
 
-      it('browser back button should show previous interval Daily', async function() {
+      it('browser back button should show previous interval Day', async function() {
         await browser.goBack();
         await retry.try(async function tryingForTime() {
           const actualInterval = await PageObjects.discover.getChartInterval();
-          expect(actualInterval).to.be('Daily');
+          expect(actualInterval).to.be('Day');
         });
         await takeSnapshot();
       });
 
-      it('should show correct data for chart interval Monthly', async function() {
-        await PageObjects.discover.setChartInterval('Monthly');
+      it('should show correct data for chart interval Month', async function() {
+        await PageObjects.discover.setChartInterval('Month');
         await takeSnapshot();
       });
 
-      it('should show correct data for chart interval Yearly', async function() {
-        await PageObjects.discover.setChartInterval('Yearly');
+      it('should show correct data for chart interval Year', async function() {
+        await PageObjects.discover.setChartInterval('Year');
         await takeSnapshot();
       });
 
