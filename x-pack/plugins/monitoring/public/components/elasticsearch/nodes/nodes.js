@@ -28,10 +28,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
+import { ELASTICSEARCH_SYSTEM_ID, ALERT_CPU_USAGE } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { AlertMenu } from '../../alert';
+import { CommonAlertSeverityColorMap } from '../../../../common/types';
 
 const getNodeTooltip = node => {
   const { nodeTypeLabel, nodeTypeClass } = node;
@@ -125,21 +126,32 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
   });
 
   cols.push({
-    name: i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumnTitle', {
-      defaultMessage: 'Status',
+    name: i18n.translate('xpack.monitoring.elasticsearch.nodes.alertsColumnTitle', {
+      defaultMessage: 'Alerts',
     }),
     field: 'isOnline',
+    width: '175px',
     sortable: true,
-    render: value => {
-      let alertStatus = null;
+    render: () => {
       if (alerts) {
-        alertStatus = (
+        return (
           <div>
             <AlertMenu alerts={alerts} />
           </div>
         );
       }
 
+      return null;
+    },
+  });
+
+  cols.push({
+    name: i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumnTitle', {
+      defaultMessage: 'Status',
+    }),
+    field: 'isOnline',
+    sortable: true,
+    render: value => {
       const status = value
         ? i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumn.onlineLabel', {
             defaultMessage: 'Online',
@@ -150,7 +162,6 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
       return (
         <div className="monTableCell__status">
           <NodeStatusIcon isOnline={value} status={status} /> {status}
-          {alertStatus}
         </div>
       );
     },
@@ -208,14 +219,25 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
       name: cpuUsageColumnTitle,
       field: 'node_cpu_utilization',
       sortable: getSortHandler('node_cpu_utilization'),
-      render: (value, node) => (
-        <MetricCell
-          isOnline={node.isOnline}
-          metric={value}
-          isPercent={true}
-          data-test-subj="cpuUsage"
-        />
-      ),
+      render: (value, node) => {
+        const style = {};
+        for (const { state } of alerts[ALERT_CPU_USAGE].states) {
+          if (state.nodeId === node.resolver) {
+            style.color = `${CommonAlertSeverityColorMap[state.ui.severity]}`;
+          }
+        }
+
+        return (
+          <div style={style}>
+            <MetricCell
+              isOnline={node.isOnline}
+              metric={value}
+              isPercent={true}
+              data-test-subj="cpuUsage"
+            />
+          </div>
+        );
+      },
     });
 
     cols.push({
@@ -454,6 +476,20 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
             }}
             onTableChange={onTableChange}
             fetchMoreData={fetchMoreData}
+            rowProps={row => {
+              for (const { states } of Object.values(alerts)) {
+                for (const { state } of states) {
+                  if (state.nodeId === row.resolver) {
+                    return {
+                      style: {
+                        border: `solid 2px ${CommonAlertSeverityColorMap[state.ui.severity]}`,
+                      },
+                    };
+                  }
+                }
+              }
+              return {};
+            }}
           />
         </EuiPageContent>
       </EuiPageBody>

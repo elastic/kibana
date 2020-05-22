@@ -16,9 +16,7 @@ interface AlertRendererProps {
 export const AlertRenderer: any = (props: AlertRendererProps) => {
   const { alertTypeIds, render, filters } = props;
   const clusterUuid = (Legacy.shims.getAngularInjector().get('globalState') as any).cluster_uuid;
-  const [alerts, setAlerts] = React.useState<{ [alertTypeId: string]: CommonAlertStatus[] } | null>(
-    null
-  );
+  const [alerts, setAlerts] = React.useState<{ [alertTypeId: string]: CommonAlertStatus[] }>({});
 
   React.useEffect(() => {
     // fetch the alerts

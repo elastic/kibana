@@ -9,6 +9,8 @@ import { SummaryStatus } from '../../summary_status';
 import { NodeStatusIcon } from '../node';
 import { formatMetric } from '../../../lib/format_number';
 import { i18n } from '@kbn/i18n';
+import { AlertSeverity } from '../../../../common/enums';
+import { CommonAlertSeverityColorMap } from '../../../../common/types';
 
 export function NodeDetailStatus({ stats, alerts }) {
   const {
@@ -26,12 +28,25 @@ export function NodeDetailStatus({ stats, alerts }) {
   } = stats;
 
   const percentSpaceUsed = (freeSpace / totalSpace) * 100;
+  let severity;
+  for (const alert of Object.values(alerts)) {
+    for (const alertState of alert.states) {
+      if (alertState.state.ui.severity === AlertSeverity.Danger) {
+        severity = AlertSeverity.Danger;
+        break;
+      }
+      severity = alertState.state.ui.severity;
+    }
+  }
 
   const metrics = [
     {
       label: 'Alerts',
-      className: alerts && Object.values(alerts).length ? 'monAlertStatus' : '',
-      value: alerts ? Object.values(alerts).length : 0,
+      value: (
+        <div style={{ color: `${CommonAlertSeverityColorMap[severity]}` }}>
+          {Object.values(alerts).length}
+        </div>
+      ),
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.nodeDetailStatus.transportAddress', {

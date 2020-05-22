@@ -51,10 +51,10 @@ export const AlertMenu: React.FC<AlertMenuProps> = (props: AlertMenuProps) => {
       <EuiBadge
         iconType="alert"
         color={type}
-        onClickAriaLabel={`${list.length} ${type}`}
+        onClickAriaLabel={`${list.length} ${type}(s)`}
         onClick={() => setShowPopover(type)}
       >
-        {list.length} {type}
+        {list.length} {type}(s)
       </EuiBadge>
     );
 

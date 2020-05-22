@@ -23,6 +23,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { AlertMenu } from '../alert';
+import { AlertSeverity } from '../../../common/enums';
+import { CommonAlertSeverityColorMap } from '../../../common/types';
 
 const zoomOutBtn = zoomInfo => {
   if (!zoomInfo || !zoomInfo.showZoomOutBtn()) {
@@ -67,6 +69,7 @@ export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }) {
     }),
   ].concat(series.map(item => `${item.metric.label}: ${item.metric.description}`));
 
+  const alertStyle = {};
   let alertStatus = null;
   if (series.alerts) {
     alertStatus = (
@@ -74,13 +77,25 @@ export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }) {
         <AlertMenu alerts={series.alerts} />
       </EuiFlexItem>
     );
+    let severity;
+    for (const alert of Object.values(series.alerts)) {
+      for (const alertState of alert.states) {
+        if (alertState.state.ui.severity === AlertSeverity.Danger) {
+          severity = AlertSeverity.Danger;
+          break;
+        }
+        severity = alertState.state.ui.severity;
+      }
+    }
+    alertStyle.border = `solid 2px ${CommonAlertSeverityColorMap[severity]}`;
   }
 
   return (
     <EuiFlexGroup
       direction="column"
       gutterSize="s"
-      className={`monRhythmChart__wrapper ${alertStatus ? 'monAlertChart' : ''}`}
+      style={alertStyle}
+      className={`monRhythmChart__wrapper`}
     >
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">

@@ -42,6 +42,7 @@ import {
 } from '../../../../common/constants';
 import { AlertMenu } from '../../alert';
 import { AlertSeverity } from '../../../../common/enums';
+import { CommonAlertSeverityColorMap } from '../../../../common/types';
 
 const calculateShards = shards => {
   const total = get(shards, 'total', 0);
@@ -210,12 +211,6 @@ export function ElasticsearchPanel(props) {
     red: 'danger',
   };
 
-  const severityColorMap = {
-    [AlertSeverity.Danger]: '#BD271E',
-    [AlertSeverity.Warning]: '#F5A700',
-    [AlertSeverity.Success]: '#017D73',
-  };
-
   const nodesAlertStyle = {};
   let nodesAlertStatus = null;
   if (alerts[ALERT_CPU_USAGE]) {
@@ -232,7 +227,7 @@ export function ElasticsearchPanel(props) {
       }
       severity = alertState.state.ui.severity;
     }
-    nodesAlertStyle.border = `solid 2px ${severityColorMap[severity]}`;
+    nodesAlertStyle.border = `solid 2px ${CommonAlertSeverityColorMap[severity]}`;
   }
 
   const overviewAlertStyle = {};
@@ -254,7 +249,7 @@ export function ElasticsearchPanel(props) {
         severity = alertState.state.ui.severity;
       }
     }
-    overviewAlertStyle.border = `solid 2px ${severityColorMap[severity]}`;
+    overviewAlertStyle.border = `solid 2px ${CommonAlertSeverityColorMap[severity]}`;
   }
 
   return (
