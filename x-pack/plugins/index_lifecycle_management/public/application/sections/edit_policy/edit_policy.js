@@ -36,7 +36,6 @@ import {
 } from '../../constants';
 
 import { toasts } from '../../services/notification';
-import { goToPolicyList } from '../../services/navigation';
 import { findFirstError } from '../../services/find_errors';
 import { LearnMoreLink } from '../components';
 import { NodeAttrsDetails } from './components/node_attrs_details';
@@ -100,7 +99,7 @@ export class EditPolicy extends Component {
 
   backToPolicyList = () => {
     this.props.setSelectedPolicy(null);
-    goToPolicyList();
+    this.props.history.push('/policies');
   };
 
   submit = async () => {

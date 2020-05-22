@@ -163,7 +163,15 @@ export class IndexLifecycleSummary extends Component {
       if (fieldName === 'action_time_millis') {
         content = moment(value).format('YYYY-MM-DD HH:mm:ss');
       } else if (fieldName === 'policy') {
-        content = <EuiLink href={getPolicyPath(value)}>{value}</EuiLink>;
+        content = (
+          <EuiLink
+            href={this.props.getUrlForApp('management', {
+              path: `data/index_lifecycle_management/${getPolicyPath(value)}`,
+            })}
+          >
+            {value}
+          </EuiLink>
+        );
       } else {
         content = value;
       }

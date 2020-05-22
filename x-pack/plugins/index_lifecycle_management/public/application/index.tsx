@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
-import { I18nStart, ScopedHistory } from 'kibana/public';
+import { I18nStart, ScopedHistory, ApplicationStart } from 'kibana/public';
 import { UnmountCallback } from 'src/core/public';
 
 import { App } from './app';
@@ -16,12 +16,13 @@ import { indexLifecycleManagementStore } from './store';
 export const renderApp = (
   element: Element,
   I18nContext: I18nStart['Context'],
-  history: ScopedHistory
+  history: ScopedHistory,
+  navigateToApp: ApplicationStart['navigateToApp']
 ): UnmountCallback => {
   render(
     <I18nContext>
       <Provider store={indexLifecycleManagementStore()}>
-        <App history={history} />
+        <App history={history} navigateToApp={navigateToApp} />
       </Provider>
     </I18nContext>,
     element

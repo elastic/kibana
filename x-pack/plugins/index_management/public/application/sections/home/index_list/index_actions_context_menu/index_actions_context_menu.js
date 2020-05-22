@@ -46,7 +46,7 @@ export class IndexActionsContextMenu extends Component {
   confirmAction = (isActionConfirmed) => {
     this.setState({ isActionConfirmed });
   };
-  panels({ services: { extensionsService } }) {
+  panels({ services: { extensionsService }, core: { getUrlForApp } }) {
     const {
       closeIndices,
       openIndices,
@@ -214,6 +214,7 @@ export class IndexActionsContextMenu extends Component {
       const actionExtensionDefinition = actionExtension({
         indices,
         reloadIndices,
+        getUrlForApp,
       });
       if (actionExtensionDefinition) {
         const {

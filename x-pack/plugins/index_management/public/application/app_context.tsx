@@ -18,6 +18,7 @@ const AppContext = createContext<AppDependencies | undefined>(undefined);
 export interface AppDependencies {
   core: {
     fatalErrors: CoreStart['fatalErrors'];
+    getUrlForApp: CoreStart['application']['getUrlForApp'];
   };
   plugins: {
     usageCollection: UsageCollectionSetup;
