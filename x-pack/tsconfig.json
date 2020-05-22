@@ -8,7 +8,6 @@
     "plugins/**/*",
     "test_utils/**/*",
     "tasks/**/*",
-    "../node_modules/@testing-library/jest-dom/extend-expect.d.ts"
   ],
   "exclude": [
     "test/**/*",
@@ -43,7 +42,8 @@
       "node",
       "jest",
       "flot",
-      "jest-styled-components"
+      "jest-styled-components",
+      "@testing-library/jest-dom"
     ]
   }
 }
