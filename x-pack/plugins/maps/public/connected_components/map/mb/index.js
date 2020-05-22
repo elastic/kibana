@@ -14,7 +14,7 @@ import {
   clearMouseCoordinates,
   clearGoto,
   setMapInitError,
-} from '../../../actions/map_actions';
+} from '../../../actions';
 import {
   getLayerList,
   getMapReady,
