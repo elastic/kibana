@@ -6,7 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { CRUD_APP_BASE_PATH } from '../../constants';
 import {
   createJob as sendCreateJobRequest,
   serializeJob,
@@ -102,7 +101,7 @@ export const createJob = (jobConfig) => async (dispatch) => {
   // This will open the new job in the detail panel. Note that we're *not* showing a success toast
   // here, because it would partially obscure the detail panel.
   getRouter().history.push({
-    pathname: `${CRUD_APP_BASE_PATH}/job_list`,
+    pathname: `/job_list`,
     search: `?job=${jobConfig.id}`,
   });
 };

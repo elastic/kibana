@@ -16,28 +16,28 @@ import { App } from './crud_app/app';
 
 import './index.scss';
 
+import { ManagementAppMountParams } from '../../../../src/plugins/management/public';
+
 /**
  * This module will be loaded asynchronously to reduce the bundle size of your plugin's main bundle.
  */
 export const renderApp = async (
   core: CoreSetup,
-  {
-    element,
-    setBreadcrumbs,
-  }: { element: HTMLElement; setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void }
+  { history, element, setBreadcrumbs }: ManagementAppMountParams
 ) => {
   const [coreStart] = await core.getStartServices();
   const I18nContext = coreStart.i18n.Context;
 
+  const services = {
+    history,
+    setBreadcrumbs,
+  };
+
   render(
     <I18nContext>
-      <KibanaContextProvider
-        services={{
-          setBreadcrumbs,
-        }}
-      >
+      <KibanaContextProvider services={services}>
         <Provider store={rollupJobsStore}>
-          <App />
+          <App history={history} />
         </Provider>
       </KibanaContextProvider>
     </I18nContext>,
