@@ -61,7 +61,7 @@ export function observeParentOffline(process: Process, workerMsgs: WorkerMsgs) {
 
       // give the parent some time to respond, if the ping
       // wins the race the parent is considered online
-      const timeout$ = sleep(5000).pipe(map(() => 'parent offline (ping timeout)'));
+      const timeout$ = sleep(20000).pipe(map(() => 'parent offline (ping timeout)'));
 
       return Rx.race(pong$, timeout$);
     }),

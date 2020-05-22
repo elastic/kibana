@@ -128,7 +128,7 @@ describe('emits and completes when parent exists because:', () => {
     const mockProc = new MockProcess({});
 
     const promise = record(observeParentOffline(mockProc, workerMsgs));
-    jest.advanceTimersByTime(10000);
+    jest.advanceTimersByTime(25000);
     expect(await promise).toMatchInlineSnapshot(`
       Array [
         "next: 'parent offline (ping timeout)'",
