@@ -77,8 +77,8 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     const emsClient = getEMSClient();
     // @ts-ignore
     const emsFileLayers = await emsClient.getFileLayers();
-    // @ts-ignore
     const emsFileLayer = emsFileLayers.find(
+      // @ts-ignore
       (fileLayer) => fileLayer.getId() === this._descriptor.id
     );
     if (!emsFileLayer) {
