@@ -118,7 +118,7 @@ export const initializeCanvas = async (
         href: getDocumentationLinks().canvas,
       },
     ],
-    content: domNode => {
+    content: (domNode) => {
       ReactDOM.render(<HelpMenu />, domNode);
       return () => ReactDOM.unmountComponentAtNode(domNode);
     },
