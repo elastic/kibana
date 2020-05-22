@@ -27,13 +27,15 @@ export async function getPackages(
 ) {
   const { savedObjectsClient } = options;
   const fnSpan = apm.startSpan(`getPackages ${options.category}`);
-  const registryItems = await Registry.fetchList({ category: options.category }).then(items => {
-    return items.map(item =>
-      Object.assign({}, item, { title: item.title || nameAsTitle(item.name) })
-    );
-  });
-  // get the installed packages
-  const packageSavedObjects = await getPackageSavedObjects(savedObjectsClient);
+  const [registryItems, packageSavedObjects] = await Promise.all([
+    Registry.fetchList({ category: options.category }).then(items => {
+      return items.map(item =>
+        Object.assign({}, item, { title: item.title || nameAsTitle(item.name) })
+      );
+    }),
+    // get the installed packages
+    getPackageSavedObjects(savedObjectsClient),
+  ]);
 
   // filter out any internal packages
   const savedObjectsVisible = packageSavedObjects.saved_objects.filter(o => !o.attributes.internal);
