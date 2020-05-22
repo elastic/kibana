@@ -40,7 +40,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
       order: 3,
       mount: async ({ element, setBreadcrumbs, history }) => {
         const [core] = await getStartServices();
-        const { i18n: i18nDep, docLinks, savedObjects } = core;
+        const { i18n: i18nDep, docLinks, savedObjects, application } = core;
         const { boot } = await import('./application/boot');
         const { TimeBuckets } = await import('./legacy');
 
@@ -59,6 +59,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           I18nContext: i18nDep.Context,
           createTimeBuckets: () => new TimeBuckets(uiSettings, data),
           history,
+          getUrlForApp: application.getUrlForApp,
         });
       },
     });

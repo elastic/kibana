@@ -6,7 +6,13 @@
 
 import React, { useEffect, useState } from 'react';
 import { Observable } from 'rxjs';
-import { DocLinksStart, HttpSetup, ToastsSetup, IUiSettingsClient } from 'kibana/public';
+import {
+  DocLinksStart,
+  HttpSetup,
+  ToastsSetup,
+  IUiSettingsClient,
+  ApplicationStart,
+} from 'kibana/public';
 
 import { Router, Switch, Route, Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
 
@@ -42,6 +48,7 @@ export interface AppDeps {
   licenseStatus$: Observable<LicenseStatus>;
   setBreadcrumbs: Parameters<RegisterManagementAppArgs['mount']>[0]['setBreadcrumbs'];
   history: ManagementAppMountParams['history'];
+  getUrlForApp: ApplicationStart['getUrlForApp'];
 }
 
 export const App = (deps: AppDeps) => {
@@ -65,7 +72,7 @@ export const App = (deps: AppDeps) => {
         iconType="help"
       >
         {message}{' '}
-        <EuiLink href="#/management/stack/license_management/home">
+        <EuiLink href={deps.getUrlForApp('management', { path: 'stack/license_management/home' })}>
           <FormattedMessage
             id="xpack.watcher.app.licenseErrorLinkText"
             defaultMessage="Manage your license."
