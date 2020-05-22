@@ -6,7 +6,7 @@
 
 export const findExistingAsset = (type, content, assets) => {
   const existingId = Object.keys(assets).find(
-    assetId => assets[assetId].type === type && assets[assetId].value === content
+    (assetId) => assets[assetId].type === type && assets[assetId].value === content
   );
   return existingId;
 };

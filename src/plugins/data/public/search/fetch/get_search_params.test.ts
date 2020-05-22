@@ -23,7 +23,7 @@ import { UI_SETTINGS } from '../../../common';
 
 function getConfigStub(config: any = {}) {
   return {
-    get: key => config[key],
+    get: (key) => config[key],
   } as IUiSettingsClient;
 }
 

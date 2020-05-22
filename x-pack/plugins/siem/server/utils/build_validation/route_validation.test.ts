@@ -37,8 +37,8 @@ describe('buildRouteValidation', () => {
   type DeepSchema = rt.TypeOf<typeof deepSchema>;
 
   const validationResult: RouteValidationResultFactory = {
-    ok: jest.fn().mockImplementation(validatedInput => validatedInput),
-    badRequest: jest.fn().mockImplementation(e => e),
+    ok: jest.fn().mockImplementation((validatedInput) => validatedInput),
+    badRequest: jest.fn().mockImplementation((e) => e),
   };
 
   beforeEach(() => {

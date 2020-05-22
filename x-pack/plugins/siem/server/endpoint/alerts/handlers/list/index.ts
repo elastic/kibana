@@ -9,7 +9,7 @@ import { searchESForAlerts } from '../lib';
 import { getRequestData, mapToAlertResultList } from './lib';
 import { AlertingIndexGetQueryResult } from '../../../../../common/endpoint_alerts/types';
 
-export const alertListHandlerWrapper = function(
+export const alertListHandlerWrapper = function (
   endpointAppContext: EndpointAppContext
 ): RequestHandler<unknown, AlertingIndexGetQueryResult, unknown> {
   const alertListHandler: RequestHandler<unknown, AlertingIndexGetQueryResult, unknown> = async (

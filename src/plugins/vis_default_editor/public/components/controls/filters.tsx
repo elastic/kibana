@@ -38,12 +38,12 @@ interface FilterValue {
 
 function FiltersParamEditor({ agg, value = [], setValue }: AggParamEditorProps<FilterValue[]>) {
   const [filters, setFilters] = useState(() =>
-    value.map(filter => ({ ...filter, id: generateId() }))
+    value.map((filter) => ({ ...filter, id: generateId() }))
   );
 
   useMount(() => {
     // set parsed values into model after initialization
-    setValue(filters.map(filter => omit({ ...filter, input: filter.input }, 'id')));
+    setValue(filters.map((filter) => omit({ ...filter, input: filter.input }, 'id')));
   });
 
   useEffect(() => {
@@ -52,13 +52,13 @@ function FiltersParamEditor({ agg, value = [], setValue }: AggParamEditorProps<F
       value.length !== filters.length ||
       value.some((filter, index) => !isEqual(filter, omit(filters[index], 'id')))
     ) {
-      setFilters(value.map(filter => ({ ...filter, id: generateId() })));
+      setFilters(value.map((filter) => ({ ...filter, id: generateId() })));
     }
   }, [filters, value]);
 
   const updateFilters = (updatedFilters: FilterValue[]) => {
     // do not set internal id parameter into saved object
-    setValue(updatedFilters.map(filter => omit(filter, 'id')));
+    setValue(updatedFilters.map((filter) => omit(filter, 'id')));
     setFilters(updatedFilters);
   };
 
@@ -73,10 +73,11 @@ function FiltersParamEditor({ agg, value = [], setValue }: AggParamEditorProps<F
         id: generateId(),
       },
     ]);
-  const onRemoveFilter = (id: string) => updateFilters(filters.filter(filter => filter.id !== id));
+  const onRemoveFilter = (id: string) =>
+    updateFilters(filters.filter((filter) => filter.id !== id));
   const onChangeValue = (id: string, query: Query, label: string) =>
     updateFilters(
-      filters.map(filter =>
+      filters.map((filter) =>
         filter.id === id
           ? {
               ...filter,

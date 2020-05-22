@@ -16,7 +16,7 @@ const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 

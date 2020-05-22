@@ -41,11 +41,11 @@ export function getUniqKeys(obj) {
     charts = [obj];
   }
 
-  const isDate = charts.every(chart => {
+  const isDate = charts.every((chart) => {
     return chart.ordered && chart.ordered.date;
   });
 
-  const isOrdered = charts.every(chart => {
+  const isOrdered = charts.every((chart) => {
     return chart.ordered;
   });
 
@@ -68,7 +68,7 @@ export function getUniqKeys(obj) {
   }
 
   // Generate a sum for each value
-  flattenedData.forEach(d => {
+  flattenedData.forEach((d) => {
     const key = d.x;
     let prev = uniqueXValues.get(key);
     if (!prev) {

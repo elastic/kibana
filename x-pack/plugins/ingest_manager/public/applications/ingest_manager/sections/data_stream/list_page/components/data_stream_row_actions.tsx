@@ -68,7 +68,7 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
     panels.push({
       id: 1,
       title: panelTitle,
-      items: dashboards.map(dashboard => {
+      items: dashboards.map((dashboard) => {
         return {
           icon: 'dashboardApp',
           href: useKibanaLink(`/dashboard/${dashboard.id || ''}`),

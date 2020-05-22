@@ -752,15 +752,15 @@ export class EndpointDocGenerator {
   }
 
   private randomMac(): string {
-    return [...this.randomNGenerator(255, 6)].map(x => x.toString(16)).join('-');
+    return [...this.randomNGenerator(255, 6)].map((x) => x.toString(16)).join('-');
   }
 
   private randomIP(): string {
-    return [10, ...this.randomNGenerator(255, 3)].map(x => x.toString()).join('.');
+    return [10, ...this.randomNGenerator(255, 3)].map((x) => x.toString()).join('.');
   }
 
   private randomVersion(): string {
-    return [6, ...this.randomNGenerator(10, 2)].map(x => x.toString()).join('.');
+    return [6, ...this.randomNGenerator(10, 2)].map((x) => x.toString()).join('.');
   }
 
   private randomChoice<T>(choices: T[]): T {
@@ -768,7 +768,7 @@ export class EndpointDocGenerator {
   }
 
   private randomString(length: number): string {
-    return [...this.randomNGenerator(36, length)].map(x => x.toString(36)).join('');
+    return [...this.randomNGenerator(36, length)].map((x) => x.toString(36)).join('');
   }
 
   private randomHostname(): string {

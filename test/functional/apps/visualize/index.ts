@@ -21,7 +21,7 @@ import { FtrProviderContext } from '../../ftr_provider_context.d';
 import { UI_SETTINGS } from '../../../../src/plugins/data/public';
 
 // eslint-disable-next-line @typescript-eslint/no-namespace, import/no-default-export
-export default function({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
@@ -43,7 +43,7 @@ export default function({ getService, getPageObjects, loadTestFile }: FtrProvide
       isOss = await PageObjects.common.isOss();
     });
 
-    describe('', function() {
+    describe('', function () {
       this.tags('ciGroup9');
 
       loadTestFile(require.resolve('./_embedding_chart'));
@@ -54,7 +54,7 @@ export default function({ getService, getPageObjects, loadTestFile }: FtrProvide
       loadTestFile(require.resolve('./_data_table_notimeindex_filters'));
     });
 
-    describe('', function() {
+    describe('', function () {
       this.tags('ciGroup10');
 
       loadTestFile(require.resolve('./_inspector'));
@@ -66,7 +66,7 @@ export default function({ getService, getPageObjects, loadTestFile }: FtrProvide
       loadTestFile(require.resolve('./_metric_chart'));
     });
 
-    describe('', function() {
+    describe('', function () {
       this.tags('ciGroup11');
 
       loadTestFile(require.resolve('./_line_chart'));
@@ -83,7 +83,7 @@ export default function({ getService, getPageObjects, loadTestFile }: FtrProvide
       }
     });
 
-    describe('', function() {
+    describe('', function () {
       this.tags('ciGroup12');
 
       loadTestFile(require.resolve('./_tag_cloud'));

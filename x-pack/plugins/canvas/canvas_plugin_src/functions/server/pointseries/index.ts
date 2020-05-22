@@ -81,7 +81,7 @@ export function pointseries(): ExpressionFunctionDefinition<
     fn: (input, args) => {
       const errors = getFunctionErrors().pointseries;
       // Note: can't replace pivotObjectArray with datatableToMathContext, lose name of non-numeric columns
-      const columnNames = input.columns.map(col => col.name);
+      const columnNames = input.columns.map((col) => col.name);
       const mathScope = pivotObjectArray(input.rows, columnNames);
       const autoQuoteColumn = (col: string | null) => {
         if (!col || !columnNames.includes(col)) {
@@ -97,7 +97,7 @@ export function pointseries(): ExpressionFunctionDefinition<
 
       // Separates args into dimensions and measures arrays
       // by checking if arg is a column reference (dimension)
-      keysOf(args).forEach(argName => {
+      keysOf(args).forEach((argName) => {
         const mathExp = autoQuoteColumn(args[argName]);
 
         if (mathExp != null && mathExp.trim() !== '') {
@@ -175,7 +175,7 @@ export function pointseries(): ExpressionFunctionDefinition<
       // Measures
       // First group up all of the distinct dimensioned bits. Each of these will be reduced to just 1 value
       // for each measure
-      const measureKeys = groupBy<DatatableRow>(rows, row =>
+      const measureKeys = groupBy<DatatableRow>(rows, (row) =>
         dimensions
           .map(({ name }) => {
             const value = args[name];
@@ -185,13 +185,13 @@ export function pointseries(): ExpressionFunctionDefinition<
       );
 
       // Then compute that 1 value for each measure
-      Object.values<DatatableRow[]>(measureKeys).forEach(valueRows => {
+      Object.values<DatatableRow[]>(measureKeys).forEach((valueRows) => {
         const subtable = { type: 'datatable', columns: input.columns, rows: valueRows };
         const subScope = pivotObjectArray(
           subtable.rows,
-          subtable.columns.map(col => col.name)
+          subtable.columns.map((col) => col.name)
         );
-        const measureValues = measureNames.map(measure => {
+        const measureValues = measureNames.map((measure) => {
           try {
             const ev = evaluate(args[measure], subScope);
             if (Array.isArray(ev)) {
@@ -205,14 +205,14 @@ export function pointseries(): ExpressionFunctionDefinition<
           }
         });
 
-        valueRows.forEach(row => {
+        valueRows.forEach((row) => {
           Object.assign(results[row[PRIMARY_KEY]], zipObject(measureNames, measureValues));
         });
       });
 
       // It only makes sense to uniq the rows in a point series as 2 values can not exist in the exact same place at the same time.
       const resultingRows = uniqBy(
-        Object.values(results).map(row => omit(row, PRIMARY_KEY)),
+        Object.values(results).map((row) => omit(row, PRIMARY_KEY)),
         JSON.stringify
       );
 

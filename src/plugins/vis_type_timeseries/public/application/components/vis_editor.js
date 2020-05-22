@@ -86,7 +86,7 @@ export class VisEditor extends Component {
     });
   }, VIS_STATE_DEBOUNCE_DELAY);
 
-  isValidKueryQuery = filterQuery => {
+  isValidKueryQuery = (filterQuery) => {
     if (filterQuery && filterQuery.language === 'kuery') {
       try {
         const queryOptions = this.coreContext.uiSettings.get(
@@ -100,7 +100,7 @@ export class VisEditor extends Component {
     return true;
   };
 
-  handleChange = partialModel => {
+  handleChange = (partialModel) => {
     if (isEmpty(partialModel)) {
       return;
     }
@@ -119,7 +119,7 @@ export class VisEditor extends Component {
     if (this.props.isEditorMode) {
       const extractedIndexPatterns = extractIndexPatterns(nextModel);
       if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
-        fetchFields(extractedIndexPatterns).then(visFields =>
+        fetchFields(extractedIndexPatterns).then((visFields) =>
           this.setState({
             visFields,
             extractedIndexPatterns,
@@ -139,7 +139,7 @@ export class VisEditor extends Component {
     this.setState({ dirty: false });
   };
 
-  handleAutoApplyToggle = event => {
+  handleAutoApplyToggle = (event) => {
     this.setState({ autoApply: event.target.checked });
   };
 

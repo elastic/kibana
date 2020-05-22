@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 
-export default function({ getPageObjects, getService }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'maps']);
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');

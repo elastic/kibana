@@ -10,7 +10,7 @@ import styled from 'styled-components';
 
 /** Renders the body (non-pointy part) of an arrow */
 export const ArrowBody = styled.span<{ height: number }>`
-  background-color: ${props => props.theme.eui.euiColorLightShade};
+  background-color: ${(props) => props.theme.eui.euiColorLightShade};
   height: ${({ height }) => `${height}px`};
   width: 25px;
 `;

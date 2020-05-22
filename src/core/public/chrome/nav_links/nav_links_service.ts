@@ -108,7 +108,7 @@ export class NavLinksService {
 
   public start({ application, http }: StartDeps): ChromeNavLinks {
     const appLinks$ = application.applications$.pipe(
-      map(apps => {
+      map((apps) => {
         return new Map(
           [...apps]
             .filter(([, app]) => !app.chromeless)
@@ -129,7 +129,7 @@ export class NavLinksService {
           return linkUpdaters.reduce((links, updater) => updater(links), appLinks);
         })
       )
-      .subscribe(navlinks => {
+      .subscribe((navlinks) => {
         navLinks$.next(navlinks);
       });
 
@@ -158,7 +158,7 @@ export class NavLinksService {
           return;
         }
 
-        const updater: LinksUpdater = navLinks =>
+        const updater: LinksUpdater = (navLinks) =>
           new Map([...navLinks.entries()].filter(([linkId]) => linkId === id));
 
         linkUpdaters$.next([...linkUpdaters$.value, updater]);
@@ -169,7 +169,7 @@ export class NavLinksService {
           return;
         }
 
-        const updater: LinksUpdater = navLinks =>
+        const updater: LinksUpdater = (navLinks) =>
           new Map(
             [...navLinks.entries()].map(([linkId, link]) => {
               return [linkId, link.id === id ? link.update(values) : link] as [
@@ -200,7 +200,7 @@ export class NavLinksService {
 
 function sortNavLinks(navLinks: ReadonlyMap<string, NavLinkWrapper>) {
   return sortBy(
-    [...navLinks.values()].map(link => link.properties),
+    [...navLinks.values()].map((link) => link.properties),
     'order'
   );
 }

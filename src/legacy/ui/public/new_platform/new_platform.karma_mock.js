@@ -152,7 +152,7 @@ const querySetup = {
       getRefreshInterval: () => {
         return refreshInterval;
       },
-      setRefreshInterval: interval => {
+      setRefreshInterval: (interval) => {
         refreshInterval = interval;
       },
       enableTimeRangeSelector: () => {
@@ -191,8 +191,8 @@ const mockAggTypesRegistry = () => {
       notifications: mockCoreStart.notifications,
     }),
   });
-  aggTypes.buckets.forEach(type => registrySetup.registerBucket(type));
-  aggTypes.metrics.forEach(type => registrySetup.registerMetric(type));
+  aggTypes.buckets.forEach((type) => registrySetup.registerBucket(type));
+  aggTypes.metrics.forEach((type) => registrySetup.registerMetric(type));
 
   return registry;
 };
@@ -400,7 +400,7 @@ export const npStart = {
       },
       getSuggestions: sinon.fake(),
       indexPatterns: {
-        get: sinon.spy(indexPatternId =>
+        get: sinon.spy((indexPatternId) =>
           Promise.resolve({
             id: indexPatternId,
             isTimeNanosBased: () => false,
@@ -446,7 +446,7 @@ export const npStart = {
             getRefreshInterval: () => {
               return refreshInterval;
             },
-            setRefreshInterval: interval => {
+            setRefreshInterval: (interval) => {
               refreshInterval = interval;
             },
             enableTimeRangeSelector: () => {

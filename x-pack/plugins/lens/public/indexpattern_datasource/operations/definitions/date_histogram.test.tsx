@@ -252,7 +252,7 @@ describe('date_histogram', () => {
         },
       };
       const indexPattern = createMockedIndexPattern();
-      const newDateField = indexPattern.fields.find(i => i.name === 'start_date')!;
+      const newDateField = indexPattern.fields.find((i) => i.name === 'start_date')!;
 
       const column = dateHistogramOperation.onFieldChange(oldColumn, indexPattern, newDateField);
       expect(column).toHaveProperty('sourceField', 'start_date');
@@ -272,7 +272,7 @@ describe('date_histogram', () => {
         },
       };
       const indexPattern = createMockedIndexPattern();
-      const newDateField = indexPattern.fields.find(i => i.name === 'start_date')!;
+      const newDateField = indexPattern.fields.find((i) => i.name === 'start_date')!;
 
       const column = dateHistogramOperation.onFieldChange(oldColumn, indexPattern, newDateField);
       expect(column).toHaveProperty('sourceField', 'start_date');

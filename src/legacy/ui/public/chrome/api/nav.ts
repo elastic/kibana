@@ -41,13 +41,13 @@ export function initChromeNavApi(chrome: any, internals: NavInternals) {
    */
   chrome.untrackNavLinksForDeletedSavedObjects = (deletedIds: string[]) => {
     function urlContainsDeletedId(url: string) {
-      const includedId = deletedIds.find(deletedId => {
+      const includedId = deletedIds.find((deletedId) => {
         return url.includes(deletedId);
       });
       return includedId !== undefined;
     }
 
-    coreNavLinks.getAll().forEach(link => {
+    coreNavLinks.getAll().forEach((link) => {
       if (link.linkToLastSubUrl && urlContainsDeletedId(link.url!)) {
         setLastUrl(link, link.baseUrl);
       }
@@ -72,14 +72,14 @@ export function initChromeNavApi(chrome: any, internals: NavInternals) {
     }
   };
 
-  internals.trackPossibleSubUrl = async function(url: string) {
+  internals.trackPossibleSubUrl = async function (url: string) {
     const kibanaParsedUrl = absoluteToParsedUrl(url, chrome.getBasePath());
 
     coreNavLinks
       .getAll()
       // Filter only legacy links
-      .filter(link => link.legacy && !link.disableSubUrlTracking)
-      .forEach(link => {
+      .filter((link) => link.legacy && !link.disableSubUrlTracking)
+      .forEach((link) => {
         const active = url.startsWith(link.subUrlBase!);
         link = coreNavLinks.update(link.id, { active })!;
 
@@ -146,8 +146,8 @@ export function initChromeNavApi(chrome: any, internals: NavInternals) {
   // link.active and link.lastUrl properties
   coreNavLinks
     .getAll()
-    .filter(link => link.subUrlBase && !link.disableSubUrlTracking)
-    .forEach(link => {
+    .filter((link) => link.subUrlBase && !link.disableSubUrlTracking)
+    .forEach((link) => {
       coreNavLinks.update(link.id, {
         subUrlBase: relativeToAbsolute(chrome.addBasePath(link.subUrlBase)),
       });

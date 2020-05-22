@@ -40,7 +40,7 @@ const baseVisData = {
   rows: [{ 'col-0': 4301021 }],
 } as any;
 
-describe('MetricVisComponent', function() {
+describe('MetricVisComponent', function () {
   const vis: ExprVis = {
     params: {
       metric: {
@@ -74,11 +74,11 @@ describe('MetricVisComponent', function() {
     expect(getComponent().exists()).toBe(true);
   });
 
-  it('should render correct structure for single metric', function() {
+  it('should render correct structure for single metric', function () {
     expect(getComponent()).toMatchSnapshot();
   });
 
-  it('should render correct structure for multi-value metrics', function() {
+  it('should render correct structure for multi-value metrics', function () {
     const component = getComponent({
       visData: {
         columns: [

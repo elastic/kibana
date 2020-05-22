@@ -35,12 +35,12 @@ import { UI_SETTINGS } from '../../../../data/server';
 function stubRequestAndServer(response, indexPatternSavedObjects = []) {
   return {
     esDataClient: sinon.stub().returns({
-      callAsCurrentUser: function() {
+      callAsCurrentUser: function () {
         return Bluebird.resolve(response);
       },
     }),
     savedObjectsClient: {
-      find: function() {
+      find: function () {
         return Bluebird.resolve({
           saved_objects: indexPatternSavedObjects,
         });
@@ -59,14 +59,14 @@ describe('es', () => {
       });
       return invoke(es, [5], tlConfig)
         .then(expect.fail)
-        .catch(e => {
+        .catch((e) => {
           expect(e).to.be.an('error');
         });
     });
 
     it('returns a seriesList', () => {
       tlConfig = stubRequestAndServer(esResponse);
-      return invoke(es, [5], tlConfig).then(r => {
+      return invoke(es, [5], tlConfig).then((r) => {
         expect(r.output.type).to.eql('seriesList');
       });
     });

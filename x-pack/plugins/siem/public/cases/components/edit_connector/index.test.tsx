@@ -41,10 +41,7 @@ describe('EditConnector ', () => {
     );
 
     expect(
-      wrapper
-        .find(`span[data-test-subj="dropdown-connector-no-connector"]`)
-        .last()
-        .exists()
+      wrapper.find(`span[data-test-subj="dropdown-connector-no-connector"]`).last().exists()
     ).toBeTruthy();
 
     wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
@@ -52,12 +49,7 @@ describe('EditConnector ', () => {
     wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
     wrapper.update();
 
-    expect(
-      wrapper
-        .find(`[data-test-subj="edit-connectors-submit"]`)
-        .last()
-        .exists()
-    ).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().exists()).toBeTruthy();
   });
 
   it('Edit external service on submit', async () => {
@@ -72,18 +64,10 @@ describe('EditConnector ', () => {
     wrapper.find('button[data-test-subj="dropdown-connector-servicenow-2"]').simulate('click');
     wrapper.update();
 
-    expect(
-      wrapper
-        .find(`[data-test-subj="edit-connectors-submit"]`)
-        .last()
-        .exists()
-    ).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().exists()).toBeTruthy();
 
     await act(async () => {
-      wrapper
-        .find(`[data-test-subj="edit-connectors-submit"]`)
-        .last()
-        .simulate('click');
+      wrapper.find(`[data-test-subj="edit-connectors-submit"]`).last().simulate('click');
       await wait();
       expect(onSubmit).toBeCalledWith(sampleConnector);
     });
@@ -105,10 +89,7 @@ describe('EditConnector ', () => {
     wrapper.update();
 
     await act(async () => {
-      wrapper
-        .find(`[data-test-subj="edit-connectors-cancel"]`)
-        .last()
-        .simulate('click');
+      wrapper.find(`[data-test-subj="edit-connectors-cancel"]`).last().simulate('click');
       await wait();
       wrapper.update();
       expect(formHookMock.setFieldValue).toBeCalledWith(
@@ -125,11 +106,6 @@ describe('EditConnector ', () => {
         <EditConnector {...props} />
       </TestProviders>
     );
-    expect(
-      wrapper
-        .find(`[data-test-subj="connector-loading"]`)
-        .last()
-        .exists()
-    ).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="connector-loading"]`).last().exists()).toBeTruthy();
   });
 });

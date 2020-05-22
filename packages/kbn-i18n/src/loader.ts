@@ -127,7 +127,7 @@ export function getRegisteredLocales() {
  */
 export async function getTranslationsByLocale(locale: string): Promise<Translation> {
   const files = translationsRegistry[locale] || [];
-  const notLoadedFiles = files.filter(file => !loadedFiles[file]);
+  const notLoadedFiles = files.filter((file) => !loadedFiles[file]);
 
   if (notLoadedFiles.length) {
     await loadAndCacheFiles(notLoadedFiles);

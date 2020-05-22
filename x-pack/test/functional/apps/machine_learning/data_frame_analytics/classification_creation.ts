@@ -7,11 +7,11 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('classification creation', function() {
+  describe('classification creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/bm_classification');
       await ml.testResources.createIndexPatternIfNeeded('ft_bank_marketing', '@timestamp');
@@ -49,7 +49,7 @@ export default function({ getService }: FtrProviderContext) {
       },
     ];
     for (const testData of testDataList) {
-      describe(`${testData.suiteTitle}`, function() {
+      describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await ml.api.deleteIndices(testData.destinationIndex);
           await ml.testResources.deleteIndexPattern(testData.destinationIndex);
@@ -142,7 +142,7 @@ export default function({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsTable.refreshAnalyticsTable();
           await ml.dataFrameAnalyticsTable.filterWithSearchString(testData.jobId);
           const rows = await ml.dataFrameAnalyticsTable.parseAnalyticsTable();
-          const filteredRows = rows.filter(row => row.id === testData.jobId);
+          const filteredRows = rows.filter((row) => row.id === testData.jobId);
           expect(filteredRows).to.have.length(
             1,
             `Filtered analytics table should have 1 row for job id '${testData.jobId}' (got matching items '${filteredRows}')`
