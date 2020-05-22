@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiConfirmModal, EuiLink, EuiOverlayMask } from '@elastic/eui';
-
+import { reactRouterNavigate } from '../../../../../../src/plugins/kibana_react/public';
 import { routing } from '../services/routing';
 import { resumeFollowerIndex } from '../store/actions';
 import { arrify } from '../../../common/services/utils';
@@ -97,7 +97,13 @@ class FollowerIndexResumeProviderUi extends PureComponent {
                   custom advanced settings, {editLink}."
                 values={{
                   editLink: (
-                    <EuiLink href={routing.getFollowerIndexPath(ids[0])} data-test-subj="editLink">
+                    <EuiLink
+                      {...reactRouterNavigate(
+                        this.props.history,
+                        routing.getFollowerIndexPath(ids[0])
+                      )}
+                      data-test-subj="editLink"
+                    >
                       <FormattedMessage
                         id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.singleResumeEditLink"
                         defaultMessage="edit the follower index"

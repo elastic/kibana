@@ -99,7 +99,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
           }),
           icon: <EuiIcon type="pencil" />,
           onClick: () => {
-            window.location.hash = routing.getAutoFollowPatternPath(patterns[0].name);
+            routing.navigate(routing.getAutoFollowPatternPath(patterns[0].name));
           },
         }
       : null,

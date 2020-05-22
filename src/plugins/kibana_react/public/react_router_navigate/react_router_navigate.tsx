@@ -33,14 +33,24 @@ const isLeftClickEvent = (event: any) => event.button === 0;
 export const toLocationObject = (to: string | LocationObject) =>
   typeof to === 'string' ? { pathname: to } : to;
 
-export const reactRouterNavigate = (history: ScopedHistory, to: string | LocationObject) => ({
+export const reactRouterNavigate = (
+  history: ScopedHistory,
+  to: string | LocationObject,
+  onClickCallback?: Function
+) => ({
   href: history.createHref(toLocationObject(to)),
-  onClick: reactRouterOnClickHandler(history, toLocationObject(to)),
+  onClick: reactRouterOnClickHandler(history, toLocationObject(to), onClickCallback),
 });
 
-export const reactRouterOnClickHandler = (history: ScopedHistory, to: string | LocationObject) => (
-  event: any
-) => {
+export const reactRouterOnClickHandler = (
+  history: ScopedHistory,
+  to: string | LocationObject,
+  onClickCallback?: Function
+) => (event: any) => {
+  if (onClickCallback) {
+    onClickCallback(event);
+  }
+
   if (event.defaultPrevented) {
     return;
   }

@@ -50,9 +50,15 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         return (
           /* eslint-disable-next-line @elastic/eui/href-or-on-click */
           <EuiLink
-            href={getTemplateDetailsLink(name, item._kbnMeta.formatVersion, true)}
+            {...reactRouterNavigate(
+              history,
+              {
+                pathname: `/templates/${encodeURIComponent(encodeURIComponent(name))}`,
+                search: `v=${item._kbnMeta.formatVersion}`,
+              },
+              () => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)
+            )}
             data-test-subj="templateDetailsLink"
-            onClick={() => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)}
           >
             {name}
           </EuiLink>

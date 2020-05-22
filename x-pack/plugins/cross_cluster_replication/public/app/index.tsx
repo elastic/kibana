@@ -6,8 +6,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
-import { Router } from 'react-router-dom';
-import { I18nStart, ScopedHistory } from 'kibana/public';
+import { I18nStart, ScopedHistory, ApplicationStart } from 'kibana/public';
 import { UnmountCallback } from 'src/core/public';
 
 import { init as initBreadcrumbs, SetBreadcrumbs } from './services/breadcrumbs';
@@ -18,14 +17,13 @@ import { ccrStore } from './store';
 const renderApp = (
   element: Element,
   I18nContext: I18nStart['Context'],
-  history: ScopedHistory
+  history: ScopedHistory,
+  getUrlForApp: ApplicationStart['getUrlForApp']
 ): UnmountCallback => {
   render(
     <I18nContext>
       <Provider store={ccrStore}>
-        <Router history={history}>
-          <App />
-        </Router>
+        <App history={history} getUrlForApp={getUrlForApp} />
       </Provider>
     </I18nContext>,
     element
@@ -41,6 +39,7 @@ export async function mountApp({
   ELASTIC_WEBSITE_URL,
   DOC_LINK_VERSION,
   history,
+  getUrlForApp,
 }: {
   element: Element;
   setBreadcrumbs: SetBreadcrumbs;
@@ -48,11 +47,12 @@ export async function mountApp({
   ELASTIC_WEBSITE_URL: string;
   DOC_LINK_VERSION: string;
   history: ScopedHistory;
+  getUrlForApp: ApplicationStart['getUrlForApp'];
 }): Promise<UnmountCallback> {
   // Import and initialize additional services here instead of in plugin.ts to reduce the size of the
   // initial bundle as much as possible.
   initBreadcrumbs(setBreadcrumbs);
   initDocumentation(`${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`);
 
-  return renderApp(element, I18nContext, history);
+  return renderApp(element, I18nContext, history, getUrlForApp);
 }

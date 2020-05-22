@@ -5,8 +5,8 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import { Route, Switch, Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
-import { History } from 'history';
+import { Route, Switch, Router, Redirect } from 'react-router-dom';
+import { ScopedHistory, ApplicationStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -36,8 +36,8 @@ import {
 } from './sections';
 
 interface AppProps {
-  history: History;
-  location: any;
+  history: ScopedHistory;
+  getUrlForApp: ApplicationStart['getUrlForApp'];
 }
 
 interface AppState {
@@ -47,7 +47,7 @@ interface AppState {
   missingClusterPrivileges: any[];
 }
 
-class AppComponent extends Component<RouteComponentProps & AppProps, AppState> {
+class AppComponent extends Component<AppProps, AppState> {
   constructor(props: any) {
     super(props);
     this.registerRouter();
@@ -98,12 +98,13 @@ class AppComponent extends Component<RouteComponentProps & AppProps, AppState> {
   }
 
   registerRouter() {
-    const { history, location } = this.props;
+    const { history, getUrlForApp } = this.props;
     routing.reactRouter = {
       history,
       route: {
-        location,
+        location: history.location,
       },
+      getUrlForApp,
     };
   }
 
@@ -188,19 +189,18 @@ class AppComponent extends Component<RouteComponentProps & AppProps, AppState> {
     }
 
     return (
-      <div>
+      <Router history={this.props.history}>
         <Switch>
           <Redirect exact from="/" to="/follower_indices" />
-          <Redirect exact from="" to="/follower_indices" />
           <Route exact path="/auto_follow_patterns/add" component={AutoFollowPatternAdd} />
           <Route exact path="/auto_follow_patterns/edit/:id" component={AutoFollowPatternEdit} />
           <Route exact path="/follower_indices/add" component={FollowerIndexAdd} />
           <Route exact path="/follower_indices/edit/:id" component={FollowerIndexEdit} />
-          <Route exact path="/:section" component={CrossClusterReplicationHome} />
+          <Route exact path={['/:section']} component={CrossClusterReplicationHome} />
         </Switch>
-      </div>
+      </Router>
     );
   }
 }
 
-export const App = withRouter(AppComponent);
+export const App = AppComponent;

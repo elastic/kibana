@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 
 import { routing } from '../services/routing';
-import { BASE_PATH_REMOTE_CLUSTERS } from '../../../common/constants';
 
 const errorMessages = {
   noClusterFound: () => (
@@ -152,10 +151,9 @@ export class RemoteClustersFormField extends PureComponent {
           {' '}
           {/* Break out of EuiFormRow's flexbox layout */}
           <EuiButtonEmpty
-            {...routing.getRouterLinkProps(
+            href={routing.getHrefToRemoteClusters(
               '/add',
-              BASE_PATH_REMOTE_CLUSTERS,
-              { redirect: currentUrl },
+              { redirect: `/data/cross_cluster_replication${currentUrl}` },
               true
             )}
             size="s"
@@ -193,10 +191,9 @@ export class RemoteClustersFormField extends PureComponent {
           <p>{this.errorMessages.noClusterFound()}</p>
 
           <EuiButton
-            {...routing.getRouterLinkProps(
+            href={routing.getHrefToRemoteClusters(
               '/add',
-              BASE_PATH_REMOTE_CLUSTERS,
-              { redirect: currentUrl },
+              { redirect: `/data/cross_cluster_replication${currentUrl}` },
               true
             )}
             iconType="plusInCircle"
@@ -234,10 +231,9 @@ export class RemoteClustersFormField extends PureComponent {
         <p>{description}</p>
 
         <EuiButton
-          {...routing.getRouterLinkProps(
+          href={routing.getHrefToRemoteClusters(
             `/edit/${name}`,
-            BASE_PATH_REMOTE_CLUSTERS,
-            { redirect: currentUrl },
+            { redirect: `/data/cross_cluster_replication${currentUrl}` },
             true
           )}
           color={fatal ? 'danger' : 'warning'}
@@ -266,10 +262,9 @@ export class RemoteClustersFormField extends PureComponent {
       <EuiCallOut title={title} color="danger" iconType="cross">
         <p>{this.errorMessages.remoteClusterDoesNotExist(name)}</p>
         <EuiButton
-          {...routing.getRouterLinkProps(
-            '/add',
-            BASE_PATH_REMOTE_CLUSTERS,
-            { redirect: currentUrl },
+          href={routing.getHrefToRemoteClusters(
+            `/add`,
+            { redirect: `/data/cross_cluster_replication${currentUrl}` },
             true
           )}
           iconType="plusInCircle"

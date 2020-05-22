@@ -48,6 +48,7 @@ export class CrossClusterReplicationPlugin implements Plugin {
         const {
           i18n: { Context: I18nContext },
           docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
+          application: { getUrlForApp },
         } = coreStart;
 
         return mountApp({
@@ -57,6 +58,7 @@ export class CrossClusterReplicationPlugin implements Plugin {
           ELASTIC_WEBSITE_URL,
           DOC_LINK_VERSION,
           history,
+          getUrlForApp,
         });
       },
     });

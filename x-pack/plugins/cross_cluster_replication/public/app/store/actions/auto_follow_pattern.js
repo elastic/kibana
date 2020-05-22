@@ -76,7 +76,7 @@ export const saveAutoFollowPattern = (id, autoFollowPattern, isUpdating = false)
           );
 
       getToasts().addSuccess(successMessage);
-      routing.navigate(`/auto_follow_patterns`, undefined, {
+      routing.navigate(`/auto_follow_patterns`, {
         pattern: encodeURIComponent(id),
       });
     },
