@@ -54,7 +54,7 @@
     "multimatch": "^4.0.0",
     "ncp": "^2.0.0",
     "ora": "^1.4.0",
-    "prettier": "^1.19.1",
+    "prettier": "^2.0.5",
     "read-pkg": "^5.2.0",
     "rxjs": "^6.5.3",
     "spawn-sync": "^1.0.15",
