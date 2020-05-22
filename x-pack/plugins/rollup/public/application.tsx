@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { ChromeBreadcrumb, CoreSetup } from 'kibana/public';
+import { CoreSetup } from 'kibana/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';

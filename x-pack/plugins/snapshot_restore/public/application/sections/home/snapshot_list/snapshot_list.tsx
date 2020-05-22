@@ -307,7 +307,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
             defaultMessage="Snapshots might load slowly. Go to {repositoryLink} to fix the errors."
             values={{
               repositoryLink: (
-                <EuiLink {...linkToRepositories(history, linkToPolicies())}>
+                <EuiLink {...linkToRepositories(history, linkToRepositories())}>
                   <FormattedMessage
                     id="xpack.snapshotRestore.repositoryWarningLinkText"
                     defaultMessage="Repositories"

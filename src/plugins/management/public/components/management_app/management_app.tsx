@@ -24,7 +24,7 @@ import {
   ScopedHistory,
 } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n/react';
-import { EuiPage, EuiPageBody } from '@elastic/eui';
+import { EuiPage } from '@elastic/eui';
 import { ManagementStart } from '../../types';
 import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
 

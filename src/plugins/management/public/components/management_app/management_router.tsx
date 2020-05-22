@@ -29,7 +29,7 @@ import { ManagementSection } from '../../utils';
 interface ManagementRouterProps {
   history: AppMountParameters['history'];
   dependencies: ManagementAppDependencies;
-  setBreadcrumbs: (crumbs: ChromeBreadcrumb[], appHistory?: ScopedHistory) => void;
+  setBreadcrumbs: (crumbs?: ChromeBreadcrumb[], appHistory?: ScopedHistory) => void;
   onAppMounted: (id: string) => void;
   sections: ManagementSection[];
 }

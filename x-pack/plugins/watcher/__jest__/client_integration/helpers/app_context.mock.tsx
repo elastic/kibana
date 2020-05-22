@@ -42,6 +42,7 @@ export const mockContextValue = {
   // For our test harness, we don't use this mocked out http service
   http: httpServiceMock.createSetupContract(),
   history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+  getUrlForApp: jest.fn(),
 };
 
 export const withAppContext = (Component: ComponentType<any>) => (props: any) => {

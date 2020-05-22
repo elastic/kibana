@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ScopedHistory } from 'kibana/public';
 
 import { User } from '../../../../common/model';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
@@ -10,12 +11,14 @@ import { UsersGridPage } from './users_grid_page';
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { userAPIClientMock } from '../index.mock';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
 import { rolesAPIClientMock } from '../../roles/index.mock';
 import { findTestSubject } from 'test_utils/find_test_subject';
 import { EuiBasicTable } from '@elastic/eui';
 
 describe('UsersGridPage', () => {
+  const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+
   it('renders the list of users', async () => {
     const apiClientMock = userAPIClientMock.create();
     apiClientMock.getUsers.mockImplementation(() => {
@@ -45,6 +48,7 @@ describe('UsersGridPage', () => {
         userAPIClient={apiClientMock}
         rolesAPIClient={rolesAPIClientMock.create()}
         notifications={coreMock.createStart().notifications}
+        history={history}
       />
     );
 
@@ -65,6 +69,7 @@ describe('UsersGridPage', () => {
         userAPIClient={apiClient}
         rolesAPIClient={rolesAPIClientMock.create()}
         notifications={coreMock.createStart().notifications}
+        history={history}
       />
     );
 
@@ -94,6 +99,7 @@ describe('UsersGridPage', () => {
         userAPIClient={apiClientMock}
         rolesAPIClient={rolesAPIClientMock.create()}
         notifications={coreMock.createStart().notifications}
+        history={history}
       />
     );
 
@@ -126,6 +132,7 @@ describe('UsersGridPage', () => {
         userAPIClient={apiClientMock}
         rolesAPIClient={rolesAPIClientMock.create()}
         notifications={coreMock.createStart().notifications}
+        history={history}
       />
     );
 
@@ -174,6 +181,7 @@ describe('UsersGridPage', () => {
         userAPIClient={apiClientMock}
         rolesAPIClient={roleAPIClientMock}
         notifications={coreMock.createStart().notifications}
+        history={history}
       />
     );
 
@@ -185,7 +193,7 @@ describe('UsersGridPage', () => {
       Object {
         "children": <div>
           kibana_user
-           
+
           <EuiIcon
             className="eui-alignTop"
             color="warning"

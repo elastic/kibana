@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { ScopedHistory } from 'kibana/public';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { RoleMappingsGridPage } from '.';
 import { SectionLoading, PermissionDenied, NoCompatibleRealms } from '../components';
@@ -14,11 +15,13 @@ import { EuiLink } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import { DocumentationLinksService } from '../documentation_links';
 
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock, scopedHistoryMock } from '../../../../../../../src/core/public/mocks';
 import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
 import { rolesAPIClientMock } from '../../roles/index.mock';
 
 describe('RoleMappingsGridPage', () => {
+  const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+
   it('renders an empty prompt when no role mappings exist', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
     roleMappingsAPI.getRoleMappings.mockResolvedValue([]);
@@ -34,6 +37,7 @@ describe('RoleMappingsGridPage', () => {
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
@@ -61,6 +65,7 @@ describe('RoleMappingsGridPage', () => {
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
@@ -96,6 +101,7 @@ describe('RoleMappingsGridPage', () => {
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
@@ -130,6 +136,7 @@ describe('RoleMappingsGridPage', () => {
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
     await nextTick();
@@ -164,6 +171,7 @@ describe('RoleMappingsGridPage', () => {
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
     await nextTick();
@@ -202,6 +210,7 @@ describe('RoleMappingsGridPage', () => {
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
     await nextTick();
@@ -263,6 +272,7 @@ describe('RoleMappingsGridPage', () => {
         roleMappingsAPI={roleMappingsAPI}
         notifications={notifications}
         docLinks={new DocumentationLinksService(docLinks)}
+        history={history}
       />
     );
     await nextTick();

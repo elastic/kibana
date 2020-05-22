@@ -31,18 +31,19 @@ interface ManagementSectionWrapperProps {
 }
 
 export class ManagementAppWrapper extends Component<ManagementSectionWrapperProps> {
-  private unmount: Unmount;
+  private unmount?: Unmount;
   private mountElementRef = createRef<HTMLElement>();
 
   componentDidMount() {
-    const { setBreadcrumbs, app, onAppMounted, history, selectedId } = this.props;
+    const { setBreadcrumbs, app, onAppMounted, history } = this.props;
     const { mount, basePath } = app;
+    const appHistory = history.createSubHistory(app.basePath);
 
     const mountResult = mount({
       basePath,
-      setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => setBreadcrumbs(crumbs, history),
-      element: this.mountElementRef.current,
-      history: history.createSubHistory(app.basePath),
+      setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => setBreadcrumbs(crumbs, appHistory),
+      element: this.mountElementRef.current!,
+      history: appHistory,
     });
 
     onAppMounted(app.id);

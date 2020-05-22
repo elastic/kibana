@@ -13,7 +13,6 @@ import { TemplateListItem, IndexTemplateFormatVersion } from '../../../../../../
 import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import { TemplateDeleteModal } from '../../../../components';
 import { useServices } from '../../../../app_context';
-import { getTemplateDetailsLink } from '../../../../services/routing';
 import { SendRequestResponse } from '../../../../../shared_imports';
 import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
 

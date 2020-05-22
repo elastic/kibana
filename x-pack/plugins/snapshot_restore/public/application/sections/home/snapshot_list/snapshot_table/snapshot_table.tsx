@@ -20,11 +20,7 @@ import { SnapshotDetails } from '../../../../../../common/types';
 import { Error } from '../../../../../shared_imports';
 import { SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useServices } from '../../../../app_context';
-import {
-  linkToPolicy,
-  linkToRepository,
-  linkToRestoreSnapshot,
-} from '../../../../services/navigation';
+import { linkToRepository, linkToRestoreSnapshot } from '../../../../services/navigation';
 import { DataPlaceholder, FormattedDateTime, SnapshotDeleteProvider } from '../../../../components';
 import { SendRequestResponse } from '../../../../../shared_imports';
 

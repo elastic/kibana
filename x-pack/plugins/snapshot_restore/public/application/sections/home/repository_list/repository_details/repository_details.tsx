@@ -35,11 +35,7 @@ import {
   cleanupRepository as cleanupRepositoryRequest,
 } from '../../../../services/http';
 import { textService } from '../../../../services/text';
-import {
-  linkToSnapshots,
-  linkToEditRepository,
-  linkToAddRepository,
-} from '../../../../services/navigation';
+import { linkToSnapshots, linkToEditRepository } from '../../../../services/navigation';
 
 import { REPOSITORY_TYPES } from '../../../../../../common';
 
