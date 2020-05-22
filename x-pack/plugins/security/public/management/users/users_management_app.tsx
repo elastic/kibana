@@ -29,7 +29,7 @@ export const usersManagementApp = Object.freeze({
         const usersBreadcrumbs = [
           {
             text: i18n.translate('xpack.security.users.breadcrumb', { defaultMessage: 'Users' }),
-            href: `#${basePath}`,
+            href: `/`,
           },
         ];
 
@@ -56,6 +56,7 @@ export const usersManagementApp = Object.freeze({
               notifications={notifications}
               userAPIClient={userAPIClient}
               rolesAPIClient={rolesAPIClient}
+              history={history}
             />
           );
         };
@@ -66,7 +67,7 @@ export const usersManagementApp = Object.freeze({
           setBreadcrumbs([
             ...usersBreadcrumbs,
             username
-              ? { text: username, href: `#${basePath}/edit/${encodeURIComponent(username)}` }
+              ? { text: username, href: `/edit/${encodeURIComponent(username)}` }
               : {
                   text: i18n.translate('xpack.security.users.createBreadcrumb', {
                     defaultMessage: 'Create',
@@ -81,6 +82,7 @@ export const usersManagementApp = Object.freeze({
               rolesAPIClient={new RolesAPIClient(http)}
               notifications={notifications}
               username={username}
+              history={history}
             />
           );
         };
