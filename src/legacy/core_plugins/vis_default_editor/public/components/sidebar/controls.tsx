@@ -52,7 +52,7 @@ function DefaultEditorControls({
 }: DefaultEditorControlsProps) {
   const { enableAutoApply } = vis.type.editorConfig;
   const [autoApplyEnabled, setAutoApplyEnabled] = useState(false);
-  const toggleAutoApply = useCallback(e => setAutoApplyEnabled(e.target.checked), []);
+  const toggleAutoApply = useCallback((e) => setAutoApplyEnabled(e.target.checked), []);
   const onClickDiscard = useCallback(() => dispatch(discardChanges(vis)), [dispatch, vis]);
 
   useDebounce(

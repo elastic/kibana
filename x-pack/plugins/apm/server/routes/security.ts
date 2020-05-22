@@ -13,5 +13,5 @@ export const indicesPrivilegesRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     return getIndicesPrivileges(setup);
-  }
+  },
 }));

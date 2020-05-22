@@ -108,7 +108,7 @@ export class RangeControlEditor extends Component<
         >
           <EuiFieldNumber
             value={this.props.controlParams.options.step}
-            onChange={event => {
+            onChange={(event) => {
               this.props.handleOptionsChange(
                 this.props.controlIndex,
                 'step',
@@ -131,7 +131,7 @@ export class RangeControlEditor extends Component<
           <EuiFieldNumber
             min={0}
             value={this.props.controlParams.options.decimalPlaces}
-            onChange={event => {
+            onChange={(event) => {
               this.props.handleOptionsChange(
                 this.props.controlIndex,
                 'decimalPlaces',

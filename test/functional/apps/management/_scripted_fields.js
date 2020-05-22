@@ -35,7 +35,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const browser = getService('browser');
@@ -52,10 +52,10 @@ export default function({ getService, getPageObjects }) {
     'timePicker',
   ]);
 
-  describe('scripted fields', function() {
+  describe('scripted fields', function () {
     this.tags(['skipFirefox']);
 
-    before(async function() {
+    before(async function () {
       await browser.setWindowSize(1200, 800);
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
@@ -69,7 +69,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.settings.removeLogstashIndexPatternIfExist();
     });
 
-    it('should not allow saving of invalid scripts', async function() {
+    it('should not allow saving of invalid scripts', async function () {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
@@ -87,7 +87,7 @@ export default function({ getService, getPageObjects }) {
     describe('testing regression for issue #33251', function describeIndexTests() {
       const scriptedPainlessFieldName = 'ram_Pain_reg';
 
-      it('should create and edit scripted field', async function() {
+      it('should create and edit scripted field', async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
@@ -103,7 +103,7 @@ export default function({ getService, getPageObjects }) {
           '1',
           script
         );
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
             startingCount + 1
           );
@@ -121,7 +121,7 @@ export default function({ getService, getPageObjects }) {
     describe('creating and using Painless numeric scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName = 'ram_Pain1';
 
-      it('should create scripted field', async function() {
+      it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
@@ -139,43 +139,43 @@ export default function({ getService, getPageObjects }) {
           '1',
           script
         );
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
             startingCount + 1
           );
         });
       });
 
-      it('should see scripted field value in Discover', async function() {
+      it('should see scripted field value in Discover', async function () {
         const fromTime = 'Sep 17, 2015 @ 06:31:44.000';
         const toTime = 'Sep 18, 2015 @ 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
-        await retry.try(async function() {
+        await retry.try(async function () {
           await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName);
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await retry.try(async function() {
+        await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\n18');
         });
       });
 
-      it('should filter by scripted field value in Discover', async function() {
+      it('should filter by scripted field value in Discover', async function () {
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
         await log.debug('filter by the first value (14) in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName, '14');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('31');
         });
       });
 
-      it('should visualize scripted field in vertical bar chart', async function() {
+      it('should visualize scripted field in vertical bar chart', async function () {
         const expectedChartValues = [
           ['14', '31'],
           ['10', '29'],
@@ -211,7 +211,7 @@ export default function({ getService, getPageObjects }) {
     describe('creating and using Painless string scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName2 = 'painString';
 
-      it('should create scripted field', async function() {
+      it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
@@ -226,44 +226,44 @@ export default function({ getService, getPageObjects }) {
           '1',
           "if (doc['response.raw'].value == '200') { return 'good'} else { return 'bad'}"
         );
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
             startingCount + 1
           );
         });
       });
 
-      it('should see scripted field value in Discover', async function() {
+      it('should see scripted field value in Discover', async function () {
         const fromTime = 'Sep 17, 2015 @ 06:31:44.000';
         const toTime = 'Sep 18, 2015 @ 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
-        await retry.try(async function() {
+        await retry.try(async function () {
           await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName2);
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await retry.try(async function() {
+        await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\ngood');
         });
       });
 
-      it('should filter by scripted field value in Discover', async function() {
+      it('should filter by scripted field value in Discover', async function () {
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await log.debug('filter by "bad" in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, 'bad');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('27');
         });
         await filterBar.removeAllFilters();
       });
 
-      it('should visualize scripted field in vertical bar chart', async function() {
+      it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await inspector.open();
@@ -277,7 +277,7 @@ export default function({ getService, getPageObjects }) {
     describe('creating and using Painless boolean scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName2 = 'painBool';
 
-      it('should create scripted field', async function() {
+      it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
@@ -292,44 +292,44 @@ export default function({ getService, getPageObjects }) {
           '1',
           "doc['response.raw'].value == '200'"
         );
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
             startingCount + 1
           );
         });
       });
 
-      it('should see scripted field value in Discover', async function() {
+      it('should see scripted field value in Discover', async function () {
         const fromTime = 'Sep 17, 2015 @ 06:31:44.000';
         const toTime = 'Sep 18, 2015 @ 18:31:44.000';
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
-        await retry.try(async function() {
+        await retry.try(async function () {
           await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName2);
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await retry.try(async function() {
+        await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('Sep 18, 2015 @ 18:20:57.916\ntrue');
         });
       });
 
-      it('should filter by scripted field value in Discover', async function() {
+      it('should filter by scripted field value in Discover', async function () {
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await log.debug('filter by "true" in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, 'true');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('359');
         });
         await filterBar.removeAllFilters();
       });
 
-      it('should visualize scripted field in vertical bar chart', async function() {
+      it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await inspector.open();
@@ -343,7 +343,7 @@ export default function({ getService, getPageObjects }) {
     describe('creating and using Painless date scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName2 = 'painDate';
 
-      it('should create scripted field', async function() {
+      it('should create scripted field', async function () {
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaIndexPatterns();
         await PageObjects.settings.clickIndexPatternLogstash();
@@ -358,32 +358,32 @@ export default function({ getService, getPageObjects }) {
           '1',
           "doc['utc_time'].value.getMillis() + (1000) * 60 * 60"
         );
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
             startingCount + 1
           );
         });
       });
 
-      it('should see scripted field value in Discover', async function() {
+      it('should see scripted field value in Discover', async function () {
         const fromTime = 'Sep 17, 2015 @ 19:22:00.000';
         const toTime = 'Sep 18, 2015 @ 07:00:00.000';
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
-        await retry.try(async function() {
+        await retry.try(async function () {
           await PageObjects.discover.clickFieldListItemAdd(scriptedPainlessFieldName2);
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await retry.try(async function() {
+        await retry.try(async function () {
           const rowData = await PageObjects.discover.getDocTableIndex(1);
           expect(rowData).to.be('Sep 18, 2015 @ 06:52:55.953\n2015-09-18 07:00');
         });
       });
 
-      it('should filter by scripted field value in Discover', async function() {
+      it('should filter by scripted field value in Discover', async function () {
         await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await log.debug('filter by "Sep 17, 2015 @ 23:00" in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(
@@ -392,13 +392,13 @@ export default function({ getService, getPageObjects }) {
         );
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await retry.try(async function() {
+        await retry.try(async function () {
           expect(await PageObjects.discover.getHitCount()).to.be('1');
         });
         await filterBar.removeAllFilters();
       });
 
-      it('should visualize scripted field in vertical bar chart', async function() {
+      it('should visualize scripted field in vertical bar chart', async function () {
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await inspector.open();

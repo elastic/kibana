@@ -57,7 +57,7 @@ uiRoutes.when('/overview', {
         $injector,
       });
 
-      const changeUrl = target => {
+      const changeUrl = (target) => {
         $scope.$evalAsync(() => {
           kbnUrl.changePath(target);
         });
@@ -65,7 +65,7 @@ uiRoutes.when('/overview', {
 
       $scope.$watch(
         () => this.data,
-        async data => {
+        async (data) => {
           if (isEmpty(data)) {
             return;
           }

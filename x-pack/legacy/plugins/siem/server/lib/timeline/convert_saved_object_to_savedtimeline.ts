@@ -13,12 +13,12 @@ import { TimelineSavedObjectRuntimeType, TimelineSavedObject } from './types';
 export const convertSavedObjectToSavedTimeline = (savedObject: unknown): TimelineSavedObject => {
   const timeline = pipe(
     TimelineSavedObjectRuntimeType.decode(savedObject),
-    map(savedTimeline => ({
+    map((savedTimeline) => ({
       savedObjectId: savedTimeline.id,
       version: savedTimeline.version,
       ...savedTimeline.attributes,
     })),
-    fold(errors => {
+    fold((errors) => {
       throw new Error(failure(errors).join('\n'));
     }, identity)
   );

@@ -114,7 +114,7 @@ describe('PluginWrapper', () => {
       setup: jest.fn(),
       start: async () => {
         // Add small delay to ensure startDependencies is not resolved until after the plugin instance's start resolves.
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise((resolve) => setTimeout(resolve, 10));
         expect(startDependenciesResolved).toBe(false);
       },
     }));
@@ -125,7 +125,7 @@ describe('PluginWrapper', () => {
 
     // Add promise callback prior to calling `start` to ensure calls in `setup` will not resolve before `start` is
     // called.
-    const startDependenciesCheck = plugin.startDependencies.then(res => {
+    const startDependenciesCheck = plugin.startDependencies.then((res) => {
       startDependenciesResolved = true;
       expect(res).toEqual([context, deps]);
     });

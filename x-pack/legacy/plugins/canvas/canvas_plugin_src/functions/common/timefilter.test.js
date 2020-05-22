@@ -14,11 +14,11 @@ const errors = getFunctionErrors().timefilter;
 
 let clock = null;
 
-beforeEach(function() {
+beforeEach(function () {
   clock = sinon.useFakeTimers();
 });
 
-afterEach(function() {
+afterEach(function () {
   clock.restore();
 });
 

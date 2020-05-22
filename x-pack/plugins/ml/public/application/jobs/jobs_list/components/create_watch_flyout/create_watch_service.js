@@ -80,7 +80,7 @@ class CreateWatchService {
     this.config.threshold = { display, val };
   }
 
-  createNewWatch = function(jobId) {
+  createNewWatch = function (jobId) {
     return new Promise((resolve, reject) => {
       this.status.watch = this.STATUS.SAVING;
       if (jobId !== undefined) {
@@ -173,7 +173,7 @@ class CreateWatchService {
                 url: this.config.watcherEditURL,
               });
             })
-            .catch(resp => {
+            .catch((resp) => {
               this.status.watch = this.STATUS.SAVE_FAILED;
               reject(resp);
             });

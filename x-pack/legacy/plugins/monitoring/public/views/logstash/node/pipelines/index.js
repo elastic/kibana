@@ -42,8 +42,8 @@ const getPageData = ($injector, _api = undefined, routeOptions = {}) => {
       },
       ...routeOptions,
     })
-    .then(response => response.data)
-    .catch(err => {
+    .then((response) => response.data)
+    .catch((err) => {
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
       return ajaxErrorHandlers(err);
     });
@@ -87,7 +87,7 @@ uiRoutes.when('/logstash/node/:uuid/pipelines', {
 
       $scope.$watch(
         () => this.data,
-        data => {
+        (data) => {
           if (!data || !data.nodeSummary) {
             return;
           }

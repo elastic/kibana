@@ -51,7 +51,7 @@ export class RemoteClustersServerPlugin implements Plugin<void, void, any, any> 
     registerUpdateRoute(routeDependencies);
     registerDeleteRoute(routeDependencies);
 
-    licensing.license$.subscribe(license => {
+    licensing.license$.subscribe((license) => {
       const { state, message } = license.check(PLUGIN.getI18nName(), PLUGIN.minimumLicenseType);
       const hasRequiredLicense = state === 'valid';
       if (hasRequiredLicense) {

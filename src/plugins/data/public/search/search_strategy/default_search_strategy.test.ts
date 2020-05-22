@@ -26,7 +26,7 @@ const { search } = defaultSearchStrategy;
 
 function getConfigStub(config: any = {}) {
   return {
-    get: key => config[key],
+    get: (key) => config[key],
   } as IUiSettingsClient;
 }
 
@@ -44,8 +44,8 @@ const newSearchMock = jest.fn().mockReturnValue({
   toPromise: () => searchMockResponse,
 });
 
-describe('defaultSearchStrategy', function() {
-  describe('search', function() {
+describe('defaultSearchStrategy', function () {
+  describe('search', function () {
     let searchArgs: MockedKeys<Omit<SearchStrategySearchParams, 'config'>>;
     let es: any;
 

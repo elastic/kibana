@@ -77,7 +77,7 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
 
     this.getFormat =
       config.getFormat ||
-      (agg => {
+      ((agg) => {
         const fieldFormatsService = getFieldFormats();
         const field = agg.getField();
         return field

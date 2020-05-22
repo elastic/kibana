@@ -76,7 +76,7 @@ export const EventDetails = React.memo<Props>(
         <EuiTabbedContent
           tabs={tabs}
           selectedTab={view === 'table-view' ? tabs[0] : tabs[1]}
-          onTabClick={e => onViewSelected(e.id as View)}
+          onTabClick={(e) => onViewSelected(e.id as View)}
         />
       </Details>
     );

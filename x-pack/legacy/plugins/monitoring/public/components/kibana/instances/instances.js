@@ -26,7 +26,7 @@ import { SetupModeBadge } from '../../setup_mode/badge';
 import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 
-const getColumns = setupMode => {
+const getColumns = (setupMode) => {
   const columns = [
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.nameColumnTitle', {
@@ -110,21 +110,21 @@ const getColumns = setupMode => {
         defaultMessage: 'Load Average',
       }),
       field: 'os.load.1m',
-      render: value => <span>{formatMetric(value, '0.00')}</span>,
+      render: (value) => <span>{formatMetric(value, '0.00')}</span>,
     },
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.memorySizeColumnTitle', {
         defaultMessage: 'Memory Size',
       }),
       field: 'process.memory.resident_set_size_in_bytes',
-      render: value => <span>{formatNumber(value, 'byte')}</span>,
+      render: (value) => <span>{formatNumber(value, 'byte')}</span>,
     },
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.requestsColumnTitle', {
         defaultMessage: 'Requests',
       }),
       field: 'requests.total',
-      render: value => <span>{formatNumber(value, 'int_commas')}</span>,
+      render: (value) => <span>{formatNumber(value, 'int_commas')}</span>,
     },
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.responseTimeColumnTitle', {
@@ -234,7 +234,7 @@ export class KibanaInstances extends PureComponent {
       );
     }
 
-    const dataFlattened = instances.map(item => ({
+    const dataFlattened = instances.map((item) => ({
       ...item,
       name: item.kibana.name,
       status: item.kibana.status,

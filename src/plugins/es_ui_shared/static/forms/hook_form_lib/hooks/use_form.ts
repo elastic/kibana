@@ -72,7 +72,7 @@ export function useForm<T extends FormData = FormData>(
 
   useEffect(() => {
     return () => {
-      formUpdateSubscribers.current.forEach(subscription => subscription.unsubscribe());
+      formUpdateSubscribers.current.forEach((subscription) => subscription.unsubscribe());
       formUpdateSubscribers.current = [];
       isUnmounted.current = true;
     };
@@ -105,7 +105,7 @@ export function useForm<T extends FormData = FormData>(
   const getFormData: FormHook<T>['getFormData'] = (getDataOptions = { unflatten: true }) =>
     getDataOptions.unflatten
       ? (unflattenObject(
-          mapFormFields(stripEmptyFields(fieldsRefs.current), field => field.__serializeOutput())
+          mapFormFields(stripEmptyFields(fieldsRefs.current), (field) => field.__serializeOutput())
         ) as T)
       : Object.entries(fieldsRefs.current).reduce(
           (acc, [key, field]) => ({
@@ -133,7 +133,7 @@ export function useForm<T extends FormData = FormData>(
 
   const updateFormValidity = () => {
     const fieldsArray = fieldsToArray();
-    const areAllFieldsValidated = fieldsArray.every(field => field.isValidated);
+    const areAllFieldsValidated = fieldsArray.every((field) => field.isValidated);
 
     if (!areAllFieldsValidated) {
       // If *not* all the fiels have been validated, the validity of the form is unknown, thus still "undefined"
@@ -146,10 +146,10 @@ export function useForm<T extends FormData = FormData>(
     return isFormValid;
   };
 
-  const validateFields: FormHook<T>['__validateFields'] = async fieldNames => {
+  const validateFields: FormHook<T>['__validateFields'] = async (fieldNames) => {
     const fieldsToValidate = fieldNames
-      .map(name => fieldsRefs.current[name])
-      .filter(field => field !== undefined);
+      .map((name) => fieldsRefs.current[name])
+      .filter((field) => field !== undefined);
 
     if (fieldsToValidate.length === 0) {
       // Nothing to validate
@@ -157,7 +157,7 @@ export function useForm<T extends FormData = FormData>(
     }
 
     const formData = getFormData({ unflatten: false });
-    await Promise.all(fieldsToValidate.map(field => field.validate({ formData })));
+    await Promise.all(fieldsToValidate.map((field) => field.validate({ formData })));
 
     const isFormValid = updateFormValidity();
     const areFieldsValid = fieldsToValidate.every(isFieldValid);
@@ -167,7 +167,7 @@ export function useForm<T extends FormData = FormData>(
 
   const validateAllFields = async (): Promise<boolean> => {
     const fieldsArray = fieldsToArray();
-    const fieldsToValidate = fieldsArray.filter(field => !field.isValidated);
+    const fieldsToValidate = fieldsArray.filter((field) => !field.isValidated);
 
     let isFormValid: boolean | undefined = isValid;
 
@@ -183,12 +183,12 @@ export function useForm<T extends FormData = FormData>(
       return isFormValid;
     }
 
-    ({ isFormValid } = await validateFields(fieldsToValidate.map(field => field.path)));
+    ({ isFormValid } = await validateFields(fieldsToValidate.map((field) => field.path)));
 
     return isFormValid!;
   };
 
-  const addField: FormHook<T>['__addField'] = field => {
+  const addField: FormHook<T>['__addField'] = (field) => {
     fieldsRefs.current[field.path] = field;
 
     if (!{}.hasOwnProperty.call(formData$.current.value, field.path)) {
@@ -197,11 +197,11 @@ export function useForm<T extends FormData = FormData>(
     }
   };
 
-  const removeField: FormHook<T>['__removeField'] = _fieldNames => {
+  const removeField: FormHook<T>['__removeField'] = (_fieldNames) => {
     const fieldNames = Array.isArray(_fieldNames) ? _fieldNames : [_fieldNames];
     const currentFormData = { ...formData$.current.value } as FormData;
 
-    fieldNames.forEach(name => {
+    fieldNames.forEach((name) => {
       delete fieldsRefs.current[name];
       delete currentFormData[name];
     });
@@ -231,16 +231,16 @@ export function useForm<T extends FormData = FormData>(
 
   const getFields: FormHook<T>['getFields'] = () => fieldsRefs.current;
 
-  const getFieldDefaultValue: FormHook['getFieldDefaultValue'] = fieldName =>
+  const getFieldDefaultValue: FormHook['getFieldDefaultValue'] = (fieldName) =>
     get(defaultValueDeserialized, fieldName);
 
-  const readFieldConfigFromSchema: FormHook<T>['__readFieldConfigFromSchema'] = fieldName => {
+  const readFieldConfigFromSchema: FormHook<T>['__readFieldConfigFromSchema'] = (fieldName) => {
     const config = (get(schema ? schema : {}, fieldName) as FieldConfig) || {};
 
     return config;
   };
 
-  const submitForm: FormHook<T>['submit'] = async e => {
+  const submitForm: FormHook<T>['submit'] = async (e) => {
     if (e) {
       e.preventDefault();
     }
@@ -262,10 +262,10 @@ export function useForm<T extends FormData = FormData>(
     return { data: formData, isValid: isFormValid! };
   };
 
-  const subscribe: FormHook<T>['subscribe'] = handler => {
+  const subscribe: FormHook<T>['subscribe'] = (handler) => {
     const format = () => serializer(getFormData() as T);
 
-    const subscription = formData$.current.subscribe(raw => {
+    const subscription = formData$.current.subscribe((raw) => {
       if (!isUnmounted.current) {
         handler({ isValid, data: { raw, format }, validate: validateAllFields });
       }

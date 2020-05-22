@@ -7,8 +7,8 @@
 import expect from '@kbn/expect';
 import { inspectSettings } from '../../../server/lib/inspect_settings';
 
-describe('inspectSettings', function() {
-  it('should propagate x-pack info', function() {
+describe('inspectSettings', function () {
+  it('should propagate x-pack info', function () {
     const mockSettings = {
       isAvailable: () => true,
       license: {
@@ -24,7 +24,7 @@ describe('inspectSettings', function() {
     expect(licenseInfo.license.valid).to.equal(true);
   });
 
-  it('should break when unavailable info', function() {
+  it('should break when unavailable info', function () {
     const mockSettings = {
       isAvailable: () => false,
     };

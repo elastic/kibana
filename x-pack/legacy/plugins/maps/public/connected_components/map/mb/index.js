@@ -43,10 +43,10 @@ function mapStateToProps(state = {}) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    extentChanged: e => {
+    extentChanged: (e) => {
       dispatch(mapExtentChanged(e));
     },
-    onMapReady: e => {
+    onMapReady: (e) => {
       dispatch(clearGoto());
       dispatch(mapExtentChanged(e));
       dispatch(mapReady());

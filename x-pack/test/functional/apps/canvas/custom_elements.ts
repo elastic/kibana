@@ -20,7 +20,7 @@ export default function canvasCustomElementTest({
   const find = getService('find');
 
   // FLAKY: https://github.com/elastic/kibana/issues/62927
-  describe.skip('custom elements', function() {
+  describe.skip('custom elements', function () {
     this.tags('skipFirefox');
 
     before(async () => {

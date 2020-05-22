@@ -144,7 +144,7 @@ export const ActionForm = ({
   useEffect(() => {
     const setActionTypesAvalilability = () => {
       const hasActionsDisabled = actions.some(
-        action =>
+        (action) =>
           actionTypesIndex &&
           !actionTypesIndex[action.actionTypeId].enabled &&
           !checkActionTypeEnabled(actionTypesIndex[action.actionTypeId]).isEnabled
@@ -160,7 +160,7 @@ export const ActionForm = ({
   }, [connectors, actionTypesIndex]);
 
   const getSelectedOptions = (actionItemId: string) => {
-    const val = connectors.find(connector => connector.id === actionItemId);
+    const val = connectors.find((connector) => connector.id === actionItemId);
     if (!val) {
       return [];
     }
@@ -183,7 +183,7 @@ export const ActionForm = ({
     index: number
   ) => {
     const optionsList = connectors
-      .filter(connectorItem => connectorItem.actionTypeId === actionItem.actionTypeId)
+      .filter((connectorItem) => connectorItem.actionTypeId === actionItem.actionTypeId)
       .map(({ name, id }) => ({
         label: `${name}`,
         key: id,
@@ -236,7 +236,7 @@ export const ActionForm = ({
                 id={`selectActionConnector-${actionItem.id}`}
                 data-test-subj="selectActionConnector"
                 selectedOptions={getSelectedOptions(actionItem.id)}
-                onChange={selectedOptions => {
+                onChange={(selectedOptions) => {
                   setActionIdByIndex(selectedOptions[0].id ?? '', index);
                 }}
                 isClearable={false}
@@ -448,7 +448,7 @@ export const ActionForm = ({
     }
     setIsAddActionPanelOpen(false);
     const actionTypeConnectors = connectors.filter(
-      field => field.actionTypeId === actionTypeModel.id
+      (field) => field.actionTypeId === actionTypeModel.id
     );
 
     if (actionTypeConnectors.length > 0) {
@@ -480,10 +480,10 @@ export const ActionForm = ({
     actionTypeNodes = actionTypeRegistry
       .list()
       .filter(
-        item => actionTypesIndex[item.id] && actionTypesIndex[item.id].enabledInConfig === true
+        (item) => actionTypesIndex[item.id] && actionTypesIndex[item.id].enabledInConfig === true
       )
       .sort((a, b) => actionTypeCompare(actionTypesIndex[a.id], actionTypesIndex[b.id]))
-      .map(function(item, index) {
+      .map(function (item, index) {
         const actionType = actionTypesIndex[item.id];
 
         const checkEnabledResult = checkActionTypeEnabled(actionTypesIndex[item.id]);
@@ -517,7 +517,7 @@ export const ActionForm = ({
   }
 
   const alertActionsList = actions.map((actionItem: AlertAction, index: number) => {
-    const actionConnector = connectors.find(field => field.id === actionItem.id);
+    const actionConnector = connectors.find((field) => field.id === actionItem.id);
     // connectors doesn't exists
     if (!actionConnector) {
       return getAddConnectorsForm(actionItem, index);

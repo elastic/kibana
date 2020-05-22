@@ -28,11 +28,11 @@ const expectStreamToContainObjects = async (
 ) => {
   const objectsToResolve: unknown[] = await new Promise((resolve, reject) => {
     const objects: SetupOpts['objects'] = [];
-    stream.on('data', chunk => {
+    stream.on('data', (chunk) => {
       objects.push(chunk);
     });
     stream.on('end', () => resolve(objects));
-    stream.on('error', err => reject(err));
+    stream.on('error', (err) => reject(err));
   });
 
   // Ensure the Readable stream passed to `resolveImportErrors` contains all of the expected objects.
@@ -51,7 +51,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
             new Readable({
               objectMode: true,
               read() {
-                setupOpts.objects.forEach(o => this.push(o));
+                setupOpts.objects.forEach((o) => this.push(o));
 
                 this.push(null);
               },
@@ -322,7 +322,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
 
     const { savedObjectsClient, savedObjectsService } = setup({
       objects,
-      resolveImportErrorsImpl: async opts => {
+      resolveImportErrorsImpl: async (opts) => {
         if (opts.namespace === 'failure-space') {
           throw new Error(`Some error occurred!`);
         }
@@ -398,7 +398,7 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
   it(`handles stream read errors`, async () => {
     const { savedObjectsClient, savedObjectsService } = setup({
       objects: [],
-      getSortedObjectsForExportImpl: opts => {
+      getSortedObjectsForExportImpl: (opts) => {
         return Promise.resolve(
           new Readable({
             objectMode: true,

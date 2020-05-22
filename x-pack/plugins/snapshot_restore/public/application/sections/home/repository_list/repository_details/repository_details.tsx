@@ -405,7 +405,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={false}>
                 <RepositoryDeleteProvider>
-                  {deleteRepositoryPrompt => {
+                  {(deleteRepositoryPrompt) => {
                     return (
                       <EuiButtonEmpty
                         color="danger"

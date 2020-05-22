@@ -67,7 +67,9 @@ function DateRangesParamEditor({
   setValidity,
 }: AggParamEditorProps<DateRangeValues[]>) {
   const { services } = useKibana();
-  const [ranges, setRanges] = useState(() => value.map(range => ({ ...range, id: generateId() })));
+  const [ranges, setRanges] = useState(() =>
+    value.map((range) => ({ ...range, id: generateId() }))
+  );
   const hasInvalidRange = value.some(
     ({ from, to }) => (!from && !to) || !validateDateMath(from) || !validateDateMath(to)
   );
@@ -85,7 +87,7 @@ function DateRangesParamEditor({
       value.length !== ranges.length ||
       value.some((range, index) => !isEqual(range, omit(ranges[index], 'id')))
     ) {
-      setRanges(value.map(range => ({ ...range, id: generateId() })));
+      setRanges(value.map((range) => ({ ...range, id: generateId() })));
     }
   }, [value]);
 
@@ -95,14 +97,14 @@ function DateRangesParamEditor({
 
   const updateRanges = (rangeValues: DateRangeValuesModel[]) => {
     // do not set internal id parameter into saved object
-    setValue(rangeValues.map(range => omit(range, 'id')));
+    setValue(rangeValues.map((range) => omit(range, 'id')));
     setRanges(rangeValues);
   };
   const onAddRange = () => updateRanges([...ranges, { id: generateId() }]);
-  const onRemoveRange = (id: string) => updateRanges(ranges.filter(range => range.id !== id));
+  const onRemoveRange = (id: string) => updateRanges(ranges.filter((range) => range.id !== id));
   const onChangeRange = (id: string, key: string, newValue: string) =>
     updateRanges(
-      ranges.map(range =>
+      ranges.map((range) =>
         range.id === id
           ? {
               ...range,
@@ -153,7 +155,7 @@ function DateRangesParamEditor({
                     isInvalid={areBothEmpty || !validateDateMath(from)}
                     placeholder={FROM_PLACEHOLDER}
                     value={from || ''}
-                    onChange={ev => onChangeRange(id, 'from', ev.target.value)}
+                    onChange={(ev) => onChangeRange(id, 'from', ev.target.value)}
                     data-test-subj={`visEditorDateRange${index}__from`}
                   />
                 </EuiFlexItem>
@@ -175,7 +177,7 @@ function DateRangesParamEditor({
                     isInvalid={areBothEmpty || !validateDateMath(to)}
                     placeholder={TO_PLACEHOLDER}
                     value={to || ''}
-                    onChange={ev => onChangeRange(id, 'to', ev.target.value)}
+                    onChange={(ev) => onChangeRange(id, 'to', ev.target.value)}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

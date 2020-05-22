@@ -117,7 +117,7 @@ export const HomePage: React.FC = () => {
                   path={`/:pageName(${SiemPageName.timelines})`}
                   render={() => <Timelines />}
                 />
-                <Route path="/link-to" render={props => <LinkToPage {...props} />} />
+                <Route path="/link-to" render={(props) => <LinkToPage {...props} />} />
                 <Route
                   path="/ml-hosts"
                   render={({ location, match }) => (

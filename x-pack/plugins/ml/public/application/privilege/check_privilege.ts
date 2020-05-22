@@ -20,7 +20,7 @@ export function checkGetManagementMlJobs() {
       ({ capabilities, isPlatinumOrTrialLicense, mlFeatureEnabledInSpace }) => {
         privileges = capabilities;
         // Loop through all privileges to ensure they are all set to true.
-        const isManageML = Object.values(privileges).every(p => p === true);
+        const isManageML = Object.values(privileges).every((p) => p === true);
 
         if (isManageML === true && isPlatinumOrTrialLicense === true) {
           return resolve({ mlFeatureEnabledInSpace });

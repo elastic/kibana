@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  describe('get_module', function() {
+  describe('get_module', function () {
     it('lists all modules', async () => {
       const rspBody = await executeGetModuleRequest('', USER.ML_POWERUSER, 200);
       expect(rspBody).to.be.an(Array);

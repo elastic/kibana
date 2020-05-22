@@ -202,7 +202,7 @@ export function registerSnapshotsRoutes({
 
           await callAsCurrentUser('snapshot.delete', { snapshot, repository })
             .then(() => response.itemsDeleted.push({ snapshot, repository }))
-            .catch(e =>
+            .catch((e) =>
               response.errors.push({
                 id: { snapshot, repository },
                 error: wrapEsError(e),

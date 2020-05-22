@@ -28,7 +28,7 @@ export const PointToolTipContentComponent = ({
   featureProps,
   closeTooltip,
 }: PointToolTipContentProps) => {
-  const featureDescriptionListItems = featureProps.map(featureProp => {
+  const featureDescriptionListItems = featureProps.map((featureProp) => {
     const key = featureProp.getPropertyKey();
     const value = featureProp.getRawValue() ?? [];
 
@@ -45,7 +45,7 @@ export const PointToolTipContentComponent = ({
               rowItems={Array.isArray(value) ? value : [value]}
               attrName={key}
               idPrefix={`map-point-tooltip-${contextId}-${key}-${value}`}
-              render={item => getRenderedFieldValue(key, item)}
+              render={(item) => getRenderedFieldValue(key, item)}
             />
           ) : (
             getEmptyTagValue()

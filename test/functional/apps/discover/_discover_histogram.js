@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
@@ -33,7 +33,7 @@ export default function({ getService, getPageObjects }) {
   };
 
   describe('discover histogram', function describeIndexTests() {
-    before(async function() {
+    before(async function () {
       log.debug('load kibana index with default index pattern');
       await PageObjects.common.navigateToApp('home');
       await security.testUser.setRoles([

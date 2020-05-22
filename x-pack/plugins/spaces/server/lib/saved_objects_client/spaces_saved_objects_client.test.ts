@@ -32,7 +32,7 @@ const createMockResponse = () => ({
 [
   { id: DEFAULT_SPACE_ID, expectedNamespace: undefined },
   { id: 'space_1', expectedNamespace: 'space_1' },
-].forEach(currentSpace => {
+].forEach((currentSpace) => {
   describe(`${currentSpace.id} space`, () => {
     describe('#get', () => {
       test(`throws error if options.namespace is specified`, async () => {

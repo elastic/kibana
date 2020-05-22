@@ -8,7 +8,7 @@ import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { inspectSettings } from './server/lib/inspect_settings';
 import { resolve } from 'path';
 
-export const tilemap = kibana => {
+export const tilemap = (kibana) => {
   return new kibana.Plugin({
     id: 'tilemap',
     configPrefix: 'xpack.tilemap',
@@ -17,7 +17,7 @@ export const tilemap = kibana => {
     uiExports: {
       hacks: ['plugins/tilemap/vis_type_enhancers/update_tilemap_settings'],
     },
-    init: function(server) {
+    init: function (server) {
       const thisPlugin = this;
       const xpackMainPlugin = server.plugins.xpack_main;
       mirrorPluginStatus(xpackMainPlugin, thisPlugin);

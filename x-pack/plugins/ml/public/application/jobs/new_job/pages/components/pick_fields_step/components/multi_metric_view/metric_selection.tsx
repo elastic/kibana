@@ -76,7 +76,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
   // watch for changes in detector list length
   useEffect(() => {
     jobCreator.removeAllDetectors();
-    aggFieldPairList.forEach(pair => {
+    aggFieldPairList.forEach((pair) => {
       jobCreator.addDetector(pair.agg, pair.field);
     });
     jobCreator.calculateModelMemoryLimit();
@@ -109,7 +109,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
       chartLoader
         .loadFieldExampleValues(splitField)
         .then(setFieldValues)
-        .catch(error => {
+        .catch((error) => {
           mlMessageBarService.notify.error(error);
         });
     } else {

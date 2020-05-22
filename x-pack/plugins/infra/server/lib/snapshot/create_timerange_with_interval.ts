@@ -51,14 +51,14 @@ const aggregationsToModules = async (
   const uniqueFields = Object.values(aggregations)
     .reduce<Array<string | undefined>>((fields, agg) => {
       if (SnapshotModelMetricAggRT.is(agg)) {
-        return uniq(fields.concat(Object.values(agg).map(a => a?.field)));
+        return uniq(fields.concat(Object.values(agg).map((a) => a?.field)));
       }
       return fields;
     }, [])
-    .filter(v => v) as string[];
+    .filter((v) => v) as string[];
   const fields = await Promise.all(
     uniqueFields.map(
-      async field =>
+      async (field) =>
         await getDatasetForField(
           framework,
           requestContext,
@@ -67,5 +67,5 @@ const aggregationsToModules = async (
         )
     )
   );
-  return fields.filter(f => f) as string[];
+  return fields.filter((f) => f) as string[];
 };

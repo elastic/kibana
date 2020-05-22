@@ -59,7 +59,7 @@ export class SourceFiltersTable extends Component {
 
   updateFilters = () => {
     const sourceFilters = this.props.indexPattern.sourceFilters || [];
-    const filters = sourceFilters.map(filter => ({
+    const filters = sourceFilters.map((filter) => ({
       ...filter,
       clientId: ++this.clientSideId,
     }));
@@ -68,12 +68,12 @@ export class SourceFiltersTable extends Component {
   };
 
   getFilteredFilters = createSelector(
-    state => state.filters,
+    (state) => state.filters,
     (state, props) => props.filterFilter,
     (filters, filterFilter) => {
       if (filterFilter) {
         const filterFilterToLowercase = filterFilter.toLowerCase();
-        return filters.filter(filter =>
+        return filters.filter((filter) =>
           filter.value.toLowerCase().includes(filterFilterToLowercase)
         );
       }
@@ -82,7 +82,7 @@ export class SourceFiltersTable extends Component {
     }
   );
 
-  startDeleteFilter = filter => {
+  startDeleteFilter = (filter) => {
     this.setState({
       filterToDelete: filter,
       isDeleteConfirmationModalVisible: true,
@@ -100,7 +100,7 @@ export class SourceFiltersTable extends Component {
     const { indexPattern, onAddOrRemoveFilter } = this.props;
     const { filterToDelete, filters } = this.state;
 
-    indexPattern.sourceFilters = filters.filter(filter => {
+    indexPattern.sourceFilters = filters.filter((filter) => {
       return filter.clientId !== filterToDelete.clientId;
     });
 
@@ -112,7 +112,7 @@ export class SourceFiltersTable extends Component {
     this.hideDeleteConfirmationModal();
   };
 
-  onAddFilter = async value => {
+  onAddFilter = async (value) => {
     const { indexPattern, onAddOrRemoveFilter } = this.props;
 
     indexPattern.sourceFilters = [...(indexPattern.sourceFilters || []), { value }];
@@ -128,7 +128,7 @@ export class SourceFiltersTable extends Component {
     const { indexPattern } = this.props;
     const { filters } = this.state;
 
-    indexPattern.sourceFilters = filters.map(filter => {
+    indexPattern.sourceFilters = filters.map((filter) => {
       if (filter.clientId === filterId) {
         return {
           value: newFilterValue,

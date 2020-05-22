@@ -121,7 +121,7 @@ function FilterRow({
             placeholder={i18n.translate('visDefaultEditor.controls.filters.labelPlaceholder', {
               defaultMessage: 'Label',
             })}
-            onChange={ev => onChangeValue(id, value, ev.target.value)}
+            onChange={(ev) => onChangeValue(id, value, ev.target.value)}
             fullWidth={true}
             compressed
           />

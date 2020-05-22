@@ -46,7 +46,7 @@ const ML__ID_COPY = 'ml__id_copy';
 export const isKeywordAndTextType = (fieldName: string): boolean => {
   const { fields } = newJobCapsService;
 
-  const fieldType = fields.find(field => field.name === fieldName)?.type;
+  const fieldType = fields.find((field) => field.name === fieldName)?.type;
   let isBothTypes = false;
 
   // If it's a keyword type - check if it has a corresponding text type
@@ -228,17 +228,17 @@ export const sortRegressionResultsColumns = (
 export function getFlattenedFields(obj: EsDocSource, resultsField: string): EsFieldName[] {
   const flatDocFields: EsFieldName[] = [];
   const newDocFields = Object.keys(obj);
-  newDocFields.forEach(f => {
+  newDocFields.forEach((f) => {
     const fieldValue = getNestedProperty(obj, f);
     if (typeof fieldValue !== 'object' || fieldValue === null || Array.isArray(fieldValue)) {
       flatDocFields.push(f);
     } else {
       const innerFields = getFlattenedFields(fieldValue, resultsField);
-      const flattenedFields = innerFields.map(d => `${f}.${d}`);
+      const flattenedFields = innerFields.map((d) => `${f}.${d}`);
       flatDocFields.push(...flattenedFields);
     }
   });
-  return flatDocFields.filter(f => f !== ML__ID_COPY);
+  return flatDocFields.filter((f) => f !== ML__ID_COPY);
 }
 
 export const getDefaultFieldsFromJobCaps = (
@@ -303,7 +303,7 @@ export const getDefaultClassificationFields = (
   const resultsField = jobConfig.dest.results_field;
   const newDocFields = getFlattenedFields(docs[0]._source, resultsField);
   return newDocFields
-    .filter(k => {
+    .filter((k) => {
       if (k === `${resultsField}.is_training`) {
         return true;
       }
@@ -324,7 +324,7 @@ export const getDefaultClassificationFields = (
         return false;
       }
 
-      return docs.some(row => row._source[k] !== null);
+      return docs.some((row) => row._source[k] !== null);
     })
     .sort((a, b) => sortRegressionResultsFields(a, b, jobConfig))
     .slice(0, DEFAULT_REGRESSION_COLUMNS);
@@ -341,7 +341,7 @@ export const getDefaultRegressionFields = (
 
   const newDocFields = getFlattenedFields(docs[0]._source, resultsField);
   return newDocFields
-    .filter(k => {
+    .filter((k) => {
       if (k === `${resultsField}.is_training`) {
         return true;
       }
@@ -357,7 +357,7 @@ export const getDefaultRegressionFields = (
         return false;
       }
 
-      return docs.some(row => row._source[k] !== null);
+      return docs.some((row) => row._source[k] !== null);
     })
     .sort((a, b) => sortRegressionResultsFields(a, b, jobConfig))
     .slice(0, DEFAULT_REGRESSION_COLUMNS);
@@ -369,7 +369,7 @@ export const getDefaultSelectableFields = (docs: EsDoc[], resultsField: string):
   }
 
   const newDocFields = getFlattenedFields(docs[0]._source, resultsField);
-  return newDocFields.filter(k => {
+  return newDocFields.filter((k) => {
     if (k === `${resultsField}.outlier_score`) {
       return true;
     }
@@ -377,7 +377,7 @@ export const getDefaultSelectableFields = (docs: EsDoc[], resultsField: string):
       return false;
     }
 
-    return docs.some(row => row._source[k] !== null);
+    return docs.some((row) => row._source[k] !== null);
   });
 };
 
@@ -402,7 +402,7 @@ export const toggleSelectedField = (
   resultsField: string,
   depVarType?: ES_FIELD_TYPES
 ): Field[] => {
-  const index = selectedFields.map(field => field.name).indexOf(column);
+  const index = selectedFields.map((field) => field.name).indexOf(column);
   if (index === -1) {
     const columnField = newJobCapsService.getFieldById(column);
     if (columnField !== null) {

@@ -27,7 +27,7 @@ export const deserializeAutoFollowPattern = (
   followIndexPattern: follow_index_pattern,
 });
 
-export const deserializeListAutoFollowPatterns = autoFollowPatterns =>
+export const deserializeListAutoFollowPatterns = (autoFollowPatterns) =>
   autoFollowPatterns.map(deserializeAutoFollowPattern);
 
 export const serializeAutoFollowPattern = ({

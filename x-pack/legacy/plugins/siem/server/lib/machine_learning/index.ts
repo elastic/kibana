@@ -76,7 +76,7 @@ const buildCriteria = (params: AnomaliesSearchParams): object[] => {
   ];
 
   if (jobIdsFilterable) {
-    const jobIdFilter = jobIds.map(jobId => `job_id:${jobId}`).join(' OR ');
+    const jobIdFilter = jobIds.map((jobId) => `job_id:${jobId}`).join(' OR ');
 
     boolCriteria.push({
       query_string: {

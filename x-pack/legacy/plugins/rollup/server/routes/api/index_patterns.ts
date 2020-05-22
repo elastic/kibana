@@ -115,7 +115,7 @@ export function registerFieldsForWildcardRoute(deps: RouteDependencies, legacy: 
                 if (!rollupIndex) {
                   return '[request query.params]: "rollup_index" is required';
                 } else if (keys.length > 1) {
-                  const invalidParams = keys.filter(key => key !== 'rollup_index');
+                  const invalidParams = keys.filter((key) => key !== 'rollup_index');
                   return `[request query.params]: ${invalidParams.join(', ')} is not allowed`;
                 }
               } catch (err) {

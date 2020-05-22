@@ -32,17 +32,17 @@ describe('get_anomalies_network_table_columns', () => {
 
   test('on network page, we should have Network Name', () => {
     const columns = getAnomaliesNetworkTableColumnsCurated(NetworkType.page, startDate, endDate);
-    expect(columns.some(col => col.name === i18n.NETWORK_NAME)).toEqual(true);
+    expect(columns.some((col) => col.name === i18n.NETWORK_NAME)).toEqual(true);
   });
 
   test('on network details page, we should not have Network Name', () => {
     const columns = getAnomaliesNetworkTableColumnsCurated(NetworkType.details, startDate, endDate);
-    expect(columns.some(col => col.name === i18n.NETWORK_NAME)).toEqual(false);
+    expect(columns.some((col) => col.name === i18n.NETWORK_NAME)).toEqual(false);
   });
 
   test('on network page, we should escape the draggable id', () => {
     const columns = getAnomaliesNetworkTableColumnsCurated(NetworkType.page, startDate, endDate);
-    const column = columns.find(col => col.name === i18n.SCORE) as Columns<
+    const column = columns.find((col) => col.name === i18n.SCORE) as Columns<
       string,
       AnomaliesByNetwork
     >;
@@ -98,7 +98,7 @@ describe('get_anomalies_network_table_columns', () => {
 
   test('on network page, undefined influencers should turn into an empty column string', () => {
     const columns = getAnomaliesNetworkTableColumnsCurated(NetworkType.page, startDate, endDate);
-    const column = columns.find(col => col.name === i18n.INFLUENCED_BY) as Columns<
+    const column = columns.find((col) => col.name === i18n.INFLUENCED_BY) as Columns<
       Anomaly['influencers'],
       AnomaliesByNetwork
     >;

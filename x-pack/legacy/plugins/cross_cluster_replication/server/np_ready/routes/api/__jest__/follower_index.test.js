@@ -105,7 +105,7 @@ describe('[CCR API Routes] Follower Index', () => {
       const infoResult = getFollowerIndexListInfoMock(totalResult);
       const statsResult = getFollowerIndexListStatsMock(
         totalResult,
-        infoResult.follower_indices.map(index => index.follower_index)
+        infoResult.follower_indices.map((index) => index.follower_index)
       );
       setHttpRequestResponse(null, infoResult);
       setHttpRequestResponse(null, statsResult);

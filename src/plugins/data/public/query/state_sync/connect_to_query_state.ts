@@ -119,7 +119,7 @@ export const connectToQueryState = <S extends QueryState>(
       .pipe(
         filter(({ changes, state }) => {
           if (updateInProgress) return false;
-          return syncKeys.some(syncKey => changes[syncKey]);
+          return syncKeys.some((syncKey) => changes[syncKey]);
         }),
         map(({ changes }) => {
           const newState: QueryState = {};
@@ -144,10 +144,10 @@ export const connectToQueryState = <S extends QueryState>(
           return newState;
         })
       )
-      .subscribe(newState => {
+      .subscribe((newState) => {
         stateContainer.set({ ...stateContainer.get(), ...newState });
       }),
-    stateContainer.state$.subscribe(state => {
+    stateContainer.state$.subscribe((state) => {
       updateInProgress = true;
 
       // cloneDeep is required because services are mutating passed objects
@@ -188,6 +188,6 @@ export const connectToQueryState = <S extends QueryState>(
   ];
 
   return () => {
-    subs.forEach(s => s.unsubscribe());
+    subs.forEach((s) => s.unsubscribe());
   };
 };

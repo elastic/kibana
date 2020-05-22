@@ -45,7 +45,7 @@ export function getFullUrls<JobDocPayloadType>({
   if (isPngJob(job)) {
     relativeUrls = [job.relativeUrl];
   } else if (isPdfJob(job)) {
-    relativeUrls = job.objects.map(obj => obj.relativeUrl);
+    relativeUrls = job.objects.map((obj) => obj.relativeUrl);
   } else {
     throw new Error(
       `No valid URL fields found in Job Params! Expected \`job.relativeUrl\` or \`job.objects[{ relativeUrl }]\``
@@ -54,7 +54,7 @@ export function getFullUrls<JobDocPayloadType>({
 
   validateUrls(relativeUrls);
 
-  const urls = relativeUrls.map(relativeUrl => {
+  const urls = relativeUrls.map((relativeUrl) => {
     const parsedRelative: UrlWithStringQuery = urlParse(relativeUrl);
     const jobUrl = getAbsoluteUrl({
       basePath: job.basePath,

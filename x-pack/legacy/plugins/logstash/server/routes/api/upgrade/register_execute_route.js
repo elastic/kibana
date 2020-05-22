@@ -40,7 +40,7 @@ export function registerExecuteRoute(server) {
   server.route({
     path: '/api/logstash/upgrade',
     method: 'POST',
-    handler: async request => {
+    handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       try {
         await executeUpgrade(callWithRequest);

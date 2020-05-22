@@ -104,8 +104,8 @@ export class TaskRunner {
     references: SavedObject['references']
   ) {
     // Inject ids into actions
-    const actionsWithIds = actions.map(action => {
-      const actionReference = references.find(obj => obj.name === action.actionRef);
+    const actionsWithIds = actions.map((action) => {
+      const actionReference = references.find((obj) => obj.name === action.actionRef);
       if (!actionReference) {
         throw new Error(`Action reference "${action.actionRef}" not found in alert id: ${alertId}`);
       }
@@ -163,7 +163,7 @@ export class TaskRunner {
 
     const alertInstances = mapValues<RawAlertInstance, AlertInstance>(
       alertRawInstances,
-      rawAlertInstance => new AlertInstance(rawAlertInstance)
+      (rawAlertInstance) => new AlertInstance(rawAlertInstance)
     );
 
     const updatedAlertTypeState = await this.alertType.executor({
@@ -211,7 +211,7 @@ export class TaskRunner {
       alertTypeState: updatedAlertTypeState || undefined,
       alertInstances: mapValues<AlertInstance, RawAlertInstance>(
         instancesWithScheduledActions,
-        alertInstance => alertInstance.toRaw()
+        (alertInstance) => alertInstance.toRaw()
       ),
     };
   }
@@ -306,7 +306,7 @@ export class TaskRunner {
           };
         }
       ),
-      runAt: resolveErr<Date | undefined, Error>(runAt, err => {
+      runAt: resolveErr<Date | undefined, Error>(runAt, (err) => {
         return isAlertSavedObjectNotFoundError(err, alertId)
           ? undefined
           : getNextRunAt(

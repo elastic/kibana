@@ -58,7 +58,7 @@ describe('DataProviders', () => {
         </TestProviders>
       );
 
-      dropMessage.forEach(word => expect(wrapper.text()).toContain(word));
+      dropMessage.forEach((word) => expect(wrapper.text()).toContain(word));
     });
 
     test('it should STILL render a placeholder given a non-empty collection of data providers', () => {
@@ -79,7 +79,7 @@ describe('DataProviders', () => {
         </TestProviders>
       );
 
-      dropMessage.forEach(word => expect(wrapper.text()).toContain(word));
+      dropMessage.forEach((word) => expect(wrapper.text()).toContain(word));
     });
 
     test('it renders the data providers', () => {
@@ -100,7 +100,7 @@ describe('DataProviders', () => {
         </TestProviders>
       );
 
-      mockDataProviders.forEach(dataProvider =>
+      mockDataProviders.forEach((dataProvider) =>
         expect(wrapper.text()).toContain(
           dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value
         )

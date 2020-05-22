@@ -24,7 +24,7 @@
  * @param {*} newRegistries - The new set of registries
  */
 export function addRegistries(registries, newRegistries) {
-  Object.keys(newRegistries).forEach(registryName => {
+  Object.keys(newRegistries).forEach((registryName) => {
     if (registries[registryName]) {
       throw new Error(`There is already a registry named "${registryName}".`);
     }
@@ -41,7 +41,7 @@ export function addRegistries(registries, newRegistries) {
  * @param {*} specs - The specs to be regsitered (e.g. { types: [], browserFunctions: [] })
  */
 export function register(registries, specs) {
-  Object.keys(specs).forEach(registryName => {
+  Object.keys(specs).forEach((registryName) => {
     if (!registries[registryName]) {
       throw new Error(`There is no registry named "${registryName}".`);
     }
@@ -49,7 +49,7 @@ export function register(registries, specs) {
     if (!registries[registryName].register) {
       throw new Error(`Registry "${registryName}" must have a register function.`);
     }
-    specs[registryName].forEach(f => registries[registryName].register(f));
+    specs[registryName].forEach((f) => registries[registryName].register(f));
   });
 
   return registries;

@@ -61,12 +61,7 @@ describe('Pane', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="flyout-resize-handle"]')
-        .first()
-        .exists()
-    ).toEqual(true);
+    expect(wrapper.find('[data-test-subj="flyout-resize-handle"]').first().exists()).toEqual(true);
   });
 
   test('it should render children', () => {

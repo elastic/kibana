@@ -108,7 +108,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
           defaultValue={policy.name}
           fullWidth
           onBlur={() => setTouched({ ...touched, name: true })}
-          onChange={e => {
+          onChange={(e) => {
             updatePolicy(
               {
                 name: e.target.value,
@@ -262,7 +262,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
         }))}
         value={policy.repository || repositories[0].name}
         onBlur={() => setTouched({ ...touched, repository: true })}
-        onChange={e => {
+        onChange={(e) => {
           updatePolicy(
             {
               repository: e.target.value,
@@ -333,7 +333,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
         <EuiFieldText
           defaultValue={policy.snapshotName}
           fullWidth
-          onChange={e => {
+          onChange={(e) => {
             updatePolicy(
               {
                 snapshotName: e.target.value,
@@ -412,7 +412,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             <EuiFieldText
               defaultValue={policy.schedule}
               fullWidth
-              onChange={e => {
+              onChange={(e) => {
                 updatePolicy(
                   {
                     schedule: e.target.value,

@@ -86,7 +86,7 @@ function convertTableGroup(tableGroup, convertTable) {
   const out = {};
   let outList;
 
-  tables.forEach(function(table) {
+  tables.forEach(function (table) {
     if (!outList) {
       const direction = tableGroup.direction === 'row' ? 'rows' : 'columns';
       outList = out[direction] = [];
@@ -104,7 +104,7 @@ function convertTableGroup(tableGroup, convertTable) {
 export const discoverResponseHandler = (response, dimensions) => {
   const tableGroup = tableResponseHandler(response, dimensions);
 
-  let converted = convertTableGroup(tableGroup, table => {
+  let converted = convertTableGroup(tableGroup, (table) => {
     return buildPointSeriesData(table, dimensions);
   });
   if (!converted) {

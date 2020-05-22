@@ -28,7 +28,7 @@ import { renderCreateIndexPatternWizard, destroyCreateIndexPatternWizard } from 
 uiRoutes.when('/management/kibana/index_pattern', {
   template: angularTemplate,
   k7Breadcrumbs: getCreateBreadcrumbs,
-  controller: function($scope, $injector) {
+  controller: function ($scope, $injector) {
     // Wait for the directives to execute
     const kbnUrl = $injector.get('kbnUrl');
     $scope.$$postDigest(() => {
@@ -43,7 +43,7 @@ uiRoutes.when('/management/kibana/index_pattern', {
         $http: npStart.core.http,
         savedObjectsClient: npStart.core.savedObjects.client,
         indexPatternCreationType,
-        changeUrl: url => {
+        changeUrl: (url) => {
           $scope.$evalAsync(() => kbnUrl.changePath(url));
         },
         openConfirm: npStart.core.overlays.openConfirm,

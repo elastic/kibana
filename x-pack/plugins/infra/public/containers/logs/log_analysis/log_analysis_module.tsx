@@ -31,7 +31,7 @@ export const useLogAnalysisModule = <JobType extends string>({
         dispatchModuleStatus({ type: 'fetchingModuleDefinition' });
         return await moduleDescriptor.getModuleDefinition();
       },
-      onResolve: response => {
+      onResolve: (response) => {
         dispatchModuleStatus({
           type: 'fetchedModuleDefinition',
           spaceId,
@@ -53,7 +53,7 @@ export const useLogAnalysisModule = <JobType extends string>({
         dispatchModuleStatus({ type: 'fetchingJobStatuses' });
         return await moduleDescriptor.getJobSummary(spaceId, sourceId);
       },
-      onResolve: jobResponse => {
+      onResolve: (jobResponse) => {
         dispatchModuleStatus({
           type: 'fetchedJobStatuses',
           payload: jobResponse,

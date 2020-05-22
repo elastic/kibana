@@ -122,10 +122,7 @@ describe('WebhookActionConnectorFields renders', () => {
       />
     );
     expect(wrapper.find('[data-test-subj="webhookViewHeadersSwitch"]').length > 0).toBeTruthy();
-    wrapper
-      .find('[data-test-subj="webhookViewHeadersSwitch"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="webhookViewHeadersSwitch"]').first().simulate('click');
     expect(wrapper.find('[data-test-subj="webhookMethodSelect"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="webhookUrlText"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="webhookUserInput"]').length > 0).toBeTruthy();
@@ -155,10 +152,7 @@ describe('WebhookParamsFields renders', () => {
     );
     expect(wrapper.find('[data-test-subj="webhookBodyEditor"]').length > 0).toBeTruthy();
     expect(
-      wrapper
-        .find('[data-test-subj="webhookBodyEditor"]')
-        .first()
-        .prop('value')
+      wrapper.find('[data-test-subj="webhookBodyEditor"]').first().prop('value')
     ).toStrictEqual('test message');
     expect(wrapper.find('[data-test-subj="bodyAddVariableButton"]').length > 0).toBeTruthy();
   });

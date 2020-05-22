@@ -64,7 +64,7 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
 
   return (
     <UpdateFieldProvider>
-      {updateField => (
+      {(updateField) => (
         <Form form={form} onSubmit={getSubmitForm(updateField)}>
           <FormDataProvider pathsToWatch={['type', 'subType']}>
             {({ type, subType }) => {

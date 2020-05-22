@@ -55,12 +55,12 @@ function mergeSelection(
   const selectedIds: string[] = [];
   const alreadySelected: string[] = [];
 
-  groupObjs.forEach(group => {
+  groupObjs.forEach((group) => {
     selectedIds.push(group.groupId);
     alreadySelected.push(...group.jobIds);
   });
 
-  jobIds.forEach(jobId => {
+  jobIds.forEach((jobId) => {
     // Add jobId if not already included in group selection
     if (alreadySelected.includes(jobId) === false) {
       selectedIds.push(jobId);
@@ -75,7 +75,7 @@ function getInitialGroupsMap(selectedGroups: GroupObj[]): GroupsMap {
   const map: GroupsMap = {};
 
   if (selectedGroups.length) {
-    selectedGroups.forEach(group => {
+    selectedGroups.forEach((group) => {
       map[group.groupId] = group.jobIds;
     });
   }
@@ -171,7 +171,7 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
 
     ml.jobs
       .jobsWithTimerange(dateFormatTz)
-      .then(resp => {
+      .then((resp) => {
         const normalizedJobs = normalizeTimes(resp.jobs, dateFormatTz, DEFAULT_GANTT_BAR_WIDTH);
         const { groups: groupsWithTimerange, groupsMap } = getGroupsFromJobs(normalizedJobs);
         setJobs(normalizedJobs);
@@ -198,7 +198,7 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
     const allNewSelection: string[] = [];
     const groupSelection: Array<{ groupId: string; jobIds: string[] }> = [];
 
-    newSelection.forEach(id => {
+    newSelection.forEach((id) => {
       if (maps.groupsMap[id] !== undefined) {
         // Push all jobs from selected groups into the newSelection list
         allNewSelection.push(...maps.groupsMap[id]);
@@ -234,7 +234,7 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
   }
 
   function removeId(id: string) {
-    setNewSelection(newSelection.filter(item => item !== id));
+    setNewSelection(newSelection.filter((item) => item !== id));
   }
 
   function clearSelection() {

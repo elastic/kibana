@@ -38,7 +38,7 @@ jest.mock('../../../services/ml_api_service', () => ({
 jest.mock('./utils', () => ({
   getCalendarSettingsData: jest.fn().mockImplementation(
     () =>
-      new Promise(resolve => {
+      new Promise((resolve) => {
         resolve({
           jobIds: ['test-job-one', 'test-job-2'],
           groupIds: ['test-group-one', 'test-group-two'],
@@ -48,7 +48,7 @@ jest.mock('./utils', () => ({
   ),
 }));
 jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => ({
-  withKibana: comp => {
+  withKibana: (comp) => {
     return comp;
   },
 }));

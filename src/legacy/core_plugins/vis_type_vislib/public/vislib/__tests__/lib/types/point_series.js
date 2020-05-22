@@ -24,7 +24,7 @@ import percentileTestdataResult from './testdata_linechart_percentile_result.jso
 
 import { vislibPointSeriesTypes as pointSeriesConfig } from '../../../lib/types/point_series';
 
-describe('Point Series Config Type Class Test Suite', function() {
+describe('Point Series Config Type Class Test Suite', function () {
   let parsedConfig;
   const histogramConfig = {
     type: 'histogram',
@@ -50,7 +50,7 @@ describe('Point Series Config Type Class Test Suite', function() {
   };
 
   const data = {
-    get: prop => {
+    get: (prop) => {
       return data[prop] || data.data[prop] || null;
     },
     getLabels: () => [],
@@ -96,11 +96,11 @@ describe('Point Series Config Type Class Test Suite', function() {
     },
   };
 
-  describe('histogram chart', function() {
-    beforeEach(function() {
+  describe('histogram chart', function () {
+    beforeEach(function () {
       parsedConfig = pointSeriesConfig.column(histogramConfig, data);
     });
-    it('should not throw an error when more than 25 series are provided', function() {
+    it('should not throw an error when more than 25 series are provided', function () {
       expect(parsedConfig.error).to.be.undefined;
     });
 
@@ -110,10 +110,10 @@ describe('Point Series Config Type Class Test Suite', function() {
     });
   });
 
-  describe('line chart', function() {
-    beforeEach(function() {
+  describe('line chart', function () {
+    beforeEach(function () {
       const percentileDataObj = {
-        get: prop => {
+        get: (prop) => {
           return data[prop] || data.data[prop] || null;
         },
         getLabels: () => [],
@@ -121,7 +121,7 @@ describe('Point Series Config Type Class Test Suite', function() {
       };
       parsedConfig = pointSeriesConfig.line(percentileTestdata.cfg, percentileDataObj);
     });
-    it('should render a percentile line chart', function() {
+    it('should render a percentile line chart', function () {
       expect(JSON.stringify(parsedConfig)).to.eql(JSON.stringify(percentileTestdataResult));
     });
   });

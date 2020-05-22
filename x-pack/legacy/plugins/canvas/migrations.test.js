@@ -9,7 +9,7 @@ import { CANVAS_TYPE } from './common/lib';
 
 describe(`${CANVAS_TYPE}`, () => {
   describe('7.0.0', () => {
-    const migrate = doc => migrations[CANVAS_TYPE]['7.0.0'](doc);
+    const migrate = (doc) => migrations[CANVAS_TYPE]['7.0.0'](doc);
 
     it('does not throw error on empty object', () => {
       const migratedDoc = migrate({});

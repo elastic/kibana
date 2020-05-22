@@ -100,7 +100,7 @@ describe('xy_suggestions', () => {
           layerId: 'first',
           changeType: 'unchanged',
         },
-      ] as TableSuggestion[]).map(table =>
+      ] as TableSuggestion[]).map((table) =>
         expect(getSuggestions({ table, keptLayerIds: [] })).toEqual([])
       )
     );
@@ -342,7 +342,7 @@ describe('xy_suggestions', () => {
 
     expect(rest).toHaveLength(0);
     expect(suggestion.state.preferredSeriesType).toEqual('bar_horizontal');
-    expect(suggestion.state.layers.every(l => l.seriesType === 'bar_horizontal')).toBeTruthy();
+    expect(suggestion.state.layers.every((l) => l.seriesType === 'bar_horizontal')).toBeTruthy();
     expect(suggestion.title).toEqual('Flip');
   });
 

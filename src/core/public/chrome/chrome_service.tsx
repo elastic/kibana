@@ -119,9 +119,9 @@ export class ChromeService {
       // combineLatest below regardless of having an application value yet.
       of(isEmbedded),
       application.currentAppId$.pipe(
-        flatMap(appId =>
+        flatMap((appId) =>
           application.applications$.pipe(
-            map(applications => {
+            map((applications) => {
               return !!appId && applications.has(appId) && !!applications.get(appId)!.chromeless;
             })
           )
@@ -225,7 +225,7 @@ export class ChromeService {
 
       getApplicationClasses$: () =>
         applicationClasses$.pipe(
-          map(set => [...set]),
+          map((set) => [...set]),
           takeUntil(this.stop$)
         ),
 

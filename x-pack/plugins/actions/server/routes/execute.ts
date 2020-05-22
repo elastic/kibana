@@ -41,7 +41,7 @@ export const executeActionRoute = (
         tags: ['access:actions-read'],
       },
     },
-    router.handleLegacyErrors(async function(
+    router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
       req: KibanaRequest<TypeOf<typeof paramSchema>, any, TypeOf<typeof bodySchema>, any>,
       res: KibanaResponseFactory

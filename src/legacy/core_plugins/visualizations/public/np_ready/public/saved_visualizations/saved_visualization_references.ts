@@ -68,7 +68,7 @@ export function extractReferences({
 export function injectReferences(savedObject: VisSavedObject, references: SavedObjectReference[]) {
   if (savedObject.savedSearchRefName) {
     const savedSearchReference = references.find(
-      reference => reference.name === savedObject.savedSearchRefName
+      (reference) => reference.name === savedObject.savedSearchRefName
     );
     if (!savedSearchReference) {
       throw new Error(`Could not find saved search reference "${savedObject.savedSearchRefName}"`);
@@ -82,7 +82,7 @@ export function injectReferences(savedObject: VisSavedObject, references: SavedO
       if (!control.indexPatternRefName) {
         return;
       }
-      const reference = references.find(ref => ref.name === control.indexPatternRefName);
+      const reference = references.find((ref) => ref.name === control.indexPatternRefName);
       if (!reference) {
         throw new Error(`Could not find index pattern reference "${control.indexPatternRefName}"`);
       }

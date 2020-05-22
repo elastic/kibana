@@ -56,12 +56,12 @@ export class IndexedFieldsTable extends Component {
   mapFields(fields) {
     const { indexPattern, fieldWildcardMatcher, helpers } = this.props;
     const sourceFilters =
-      indexPattern.sourceFilters && indexPattern.sourceFilters.map(f => f.value);
+      indexPattern.sourceFilters && indexPattern.sourceFilters.map((f) => f.value);
     const fieldWildcardMatch = fieldWildcardMatcher(sourceFilters || []);
 
     return (
       (fields &&
-        fields.map(field => {
+        fields.map((field) => {
           return {
             ...field,
             displayName: field.displayName,
@@ -77,17 +77,17 @@ export class IndexedFieldsTable extends Component {
   }
 
   getFilteredFields = createSelector(
-    state => state.fields,
+    (state) => state.fields,
     (state, props) => props.fieldFilter,
     (state, props) => props.indexedFieldTypeFilter,
     (fields, fieldFilter, indexedFieldTypeFilter) => {
       if (fieldFilter) {
         const normalizedFieldFilter = fieldFilter.toLowerCase();
-        fields = fields.filter(field => field.name.toLowerCase().includes(normalizedFieldFilter));
+        fields = fields.filter((field) => field.name.toLowerCase().includes(normalizedFieldFilter));
       }
 
       if (indexedFieldTypeFilter) {
-        fields = fields.filter(field => field.type === indexedFieldTypeFilter);
+        fields = fields.filter((field) => field.type === indexedFieldTypeFilter);
       }
 
       return fields;
@@ -104,7 +104,7 @@ export class IndexedFieldsTable extends Component {
         <Table
           indexPattern={indexPattern}
           items={fields}
-          editField={field => this.props.helpers.redirectToRoute(field, 'edit')}
+          editField={(field) => this.props.helpers.redirectToRoute(field, 'edit')}
         />
       </div>
     );

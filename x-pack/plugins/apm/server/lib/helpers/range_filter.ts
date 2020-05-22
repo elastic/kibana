@@ -9,7 +9,7 @@ export function rangeFilter(start: number, end: number) {
     '@timestamp': {
       gte: start,
       lte: end,
-      format: 'epoch_millis'
-    }
+      format: 'epoch_millis',
+    },
   };
 }

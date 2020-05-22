@@ -7,5 +7,5 @@
 import { SummaryHistogramPoint } from '../../../common/graphql/types';
 
 export const seriesHasDownValues = (series: SummaryHistogramPoint[] | null): boolean => {
-  return series ? series.some(point => !!point.down) : false;
+  return series ? series.some((point) => !!point.down) : false;
 };

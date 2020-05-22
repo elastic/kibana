@@ -12,7 +12,7 @@ jest.mock('../../services/job_service.js', () => 'mlJobService');
 // with 'mock' so it can be used lazily.
 const mockCheckPermission = jest.fn(() => true);
 jest.mock('../../privilege/check_privilege', () => ({
-  checkPermission: privilege => mockCheckPermission(privilege),
+  checkPermission: (privilege) => mockCheckPermission(privilege),
 }));
 
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';

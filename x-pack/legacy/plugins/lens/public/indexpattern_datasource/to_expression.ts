@@ -23,7 +23,7 @@ function getExpressionForLayer(
     return operationDefinitionMap[column.operationType].toEsAggsConfig(column, columnId);
   }
 
-  const columnEntries = columnOrder.map(colId => [colId, columns[colId]] as const);
+  const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
 
   if (columnEntries.length) {
     const aggs = columnEntries.map(([colId, col]) => {
@@ -52,7 +52,7 @@ function getExpressionForLayer(
         }
         return base;
       })
-      .filter(expr => !!expr)
+      .filter((expr) => !!expr)
       .join(' ');
 
     return `esaggs

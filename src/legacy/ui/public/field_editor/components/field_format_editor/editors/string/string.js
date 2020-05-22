@@ -61,13 +61,13 @@ export class StringFormatEditor extends DefaultFormatEditor {
           <EuiSelect
             data-test-subj="stringEditorTransform"
             defaultValue={formatParams.transform}
-            options={format.type.transformOptions.map(option => {
+            options={format.type.transformOptions.map((option) => {
               return {
                 value: option.kind,
                 text: option.text,
               };
             })}
-            onChange={e => {
+            onChange={(e) => {
               this.onChange({ transform: e.target.value });
             }}
             isInvalid={!!error}

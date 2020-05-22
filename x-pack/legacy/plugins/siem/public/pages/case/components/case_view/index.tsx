@@ -150,17 +150,17 @@ export const CaseComponent = React.memo<CaseProps>(
     const { pushButton, pushCallouts } = usePushToService({
       caseId: caseData.id,
       caseStatus: caseData.status,
-      isNew: caseUserActions.filter(cua => cua.action === 'push-to-service').length === 0,
+      isNew: caseUserActions.filter((cua) => cua.action === 'push-to-service').length === 0,
       updateCase: handleUpdateCase,
       userCanCrud,
     });
 
-    const onSubmitTags = useCallback(newTags => onUpdateField('tags', newTags), [onUpdateField]);
-    const onSubmitTitle = useCallback(newTitle => onUpdateField('title', newTitle), [
+    const onSubmitTags = useCallback((newTags) => onUpdateField('tags', newTags), [onUpdateField]);
+    const onSubmitTitle = useCallback((newTitle) => onUpdateField('title', newTitle), [
       onUpdateField,
     ]);
     const toggleStatusCase = useCallback(
-      e => onUpdateField('status', e.target.checked ? 'closed' : 'open'),
+      (e) => onUpdateField('status', e.target.checked ? 'closed' : 'open'),
       [onUpdateField]
     );
     const handleRefresh = useCallback(() => {

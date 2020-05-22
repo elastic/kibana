@@ -192,7 +192,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                         isLocked={isScrollLocked}
                         entriesCount={items.length}
                       >
-                        {registerChild =>
+                        {(registerChild) =>
                           items.length > 0 ? (
                             <>
                               <LogTextStreamLoadingItemView
@@ -203,7 +203,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                                 isStreaming={false}
                                 startDateExpression={startDateExpression}
                                 endDateExpression={endDateExpression}
-                                onExtendRange={newDateExpression =>
+                                onExtendRange={(newDateExpression) =>
                                   updateDateRange({ startDateExpression: newDateExpression })
                                 }
                               />
@@ -223,7 +223,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                                       register={registerChild}
                                       registrationKey={getStreamItemId(item)}
                                     >
-                                      {itemMeasureRef => (
+                                      {(itemMeasureRef) => (
                                         <LogEntryRow
                                           columnConfigurations={columnConfigurations}
                                           columnWidths={columnWidths}
@@ -260,7 +260,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                                 }
                                 startDateExpression={startDateExpression}
                                 endDateExpression={endDateExpression}
-                                onExtendRange={newDateExpression =>
+                                onExtendRange={(newDateExpression) =>
                                   updateDateRange({ endDateExpression: newDateExpression })
                                 }
                                 onStreamStart={() => startLiveStreaming()}

@@ -25,7 +25,7 @@ export function parseQuery(query) {
     if (query.ast.getTermClauses().length) {
       queryText = query.ast
         .getTermClauses()
-        .map(clause => clause.value)
+        .map((clause) => clause.value)
         .join(' ');
     }
     if (query.ast.getFieldClauses('type')) {

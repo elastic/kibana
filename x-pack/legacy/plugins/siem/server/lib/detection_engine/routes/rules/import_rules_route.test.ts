@@ -55,7 +55,7 @@ describe('import_rules_route', () => {
     request = getImportRulesRequest(hapiStream);
 
     config = () => ({
-      get: jest.fn(value => {
+      get: jest.fn((value) => {
         switch (value) {
           case 'savedObjects.maxImportPayloadBytes': {
             return 10000;
@@ -285,7 +285,7 @@ describe('import_rules_route', () => {
     });
 
     test('returns 200 with errors if all rules are missing rule_ids and import fails on validation', async () => {
-      const rulesWithoutRuleIds = ['rule-1', 'rule-2'].map(ruleId => getSimpleRuleWithId(ruleId));
+      const rulesWithoutRuleIds = ['rule-1', 'rule-2'].map((ruleId) => getSimpleRuleWithId(ruleId));
       const badPayload = buildHapiStream(rulesToNdJsonString(rulesWithoutRuleIds));
       const badRequest = getImportRulesRequest(badPayload);
 

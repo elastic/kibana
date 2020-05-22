@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const inspector = getService('inspector');
   const browser = getService('browser');
@@ -59,7 +59,7 @@ export default function({ getService, getPageObjects }) {
       return PageObjects.visEditor.clickGo();
     };
 
-    before(async function() {
+    before(async function () {
       await security.testUser.setRoles([
         'kibana_admin',
         'long_window_logstash',
@@ -68,31 +68,31 @@ export default function({ getService, getPageObjects }) {
       await initAreaChart();
     });
 
-    it('should save and load with special characters', async function() {
+    it('should save and load with special characters', async function () {
       const vizNamewithSpecialChars = vizName1 + '/?&=%';
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(
         vizNamewithSpecialChars
       );
     });
 
-    it('should save and load with non-ascii characters', async function() {
+    it('should save and load with non-ascii characters', async function () {
       const vizNamewithSpecialChars = `${vizName1} with Umlaut ä`;
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(
         vizNamewithSpecialChars
       );
     });
 
-    it('should save and load', async function() {
+    it('should save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visChart.waitForVisualization();
     });
 
-    it('should have inspector enabled', async function() {
+    it('should have inspector enabled', async function () {
       await inspector.expectIsEnabled();
     });
 
-    it('should show correct chart', async function() {
+    it('should show correct chart', async function () {
       const xAxisLabels = [
         '2015-09-20 00:00',
         '2015-09-21 00:00',
@@ -141,7 +141,7 @@ export default function({ getService, getPageObjects }) {
       expect(paths).to.eql(expectedAreaChartData);
     });
 
-    it('should show correct data', async function() {
+    it('should show correct data', async function () {
       const expectedTableData = [
         ['2015-09-20 00:00', '37'],
         ['2015-09-20 03:00', '202'],
@@ -287,10 +287,7 @@ export default function({ getService, getPageObjects }) {
 
       after(async () => {
         const url = await browser.getCurrentUrl();
-        const embedUrl = url
-          .split('/visualize/')
-          .pop()
-          .replace('embed=true', '');
+        const embedUrl = url.split('/visualize/').pop().replace('embed=true', '');
         await PageObjects.common.navigateToUrl('visualize', embedUrl);
         await security.testUser.restoreDefaults();
       });

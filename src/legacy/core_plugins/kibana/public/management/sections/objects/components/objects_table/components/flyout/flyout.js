@@ -104,7 +104,7 @@ export class Flyout extends Component {
   };
 
   changeOverwriteAll = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       isOverwriteAllChecked: !state.isOverwriteAllChecked,
     }));
   };
@@ -160,10 +160,10 @@ export class Flyout extends Component {
    * @param {array} objects List of objects to request the user if they wish to overwrite it
    * @return {Promise<array>} An object with the key being "type:id" and value the resolution chosen by the user
    */
-  getConflictResolutions = async objects => {
+  getConflictResolutions = async (objects) => {
     const resolutions = {};
     for (const { type, id, title } of objects) {
-      const overwrite = await new Promise(resolve => {
+      const overwrite = await new Promise((resolve) => {
         this.setState({
           conflictingRecord: {
             id,
@@ -243,8 +243,8 @@ export class Flyout extends Component {
     }
 
     contents = contents
-      .filter(content => POSSIBLE_TYPES.includes(content._type))
-      .map(doc => ({
+      .filter((content) => POSSIBLE_TYPES.includes(content._type))
+      .map((doc) => ({
         ...doc,
         // The server assumes that documents with no migrationVersion are up to date.
         // That assumption enables Kibana and other API consumers to not have to build
@@ -274,7 +274,7 @@ export class Flyout extends Component {
         return { doc, obj: obj._serialize() };
       })
       .forEach(({ doc, obj }) =>
-        obj.references.forEach(ref => {
+        obj.references.forEach((ref) => {
           byId[ref.id] = byId[ref.id] != null ? byId[ref.id].concat({ doc, obj }) : [{ doc, obj }];
         })
       );
@@ -408,9 +408,9 @@ export class Flyout extends Component {
 
   onIndexChanged = (id, e) => {
     const value = e.target.value;
-    this.setState(state => {
+    this.setState((state) => {
       const conflictIndex = state.unmatchedReferences.findIndex(
-        conflict => conflict.existingIndexPatternId === id
+        (conflict) => conflict.existingIndexPatternId === id
       );
       if (conflictIndex === -1) {
         return state;
@@ -459,7 +459,7 @@ export class Flyout extends Component {
           'kbn.management.objects.objectsTable.flyout.renderConflicts.columnCountDescription',
           { defaultMessage: 'How many affected objects' }
         ),
-        render: list => {
+        render: (list) => {
           return <Fragment>{list.length}</Fragment>;
         },
       },
@@ -473,7 +473,7 @@ export class Flyout extends Component {
           'kbn.management.objects.objectsTable.flyout.renderConflicts.columnSampleOfAffectedObjectsDescription',
           { defaultMessage: 'Sample of affected objects' }
         ),
-        render: list => {
+        render: (list) => {
           return (
             <ul style={{ listStyle: 'none' }}>
               {take(list, 3).map((obj, key) => (
@@ -489,8 +489,8 @@ export class Flyout extends Component {
           'kbn.management.objects.objectsTable.flyout.renderConflicts.columnNewIndexPatternName',
           { defaultMessage: 'New index pattern' }
         ),
-        render: id => {
-          const options = this.state.indexPatterns.map(indexPattern => ({
+        render: (id) => {
+          const options = this.state.indexPatterns.map((indexPattern) => ({
             text: indexPattern.title,
             value: indexPattern.id,
             ['data-test-subj']: `indexPatternOption-${indexPattern.title}`,
@@ -504,7 +504,7 @@ export class Flyout extends Component {
           return (
             <EuiSelect
               data-test-subj={`managementChangeIndexSelection-${id}`}
-              onChange={e => this.onIndexChanged(id, e)}
+              onChange={(e) => this.onIndexChanged(id, e)}
               options={options}
             />
           );
@@ -601,7 +601,7 @@ export class Flyout extends Component {
             {failedImports
               .map(({ error, obj }) => {
                 if (error.type === 'missing_references') {
-                  return error.references.map(reference => {
+                  return error.references.map((reference) => {
                     return i18n.translate(
                       'kbn.management.objects.objectsTable.flyout.importFailedMissingReference',
                       {

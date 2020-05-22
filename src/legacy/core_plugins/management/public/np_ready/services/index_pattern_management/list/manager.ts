@@ -29,7 +29,7 @@ export class IndexPatternListManager {
 
   public add(Config: typeof IndexPatternListConfig) {
     const config = new Config();
-    if (this.configs.findIndex(c => c.key === config.key) !== -1) {
+    if (this.configs.findIndex((c) => c.key === config.key) !== -1) {
       throw new Error(`${config.key} exists in IndexPatternListManager.`);
     }
     this.configs.push(config);
@@ -50,7 +50,7 @@ export class IndexPatternListManager {
   }
 
   public areScriptedFieldsEnabled(indexPattern: IIndexPattern): boolean {
-    return this.configs.every(config => {
+    return this.configs.every((config) => {
       return config.areScriptedFieldsEnabled ? config.areScriptedFieldsEnabled(indexPattern) : true;
     });
   }

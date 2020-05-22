@@ -74,7 +74,7 @@ const bucketSelector = (
 
 const handleAfterKey = createAfterKeyHandler(
   'body.aggregations.nodes.composite.after',
-  input => input?.aggregations?.nodes?.after_key
+  (input) => input?.aggregations?.nodes?.after_key
 );
 
 const callClusterFactory = (framework: KibanaFramework, requestContext: RequestHandlerContext) => (
@@ -194,7 +194,7 @@ const mergeNodeBuckets = (
 ): SnapshotNode[] => {
   const nodeMetricsForLookup = getNodeMetricsForLookup(nodeMetricsBuckets);
 
-  return nodeGroupByBuckets.map(node => {
+  return nodeGroupByBuckets.map((node) => {
     return {
       path: getNodePath(node, options),
       metric: getNodeMetrics(nodeMetricsForLookup[node.key.id], options),

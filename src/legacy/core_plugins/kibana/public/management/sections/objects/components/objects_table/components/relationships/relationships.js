@@ -151,7 +151,7 @@ export class Relationships extends Component {
         sortable: false,
         width: '125px',
         'data-test-subj': 'directRelationship',
-        render: relationship => {
+        render: (relationship) => {
           if (relationship === 'parent') {
             return (
               <EuiText size="s">
@@ -220,15 +220,15 @@ export class Relationships extends Component {
             type: 'icon',
             icon: 'inspect',
             'data-test-subj': 'relationshipsTableAction-inspect',
-            onClick: object => goInspectObject(object),
-            available: object => !!object.meta.editUrl,
+            onClick: (object) => goInspectObject(object),
+            available: (object) => !!object.meta.editUrl,
           },
         ],
       },
     ];
 
     const filterTypesMap = new Map(
-      relationships.map(relationship => [
+      relationships.map((relationship) => [
         relationship.type,
         {
           value: relationship.type,

@@ -2108,7 +2108,7 @@ export const mockTimelineModel: TimelineModel = {
 
 export const mockTimelineResult: TimelineResult = {
   savedObjectId: 'ef579e40-jibber-jabber',
-  columns: timelineDefaults.columns.filter(column => column.id !== 'event.action'),
+  columns: timelineDefaults.columns.filter((column) => column.id !== 'event.action'),
   dateRange: { start: 1584539198929, end: 1584539558929 },
   description: 'This is a sample rule description',
   eventType: 'all',

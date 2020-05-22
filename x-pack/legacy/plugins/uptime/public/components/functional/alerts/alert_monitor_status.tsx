@@ -59,7 +59,7 @@ export const AlertFieldNumber = ({
       compressed
       data-test-subj={dataTestSubj}
       min={1}
-      onChange={e => handleAlertFieldNumberChange(e, isInvalid, setIsInvalid, setFieldValue)}
+      onChange={(e) => handleAlertFieldNumberChange(e, isInvalid, setIsInvalid, setFieldValue)}
       disabled={disabled}
       value={fieldValue}
       isInvalid={isInvalid}
@@ -134,7 +134,7 @@ interface AlertMonitorStatusProps {
   };
 }
 
-export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = props => {
+export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (props) => {
   const { filters, locations } = props;
   const [numTimes, setNumTimes] = useState<number>(5);
   const [numMins, setNumMins] = useState<number>(15);
@@ -142,7 +142,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
 
   // locations is an array of `Option[]`, but that type doesn't seem to be exported by EUI
   const [selectedLocations, setSelectedLocations] = useState<any[]>(
-    locations.map(location => ({
+    locations.map((location) => ({
       'aria-label': i18n.translate('xpack.uptime.alerts.locationSelectionItem.ariaLabel', {
         defaultMessage: 'Location selection item for "{location}"',
         values: {
@@ -226,7 +226,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
     } else {
       setAlertParams(
         'locations',
-        selectedLocations.filter(l => l.checked === 'on').map(l => l.label)
+        selectedLocations.filter((l) => l.checked === 'on').map((l) => l.label)
       );
     }
   }, [selectedLocations, setAlertParams, allLabels]);
@@ -329,7 +329,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
                   )}
                   data-test-subj="xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable"
                   options={timerangeUnitOptions}
-                  onChange={newOptions => {
+                  onChange={(newOptions) => {
                     if (newOptions.reduce((acc, { checked }) => acc || checked === 'on', false)) {
                       setTimerangeUnitOptions(newOptions);
                     }
@@ -339,7 +339,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
                     showIcons: true,
                   }}
                 >
-                  {list => list}
+                  {(list) => list}
                 </EuiSelectable>
               </>
             }
@@ -409,9 +409,9 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = pr
                 <EuiSelectable
                   data-test-subj="xpack.uptime.alerts.monitorStatus.locationsSelectionSelectable"
                   options={selectedLocations}
-                  onChange={e => setSelectedLocations(e)}
+                  onChange={(e) => setSelectedLocations(e)}
                 >
-                  {location => location}
+                  {(location) => location}
                 </EuiSelectable>
               </EuiFlexItem>
             </EuiFlexGroup>

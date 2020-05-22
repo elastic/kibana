@@ -18,8 +18,8 @@ const expiredLicense = new License({
     mode: 'platinum',
     status: 'expired',
     type: 'platinum',
-    uid: '1'
-  }
+    uid: '1',
+  },
 });
 
 const Wrapper: FunctionComponent = ({ children }) => {
@@ -36,7 +36,7 @@ describe('ServiceMap', () => {
       expect(
         (
           await render(<ServiceMap />, {
-            wrapper: Wrapper
+            wrapper: Wrapper,
           }).findAllByText(/Platinum/)
         ).length
       ).toBeGreaterThan(0);

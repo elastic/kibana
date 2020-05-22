@@ -158,7 +158,7 @@ function populateFailures(error, failures, chunkCount) {
 function updatePipelineTimezone(ingestPipeline) {
   if (ingestPipeline !== undefined && ingestPipeline.processors && ingestPipeline.processors) {
     const dateProcessor = ingestPipeline.processors.find(
-      p => p.date !== undefined && p.date.timezone === '{{ event.timezone }}'
+      (p) => p.date !== undefined && p.date.timezone === '{{ event.timezone }}'
     );
 
     if (dateProcessor) {

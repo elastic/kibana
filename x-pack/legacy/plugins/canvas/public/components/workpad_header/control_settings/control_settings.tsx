@@ -56,7 +56,7 @@ export const ControlSettings = ({
           <EuiFlexItem>
             <AutoRefreshControls
               refreshInterval={refreshInterval}
-              setRefresh={val => setRefresh(val)}
+              setRefresh={(val) => setRefresh(val)}
               disableInterval={() => disableInterval()}
             />
           </EuiFlexItem>

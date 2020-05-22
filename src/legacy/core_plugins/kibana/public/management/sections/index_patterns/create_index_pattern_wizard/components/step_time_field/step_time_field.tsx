@@ -133,7 +133,7 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
   };
 
   toggleAdvancedOptions = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       isAdvancedOptionsVisible: !state.isAdvancedOptionsVisible,
     }));
   };

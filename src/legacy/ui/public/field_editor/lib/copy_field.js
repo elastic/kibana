@@ -64,15 +64,15 @@ export const copyField = (field, indexPattern, Field) => {
   // So we copy `field`'s **property descriptors** into `newFieldProps`
   // and modify them so that they are "writable" with a getter/setter that
   // stores and retrieves changes into/from another object (`changes`).
-  Object.getOwnPropertyNames(field).forEach(function(prop) {
+  Object.getOwnPropertyNames(field).forEach(function (prop) {
     const desc = Object.getOwnPropertyDescriptor(field, prop);
 
     newFieldProps[prop] = {
       enumerable: desc.enumerable,
-      get: function() {
+      get: function () {
         return has(changes, prop) ? changes[prop] : field[prop];
       },
-      set: function(v) {
+      set: function (v) {
         changes[prop] = v;
       },
     };

@@ -106,43 +106,23 @@ describe('CaseView ', () => {
       </TestProviders>
     );
     await wait();
+    expect(wrapper.find(`[data-test-subj="case-view-title"]`).first().prop('title')).toEqual(
+      data.title
+    );
+    expect(wrapper.find(`[data-test-subj="case-view-status"]`).first().text()).toEqual(data.status);
     expect(
-      wrapper
-        .find(`[data-test-subj="case-view-title"]`)
-        .first()
-        .prop('title')
-    ).toEqual(data.title);
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-view-status"]`)
-        .first()
-        .text()
-    ).toEqual(data.status);
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-view-tag-list"] .euiBadge__text`)
-        .first()
-        .text()
+      wrapper.find(`[data-test-subj="case-view-tag-list"] .euiBadge__text`).first().text()
     ).toEqual(data.tags[0]);
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-view-username"]`)
-        .first()
-        .text()
-    ).toEqual(data.createdBy.username);
+    expect(wrapper.find(`[data-test-subj="case-view-username"]`).first().text()).toEqual(
+      data.createdBy.username
+    );
     expect(wrapper.contains(`[data-test-subj="case-view-closedAt"]`)).toBe(false);
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-view-createdAt"]`)
-        .first()
-        .prop('value')
-    ).toEqual(data.createdAt);
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-view-description"]`)
-        .first()
-        .prop('raw')
-    ).toEqual(data.description);
+    expect(wrapper.find(`[data-test-subj="case-view-createdAt"]`).first().prop('value')).toEqual(
+      data.createdAt
+    );
+    expect(wrapper.find(`[data-test-subj="case-view-description"]`).first().prop('raw')).toEqual(
+      data.description
+    );
   });
 
   it('should show closed indicators in header when case is closed', async () => {
@@ -159,18 +139,12 @@ describe('CaseView ', () => {
     );
     await wait();
     expect(wrapper.contains(`[data-test-subj="case-view-createdAt"]`)).toBe(false);
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-view-closedAt"]`)
-        .first()
-        .prop('value')
-    ).toEqual(dataClosed.closedAt);
-    expect(
-      wrapper
-        .find(`[data-test-subj="case-view-status"]`)
-        .first()
-        .text()
-    ).toEqual(dataClosed.status);
+    expect(wrapper.find(`[data-test-subj="case-view-closedAt"]`).first().prop('value')).toEqual(
+      dataClosed.closedAt
+    );
+    expect(wrapper.find(`[data-test-subj="case-view-status"]`).first().text()).toEqual(
+      dataClosed.status
+    );
   });
 
   it('should dispatch update state when button is toggled', async () => {

@@ -111,10 +111,7 @@ describe('Timeline', () => {
       );
 
       expect(
-        wrapper
-          .find('[data-test-subj="timeline-title"]')
-          .first()
-          .props().placeholder
+        wrapper.find('[data-test-subj="timeline-title"]').first().props().placeholder
       ).toContain('Untitled timeline');
     });
 
@@ -186,10 +183,7 @@ describe('Timeline', () => {
             </MockedProvider>
           </TestProviders>
         );
-        wrapper
-          .find('button[data-test-subj="providerBadge"]')
-          .first()
-          .simulate('click');
+        wrapper.find('button[data-test-subj="providerBadge"]').first().simulate('click');
 
         wrapper.update();
 
@@ -214,10 +208,7 @@ describe('Timeline', () => {
           </TestProviders>
         );
 
-        wrapper
-          .find('button[data-test-subj="providerBadge"]')
-          .first()
-          .simulate('click');
+        wrapper.find('button[data-test-subj="providerBadge"]').first().simulate('click');
 
         wrapper.update();
 
@@ -281,7 +272,7 @@ describe('Timeline', () => {
           '[data-test-subj="providerBadge"] .euiBadge__content span.field-value'
         );
 
-        const andProviderBadgesText = andProviderBadges.map(node => node.text()).join(' ');
+        const andProviderBadgesText = andProviderBadges.map((node) => node.text()).join(' ');
         expect(andProviderBadges.length).toEqual(6);
         expect(andProviderBadgesText).toEqual(
           'name:  "Provider 1" name:  "Provider 2" name:  "Provider 3"'

@@ -29,7 +29,7 @@ export class PinnedEvent {
     const savedObjectsClient = request.context.core.savedObjects.client;
 
     await Promise.all(
-      pinnedEventIds.map(pinnedEventId =>
+      pinnedEventIds.map((pinnedEventId) =>
         savedObjectsClient.delete(pinnedEventSavedObjectType, pinnedEventId)
       )
     );
@@ -44,7 +44,7 @@ export class PinnedEvent {
     };
     const pinnedEventToBeDeleted = await this.getAllSavedPinnedEvents(request, options);
     await Promise.all(
-      pinnedEventToBeDeleted.map(pinnedEvent =>
+      pinnedEventToBeDeleted.map((pinnedEvent) =>
         savedObjectsClient.delete(pinnedEventSavedObjectType, pinnedEvent.pinnedEventId)
       )
     );
@@ -114,7 +114,7 @@ export class PinnedEvent {
         if (timelineId != null) {
           const allPinnedEventId = await this.getAllPinnedEventsByTimelineId(request, timelineId);
           const isPinnedAlreadyExisting = allPinnedEventId.filter(
-            pinnedEvent => pinnedEvent.eventId === eventId
+            (pinnedEvent) => pinnedEvent.eventId === eventId
           );
 
           if (isPinnedAlreadyExisting.length === 0) {
@@ -175,7 +175,7 @@ export class PinnedEvent {
     const savedObjectsClient = request.context.core.savedObjects.client;
     const savedObjects = await savedObjectsClient.find(options);
 
-    return savedObjects.saved_objects.map(savedObject =>
+    return savedObjects.saved_objects.map((savedObject) =>
       convertSavedObjectToSavedPinnedEvent(savedObject)
     );
   }
@@ -187,13 +187,13 @@ export const convertSavedObjectToSavedPinnedEvent = (
 ): PinnedEventSavedObject =>
   pipe(
     PinnedEventSavedObjectRuntimeType.decode(savedObject),
-    map(savedPinnedEvent => ({
+    map((savedPinnedEvent) => ({
       pinnedEventId: savedPinnedEvent.id,
       version: savedPinnedEvent.version,
       timelineVersion,
       ...savedPinnedEvent.attributes,
     })),
-    fold(errors => {
+    fold((errors) => {
       throw new Error(failure(errors).join('\n'));
     }, identity)
   );

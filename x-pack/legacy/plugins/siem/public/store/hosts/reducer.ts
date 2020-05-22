@@ -82,7 +82,7 @@ export const initialHostsState: HostsState = {
 };
 
 export const hostsReducer = reducerWithInitialState(initialHostsState)
-  .case(setHostTablesActivePageToZero, state => ({
+  .case(setHostTablesActivePageToZero, (state) => ({
     ...state,
     page: {
       ...state.page,
@@ -93,7 +93,7 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
       queries: setHostDetailsQueriesActivePageToZero(state),
     },
   }))
-  .case(setHostDetailsTablesActivePageToZero, state => ({
+  .case(setHostDetailsTablesActivePageToZero, (state) => ({
     ...state,
     details: {
       ...state.details,

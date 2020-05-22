@@ -27,7 +27,7 @@ const formatMap = {
 
 const now = moment();
 
-const dateFormats = Object.values(formatMap).map(format => ({
+const dateFormats = Object.values(formatMap).map((format) => ({
   value: format,
   text: moment.utc(now).format(format),
 }));

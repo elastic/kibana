@@ -20,7 +20,7 @@
 import { flow } from 'lodash';
 import { SavedObjectMigrationFn, SavedObjectsType } from 'kibana/server';
 
-const resetCount: SavedObjectMigrationFn = doc => ({
+const resetCount: SavedObjectMigrationFn = (doc) => ({
   ...doc,
   attributes: {
     ...doc.attributes,

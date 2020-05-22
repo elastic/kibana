@@ -66,7 +66,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           // disable anonymouse access so that we're testing both on and off in different suites
           '--status.allowAnonymous=false',
           '--server.xsrf.disableProtection=true',
-          ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
+          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
         ],
       },
     };

@@ -114,7 +114,7 @@ export const PingListComponent = ({
   const locationOptions = !locations
     ? [AllLocationOption]
     : [AllLocationOption].concat(
-        locations.map(name => {
+        locations.map((name) => {
           return { text: name, value: name };
         })
       );
@@ -273,7 +273,7 @@ export const PingListComponent = ({
                           defaultMessage: 'Status',
                         })}
                         value={selectedOption}
-                        onChange={selected => {
+                        onChange={(selected) => {
                           if (typeof selected.target.value === 'string') {
                             onSelectedStatusChange(
                               selected.target && selected.target.value !== ''
@@ -298,7 +298,7 @@ export const PingListComponent = ({
                         aria-label={i18n.translate('xpack.uptime.pingList.locationLabel', {
                           defaultMessage: 'Location',
                         })}
-                        onChange={selected => {
+                        onChange={(selected) => {
                           onSelectedLocationChange(
                             selected.target && selected.target.value !== ''
                               ? selected.target.value

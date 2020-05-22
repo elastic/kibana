@@ -12,7 +12,7 @@ import { npStart } from '../../../../../../../src/legacy/ui/public/new_platform'
 const module = uiModules.get('app/maps');
 
 // This is the only thing that gets injected into controllers
-module.service('gisMapSavedObjectLoader', function() {
+module.service('gisMapSavedObjectLoader', function () {
   const savedObjectsClient = npStart.core.savedObjects.client;
   const services = {
     savedObjectsClient,

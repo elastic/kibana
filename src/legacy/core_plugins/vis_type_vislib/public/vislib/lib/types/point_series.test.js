@@ -34,7 +34,7 @@ describe('vislibPointSeriesTypes', () => {
   };
 
   const stackedData = {
-    get: prop => {
+    get: (prop) => {
       return stackedSeries[prop] || null;
     },
     getLabels: () => [],
@@ -42,7 +42,7 @@ describe('vislibPointSeriesTypes', () => {
   };
 
   const maxBucketData = {
-    get: prop => {
+    get: (prop) => {
       return maxBucketData[prop] || maxBucketData.data[prop] || null;
     },
     getLabels: () => [],

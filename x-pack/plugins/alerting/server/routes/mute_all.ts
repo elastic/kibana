@@ -31,7 +31,7 @@ export const muteAllAlertRoute = (router: IRouter, licenseState: LicenseState) =
         tags: ['access:alerting-all'],
       },
     },
-    router.handleLegacyErrors(async function(
+    router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
       req: KibanaRequest<TypeOf<typeof paramSchema>, any, any, any>,
       res: KibanaResponseFactory

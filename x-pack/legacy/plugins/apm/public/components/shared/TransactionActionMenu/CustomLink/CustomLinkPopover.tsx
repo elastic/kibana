@@ -8,7 +8,7 @@ import {
   EuiPopoverTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -28,7 +28,7 @@ export const CustomLinkPopover = ({
   customLinks,
   onCreateCustomLinkClick,
   onClose,
-  transaction
+  transaction,
 }: {
   customLinks: CustomLink[];
   onCreateCustomLinkClick: () => void;
@@ -51,7 +51,7 @@ export const CustomLinkPopover = ({
               {i18n.translate(
                 'xpack.apm.transactionActionMenu.customLink.popover.title',
                 {
-                  defaultMessage: 'CUSTOM LINKS'
+                  defaultMessage: 'CUSTOM LINKS',
                 }
               )}
             </EuiButtonEmpty>

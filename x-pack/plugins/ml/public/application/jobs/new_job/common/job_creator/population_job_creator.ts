@@ -77,7 +77,7 @@ export class PopulationJobCreator extends JobCreator {
 
   // remove over field from all detectors
   public removeSplitField() {
-    this._detectors.forEach(d => {
+    this._detectors.forEach((d) => {
       delete d.over_field_name;
     });
   }

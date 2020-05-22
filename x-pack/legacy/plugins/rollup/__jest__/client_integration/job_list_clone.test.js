@@ -12,7 +12,7 @@ import { CRUD_APP_BASE_PATH } from '../../public/crud_app/constants';
 
 jest.mock('ui/new_platform');
 
-jest.mock('lodash/function/debounce', () => fn => fn);
+jest.mock('lodash/function/debounce', () => (fn) => fn);
 
 const { setup } = pageHelpers.jobList;
 

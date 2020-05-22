@@ -144,7 +144,7 @@ describe('xy_expression', () => {
     let convertSpy: jest.Mock;
 
     beforeEach(() => {
-      convertSpy = jest.fn(x => x);
+      convertSpy = jest.fn((x) => x);
       getFormatSpy = jest.fn();
       getFormatSpy.mockReturnValue({ convert: convertSpy });
     });
@@ -479,10 +479,9 @@ describe('xy_expression', () => {
         />
       );
 
-      wrapper
-        .find(Settings)
-        .first()
-        .prop('onElementClick')!([[geometry, series as XYChartSeriesIdentifier]]);
+      wrapper.find(Settings).first().prop('onElementClick')!([
+        [geometry, series as XYChartSeriesIdentifier],
+      ]);
 
       expect(executeTriggerActions).toHaveBeenCalledWith('VALUE_CLICK_TRIGGER', {
         data: {
@@ -970,10 +969,7 @@ describe('xy_expression', () => {
         />
       );
 
-      const tickFormatter = instance
-        .find(Axis)
-        .first()
-        .prop('tickFormat');
+      const tickFormatter = instance.find(Axis).first().prop('tickFormat');
 
       if (!tickFormatter) {
         throw new Error('tickFormatter prop not found');

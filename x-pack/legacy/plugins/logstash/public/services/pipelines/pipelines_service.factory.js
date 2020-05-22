@@ -8,7 +8,7 @@ import { uiModules } from 'ui/modules';
 import { PipelinesService } from './pipelines_service';
 import '../monitoring';
 
-uiModules.get('xpack/logstash').factory('pipelinesService', $injector => {
+uiModules.get('xpack/logstash').factory('pipelinesService', ($injector) => {
   const $http = $injector.get('$http');
   const $window = $injector.get('$window');
   const Promise = $injector.get('Promise');

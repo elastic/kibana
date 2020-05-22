@@ -37,11 +37,7 @@ const parseRange = (range: MetricsTimeInput) => {
   const parsedTo = dateMath.parse(range.to, { roundUp: true });
   return {
     ...range,
-    from:
-      (parsedFrom && parsedFrom.valueOf()) ||
-      moment()
-        .subtract(1, 'hour')
-        .valueOf(),
+    from: (parsedFrom && parsedFrom.valueOf()) || moment().subtract(1, 'hour').valueOf(),
     to: (parsedTo && parsedTo.valueOf()) || moment().valueOf(),
   };
 };
@@ -117,7 +113,7 @@ export const WithMetricsTimeUrlState = () => (
         }}
         urlStateKey="metricTime"
         mapToUrlState={mapToUrlState}
-        onChange={newUrlState => {
+        onChange={(newUrlState) => {
           if (newUrlState && newUrlState.time) {
             setTimeRange(newUrlState.time);
           }
@@ -134,7 +130,7 @@ export const WithMetricsTimeUrlState = () => (
             setRefreshInterval(newUrlState.refreshInterval);
           }
         }}
-        onInitialize={initialUrlState => {
+        onInitialize={(initialUrlState) => {
           if (initialUrlState && initialUrlState.time) {
             if (
               timeRange.from !== initialUrlState.time.from ||

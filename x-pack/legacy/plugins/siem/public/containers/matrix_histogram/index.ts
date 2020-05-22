@@ -65,7 +65,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
           },
         })
         .then(
-          result => {
+          (result) => {
             if (isSubscribed) {
               const source = result?.data?.source?.MatrixHistogram ?? {};
               setData(source?.matrixHistogramData ?? []);
@@ -74,7 +74,7 @@ export const useQuery = <Hit, Aggs, TCache = object>({
               setLoading(false);
             }
           },
-          error => {
+          (error) => {
             if (isSubscribed) {
               setData(null);
               setTotalCount(-1);

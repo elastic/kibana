@@ -244,7 +244,7 @@ export const AllRules = React.memo<AllRulesProps>(
       () => ({
         selectable: (item: Rule) => !loadingRuleIds.includes(item.id),
         onSelectionChange: (selected: Rule[]) =>
-          dispatch({ type: 'selectedRuleIds', ids: selected.map(r => r.id) }),
+          dispatch({ type: 'selectedRuleIds', ids: selected.map((r) => r.id) }),
       }),
       [loadingRuleIds]
     );
@@ -276,7 +276,7 @@ export const AllRules = React.memo<AllRulesProps>(
         <GenericDownloader
           filename={`${i18n.EXPORT_FILENAME}.ndjson`}
           ids={exportRuleIds}
-          onExportSuccess={exportCount => {
+          onExportSuccess={(exportCount) => {
             dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
             dispatchToaster({
               type: 'addToaster',

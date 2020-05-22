@@ -133,7 +133,7 @@ export class BfetchServerPlugin
     addStreamingResponseRoute<
       BatchRequestData<BatchItemData>,
       BatchResponseItem<BatchItemResult, E>
-    >(path, request => {
+    >(path, (request) => {
       const handlerInstance = handler(request);
       return {
         getResponseStream: ({ batch }) => {

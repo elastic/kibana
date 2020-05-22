@@ -13,12 +13,12 @@ export function getConfigFromInjectedMetadata(): ConfigSchema {
   const {
     apmIndexPatternTitle,
     apmServiceMapEnabled,
-    apmUiEnabled
+    apmUiEnabled,
   } = core.injectedMetadata.getInjectedVars();
 
   return {
     indexPatternTitle: `${apmIndexPatternTitle}`,
     serviceMapEnabled: !!apmServiceMapEnabled,
-    ui: { enabled: !!apmUiEnabled }
+    ui: { enabled: !!apmUiEnabled },
   };
 }

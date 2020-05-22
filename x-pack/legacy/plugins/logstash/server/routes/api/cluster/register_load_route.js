@@ -23,10 +23,10 @@ export function registerLoadRoute(server) {
       const callWithRequest = callWithRequestFactory(server, request);
 
       return fetchCluster(callWithRequest)
-        .then(responseFromES => ({
+        .then((responseFromES) => ({
           cluster: Cluster.fromUpstreamJSON(responseFromES).downstreamJSON,
         }))
-        .catch(e => {
+        .catch((e) => {
           if (e.status === 403) {
             return h.response();
           }

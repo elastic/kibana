@@ -14,7 +14,7 @@ interface Resolvable<T> {
  */
 export function resolvable<T>(): Promise<T> & Resolvable<T> {
   let resolve: (arg?: T) => void;
-  const result = new Promise<T>(r => {
+  const result = new Promise<T>((r) => {
     resolve = r;
   }) as any;
 

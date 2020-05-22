@@ -9,7 +9,7 @@ import { AlertExecutorOptions, AlertType } from '../../../../../../plugins/alert
 import { ActionTypeExecutorOptions, ActionType } from '../../../../../../plugins/actions/server';
 
 // eslint-disable-next-line import/no-default-export
-export default function(kibana: any) {
+export default function (kibana: any) {
   return new kibana.Plugin({
     require: ['xpack_main', 'actions', 'alerting', 'elasticsearch'],
     name: 'alerts',
@@ -279,7 +279,7 @@ export default function(kibana: any) {
 
           const runCount = (state.runCount || 0) + 1;
 
-          times(runCount, index => {
+          times(runCount, (index) => {
             services
               .alertInstanceFactory(`instance-${index}`)
               .replaceState({ instanceStateValue: true })

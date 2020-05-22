@@ -183,9 +183,7 @@ export const prepareJson = (variable: string, data?: object): string => {
   if (data === undefined) {
     return '';
   }
-  return `${variable}='${JSON.stringify(data)
-    .replace(/\\/g, `\\\\`)
-    .replace(/'/g, `\\'`)}' `;
+  return `${variable}='${JSON.stringify(data).replace(/\\/g, `\\\\`).replace(/'/g, `\\'`)}' `;
 };
 
 export const escapeString = (data: string): string => {
@@ -235,7 +233,7 @@ const adjustVislibDimensionFormmaters = (vis: Vis, dimensions: { y: any[] }): vo
   const visConfig = vis.params;
   const responseAggs = vis.data.aggs!.getResponseAggs().filter((agg: IAggConfig) => agg.enabled);
 
-  (dimensions.y || []).forEach(yDimension => {
+  (dimensions.y || []).forEach((yDimension) => {
     const yAgg = responseAggs[yDimension.accessor];
     const seriesParam = (visConfig.seriesParams || []).find(
       (param: any) => param.data.id === yAgg.id
@@ -255,25 +253,25 @@ const adjustVislibDimensionFormmaters = (vis: Vis, dimensions: { y: any[] }): vo
 };
 
 export const buildPipelineVisFunction: BuildPipelineVisFunction = {
-  vega: params => {
+  vega: (params) => {
     return `vega ${prepareString('spec', params.spec)}`;
   },
-  input_control_vis: params => {
+  input_control_vis: (params) => {
     return `input_control_vis ${prepareJson('visConfig', params)}`;
   },
   metrics: (params, schemas, uiState = {}) => {
     const paramsJson = prepareJson('params', params);
     const uiStateJson = prepareJson('uiState', uiState);
 
-    const paramsArray = [paramsJson, uiStateJson].filter(param => Boolean(param));
+    const paramsArray = [paramsJson, uiStateJson].filter((param) => Boolean(param));
     return `tsvb ${paramsArray.join(' ')}`;
   },
-  timelion: params => {
+  timelion: (params) => {
     const expression = prepareString('expression', params.expression);
     const interval = prepareString('interval', params.interval);
     return `timelion_vis ${expression}${interval}`;
   },
-  markdown: params => {
+  markdown: (params) => {
     const { markdown, fontSize, openLinksInNewTab } = params;
     let escapedMarkdown = '';
     if (typeof markdown === 'string' || markdown instanceof String) {
@@ -394,7 +392,7 @@ const buildVisConfig: BuildVisConfigFunction = {
     }
     return visConfig;
   },
-  metric: schemas => {
+  metric: (schemas) => {
     const visConfig = { dimensions: {} } as any;
     visConfig.dimensions.metrics = schemas.metric;
     if (schemas.group) {
@@ -402,7 +400,7 @@ const buildVisConfig: BuildVisConfigFunction = {
     }
     return visConfig;
   },
-  tagcloud: schemas => {
+  tagcloud: (schemas) => {
     const visConfig = {} as any;
     visConfig.metric = schemas.metric[0];
     if (schemas.segment) {
@@ -410,7 +408,7 @@ const buildVisConfig: BuildVisConfigFunction = {
     }
     return visConfig;
   },
-  region_map: schemas => {
+  region_map: (schemas) => {
     const visConfig = {} as any;
     visConfig.metric = schemas.metric[0];
     if (schemas.segment) {
@@ -418,7 +416,7 @@ const buildVisConfig: BuildVisConfigFunction = {
     }
     return visConfig;
   },
-  tile_map: schemas => {
+  tile_map: (schemas) => {
     const visConfig = {} as any;
     visConfig.dimensions = {
       metric: schemas.metric[0],
@@ -427,7 +425,7 @@ const buildVisConfig: BuildVisConfigFunction = {
     };
     return visConfig;
   },
-  pie: schemas => {
+  pie: (schemas) => {
     const visConfig = {} as any;
     visConfig.dimensions = {
       metric: schemas.metric[0],

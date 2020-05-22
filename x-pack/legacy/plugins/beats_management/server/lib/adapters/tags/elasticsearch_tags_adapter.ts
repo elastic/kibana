@@ -49,7 +49,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
   }
 
   public async delete(user: FrameworkUser, tagIds: string[]): Promise<boolean> {
-    const ids = tagIds.map(tag => tag);
+    const ids = tagIds.map((tag) => tag);
 
     const params = {
       ignore: [404],
@@ -67,8 +67,8 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
       (beat: any) => beat._source.beat
     );
 
-    const inactiveBeats = beats.filter(beat => beat.active === false);
-    const activeBeats = beats.filter(beat => beat.active === true);
+    const inactiveBeats = beats.filter((beat) => beat.active === false);
+    const activeBeats = beats.filter((beat) => beat.active === true);
     if (activeBeats.length !== 0) {
       return false;
     }
@@ -76,7 +76,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
 
     // While we block tag deletion when on an active beat, we should remove from inactive
     const bulkInactiveBeatsUpdates = flatten(
-      beatIds.map(beatId => {
+      beatIds.map((beatId) => {
         const script = `
         def beat = ctx._source.beat;
         if (beat.tags != null) {
@@ -84,7 +84,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
         }`;
 
         return flatten(
-          ids.map(tagId => [
+          ids.map((tagId) => [
             { update: { _id: `beat:${beatId}` } },
             { script: { source: script.replace('          ', ''), params: { tagId } } },
           ])
@@ -92,7 +92,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
       })
     );
 
-    const bulkTagsDelete = ids.map(tagId => ({ delete: { _id: `tag:${tagId}` } }));
+    const bulkTagsDelete = ids.map((tagId) => ({ delete: { _id: `tag:${tagId}` } }));
 
     await this.database.bulk(user, {
       body: flatten([...bulkInactiveBeatsUpdates, ...bulkTagsDelete]),
@@ -107,7 +107,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     if (tagIds.length === 0) {
       return [];
     }
-    const ids = tagIds.map(tag => `tag:${tag}`);
+    const ids = tagIds.map((tag) => `tag:${tag}`);
 
     const params = {
       ignore: [404],

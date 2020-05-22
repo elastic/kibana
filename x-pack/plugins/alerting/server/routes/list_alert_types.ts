@@ -24,7 +24,7 @@ export const listAlertTypesRoute = (router: IRouter, licenseState: LicenseState)
         tags: ['access:alerting-read'],
       },
     },
-    router.handleLegacyErrors(async function(
+    router.handleLegacyErrors(async function (
       context: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory

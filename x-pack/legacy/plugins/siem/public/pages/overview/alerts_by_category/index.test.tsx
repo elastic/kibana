@@ -73,7 +73,7 @@ describe('Alerts by category', () => {
     test('it renders the expected filter fields', () => {
       const expectedOptions = ['event.category', 'event.module'];
 
-      expectedOptions.forEach(option => {
+      expectedOptions.forEach((option) => {
         expect(wrapper.find(`option[value="${option}"]`).text()).toEqual(option);
       });
     });

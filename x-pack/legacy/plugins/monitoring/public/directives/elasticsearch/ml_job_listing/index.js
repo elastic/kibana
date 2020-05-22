@@ -32,7 +32,7 @@ const getColumns = (kbnUrl, scope) => [
     }),
     field: 'state',
     sortable: true,
-    render: state => (
+    render: (state) => (
       <div>
         <MachineLearningJobStatusIcon status={state} />
         &nbsp;
@@ -46,7 +46,7 @@ const getColumns = (kbnUrl, scope) => [
     }),
     field: 'data_counts.processed_record_count',
     sortable: true,
-    render: value => <span>{numeral(value).format(LARGE_ABBREVIATED)}</span>,
+    render: (value) => <span>{numeral(value).format(LARGE_ABBREVIATED)}</span>,
   },
   {
     name: i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.modelSizeTitle', {
@@ -54,7 +54,7 @@ const getColumns = (kbnUrl, scope) => [
     }),
     field: 'model_size_stats.model_bytes',
     sortable: true,
-    render: value => <span>{numeral(value).format(LARGE_BYTES)}</span>,
+    render: (value) => <span>{numeral(value).format(LARGE_BYTES)}</span>,
   },
   {
     name: i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.forecastsTitle', {
@@ -62,7 +62,7 @@ const getColumns = (kbnUrl, scope) => [
     }),
     field: 'forecasts_stats.total',
     sortable: true,
-    render: value => <span>{numeral(value).format(LARGE_ABBREVIATED)}</span>,
+    render: (value) => <span>{numeral(value).format(LARGE_ABBREVIATED)}</span>,
   },
   {
     name: i18n.translate('xpack.monitoring.elasticsearch.mlJobListing.nodeTitle', {
@@ -94,7 +94,7 @@ const getColumns = (kbnUrl, scope) => [
 ];
 
 const uiModule = uiModules.get('monitoring/directives', []);
-uiModule.directive('monitoringMlListing', kbnUrl => {
+uiModule.directive('monitoringMlListing', (kbnUrl) => {
   return {
     restrict: 'E',
     scope: {

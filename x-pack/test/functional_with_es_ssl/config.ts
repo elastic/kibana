@@ -11,7 +11,7 @@ import { services } from './services';
 import { pageObjects } from './page_objects';
 
 // eslint-disable-next-line import/no-default-export
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
 
   const servers = {

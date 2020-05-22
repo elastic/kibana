@@ -21,7 +21,7 @@ function formatCluster(cluster) {
 }
 
 const uiModule = uiModules.get('monitoring/clusters');
-uiModule.service('monitoringClusters', $injector => {
+uiModule.service('monitoringClusters', ($injector) => {
   return (clusterUuid, ccs, codePaths) => {
     const { min, max } = timefilter.getBounds();
 
@@ -41,11 +41,11 @@ uiModule.service('monitoringClusters', $injector => {
         },
         codePaths,
       })
-      .then(response => response.data)
-      .then(data => {
+      .then((response) => response.data)
+      .then((data) => {
         return formatClusters(data); // return set of clusters
       })
-      .catch(err => {
+      .catch((err) => {
         const Private = $injector.get('Private');
         const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
         return ajaxErrorHandlers(err);

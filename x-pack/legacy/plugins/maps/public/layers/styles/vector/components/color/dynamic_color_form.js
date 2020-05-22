@@ -59,7 +59,7 @@ export function DynamicColorForm({
     });
   };
 
-  const onColorMapTypeChange = async e => {
+  const onColorMapTypeChange = async (e) => {
     const colorMapType = e.target.value;
     onDynamicStyleChange(styleProperty.getStyleName(), {
       ...styleOptions,
@@ -73,7 +73,7 @@ export function DynamicColorForm({
       return null;
     }
 
-    return fields.find(field => {
+    return fields.find((field) => {
       return field.name === fieldName;
     });
   };

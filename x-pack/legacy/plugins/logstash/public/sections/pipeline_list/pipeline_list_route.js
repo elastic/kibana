@@ -18,7 +18,7 @@ routes.when('/management/logstash/pipelines/', {
 
 routes.defaults(/\/management/, {
   resolve: {
-    logstashManagementSection: $injector => {
+    logstashManagementSection: ($injector) => {
       const licenseService = $injector.get('logstashLicenseService');
       const logstashSection = management.getSection('logstash/pipelines');
 

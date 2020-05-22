@@ -52,7 +52,7 @@ export class Table extends Component {
   startEditingFilter = (id, value) =>
     this.setState({ editingFilterId: id, editingFilterValue: value });
   stopEditingFilter = () => this.setState({ editingFilterId: null });
-  onEditingFilterChange = e => this.setState({ editingFilterValue: e.target.value });
+  onEditingFilterChange = (e) => this.setState({ editingFilterValue: e.target.value });
 
   onEditFieldKeyDown = ({ keyCode }) => {
     if (keyCodes.ENTER === keyCode) {
@@ -114,7 +114,7 @@ export class Table extends Component {
           const matcher = fieldWildcardMatcher([realtimeValue]);
           const matches = indexPattern
             .getNonScriptedFields()
-            .map(f => f.name)
+            .map((f) => f.name)
             .filter(matcher)
             .sort();
           if (matches.length) {
@@ -135,7 +135,7 @@ export class Table extends Component {
         name: '',
         align: RIGHT_ALIGNMENT,
         width: '100',
-        render: filter => {
+        render: (filter) => {
           if (this.state.editingFilterId === filter.clientId) {
             return (
               <Fragment>

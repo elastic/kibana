@@ -567,14 +567,18 @@ export const getMockPrivilegesResult = () => ({
   application: {},
 });
 
-export const getFindResultStatusEmpty = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
+export const getFindResultStatusEmpty = (): SavedObjectsFindResponse<
+  IRuleSavedAttributesSavedObjectAttributes
+> => ({
   page: 1,
   per_page: 1,
   total: 0,
   saved_objects: [],
 });
 
-export const getFindResultStatus = (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
+export const getFindResultStatus = (): SavedObjectsFindResponse<
+  IRuleSavedAttributesSavedObjectAttributes
+> => ({
   page: 1,
   per_page: 6,
   total: 2,

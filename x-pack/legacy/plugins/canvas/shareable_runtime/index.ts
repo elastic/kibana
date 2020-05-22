@@ -15,7 +15,7 @@ const css = require.context(
   true,
   /\.\/plugins\/(?!canvas).*light\.css/
 );
-css.keys().forEach(filename => {
+css.keys().forEach((filename) => {
   css(filename);
 });
 
@@ -24,4 +24,4 @@ const uiStyles = require.context(
   false,
   /[\/\\](?!mixins|variables|_|\.|bootstrap_(light|dark))[^\/\\]+\.less/
 );
-uiStyles.keys().forEach(key => uiStyles(key));
+uiStyles.keys().forEach((key) => uiStyles(key));

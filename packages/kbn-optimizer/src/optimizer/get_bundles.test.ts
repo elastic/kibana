@@ -44,7 +44,7 @@ it('returns a bundle for each plugin', () => {
         },
       ],
       '/repo'
-    ).map(b => b.toSpec())
+    ).map((b) => b.toSpec())
   ).toMatchInlineSnapshot(`
     Array [
       Object {

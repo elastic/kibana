@@ -29,9 +29,9 @@ export function defineCheckPrivilegesRoutes({ router, clusterClient }: RouteDefi
           }),
           scopedClusterClient.callAsCurrentUser('shield.getAPIKeys', { owner: true }).then(
             //  If the API returns a truthy result that means it's enabled.
-            result => ({ areApiKeysEnabled: !!result }),
+            (result) => ({ areApiKeysEnabled: !!result }),
             // This is a brittle dependency upon message. Tracked by https://github.com/elastic/elasticsearch/issues/47759.
-            e =>
+            (e) =>
               e.message.includes('api keys are not enabled')
                 ? Promise.resolve({ areApiKeysEnabled: false })
                 : Promise.reject(e)

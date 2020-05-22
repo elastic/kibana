@@ -219,7 +219,7 @@ export function useLoadIndexTemplates() {
 
 export async function deleteTemplates(names: Array<Template['name']>) {
   const result = sendRequest({
-    path: `${API_BASE_PATH}/templates/${names.map(name => encodeURIComponent(name)).join(',')}`,
+    path: `${API_BASE_PATH}/templates/${names.map((name) => encodeURIComponent(name)).join(',')}`,
     method: 'delete',
   });
 

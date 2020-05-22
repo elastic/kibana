@@ -22,11 +22,11 @@ function getTransformConfig(): TransformPivotConfig {
   };
 }
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  describe('cloning', function() {
+  describe('cloning', function () {
     this.tags(['smoke']);
     const transformConfig = getTransformConfig();
 
@@ -50,7 +50,7 @@ export default function({ getService }: FtrProviderContext) {
     ];
 
     for (const testData of testDataList) {
-      describe(`${testData.suiteTitle}`, function() {
+      describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           // await transform.api.deleteIndices(<CLONE_DEST_INDEX>);
         });

@@ -37,7 +37,7 @@ export function migrateRawDocs(
   migrateDoc: TransformFn,
   rawDocs: SavedObjectsRawDoc[]
 ): SavedObjectsRawDoc[] {
-  return rawDocs.map(raw => {
+  return rawDocs.map((raw) => {
     if (serializer.isRawSavedObject(raw)) {
       const savedObject = serializer.rawToSavedObject(raw);
       savedObject.migrationVersion = savedObject.migrationVersion || {};

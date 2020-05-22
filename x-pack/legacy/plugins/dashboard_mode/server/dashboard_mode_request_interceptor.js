@@ -44,10 +44,10 @@ export function createDashboardModeRequestInterceptor(dashboardViewerApp) {
         return h.continue;
       }
 
-      const isDashboardOnlyModeUser = user.roles.find(role =>
+      const isDashboardOnlyModeUser = user.roles.find((role) =>
         dashboardOnlyModeRoles.includes(role)
       );
-      const isSuperUser = user.roles.find(role => role === superuserRole);
+      const isSuperUser = user.roles.find((role) => role === superuserRole);
 
       const enforceDashboardOnlyMode = isDashboardOnlyModeUser && !isSuperUser;
       if (enforceDashboardOnlyMode) {

@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { SavedObject } from 'src/core/server';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
   const randomness = getService('randomness');
   const supertest = getService('supertest');
@@ -255,7 +255,7 @@ export default function({ getService }: FtrProviderContext) {
     describe('within a default space', () => {
       runTests(
         () => '/api/saved_objects/',
-        id => `${SAVED_OBJECT_WITH_SECRET_TYPE}:${id}`
+        (id) => `${SAVED_OBJECT_WITH_SECRET_TYPE}:${id}`
       );
     });
 
@@ -271,15 +271,12 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await supertest
-          .delete(`/api/spaces/space/${SPACE_ID}`)
-          .set('kbn-xsrf', 'xxx')
-          .expect(204);
+        await supertest.delete(`/api/spaces/space/${SPACE_ID}`).set('kbn-xsrf', 'xxx').expect(204);
       });
 
       runTests(
         () => `/s/${SPACE_ID}/api/saved_objects/`,
-        id => `${SPACE_ID}:${SAVED_OBJECT_WITH_SECRET_TYPE}:${id}`
+        (id) => `${SPACE_ID}:${SAVED_OBJECT_WITH_SECRET_TYPE}:${id}`
       );
     });
   });

@@ -71,11 +71,8 @@ describe('<JobTable />', () => {
       expect(tableColumns).toEqual(expectedColumns);
     });
 
-    const getRowTextGetter = row => field =>
-      row
-        .find(`[data-test-subj="jobTableCell-${field}"]`)
-        .hostNodes()
-        .text();
+    const getRowTextGetter = (row) => (field) =>
+      row.find(`[data-test-subj="jobTableCell-${field}"]`).hostNodes().text();
 
     it('should set the correct job value in each row cell', () => {
       const unformattedFields = [
@@ -89,7 +86,7 @@ describe('<JobTable />', () => {
       const job = jobs[0];
       const getCellText = getRowTextGetter(row);
 
-      unformattedFields.forEach(field => {
+      unformattedFields.forEach((field) => {
         const cellText = getCellText(field);
         expect(cellText).toEqual(job[field]);
       });
@@ -115,10 +112,7 @@ describe('<JobTable />', () => {
     it('should open the detail panel when clicking on the job id', () => {
       const row = tableRows.first();
       const job = jobs[0];
-      const linkJobId = row
-        .find(`[data-test-subj="jobTableCell-id"]`)
-        .hostNodes()
-        .find('EuiLink');
+      const linkJobId = row.find(`[data-test-subj="jobTableCell-id"]`).hostNodes().find('EuiLink');
 
       linkJobId.simulate('click');
 
@@ -175,8 +169,8 @@ describe('<JobTable />', () => {
       expect(contextMenu.length).toBeTruthy();
 
       const contextMenuButtons = contextMenu.find('button');
-      const buttonsLabel = contextMenuButtons.map(btn => btn.text());
-      const hasExpectedLabels = ['Start job', 'Delete job'].every(expectedLabel =>
+      const buttonsLabel = contextMenuButtons.map((btn) => btn.text());
+      const hasExpectedLabels = ['Start job', 'Delete job'].every((expectedLabel) =>
         buttonsLabel.includes(expectedLabel)
       );
 
@@ -192,7 +186,7 @@ describe('<JobTable />', () => {
       find('jobActionMenuButton').simulate('click');
 
       const contextMenuButtons = find('jobActionContextMenu').find('button');
-      const buttonsLabel = contextMenuButtons.map(btn => btn.text());
+      const buttonsLabel = contextMenuButtons.map((btn) => btn.text());
       const hasExpectedLabels = buttonsLabel.includes('Stop job');
       expect(hasExpectedLabels).toBe(true);
     });
@@ -208,8 +202,8 @@ describe('<JobTable />', () => {
       find('jobActionMenuButton').simulate('click');
 
       const contextMenuButtons = find('jobActionContextMenu').find('button');
-      const buttonsLabel = contextMenuButtons.map(btn => btn.text());
-      const hasExpectedLabels = ['Start jobs', 'Stop jobs'].every(expectedLabel =>
+      const buttonsLabel = contextMenuButtons.map((btn) => btn.text());
+      const hasExpectedLabels = ['Start jobs', 'Stop jobs'].every((expectedLabel) =>
         buttonsLabel.includes(expectedLabel)
       );
 

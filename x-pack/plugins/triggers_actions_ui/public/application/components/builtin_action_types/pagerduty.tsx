@@ -288,7 +288,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
               data-test-subj="severitySelect"
               options={severityOptions}
               value={severity}
-              onChange={e => {
+              onChange={(e) => {
                 editAction('severity', e.target.value, index);
               }}
             />
@@ -309,7 +309,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
               data-test-subj="eventActionSelect"
               options={eventActionOptions}
               value={eventAction}
-              onChange={e => {
+              onChange={(e) => {
                 editAction('eventAction', e.target.value, index);
               }}
             />

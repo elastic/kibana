@@ -22,17 +22,17 @@ export function registerGrokSimulateRoute(server) {
   server.route({
     path: '/api/grokdebugger/simulate',
     method: 'POST',
-    handler: request => {
+    handler: (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
       const grokdebuggerRequest = GrokdebuggerRequest.fromDownstreamJSON(request.payload);
       return simulateGrok(callWithRequest, grokdebuggerRequest.upstreamJSON)
-        .then(simulateResponseFromES => {
+        .then((simulateResponseFromES) => {
           const grokdebuggerResponse = GrokdebuggerResponse.fromUpstreamJSON(
             simulateResponseFromES
           );
           return { grokdebuggerResponse };
         })
-        .catch(e => wrapEsError(e));
+        .catch((e) => wrapEsError(e));
     },
     config: {
       pre: [licensePreRouting],

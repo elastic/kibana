@@ -15,7 +15,7 @@ import { CODE_PATH_ALL } from '../../../../common/constants';
 
 const CODE_PATHS = [CODE_PATH_ALL];
 
-const getPageData = $injector => {
+const getPageData = ($injector) => {
   const monitoringClusters = $injector.get('monitoringClusters');
   return monitoringClusters(undefined, undefined, CODE_PATHS);
 };
@@ -26,7 +26,7 @@ uiRoutes
     resolve: {
       clusters: (Private, kbnUrl) => {
         const routeInit = Private(routeInitProvider);
-        return routeInit({ codePaths: CODE_PATHS, fetchAllClusters: true }).then(clusters => {
+        return routeInit({ codePaths: CODE_PATHS, fetchAllClusters: true }).then((clusters) => {
           if (!clusters || !clusters.length) {
             kbnUrl.changePath('/no-data');
             return Promise.reject();
@@ -61,7 +61,7 @@ uiRoutes
 
         $scope.$watch(
           () => this.data,
-          data => {
+          (data) => {
             this.renderReact(
               <I18nContext>
                 <Listing

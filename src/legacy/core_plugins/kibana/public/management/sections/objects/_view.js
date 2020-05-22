@@ -74,10 +74,10 @@ function destroyReactView() {
 
 uiModules
   .get('apps/management', ['monospaced.elastic'])
-  .directive('kbnManagementObjectsView', function() {
+  .directive('kbnManagementObjectsView', function () {
     return {
       restrict: 'E',
-      controller: function($scope, $routeParams) {
+      controller: function ($scope, $routeParams) {
         createReactView($scope, $routeParams);
         $scope.$on('$destroy', destroyReactView);
       },

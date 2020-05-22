@@ -9,7 +9,7 @@ import { ESFilter } from '../../../../typings/elasticsearch';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
-  PROCESSOR_EVENT
+  PROCESSOR_EVENT,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { rangeFilter } from '../../helpers/range_filter';
@@ -18,7 +18,7 @@ import { SERVICE_VERSION } from '../../../../common/elasticsearch_fieldnames';
 export async function getServiceAnnotations({
   setup,
   serviceName,
-  environment
+  environment,
 }: {
   serviceName: string;
   environment?: string;
@@ -29,7 +29,7 @@ export async function getServiceAnnotations({
   const filter: ESFilter[] = [
     { term: { [PROCESSOR_EVENT]: 'transaction' } },
     { range: rangeFilter(start, end) },
-    { term: { [SERVICE_NAME]: serviceName } }
+    { term: { [SERVICE_NAME]: serviceName } },
   ];
 
   if (environment) {
@@ -45,23 +45,23 @@ export async function getServiceAnnotations({
           track_total_hits: false,
           query: {
             bool: {
-              filter
-            }
+              filter,
+            },
           },
           aggs: {
             versions: {
               terms: {
-                field: SERVICE_VERSION
-              }
-            }
-          }
-        }
+                field: SERVICE_VERSION,
+              },
+            },
+          },
+        },
       })
-    ).aggregations?.versions.buckets.map(bucket => bucket.key) ?? [];
+    ).aggregations?.versions.buckets.map((bucket) => bucket.key) ?? [];
 
   if (versions.length > 1) {
     const annotations = await Promise.all(
-      versions.map(async version => {
+      versions.map(async (version) => {
         const response = await client.search({
           index: indices['apm_oss.transactionIndices'],
           body: {
@@ -69,23 +69,25 @@ export async function getServiceAnnotations({
             query: {
               bool: {
                 filter: filter
-                  .filter(esFilter => !Object.keys(esFilter).includes('range'))
+                  .filter(
+                    (esFilter) => !Object.keys(esFilter).includes('range')
+                  )
                   .concat({
                     term: {
-                      [SERVICE_VERSION]: version
-                    }
-                  })
-              }
+                      [SERVICE_VERSION]: version,
+                    },
+                  }),
+              },
             },
             aggs: {
               first_seen: {
                 min: {
-                  field: '@timestamp'
-                }
-              }
+                  field: '@timestamp',
+                },
+              },
             },
-            track_total_hits: false
-          }
+            track_total_hits: false,
+          },
         });
 
         const firstSeen = response.aggregations?.first_seen.value;
@@ -104,7 +106,7 @@ export async function getServiceAnnotations({
           type: AnnotationType.VERSION,
           id: version,
           time: firstSeen,
-          text: version
+          text: version,
         };
       })
     );

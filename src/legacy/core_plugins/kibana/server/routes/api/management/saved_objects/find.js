@@ -36,22 +36,11 @@ export function registerFind(server) {
       validate: {
         query: Joi.object()
           .keys({
-            perPage: Joi.number()
-              .min(0)
-              .default(20),
-            page: Joi.number()
-              .min(0)
-              .default(1),
-            type: Joi.array()
-              .items(Joi.string())
-              .single()
-              .required(),
-            search: Joi.string()
-              .allow('')
-              .optional(),
-            defaultSearchOperator: Joi.string()
-              .valid('OR', 'AND')
-              .default('OR'),
+            perPage: Joi.number().min(0).default(20),
+            page: Joi.number().min(0).default(1),
+            type: Joi.array().items(Joi.string()).single().required(),
+            search: Joi.string().allow('').optional(),
+            defaultSearchOperator: Joi.string().valid('OR', 'AND').default('OR'),
             sortField: Joi.string(),
             hasReference: Joi.object()
               .keys({
@@ -59,9 +48,7 @@ export function registerFind(server) {
                 id: Joi.string().required(),
               })
               .optional(),
-            fields: Joi.array()
-              .items(Joi.string())
-              .single(),
+            fields: Joi.array().items(Joi.string()).single(),
           })
           .default(),
       },
@@ -71,7 +58,7 @@ export function registerFind(server) {
       const searchTypes = request.query.type;
       const savedObjectsClient = request.getSavedObjectsClient();
       const savedObjectsManagement = server.getSavedObjectsManagement();
-      const importAndExportableTypes = searchTypes.filter(type =>
+      const importAndExportableTypes = searchTypes.filter((type) =>
         savedObjectsManagement.isImportAndExportable(type)
       );
 
@@ -93,8 +80,8 @@ export function registerFind(server) {
       return {
         ...findResponse,
         saved_objects: findResponse.saved_objects
-          .map(obj => injectMetaAttributes(obj, savedObjectsManagement))
-          .map(obj => {
+          .map((obj) => injectMetaAttributes(obj, savedObjectsManagement))
+          .map((obj) => {
             const result = { ...obj, attributes: {} };
             for (const field of request.query.fields || []) {
               result.attributes[field] = obj.attributes[field];

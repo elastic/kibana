@@ -125,7 +125,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
               id="checkboxShowSystemIndexTemplates"
               data-test-subj="systemTemplatesSwitch"
               checked={showSystemTemplates}
-              onChange={event => setShowSystemTemplates(event.target.checked)}
+              onChange={(event) => setShowSystemTemplates(event.target.checked)}
               label={
                 <FormattedMessage
                   id="xpack.idxMgmt.indexTemplatesTable.systemIndexTemplatesSwitchLabel"

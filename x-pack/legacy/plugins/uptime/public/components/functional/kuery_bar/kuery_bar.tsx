@@ -88,7 +88,7 @@ export function KueryBarComponent({
           selectionEnd: selectionStart,
         })) || []
       )
-        .filter(suggestion => !startsWith(suggestion.text, 'span.'))
+        .filter((suggestion) => !startsWith(suggestion.text, 'span.'))
         .slice(0, 15);
 
       if (currentRequest !== currentRequestCheck) {

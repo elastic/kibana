@@ -22,11 +22,11 @@ import { PluginFunctionalProviderContext } from '../../services';
 import '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
+export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
 
-  describe('ui plugins', function() {
+  describe('ui plugins', function () {
     describe('loading', function describeIndexTests() {
       before(async () => {
         await PageObjects.common.navigateToApp('settings');
@@ -56,7 +56,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
 
       it('to start services via coreSetup.getStartServices', async () => {
         expect(
-          await browser.executeAsync(async cb => {
+          await browser.executeAsync(async (cb) => {
             const [coreStart] = await window.__coreProvider.setup.core.getStartServices();
             cb(Boolean(coreStart.overlays));
           })
@@ -83,7 +83,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
 
       it('should send kbn-system-request header when asSystemRequest: true', async () => {
         expect(
-          await browser.executeAsync(async cb => {
+          await browser.executeAsync(async (cb) => {
             window.__coreProvider.start.plugins.core_plugin_b.sendSystemRequest(true).then(cb);
           })
         ).to.be('/core_plugin_b/system_request says: "System request? true"');
@@ -91,7 +91,7 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
 
       it('should not send kbn-system-request header when asSystemRequest: false', async () => {
         expect(
-          await browser.executeAsync(async cb => {
+          await browser.executeAsync(async (cb) => {
             window.__coreProvider.start.plugins.core_plugin_b.sendSystemRequest(false).then(cb);
           })
         ).to.be('/core_plugin_b/system_request says: "System request? false"');

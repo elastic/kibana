@@ -62,10 +62,10 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
       .then(([allSpaces, activeSpace]) => {
         setSpacesState({
           isLoading: false,
-          spaces: allSpaces.filter(space => space.id !== activeSpace.id),
+          spaces: allSpaces.filter((space) => space.id !== activeSpace.id),
         });
       })
-      .catch(e => {
+      .catch((e) => {
         toastNotifications.addError(e, {
           title: i18n.translate('xpack.spaces.management.copyToSpace.spacesLoadErrorTitle', {
             defaultMessage: 'Error loading available spaces',
@@ -113,8 +113,8 @@ export const CopySavedObjectsToSpaceFlyout = (props: Props) => {
   }
 
   async function finishCopy() {
-    const needsConflictResolution = Object.values(retries).some(spaceRetry =>
-      spaceRetry.some(retry => retry.overwrite)
+    const needsConflictResolution = Object.values(retries).some((spaceRetry) =>
+      spaceRetry.some((retry) => retry.overwrite)
     );
 
     if (needsConflictResolution) {

@@ -22,18 +22,18 @@ import expect from '@kbn/expect';
 
 import { visTypes } from '../../visualizations/vis_types';
 
-describe('Vislib Vis Types Test Suite', function() {
+describe('Vislib Vis Types Test Suite', function () {
   let visFunc;
 
-  beforeEach(function() {
+  beforeEach(function () {
     visFunc = visTypes.point_series;
   });
 
-  it('should be an object', function() {
+  it('should be an object', function () {
     expect(_.isObject(visTypes)).to.be(true);
   });
 
-  it('should return a function', function() {
+  it('should return a function', function () {
     expect(typeof visFunc).to.be('function');
   });
 });

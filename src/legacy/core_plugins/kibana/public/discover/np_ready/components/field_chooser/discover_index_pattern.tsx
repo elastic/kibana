@@ -46,7 +46,7 @@ export function DiscoverIndexPattern({
   selectedIndexPattern,
   setIndexPattern,
 }: DiscoverIndexPatternProps) {
-  const options: IndexPatternRef[] = (indexPatternList || []).map(entity => ({
+  const options: IndexPatternRef[] = (indexPatternList || []).map((entity) => ({
     id: entity.id,
     title: entity.attributes!.title,
   }));
@@ -76,8 +76,8 @@ export function DiscoverIndexPattern({
           }}
           indexPatternId={selected.id}
           indexPatternRefs={options}
-          onChangeIndexPattern={id => {
-            const indexPattern = options.find(pattern => pattern.id === id);
+          onChangeIndexPattern={(id) => {
+            const indexPattern = options.find((pattern) => pattern.id === id);
             if (indexPattern) {
               setIndexPattern(id);
               setSelected(indexPattern);

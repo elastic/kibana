@@ -23,7 +23,7 @@ class LegacyRegistry extends Registry<any, any> {
   }
 
   getOriginalFns() {
-    return this.toArray().map(entry => entry.fn);
+    return this.toArray().map((entry) => entry.fn);
   }
 }
 

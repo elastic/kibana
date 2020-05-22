@@ -6,12 +6,12 @@
 
 import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
 
-describe('authorized_user_pre_routing', function() {
+describe('authorized_user_pre_routing', function () {
   // the getClientShield is using `once` which forces us to use a constant mock
   // which makes testing anything that is dependent on `oncePerServer` confusing.
   // so createMockServer reuses the same 'instance' of the server and overwrites
   // the properties to contain different values
-  const createMockServer = (function() {
+  const createMockServer = (function () {
     const getUserStub = jest.fn();
     let mockConfig;
 
@@ -24,14 +24,14 @@ describe('authorized_user_pre_routing', function() {
           },
         };
       },
-      log: function() {},
+      log: function () {},
       plugins: {
         xpack_main: {},
         security: { getUser: getUserStub },
       },
     };
 
-    return function({
+    return function ({
       securityEnabled = true,
       xpackInfoUndefined = false,
       xpackInfoAvailable = true,
@@ -75,18 +75,18 @@ describe('authorized_user_pre_routing', function() {
     raw: { req: mockRequestRaw },
   });
 
-  const getMockPlugins = pluginSet => {
+  const getMockPlugins = (pluginSet) => {
     return pluginSet || { security: null };
   };
 
   const getMockLogger = () => ({
     warn: jest.fn(),
-    error: msg => {
+    error: (msg) => {
       throw new Error(msg);
     },
   });
 
-  it('should return with boom notFound when xpackInfo is undefined', async function() {
+  it('should return with boom notFound when xpackInfo is undefined', async function () {
     const mockServer = createMockServer({ xpackInfoUndefined: true });
 
     const authorizedUserPreRouting = authorizedUserPreRoutingFactory(
@@ -99,7 +99,7 @@ describe('authorized_user_pre_routing', function() {
     expect(response.output.statusCode).toBe(404);
   });
 
-  it(`should return with boom notFound when xpackInfo isn't available`, async function() {
+  it(`should return with boom notFound when xpackInfo isn't available`, async function () {
     const mockServer = createMockServer({ xpackInfoAvailable: false });
 
     const authorizedUserPreRouting = authorizedUserPreRoutingFactory(
@@ -112,7 +112,7 @@ describe('authorized_user_pre_routing', function() {
     expect(response.output.statusCode).toBe(404);
   });
 
-  it('should return with null user when security is disabled in Elasticsearch', async function() {
+  it('should return with null user when security is disabled in Elasticsearch', async function () {
     const mockServer = createMockServer({ securityEnabled: false });
 
     const authorizedUserPreRouting = authorizedUserPreRoutingFactory(
@@ -124,7 +124,7 @@ describe('authorized_user_pre_routing', function() {
     expect(response).toBe(null);
   });
 
-  it('should return with boom unauthenticated when security is enabled but no authenticated user', async function() {
+  it('should return with boom unauthenticated when security is enabled but no authenticated user', async function () {
     const mockServer = createMockServer({
       user: null,
       config: { 'xpack.reporting.roles.allow': ['.reporting_user'] },
@@ -143,7 +143,7 @@ describe('authorized_user_pre_routing', function() {
     expect(response.output.statusCode).toBe(401);
   });
 
-  it(`should return with boom forbidden when security is enabled but user doesn't have allowed role`, async function() {
+  it(`should return with boom forbidden when security is enabled but user doesn't have allowed role`, async function () {
     const mockServer = createMockServer({
       user: { roles: [] },
       config: { 'xpack.reporting.roles.allow': ['.reporting_user'] },
@@ -162,7 +162,7 @@ describe('authorized_user_pre_routing', function() {
     expect(response.output.statusCode).toBe(403);
   });
 
-  it('should return with user when security is enabled and user has explicitly allowed role', async function() {
+  it('should return with user when security is enabled and user has explicitly allowed role', async function () {
     const user = { roles: ['.reporting_user', 'something_else'] };
     const mockServer = createMockServer({
       user,
@@ -183,7 +183,7 @@ describe('authorized_user_pre_routing', function() {
     expect(response).toEqual(user);
   });
 
-  it('should return with user when security is enabled and user has superuser role', async function() {
+  it('should return with user when security is enabled and user has superuser role', async function () {
     const user = { roles: ['superuser', 'something_else'] };
     const mockServer = createMockServer({
       user,

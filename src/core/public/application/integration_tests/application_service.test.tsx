@@ -66,7 +66,7 @@ describe('ApplicationService', () => {
         id: 'app1',
         title: 'App1',
         mount: ({ onAppLeave }: AppMountParameters) => {
-          onAppLeave(actions => actions.default());
+          onAppLeave((actions) => actions.default());
           return () => undefined;
         },
       });
@@ -99,7 +99,7 @@ describe('ApplicationService', () => {
         id: 'app1',
         title: 'App1',
         mount: ({ onAppLeave }: AppMountParameters) => {
-          onAppLeave(actions => actions.confirm('confirmation-message', 'confirmation-title'));
+          onAppLeave((actions) => actions.confirm('confirmation-message', 'confirmation-title'));
           return () => undefined;
         },
       });
@@ -136,7 +136,7 @@ describe('ApplicationService', () => {
         id: 'app1',
         title: 'App1',
         mount: ({ onAppLeave }: AppMountParameters) => {
-          onAppLeave(actions => actions.confirm('confirmation-message', 'confirmation-title'));
+          onAppLeave((actions) => actions.confirm('confirmation-message', 'confirmation-title'));
           return () => undefined;
         },
       });

@@ -85,7 +85,7 @@ export const KioskControls = ({
         <EuiSwitch
           checked={autoplayEnabled}
           label={strings.getCycleToggleSwitch()}
-          onChange={ev => onSetEnabled(ev.target.checked)}
+          onChange={(ev) => onSetEnabled(ev.target.checked)}
         />
         <EuiSpacer size="m" />
 
@@ -130,7 +130,7 @@ export const KioskControls = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <CustomInterval onSubmit={value => onSetInterval(value)} />
+        <CustomInterval onSubmit={(value) => onSetInterval(value)} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

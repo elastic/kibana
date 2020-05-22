@@ -19,19 +19,19 @@ describe('Distribution', () => {
         count: 5,
         samples: [
           {
-            transactionId: 'someTransactionId'
-          }
-        ]
+            transactionId: 'someTransactionId',
+          },
+        ],
       },
       {
         key: 80,
         count: 100,
         samples: [
           {
-            transactionId: 'anotherTransactionId'
-          }
-        ]
-      }
+            transactionId: 'anotherTransactionId',
+          },
+        ],
+      },
     ] as IBucket[];
     expect(getFormattedBuckets(buckets, 20)).toEqual([
       { x: 20, x0: 0, y: 0, style: { cursor: 'default' }, samples: [] },
@@ -44,9 +44,9 @@ describe('Distribution', () => {
         style: { cursor: 'pointer' },
         samples: [
           {
-            transactionId: 'someTransactionId'
-          }
-        ]
+            transactionId: 'someTransactionId',
+          },
+        ],
       },
       {
         x: 100,
@@ -55,10 +55,10 @@ describe('Distribution', () => {
         style: { cursor: 'pointer' },
         samples: [
           {
-            transactionId: 'anotherTransactionId'
-          }
-        ]
-      }
+            transactionId: 'anotherTransactionId',
+          },
+        ],
+      },
     ]);
   });
 });

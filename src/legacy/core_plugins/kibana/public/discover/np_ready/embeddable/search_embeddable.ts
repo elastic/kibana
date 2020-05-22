@@ -204,7 +204,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
 
     this.pushContainerStateParamsToScope(searchScope);
 
-    searchScope.setSortOrder = sort => {
+    searchScope.setSortOrder = (sort) => {
       this.updateInput({ sort });
     };
 
@@ -241,7 +241,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
         operator,
         indexPattern.id!
       );
-      filters = filters.map(filter => ({
+      filters = filters.map((filter) => ({
         ...filter,
         $state: { store: esFilters.FilterStateStore.APP_STATE },
       }));

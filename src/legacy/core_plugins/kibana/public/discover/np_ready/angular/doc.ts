@@ -28,7 +28,7 @@ interface LazyScope extends ng.IScope {
 
 const { timefilter } = getServices();
 const app = getAngularModule();
-app.directive('discoverDoc', function(reactDirective: any) {
+app.directive('discoverDoc', function (reactDirective: any) {
   return reactDirective(
     wrapInI18nContext(Doc),
     [

@@ -43,7 +43,7 @@ export function AboutPanel({ onFilePickerChange }) {
                       defaultMessage: 'Select or drag and drop a file',
                     }
                   )}
-                  onChange={files => onFilePickerChange(files)}
+                  onChange={(files) => onFilePickerChange(files)}
                   className="file-datavisualizer-file-picker"
                 />
               </div>

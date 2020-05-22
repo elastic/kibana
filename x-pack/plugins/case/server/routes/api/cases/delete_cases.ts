@@ -24,7 +24,7 @@ export function initDeleteCasesApi({ caseService, router, userActionService }: R
       try {
         const client = context.core.savedObjects.client;
         await Promise.all(
-          request.query.ids.map(id =>
+          request.query.ids.map((id) =>
             caseService.deleteCase({
               client,
               caseId: id,
@@ -32,7 +32,7 @@ export function initDeleteCasesApi({ caseService, router, userActionService }: R
           )
         );
         const comments = await Promise.all(
-          request.query.ids.map(id =>
+          request.query.ids.map((id) =>
             caseService.getAllCaseComments({
               client,
               caseId: id,
@@ -40,9 +40,9 @@ export function initDeleteCasesApi({ caseService, router, userActionService }: R
           )
         );
 
-        if (comments.some(c => c.saved_objects.length > 0)) {
+        if (comments.some((c) => c.saved_objects.length > 0)) {
           await Promise.all(
-            comments.map(c =>
+            comments.map((c) =>
               Promise.all(
                 c.saved_objects.map(({ id }) =>
                   caseService.deleteComment({
@@ -59,7 +59,7 @@ export function initDeleteCasesApi({ caseService, router, userActionService }: R
 
         await userActionService.postUserActions({
           client,
-          actions: request.query.ids.map(id =>
+          actions: request.query.ids.map((id) =>
             buildCaseUserActionItem({
               action: 'create',
               actionAt: deleteDate,

@@ -10,7 +10,7 @@ import {
   AGENT_NAME,
   SERVICE_NAME,
   SPAN_SUBTYPE,
-  SPAN_TYPE
+  SPAN_TYPE,
 } from '../../../../../../../plugins/apm/common/elasticsearch_fieldnames';
 import databaseIcon from './icons/database.svg';
 import defaultIconImport from './icons/default.svg';
@@ -35,7 +35,7 @@ const icons: { [key: string]: string } = {
   ext: globeIcon,
   external: globeIcon,
   messaging: documentsIcon,
-  resource: globeIcon
+  resource: globeIcon,
 };
 
 const serviceIcons: { [key: string]: string } = {
@@ -46,7 +46,7 @@ const serviceIcons: { [key: string]: string } = {
   nodejs: nodeJsIcon,
   php: phpIcon,
   python: pythonIcon,
-  ruby: rubyIcon
+  ruby: rubyIcon,
 };
 
 // IE 11 does not properly load some SVGs, which causes a runtime error and the

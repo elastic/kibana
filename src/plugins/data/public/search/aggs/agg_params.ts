@@ -81,7 +81,7 @@ export const writeParams = <
   };
   locals = locals || {};
 
-  params.forEach(param => {
+  params.forEach((param) => {
     if (param.write) {
       param.write(aggConfig, output, aggs, locals);
     } else {

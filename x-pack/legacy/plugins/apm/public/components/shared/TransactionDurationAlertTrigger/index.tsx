@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { ForLastExpression } from '../../../../../../../plugins/triggers_actions_ui/public';
 import {
   TRANSACTION_ALERT_AGGREGATION_TYPES,
-  ALERT_TYPES_CONFIG
+  ALERT_TYPES_CONFIG,
 } from '../../../../../../../plugins/apm/common/alert_types';
 import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
 import { useUrlParams } from '../../../hooks/useUrlParams';
@@ -48,30 +48,30 @@ export function TransactionDurationAlertTrigger(props: Props) {
     aggregationType: 'avg',
     windowSize: 5,
     windowUnit: 'm',
-    transactionType: transactionTypes[0]
+    transactionType: transactionTypes[0],
   };
 
   const params = {
     ...defaults,
-    ...alertParams
+    ...alertParams,
   };
 
   const fields = [
     <PopoverExpression
       value={params.transactionType}
       title={i18n.translate('xpack.apm.transactionDurationAlertTrigger.type', {
-        defaultMessage: 'Type'
+        defaultMessage: 'Type',
       })}
     >
       <EuiSelect
         value={params.transactionType}
-        options={transactionTypes.map(key => {
+        options={transactionTypes.map((key) => {
           return {
             text: key,
-            value: key
+            value: key,
           };
         })}
-        onChange={e =>
+        onChange={(e) =>
           setAlertParams(
             'transactionType',
             e.target.value as Params['transactionType']
@@ -83,7 +83,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
     <PopoverExpression
       value={params.aggregationType}
       title={i18n.translate('xpack.apm.transactionDurationAlertTrigger.when', {
-        defaultMessage: 'When'
+        defaultMessage: 'When',
       })}
     >
       <EuiSelect
@@ -91,10 +91,10 @@ export function TransactionDurationAlertTrigger(props: Props) {
         options={map(TRANSACTION_ALERT_AGGREGATION_TYPES, (label, key) => {
           return {
             text: label,
-            value: key
+            value: key,
           };
         })}
-        onChange={e =>
+        onChange={(e) =>
           setAlertParams(
             'aggregationType',
             e.target.value as Params['aggregationType']
@@ -108,33 +108,33 @@ export function TransactionDurationAlertTrigger(props: Props) {
       title={i18n.translate(
         'xpack.apm.transactionDurationAlertTrigger.isAbove',
         {
-          defaultMessage: 'is above'
+          defaultMessage: 'is above',
         }
       )}
     >
       <EuiFieldNumber
         value={params.threshold ?? ''}
-        onChange={e => setAlertParams('threshold', e.target.value)}
+        onChange={(e) => setAlertParams('threshold', e.target.value)}
         append={i18n.translate('xpack.apm.transactionDurationAlertTrigger.ms', {
-          defaultMessage: 'ms'
+          defaultMessage: 'ms',
         })}
         compressed
       />
     </PopoverExpression>,
     <ForLastExpression
-      onChangeWindowSize={timeWindowSize =>
+      onChangeWindowSize={(timeWindowSize) =>
         setAlertParams('windowSize', timeWindowSize || '')
       }
-      onChangeWindowUnit={timeWindowUnit =>
+      onChangeWindowUnit={(timeWindowUnit) =>
         setAlertParams('windowUnit', timeWindowUnit)
       }
       timeWindowSize={params.windowSize}
       timeWindowUnit={params.windowUnit}
       errors={{
         timeWindowSize: [],
-        timeWindowUnit: []
+        timeWindowUnit: [],
       }}
-    />
+    />,
   ];
 
   return (

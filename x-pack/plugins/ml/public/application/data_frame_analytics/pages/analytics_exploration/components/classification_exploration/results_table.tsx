@@ -148,7 +148,7 @@ export const ResultsTable: FC<Props> = React.memo(
 
     const columns: Array<ColumnType<TableItem>> = selectedFields
       .sort(({ name: a }, { name: b }) => sortRegressionResultsFields(a, b, jobConfig))
-      .map(field => {
+      .map((field) => {
         const { type } = field;
         let format: any;
 
@@ -172,7 +172,7 @@ export const ResultsTable: FC<Props> = React.memo(
             return d;
           }
 
-          if (Array.isArray(d) && d.every(item => typeof item === 'string')) {
+          if (Array.isArray(d) && d.every((item) => typeof item === 'string')) {
             // If the cells data is an array of strings, return as a comma separated list.
             // The list will get limited to 5 items with `…` at the end if there's more in the original array.
             return `${d.slice(0, 5).join(', ')}${d.length > 5 ? ', …' : ''}`;
@@ -211,7 +211,7 @@ export const ResultsTable: FC<Props> = React.memo(
           switch (type) {
             case ES_FIELD_TYPES.BOOLEAN:
               column.dataType = ES_FIELD_TYPES.BOOLEAN;
-              column.render = d => (d ? 'true' : 'false');
+              column.render = (d) => (d ? 'true' : 'false');
               break;
             case ES_FIELD_TYPES.DATE:
               column.align = 'right';
@@ -246,7 +246,7 @@ export const ResultsTable: FC<Props> = React.memo(
         selectedFields.length > 0 &&
         sortField !== undefined &&
         sortDirection !== undefined &&
-        selectedFields.some(field => field.name === sortField)
+        selectedFields.some((field) => field.name === sortField)
       ) {
         let field = sortField;
         // If sorting by predictedField use dependentVar type
@@ -271,10 +271,10 @@ export const ResultsTable: FC<Props> = React.memo(
         jobConfig !== undefined &&
         columns.length > 0 &&
         selectedFields.length > 0 &&
-        !selectedFields.some(field => field.name === sortField)
+        !selectedFields.some((field) => field.name === sortField)
       ) {
         const predictedFieldSelected = selectedFields.some(
-          field => field.name === predictedFieldName
+          (field) => field.name === predictedFieldName
         );
 
         // CHECK IF keyword suffix is needed (if predicted field is selected we have to check the dependent variable type)
@@ -500,10 +500,10 @@ export const ResultsTable: FC<Props> = React.memo(
                           key={name}
                           id={name}
                           label={name}
-                          checked={selectedFields.some(field => field.name === name)}
+                          checked={selectedFields.some((field) => field.name === name)}
                           onChange={() => toggleColumn(name)}
                           disabled={
-                            selectedFields.some(field => field.name === name) &&
+                            selectedFields.some((field) => field.name === name) &&
                             selectedFields.length === 1
                           }
                         />

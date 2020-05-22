@@ -16,7 +16,7 @@ import {
 
 function serializeFetchParams(searchRequests: SearchRequest[]) {
   return JSON.stringify(
-    searchRequests.map(searchRequestWithFetchParams => {
+    searchRequests.map((searchRequestWithFetchParams) => {
       const indexPattern =
         searchRequestWithFetchParams.index.title || searchRequestWithFetchParams.index;
       const {
@@ -38,7 +38,7 @@ function serializeFetchParams(searchRequests: SearchRequest[]) {
 // to return hits > 0, otherwise they do not render. We fake the number of hits here
 // by counting the number of aggregation buckets/values returned by rollup search.
 function shimHitsInFetchResponse(response: SearchResponse[]) {
-  return response.map(result => {
+  return response.map((result) => {
     const buckets = result.aggregations
       ? Object.keys(result.aggregations).reduce((allBuckets, agg) => {
           return allBuckets.concat(
@@ -73,7 +73,7 @@ export const getRollupSearchStrategy = (fetch: HttpSetup['fetch']): SearchStrate
     });
 
     return {
-      searching: promise.then(shimHitsInFetchResponse).catch(error => {
+      searching: promise.then(shimHitsInFetchResponse).catch((error) => {
         const {
           body: { statusCode, error: title, message },
           res: { url },

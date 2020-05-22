@@ -62,7 +62,7 @@ jest.mock('ui/scripting_languages', () => ({
 }));
 
 jest.mock('ui/documentation_links', () => ({
-  getDocLink: doc => `(docLink for ${doc})`,
+  getDocLink: (doc) => `(docLink for ${doc})`,
 }));
 
 jest.mock('ui/notify', () => ({
@@ -86,7 +86,7 @@ const fields = [
     name: 'foobar',
   },
 ];
-fields.getByName = name => {
+fields.getByName = (name) => {
   const fields = {
     foobar: {
       name: 'foobar',
@@ -125,7 +125,7 @@ describe('FieldEditor', () => {
     };
 
     npStart.plugins.data.fieldFormats.getDefaultType = jest.fn(() => Format);
-    npStart.plugins.data.fieldFormats.getByFieldType = jest.fn(fieldType => {
+    npStart.plugins.data.fieldFormats.getByFieldType = jest.fn((fieldType) => {
       if (fieldType === 'number') {
         return [Format];
       }
@@ -137,7 +137,7 @@ describe('FieldEditor', () => {
       <FieldEditor indexPattern={indexPattern} field={field} helpers={helpers} />
     );
 
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     component.update();
     expect(component).toMatchSnapshot();
   });
@@ -149,7 +149,7 @@ describe('FieldEditor', () => {
       script: 'doc.test.value',
     };
     indexPattern.fields.push(testField);
-    indexPattern.fields.getByName = name => {
+    indexPattern.fields.getByName = (name) => {
       const fields = {
         [testField.name]: testField,
       };
@@ -160,7 +160,7 @@ describe('FieldEditor', () => {
       <FieldEditor indexPattern={indexPattern} field={testField} helpers={helpers} />
     );
 
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     component.update();
     expect(component).toMatchSnapshot();
   });
@@ -173,7 +173,7 @@ describe('FieldEditor', () => {
       lang: 'testlang',
     };
     indexPattern.fields.push(testField);
-    indexPattern.fields.getByName = name => {
+    indexPattern.fields.getByName = (name) => {
       const fields = {
         [testField.name]: testField,
       };
@@ -184,7 +184,7 @@ describe('FieldEditor', () => {
       <FieldEditor indexPattern={indexPattern} field={testField} helpers={helpers} />
     );
 
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     component.update();
     expect(component).toMatchSnapshot();
   });
@@ -195,7 +195,7 @@ describe('FieldEditor', () => {
       <FieldEditor indexPattern={indexPattern} field={testField} helpers={helpers} />
     );
 
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     component.instance().onFieldChange('name', 'foobar');
     component.update();
     expect(component).toMatchSnapshot();
@@ -214,7 +214,7 @@ describe('FieldEditor', () => {
       <FieldEditor indexPattern={indexPattern} field={testField} helpers={helpers} />
     );
 
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     component.instance().onFieldChange('name', 'foobar');
     component.update();
     expect(component).toMatchSnapshot();

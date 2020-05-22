@@ -151,7 +151,7 @@ const formatServiceRequestData = (myCase: Case): ServiceConnectorCaseParams => {
       username: createdBy?.username ?? '',
     },
     comments: comments
-      .filter(c => {
+      .filter((c) => {
         const lastPush = c.pushedAt != null ? new Date(c.pushedAt) : null;
         const lastUpdate = c.updatedAt != null ? new Date(c.updatedAt) : null;
         if (
@@ -162,7 +162,7 @@ const formatServiceRequestData = (myCase: Case): ServiceConnectorCaseParams => {
         }
         return false;
       })
-      .map(c => ({
+      .map((c) => ({
         commentId: c.id,
         comment: c.comment,
         createdAt: c.createdAt,

@@ -133,7 +133,7 @@ describe('AggType Class', () => {
       });
     });
 
-    describe('getFormat', function() {
+    describe('getFormat', function () {
       let aggConfig: IAggConfig;
       let field: any;
 

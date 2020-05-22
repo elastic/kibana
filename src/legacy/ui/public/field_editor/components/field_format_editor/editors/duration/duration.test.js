@@ -24,7 +24,7 @@ import { DurationFormatEditor } from './duration';
 
 const fieldType = 'number';
 const format = {
-  getConverterFor: jest.fn().mockImplementation(() => input => `converted duration for ${input}`),
+  getConverterFor: jest.fn().mockImplementation(() => (input) => `converted duration for ${input}`),
   getParamDefaults: jest.fn().mockImplementation(() => {
     return {
       inputFormat: 'seconds',

@@ -98,7 +98,7 @@ export const EditFieldFormRow = React.memo(
             defaultValue: initialVisibleState,
           }}
         >
-          {field => {
+          {(field) => {
             return <ToggleField field={field} euiFieldProps={{ label: title, showLabel: false }} />;
           }}
         </UseField>
@@ -180,7 +180,7 @@ export const EditFieldFormRow = React.memo(
 
     return formFieldPath ? (
       <FormDataProvider pathsToWatch={formFieldPath}>
-        {formData => {
+        {(formData) => {
           setIsContentVisible(formData[formFieldPath]);
           return renderContent();
         }}

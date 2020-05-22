@@ -37,8 +37,8 @@ function getPageData($injector) {
       },
       is_advanced: false,
     })
-    .then(response => response.data)
-    .catch(err => {
+    .then((response) => response.data)
+    .catch((err) => {
       const Private = $injector.get('Private');
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
       return ajaxErrorHandlers(err);
@@ -80,7 +80,7 @@ uiRoutes.when('/elasticsearch/indices/:index', {
 
       $scope.$watch(
         () => this.data,
-        data => {
+        (data) => {
           if (!data || !data.shards) {
             return;
           }
@@ -89,7 +89,7 @@ uiRoutes.when('/elasticsearch/indices/:index', {
           $scope.totalCount = shards.length;
           $scope.showing = transformer(shards, data.nodes);
           $scope.labels = labels.node;
-          if (shards.some(shard => shard.state === 'UNASSIGNED')) {
+          if (shards.some((shard) => shard.state === 'UNASSIGNED')) {
             $scope.labels = labels.indexWithUnassigned;
           } else {
             $scope.labels = labels.index;

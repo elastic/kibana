@@ -89,8 +89,8 @@ interface LogEntryColumnContentProps {
 const FieldColumnContent = euiStyled(LogEntryColumnContent)<LogEntryColumnContentProps>`
   text-overflow: ellipsis;
 
-  ${props => (props.isHovered || props.isHighlighted ? hoveredContentStyle : '')};
-  ${props =>
+  ${(props) => (props.isHovered || props.isHighlighted ? hoveredContentStyle : '')};
+  ${(props) =>
     props.wrapMode === 'long'
       ? longWrappedContentStyle
       : props.wrapMode === 'pre-wrapped'

@@ -31,7 +31,7 @@ function getDefaultsByType(settingDefinition: RawSettingDefinition) {
         validationError: i18n.translate(
           'xpack.apm.agentConfig.integer.errorText',
           { defaultMessage: 'Must be an integer' }
-        )
+        ),
       };
     case 'float':
       return {
@@ -39,7 +39,7 @@ function getDefaultsByType(settingDefinition: RawSettingDefinition) {
         validationError: i18n.translate(
           'xpack.apm.agentConfig.float.errorText',
           { defaultMessage: 'Must be a number between 0.000 and 1' }
-        )
+        ),
       };
     case 'bytes':
       return {
@@ -48,7 +48,7 @@ function getDefaultsByType(settingDefinition: RawSettingDefinition) {
         validationError: i18n.translate(
           'xpack.apm.agentConfig.bytes.errorText',
           { defaultMessage: 'Please specify an integer and a unit' }
-        )
+        ),
       };
     case 'duration':
       return {
@@ -57,7 +57,7 @@ function getDefaultsByType(settingDefinition: RawSettingDefinition) {
         validationError: i18n.translate(
           'xpack.apm.agentConfig.bytes.errorText',
           { defaultMessage: 'Please specify an integer and a unit' }
-        )
+        ),
       };
   }
 }
@@ -96,10 +96,10 @@ export function isValid(setting: SettingDefinition, value: unknown) {
 }
 
 export const settingDefinitions = sortBy(
-  [...generalSettings, ...javaSettings].map(def => {
+  [...generalSettings, ...javaSettings].map((def) => {
     const defWithDefaults = {
       ...getDefaultsByType(def),
-      ...def
+      ...def,
     };
 
     // ensure every option has validation

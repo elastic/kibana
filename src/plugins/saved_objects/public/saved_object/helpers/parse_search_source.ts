@@ -82,7 +82,7 @@ export function parseSearchSource(
   const searchSourceFields = savedObject.searchSource.getFields();
   const fnProps = _.transform(
     searchSourceFields,
-    function(dynamic: Record<string, any>, val: any, name: string | undefined) {
+    function (dynamic: Record<string, any>, val: any, name: string | undefined) {
       if (_.isFunction(val) && name) dynamic[name] = val;
     },
     {}

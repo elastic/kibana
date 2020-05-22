@@ -12,22 +12,25 @@ export function getNumberFloatRt({ min, max }: { min: number; max: number }) {
     'numberFloatRt',
     t.string.is,
     (input, context) => {
-      return either.chain(t.string.validate(input, context), inputAsString => {
-        const inputAsFloat = parseFloat(inputAsString);
-        const maxThreeDecimals =
-          parseFloat(inputAsFloat.toFixed(3)) === inputAsFloat;
+      return either.chain(
+        t.string.validate(input, context),
+        (inputAsString) => {
+          const inputAsFloat = parseFloat(inputAsString);
+          const maxThreeDecimals =
+            parseFloat(inputAsFloat.toFixed(3)) === inputAsFloat;
 
-        const isValid =
-          inputAsFloat >= min && inputAsFloat <= max && maxThreeDecimals;
+          const isValid =
+            inputAsFloat >= min && inputAsFloat <= max && maxThreeDecimals;
 
-        return isValid
-          ? t.success(inputAsString)
-          : t.failure(
-              input,
-              context,
-              `Number must be between ${min} and ${max}`
-            );
-      });
+          return isValid
+            ? t.success(inputAsString)
+            : t.failure(
+                input,
+                context,
+                `Number must be between ${min} and ${max}`
+              );
+        }
+      );
     },
     t.identity
   );

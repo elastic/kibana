@@ -47,7 +47,7 @@ async function getSpacesUsage(
     return {} as UsageStats;
   }
 
-  const knownFeatureIds = features.getFeatures().map(feature => feature.id);
+  const knownFeatureIds = features.getFeatures().map((feature) => feature.id);
 
   let resp: SpacesAggregationResponse | undefined;
   try {
@@ -103,7 +103,7 @@ async function getSpacesUsage(
   );
 
   const usesFeatureControls = Object.values(disabledFeatures).some(
-    disabledSpaceCount => disabledSpaceCount > 0
+    (disabledSpaceCount) => disabledSpaceCount > 0
   );
 
   return {

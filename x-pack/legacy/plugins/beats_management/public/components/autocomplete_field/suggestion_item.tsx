@@ -18,7 +18,7 @@ interface SuggestionItemProps {
   suggestion: QuerySuggestion;
 }
 
-export const SuggestionItem: React.FC<SuggestionItemProps> = props => {
+export const SuggestionItem: React.FC<SuggestionItemProps> = (props) => {
   const { isSelected, onClick, onMouseEnter, suggestion } = props;
 
   return (
@@ -41,10 +41,10 @@ const SuggestionItemContainer = styled.div<{
 }>`
   display: flex;
   flex-direction: row;
-  font-size: ${props => props.theme.eui.default.euiFontSizeS};
-  height: ${props => props.theme.eui.default.euiSizeXl};
+  font-size: ${(props) => props.theme.eui.default.euiFontSizeS};
+  height: ${(props) => props.theme.eui.default.euiSizeXl};
   white-space: nowrap;
-  background-color: ${props =>
+  background-color: ${(props) =>
     props.isSelected ? props.theme.eui.default.euiColorLightestShade : 'transparent'};
 `;
 
@@ -53,25 +53,25 @@ const SuggestionItemField = styled.div`
   cursor: pointer;
   display: flex;
   flex-direction: row;
-  height: ${props => props.theme.eui.default.euiSizeXl};
-  padding: ${props => props.theme.eui.default.euiSizeXs};
+  height: ${(props) => props.theme.eui.default.euiSizeXl};
+  padding: ${(props) => props.theme.eui.default.euiSizeXs};
 `;
 
 const SuggestionItemIconField = styled(SuggestionItemField)<{ suggestionType: string }>`
-  background-color: ${props => {
+  background-color: ${(props) => {
     return tint(0.1, getEuiIconColor(props.theme, props.suggestionType));
   }};
-  color: ${props => {
+  color: ${(props) => {
     return getEuiIconColor(props.theme, props.suggestionType);
   }};
   flex: 0 0 auto;
   justify-content: center;
-  width: ${props => props.theme.eui.default.euiSizeXl};
+  width: ${(props) => props.theme.eui.default.euiSizeXl};
 `;
 
 const SuggestionItemTextField = styled(SuggestionItemField)`
   flex: 2 0 0;
-  font-family: ${props => props.theme.eui.default.euiCodeFontFamily};
+  font-family: ${(props) => props.theme.eui.default.euiCodeFontFamily};
 `;
 
 const SuggestionItemDescriptionField = styled(SuggestionItemField)`
@@ -79,7 +79,7 @@ const SuggestionItemDescriptionField = styled(SuggestionItemField)`
   p {
     display: inline;
     span {
-      font-family: ${props => props.theme.eui.default.euiCodeFontFamily};
+      font-family: ${(props) => props.theme.eui.default.euiCodeFontFamily};
     }
   }
 `;

@@ -18,7 +18,7 @@ const mockResponses = {
 
 // mock callWithRequestFactory
 const callWithRequestFactory = (responses, fail = false) => {
-  return requestName => {
+  return (requestName) => {
     return new Promise((resolve, reject) => {
       const response = responses[requestName];
       if (fail) {
@@ -31,28 +31,28 @@ const callWithRequestFactory = (responses, fail = false) => {
 };
 
 describe('ML - validateCardinality', () => {
-  it('called without arguments', done => {
+  it('called without arguments', (done) => {
     validateCardinality(callWithRequestFactory(mockResponses)).then(
       () => done(new Error('Promise should not resolve for this test without job argument.')),
       () => done()
     );
   });
 
-  it('called with non-valid job argument #1, missing analysis_config', done => {
+  it('called with non-valid job argument #1, missing analysis_config', (done) => {
     validateCardinality(callWithRequestFactory(mockResponses), {}).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
       () => done()
     );
   });
 
-  it('called with non-valid job argument #2, missing datafeed_config', done => {
+  it('called with non-valid job argument #2, missing datafeed_config', (done) => {
     validateCardinality(callWithRequestFactory(mockResponses), { analysis_config: {} }).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
       () => done()
     );
   });
 
-  it('called with non-valid job argument #3, missing datafeed_config.indices', done => {
+  it('called with non-valid job argument #3, missing datafeed_config.indices', (done) => {
     const job = { analysis_config: {}, datafeed_config: {} };
     validateCardinality(callWithRequestFactory(mockResponses), job).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
@@ -60,7 +60,7 @@ describe('ML - validateCardinality', () => {
     );
   });
 
-  it('called with non-valid job argument #4, missing data_description', done => {
+  it('called with non-valid job argument #4, missing data_description', (done) => {
     const job = { analysis_config: {}, datafeed_config: { indices: [] } };
     validateCardinality(callWithRequestFactory(mockResponses), job).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
@@ -68,7 +68,7 @@ describe('ML - validateCardinality', () => {
     );
   });
 
-  it('called with non-valid job argument #5, missing data_description.time_field', done => {
+  it('called with non-valid job argument #5, missing data_description.time_field', (done) => {
     const job = { analysis_config: {}, data_description: {}, datafeed_config: { indices: [] } };
     validateCardinality(callWithRequestFactory(mockResponses), job).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
@@ -76,7 +76,7 @@ describe('ML - validateCardinality', () => {
     );
   });
 
-  it('called with non-valid job argument #6, missing analysis_config.influencers', done => {
+  it('called with non-valid job argument #6, missing analysis_config.influencers', (done) => {
     const job = {
       analysis_config: {},
       datafeed_config: { indices: [] },
@@ -97,13 +97,13 @@ describe('ML - validateCardinality', () => {
       },
     };
 
-    return validateCardinality(callWithRequestFactory(mockResponses), job).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateCardinality(callWithRequestFactory(mockResponses), job).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).to.eql([]);
     });
   });
 
-  const getJobConfig = fieldName => ({
+  const getJobConfig = (fieldName) => ({
     analysis_config: {
       detectors: [
         {
@@ -123,33 +123,35 @@ describe('ML - validateCardinality', () => {
     const job = getJobConfig(fieldName);
     const mockCardinality = _.cloneDeep(mockResponses);
     mockCardinality.search.aggregations.airline_cardinality.value = cardinality;
-    return validateCardinality(callWithRequestFactory(mockCardinality), job, {}).then(messages => {
-      const ids = messages.map(m => m.id);
-      test(ids);
-    });
+    return validateCardinality(callWithRequestFactory(mockCardinality), job, {}).then(
+      (messages) => {
+        const ids = messages.map((m) => m.id);
+        test(ids);
+      }
+    );
   };
 
   it(`field '_source' not aggregatable`, () => {
     const job = getJobConfig('partition_field_name');
     job.analysis_config.detectors[0].partition_field_name = '_source';
-    return validateCardinality(callWithRequestFactory(mockResponses), job).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateCardinality(callWithRequestFactory(mockResponses), job).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).to.eql(['field_not_aggregatable']);
     });
   });
 
   it(`field 'airline' aggregatable`, () => {
     const job = getJobConfig('partition_field_name');
-    return validateCardinality(callWithRequestFactory(mockResponses), job).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateCardinality(callWithRequestFactory(mockResponses), job).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).to.eql(['success_cardinality']);
     });
   });
 
   it('field not aggregatable', () => {
     const job = getJobConfig('partition_field_name');
-    return validateCardinality(callWithRequestFactory({}), job).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateCardinality(callWithRequestFactory({}), job).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).to.eql(['field_not_aggregatable']);
     });
   });
@@ -160,50 +162,50 @@ describe('ML - validateCardinality', () => {
       function: 'count',
       partition_field_name: 'airline',
     });
-    return validateCardinality(callWithRequestFactory({}, true), job).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateCardinality(callWithRequestFactory({}, true), job).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).to.eql(['fields_not_aggregatable']);
     });
   });
 
   it('valid partition field cardinality', () => {
-    return testCardinality('partition_field_name', 50, ids => {
+    return testCardinality('partition_field_name', 50, (ids) => {
       expect(ids).to.eql(['success_cardinality']);
     });
   });
 
   it('too high partition field cardinality', () => {
-    return testCardinality('partition_field_name', 1001, ids => {
+    return testCardinality('partition_field_name', 1001, (ids) => {
       expect(ids).to.eql(['cardinality_partition_field']);
     });
   });
 
   it('valid by field cardinality', () => {
-    return testCardinality('by_field_name', 50, ids => {
+    return testCardinality('by_field_name', 50, (ids) => {
       expect(ids).to.eql(['success_cardinality']);
     });
   });
 
   it('too high by field cardinality', () => {
-    return testCardinality('by_field_name', 1001, ids => {
+    return testCardinality('by_field_name', 1001, (ids) => {
       expect(ids).to.eql(['cardinality_by_field']);
     });
   });
 
   it('valid over field cardinality', () => {
-    return testCardinality('over_field_name', 50, ids => {
+    return testCardinality('over_field_name', 50, (ids) => {
       expect(ids).to.eql(['success_cardinality']);
     });
   });
 
   it('too low over field cardinality', () => {
-    return testCardinality('over_field_name', 9, ids => {
+    return testCardinality('over_field_name', 9, (ids) => {
       expect(ids).to.eql(['cardinality_over_field_low']);
     });
   });
 
   it('too high over field cardinality', () => {
-    return testCardinality('over_field_name', 1000001, ids => {
+    return testCardinality('over_field_name', 1000001, (ids) => {
       expect(ids).to.eql(['cardinality_over_field_high']);
     });
   });
@@ -214,8 +216,8 @@ describe('ML - validateCardinality', () => {
     job.model_plot_config = { enabled: false };
     const mockCardinality = _.cloneDeep(mockResponses);
     mockCardinality.search.aggregations.airline_cardinality.value = cardinality;
-    return validateCardinality(callWithRequestFactory(mockCardinality), job).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateCardinality(callWithRequestFactory(mockCardinality), job).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).to.eql(['success_cardinality']);
     });
   });
@@ -225,8 +227,8 @@ describe('ML - validateCardinality', () => {
     job.model_plot_config = { enabled: true };
     const mockCardinality = _.cloneDeep(mockResponses);
     mockCardinality.search.aggregations.airline_cardinality.value = cardinality;
-    return validateCardinality(callWithRequestFactory(mockCardinality), job).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateCardinality(callWithRequestFactory(mockCardinality), job).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).to.eql(['cardinality_model_plot_high']);
     });
   });
@@ -236,8 +238,8 @@ describe('ML - validateCardinality', () => {
     job.model_plot_config = { enabled: false };
     const mockCardinality = _.cloneDeep(mockResponses);
     mockCardinality.search.aggregations.airline_cardinality.value = cardinality;
-    return validateCardinality(callWithRequestFactory(mockCardinality), job).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateCardinality(callWithRequestFactory(mockCardinality), job).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).to.eql(['cardinality_by_field']);
     });
   });
@@ -247,8 +249,8 @@ describe('ML - validateCardinality', () => {
     job.model_plot_config = { enabled: true };
     const mockCardinality = _.cloneDeep(mockResponses);
     mockCardinality.search.aggregations.airline_cardinality.value = cardinality;
-    return validateCardinality(callWithRequestFactory(mockCardinality), job).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateCardinality(callWithRequestFactory(mockCardinality), job).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).to.eql(['cardinality_model_plot_high', 'cardinality_by_field']);
     });
   });
@@ -258,8 +260,8 @@ describe('ML - validateCardinality', () => {
     job.model_plot_config = { enabled: true, terms: 'AAL,AAB' };
     const mockCardinality = _.cloneDeep(mockResponses);
     mockCardinality.search.aggregations.airline_cardinality.value = cardinality;
-    return validateCardinality(callWithRequestFactory(mockCardinality), job).then(messages => {
-      const ids = messages.map(m => m.id);
+    return validateCardinality(callWithRequestFactory(mockCardinality), job).then((messages) => {
+      const ids = messages.map((m) => m.id);
       expect(ids).to.eql(['cardinality_by_field']);
     });
   });

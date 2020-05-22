@@ -16,16 +16,16 @@ import { getCoreStart } from '../legacy';
 
 const { esService: strings } = ErrorStrings;
 
-const getApiPath = function() {
+const getApiPath = function () {
   const basePath = getCoreStart().http.basePath.get();
   return basePath + API_ROUTE;
 };
 
-const getSavedObjectsClient = function() {
+const getSavedObjectsClient = function () {
   return getCoreStart().savedObjects.client;
 };
 
-const getAdvancedSettings = function() {
+const getAdvancedSettings = function () {
   return getCoreStart().uiSettings;
 };
 
@@ -34,7 +34,7 @@ export const getFields = (index = '_all') => {
     .get(`${getApiPath()}/es_fields?index=${index}`)
     .then(({ data: mapping }: { data: object }) =>
       Object.keys(mapping)
-        .filter(field => !field.startsWith('_')) // filters out meta fields
+        .filter((field) => !field.startsWith('_')) // filters out meta fields
         .sort()
     )
     .catch((err: Error) =>
@@ -52,8 +52,8 @@ export const getIndices = () =>
       searchFields: ['title'],
       perPage: 1000,
     })
-    .then(resp => {
-      return resp.savedObjects.map(savedObject => {
+    .then((resp) => {
+      return resp.savedObjects.map((savedObject) => {
         return savedObject.attributes.title;
       });
     })
@@ -65,7 +65,7 @@ export const getDefaultIndex = () => {
   return defaultIndexId
     ? getSavedObjectsClient()
         .get<IndexPatternAttributes>('index-pattern', defaultIndexId)
-        .then(defaultIndex => defaultIndex.attributes.title)
-        .catch(err => notify.error(err, { title: strings.getDefaultIndexFetchErrorMessage() }))
+        .then((defaultIndex) => defaultIndex.attributes.title)
+        .catch((err) => notify.error(err, { title: strings.getDefaultIndexFetchErrorMessage() }))
     : Promise.resolve('');
 };

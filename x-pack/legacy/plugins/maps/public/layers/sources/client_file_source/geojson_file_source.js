@@ -77,7 +77,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
         return;
       }
       const { fields, id } = indexPatternResp;
-      const geoFieldArr = fields.filter(field =>
+      const geoFieldArr = fields.filter((field) =>
         Object.values(ES_GEO_FIELD_TYPE).includes(field.type)
       );
       const geoField = _.get(geoFieldArr, '[0].name');

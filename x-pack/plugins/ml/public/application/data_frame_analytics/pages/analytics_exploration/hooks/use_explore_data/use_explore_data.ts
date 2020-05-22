@@ -93,7 +93,7 @@ export const useExploreData = (jobId: string): UseExploreDataReturnType => {
 
   // get analytics configuration
   useEffect(() => {
-    (async function() {
+    (async function () {
       const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
       const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
       const stats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
@@ -166,7 +166,7 @@ export const useExploreData = (jobId: string): UseExploreDataReturnType => {
           const resultsField = jobConfig.dest.results_field;
 
           const sort: EsSorting = sortingColumns
-            .map(column => {
+            .map((column) => {
               const { id } = column;
               column.id = isKeywordAndTextType(id) ? `${id}.keyword` : id;
               return column;
@@ -206,9 +206,9 @@ export const useExploreData = (jobId: string): UseExploreDataReturnType => {
           // This avoids confusion later on if a field name has dots in its name
           // or is a nested fields when displaying it via EuiInMemoryTable.
           const flattenedFields = getFlattenedFields(docs[0]._source, resultsField);
-          const transformedTableItems = docs.map(doc => {
+          const transformedTableItems = docs.map((doc) => {
             const item: TableItem = {};
-            flattenedFields.forEach(ff => {
+            flattenedFields.forEach((ff) => {
               item[ff] = getNestedProperty(doc._source, ff);
               if (item[ff] === undefined) {
                 // If the attribute is undefined, it means it was not a nested property

@@ -57,7 +57,7 @@ function defaultStartDeps(availableApps?: App[]) {
 
   if (availableApps) {
     deps.application.applications$ = new Rx.BehaviorSubject<Map<string, App>>(
-      new Map(availableApps.map(app => [app.id, app]))
+      new Map(availableApps.map((app) => [app.id, app]))
     );
   }
 
@@ -132,10 +132,7 @@ describe('start', () => {
   describe('brand', () => {
     it('updates/emits the brand as it changes', async () => {
       const { chrome, service } = await start();
-      const promise = chrome
-        .getBrand$()
-        .pipe(toArray())
-        .toPromise();
+      const promise = chrome.getBrand$().pipe(toArray()).toPromise();
 
       chrome.setBrand({
         logo: 'big logo',
@@ -165,10 +162,7 @@ describe('start', () => {
   describe('visibility', () => {
     it('updates/emits the visibility', async () => {
       const { chrome, service } = await start();
-      const promise = chrome
-        .getIsVisible$()
-        .pipe(toArray())
-        .toPromise();
+      const promise = chrome.getIsVisible$().pipe(toArray()).toPromise();
 
       chrome.setIsVisible(true);
       chrome.setIsVisible(false);
@@ -189,10 +183,7 @@ describe('start', () => {
       window.history.pushState(undefined, '', '#/home?a=b&embed=true');
 
       const { chrome, service } = await start();
-      const promise = chrome
-        .getIsVisible$()
-        .pipe(toArray())
-        .toPromise();
+      const promise = chrome.getIsVisible$().pipe(toArray()).toPromise();
 
       chrome.setIsVisible(true);
       chrome.setIsVisible(false);
@@ -217,13 +208,10 @@ describe('start', () => {
       ]);
       const { applications$, navigateToApp } = startDeps.application;
       const { chrome, service } = await start({ startDeps });
-      const promise = chrome
-        .getIsVisible$()
-        .pipe(toArray())
-        .toPromise();
+      const promise = chrome.getIsVisible$().pipe(toArray()).toPromise();
 
       const availableApps = await applications$.pipe(take(1)).toPromise();
-      [...availableApps.keys()].forEach(appId => navigateToApp(appId));
+      [...availableApps.keys()].forEach((appId) => navigateToApp(appId));
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
@@ -240,10 +228,7 @@ describe('start', () => {
       const startDeps = defaultStartDeps([new FakeApp('alpha', true)]);
       const { navigateToApp } = startDeps.application;
       const { chrome, service } = await start({ startDeps });
-      const promise = chrome
-        .getIsVisible$()
-        .pipe(toArray())
-        .toPromise();
+      const promise = chrome.getIsVisible$().pipe(toArray()).toPromise();
 
       navigateToApp('alpha');
       chrome.setIsVisible(true);
@@ -262,10 +247,7 @@ describe('start', () => {
   describe('application classes', () => {
     it('updates/emits the application classes', async () => {
       const { chrome, service } = await start();
-      const promise = chrome
-        .getApplicationClasses$()
-        .pipe(toArray())
-        .toPromise();
+      const promise = chrome.getApplicationClasses$().pipe(toArray()).toPromise();
 
       chrome.addApplicationClass('foo');
       chrome.addApplicationClass('foo');
@@ -313,10 +295,7 @@ describe('start', () => {
   describe('badge', () => {
     it('updates/emits the current badge', async () => {
       const { chrome, service } = await start();
-      const promise = chrome
-        .getBadge$()
-        .pipe(toArray())
-        .toPromise();
+      const promise = chrome.getBadge$().pipe(toArray()).toPromise();
 
       chrome.setBadge({ text: 'foo', tooltip: `foo's tooltip` });
       chrome.setBadge({ text: 'bar', tooltip: `bar's tooltip` });
@@ -343,10 +322,7 @@ describe('start', () => {
   describe('breadcrumbs', () => {
     it('updates/emits the current set of breadcrumbs', async () => {
       const { chrome, service } = await start();
-      const promise = chrome
-        .getBreadcrumbs$()
-        .pipe(toArray())
-        .toPromise();
+      const promise = chrome.getBreadcrumbs$().pipe(toArray()).toPromise();
 
       chrome.setBreadcrumbs([{ text: 'foo' }, { text: 'bar' }]);
       chrome.setBreadcrumbs([{ text: 'foo' }]);
@@ -384,10 +360,7 @@ describe('start', () => {
   describe('help extension', () => {
     it('updates/emits the current help extension', async () => {
       const { chrome, service } = await start();
-      const promise = chrome
-        .getHelpExtension$()
-        .pipe(toArray())
-        .toPromise();
+      const promise = chrome.getHelpExtension$().pipe(toArray()).toPromise();
 
       chrome.setHelpExtension({ appName: 'App name', content: () => () => undefined });
       chrome.setHelpExtension(undefined);

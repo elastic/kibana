@@ -52,7 +52,7 @@ export class ElementTypes extends Component {
     this.props.findCustomElements();
   }
 
-  _showEditModal = elementToEdit => this.setState({ elementToEdit });
+  _showEditModal = (elementToEdit) => this.setState({ elementToEdit });
 
   _hideEditModal = () => this.setState({ elementToEdit: null });
 
@@ -63,7 +63,7 @@ export class ElementTypes extends Component {
     this._hideEditModal();
   };
 
-  _showDeleteModal = elementToDelete => this.setState({ elementToDelete });
+  _showDeleteModal = (elementToDelete) => this.setState({ elementToDelete });
 
   _hideDeleteModal = () => this.setState({ elementToDelete: null });
 
@@ -115,7 +115,7 @@ export class ElementTypes extends Component {
     );
   };
 
-  _sortElements = elements =>
+  _sortElements = (elements) =>
     sortBy(
       map(elements, (element, name) => ({ name, ...element })),
       'displayName'

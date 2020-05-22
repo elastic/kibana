@@ -13,12 +13,12 @@ import { pageObjects } from './page_objects';
 // that returns an object with the projects config values
 
 /* eslint-disable import/no-default-export */
-export default async function({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
 
   // Find all folders in ./plugins since we treat all them as plugin folder
   const allFiles = fs.readdirSync(resolve(__dirname, 'plugins'));
-  const plugins = allFiles.filter(file =>
+  const plugins = allFiles.filter((file) =>
     fs.statSync(resolve(__dirname, 'plugins', file)).isDirectory()
   );
 
@@ -37,7 +37,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
-        ...plugins.map(pluginDir => `--plugin-path=${resolve(__dirname, 'plugins', pluginDir)}`),
+        ...plugins.map((pluginDir) => `--plugin-path=${resolve(__dirname, 'plugins', pluginDir)}`),
         // Required to load new platform plugins via `--plugin-path` flag.
         '--env.name=development',
       ],

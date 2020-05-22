@@ -39,7 +39,7 @@ export function registerSaveRoute(server) {
       const pipeline = Pipeline.fromDownstreamJSON(request.payload, pipelineId, username);
       return savePipeline(callWithRequest, pipeline.id, pipeline.upstreamJSON)
         .then(() => h.response().code(204))
-        .catch(e => wrapEsError(e));
+        .catch((e) => wrapEsError(e));
     },
     config: {
       pre: [licensePreRouting],

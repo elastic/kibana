@@ -29,7 +29,7 @@ export class IndexPatternCreationManager {
 
   public add(Config: typeof IndexPatternCreationConfig) {
     const config = new Config({ httpClient: this.httpClient });
-    if (this.configs.findIndex(c => c.key === config.key) !== -1) {
+    if (this.configs.findIndex((c) => c.key === config.key) !== -1) {
       throw new Error(`${config.key} exists in IndexPatternCreationManager.`);
     }
     this.configs.push(config);
@@ -37,7 +37,7 @@ export class IndexPatternCreationManager {
 
   public getType(key: string | undefined): IndexPatternCreationConfig | null {
     if (key) {
-      const index = this.configs.findIndex(config => config.key === key);
+      const index = this.configs.findIndex((config) => config.key === key);
       return this.configs[index] || null;
     } else {
       return this.getType('default');
@@ -47,7 +47,7 @@ export class IndexPatternCreationManager {
   public async getIndexPatternCreationOptions(urlHandler: UrlHandler) {
     const options: IndexPatternCreationOption[] = [];
     await Promise.all(
-      this.configs.map(async config => {
+      this.configs.map(async (config) => {
         const option = config.getIndexPatternCreationOption
           ? await config.getIndexPatternCreationOption(urlHandler)
           : null;

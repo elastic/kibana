@@ -215,10 +215,7 @@ describe('TaskPool', () => {
         },
         get startedAt() {
           // 5 and a half minutes
-          return moment(now)
-            .subtract(5, 'm')
-            .subtract(30, 's')
-            .toDate();
+          return moment(now).subtract(5, 'm').subtract(30, 's').toDate();
         },
         cancel: shouldRun,
       },

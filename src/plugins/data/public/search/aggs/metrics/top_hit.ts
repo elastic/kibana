@@ -61,7 +61,7 @@ export const topHitMetricAgg = new MetricAggType({
       type: 'field',
       onlyAggregatable: false,
       filterFieldTypes: Object.values(KBN_FIELD_TYPES).filter(
-        type => type !== KBN_FIELD_TYPES.HISTOGRAM
+        (type) => type !== KBN_FIELD_TYPES.HISTOGRAM
       ),
       write(agg, output) {
         const field = agg.getParam('field');
@@ -210,7 +210,7 @@ export const topHitMetricAgg = new MetricAggType({
     const path = agg.getParam('field').name;
 
     let values = _.flatten(
-      hits.map(hit =>
+      hits.map((hit) =>
         path === '_source' ? hit._source : agg.getIndexPattern().flattenHit(hit, true)[path]
       )
     );

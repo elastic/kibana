@@ -35,7 +35,7 @@ export function registerCanvasUsageCollector(
     isReady: () => true,
     fetch: async (callCluster: CallCluster) => {
       const collectorResults = await Promise.all(
-        collectors.map(collector => collector(kibanaIndex, callCluster))
+        collectors.map((collector) => collector(kibanaIndex, callCluster))
       );
 
       return collectorResults.reduce(

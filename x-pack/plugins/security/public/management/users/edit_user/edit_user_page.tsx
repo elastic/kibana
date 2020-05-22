@@ -378,8 +378,8 @@ export class EditUserPage extends Component<Props, State> {
       return null;
     }
 
-    const hasAnyDeprecatedRolesAssigned = selectedRoles.some(selected => {
-      const role = roles.find(r => r.name === selected);
+    const hasAnyDeprecatedRolesAssigned = selectedRoles.some((selected) => {
+      const role = roles.find((r) => r.name === selected);
       return role && isRoleDeprecated(role);
     });
 
@@ -390,9 +390,7 @@ export class EditUserPage extends Component<Props, State> {
           defaultMessage="This user is assigned a deprecated role. Please migrate to a supported role."
         />
       </span>
-    ) : (
-      undefined
-    );
+    ) : undefined;
 
     return (
       <div className="secUsersEditPage">

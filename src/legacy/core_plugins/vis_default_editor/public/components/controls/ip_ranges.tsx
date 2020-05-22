@@ -52,7 +52,7 @@ function IpRangesParamEditor({
           list={value.mask}
           showValidation={showValidation}
           onBlur={setTouched}
-          onChange={items => handleChange(IpRangeTypes.MASK, items)}
+          onChange={(items) => handleChange(IpRangeTypes.MASK, items)}
           setValidity={setValidity}
         />
       ) : (
@@ -60,7 +60,7 @@ function IpRangesParamEditor({
           list={value.fromTo}
           showValidation={showValidation}
           onBlur={setTouched}
-          onChange={items => handleChange(IpRangeTypes.FROM_TO, items)}
+          onChange={(items) => handleChange(IpRangeTypes.FROM_TO, items)}
           setValidity={setValidity}
         />
       )}
