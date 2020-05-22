@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, KibanaRequest } from '../../../../../src/core/server';
+import { Logger, KibanaRequest, SavedObjectsClientContract } from '../../../../../src/core/server';
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
 import {
   ActionTypeExecutorResult,
@@ -12,7 +12,6 @@ import {
   GetServicesFunction,
   RawAction,
   PreConfiguredAction,
-  Services,
 } from '../types';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { SpacesServiceSetup } from '../../../spaces/server';
@@ -23,6 +22,7 @@ export interface ActionExecutorContext {
   logger: Logger;
   spaces?: SpacesServiceSetup;
   getServices: GetServicesFunction;
+  getScopedSavedObjectsClient: (req: KibanaRequest) => SavedObjectsClientContract;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
@@ -76,6 +76,7 @@ export class ActionExecutor {
       actionTypeRegistry,
       eventLogger,
       preconfiguredActions,
+      getScopedSavedObjectsClient,
     } = this.actionExecutorContext!;
 
     const services = getServices(request);
@@ -83,7 +84,7 @@ export class ActionExecutor {
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
     const { actionTypeId, name, config, secrets } = await getActionInfo(
-      services,
+      getScopedSavedObjectsClient(request),
       encryptedSavedObjectsClient,
       preconfiguredActions,
       actionId,
@@ -195,7 +196,7 @@ interface ActionInfo {
 }
 
 async function getActionInfo(
-  services: Services,
+  savedObjectsClient: SavedObjectsClientContract,
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
   preconfiguredActions: PreConfiguredAction[],
   actionId: string,
@@ -218,7 +219,7 @@ async function getActionInfo(
   // ensure user can read the action before processing
   const {
     attributes: { actionTypeId, config, name },
-  } = await services.savedObjectsClient.get<RawAction>('action', actionId);
+  } = await savedObjectsClient.get<RawAction>('action', actionId);
 
   const {
     attributes: { secrets },

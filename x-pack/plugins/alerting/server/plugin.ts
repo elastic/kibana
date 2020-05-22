@@ -291,7 +291,7 @@ export class AlertingPlugin {
     savedObjects: SavedObjectsServiceStart,
     request: KibanaRequest
   ) {
-    return savedObjects.getScopedClient(request, { includedHiddenTypes: ['alert'] });
+    return savedObjects.getScopedClient(request, { includedHiddenTypes: ['alert', 'action'] });
   }
 
   public stop() {
