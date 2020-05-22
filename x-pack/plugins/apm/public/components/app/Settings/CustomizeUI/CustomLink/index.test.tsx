@@ -37,7 +37,7 @@ const data = [
 describe('CustomLink', () => {
   let callApmApiSpy: jasmine.Spy;
   beforeAll(() => {
-    callApmApiSpy = spyOn(apmApi, 'callApmApi').and.returnValue({});
+    callApmApiSpy = jest.spyOn(apmApi, 'callApmApi').mockReturnValue({});
   });
   afterAll(() => {
     jest.resetAllMocks();
@@ -54,7 +54,7 @@ describe('CustomLink', () => {
   });
   describe('empty prompt', () => {
     beforeAll(() => {
-      spyOn(hooks, 'useFetcher').and.returnValue({
+      jest.spyOn(hooks, 'useFetcher').mockReturnValue({
         data: [],
         status: 'success'
       });
@@ -75,7 +75,7 @@ describe('CustomLink', () => {
 
   describe('overview', () => {
     beforeAll(() => {
-      spyOn(hooks, 'useFetcher').and.returnValue({
+      jest.spyOn(hooks, 'useFetcher').mockReturnValue({
         data,
         status: 'success'
       });
@@ -122,8 +122,8 @@ describe('CustomLink', () => {
     const refetch = jest.fn();
     let saveCustomLinkSpy: Function;
     beforeAll(() => {
-      saveCustomLinkSpy = spyOn(saveCustomLink, 'saveCustomLink');
-      spyOn(hooks, 'useFetcher').and.returnValue({
+      saveCustomLinkSpy = jest.spyOn(saveCustomLink, 'saveCustomLink');
+      jest.spyOn(hooks, 'useFetcher').mockReturnValue({
         data,
         status: 'success',
         refetch
@@ -268,7 +268,7 @@ describe('CustomLink', () => {
 
   describe('invalid license', () => {
     beforeAll(() => {
-      spyOn(hooks, 'useFetcher').and.returnValue({
+      jest.spyOn(hooks, 'useFetcher').mockReturnValue({
         data: [],
         status: 'success'
       });

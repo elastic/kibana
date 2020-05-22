@@ -59,7 +59,7 @@ describe('Service Overview -> View', () => {
     global.sessionStorage = new SessionStorageMock();
 
     // mock urlParams
-    spyOn(urlParamsHooks, 'useUrlParams').and.returnValue({
+    jest.spyOn(urlParamsHooks, 'useUrlParams').mockReturnValue({
       urlParams: {
         start: 'myStart',
         end: 'myEnd'
