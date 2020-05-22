@@ -79,7 +79,7 @@ export const DynamicParameter = ({ defaultToggleValue }: Props) => {
       formFieldPath="dynamic_toggle"
       defaultToggleValue={defaultToggleValue}
     >
-      {isOn => {
+      {(isOn) => {
         return isOn === false ? (
           <UseField
             path="dynamic_strict"

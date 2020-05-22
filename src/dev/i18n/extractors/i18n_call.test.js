@@ -41,19 +41,19 @@ describe('dev/i18n/extractors/i18n_call', () => {
   test('extracts "i18n" and "i18n.translate" functions call message', () => {
     let callExpressionNode = [
       ...traverseNodes(parse(i18nCallMessageSource).program.body),
-    ].find(node => isCallExpression(node));
+    ].find((node) => isCallExpression(node));
 
     expect(extractI18nCallMessages(callExpressionNode)).toMatchSnapshot();
 
     callExpressionNode = [
       ...traverseNodes(parse(translateCallMessageSource).program.body),
-    ].find(node => isCallExpression(node));
+    ].find((node) => isCallExpression(node));
 
     expect(extractI18nCallMessages(callExpressionNode)).toMatchSnapshot();
 
     callExpressionNode = [
       ...traverseNodes(parse(i18nCallMessageWithTemplateLiteralSource).program.body),
-    ].find(node => isCallExpression(node));
+    ].find((node) => isCallExpression(node));
 
     expect(extractI18nCallMessages(callExpressionNode)).toMatchSnapshot();
   });
@@ -62,7 +62,7 @@ describe('dev/i18n/extractors/i18n_call', () => {
     const source = `
 i18n(messageIdIdentifier, { defaultMessage: 'Default message', description: 'Message description' });
 `;
-    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find(node =>
+    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find((node) =>
       isCallExpression(node)
     );
 
@@ -71,7 +71,7 @@ i18n(messageIdIdentifier, { defaultMessage: 'Default message', description: 'Mes
 
   test('throws if properties object is not provided', () => {
     const source = `i18n('message-id');`;
-    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find(node =>
+    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find((node) =>
       isCallExpression(node)
     );
 
@@ -83,7 +83,7 @@ i18n(messageIdIdentifier, { defaultMessage: 'Default message', description: 'Mes
 const message = 'Default message';
 i18n('message-id', { defaultMessage: message });
 `;
-    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find(node =>
+    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find((node) =>
       isCallExpression(node)
     );
 
@@ -92,7 +92,7 @@ i18n('message-id', { defaultMessage: message });
 
   test('throws on empty defaultMessage', () => {
     const source = `i18n('message-id', { defaultMessage: '' });`;
-    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find(node =>
+    const callExpressionNode = [...traverseNodes(parse(source).program.body)].find((node) =>
       isCallExpression(node)
     );
 

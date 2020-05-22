@@ -45,7 +45,7 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
         placeholder={txtUntitledDrilldown}
         value={name}
         disabled={onNameChange === noopFn}
-        onChange={event => onNameChange(event.target.value)}
+        onChange={(event) => onNameChange(event.target.value)}
         data-test-subj="drilldownNameInput"
       />
     </EuiFormRow>
@@ -60,8 +60,8 @@ export const FormDrilldownWizard: React.FC<FormDrilldownWizardProps> = ({
         actionFactories={actionFactories}
         currentActionFactory={currentActionFactory}
         config={actionConfig}
-        onActionFactoryChange={actionFactory => onActionFactoryChange(actionFactory)}
-        onConfigChange={config => onActionConfigChange(config)}
+        onActionFactoryChange={(actionFactory) => onActionFactoryChange(actionFactory)}
+        onConfigChange={(config) => onActionConfigChange(config)}
         context={actionFactoryContext}
       />
     </EuiFormRow>

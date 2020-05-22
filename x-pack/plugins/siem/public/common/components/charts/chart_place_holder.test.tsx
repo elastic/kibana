@@ -76,12 +76,9 @@ describe('ChartPlaceHolder', () => {
     shallowWrapper = shallow(
       <ChartPlaceHolder height={height} width={width} data={mockDataAllZeros} />
     );
-    expect(
-      shallowWrapper
-        .find(`[data-test-subj="chartHolderText"]`)
-        .childAt(0)
-        .text()
-    ).toEqual('All values returned zero');
+    expect(shallowWrapper.find(`[data-test-subj="chartHolderText"]`).childAt(0).text()).toEqual(
+      'All values returned zero'
+    );
   });
 
   it('should render correct wording when unexpected value exists', () => {
@@ -94,11 +91,8 @@ describe('ChartPlaceHolder', () => {
         data={mockDataUnexpectedValue as ChartSeriesData[]}
       />
     );
-    expect(
-      shallowWrapper
-        .find(`[data-test-subj="chartHolderText"]`)
-        .childAt(0)
-        .text()
-    ).toEqual('Chart Data Not Available');
+    expect(shallowWrapper.find(`[data-test-subj="chartHolderText"]`).childAt(0).text()).toEqual(
+      'Chart Data Not Available'
+    );
   });
 });
