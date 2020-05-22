@@ -80,7 +80,7 @@ function createOptimizerState(
  * calculate the total state, given a set of compiler messages
  */
 function getStatePhase(states: Array<CompilerMsg | undefined>): OptimizerState['phase'] {
-  const types = states.map(s => s?.type);
+  const types = states.map((s) => s?.type);
 
   if (types.includes('running') || types.includes(undefined)) {
     return 'running';
@@ -90,7 +90,7 @@ function getStatePhase(states: Array<CompilerMsg | undefined>): OptimizerState['
     return 'issue';
   }
 
-  if (types.every(s => s === 'compiler success')) {
+  if (types.every((s) => s === 'compiler success')) {
     return 'success';
   }
 
@@ -172,12 +172,12 @@ export function createOptimizerStateSummarizer(
       event.type === 'compiler success' ||
       event.type === 'running'
     ) {
-      const allCompilerStates = config.bundles.map(bundle => {
+      const allCompilerStates = config.bundles.map((bundle) => {
         if (event.bundleId === bundle.id) {
           return event;
         }
 
-        return state.compilerStates.find(c => c.bundleId === bundle.id);
+        return state.compilerStates.find((c) => c.bundleId === bundle.id);
       });
 
       return createOptimizerState(state, {

@@ -49,7 +49,7 @@ interface ProcResource extends Rx.Unsubscribable {
 const isNumeric = (input: any) => String(input).match(/^[0-9]+$/);
 
 let inspectPortCounter = 9230;
-const inspectFlagIndex = process.execArgv.findIndex(flag => flag.startsWith('--inspect'));
+const inspectFlagIndex = process.execArgv.findIndex((flag) => flag.startsWith('--inspect'));
 let inspectFlag: string | undefined;
 if (inspectFlagIndex !== -1) {
   const argv = process.execArgv[inspectFlagIndex];
@@ -76,7 +76,7 @@ function usingWorkerProc<T>(
 ) {
   return Rx.using(
     (): ProcResource => {
-      const args = [JSON.stringify(workerConfig), JSON.stringify(bundles.map(b => b.toSpec()))];
+      const args = [JSON.stringify(workerConfig), JSON.stringify(bundles.map((b) => b.toSpec()))];
 
       const proc = fork(require.resolve('../worker/run_worker'), args, {
         stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
@@ -96,7 +96,7 @@ function usingWorkerProc<T>(
       };
     },
 
-    resource => {
+    (resource) => {
       const { proc } = resource as ProcResource;
       return fn(proc);
     }
@@ -109,7 +109,7 @@ function observeStdio$(stream: Readable, name: WorkerStdio['stream']) {
       Rx.race(
         Rx.fromEvent<void>(stream, 'end'),
         Rx.fromEvent<Error>(stream, 'error').pipe(
-          map(error => {
+          map((error) => {
             throw error;
           })
         )
@@ -136,7 +136,7 @@ export function observeWorker(
   workerConfig: WorkerConfig,
   bundles: Bundle[]
 ): Rx.Observable<WorkerMsg | WorkerStatus> {
-  return usingWorkerProc(config, workerConfig, bundles, proc => {
+  return usingWorkerProc(config, workerConfig, bundles, (proc) => {
     let lastMsg: WorkerMsg;
 
     return Rx.merge(
@@ -173,7 +173,7 @@ export function observeWorker(
             Rx.race(
               // throw into stream on error events
               Rx.fromEvent<Error>(proc, 'error').pipe(
-                map(error => {
+                map((error) => {
                   throw new Error(`worker failed to spawn: ${error.message}`);
                 })
               ),

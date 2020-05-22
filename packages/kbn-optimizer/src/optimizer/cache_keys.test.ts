@@ -35,7 +35,7 @@ jest.mock('./get_changes.ts', () => ({
 }));
 
 jest.mock('./get_mtimes.ts', () => ({
-  getMtimes: async (paths: string[]) => new Map(paths.map(path => [path, 12345])),
+  getMtimes: async (paths: string[]) => new Map(paths.map((path) => [path, 12345])),
 }));
 
 jest.mock('execa');

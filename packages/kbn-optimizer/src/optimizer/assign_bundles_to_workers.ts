@@ -72,16 +72,16 @@ export function assignBundlesToWorkers(
    * counts and sort them by [moduleCount, id]
    */
   const bundlesWithCountsDesc = bundles
-    .filter(b => b.cache.getModuleCount() !== undefined)
+    .filter((b) => b.cache.getModuleCount() !== undefined)
     .sort(
       descending(
-        b => b.cache.getModuleCount(),
-        b => b.id
+        (b) => b.cache.getModuleCount(),
+        (b) => b.id
       )
     );
   const bundlesWithoutModuleCounts = bundles
-    .filter(b => b.cache.getModuleCount() === undefined)
-    .sort(descending(b => b.id));
+    .filter((b) => b.cache.getModuleCount() === undefined)
+    .sort(descending((b) => b.id));
 
   // sum up the total number of known modules
   const sumOfKnownModuleCount = bundlesWithCountsDesc.reduce(
@@ -106,7 +106,7 @@ export function assignBundlesToWorkers(
   /**
    * assign bundles without module counts to their own workers
    */
-  const newBundleWorkers = bundlesWithoutModuleCounts.map(b => {
+  const newBundleWorkers = bundlesWithoutModuleCounts.map((b) => {
     const assignment: Assignment = {
       moduleCount: 0,
       newBundles: 0,
@@ -123,7 +123,7 @@ export function assignBundlesToWorkers(
    */
   while (bundlesWithCountsDesc.length) {
     const [smallestWorker, nextSmallestWorker] = knownBundleWorkers.sort(
-      ascending(w => w.moduleCount)
+      ascending((w) => w.moduleCount)
     );
 
     while (!nextSmallestWorker || smallestWorker.moduleCount <= nextSmallestWorker.moduleCount) {
@@ -139,8 +139,8 @@ export function assignBundlesToWorkers(
 
   return [...newBundleWorkers, ...knownBundleWorkers].sort(
     descending(
-      bundle => bundle.newBundles,
-      bundle => bundle.moduleCount
+      (bundle) => bundle.newBundles,
+      (bundle) => bundle.moduleCount
     )
   );
 }

@@ -85,37 +85,37 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     }
   };
 
-  const initializingStates = msgs.filter(msg => msg.state.phase === 'initializing');
+  const initializingStates = msgs.filter((msg) => msg.state.phase === 'initializing');
   assert('produce at least one initializing event', initializingStates.length >= 1);
 
   const bundleCacheStates = msgs.filter(
-    msg =>
+    (msg) =>
       (msg.event?.type === 'bundle cached' || msg.event?.type === 'bundle not cached') &&
       msg.state.phase === 'initializing'
   );
   assert('produce two bundle cache events while initializing', bundleCacheStates.length === 2);
 
-  const initializedStates = msgs.filter(msg => msg.state.phase === 'initialized');
+  const initializedStates = msgs.filter((msg) => msg.state.phase === 'initialized');
   assert(
     'produce at least one initialized event',
     initializedStates.length >= 1,
     initializedStates
   );
 
-  const workerStarted = msgs.filter(msg => msg.event?.type === 'worker started');
+  const workerStarted = msgs.filter((msg) => msg.event?.type === 'worker started');
   assert('produce two worker started events', workerStarted.length === 2, workerStarted);
 
-  const runningStates = msgs.filter(msg => msg.state.phase === 'running');
+  const runningStates = msgs.filter((msg) => msg.state.phase === 'running');
   assert('produce four "running" states', runningStates.length === 4, runningStates);
 
-  const bundleNotCachedEvents = msgs.filter(msg => msg.event?.type === 'bundle not cached');
+  const bundleNotCachedEvents = msgs.filter((msg) => msg.event?.type === 'bundle not cached');
   assert(
     'produce two "bundle not cached" events',
     bundleNotCachedEvents.length === 2,
     bundleNotCachedEvents
   );
 
-  const successStates = msgs.filter(msg => msg.state.phase === 'success');
+  const successStates = msgs.filter((msg) => msg.state.phase === 'success');
   assert(
     'produce one or two "compiler success" states',
     successStates.length === 1 || successStates.length === 2,
@@ -123,7 +123,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   );
 
   const otherStates = msgs.filter(
-    msg =>
+    (msg) =>
       msg.state.phase !== 'initializing' &&
       msg.state.phase !== 'success' &&
       msg.state.phase !== 'running' &&
@@ -132,7 +132,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   );
   assert('produce zero unexpected states', otherStates.length === 0, otherStates);
 
-  const foo = config.bundles.find(b => b.id === 'foo')!;
+  const foo = config.bundles.find((b) => b.id === 'foo')!;
   expect(foo).toBeTruthy();
   foo.cache.refresh();
   expect(foo.cache.getModuleCount()).toBe(4);
@@ -145,7 +145,7 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
     ]
   `);
 
-  const bar = config.bundles.find(b => b.id === 'bar')!;
+  const bar = config.bundles.find((b) => b.id === 'bar')!;
   expect(bar).toBeTruthy();
   bar.cache.refresh();
   expect(bar.cache.getModuleCount()).toBe(
@@ -179,7 +179,7 @@ it('uses cache on second run and exist cleanly', async () => {
 
   const msgs = await runOptimizer(config)
     .pipe(
-      tap(state => {
+      tap((state) => {
         if (state.event?.type === 'worker stdio') {
           // eslint-disable-next-line no-console
           console.log('worker', state.event.stream, state.event.chunk.toString('utf8'));
@@ -189,7 +189,7 @@ it('uses cache on second run and exist cleanly', async () => {
     )
     .toPromise();
 
-  expect(msgs.map(m => m.state.phase)).toMatchInlineSnapshot(`
+  expect(msgs.map((m) => m.state.phase)).toMatchInlineSnapshot(`
     Array [
       "initializing",
       "initializing",
@@ -208,9 +208,7 @@ it('prepares assets for distribution', async () => {
     dist: true,
   });
 
-  await runOptimizer(config)
-    .pipe(logOptimizerState(log, config), toArray())
-    .toPromise();
+  await runOptimizer(config).pipe(logOptimizerState(log, config), toArray()).toPromise();
 
   expectFileMatchesSnapshotWithCompression('plugins/foo/target/public/foo.plugin.js', 'foo bundle');
   expectFileMatchesSnapshotWithCompression(
