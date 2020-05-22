@@ -4,6 +4,7 @@
     "types": [
       "mocha",
       "node",
+      "jest",
       "flot"
     ]
   },
