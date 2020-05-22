@@ -44,28 +44,35 @@ export interface Process extends EventEmitter {
  *     call errored with an 'ERR_IPC_CHANNEL_CLOSED' exception
  */
 export function observeParentOffline(process: Process, workerMsgs: WorkerMsgs) {
-  return sleep(5000).pipe(
-    mergeMap(() => {
-      if (!process.connected || !process.send) {
-        return Rx.of('parent offline (disconnected)');
-      }
+  return Rx.race(
+    Rx.fromEvent(process, 'disconnect').pipe(
+      take(1),
+      map(() => 'parent offline (disconnect event)')
+    ),
 
-      process.send(workerMsgs.ping());
+    sleep(5000).pipe(
+      mergeMap(() => {
+        if (!process.connected || !process.send) {
+          return Rx.of('parent offline (disconnected)');
+        }
 
-      const pong$ = Rx.fromEvent<[any]>(process, 'message').pipe(
-        first(([msg]) => isParentPong(msg)),
-        map(() => {
-          throw new Error('parent still online');
-        })
-      );
+        process.send(workerMsgs.ping());
 
-      // give the parent some time to respond, if the ping
-      // wins the race the parent is considered online
-      const timeout$ = sleep(5000).pipe(map(() => 'parent offline (ping timeout)'));
+        const pong$ = Rx.fromEvent<[any]>(process, 'message').pipe(
+          first(([msg]) => isParentPong(msg)),
+          map(() => {
+            throw new Error('parent still online');
+          })
+        );
 
-      return Rx.race(pong$, timeout$);
-    }),
+        // give the parent some time to respond, if the ping
+        // wins the race the parent is considered online
+        const timeout$ = sleep(5000).pipe(map(() => 'parent offline (ping timeout)'));
 
+        return Rx.race(pong$, timeout$);
+      })
+    )
+  ).pipe(
     /**
      * resubscribe to the source observable (triggering the timer,
      * ping, wait for response) if the source observable does not

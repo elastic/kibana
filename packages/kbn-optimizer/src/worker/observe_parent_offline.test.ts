@@ -75,6 +75,18 @@ async function waitForTick() {
 }
 
 describe('emits and completes when parent exists because:', () => {
+  test('"disconnect" event', async () => {
+    const mockProc = new MockProcess();
+    const promise = record(observeParentOffline(mockProc, workerMsgs));
+    mockProc.emit('disconnect');
+    expect(await promise).toMatchInlineSnapshot(`
+      Array [
+        "next: 'parent offline (disconnect event)'",
+        "complete",
+      ]
+    `);
+  });
+
   test('process.connected is false', async () => {
     const mockProc = new MockProcess({
       connected: false,
