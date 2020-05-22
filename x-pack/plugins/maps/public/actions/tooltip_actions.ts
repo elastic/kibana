@@ -76,15 +76,15 @@ export function cleanTooltipStateForLayer(layerId: string, layerFeatures: Featur
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
     let featuresRemoved = false;
     const openTooltips = getOpenTooltips(getState())
-      .map(tooltipState => {
-        const nextFeatures = tooltipState.features.filter(tooltipFeature => {
+      .map((tooltipState) => {
+        const nextFeatures = tooltipState.features.filter((tooltipFeature) => {
           if (tooltipFeature.layerId !== layerId) {
             // feature from another layer, keep it
             return true;
           }
 
           // Keep feature if it is still in layer
-          return layerFeatures.some(layerFeature => {
+          return layerFeatures.some((layerFeature) => {
             return layerFeature.properties![FEATURE_ID_PROPERTY_NAME] === tooltipFeature.id;
           });
         });
@@ -95,7 +95,7 @@ export function cleanTooltipStateForLayer(layerId: string, layerFeatures: Featur
 
         return { ...tooltipState, features: nextFeatures };
       })
-      .filter(tooltipState => {
+      .filter((tooltipState) => {
         return tooltipState.features.length > 0;
       });
 
