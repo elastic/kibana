@@ -135,7 +135,7 @@ describe('Step1', () => {
 
       expect(kfetch).toHaveBeenCalledWith({
         method: 'POST',
-        pathname: `/api/actions`,
+        pathname: `/api/actions/action`,
         body: JSON.stringify({
           name: 'Email action for Stack Monitoring alerts',
           actionTypeId: ALERT_ACTION_TYPE_EMAIL,
