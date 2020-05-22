@@ -14,7 +14,7 @@ import {
   AgentEventSOAttributes,
   AgentMetadata,
 } from '../../types';
-
+import { apm } from '../../index';
 import { agentConfigService } from '../agent_config';
 import * as APIKeysService from '../api_keys';
 import { AGENT_SAVED_OBJECT_TYPE, AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../constants';
@@ -27,6 +27,7 @@ export async function agentCheckin(
   events: NewAgentEvent[],
   localMetadata?: any
 ) {
+  const fnSpan = apm.startSpan('agentservice checkin');
   const updateData: {
     last_checkin: string;
     default_api_key?: string;
@@ -79,7 +80,7 @@ export async function agentCheckin(
   }
 
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id, updateData);
-
+  if (fnSpan) fnSpan.end();
   return { actions };
 }
 
@@ -88,6 +89,7 @@ async function processEventsForCheckin(
   agent: Agent,
   events: NewAgentEvent[]
 ) {
+  const fnSpan = apm.startSpan('agentservice processEventsForCheckin');
   const acknowledgedActionIds: string[] = [];
   const updatedErrorEvents: Array<AgentEvent | NewAgentEvent> = [...agent.current_error_events];
   for (const event of events) {
@@ -113,7 +115,7 @@ async function processEventsForCheckin(
   if (events.length > 0) {
     await createEventsForAgent(soClient, agent.id, events);
   }
-
+  if (fnSpan) fnSpan.end();
   return {
     acknowledgedActionIds,
     updatedErrorEvents,
@@ -125,6 +127,7 @@ async function createEventsForAgent(
   agentId: string,
   events: NewAgentEvent[]
 ) {
+  const span = apm.startSpan('createEventsForAgent .map');
   const objects: Array<SavedObjectsBulkCreateObject<AgentEventSOAttributes>> = events.map(
     eventData => {
       return {
@@ -136,7 +139,7 @@ async function createEventsForAgent(
       };
     }
   );
-
+  if (span) span.end();
   return soClient.bulkCreate(objects);
 }
 

@@ -31,7 +31,7 @@ import {
 import * as AgentService from '../../services/agents';
 import * as APIKeyService from '../../services/api_keys';
 import { appContextService } from '../../services/app_context';
-
+import { apm } from '../../index';
 export function getInternalUserSOClient(request: KibanaRequest) {
   // soClient as kibana internal users, be carefull on how you use it, security is not enabled
   return appContextService.getSavedObjects().getScopedClient(request, {
@@ -175,6 +175,7 @@ export const postAgentCheckinHandler: RequestHandler<
   undefined,
   TypeOf<typeof PostAgentCheckinRequestSchema.body>
 > = async (context, request, response) => {
+  const fnTrans = apm.startTransaction('agent checkin', 'Ingest Manager');
   try {
     const soClient = getInternalUserSOClient(request);
     const res = APIKeyService.parseApiKeyFromHeaders(request.headers);
@@ -196,9 +197,10 @@ export const postAgentCheckinHandler: RequestHandler<
         created_at: a.created_at,
       })),
     };
-
+    if (fnTrans) fnTrans.end('success');
     return response.ok({ body });
   } catch (e) {
+    if (fnTrans) fnTrans.end('error');
     if (e.isBoom && e.output.statusCode === 404) {
       return response.notFound({
         body: { message: `Agent ${request.params.agentId} not found` },
@@ -217,6 +219,7 @@ export const postAgentEnrollHandler: RequestHandler<
   undefined,
   TypeOf<typeof PostAgentEnrollRequestSchema.body>
 > = async (context, request, response) => {
+  const fnTrans = apm.startTransaction('agent enroll', 'Ingest Manager');
   try {
     const soClient = getInternalUserSOClient(request);
     const { apiKeyId } = APIKeyService.parseApiKeyFromHeaders(request.headers);
@@ -246,9 +249,10 @@ export const postAgentEnrollHandler: RequestHandler<
         status: AgentService.getAgentStatus(agent),
       },
     };
-
+    if (fnTrans) fnTrans.end('success');
     return response.ok({ body });
   } catch (e) {
+    if (fnTrans) fnTrans.end('error');
     if (e.isBoom) {
       return response.customError({
         statusCode: e.output.statusCode,

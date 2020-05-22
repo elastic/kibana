@@ -19,6 +19,7 @@ import {
   AgentSOAttributes,
   AgentActionSOAttributes,
 } from '../../types';
+import { apm } from '../../index';
 import {
   AGENT_EVENT_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
@@ -33,6 +34,7 @@ export async function acknowledgeAgentActions(
   agent: Agent,
   agentEvents: AgentEvent[]
 ): Promise<AgentAction[]> {
+  const fnSpan = apm.startSpan('agentservice acknowledgeAgentActions');
   for (const agentEvent of agentEvents) {
     if (!isAllowedType(agentEvent.type)) {
       throw Boom.badRequest(`${agentEvent.type} not allowed for acknowledgment only ACTION_RESULT`);
@@ -68,7 +70,7 @@ export async function acknowledgeAgentActions(
     buildUpdateAgentConfigRevision(agent.id, configRevision),
     ...buildUpdateAgentActionSentAt(actionIds),
   ]);
-
+  if (fnSpan) fnSpan.end();
   return actions;
 }
 

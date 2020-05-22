@@ -9,6 +9,7 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import { AgentType, Agent, AgentSOAttributes } from '../../types';
 import { savedObjectToAgent } from './saved_objects';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
+import { apm } from '../../index';
 import * as APIKeyService from '../api_keys';
 
 export async function enroll(
@@ -18,6 +19,7 @@ export async function enroll(
   metadata?: { local: any; userProvided: any },
   sharedId?: string
 ): Promise<Agent> {
+  const fnSpan = apm.startSpan('agentservice enroll');
   const existingAgent = sharedId ? await getAgentBySharedId(soClient, sharedId) : null;
 
   if (existingAgent && existingAgent.active === true) {
@@ -62,6 +64,7 @@ export async function enroll(
     access_api_key_id: accessAPIKey.id,
   });
 
+  if (fnSpan) fnSpan.end();
   return { ...agent, access_api_key: accessAPIKey.key };
 }
 

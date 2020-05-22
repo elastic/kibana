@@ -9,6 +9,7 @@
 import { RequestHandler } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
 import { PostAgentAcksRequestSchema } from '../../types/rest_spec';
+import { apm } from '../../index';
 import * as APIKeyService from '../../services/api_keys';
 import { AcksService } from '../../services/agents';
 import { AgentEvent } from '../../../common/types/models';
@@ -22,6 +23,7 @@ export const postAgentAcksHandlerBuilder = function(
   TypeOf<typeof PostAgentAcksRequestSchema.body>
 > {
   return async (context, request, response) => {
+    const fnTrans = apm.startTransaction('agent acks', 'Ingest Manager');
     try {
       const soClient = ackService.getSavedObjectsClientContract(request);
       const res = APIKeyService.parseApiKeyFromHeaders(request.headers);
@@ -50,9 +52,10 @@ export const postAgentAcksHandlerBuilder = function(
         action: 'acks',
         success: true,
       };
-
+      if (fnTrans) fnTrans.end('success');
       return response.ok({ body });
     } catch (e) {
+      if (fnTrans) fnTrans.end('error');
       if (e.isBoom) {
         return response.customError({
           statusCode: e.output.statusCode,
