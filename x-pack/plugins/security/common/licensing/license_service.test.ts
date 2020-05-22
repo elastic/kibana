@@ -5,7 +5,7 @@
  */
 
 import { of, BehaviorSubject } from 'rxjs';
-import { licensingMock } from '../../../licensing/common/mocks';
+import { licenseMock } from '../../../licensing/common/licensing.mock';
 import { SecurityLicenseService } from './license_service';
 
 describe('license features', function() {
@@ -28,7 +28,7 @@ describe('license features', function() {
   });
 
   it('should display error when X-Pack is unavailable', () => {
-    const rawLicenseMock = licensingMock.createLicenseMock();
+    const rawLicenseMock = licenseMock.createLicenseMock();
     rawLicenseMock.isAvailable = false;
     const serviceSetup = new SecurityLicenseService().setup({
       license$: of(rawLicenseMock),
@@ -48,7 +48,7 @@ describe('license features', function() {
   });
 
   it('should notify consumers of licensed feature changes', () => {
-    const rawLicenseMock = licensingMock.createLicenseMock();
+    const rawLicenseMock = licenseMock.createLicenseMock();
     rawLicenseMock.isAvailable = false;
     const rawLicense$ = new BehaviorSubject(rawLicenseMock);
     const serviceSetup = new SecurityLicenseService().setup({
@@ -76,7 +76,7 @@ describe('license features', function() {
         ]
       `);
 
-      rawLicense$.next(licensingMock.createLicenseMock());
+      rawLicense$.next(licenseMock.createLicenseMock());
       expect(subscriptionHandler).toHaveBeenCalledTimes(2);
       expect(subscriptionHandler.mock.calls[1]).toMatchInlineSnapshot(`
         Array [
@@ -99,7 +99,7 @@ describe('license features', function() {
   });
 
   it('should show login page and other security elements, allow RBAC but forbid paid features if license is basic.', () => {
-    const mockRawLicense = licensingMock.createLicense({
+    const mockRawLicense = licenseMock.createLicense({
       features: { security: { isEnabled: true, isAvailable: true } },
     });
 
@@ -124,7 +124,7 @@ describe('license features', function() {
   });
 
   it('should not show login page or other security elements if security is disabled in Elasticsearch.', () => {
-    const mockRawLicense = licensingMock.createLicense({
+    const mockRawLicense = licenseMock.createLicense({
       features: { security: { isEnabled: false, isAvailable: true } },
     });
 
@@ -145,7 +145,7 @@ describe('license features', function() {
   });
 
   it('should allow role mappings, access agreement and sub-feature privileges, but not DLS/FLS if license = gold', () => {
-    const mockRawLicense = licensingMock.createLicense({
+    const mockRawLicense = licenseMock.createLicense({
       license: { mode: 'gold', type: 'gold' },
       features: { security: { isEnabled: true, isAvailable: true } },
     });
@@ -167,7 +167,7 @@ describe('license features', function() {
   });
 
   it('should allow to login, allow RBAC, role mappings, access agreement, sub-feature privileges, and DLS if license >= platinum', () => {
-    const mockRawLicense = licensingMock.createLicense({
+    const mockRawLicense = licenseMock.createLicense({
       license: { mode: 'platinum', type: 'platinum' },
       features: { security: { isEnabled: true, isAvailable: true } },
     });
