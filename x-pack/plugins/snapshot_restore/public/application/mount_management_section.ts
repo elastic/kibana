@@ -41,8 +41,9 @@ export async function mountManagementSection(
       httpService,
       uiMetricService: services.uiMetricService,
       i18n,
+      history,
     },
   };
 
-  return renderApp(element, appDependencies, history);
+  return renderApp(element, appDependencies);
 }

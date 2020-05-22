@@ -13,16 +13,20 @@ import { App } from './app';
 import { AppProviders } from './app_providers';
 import { AppDependencies } from './app_context';
 
-const AppWithRouter = ({ history }: { history: ScopedHistory }) => (
+interface AppWithRouterProps {
+  history: ScopedHistory;
+}
+
+const AppWithRouter = ({ history }: AppWithRouterProps) => (
   <Router history={history}>
     <App />
   </Router>
 );
 
-export const renderApp = (elem: Element, dependencies: AppDependencies, history: ScopedHistory) => {
+export const renderApp = (elem: Element, dependencies: AppDependencies) => {
   render(
     <AppProviders appDependencies={dependencies}>
-      <AppWithRouter history={history} />
+      <AppWithRouter history={dependencies.services.history} />
     </AppProviders>,
     elem
   );

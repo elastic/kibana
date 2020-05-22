@@ -25,6 +25,9 @@ import {
 } from '../../../../../components';
 import { linkToPolicy } from '../../../../../services/navigation';
 import { SnapshotState } from './snapshot_state';
+import { useServices } from '../../../../../app_context';
+
+import { reactRouterNavigate } from '../../../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   snapshotDetails: SnapshotDetails;
@@ -45,6 +48,8 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
     uuid,
     policyName,
   } = snapshotDetails;
+
+  const { history } = useServices();
 
   return (
     <EuiDescriptionList textStyle="reverse">
@@ -201,7 +206,9 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
             </EuiDescriptionListTitle>
 
             <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-              <EuiLink href={linkToPolicy(policyName)}>{policyName}</EuiLink>
+              <EuiLink {...reactRouterNavigate(history, linkToPolicy(policyName))}>
+                {policyName}
+              </EuiLink>
             </EuiDescriptionListDescription>
           </EuiFlexItem>
         ) : null}

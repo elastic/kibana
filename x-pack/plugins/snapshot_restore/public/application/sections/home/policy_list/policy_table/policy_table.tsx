@@ -32,6 +32,8 @@ import {
 import { linkToAddPolicy, linkToEditPolicy } from '../../../../services/navigation';
 import { SendRequestResponse } from '../../../../../shared_imports';
 
+import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
+
 interface Props {
   policies: SlmPolicy[];
   reload: () => Promise<SendRequestResponse<any, Error>>;
@@ -47,7 +49,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
   onPolicyDeleted,
   onPolicyExecuted,
 }) => {
-  const { i18n, uiMetricService } = useServices();
+  const { i18n, uiMetricService, history } = useServices();
   const [selectedItems, setSelectedItems] = useState<SlmPolicy[]>([]);
 
   const columns = [
@@ -64,8 +66,9 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
             <EuiFlexItem grow={false}>
               {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiLink
+                // TODO: move onClick into reactRouterNavigate
+                {...reactRouterNavigate(history, openPolicyDetailsUrl(name))}
                 onClick={() => uiMetricService.trackUiMetric(UIM_POLICY_SHOW_DETAILS_CLICK)}
-                href={openPolicyDetailsUrl(name)}
                 data-test-subj="policyLink"
               >
                 {name}
@@ -249,7 +252,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
                       )}
                       iconType="pencil"
                       color="primary"
-                      href={linkToEditPolicy(name)}
+                      {...reactRouterNavigate(history, linkToEditPolicy(name))}
                       data-test-subj="editPolicyButton"
                     />
                   </EuiToolTip>
@@ -373,7 +376,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       </EuiButton>,
       <EuiButton
         key="createNewPolicy"
-        href={linkToAddPolicy()}
+        {...reactRouterNavigate(history, linkToAddPolicy())}
         fill
         iconType="plusInCircle"
         data-test-subj="createPolicyButton"
