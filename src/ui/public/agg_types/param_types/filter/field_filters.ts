@@ -55,8 +55,8 @@ class AggTypeFieldFilters {
    */
   public filter(fields: any[], fieldParamType: FieldParamType, aggConfig: AggConfig, vis: Vis) {
     const allFilters = Array.from(this.filters);
-    const allowedAggTypeFields = fields.filter(field => {
-      const isAggTypeFieldAllowed = allFilters.every(filter =>
+    const allowedAggTypeFields = fields.filter((field) => {
+      const isAggTypeFieldAllowed = allFilters.every((filter) =>
         filter(field, fieldParamType, aggConfig, vis)
       );
       return isAggTypeFieldAllowed;

@@ -305,11 +305,11 @@ export class QueryBarUI extends Component<Props, State> {
       return [];
     }
     const recentSearches = this.persistedLog.get();
-    const matchingRecentSearches = recentSearches.filter(recentQuery => {
+    const matchingRecentSearches = recentSearches.filter((recentQuery) => {
       const recentQueryString = typeof recentQuery === 'object' ? toUser(recentQuery) : recentQuery;
       return recentQueryString.includes(query);
     });
-    return matchingRecentSearches.map(recentSearch => {
+    return matchingRecentSearches.map((recentSearch) => {
       const text = recentSearch;
       const start = 0;
       const end = query.length;
@@ -575,7 +575,7 @@ export class QueryBarUI extends Component<Props, State> {
                       onClick={this.onClickInput}
                       fullWidth
                       autoFocus={!this.props.disableAutoFocus}
-                      inputRef={node => {
+                      inputRef={(node) => {
                         if (node) {
                           this.inputRef = node;
                         }

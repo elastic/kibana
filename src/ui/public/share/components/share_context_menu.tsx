@@ -170,7 +170,7 @@ class ShareContextMenuUI extends Component<Props> {
             }
             return -1;
           })
-          .map(menuItem => {
+          .map((menuItem) => {
             menuItem['data-test-subj'] = `sharePanel-${menuItem.name.replace(' ', '')}`;
             delete menuItem.sortOrder;
             return menuItem;

@@ -53,7 +53,7 @@ interface Server {
 }
 
 interface ElasticsearchPlugin {
-  getCluster: ((name: 'admin') => { callWithInternalUser: CallCluster });
+  getCluster: (name: 'admin') => { callWithInternalUser: CallCluster };
   waitUntilReady: () => Promise<any>;
 }
 
@@ -161,7 +161,7 @@ export class KibanaMigrator {
  */
 function mergeProperties(mappings: any[]): MappingProperties {
   return mappings.reduce((acc, { pluginId, properties }) => {
-    const duplicate = Object.keys(properties).find(k => acc.hasOwnProperty(k));
+    const duplicate = Object.keys(properties).find((k) => acc.hasOwnProperty(k));
     if (duplicate) {
       throw new Error(`Plugin ${pluginId} is attempting to redefine mapping "${duplicate}".`);
     }

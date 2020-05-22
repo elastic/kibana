@@ -93,7 +93,7 @@ const setReloadRequestTime = (
   embeddables: EmbeddablesMap,
   lastReloadRequestTime: number
 ): EmbeddablesMap => {
-  return _.mapValues<EmbeddablesMap>(embeddables, embeddable => ({
+  return _.mapValues<EmbeddablesMap>(embeddables, (embeddable) => ({
     ...embeddable,
     lastReloadRequestTime,
   }));

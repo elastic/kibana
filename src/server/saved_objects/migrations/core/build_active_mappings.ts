@@ -83,7 +83,7 @@ function defaultMapping(): IndexMapping {
 }
 
 function validateAndMerge(dest: MappingProperties, source: MappingProperties) {
-  Object.keys(source).forEach(k => {
+  Object.keys(source).forEach((k) => {
     if (k.startsWith('_')) {
       throw new Error(`Invalid mapping "${k}". Mappings cannot start with _.`);
     }

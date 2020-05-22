@@ -27,7 +27,7 @@ import { getTsProjectForAbsolutePath, Project } from '../typescript';
 function groupFilesByProject(files: File[]) {
   const filesByProject: Map<Project, File[]> = new Map();
 
-  files.forEach(file => {
+  files.forEach((file) => {
     const project = getTsProjectForAbsolutePath(file.getAbsolutePath());
     const filesForProject = filesByProject.get(project);
 
@@ -54,7 +54,7 @@ export async function lintFiles(log: ToolingLog, files: File[]) {
     const exitCode = await run(
       {
         exclude: [],
-        files: filesInProject.map(f => f.getAbsolutePath()),
+        files: filesInProject.map((f) => f.getAbsolutePath()),
         fix: false,
         format: 'stylish',
         project: project.tsConfigPath,

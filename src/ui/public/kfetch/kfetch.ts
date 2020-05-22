@@ -60,7 +60,7 @@ export async function kfetch(
         query,
       });
 
-      return window.fetch(fullUrl, restOptions).then(async res => {
+      return window.fetch(fullUrl, restOptions).then(async (res) => {
         const body = await getBodyAsJson(res);
         if (res.ok) {
           return body;

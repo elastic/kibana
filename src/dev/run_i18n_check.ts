@@ -67,7 +67,7 @@ run(
     }
 
     const list = new Listr(
-      config.translations.map(translationsPath => ({
+      config.translations.map((translationsPath) => ({
         task: async () => {
           // If `--fix` is set we should try apply all possible fixes and override translations file.
           await integrateLocaleFiles(defaultMessages, {

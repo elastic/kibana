@@ -111,7 +111,9 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                             one {type}
                             other {types}
                           } found"
-                          values={{ resultCount: visTypes.filter(type => type.highlighted).length }}
+                          values={{
+                            resultCount: visTypes.filter((type) => type.highlighted).length,
+                          }}
                         />
                       )}
                     </span>
@@ -150,7 +152,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
   }
 
   private filteredVisTypes(visTypes: VisType[], query: string): VisTypeListEntry[] {
-    const types = visTypes.filter(type => {
+    const types = visTypes.filter((type) => {
       // Filter out all lab visualizations if lab mode is not enabled
       if (!this.props.showExperimental && type.stage === 'experimental') {
         return false;
@@ -166,10 +168,10 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
 
     let entries: VisTypeListEntry[];
     if (!query) {
-      entries = types.map(type => ({ ...type, highlighted: false }));
+      entries = types.map((type) => ({ ...type, highlighted: false }));
     } else {
       const q = query.toLowerCase();
-      entries = types.map(type => {
+      entries = types.map((type) => {
         const matchesQuery =
           type.name.toLowerCase().includes(q) ||
           type.title.toLowerCase().includes(q) ||

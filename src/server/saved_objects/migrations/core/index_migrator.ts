@@ -172,7 +172,7 @@ async function migrateSourceToDest(context: Context) {
       return;
     }
 
-    log.debug(`Migrating saved objects ${docs.map(d => d._id).join(', ')}`);
+    log.debug(`Migrating saved objects ${docs.map((d) => d._id).join(', ')}`);
 
     await Index.write(
       callCluster,

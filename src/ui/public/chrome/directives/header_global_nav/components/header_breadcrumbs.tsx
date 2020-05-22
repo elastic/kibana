@@ -73,7 +73,7 @@ export class HeaderBreadcrumbs extends Component<Props, State> {
   }
 
   private subscribe() {
-    this.subscription = this.props.breadcrumbs$.subscribe(breadcrumbs => {
+    this.subscription = this.props.breadcrumbs$.subscribe((breadcrumbs) => {
       this.setState({
         breadcrumbs,
       });

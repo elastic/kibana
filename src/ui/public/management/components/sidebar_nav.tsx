@@ -47,8 +47,8 @@ const sectionToNav = (selectedId: string) => ({ display, id, url, icon }: Subsec
 export const sideNavItems = (sections: Section[], selectedId: string) =>
   sections
     .filter(sectionVisible)
-    .filter(section => section.items.filter(sectionVisible).length)
-    .map(section => ({
+    .filter((section) => section.items.filter(sectionVisible).length)
+    .map((section) => ({
       items: section.items.inOrder.filter(sectionVisible).map(sectionToNav(selectedId)),
       ...sectionToNav(selectedId)(section),
     }));

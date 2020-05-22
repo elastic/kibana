@@ -35,13 +35,13 @@ export function execInProjects(
   getArgs: (project: Project) => string[]
 ) {
   const list = new Listr(
-    projects.map(project => ({
+    projects.map((project) => ({
       task: () =>
         execa(cmd, getArgs(project), {
           cwd: project.directory,
           env: chalk.enabled ? { FORCE_COLOR: 'true' } : {},
           stdio: ['ignore', 'pipe', 'pipe'],
-        }).catch(error => {
+        }).catch((error) => {
           throw new ProjectFailure(project, error);
         }),
       title: project.name,

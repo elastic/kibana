@@ -27,7 +27,7 @@ class PanelActionsStore {
    * @type {IndexedArray} panelActionsRegistry
    */
   public initializeFromRegistry(panelActionsRegistry: ContextMenuAction[]) {
-    panelActionsRegistry.forEach(panelAction => {
+    panelActionsRegistry.forEach((panelAction) => {
       this.actions.push(panelAction);
     });
   }

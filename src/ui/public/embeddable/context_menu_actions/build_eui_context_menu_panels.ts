@@ -27,7 +27,7 @@ import { ContainerState, ContextMenuAction, ContextMenuPanel, Embeddable } from 
  * @param {Array.<ContextMenuAction>} allActions
  */
 function getActionsForPanel(contextMenuPanelId: string, allActions: ContextMenuAction[]) {
-  return allActions.filter(action => action.parentPanelId === contextMenuPanelId);
+  return allActions.filter((action) => action.parentPanelId === contextMenuPanelId);
 }
 
 /**
@@ -56,7 +56,7 @@ function buildEuiContextMenuPanelItemsAndChildPanels({
   const items: EuiContextMenuPanelItemDescriptor[] = [];
   const childPanels: EuiContextMenuPanelDescriptor[] = [];
   const actionsForPanel = getActionsForPanel(contextMenuPanelId, actions);
-  actionsForPanel.forEach(action => {
+  actionsForPanel.forEach((action) => {
     const isVisible = action.isVisible({ embeddable, containerState });
     if (!isVisible) {
       return;

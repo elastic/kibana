@@ -26,7 +26,7 @@ export class PriorityCollection<T> {
   private readonly array: Array<PriorityCollectionEntry<T>> = [];
 
   public add(priority: number, value: T) {
-    const foundIndex = this.array.findIndex(current => {
+    const foundIndex = this.array.findIndex((current) => {
       if (priority === current.priority) {
         throw new Error('Already have entry with this priority');
       }
@@ -39,6 +39,6 @@ export class PriorityCollection<T> {
   }
 
   public toPrioritizedArray(): T[] {
-    return this.array.map(entry => entry.value);
+    return this.array.map((entry) => entry.value);
   }
 }

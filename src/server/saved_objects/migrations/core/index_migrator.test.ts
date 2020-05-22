@@ -353,7 +353,7 @@ function withIndex(callCluster: sinon.SinonStub, opts: any = {}) {
   callCluster.withArgs('tasks.get').returns(Promise.resolve({ completed: true }));
   callCluster.withArgs('search').returns(searchResult(0));
 
-  _.range(1, docs.length).forEach(i => {
+  _.range(1, docs.length).forEach((i) => {
     callCluster
       .withArgs('scroll')
       .onCall(i - 1)

@@ -35,7 +35,7 @@ const updatePanel = (panels: PanelsMap, panelState: PanelState): PanelsMap => ({
 
 const updatePanels = (panels: PanelsMap, updatedPanels: PanelsMap): PanelsMap => {
   const panelsCopy = { ...panels };
-  Object.values(updatedPanels).forEach(panel => {
+  Object.values(updatedPanels).forEach((panel) => {
     panelsCopy[panel.panelIndex] = panel;
   });
   return panelsCopy;

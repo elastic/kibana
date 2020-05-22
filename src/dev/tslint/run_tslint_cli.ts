@@ -23,7 +23,7 @@ import getopts from 'getopts';
 import { execInProjects, filterProjectsByFlag, Project } from '../typescript';
 
 export function runTslintCliOnTsConfigPaths(tsConfigPaths: string[]) {
-  runTslintCli(tsConfigPaths.map(tsConfigPath => new Project(tsConfigPath)));
+  runTslintCli(tsConfigPaths.map((tsConfigPath) => new Project(tsConfigPath)));
 }
 
 export function runTslintCli(projects?: Project[]) {

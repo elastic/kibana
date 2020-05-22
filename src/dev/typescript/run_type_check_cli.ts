@@ -87,5 +87,9 @@ export function runTypeCheckCli() {
     process.exit(1);
   }
 
-  execInProjects(log, projects, 'tsc', project => ['--project', project.tsConfigPath, ...tscArgs]);
+  execInProjects(log, projects, 'tsc', (project) => [
+    '--project',
+    project.tsConfigPath,
+    ...tscArgs,
+  ]);
 }

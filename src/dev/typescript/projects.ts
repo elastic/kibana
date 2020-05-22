@@ -33,7 +33,7 @@ export const PROJECTS = [
   // both took closer to 1000ms.
   ...glob
     .sync('packages/*/tsconfig.json', { cwd: REPO_ROOT })
-    .map(path => new Project(resolve(REPO_ROOT, path))),
+    .map((path) => new Project(resolve(REPO_ROOT, path))),
 ];
 
 export function filterProjectsByFlag(projectFlag?: string) {
@@ -42,5 +42,5 @@ export function filterProjectsByFlag(projectFlag?: string) {
   }
 
   const tsConfigPath = resolve(projectFlag);
-  return PROJECTS.filter(project => project.tsConfigPath === tsConfigPath);
+  return PROJECTS.filter((project) => project.tsConfigPath === tsConfigPath);
 }

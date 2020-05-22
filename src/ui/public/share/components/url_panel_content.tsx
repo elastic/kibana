@@ -334,9 +334,7 @@ class UrlPanelContentUI extends Component<Props, State> {
         defaultMessage="Can't share as saved object until the {objectType} has been saved."
         values={{ objectType: this.props.objectType }}
       />
-    ) : (
-      undefined
-    );
+    ) : undefined;
     return (
       <EuiFormRow
         label={

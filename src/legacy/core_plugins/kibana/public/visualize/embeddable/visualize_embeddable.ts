@@ -98,7 +98,7 @@ export class VisualizeEmbeddable extends Embeddable {
       // Turn this off or the uiStateChangeHandler will fire for every modification.
       this.uiState.off('change', this.uiStateChangeHandler);
       this.uiState.clearAllKeys();
-      Object.getOwnPropertyNames(customization).forEach(key => {
+      Object.getOwnPropertyNames(customization).forEach((key) => {
         this.uiState.set(key, customization[key]);
       });
       this.customization = customization;

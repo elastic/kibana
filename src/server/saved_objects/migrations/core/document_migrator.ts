@@ -314,7 +314,7 @@ function wrapWithTry(version: string, prop: string, transform: TransformFn, log:
  * Finds the first unmigrated property in the specified document.
  */
 function nextUnmigratedProp(doc: SavedObjectDoc, migrations: ActiveMigrations) {
-  return props(doc).find(p => {
+  return props(doc).find((p) => {
     const latestVersion = propVersion(migrations, p);
     const docVersion = propVersion(doc, p);
 
@@ -407,7 +407,7 @@ function assertNoDowngrades(
   }
 
   const downgrade = Object.keys(migrationVersion).find(
-    k => !docVersion.hasOwnProperty(k) || Semver.lt(docVersion[k], migrationVersion[k])
+    (k) => !docVersion.hasOwnProperty(k) || Semver.lt(docVersion[k], migrationVersion[k])
   );
 
   if (downgrade) {

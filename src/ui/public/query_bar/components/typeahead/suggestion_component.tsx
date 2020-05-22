@@ -48,7 +48,7 @@ interface Props {
   ariaId: string;
 }
 
-export const SuggestionComponent: SFC<Props> = props => {
+export const SuggestionComponent: SFC<Props> = (props) => {
   return (
     <div
       className={classNames({

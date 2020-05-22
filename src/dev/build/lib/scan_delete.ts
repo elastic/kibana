@@ -60,12 +60,12 @@ export async function scanDelete(options: Options) {
   // and recursively iterating through all children, unless a child matches
   // one of the supplied regular expressions
   const getPathsToDelete$ = (path: string): Rx.Observable<string> => {
-    if (regularExpressions.some(re => re.test(path))) {
+    if (regularExpressions.some((re) => re.test(path))) {
       return Rx.of(path);
     }
 
     return getStat$(path).pipe(
-      mergeMap(stat => (stat.isDirectory() ? getChildPath$(path) : Rx.EMPTY)),
+      mergeMap((stat) => (stat.isDirectory() ? getChildPath$(path) : Rx.EMPTY)),
       mergeMap(getPathsToDelete$)
     );
   };
@@ -73,7 +73,7 @@ export async function scanDelete(options: Options) {
   return await Rx.of(directory)
     .pipe(
       mergeMap(getPathsToDelete$),
-      mergeMap(async path => await del(path), concurrency),
+      mergeMap(async (path) => await del(path), concurrency),
       count()
     )
     .toPromise();

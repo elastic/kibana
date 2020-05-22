@@ -42,7 +42,7 @@ export async function extractDefaultMessages({
   const reporter = new ErrorReporter();
 
   const list = new Listr(
-    filteredPaths.map(filteredPath => ({
+    filteredPaths.map((filteredPath) => ({
       task: async (messages: Map<string, unknown>) => {
         const initialErrorsNumber = reporter.errors.length;
 

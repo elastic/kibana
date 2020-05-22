@@ -508,10 +508,10 @@ describe('DocumentMigrator', () => {
       ...testOpts(),
       migrations: {
         aaa: {
-          '2.3.4': d => _.set(d, 'attributes.counter', 42),
+          '2.3.4': (d) => _.set(d, 'attributes.counter', 42),
         },
       },
-      validateDoc: d => {
+      validateDoc: (d) => {
         if ((d.attributes as any).counter === 42) {
           throw new Error('Meaningful!');
         }

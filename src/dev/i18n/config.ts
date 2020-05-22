@@ -77,15 +77,17 @@ export function filterConfigPaths(inputPaths: string[], config: I18nConfig) {
 
     // If input path is the sub path of or equal to any available path, include it.
     if (
-      availablePaths.some(path => normalizedPath.startsWith(`${path}/`) || path === normalizedPath)
+      availablePaths.some(
+        (path) => normalizedPath.startsWith(`${path}/`) || path === normalizedPath
+      )
     ) {
       pathsForExtraction.add(normalizedPath);
     } else {
       // Otherwise go through all available paths and see if any of them is the sub
       // path of the input path (empty normalized path corresponds to root or above).
       availablePaths
-        .filter(path => !normalizedPath || path.startsWith(`${normalizedPath}/`))
-        .forEach(ePath => pathsForExtraction.add(ePath));
+        .filter((path) => !normalizedPath || path.startsWith(`${normalizedPath}/`))
+        .forEach((ePath) => pathsForExtraction.add(ePath));
     }
   }
 
