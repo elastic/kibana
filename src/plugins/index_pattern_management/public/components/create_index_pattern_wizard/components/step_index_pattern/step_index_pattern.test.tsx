@@ -88,7 +88,7 @@ describe('StepIndexPattern', () => {
     );
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     await component.update();
 
@@ -112,7 +112,7 @@ describe('StepIndexPattern', () => {
     instance.onQueryChanged({ target: { value: '?' } } as React.ChangeEvent<HTMLInputElement>);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
     expect({
@@ -135,7 +135,7 @@ describe('StepIndexPattern', () => {
     instance.onQueryChanged({ target: { value: 'k' } } as React.ChangeEvent<HTMLInputElement>);
 
     // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     // Ensure the state changes are reflected
     component.update();
 
@@ -189,7 +189,7 @@ describe('StepIndexPattern', () => {
     const instance = component.instance() as StepIndexPattern;
     instance.onQueryChanged({ target: { value: 'e' } } as React.ChangeEvent<HTMLInputElement>);
     instance.lastQuery = 'k';
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
 
     // Honesty, the state would match the result of the `k` query but
     // it's hard to mock this in tests but if remove our fix
@@ -202,7 +202,7 @@ describe('StepIndexPattern', () => {
     // Provide `es` so we do not auto append * and enter our other code flow
     instance.onQueryChanged({ target: { value: 'es' } } as React.ChangeEvent<HTMLInputElement>);
     instance.lastQuery = 'k';
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     expect(component.state('exactMatchedIndices')).toEqual([]);
   });
 });

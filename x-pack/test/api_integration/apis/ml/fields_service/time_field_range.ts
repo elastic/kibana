@@ -92,7 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  describe('time_field_range', function() {
+  describe('time_field_range', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ecommerce');
       await ml.testResources.setKibanaTimeZoneToUTC();

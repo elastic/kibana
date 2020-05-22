@@ -139,7 +139,7 @@ describe('PluginsService', () => {
         },
         start: async (core, plugins) => {
           contextFromStart = { core, plugins };
-          await new Promise(resolve => setTimeout(resolve, 10));
+          await new Promise((resolve) => setTimeout(resolve, 10));
           expect(startDependenciesResolved).toBe(false);
           return pluginStartContract;
         },

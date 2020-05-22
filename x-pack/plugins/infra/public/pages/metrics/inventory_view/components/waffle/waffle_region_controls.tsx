@@ -27,7 +27,7 @@ export const WaffleRegionControls = (props: Props) => {
     setIsOpen(false);
   }, [setIsOpen]);
 
-  const currentLabel = options.find(o => region === o);
+  const currentLabel = options.find((o) => region === o);
 
   const changeRegion = useCallback(
     (val: string) => {
@@ -46,7 +46,7 @@ export const WaffleRegionControls = (props: Props) => {
       {
         id: 0,
         title: '',
-        items: options.map(o => {
+        items: options.map((o) => {
           const icon = o === region ? 'check' : 'empty';
           const panel = { name: o, onClick: () => changeRegion(o), icon };
           return panel;

@@ -56,7 +56,7 @@ async function getStats(callCluster: APICaller, index: string) {
   const visTypes = groupBy(visSummaries, 'type');
 
   // get the final result
-  return mapValues(visTypes, curr => {
+  return mapValues(visTypes, (curr) => {
     const total = curr.length;
     const spacesBreakdown = countBy(curr, 'space');
     const spaceCounts: number[] = _.values(spacesBreakdown);

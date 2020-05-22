@@ -99,7 +99,7 @@ describe('DraggableLegend', () => {
     });
 
     it('renders the legend items', () => {
-      legendItems.forEach(item =>
+      legendItems.forEach((item) =>
         expect(
           wrapper
             .find(

@@ -103,7 +103,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
       perPage: 10000,
     });
 
-    const existingIndexPatterns = savedObjects.map(obj =>
+    const existingIndexPatterns = savedObjects.map((obj) =>
       obj && obj.attributes ? obj.attributes.title : ''
     ) as string[];
 

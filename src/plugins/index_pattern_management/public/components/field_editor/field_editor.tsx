@@ -195,7 +195,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
     this.setState({
       isReady: true,
-      isCreating: !indexPattern.fields.find(f => f.name === field.name),
+      isCreating: !indexPattern.fields.find((f) => f.name === field.name),
       isDeprecatedLang: this.deprecatedLangs.includes(field.lang || ''),
       errors: [],
       scriptingLangs,
@@ -223,7 +223,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
     field.type = type;
 
-    field.format = new DefaultFieldFormat(null, key => uiSettings.get(key));
+    field.format = new DefaultFieldFormat(null, (key) => uiSettings.get(key));
 
     this.setState({
       fieldTypeFormats: getFieldTypeFormatsList(field, DefaultFieldFormat, data.fieldFormats),
@@ -251,7 +251,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       formatId || (fieldTypeFormats[0] as InitialFieldTypeFormat).defaultFieldFormat.id
     ) as FieldFormatInstanceType;
 
-    field.format = new FieldFormat(params, key => uiSettings.get(key));
+    field.format = new FieldFormat(params, (key) => uiSettings.get(key));
 
     this.setState({
       fieldFormatId: FieldFormat.id,
@@ -321,7 +321,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             defaultMessage: 'New scripted field',
           })}
           data-test-subj="editorFieldName"
-          onChange={e => {
+          onChange={(e) => {
             this.onFieldChange('name', e.target.value);
           }}
           isInvalid={isInvalid}
@@ -375,11 +375,11 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       >
         <EuiSelect
           value={field.lang}
-          options={scriptingLangs.map(lang => {
+          options={scriptingLangs.map((lang) => {
             return { value: lang, text: lang };
           })}
           data-test-subj="editorFieldLang"
-          onChange={e => {
+          onChange={(e) => {
             this.onLangChange(e.target.value);
           }}
         />
@@ -397,11 +397,11 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         <EuiSelect
           value={field.type}
           disabled={!field.scripted}
-          options={fieldTypes.map(type => {
+          options={fieldTypes.map((type) => {
             return { value: type, text: type };
           })}
           data-test-subj="editorFieldType"
-          onChange={e => {
+          onChange={(e) => {
             this.onTypeChange(e.target.value as KBN_FIELD_TYPES);
           }}
         />
@@ -496,11 +496,11 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         >
           <EuiSelect
             value={fieldFormatId}
-            options={fieldTypeFormats.map(format => {
+            options={fieldTypeFormats.map((format) => {
               return { value: format.id || '', text: format.title };
             })}
             data-test-subj="editorSelectedFormatId"
-            onChange={e => {
+            onChange={(e) => {
               this.onFormatChange(e.target.value);
             }}
           />
@@ -534,7 +534,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         <EuiFieldNumber
           value={field.count}
           data-test-subj="editorFieldCount"
-          onChange={e => {
+          onChange={(e) => {
             this.onFieldChange('count', e.target.value ? Number(e.target.value) : '');
           }}
         />

@@ -71,7 +71,7 @@ export async function runCommand(command: ICommand, config: Omit<ICommandConfig,
 
       const keys = Object.keys(e.meta);
       if (keys.length > 0) {
-        const metaOutput = keys.map(key => {
+        const metaOutput = keys.map((key) => {
           const value = e.meta[key];
           return `${key}: ${value}`;
         });

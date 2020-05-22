@@ -15,7 +15,7 @@ export class MemoryConfigurationBlockAdapter implements ConfigurationBlockAdapte
   private db: ConfigurationBlock[] = [];
 
   constructor(db: ConfigurationBlock[]) {
-    this.db = db.map(config => {
+    this.db = db.map((config) => {
       if (config.id === undefined) {
         config.id = chance.word();
       }
@@ -24,11 +24,11 @@ export class MemoryConfigurationBlockAdapter implements ConfigurationBlockAdapte
   }
 
   public async getByIds(user: FrameworkUser, ids: string[]) {
-    return this.db.filter(block => ids.includes(block.id));
+    return this.db.filter((block) => ids.includes(block.id));
   }
   public async delete(user: FrameworkUser, blockIds: string[]) {
-    this.db = this.db.filter(block => !blockIds.includes(block.id));
-    return blockIds.map(id => ({
+    this.db = this.db.filter((block) => !blockIds.includes(block.id));
+    return blockIds.map((id) => ({
       id,
       success: true,
     }));
@@ -37,14 +37,14 @@ export class MemoryConfigurationBlockAdapter implements ConfigurationBlockAdapte
     user: FrameworkUser,
     tagIds: string[]
   ): Promise<{ success: boolean; reason?: string }> {
-    this.db = this.db.filter(block => !tagIds.includes(block.tag));
+    this.db = this.db.filter((block) => !tagIds.includes(block.tag));
     return {
       success: true,
     };
   }
 
   public async getForTags(user: FrameworkUser, tagIds: string[], page?: number, size?: number) {
-    const results = this.db.filter(block => tagIds.includes(block.id));
+    const results = this.db.filter((block) => tagIds.includes(block.id));
     return {
       page: 0,
       total: results.length,
@@ -53,8 +53,8 @@ export class MemoryConfigurationBlockAdapter implements ConfigurationBlockAdapte
   }
 
   public async create(user: FrameworkUser, blocks: ConfigurationBlock[]) {
-    return blocks.map(block => {
-      const existingIndex = this.db.findIndex(t => t.id === block.id);
+    return blocks.map((block) => {
+      const existingIndex = this.db.findIndex((t) => t.id === block.id);
       if (existingIndex !== -1) {
         this.db[existingIndex] = block;
       } else {
@@ -65,7 +65,7 @@ export class MemoryConfigurationBlockAdapter implements ConfigurationBlockAdapte
   }
 
   public setDB(db: ConfigurationBlock[]) {
-    this.db = db.map(block => {
+    this.db = db.map((block) => {
       if (block.id === undefined) {
         block.id = chance.word();
       }

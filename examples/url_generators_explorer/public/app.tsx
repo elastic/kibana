@@ -81,7 +81,7 @@ const ActionsExplorer = ({ getLinkGenerator }: Props) => {
 
     const updateLinks = async () => {
       const updatedLinks = await Promise.all(
-        persistedLinks.map(async savedLink => {
+        persistedLinks.map(async (savedLink) => {
           const generator = getLinkGenerator(savedLink.id);
           const link = await generator.createUrl(savedLink.state);
           return {
@@ -109,11 +109,11 @@ const ActionsExplorer = ({ getLinkGenerator }: Props) => {
             </EuiText>
             <EuiFieldText
               prepend="First name"
-              onChange={e => {
+              onChange={(e) => {
                 setFirstName(e.target.value);
               }}
             />
-            <EuiFieldText prepend="Last name" onChange={e => setLastName(e.target.value)} />
+            <EuiFieldText prepend="Last name" onChange={(e) => setLastName(e.target.value)} />
             <EuiButton
               onClick={() =>
                 setPersistedLinks([
@@ -142,7 +142,7 @@ const ActionsExplorer = ({ getLinkGenerator }: Props) => {
             {buildingLinks ? (
               <div>loading...</div>
             ) : (
-              migratedLinks.map(link => (
+              migratedLinks.map((link) => (
                 <React.Fragment>
                   <EuiLink
                     color={link.isDeprecated ? 'danger' : 'primary'}
