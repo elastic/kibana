@@ -28,7 +28,7 @@ export interface EmbeddableExpression<Input extends EmbeddableInput> {
    * Timestamp. Needed to get a different result after each time the expression is evaluated
    * to force a reload of the embeddables internal data
    */
-  generated: number;
+  generatedAt: number;
 }
 
 export const embeddableType = (): ExpressionTypeDefinition<

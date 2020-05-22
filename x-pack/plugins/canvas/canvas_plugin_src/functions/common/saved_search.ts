@@ -49,7 +49,7 @@ export function savedSearch(): ExpressionFunctionDefinition<
           ...buildEmbeddableFilters(filters),
         },
         embeddableType: EmbeddableTypes.search,
-        generated: Date.now(),
+        generatedAt: Date.now(),
       };
     },
   };
