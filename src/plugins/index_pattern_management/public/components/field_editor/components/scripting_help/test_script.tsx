@@ -121,7 +121,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
 
     this.setState({
       isLoading: false,
-      previewData: scriptResponse.hits.hits.map(hit => ({
+      previewData: scriptResponse.hits.hits.map((hit) => ({
         _id: hit._id,
         ...hit._source,
         ...hit.fields,
@@ -187,11 +187,11 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
     const fields: EuiComboBoxOptionOption[] = [];
 
     this.props.indexPattern.fields
-      .filter(field => {
+      .filter((field) => {
         const isMultiField = field.subType && field.subType.multi;
         return !field.name.startsWith('_') && !isMultiField && !field.scripted;
       })
-      .forEach(field => {
+      .forEach((field) => {
         if (fieldsByTypeMap.has(field.type)) {
           const fieldsList = fieldsByTypeMap.get(field.type);
           fieldsList.push(field.name);
@@ -230,7 +230,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
             })}
             options={fields}
             selectedOptions={this.state.additionalFields}
-            onChange={selected => this.onAdditionalFieldsChange(selected as AdditionalField[])}
+            onChange={(selected) => this.onAdditionalFieldsChange(selected as AdditionalField[])}
             data-test-subj="additionalFieldsSelect"
             fullWidth
           />

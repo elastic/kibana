@@ -62,7 +62,7 @@ export const IndexSetupRow: React.FC<{
 };
 
 const formatValidationError = (errors: ValidationUIError[]): React.ReactNode => {
-  return errors.map(error => {
+  return errors.map((error) => {
     switch (error.error) {
       case 'INDEX_NOT_FOUND':
         return (

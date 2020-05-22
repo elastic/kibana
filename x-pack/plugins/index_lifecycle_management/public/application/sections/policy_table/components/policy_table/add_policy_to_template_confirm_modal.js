@@ -108,7 +108,7 @@ export class AddPolicyToTemplateConfirmModal extends Component {
   }
   getSelectedTemplate() {
     const { templates, templateName } = this.state;
-    return find(templates, template => template.name === templateName);
+    return find(templates, (template) => template.name === templateName);
   }
   renderForm() {
     const { templates, templateName, templateError } = this.state;
@@ -143,7 +143,7 @@ export class AddPolicyToTemplateConfirmModal extends Component {
           <EuiSelect
             options={options}
             value={templateName}
-            onChange={e => {
+            onChange={(e) => {
               this.setState({ templateError: null, templateName: e.target.value });
             }}
           />
@@ -170,7 +170,7 @@ export class AddPolicyToTemplateConfirmModal extends Component {
       >
         <EuiFieldText
           value={aliasName}
-          onChange={e => {
+          onChange={(e) => {
             this.setState({ aliasName: e.target.value });
           }}
         />

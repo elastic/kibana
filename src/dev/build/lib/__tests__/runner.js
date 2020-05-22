@@ -46,8 +46,8 @@ describe('dev/build/lib/runner', () => {
     getLogTag: sinon.match.func,
   });
 
-  const ossBuildMatcher = buildMatcher.and(sinon.match(b => b.isOss(), 'is oss build'));
-  const defaultBuildMatcher = buildMatcher.and(sinon.match(b => !b.isOss(), 'is not oss build'));
+  const ossBuildMatcher = buildMatcher.and(sinon.match((b) => b.isOss(), 'is oss build'));
+  const defaultBuildMatcher = buildMatcher.and(sinon.match((b) => !b.isOss(), 'is not oss build'));
 
   afterEach(() => sandbox.reset());
 
@@ -159,9 +159,7 @@ describe('dev/build/lib/runner', () => {
         });
         throw new Error('expected run() to reject');
       } catch (error) {
-        expect(error)
-          .to.have.property('message')
-          .be('FOO');
+        expect(error).to.have.property('message').be('FOO');
         sinon.assert.calledWith(onLogLine, sinon.match(/FOO/));
         expect(isErrorLogged(error)).to.be(true);
       }
@@ -177,9 +175,7 @@ describe('dev/build/lib/runner', () => {
 
         throw new Error('expected run() to reject');
       } catch (error) {
-        expect(error)
-          .to.have.property('message')
-          .be('FOO');
+        expect(error).to.have.property('message').be('FOO');
         sinon.assert.neverCalledWith(onLogLine, sinon.match(/FOO/));
         expect(isErrorLogged(error)).to.be(true);
       }

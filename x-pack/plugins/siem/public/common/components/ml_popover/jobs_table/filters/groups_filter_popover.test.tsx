@@ -34,23 +34,12 @@ describe('GroupsFilterPopover', () => {
       />
     );
 
-    wrapper
-      .find('[data-test-subj="groups-filter-popover-button"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="groups-filter-popover-button"]').first().simulate('click');
     wrapper.update();
 
-    wrapper
-      .find('EuiFilterSelectItem')
-      .first()
-      .simulate('click');
+    wrapper.find('EuiFilterSelectItem').first().simulate('click');
     wrapper.update();
 
-    expect(
-      wrapper
-        .find('EuiFilterSelectItem')
-        .first()
-        .prop('checked')
-    ).toEqual('on');
+    expect(wrapper.find('EuiFilterSelectItem').first().prop('checked')).toEqual('on');
   });
 });

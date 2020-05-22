@@ -36,7 +36,7 @@ export class FeatureUsageService {
 
   public setup(): FeatureUsageServiceSetup {
     return {
-      register: featureName => {
+      register: (featureName) => {
         if (this.features.includes(featureName)) {
           throw new Error(`Feature '${featureName}' has already been registered.`);
         }

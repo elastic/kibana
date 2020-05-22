@@ -43,7 +43,7 @@ export class Router extends React.PureComponent {
     let firstLoad = true;
 
     // when the component in the route changes, render it
-    router.onPathChange(route => {
+    router.onPathChange((route) => {
       const { pathname } = route.location;
       const { component } = route.meta;
 
@@ -64,7 +64,7 @@ export class Router extends React.PureComponent {
         router
           .execute()
           .then(() => onLoad())
-          .catch(err => onError(err));
+          .catch((err) => onError(err));
       }
 
       const appState = getAppState();

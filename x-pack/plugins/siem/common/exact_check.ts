@@ -58,8 +58,8 @@ export const findDifferencesRecursive = <T>(original: T, decodedValue: T): strin
     return [];
   } else {
     const decodedKeys = Object.keys(decodedValue);
-    const differences = Object.keys(original).flatMap(originalKey => {
-      const foundKey = decodedKeys.some(key => key === originalKey);
+    const differences = Object.keys(original).flatMap((originalKey) => {
+      const foundKey = decodedKeys.some((key) => key === originalKey);
       const topLevelKey = foundKey ? [] : [originalKey];
       // I use lodash to cheat and get an any (not going to lie ;-))
       const valueObjectOrArrayOriginal = get(originalKey, original);

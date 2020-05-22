@@ -38,7 +38,7 @@ export class ElasticsearchIndexFieldAdapter implements FieldsAdapter {
       {} as IndexesAliasIndices
     );
     const responsesIndexFields: IndexFieldDescriptor[][] = await Promise.all(
-      Object.values(indexesAliasIndices).map(indicesByGroup =>
+      Object.values(indexesAliasIndices).map((indicesByGroup) =>
         indexPatternsService.getFieldsForWildcard({
           pattern: indicesByGroup,
         })
@@ -97,7 +97,9 @@ export const formatIndexFields = (
       []
     )
     .reduce((accumulator: IndexField[], indexfield: IndexField) => {
-      const alreadyExistingIndexField = accumulator.findIndex(acc => acc.name === indexfield.name);
+      const alreadyExistingIndexField = accumulator.findIndex(
+        (acc) => acc.name === indexfield.name
+      );
       if (alreadyExistingIndexField > -1) {
         const existingIndexField = accumulator[alreadyExistingIndexField];
         return [

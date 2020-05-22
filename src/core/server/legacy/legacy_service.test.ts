@@ -353,7 +353,7 @@ describe('once LegacyService is set up without connection info', () => {
 
 describe('once LegacyService is set up in `devClusterMaster` mode', () => {
   beforeEach(() => {
-    configService.atPath.mockImplementation(path => {
+    configService.atPath.mockImplementation((path) => {
       return new BehaviorSubject(
         path === 'dev' ? { basePathProxyTargetPort: 100500 } : { basePath: '/abc' }
       );
@@ -447,7 +447,7 @@ describe('#discoverPlugins()', () => {
 
   it(`register legacy plugin's deprecation providers`, async () => {
     findLegacyPluginSpecsMock.mockImplementation(
-      settings =>
+      (settings) =>
         Promise.resolve({
           pluginSpecs: [
             {
@@ -486,7 +486,7 @@ describe('#discoverPlugins()', () => {
       { getId: () => 'pluginB', getDeprecationsProvider: () => undefined },
     ];
     findLegacyPluginSpecsMock.mockImplementation(
-      settings =>
+      (settings) =>
         Promise.resolve({
           pluginSpecs,
           pluginExtendedConfig: settings,

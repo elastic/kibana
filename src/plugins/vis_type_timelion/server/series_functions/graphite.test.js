@@ -23,7 +23,7 @@ import fn from './graphite';
 
 jest.mock('node-fetch', () => () => {
   return Promise.resolve({
-    json: function() {
+    json: function () {
       return [
         {
           target: '__beer__',
@@ -41,22 +41,22 @@ jest.mock('node-fetch', () => () => {
 
 import invoke from './helpers/invoke_series_fn.js';
 
-describe('graphite', function() {
-  it('should wrap the graphite response up in a seriesList', function() {
-    return invoke(fn, []).then(function(result) {
+describe('graphite', function () {
+  it('should wrap the graphite response up in a seriesList', function () {
+    return invoke(fn, []).then(function (result) {
       expect(result.output.list[0].data[0][1]).to.eql(3);
       expect(result.output.list[0].data[1][1]).to.eql(14);
     });
   });
 
-  it('should convert the seconds to milliseconds', function() {
-    return invoke(fn, []).then(function(result) {
+  it('should convert the seconds to milliseconds', function () {
+    return invoke(fn, []).then(function (result) {
       expect(result.output.list[0].data[1][0]).to.eql(2000 * 1000);
     });
   });
 
-  it('should set the label to that of the graphite target', function() {
-    return invoke(fn, []).then(function(result) {
+  it('should set the label to that of the graphite target', function () {
+    return invoke(fn, []).then(function (result) {
       expect(result.output.list[0].label).to.eql('__beer__');
     });
   });

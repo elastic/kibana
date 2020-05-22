@@ -17,7 +17,7 @@ describe('TaskPoller', () => {
 
   test(
     'intializes the poller with the provided interval',
-    fakeSchedulers(async advance => {
+    fakeSchedulers(async (advance) => {
       const pollInterval = 100;
       const bufferCapacity = 5;
       const halfInterval = Math.floor(pollInterval / 2);
@@ -48,7 +48,7 @@ describe('TaskPoller', () => {
 
   test(
     'filters interval polling on capacity',
-    fakeSchedulers(async advance => {
+    fakeSchedulers(async (advance) => {
       const pollInterval = 100;
       const bufferCapacity = 2;
 
@@ -104,7 +104,7 @@ describe('TaskPoller', () => {
 
   test(
     'requests with no arguments (nudge requests) are queued on-demand in between intervals',
-    fakeSchedulers(async advance => {
+    fakeSchedulers(async (advance) => {
       const pollInterval = 100;
       const bufferCapacity = 2;
       const querterInterval = Math.floor(pollInterval / 4);
@@ -147,7 +147,7 @@ describe('TaskPoller', () => {
 
   test(
     'requests with no arguments (nudge requests) are dropped when there is no capacity',
-    fakeSchedulers(async advance => {
+    fakeSchedulers(async (advance) => {
       const pollInterval = 100;
       const bufferCapacity = 2;
       const querterInterval = Math.floor(pollInterval / 4);
@@ -193,7 +193,7 @@ describe('TaskPoller', () => {
 
   test(
     'requests with arguments are emitted',
-    fakeSchedulers(async advance => {
+    fakeSchedulers(async (advance) => {
       const pollInterval = 100;
       const bufferCapacity = 2;
 
@@ -226,7 +226,7 @@ describe('TaskPoller', () => {
 
   test(
     'waits for work to complete before emitting the next event',
-    fakeSchedulers(async advance => {
+    fakeSchedulers(async (advance) => {
       const pollInterval = 100;
       const bufferCapacity = 2;
 
@@ -274,7 +274,7 @@ describe('TaskPoller', () => {
 
   test(
     'returns an error when polling for work fails',
-    fakeSchedulers(async advance => {
+    fakeSchedulers(async (advance) => {
       const pollInterval = 100;
       const bufferCapacity = 2;
 
@@ -305,7 +305,7 @@ describe('TaskPoller', () => {
 
   test(
     'continues polling after work fails',
-    fakeSchedulers(async advance => {
+    fakeSchedulers(async (advance) => {
       const pollInterval = 100;
       const bufferCapacity = 2;
 
@@ -353,7 +353,7 @@ describe('TaskPoller', () => {
 
   test(
     'returns a request capcity error when new request is emitted but the poller is at buffer capacity',
-    fakeSchedulers(async advance => {
+    fakeSchedulers(async (advance) => {
       const pollInterval = 1000;
       const bufferCapacity = 2;
 

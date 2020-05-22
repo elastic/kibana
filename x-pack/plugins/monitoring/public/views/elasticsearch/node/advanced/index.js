@@ -34,8 +34,8 @@ function getPageData($injector) {
       },
       is_advanced: true,
     })
-    .then(response => response.data)
-    .catch(err => {
+    .then((response) => response.data)
+    .catch((err) => {
       const Private = $injector.get('Private');
       const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
       return ajaxErrorHandlers(err);
@@ -45,7 +45,7 @@ function getPageData($injector) {
 uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
   template,
   resolve: {
-    clusters: function(Private) {
+    clusters: function (Private) {
       const routeInit = Private(routeInitProvider);
       return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH] });
     },
@@ -63,7 +63,7 @@ uiRoutes.when('/elasticsearch/nodes/:node/advanced', {
 
       $scope.$watch(
         () => this.data,
-        data => {
+        (data) => {
           if (!data || !data.nodeSummary) {
             return;
           }

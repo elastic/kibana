@@ -10,12 +10,12 @@ import { isOnPolicyListPage, urlSearchParams } from './selectors';
 import { ImmutableMiddlewareFactory } from '../../../common/store';
 import { Immutable } from '../../../../common/endpoint/types';
 
-export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<Immutable<
-  PolicyListState
->> = coreStart => {
+export const policyListMiddlewareFactory: ImmutableMiddlewareFactory<Immutable<PolicyListState>> = (
+  coreStart
+) => {
   const http = coreStart.http;
 
-  return ({ getState, dispatch }) => next => async action => {
+  return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
 
     const state = getState();

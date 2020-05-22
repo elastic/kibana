@@ -38,18 +38,18 @@ const mlCapabilitiesSelector = (state: AppState) => state.ml.mlCapabilities.data
 
 export const hasMLFeatureAvailable = createSelector(
   mlCapabilitiesSelector,
-  mlCapabilities =>
+  (mlCapabilities) =>
     mlCapabilities?.isPlatinumOrTrialLicense && mlCapabilities?.mlFeatureEnabledInSpace
 );
 
 export const canCreateMLJobSelector = createSelector(
   mlCapabilitiesSelector,
-  mlCapabilities => mlCapabilities?.capabilities.canCreateJob
+  (mlCapabilities) => mlCapabilities?.capabilities.canCreateJob
 );
 
 export const canDeleteMLJobSelector = createSelector(
   mlCapabilitiesSelector,
-  mlCapabilities => mlCapabilities?.capabilities.canDeleteJob
+  (mlCapabilities) => mlCapabilities?.capabilities.canDeleteJob
 );
 
 export const hasMLJobSelector = ({ ml }: AppState) => ml.mlJob;

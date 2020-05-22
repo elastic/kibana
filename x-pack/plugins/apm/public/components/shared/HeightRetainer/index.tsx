@@ -6,7 +6,7 @@
 
 import React, { useEffect, useRef } from 'react';
 
-export const HeightRetainer: React.FC = props => {
+export const HeightRetainer: React.FC = (props) => {
   const containerElement = useRef<HTMLDivElement>(null);
   const minHeight = useRef<number>(0);
 

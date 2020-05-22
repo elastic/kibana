@@ -23,7 +23,7 @@ describe(`Check CSV Injected values`, () => {
     ).toBe(false);
   });
 
-  formulaValues.forEach(formula => {
+  formulaValues.forEach((formula) => {
     it(`returns 'true' when cells start with "${formula}"`, () => {
       expect(
         checkIfRowsHaveFormulas(
@@ -51,7 +51,7 @@ describe(`Check CSV Injected values`, () => {
     });
   });
 
-  formulaValues.forEach(formula => {
+  formulaValues.forEach((formula) => {
     it(`returns 'true' when headers start with "${formula}"`, () => {
       expect(
         checkIfRowsHaveFormulas(
@@ -79,7 +79,7 @@ describe(`Check CSV Injected values`, () => {
     });
   });
 
-  nonRows.forEach(nonRow => {
+  nonRows.forEach((nonRow) => {
     it(`returns false when there's "${nonRow}" for rows`, () => {
       expect(
         checkIfRowsHaveFormulas(

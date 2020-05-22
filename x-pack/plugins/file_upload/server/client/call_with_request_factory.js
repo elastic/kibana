@@ -9,7 +9,7 @@ import { getDataClient } from '../kibana_server_services';
 
 const callWithRequest = once(() => getDataClient());
 
-export const callWithRequestFactory = request => {
+export const callWithRequestFactory = (request) => {
   return (...args) => {
     return (
       callWithRequest()

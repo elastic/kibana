@@ -138,11 +138,11 @@ export const buildCaseUserActions = ({
   updatedCases: Array<SavedObjectsUpdateResponse<CaseAttributes>>;
 }): UserActionItem[] =>
   updatedCases.reduce<UserActionItem[]>((acc, updatedItem) => {
-    const originalItem = originalCases.find(oItem => oItem.id === updatedItem.id);
+    const originalItem = originalCases.find((oItem) => oItem.id === updatedItem.id);
     if (originalItem != null) {
       let userActions: UserActionItem[] = [];
       const updatedFields = Object.keys(updatedItem.attributes) as UserActionField;
-      updatedFields.forEach(field => {
+      updatedFields.forEach((field) => {
         if (userActionFieldsAllowed.includes(field)) {
           const origValue = get(originalItem, ['attributes', field]);
           const updatedValue = get(updatedItem, ['attributes', field]);

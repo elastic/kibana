@@ -74,7 +74,9 @@ export async function loadAlerts({
     filters.push(
       [
         '(',
-        actionTypesFilter.map(id => `alert.attributes.actions:{ actionTypeId:${id} }`).join(' OR '),
+        actionTypesFilter
+          .map((id) => `alert.attributes.actions:{ actionTypeId:${id} }`)
+          .join(' OR '),
         ')',
       ].join('')
     );
@@ -102,11 +104,11 @@ export async function deleteAlerts({
 }): Promise<{ successes: string[]; errors: string[] }> {
   const successes: string[] = [];
   const errors: string[] = [];
-  await Promise.all(ids.map(id => http.delete(`${BASE_ALERT_API_PATH}/${id}`))).then(
-    function(fulfilled) {
+  await Promise.all(ids.map((id) => http.delete(`${BASE_ALERT_API_PATH}/${id}`))).then(
+    function (fulfilled) {
       successes.push(...fulfilled);
     },
-    function(rejected) {
+    function (rejected) {
       errors.push(...rejected);
     }
   );
@@ -152,7 +154,7 @@ export async function enableAlerts({
   ids: string[];
   http: HttpSetup;
 }): Promise<void> {
-  await Promise.all(ids.map(id => enableAlert({ id, http })));
+  await Promise.all(ids.map((id) => enableAlert({ id, http })));
 }
 
 export async function disableAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
@@ -166,7 +168,7 @@ export async function disableAlerts({
   ids: string[];
   http: HttpSetup;
 }): Promise<void> {
-  await Promise.all(ids.map(id => disableAlert({ id, http })));
+  await Promise.all(ids.map((id) => disableAlert({ id, http })));
 }
 
 export async function muteAlertInstance({
@@ -198,7 +200,7 @@ export async function muteAlert({ id, http }: { id: string; http: HttpSetup }): 
 }
 
 export async function muteAlerts({ ids, http }: { ids: string[]; http: HttpSetup }): Promise<void> {
-  await Promise.all(ids.map(id => muteAlert({ http, id })));
+  await Promise.all(ids.map((id) => muteAlert({ http, id })));
 }
 
 export async function unmuteAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
@@ -212,7 +214,7 @@ export async function unmuteAlerts({
   ids: string[];
   http: HttpSetup;
 }): Promise<void> {
-  await Promise.all(ids.map(id => unmuteAlert({ id, http })));
+  await Promise.all(ids.map((id) => unmuteAlert({ id, http })));
 }
 
 export async function health({ http }: { http: HttpSetup }): Promise<AlertingFrameworkHealth> {
