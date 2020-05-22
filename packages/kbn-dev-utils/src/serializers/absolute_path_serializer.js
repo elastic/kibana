@@ -19,7 +19,7 @@
 
 export function createAbsolutePathSerializer(rootPath) {
   return {
-    print: value => value.replace(rootPath, '<absolute path>').replace(/\\/g, '/'),
-    test: value => typeof value === 'string' && value.startsWith(rootPath),
+    print: (value) => value.replace(rootPath, '<absolute path>').replace(/\\/g, '/'),
+    test: (value) => typeof value === 'string' && value.startsWith(rootPath),
   };
 }

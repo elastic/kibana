@@ -47,7 +47,7 @@ export const timelion = () => ({
   fn: (context, args) => {
     // Timelion requires a time range. Use the time range from the timefilter element in the
     // workpad, if it exists. Otherwise fall back on the function args.
-    const timeFilter = context.and.find(and => and.type === 'time');
+    const timeFilter = context.and.find((and) => and.type === 'time');
     const range = timeFilter
       ? { from: timeFilter.from, to: timeFilter.to }
       : { from: args.from, to: args.to };
@@ -75,12 +75,12 @@ export const timelion = () => ({
       method: 'POST',
       responseType: 'json',
       data: body,
-    }).then(resp => {
+    }).then((resp) => {
       const seriesList = resp.data.sheet[0].list;
 
       const rows = flatten(
-        seriesList.map(series =>
-          series.data.map(row => ({ '@timestamp': row[0], value: row[1], label: series.label }))
+        seriesList.map((series) =>
+          series.data.map((row) => ({ '@timestamp': row[0], value: row[1], label: series.label }))
         )
       );
 

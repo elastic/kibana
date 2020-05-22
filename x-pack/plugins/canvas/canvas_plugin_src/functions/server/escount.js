@@ -48,6 +48,6 @@ export const escount = () => ({
       context
     );
 
-    return handlers.elasticsearchClient('count', esRequest).then(resp => resp.count);
+    return handlers.elasticsearchClient('count', esRequest).then((resp) => resp.count);
   },
 });

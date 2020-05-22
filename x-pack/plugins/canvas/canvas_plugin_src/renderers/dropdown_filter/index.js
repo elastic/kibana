@@ -23,7 +23,7 @@ export const dropdownFilter = () => ({
       value = get(filterAST, 'chain[0].arguments.value[0]');
     }
 
-    const commit = value => {
+    const commit = (value) => {
       if (value === '%%CANVAS_MATCH_ALL%%') {
         handlers.setFilter('');
       } else {

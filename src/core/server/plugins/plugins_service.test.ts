@@ -155,7 +155,7 @@ test('`start` throws if discovered plugins with conflicting names', async () => 
 test('`start` properly detects plugins that should be disabled.', async () => {
   jest
     .spyOn(configService, 'isEnabledAtPath')
-    .mockImplementation(path => Promise.resolve(!path.includes('disabled')));
+    .mockImplementation((path) => Promise.resolve(!path.includes('disabled')));
 
   mockPluginSystem.startPlugins.mockResolvedValue(new Map());
 

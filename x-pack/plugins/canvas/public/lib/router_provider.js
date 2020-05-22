@@ -20,7 +20,7 @@ export function routerProvider(routes) {
   const history = historyProvider(getWindow());
   let componentListener = null;
 
-  const isPath = str => typeof str === 'string' && str.substr(0, 1) === '/';
+  const isPath = (str) => typeof str === 'string' && str.substr(0, 1) === '/';
 
   const getState = (name, params, state) => {
     // given a path, assuming params is the state
@@ -61,7 +61,7 @@ export function routerProvider(routes) {
         throw new Error('Only one route component listener is allowed');
       }
 
-      const execOnMatch = location => {
+      const execOnMatch = (location) => {
         const { pathname } = location;
         const match = this.match(pathname);
 

@@ -17,7 +17,7 @@ class VerticalLines extends PureComponent {
       height,
       margins,
       xDomain,
-      tickValues
+      tickValues,
     } = this.props.plotValues;
 
     const agentMarkTimes = this.props.agentMarks.map(({ us }) => us);
@@ -27,7 +27,7 @@ class VerticalLines extends PureComponent {
         style={{
           position: 'absolute',
           top: 0,
-          left: 0
+          left: 0,
         }}
       >
         <XYPlot
@@ -61,11 +61,11 @@ class VerticalLines extends PureComponent {
 
 VerticalLines.propTypes = {
   plotValues: PropTypes.object.isRequired,
-  agentMarks: PropTypes.array
+  agentMarks: PropTypes.array,
 };
 
 VerticalLines.defaultProps = {
-  agentMarks: []
+  agentMarks: [],
 };
 
 export default VerticalLines;

@@ -34,7 +34,7 @@ export class Workpad extends React.PureComponent {
     css: PropTypes.object,
   };
 
-  keyHandler = action => {
+  keyHandler = (action) => {
     const {
       fetchAllRenderables,
       undoHistory,

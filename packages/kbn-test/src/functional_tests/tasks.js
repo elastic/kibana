@@ -72,7 +72,7 @@ export async function runTests(options) {
       continue;
     }
 
-    await withProcRunner(log, async procs => {
+    await withProcRunner(log, async (procs) => {
       const config = await readConfigFile(log, configPath);
 
       let es;
@@ -108,7 +108,7 @@ export async function startServers(options) {
     log,
   };
 
-  await withProcRunner(log, async procs => {
+  await withProcRunner(log, async (procs) => {
     const config = await readConfigFile(log, options.config);
 
     const es = await runElasticsearch({ config, options: opts });

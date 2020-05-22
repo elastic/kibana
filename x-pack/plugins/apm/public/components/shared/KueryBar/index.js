@@ -11,7 +11,7 @@ import view from './view';
 function mapStateToProps(state = {}) {
   return {
     location: state.location,
-    urlParams: getUrlParams(state)
+    urlParams: getUrlParams(state),
   };
 }
 

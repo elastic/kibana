@@ -16,17 +16,17 @@ export async function getServerStatus({ setup }) {
         bool: {
           filter: {
             exists: {
-              field: 'listening'
-            }
-          }
-        }
-      }
-    }
+              field: 'listening',
+            },
+          },
+        },
+      },
+    },
   };
 
   const resp = await client('search', params);
 
   return {
-    dataFound: resp.hits.total >= 1
+    dataFound: resp.hits.total >= 1,
   };
 }

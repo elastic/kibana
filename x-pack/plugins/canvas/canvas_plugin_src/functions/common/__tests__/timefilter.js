@@ -12,11 +12,11 @@ import { emptyFilter } from './fixtures/test_filters';
 
 let clock = null;
 
-beforeEach(function() {
+beforeEach(function () {
   clock = sinon.useFakeTimers();
 });
 
-afterEach(function() {
+afterEach(function () {
   clock.restore();
 });
 
@@ -87,9 +87,11 @@ describe('timefilter', () => {
       });
 
       it('throws when provided an invalid date string', () => {
-        expect(() => fn(emptyFilter, { from: '2018-13-42T15:00:00.950Z' })).to.throwException(e => {
-          expect(e.message).to.be.equal(`Invalid date/time string: '2018-13-42T15:00:00.950Z'`);
-        });
+        expect(() => fn(emptyFilter, { from: '2018-13-42T15:00:00.950Z' })).to.throwException(
+          (e) => {
+            expect(e.message).to.be.equal(`Invalid date/time string: '2018-13-42T15:00:00.950Z'`);
+          }
+        );
       });
     });
   });

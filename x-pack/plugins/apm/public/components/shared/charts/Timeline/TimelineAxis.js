@@ -24,7 +24,7 @@ const getXAxisTickValues = (tickValues, traceRootDuration) => {
   const lowerBound = traceRootDuration - padding;
   const upperBound = traceRootDuration + padding;
 
-  return tickValues.filter(value => {
+  return tickValues.filter((value) => {
     const isInRange = inRange(value, lowerBound, upperBound);
     return !isInRange && value !== traceRootDuration;
   });
@@ -47,7 +47,7 @@ function TimelineAxis({ plotValues, agentMarks, traceRootDuration }) {
               height: px(margins.top),
               zIndex: 2,
               width: '100%',
-              ...style
+              ...style,
             }}
           >
             <XYPlot
@@ -57,7 +57,7 @@ function TimelineAxis({ plotValues, agentMarks, traceRootDuration }) {
               margin={{
                 top: margins.top,
                 left: margins.left,
-                right: margins.right
+                right: margins.right,
               }}
               xDomain={xDomain}
             >
@@ -69,7 +69,7 @@ function TimelineAxis({ plotValues, agentMarks, traceRootDuration }) {
                 tickFormat={tickFormat}
                 tickPadding={20}
                 style={{
-                  text: { fill: colors.gray3 }
+                  text: { fill: colors.gray3 },
                 }}
               />
 
@@ -81,7 +81,7 @@ function TimelineAxis({ plotValues, agentMarks, traceRootDuration }) {
                 />
               )}
 
-              {agentMarks.map(agentMark => (
+              {agentMarks.map((agentMark) => (
                 <AgentMarker
                   key={agentMark.name}
                   agentMark={agentMark}
@@ -99,11 +99,11 @@ function TimelineAxis({ plotValues, agentMarks, traceRootDuration }) {
 TimelineAxis.propTypes = {
   header: PropTypes.node,
   plotValues: PropTypes.object.isRequired,
-  agentMarks: PropTypes.array
+  agentMarks: PropTypes.array,
 };
 
 TimelineAxis.defaultProps = {
-  agentMarks: []
+  agentMarks: [],
 };
 
 export default TimelineAxis;

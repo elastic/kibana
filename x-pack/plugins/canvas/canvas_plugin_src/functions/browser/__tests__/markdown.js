@@ -15,9 +15,7 @@ describe('markdown', () => {
 
   it('returns a render as markdown', () => {
     const result = fn(null, { expression: [''], font: fontStyle });
-    expect(result)
-      .to.have.property('type', 'render')
-      .and.to.have.property('as', 'markdown');
+    expect(result).to.have.property('type', 'render').and.to.have.property('as', 'markdown');
   });
 
   describe('args', () => {
@@ -33,7 +31,7 @@ describe('markdown', () => {
 
       it('compiles and concatenates handlebars expressions using context', () => {
         let expectedContent = 'Columns:';
-        testTable.columns.map(col => (expectedContent += ` ${col.name}`));
+        testTable.columns.map((col) => (expectedContent += ` ${col.name}`));
 
         const result = fn(testTable, {
           expression: ['Columns:', '{{#each columns}} {{name}}{{/each}}'],

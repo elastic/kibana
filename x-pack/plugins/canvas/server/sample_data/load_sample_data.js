@@ -10,7 +10,7 @@ export function loadSampleData(server) {
   const now = new Date();
   const nowTimestamp = now.toISOString();
   function updateCanvasWorkpadTimestamps(savedObjects) {
-    return savedObjects.map(savedObject => {
+    return savedObjects.map((savedObject) => {
       if (savedObject.type === 'canvas-workpad') {
         savedObject.attributes['@timestamp'] = nowTimestamp;
         savedObject.attributes['@created'] = nowTimestamp;

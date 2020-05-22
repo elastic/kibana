@@ -17,13 +17,13 @@ import 'jest-styled-components';
 export function toJson(wrapper) {
   return enzymeToJson(wrapper, {
     noKey: true,
-    mode: 'deep'
+    mode: 'deep',
   });
 }
 
 const defaultRoute = {
   match: { path: '/', url: '/', params: {}, isExact: true },
-  location: { pathname: '/', search: '', hash: '', key: '4yyjf5' }
+  location: { pathname: '/', search: '', hash: '', key: '4yyjf5' },
 };
 
 export function mountWithRouterAndStore(
@@ -39,13 +39,13 @@ export function mountWithRouterAndStore(
       store,
       router: {
         history,
-        route
-      }
+        route,
+      },
     },
     childContextTypes: {
       store: PropTypes.object.isRequired,
-      router: PropTypes.object.isRequired
-    }
+      router: PropTypes.object.isRequired,
+    },
   };
 
   return mount(Component, options);
@@ -56,11 +56,11 @@ export function mountWithStore(Component, storeState = {}) {
 
   const options = {
     context: {
-      store
+      store,
     },
     childContextTypes: {
-      store: PropTypes.object.isRequired
-    }
+      store: PropTypes.object.isRequired,
+    },
   };
 
   return mount(Component, options);
@@ -68,12 +68,12 @@ export function mountWithStore(Component, storeState = {}) {
 
 export function mockMoment() {
   // avoid timezone issues
-  jest.spyOn(moment.prototype, 'format').mockImplementation(function() {
+  jest.spyOn(moment.prototype, 'format').mockImplementation(function () {
     return `1st of January (mocking ${this.unix()})`;
   });
 
   // convert relative time to absolute time to avoid timing issues
-  jest.spyOn(moment.prototype, 'fromNow').mockImplementation(function() {
+  jest.spyOn(moment.prototype, 'fromNow').mockImplementation(function () {
     return `1337 minutes ago (mocking ${this.unix()})`;
   });
 }

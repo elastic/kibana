@@ -11,13 +11,10 @@ import { getUrlParams } from '../../../store/urlParams';
 function mapStateToProps(state = {}) {
   return {
     urlParams: getUrlParams(state),
-    location: state.location
+    location: state.location,
   };
 }
 
 const mapDispatchToProps = {};
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(ErrorGroupDetails);
+export default connect(mapStateToProps, mapDispatchToProps)(ErrorGroupDetails);

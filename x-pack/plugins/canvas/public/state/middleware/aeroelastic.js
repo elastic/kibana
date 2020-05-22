@@ -57,7 +57,7 @@ const aeroelasticConfiguration = {
   tooltipZ: 1100,
 };
 
-const isGroupId = id => id.startsWith(aeroelasticConfiguration.groupName);
+const isGroupId = (id) => id.startsWith(aeroelasticConfiguration.groupName);
 
 const pageChangerActions = [duplicatePage.toString(), addPage.toString(), setPage.toString()];
 
@@ -107,7 +107,7 @@ const elementToShape = (element, i) => {
   };
 };
 
-const shapeToElement = shape => {
+const shapeToElement = (shape) => {
   return {
     left: shape.transformMatrix[12] - shape.a,
     top: shape.transformMatrix[13] - shape.b,
@@ -121,7 +121,7 @@ const shapeToElement = shape => {
 
 const updateGlobalPositions = (setMultiplePositions, { shapes, gestureEnd }, unsortedElements) => {
   const ascending = (a, b) => (a.id < b.id ? -1 : 1);
-  const relevant = s => s.type !== 'annotation' && s.subtype !== 'adHocGroup';
+  const relevant = (s) => s.type !== 'annotation' && s.subtype !== 'adHocGroup';
   const elements = unsortedElements.filter(relevant).sort(ascending);
   const repositionings = shapes
     .filter(relevant)
@@ -159,18 +159,18 @@ const updateGlobalPositions = (setMultiplePositions, { shapes, gestureEnd }, uns
   }
 };
 
-const id = element => element.id;
+const id = (element) => element.id;
 // check for duplication
-const deduped = a => a.filter((d, i) => a.indexOf(d) === i);
-const idDuplicateCheck = groups => {
-  if (deduped(groups.map(g => g.id)).length !== groups.length) {
+const deduped = (a) => a.filter((d, i) => a.indexOf(d) === i);
+const idDuplicateCheck = (groups) => {
+  if (deduped(groups.map((g) => g.id)).length !== groups.length) {
     throw new Error('Duplicate element encountered');
   }
 };
 
-const missingParentCheck = groups => {
-  const idMap = arrayToMap(groups.map(g => g.id));
-  groups.forEach(g => {
+const missingParentCheck = (groups) => {
+  const idMap = arrayToMap(groups.map((g) => g.id));
+  groups.forEach((g) => {
     if (g.parent && !idMap[g.parent]) {
       g.parent = null;
     }
@@ -193,15 +193,15 @@ export const aeroelastic = ({ dispatch, getState }) => {
     const selectedElement = getSelectedElement(getState());
 
     const shapes = nextScene.shapes;
-    const persistableGroups = shapes.filter(s => s.subtype === 'persistentGroup');
-    const persistedGroups = elements.filter(e => isGroupId(e.id));
+    const persistableGroups = shapes.filter((s) => s.subtype === 'persistentGroup');
+    const persistedGroups = elements.filter((e) => isGroupId(e.id));
 
     idDuplicateCheck(persistableGroups);
     idDuplicateCheck(persistedGroups);
 
-    persistableGroups.forEach(g => {
+    persistableGroups.forEach((g) => {
       if (
-        !persistedGroups.find(p => {
+        !persistedGroups.find((p) => {
           if (!p.id) {
             throw new Error('Element has no id');
           }
@@ -223,20 +223,25 @@ export const aeroelastic = ({ dispatch, getState }) => {
     const elementsToRemove = persistedGroups.filter(
       // list elements for removal if they're not in the persistable set, or if there's no longer an associated element
       // the latter of which shouldn't happen, so it's belts and braces
-      p =>
-        !persistableGroups.find(g => p.id === g.id) ||
-        !elements.find(e => e.position.parent === p.id)
+      (p) =>
+        !persistableGroups.find((g) => p.id === g.id) ||
+        !elements.find((e) => e.position.parent === p.id)
     );
 
     updateGlobalPositions(
-      positions => dispatch(setMultiplePositions(positions.map(p => ({ ...p, pageId: page })))),
+      (positions) => dispatch(setMultiplePositions(positions.map((p) => ({ ...p, pageId: page })))),
       nextScene,
       elements
     );
 
     if (elementsToRemove.length) {
       // remove elements for groups that were ungrouped
-      dispatch(removeElements(elementsToRemove.map(e => e.id), page));
+      dispatch(
+        removeElements(
+          elementsToRemove.map((e) => e.id),
+          page
+        )
+      );
     }
 
     // set the selected element on the global store, if one element is selected
@@ -249,7 +254,7 @@ export const aeroelastic = ({ dispatch, getState }) => {
       // otherwise, clear the selected element state
       // even for groups - TODO add handling for groups, esp. persistent groups - common styling etc.
       if (selectedElement) {
-        const shape = shapes.find(s => s.id === selectedShape);
+        const shape = shapes.find((s) => s.id === selectedShape);
         // don't reset if eg. we're in the middle of converting an ad hoc group into a persistent one
         if (!shape || shape.subtype !== 'adHocGroup') {
           dispatch(selectElement(null));
@@ -258,7 +263,7 @@ export const aeroelastic = ({ dispatch, getState }) => {
     }
   };
 
-  const createStore = page =>
+  const createStore = (page) =>
     aero.createStore(
       {
         shapeAdditions: [],
@@ -270,11 +275,11 @@ export const aeroelastic = ({ dispatch, getState }) => {
       page
     );
 
-  const populateWithElements = page => {
+  const populateWithElements = (page) => {
     const newShapes = getNodes(getState(), page)
       .map(elementToShape)
       // filtering to eliminate residual element of a possible group that had been deleted in Redux
-      .filter((d, i, a) => !isGroupId(d.id) || a.find(s => s.parent === d.id));
+      .filter((d, i, a) => !isGroupId(d.id) || a.find((s) => s.parent === d.id));
     idDuplicateCheck(newShapes);
     missingParentCheck(newShapes);
     return aero.commit(page, 'restateShapesEvent', { newShapes }, { silent: true });
@@ -284,11 +289,11 @@ export const aeroelastic = ({ dispatch, getState }) => {
     aero.commit(page, 'shapeSelect', { shapes: [id] });
   };
 
-  const unselectShape = page => {
+  const unselectShape = (page) => {
     aero.commit(page, 'shapeSelect', { shapes: [] });
   };
 
-  return next => action => {
+  return (next) => (action) => {
     // get information before the state is changed
     const prevPage = getSelectedPage(getState());
     const prevElements = getNodes(getState(), prevPage);
@@ -298,18 +303,18 @@ export const aeroelastic = ({ dispatch, getState }) => {
       aero.clearStores();
       // Create the aeroelastic store, which happens once per page creation; disposed on workbook change.
       // TODO: consider implementing a store removal upon page removal to reclaim a small amount of storage
-      pages.map(p => p.id).forEach(createStore);
+      pages.map((p) => p.id).forEach(createStore);
     }
 
     if (action.type === restoreHistory.toString()) {
       aero.clearStores();
-      action.payload.workpad.pages.map(p => p.id).forEach(createStore);
+      action.payload.workpad.pages.map((p) => p.id).forEach(createStore);
     }
 
     if (action.type === appReady.toString()) {
       const pages = getPages(getState());
       aero.clearStores();
-      pages.map(p => p.id).forEach(createStore);
+      pages.map((p) => p.id).forEach(createStore);
     }
 
     let lastPageRemoved = false;
@@ -338,7 +343,7 @@ export const aeroelastic = ({ dispatch, getState }) => {
       case setWorkpad.toString():
         // Populate the aeroelastic store, which only happens once per page creation; disposed on workbook change.
         getPages(getState())
-          .map(p => p.id)
+          .map((p) => p.id)
           .forEach(populateWithElements);
         break;
 

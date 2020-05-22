@@ -20,7 +20,7 @@ function setPageIndex(workpadState, index) {
 }
 
 function getPageIndexById(workpadState, id) {
-  return workpadState.pages.findIndex(page => page.id === id);
+  return workpadState.pages.findIndex((page) => page.id === id);
 }
 
 function addPage(workpadState, payload, srcIndex = workpadState.pages.length - 1) {
@@ -37,8 +37,8 @@ function clonePage(page) {
   return {
     ...page,
     id: getId('page'),
-    groups: newNodes.filter(n => n.position.type === 'group'),
-    elements: newNodes.filter(n => n.position.type !== 'group'),
+    groups: newNodes.filter((n) => n.position.type === 'group'),
+    elements: newNodes.filter((n) => n.position.type !== 'group'),
   };
 }
 
@@ -57,7 +57,7 @@ export const pagesReducer = handleActions(
     },
 
     [actions.duplicatePage]: (workpadState, { payload }) => {
-      const srcPage = workpadState.pages.find(page => page.id === payload);
+      const srcPage = workpadState.pages.find((page) => page.id === payload);
 
       // if the page id is invalid, don't change the state
       if (!srcPage) {
@@ -101,7 +101,7 @@ export const pagesReducer = handleActions(
 
       // adjust the selected page index and return the new state
       const selectedId = workpadState.pages[workpadState.page].id;
-      const newSelectedIndex = newState.pages.findIndex(page => page.id === selectedId);
+      const newSelectedIndex = newState.pages.findIndex((page) => page.id === selectedId);
       newState = set(newState, 'page', newSelectedIndex);
 
       // changes to the page require navigation
@@ -142,12 +142,12 @@ export const pagesReducer = handleActions(
     },
 
     [actions.stylePage]: (workpadState, { payload }) => {
-      const pageIndex = workpadState.pages.findIndex(page => page.id === payload.pageId);
+      const pageIndex = workpadState.pages.findIndex((page) => page.id === payload.pageId);
       return set(workpadState, ['pages', pageIndex, 'style'], payload.style);
     },
 
     [actions.setPageTransition]: (workpadState, { payload }) => {
-      const pageIndex = workpadState.pages.findIndex(page => page.id === payload.pageId);
+      const pageIndex = workpadState.pages.findIndex((page) => page.id === payload.pageId);
       return set(workpadState, ['pages', pageIndex, 'transition'], payload.transition);
     },
   },

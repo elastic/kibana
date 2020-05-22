@@ -51,16 +51,12 @@ export const axisConfig = () => ({
 
     if (min != null && isNaN(min)) {
       throw new Error(
-        `Invalid date string: '${
-          args.min
-        }'. 'min' must be a number, date in ms, or ISO8601 date string`
+        `Invalid date string: '${args.min}'. 'min' must be a number, date in ms, or ISO8601 date string`
       );
     }
     if (max != null && isNaN(max)) {
       throw new Error(
-        `Invalid date string: '${
-          args.max
-        }'. 'max' must be a number, date in ms, or ISO8601 date string`
+        `Invalid date string: '${args.max}'. 'max' must be a number, date in ms, or ISO8601 date string`
       );
     }
 

@@ -30,7 +30,7 @@ export const markdown = () => ({
     },
   },
   fn: (context, args) => {
-    const compileFunctions = args.expression.map(str =>
+    const compileFunctions = args.expression.map((str) =>
       Handlebars.compile(String(str), { knownHelpersOnly: true })
     );
     const ctx = {
@@ -44,7 +44,7 @@ export const markdown = () => ({
       type: 'render',
       as: 'markdown',
       value: {
-        content: compileFunctions.map(fn => fn(ctx)).join(''),
+        content: compileFunctions.map((fn) => fn(ctx)).join(''),
         font: args.font,
       },
     };

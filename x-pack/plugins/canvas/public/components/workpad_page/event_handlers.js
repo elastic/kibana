@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const ancestorElement = element => {
+const ancestorElement = (element) => {
   if (!element) {
     return element;
   }
@@ -56,7 +56,7 @@ const setupHandler = (commit, target, initialCallback, initialClientX, initialCl
       commit('cursorPosition', {});
     }
   };
-  window.onmouseup = e => {
+  window.onmouseup = (e) => {
     e.stopPropagation();
     const { clientX, clientY, altKey, metaKey, shiftKey, ctrlKey } = e;
     const { x, y } = localMousePosition(canvasOrigin, clientX, clientY);
@@ -125,9 +125,9 @@ const handleMouseDown = (commit, e, isEditable) => {
 };
 
 export const eventHandlers = {
-  onMouseDown: props => e => handleMouseDown(props.commit, e, props.isEditable),
-  onMouseMove: props => e => handleMouseMove(props.commit, e, props.isEditable),
-  onKeyDown: props => () => props.commit('keyboardEvent'), // dummy event
-  onWheel: props => e => handleWheel(props.commit, e, props.isEditable),
+  onMouseDown: (props) => (e) => handleMouseDown(props.commit, e, props.isEditable),
+  onMouseMove: (props) => (e) => handleMouseMove(props.commit, e, props.isEditable),
+  onKeyDown: (props) => () => props.commit('keyboardEvent'), // dummy event
+  onWheel: (props) => (e) => handleWheel(props.commit, e, props.isEditable),
   resetHandler: () => () => resetHandler(),
 };

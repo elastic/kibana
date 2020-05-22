@@ -97,7 +97,7 @@ export class HttpServer {
 
     const basePath = config.basePath;
     server.ext('onRequest', (request, responseToolkit) => {
-      const newURL = modifyUrl(request.url.href!, urlParts => {
+      const newURL = modifyUrl(request.url.href!, (urlParts) => {
         if (urlParts.pathname != null && urlParts.pathname.startsWith(basePath)) {
           urlParts.pathname = urlParts.pathname.replace(basePath, '') || '/';
         } else {
@@ -106,10 +106,7 @@ export class HttpServer {
       });
 
       if (!newURL) {
-        return responseToolkit
-          .response('Not Found')
-          .code(404)
-          .takeover();
+        return responseToolkit.response('Not Found').code(404).takeover();
       }
 
       request.setUrl(newURL);

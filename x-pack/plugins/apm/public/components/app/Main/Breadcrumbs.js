@@ -16,7 +16,7 @@ class Breadcrumbs extends React.Component {
     const { _g = '', kuery = '' } = toQuery(this.props.location.search);
     const breadcrumbs = this.props.breadcrumbs.map(({ breadcrumb, match }) => ({
       text: breadcrumb,
-      href: `#${match.url}?_g=${_g}&kuery=${kuery}`
+      href: `#${match.url}?_g=${_g}&kuery=${kuery}`,
     }));
 
     chrome.breadcrumbs.set(breadcrumbs);
@@ -52,7 +52,7 @@ class Breadcrumbs extends React.Component {
             >
               {isLast ? (
                 <span
-                  ref={node => {
+                  ref={(node) => {
                     if (node && document.title !== node.textContent) {
                       document.title = capitalize(node.textContent);
                     }
@@ -74,7 +74,7 @@ class Breadcrumbs extends React.Component {
 }
 
 const flatRoutes = flatten(
-  routes.map(route => (route.switch ? route.routes : route))
+  routes.map((route) => (route.switch ? route.routes : route))
 );
 
 export default withBreadcrumbs(flatRoutes)(Breadcrumbs);

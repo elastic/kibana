@@ -15,9 +15,7 @@ describe('pie', () => {
 
   it('returns a render as pie', () => {
     const result = fn(testPie);
-    expect(result)
-      .to.have.property('type', 'render')
-      .and.to.have.property('as', 'pie');
+    expect(result).to.have.property('type', 'render').and.to.have.property('as', 'pie');
   });
 
   describe('data', () => {
@@ -58,7 +56,7 @@ describe('pie', () => {
     describe('seriesStyle', () => {
       it('sets the color for a specific series', () => {
         const result = fn(testPie, { seriesStyle: [seriesStyle] }).value;
-        const seriesIndex = result.data.findIndex(series => series.label === seriesStyle.label);
+        const seriesIndex = result.data.findIndex((series) => series.label === seriesStyle.label);
         const resultSeries = result.data[seriesIndex];
 
         expect(resultSeries).to.have.property('color', seriesStyle.color);

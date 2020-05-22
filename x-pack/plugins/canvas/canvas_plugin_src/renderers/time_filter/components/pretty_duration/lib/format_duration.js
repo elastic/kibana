@@ -10,7 +10,7 @@ import { quickRanges } from './quick_ranges';
 import { timeUnits } from './time_units';
 
 const lookupByRange = {};
-quickRanges.forEach(function(frame) {
+quickRanges.forEach(function (frame) {
   lookupByRange[frame.from + ' to ' + frame.to] = frame;
 });
 

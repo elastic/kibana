@@ -20,13 +20,13 @@ import { findExistingAsset } from '../../lib/find_existing_asset';
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
 import { AssetManager as Component } from './asset_manager';
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   assets: getAssets(state),
   selectedPage: getSelectedPage(state),
 });
 
-const mapDispatchToProps = dispatch => ({
-  addImageElement: pageId => assetId => {
+const mapDispatchToProps = (dispatch) => ({
+  addImageElement: (pageId) => (assetId) => {
     const imageElement = elementsRegistry.get('image');
     const elementAST = fromExpression(imageElement.expression);
     const selector = ['chain', '0', 'arguments', 'dataurl'];
@@ -56,7 +56,7 @@ const mapDispatchToProps = dispatch => ({
     // then return the id, so the caller knows the id that will be created
     return assetId;
   },
-  removeAsset: assetId => dispatch(removeAsset(assetId)),
+  removeAsset: (assetId) => dispatch(removeAsset(assetId)),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
@@ -70,10 +70,10 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     selectedPage,
     assetValues,
     addImageElement: dispatchProps.addImageElement(stateProps.selectedPage),
-    onAssetAdd: file => {
+    onAssetAdd: (file) => {
       const [type, subtype] = get(file, 'type', '').split('/');
       if (type === 'image' && VALID_IMAGE_TYPES.indexOf(subtype) >= 0) {
-        return encode(file).then(dataurl => {
+        return encode(file).then((dataurl) => {
           const type = 'dataurl';
           const existingId = findExistingAsset(type, dataurl, assetValues);
           if (existingId) {
@@ -89,10 +89,6 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 };
 
 export const AssetManager = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps
-  ),
-  withProps({ copyAsset: assetId => notify.success(`Copied '${assetId}' to clipboard`) })
+  connect(mapStateToProps, mapDispatchToProps, mergeProps),
+  withProps({ copyAsset: (assetId) => notify.success(`Copied '${assetId}' to clipboard`) })
 )(Component);

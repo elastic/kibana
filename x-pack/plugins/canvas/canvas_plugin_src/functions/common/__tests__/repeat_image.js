@@ -15,9 +15,7 @@ describe('repeatImage', () => {
 
   it('returns a render as repeatImage', () => {
     const result = fn(10);
-    expect(result)
-      .to.have.property('type', 'render')
-      .and.to.have.property('as', 'repeatImage');
+    expect(result).to.have.property('type', 'render').and.to.have.property('as', 'repeatImage');
   });
 
   describe('args', () => {

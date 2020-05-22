@@ -19,7 +19,7 @@ export const progress = () => ({
       help: 'Shape of the progress indicator',
       argType: 'select',
       options: {
-        choices: Object.keys(shapes).map(key => ({
+        choices: Object.keys(shapes).map((key) => ({
           value: key,
           //turns camel into title case
           name: key[0].toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1'),

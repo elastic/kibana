@@ -60,20 +60,20 @@ export class AssetManager extends React.PureComponent {
     this.props.removeAsset(this.state.deleteId);
   };
 
-  handleFileUpload = files => {
+  handleFileUpload = (files) => {
     this.setState({ loading: true });
-    Promise.all(Array.from(files).map(file => this.props.onAssetAdd(file))).finally(() => {
+    Promise.all(Array.from(files).map((file) => this.props.onAssetAdd(file))).finally(() => {
       this._isMounted && this.setState({ loading: false });
     });
   };
 
-  addElement = assetId => {
+  addElement = (assetId) => {
     this.props.addImageElement(assetId);
   };
 
   resetDelete = () => this.setState({ deleteId: null });
 
-  renderAsset = asset => (
+  renderAsset = (asset) => (
     <EuiFlexItem key={asset.id}>
       <EuiPanel className="canvasAssetManager__asset" paddingSize="s">
         <div className="canvasAssetManager__thumb canvasCheckered">
@@ -125,7 +125,7 @@ export class AssetManager extends React.PureComponent {
             <EuiToolTip content="Copy id to clipboard">
               <Clipboard
                 content={asset.id}
-                onCopy={result => result && this.props.copyAsset(asset.id)}
+                onCopy={(result) => result && this.props.copyAsset(asset.id)}
               >
                 <EuiButtonIcon iconType="copyClipboard" aria-label="Copy id to clipboard" />
               </Clipboard>

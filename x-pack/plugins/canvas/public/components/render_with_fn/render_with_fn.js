@@ -91,7 +91,7 @@ export class RenderWithFn extends React.Component {
     }
   };
 
-  resetRenderTarget = domNode => {
+  resetRenderTarget = (domNode) => {
     const { handlers } = this.props;
 
     if (!domNode) {
@@ -119,7 +119,7 @@ export class RenderWithFn extends React.Component {
     return div;
   };
 
-  shouldFullRerender = prevProps => {
+  shouldFullRerender = (prevProps) => {
     // TODO: What a shitty hack. None of these props should update when you move the element.
     // This should be fixed at a higher level.
     return (
@@ -141,7 +141,7 @@ export class RenderWithFn extends React.Component {
       >
         <RenderToDom
           style={{ height: '100%', width: '100%' }}
-          render={domNode => {
+          render={(domNode) => {
             this.domNode = domNode;
             this.callRenderFn();
           }}

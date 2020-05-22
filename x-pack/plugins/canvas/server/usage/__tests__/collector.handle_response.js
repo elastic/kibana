@@ -10,7 +10,7 @@ import { workpads } from '../../../__tests__/fixtures/workpads';
 
 const getMockResponse = (mocks = workpads) => ({
   hits: {
-    hits: mocks.map(workpad => ({
+    hits: mocks.map((workpad) => ({
       _source: {
         'canvas-workpad': workpad,
       },

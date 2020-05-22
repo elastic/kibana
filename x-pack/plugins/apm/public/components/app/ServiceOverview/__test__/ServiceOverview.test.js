@@ -18,7 +18,7 @@ describe('Service Overview -> View', () => {
 
   beforeEach(() => {
     mockAgentStatus = {
-      dataFound: true
+      dataFound: true,
     };
 
     apmRestServices.loadAgentStatus = jest.fn(() =>
@@ -31,20 +31,14 @@ describe('Service Overview -> View', () => {
 
   it('should render when historical data is found', () => {
     expect(wrapper).toMatchSnapshot();
-    const List = wrapper
-      .find('ServiceListRequest')
-      .props()
-      .render({});
+    const List = wrapper.find('ServiceListRequest').props().render({});
     expect(List.props).toMatchSnapshot();
   });
 
   it('should render when historical data is not found', () => {
     wrapper.setState({ historicalDataFound: false });
     expect(wrapper).toMatchSnapshot();
-    const List = wrapper
-      .find('ServiceListRequest')
-      .props()
-      .render({});
+    const List = wrapper.find('ServiceListRequest').props().render({});
     expect(List.props).toMatchSnapshot();
   });
 
@@ -55,8 +49,8 @@ describe('Service Overview -> View', () => {
       const props = {
         serviceList: {
           status: STATUS.SUCCESS,
-          data: []
-        }
+          data: [],
+        },
       };
       await instance.checkForHistoricalData(props);
       expect(wrapper.state('historicalDataFound')).toEqual(true);
@@ -66,8 +60,8 @@ describe('Service Overview -> View', () => {
       const props = {
         serviceList: {
           status: STATUS.SUCCESS,
-          data: []
-        }
+          data: [],
+        },
       };
       mockAgentStatus.dataFound = false;
       await instance.checkForHistoricalData(props);

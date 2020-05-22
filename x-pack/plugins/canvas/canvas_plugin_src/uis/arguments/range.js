@@ -11,7 +11,7 @@ import { templateFromReactComponent } from '../../../public/lib/template_from_re
 
 const RangeArgInput = ({ typeInstance, onValueChange, argValue }) => {
   const { min, max, step } = typeInstance.options;
-  const handleChange = ev => {
+  const handleChange = (ev) => {
     return onValueChange(Number(ev.target.value));
   };
 

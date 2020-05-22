@@ -16,7 +16,7 @@ export const defaultSpec = {
   color: '#000',
 };
 
-export const getFontSpec = argFont => {
+export const getFontSpec = (argFont) => {
   if (!argFont || !argFont.spec) {
     return defaultSpec;
   }

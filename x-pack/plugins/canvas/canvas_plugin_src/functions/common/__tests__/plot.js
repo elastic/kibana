@@ -68,7 +68,7 @@ describe('plot', () => {
     describe('seriesStyle', () => {
       it('sets the seriesStyle for a specific series', () => {
         const result = fn(testPlot, { seriesStyle: [seriesStyle] }).value;
-        const seriesIndex = result.data.findIndex(series => series.label === seriesStyle.label);
+        const seriesIndex = result.data.findIndex((series) => series.label === seriesStyle.label);
         const resultSeries = result.data[seriesIndex];
 
         expect(resultSeries.lines)
@@ -108,9 +108,7 @@ describe('plot', () => {
 
         expect(defaultSeriesConfig.bubbles).to.have.property('fill', defaultStyle.fill);
 
-        expect(defaultSeriesConfig)
-          .to.not.have.property('stack')
-          .and.to.not.have.property('color');
+        expect(defaultSeriesConfig).to.not.have.property('stack').and.to.not.have.property('color');
       });
 
       // TODO: write test when using an instance of the interpreter
@@ -156,9 +154,7 @@ describe('plot', () => {
     describe('legend', () => {
       it('hides the legend', () => {
         const result = fn(testPlot, { legend: false }).value.options;
-        expect(result.legend)
-          .to.only.have.key('show')
-          .and.to.have.property('show', false);
+        expect(result.legend).to.only.have.key('show').and.to.have.property('show', false);
       });
 
       it('sets the position of the legend', () => {
@@ -220,9 +216,7 @@ describe('plot', () => {
 
       it('configures the x-axis with an AxisConfig', () => {
         const result = fn(testPlot, { xaxis: xAxisConfig }).value.options;
-        expect(result.xaxis)
-          .to.have.property('show', true)
-          .and.to.have.property('position', 'top');
+        expect(result.xaxis).to.have.property('show', true).and.to.have.property('position', 'top');
       });
 
       it("defaults to 'true' if not provided", () => {

@@ -56,13 +56,10 @@ export class PluginsSystem {
       const exposedDependencyValues = [
         ...plugin.requiredDependencies,
         ...plugin.optionalDependencies,
-      ].reduce(
-        (dependencies, dependencyName) => {
-          dependencies[dependencyName] = exposedValues.get(dependencyName);
-          return dependencies;
-        },
-        {} as Record<PluginName, unknown>
-      );
+      ].reduce((dependencies, dependencyName) => {
+        dependencies[dependencyName] = exposedValues.get(dependencyName);
+        return dependencies;
+      }, {} as Record<PluginName, unknown>);
 
       exposedValues.set(
         pluginName,
@@ -113,7 +110,7 @@ export class PluginsSystem {
           pluginName,
           new Set([
             ...plugin.requiredDependencies,
-            ...plugin.optionalDependencies.filter(dependency => this.plugins.has(dependency)),
+            ...plugin.optionalDependencies.filter((dependency) => this.plugins.has(dependency)),
           ]),
         ] as [PluginName, Set<PluginName>];
       })
@@ -122,7 +119,7 @@ export class PluginsSystem {
     // First, find a list of "start nodes" which have no outgoing edges. At least
     // one such node must exist in a non-empty acyclic graph.
     const pluginsWithAllDependenciesSorted = [...pluginsDependenciesGraph.keys()].filter(
-      pluginName => pluginsDependenciesGraph.get(pluginName)!.size === 0
+      (pluginName) => pluginsDependenciesGraph.get(pluginName)!.size === 0
     );
 
     const sortedPluginNames = new Set<PluginName>();

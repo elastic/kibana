@@ -19,7 +19,7 @@ import {
 } from '../../state/selectors/workpad';
 import { Workpad as Component } from './workpad';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   const { width, height, id: workpadId, css: workpadCss } = getWorkpad(state);
   return {
     pages: getPages(state),
@@ -45,10 +45,7 @@ export const Workpad = compose(
     router: PropTypes.object,
   }),
   withState('grid', 'setGrid', false),
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps),
   withState('transition', 'setTransition', null),
   withState('prevSelectedPageNumber', 'setPrevSelectedPageNumber', 0),
   withProps(({ selectedPageNumber, prevSelectedPageNumber, transition }) => {
@@ -69,7 +66,7 @@ export const Workpad = compose(
     return { getAnimation };
   }),
   withHandlers({
-    onPageChange: props => pageNumber => {
+    onPageChange: (props) => (pageNumber) => {
       if (pageNumber === props.selectedPageNumber) {
         return;
       }
@@ -84,11 +81,11 @@ export const Workpad = compose(
   }),
   withHandlers({
     onTransitionEnd: ({ setTransition }) => () => setTransition(null),
-    nextPage: props => () => {
+    nextPage: (props) => () => {
       const pageNumber = Math.min(props.selectedPageNumber + 1, props.pages.length);
       props.onPageChange(pageNumber);
     },
-    previousPage: props => () => {
+    previousPage: (props) => () => {
       const pageNumber = Math.max(1, props.selectedPageNumber - 1);
       props.onPageChange(pageNumber);
     },

@@ -14,7 +14,7 @@ export const ShapePicker = ({ shapes, onChange }) => {
     <EuiFlexGrid gutterSize="s" columns={4}>
       {Object.keys(shapes)
         .sort()
-        .map(shapeKey => (
+        .map((shapeKey) => (
           <EuiFlexItem key={shapeKey}>
             <EuiLink onClick={() => onChange(shapeKey)}>
               <ShapePreview shape={shapes[shapeKey]} />

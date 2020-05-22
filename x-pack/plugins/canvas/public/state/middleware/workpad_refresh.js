@@ -9,7 +9,7 @@ import { setRefreshInterval } from '../actions/workpad';
 import { inFlightComplete } from '../actions/resolved_args';
 import { getInFlight } from '../selectors/resolved_args';
 
-export const workpadRefresh = ({ dispatch, getState }) => next => {
+export const workpadRefresh = ({ dispatch, getState }) => (next) => {
   let refreshTimeout;
   let refreshInterval = 0;
 
@@ -36,7 +36,7 @@ export const workpadRefresh = ({ dispatch, getState }) => next => {
     }, refreshInterval);
   }
 
-  return action => {
+  return (action) => {
     next(action);
 
     // when in-flight requests are finished, update the workpad after a given delay

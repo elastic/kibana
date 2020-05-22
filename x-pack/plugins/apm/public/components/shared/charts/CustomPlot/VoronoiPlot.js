@@ -12,9 +12,11 @@ import React, { PureComponent } from 'react';
 import { SharedPlot } from './plotUtils';
 
 function getXValuesCombined(series) {
-  return union(...series.map(serie => serie.data.map(p => p.x))).map(x => ({
-    x
-  }));
+  return union(...series.map((serie) => serie.data.map((p) => p.x))).map(
+    (x) => ({
+      x,
+    })
+  );
 }
 
 class VoronoiPlot extends PureComponent {
@@ -32,12 +34,15 @@ class VoronoiPlot extends PureComponent {
         onMouseLeave={this.props.onMouseLeave}
       >
         <Voronoi
-          extent={[[XY_MARGIN.left, XY_MARGIN.top], [XY_WIDTH, XY_HEIGHT]]}
+          extent={[
+            [XY_MARGIN.left, XY_MARGIN.top],
+            [XY_WIDTH, XY_HEIGHT],
+          ]}
           nodes={xValuesCombined}
           onHover={this.props.onHover}
           onMouseDown={this.props.onMouseDown}
           onMouseUp={this.props.onMouseUp}
-          x={d => x(d.x)}
+          x={(d) => x(d.x)}
           y={() => 0}
         />
       </SharedPlot>
@@ -54,5 +59,5 @@ VoronoiPlot.propTypes = {
   onMouseLeave: PropTypes.func.isRequired,
   onMouseUp: PropTypes.func,
   series: PropTypes.array.isRequired,
-  plotValues: PropTypes.object.isRequired
+  plotValues: PropTypes.object.isRequired,
 };

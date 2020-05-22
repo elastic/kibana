@@ -39,7 +39,7 @@ export class TimeFilter extends Component {
     return this.state.filter !== nextState.filter;
   }
 
-  setFilter = column => (from, to) => {
+  setFilter = (column) => (from, to) => {
     const { commit } = this.props;
     const filter = `timefilter from="${from}" to=${to} column=${column}`;
 

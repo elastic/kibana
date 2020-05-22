@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 
-export const ConfirmModal = props => {
+export const ConfirmModal = (props) => {
   const {
     isOpen,
     title,
@@ -22,11 +22,11 @@ export const ConfirmModal = props => {
     ...rest
   } = props;
 
-  const confirm = ev => {
+  const confirm = (ev) => {
     onConfirm && onConfirm(ev);
   };
 
-  const cancel = ev => {
+  const cancel = (ev) => {
     onCancel && onCancel(ev);
   };
 

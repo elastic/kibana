@@ -51,7 +51,7 @@ describe('math', () => {
     it('throws when expression evaluates to an array', () => {
       expect(fn)
         .withArgs(testTable, { expression: 'multiply(price, 2)' })
-        .to.throwException(e => {
+        .to.throwException((e) => {
           expect(e.message).to.be(
             'Expressions must return a single number. Try wrapping your expression in mean() or sum()'
           );
@@ -61,7 +61,7 @@ describe('math', () => {
     it('throws when using an unknown context variable', () => {
       expect(fn)
         .withArgs(testTable, { expression: 'sum(foo)' })
-        .to.throwException(e => {
+        .to.throwException((e) => {
           expect(e.message).to.be('Unknown variable: foo');
         });
     });
@@ -69,12 +69,12 @@ describe('math', () => {
     it('throws when using non-numeric data', () => {
       expect(fn)
         .withArgs(testTable, { expression: 'mean(name)' })
-        .to.throwException(e => {
+        .to.throwException((e) => {
           expect(e.message).to.be('Failed to execute math expression. Check your column names');
         });
       expect(fn)
         .withArgs(testTable, { expression: 'mean(in_stock)' })
-        .to.throwException(e => {
+        .to.throwException((e) => {
           expect(e.message).to.be('Failed to execute math expression. Check your column names');
         });
     });
@@ -82,17 +82,17 @@ describe('math', () => {
     it('throws when missing expression', () => {
       expect(fn)
         .withArgs(testTable)
-        .to.throwException(e => {
+        .to.throwException((e) => {
           expect(e.message).to.be('Empty expression');
         });
       expect(fn)
         .withArgs(testTable, { expression: '' })
-        .to.throwException(e => {
+        .to.throwException((e) => {
           expect(e.message).to.be('Empty expression');
         });
       expect(fn)
         .withArgs(testTable, { expression: ' ' })
-        .to.throwException(e => {
+        .to.throwException((e) => {
           expect(e.message).to.be('Empty expression');
         });
     });
@@ -100,7 +100,7 @@ describe('math', () => {
     it('throws when passing a context variable from an empty datatable', () => {
       expect(fn)
         .withArgs(emptyTable, { expression: 'mean(foo)' })
-        .to.throwException(e => {
+        .to.throwException((e) => {
           expect(e.message).to.be('Empty datatable');
         });
     });

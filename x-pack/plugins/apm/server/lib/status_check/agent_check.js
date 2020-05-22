@@ -13,7 +13,7 @@ export async function getAgentStatus({ setup }) {
   const params = {
     index: [
       config.get('apm_oss.errorIndices'),
-      config.get('apm_oss.transactionIndices')
+      config.get('apm_oss.transactionIndices'),
     ],
     body: {
       size: 0,
@@ -23,16 +23,16 @@ export async function getAgentStatus({ setup }) {
             { term: { [PROCESSOR_NAME]: 'error' } },
             { term: { [PROCESSOR_NAME]: 'transaction' } },
             { term: { [PROCESSOR_NAME]: 'metric' } },
-            { term: { [PROCESSOR_NAME]: 'sourcemap' } }
-          ]
-        }
-      }
-    }
+            { term: { [PROCESSOR_NAME]: 'sourcemap' } },
+          ],
+        },
+      },
+    },
   };
 
   const resp = await client('search', params);
 
   return {
-    dataFound: resp.hits.total >= 1
+    dataFound: resp.hits.total >= 1,
   };
 }

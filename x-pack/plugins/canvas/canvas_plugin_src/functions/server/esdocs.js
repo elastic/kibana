@@ -64,12 +64,12 @@ export const esdocs = () => ({
       .from(args.index.toLowerCase());
 
     if (args.fields) {
-      const fields = args.fields.split(',').map(field => field.trim());
-      fields.forEach(field => (query = query.field(field)));
+      const fields = args.fields.split(',').map((field) => field.trim());
+      fields.forEach((field) => (query = query.field(field)));
     }
 
     if (args.sort) {
-      const [sortField, sortOrder] = args.sort.split(',').map(str => str.trim());
+      const [sortField, sortOrder] = args.sort.split(',').map((str) => str.trim());
       if (sortField) {
         query.order(`"${sortField}"`, sortOrder.toLowerCase() === 'asc');
       }

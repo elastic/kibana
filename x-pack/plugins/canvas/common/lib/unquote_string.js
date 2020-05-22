@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const unquoteString = str => {
+export const unquoteString = (str) => {
   if (/^"/.test(str)) {
     return str.replace(/^"(.+(?="$))"$/, '$1');
   }

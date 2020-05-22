@@ -15,12 +15,15 @@ export const location = () => ({
   help:
     "Use the browser's location functionality to get your current location. Usually quite slow, but fairly accurate",
   fn: () => {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       function createLocation(geoposition) {
         const { latitude, longitude } = geoposition.coords;
         return resolve({
           type: 'datatable',
-          columns: [{ name: 'latitude', type: 'number' }, { name: 'longitude', type: 'number' }],
+          columns: [
+            { name: 'latitude', type: 'number' },
+            { name: 'longitude', type: 'number' },
+          ],
           rows: [{ latitude, longitude }],
         });
       }

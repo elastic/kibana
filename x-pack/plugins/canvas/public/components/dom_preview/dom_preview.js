@@ -86,13 +86,13 @@ export class DomPreview extends React.Component {
   render() {
     return (
       <div
-        ref={container => {
+        ref={(container) => {
           this.container = container;
         }}
         className="dom-preview"
       >
         <div
-          ref={content => {
+          ref={(content) => {
             this.content = content;
           }}
         />

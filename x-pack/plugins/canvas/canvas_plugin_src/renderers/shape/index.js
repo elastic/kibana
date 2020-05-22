@@ -37,7 +37,7 @@ export const shape = () => ({
     const initialViewBox = shapeSvg
       .getAttribute('viewBox')
       .split(' ')
-      .map(v => parseInt(v, 10));
+      .map((v) => parseInt(v, 10));
 
     const draw = () => {
       const width = domNode.offsetWidth;

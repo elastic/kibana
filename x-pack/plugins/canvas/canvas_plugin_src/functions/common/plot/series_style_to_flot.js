@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 
-export const seriesStyleToFlot = seriesStyle => {
+export const seriesStyleToFlot = (seriesStyle) => {
   if (!seriesStyle) {
     return {};
   }

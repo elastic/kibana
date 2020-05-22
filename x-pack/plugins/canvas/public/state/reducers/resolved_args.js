@@ -101,11 +101,11 @@ export const resolvedArgsReducer = handleActions(
       }, transientState);
     },
 
-    [actions.inFlightActive]: transientState => {
+    [actions.inFlightActive]: (transientState) => {
       return set(transientState, 'inFlight', true);
     },
 
-    [actions.inFlightComplete]: transientState => {
+    [actions.inFlightComplete]: (transientState) => {
       return set(transientState, 'inFlight', false);
     },
 

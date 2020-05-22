@@ -26,14 +26,14 @@ import { Expression as Component } from './expression';
 
 const storage = new Storage(getWindow().localStorage);
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   pageId: getSelectedPage(state),
   element: getSelectedElement(state),
   functionDefinitionsPromise: getFunctionDefinitions(state),
 });
 
-const mapDispatchToProps = dispatch => ({
-  setExpression: (elementId, pageId) => expression => {
+const mapDispatchToProps = (dispatch) => ({
+  setExpression: (elementId, pageId) => (expression) => {
     // destroy the context cache
     dispatch(flushContext(elementId));
 
@@ -70,16 +70,12 @@ const expressionLifecycle = lifecycle({
   },
   componentDidMount() {
     const { functionDefinitionsPromise, setFunctionDefinitions } = this.props;
-    functionDefinitionsPromise.then(defs => setFunctionDefinitions(defs));
+    functionDefinitionsPromise.then((defs) => setFunctionDefinitions(defs));
   },
 });
 
 export const Expression = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withState('functionDefinitions', 'setFunctionDefinitions', []),
   withState('formState', 'setFormState', ({ expression }) => ({
     expression,
@@ -94,14 +90,14 @@ export const Expression = compose(
       storage.set(LOCALSTORAGE_AUTOCOMPLETE_ENABLED, !isAutocompleteEnabled);
       setIsAutocompleteEnabled(!isAutocompleteEnabled);
     },
-    updateValue: ({ setFormState }) => expression => {
+    updateValue: ({ setFormState }) => (expression) => {
       setFormState({
         expression,
         dirty: true,
       });
     },
-    setExpression: ({ setExpression, setFormState }) => exp => {
-      setFormState(prev => ({
+    setExpression: ({ setExpression, setFormState }) => (exp) => {
+      setFormState((prev) => ({
         ...prev,
         dirty: false,
       }));
@@ -110,7 +106,7 @@ export const Expression = compose(
   }),
   expressionLifecycle,
   withPropsOnChange(['formState'], ({ formState }) => ({
-    error: (function() {
+    error: (function () {
       try {
         // TODO: We should merge the advanced UI input and this into a single validated expression input.
         fromExpression(formState.expression);
@@ -120,5 +116,5 @@ export const Expression = compose(
       }
     })(),
   })),
-  branch(props => !props.element, renderComponent(ElementNotSelected))
+  branch((props) => !props.element, renderComponent(ElementNotSelected))
 )(Component);

@@ -22,7 +22,7 @@ import { PageManager } from '../page_manager';
 import { Expression } from '../expression';
 import { Tray } from './tray';
 
-export const Toolbar = props => {
+export const Toolbar = (props) => {
   const {
     selectedElement,
     tray,
@@ -40,7 +40,7 @@ export const Toolbar = props => {
 
   const done = () => setTray(null);
 
-  const showHideTray = exp => {
+  const showHideTray = (exp) => {
     if (tray && tray === exp) {
       return done();
     }

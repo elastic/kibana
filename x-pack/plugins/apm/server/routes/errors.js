@@ -14,7 +14,7 @@ import { setupRequest } from '../lib/helpers/setup_request';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 
 const ROOT = '/api/apm/services/{serviceName}/errors';
-const defaultErrorHandler = err => {
+const defaultErrorHandler = (err) => {
   console.error(err.stack);
   throw Boom.boomify(err, { statusCode: 400 });
 };
@@ -27,11 +27,11 @@ export function initErrorsApi(server) {
       validate: {
         query: withDefaultValidators({
           sortField: Joi.string(),
-          sortDirection: Joi.string()
-        })
-      }
+          sortDirection: Joi.string(),
+        }),
+      },
     },
-    handler: req => {
+    handler: (req) => {
       const setup = setupRequest(req);
       const { serviceName } = req.params;
       const { sortField, sortDirection } = req.query;
@@ -40,9 +40,9 @@ export function initErrorsApi(server) {
         serviceName,
         sortField,
         sortDirection,
-        setup
+        setup,
       }).catch(defaultErrorHandler);
-    }
+    },
   });
 
   server.route({
@@ -50,19 +50,19 @@ export function initErrorsApi(server) {
     path: `${ROOT}/{groupId}`,
     config: {
       validate: {
-        query: withDefaultValidators()
-      }
+        query: withDefaultValidators(),
+      },
     },
-    handler: req => {
+    handler: (req) => {
       const setup = setupRequest(req);
       const { serviceName, groupId } = req.params;
       return getErrorGroup({ serviceName, groupId, setup }).catch(
         defaultErrorHandler
       );
-    }
+    },
   });
 
-  const distributionHandler = req => {
+  const distributionHandler = (req) => {
     const setup = setupRequest(req);
     const { serviceName, groupId } = req.params;
 
@@ -76,10 +76,10 @@ export function initErrorsApi(server) {
     path: `${ROOT}/{groupId}/distribution`,
     config: {
       validate: {
-        query: withDefaultValidators()
-      }
+        query: withDefaultValidators(),
+      },
     },
-    handler: distributionHandler
+    handler: distributionHandler,
   });
 
   server.route({
@@ -87,9 +87,9 @@ export function initErrorsApi(server) {
     path: `${ROOT}/distribution`,
     config: {
       validate: {
-        query: withDefaultValidators()
-      }
+        query: withDefaultValidators(),
+      },
     },
-    handler: distributionHandler
+    handler: distributionHandler,
   });
 }

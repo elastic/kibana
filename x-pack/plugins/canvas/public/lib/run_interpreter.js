@@ -20,7 +20,7 @@ import { notify } from './notify';
  */
 export function runInterpreter(ast, context = null, options = {}) {
   return interpretAst(ast, context)
-    .then(renderable => {
+    .then((renderable) => {
       if (getType(renderable) === 'render') {
         return renderable;
       }
@@ -33,7 +33,7 @@ export function runInterpreter(ast, context = null, options = {}) {
 
       return new Error(`Ack! I don't know how to render a '${getType(renderable)}'`);
     })
-    .catch(err => {
+    .catch((err) => {
       notify.error(err);
       throw err;
     });

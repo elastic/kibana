@@ -10,14 +10,14 @@ import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { set, del } from 'object-path-immutable';
 import { get } from 'lodash';
 
-export const ExtendedTemplate = props => {
+export const ExtendedTemplate = (props) => {
   const { typeInstance, onValueChange, labels, argValue } = props;
   const chain = get(argValue, 'chain.0', {});
   const chainArgs = get(chain, 'arguments', {});
   const selectedSeries = get(chainArgs, 'label.0', '');
   const { name } = typeInstance;
   const fields = get(typeInstance, 'options.include', []);
-  const hasPropFields = fields.some(field => ['lines', 'bars', 'points'].indexOf(field) !== -1);
+  const hasPropFields = fields.some((field) => ['lines', 'bars', 'points'].indexOf(field) !== -1);
 
   const handleChange = (argName, ev) => {
     const fn = ev.target.value === '' ? del : set;
@@ -38,7 +38,7 @@ export const ExtendedTemplate = props => {
   ];
 
   const labelOptions = [{ value: '', text: 'Select Series' }];
-  labels.sort().forEach(val => labelOptions.push({ value: val, text: val }));
+  labels.sort().forEach((val) => labelOptions.push({ value: val, text: val }));
 
   return (
     <div>
@@ -47,7 +47,7 @@ export const ExtendedTemplate = props => {
           <EuiSelect
             value={selectedSeries}
             options={labelOptions}
-            onChange={ev => handleChange('label', ev)}
+            onChange={(ev) => handleChange('label', ev)}
           />
         </EuiFormRow>
       )}
@@ -59,7 +59,7 @@ export const ExtendedTemplate = props => {
                 <EuiSelect
                   value={get(chainArgs, 'lines.0', 0)}
                   options={values}
-                  onChange={ev => handleChange('lines', ev)}
+                  onChange={(ev) => handleChange('lines', ev)}
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -70,7 +70,7 @@ export const ExtendedTemplate = props => {
                 <EuiSelect
                   value={get(chainArgs, 'bars.0', 0)}
                   options={values}
-                  onChange={ev => handleChange('bars', ev)}
+                  onChange={(ev) => handleChange('bars', ev)}
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -81,7 +81,7 @@ export const ExtendedTemplate = props => {
                 <EuiSelect
                   value={get(chainArgs, 'points.0', 0)}
                   options={values}
-                  onChange={ev => handleChange('points', ev)}
+                  onChange={(ev) => handleChange('points', ev)}
                 />
               </EuiFormRow>
             </EuiFlexItem>

@@ -32,7 +32,7 @@ export const csv = () => ({
     const { data: csvString, delimiter, newline } = args;
 
     const config = {
-      transform: val => {
+      transform: (val) => {
         if (val.indexOf('"') >= 0) {
           const trimmed = val.trim();
           return trimmed.replace(/(^\"|\"$)/g, '');
@@ -56,7 +56,7 @@ export const csv = () => ({
       (acc, row, i) => {
         if (i === 0) {
           // first row, assume header values
-          row.forEach(colName => acc.columns.push({ name: colName.trim(), type: 'string' }));
+          row.forEach((colName) => acc.columns.push({ name: colName.trim(), type: 'string' }));
         } else {
           // any other row is a data row
           const rowObj = row.reduce((rowAcc, colValue, j) => {

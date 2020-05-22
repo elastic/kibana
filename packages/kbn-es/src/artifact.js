@@ -61,7 +61,7 @@ async function retry(log, fn) {
       }
 
       log.warning('...failure, retrying in 5 seconds:', error.message);
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
       log.info('...retrying');
       return await doAttempt(attempt + 1);
     }
@@ -119,7 +119,7 @@ async function getArtifactSpecForSnapshot(urlVersion, license, log) {
 
   const ext = process.platform === 'win32' ? 'zip' : 'tar.gz';
   const archive = manifest.archives.find(
-    archive =>
+    (archive) =>
       archive.version === desiredVersion &&
       archive.filename.endsWith(ext) &&
       archive.license === desiredLicense

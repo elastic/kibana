@@ -13,7 +13,7 @@ import { ColorDot } from '../color_dot';
 import { WorkpadColorPicker } from '../workpad_color_picker/';
 
 export const ColorPickerMini = ({ onChange, value, anchorPosition, colors }) => {
-  const button = handleClick => (
+  const button = (handleClick) => (
     <EuiLink style={{ fontSize: 0 }} onClick={handleClick}>
       <ColorDot value={value} clickable />
     </EuiLink>

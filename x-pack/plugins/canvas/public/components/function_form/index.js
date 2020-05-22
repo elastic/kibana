@@ -37,8 +37,8 @@ const mapDispatchToProps = (dispatch, { expressionIndex }) => ({
       addArgumentValueAtIndex({ index: expressionIndex, element, pageId, argName, value: argValue })
     );
   },
-  updateContext: element => () => dispatch(fetchContext(expressionIndex, element)),
-  setArgument: (element, pageId) => (argName, valueIndex) => value => {
+  updateContext: (element) => () => dispatch(fetchContext(expressionIndex, element)),
+  setArgument: (element, pageId) => (argName, valueIndex) => (value) => {
     dispatch(
       setArgumentAtIndex({
         index: expressionIndex,
@@ -103,11 +103,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   };
 };
 
-export const FunctionForm = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-  mergeProps
-)(Component);
+export const FunctionForm = connect(mapStateToProps, mapDispatchToProps, mergeProps)(Component);
 
 FunctionForm.propTypes = {
   expressionIndex: PropTypes.number,

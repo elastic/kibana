@@ -11,18 +11,18 @@ import { units, px, colors, fontSizes } from '../../../../style/variables';
 const Container = styled.div`
   display: flex;
   align-items: center;
-  font-size: ${props => props.fontSize};
+  font-size: ${(props) => props.fontSize};
   color: ${colors.gray2};
-  cursor: ${props => (props.clickable ? 'pointer' : 'initial')};
-  opacity: ${props => (props.disabled ? 0.4 : 1)};
+  cursor: ${(props) => (props.clickable ? 'pointer' : 'initial')};
+  opacity: ${(props) => (props.disabled ? 0.4 : 1)};
   user-select: none;
 `;
 
 export const Indicator = styled.span`
-  width: ${props => px(props.radius)};
-  height: ${props => px(props.radius)};
-  margin-right: ${props => px(props.radius / 2)};
-  background: ${props => props.color};
+  width: ${(props) => px(props.radius)};
+  height: ${(props) => px(props.radius)};
+  margin-right: ${(props) => px(props.radius / 2)};
+  background: ${(props) => props.color};
   border-radius: 100%;
 `;
 

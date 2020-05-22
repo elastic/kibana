@@ -11,7 +11,7 @@ import {
   LineSeries,
   LineMarkSeries,
   AreaSeries,
-  VerticalRectSeries
+  VerticalRectSeries,
 } from 'react-vis';
 import PropTypes from 'prop-types';
 import React, { PureComponent } from 'react';
@@ -28,7 +28,7 @@ class StaticPlot extends PureComponent {
     return series
       .slice()
       .reverse()
-      .map(serie => this.getSerie(serie, plotValues));
+      .map((serie) => this.getSerie(serie, plotValues));
   }
 
   getSerie(serie, plotValues) {
@@ -36,7 +36,7 @@ class StaticPlot extends PureComponent {
       case 'line':
         return (
           <LineSeries
-            getNull={d => d.y !== null}
+            getNull={(d) => d.y !== null}
             key={serie.title}
             xType="time"
             curve={'curveMonotoneX'}
@@ -47,7 +47,7 @@ class StaticPlot extends PureComponent {
       case 'area':
         return (
           <AreaSeries
-            getNull={d => d.y !== null}
+            getNull={(d) => d.y !== null}
             key={serie.title}
             xType="time"
             curve={'curveMonotoneX'}
@@ -59,16 +59,16 @@ class StaticPlot extends PureComponent {
         );
       case 'areaMaxHeight':
         const yMax = last(plotValues.yTickValues);
-        const data = serie.data.map(p => ({
+        const data = serie.data.map((p) => ({
           x0: p.x0,
           x: p.x,
           y0: 0,
-          y: yMax
+          y: yMax,
         }));
 
         return (
           <VerticalRectSeries
-            getNull={d => d.y !== null}
+            getNull={(d) => d.y !== null}
             key={serie.title}
             xType="time"
             curve={'curveMonotoneX'}
@@ -81,7 +81,7 @@ class StaticPlot extends PureComponent {
       case 'linemark':
         return (
           <LineMarkSeries
-            getNull={d => d.y !== null}
+            getNull={(d) => d.y !== null}
             key={serie.title}
             xType="time"
             curve={'curveMonotoneX'}
@@ -108,7 +108,7 @@ class StaticPlot extends PureComponent {
           tickValues={yTickValues}
           tickFormat={tickFormatY}
           style={{
-            line: { stroke: 'none', fill: 'none' }
+            line: { stroke: 'none', fill: 'none' },
           }}
         />
 
@@ -116,7 +116,7 @@ class StaticPlot extends PureComponent {
           <StatusText
             marginLeft={30}
             text={i18n.translate('xpack.apm.metrics.plot.noDataLabel', {
-              defaultMessage: 'No data within this time range.'
+              defaultMessage: 'No data within this time range.',
             })}
           />
         ) : (
@@ -134,5 +134,5 @@ StaticPlot.propTypes = {
   series: PropTypes.array.isRequired,
   plotValues: PropTypes.object.isRequired,
   tickFormatX: PropTypes.func,
-  tickFormatY: PropTypes.func.isRequired
+  tickFormatY: PropTypes.func.isRequired,
 };

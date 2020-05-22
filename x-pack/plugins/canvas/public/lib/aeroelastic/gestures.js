@@ -24,18 +24,18 @@ const appleKeyboard = Boolean(
  *    (we could turn gesture.js into a factory, with this state root - primaryUpdate - being passed...)
  */
 
-const primaryUpdate = state => state.primaryUpdate;
+const primaryUpdate = (state) => state.primaryUpdate;
 
 /**
  * Gestures - derived selectors for transient state
  */
 
 // dispatch the various types of actions
-const rawCursorPosition = select(action =>
+const rawCursorPosition = select((action) =>
   action.type === 'cursorPosition' ? action.payload : null
 )(primaryUpdate);
 
-const mouseButtonEvent = select(action => (action.type === 'mouseEvent' ? action.payload : null))(
+const mouseButtonEvent = select((action) => (action.type === 'mouseEvent' ? action.payload : null))(
   primaryUpdate
 );
 
@@ -43,9 +43,9 @@ const keyFromMouse = select(({ type, payload: { altKey, metaKey, shiftKey, ctrlK
   type === 'cursorPosition' || type === 'mouseEvent' ? { altKey, metaKey, shiftKey, ctrlKey } : {}
 )(primaryUpdate);
 
-export const metaHeld = select(appleKeyboard ? e => e.metaKey : e => e.altKey)(keyFromMouse);
-export const optionHeld = select(appleKeyboard ? e => e.altKey : e => e.ctrlKey)(keyFromMouse);
-export const shiftHeld = select(e => e.shiftKey)(keyFromMouse);
+export const metaHeld = select(appleKeyboard ? (e) => e.metaKey : (e) => e.altKey)(keyFromMouse);
+export const optionHeld = select(appleKeyboard ? (e) => e.altKey : (e) => e.ctrlKey)(keyFromMouse);
+export const shiftHeld = select((e) => e.shiftKey)(keyFromMouse);
 
 export const cursorPosition = selectReduce((previous, position) => position || previous, {
   x: 0,
@@ -73,7 +73,7 @@ export const mouseIsDown = selectReduce(
 )(mouseButtonEvent);
 
 export const gestureEnd = select(
-  action =>
+  (action) =>
     action &&
     (action.type === 'actionEvent' ||
       (action.type === 'mouseEvent' && action.payload.event === 'mouseUp'))
@@ -128,9 +128,9 @@ const mouseButtonState = selectReduce(
   { buttonState: 'up', downX: null, downY: null }
 )(mouseIsDown, cursorPosition);
 
-export const mouseDowned = select(state => state.buttonState === 'downed')(mouseButtonState);
+export const mouseDowned = select((state) => state.buttonState === 'downed')(mouseButtonState);
 
-export const dragging = select(state => state.buttonState === 'dragging')(mouseButtonState);
+export const dragging = select((state) => state.buttonState === 'dragging')(mouseButtonState);
 
 export const dragVector = select(({ buttonState, downX, downY }, { x, y }) => ({
   down: buttonState !== 'up',
@@ -140,6 +140,6 @@ export const dragVector = select(({ buttonState, downX, downY }, { x, y }) => ({
   y1: y,
 }))(mouseButtonState, cursorPosition);
 
-export const actionEvent = select(action =>
+export const actionEvent = select((action) =>
   action.type === 'actionEvent' ? action.payload : null
 )(primaryUpdate);

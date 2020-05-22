@@ -305,7 +305,7 @@ describe('once LegacyService is started without connection info', () => {
 
 describe('once LegacyService is started in `devClusterMaster` mode', () => {
   beforeEach(() => {
-    configService.atPath.mockImplementation(path => {
+    configService.atPath.mockImplementation((path) => {
       return new BehaviorSubject(
         path === 'dev' ? { basePathProxyTargetPort: 100500 } : { basePath: '/abc' }
       );

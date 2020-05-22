@@ -31,7 +31,12 @@ describe('getTickHash', () => {
       x: { type: 'number', role: 'dimension', expression: 'id' },
       y: { type: 'boolean', role: 'dimension', expression: 'running' },
     };
-    const rows = [{ x: 1, y: true }, { x: 2, y: true }, { x: 1, y: false }, { x: 2, y: false }];
+    const rows = [
+      { x: 1, y: true },
+      { x: 2, y: true },
+      { x: 1, y: false },
+      { x: 2, y: false },
+    ];
 
     expect(getTickHash(columns, rows)).to.eql({
       x: { hash: {}, counter: 0 },

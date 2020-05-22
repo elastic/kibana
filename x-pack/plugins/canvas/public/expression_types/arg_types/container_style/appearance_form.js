@@ -17,12 +17,15 @@ const opacities = [
   { value: 0.1, text: '10%' },
 ];
 
-const overflows = [{ value: 'hidden', text: 'Hidden' }, { value: 'visible', text: 'Visible' }];
+const overflows = [
+  { value: 'hidden', text: 'Hidden' },
+  { value: 'visible', text: 'Visible' },
+];
 
 export const AppearanceForm = ({ padding, opacity, overflow, onChange }) => {
   const paddingVal = padding ? padding.replace('px', '') : '';
 
-  const namedChange = name => ev => {
+  const namedChange = (name) => (ev) => {
     if (name === 'padding') {
       return onChange(name, `${ev.target.value}px`);
     }

@@ -24,7 +24,7 @@ setInterval(() => {
 }, INTERVAL_MS);
 
 function throttle() {
-  return next => action => {
+  return (next) => (action) => {
     count += 1;
 
     if (count > MAX_DISPATCHES || IS_THROTTLED) {

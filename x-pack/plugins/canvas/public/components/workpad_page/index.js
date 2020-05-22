@@ -23,11 +23,11 @@ const mapStateToProps = (state, ownProps) => {
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    insertNodes: pageId => selectedElements => dispatch(insertNodes(selectedElements, pageId)),
-    removeElements: pageId => elementIds => dispatch(removeElements(elementIds, pageId)),
-    selectElement: selectedElement => dispatch(selectElement(selectedElement)),
+    insertNodes: (pageId) => (selectedElements) => dispatch(insertNodes(selectedElements, pageId)),
+    removeElements: (pageId) => (elementIds) => dispatch(removeElements(elementIds, pageId)),
+    selectElement: (selectedElement) => dispatch(selectElement(selectedElement)),
     // TODO: Abstract this out. This is the same code as in sidebar/index.js
     elementLayer: (pageId, selectedElement, movement) => {
       dispatch(
@@ -53,10 +53,7 @@ const getRootElementId = (lookup, id) => {
 };
 
 export const WorkpadPage = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps),
   withProps(({ isSelected, animation }) => {
     function getClassName() {
       if (animation) {
@@ -86,33 +83,33 @@ export const WorkpadPage = compose(
     const { shapes, selectedPrimaryShapes = [], cursor } = aeroelastic.getStore(
       page.id
     ).currentScene;
-    const elementLookup = new Map(pageElements.map(element => [element.id, element]));
-    const recurseGroupTree = shapeId => {
+    const elementLookup = new Map(pageElements.map((element) => [element.id, element]));
+    const recurseGroupTree = (shapeId) => {
       return [
         shapeId,
         ...flatten(
           shapes
-            .filter(s => s.parent === shapeId && s.type !== 'annotation')
-            .map(s => s.id)
+            .filter((s) => s.parent === shapeId && s.type !== 'annotation')
+            .map((s) => s.id)
             .map(recurseGroupTree)
         ),
       ];
     };
 
     const selectedPrimaryShapeObjects = selectedPrimaryShapes
-      .map(id => shapes.find(s => s.id === id))
-      .filter(shape => shape);
+      .map((id) => shapes.find((s) => s.id === id))
+      .filter((shape) => shape);
 
     const selectedPersistentPrimaryShapes = flatten(
-      selectedPrimaryShapeObjects.map(shape =>
+      selectedPrimaryShapeObjects.map((shape) =>
         shape.subtype === 'adHocGroup'
-          ? shapes.filter(s => s.parent === shape.id && s.type !== 'annotation').map(s => s.id)
+          ? shapes.filter((s) => s.parent === shape.id && s.type !== 'annotation').map((s) => s.id)
           : [shape.id]
       )
     );
     const selectedElementIds = flatten(selectedPersistentPrimaryShapes.map(recurseGroupTree));
     const selectedElements = [];
-    const elements = shapes.map(shape => {
+    const elements = shapes.map((shape) => {
       let element = null;
       if (elementLookup.has(shape.id)) {
         element = elementLookup.get(shape.id);

@@ -202,7 +202,7 @@ test('stops services if consequent logger upgrade fails', async () => {
   // Wait for shutdown to be called.
   await onShutdown
     .pipe(
-      filter(e => e !== null),
+      filter((e) => e !== null),
       first()
     )
     .toPromise();

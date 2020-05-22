@@ -27,12 +27,12 @@ export default function testTasks(gulp, { mocha }) {
     );
   }
 
-  const getTestGlobs = rootPath => [
+  const getTestGlobs = (rootPath) => [
     join(canvasRoot, `${rootPath}/**/__tests__/**/*.js`),
     join(canvasRoot, `!${rootPath}/**/__tests__/fixtures/**/*.js`),
   ];
 
-  const getRootGlobs = rootPath => [join(canvasRoot, `${rootPath}/**/*.js`)];
+  const getRootGlobs = (rootPath) => [join(canvasRoot, `${rootPath}/**/*.js`)];
 
   gulp.task('canvas:test:common', () => {
     return runMocha(getTestGlobs('common'), { withDOM: true });

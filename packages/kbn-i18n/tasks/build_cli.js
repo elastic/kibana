@@ -60,7 +60,7 @@ if (flags.help) {
   process.exit();
 }
 
-withProcRunner(log, async proc => {
+withProcRunner(log, async (proc) => {
   log.info('Deleting old output');
   await del(BUILD_DIR);
 
@@ -72,7 +72,7 @@ withProcRunner(log, async proc => {
 
   log.info(`Starting babel and typescript${flags.watch ? ' in watch mode' : ''}`);
   await Promise.all([
-    ...['web', 'node'].map(subTask =>
+    ...['web', 'node'].map((subTask) =>
       proc.run(padRight(10, `babel:${subTask}`), {
         cmd: 'babel',
         args: [
@@ -109,7 +109,7 @@ withProcRunner(log, async proc => {
   ]);
 
   log.success('Complete');
-}).catch(error => {
+}).catch((error) => {
   log.error(error);
   process.exit(1);
 });

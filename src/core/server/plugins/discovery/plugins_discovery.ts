@@ -47,7 +47,7 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
   log.debug('Discovering plugins...');
 
   const discoveryResults$ = processPluginSearchPaths$(config.pluginSearchPaths, log).pipe(
-    mergeMap(pluginPathOrError => {
+    mergeMap((pluginPathOrError) => {
       return typeof pluginPathOrError === 'string'
         ? createPlugin$(pluginPathOrError, log, coreContext)
         : [pluginPathOrError];
@@ -72,21 +72,21 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
  */
 function processPluginSearchPaths$(pluginDirs: ReadonlyArray<string>, log: Logger) {
   return from(pluginDirs).pipe(
-    mergeMap(dir => {
+    mergeMap((dir) => {
       log.debug(`Scanning "${dir}" for plugin sub-directories...`);
 
       return fsReadDir$(dir).pipe(
-        mergeMap((subDirs: string[]) => subDirs.map(subDir => resolve(dir, subDir))),
-        mergeMap(path =>
+        mergeMap((subDirs: string[]) => subDirs.map((subDir) => resolve(dir, subDir))),
+        mergeMap((path) =>
           fsStat$(path).pipe(
             // Filter out non-directory entries from target directories, it's expected that
             // these directories may contain files (e.g. `README.md` or `package.json`).
             // We shouldn't silently ignore the entries we couldn't get stat for though.
-            mergeMap(pathStat => (pathStat.isDirectory() ? [path] : [])),
-            catchError(err => [PluginDiscoveryError.invalidPluginPath(path, err)])
+            mergeMap((pathStat) => (pathStat.isDirectory() ? [path] : [])),
+            catchError((err) => [PluginDiscoveryError.invalidPluginPath(path, err)])
           )
         ),
-        catchError(err => [PluginDiscoveryError.invalidSearchPath(dir, err)])
+        catchError((err) => [PluginDiscoveryError.invalidSearchPath(dir, err)])
       );
     })
   );
@@ -102,10 +102,10 @@ function processPluginSearchPaths$(pluginDirs: ReadonlyArray<string>, log: Logge
  */
 function createPlugin$(path: string, log: Logger, coreContext: CoreContext) {
   return from(parseManifest(path, coreContext.env.packageInfo)).pipe(
-    map(manifest => {
+    map((manifest) => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
       return new Plugin(path, manifest, createPluginInitializerContext(coreContext, manifest));
     }),
-    catchError(err => [err])
+    catchError((err) => [err])
   );
 }

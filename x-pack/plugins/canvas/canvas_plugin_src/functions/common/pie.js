@@ -72,7 +72,7 @@ export const pie = () => ({
     const data = map(groupBy(context.rows, 'color'), (series, label) => {
       const item = {
         label: label,
-        data: series.map(point => point.size || 1),
+        data: series.map((point) => point.size || 1),
       };
 
       const seriesStyle = seriesStyles[label];

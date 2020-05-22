@@ -75,14 +75,14 @@ export class PluginsService implements CoreService<PluginsServiceStartContract> 
 
     const errors = await error$
       .pipe(
-        filter(error => errorTypesToReport.includes(error.type)),
-        tap(pluginError => this.log.error(pluginError)),
+        filter((error) => errorTypesToReport.includes(error.type)),
+        tap((pluginError) => this.log.error(pluginError)),
         toArray()
       )
       .toPromise();
     if (errors.length > 0) {
       throw new Error(
-        `Failed to initialize plugins:${errors.map(err => `\n\t${err.message}`).join('')}`
+        `Failed to initialize plugins:${errors.map((err) => `\n\t${err.message}`).join('')}`
       );
     }
   }
@@ -91,7 +91,7 @@ export class PluginsService implements CoreService<PluginsServiceStartContract> 
     const pluginEnableStatuses = new Map<PluginName, { plugin: Plugin; isEnabled: boolean }>();
     await plugin$
       .pipe(
-        mergeMap(async plugin => {
+        mergeMap(async (plugin) => {
           const isEnabled = await this.coreContext.configService.isEnabledAtPath(plugin.configPath);
 
           if (pluginEnableStatuses.has(plugin.name)) {
@@ -129,7 +129,7 @@ export class PluginsService implements CoreService<PluginsServiceStartContract> 
     return (
       pluginInfo !== undefined &&
       pluginInfo.isEnabled &&
-      pluginInfo.plugin.requiredDependencies.every(dependencyName =>
+      pluginInfo.plugin.requiredDependencies.every((dependencyName) =>
         this.shouldEnablePlugin(dependencyName, pluginEnableStatuses)
       )
     );

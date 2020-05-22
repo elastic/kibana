@@ -32,25 +32,25 @@ export const columns = () => ({
     let result = { ...context };
 
     if (exclude) {
-      const fields = exclude.split(',').map(field => field.trim());
-      const columns = result.columns.filter(col => !fields.includes(col.name));
-      const rows = columns.length > 0 ? result.rows.map(row => omit(row, fields)) : [];
+      const fields = exclude.split(',').map((field) => field.trim());
+      const columns = result.columns.filter((col) => !fields.includes(col.name));
+      const rows = columns.length > 0 ? result.rows.map((row) => omit(row, fields)) : [];
 
       result = { ...result, rows, columns };
     }
 
     if (include) {
-      const fields = include.split(',').map(field => field.trim());
+      const fields = include.split(',').map((field) => field.trim());
       //const columns = result.columns.filter(col => fields.includes(col.name));
       // Include columns in the order the user specified
       const columns = [];
-      fields.forEach(field => {
+      fields.forEach((field) => {
         const column = find(result.columns, { name: field });
         if (column) {
           columns.push(column);
         }
       });
-      const rows = columns.length > 0 ? result.rows.map(row => pick(row, fields)) : [];
+      const rows = columns.length > 0 ? result.rows.map((row) => pick(row, fields)) : [];
       result = { ...result, rows, columns };
     }
 

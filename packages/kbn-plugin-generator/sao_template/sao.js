@@ -31,7 +31,7 @@ const kibanaPkg = require(kibanaPkgPath); // eslint-disable-line import/no-dynam
 
 const KBN_DIR = dirname(kibanaPkgPath);
 
-module.exports = function({ name }) {
+module.exports = function ({ name }) {
   return {
     prompts: {
       description: {
@@ -65,7 +65,7 @@ module.exports = function({ name }) {
       generateScss: {
         type: 'confirm',
         message: 'Should SCSS be used?',
-        when: answers => answers.generateApp,
+        when: (answers) => answers.generateApp,
         default: true,
       },
     },
@@ -83,7 +83,7 @@ module.exports = function({ name }) {
       eslintrc: '.eslintrc',
       'package_template.json': 'package.json',
     },
-    data: answers =>
+    data: (answers) =>
       Object.assign(
         {
           templateVersion: pkg.version,

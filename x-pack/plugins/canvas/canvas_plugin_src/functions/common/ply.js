@@ -9,8 +9,8 @@ import { groupBy, flatten, pick, map } from 'lodash';
 function combineColumns(arrayOfColumnsArrays) {
   return arrayOfColumnsArrays.reduce((resultingColumns, columns) => {
     if (columns) {
-      columns.forEach(column => {
-        if (resultingColumns.find(resultingColumn => resultingColumn.name === column.name)) {
+      columns.forEach((column) => {
+        if (resultingColumns.find((resultingColumn) => resultingColumn.name === column.name)) {
           return;
         } else {
           resultingColumns.push(column);
@@ -29,7 +29,7 @@ function combineAcross(datatableArray) {
   const targetRowLength = referenceTable.rows.length;
 
   // Sanity check
-  datatableArray.forEach(datatable => {
+  datatableArray.forEach((datatable) => {
     if (datatable.rows.length !== targetRowLength) {
       throw new Error('All expressions must return the same number of rows');
     }
@@ -92,15 +92,15 @@ export const ply = () => ({
     let originalDatatables;
 
     if (args.by) {
-      byColumns = args.by.map(by => {
-        const column = context.columns.find(column => column.name === by);
+      byColumns = args.by.map((by) => {
+        const column = context.columns.find((column) => column.name === by);
         if (!column) {
           throw new Error(`Column not found: '${by}'`);
         }
         return column;
       });
-      const keyedDatatables = groupBy(context.rows, row => JSON.stringify(pick(row, args.by)));
-      originalDatatables = Object.values(keyedDatatables).map(rows => ({
+      const keyedDatatables = groupBy(context.rows, (row) => JSON.stringify(pick(row, args.by)));
+      originalDatatables = Object.values(keyedDatatables).map((rows) => ({
         ...context,
         rows,
       }));
@@ -108,11 +108,13 @@ export const ply = () => ({
       originalDatatables = [context];
     }
 
-    const datatablePromises = originalDatatables.map(originalDatatable => {
+    const datatablePromises = originalDatatables.map((originalDatatable) => {
       let expressionResultPromises = [];
 
       if (args.expression) {
-        expressionResultPromises = args.expression.map(expression => expression(originalDatatable));
+        expressionResultPromises = args.expression.map((expression) =>
+          expression(originalDatatable)
+        );
       } else {
         expressionResultPromises.push(Promise.resolve(originalDatatable));
       }
@@ -120,13 +122,13 @@ export const ply = () => ({
       return Promise.all(expressionResultPromises).then(combineAcross);
     });
 
-    return Promise.all(datatablePromises).then(newDatatables => {
+    return Promise.all(datatablePromises).then((newDatatables) => {
       // Here we're just merging each for the by splits, so it doesn't actually matter if the rows are the same length
       const columns = combineColumns([byColumns].concat(map(newDatatables, 'columns')));
       const rows = flatten(
         newDatatables.map((dt, i) => {
           const byColumnValues = pick(originalDatatables[i].rows[0], args.by);
-          return dt.rows.map(row => ({
+          return dt.rows.map((row) => ({
             ...byColumnValues,
             ...row,
           }));

@@ -81,7 +81,7 @@ test('`close` calls callback immediately.', async () => {
 });
 
 test('returns connection count from the underlying server.', () => {
-  server.getConnections.mockImplementation(callback => callback(null, 0));
+  server.getConnections.mockImplementation((callback) => callback(null, 0));
   const onGetConnectionsComplete = jest.fn();
   proxy.getConnections(onGetConnectionsComplete);
 
@@ -89,7 +89,7 @@ test('returns connection count from the underlying server.', () => {
   expect(onGetConnectionsComplete).toHaveBeenCalledWith(null, 0);
   onGetConnectionsComplete.mockReset();
 
-  server.getConnections.mockImplementation(callback => callback(null, 100500));
+  server.getConnections.mockImplementation((callback) => callback(null, 100500));
   proxy.getConnections(onGetConnectionsComplete);
 
   expect(onGetConnectionsComplete).toHaveBeenCalledTimes(1);

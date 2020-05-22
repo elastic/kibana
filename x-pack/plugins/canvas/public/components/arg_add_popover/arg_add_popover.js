@@ -11,7 +11,7 @@ import { Popover } from '../popover';
 import { ArgAdd } from '../arg_add';
 
 export const ArgAddPopover = ({ options }) => {
-  const button = handleClick => (
+  const button = (handleClick) => (
     <EuiButtonIcon iconType="plusInCircle" aria-label="Add Argument" onClick={handleClick} />
   );
 
@@ -23,7 +23,7 @@ export const ArgAddPopover = ({ options }) => {
       button={button}
     >
       {({ closePopover }) =>
-        options.map(opt => (
+        options.map((opt) => (
           <ArgAdd
             key={`${opt.arg.name}-add`}
             displayName={opt.arg.displayName}

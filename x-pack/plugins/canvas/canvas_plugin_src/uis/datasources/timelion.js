@@ -65,7 +65,7 @@ const TimelionDatasource = ({ args, updateArgs }) => {
         <EuiTextArea
           className="canvasTextArea--code"
           value={getQuery()}
-          onChange={e => setArg(argName, e.target.value)}
+          onChange={(e) => setArg(argName, e.target.value)}
         />
       </EuiFormRow>
       {
@@ -76,7 +76,7 @@ const TimelionDatasource = ({ args, updateArgs }) => {
         helpText="Accepts Elasticsearch date math: 1w, 5d, 10s, or auto"
         compressed
       >
-        <EuiFieldText value={getInterval()} onChange={e => setArg('interval', e.target.value)} />
+        <EuiFieldText value={getInterval()} onChange={(e) => setArg('interval', e.target.value)} />
       </EuiFormRow>
 
       <EuiCallOut color="warning" title="Some tips" size="s">

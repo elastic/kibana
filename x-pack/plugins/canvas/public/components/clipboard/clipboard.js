@@ -15,7 +15,7 @@ export class Clipboard extends React.PureComponent {
     onCopy: PropTypes.func,
   };
 
-  onClick = ev => {
+  onClick = (ev) => {
     const { content, onCopy } = this.props;
     ev.preventDefault();
 

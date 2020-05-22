@@ -14,7 +14,7 @@ import {
   px,
   units,
   fontSizes,
-  unit
+  unit,
 } from '../../../../style/variables';
 import { tint } from 'polished';
 
@@ -53,21 +53,21 @@ const ListItem = styled.li`
   height: ${px(units.double)};
   align-items: center;
   display: flex;
-  background: ${props => (props.selected ? colors.gray5 : 'initial')};
+  background: ${(props) => (props.selected ? colors.gray5 : 'initial')};
   cursor: pointer;
   border-radius: ${px(units.quarter)};
 
   ${Description} {
     p span {
-      background: ${props => (props.selected ? colors.white : colors.gray5)};
+      background: ${(props) => (props.selected ? colors.white : colors.gray5)};
     }
   }
 `;
 
 const Icon = styled.div`
   flex: 0 0 ${px(units.double)};
-  background: ${props => tint(0.1, getIconColor(props.type))};
-  color: ${props => getIconColor(props.type)};
+  background: ${(props) => tint(0.1, getIconColor(props.type))};
+  color: ${(props) => getIconColor(props.type)};
   width: 100%;
   height: 100%;
   text-align: center;
@@ -121,7 +121,7 @@ Suggestion.propTypes = {
   onMouseEnter: PropTypes.func.isRequired,
   selected: PropTypes.bool,
   suggestion: PropTypes.object.isRequired,
-  innerRef: PropTypes.func.isRequired
+  innerRef: PropTypes.func.isRequired,
 };
 
 export default Suggestion;

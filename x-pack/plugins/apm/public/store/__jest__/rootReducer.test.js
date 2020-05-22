@@ -11,7 +11,7 @@ describe('root reducer', () => {
     expect(rootReducer(undefined, {})).toEqual({
       location: { hash: '', pathname: '', search: '' },
       reactReduxRequest: {},
-      urlParams: {}
+      urlParams: {},
     });
   });
 });

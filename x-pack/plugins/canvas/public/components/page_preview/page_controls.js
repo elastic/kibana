@@ -9,12 +9,12 @@ import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 export const PageControls = ({ pageId, onDelete, onDuplicate }) => {
-  const handleDuplicate = ev => {
+  const handleDuplicate = (ev) => {
     ev.preventDefault();
     onDuplicate(pageId);
   };
 
-  const handleDelete = ev => {
+  const handleDelete = (ev) => {
     ev.preventDefault();
     onDelete(pageId);
   };

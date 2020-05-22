@@ -15,12 +15,12 @@ jest.mock(
   'ui/chrome',
   () => ({
     breadcrumbs: {
-      set: () => {}
+      set: () => {},
     },
     getBasePath: () => `/some/base/path`,
     getUiSettingsClient: () => {
       return {
-        get: key => {
+        get: (key) => {
           switch (key) {
             case 'timepicker:timeDefaults':
               return { from: 'now-15m', to: 'now', mode: 'quick' };
@@ -29,9 +29,9 @@ jest.mock(
             default:
               throw new Error(`Unexpected config key: ${key}`);
           }
-        }
+        },
       };
-    }
+    },
   }),
   { virtual: true }
 );

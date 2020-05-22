@@ -12,13 +12,13 @@ import { STATUS } from '../../../../constants/index';
 function getIsLoading(state) {
   return some(
     state.reactReduxRequest,
-    subState => get(subState, 'status') === STATUS.LOADING
+    (subState) => get(subState, 'status') === STATUS.LOADING
   );
 }
 
 function mapStateToProps(state = {}) {
   return {
-    isLoading: getIsLoading(state)
+    isLoading: getIsLoading(state),
   };
 }
 

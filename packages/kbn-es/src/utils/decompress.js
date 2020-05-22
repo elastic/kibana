@@ -51,15 +51,12 @@ function decompressZip(input, output) {
         resolve();
       });
 
-      zipfile.on('error', err => {
+      zipfile.on('error', (err) => {
         reject(err);
       });
 
-      zipfile.on('entry', entry => {
-        const zipPath = entry.fileName
-          .split(/\/|\\/)
-          .slice(1)
-          .join(path.sep);
+      zipfile.on('entry', (entry) => {
+        const zipPath = entry.fileName.split(/\/|\\/).slice(1).join(path.sep);
         const fileName = path.resolve(output, zipPath);
 
         if (/\/$/.test(entry.fileName)) {
@@ -84,7 +81,7 @@ function decompressZip(input, output) {
   });
 }
 
-exports.decompress = async function(input, output) {
+exports.decompress = async function (input, output) {
   const ext = path.extname(input);
 
   switch (path.extname(input)) {

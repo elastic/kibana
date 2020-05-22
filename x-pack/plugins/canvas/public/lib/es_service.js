@@ -17,10 +17,10 @@ export const getFields = (index = '_all') => {
     .get(`${apiPath}/es_fields?index=${index}`)
     .then(({ data: mapping }) =>
       Object.keys(mapping)
-        .filter(field => !field.startsWith('_')) // filters out meta fields
+        .filter((field) => !field.startsWith('_')) // filters out meta fields
         .sort()
     )
-    .catch(err =>
+    .catch((err) =>
       notify.error(err, { title: `Couldn't fetch Elasticsearch fields for '${index}'` })
     );
 };
@@ -34,10 +34,10 @@ export const getIndices = () => {
       search_fields: ['title'],
       perPage: 1000,
     })
-    .then(resp => {
-      return resp.savedObjects.map(savedObject => {
+    .then((resp) => {
+      return resp.savedObjects.map((savedObject) => {
         return savedObject.attributes.title;
       });
     })
-    .catch(err => notify.error(err, { title: `Couldn't fetch Elasticsearch indices` }));
+    .catch((err) => notify.error(err, { title: `Couldn't fetch Elasticsearch indices` }));
 };

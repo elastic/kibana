@@ -18,7 +18,7 @@ function location(state = { pathname: '', search: '', hash: '' }, action) {
 export function updateLocation(nextLocation) {
   return {
     type: LOCATION_UPDATE,
-    location: nextLocation
+    location: nextLocation,
   };
 }
 

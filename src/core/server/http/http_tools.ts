@@ -62,7 +62,7 @@ export function getServerOptions(config: HttpConfig, { configureTLS = true } = {
     const tlsOptions: TLSOptions = {
       ca:
         config.ssl.certificateAuthorities &&
-        config.ssl.certificateAuthorities.map(caFilePath => readFileSync(caFilePath)),
+        config.ssl.certificateAuthorities.map((caFilePath) => readFileSync(caFilePath)),
       cert: readFileSync(ssl.certificate!),
       ciphers: config.ssl.cipherSuites.join(':'),
       // We use the server's cipher order rather than the client's to prevent the BEAST attack.
@@ -131,7 +131,7 @@ export function defaultValidationErrorHandler(
     const validationError: HapiValidationError = err as HapiValidationError;
     const validationKeys: string[] = [];
 
-    validationError.details.forEach(detail => {
+    validationError.details.forEach((detail) => {
       if (detail.path.length > 0) {
         validationKeys.push(Hoek.escapeHtml(detail.path.join('.')));
       } else {

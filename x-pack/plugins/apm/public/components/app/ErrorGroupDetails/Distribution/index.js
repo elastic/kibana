@@ -19,7 +19,7 @@ export function getFormattedBuckets(buckets, bucketSize) {
     return {
       x0: key,
       x: key + bucketSize,
-      y: count
+      y: count,
     };
   });
 }
@@ -27,8 +27,8 @@ export function getFormattedBuckets(buckets, bucketSize) {
 function Distribution({
   distribution,
   title = i18n.translate('xpack.apm.errorGroupDetails.occurrencesChartLabel', {
-    defaultMessage: 'Occurrences'
-  })
+    defaultMessage: 'Occurrences',
+  }),
 }) {
   const buckets = getFormattedBuckets(
     distribution.buckets,
@@ -41,7 +41,7 @@ function Distribution({
     return (
       <EmptyMessage
         heading={i18n.translate('xpack.apm.errorGroupDetails.noErrorsLabel', {
-          defaultMessage: 'No errors were found'
+          defaultMessage: 'No errors were found',
         })}
       />
     );
@@ -53,20 +53,20 @@ function Distribution({
         <span>{title}</span>
       </EuiTitle>
       <Histogram
-        verticalLineHover={bucket => bucket.x}
+        verticalLineHover={(bucket) => bucket.x}
         xType="time"
         buckets={buckets}
         bucketSize={distribution.bucketSize}
-        formatYShort={value =>
+        formatYShort={(value) =>
           i18n.translate('xpack.apm.errorGroupDetails.occurrencesShortLabel', {
             defaultMessage: '{occCount} occ.',
-            values: { occCount: value }
+            values: { occCount: value },
           })
         }
-        formatYLong={value =>
+        formatYLong={(value) =>
           i18n.translate('xpack.apm.errorGroupDetails.occurrencesLongLabel', {
             defaultMessage: '{occCount} occurrences',
-            values: { occCount: value }
+            values: { occCount: value },
           })
         }
       />

@@ -49,7 +49,7 @@ export class WorkpadTemplates extends React.PureComponent {
     const filterTags = [];
     const searchTerms = [];
 
-    clauses.forEach(clause => {
+    clauses.forEach((clause) => {
       const { type, field, value } = clause;
       // extract terms from the query AST
       if (type === 'term') {
@@ -64,7 +64,7 @@ export class WorkpadTemplates extends React.PureComponent {
     this.setState({ searchTerm: searchTerms.join(' '), filterTags });
   };
 
-  cloneTemplate = template => this.props.cloneWorkpad(template).then(() => this.props.onClose());
+  cloneTemplate = (template) => this.props.cloneWorkpad(template).then(() => this.props.onClose());
 
   renderWorkpadTable = ({ rows, pageNumber, totalPages, setPage }) => {
     const { uniqueTags } = this.props;
@@ -104,11 +104,11 @@ export class WorkpadTemplates extends React.PureComponent {
         sortable: false,
         dataType: 'string',
         width: '30%',
-        render: tags => {
+        render: (tags) => {
           if (!tags) {
             return 'No tags';
           }
-          return tags.map(tag => (
+          return tags.map((tag) => (
             <EuiHealth key={getId('tag')} color={get(uniqueTags, `${tag}.color`, '#666666')}>
               {tag}
             </EuiHealth>
@@ -189,7 +189,7 @@ export class WorkpadTemplates extends React.PureComponent {
 
     const filteredTemplates = sortedTemplates.filter(({ name = '', help = '', tags = [] }) => {
       const tagMatch = filterTags.length
-        ? filterTags.every(filterTag => tags.indexOf(filterTag) > -1)
+        ? filterTags.every((filterTag) => tags.indexOf(filterTag) > -1)
         : true;
 
       const lowercaseSearch = searchTerm.toLowerCase();
@@ -203,7 +203,7 @@ export class WorkpadTemplates extends React.PureComponent {
 
     return (
       <Paginate rows={filteredTemplates}>
-        {pagination => (
+        {(pagination) => (
           <Fragment>
             {this.renderSearch()}
             <EuiSpacer />

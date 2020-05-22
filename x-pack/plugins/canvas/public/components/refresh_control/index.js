@@ -11,7 +11,7 @@ import { getInFlight } from '../../state/selectors/resolved_args';
 import { getRefreshInterval, getElementStats } from '../../state/selectors/workpad';
 import { RefreshControl as Component } from './refresh_control';
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   inFlight: getInFlight(state),
   refreshInterval: getRefreshInterval(state),
   elementStats: getElementStats(state),
@@ -22,7 +22,4 @@ const mapDispatchToProps = {
   setRefreshInterval,
 };
 
-export const RefreshControl = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Component);
+export const RefreshControl = connect(mapStateToProps, mapDispatchToProps)(Component);

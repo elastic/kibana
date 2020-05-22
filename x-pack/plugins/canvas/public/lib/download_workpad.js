@@ -7,7 +7,7 @@ import fileSaver from 'file-saver';
 import { notify } from './notify';
 import * as workpadService from './workpad_service';
 
-export const downloadWorkpad = async workpadId => {
+export const downloadWorkpad = async (workpadId) => {
   try {
     const workpad = await workpadService.get(workpadId);
     const jsonBlob = new Blob([JSON.stringify(workpad)], { type: 'application/json' });

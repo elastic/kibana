@@ -11,7 +11,7 @@ import { getPages, getWorkpadName, isWriteable } from '../selectors/workpad';
 import { getWindow } from '../../lib/get_window';
 import { setDocTitle } from '../../lib/doc_title';
 
-export const workpadUpdate = ({ dispatch, getState }) => next => action => {
+export const workpadUpdate = ({ dispatch, getState }) => (next) => (action) => {
   const oldIsWriteable = isWriteable(getState());
   const oldName = getWorkpadName(getState());
 
@@ -29,7 +29,7 @@ export const workpadUpdate = ({ dispatch, getState }) => next => action => {
     const newPage = pages[pages.length - 1];
 
     // For each element on that page, dispatch the action to update it
-    newPage.elements.forEach(element => dispatch(fetchRenderable(element)));
+    newPage.elements.forEach((element) => dispatch(fetchRenderable(element)));
   }
 
   // This middleware clears any page selection when the writeable mode changes

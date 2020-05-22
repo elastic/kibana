@@ -20,7 +20,10 @@ import { map, includes, sortBy } from 'lodash';
 
 export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
   search = lowerCase(search);
-  elements = sortBy(map(elements, (element, name) => ({ name, ...element })), 'displayName');
+  elements = sortBy(
+    map(elements, (element, name) => ({ name, ...element })),
+    'displayName'
+  );
   const elementList = map(elements, (element, name) => {
     const { help, displayName, expression, filter, width, height, image } = element;
     const whenClicked = () => onClick({ expression, filter, width, height });
@@ -62,7 +65,7 @@ export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
             <EuiFieldSearch
               className="canvasElements__filter"
               placeholder="Filter elements"
-              onChange={e => setSearch(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
               value={search}
             />
           </EuiFlexItem>

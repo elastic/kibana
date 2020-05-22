@@ -33,7 +33,7 @@ export class WorkpadExport extends React.PureComponent {
     array.push(tree);
 
     if (tree.items) {
-      tree.items.forEach(item => {
+      tree.items.forEach((item) => {
         if (item.panel) {
           this.flattenPanelTree(item.panel, array);
           item.panel = item.panel.id;
@@ -52,7 +52,7 @@ export class WorkpadExport extends React.PureComponent {
     this.props.onExport('json');
   };
 
-  renderPDFControls = closePopover => {
+  renderPDFControls = (closePopover) => {
     const pdfUrl = this.props.getExportUrl('pdf');
     return (
       <div className="canvasWorkpadExport__panelContent">
@@ -104,7 +104,7 @@ export class WorkpadExport extends React.PureComponent {
     );
   };
 
-  renderPanelTree = closePopover => ({
+  renderPanelTree = (closePopover) => ({
     id: 0,
     title: 'Share this workpad',
     items: [
@@ -159,7 +159,7 @@ export class WorkpadExport extends React.PureComponent {
   };
 
   render() {
-    const exportControl = togglePopover => (
+    const exportControl = (togglePopover) => (
       <EuiButtonIcon iconType="share" aria-label="Share this workpad" onClick={togglePopover} />
     );
 

@@ -9,8 +9,8 @@ import ReactDom from 'react-dom';
 import PropTypes from 'prop-types';
 import { ErrorBoundary } from '../components/enhance/error_boundary';
 
-export const templateFromReactComponent = Component => {
-  const WrappedComponent = props => (
+export const templateFromReactComponent = (Component) => {
+  const WrappedComponent = (props) => (
     <ErrorBoundary>
       {({ error }) => {
         if (error) {

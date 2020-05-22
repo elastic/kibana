@@ -41,7 +41,7 @@ export class ProcRunner {
     this._procs = [];
     this._log = log;
     this._signalSubscription = observeSignals(process).subscribe({
-      next: async signal => {
+      next: async (signal) => {
         await this.teardown(signal);
         if (signal !== 'exit') {
           // resend the signal
@@ -93,9 +93,9 @@ export class ProcRunner {
       if (wait instanceof RegExp) {
         await proc.lines$
           .pipe(
-            filter(line => wait.test(line)),
+            filter((line) => wait.test(line)),
             first(),
-            catchError(err => {
+            catchError((err) => {
               if (err.name !== 'EmptyError') {
                 throw createCliError(`[${name}] exited without matching pattern: ${wait}`);
               } else {
@@ -140,7 +140,7 @@ export class ProcRunner {
    *  @return {Promise<undefined>}
    */
   async waitForAllToStop() {
-    await Promise.all(this._procs.map(proc => proc.getOutcomePromise()));
+    await Promise.all(this._procs.map((proc) => proc.getOutcomePromise()));
   }
 
   /**
@@ -161,16 +161,16 @@ export class ProcRunner {
       this._log.warning(
         '%d processes left running, stop them with procs.stop(name):',
         this._procs.length,
-        this._procs.map(proc => proc.name)
+        this._procs.map((proc) => proc.name)
       );
     }
 
     const stopWith = signal === 'exit' ? 'SIGKILL' : signal;
-    await Promise.all(this._procs.map(proc => proc.stop(stopWith)));
+    await Promise.all(this._procs.map((proc) => proc.stop(stopWith)));
   }
 
   _getProc(name) {
-    return this._procs.find(proc => proc.name === name);
+    return this._procs.find((proc) => proc.name === name);
   }
 
   _createProc(name, options) {
@@ -187,14 +187,14 @@ export class ProcRunner {
 
     // tie into proc outcome$, remove from _procs on compete
     proc.outcome$.subscribe({
-      next: code => {
+      next: (code) => {
         const duration = moment.duration(Date.now() - startMs);
         this._log.info('[%s] exited with %s after %s', name, code, duration.humanize());
       },
       complete: () => {
         remove();
       },
-      error: error => {
+      error: (error) => {
         if (this._closing) {
           this._log.error(error);
         }

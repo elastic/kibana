@@ -22,7 +22,7 @@ export const routes = [
       {
         name: 'createWorkpad',
         path: '/create',
-        action: dispatch => async ({ router }) => {
+        action: (dispatch) => async ({ router }) => {
           const newWorkpad = getDefaultWorkpad();
           try {
             await workpadService.create(newWorkpad);
@@ -59,7 +59,7 @@ export const routes = [
               // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduced
               // https://github.com/elastic/kibana/issues/20277
               if (firstLoad) {
-                await workpadService.update(params.id, fetchedWorkpad).catch(err => {
+                await workpadService.update(params.id, fetchedWorkpad).catch((err) => {
                   if (err.response && err.response.status === 403) {
                     dispatch(setCanUserWrite(false));
                   }

@@ -12,15 +12,15 @@ import { setWriteable } from '../../state/actions/workpad';
 import { addElement } from '../../state/actions/elements';
 import { WorkpadHeader as Component } from './workpad_header';
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   isWriteable: isWriteable(state) && canUserWrite(state),
   canUserWrite: canUserWrite(state),
   selectedPage: getSelectedPage(state),
 });
 
-const mapDispatchToProps = dispatch => ({
-  setWriteable: isWriteable => dispatch(setWriteable(isWriteable)),
-  addElement: pageId => partialElement => dispatch(addElement(pageId, partialElement)),
+const mapDispatchToProps = (dispatch) => ({
+  setWriteable: (isWriteable) => dispatch(setWriteable(isWriteable)),
+  addElement: (pageId) => (partialElement) => dispatch(addElement(pageId, partialElement)),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => ({
@@ -32,10 +32,6 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => ({
 });
 
 export const WorkpadHeader = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withState('showElementModal', 'setShowElementModal', false)
 )(Component);

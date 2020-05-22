@@ -32,7 +32,7 @@ export function canvas(kibana) {
       mappings,
     },
 
-    config: Joi => {
+    config: (Joi) => {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         indexPrefix: Joi.string().default('.canvas'),

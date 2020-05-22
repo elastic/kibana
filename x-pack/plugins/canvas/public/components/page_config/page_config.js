@@ -35,7 +35,7 @@ export const PageConfig = ({
             <EuiSelect
               value={transition ? transition.name : ''}
               options={transitions}
-              onChange={e => setTransition(e.target.value)}
+              onChange={(e) => setTransition(e.target.value)}
             />
           </EuiFormRow>
           {transition ? (

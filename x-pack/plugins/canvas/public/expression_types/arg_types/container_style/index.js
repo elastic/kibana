@@ -11,7 +11,7 @@ import { templateFromReactComponent } from '../../../lib/template_from_react_com
 import { SimpleTemplate } from './simple_template';
 import { ExtendedTemplate } from './extended_template';
 
-const wrap = Component =>
+const wrap = (Component) =>
   // TODO: this should be in a helper
   withHandlers({
     getArgValue: ({ argValue }) => (name, alt) => {

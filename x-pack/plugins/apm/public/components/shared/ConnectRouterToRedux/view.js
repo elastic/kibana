@@ -16,7 +16,7 @@ import PropTypes from 'prop-types';
 
 class ConnectRouterToRedux extends Component {
   static propTypes = {
-    location: PropTypes.object.isRequired
+    location: PropTypes.object.isRequired,
   };
 
   componentDidMount() {

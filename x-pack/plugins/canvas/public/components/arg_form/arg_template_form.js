@@ -47,7 +47,7 @@ class ArgTemplateFormComponent extends React.Component {
     this.props.handlers.destroy();
   }
 
-  renderTemplate = domNode => {
+  renderTemplate = (domNode) => {
     const { template, argumentProps, handlers } = this.props;
     if (template) {
       return template(domNode, argumentProps, handlers);
@@ -72,7 +72,7 @@ class ArgTemplateFormComponent extends React.Component {
 
     return (
       <RenderToDom
-        render={domNode => {
+        render={(domNode) => {
           this.domNode = domNode;
           this.renderTemplate(domNode);
         }}

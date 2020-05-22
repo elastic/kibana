@@ -10,7 +10,7 @@ import { addColor, removeColor } from '../../state/actions/workpad';
 
 import { WorkpadColorPicker as Component } from './workpad_color_picker';
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   colors: getWorkpadColors(state),
 });
 
@@ -19,7 +19,4 @@ const mapDispatchToProps = {
   removeColor,
 };
 
-export const WorkpadColorPicker = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Component);
+export const WorkpadColorPicker = connect(mapStateToProps, mapDispatchToProps)(Component);

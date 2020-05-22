@@ -16,8 +16,8 @@ describe('urlParams', () => {
         location: {
           pathname:
             'myServiceName/transactions/myTransactionType/myTransactionName/b/c',
-          search: '?transactionId=myTransactionId&detailTab=request&spanId=10'
-        }
+          search: '?transactionId=myTransactionId&detailTab=request&spanId=10',
+        },
       }
     );
 
@@ -29,7 +29,7 @@ describe('urlParams', () => {
       transactionId: 'myTransactionId',
       transactionName: 'myTransactionName',
       detailTab: 'request',
-      transactionType: 'myTransactionType'
+      transactionType: 'myTransactionType',
     });
   });
 
@@ -40,8 +40,8 @@ describe('urlParams', () => {
         type: LOCATION_UPDATE,
         location: {
           pathname: 'myServiceName/errors/myErrorGroupId',
-          search: '?detailTab=request&transactionId=myTransactionId'
-        }
+          search: '?detailTab=request&transactionId=myTransactionId',
+        },
       }
     );
 
@@ -50,7 +50,7 @@ describe('urlParams', () => {
         serviceName: 'myServiceName',
         errorGroupId: 'myErrorGroupId',
         detailTab: 'request',
-        transactionId: 'myTransactionId'
+        transactionId: 'myTransactionId',
       })
     );
   });
@@ -60,7 +60,7 @@ describe('urlParams', () => {
       {},
       updateTimePicker({
         min: 'minTime',
-        max: 'maxTime'
+        max: 'maxTime',
       })
     );
 

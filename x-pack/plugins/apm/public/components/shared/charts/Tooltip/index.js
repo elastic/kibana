@@ -17,7 +17,7 @@ import {
   px,
   borderRadius,
   fontSize,
-  fontSizes
+  fontSizes,
 } from '../../../../style/variables';
 import Legend from '../Legend';
 
@@ -116,7 +116,7 @@ Tooltip.propTypes = {
   header: PropTypes.string,
   tooltipPoints: PropTypes.array.isRequired,
   x: PropTypes.number,
-  y: PropTypes.number
+  y: PropTypes.number,
 };
 
 Tooltip.defaultProps = {};

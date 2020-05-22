@@ -11,7 +11,7 @@ import { getAssets } from './assets';
 
 const workpadRoot = 'persistent.workpad';
 
-const appendAst = element => ({
+const appendAst = (element) => ({
   ...element,
   ast: safeElementFromExpression(element.expression),
 });
@@ -59,12 +59,12 @@ export function getPages(state) {
 
 export function getPageById(state, id) {
   const pages = getPages(state);
-  return pages.find(page => page.id === id);
+  return pages.find((page) => page.id === id);
 }
 
 export function getPageIndexById(state, id) {
   const pages = getPages(state);
-  return pages.findIndex(page => page.id === id);
+  return pages.findIndex((page) => page.id === id);
 }
 
 export function getWorkpadName(state) {
@@ -87,7 +87,7 @@ export function getElementCounts(state) {
     error: 0,
   };
 
-  Object.keys(resolvedArgs).forEach(resolvedArg => {
+  Object.keys(resolvedArgs).forEach((resolvedArg) => {
     const arg = resolvedArgs[resolvedArg];
     const { expressionRenderable } = arg;
 
@@ -116,8 +116,8 @@ export function getElementStats(state) {
 
 export function getGlobalFilterExpression(state) {
   return getAllElements(state)
-    .map(el => el.filter)
-    .filter(str => str != null && str.length)
+    .map((el) => el.filter)
+    .filter((str) => str != null && str.length)
     .join(' | ');
 }
 
@@ -147,19 +147,19 @@ export function getElements(state, pageId, withAst = true) {
   // due to https://github.com/elastic/kibana-canvas/issues/260
   // TODO: remove this once it's been in the wild a bit
   if (!withAst) {
-    return elements.map(el => omit(el, ['ast']));
+    return elements.map((el) => omit(el, ['ast']));
   }
 
   return elements.map(appendAst);
 }
 
-const augment = type => n => ({
+const augment = (type) => (n) => ({
   ...n,
   position: { ...n.position, type },
   ...(type === 'group' && { expression: 'shape fill="rgba(255,255,255,0)" | render' }), // fixme unify with mw/aeroelastic
 });
 
-const getNodesOfPage = page =>
+const getNodesOfPage = (page) =>
   get(page, 'elements')
     .map(augment('element'))
     .concat((get(page, 'groups') || []).map(augment('group')));
@@ -182,7 +182,7 @@ export function getNodes(state, pageId, withAst = true) {
   // due to https://github.com/elastic/kibana-canvas/issues/260
   // TODO: remove this once it's been in the wild a bit
   if (!withAst) {
-    return elements.map(el => omit(el, ['ast']));
+    return elements.map((el) => omit(el, ['ast']));
   }
 
   return elements.map(appendAst);
@@ -190,7 +190,7 @@ export function getNodes(state, pageId, withAst = true) {
 
 export function getElementById(state, id, pageId) {
   // do we need to pass a truthy empty array instead of `true`?
-  const element = getElements(state, pageId, []).find(el => el.id === id);
+  const element = getElements(state, pageId, []).find((el) => el.id === id);
   if (element) {
     return appendAst(element);
   }
@@ -198,7 +198,7 @@ export function getElementById(state, id, pageId) {
 
 export function getNodeById(state, id, pageId) {
   // do we need to pass a truthy empty array instead of `true`?
-  const group = getNodes(state, pageId, []).find(el => el.id === id);
+  const group = getNodes(state, pageId, []).find((el) => el.id === id);
   if (group) {
     return appendAst(group);
   }

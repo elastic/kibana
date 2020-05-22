@@ -85,7 +85,7 @@ test("does not push new configs when reloading if config at path hasn't changed"
   const configService = new ConfigService(config$, defaultEnv, logger);
 
   const valuesReceived: any[] = [];
-  configService.atPath('key', ExampleClassWithStringSchema).subscribe(config => {
+  configService.atPath('key', ExampleClassWithStringSchema).subscribe((config) => {
     valuesReceived.push(config.value);
   });
 
@@ -99,7 +99,7 @@ test('pushes new config when reloading and config at path has changed', async ()
   const configService = new ConfigService(config$, defaultEnv, logger);
 
   const valuesReceived: any[] = [];
-  configService.atPath('key', ExampleClassWithStringSchema).subscribe(config => {
+  configService.atPath('key', ExampleClassWithStringSchema).subscribe((config) => {
     valuesReceived.push(config.value);
   });
 

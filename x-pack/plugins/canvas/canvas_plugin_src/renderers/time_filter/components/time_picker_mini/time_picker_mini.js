@@ -11,7 +11,7 @@ import { PrettyDuration } from '../pretty_duration';
 import { TimePicker } from '../time_picker';
 
 export const TimePickerMini = ({ from, to, onSelect }) => {
-  const button = handleClick => (
+  const button = (handleClick) => (
     <button className="canvasTimePickerMini__button" onClick={handleClick}>
       <PrettyDuration from={from} to={to} />
     </button>

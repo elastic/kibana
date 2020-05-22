@@ -54,12 +54,12 @@ export class LegacyService implements CoreService {
     this.log.debug('starting legacy service');
 
     const update$ = this.coreContext.configService.getConfig$().pipe(
-      tap(config => {
+      tap((config) => {
         if (this.kbnServer !== undefined) {
           this.kbnServer.applyLoggingConfiguration(config.toRaw());
         }
       }),
-      tap({ error: err => this.log.error(err) }),
+      tap({ error: (err) => this.log.error(err) }),
       publishReplay(1)
     ) as ConnectableObservable<Config>;
 
@@ -69,7 +69,7 @@ export class LegacyService implements CoreService {
     this.kbnServer = await update$
       .pipe(
         first(),
-        mergeMap(async config => {
+        mergeMap(async (config) => {
           if (this.coreContext.env.isDevClusterMaster) {
             await this.createClusterManager(config);
             return;

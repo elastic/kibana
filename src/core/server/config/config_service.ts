@@ -64,7 +64,7 @@ export class ConfigService {
     ConfigClass: ConfigWithSchema<TSchema, TConfig>
   ) {
     return this.getDistinctConfig(path).pipe(
-      map(config => this.createConfig(path, config, ConfigClass))
+      map((config) => this.createConfig(path, config, ConfigClass))
     );
   }
 
@@ -79,7 +79,7 @@ export class ConfigService {
     ConfigClass: ConfigWithSchema<TSchema, TConfig>
   ) {
     return this.getDistinctConfig(path).pipe(
-      map(config =>
+      map((config) =>
         config === undefined ? undefined : this.createConfig(path, config, ConfigClass)
       )
     );
@@ -112,14 +112,14 @@ export class ConfigService {
     const config = await this.config$.pipe(first()).toPromise();
     const handledPaths = this.handledPaths.map(pathToString);
 
-    return config.getFlattenedPaths().filter(path => !isPathHandled(path, handledPaths));
+    return config.getFlattenedPaths().filter((path) => !isPathHandled(path, handledPaths));
   }
 
   public async getUsedPaths() {
     const config = await this.config$.pipe(first()).toPromise();
     const handledPaths = this.handledPaths.map(pathToString);
 
-    return config.getFlattenedPaths().filter(path => isPathHandled(path, handledPaths));
+    return config.getFlattenedPaths().filter((path) => isPathHandled(path, handledPaths));
   }
 
   private createConfig<TSchema extends Type<any>, TConfig>(
@@ -133,9 +133,7 @@ export class ConfigService {
 
     if (configSchema === undefined || typeof configSchema.validate !== 'function') {
       throw new Error(
-        `The config class [${
-          ConfigClass.name
-        }] did not contain a static 'schema' field, which is required when creating a config instance`
+        `The config class [${ConfigClass.name}] did not contain a static 'schema' field, which is required when creating a config instance`
       );
     }
 
@@ -155,7 +153,7 @@ export class ConfigService {
     this.markAsHandled(path);
 
     return this.config$.pipe(
-      map(config => config.get(path)),
+      map((config) => config.get(path)),
       distinctUntilChanged(isEqual)
     );
   }
@@ -180,4 +178,4 @@ const pathToString = (path: ConfigPath) => (Array.isArray(path) ? path.join('.')
  * handled paths.
  */
 const isPathHandled = (path: string, handledPaths: string[]) =>
-  handledPaths.some(handledPath => path.startsWith(handledPath));
+  handledPaths.some((handledPath) => path.startsWith(handledPath));

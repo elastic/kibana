@@ -14,7 +14,7 @@ describe('createInitialDataSelector', () => {
 
     expect(withInitialData(state)).toBe(withInitialData(state));
     expect(withInitialData(state, initialData)).toEqual({
-      data: { foo: 'bar' }
+      data: { foo: 'bar' },
     });
   });
 
@@ -25,7 +25,7 @@ describe('createInitialDataSelector', () => {
 
     expect(withInitialData(state)).toBe(withInitialData(state));
     expect(withInitialData(state, initialData)).toEqual({
-      data: 'hello'
+      data: 'hello',
     });
   });
 });

@@ -14,5 +14,5 @@ export const rowCount = () => ({
   help:
     'Return the number of rows. Pair with ply to get the count of unique column values, or combinations of unique column values.',
   args: {},
-  fn: context => context.rows.length,
+  fn: (context) => context.rows.length,
 });

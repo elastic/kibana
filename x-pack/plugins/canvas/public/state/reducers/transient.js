@@ -15,7 +15,7 @@ export const transientReducer = handleActions(
   {
     // clear all the resolved args when restoring the history
     // TODO: we shouldn't need to reset the resolved args for history
-    [restoreHistory]: transientState => set(transientState, 'resolvedArgs', {}),
+    [restoreHistory]: (transientState) => set(transientState, 'resolvedArgs', {}),
 
     [removeElements]: (transientState, { payload: { elementIds } }) => {
       const { selectedElement } = transientState;

@@ -52,9 +52,9 @@ export const RefreshControl = ({
     loadingIndicator.hide();
   }
 
-  const setRefresh = val => setRefreshInterval(getRefreshInterval(val));
+  const setRefresh = (val) => setRefreshInterval(getRefreshInterval(val));
 
-  const popoverButton = handleClick => (
+  const popoverButton = (handleClick) => (
     <EuiButtonEmpty size="s" onClick={handleClick}>
       <div style={{ display: 'flex', alignItems: 'center' }}>Refresh</div>
     </EuiButtonEmpty>
@@ -71,7 +71,7 @@ export const RefreshControl = ({
           <AutoRefreshControls
             inFlight={inFlight}
             refreshInterval={refreshInterval}
-            setRefresh={val => {
+            setRefresh={(val) => {
               setRefresh(val);
               closePopover();
             }}

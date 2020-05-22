@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { Shortcuts } from 'react-shortcuts';
 
 export class FullscreenControl extends React.PureComponent {
-  keyHandler = action => {
+  keyHandler = (action) => {
     const enterFullscreen = action === 'FULLSCREEN';
     const exitFullscreen = this.props.isFullscreen && action === 'FULLSCREEN_EXIT';
 

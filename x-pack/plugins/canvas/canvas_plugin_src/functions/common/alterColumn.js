@@ -36,7 +36,7 @@ export const alterColumn = () => ({
       return context;
     }
 
-    const column = context.columns.find(col => col.name === args.column);
+    const column = context.columns.find((col) => col.name === args.column);
     if (!column) {
       throw new Error(`Column not found: '${args.column}'`);
     }
@@ -55,20 +55,20 @@ export const alterColumn = () => ({
       return all;
     }, []);
 
-    let handler = val => val;
+    let handler = (val) => val;
 
     if (args.type) {
       handler = (function getHandler() {
         switch (type) {
           case 'string':
             if (column.type === 'date') {
-              return v => new Date(v).toISOString();
+              return (v) => new Date(v).toISOString();
             }
             return String;
           case 'number':
             return Number;
           case 'date':
-            return v => new Date(v).valueOf();
+            return (v) => new Date(v).valueOf();
           case 'boolean':
             return Boolean;
           case 'null':
@@ -79,7 +79,7 @@ export const alterColumn = () => ({
       })();
     }
 
-    const rows = context.rows.map(row => ({
+    const rows = context.rows.map((row) => ({
       ...omit(row, column.name),
       [name]: handler(row[column.name]),
     }));

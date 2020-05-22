@@ -7,7 +7,7 @@
 import { isEqual } from 'lodash';
 import { setFilter } from '../../../state/actions/elements';
 
-export const createHandlers = dispatch => {
+export const createHandlers = (dispatch) => {
   let isComplete = false;
   let oldElement;
   let completeFn = () => {};

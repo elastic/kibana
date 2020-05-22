@@ -130,7 +130,7 @@ export class WorkpadPage extends PureComponent {
       >
         {shortcuts}
         {elements
-          .map(element => {
+          .map((element) => {
             if (element.type === 'annotation') {
               if (!isEditable) {
                 return;
@@ -165,7 +165,7 @@ export class WorkpadPage extends PureComponent {
               return <ElementWrapper key={element.id} element={element} />;
             }
           })
-          .filter(element => !!element)}
+          .filter((element) => !!element)}
       </div>
     );
   }

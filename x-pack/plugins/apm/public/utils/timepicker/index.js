@@ -13,7 +13,7 @@ import { timefilter, registerTimefilterWithGlobalState } from 'ui/timefilter';
 let currentInterval;
 
 // hack to wait for angular template to be ready
-const waitForAngularReady = new Promise(resolve => {
+const waitForAngularReady = new Promise((resolve) => {
   const checkInterval = setInterval(() => {
     const hasElm = !!document.querySelector('#react-apm-breadcrumbs');
     if (hasElm) {
@@ -24,14 +24,14 @@ const waitForAngularReady = new Promise(resolve => {
 });
 
 export function initTimepicker(history, dispatch) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     // default the timepicker to the last 24 hours
     chrome.getUiSettingsClient().overrideLocalDefault(
       'timepicker:timeDefaults',
       JSON.stringify({
         from: 'now-24h',
         to: 'now',
-        mode: 'quick'
+        mode: 'quick',
       })
     );
 
@@ -46,15 +46,15 @@ export function initTimepicker(history, dispatch) {
           $scope.topNavMenu.push({
             key: 'APM feedback',
             label: i18n('xpack.apm.topNav.apmFeedbackLabel', {
-              defaultMessage: 'APM feedback'
+              defaultMessage: 'APM feedback',
             }),
             description: i18n('xpack.apm.topNav.apmFeedbackDescription', {
-              defaultMessage: 'APM feedback'
+              defaultMessage: 'APM feedback',
             }),
             tooltip: i18n('xpack.apm.topNav.apmFeedbackTooltip', {
-              defaultMessage: 'Provide feedback on APM'
+              defaultMessage: 'Provide feedback on APM',
             }),
-            template: require('../../templates/feedback_menu.html')
+            template: require('../../templates/feedback_menu.html'),
           });
 
           history.listen(() => {
@@ -85,7 +85,7 @@ export function initTimepicker(history, dispatch) {
 function updateTimePickerAction() {
   return updateTimePicker({
     min: timefilter.getBounds().min.toISOString(),
-    max: timefilter.getBounds().max.toISOString()
+    max: timefilter.getBounds().max.toISOString(),
   });
 }
 

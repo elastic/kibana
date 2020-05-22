@@ -32,20 +32,20 @@ export const mapColumn = () => ({
     args.expression = args.expression || (() => Promise.resolve(null));
 
     const columns = [...context.columns];
-    const rowPromises = context.rows.map(row => {
+    const rowPromises = context.rows.map((row) => {
       return args
         .expression({
           type: 'datatable',
           columns,
           rows: [row],
         })
-        .then(val => ({
+        .then((val) => ({
           ...row,
           [args.name]: val,
         }));
     });
 
-    return Promise.all(rowPromises).then(rows => {
+    return Promise.all(rowPromises).then((rows) => {
       const existingColumnIndex = columns.findIndex(({ name }) => name === args.name);
       const type = rows.length ? getType(rows[0][args.name]) : 'null';
       const newColumn = { name: args.name, type };

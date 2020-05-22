@@ -87,10 +87,7 @@ test('returns config at path as observable', async () => {
 
   configService.loadConfig();
 
-  const exampleConfig = await configService
-    .getConfig$()
-    .pipe(first())
-    .toPromise();
+  const exampleConfig = await configService.getConfig$().pipe(first()).toPromise();
 
   expect(exampleConfig.get('key')).toEqual('value');
   expect(exampleConfig.getFlattenedPaths()).toEqual(['key']);
@@ -104,7 +101,7 @@ test("pushes new configs when reloading even if config at path hasn't changed", 
   configService.loadConfig();
 
   const valuesReceived: any[] = [];
-  configService.getConfig$().subscribe(config => {
+  configService.getConfig$().subscribe((config) => {
     valuesReceived.push(config);
   });
 
@@ -137,7 +134,7 @@ test('pushes new config when reloading and config at path has changed', async ()
   configService.loadConfig();
 
   const valuesReceived: any[] = [];
-  configService.getConfig$().subscribe(config => {
+  configService.getConfig$().subscribe((config) => {
     valuesReceived.push(config);
   });
 
@@ -153,7 +150,7 @@ test('pushes new config when reloading and config at path has changed', async ()
   expect(valuesReceived[1].getFlattenedPaths()).toEqual(['key']);
 });
 
-test('completes config observables when stopped', done => {
+test('completes config observables when stopped', (done) => {
   expect.assertions(0);
 
   mockGetConfigFromFiles.mockImplementation(() => ({ key: 'value' }));

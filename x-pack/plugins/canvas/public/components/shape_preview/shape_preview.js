@@ -17,7 +17,7 @@ export const ShapePreview = ({ shape }) => {
   const initialViewBox = shapeSvg
     .getAttribute('viewBox')
     .split(' ')
-    .map(v => parseInt(v, 10));
+    .map((v) => parseInt(v, 10));
 
   let [minX, minY, width, height] = initialViewBox;
   minX -= weight / 2;

@@ -31,7 +31,10 @@ export const math = () => ({
 
     const isDatatable = context && context.type === 'datatable';
     const mathContext = isDatatable
-      ? pivotObjectArray(context.rows, context.columns.map(col => col.name))
+      ? pivotObjectArray(
+          context.rows,
+          context.columns.map((col) => col.name)
+        )
       : { value: context };
     try {
       const result = evaluate(args.expression, mathContext);

@@ -15,9 +15,7 @@ describe('revealImage', () => {
 
   it('returns a render as revealImage', () => {
     const result = fn(0.5);
-    expect(result)
-      .to.have.property('type', 'render')
-      .and.to.have.property('as', 'revealImage');
+    expect(result).to.have.property('type', 'render').and.to.have.property('as', 'revealImage');
   });
 
   describe('context', () => {
@@ -28,7 +26,7 @@ describe('revealImage', () => {
           emptyImage: elasticOutline,
           origin: 'top',
         })
-        .to.throwException(e => {
+        .to.throwException((e) => {
           expect(e.message).to.be.equal(`Invalid value: '10'. Percentage must be between 0 and 1`);
         });
 
@@ -38,7 +36,7 @@ describe('revealImage', () => {
           emptyImage: elasticOutline,
           origin: 'top',
         })
-        .to.throwException(e => {
+        .to.throwException((e) => {
           expect(e.message).to.be.equal(
             `Invalid value: '-0.1'. Percentage must be between 0 and 1`
           );

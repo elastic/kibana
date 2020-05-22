@@ -43,7 +43,7 @@ describe('getCell', () => {
       });
 
       it('throws when invalid column is provided', () => {
-        expect(() => fn(testTable, { column: 'foo' })).to.throwException(e => {
+        expect(() => fn(testTable, { column: 'foo' })).to.throwException((e) => {
           expect(e.message).to.be(`Column not found: 'foo'`);
         });
       });
@@ -65,15 +65,15 @@ describe('getCell', () => {
       it('throws when row does not exist', () => {
         const invalidRow = testTable.rows.length;
 
-        expect(() => fn(testTable, { column: 'name', row: invalidRow })).to.throwException(e => {
+        expect(() => fn(testTable, { column: 'name', row: invalidRow })).to.throwException((e) => {
           expect(e.message).to.be(`Row not found: '${invalidRow}'`);
         });
 
-        expect(() => fn(emptyTable, { column: 'foo' })).to.throwException(e => {
+        expect(() => fn(emptyTable, { column: 'foo' })).to.throwException((e) => {
           expect(e.message).to.be(`Row not found: '0'`);
         });
 
-        expect(() => fn(emptyTable)).to.throwException(e => {
+        expect(() => fn(emptyTable)).to.throwException((e) => {
           expect(e.message).to.be(`Row not found: '0'`);
         });
       });

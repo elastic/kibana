@@ -58,7 +58,7 @@ describe('axisConfig', () => {
       it('throws when given an invalid position', () => {
         expect(fn)
           .withArgs(testTable, { position: 'foo' })
-          .to.throwException(e => {
+          .to.throwException((e) => {
             expect(e.message).to.be(`Invalid position: 'foo'`);
           });
       });
@@ -81,7 +81,7 @@ describe('axisConfig', () => {
       it('throws when given an invalid date string', () => {
         expect(fn)
           .withArgs(testTable, { min: 'foo' })
-          .to.throwException(e => {
+          .to.throwException((e) => {
             expect(e.message).to.be(
               `Invalid date string: 'foo'. 'min' must be a number, date in ms, or ISO8601 date string`
             );
@@ -106,7 +106,7 @@ describe('axisConfig', () => {
       it('throws when given an invalid date string', () => {
         expect(fn)
           .withArgs(testTable, { max: '20/02/17' })
-          .to.throwException(e => {
+          .to.throwException((e) => {
             expect(e.message).to.be(
               `Invalid date string: '20/02/17'. 'max' must be a number, date in ms, or ISO8601 date string`
             );

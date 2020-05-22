@@ -19,7 +19,7 @@ export const getTickHash = (columns, rows) => {
   };
 
   if (get(columns, 'x.type') === 'string') {
-    sortBy(rows, ['x']).forEach(row => {
+    sortBy(rows, ['x']).forEach((row) => {
       if (!ticks.x.hash[row.x]) {
         ticks.x.hash[row.x] = ticks.x.counter++;
       }
@@ -29,7 +29,7 @@ export const getTickHash = (columns, rows) => {
   if (get(columns, 'y.type') === 'string') {
     sortBy(rows, ['y'])
       .reverse()
-      .forEach(row => {
+      .forEach((row) => {
         if (!ticks.y.hash[row.y]) {
           ticks.y.hash[row.y] = ticks.y.counter++;
         }

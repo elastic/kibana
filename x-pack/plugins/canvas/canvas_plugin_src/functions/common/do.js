@@ -16,5 +16,5 @@ export const doFn = () => ({
         'One or more sub-expressions. The value of these is not available in the root pipeline as this function simply returns the passed in context',
     },
   },
-  fn: context => context,
+  fn: (context) => context,
 });

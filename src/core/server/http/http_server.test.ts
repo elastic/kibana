@@ -74,7 +74,7 @@ test('200 OK with body', async () => {
   await supertest(innerServer.listener)
     .get('/foo/')
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ key: 'value' });
     });
 });
@@ -93,7 +93,7 @@ test('202 Accepted with body', async () => {
   await supertest(innerServer.listener)
     .get('/foo/')
     .expect(202)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ location: 'somewhere' });
     });
 });
@@ -112,7 +112,7 @@ test('204 No content', async () => {
   await supertest(innerServer.listener)
     .get('/foo/')
     .expect(204)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({});
       // TODO Is ^ wrong or just a result of supertest, I expect `null` or `undefined`
     });
@@ -133,7 +133,7 @@ test('400 Bad request with error', async () => {
   await supertest(innerServer.listener)
     .get('/foo/')
     .expect(400)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ error: 'some message' });
     });
 });
@@ -144,7 +144,7 @@ test('valid params', async () => {
   router.get(
     {
       path: '/{test}',
-      validate: schema => ({
+      validate: (schema) => ({
         params: schema.object({
           test: schema.string(),
         }),
@@ -162,7 +162,7 @@ test('valid params', async () => {
   await supertest(innerServer.listener)
     .get('/foo/some-string')
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ key: 'some-string' });
     });
 });
@@ -173,7 +173,7 @@ test('invalid params', async () => {
   router.get(
     {
       path: '/{test}',
-      validate: schema => ({
+      validate: (schema) => ({
         params: schema.object({
           test: schema.number(),
         }),
@@ -191,7 +191,7 @@ test('invalid params', async () => {
   await supertest(innerServer.listener)
     .get('/foo/some-string')
     .expect(400)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({
         error: '[test]: expected value of type [number] but got [string]',
       });
@@ -204,7 +204,7 @@ test('valid query', async () => {
   router.get(
     {
       path: '/',
-      validate: schema => ({
+      validate: (schema) => ({
         query: schema.object({
           bar: schema.string(),
           quux: schema.number(),
@@ -223,7 +223,7 @@ test('valid query', async () => {
   await supertest(innerServer.listener)
     .get('/foo/?bar=test&quux=123')
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ bar: 'test', quux: 123 });
     });
 });
@@ -234,7 +234,7 @@ test('invalid query', async () => {
   router.get(
     {
       path: '/',
-      validate: schema => ({
+      validate: (schema) => ({
         query: schema.object({
           bar: schema.number(),
         }),
@@ -252,7 +252,7 @@ test('invalid query', async () => {
   await supertest(innerServer.listener)
     .get('/foo/?bar=test')
     .expect(400)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({
         error: '[bar]: expected value of type [number] but got [string]',
       });
@@ -265,7 +265,7 @@ test('valid body', async () => {
   router.post(
     {
       path: '/',
-      validate: schema => ({
+      validate: (schema) => ({
         body: schema.object({
           bar: schema.string(),
           baz: schema.number(),
@@ -288,7 +288,7 @@ test('valid body', async () => {
       baz: 123,
     })
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ bar: 'test', baz: 123 });
     });
 });
@@ -299,7 +299,7 @@ test('invalid body', async () => {
   router.post(
     {
       path: '/',
-      validate: schema => ({
+      validate: (schema) => ({
         body: schema.object({
           bar: schema.number(),
         }),
@@ -318,7 +318,7 @@ test('invalid body', async () => {
     .post('/foo/')
     .send({ bar: 'test' })
     .expect(400)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({
         error: '[bar]: expected value of type [number] but got [string]',
       });
@@ -331,7 +331,7 @@ test('handles putting', async () => {
   router.put(
     {
       path: '/',
-      validate: schema => ({
+      validate: (schema) => ({
         body: schema.object({
           key: schema.string(),
         }),
@@ -350,7 +350,7 @@ test('handles putting', async () => {
     .put('/foo/')
     .send({ key: 'new value' })
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ key: 'new value' });
     });
 });
@@ -361,7 +361,7 @@ test('handles deleting', async () => {
   router.delete(
     {
       path: '/{id}',
-      validate: schema => ({
+      validate: (schema) => ({
         params: schema.object({
           id: schema.number(),
         }),
@@ -379,7 +379,7 @@ test('handles deleting', async () => {
   await supertest(innerServer.listener)
     .delete('/foo/3')
     .expect(200)
-    .then(res => {
+    .then((res) => {
       expect(res.body).toEqual({ key: 3 });
     });
 });
@@ -436,28 +436,22 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
   });
 
   test('/bar => 404', async () => {
-    await supertest(innerServerListener)
-      .get('/bar')
-      .expect(404);
+    await supertest(innerServerListener).get('/bar').expect(404);
   });
 
   test('/bar/ => 404', async () => {
-    await supertest(innerServerListener)
-      .get('/bar/')
-      .expect(404);
+    await supertest(innerServerListener).get('/bar/').expect(404);
   });
 
   test('/bar/foo => 404', async () => {
-    await supertest(innerServerListener)
-      .get('/bar/foo')
-      .expect(404);
+    await supertest(innerServerListener).get('/bar/foo').expect(404);
   });
 
   test('/ => /', async () => {
     await supertest(innerServerListener)
       .get('/')
       .expect(200)
-      .then(res => {
+      .then((res) => {
         expect(res.body).toEqual({ key: 'value:/' });
       });
   });
@@ -466,7 +460,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
     await supertest(innerServerListener)
       .get('/foo')
       .expect(200)
-      .then(res => {
+      .then((res) => {
         expect(res.body).toEqual({ key: 'value:/foo' });
       });
   });
@@ -499,7 +493,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
     await supertest(innerServerListener)
       .get('/bar')
       .expect(200)
-      .then(res => {
+      .then((res) => {
         expect(res.body).toEqual({ key: 'value:/' });
       });
   });
@@ -508,7 +502,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
     await supertest(innerServerListener)
       .get('/bar/')
       .expect(200)
-      .then(res => {
+      .then((res) => {
         expect(res.body).toEqual({ key: 'value:/' });
       });
   });
@@ -517,21 +511,17 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
     await supertest(innerServerListener)
       .get('/bar/foo')
       .expect(200)
-      .then(res => {
+      .then((res) => {
         expect(res.body).toEqual({ key: 'value:/foo' });
       });
   });
 
   test('/ => 404', async () => {
-    await supertest(innerServerListener)
-      .get('/')
-      .expect(404);
+    await supertest(innerServerListener).get('/').expect(404);
   });
 
   test('/foo => 404', async () => {
-    await supertest(innerServerListener)
-      .get('/foo')
-      .expect(404);
+    await supertest(innerServerListener).get('/foo').expect(404);
   });
 });
 

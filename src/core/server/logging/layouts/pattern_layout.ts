@@ -58,9 +58,7 @@ const LEVEL_COLORS = new Map([
 /**
  * Default pattern used by PatternLayout if it's not overridden in the configuration.
  */
-const DEFAULT_PATTERN = `[${Parameters.Timestamp}][${Parameters.Level}][${Parameters.Context}] ${
-  Parameters.Message
-}`;
+const DEFAULT_PATTERN = `[${Parameters.Timestamp}][${Parameters.Level}][${Parameters.Context}] ${Parameters.Message}`;
 
 const patternLayoutSchema = schema.object({
   highlight: schema.maybe(schema.boolean()),
@@ -111,6 +109,6 @@ export class PatternLayout implements Layout {
       PatternLayout.highlightRecord(record, formattedRecord);
     }
 
-    return this.pattern.replace(PATTERN_REGEX, match => formattedRecord.get(match)!);
+    return this.pattern.replace(PATTERN_REGEX, (match) => formattedRecord.get(match)!);
   }
 }

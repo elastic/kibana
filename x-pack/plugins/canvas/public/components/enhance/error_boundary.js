@@ -24,10 +24,10 @@ export const errorBoundaryHoc = compose(
       this.props.setErrorInfo(errorInfo);
     },
   }),
-  mapProps(props => omit(props, ['setError', 'setErrorInfo']))
+  mapProps((props) => omit(props, ['setError', 'setErrorInfo']))
 );
 
-const ErrorBoundaryComponent = props => (
+const ErrorBoundaryComponent = (props) => (
   <Fragment>
     {props.children({
       error: props.error,

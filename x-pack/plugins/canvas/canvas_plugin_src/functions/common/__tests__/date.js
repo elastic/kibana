@@ -47,7 +47,7 @@ describe('date', () => {
       });
 
       it('throws when passing an invalid date string and format is not specified', () => {
-        expect(() => fn(null, { value: '23/25/2014' })).to.throwException(e => {
+        expect(() => fn(null, { value: '23/25/2014' })).to.throwException((e) => {
           expect(e.message).to.be('Invalid date input: 23/25/2014');
         });
       });

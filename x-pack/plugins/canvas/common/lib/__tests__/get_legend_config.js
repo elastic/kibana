@@ -22,9 +22,7 @@ describe('getLegendConfig', () => {
       expect(getLegendConfig(false, 1))
         .to.only.have.key('show')
         .and.to.have.property('show', false);
-      expect(getLegendConfig(true, 1))
-        .to.only.have.key('show')
-        .and.to.have.property('show', false);
+      expect(getLegendConfig(true, 1)).to.only.have.key('show').and.to.have.property('show', false);
     });
 
     it('shows the legend when there are two or more series', () => {

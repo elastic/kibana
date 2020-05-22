@@ -40,7 +40,7 @@ export class ExtendedTemplate extends React.PureComponent {
   };
 
   // TODO: this should be in a helper, it's the same code from container_style
-  setArgValue = name => ev => {
+  setArgValue = (name) => (ev) => {
     const val = ev.target.value;
     const { argValue, onValueChange } = this.props;
     const oldVal = typeof argValue === 'boolean' ? defaultExpression : argValue;
@@ -62,7 +62,7 @@ export class ExtendedTemplate extends React.PureComponent {
     const argName = this.props.typeInstance.name;
     const position = this.getArgValue('position', positions[argName][0]);
 
-    const options = positions[argName].map(val => ({ value: val, text: val }));
+    const options = positions[argName].map((val) => ({ value: val, text: val }));
 
     return (
       <Fragment>

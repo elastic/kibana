@@ -10,7 +10,7 @@ import { EuiRange } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 
 const PercentageArgInput = ({ onValueChange, argValue }) => {
-  const handleChange = ev => {
+  const handleChange = (ev) => {
     return onValueChange(ev.target.value / 100);
   };
 

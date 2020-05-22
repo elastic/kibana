@@ -46,7 +46,7 @@ class EssqlDatasource extends PureComponent {
       });
   };
 
-  onChange = e => {
+  onChange = (e) => {
     const { value } = e.target;
     this.props.setInvalid(!value.trim());
     this.setArg(this.getArgName(), value);

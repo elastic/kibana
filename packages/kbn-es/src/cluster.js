@@ -159,8 +159,8 @@ exports.Cluster = class Cluster {
 
     await Promise.race([
       // await the "started" log message
-      new Promise(resolve => {
-        this._process.stdout.on('data', data => {
+      new Promise((resolve) => {
+        this._process.stdout.on('data', (data) => {
           if (/started/.test(data)) {
             resolve();
           }
@@ -245,15 +245,15 @@ exports.Cluster = class Cluster {
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
-    this._process.stdout.on('data', data => {
+    this._process.stdout.on('data', (data) => {
       const lines = parseEsLog(data.toString());
-      lines.forEach(line => this._log.info(line.formattedMessage));
+      lines.forEach((line) => this._log.info(line.formattedMessage));
     });
 
-    this._process.stderr.on('data', data => this._log.error(chalk.red(data.toString())));
+    this._process.stderr.on('data', (data) => this._log.error(chalk.red(data.toString())));
 
     this._outcome = new Promise((resolve, reject) => {
-      this._process.once('exit', code => {
+      this._process.once('exit', (code) => {
         if (this._stopCalled) {
           resolve();
           return;

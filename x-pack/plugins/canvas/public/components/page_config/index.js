@@ -11,7 +11,7 @@ import { getSelectedPageIndex, getPages } from '../../state/selectors/workpad';
 import { stylePage, setPageTransition } from '../../state/actions/pages';
 import { PageConfig as Component } from './page_config';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   const pageIndex = getSelectedPageIndex(state);
   const page = getPages(state)[pageIndex];
   return { page, pageIndex };
@@ -22,7 +22,7 @@ const mapDispatchToProps = { stylePage, setPageTransition };
 const mergeProps = (stateProps, dispatchProps) => {
   return {
     pageIndex: stateProps.pageIndex,
-    setBackground: background => {
+    setBackground: (background) => {
       const itsTheNewStyle = { ...stateProps.page.style, background };
       dispatchProps.stylePage(stateProps.page.id, itsTheNewStyle);
     },
@@ -34,14 +34,10 @@ const mergeProps = (stateProps, dispatchProps) => {
         text: displayName,
       }))
     ),
-    setTransition: name => {
+    setTransition: (name) => {
       dispatchProps.setPageTransition(stateProps.page.id, { name });
     },
   };
 };
 
-export const PageConfig = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-  mergeProps
-)(Component);
+export const PageConfig = connect(mapStateToProps, mapDispatchToProps, mergeProps)(Component);

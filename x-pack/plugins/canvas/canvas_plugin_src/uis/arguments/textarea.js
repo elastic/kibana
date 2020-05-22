@@ -25,7 +25,7 @@ const TextAreaArgInput = ({ updateValue, value, confirm, commit, renderError, ar
         rows={10}
         value={value}
         resize="none"
-        onChange={confirm ? updateValue : ev => commit(ev.target.value)}
+        onChange={confirm ? updateValue : (ev) => commit(ev.target.value)}
       />
       <EuiSpacer size="s" />
       <EuiButton size="s" onClick={() => commit(value)}>

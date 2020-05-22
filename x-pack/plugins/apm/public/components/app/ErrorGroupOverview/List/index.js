@@ -17,7 +17,7 @@ import {
   px,
   fontFamilyCode,
   fontSizes,
-  truncate
+  truncate,
 } from '../../../../style/variables';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { i18n } from '@kbn/i18n';
@@ -48,8 +48,8 @@ export class ErrorGroupList extends Component {
   state = {
     page: {
       index: 0,
-      size: 25
-    }
+      size: 25,
+    },
   };
 
   onTableChange = ({ page = {}, sort = {} }) => {
@@ -62,8 +62,8 @@ export class ErrorGroupList extends Component {
       search: fromQuery({
         ...toQuery(location.search),
         sortField: sort.field,
-        sortDirection: sort.direction
-      })
+        sortDirection: sort.direction,
+      }),
     });
   };
 
@@ -74,30 +74,30 @@ export class ErrorGroupList extends Component {
     const paginatedItems = paginateItems({
       items,
       pageIndex: this.state.page.index,
-      pageSize: this.state.page.size
+      pageSize: this.state.page.size,
     });
 
     const columns = [
       {
         name: i18n.translate('xpack.apm.errorsTable.groupIdColumnLabel', {
-          defaultMessage: 'Group ID'
+          defaultMessage: 'Group ID',
         }),
         field: 'groupId',
         sortable: false,
         width: px(unit * 6),
-        render: groupId => {
+        render: (groupId) => {
           return (
             <GroupIdLink hash={`/${serviceName}/errors/${groupId}`}>
               {groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
             </GroupIdLink>
           );
-        }
+        },
       },
       {
         name: i18n.translate(
           'xpack.apm.errorsTable.errorMessageAndCulpritColumnLabel',
           {
-            defaultMessage: 'Error message and culprit'
+            defaultMessage: 'Error message and culprit',
           }
         ),
         field: 'message',
@@ -123,31 +123,31 @@ export class ErrorGroupList extends Component {
               </EuiToolTip>
             </MessageAndCulpritCell>
           );
-        }
+        },
       },
       {
         name: '',
         field: 'handled',
         sortable: false,
         align: 'right',
-        render: isUnhandled =>
+        render: (isUnhandled) =>
           isUnhandled === false && (
             <EuiBadge color="warning">
               {i18n.translate('xpack.apm.errorsTable.unhandledLabel', {
-                defaultMessage: 'Unhandled'
+                defaultMessage: 'Unhandled',
               })}
             </EuiBadge>
-          )
+          ),
       },
       {
         name: i18n.translate('xpack.apm.errorsTable.occurrencesColumnLabel', {
-          defaultMessage: 'Occurrences'
+          defaultMessage: 'Occurrences',
         }),
         field: 'occurrenceCount',
         sortable: true,
         dataType: 'number',
-        render: value =>
-          value ? numeral(value).format('0.[0]a') : NOT_AVAILABLE_LABEL
+        render: (value) =>
+          value ? numeral(value).format('0.[0]a') : NOT_AVAILABLE_LABEL,
       },
       {
         field: 'latestOccurrenceAt',
@@ -155,31 +155,32 @@ export class ErrorGroupList extends Component {
         name: i18n.translate(
           'xpack.apm.errorsTable.latestOccurrenceColumnLabel',
           {
-            defaultMessage: 'Latest occurrence'
+            defaultMessage: 'Latest occurrence',
           }
         ),
         align: 'right',
-        render: value => (value ? moment(value).fromNow() : NOT_AVAILABLE_LABEL)
-      }
+        render: (value) =>
+          value ? moment(value).fromNow() : NOT_AVAILABLE_LABEL,
+      },
     ];
 
     return (
       <EuiBasicTable
         noItemsMessage={i18n.translate('xpack.apm.errorsTable.noErrorsLabel', {
-          defaultMessage: 'No errors were found'
+          defaultMessage: 'No errors were found',
         })}
         items={paginatedItems}
         columns={columns}
         pagination={{
           pageIndex: this.state.page.index,
           pageSize: this.state.page.size,
-          totalItemCount: this.props.items.length
+          totalItemCount: this.props.items.length,
         }}
         sorting={{
           sort: {
             field: sortField || 'latestOccurrenceAt',
-            direction: sortDirection || 'desc'
-          }
+            direction: sortDirection || 'desc',
+          },
         }}
         onChange={this.onTableChange}
       />
@@ -188,5 +189,5 @@ export class ErrorGroupList extends Component {
 }
 
 ErrorGroupList.propTypes = {
-  location: PropTypes.object.isRequired
+  location: PropTypes.object.isRequired,
 };

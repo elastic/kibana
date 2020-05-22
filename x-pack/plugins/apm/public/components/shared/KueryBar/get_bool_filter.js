@@ -9,7 +9,7 @@ import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
   TRANSACTION_NAME,
-  SERVICE_NAME
+  SERVICE_NAME,
 } from '../../../../common/constants';
 
 export function getBoolFilter(urlParams) {
@@ -19,45 +19,45 @@ export function getBoolFilter(urlParams) {
         '@timestamp': {
           gte: new Date(urlParams.start).getTime(),
           lte: new Date(urlParams.end).getTime(),
-          format: 'epoch_millis'
-        }
-      }
-    }
+          format: 'epoch_millis',
+        },
+      },
+    },
   ];
 
   if (urlParams.serviceName) {
     boolFilter.push({
-      term: { [SERVICE_NAME]: urlParams.serviceName }
+      term: { [SERVICE_NAME]: urlParams.serviceName },
     });
   }
 
   switch (urlParams.processorEvent) {
     case 'transaction':
       boolFilter.push({
-        term: { [PROCESSOR_EVENT]: 'transaction' }
+        term: { [PROCESSOR_EVENT]: 'transaction' },
       });
 
       if (urlParams.transactionName) {
         boolFilter.push({
-          term: { [`${TRANSACTION_NAME}.keyword`]: urlParams.transactionName }
+          term: { [`${TRANSACTION_NAME}.keyword`]: urlParams.transactionName },
         });
       }
 
       if (urlParams.transactionType) {
         boolFilter.push({
-          term: { [TRANSACTION_TYPE]: urlParams.transactionType }
+          term: { [TRANSACTION_TYPE]: urlParams.transactionType },
         });
       }
       break;
 
     case 'error':
       boolFilter.push({
-        term: { [PROCESSOR_EVENT]: 'error' }
+        term: { [PROCESSOR_EVENT]: 'error' },
       });
 
       if (urlParams.errorGroupId) {
         boolFilter.push({
-          term: { [ERROR_GROUP_ID]: urlParams.errorGroupId }
+          term: { [ERROR_GROUP_ID]: urlParams.errorGroupId },
         });
       }
       break;
@@ -67,9 +67,9 @@ export function getBoolFilter(urlParams) {
         bool: {
           should: [
             { term: { [PROCESSOR_EVENT]: 'error' } },
-            { term: { [PROCESSOR_EVENT]: 'transaction' } }
-          ]
-        }
+            { term: { [PROCESSOR_EVENT]: 'transaction' } },
+          ],
+        },
       });
   }
 

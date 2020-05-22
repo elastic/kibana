@@ -59,7 +59,7 @@ exports.run = function run(argv) {
     configOptions: {
       name,
     },
-  }).catch(error => {
+  }).catch((error) => {
     console.error(chalk`{red fatal error}!`);
     console.error(error.stack);
     process.exit(1);

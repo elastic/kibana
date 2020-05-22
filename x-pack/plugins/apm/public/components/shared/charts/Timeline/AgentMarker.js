@@ -29,7 +29,7 @@ export default function AgentMarker({ agentMark, x }) {
       style={{
         position: 'absolute',
         left: px(x - legendWidth / 2),
-        bottom: 0
+        bottom: 0,
       }}
     >
       <EuiToolTip
@@ -50,5 +50,5 @@ export default function AgentMarker({ agentMark, x }) {
 
 AgentMarker.propTypes = {
   agentMark: PropTypes.object.isRequired,
-  x: PropTypes.number.isRequired
+  x: PropTypes.number.isRequired,
 };

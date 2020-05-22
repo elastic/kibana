@@ -71,14 +71,14 @@ export class WorkpadConfig extends PureComponent {
         <EuiSpacer size="m" />
 
         <EuiFormRow label="Name" compressed>
-          <EuiFieldText value={name} onChange={e => setName(e.target.value)} />
+          <EuiFieldText value={name} onChange={(e) => setName(e.target.value)} />
         </EuiFormRow>
 
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem>
             <EuiFormRow label="Width" compressed>
               <EuiFieldNumber
-                onChange={e => setSize({ width: Number(e.target.value), height: size.height })}
+                onChange={(e) => setSize({ width: Number(e.target.value), height: size.height })}
                 value={size.width}
               />
             </EuiFormRow>
@@ -99,7 +99,7 @@ export class WorkpadConfig extends PureComponent {
           <EuiFlexItem>
             <EuiFormRow label="Height" compressed>
               <EuiFieldNumber
-                onChange={e => setSize({ height: Number(e.target.value), width: size.width })}
+                onChange={(e) => setSize({ height: Number(e.target.value), width: size.width })}
                 value={size.height}
               />
             </EuiFormRow>
@@ -143,7 +143,7 @@ export class WorkpadConfig extends PureComponent {
             <EuiTextArea
               aria-label="Apply styles to all pages in this workpad"
               value={css}
-              onChange={e => this.setState({ css: e.target.value })}
+              onChange={(e) => this.setState({ css: e.target.value })}
               rows={10}
             />
             <EuiSpacer size="s" />

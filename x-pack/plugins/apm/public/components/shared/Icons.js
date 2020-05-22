@@ -16,7 +16,7 @@ export function Ellipsis({ horizontal, style, ...props }) {
       style={{
         transition: 'transform 0.1s',
         transform: `rotate(${horizontal ? 90 : 0}deg)`,
-        ...style
+        ...style,
       }}
       name="fa-ellipsis-v"
       {...props}

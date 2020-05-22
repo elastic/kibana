@@ -70,7 +70,7 @@ export function workpad(server) {
 
     const now = new Date().toISOString();
 
-    return savedObjectsClient.get(CANVAS_TYPE, id).then(workpad => {
+    return savedObjectsClient.get(CANVAS_TYPE, id).then((workpad) => {
       // TODO: Using create with force over-write because of version conflict issues with update
       return savedObjectsClient.create(
         CANVAS_TYPE,
@@ -112,13 +112,13 @@ export function workpad(server) {
   server.route({
     method: 'GET',
     path: `${routePrefix}/{id}`,
-    handler: function(req) {
+    handler: function (req) {
       const savedObjectsClient = req.getSavedObjectsClient();
       const { id } = req.params;
 
       return savedObjectsClient
         .get(CANVAS_TYPE, id)
-        .then(obj => obj.attributes)
+        .then((obj) => obj.attributes)
         .then(formatResponse)
         .catch(formatResponse);
     },
@@ -129,7 +129,7 @@ export function workpad(server) {
     method: 'POST',
     path: routePrefix,
     config: { payload: { allow: 'application/json', maxBytes: 26214400 } }, // 25MB payload limit
-    handler: function(request) {
+    handler: function (request) {
       return createWorkpad(request)
         .then(() => ({ ok: true }))
         .catch(formatResponse);
@@ -141,7 +141,7 @@ export function workpad(server) {
     method: 'PUT',
     path: `${routePrefix}/{id}`,
     config: { payload: { allow: 'application/json', maxBytes: 26214400 } }, // 25MB payload limit
-    handler: function(request) {
+    handler: function (request) {
       return updateWorkpad(request)
         .then(() => ({ ok: true }))
         .catch(formatResponse);
@@ -153,7 +153,7 @@ export function workpad(server) {
     method: 'PUT',
     path: `${routePrefixAssets}/{id}`,
     config: { payload: { allow: 'application/json', maxBytes: 26214400 } }, // 25MB payload limit
-    handler: function(request) {
+    handler: function (request) {
       const payload = { assets: request.payload };
       return updateWorkpad(request, payload)
         .then(() => ({ ok: true }))
@@ -166,7 +166,7 @@ export function workpad(server) {
     method: 'PUT',
     path: `${routePrefixStructures}/{id}`,
     config: { payload: { allow: 'application/json', maxBytes: 26214400 } }, // 25MB payload limit
-    handler: function(request) {
+    handler: function (request) {
       return updateWorkpad(request)
         .then(() => ({ ok: true }))
         .catch(formatResponse);
@@ -177,7 +177,7 @@ export function workpad(server) {
   server.route({
     method: 'DELETE',
     path: `${routePrefix}/{id}`,
-    handler: function(request) {
+    handler: function (request) {
       return deleteWorkpad(request)
         .then(() => ({ ok: true }))
         .catch(formatResponse);
@@ -188,13 +188,13 @@ export function workpad(server) {
   server.route({
     method: 'GET',
     path: `${routePrefix}/find`,
-    handler: function(request) {
+    handler: function (request) {
       return findWorkpad(request)
         .then(formatResponse)
-        .then(resp => {
+        .then((resp) => {
           return {
             total: resp.total,
-            workpads: resp.saved_objects.map(hit => hit.attributes),
+            workpads: resp.saved_objects.map((hit) => hit.attributes),
           };
         })
         .catch(() => {

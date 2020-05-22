@@ -6,7 +6,7 @@
 
 import moment from 'moment';
 
-const getInputDate = input => {
+const getInputDate = (input) => {
   // return current date if no input
   if (!input) {
     return new Date();

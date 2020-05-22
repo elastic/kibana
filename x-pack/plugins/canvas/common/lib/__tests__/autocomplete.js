@@ -19,7 +19,7 @@ describe('getAutocompleteSuggestions', () => {
   it('should suggest functions filtered by text', () => {
     const expression = 'pl';
     const suggestions = getAutocompleteSuggestions(functionSpecs, expression, 0);
-    const nonmatching = suggestions.map(s => s.text).filter(text => !text.includes(expression));
+    const nonmatching = suggestions.map((s) => s.text).filter((text) => !text.includes(expression));
     expect(nonmatching.length).to.be(0);
     expect(suggestions[0].start).to.be(0);
     expect(suggestions[0].end).to.be(expression.length);
@@ -28,7 +28,7 @@ describe('getAutocompleteSuggestions', () => {
   it('should suggest arguments', () => {
     const expression = 'plot ';
     const suggestions = getAutocompleteSuggestions(functionSpecs, expression, expression.length);
-    const plotFn = functionSpecs.find(spec => spec.name === 'plot');
+    const plotFn = functionSpecs.find((spec) => spec.name === 'plot');
     expect(suggestions.length).to.be(Object.keys(plotFn.args).length);
     expect(suggestions[0].start).to.be(expression.length);
     expect(suggestions[0].end).to.be(expression.length);
@@ -37,8 +37,8 @@ describe('getAutocompleteSuggestions', () => {
   it('should suggest arguments filtered by text', () => {
     const expression = 'plot axis';
     const suggestions = getAutocompleteSuggestions(functionSpecs, expression, expression.length);
-    const plotFn = functionSpecs.find(spec => spec.name === 'plot');
-    const matchingArgs = Object.keys(plotFn.args).filter(key => key.includes('axis'));
+    const plotFn = functionSpecs.find((spec) => spec.name === 'plot');
+    const matchingArgs = Object.keys(plotFn.args).filter((key) => key.includes('axis'));
     expect(suggestions.length).to.be(matchingArgs.length);
     expect(suggestions[0].start).to.be('plot '.length);
     expect(suggestions[0].end).to.be('plot axis'.length);
@@ -47,7 +47,7 @@ describe('getAutocompleteSuggestions', () => {
   it('should suggest values', () => {
     const expression = 'shape shape=';
     const suggestions = getAutocompleteSuggestions(functionSpecs, expression, expression.length);
-    const shapeFn = functionSpecs.find(spec => spec.name === 'shape');
+    const shapeFn = functionSpecs.find((spec) => spec.name === 'shape');
     expect(suggestions.length).to.be(shapeFn.args.shape.options.length);
     expect(suggestions[0].start).to.be(expression.length);
     expect(suggestions[0].end).to.be(expression.length);
@@ -56,8 +56,8 @@ describe('getAutocompleteSuggestions', () => {
   it('should suggest values filtered by text', () => {
     const expression = 'shape shape=ar';
     const suggestions = getAutocompleteSuggestions(functionSpecs, expression, expression.length);
-    const shapeFn = functionSpecs.find(spec => spec.name === 'shape');
-    const matchingValues = shapeFn.args.shape.options.filter(key => key.includes('ar'));
+    const shapeFn = functionSpecs.find((spec) => spec.name === 'shape');
+    const matchingValues = shapeFn.args.shape.options.filter((key) => key.includes('ar'));
     expect(suggestions.length).to.be(matchingValues.length);
     expect(suggestions[0].start).to.be(expression.length - 'ar'.length);
     expect(suggestions[0].end).to.be(expression.length);
@@ -82,7 +82,7 @@ describe('getAutocompleteSuggestions', () => {
       expression,
       expression.length - 1
     );
-    const ltFn = functionSpecs.find(spec => spec.name === 'lt');
+    const ltFn = functionSpecs.find((spec) => spec.name === 'lt');
     expect(suggestions.length).to.be(Object.keys(ltFn.args).length);
     expect(suggestions[0].start).to.be(expression.length - 1);
     expect(suggestions[0].end).to.be(expression.length - 1);
@@ -95,7 +95,7 @@ describe('getAutocompleteSuggestions', () => {
       expression,
       expression.length - 1
     );
-    const shapeFn = functionSpecs.find(spec => spec.name === 'shape');
+    const shapeFn = functionSpecs.find((spec) => spec.name === 'shape');
     expect(suggestions.length).to.be(shapeFn.args.shape.options.length);
     expect(suggestions[0].start).to.be(expression.length - 1);
     expect(suggestions[0].end).to.be(expression.length - 1);
@@ -108,8 +108,8 @@ describe('getAutocompleteSuggestions', () => {
       expression,
       expression.length - 1
     );
-    const shapeFn = functionSpecs.find(spec => spec.name === 'shape');
-    const matchingValues = shapeFn.args.shape.options.filter(key => key.includes('ar'));
+    const shapeFn = functionSpecs.find((spec) => spec.name === 'shape');
+    const matchingValues = shapeFn.args.shape.options.filter((key) => key.includes('ar'));
     expect(suggestions.length).to.be(matchingValues.length);
     expect(suggestions[0].start).to.be(expression.length - '"ar"'.length);
     expect(suggestions[0].end).to.be(expression.length);
@@ -118,32 +118,32 @@ describe('getAutocompleteSuggestions', () => {
   it('should prioritize functions that start with text', () => {
     const expression = 't';
     const suggestions = getAutocompleteSuggestions(functionSpecs, expression, expression.length);
-    const tableIndex = suggestions.findIndex(suggestion => suggestion.text.includes('table'));
-    const fontIndex = suggestions.findIndex(suggestion => suggestion.text.includes('font'));
+    const tableIndex = suggestions.findIndex((suggestion) => suggestion.text.includes('table'));
+    const fontIndex = suggestions.findIndex((suggestion) => suggestion.text.includes('font'));
     expect(tableIndex).to.be.lessThan(fontIndex);
   });
 
   it('should prioritize functions that match the previous function type', () => {
     const expression = 'plot | ';
     const suggestions = getAutocompleteSuggestions(functionSpecs, expression, expression.length);
-    const renderIndex = suggestions.findIndex(suggestion => suggestion.text.includes('render'));
-    const anyIndex = suggestions.findIndex(suggestion => suggestion.text.includes('any'));
+    const renderIndex = suggestions.findIndex((suggestion) => suggestion.text.includes('render'));
+    const anyIndex = suggestions.findIndex((suggestion) => suggestion.text.includes('any'));
     expect(renderIndex).to.be.lessThan(anyIndex);
   });
 
   it('should alphabetize functions', () => {
     const expression = '';
     const suggestions = getAutocompleteSuggestions(functionSpecs, expression, expression.length);
-    const metricIndex = suggestions.findIndex(suggestion => suggestion.text.includes('metric'));
-    const anyIndex = suggestions.findIndex(suggestion => suggestion.text.includes('any'));
+    const metricIndex = suggestions.findIndex((suggestion) => suggestion.text.includes('metric'));
+    const anyIndex = suggestions.findIndex((suggestion) => suggestion.text.includes('any'));
     expect(anyIndex).to.be.lessThan(metricIndex);
   });
 
   it('should prioritize arguments that start with text', () => {
     const expression = 'plot y';
     const suggestions = getAutocompleteSuggestions(functionSpecs, expression, expression.length);
-    const yaxisIndex = suggestions.findIndex(suggestion => suggestion.text.includes('yaxis'));
-    const defaultStyleIndex = suggestions.findIndex(suggestion =>
+    const yaxisIndex = suggestions.findIndex((suggestion) => suggestion.text.includes('yaxis'));
+    const defaultStyleIndex = suggestions.findIndex((suggestion) =>
       suggestion.text.includes('defaultStyle')
     );
     expect(yaxisIndex).to.be.lessThan(defaultStyleIndex);
@@ -152,16 +152,16 @@ describe('getAutocompleteSuggestions', () => {
   it('should prioritize unnamed arguments', () => {
     const expression = 'case ';
     const suggestions = getAutocompleteSuggestions(functionSpecs, expression, expression.length);
-    const whenIndex = suggestions.findIndex(suggestion => suggestion.text.includes('when'));
-    const thenIndex = suggestions.findIndex(suggestion => suggestion.text.includes('then'));
+    const whenIndex = suggestions.findIndex((suggestion) => suggestion.text.includes('when'));
+    const thenIndex = suggestions.findIndex((suggestion) => suggestion.text.includes('then'));
     expect(whenIndex).to.be.lessThan(thenIndex);
   });
 
   it('should alphabetize arguments', () => {
     const expression = 'plot ';
     const suggestions = getAutocompleteSuggestions(functionSpecs, expression, expression.length);
-    const yaxisIndex = suggestions.findIndex(suggestion => suggestion.text.includes('yaxis'));
-    const defaultStyleIndex = suggestions.findIndex(suggestion =>
+    const yaxisIndex = suggestions.findIndex((suggestion) => suggestion.text.includes('yaxis'));
+    const defaultStyleIndex = suggestions.findIndex((suggestion) =>
       suggestion.text.includes('defaultStyle')
     );
     expect(defaultStyleIndex).to.be.lessThan(yaxisIndex);

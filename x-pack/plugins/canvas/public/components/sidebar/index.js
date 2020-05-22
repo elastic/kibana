@@ -12,12 +12,12 @@ import { selectElement } from './../../state/actions/transient';
 
 import { Sidebar as Component } from './sidebar';
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   selectedPage: getSelectedPage(state),
   selectedElement: getSelectedElement(state),
 });
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   duplicateElement: (pageId, selectedElement) => () => {
     // gradually unifying code with copy/paste
     // todo: more unification w/ copy/paste; group cloning
@@ -25,7 +25,7 @@ const mapDispatchToProps = dispatch => ({
     dispatch(insertNodes(newElements, pageId));
     dispatch(selectElement(newElements[0].id));
   },
-  elementLayer: (pageId, selectedElement) => movement =>
+  elementLayer: (pageId, selectedElement) => (movement) =>
     dispatch(
       elementLayer({
         pageId,
@@ -48,8 +48,4 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   };
 };
 
-export const Sidebar = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-  mergeProps
-)(Component);
+export const Sidebar = connect(mapStateToProps, mapDispatchToProps, mergeProps)(Component);

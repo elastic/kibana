@@ -42,7 +42,7 @@ export class WorkpadHeader extends React.PureComponent {
     </EuiToolTip>
   );
 
-  keyHandler = action => {
+  keyHandler = (action) => {
     if (action === 'EDITING') {
       this.props.toggleWriteable();
     }
@@ -60,7 +60,7 @@ export class WorkpadHeader extends React.PureComponent {
           initialFocus=".canvasElements__filter"
         >
           <ElementTypes
-            onClick={element => {
+            onClick={(element) => {
               addElement(element);
               setShowElementModal(false);
             }}

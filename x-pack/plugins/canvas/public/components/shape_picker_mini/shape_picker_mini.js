@@ -12,7 +12,7 @@ import { ShapePicker } from '../shape_picker/';
 import { ShapePreview } from '../shape_preview';
 
 export const ShapePickerMini = ({ shapes, onChange, value, anchorPosition }) => {
-  const button = handleClick => (
+  const button = (handleClick) => (
     <EuiLink style={{ fontSize: 0 }} onClick={handleClick}>
       <ShapePreview shape={shapes[value]} />
     </EuiLink>

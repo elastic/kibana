@@ -20,7 +20,7 @@ class Timeline extends PureComponent {
       agentMarks,
       traceRootDuration,
       height,
-      margins
+      margins,
     } = this.props;
     if (duration == null || !width) {
       return null;
@@ -50,7 +50,7 @@ Timeline.propTypes = {
   height: PropTypes.number.isRequired,
   header: PropTypes.node,
   margins: PropTypes.object.isRequired,
-  width: PropTypes.number
+  width: PropTypes.number,
 };
 
 export default makeWidthFlexible(Timeline);

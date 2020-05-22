@@ -60,7 +60,7 @@ export class ExpressionInput extends React.Component {
   }
 
   stash = debounce(
-    value => {
+    (value) => {
       this.undoHistory.push(value);
       this.redoHistory = [];
     },
@@ -68,7 +68,7 @@ export class ExpressionInput extends React.Component {
     { leading: true, trailing: false }
   );
 
-  onKeyDown = e => {
+  onKeyDown = (e) => {
     if (e.ctrlKey || e.metaKey) {
       if (e.key === 'z') {
         e.preventDefault();
@@ -85,7 +85,7 @@ export class ExpressionInput extends React.Component {
     }
   };
 
-  onSuggestionSelect = item => {
+  onSuggestionSelect = (item) => {
     const { text, start, end } = item;
     const value = this.props.value.substr(0, start) + text + this.props.value.substr(end);
     const selection = { start: start + text.length, end: start + text.length };
@@ -95,7 +95,7 @@ export class ExpressionInput extends React.Component {
     this.ref.focus();
   };
 
-  onChange = e => {
+  onChange = (e) => {
     const { target } = e;
     const { value, selectionStart, selectionEnd } = target;
     const selection = {
@@ -128,7 +128,7 @@ export class ExpressionInput extends React.Component {
     );
   };
 
-  getReference = selectedItem => {
+  getReference = (selectedItem) => {
     const { fnDef, argDef } = selectedItem || {};
     if (argDef) {
       return <ArgumentReference argDef={argDef} />;
@@ -175,7 +175,7 @@ export class ExpressionInput extends React.Component {
                 className="canvasTextArea--code"
                 value={value}
                 onChange={this.onChange}
-                inputRef={ref => (this.ref = ref)}
+                inputRef={(ref) => (this.ref = ref)}
                 spellCheck="false"
               />
             </Autocomplete>
@@ -185,7 +185,7 @@ export class ExpressionInput extends React.Component {
               className="canvasTextArea--code"
               value={value}
               onChange={this.onChange}
-              inputRef={ref => (this.ref = ref)}
+              inputRef={(ref) => (this.ref = ref)}
               spellCheck="false"
             />
           )}

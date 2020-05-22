@@ -76,7 +76,7 @@ describe('containerStyle', () => {
       it('throws when provided an invalid dataurl/url', () => {
         expect(fn)
           .withArgs(null, { backgroundImage: 'foo' })
-          .to.throwException(e => {
+          .to.throwException((e) => {
             expect(e.message).to.be('Invalid backgroundImage. Please provide an asset or a URL.');
           });
       });

@@ -68,7 +68,7 @@ function getArgItems(args) {
 }
 
 function getArgColumns() {
-  return ['argument', 'aliases', 'types', 'default', 'description'].map(field => {
+  return ['argument', 'aliases', 'types', 'default', 'description'].map((field) => {
     const column = { field, name: startCase(field), truncateText: field !== 'description' };
     if (field === 'description') {
       column.width = '50%';

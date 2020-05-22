@@ -37,7 +37,7 @@ export class Popover extends Component {
   }
 
   handleClick = () => {
-    this.setState(state => ({
+    this.setState((state) => ({
       isPopoverOpen: !state.isPopoverOpen,
     }));
   };
@@ -51,7 +51,7 @@ export class Popover extends Component {
   render() {
     const { button, children, tooltip, tooltipPosition, ...rest } = this.props;
 
-    const wrappedButton = handleClick => {
+    const wrappedButton = (handleClick) => {
       // wrap button in tooltip, if tooltip text is provided
       if (!this.state.isPopoverOpen && tooltip.length) {
         return (

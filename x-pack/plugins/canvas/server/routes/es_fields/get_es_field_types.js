@@ -17,8 +17,8 @@ export function getESFieldTypes(index, fields, elasticsearchClient) {
     return Promise.resolve({});
   }
 
-  return elasticsearchClient('fieldCaps', config).then(resp => {
-    return mapValues(resp.fields, types => {
+  return elasticsearchClient('fieldCaps', config).then((resp) => {
+    return mapValues(resp.fields, (types) => {
       if (keys(types).length > 1) {
         return 'conflict';
       }

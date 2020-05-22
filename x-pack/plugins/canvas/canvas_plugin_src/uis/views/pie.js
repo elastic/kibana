@@ -11,7 +11,10 @@ import { getState, getValue } from '../../../public/lib/resolved_arg';
 export const pie = () => ({
   name: 'pie',
   displayName: 'Chart style',
-  modelArgs: [['color', { label: 'Slice Labels' }], ['size', { label: 'Slice Angles' }]],
+  modelArgs: [
+    ['color', { label: 'Slice Labels' }],
+    ['size', { label: 'Slice Angles' }],
+  ],
   args: [
     {
       name: 'palette',
@@ -84,6 +87,6 @@ export const pie = () => ({
     if (getState(context) !== 'ready') {
       return { labels: [] };
     }
-    return { labels: uniq(map(getValue(context).rows, 'color').filter(v => v !== undefined)) };
+    return { labels: uniq(map(getValue(context).rows, 'color').filter((v) => v !== undefined)) };
   },
 });

@@ -18,7 +18,7 @@ const XY_MARGIN = {
   top: unit,
   left: unit * 5,
   right: 0,
-  bottom: unit * 2
+  bottom: unit * 2,
 };
 
 const getXScale = (xMin, xMax, width) => {
@@ -28,19 +28,16 @@ const getXScale = (xMin, xMax, width) => {
 };
 
 const getYScale = (yMin, yMax) => {
-  return scaleLinear()
-    .domain([yMin, yMax])
-    .range([XY_HEIGHT, 0])
-    .nice();
+  return scaleLinear().domain([yMin, yMax]).range([XY_HEIGHT, 0]).nice();
 };
 
 function getFlattenedCoordinates(visibleSeries, enabledSeries) {
-  const enabledCoordinates = flatten(enabledSeries.map(serie => serie.data));
+  const enabledCoordinates = flatten(enabledSeries.map((serie) => serie.data));
   if (!isEmpty(enabledCoordinates)) {
     return enabledCoordinates;
   }
 
-  return flatten(visibleSeries.map(serie => serie.data));
+  return flatten(visibleSeries.map((serie) => serie.data));
 }
 
 export function getPlotValues(
@@ -56,13 +53,13 @@ export function getPlotValues(
     return null;
   }
 
-  const xMin = d3.min(flattenedCoordinates, d => d.x);
-  const xMax = d3.max(flattenedCoordinates, d => d.x);
+  const xMin = d3.min(flattenedCoordinates, (d) => d.x);
+  const xMax = d3.max(flattenedCoordinates, (d) => d.x);
   if (yMax === 'max') {
-    yMax = d3.max(flattenedCoordinates, d => d.y);
+    yMax = d3.max(flattenedCoordinates, (d) => d.y);
   }
   if (yMin === 'min') {
-    yMin = d3.min(flattenedCoordinates, d => d.y);
+    yMin = d3.min(flattenedCoordinates, (d) => d.y);
   }
   const xScale = getXScale(xMin, xMax, width);
   const yScale = getYScale(yMin, yMax);
@@ -76,7 +73,7 @@ export function getPlotValues(
     yTickValues,
     XY_MARGIN,
     XY_HEIGHT,
-    XY_WIDTH: width
+    XY_WIDTH: width,
   };
 }
 
@@ -101,6 +98,6 @@ SharedPlot.propTypes = {
   plotValues: PropTypes.shape({
     x: PropTypes.func.isRequired,
     y: PropTypes.func.isRequired,
-    XY_WIDTH: PropTypes.number.isRequired
-  }).isRequired
+    XY_WIDTH: PropTypes.number.isRequired,
+  }).isRequired,
 };

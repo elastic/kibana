@@ -67,7 +67,7 @@ export function getAutocompleteSuggestions(specs, expression, position) {
  * Get the function and argument (if there is one) at the given position.
  */
 function getFnArgAtPosition(ast, position) {
-  const fnIndex = ast.node.chain.findIndex(fn => fn.start <= position && position <= fn.end);
+  const fnIndex = ast.node.chain.findIndex((fn) => fn.start <= position && position <= fn.end);
   const fn = ast.node.chain[fnIndex];
   for (const [argName, argValues] of Object.entries(fn.node.arguments)) {
     for (let argIndex = 0; argIndex < argValues.length; argIndex++) {
@@ -101,7 +101,7 @@ function getFnNameSuggestions(specs, ast, fnIndex) {
   );
   const fnDefs = matchingFnDefs.sort(comparator);
 
-  return fnDefs.map(fnDef => {
+  return fnDefs.map((fnDef) => {
     return { type: 'function', text: fnDef.name + ' ', start, end: end - MARKER.length, fnDef };
   });
 }
@@ -123,9 +123,9 @@ function getArgNameSuggestions(specs, ast, fnIndex, argName, argIndex) {
 
   // Filter the list of args by those which aren't already present (unless they allow multi)
   const argEntries = Object.entries(fn.arguments).map(([name, values]) => {
-    return [name, values.filter(value => !value.text.includes(MARKER))];
+    return [name, values.filter((value) => !value.text.includes(MARKER))];
   });
-  const unusedArgDefs = matchingArgDefs.filter(argDef => {
+  const unusedArgDefs = matchingArgDefs.filter((argDef) => {
     if (argDef.multi) {
       return true;
     }
@@ -143,7 +143,7 @@ function getArgNameSuggestions(specs, ast, fnIndex, argName, argIndex) {
   );
   const argDefs = unusedArgDefs.sort(comparator);
 
-  return argDefs.map(argDef => {
+  return argDefs.map((argDef) => {
     return { type: 'argument', text: argDef.name + '=', start, end: end - MARKER.length, argDef };
   });
 }
@@ -166,13 +166,13 @@ function getArgValueSuggestions(specs, ast, fnIndex, argName, argIndex) {
   const suggestions = uniq(argDef.options.concat(argDef.default || []));
 
   // Filter the list of suggestions by the text at the marker
-  const filtered = suggestions.filter(option => textMatches(String(option), query));
+  const filtered = suggestions.filter((option) => textMatches(String(option), query));
 
   // Sort by whether or not the value starts with the text at the marker, then alphabetically
   const comparator = combinedComparator(startsWithComparator(query), alphanumericalComparator);
   const sorted = filtered.sort(comparator);
 
-  return sorted.map(value => {
+  return sorted.map((value) => {
     const text = maybeQuote(value) + ' ';
     return { start, end: end - MARKER.length, type: 'value', text };
   });
@@ -227,5 +227,5 @@ function combinedComparator(...comparators) {
 }
 
 function invokeWithProp(fn, prop) {
-  return (...args) => fn(...args.map(arg => arg[prop]));
+  return (...args) => fn(...args.map((arg) => arg[prop]));
 }

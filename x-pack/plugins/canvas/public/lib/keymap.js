@@ -7,12 +7,12 @@
 import { mapValues } from 'lodash';
 
 // maps 'option' for mac and 'alt' for other OS
-const getAltShortcuts = shortcuts => {
+const getAltShortcuts = (shortcuts) => {
   if (!Array.isArray(shortcuts)) {
     shortcuts = [shortcuts];
   }
-  const optionShortcuts = shortcuts.map(shortcut => `option+${shortcut}`);
-  const altShortcuts = shortcuts.map(shortcut => `alt+${shortcut}`);
+  const optionShortcuts = shortcuts.map((shortcut) => `option+${shortcut}`);
+  const altShortcuts = shortcuts.map((shortcut) => `alt+${shortcut}`);
 
   return {
     osx: optionShortcuts,
@@ -23,12 +23,12 @@ const getAltShortcuts = shortcuts => {
 };
 
 // maps 'command' for mac and 'ctrl' for other OS
-const getCtrlShortcuts = shortcuts => {
+const getCtrlShortcuts = (shortcuts) => {
   if (!Array.isArray(shortcuts)) {
     shortcuts = [shortcuts];
   }
-  const cmdShortcuts = shortcuts.map(shortcut => `command+${shortcut}`);
-  const ctrlShortcuts = shortcuts.map(shortcut => `ctrl+${shortcut}`);
+  const cmdShortcuts = shortcuts.map((shortcut) => `command+${shortcut}`);
+  const ctrlShortcuts = shortcuts.map((shortcut) => `ctrl+${shortcut}`);
 
   return {
     osx: cmdShortcuts,

@@ -20,6 +20,6 @@ export function getPlotValues({ width, duration, height, margins }) {
     width,
     xDomain: xScale.domain(),
     xMax,
-    xScale
+    xScale,
   };
 }

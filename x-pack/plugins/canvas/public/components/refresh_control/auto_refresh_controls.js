@@ -115,7 +115,7 @@ export class AutoRefreshControls extends Component {
         <EuiSpacer size="m" />
 
         <form
-          onSubmit={ev => {
+          onSubmit={(ev) => {
             ev.preventDefault();
             setRefresh(this.refreshInput.value);
           }}
@@ -127,7 +127,7 @@ export class AutoRefreshControls extends Component {
                 helpText="Use shorthand notation, like 30s, 10m, or 1h"
                 compressed
               >
-                <EuiFieldText inputRef={i => (this.refreshInput = i)} />
+                <EuiFieldText inputRef={(i) => (this.refreshInput = i)} />
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

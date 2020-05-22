@@ -38,7 +38,7 @@ import {
 import { App as Component } from './app';
 import { trackRouteChange } from './track_route_change';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   // appReady could be an error object
   const appState = getAppReady(state);
 
@@ -73,7 +73,7 @@ register(registries, {
   tagUIs: tagSpecs,
 });
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   setAppReady: () => async () => {
     try {
       await getInterpreter();
@@ -84,7 +84,7 @@ const mapDispatchToProps = dispatch => ({
       dispatch(appError(e));
     }
   },
-  setAppError: payload => dispatch(appError(payload)),
+  setAppError: (payload) => dispatch(appError(payload)),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
@@ -97,11 +97,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 };
 
 export const App = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withProps(() => ({
     onRouteChange: trackRouteChange,
   }))

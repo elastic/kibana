@@ -14,9 +14,7 @@ describe('metric', () => {
 
   it('returns a render as metric', () => {
     const result = fn(null);
-    expect(result)
-      .to.have.property('type', 'render')
-      .and.to.have.property('as', 'metric');
+    expect(result).to.have.property('type', 'render').and.to.have.property('as', 'metric');
   });
 
   it('sets the metric to context', () => {

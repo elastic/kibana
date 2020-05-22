@@ -78,11 +78,11 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
     childProcess.stdin.end();
   }
 
-  return new class Proc {
+  return new (class Proc {
     name = name;
 
     lines$ = Rx.merge(observeLines(childProcess.stdout), observeLines(childProcess.stderr)).pipe(
-      tap(line => log.write(` ${gray('proc')} [${gray(name)}] ${line}`)),
+      tap((line) => log.write(` ${gray('proc')} [${gray(name)}] ${line}`)),
       share()
     );
 
@@ -106,7 +106,7 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
       // observe first error event until there is a close event
       const error$ = Rx.fromEvent(childProcess, 'error').pipe(
         take(1),
-        mergeMap(err => Rx.throwError(err))
+        mergeMap((err) => Rx.throwError(err))
       );
 
       return Rx.race(exit$, error$);
@@ -156,5 +156,5 @@ export function createProc(name, { cmd, args, cwd, env, stdin, log }) {
         }
       );
     }
-  }();
+  })();
 }

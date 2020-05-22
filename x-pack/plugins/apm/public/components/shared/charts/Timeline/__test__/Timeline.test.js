@@ -26,14 +26,14 @@ describe('Timeline', () => {
         top: 100,
         left: 50,
         right: 50,
-        bottom: 0
+        bottom: 0,
       },
       animation: null,
       agentMarks: [
         { name: 'timeToFirstByte', us: 100000 },
         { name: 'domInteractive', us: 110000 },
-        { name: 'domComplete', us: 190000 }
-      ]
+        { name: 'domComplete', us: 190000 },
+      ],
     };
 
     const wrapper = mount(
@@ -55,8 +55,8 @@ describe('Timeline', () => {
         top: 100,
         left: 50,
         right: 50,
-        bottom: 0
-      }
+        bottom: 0,
+      },
     };
 
     const mountTimeline = () =>

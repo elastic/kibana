@@ -24,7 +24,7 @@ export function normalizeType(type) {
     null: ['null'],
   };
 
-  const normalizedType = Object.keys(normalTypes).find(t => normalTypes[t].includes(type));
+  const normalizedType = Object.keys(normalTypes).find((t) => normalTypes[t].includes(type));
 
   if (normalizedType) {
     return normalizedType;

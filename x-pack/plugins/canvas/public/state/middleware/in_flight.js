@@ -7,10 +7,10 @@
 import { convert } from '../../lib/modify_path';
 import { setLoading, setValue, inFlightActive, inFlightComplete } from '../actions/resolved_args';
 
-export const inFlight = ({ dispatch }) => next => {
+export const inFlight = ({ dispatch }) => (next) => {
   const pendingCache = [];
 
-  return action => {
+  return (action) => {
     const isLoading = action.type === setLoading.toString();
     const isSetting = action.type === setValue.toString();
 

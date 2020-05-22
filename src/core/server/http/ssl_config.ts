@@ -56,7 +56,7 @@ const sslSchema = schema.object(
     ),
   },
   {
-    validate: ssl => {
+    validate: (ssl) => {
       if (ssl.enabled && (!ssl.key || !ssl.certificate)) {
         return 'must specify [certificate] and [key] when ssl is enabled';
       }

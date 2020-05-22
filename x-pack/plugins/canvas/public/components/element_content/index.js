@@ -12,7 +12,7 @@ import { registries } from '@kbn/interpreter/public';
 import { getSelectedPage, getPageById } from '../../state/selectors/workpad';
 import { ElementContent as Component } from './element_content';
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   backgroundColor: getPageById(state, getSelectedPage(state)).style.background,
 });
 

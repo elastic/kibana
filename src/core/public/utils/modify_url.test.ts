@@ -25,7 +25,7 @@ it('supports returning a new url spec', () => {
 
 it('supports modifying the passed object', () => {
   expect(
-    modifyUrl('http://localhost', parsed => {
+    modifyUrl('http://localhost', (parsed) => {
       parsed.port = '9999';
       parsed.auth = 'foo:bar';
     })
@@ -34,7 +34,7 @@ it('supports modifying the passed object', () => {
 
 it('supports changing pathname', () => {
   expect(
-    modifyUrl('http://localhost/some/path', parsed => {
+    modifyUrl('http://localhost/some/path', (parsed) => {
       parsed.pathname += '/subpath';
     })
   ).toBe('http://localhost/some/path/subpath');
@@ -42,7 +42,7 @@ it('supports changing pathname', () => {
 
 it('supports changing port', () => {
   expect(
-    modifyUrl('http://localhost:5601', parsed => {
+    modifyUrl('http://localhost:5601', (parsed) => {
       parsed.port = String(Number(parsed.port) + 1);
     })
   ).toBe('http://localhost:5602/');
@@ -50,7 +50,7 @@ it('supports changing port', () => {
 
 it('supports changing protocol', () => {
   expect(
-    modifyUrl('http://localhost', parsed => {
+    modifyUrl('http://localhost', (parsed) => {
       parsed.protocol = 'mail';
       parsed.slashes = false;
       parsed.pathname = undefined;

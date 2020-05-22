@@ -14,34 +14,34 @@ import { MarkSeries, VerticalGridLines } from 'react-vis';
 import Tooltip from '../Tooltip';
 
 function getPointByX(serie, x) {
-  return serie.data.find(point => point.x === x);
+  return serie.data.find((point) => point.x === x);
 }
 
 class InteractivePlot extends PureComponent {
-  getMarkPoints = hoverX => {
+  getMarkPoints = (hoverX) => {
     return this.props.series
-      .filter(serie =>
-        serie.data.some(point => point.x === hoverX && point.y != null)
+      .filter((serie) =>
+        serie.data.some((point) => point.x === hoverX && point.y != null)
       )
-      .map(serie => {
+      .map((serie) => {
         const { x, y } = getPointByX(serie, hoverX) || {};
         return {
           x,
           y,
-          color: serie.color
+          color: serie.color,
         };
       });
   };
 
-  getTooltipPoints = hoverX => {
+  getTooltipPoints = (hoverX) => {
     return this.props.series
-      .filter(series => !series.hideTooltipValue)
-      .map(serie => {
+      .filter((series) => !series.hideTooltipValue)
+      .map((serie) => {
         const point = getPointByX(serie, hoverX) || {};
         return {
           color: serie.color,
           value: this.props.formatTooltipValue(point),
-          text: serie.titleShort || serie.title
+          text: serie.titleShort || serie.title,
         };
       });
   };
@@ -53,7 +53,7 @@ class InteractivePlot extends PureComponent {
       series,
       isDrawing,
       selectionStart,
-      selectionEnd
+      selectionEnd,
     } = this.props;
 
     if (isEmpty(series)) {
@@ -89,7 +89,7 @@ InteractivePlot.propTypes = {
   plotValues: PropTypes.object.isRequired,
   selectionEnd: PropTypes.number,
   selectionStart: PropTypes.number,
-  series: PropTypes.array.isRequired
+  series: PropTypes.array.isRequired,
 };
 
 export default InteractivePlot;

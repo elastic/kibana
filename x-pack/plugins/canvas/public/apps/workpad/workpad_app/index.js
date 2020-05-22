@@ -12,7 +12,7 @@ import { getWorkpad, isWriteable } from '../../../state/selectors/workpad';
 import { LoadWorkpad } from './load_workpad';
 import { WorkpadApp as Component } from './workpad_app';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   const appReady = getAppReady(state);
 
   return {
@@ -22,7 +22,7 @@ const mapStateToProps = state => {
   };
 };
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   deselectElement(ev) {
     ev && ev.stopPropagation();
     dispatch(selectElement(null));
@@ -32,9 +32,6 @@ const mapDispatchToProps = dispatch => ({
 const branches = [branch(({ workpad }) => workpad == null, renderComponent(LoadWorkpad))];
 
 export const WorkpadApp = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
+  connect(mapStateToProps, mapDispatchToProps),
   ...branches
 )(Component);

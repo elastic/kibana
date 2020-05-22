@@ -18,8 +18,8 @@ const collectFns = (ast, cb) => {
       cb(cFunction);
 
       // recurse the argumetns and update the set along the way
-      Object.keys(cArguments).forEach(argName => {
-        cArguments[argName].forEach(subAst => {
+      Object.keys(cArguments).forEach((argName) => {
+        cArguments[argName].forEach((subAst) => {
           if (subAst != null) {
             collectFns(subAst, cb);
           }
@@ -38,7 +38,7 @@ export function handleResponse({ hits }) {
   const functionSet = new Set();
 
   // make a summary of info about each workpad
-  const workpadsInfo = workpadDocs.map(hit => {
+  const workpadsInfo = workpadDocs.map((hit) => {
     const workpad = hit._source[CANVAS_TYPE];
 
     let pages;
@@ -52,9 +52,9 @@ export function handleResponse({ hits }) {
       []
     );
     const functionCounts = workpad.pages.reduce((accum, page) => {
-      return page.elements.map(element => {
+      return page.elements.map((element) => {
         const ast = fromExpression(element.expression);
-        collectFns(ast, cFunction => {
+        collectFns(ast, (cFunction) => {
           functionSet.add(cFunction);
         });
         return ast.chain.length; // get the number of parts in the expression
@@ -137,7 +137,7 @@ export function registerCanvasUsageCollector(server) {
   const collector = server.usage.collectorSet.makeUsageCollector({
     type: CANVAS_USAGE_TYPE,
     isReady: () => true,
-    fetch: async callCluster => {
+    fetch: async (callCluster) => {
       const searchParams = {
         size: 10000, // elasticsearch index.max_result_window default value
         index,

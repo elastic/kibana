@@ -11,6 +11,6 @@ export function getFieldType(columns, field) {
     return 'null';
   }
   const realField = unquoteString(field);
-  const column = columns.find(column => column.name === realField);
+  const column = columns.find((column) => column.name === realField);
   return column ? column.type : 'null';
 }

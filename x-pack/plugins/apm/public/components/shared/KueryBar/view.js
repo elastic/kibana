@@ -12,7 +12,7 @@ import {
   history,
   fromQuery,
   toQuery,
-  legacyEncodeURIComponent
+  legacyEncodeURIComponent,
 } from '../Links/url_helpers';
 import { KibanaLink } from '../Links/KibanaLink';
 import { Typeahead } from './Typeahead';
@@ -20,7 +20,7 @@ import chrome from 'ui/chrome';
 import {
   convertKueryToEsQuery,
   getSuggestions,
-  getAPMIndexPatternForKuery
+  getAPMIndexPatternForKuery,
 } from '../../../services/kuery';
 import styled from 'styled-components';
 import { getBoolFilter } from './get_bool_filter';
@@ -36,7 +36,7 @@ class KueryBarView extends Component {
     indexPattern: null,
     suggestions: [],
     isLoadingIndexPattern: true,
-    isLoadingSuggestions: false
+    isLoadingSuggestions: false,
   };
 
   async componentDidMount() {
@@ -54,12 +54,14 @@ class KueryBarView extends Component {
 
     const boolFilter = getBoolFilter(urlParams);
     try {
-      const suggestions = (await getSuggestions(
-        inputValue,
-        selectionStart,
-        indexPattern,
-        boolFilter
-      )).filter(suggestion => !startsWith(suggestion.text, 'span.'));
+      const suggestions = (
+        await getSuggestions(
+          inputValue,
+          selectionStart,
+          indexPattern,
+          boolFilter
+        )
+      ).filter((suggestion) => !startsWith(suggestion.text, 'span.'));
 
       if (currentRequest !== this.currentRequest) {
         return;
@@ -71,7 +73,7 @@ class KueryBarView extends Component {
     }
   };
 
-  onSubmit = inputValue => {
+  onSubmit = (inputValue) => {
     const { indexPattern } = this.state;
     const { location } = this.props;
     try {
@@ -84,8 +86,8 @@ class KueryBarView extends Component {
         ...location,
         search: fromQuery({
           ...toQuery(this.props.location.search),
-          kuery: legacyEncodeURIComponent(inputValue.trim())
-        })
+          kuery: legacyEncodeURIComponent(inputValue.trim()),
+        }),
       });
     } catch (e) {
       console.log('Invalid kuery syntax'); // eslint-disable-line no-console
@@ -128,7 +130,7 @@ class KueryBarView extends Component {
                           { defaultMessage: 'Setup Instructions' }
                         )}
                       </KibanaLink>
-                    )
+                    ),
                   }}
                 />
               </div>
@@ -145,7 +147,7 @@ class KueryBarView extends Component {
 
 KueryBarView.propTypes = {
   location: PropTypes.object.isRequired,
-  urlParams: PropTypes.object.isRequired
+  urlParams: PropTypes.object.isRequired,
 };
 
 export default KueryBarView;

@@ -31,9 +31,9 @@ describe('ErrorGroupOverview -> List', () => {
       agentName: 'python',
       transactionsPerMinute: 86.93333333333334,
       errorsPerMinute: 12.6,
-      avgResponseTime: 91535.42944785276
+      avgResponseTime: 91535.42944785276,
     };
-    const renderedColumns = SERVICE_COLUMNS.map(c =>
+    const renderedColumns = SERVICE_COLUMNS.map((c) =>
       c.render(service[c.field], service)
     );
     expect(renderedColumns[0]).toMatchSnapshot();
@@ -41,7 +41,7 @@ describe('ErrorGroupOverview -> List', () => {
       'python',
       '92 ms',
       '86.9 tpm',
-      '12.6 err.'
+      '12.6 err.',
     ]);
   });
 });

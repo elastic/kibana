@@ -48,7 +48,7 @@ describe('alterColumn', () => {
       });
 
       it('throws if column does not exists', () => {
-        expect(() => fn(emptyTable, { column: 'foo', type: 'number' })).to.throwException(e => {
+        expect(() => fn(emptyTable, { column: 'foo', type: 'number' })).to.throwException((e) => {
           expect(e.message).to.be("Column not found: 'foo'");
         });
       });
@@ -78,7 +78,7 @@ describe('alterColumn', () => {
       });
 
       it('throws when converting to an invalid type', () => {
-        expect(() => fn(testTable, { column: 'name', type: 'foo' })).to.throwException(e => {
+        expect(() => fn(testTable, { column: 'name', type: 'foo' })).to.throwException((e) => {
           expect(e.message).to.be(`Cannot convert to 'foo'`);
         });
       });

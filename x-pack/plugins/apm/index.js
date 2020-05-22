@@ -27,12 +27,12 @@ export function apm(kibana) {
       app: {
         title: 'APM',
         description: i18n.translate('xpack.apm.apmForESDescription', {
-          defaultMessage: 'APM for the Elastic Stack'
+          defaultMessage: 'APM for the Elastic Stack',
         }),
         main: 'plugins/apm/index',
         icon: 'plugins/apm/icon.svg',
         euiIconType: 'apmApp',
-        order: 8100
+        order: 8100,
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       home: ['plugins/apm/register_feature'],
@@ -40,16 +40,16 @@ export function apm(kibana) {
         const config = server.config();
         return {
           apmUiEnabled: config.get('xpack.apm.ui.enabled'),
-          apmIndexPatternTitle: config.get('apm_oss.indexPattern') // TODO: rename to apm_oss.indexPatternTitle in 7.0 (breaking change)
+          apmIndexPatternTitle: config.get('apm_oss.indexPattern'), // TODO: rename to apm_oss.indexPatternTitle in 7.0 (breaking change)
         };
       },
       hacks: ['plugins/apm/hacks/toggle_app_link_in_nav'],
       savedObjectSchemas: {
         'apm-telemetry': {
-          isNamespaceAgnostic: true
-        }
+          isNamespaceAgnostic: true,
+        },
       },
-      mappings
+      mappings,
     },
 
     config(Joi) {
@@ -57,7 +57,7 @@ export function apm(kibana) {
         // display menu item
         ui: Joi.object({
           enabled: Joi.boolean().default(true),
-          transactionGroupBucketSize: Joi.number().default(100)
+          transactionGroupBucketSize: Joi.number().default(100),
         }).default(),
 
         // enable plugin
@@ -65,7 +65,7 @@ export function apm(kibana) {
 
         // buckets
         minimumBucketSize: Joi.number().default(15),
-        bucketTargetCount: Joi.number().default(27)
+        bucketTargetCount: Joi.number().default(27),
       }).default();
     },
 
@@ -78,6 +78,6 @@ export function apm(kibana) {
       initStatusApi(server);
       initMetricsApi(server);
       makeApmUsageCollector(server);
-    }
+    },
   });
 }

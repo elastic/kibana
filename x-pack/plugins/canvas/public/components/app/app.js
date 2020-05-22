@@ -61,7 +61,7 @@ export class App extends React.PureComponent {
           loadingMessage="Canvas is loading"
           onRouteChange={this.props.onRouteChange}
           onLoad={() => this.props.setAppReady(true)}
-          onError={err => this.props.setAppError(err)}
+          onError={(err) => this.props.setAppError(err)}
         />
       </div>
     );

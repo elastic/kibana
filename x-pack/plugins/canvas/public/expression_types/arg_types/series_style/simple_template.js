@@ -12,7 +12,7 @@ import { get } from 'lodash';
 import { ColorPickerMini } from '../../../components/color_picker_mini';
 import { TooltipIcon } from '../../../components/tooltip_icon';
 
-export const SimpleTemplate = props => {
+export const SimpleTemplate = (props) => {
   const { typeInstance, argValue, onValueChange, labels, workpad } = props;
   const { name } = typeInstance;
   const chain = get(argValue, 'chain.0', {});
@@ -50,7 +50,7 @@ export const SimpleTemplate = props => {
             <ColorPickerMini
               id="series-style"
               value={color}
-              onChange={val => handlePlain('color', val)}
+              onChange={(val) => handlePlain('color', val)}
               colors={workpad.colors}
               placement="leftCenter"
             />

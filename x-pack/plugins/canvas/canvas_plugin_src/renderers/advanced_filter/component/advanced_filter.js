@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 export const AdvancedFilter = ({ value, onChange, commit }) => (
   <form
-    onSubmit={e => {
+    onSubmit={(e) => {
       e.preventDefault();
       commit(value);
     }}
@@ -23,7 +23,7 @@ export const AdvancedFilter = ({ value, onChange, commit }) => (
           className="canvasAdvancedFilter__input"
           placeholder="Enter filter expression"
           value={value}
-          onChange={e => onChange(e.target.value)}
+          onChange={(e) => onChange(e.target.value)}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

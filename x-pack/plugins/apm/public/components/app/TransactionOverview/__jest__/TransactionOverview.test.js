@@ -12,7 +12,7 @@ jest.mock(
   'ui/chrome',
   () => ({
     getBasePath: () => `/some/base/path`,
-    getInjected: key => {
+    getInjected: (key) => {
       if (key === 'mlEnabled') {
         return true;
       }
@@ -20,7 +20,7 @@ jest.mock(
     },
     getUiSettingsClient: () => {
       return {
-        get: key => {
+        get: (key) => {
           switch (key) {
             case 'timepicker:timeDefaults':
               return { from: 'now-15m', to: 'now', mode: 'quick' };
@@ -29,9 +29,9 @@ jest.mock(
             default:
               throw new Error(`Unexpected config key: ${key}`);
           }
-        }
+        },
       };
-    }
+    },
   }),
   { virtual: true }
 );
@@ -43,9 +43,9 @@ const setup = () => {
     serviceTransactionTypes: ['a', 'b'],
     location: {},
     history: {
-      push: jest.fn()
+      push: jest.fn(),
     },
-    urlParams: { transactionType: 'test-type', serviceName: 'MyServiceName' }
+    urlParams: { transactionType: 'test-type', serviceName: 'MyServiceName' },
   };
 
   const wrapper = shallow(<TransactionOverviewView {...props} />);
@@ -67,7 +67,7 @@ describe('TransactionOverviewView', () => {
   it('should render without type filter controls if there is just a single type', () => {
     const { wrapper } = setup();
     wrapper.setProps({
-      serviceTransactionTypes: ['a']
+      serviceTransactionTypes: ['a'],
     });
     expect(wrapper).toMatchSnapshot();
   });

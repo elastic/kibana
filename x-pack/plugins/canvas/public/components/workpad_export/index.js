@@ -17,13 +17,13 @@ import { downloadWorkpad } from '../../lib/download_workpad';
 import { WorkpadExport as Component } from './workpad_export';
 import { getPdfUrl, createPdf } from './utils';
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   workpad: getWorkpad(state),
   pageCount: getPages(state).length,
   enabled: getReportingBrowserType(state) === 'chromium',
 });
 
-const getAbsoluteUrl = path => {
+const getAbsoluteUrl = (path) => {
   const { location } = getWindow();
   if (!location) {
     return path;
@@ -36,14 +36,14 @@ const getAbsoluteUrl = path => {
 export const WorkpadExport = compose(
   connect(mapStateToProps),
   withProps(({ workpad, pageCount }) => ({
-    getExportUrl: type => {
+    getExportUrl: (type) => {
       if (type === 'pdf') {
         return getAbsoluteUrl(getPdfUrl(workpad, { pageCount }));
       }
 
       throw new Error(`Unknown export type: ${type}`);
     },
-    onCopy: type => {
+    onCopy: (type) => {
       switch (type) {
         case 'pdf':
           return notify.info('The PDF generation URL was copied to your clipboard.');
@@ -52,7 +52,7 @@ export const WorkpadExport = compose(
       }
       throw new Error(`Unknown export type: ${type}`);
     },
-    onExport: type => {
+    onExport: (type) => {
       switch (type) {
         case 'pdf':
           return createPdf(workpad, { pageCount })
@@ -64,7 +64,7 @@ export const WorkpadExport = compose(
               // register the job so a completion notification shows up when it's ready
               jobCompletionNotifications.add(data.job.id);
             })
-            .catch(err => {
+            .catch((err) => {
               notify.error(err, { title: `Failed to create PDF for '${workpad.name}'` });
             });
         case 'json':

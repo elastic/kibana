@@ -15,9 +15,7 @@ describe('progress', () => {
 
   it('returns a render as progress', () => {
     const result = fn(0.2);
-    expect(result)
-      .to.have.property('type', 'render')
-      .and.to.have.property('as', 'progress');
+    expect(result).to.have.property('type', 'render').and.to.have.property('as', 'progress');
   });
 
   it('sets the progress to context', () => {
@@ -28,7 +26,7 @@ describe('progress', () => {
   it(`throws when context is outside of the valid range`, () => {
     expect(fn)
       .withArgs(3)
-      .to.throwException(e => {
+      .to.throwException((e) => {
         expect(e.message).to.be(`Invalid value: '3'. Value must be between 0 and 1`);
       });
   });
@@ -64,7 +62,7 @@ describe('progress', () => {
       it('throws if max <= 0', () => {
         expect(fn)
           .withArgs(value, { max: -0.5 })
-          .to.throwException(e => {
+          .to.throwException((e) => {
             expect(e.message).to.be(`Invalid max value: '-0.5'. 'max' must be greater than 0`);
           });
       });

@@ -14,7 +14,7 @@ import {
   fontSizes,
   px,
   colors,
-  truncate
+  truncate,
 } from '../../../../style/variables';
 
 const Container = styled.div`
@@ -74,7 +74,7 @@ export default function Legends({
   noHits,
   series,
   seriesEnabledState,
-  truncateLegends
+  truncateLegends,
 }) {
   if (noHits) {
     return null;
@@ -119,5 +119,5 @@ Legends.propTypes = {
   noHits: PropTypes.bool.isRequired,
   series: PropTypes.array.isRequired,
   seriesEnabledState: PropTypes.array.isRequired,
-  truncateLegends: PropTypes.bool.isRequired
+  truncateLegends: PropTypes.bool.isRequired,
 };

@@ -19,7 +19,7 @@ export const ColorManager = ({ value, addColor, removeColor, onChange }) => (
         compressed
         value={value || ''}
         placeholder="#hex color"
-        onChange={e => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value)}
       />
     </EuiFlexItem>
     {(addColor || removeColor) && (

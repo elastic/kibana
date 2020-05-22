@@ -58,7 +58,7 @@ export async function bootstrap({
 
   const rawConfigService = new RawConfigService(
     env.configs,
-    rawConfig => new LegacyObjectToConfigAdapter(applyConfigOverrides(rawConfig))
+    (rawConfig) => new LegacyObjectToConfigAdapter(applyConfigOverrides(rawConfig))
   );
 
   rawConfigService.loadConfig();

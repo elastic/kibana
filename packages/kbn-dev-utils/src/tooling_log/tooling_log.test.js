@@ -79,7 +79,7 @@ describe('#indent()', () => {
   });
 });
 
-['verbose', 'debug', 'info', 'success', 'warning', 'error', 'write'].forEach(method => {
+['verbose', 'debug', 'info', 'success', 'warning', 'error', 'write'].forEach((method) => {
   describe(`#${method}()`, () => {
     it(`sends a msg of type "${method}" to each writer with indent and arguments`, () => {
       const log = new ToolingLog();
@@ -109,13 +109,7 @@ describe('#getWritten$()', () => {
     log.setWriters(writers);
 
     const done$ = new Rx.Subject();
-    const promise = log
-      .getWritten$()
-      .pipe(
-        takeUntil(done$),
-        toArray()
-      )
-      .toPromise();
+    const promise = log.getWritten$().pipe(takeUntil(done$), toArray()).toPromise();
 
     log.debug('foo');
     log.info('bar');

@@ -12,11 +12,11 @@ import { isObject, isArray, isString } from 'lodash';
 import esResponse from './esResponse.json';
 
 jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'mocked-uuid')
+  v4: jest.fn(() => 'mocked-uuid'),
 }));
 
 // disable html escaping since this is also disabled in watcher\s mustache implementation
-mustache.escape = value => value;
+mustache.escape = (value) => value;
 
 describe('createErrorGroupWatch', () => {
   let createWatchResponse;
@@ -29,19 +29,19 @@ describe('createErrorGroupWatch', () => {
       emails: ['my@email.dk', 'mySecond@email.dk'],
       schedule: {
         daily: {
-          at: '08:00'
-        }
+          at: '08:00',
+        },
       },
       serviceName: 'opbeans-node',
       slackUrl: 'https://hooks.slack.com/services/slackid1/slackid2/slackid3',
       threshold: 10,
-      timeRange: { value: 24, unit: 'h' }
+      timeRange: { value: 24, unit: 'h' },
     });
 
     const watchBody = rest.createWatch.mock.calls[0][1];
     const templateCtx = {
       payload: esResponse,
-      metadata: watchBody.metadata
+      metadata: watchBody.metadata,
     };
 
     tmpl = renderMustache(rest.createWatch.mock.calls[0][1], templateCtx);
@@ -90,12 +90,12 @@ function renderMustache(input, ctx) {
   if (isString(input)) {
     return mustache.render(input, {
       ctx,
-      join: () => (text, render) => render(`{{${text}}}`, { ctx })
+      join: () => (text, render) => render(`{{${text}}}`, { ctx }),
     });
   }
 
   if (isArray(input)) {
-    return input.map(itemValue => renderMustache(itemValue, ctx));
+    return input.map((itemValue) => renderMustache(itemValue, ctx));
   }
 
   if (isObject(input)) {

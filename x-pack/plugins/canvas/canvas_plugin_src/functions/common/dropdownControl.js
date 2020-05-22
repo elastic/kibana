@@ -27,7 +27,7 @@ export const dropdownControl = () => ({
   fn: (context, { valueColumn, filterColumn }) => {
     let choices = [];
     if (context.rows[0][valueColumn]) {
-      choices = uniq(context.rows.map(row => row[valueColumn])).sort();
+      choices = uniq(context.rows.map((row) => row[valueColumn])).sort();
     }
 
     const column = filterColumn || valueColumn;

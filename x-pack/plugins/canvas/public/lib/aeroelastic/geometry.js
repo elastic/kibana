@@ -78,9 +78,9 @@ const shapesAtPoint = (shapes, x, y) =>
 // viewer. But that's not the case. So we maximize the Z value to tell what's on top.
 export const shapesAt = (shapes, { x, y }) =>
   shapesAtPoint(shapes, x, y)
-    .filter(shape => shape.inside)
+    .filter((shape) => shape.inside)
     .sort((shape1, shape2) => shape2.z - shape1.z || shape2.index - shape1.index) // stable sort: DOM insertion order!!!
-    .map(shape => shape.shape); // decreasing order, ie. from front (closest to viewer) to back
+    .map((shape) => shape.shape); // decreasing order, ie. from front (closest to viewer) to back
 
 const getExtremum = (transformMatrix, a, b) => normalize(mvMultiply(transformMatrix, [a, b, 0, 1]));
 

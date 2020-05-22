@@ -63,7 +63,7 @@ const createHttpSchema = schema.object(
     ssl: SslConfig.schema,
   },
   {
-    validate: config => {
+    validate: (config) => {
       if (!config.basePath && config.rewriteBasePath) {
         return 'cannot use [rewriteBasePath] when [basePath] is not specified';
       }

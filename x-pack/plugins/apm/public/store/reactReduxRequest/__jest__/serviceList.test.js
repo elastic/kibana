@@ -19,7 +19,7 @@ describe('serviceList', () => {
     it('should return serviceList when not empty', () => {
       const state = {
         reactReduxRequest: { serviceList: { data: [{ foo: 'bar' }] } },
-        sorting: { service: {} }
+        sorting: { service: {} },
       };
       expect(getServiceList(state)).toEqual({ data: [{ foo: 'bar' }] });
     });
@@ -33,9 +33,9 @@ describe('serviceList', () => {
     beforeEach(() => {
       const state = {
         reactReduxRequest: {
-          serviceList: { status: 'my-status', data: [{ foo: 'bar' }] }
+          serviceList: { status: 'my-status', data: [{ foo: 'bar' }] },
         },
-        sorting: { service: {} }
+        sorting: { service: {} },
       };
 
       loadSpy = jest.spyOn(rest, 'loadServiceList').mockReturnValue();
@@ -53,14 +53,14 @@ describe('serviceList', () => {
     it('should call render method', () => {
       expect(renderSpy).toHaveBeenCalledWith({
         data: [{ foo: 'bar' }],
-        status: 'my-status'
+        status: 'my-status',
       });
     });
 
     it('should call "loadServiceList"', () => {
       expect(loadSpy).toHaveBeenCalledWith({
         start: 'myStart',
-        end: 'myEnd'
+        end: 'myEnd',
       });
     });
 

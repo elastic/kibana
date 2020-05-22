@@ -47,12 +47,12 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
     if (commas.length === 0) {
       return [];
     }
-    return commas.split(',').map(str => str.trim());
+    return commas.split(',').map((str) => str.trim());
   };
 
   const getSortBy = () => {
     const commas = getSimpleArg('sort', args)[0] || ', DESC';
-    return commas.split(',').map(str => str.trim());
+    return commas.split(',').map((str) => str.trim());
   };
 
   const fields = getFields();
@@ -60,7 +60,10 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
 
   const index = getIndex().toLowerCase();
 
-  const sortOptions = [{ value: 'asc', text: 'Ascending' }, { value: 'desc', text: 'Descending' }];
+  const sortOptions = [
+    { value: 'asc', text: 'Ascending' },
+    { value: 'desc', text: 'Descending' },
+  ];
 
   return (
     <div>
@@ -76,23 +79,23 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
       <EuiSpacer size="m" />
 
       <EuiFormRow label="Index" helpText="Enter an index name or select an index pattern">
-        <ESIndexSelect value={index} onChange={index => setArg('index', index)} />
+        <ESIndexSelect value={index} onChange={(index) => setArg('index', index)} />
       </EuiFormRow>
 
       <EuiFormRow label="Query" helpText="Lucene query string syntax" compressed>
-        <EuiFieldText value={getQuery()} onChange={e => setArg(getArgName(), e.target.value)} />
+        <EuiFieldText value={getQuery()} onChange={(e) => setArg(getArgName(), e.target.value)} />
       </EuiFormRow>
       <EuiFormRow label="Sort Field" helpText="Document sort field">
         <ESFieldSelect
           index={index}
           value={sortField}
-          onChange={field => setArg('sort', [field, sortOrder].join(', '))}
+          onChange={(field) => setArg('sort', [field, sortOrder].join(', '))}
         />
       </EuiFormRow>
       <EuiFormRow label="Sort Order" helpText="Document sort order" compressed>
         <EuiSelect
           value={sortOrder.toLowerCase()}
-          onChange={e => setArg('sort', [sortField, e.target.value].join(', '))}
+          onChange={(e) => setArg('sort', [sortField, e.target.value].join(', '))}
           options={sortOptions}
         />
       </EuiFormRow>
@@ -106,7 +109,7 @@ const EsdocsDatasource = ({ args, updateArgs }) => {
       >
         <ESFieldsSelect
           index={index}
-          onChange={fields => setArg('fields', fields.join(', '))}
+          onChange={(fields) => setArg('fields', fields.join(', '))}
           selected={fields}
         />
       </EuiFormRow>

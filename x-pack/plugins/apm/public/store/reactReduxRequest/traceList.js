@@ -18,7 +18,7 @@ const selectRRR = (state = {}) => state.reactReduxRequest;
 
 export const selectTraceList = createSelector(
   [selectRRR],
-  reactReduxRequest => {
+  (reactReduxRequest) => {
     return withInitialData(reactReduxRequest[ID]);
   }
 );
@@ -38,8 +38,8 @@ export function TraceListRequest({ urlParams = {}, render }) {
         {
           start,
           end,
-          kuery
-        }
+          kuery,
+        },
       ]}
       selector={selectTraceList}
       render={render}

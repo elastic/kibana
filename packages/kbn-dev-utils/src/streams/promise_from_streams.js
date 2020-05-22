@@ -47,7 +47,7 @@ export async function createPromiseFromStreams(streams) {
 
   // resolve when the last stream has finished writing, or
   // immediately if the last stream is not writable
-  const lastFinishedWriting = new Promise(resolve => {
+  const lastFinishedWriting = new Promise((resolve) => {
     if (typeof last.write !== 'function') {
       resolve();
       return;
@@ -59,14 +59,14 @@ export async function createPromiseFromStreams(streams) {
   // resolve with the final value provided by the last stream
   // after the last stream has provided it, or immediately if the
   // stream is not readable
-  const lastFinishedReading = new Promise(resolve => {
+  const lastFinishedReading = new Promise((resolve) => {
     if (typeof last.read !== 'function') {
       resolve();
       return;
     }
 
     let finalChunk;
-    last.on('data', chunk => {
+    last.on('data', (chunk) => {
       finalChunk = chunk;
     });
     last.on('end', () => {

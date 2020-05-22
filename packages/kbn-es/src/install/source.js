@@ -29,7 +29,7 @@ const { createCliError } = require('../errors');
 const { findMostRecentlyChanged, log: defaultLog, cache } = require('../utils');
 const { GRADLE_BIN, ES_ARCHIVE_PATTERN, ES_OSS_ARCHIVE_PATTERN, BASE_PATH } = require('../paths');
 
-const onceEvent = (emitter, event) => new Promise(resolve => emitter.once(event, resolve));
+const onceEvent = (emitter, event) => new Promise((resolve) => emitter.once(event, resolve));
 
 /**
  * Installs ES from source
@@ -100,15 +100,11 @@ async function sourceInfo(cwd, license, log = defaultLog) {
   etag.update(sha);
 
   // for changed files, use last modified times in hash calculation
-  status.files.forEach(file => {
+  status.files.forEach((file) => {
     etag.update(fs.statSync(path.join(cwd, file.path)).mtime.toString());
   });
 
-  const cwdHash = crypto
-    .createHash('md5')
-    .update(cwd)
-    .digest('hex')
-    .substr(0, 8);
+  const cwdHash = crypto.createHash('md5').update(cwd).digest('hex').substr(0, 8);
 
   const basename = `${branch}${license === 'oss' ? '-oss-' : '-'}${cwdHash}`;
   const filename = `${basename}.tar.gz`;
@@ -144,8 +140,8 @@ async function createSnapshot({ license, sourcePath, log = defaultLog }) {
   const stdout = readline.createInterface({ input: build.stdout });
   const stderr = readline.createInterface({ input: build.stderr });
 
-  stdout.on('line', line => log.debug(line));
-  stderr.on('line', line => log.error(line));
+  stdout.on('line', (line) => log.debug(line));
+  stderr.on('line', (line) => log.error(line));
 
   const [exitCode] = await Promise.all([
     onceEvent(build, 'exit'),

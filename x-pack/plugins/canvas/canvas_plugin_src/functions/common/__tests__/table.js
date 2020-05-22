@@ -19,9 +19,7 @@ describe('table', () => {
       paginate: false,
       perPage: 2,
     });
-    expect(result)
-      .to.have.property('type', 'render')
-      .and.to.have.property('as', 'table');
+    expect(result).to.have.property('type', 'render').and.to.have.property('as', 'table');
   });
 
   describe('context', () => {

@@ -33,7 +33,7 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
   const borderWidthVal = borderWidth ? borderWidth.replace('px', '') : '';
   const radiusVal = radius ? radius.replace('px', '') : '';
 
-  const namedChange = name => val => {
+  const namedChange = (name) => (val) => {
     if (name === 'borderWidth') {
       return onChange('border', `${val}px ${borderStyle} ${borderColor}`);
     }
@@ -50,7 +50,7 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
     onChange(name, val);
   };
 
-  const borderColorChange = color => onChange('border', `${borderWidth} ${borderStyle} ${color}`);
+  const borderColorChange = (color) => onChange('border', `${borderWidth} ${borderStyle} ${color}`);
 
   return (
     <EuiFlexGroup gutterSize="s">
@@ -58,7 +58,7 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
         <EuiFormRow label="Thickness" compressed>
           <EuiFieldNumber
             value={Number(borderWidthVal)}
-            onChange={e => namedChange('borderWidth')(e.target.value)}
+            onChange={(e) => namedChange('borderWidth')(e.target.value)}
           />
         </EuiFormRow>
       </EuiFlexItem>
@@ -67,7 +67,7 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
         <EuiFormRow label="Style" compressed>
           <EuiSuperSelect
             valueOfSelected={borderStyle || 'none'}
-            options={styles.map(style => ({
+            options={styles.map((style) => ({
               value: style,
               inputDisplay: <div style={{ height: 16, border: `4px ${style}` }} />,
             }))}
@@ -80,7 +80,7 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
         <EuiFormRow label="Radius" compressed>
           <EuiFieldNumber
             value={Number(radiusVal)}
-            onChange={e => namedChange('borderRadius')(e.target.value)}
+            onChange={(e) => namedChange('borderRadius')(e.target.value)}
           />
         </EuiFormRow>
       </EuiFlexItem>
