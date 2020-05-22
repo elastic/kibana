@@ -5,8 +5,8 @@
  */
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ loadTestFile }: FtrProviderContext) {
-  describe('data visualizer', function() {
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('data visualizer', function () {
     loadTestFile(require.resolve('./get_field_stats'));
     loadTestFile(require.resolve('./get_overall_stats'));
   });

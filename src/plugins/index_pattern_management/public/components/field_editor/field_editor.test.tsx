@@ -82,7 +82,7 @@ const fields: IndexPatternField[] = [
 
 // @ts-ignore
 fields.getByName = (name: string) => {
-  return fields.find(field => field.name === name);
+  return fields.find((field) => field.name === name);
 };
 
 class Format {
@@ -127,7 +127,7 @@ describe('FieldEditor', () => {
       () => (({} as unknown) as FieldFormatInstanceType)
     );
 
-    services.fieldFormats.getByFieldType = jest.fn(fieldType => {
+    services.fieldFormats.getByFieldType = jest.fn((fieldType) => {
       if (fieldType === 'number') {
         return [({} as unknown) as FieldFormatInstanceType];
       } else {
@@ -145,7 +145,7 @@ describe('FieldEditor', () => {
       />
     );
 
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     component.update();
     expect(component).toMatchSnapshot();
   });
@@ -158,7 +158,7 @@ describe('FieldEditor', () => {
     };
     indexPattern.fields.push(testField as IndexPatternField);
 
-    indexPattern.fields.getByName = name => {
+    indexPattern.fields.getByName = (name) => {
       const flds = {
         [testField.name]: testField,
       };
@@ -173,7 +173,7 @@ describe('FieldEditor', () => {
       />
     );
 
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     component.update();
     expect(component).toMatchSnapshot();
   });
@@ -186,7 +186,7 @@ describe('FieldEditor', () => {
       lang: 'testlang',
     };
     indexPattern.fields.push((testField as unknown) as IndexPatternField);
-    indexPattern.fields.getByName = name => {
+    indexPattern.fields.getByName = (name) => {
       const flds = {
         [testField.name]: testField,
       };
@@ -201,7 +201,7 @@ describe('FieldEditor', () => {
       />
     );
 
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     component.update();
     expect(component).toMatchSnapshot();
   });
@@ -216,7 +216,7 @@ describe('FieldEditor', () => {
       />
     );
 
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     (component.instance() as FieldEditor).onFieldChange('name', 'foobar');
     component.update();
     expect(component).toMatchSnapshot();
@@ -239,7 +239,7 @@ describe('FieldEditor', () => {
       />
     );
 
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise((resolve) => process.nextTick(resolve));
     (component.instance() as FieldEditor).onFieldChange('name', 'foobar');
     component.update();
     expect(component).toMatchSnapshot();

@@ -133,7 +133,7 @@ export class Autocomplete extends React.Component {
    * Handle key down events for the menu, including selecting the previous and next items, making
    * the item selection, closing the menu, etc.
    */
-  onKeyDown = e => {
+  onKeyDown = (e) => {
     const { ESCAPE, TAB, ENTER, UP, DOWN, LEFT, RIGHT } = keyCodes;
     const { keyCode } = e;
     const { items } = this.props;
@@ -222,14 +222,14 @@ export class Autocomplete extends React.Component {
                 <EuiFlexItem style={{ maxWidth: 400 }}>
                   <div
                     className="autocompleteItems"
-                    ref={ref => (this.containerRef = ref)}
+                    ref={(ref) => (this.containerRef = ref)}
                     role="listbox"
                   >
                     {header}
                     {items.map((item, i) => (
                       <div
                         key={i}
-                        ref={ref => (this.itemRefs[i] = ref)}
+                        ref={(ref) => (this.itemRefs[i] = ref)}
                         className={
                           'autocompleteItem' +
                           (this.state.selectedIndex === i ? ' autocompleteItem--isActive' : '')

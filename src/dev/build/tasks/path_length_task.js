@@ -30,10 +30,10 @@ export const PathLengthTask = {
     const buildRoot = build.resolvePath();
     await scan$(buildRoot)
       .pipe(
-        map(path => relative(buildRoot, path)),
-        filter(relativePath => relativePath.length > 200),
+        map((path) => relative(buildRoot, path)),
+        filter((relativePath) => relativePath.length > 200),
         toArray(),
-        tap(tooLongPaths => {
+        tap((tooLongPaths) => {
           if (!tooLongPaths.length) {
             return;
           }

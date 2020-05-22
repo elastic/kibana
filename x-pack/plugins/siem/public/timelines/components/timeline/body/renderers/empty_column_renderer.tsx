@@ -22,7 +22,7 @@ import { ColumnRenderer } from './column_renderer';
 import { parseQueryValue } from './parse_query_value';
 
 export const dataNotExistsAtColumn = (columnName: string, data: TimelineNonEcsData[]): boolean =>
-  data.findIndex(item => item.field === columnName) === -1;
+  data.findIndex((item) => item.field === columnName) === -1;
 
 export const emptyColumnRenderer: ColumnRenderer = {
   isInstance: (columnName: string, data: TimelineNonEcsData[]) =>

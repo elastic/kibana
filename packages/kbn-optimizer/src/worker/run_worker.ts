@@ -77,10 +77,10 @@ Rx.defer(() => {
 })
   .pipe(takeUntil(observeParentOffline(process, workerMsgs)))
   .subscribe(
-    msg => {
+    (msg) => {
       send(msg);
     },
-    error => {
+    (error) => {
       if (isWorkerMsg(error)) {
         send(error);
       } else {

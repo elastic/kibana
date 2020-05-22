@@ -30,7 +30,7 @@ import _ from 'lodash';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 
-const getNodeTooltip = node => {
+const getNodeTooltip = (node) => {
   const { nodeTypeLabel, nodeTypeClass } = node;
 
   const nodeTypeLabelContent =
@@ -53,7 +53,7 @@ const getNodeTooltip = node => {
   return null;
 };
 
-const getSortHandler = type => item => _.get(item, [type, 'summary', 'lastVal']);
+const getSortHandler = (type) => (item) => _.get(item, [type, 'summary', 'lastVal']);
 const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
   const cols = [];
 
@@ -127,7 +127,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
     }),
     field: 'isOnline',
     sortable: true,
-    render: value => {
+    render: (value) => {
       const status = value
         ? i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumn.onlineLabel', {
             defaultMessage: 'Online',

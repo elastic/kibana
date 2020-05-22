@@ -41,10 +41,10 @@ export class RawConfigService {
 
   constructor(
     public readonly configFiles: readonly string[],
-    configAdapter: RawConfigAdapter = rawConfig => rawConfig
+    configAdapter: RawConfigAdapter = (rawConfig) => rawConfig
   ) {
     this.config$ = this.rawConfigFromFile$.pipe(
-      map(rawConfig => {
+      map((rawConfig) => {
         if (isPlainObject(rawConfig)) {
           // TODO Make config consistent, e.g. handle dots in keys
           return configAdapter(cloneDeep(rawConfig));

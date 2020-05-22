@@ -36,7 +36,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           }),
         },
       },
-      async function(
+      async function (
         context: RequestHandlerContext,
         req: KibanaRequest<any, any, any, any>,
         res: KibanaResponseFactory

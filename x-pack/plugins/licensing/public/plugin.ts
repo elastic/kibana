@@ -75,7 +75,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
       this.getSaved()
     );
 
-    this.internalSubscription = license$.subscribe(license => {
+    this.internalSubscription = license$.subscribe((license) => {
       if (license.isAvailable) {
         this.prevSignature = license.signature;
         this.save(license);
@@ -92,7 +92,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
     });
 
     this.removeInterceptor = core.http.intercept({
-      response: async httpResponse => {
+      response: async (httpResponse) => {
         // we don't track license as anon users do not have one.
         if (core.http.anonymousPaths.isAnonymous(window.location.pathname)) return httpResponse;
         if (httpResponse.response) {

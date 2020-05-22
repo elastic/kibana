@@ -96,7 +96,7 @@ describe('<RepositoryAdd />', () => {
     test('should have 1 card for each repository type', () => {
       const { exists } = testBed;
 
-      repositoryTypes.forEach(type => {
+      repositoryTypes.forEach((type) => {
         const testSubject: any = `${type}RepositoryType`;
         try {
           expect(exists(testSubject)).toBe(true);
@@ -173,7 +173,7 @@ describe('<RepositoryAdd />', () => {
           const expectedErrors = typeToErrorMessagesMap[type];
           const errorsFound = form.getErrorsMessages();
 
-          expectedErrors.forEach(error => {
+          expectedErrors.forEach((error) => {
             try {
               expect(errorsFound).toContain(error);
             } catch {

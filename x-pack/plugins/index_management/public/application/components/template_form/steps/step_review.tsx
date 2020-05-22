@@ -78,7 +78,7 @@ export const StepReview: React.FunctionComponent<StepProps> = ({ template, updat
 
   const numIndexPatterns = indexPatterns!.length;
 
-  const hasWildCardIndexPattern = Boolean(indexPatterns!.find(pattern => pattern === '*'));
+  const hasWildCardIndexPattern = Boolean(indexPatterns!.find((pattern) => pattern === '*'));
 
   const SummaryTab = () => (
     <div data-test-subj="summaryTab">

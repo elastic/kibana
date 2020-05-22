@@ -33,7 +33,7 @@ const createTestCases = () => {
   return { normalTypes, hiddenType, allTypes };
 };
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
@@ -72,10 +72,10 @@ export default function({ getService }: FtrProviderContext) {
         users.readAtDefaultSpace,
         users.allAtSpace1,
         users.readAtSpace1,
-      ].forEach(user => {
+      ].forEach((user) => {
         _addTests(user, unauthorized);
       });
-      [users.dualAll, users.dualRead, users.allGlobally, users.readGlobally].forEach(user => {
+      [users.dualAll, users.dualRead, users.allGlobally, users.readGlobally].forEach((user) => {
         _addTests(user, authorized);
       });
       _addTests(users.superuser, superuser);

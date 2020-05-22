@@ -37,7 +37,7 @@ export function EuiMonitoringSSPTable({
     search.box['data-test-subj'] = 'monitoringTableToolBar';
   }
 
-  const columns = _columns.map(column => {
+  const columns = _columns.map((column) => {
     if (!('sortable' in column)) {
       column.sortable = true;
     }
