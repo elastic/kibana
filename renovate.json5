@@ -474,6 +474,14 @@
         ],
       },
       {
+        groupSlug: 'jsdom',
+        groupName: 'jsdom related packages',
+        packageNames: [
+          'jsdom',
+          '@types/jsdom',
+        ],
+      },
+      {
         groupSlug: 'json-stable-stringify',
         groupName: 'json-stable-stringify related packages',
         packageNames: [

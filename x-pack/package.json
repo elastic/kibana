@@ -76,6 +76,7 @@
     "@types/joi": "^13.4.2",
     "@types/js-search": "^1.4.0",
     "@types/js-yaml": "^3.11.1",
+    "@types/jsdom": "^16.2.3",
     "@types/json-stable-stringify": "^1.0.32",
     "@types/jsonwebtoken": "^7.2.8",
     "@types/lodash": "^3.10.1",
