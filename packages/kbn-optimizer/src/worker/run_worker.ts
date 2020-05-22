@@ -50,22 +50,6 @@ const send = (msg: WorkerMsg) => {
   }
 };
 
-/**
- * set the exitCode and wait for the process to exit, if it
- * doesn't exit naturally do so forcibly and fail.
- */
-const exit = (code: number) => {
-  process.exitCode = code;
-  setTimeout(() => {
-    send(
-      workerMsgs.error(
-        new Error('process did not automatically exit within 5 seconds, forcing exit')
-      )
-    );
-    process.exit(1);
-  }, 5000).unref();
-};
-
 Rx.defer(() => {
   const workerConfig = parseWorkerConfig(process.argv[2]);
   const bundles = parseBundles(process.argv[3]);
@@ -87,9 +71,9 @@ Rx.defer(() => {
         send(workerMsgs.error(error));
       }
 
-      exit(1);
+      process.exit(1);
     },
     () => {
-      exit(0);
+      process.exit(0);
     }
   );
