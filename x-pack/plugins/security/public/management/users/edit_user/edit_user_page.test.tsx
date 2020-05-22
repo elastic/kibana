@@ -163,6 +163,7 @@ describe('EditUserPage', () => {
         rolesAPIClient={rolesAPIClient}
         authc={securitySetup.authc}
         notifications={coreMock.createStart().notifications}
+        history={history}
       />
     );
 

@@ -33,7 +33,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { NotificationsStart, ScopedHistory } from 'src/core/public';
 import { User, EditUser, Role, isRoleDeprecated } from '../../../../common/model';
 import { AuthenticationServiceSetup } from '../../../authentication';
-import { USERS_PATH } from '../../management_urls';
 import { RolesAPIClient } from '../../roles';
 import { ConfirmDeleteUsers, ChangePasswordForm } from '../components';
 import { UserValidator, UserValidationResult } from './validate_user';

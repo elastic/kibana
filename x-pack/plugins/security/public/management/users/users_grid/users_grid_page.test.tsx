@@ -240,6 +240,7 @@ describe('UsersGridPage', () => {
         userAPIClient={apiClientMock}
         rolesAPIClient={roleAPIClientMock}
         notifications={coreMock.createStart().notifications}
+        history={history}
       />
     );
 
