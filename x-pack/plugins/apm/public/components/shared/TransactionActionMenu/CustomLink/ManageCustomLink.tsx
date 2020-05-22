@@ -9,14 +9,14 @@ import {
   EuiFlexItem,
   EuiToolTip,
   EuiButtonEmpty,
-  EuiIcon
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { APMLink } from '../../Links/apm/APMLink';
 
 export const ManageCustomLink = ({
   onCreateCustomLinkClick,
-  showCreateCustomLinkButton = true
+  showCreateCustomLinkButton = true,
 }: {
   onCreateCustomLinkClick: () => void;
   showCreateCustomLinkButton?: boolean;
@@ -28,7 +28,7 @@ export const ManageCustomLink = ({
           <EuiToolTip
             position="top"
             content={i18n.translate('xpack.apm.customLink.buttom.manage', {
-              defaultMessage: 'Manage custom links'
+              defaultMessage: 'Manage custom links',
             })}
           >
             <APMLink path={`/settings/customize-ui`}>
@@ -48,7 +48,7 @@ export const ManageCustomLink = ({
               onClick={onCreateCustomLinkClick}
             >
               {i18n.translate('xpack.apm.customLink.buttom.create.title', {
-                defaultMessage: 'Create'
+                defaultMessage: 'Create',
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>

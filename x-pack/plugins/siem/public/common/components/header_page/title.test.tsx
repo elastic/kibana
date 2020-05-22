@@ -32,12 +32,7 @@ describe('Title', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-page-title"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="header-page-title"]').first().exists()).toBe(true);
   });
 
   test('it renders as a draggable when arguments provided', () => {
@@ -47,12 +42,7 @@ describe('Title', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-page-draggable"]')
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find('[data-test-subj="header-page-draggable"]').first().exists()).toBe(true);
   });
 
   test('it DOES NOT render as a draggable when arguments not provided', () => {
@@ -62,11 +52,6 @@ describe('Title', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-page-draggable"]')
-        .first()
-        .exists()
-    ).toBe(false);
+    expect(wrapper.find('[data-test-subj="header-page-draggable"]').first().exists()).toBe(false);
   });
 });

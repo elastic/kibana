@@ -109,7 +109,7 @@ export class CreateIndexPatternWizard extends Component<
     try {
       return await asyncFn;
     } catch (errors) {
-      this.setState(prevState => ({
+      this.setState((prevState) => ({
         toasts: prevState.toasts.concat([
           {
             title: errorMsg,
@@ -224,7 +224,7 @@ export class CreateIndexPatternWizard extends Component<
   };
 
   onChangeIncludingSystemIndices = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isIncludingSystemIndices: !prevState.isIncludingSystemIndices,
     }));
   };
@@ -305,8 +305,8 @@ export class CreateIndexPatternWizard extends Component<
   }
 
   removeToast = (id: string) => {
-    this.setState(prevState => ({
-      toasts: prevState.toasts.filter(toast => toast.id !== id),
+    this.setState((prevState) => ({
+      toasts: prevState.toasts.filter((toast) => toast.id !== id),
     }));
   };
 

@@ -8,7 +8,7 @@ import React from 'react';
 import {
   EuiDescribedFormGroup,
   EuiSelectOption,
-  EuiFormRow
+  EuiFormRow,
 } from '@elastic/eui';
 import { SelectWithPlaceholder } from '../../../../../shared/SelectWithPlaceholder';
 
@@ -31,7 +31,7 @@ export function FormRowSelect({
   options,
   value,
   disabled,
-  onChange
+  onChange,
 }: Props) {
   return (
     <EuiDescribedFormGroup

@@ -27,7 +27,7 @@ export default {
     '**/integration_tests/**/*.test.tsx',
   ],
   testPathIgnorePatterns: config.testPathIgnorePatterns.filter(
-    pattern => !pattern.includes('integration_tests')
+    (pattern) => !pattern.includes('integration_tests')
   ),
   reporters: [
     'default',

@@ -41,8 +41,10 @@ import {
   hideViewControl,
   setHiddenLayers,
   setMapSettings,
-} from '../actions/map_actions';
-import { setReadOnly, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions/ui_actions';
+  setReadOnly,
+  setIsLayerTOCOpen,
+  setOpenTOCDetails,
+} from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
   getInspectorAdapters,
@@ -102,7 +104,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     this._settings = config.settings;
     this._store = createMapStore();
 
-    this._subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
+    this._subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
   }
 
   setRenderTooltipContent = (renderTooltipContent: RenderToolTipContent) => {
@@ -147,7 +149,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     this._prevFilters = filters;
     this._store.dispatch(
       setQuery({
-        filters: filters.filter(filter => !filter.meta.disabled),
+        filters: filters.filter((filter) => !filter.meta.disabled),
         query,
         timeFilters: timeRange,
         refresh,

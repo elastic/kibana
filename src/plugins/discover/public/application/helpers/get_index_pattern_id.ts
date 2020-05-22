@@ -26,7 +26,7 @@ export function findIndexPatternById(
   if (!Array.isArray(indexPatterns) || !id) {
     return;
   }
-  return indexPatterns.find(o => o.id === id);
+  return indexPatterns.find((o) => o.id === id);
 }
 
 /**

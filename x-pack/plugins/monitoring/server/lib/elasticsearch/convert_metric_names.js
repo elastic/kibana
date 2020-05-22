@@ -53,7 +53,7 @@ export function uncovertMetricNames(byDateBucketResponse) {
   const unconverted = {};
   for (const metricName of LISTING_METRICS_NAMES) {
     unconverted[metricName] = {
-      buckets: byDateBucketResponse.buckets.map(bucket => {
+      buckets: byDateBucketResponse.buckets.map((bucket) => {
         const {
           // eslint-disable-next-line camelcase
           key_as_string,

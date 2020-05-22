@@ -23,7 +23,7 @@ export class EndpointPolicyDetails {
   ): SecuritySubPluginWithStore<'policyDetails', Immutable<PolicyDetailsState>> {
     const { data, ingestManager } = plugins;
     const middleware = substateMiddlewareFactory(
-      globalState => globalState.policyDetails,
+      (globalState) => globalState.policyDetails,
       policyDetailsMiddlewareFactory(core, { data, ingestManager })
     );
 

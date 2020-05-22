@@ -72,7 +72,7 @@ export class SpacesService {
 
       return config$
         .pipe(
-          map(config => {
+          map((config) => {
             const internalRepository = coreStart.savedObjects.createInternalRepository(['space']);
 
             const callWithRequestRepository = coreStart.savedObjects.createScopedRepository(

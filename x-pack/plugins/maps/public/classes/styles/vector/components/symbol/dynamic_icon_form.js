@@ -28,7 +28,7 @@ export function DynamicIconForm({
     });
   };
 
-  const onIconMapChange = newOptions => {
+  const onIconMapChange = (newOptions) => {
     onDynamicStyleChange(styleProperty.getStyleName(), {
       ...styleOptions,
       ...newOptions,

@@ -69,7 +69,7 @@ export class EMSTMSSource extends AbstractTMSSource {
     const emsClient = getEMSClient();
     const emsTMSServices = await emsClient.getTMSServices();
     const emsTileLayerId = this.getTileLayerId();
-    const tmsService = emsTMSServices.find(tmsService => tmsService.getId() === emsTileLayerId);
+    const tmsService = emsTMSServices.find((tmsService) => tmsService.getId() === emsTileLayerId);
     if (!tmsService) {
       throw new Error(
         i18n.translate('xpack.maps.source.emsTile.errorMessage', {

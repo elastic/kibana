@@ -28,7 +28,7 @@ export function getClusterLicense(req, esIndexPattern, clusterUuid) {
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params).then(response => {
+  return callWithRequest(req, 'search', params).then((response) => {
     return get(response, 'hits.hits[0]._source.license', {});
   });
 }

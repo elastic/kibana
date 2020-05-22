@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import { schema } from '@kbn/config-schema';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -54,7 +54,7 @@ export default function({ getService }: FtrProviderContext) {
     const defaultTypes = ['visualization', 'index-pattern', 'search', 'dashboard'];
 
     const relationshipsUrl = (type: string, id: string, types: string[] = defaultTypes) => {
-      const typesQuery = types.map(t => `savedObjectTypes=${t}`).join('&');
+      const typesQuery = types.map((t) => `savedObjectTypes=${t}`).join('&');
       return `${baseApiUrl}/${type}/${id}?${typesQuery}`;
     };
 
