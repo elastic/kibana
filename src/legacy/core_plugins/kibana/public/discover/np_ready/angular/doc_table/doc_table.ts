@@ -67,7 +67,7 @@ export function createDocTableDirective(pagerFactory: any, $filter: any) {
         getServices().uiSettings.get('discover:sampleSize')
       );
 
-      $scope.addRows = function() {
+      $scope.addRows = function () {
         $scope.limit += 50;
       };
 

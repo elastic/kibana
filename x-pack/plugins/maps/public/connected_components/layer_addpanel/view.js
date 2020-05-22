@@ -80,7 +80,7 @@ export class AddLayerPanel extends Component {
     this.props.removeTransientLayer();
   };
 
-  _onWizardSelect = layerWizard => {
+  _onWizardSelect = (layerWizard) => {
     this.setState({ layerWizard, importView: !!layerWizard.isIndexingSource });
   };
 

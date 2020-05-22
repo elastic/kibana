@@ -85,7 +85,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
 
     this.expressionRenderer = expressionRenderer;
     this.savedVis = savedVis;
-    this.subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
+    this.subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
     this.onContainerStateChanged(initialInput);
 
     this.autoRefreshFetchSubscription = timefilter
@@ -105,7 +105,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
 
   onContainerStateChanged(containerState: LensEmbeddableInput) {
     const cleanedFilters = containerState.filters
-      ? containerState.filters.filter(filter => !filter.meta.disabled)
+      ? containerState.filters.filter((filter) => !filter.meta.disabled)
       : undefined;
     if (
       !_.isEqual(containerState.timeRange, this.currentContext.timeRange) ||

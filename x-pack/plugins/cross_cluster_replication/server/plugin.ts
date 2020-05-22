@@ -49,7 +49,7 @@ const ccrDataEnricher = async (indicesList: Index[], callWithRequest: APICaller)
       'transport.request',
       params
     );
-    return indicesList.map(index => {
+    return indicesList.map((index) => {
       const isFollowerIndex = !!followerIndices.find(
         (followerIndex: { follower_index: string }) => {
           return followerIndex.follower_index === index.name;
@@ -83,7 +83,7 @@ export class CrossClusterReplicationServerPlugin implements Plugin<void, void, a
     this.config$
       .pipe(first())
       .toPromise()
-      .then(config => {
+      .then((config) => {
         // remoteClusters.isUiEnabled is driven by the xpack.remote_clusters.ui.enabled setting.
         // The CCR UI depends upon the Remote Clusters UI (e.g. by cross-linking to it), so if
         // the Remote Clusters UI is disabled we can't show the CCR UI.

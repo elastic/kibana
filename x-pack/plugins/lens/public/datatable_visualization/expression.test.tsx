@@ -66,7 +66,7 @@ describe('datatable_expression', () => {
           <DatatableComponent
             data={data}
             args={args}
-            formatFactory={x => x as IFieldFormat}
+            formatFactory={(x) => x as IFieldFormat}
             executeTriggerActions={executeTriggerActions}
             getType={jest.fn()}
           />
@@ -87,16 +87,13 @@ describe('datatable_expression', () => {
             },
           }}
           args={args}
-          formatFactory={x => x as IFieldFormat}
+          formatFactory={(x) => x as IFieldFormat}
           executeTriggerActions={executeTriggerActions}
           getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
         />
       );
 
-      wrapper
-        .find('[data-test-subj="lensDatatableFilterOut"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="lensDatatableFilterOut"]').first().simulate('click');
 
       expect(executeTriggerActions).toHaveBeenCalledWith('VALUE_CLICK_TRIGGER', {
         data: {
@@ -127,16 +124,13 @@ describe('datatable_expression', () => {
             },
           }}
           args={args}
-          formatFactory={x => x as IFieldFormat}
+          formatFactory={(x) => x as IFieldFormat}
           executeTriggerActions={executeTriggerActions}
           getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
         />
       );
 
-      wrapper
-        .find('[data-test-subj="lensDatatableFilterFor"]')
-        .at(3)
-        .simulate('click');
+      wrapper.find('[data-test-subj="lensDatatableFilterFor"]').at(3).simulate('click');
 
       expect(executeTriggerActions).toHaveBeenCalledWith('VALUE_CLICK_TRIGGER', {
         data: {
@@ -170,9 +164,9 @@ describe('datatable_expression', () => {
         <DatatableComponent
           data={emptyData}
           args={args}
-          formatFactory={x => x as IFieldFormat}
+          formatFactory={(x) => x as IFieldFormat}
           executeTriggerActions={executeTriggerActions}
-          getType={jest.fn(type =>
+          getType={jest.fn((type) =>
             type === 'count' ? ({ type: 'metrics' } as IAggType) : ({ type: 'buckets' } as IAggType)
           )}
         />

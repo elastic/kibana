@@ -26,7 +26,7 @@ export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersC
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: userName =>
+    render: (userName) =>
       getRowItemDraggable({
         rowItem: userName,
         attrName: 'user.name',
@@ -39,7 +39,7 @@ export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersC
     truncateText: false,
     hideForMobile: false,
     sortable: false,
-    render: userIds =>
+    render: (userIds) =>
       getRowItemDraggables({
         rowItems: userIds,
         attrName: 'user.id',
@@ -52,7 +52,7 @@ export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersC
     truncateText: false,
     hideForMobile: false,
     sortable: false,
-    render: groupNames =>
+    render: (groupNames) =>
       getRowItemDraggables({
         rowItems: groupNames,
         attrName: 'user.group.name',
@@ -65,7 +65,7 @@ export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersC
     truncateText: false,
     hideForMobile: false,
     sortable: false,
-    render: groupId =>
+    render: (groupId) =>
       getRowItemDraggables({
         rowItems: groupId,
         attrName: 'user.group.id',
@@ -79,6 +79,6 @@ export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersC
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: docCount => defaultToEmptyTag(docCount),
+    render: (docCount) => defaultToEmptyTag(docCount),
   },
 ];

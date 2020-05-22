@@ -410,7 +410,7 @@ describe('helpers', () => {
     test('should merge columns when event.action is deleted without two extra column names of user.name', () => {
       const timeline = {
         savedObjectId: 'savedObject-1',
-        columns: timelineDefaults.columns.filter(column => column.id !== 'event.action'),
+        columns: timelineDefaults.columns.filter((column) => column.id !== 'event.action'),
         version: '1',
       };
 
@@ -546,7 +546,7 @@ describe('helpers', () => {
     test('should merge filters object back with json object', () => {
       const timeline = {
         savedObjectId: 'savedObject-1',
-        columns: timelineDefaults.columns.filter(column => column.id !== 'event.action'),
+        columns: timelineDefaults.columns.filter((column) => column.id !== 'event.action'),
         filters: [
           {
             meta: {
@@ -749,7 +749,7 @@ describe('helpers', () => {
       timelineDispatch = dispatchUpdateTimeline(dispatch);
     });
 
-    afterEach(function() {
+    afterEach(function () {
       clock.restore();
     });
 

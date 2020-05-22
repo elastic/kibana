@@ -89,13 +89,13 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     });
 
     after(async () => {
-      const users = features.map(feature => security.user.delete(`${feature.featureId}-user`));
-      const roles = features.map(feature => security.role.delete(`${feature.featureId}-role`));
+      const users = features.map((feature) => security.user.delete(`${feature.featureId}-user`));
+      const roles = features.map((feature) => security.role.delete(`${feature.featureId}-role`));
       await Promise.all([...users, ...roles]);
       await security.user.delete(kibanaUsername);
     });
 
-    features.forEach(feature => {
+    features.forEach((feature) => {
       it(`users with "read" access to ${feature.featureId} ${
         feature.canAccess ? 'should' : 'should not'
       } be able to access short-urls`, async () => {

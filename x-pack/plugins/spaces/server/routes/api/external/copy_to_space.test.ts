@@ -44,7 +44,7 @@ import {
 
 describe('copy to space', () => {
   const spacesSavedObjects = createSpaces();
-  const spaces = spacesSavedObjects.map(s => ({ id: s.id, ...s.attributes }));
+  const spaces = spacesSavedObjects.map((s) => ({ id: s.id, ...s.attributes }));
 
   beforeEach(() => {
     (exportSavedObjectsToStream as jest.Mock).mockReset();

@@ -26,8 +26,8 @@ import { safeLoad } from 'js-yaml';
 
 const JOBS_YAML = readFileSync(resolve(__dirname, '../.ci/jobs.yml'), 'utf8');
 const TEST_TAGS = safeLoad(JOBS_YAML)
-  .JOB.filter(id => id.startsWith('kibana-ciGroup'))
-  .map(id => id.replace(/^kibana-/, ''));
+  .JOB.filter((id) => id.startsWith('kibana-ciGroup'))
+  .map((id) => id.replace(/^kibana-/, ''));
 
 export function getFunctionalTestGroupRunConfigs({ kibanaInstallDir } = {}) {
   return {
@@ -61,13 +61,13 @@ export function getFunctionalTestGroupRunConfigs({ kibanaInstallDir } = {}) {
 grunt.registerTask(
   'functionalTests:ensureAllTestsInCiGroup',
   'Check that all of the functional tests are in a CI group',
-  async function() {
+  async function () {
     const done = this.async();
 
     try {
       const result = await execa(process.execPath, [
         'scripts/functional_test_runner',
-        ...TEST_TAGS.map(tag => `--include-tag=${tag}`),
+        ...TEST_TAGS.map((tag) => `--include-tag=${tag}`),
         '--config',
         'test/functional/config.js',
         '--test-stats',

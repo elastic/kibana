@@ -32,7 +32,7 @@ export class EMSFileSource extends AbstractVectorSource {
 
   constructor(descriptor, inspectorAdapters) {
     super(EMSFileSource.createDescriptor(descriptor), inspectorAdapters);
-    this._tooltipFields = this._descriptor.tooltipProperties.map(propertyKey =>
+    this._tooltipFields = this._descriptor.tooltipProperties.map((propertyKey) =>
       this.createField({ fieldName: propertyKey })
     );
   }
@@ -59,7 +59,9 @@ export class EMSFileSource extends AbstractVectorSource {
   async getEMSFileLayer() {
     const emsClient = getEMSClient();
     const emsFileLayers = await emsClient.getFileLayers();
-    const emsFileLayer = emsFileLayers.find(fileLayer => fileLayer.getId() === this._descriptor.id);
+    const emsFileLayer = emsFileLayers.find(
+      (fileLayer) => fileLayer.getId() === this._descriptor.id
+    );
     if (!emsFileLayer) {
       throw new Error(
         i18n.translate('xpack.maps.source.emsFile.unableToFindIdErrorMessage', {
@@ -81,7 +83,7 @@ export class EMSFileSource extends AbstractVectorSource {
       fetchUrl: emsFileLayer.getDefaultFormatUrl(),
     });
 
-    const emsIdField = emsFileLayer._config.fields.find(field => {
+    const emsIdField = emsFileLayer._config.fields.find((field) => {
       return field.type === 'id';
     });
     featureCollection.features.forEach((feature, index) => {
@@ -135,7 +137,7 @@ export class EMSFileSource extends AbstractVectorSource {
   async getLeftJoinFields() {
     const emsFileLayer = await this.getEMSFileLayer();
     const fields = emsFileLayer.getFieldsInLanguage();
-    return fields.map(f => this.createField({ fieldName: f.name }));
+    return fields.map((f) => this.createField({ fieldName: f.name }));
   }
 
   canFormatFeatureProperties() {
@@ -143,7 +145,7 @@ export class EMSFileSource extends AbstractVectorSource {
   }
 
   async filterAndFormatPropertiesToHtml(properties) {
-    const tooltipProperties = this._tooltipFields.map(field => {
+    const tooltipProperties = this._tooltipFields.map((field) => {
       const value = properties[field.getName()];
       return field.createTooltipProperty(value);
     });

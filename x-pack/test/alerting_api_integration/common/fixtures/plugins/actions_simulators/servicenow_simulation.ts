@@ -74,8 +74,5 @@ function jsonResponse(h: any, code: number, object?: any) {
     return h.response('').code(code);
   }
 
-  return h
-    .response(JSON.stringify(object))
-    .type('application/json')
-    .code(code);
+  return h.response(JSON.stringify(object)).type('application/json').code(code);
 }

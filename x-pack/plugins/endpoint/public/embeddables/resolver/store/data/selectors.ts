@@ -73,7 +73,7 @@ const distanceBetweenNodes = distanceBetweenNodesInUnits * unit;
  */
 export const graphableProcesses = createSelector(
   ({ results }: DataState) => results,
-  function(results: DataState['results']) {
+  function (results: DataState['results']) {
     return results.filter(isGraphableProcess);
   }
 );

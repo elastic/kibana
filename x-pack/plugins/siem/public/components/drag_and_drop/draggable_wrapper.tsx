@@ -172,7 +172,7 @@ export const DraggableWrapper = React.memo<Props>(
                 </ConditionalPortal>
               )}
             >
-              {droppableProvided => (
+              {(droppableProvided) => (
                 <div ref={droppableProvided.innerRef} {...droppableProvided.droppableProps}>
                   <Draggable
                     draggableId={getDraggableId(dataProvider.id)}

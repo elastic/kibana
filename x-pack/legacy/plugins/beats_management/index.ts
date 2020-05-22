@@ -14,9 +14,7 @@ const DEFAULT_ENROLLMENT_TOKENS_TTL_S = 10 * 60; // 10 minutes
 
 export const config = Joi.object({
   enabled: Joi.boolean().default(true),
-  defaultUserRoles: Joi.array()
-    .items(Joi.string())
-    .default(['superuser']),
+  defaultUserRoles: Joi.array().items(Joi.string()).default(['superuser']),
   encryptionKey: Joi.string().default('xpack_beats_default_encryptionKey'),
   enrollmentTokensTtlInSeconds: Joi.number()
     .integer()

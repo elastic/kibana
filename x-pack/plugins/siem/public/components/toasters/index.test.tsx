@@ -45,7 +45,7 @@ describe('Toaster', () => {
               type="button"
               onClick={() => dispatch({ type: 'addToaster', toast: mockToast })}
             />
-            {toasts.map(toast => (
+            {toasts.map((toast) => (
               <span
                 data-test-subj={`add-toaster-${toast.id}`}
                 key={`add-toaster-${toast.id}`}
@@ -77,7 +77,7 @@ describe('Toaster', () => {
               type="button"
               onClick={() => dispatch({ type: 'deleteToaster', id: mockToast.id })}
             />
-            {toasts.map(toast => (
+            {toasts.map((toast) => (
               <span
                 data-test-subj={`delete-toaster-${toast.id}`}
                 key={`delete-toaster-${toast.id}`}
@@ -109,7 +109,7 @@ describe('Toaster', () => {
               type="button"
               onClick={() => dispatch({ type: 'addToaster', toast: mockToast })}
             />
-            {toasts.map(toast => (
+            {toasts.map((toast) => (
               <span key={`add-toaster-${toast.id}`}>{`${toast.title} ${toast.text}`}</span>
             ))}
           </>
@@ -141,7 +141,7 @@ describe('Toaster', () => {
               type="button"
               onClick={() => dispatch({ type: 'addToaster', toast: mockErrorToast })}
             />
-            {toasts.map(toast => (
+            {toasts.map((toast) => (
               <span key={`add-toaster-${toast.id}`}>{`${toast.title} ${toast.text}`}</span>
             ))}
           </>
@@ -186,7 +186,7 @@ describe('Toaster', () => {
                 dispatch({ type: 'deleteToaster', id: mockToast.id });
               }}
             />
-            {toasts.map(toast => (
+            {toasts.map((toast) => (
               <span key={`add-toaster-${toast.id}`}>{`${toast.title} ${toast.text}`}</span>
             ))}
           </>
@@ -224,7 +224,7 @@ describe('Toaster', () => {
                 dispatch({ type: 'addToaster', toast: mockToast });
               }}
             />
-            {toasts.map(toast => (
+            {toasts.map((toast) => (
               <span key={`add-toaster-${toast.id}`}>{`${toast.title} ${toast.text}`}</span>
             ))}
           </>
@@ -260,7 +260,7 @@ describe('Toaster', () => {
                 dispatch({ type: 'addToaster', toast: mockToast });
               }}
             />
-            {toasts.map(toast => (
+            {toasts.map((toast) => (
               <span key={`add-toaster-${toast.id}`}>{`${toast.title} ${toast.text}`}</span>
             ))}
           </>

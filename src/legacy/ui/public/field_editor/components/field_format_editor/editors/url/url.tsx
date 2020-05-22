@@ -152,7 +152,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           <EuiFieldNumber
             data-test-subj="urlEditorWidth"
             value={width}
-            onChange={e => {
+            onChange={(e) => {
               this.onChange({ width: e.target.value });
             }}
           />
@@ -165,7 +165,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           <EuiFieldNumber
             data-test-subj="urlEditorHeight"
             value={height}
-            onChange={e => {
+            onChange={(e) => {
               this.onChange({ height: e.target.value });
             }}
           />
@@ -202,7 +202,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
                 text: type.text,
               };
             })}
-            onChange={e => {
+            onChange={(e) => {
               this.onTypeChange(e.target.value);
             }}
           />
@@ -226,7 +226,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
                 )
               }
               checked={!formatParams.openLinkInCurrentTab}
-              onChange={e => {
+              onChange={(e) => {
                 this.onChange({ openLinkInCurrentTab: !e.target.checked });
               }}
             />
@@ -254,7 +254,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           <EuiFieldText
             data-test-subj="urlEditorUrlTemplate"
             value={formatParams.urlTemplate || ''}
-            onChange={e => {
+            onChange={(e) => {
               this.onChange({ urlTemplate: e.target.value });
             }}
           />
@@ -281,7 +281,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           <EuiFieldText
             data-test-subj="urlEditorLabelTemplate"
             value={formatParams.labelTemplate || ''}
-            onChange={e => {
+            onChange={(e) => {
               this.onChange({ labelTemplate: e.target.value });
             }}
           />

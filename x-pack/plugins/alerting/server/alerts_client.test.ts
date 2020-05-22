@@ -2805,7 +2805,7 @@ describe('update()', () => {
       expect(taskManager.runNow).not.toHaveBeenCalled();
     });
 
-    test('updating the alert should not wait for the rerun the task to complete', async done => {
+    test('updating the alert should not wait for the rerun the task to complete', async (done) => {
       const alertId = uuid.v4();
       const taskId = uuid.v4();
 

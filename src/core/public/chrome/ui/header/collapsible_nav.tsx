@@ -50,7 +50,7 @@ function getOrderedCategories(
 ) {
   return sortBy(
     Object.keys(mainCategories),
-    categoryName => categoryDictionary[categoryName]?.order
+    (categoryName) => categoryDictionary[categoryName]?.order
   );
 }
 
@@ -92,7 +92,7 @@ export function CollapsibleNav({
   storage = window.localStorage,
 }: Props) {
   const lockRef = useRef<HTMLButtonElement>(null);
-  const groupedNavLinks = groupBy(navLinks, link => link?.category?.id);
+  const groupedNavLinks = groupBy(navLinks, (link) => link?.category?.id);
   const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
   const categoryDictionary = getAllCategories(allCategorizedLinks);
   const orderedCategories = getOrderedCategories(allCategorizedLinks, categoryDictionary);
@@ -142,7 +142,7 @@ export function CollapsibleNav({
         title={i18n.translate('core.ui.recentlyViewed', { defaultMessage: 'Recently viewed' })}
         isCollapsible={true}
         initialIsOpen={getIsCategoryOpen('recentlyViewed', storage)}
-        onToggle={isCategoryOpen => setIsCategoryOpen('recentlyViewed', isCategoryOpen, storage)}
+        onToggle={(isCategoryOpen) => setIsCategoryOpen('recentlyViewed', isCategoryOpen, storage)}
         data-test-subj="collapsibleNavGroup-recentlyViewed"
       >
         {recentNavLinks.length > 0 ? (
@@ -204,7 +204,7 @@ export function CollapsibleNav({
               title={category.label}
               isCollapsible={true}
               initialIsOpen={getIsCategoryOpen(category.id, storage)}
-              onToggle={isCategoryOpen => setIsCategoryOpen(category.id, isCategoryOpen, storage)}
+              onToggle={(isCategoryOpen) => setIsCategoryOpen(category.id, isCategoryOpen, storage)}
               data-test-subj={`collapsibleNavGroup-${category.id}`}
             >
               <EuiListGroup

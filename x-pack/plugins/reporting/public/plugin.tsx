@@ -121,7 +121,7 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
       id: 'reporting',
       title: this.title,
       order: 15,
-      mount: async params => {
+      mount: async (params) => {
         const [start] = await getStartServices();
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
         ReactDOM.render(
@@ -168,10 +168,10 @@ export class ReportingPublicPlugin implements Plugin<void, void> {
       .pipe(
         takeUntil(this.stop$), // stop the interval when stop method is called
         map(() => getStored()), // read all pending job IDs from session storage
-        filter(storedJobs => storedJobs.length > 0), // stop the pipeline here if there are none pending
-        mergeMap(storedJobs => streamHandler.findChangedStatusJobs(storedJobs)), // look up the latest status of all pending jobs on the server
+        filter((storedJobs) => storedJobs.length > 0), // stop the pipeline here if there are none pending
+        mergeMap((storedJobs) => streamHandler.findChangedStatusJobs(storedJobs)), // look up the latest status of all pending jobs on the server
         mergeMap(({ completed, failed }) => streamHandler.showNotifications({ completed, failed })),
-        catchError(err => handleError(notifications, err))
+        catchError((err) => handleError(notifications, err))
       )
       .subscribe();
   }

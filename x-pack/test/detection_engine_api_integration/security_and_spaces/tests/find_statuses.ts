@@ -51,7 +51,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(200);
 
       // wait for Task Manager to execute the rule and update status
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
 
       // query the single rule from _find
       const { body } = await supertest

@@ -55,7 +55,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
   }
 
   _togglePopover = () => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       isPopoverOpen: !prevState.isPopoverOpen,
     }));
   };

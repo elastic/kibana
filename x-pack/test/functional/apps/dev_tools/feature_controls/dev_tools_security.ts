@@ -6,7 +6,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'console', 'security']);
@@ -64,7 +64,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows Dev Tools navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map(link => link.text)).to.eql(['Dev Tools', 'Stack Management']);
+        expect(navLinks.map((link) => link.text)).to.eql(['Dev Tools', 'Stack Management']);
       });
 
       describe('console', () => {
@@ -144,7 +144,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`shows 'Dev Tools' navlink`, async () => {
-        const navLinks = (await appsMenu.readLinks()).map(link => link.text);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.eql(['Dev Tools', 'Stack Management']);
       });
 

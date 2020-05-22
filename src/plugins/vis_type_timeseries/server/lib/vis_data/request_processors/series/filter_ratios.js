@@ -17,14 +17,14 @@
  * under the License.
  */
 
-const filter = metric => metric.type === 'filter_ratio';
+const filter = (metric) => metric.type === 'filter_ratio';
 import { bucketTransform } from '../../helpers/bucket_transform';
 import { overwrite } from '../../helpers';
 
 export function ratios(req, panel, series) {
-  return next => doc => {
+  return (next) => (doc) => {
     if (series.metrics.some(filter)) {
-      series.metrics.filter(filter).forEach(metric => {
+      series.metrics.filter(filter).forEach((metric) => {
         overwrite(doc, `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}-numerator.filter`, {
           query_string: { query: metric.numerator || '*', analyze_wildcard: true },
         });

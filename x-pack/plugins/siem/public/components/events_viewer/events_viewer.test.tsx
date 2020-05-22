@@ -55,12 +55,9 @@ describe('EventsViewer', () => {
     await wait();
     wrapper.update();
 
-    expect(
-      wrapper
-        .find(`[data-test-subj="header-section-subtitle"]`)
-        .first()
-        .text()
-    ).toEqual('Showing: 12 events');
+    expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().text()).toEqual(
+      'Showing: 12 events'
+    );
   });
 
   test('it renders the Fields Browser as a settings gear', async () => {
@@ -80,12 +77,7 @@ describe('EventsViewer', () => {
     await wait();
     wrapper.update();
 
-    expect(
-      wrapper
-        .find(`[data-test-subj="show-field-browser-gear"]`)
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find(`[data-test-subj="show-field-browser-gear"]`).first().exists()).toBe(true);
   });
 
   test('it renders the footer containing the Load More button', async () => {
@@ -105,15 +97,10 @@ describe('EventsViewer', () => {
     await wait();
     wrapper.update();
 
-    expect(
-      wrapper
-        .find(`[data-test-subj="TimelineMoreButton"]`)
-        .first()
-        .exists()
-    ).toBe(true);
+    expect(wrapper.find(`[data-test-subj="TimelineMoreButton"]`).first().exists()).toBe(true);
   });
 
-  defaultHeaders.forEach(header => {
+  defaultHeaders.forEach((header) => {
     test(`it renders the ${header.id} default EventsViewer column header`, async () => {
       const wrapper = mount(
         <TestProviders>
@@ -131,13 +118,10 @@ describe('EventsViewer', () => {
       await wait();
       wrapper.update();
 
-      defaultHeaders.forEach(h =>
-        expect(
-          wrapper
-            .find(`[data-test-subj="header-text-${header.id}"]`)
-            .first()
-            .exists()
-        ).toBe(true)
+      defaultHeaders.forEach((h) =>
+        expect(wrapper.find(`[data-test-subj="header-text-${header.id}"]`).first().exists()).toBe(
+          true
+        )
       );
     });
   });

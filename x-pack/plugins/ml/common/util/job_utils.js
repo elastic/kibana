@@ -286,7 +286,7 @@ export function getSafeAggregationName(fieldName, index) {
 
 export function uniqWithIsEqual(arr) {
   return arr.reduce((dedupedArray, value) => {
-    if (dedupedArray.filter(compareValue => _.isEqual(compareValue, value)).length === 0) {
+    if (dedupedArray.filter((compareValue) => _.isEqual(compareValue, value)).length === 0) {
       dedupedArray.push(value);
     }
     return dedupedArray;
@@ -324,7 +324,7 @@ export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
     // Analysis Configuration
     if (job.analysis_config.categorization_filters) {
       let v = true;
-      _.each(job.analysis_config.categorization_filters, d => {
+      _.each(job.analysis_config.categorization_filters, (d) => {
         try {
           new RegExp(d);
         } catch (e) {
@@ -356,7 +356,7 @@ export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
       valid = false;
     } else {
       let v = true;
-      _.each(job.analysis_config.detectors, d => {
+      _.each(job.analysis_config.detectors, (d) => {
         if (_.isEmpty(d.function)) {
           v = false;
         }
@@ -373,7 +373,7 @@ export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
     if (job.analysis_config.detectors.length >= 2) {
       // create an array of objects with a subset of the attributes
       // where we want to make sure they are not be the same across detectors
-      const compareSubSet = job.analysis_config.detectors.map(d =>
+      const compareSubSet = job.analysis_config.detectors.map((d) =>
         _.pick(d, [
           'function',
           'field_name',
@@ -454,8 +454,8 @@ export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
   return {
     messages,
     valid,
-    contains: id => messages.some(m => id === m.id),
-    find: id => messages.find(m => id === m.id),
+    contains: (id) => messages.some((m) => id === m.id),
+    find: (id) => messages.find((m) => id === m.id),
   };
 }
 
@@ -482,8 +482,8 @@ export function basicDatafeedValidation(datafeed) {
   return {
     messages,
     valid,
-    contains: id => messages.some(m => id === m.id),
-    find: id => messages.find(m => id === m.id),
+    contains: (id) => messages.some((m) => id === m.id),
+    find: (id) => messages.find((m) => id === m.id),
   };
 }
 
@@ -513,8 +513,8 @@ export function validateModelMemoryLimit(job, limits) {
   return {
     valid,
     messages,
-    contains: id => messages.some(m => id === m.id),
-    find: id => messages.find(m => id === m.id),
+    contains: (id) => messages.some((m) => id === m.id),
+    find: (id) => messages.find((m) => id === m.id),
   };
 }
 
@@ -537,16 +537,16 @@ export function validateModelMemoryLimitUnits(modelMemoryLimit) {
   return {
     valid,
     messages,
-    contains: id => messages.some(m => id === m.id),
-    find: id => messages.find(m => id === m.id),
+    contains: (id) => messages.some((m) => id === m.id),
+    find: (id) => messages.find((m) => id === m.id),
   };
 }
 
 export function validateGroupNames(job) {
   const { groups = [] } = job;
   const errorMessages = [
-    ...(groups.some(group => !isJobIdValid(group)) ? [{ id: 'job_group_id_invalid' }] : []),
-    ...(groups.some(group => maxLengthValidator(JOB_ID_MAX_LENGTH)(group))
+    ...(groups.some((group) => !isJobIdValid(group)) ? [{ id: 'job_group_id_invalid' }] : []),
+    ...(groups.some((group) => maxLengthValidator(JOB_ID_MAX_LENGTH)(group))
       ? [{ id: 'job_group_id_invalid_max_length' }]
       : []),
   ];
@@ -556,8 +556,8 @@ export function validateGroupNames(job) {
   return {
     valid,
     messages,
-    contains: id => messages.some(m => id === m.id),
-    find: id => messages.find(m => id === m.id),
+    contains: (id) => messages.some((m) => id === m.id),
+    find: (id) => messages.find((m) => id === m.id),
   };
 }
 
@@ -593,6 +593,6 @@ export function processCreatedBy(customSettings) {
 
 export function splitIndexPatternNames(indexPatternName) {
   return indexPatternName.includes(',')
-    ? indexPatternName.split(',').map(i => i.trim())
+    ? indexPatternName.split(',').map((i) => i.trim())
     : [indexPatternName];
 }

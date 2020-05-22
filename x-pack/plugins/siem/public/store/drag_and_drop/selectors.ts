@@ -14,5 +14,5 @@ const selectDataProviders = (state: State): IdToDataProvider => state.dragAndDro
 
 export const dataProvidersSelector = createSelector(
   selectDataProviders,
-  dataProviders => dataProviders
+  (dataProviders) => dataProviders
 );

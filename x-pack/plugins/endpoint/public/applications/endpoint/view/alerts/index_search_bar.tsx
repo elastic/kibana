@@ -23,7 +23,7 @@ export const AlertIndexSearchBar = memo(() => {
 
   // Deeply clone the search bar index patterns as the receiving component may mutate them
   const clonedSearchBarIndexPatterns = useMemo(
-    () => searchBarIndexPatterns.map(pattern => clone(pattern)),
+    () => searchBarIndexPatterns.map((pattern) => clone(pattern)),
     [searchBarIndexPatterns]
   );
   const searchBarQuery = useAlertListSelector(selectors.searchBarQuery);

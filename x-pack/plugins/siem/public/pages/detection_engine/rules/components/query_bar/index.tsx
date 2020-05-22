@@ -253,7 +253,7 @@ export const QueryBarDefineRule = ({
           observerOptions={{ subtree: true, attributes: true, childList: true }}
           onMutation={onMutation}
         >
-          {mutationRef => (
+          {(mutationRef) => (
             <div ref={mutationRef}>
               <QueryBar
                 indexPattern={indexPattern}

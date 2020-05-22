@@ -79,7 +79,7 @@ export function MetricSelect({ value, onChange, metricsFilter, ...rest }) {
       singleSelection={true}
       isClearable={false}
       options={options}
-      selectedOptions={AGG_OPTIONS.filter(option => {
+      selectedOptions={AGG_OPTIONS.filter((option) => {
         return value === option.value;
       })}
       onChange={onAggChange}

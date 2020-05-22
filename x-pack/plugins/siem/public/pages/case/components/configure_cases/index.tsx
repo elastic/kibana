@@ -109,7 +109,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
       setConnector(id);
       persistCaseConfigure({
         connectorId: id,
-        connectorName: connectors.find(c => c.id === id)?.name ?? '',
+        connectorName: connectors.find((c) => c.id === id)?.name ?? '',
         closureType,
       });
     },
@@ -121,7 +121,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
       setClosureType(type);
       persistCaseConfigure({
         connectorId,
-        connectorName: connectors.find(c => c.id === connectorId)?.name ?? '',
+        connectorName: connectors.find((c) => c.id === connectorId)?.name ?? '',
         closureType: type,
       });
     },
@@ -132,12 +132,12 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     if (
       !isLoadingConnectors &&
       connectorId !== 'none' &&
-      !connectors.some(c => c.id === connectorId)
+      !connectors.some((c) => c.id === connectorId)
     ) {
       setConnectorIsValid(false);
     } else if (
       !isLoadingConnectors &&
-      (connectorId === 'none' || connectors.some(c => c.id === connectorId))
+      (connectorId === 'none' || connectors.some((c) => c.id === connectorId))
     ) {
       setConnectorIsValid(true);
     }
@@ -146,7 +146,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
   useEffect(() => {
     if (!isLoadingConnectors && connectorId !== 'none') {
       setEditedConnectorItem(
-        connectors.find(c => c.id === connectorId) as ActionConnectorTableItem
+        connectors.find((c) => c.id === connectorId) as ActionConnectorTableItem
       );
     }
   }, [connectors, connectorId]);

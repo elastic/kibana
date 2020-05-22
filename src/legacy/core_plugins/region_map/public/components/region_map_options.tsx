@@ -86,7 +86,7 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
       if (stateParams.selectedLayer) {
         setValue(
           paramName,
-          stateParams.selectedLayer.fields.find(f => f.name === value)
+          stateParams.selectedLayer.fields.find((f) => f.name === value)
         );
       }
     },

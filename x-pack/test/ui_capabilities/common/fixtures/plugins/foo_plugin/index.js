@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function(kibana) {
+export default function (kibana) {
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     name: 'foo',
