@@ -7646,7 +7646,6 @@
     "xpack.infra.kibanaMetrics.nodeDoesNotExistErrorMessage": "{nodeId} が存在しません。",
     "xpack.infra.legendControls.applyButton": "適用",
     "xpack.infra.legendControls.buttonLabel": "凡例を校正",
-    "xpack.infra.legendControls.errorMessage": "最低値は最高値よりも低く設定する必要があります",
     "xpack.infra.legendControls.maxLabel": "最高",
     "xpack.infra.legendControls.minLabel": "最低",
     "xpack.infra.legendControls.switchLabel": "自動計算範囲",
