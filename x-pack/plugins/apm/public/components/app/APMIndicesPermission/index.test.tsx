@@ -128,7 +128,10 @@ describe('APMIndicesPermission', () => {
   });
 
   it("shows children component when api doesn't return value", () => {
-    jest.spyOn(hooks, 'useFetcher');
+    jest.spyOn(hooks, 'useFetcher').mockReturnValue({
+      status: hooks.FETCH_STATUS.SUCCESS,
+      refetch: jest.fn(),
+    });
     const component = render(
       <MockApmPluginContextWrapper>
         <APMIndicesPermission>
