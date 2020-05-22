@@ -23,7 +23,7 @@ import { HitsCounter, HitsCounterProps } from './hits_counter';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 
-describe('hits counter', function() {
+describe('hits counter', function () {
   let props: HitsCounterProps;
   let component: ReactWrapper<HitsCounterProps>;
 
@@ -47,13 +47,13 @@ describe('hits counter', function() {
     expect(findTestSubject(component, 'resetSavedSearch').length).toBe(0);
   });
 
-  it('expect to render the number of hits', function() {
+  it('expect to render the number of hits', function () {
     component = mountWithIntl(<HitsCounter {...props} />);
     const hits = findTestSubject(component, 'discoverQueryHits');
     expect(hits.text()).toBe('2');
   });
 
-  it('expect to render 1,899 hits if 1899 hits given', function() {
+  it('expect to render 1,899 hits if 1899 hits given', function () {
     component = mountWithIntl(
       <HitsCounter hits={1899} showResetButton={false} onResetQuery={jest.fn()} />
     );
@@ -61,7 +61,7 @@ describe('hits counter', function() {
     expect(hits.text()).toBe('1,899');
   });
 
-  it('should reset query', function() {
+  it('should reset query', function () {
     component = mountWithIntl(<HitsCounter {...props} />);
     findTestSubject(component, 'resetSavedSearch').simulate('click');
     expect(props.onResetQuery).toHaveBeenCalled();

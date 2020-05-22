@@ -29,6 +29,6 @@ export function logWrapper<T extends Record<string, Function>>(
 }
 
 function logMethodCall(log: ToolingLog, prefix: string, prop: string, args: unknown[]) {
-  const argsStr = args.map(arg => (typeof arg === 'string' ? `'${arg}'` : arg)).join(', ');
+  const argsStr = args.map((arg) => (typeof arg === 'string' ? `'${arg}'` : arg)).join(', ');
   log.debug(`${prefix}.${prop}(${argsStr})`);
 }

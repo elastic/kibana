@@ -259,7 +259,7 @@ describe('<TemplateCreate />', () => {
         expect(
           find('summaryTabContent')
             .find('.euiTab')
-            .map(t => t.text())
+            .map((t) => t.text())
         ).toEqual(['Summary', 'Request']);
       });
 

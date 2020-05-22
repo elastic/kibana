@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
  */
 const numberOfHostsInFixture = 3;
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   describe('test metadata api', () => {

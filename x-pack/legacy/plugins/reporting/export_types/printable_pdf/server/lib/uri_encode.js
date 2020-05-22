@@ -9,9 +9,9 @@ import { url } from '../../../../../../../../src/plugins/kibana_utils/server';
 
 function toKeyValue(obj) {
   const parts = [];
-  forEach(obj, function(value, key) {
+  forEach(obj, function (value, key) {
     if (isArray(value)) {
-      forEach(value, function(arrayValue) {
+      forEach(value, function (arrayValue) {
         const keyStr = url.encodeUriQuery(key, true);
         const valStr = arrayValue === true ? '' : '=' + url.encodeUriQuery(arrayValue, true);
         parts.push(keyStr + valStr);

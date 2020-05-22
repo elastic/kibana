@@ -64,7 +64,7 @@ export class CollectorSet {
   };
 
   public getCollectorByType = (type: string) => {
-    return this.collectors.find(c => c.type === type);
+    return this.collectors.find((c) => c.type === type);
   };
 
   public isUsageCollector = (x: UsageCollector | any): x is UsageCollector => {
@@ -140,7 +140,7 @@ export class CollectorSet {
   };
 
   public bulkFetchUsage = async (callCluster: APICaller) => {
-    const usageCollectors = this.getFilteredCollectorSet(c => c instanceof UsageCollector);
+    const usageCollectors = this.getFilteredCollectorSet((c) => c instanceof UsageCollector);
     return await this.bulkFetch(callCluster, usageCollectors.collectors);
   };
 

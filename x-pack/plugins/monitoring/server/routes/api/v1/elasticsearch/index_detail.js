@@ -38,7 +38,7 @@ export function esIndexRoute(server) {
         }),
       },
     },
-    handler: async req => {
+    handler: async (req) => {
       try {
         const config = server.config();
         const ccs = req.payload.ccs;
