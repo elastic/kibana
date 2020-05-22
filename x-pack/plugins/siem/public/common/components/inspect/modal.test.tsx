@@ -167,7 +167,7 @@ describe('Modal Inspect', () => {
       expect(
         JSON.parse(
           wrapper
-            .find('.euiCodeBlock')
+            .find('EuiCodeBlock')
             .first()
             .text()
         )
@@ -244,7 +244,7 @@ describe('Modal Inspect', () => {
       expect(
         JSON.parse(
           wrapper
-            .find('.euiCodeBlock')
+            .find('EuiCodeBlock')
             .first()
             .text()
         )

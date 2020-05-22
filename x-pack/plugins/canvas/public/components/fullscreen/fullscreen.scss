@@ -1,4 +1,13 @@
 body.canvas-isFullscreen { // sass-lint:disable-line no-qualifying-elements
+  // following two rules are for overriding the header bar padding
+  &.euiBody--headerIsFixed {
+    padding-top: 0;
+  }
+
+  .headerWrapper ~ .app-wrapper {
+    min-height: 100vh;
+  }
+
   // hide global loading indicator
   .kbnLoadingIndicator {
     display: none;
