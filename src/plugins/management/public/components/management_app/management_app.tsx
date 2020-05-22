@@ -17,7 +17,6 @@
  * under the License.
  */
 import React, { useState, useEffect, useCallback } from 'react';
-import { Route, Router, Switch } from 'react-router-dom';
 import {
   AppMountContext,
   AppMountParameters,
@@ -29,10 +28,8 @@ import { EuiPage, EuiPageBody } from '@elastic/eui';
 import { ManagementStart } from '../../types';
 import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
 
-import { ManagementLandingPage } from '../langing';
+import { ManagementRouter } from './management_router';
 import { ManagementSidebarNav } from '../management_sidebar_nav';
-import { ManagementAppWrapper } from '../management_app_wrapper';
-
 import { reactRouterNavigate } from '../../../../kibana_react/public';
 
 import './_management_app.scss';
@@ -83,39 +80,16 @@ export const ManagementApp = ({ context, dependencies, history }: ManagementAppP
 
   return (
     <I18nProvider>
-      <Router history={history}>
-        <EuiPage>
-          <ManagementSidebarNav selectedId={selectedId} sections={sections} history={history} />
-          <EuiPageBody restrictWidth={true} className="mgtPage__body">
-            <Switch>
-              {sections.map((section) =>
-                section.apps.map((app) => (
-                  <Route
-                    path={`${app.basePath}`}
-                    component={() => (
-                      <ManagementAppWrapper
-                        app={app}
-                        setBreadcrumbs={setBreadcrumbs}
-                        onAppMounted={onAppMounted}
-                        history={history.createSubHistory(app.basePath)}
-                      />
-                    )}
-                  />
-                ))
-              )}
-              <Route
-                path={'/'}
-                component={() => (
-                  <ManagementLandingPage
-                    version={dependencies.kibanaVersion}
-                    setBreadcrumbs={setBreadcrumbs}
-                  />
-                )}
-              />
-            </Switch>
-          </EuiPageBody>
-        </EuiPage>
-      </Router>
+      <EuiPage>
+        <ManagementSidebarNav selectedId={selectedId} sections={sections} history={history} />
+        <ManagementRouter
+          history={history}
+          setBreadcrumbs={setBreadcrumbs}
+          onAppMounted={onAppMounted}
+          sections={sections}
+          dependencies={dependencies}
+        />
+      </EuiPage>
     </I18nProvider>
   );
 };

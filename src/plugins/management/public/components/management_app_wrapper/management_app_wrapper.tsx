@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useEffect, createRef, useRef, RefObject } from 'react';
+import React, { createRef, Component } from 'react';
 
 import { ChromeBreadcrumb, AppMountParameters, ScopedHistory } from 'kibana/public';
 import { ManagementApp } from '../../utils';
@@ -30,43 +30,39 @@ interface ManagementSectionWrapperProps {
   history: AppMountParameters['history'];
 }
 
-export const ManagementAppWrapper = ({
-  app,
-  setBreadcrumbs,
-  onAppMounted,
-  history,
-}: ManagementSectionWrapperProps) => {
-  const mountElementRef = useRef<RefObject<any>>();
-  const { mount, basePath } = app;
-  const unmount = useRef<Unmount>();
+export class ManagementAppWrapper extends Component<ManagementSectionWrapperProps> {
+  private unmount: Unmount;
+  private mountElementRef = createRef<HTMLElement>();
 
-  mountElementRef.current = createRef<HTMLElement>();
+  componentDidMount() {
+    const { setBreadcrumbs, app, onAppMounted, history, selectedId } = this.props;
+    const { mount, basePath } = app;
 
-  useEffect(() => {
-    if (mount && basePath) {
-      const mountResult = mount({
-        basePath,
-        setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => setBreadcrumbs(crumbs, history),
-        element: mountElementRef.current!.current,
-        history,
+    const mountResult = mount({
+      basePath,
+      setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => setBreadcrumbs(crumbs, history),
+      element: this.mountElementRef.current,
+      history: history.createSubHistory(app.basePath),
+    });
+
+    onAppMounted(app.id);
+
+    if (mountResult instanceof Promise) {
+      mountResult.then((um) => {
+        this.unmount = um;
       });
-
-      onAppMounted(app.id);
-
-      if (mountResult instanceof Promise) {
-        mountResult.then((um) => {
-          unmount.current = um;
-        });
-      } else {
-        unmount.current = mountResult;
-      }
-      return () => {
-        if (unmount.current) {
-          unmount.current();
-        }
-      };
+    } else {
+      this.unmount = mountResult;
     }
-  }, [app.id, basePath, history, mount, onAppMounted, setBreadcrumbs]);
+  }
 
-  return <main ref={mountElementRef.current} />;
-};
+  async componentWillUnmount() {
+    if (this.unmount) {
+      await this.unmount();
+    }
+  }
+
+  render() {
+    return <main ref={this.mountElementRef} />;
+  }
+}
