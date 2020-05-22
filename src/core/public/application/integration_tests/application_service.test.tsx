@@ -31,7 +31,7 @@ import { overlayServiceMock } from '../../overlays/overlay_service.mock';
 import { AppMountParameters } from '../types';
 import { ScopedHistory } from '../scoped_history';
 
-const flushPromises = () => new Promise(resolve => setImmediate(resolve));
+const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('ApplicationService', () => {
   let setupDeps: MockLifecycle<'setup'>;
@@ -68,7 +68,7 @@ describe('ApplicationService', () => {
         const { register } = service.setup(setupDeps);
 
         let resolveMount: () => void;
-        const promise = new Promise(resolve => {
+        const promise = new Promise((resolve) => {
           resolveMount = resolve;
         });
 
@@ -102,7 +102,7 @@ describe('ApplicationService', () => {
         const { register } = service.setup(setupDeps);
 
         let resolveMount: () => void;
-        const promise = new Promise(resolve => {
+        const promise = new Promise((resolve) => {
           resolveMount = resolve;
         });
 
@@ -129,17 +129,12 @@ describe('ApplicationService', () => {
   });
 
   describe('redirects', () => {
-    // https://remarkablemark.org/blog/2018/11/17/mock-window-location/
-    const { location } = window;
-    const reloadSpy = jest.fn();
-
     beforeAll(() => {
-      delete window.location;
-      (window as any).location = { reload: reloadSpy };
-    });
-
-    afterAll(() => {
-      window.location = location;
+      Object.defineProperty(window, 'location', {
+        value: {
+          reload: jest.fn(),
+        },
+      });
     });
 
     it('to full path when navigating to legacy app', async () => {
@@ -159,7 +154,7 @@ describe('ApplicationService', () => {
         id: 'app1',
         title: 'App1',
         mount: ({ onAppLeave }: AppMountParameters) => {
-          onAppLeave(actions => actions.default());
+          onAppLeave((actions) => actions.default());
           return () => undefined;
         },
       });
@@ -177,7 +172,7 @@ describe('ApplicationService', () => {
       await act(() => navigateToApp('myLegacyTestApp', { path: '#/some-path' }));
 
       expect(redirectTo).toHaveBeenCalledWith('/test/app/myLegacyTestApp#/some-path');
-      expect(reloadSpy).toHaveBeenCalled();
+      expect(window.location.reload).toHaveBeenCalled();
     });
   });
 
@@ -191,7 +186,7 @@ describe('ApplicationService', () => {
         id: 'app1',
         title: 'App1',
         mount: ({ onAppLeave }: AppMountParameters) => {
-          onAppLeave(actions => actions.default());
+          onAppLeave((actions) => actions.default());
           return () => undefined;
         },
       });
@@ -226,7 +221,7 @@ describe('ApplicationService', () => {
         id: 'app1',
         title: 'App1',
         mount: ({ onAppLeave }: AppMountParameters) => {
-          onAppLeave(actions => actions.confirm('confirmation-message', 'confirmation-title'));
+          onAppLeave((actions) => actions.confirm('confirmation-message', 'confirmation-title'));
           return () => undefined;
         },
       });
@@ -265,7 +260,7 @@ describe('ApplicationService', () => {
         id: 'app1',
         title: 'App1',
         mount: ({ onAppLeave }: AppMountParameters) => {
-          onAppLeave(actions => actions.confirm('confirmation-message', 'confirmation-title'));
+          onAppLeave((actions) => actions.confirm('confirmation-message', 'confirmation-title'));
           return () => undefined;
         },
       });

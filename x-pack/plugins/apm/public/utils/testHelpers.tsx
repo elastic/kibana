@@ -21,14 +21,14 @@ import { PromiseReturnType } from '../../typings/common';
 import {
   ESFilter,
   ESSearchResponse,
-  ESSearchRequest
+  ESSearchRequest,
 } from '../../typings/elasticsearch';
 import { MockApmPluginContextWrapper } from '../context/ApmPluginContext/MockApmPluginContext';
 
 export function toJson(wrapper: ReactWrapper) {
   return enzymeToJson(wrapper, {
     noKey: true,
-    mode: 'deep'
+    mode: 'deep',
   });
 }
 
@@ -36,14 +36,14 @@ export function mockMoment() {
   // avoid timezone issues
   jest
     .spyOn(moment.prototype, 'format')
-    .mockImplementation(function(this: Moment) {
+    .mockImplementation(function (this: Moment) {
       return `1st of January (mocking ${this.unix()})`;
     });
 
   // convert relative time to absolute time to avoid timing issues
   jest
     .spyOn(moment.prototype, 'fromNow')
-    .mockImplementation(function(this: Moment) {
+    .mockImplementation(function (this: Moment) {
       return `1337 minutes ago (mocking ${this.unix()})`;
     });
 }
@@ -72,11 +72,11 @@ export function mockNow(date: string | number | Date) {
 }
 
 export function delay(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export function expectTextsNotInDocument(output: any, texts: string[]) {
-  texts.forEach(text => {
+  texts.forEach((text) => {
     try {
       output.getByText(text);
     } catch (err) {
@@ -92,7 +92,7 @@ export function expectTextsNotInDocument(output: any, texts: string[]) {
 }
 
 export function expectTextsInDocument(output: any, texts: string[]) {
-  texts.forEach(text => {
+  texts.forEach((text) => {
     expect(output.getByText(text)).toBeInTheDocument();
   });
 }
@@ -127,17 +127,17 @@ export async function inspectSearchParams(
   fn: (mockSetup: MockSetup) => Promise<any>,
   options: Options = {}
 ) {
-  const spy = jest.fn().mockImplementation(async request => {
+  const spy = jest.fn().mockImplementation(async (request) => {
     return options.mockResponse
       ? options.mockResponse(request)
       : {
           hits: {
             hits: {
               total: {
-                value: 0
-              }
-            }
-          }
+                value: 0,
+              },
+            },
+          },
         };
   });
 
@@ -159,9 +159,9 @@ export async function inspectSearchParams(
       'apm_oss.transactionIndices': 'myIndex',
       'apm_oss.metricsIndices': 'myIndex',
       apmAgentConfigurationIndex: 'myIndex',
-      apmCustomLinkIndex: 'myIndex'
+      apmCustomLinkIndex: 'myIndex',
     },
-    dynamicIndexPattern: null as any
+    dynamicIndexPattern: null as any,
   };
   try {
     response = await fn(mockSetup);
@@ -175,7 +175,7 @@ export async function inspectSearchParams(
     response,
     error,
     spy,
-    teardown: () => spy.mockClear()
+    teardown: () => spy.mockClear(),
   };
 }
 

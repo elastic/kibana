@@ -21,28 +21,32 @@ const { setup } = pageHelpers.templateCreate;
 
 jest.mock('ui/new_platform');
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
-  // which does not produce a valid component wrapper
-  EuiComboBox: (props: any) => (
-    <input
-      data-test-subj="mockComboBox"
-      onChange={(syntheticEvent: any) => {
-        props.onChange([syntheticEvent['0']]);
-      }}
-    />
-  ),
-  // Mocking EuiCodeEditor, which uses React Ace under the hood
-  EuiCodeEditor: (props: any) => (
-    <input
-      data-test-subj="mockCodeEditor"
-      onChange={(syntheticEvent: any) => {
-        props.onChange(syntheticEvent.jsonString);
-      }}
-    />
-  ),
-}));
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
+    // which does not produce a valid component wrapper
+    EuiComboBox: (props: any) => (
+      <input
+        data-test-subj="mockComboBox"
+        onChange={(syntheticEvent: any) => {
+          props.onChange([syntheticEvent['0']]);
+        }}
+      />
+    ),
+    // Mocking EuiCodeEditor, which uses React Ace under the hood
+    EuiCodeEditor: (props: any) => (
+      <input
+        data-test-subj="mockCodeEditor"
+        onChange={(syntheticEvent: any) => {
+          props.onChange(syntheticEvent.jsonString);
+        }}
+      />
+    ),
+  };
+});
 
 const TEXT_MAPPING_FIELD = {
   name: 'text_datatype',
@@ -259,7 +263,7 @@ describe('<TemplateCreate />', () => {
         expect(
           find('summaryTabContent')
             .find('.euiTab')
-            .map(t => t.text())
+            .map((t) => t.text())
         ).toEqual(['Summary', 'Request']);
       });
 

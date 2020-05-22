@@ -49,32 +49,40 @@ const WATCH_VISUALIZE_DATA = {
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
 
-jest.mock('../../public/application/lib/api', () => ({
-  ...jest.requireActual('../../public/application/lib/api'),
-  loadIndexPatterns: async () => {
-    const INDEX_PATTERNS = [
-      { attributes: { title: 'index1' } },
-      { attributes: { title: 'index2' } },
-      { attributes: { title: 'index3' } },
-    ];
-    return await INDEX_PATTERNS;
-  },
-  getHttpClient: () => mockHttpClient,
-}));
+jest.mock('../../public/application/lib/api', () => {
+  const original = jest.requireActual('../../public/application/lib/api');
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
-  // which does not produce a valid component wrapper
-  EuiComboBox: (props: any) => (
-    <input
-      data-test-subj="mockComboBox"
-      onChange={(syntheticEvent: any) => {
-        props.onChange([syntheticEvent['0']]);
-      }}
-    />
-  ),
-}));
+  return {
+    ...original,
+    loadIndexPatterns: async () => {
+      const INDEX_PATTERNS = [
+        { attributes: { title: 'index1' } },
+        { attributes: { title: 'index2' } },
+        { attributes: { title: 'index3' } },
+      ];
+      return await INDEX_PATTERNS;
+    },
+    getHttpClient: () => mockHttpClient,
+  };
+});
+
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
+    // which does not produce a valid component wrapper
+    EuiComboBox: (props: any) => (
+      <input
+        data-test-subj="mockComboBox"
+        onChange={(syntheticEvent: any) => {
+          props.onChange([syntheticEvent['0']]);
+        }}
+      />
+    ),
+  };
+});
 
 const { setup } = pageHelpers.watchCreateThreshold;
 

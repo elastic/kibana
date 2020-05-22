@@ -56,8 +56,10 @@ export function createJestConfig({ kibanaDirectory, xPackKibanaDirectory }) {
       `${kibanaDirectory}/src/dev/jest/setup/mocks.js`,
       `${kibanaDirectory}/src/dev/jest/setup/react_testing_library.js`,
     ],
+    testEnvironment: 'jest-environment-jsdom-sixteen',
     testMatch: ['**/*.test.{js,ts,tsx}'],
     testRunner: 'jest-circus/runner',
+    testTimeout: 10000,
     transform: {
       '^.+\\.(js|tsx?)$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
       '^.+\\.html?$': 'jest-raw-loader',

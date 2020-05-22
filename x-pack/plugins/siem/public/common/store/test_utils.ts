@@ -78,14 +78,14 @@ export const createSpyMiddleware = <
   let spyDispatch: jest.Mock<Dispatch<A>>;
 
   return {
-    waitForAction: async actionType => {
+    waitForAction: async (actionType) => {
       type ResolvedAction = A extends { type: typeof actionType } ? A : never;
 
       // Error is defined here so that we get a better stack trace that points to the test from where it was used
       const err = new Error(`action '${actionType}' was not dispatched within the allocated time`);
 
       return new Promise<ResolvedAction>((resolve, reject) => {
-        const watch: ActionWatcher = action => {
+        const watch: ActionWatcher = (action) => {
           if (action.type === actionType) {
             watchers.delete(watch);
             clearTimeout(timeout);
@@ -112,8 +112,8 @@ export const createSpyMiddleware = <
     },
 
     actionSpyMiddleware: () => {
-      return next => {
-        spyDispatch = jest.fn(action => {
+      return (next) => {
+        spyDispatch = jest.fn((action) => {
           next(action);
           // loop through the list of watcher (if any) and call them with this action
           for (const watch of watchers) {

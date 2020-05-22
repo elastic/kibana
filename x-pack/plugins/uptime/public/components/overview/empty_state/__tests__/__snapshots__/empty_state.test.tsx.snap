@@ -633,7 +633,7 @@ exports[`EmptyState component doesn't render child components when count is fals
                 >
                   <EuiEmptyPrompt
                     actions={
-                      <ForwardRef>
+                      <EuiFlexGroup>
                         <EuiFlexItem>
                           <EuiButton
                             color="primary"
@@ -659,7 +659,7 @@ exports[`EmptyState component doesn't render child components when count is fals
                             />
                           </EuiButton>
                         </EuiFlexItem>
-                      </ForwardRef>
+                      </EuiFlexGroup>
                     }
                     body={
                       <React.Fragment>

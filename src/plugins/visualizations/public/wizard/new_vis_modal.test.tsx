@@ -24,7 +24,6 @@ import { NewVisModal } from './new_vis_modal';
 import { ApplicationStart, SavedObjectsStart } from '../../../../core/public';
 
 describe('NewVisModal', () => {
-  const { location } = window;
   const defaultVisTypeParams = {
     hidden: false,
     visualization: class Controller {
@@ -54,7 +53,7 @@ describe('NewVisModal', () => {
   ];
   const visTypes: TypesStart = {
     get: (id: string) => {
-      return _visTypes.find(vis => vis.name === id) as VisType;
+      return _visTypes.find((vis) => vis.name === id) as VisType;
     },
     all: () => {
       return _visTypes as VisType[];
@@ -66,17 +65,15 @@ describe('NewVisModal', () => {
   const uiSettings: any = { get: settingsGet };
 
   beforeAll(() => {
-    // https://remarkablemark.org/blog/2018/11/17/mock-window-location/
-    delete window.location;
-    (window as any).location = { assign: jest.fn() };
+    Object.defineProperty(window, 'location', {
+      value: {
+        assign: jest.fn(),
+      },
+    });
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  afterAll(() => {
-    window.location = location;
   });
 
   it('should render as expected', () => {

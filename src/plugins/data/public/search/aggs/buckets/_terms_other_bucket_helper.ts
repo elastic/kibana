@@ -65,7 +65,7 @@ const getAggResultBuckets = (
       for (let aggId = 0; aggId < responseAggs.length; aggId++) {
         const aggById = responseAggs[aggId];
         const aggKey = keys(responseAgg)[aggId];
-        const aggConfig = find(aggConfigs.aggs, agg => agg.id === aggKey);
+        const aggConfig = find(aggConfigs.aggs, (agg) => agg.id === aggKey);
         if (aggConfig) {
           const aggResultBucket = find(aggById.buckets, (bucket, bucketObjKey) => {
             const bucketKey = aggConfig
@@ -102,9 +102,9 @@ const getAggConfigResultMissingBuckets = (responseAggs: any, aggId: string) => {
     if (matchingBucket) resultBuckets.push(matchingBucket);
     return resultBuckets;
   }
-  each(responseAggs, agg => {
+  each(responseAggs, (agg) => {
     if (agg.buckets) {
-      each(agg.buckets, bucket => {
+      each(agg.buckets, (bucket) => {
         resultBuckets = [...resultBuckets, ...getAggConfigResultMissingBuckets(bucket, aggId)];
       });
     }
@@ -137,8 +137,8 @@ export const buildOtherBucketAgg = (
   aggWithOtherBucket: IBucketAggConfig,
   response: any
 ) => {
-  const bucketAggs = aggConfigs.aggs.filter(agg => agg.type.type === AggGroupNames.Buckets);
-  const index = bucketAggs.findIndex(agg => agg.id === aggWithOtherBucket.id);
+  const bucketAggs = aggConfigs.aggs.filter((agg) => agg.type.type === AggGroupNames.Buckets);
+  const index = bucketAggs.findIndex((agg) => agg.id === aggWithOtherBucket.id);
   const aggs = aggConfigs.toDsl();
   const indexPattern = aggWithOtherBucket.params.field.indexPattern;
 
@@ -215,7 +215,7 @@ export const buildOtherBucketAgg = (
     }
 
     // create not filters for all the buckets
-    each(agg.buckets, bucket => {
+    each(agg.buckets, (bucket) => {
       if (bucket.key === '__missing__') return;
       const filter = currentAgg.createFilter(bucket.key);
       filter.meta.negate = true;
@@ -289,7 +289,7 @@ export const updateMissingBucket = (
 ) => {
   const updatedResponse = cloneDeep(response);
   const aggResultBuckets = getAggConfigResultMissingBuckets(updatedResponse.aggregations, agg.id);
-  aggResultBuckets.forEach(bucket => {
+  aggResultBuckets.forEach((bucket) => {
     bucket.key = '__missing__';
   });
   return updatedResponse;

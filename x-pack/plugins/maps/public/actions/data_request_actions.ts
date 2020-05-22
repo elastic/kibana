@@ -66,7 +66,7 @@ export function clearDataRequests(layer: ILayer) {
 
 export function cancelAllInFlightRequests() {
   return (dispatch: Dispatch, getState: () => MapStoreState) => {
-    getLayerList(getState()).forEach(layer => {
+    getLayerList(getState()).forEach((layer) => {
       dispatch<any>(clearDataRequests(layer));
     });
   };
@@ -126,7 +126,7 @@ function getDataRequestContext(
 
 export function syncDataForAllLayers() {
   return async (dispatch: Dispatch, getState: () => MapStoreState) => {
-    const syncPromises = getLayerList(getState()).map(async layer => {
+    const syncPromises = getLayerList(getState()).map(async (layer) => {
       return dispatch<any>(syncDataForLayer(layer));
     });
     await Promise.all(syncPromises);

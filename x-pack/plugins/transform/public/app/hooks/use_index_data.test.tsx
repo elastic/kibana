@@ -30,7 +30,7 @@ const query: SimpleQuery = {
 };
 
 describe('Transform: useIndexData()', () => {
-  test('indexPattern set triggers loading', async done => {
+  test('indexPattern set triggers loading', async (done) => {
     const { result, waitForNextUpdate } = renderHook(() =>
       useIndexData(
         ({
@@ -54,7 +54,7 @@ describe('Transform: useIndexData()', () => {
 
 describe('Transform: <DataGrid /> with useIndexData()', () => {
   // Using the async/await wait()/done() pattern to avoid act() errors.
-  test('Minimal initialization', async done => {
+  test('Minimal initialization', async (done) => {
     // Arrange
     const indexPattern = {
       title: 'the-index-pattern-title',

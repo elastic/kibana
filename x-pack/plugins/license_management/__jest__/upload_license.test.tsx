@@ -52,16 +52,12 @@ const thunkServices = {
 };
 
 describe('UploadLicense', () => {
-  // https://remarkablemark.org/blog/2018/11/17/mock-window-location/
-  const { location } = window;
-
   beforeAll(() => {
-    delete window.location;
-    (window as any).location = { reload: jest.fn() };
-  });
-
-  afterAll(() => {
-    window.location = location;
+    Object.defineProperty(window, 'location', {
+      value: {
+        reload: jest.fn(),
+      },
+    });
   });
 
   beforeEach(() => {

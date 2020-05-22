@@ -7,16 +7,12 @@
 import { SessionExpired } from './session_expired';
 
 describe('#logout', () => {
-  const { location } = window;
   const mockGetItem = jest.fn().mockReturnValue(null);
   const CURRENT_URL = '/foo/bar?baz=quz#quuz';
   const LOGOUT_URL = '/logout';
   const TENANT = '/some-basepath';
 
   beforeAll(() => {
-    // https://remarkablemark.org/blog/2018/11/17/mock-window-location/
-    delete window.location;
-    (window as any).location = { assign: jest.fn() };
     Object.defineProperty(window, 'sessionStorage', {
       value: {
         getItem: mockGetItem,
@@ -26,18 +22,20 @@ describe('#logout', () => {
   });
 
   beforeEach(() => {
-    (window as any).location = {
-      pathname: CURRENT_URL,
-      assign: jest.fn(),
-      search: '',
-      hash: '',
-    };
+    Object.defineProperty(window, 'location', {
+      value: {
+        assign: jest.fn(),
+        pathname: CURRENT_URL,
+        search: '',
+        hash: '',
+      },
+      configurable: true,
+    });
     mockGetItem.mockReset();
   });
 
   afterAll(() => {
     delete (window as any).sessionStorage;
-    window.location = location;
   });
 
   it(`redirects user to the logout URL with 'msg' and 'next' parameters`, async () => {

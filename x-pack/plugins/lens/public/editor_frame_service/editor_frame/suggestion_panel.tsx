@@ -171,7 +171,7 @@ export function SuggestionPanel({
       activeVisualizationId: currentVisualizationId,
       visualizationState: currentVisualizationState,
     })
-      .map(suggestion => ({
+      .map((suggestion) => ({
         ...suggestion,
         previewExpression: preparePreviewExpression(
           suggestion,
@@ -181,7 +181,7 @@ export function SuggestionPanel({
           frame
         ),
       }))
-      .filter(suggestion => !suggestion.hide)
+      .filter((suggestion) => !suggestion.hide)
       .slice(0, MAX_SUGGESTIONS_DISPLAYED);
 
     const newStateExpression =
@@ -368,7 +368,7 @@ function getPreviewExpression(
       visualizableState.keptLayerIds
     );
     const changedLayers = datasource.getLayers(visualizableState.datasourceState);
-    changedLayers.forEach(layerId => {
+    changedLayers.forEach((layerId) => {
       if (updatedLayerApis[layerId]) {
         updatedLayerApis[layerId] = datasource.getPublicAPI({
           layerId,

@@ -27,7 +27,7 @@ const getPageSizeValue = () => {
   return value;
 };
 
-export const MonitorList: React.FC<MonitorListProps> = props => {
+export const MonitorList: React.FC<MonitorListProps> = (props) => {
   const { filters } = props;
 
   const [pageSize, setPageSize] = useState<number>(getPageSizeValue);

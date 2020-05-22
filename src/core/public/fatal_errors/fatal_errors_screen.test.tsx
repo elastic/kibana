@@ -25,133 +25,123 @@ import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { FatalErrorsScreen } from './fatal_errors_screen';
 
-const errorInfoFoo = {
-  message: 'foo',
-  stack: 'Error: foo\n  stack...foo.js:1:1',
-};
-const errorInfoBar = {
-  message: 'bar',
-  stack: 'Error: bar\n  stack...bar.js:1:1',
-};
-
-const defaultProps = {
-  buildNumber: 123,
-  kibanaVersion: 'bar',
-  errorInfo$: Rx.of(errorInfoFoo, errorInfoBar),
-};
-
-const noop = () => {
-  // noop
-};
-
-const { location, addEventListener } = window;
-
-beforeAll(() => {
-  // https://remarkablemark.org/blog/2018/11/17/mock-window-location/
-  delete window.location;
-  delete window.addEventListener;
-
-  window.addEventListener = jest.fn();
-  (window as any).location = {
-    reload: jest.fn(),
+describe('FatalErrorsScreen', () => {
+  const errorInfoFoo = {
+    message: 'foo',
+    stack: 'Error: foo\n  stack...foo.js:1:1',
   };
-});
+  const errorInfoBar = {
+    message: 'bar',
+    stack: 'Error: bar\n  stack...bar.js:1:1',
+  };
 
-afterEach(() => {
-  jest.restoreAllMocks();
-});
+  const defaultProps = {
+    buildNumber: 123,
+    kibanaVersion: 'bar',
+    errorInfo$: Rx.of(errorInfoFoo, errorInfoBar),
+  };
 
-afterAll(() => {
-  window.location = location;
-  window.addEventListener = addEventListener;
-});
+  const noop = () => {
+    // noop
+  };
 
-describe('reloading', () => {
-  it('refreshes the page if a `hashchange` event is emitted', () => {
-    shallowWithIntl(<FatalErrorsScreen {...defaultProps} />);
-    expect(window.addEventListener).toHaveBeenCalledTimes(1);
-    expect(window.addEventListener).toHaveBeenCalledWith(
-      'hashchange',
-      expect.any(Function),
-      undefined
-    );
-
-    expect(window.location.reload).not.toHaveBeenCalled();
-    const [, handler] = (window as any).addEventListener.mock.calls[0];
-    (handler as jest.Mock)();
-    expect(window.location.reload).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe('rendering', () => {
-  it('render matches snapshot', () => {
-    expect(shallowWithIntl(<FatalErrorsScreen {...defaultProps} />)).toMatchSnapshot();
-  });
-
-  it('rerenders when errorInfo$ emits more errors', () => {
-    const errorInfo$ = new Rx.ReplaySubject<typeof errorInfoFoo>();
-
-    const el = shallowWithIntl(<FatalErrorsScreen {...defaultProps} errorInfo$={errorInfo$} />);
-
-    expect(el.find(EuiCallOut)).toHaveLength(0);
-
-    errorInfo$.next(errorInfoFoo);
-    el.update(); // allow setState() to cause a render
-
-    expect(el.find(EuiCallOut)).toHaveLength(1);
-
-    errorInfo$.next(errorInfoBar);
-    el.update(); // allow setState() to cause a render
-
-    expect(el.find(EuiCallOut)).toHaveLength(2);
-  });
-});
-
-describe('buttons', () => {
   beforeAll(() => {
-    delete (window as any).localStorage;
-    delete (window as any).sessionStorage;
-
-    Object.assign(window, {
-      localStorage: {
-        clear: jest.fn(),
-      },
-      sessionStorage: {
-        clear: jest.fn(),
+    Object.defineProperty(window, 'location', {
+      value: {
+        reload: jest.fn(),
       },
     });
   });
 
-  afterAll(() => {
-    delete (window as any).localStorage;
-    delete (window as any).sessionStorage;
-  });
+  describe('reloading', () => {
+    it('refreshes the page if a `hashchange` event is emitted', () => {
+      const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
 
-  describe('"Clear your session"', () => {
-    it('clears localStorage, sessionStorage, the location.hash, and reloads the page', () => {
-      window.location.hash = '/foo/bar';
-      jest.spyOn(window.location, 'reload').mockImplementation(noop);
+      shallowWithIntl(<FatalErrorsScreen {...defaultProps} />);
+      expect(addEventListenerSpy).toHaveBeenCalledTimes(1);
+      expect(addEventListenerSpy).toHaveBeenCalledWith(
+        'hashchange',
+        expect.any(Function),
+        undefined
+      );
 
-      const el = mountWithIntl(<FatalErrorsScreen {...defaultProps} />);
-      const button = el.find('button').find(testSubjSelector('clearSession'));
-      button.simulate('click');
-
-      expect(window.localStorage.clear).toHaveBeenCalled();
-      expect(window.sessionStorage.clear).toHaveBeenCalled();
-      expect(window.location.reload).toHaveBeenCalled();
-      expect(window.location.hash).toBe('');
+      expect(window.location.reload).not.toHaveBeenCalled();
+      const [, handler] = (window as any).addEventListener.mock.calls[0];
+      (handler as jest.Mock)();
+      expect(window.location.reload).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe('"Go back"', () => {
-    it('calls window.history.back()', () => {
-      jest.spyOn(window.history, 'back').mockImplementation(noop);
+  describe('rendering', () => {
+    it('render matches snapshot', () => {
+      expect(shallowWithIntl(<FatalErrorsScreen {...defaultProps} />)).toMatchSnapshot();
+    });
 
-      const el = mountWithIntl(<FatalErrorsScreen {...defaultProps} />);
-      const button = el.find('button').find(testSubjSelector('goBack'));
-      button.simulate('click');
+    it('rerenders when errorInfo$ emits more errors', () => {
+      const errorInfo$ = new Rx.ReplaySubject<typeof errorInfoFoo>();
 
-      expect(window.history.back).toHaveBeenCalled();
+      const el = shallowWithIntl(<FatalErrorsScreen {...defaultProps} errorInfo$={errorInfo$} />);
+
+      expect(el.find(EuiCallOut)).toHaveLength(0);
+
+      errorInfo$.next(errorInfoFoo);
+      el.update(); // allow setState() to cause a render
+
+      expect(el.find(EuiCallOut)).toHaveLength(1);
+
+      errorInfo$.next(errorInfoBar);
+      el.update(); // allow setState() to cause a render
+
+      expect(el.find(EuiCallOut)).toHaveLength(2);
+    });
+  });
+
+  describe('buttons', () => {
+    beforeAll(() => {
+      delete (window as any).localStorage;
+      delete (window as any).sessionStorage;
+
+      Object.assign(window, {
+        localStorage: {
+          clear: jest.fn(),
+        },
+        sessionStorage: {
+          clear: jest.fn(),
+        },
+      });
+    });
+
+    afterAll(() => {
+      delete (window as any).localStorage;
+      delete (window as any).sessionStorage;
+    });
+
+    describe('"Clear your session"', () => {
+      it('clears localStorage, sessionStorage, the location.hash, and reloads the page', () => {
+        window.location.hash = '/foo/bar';
+        jest.spyOn(window.location, 'reload').mockImplementation(noop);
+
+        const el = mountWithIntl(<FatalErrorsScreen {...defaultProps} />);
+        const button = el.find('button').find(testSubjSelector('clearSession'));
+        button.simulate('click');
+
+        expect(window.localStorage.clear).toHaveBeenCalled();
+        expect(window.sessionStorage.clear).toHaveBeenCalled();
+        expect(window.location.reload).toHaveBeenCalled();
+        expect(window.location.hash).toBe('');
+      });
+    });
+
+    describe('"Go back"', () => {
+      it('calls window.history.back()', () => {
+        jest.spyOn(window.history, 'back').mockImplementation(noop);
+
+        const el = mountWithIntl(<FatalErrorsScreen {...defaultProps} />);
+        const button = el.find('button').find(testSubjSelector('goBack'));
+        button.simulate('click');
+
+        expect(window.history.back).toHaveBeenCalled();
+      });
     });
   });
 });

@@ -36,7 +36,7 @@ export const sideEffectSimulator: () => SideEffectSimulator = () => {
   /**
    * Get the simulate `DOMRect` for `element`.
    */
-  const contentRectForElement: (target: Element) => DOMRect = target => {
+  const contentRectForElement: (target: Element) => DOMRect = (target) => {
     if (contentRects.has(target)) {
       return contentRects.get(target)!;
     }
@@ -61,7 +61,7 @@ export const sideEffectSimulator: () => SideEffectSimulator = () => {
    */
   jest
     .spyOn(Element.prototype, 'getBoundingClientRect')
-    .mockImplementation(function(this: Element) {
+    .mockImplementation(function (this: Element) {
       return contentRectForElement(this);
     });
 
