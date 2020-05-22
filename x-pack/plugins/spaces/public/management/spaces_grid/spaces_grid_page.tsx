@@ -131,9 +131,7 @@ export class SpacesGridPage extends Component<Props, State> {
                 id="xpack.spaces.management.spacesGridPage.loadingTitle"
                 defaultMessage="loading…"
               />
-            ) : (
-              undefined
-            )
+            ) : undefined
           }
         />
       </Fragment>

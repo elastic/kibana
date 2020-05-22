@@ -80,7 +80,7 @@ export const renderApp = (
 
   const mlLicense = setLicenseCache(deps.licensing);
 
-  appMountParams.onAppLeave(actions => actions.default());
+  appMountParams.onAppLeave((actions) => actions.default());
 
   ReactDOM.render(
     <App coreStart={coreStart} deps={deps} history={appMountParams.history} />,

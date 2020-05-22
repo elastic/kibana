@@ -291,7 +291,7 @@ export class ManageSpacePage extends Component<Props, State> {
       const originalSpace: Space = this.state.originalSpace as Space;
       const space: Space = this.state.space as Space;
 
-      spacesManager.getActiveSpace().then(activeSpace => {
+      spacesManager.getActiveSpace().then((activeSpace) => {
         const editingActiveSpace = activeSpace.id === originalSpace.id;
 
         const haveDisabledFeaturesChanged =
@@ -399,7 +399,7 @@ export class ManageSpacePage extends Component<Props, State> {
           });
         }
       })
-      .catch(error => {
+      .catch((error) => {
         const message = error?.body?.message ?? '';
 
         this.setState({ saveInProgress: false });

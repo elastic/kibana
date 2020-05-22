@@ -131,7 +131,7 @@ export const IndexPatternTable = ({
   services.setBreadcrumbs(getListBreadcrumbs());
 
   useEffect(() => {
-    (async function() {
+    (async function () {
       const options = await getIndexPatternCreationOptions(history.push);
       const gettedIndexPatterns: IndexPatternTableItem[] = await getIndexPatterns(
         services.savedObjectsClient,

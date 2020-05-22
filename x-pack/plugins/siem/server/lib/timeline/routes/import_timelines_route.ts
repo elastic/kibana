@@ -236,8 +236,10 @@ export const importTimelinesRoute = (
           ];
         }
 
-        const errorsResp = importTimelineResponse.filter(resp => isBulkError(resp)) as BulkError[];
-        const successes = importTimelineResponse.filter(resp => {
+        const errorsResp = importTimelineResponse.filter((resp) =>
+          isBulkError(resp)
+        ) as BulkError[];
+        const successes = importTimelineResponse.filter((resp) => {
           if (isImportRegular(resp)) {
             return resp.status_code === 200;
           } else {

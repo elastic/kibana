@@ -100,14 +100,14 @@ export const EditIndexPattern = withRouter(
   ({ indexPattern, config, services, history, location }: EditIndexPatternProps) => {
     const [fields, setFields] = useState<IndexPatternField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<IndexPatternField[]>(
-      indexPattern.fields.filter(field => field.type === 'conflict')
+      indexPattern.fields.filter((field) => field.type === 'conflict')
     );
     const [defaultIndex, setDefaultIndex] = useState<string>(config.get('defaultIndex'));
     const [tags, setTags] = useState<any[]>([]);
 
     useEffect(() => {
       setFields(indexPattern.getNonScriptedFields());
-      setConflictedFields(indexPattern.fields.filter(field => field.type === 'conflict'));
+      setConflictedFields(indexPattern.fields.filter((field) => field.type === 'conflict'));
     }, [indexPattern]);
 
     useEffect(() => {
@@ -127,7 +127,7 @@ export const EditIndexPattern = withRouter(
     const refreshFields = () => {
       services.overlays
         .openConfirm(confirmMessage, confirmModalOptionsRefresh)
-        .then(async isConfirmed => {
+        .then(async (isConfirmed) => {
           if (isConfirmed) {
             await indexPattern.init(true);
             setFields(indexPattern.getNonScriptedFields());
@@ -144,7 +144,7 @@ export const EditIndexPattern = withRouter(
             services.indexPatternManagement
           );
           config.remove('defaultIndex');
-          const otherPatterns = filter(indexPatterns, pattern => {
+          const otherPatterns = filter(indexPatterns, (pattern) => {
             return pattern.id !== indexPattern.id;
           });
 
@@ -153,12 +153,12 @@ export const EditIndexPattern = withRouter(
           }
         }
 
-        Promise.resolve(indexPattern.destroy()).then(function() {
+        Promise.resolve(indexPattern.destroy()).then(function () {
           history.push('');
         });
       }
 
-      services.overlays.openConfirm('', confirmModalOptionsDelete).then(isConfirmed => {
+      services.overlays.openConfirm('', confirmModalOptionsDelete).then((isConfirmed) => {
         if (isConfirmed) {
           doRemove();
         }

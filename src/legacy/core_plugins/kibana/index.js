@@ -31,22 +31,16 @@ import { kbnBaseUrl } from '../../../plugins/kibana_legacy/server';
 
 const mkdirAsync = promisify(Fs.mkdir);
 
-export default function(kibana) {
+export default function (kibana) {
   return new kibana.Plugin({
     id: 'kibana',
-    config: function(Joi) {
+    config: function (Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         index: Joi.string().default('.kibana'),
-        autocompleteTerminateAfter: Joi.number()
-          .integer()
-          .min(1)
-          .default(100000),
+        autocompleteTerminateAfter: Joi.number().integer().min(1).default(100000),
         // TODO Also allow units here like in elasticsearch config once this is moved to the new platform
-        autocompleteTimeout: Joi.number()
-          .integer()
-          .min(1)
-          .default(1000),
+        autocompleteTimeout: Joi.number().integer().min(1).default(1000),
       }).default();
     },
 
@@ -83,7 +77,7 @@ export default function(kibana) {
       uiSettingDefaults: getUiSettingDefaults(),
     },
 
-    preInit: async function(server) {
+    preInit: async function (server) {
       try {
         // Create the data directory (recursively, if the a parent dir doesn't exist).
         // If it already exists, does nothing.
@@ -95,7 +89,7 @@ export default function(kibana) {
       }
     },
 
-    init: async function(server) {
+    init: async function (server) {
       const { usageCollection } = server.newPlatform.setup.plugins;
       // routes
       importApi(server);

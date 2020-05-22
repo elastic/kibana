@@ -70,7 +70,7 @@ export class RemoteClusterEdit extends Component {
     this.props.stopEditingCluster();
   }
 
-  save = clusterConfig => {
+  save = (clusterConfig) => {
     this.props.editCluster(clusterConfig);
   };
 

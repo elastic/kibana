@@ -74,8 +74,8 @@ export class IndexPatternManagementPlugin
     const newAppPath = `management/kibana/${IPM_APP_ID}`;
     const legacyPatternsPath = 'management/kibana/index_patterns';
 
-    kibanaLegacy.forwardApp('management/kibana/index_pattern', newAppPath, path => '/create');
-    kibanaLegacy.forwardApp(legacyPatternsPath, newAppPath, path => {
+    kibanaLegacy.forwardApp('management/kibana/index_pattern', newAppPath, (path) => '/create');
+    kibanaLegacy.forwardApp(legacyPatternsPath, newAppPath, (path) => {
       const pathInApp = path.substr(legacyPatternsPath.length + 1);
       return pathInApp && `/patterns${pathInApp}`;
     });
@@ -84,7 +84,7 @@ export class IndexPatternManagementPlugin
       id: IPM_APP_ID,
       title: sectionsHeader,
       order: 0,
-      mount: async params => {
+      mount: async (params) => {
         const { mountManagementSection } = await import('./management_app');
 
         return mountManagementSection(core.getStartServices, params);

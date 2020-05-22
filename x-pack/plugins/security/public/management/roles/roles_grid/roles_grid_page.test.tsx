@@ -78,7 +78,7 @@ describe('<RolesGridPage />', () => {
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
 
-    await waitForRender(wrapper, updatedWrapper => {
+    await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(EuiIcon).length > initialIconCount;
     });
 
@@ -96,7 +96,7 @@ describe('<RolesGridPage />', () => {
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
 
-    await waitForRender(wrapper, updatedWrapper => {
+    await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(EuiIcon).length > initialIconCount;
     });
 
@@ -114,7 +114,7 @@ describe('<RolesGridPage />', () => {
         notifications={coreMock.createStart().notifications}
       />
     );
-    await waitForRender(wrapper, updatedWrapper => {
+    await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(PermissionDenied).length > 0;
     });
     expect(wrapper.find(PermissionDenied)).toMatchSnapshot();
@@ -130,7 +130,7 @@ describe('<RolesGridPage />', () => {
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
 
-    await waitForRender(wrapper, updatedWrapper => {
+    await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(EuiIcon).length > initialIconCount;
     });
 
@@ -160,7 +160,7 @@ describe('<RolesGridPage />', () => {
     );
     const initialIconCount = wrapper.find(EuiIcon).length;
 
-    await waitForRender(wrapper, updatedWrapper => {
+    await waitForRender(wrapper, (updatedWrapper) => {
       return updatedWrapper.find(EuiIcon).length > initialIconCount;
     });
 

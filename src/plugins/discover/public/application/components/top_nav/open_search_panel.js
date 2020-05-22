@@ -72,7 +72,7 @@ export function OpenSearchPanel(props) {
               }),
             },
           ]}
-          onChoose={id => {
+          onChoose={(id) => {
             window.location.assign(props.makeUrl(id));
             props.onClose();
           }}

@@ -145,13 +145,13 @@ app.controller(
 
     const visibleSubscription = getCoreChrome()
       .getIsVisible$()
-      .subscribe(isVisible => {
+      .subscribe((isVisible) => {
         $scope.$evalAsync(() => {
           $scope.isVisible = isVisible;
         });
       });
 
-    $scope.$listen(globalState, 'fetch_with_changes', diff => {
+    $scope.$listen(globalState, 'fetch_with_changes', (diff) => {
       if (diff.includes('time') || diff.includes('filters')) {
         onQueryChange({
           filters: [...globalState.filters, ...getAppStateFilters()],
@@ -163,7 +163,7 @@ app.controller(
       }
     });
 
-    $scope.$listen($state, 'fetch_with_changes', function(diff) {
+    $scope.$listen($state, 'fetch_with_changes', function (diff) {
       if ((diff.includes('query') || diff.includes('filters')) && $state.query) {
         onQueryChange({
           filters: [...globalState.filters, ...getAppStateFilters()],
@@ -209,16 +209,16 @@ app.controller(
 
     $scope.$watch(
       () => getMapsCapabilities().saveQuery,
-      newCapability => {
+      (newCapability) => {
         $scope.showSaveQuery = newCapability;
       }
     );
 
-    $scope.onQuerySaved = savedQuery => {
+    $scope.onQuerySaved = (savedQuery) => {
       $scope.savedQuery = savedQuery;
     };
 
-    $scope.onSavedQueryUpdated = savedQuery => {
+    $scope.onSavedQueryUpdated = (savedQuery) => {
       $scope.savedQuery = { ...savedQuery };
     };
 
@@ -259,7 +259,7 @@ app.controller(
       }
     }
 
-    $scope.$watch('savedQuery', newSavedQuery => {
+    $scope.$watch('savedQuery', (newSavedQuery) => {
       if (!newSavedQuery) return;
 
       $state.savedQuery = newSavedQuery.id;
@@ -268,13 +268,13 @@ app.controller(
 
     $scope.$watch(
       () => $state.savedQuery,
-      newSavedQueryId => {
+      (newSavedQueryId) => {
         if (!newSavedQueryId) {
           $scope.savedQuery = undefined;
           return;
         }
         if ($scope.savedQuery && newSavedQueryId !== $scope.savedQuery.id) {
-          savedQueryService.getSavedQuery(newSavedQueryId).then(savedQuery => {
+          savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
             $scope.$evalAsync(() => {
               $scope.savedQuery = savedQuery;
               updateStateFromSavedQuery(savedQuery);
@@ -311,19 +311,19 @@ app.controller(
     }
 
     $scope.indexPatterns = [];
-    $scope.onQuerySubmit = function({ dateRange, query }) {
+    $scope.onQuerySubmit = function ({ dateRange, query }) {
       onQueryChange({
         query,
         time: dateRange,
         refresh: true,
       });
     };
-    $scope.updateFiltersAndDispatch = function(filters) {
+    $scope.updateFiltersAndDispatch = function (filters) {
       onQueryChange({
         filters,
       });
     };
-    $scope.onRefreshChange = function({ isPaused, refreshInterval }) {
+    $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
       $scope.refreshConfig = {
         isPaused,
         interval: refreshInterval ? refreshInterval : $scope.refreshConfig.interval,
@@ -334,7 +334,7 @@ app.controller(
     };
 
     function addFilters(newFilters) {
-      newFilters.forEach(filter => {
+      newFilters.forEach((filter) => {
         filter.$state = { store: esFilters.FilterStateStore.APP_STATE };
       });
       $scope.updateFiltersAndDispatch([...$scope.filters, ...newFilters]);
@@ -439,7 +439,7 @@ app.controller(
     let prevIndexPatternIds;
     async function updateIndexPatterns(nextIndexPatternIds) {
       const indexPatterns = [];
-      const getIndexPatternPromises = nextIndexPatternIds.map(async indexPatternId => {
+      const getIndexPatternPromises = nextIndexPatternIds.map(async (indexPatternId) => {
         try {
           const indexPattern = await getIndexPatternService().get(indexPatternId);
           indexPatterns.push(indexPattern);
@@ -659,7 +659,7 @@ app.controller(
                     isTitleDuplicateConfirmed,
                     onTitleDuplicate,
                   };
-                  return doSave(saveOptions).then(response => {
+                  return doSave(saveOptions).then((response) => {
                     // If the save wasn't successful, put the original values back.
                     if (!response.id || response.error) {
                       savedMap.title = currentTitle;

@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import { Response } from 'supertest';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');

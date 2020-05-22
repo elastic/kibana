@@ -75,7 +75,7 @@ const UsersTableComponent = React.memo<UsersTableProps>(
     sort,
   }) => {
     const updateLimitPagination = useCallback(
-      newLimit =>
+      (newLimit) =>
         updateNetworkTable({
           networkType: type,
           tableType,
@@ -85,7 +85,7 @@ const UsersTableComponent = React.memo<UsersTableProps>(
     );
 
     const updateActivePage = useCallback(
-      newPage =>
+      (newPage) =>
         updateNetworkTable({
           networkType: type,
           tableType,

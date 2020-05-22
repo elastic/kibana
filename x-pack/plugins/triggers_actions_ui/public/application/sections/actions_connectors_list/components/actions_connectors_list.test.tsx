@@ -94,10 +94,7 @@ describe('actions_connectors_list component empty', () => {
   });
 
   test('if click create button should render ConnectorAddFlyout', () => {
-    wrapper
-      .find('[data-test-subj="createFirstActionButton"]')
-      .first()
-      .simulate('click');
+    wrapper.find('[data-test-subj="createFirstActionButton"]').first().simulate('click');
     expect(wrapper.find('ConnectorAddFlyout')).toHaveLength(1);
   });
 });
@@ -207,10 +204,7 @@ describe('actions_connectors_list component with items', () => {
   });
 
   test('if select item for edit should render ConnectorEditFlyout', async () => {
-    await wrapper
-      .find('[data-test-subj="edit1"]')
-      .first()
-      .simulate('click');
+    await wrapper.find('[data-test-subj="edit1"]').first().simulate('click');
 
     expect(wrapper.find('ConnectorEditFlyout')).toHaveLength(1);
   });
@@ -370,7 +364,7 @@ describe('actions_connectors_list with show only capability', () => {
   it('renders table of connectors with delete button disabled', () => {
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
-    wrapper.find('EuiTableRow').forEach(elem => {
+    wrapper.find('EuiTableRow').forEach((elem) => {
       const deleteButton = elem.find('[data-test-subj="deleteConnector"]').first();
       expect(deleteButton).toBeTruthy();
       expect(deleteButton.prop('isDisabled')).toBeTruthy();
@@ -470,18 +464,12 @@ describe('actions_connectors_list component with disabled items', () => {
   it('renders table of connectors', () => {
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
-    expect(
-      wrapper
-        .find('EuiTableRow')
-        .at(0)
-        .prop('className')
-    ).toEqual('actConnectorsList__tableRowDisabled');
-    expect(
-      wrapper
-        .find('EuiTableRow')
-        .at(1)
-        .prop('className')
-    ).toEqual('actConnectorsList__tableRowDisabled');
+    expect(wrapper.find('EuiTableRow').at(0).prop('className')).toEqual(
+      'actConnectorsList__tableRowDisabled'
+    );
+    expect(wrapper.find('EuiTableRow').at(1).prop('className')).toEqual(
+      'actConnectorsList__tableRowDisabled'
+    );
   });
 });
 

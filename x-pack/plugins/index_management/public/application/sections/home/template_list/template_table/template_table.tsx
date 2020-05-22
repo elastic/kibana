@@ -226,9 +226,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
             values={{ count: selection.length }}
           />
         </EuiButton>
-      ) : (
-        undefined
-      ),
+      ) : undefined,
     toolsRight: [
       <EuiButton
         color="secondary"
@@ -261,7 +259,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     <Fragment>
       {templatesToDelete && templatesToDelete.length > 0 ? (
         <TemplateDeleteModal
-          callback={data => {
+          callback={(data) => {
             if (data && data.hasDeletedTemplates) {
               reload();
             } else {

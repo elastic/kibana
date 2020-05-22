@@ -25,7 +25,7 @@ import styled from 'styled-components';
 import * as i18n from './translations';
 
 const DescriptionListStyled = styled(EuiDescriptionList)`
-  @media only screen and (min-width: ${props => props.theme.eui.euiBreakpoints.s}) {
+  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.s}) {
     .euiDescriptionList__title {
       width: 30% !important;
     }
@@ -72,7 +72,7 @@ const MyEuiModal = styled(EuiModal)`
 `;
 
 MyEuiModal.displayName = 'MyEuiModal';
-const parseInspectString = function<T>(objectStringify: string): T | null {
+const parseInspectString = function <T>(objectStringify: string): T | null {
   try {
     return JSON.parse(objectStringify);
   } catch {

@@ -311,10 +311,7 @@ function toggleFeature(wrapper: ReactWrapper<any, any>) {
 
   wrapper.update();
 
-  wrapper
-    .find(EuiSwitch)
-    .find('button')
-    .simulate('click');
+  wrapper.find(EuiSwitch).find('button').simulate('click');
 
   wrapper.update();
 }

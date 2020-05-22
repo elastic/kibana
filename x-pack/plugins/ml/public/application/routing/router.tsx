@@ -55,7 +55,7 @@ export const MlRouter: FC<{ pageDeps: PageDependencies }> = ({ pageDeps }) => {
             key={name}
             path={route.path}
             exact
-            render={props => {
+            render={(props) => {
               window.setTimeout(() => {
                 setBreadcrumbs(route.breadcrumbs);
               });

@@ -91,13 +91,13 @@ const fetchStatuses = {
 
 const app = getAngularModule();
 
-app.config($routeProvider => {
+app.config(($routeProvider) => {
   const defaults = {
     requireDefaultIndex: true,
     requireUICapability: 'discover.show',
     k7Breadcrumbs: ($route, $injector) =>
       $injector.invoke($route.current.params.id ? getSavedSearchBreadcrumbs : getRootBreadcrumbs),
-    badge: uiCapabilities => {
+    badge: (uiCapabilities) => {
       if (uiCapabilities.discover.save) {
         return undefined;
       }
@@ -118,14 +118,14 @@ app.config($routeProvider => {
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      savedObjects: function($route, Promise) {
+      savedObjects: function ($route, Promise) {
         const history = getHistory();
         const savedSearchId = $route.current.params.id;
         return data.indexPatterns.ensureDefaultIndexPattern(history).then(() => {
           const { appStateContainer } = getState({ history });
           const { index } = appStateContainer.getState();
           return Promise.props({
-            ip: indexPatterns.getCache().then(indexPatternList => {
+            ip: indexPatterns.getCache().then((indexPatternList) => {
               /**
                *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
                *  the load order of AppState conflicts with the load order of many other things
@@ -145,7 +145,7 @@ app.config($routeProvider => {
             }),
             savedSearch: getServices()
               .getSavedSearchById(savedSearchId)
-              .then(savedSearch => {
+              .then((savedSearch) => {
                 if (savedSearchId) {
                   chrome.recentlyAccessed.add(
                     savedSearch.getFullPath(),
@@ -179,7 +179,7 @@ app.config($routeProvider => {
   });
 });
 
-app.directive('discoverApp', function() {
+app.directive('discoverApp', function () {
   return {
     restrict: 'E',
     controllerAs: 'discoverApp',
@@ -249,7 +249,7 @@ function discoverController(
     { filters: esFilters.FilterStateStore.APP_STATE }
   );
 
-  const appStateUnsubscribe = appStateContainer.subscribe(async newState => {
+  const appStateUnsubscribe = appStateContainer.subscribe(async (newState) => {
     const { state: newStatePartial } = splitState(newState);
     const { state: oldStatePartial } = splitState(getPreviousAppState());
 
@@ -259,7 +259,7 @@ function discoverController(
 
         // detect changes that should trigger fetching of new data
         const changes = ['interval', 'sort', 'query'].filter(
-          prop => !_.isEqual(newStatePartial[prop], oldStatePartial[prop])
+          (prop) => !_.isEqual(newStatePartial[prop], oldStatePartial[prop])
         );
 
         if (changes.length) {
@@ -278,7 +278,7 @@ function discoverController(
     }
   });
 
-  $scope.setIndexPattern = async id => {
+  $scope.setIndexPattern = async (id) => {
     await replaceUrlAppState({ index: id });
     $route.reload();
   };
@@ -294,7 +294,7 @@ function discoverController(
           $scope.updateDataSource();
         },
       },
-      error => addFatalError(core.fatalErrors, error)
+      (error) => addFatalError(core.fatalErrors, error)
     )
   );
 
@@ -302,7 +302,7 @@ function discoverController(
     requests: new RequestAdapter(),
   };
 
-  $scope.timefilterUpdateHandler = ranges => {
+  $scope.timefilterUpdateHandler = (ranges) => {
     timefilter.setTime({
       from: moment(ranges.from).toISOString(),
       to: moment(ranges.to).toISOString(),
@@ -316,7 +316,7 @@ function discoverController(
 
   $scope.$watch(
     () => uiCapabilities.discover.saveQuery,
-    newCapability => {
+    (newCapability) => {
       $scope.showSaveQuery = newCapability;
     }
   );
@@ -342,7 +342,7 @@ function discoverController(
       description: i18n.translate('discover.localMenu.newSearchDescription', {
         defaultMessage: 'New Search',
       }),
-      run: function() {
+      run: function () {
         $scope.$evalAsync(() => {
           history.push('/');
         });
@@ -374,7 +374,7 @@ function discoverController(
             isTitleDuplicateConfirmed,
             onTitleDuplicate,
           };
-          return saveDataSource(saveOptions).then(response => {
+          return saveDataSource(saveOptions).then((response) => {
             // If the save wasn't successful, put the original values back.
             if (!response.id || response.error) {
               savedSearch.title = currentTitle;
@@ -414,7 +414,7 @@ function discoverController(
       testId: 'discoverOpenButton',
       run: () => {
         showOpenSearchPanel({
-          makeUrl: searchId => `#/${encodeURIComponent(searchId)}`,
+          makeUrl: (searchId) => `#/${encodeURIComponent(searchId)}`,
           I18nContext: core.i18n.Context,
         });
       },
@@ -429,7 +429,7 @@ function discoverController(
         defaultMessage: 'Share Search',
       }),
       testId: 'shareTopNavButton',
-      run: async anchorElement => {
+      run: async (anchorElement) => {
         const sharingData = await this.getSharingData();
         share.toggleShareContextMenu({
           anchorElement,
@@ -524,8 +524,8 @@ function discoverController(
       return $scope.fieldCounts;
     }
 
-    return await new Promise(resolve => {
-      const unwatch = $scope.$watch('fetchStatus', newValue => {
+    return await new Promise((resolve) => {
+      const unwatch = $scope.$watch('fetchStatus', (newValue) => {
         if (newValue === fetchStatuses.COMPLETE) {
           unwatch();
           resolve($scope.fieldCounts);
@@ -582,8 +582,8 @@ function discoverController(
       fields: selectFields,
       metaFields: $scope.indexPattern.metaFields,
       conflictedTypesFields: $scope.indexPattern.fields
-        .filter(f => f.type === 'conflict')
-        .map(f => f.name),
+        .filter((f) => f.type === 'conflict')
+        .map((f) => f.name),
       indexPatternId: searchSource.getField('index').id,
     };
   };
@@ -644,7 +644,7 @@ function discoverController(
           {
             next: $scope.fetch,
           },
-          error => addFatalError(core.fatalErrors, error)
+          (error) => addFatalError(core.fatalErrors, error)
         )
       );
       subscriptions.add(
@@ -656,11 +656,11 @@ function discoverController(
               $scope.updateTime();
             },
           },
-          error => addFatalError(core.fatalErrors, error)
+          (error) => addFatalError(core.fatalErrors, error)
         )
       );
 
-      $scope.changeInterval = interval => {
+      $scope.changeInterval = (interval) => {
         if (interval) {
           setAppState({ interval });
         }
@@ -694,7 +694,7 @@ function discoverController(
             else return status.NO_RESULTS;
           }
 
-          return function() {
+          return function () {
             const current = {
               rows: $scope.rows,
               fetchStatus: $scope.fetchStatus,
@@ -768,7 +768,7 @@ function discoverController(
     }
   }
 
-  $scope.opts.fetch = $scope.fetch = function() {
+  $scope.opts.fetch = $scope.fetch = function () {
     // ignore requests to fetch before the app inits
     if (!init.complete) return;
     $scope.fetchCounter++;
@@ -781,7 +781,7 @@ function discoverController(
     $scope
       .updateDataSource()
       .then(setupVisualization)
-      .then(function() {
+      .then(function () {
         $scope.fetchStatus = fetchStatuses.LOADING;
         logInspectorRequest();
         return $scope.searchSource.fetch({
@@ -789,7 +789,7 @@ function discoverController(
         });
       })
       .then(onResults)
-      .catch(error => {
+      .catch((error) => {
         // If the request was aborted then no need to surface this error in the UI
         if (error instanceof Error && error.name === 'AbortError') return;
 
@@ -808,14 +808,14 @@ function discoverController(
       });
   };
 
-  $scope.updateQuery = function({ query }, isUpdate = true) {
+  $scope.updateQuery = function ({ query }, isUpdate = true) {
     if (!_.isEqual(query, appStateContainer.getState().query) || isUpdate === false) {
       setAppState({ query });
       $fetchObservable.next();
     }
   };
 
-  $scope.updateSavedQueryId = newSavedQueryId => {
+  $scope.updateSavedQueryId = (newSavedQueryId) => {
     if (newSavedQueryId) {
       setAppState({ savedQuery: newSavedQueryId });
     } else {
@@ -878,9 +878,9 @@ function discoverController(
     // if we haven't counted yet, reset the counts
     const counts = ($scope.fieldCounts = $scope.fieldCounts || {});
 
-    $scope.rows.forEach(hit => {
+    $scope.rows.forEach((hit) => {
       const fields = Object.keys($scope.indexPattern.flattenHit(hit));
-      fields.forEach(fieldName => {
+      fields.forEach((fieldName) => {
         counts[fieldName] = (counts[fieldName] || 0) + 1;
       });
     });
@@ -898,12 +898,12 @@ function discoverController(
     });
     inspectorRequest = inspectorAdapters.requests.start(title, { description });
     inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
-    $scope.searchSource.getSearchRequestBody().then(body => {
+    $scope.searchSource.getSearchRequestBody().then((body) => {
       inspectorRequest.json(body);
     });
   }
 
-  $scope.updateTime = function() {
+  $scope.updateTime = function () {
     //this is the timerange for the histogram, should be refactored
     $scope.timeRange = {
       from: dateMath.parse(timefilter.getTime().from),
@@ -911,16 +911,16 @@ function discoverController(
     };
   };
 
-  $scope.toMoment = function(datetime) {
+  $scope.toMoment = function (datetime) {
     return moment(datetime).format(config.get('dateFormat'));
   };
 
-  $scope.resetQuery = function() {
+  $scope.resetQuery = function () {
     history.push(`/${encodeURIComponent($route.current.params.id)}`);
     $route.reload();
   };
 
-  $scope.newQuery = function() {
+  $scope.newQuery = function () {
     history.push('/');
   };
 
@@ -947,7 +947,7 @@ function discoverController(
   };
 
   // TODO: On array fields, negating does not negate the combination, rather all terms
-  $scope.filterQuery = function(field, values, operation) {
+  $scope.filterQuery = function (field, values, operation) {
     $scope.indexPattern.popularizeField(field, 1);
     const newFilters = esFilters.generateFilters(
       filterManager,
@@ -976,18 +976,18 @@ function discoverController(
     setAppState({ columns });
   };
 
-  $scope.scrollToTop = function() {
+  $scope.scrollToTop = function () {
     $window.scrollTo(0, 0);
   };
 
-  $scope.scrollToBottom = function() {
+  $scope.scrollToBottom = function () {
     // delay scrolling to after the rows have been rendered
     $timeout(() => {
       $element.find('#discoverBottomMarker').focus();
     }, 0);
   };
 
-  $scope.showAllRows = function() {
+  $scope.showAllRows = function () {
     $scope.minimumVisibleRows = $scope.hits;
   };
 
@@ -1029,7 +1029,7 @@ function discoverController(
       return $scope.vis.data.aggs.onSearchRequestStart(searchSource, options);
     });
 
-    $scope.searchSource.setField('aggs', function() {
+    $scope.searchSource.setField('aggs', function () {
       if (!$scope.vis) return;
       return $scope.vis.data.aggs.toDsl();
     });

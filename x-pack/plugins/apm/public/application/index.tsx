@@ -55,7 +55,7 @@ const ApmAppRoot = ({
   core,
   deps,
   routerHistory,
-  config
+  config,
 }: {
   core: CoreStart;
   deps: ApmPluginSetupDeps;
@@ -67,7 +67,7 @@ const ApmAppRoot = ({
   const apmPluginContextValue = {
     config,
     core,
-    plugins
+    plugins,
   };
   return (
     <ApmPluginContext.Provider value={apmPluginContextValue}>
@@ -78,7 +78,7 @@ const ApmAppRoot = ({
           capabilities: core.application.capabilities,
           toastNotifications: core.notifications.toasts,
           actionTypeRegistry: plugins.triggers_actions_ui.actionTypeRegistry,
-          alertTypeRegistry: plugins.triggers_actions_ui.alertTypeRegistry
+          alertTypeRegistry: plugins.triggers_actions_ui.alertTypeRegistry,
         }}
       >
         <KibanaContextProvider services={{ ...core, ...plugins }}>
