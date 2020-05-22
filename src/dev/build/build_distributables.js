@@ -40,7 +40,6 @@ import {
   CreatePackageJsonTask,
   CreateReadmeTask,
   CreateRpmPackageTask,
-  CreateStaticFsWithNodeModulesTask,
   DownloadNodeBuildsTask,
   ExtractNodeBuildsTask,
   InstallDependenciesTask,
@@ -127,7 +126,6 @@ export async function buildDistributables(options) {
   await run(CleanTypescriptTask);
   await run(CleanExtraFilesFromModulesTask);
   await run(CleanEmptyFoldersTask);
-  await run(CreateStaticFsWithNodeModulesTask);
 
   /**
    * copy generic build outputs into platform-specific build

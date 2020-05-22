@@ -103,9 +103,7 @@ describe('getOptimizerCacheKey()', () => {
                 "cache": true,
                 "dist": false,
                 "optimizerCacheKey": "♻",
-                "profileWebpack": false,
                 "repoRoot": <absolute path>,
-                "watch": false,
               },
             }
           `);

@@ -468,7 +468,7 @@
   dependencies:
     "@babel/helper-plugin-utils" "^7.0.0"
 
-"@babel/plugin-syntax-dynamic-import@^7.2.0", "@babel/plugin-syntax-dynamic-import@^7.8.0", "@babel/plugin-syntax-dynamic-import@^7.8.3":
+"@babel/plugin-syntax-dynamic-import@^7.2.0", "@babel/plugin-syntax-dynamic-import@^7.8.0":
   version "7.8.3"
   resolved "https://registry.yarnpkg.com/@babel/plugin-syntax-dynamic-import/-/plugin-syntax-dynamic-import-7.8.3.tgz#62bf98b2da3cd21d626154fc96ee5b3cb68eacb3"
   integrity sha512-5gdGbFon+PszYzqs83S3E5mpi7/y/8M9eC90MRTZfduQOYW76ig6SOSPNe41IG5LoP3FGBn2N0RjVDSQiS94kQ==
@@ -1332,10 +1332,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@22.3.1":
-  version "22.3.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-22.3.1.tgz#d824835774476f1aaca006a466324256a56c1df6"
-  integrity sha512-psGMIsNhI0LApvmR19Y0DvtmV3BvvzXkd8dVXORjBiPW4Z7N2sGgsMmqpvxlZ1rfP59PyIKpQOTReJZFLSmKQQ==
+"@elastic/eui@23.3.1":
+  version "23.3.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-23.3.1.tgz#08516910d24eb148110f99d3bd7551240f9ef3d4"
+  integrity sha512-81N5xXeZwm8HEPE5RAPQFFUNUzYlTVJcNhW+DDN0EY8MlxVob9hgHy0AwshQGfrHlqhm+4gix110pW3n9Jweyw==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/enzyme" "^3.1.13"
@@ -1426,11 +1426,6 @@
     "@elastic/node-crypto" "1.1.1"
     "@types/node-jose" "1.1.0"
     node-jose "1.1.0"
-
-"@elastic/static-fs@1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@elastic/static-fs/-/static-fs-1.0.2.tgz#c1e5fea6a1b35abcd005cecf7880156ed0f273ae"
-  integrity sha512-0cZc5D9Wg6pJsc8Sa2ns1eOuxtXEidE7GBb2B0KZdJq9nZzUCxMyplURqT0Nr3i5XpoHb6ZEmxWsji86j1KjDw==
 
 "@elastic/ui-ace@0.2.3":
   version "0.2.3"

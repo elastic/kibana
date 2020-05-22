@@ -16,7 +16,7 @@ import {
   SHOW_TOC_DETAILS,
   HIDE_TOC_DETAILS,
   UPDATE_INDEXING_STAGE,
-} from '../actions/ui_actions';
+} from '../actions';
 
 export enum FLYOUT_STATE {
   NONE = 'NONE',
