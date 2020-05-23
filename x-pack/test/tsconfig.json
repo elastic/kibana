@@ -4,13 +4,13 @@
     "types": [
       "mocha",
       "node",
-      "jest",
       "flot"
-    ]
+    ],
   },
   "include": [
     "**/*",
-    "../typings/**/*"
+    "../typings/**/*",
+    "typings/**/*"
   ],
   "exclude": [
     "../typings/jest.d.ts"
