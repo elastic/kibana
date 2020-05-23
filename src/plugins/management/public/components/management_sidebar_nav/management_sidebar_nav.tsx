@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EuiIcon, EuiSideNav, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiIcon, EuiSideNav, EuiScreenReaderOnly, EuiSideNavItemType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { AppMountParameters } from 'kibana/public';
@@ -74,7 +74,7 @@ export const ManagementSidebarNav = ({
 
   const createNavItem = <T extends ManagementItem>(
     item: T,
-    customParams: Record<string, any> = {}
+    customParams: Partial<EuiSideNavItemType<any>> = {}
   ) => {
     const iconType = item.euiIconType || item.icon;
 
