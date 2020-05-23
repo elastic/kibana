@@ -44,7 +44,7 @@ export const initLogEntriesHighlightsRoute = ({ framework, logEntries }: InfraBa
 
         if ('center' in payload) {
           entriesPerHighlightTerm = await Promise.all(
-            highlightTerms.map(highlightTerm =>
+            highlightTerms.map((highlightTerm) =>
               logEntries.getLogEntriesAround(requestContext, sourceId, {
                 startTimestamp,
                 endTimestamp,
@@ -64,7 +64,7 @@ export const initLogEntriesHighlightsRoute = ({ framework, logEntries }: InfraBa
           }
 
           entriesPerHighlightTerm = await Promise.all(
-            highlightTerms.map(highlightTerm =>
+            highlightTerms.map((highlightTerm) =>
               logEntries.getLogEntries(requestContext, sourceId, {
                 startTimestamp,
                 endTimestamp,
@@ -79,7 +79,7 @@ export const initLogEntriesHighlightsRoute = ({ framework, logEntries }: InfraBa
 
         return response.ok({
           body: logEntriesHighlightsResponseRT.encode({
-            data: entriesPerHighlightTerm.map(entries => ({
+            data: entriesPerHighlightTerm.map((entries) => ({
               entries,
               topCursor: entries[0].cursor,
               bottomCursor: entries[entries.length - 1].cursor,

@@ -10,7 +10,7 @@ import { SavedObjectsClientContract } from '../../../../../../../src/core/server
 describe('saveApmIndices', () => {
   it('should trim and strip empty settings', async () => {
     const savedObjectsClient = ({
-      create: jest.fn()
+      create: jest.fn(),
     } as unknown) as SavedObjectsClientContract;
 
     const apmIndices = {
@@ -20,7 +20,7 @@ describe('saveApmIndices', () => {
       settingD: null,
       settingE: ' ',
       settingF: 'ff',
-      settingG: ' gg '
+      settingG: ' gg ',
     } as any;
     await saveApmIndices(savedObjectsClient, apmIndices);
     expect(savedObjectsClient.create).toHaveBeenCalledWith(

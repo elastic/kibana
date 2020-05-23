@@ -30,7 +30,7 @@ export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue 
 
   return (
     <form
-      onSubmit={ev => {
+      onSubmit={(ev) => {
         ev.preventDefault();
         if (!isInvalid && refreshInterval) {
           onSubmit(refreshInterval);

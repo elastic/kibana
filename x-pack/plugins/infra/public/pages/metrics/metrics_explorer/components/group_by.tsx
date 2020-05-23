@@ -20,14 +20,14 @@ interface Props {
 export const MetricsExplorerGroupBy = ({ options, onChange, fields }: Props) => {
   const handleChange = useCallback(
     (selectedOptions: Array<{ label: string }>) => {
-      const groupBy = selectedOptions.map(option => option.label);
+      const groupBy = selectedOptions.map((option) => option.label);
       onChange(groupBy);
     },
     [onChange]
   );
 
   const selectedOptions = Array.isArray(options.groupBy)
-    ? options.groupBy.map(field => ({ label: field }))
+    ? options.groupBy.map((field) => ({ label: field }))
     : options.groupBy
     ? [{ label: options.groupBy }]
     : [];
@@ -44,8 +44,8 @@ export const MetricsExplorerGroupBy = ({ options, onChange, fields }: Props) => 
       singleSelection={false}
       selectedOptions={selectedOptions}
       options={fields
-        .filter(f => f.aggregatable && f.type === 'string')
-        .map(f => ({ label: f.name }))}
+        .filter((f) => f.aggregatable && f.type === 'string')
+        .map((f) => ({ label: f.name }))}
       onChange={handleChange}
       isClearable={true}
     />

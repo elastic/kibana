@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({
+export default function ({
   getService,
   getPageObjects,
 }: {
@@ -33,7 +33,7 @@ export default function({
     const defaultSettings = { defaultIndex: 'logstash-*' };
     const testSubjects = getService('testSubjects');
 
-    before(async function() {
+    before(async function () {
       await esArchiver.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
@@ -41,7 +41,7 @@ export default function({
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    it('can add fields to the table', async function() {
+    it('can add fields to the table', async function () {
       const getTitles = async () =>
         (await testSubjects.getVisibleText('dataGridHeader')).replace(/\s|\r?\n|\r/g, ' ');
 

@@ -97,12 +97,9 @@ describe('OverviewNetwork', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-section-title"]')
-        .first()
-        .text()
-    ).toEqual('Network events');
+    expect(wrapper.find('[data-test-subj="header-section-title"]').first().text()).toEqual(
+      'Network events'
+    );
   });
 
   test('it renders an empty subtitle while loading', () => {
@@ -112,12 +109,7 @@ describe('OverviewNetwork', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-panel-subtitle"]')
-        .first()
-        .text()
-    ).toEqual('');
+    expect(wrapper.find('[data-test-subj="header-panel-subtitle"]').first().text()).toEqual('');
   });
 
   test('it renders the expected event count in the subtitle after loading events', async () => {
@@ -131,11 +123,8 @@ describe('OverviewNetwork', () => {
     await wait();
     wrapper.update();
 
-    expect(
-      wrapper
-        .find('[data-test-subj="header-panel-subtitle"]')
-        .first()
-        .text()
-    ).toEqual('Showing: 9 events');
+    expect(wrapper.find('[data-test-subj="header-panel-subtitle"]').first().text()).toEqual(
+      'Showing: 9 events'
+    );
   });
 });

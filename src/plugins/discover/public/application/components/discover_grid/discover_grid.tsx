@@ -193,11 +193,11 @@ export const DiscoverGrid = function DiscoverGridInner({
    */
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: lowestPageSize });
   const onChangeItemsPerPage = useCallback(
-    pageSize => setPagination(paginationData => ({ ...paginationData, pageSize })),
+    (pageSize) => setPagination((paginationData) => ({ ...paginationData, pageSize })),
     [setPagination]
   );
   const onChangePage = useCallback(
-    pageIndex => setPagination(paginationData => ({ ...paginationData, pageIndex })),
+    (pageIndex) => setPagination((paginationData) => ({ ...paginationData, pageIndex })),
     [setPagination]
   );
 
@@ -206,7 +206,7 @@ export const DiscoverGrid = function DiscoverGridInner({
    */
   const sortingColumns = useMemo(() => sort.map(([id, direction]) => ({ id, direction })), [sort]);
   const onTableSort = useCallback(
-    sortingColumnsData => {
+    (sortingColumnsData) => {
       onSort(sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]));
     },
     [onSort]
@@ -215,14 +215,14 @@ export const DiscoverGrid = function DiscoverGridInner({
   /**
    * Visibility and order
    */
-  const [visibleColumns, setVisibleColumns] = useState(dataGridColumns.map(obj => obj.id));
+  const [visibleColumns, setVisibleColumns] = useState(dataGridColumns.map((obj) => obj.id));
   const mounted = React.useRef(false);
   useEffect(() => {
     // every time a column is added, make it visible
     if (!mounted.current) {
       mounted.current = true;
     } else {
-      setVisibleColumns(dataGridColumns.map(obj => obj.id));
+      setVisibleColumns(dataGridColumns.map((obj) => obj.id));
     }
   }, [dataGridColumns.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -240,7 +240,7 @@ export const DiscoverGrid = function DiscoverGridInner({
         type
       );
     };
-    const formattedField = function(row: any, columnId: string) {
+    const formattedField = function (row: any, columnId: string) {
       const formattedValue = indexPattern.formatField(row, columnId);
 
       // TODO Field formatters need to be fixed

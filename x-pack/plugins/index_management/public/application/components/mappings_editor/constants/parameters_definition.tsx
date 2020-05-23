@@ -225,15 +225,15 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
       min: {
         fieldConfig: {
           defaultValue: 0.01,
-          serializer: value => (value === '' ? '' : toInt(value) / 100),
-          deserializer: value => Math.round(value * 100),
+          serializer: (value) => (value === '' ? '' : toInt(value) / 100),
+          deserializer: (value) => Math.round(value * 100),
         } as FieldConfig,
       },
       max: {
         fieldConfig: {
           defaultValue: 1,
-          serializer: value => (value === '' ? '' : toInt(value) / 100),
-          deserializer: value => Math.round(value * 100),
+          serializer: (value) => (value === '' ? '' : toInt(value) / 100),
+          deserializer: (value) => Math.round(value * 100),
         } as FieldConfig,
       },
     },
@@ -582,7 +582,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
       serializer: (format: ComboBoxOption[]): string | undefined =>
         format.length ? format.map(({ label }) => label).join('||') : undefined,
       deserializer: (formats: string): ComboBoxOption[] | undefined =>
-        formats.split('||').map(format => ({ label: format })),
+        formats.split('||').map((format) => ({ label: format })),
       helpText: (
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.formatHelpText"
@@ -801,14 +801,14 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
         fieldConfig: {
           type: FIELD_TYPES.NUMBER,
           defaultValue: 2,
-          serializer: value => (value === '' ? '' : toInt(value)),
+          serializer: (value) => (value === '' ? '' : toInt(value)),
         } as FieldConfig,
       },
       max_chars: {
         fieldConfig: {
           type: FIELD_TYPES.NUMBER,
           defaultValue: 5,
-          serializer: value => (value === '' ? '' : toInt(value)),
+          serializer: (value) => (value === '' ? '' : toInt(value)),
         } as FieldConfig,
       },
     },

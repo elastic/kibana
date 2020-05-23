@@ -41,10 +41,7 @@ describe('ToolTipFilter', () => {
       );
 
       expect(
-        wrapper
-          .find('[data-test-subj="previous-feature-button"]')
-          .first()
-          .prop('disabled')
+        wrapper.find('[data-test-subj="previous-feature-button"]').first().prop('disabled')
       ).toBe(true);
     });
 
@@ -58,10 +55,7 @@ describe('ToolTipFilter', () => {
         />
       );
 
-      wrapper
-        .find('[data-test-subj="previous-feature-button"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="previous-feature-button"]').first().simulate('click');
       expect(previousFeature).toHaveBeenCalledTimes(0);
     });
 
@@ -75,12 +69,9 @@ describe('ToolTipFilter', () => {
         />
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="next-feature-button"]')
-          .first()
-          .prop('disabled')
-      ).toBe(false);
+      expect(wrapper.find('[data-test-subj="next-feature-button"]').first().prop('disabled')).toBe(
+        false
+      );
     });
 
     test('nextFeature is called when featureIndex is < totalFeatures', () => {
@@ -93,10 +84,7 @@ describe('ToolTipFilter', () => {
         />
       );
 
-      wrapper
-        .find('[data-test-subj="next-feature-button"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="next-feature-button"]').first().simulate('click');
       expect(nextFeature).toHaveBeenCalledTimes(1);
     });
   });
@@ -113,10 +101,7 @@ describe('ToolTipFilter', () => {
       );
 
       expect(
-        wrapper
-          .find('[data-test-subj="previous-feature-button"]')
-          .first()
-          .prop('disabled')
+        wrapper.find('[data-test-subj="previous-feature-button"]').first().prop('disabled')
       ).toBe(false);
     });
 
@@ -130,10 +115,7 @@ describe('ToolTipFilter', () => {
         />
       );
 
-      wrapper
-        .find('[data-test-subj="previous-feature-button"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="previous-feature-button"]').first().simulate('click');
       expect(previousFeature).toHaveBeenCalledTimes(1);
     });
 
@@ -147,12 +129,9 @@ describe('ToolTipFilter', () => {
         />
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="next-feature-button"]')
-          .first()
-          .prop('disabled')
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="next-feature-button"]').first().prop('disabled')).toBe(
+        true
+      );
     });
 
     test('nextFunction is not called when featureIndex >== totalFeatures', () => {
@@ -164,10 +143,7 @@ describe('ToolTipFilter', () => {
           totalFeatures={5}
         />
       );
-      wrapper
-        .find('[data-test-subj="next-feature-button"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="next-feature-button"]').first().simulate('click');
       expect(nextFeature).toHaveBeenCalledTimes(0);
     });
   });
@@ -184,10 +160,7 @@ describe('ToolTipFilter', () => {
       );
 
       expect(
-        wrapper
-          .find('[data-test-subj="previous-feature-button"]')
-          .first()
-          .prop('disabled')
+        wrapper.find('[data-test-subj="previous-feature-button"]').first().prop('disabled')
       ).toBe(true);
     });
 
@@ -201,10 +174,7 @@ describe('ToolTipFilter', () => {
         />
       );
 
-      wrapper
-        .find('[data-test-subj="previous-feature-button"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="previous-feature-button"]').first().simulate('click');
       expect(previousFeature).toHaveBeenCalledTimes(0);
     });
 
@@ -218,12 +188,9 @@ describe('ToolTipFilter', () => {
         />
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="next-feature-button"]')
-          .first()
-          .prop('disabled')
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="next-feature-button"]').first().prop('disabled')).toBe(
+        true
+      );
     });
 
     test('nextFunction is not called when only a single feature is provided', () => {
@@ -236,10 +203,7 @@ describe('ToolTipFilter', () => {
         />
       );
 
-      wrapper
-        .find('[data-test-subj="next-feature-button"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="next-feature-button"]').first().simulate('click');
       expect(nextFeature).toHaveBeenCalledTimes(0);
     });
   });
@@ -256,10 +220,7 @@ describe('ToolTipFilter', () => {
       );
 
       expect(
-        wrapper
-          .find('[data-test-subj="previous-feature-button"]')
-          .first()
-          .prop('disabled')
+        wrapper.find('[data-test-subj="previous-feature-button"]').first().prop('disabled')
       ).toBe(false);
     });
 
@@ -273,10 +234,7 @@ describe('ToolTipFilter', () => {
         />
       );
 
-      wrapper
-        .find('[data-test-subj="previous-feature-button"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="previous-feature-button"]').first().simulate('click');
       expect(previousFeature).toHaveBeenCalledTimes(1);
     });
 
@@ -290,12 +248,9 @@ describe('ToolTipFilter', () => {
         />
       );
 
-      expect(
-        wrapper
-          .find('[data-test-subj="next-feature-button"]')
-          .first()
-          .prop('disabled')
-      ).toBe(false);
+      expect(wrapper.find('[data-test-subj="next-feature-button"]').first().prop('disabled')).toBe(
+        false
+      );
     });
 
     test('nextFunction is called when featureIndex > 0 && featureIndex < totalFeatures', () => {
@@ -308,10 +263,7 @@ describe('ToolTipFilter', () => {
         />
       );
 
-      wrapper
-        .find('[data-test-subj="next-feature-button"]')
-        .first()
-        .simulate('click');
+      wrapper.find('[data-test-subj="next-feature-button"]').first().simulate('click');
       expect(nextFeature).toHaveBeenCalledTimes(1);
     });
   });

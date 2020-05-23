@@ -70,7 +70,7 @@ export const EventsTable = ({
         defaultMessage: 'Start',
       }),
       sortable: true,
-      render: timeMs => {
+      render: (timeMs) => {
         const time = moment(timeMs);
         return time.format(TIME_FORMAT);
       },
@@ -81,7 +81,7 @@ export const EventsTable = ({
         defaultMessage: 'End',
       }),
       sortable: true,
-      render: timeMs => {
+      render: (timeMs) => {
         const time = moment(timeMs);
         return time.format(TIME_FORMAT);
       },
@@ -89,7 +89,7 @@ export const EventsTable = ({
     {
       field: '',
       name: '',
-      render: event => (
+      render: (event) => (
         <DeleteButton
           data-test-subj="event_delete"
           canDeleteCalendar={canDeleteCalendar}

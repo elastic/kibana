@@ -17,7 +17,7 @@ const EmptyValue = styled.span`
 
 export function FormattedKey({
   k,
-  value
+  value,
 }: {
   k: string;
   value: unknown;

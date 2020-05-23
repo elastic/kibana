@@ -262,7 +262,7 @@ const savedObjectTypes: { [key: string]: SavedObjectsType } = {
 };
 
 export function registerSavedObjects(savedObjects: SavedObjectsServiceSetup) {
-  Object.values(savedObjectTypes).forEach(type => {
+  Object.values(savedObjectTypes).forEach((type) => {
     savedObjects.registerType(type);
   });
 }

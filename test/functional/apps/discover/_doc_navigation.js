@@ -19,15 +19,16 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const docTable = getService('docTable');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
+  const kibanaServer = getService('kibanaServer');
 
   describe('doc link in discover', function contextSize() {
-    before(async function() {
+    before(async function () {
       await esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.replace({ 'doc_table:legacyTable': true });
       await PageObjects.common.navigateToApp('discover');
@@ -35,7 +36,7 @@ export default function({ getService, getPageObjects }) {
       await PageObjects.discover.waitForDocTableLoadingComplete();
     });
 
-    it('should open the doc view of the selected document', async function() {
+    it('should open the doc view of the selected document', async function () {
       // navigate to the doc view
       await docTable.clickRowToggle({ rowIndex: 0 });
 

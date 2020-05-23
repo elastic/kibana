@@ -66,7 +66,7 @@ const initializeElementFactories = [metricElementInitializer];
 export const initializeElements: SetupInitializer<ElementFactory[]> = (core, plugins) => {
   const specs = [
     ...elementSpecs,
-    ...initializeElementFactories.map(factory => factory(core, plugins)),
+    ...initializeElementFactories.map((factory) => factory(core, plugins)),
   ];
 
   return applyElementStrings(specs);

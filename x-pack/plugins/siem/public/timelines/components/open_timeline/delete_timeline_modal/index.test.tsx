@@ -27,34 +27,19 @@ describe('DeleteTimelineModal', () => {
       };
       const wrapper = mountWithIntl(<DeleteTimelineModalOverlay {...testProps} />);
 
-      expect(
-        wrapper
-          .find('[data-test-subj="delete-timeline-modal"]')
-          .first()
-          .exists()
-      ).toBe(false);
+      expect(wrapper.find('[data-test-subj="delete-timeline-modal"]').first().exists()).toBe(false);
     });
 
     test('it renders the modal when isModalOpen is true', () => {
       const wrapper = mountWithIntl(<DeleteTimelineModalOverlay {...defaultProps} />);
 
-      expect(
-        wrapper
-          .find('[data-test-subj="delete-timeline-modal"]')
-          .first()
-          .exists()
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="delete-timeline-modal"]').first().exists()).toBe(true);
     });
 
     test('it hides popover when isModalOpen is true', () => {
       const wrapper = mountWithIntl(<DeleteTimelineModalOverlay {...defaultProps} />);
 
-      expect(
-        wrapper
-          .find('[data-test-subj="remove-popover"]')
-          .first()
-          .exists()
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="remove-popover"]').first().exists()).toBe(true);
     });
   });
 });

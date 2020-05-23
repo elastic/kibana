@@ -12,7 +12,7 @@ import { routes } from './route_config';
 import { UpdateBreadcrumbs } from './UpdateBreadcrumbs';
 import {
   MockApmPluginContextWrapper,
-  mockApmPluginContextValue
+  mockApmPluginContextValue,
 } from '../../../context/ApmPluginContext/MockApmPluginContext';
 
 const setBreadcrumbs = jest.fn();
@@ -27,9 +27,9 @@ function expectBreadcrumbToMatchSnapshot(route: string, params = '') {
             ...mockApmPluginContextValue.core,
             chrome: {
               ...mockApmPluginContextValue.core.chrome,
-              setBreadcrumbs
-            }
-          }
+              setBreadcrumbs,
+            },
+          },
         } as unknown) as ApmPluginContextValue
       }
     >
@@ -48,7 +48,7 @@ describe('UpdateBreadcrumbs', () => {
   beforeEach(() => {
     realDoc = window.document;
     (window.document as any) = {
-      title: 'Kibana'
+      title: 'Kibana',
     };
     setBreadcrumbs.mockReset();
   });

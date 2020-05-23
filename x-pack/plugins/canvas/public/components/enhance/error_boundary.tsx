@@ -27,7 +27,7 @@ interface ComponentProps extends Props {
   children: (props: Props) => ReactChildren;
 }
 
-const ErrorBoundaryComponent: FunctionComponent<ComponentProps> = props => (
+const ErrorBoundaryComponent: FunctionComponent<ComponentProps> = (props) => (
   <Fragment>
     {props.children({
       error: props.error,
@@ -68,7 +68,7 @@ export const errorBoundaryHoc = compose<ComponentProps, {}>(
       this.props.setErrorInfo(errorInfo);
     },
   }),
-  mapProps<HOCProps, Omit<HOCProps, 'setError' | 'setErrorInfo'>>(props =>
+  mapProps<HOCProps, Omit<HOCProps, 'setError' | 'setErrorInfo'>>((props) =>
     omit(props, ['setError', 'setErrorInfo'])
   )
 );

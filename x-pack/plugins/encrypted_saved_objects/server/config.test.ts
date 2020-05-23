@@ -54,9 +54,7 @@ describe('createConfig$()', () => {
     mockRandomBytes.mockReturnValue('ab'.repeat(16));
 
     const contextMock = coreMock.createPluginInitializerContext({});
-    const config = await createConfig$(contextMock)
-      .pipe(first())
-      .toPromise();
+    const config = await createConfig$(contextMock).pipe(first()).toPromise();
     expect(config).toEqual({
       config: { encryptionKey: 'ab'.repeat(16) },
       usingEphemeralEncryptionKey: true,
@@ -75,9 +73,7 @@ describe('createConfig$()', () => {
     const contextMock = coreMock.createPluginInitializerContext({
       encryptionKey: 'supersecret',
     });
-    const config = await createConfig$(contextMock)
-      .pipe(first())
-      .toPromise();
+    const config = await createConfig$(contextMock).pipe(first()).toPromise();
     expect(config).toEqual({
       config: { encryptionKey: 'supersecret' },
       usingEphemeralEncryptionKey: false,

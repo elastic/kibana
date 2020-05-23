@@ -60,7 +60,7 @@ export class BaseWatch {
       isSystemWatch: this.isSystemWatch,
       watchStatus: this.watchStatus ? this.watchStatus.downstreamJson : undefined,
       watchErrors: this.watchErrors ? this.watchErrors.downstreamJson : undefined,
-      actions: map(this.actions, action => action.downstreamJson),
+      actions: map(this.actions, (action) => action.downstreamJson),
     };
 
     return json;
@@ -68,7 +68,7 @@ export class BaseWatch {
 
   // from Kibana
   static getPropsFromDownstreamJson(json) {
-    const actions = map(json.actions, action => {
+    const actions = map(json.actions, (action) => {
       return Action.fromDownstreamJson(action);
     });
 

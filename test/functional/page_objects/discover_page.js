@@ -82,7 +82,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async getColumnHeaders() {
       const headerElements = await testSubjects.findAll('docTableHeaderField');
-      return await Promise.all(headerElements.map(async el => await el.getVisibleText()));
+      return await Promise.all(headerElements.map(async (el) => await el.getVisibleText()));
     }
 
     async openLoadSavedSearchPanel() {
@@ -144,11 +144,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     async clickHistogramBar() {
       const el = await this.getChartCanvas();
 
-      await browser
-        .getActions()
-        .move({ x: 200, y: 20, origin: el._webElement })
-        .click()
-        .perform();
+      await browser.getActions().move({ x: 200, y: 20, origin: el._webElement }).click().perform();
     }
 
     async brushHistogram() {
@@ -181,7 +177,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       log.debug('theHeight = ' + yAxisHeight);
       const bars = $('g > g.series > rect')
         .toArray()
-        .map(chart => {
+        .map((chart) => {
           const barHeight = $(chart).attr('height');
           return Math.round((barHeight / yAxisHeight) * yAxisLabel);
         });
@@ -239,7 +235,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async getMarks() {
       const marks = await find.allByCssSelector('mark');
-      return await Promise.all(marks.map(mark => mark.getVisibleText()));
+      return await Promise.all(marks.map((mark) => mark.getVisibleText()));
     }
 
     async toggleSidebarCollapse() {
@@ -248,7 +244,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
 
     async getAllFieldNames() {
       const items = await find.allByCssSelector('.dscSidebarItem');
-      return await Promise.all(items.map(item => item.getVisibleText()));
+      return await Promise.all(items.map((item) => item.getVisibleText()));
     }
 
     async getSidebarWidth() {

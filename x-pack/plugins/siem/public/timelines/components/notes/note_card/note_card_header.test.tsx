@@ -29,34 +29,19 @@ describe('NoteCardHeader', () => {
   test('it renders an avatar containing the first letter of the username', () => {
     const wrapper = mountWithIntl(<NoteCardHeader created={date.toDate()} user={user} />);
 
-    expect(
-      wrapper
-        .find('[data-test-subj="avatar"]')
-        .first()
-        .text()
-    ).toEqual(user[0]);
+    expect(wrapper.find('[data-test-subj="avatar"]').first().text()).toEqual(user[0]);
   });
 
   test('it renders the username', () => {
     const wrapper = mountWithIntl(<NoteCardHeader created={date.toDate()} user={user} />);
 
-    expect(
-      wrapper
-        .find('[data-test-subj="user"]')
-        .first()
-        .text()
-    ).toEqual(user);
+    expect(wrapper.find('[data-test-subj="user"]').first().text()).toEqual(user);
   });
 
   test('it renders the expected action', () => {
     const wrapper = mountWithIntl(<NoteCardHeader created={date.toDate()} user={user} />);
 
-    expect(
-      wrapper
-        .find('[data-test-subj="action"]')
-        .first()
-        .text()
-    ).toEqual(i18n.ADDED_A_NOTE);
+    expect(wrapper.find('[data-test-subj="action"]').first().text()).toEqual(i18n.ADDED_A_NOTE);
   });
 
   test('it renders a humanized date when the note was created', () => {

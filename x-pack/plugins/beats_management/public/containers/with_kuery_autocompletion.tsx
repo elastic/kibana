@@ -73,7 +73,7 @@ export class WithKueryAutocompletion extends React.Component<
       suggestions = [];
     }
 
-    this.setState(state =>
+    this.setState((state) =>
       state.currentRequest &&
       state.currentRequest.expression !== expression &&
       state.currentRequest.cursorPosition !== cursorPosition
