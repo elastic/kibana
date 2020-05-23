@@ -45,7 +45,6 @@ const customElement: CustomElementPayload = {
   name: 'MyCustomElement',
   displayName: 'My Wonderful Custom Element',
   content: 'This is content',
-  tags: ['filter', 'graphic'],
   '@created': '2019-02-08T18:35:23.029Z',
   '@timestamp': '2019-02-08T18:35:23.029Z',
 };

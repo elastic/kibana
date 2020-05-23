@@ -20,6 +20,7 @@
 import { LegacyConfig } from '../legacy';
 import { SavedObjectMigrationMap } from './migrations';
 import {
+  SavedObjectsNamespaceType,
   SavedObjectsType,
   SavedObjectsLegacyUiExports,
   SavedObjectLegacyMigrationMap,
@@ -48,10 +49,15 @@ export const convertLegacyTypes = (
         const schema = savedObjectSchemas[type];
         const migrations = savedObjectMigrations[type];
         const management = savedObjectsManagement[type];
+        const namespaceType = (schema?.isNamespaceAgnostic
+          ? 'agnostic'
+          : schema?.multiNamespace
+          ? 'multiple'
+          : 'single') as SavedObjectsNamespaceType;
         return {
           name: type,
           hidden: schema?.hidden ?? false,
-          namespaceAgnostic: schema?.isNamespaceAgnostic ?? false,
+          namespaceType,
           mappings,
           indexPattern:
             typeof schema?.indexPattern === 'function'
@@ -76,7 +82,8 @@ export const convertTypesToLegacySchema = (
     return {
       ...schema,
       [type.name]: {
-        isNamespaceAgnostic: type.namespaceAgnostic,
+        isNamespaceAgnostic: type.namespaceType === 'agnostic',
+        multiNamespace: type.namespaceType === 'multiple',
         hidden: type.hidden,
         indexPattern: type.indexPattern,
         convertToAliasScript: type.convertToAliasScript,

@@ -7,7 +7,7 @@
 import { advancedFilter } from './advanced_filter';
 import { debug } from './debug';
 import { dropdownFilter } from './dropdown_filter';
-import { embeddable } from './embeddable/embeddable';
+import { embeddableRendererFactory } from './embeddable/embeddable';
 import { error } from './error';
 import { image } from './image';
 import { markdown } from './markdown';
@@ -20,13 +20,12 @@ import { revealImage } from './reveal_image';
 import { shape } from './shape';
 import { table } from './table';
 import { text } from './text';
-import { timeFilter } from './time_filter';
+import { timeFilterFactory } from './time_filter';
 
 export const renderFunctions = [
   advancedFilter,
   debug,
   dropdownFilter,
-  embeddable,
   error,
   image,
   markdown,
@@ -39,5 +38,6 @@ export const renderFunctions = [
   shape,
   table,
   text,
-  timeFilter,
 ];
+
+export const renderFunctionFactories = [embeddableRendererFactory, timeFilterFactory];

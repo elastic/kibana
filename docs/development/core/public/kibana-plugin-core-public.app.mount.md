@@ -14,5 +14,5 @@ mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>
 
 ## Remarks
 
-When function has two arguments, it will be called with a [context](./kibana-plugin-core-public.appmountcontext.md) as the first argument. This behavior is \*\*deprecated\*\*, and consumers should instead use [CoreSetup.getStartServices()](./kibana-plugin-core-public.coresetup.getstartservices.md)<!-- -->.
+When function has two arguments, it will be called with a [context](./kibana-plugin-core-public.appmountcontext.md) as the first argument. This behavior is \*\*deprecated\*\*, and consumers should instead use [CoreSetup.getStartServices](./kibana-plugin-core-public.coresetup.getstartservices.md)<!-- -->.
 

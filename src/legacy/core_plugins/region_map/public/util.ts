@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { FileLayer, VectorLayer } from 'ui/vis/map/service_settings';
-// TODO: reference to TILE_MAP plugin should be removed
-import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
+import { FileLayer, VectorLayer } from '../../../../plugins/maps_legacy/public';
+import { ORIGIN } from '../../../../plugins/maps_legacy/public';
 
 export const mapToLayerWithId = (prefix: string, layer: FileLayer): VectorLayer => ({
   ...layer,

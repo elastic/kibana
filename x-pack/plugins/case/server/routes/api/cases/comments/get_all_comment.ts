@@ -9,11 +9,12 @@ import { schema } from '@kbn/config-schema';
 import { AllCommentsResponseRt } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { flattenCommentSavedObjects, wrapError } from '../../utils';
+import { CASE_COMMENTS_URL } from '../../../../../common/constants';
 
 export function initGetAllCommentsApi({ caseService, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases/{case_id}/comments',
+      path: CASE_COMMENTS_URL,
       validate: {
         params: schema.object({
           case_id: schema.string(),
@@ -22,8 +23,9 @@ export function initGetAllCommentsApi({ caseService, router }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
+        const client = context.core.savedObjects.client;
         const comments = await caseService.getAllCaseComments({
-          client: context.core.savedObjects.client,
+          client,
           caseId: request.params.case_id,
         });
         return response.ok({

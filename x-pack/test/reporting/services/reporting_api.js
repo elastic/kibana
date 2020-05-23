@@ -97,7 +97,6 @@ export function ReportingAPIProvider({ getService }) {
     },
 
     expectRecentPdfAppStats(stats, app, count) {
-      expect(stats.reporting.last_day.printable_pdf.app[app]).to.be(count);
       expect(stats.reporting.last_7_days.printable_pdf.app[app]).to.be(count);
     },
 
@@ -106,7 +105,6 @@ export function ReportingAPIProvider({ getService }) {
     },
 
     expectRecentPdfLayoutStats(stats, layout, count) {
-      expect(stats.reporting.last_day.printable_pdf.layout[layout]).to.be(count);
       expect(stats.reporting.last_7_days.printable_pdf.layout[layout]).to.be(count);
     },
 
@@ -115,7 +113,6 @@ export function ReportingAPIProvider({ getService }) {
     },
 
     expectRecentJobTypeTotalStats(stats, jobType, count) {
-      expect(stats.reporting.last_day[jobType].total).to.be(count);
       expect(stats.reporting.last_7_days[jobType].total).to.be(count);
     },
 

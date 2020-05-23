@@ -6,7 +6,8 @@
 
 import {
   staticIndexPatternRoute,
-  dynamicIndexPatternRoute
+  dynamicIndexPatternRoute,
+  apmIndexPatternTitleRoute
 } from './index_pattern';
 import {
   errorDistributionRoute,
@@ -22,6 +23,7 @@ import {
 } from './services';
 import {
   agentConfigurationRoute,
+  getSingleAgentConfigurationRoute,
   agentConfigurationSearchRoute,
   deleteAgentConfigurationRoute,
   listAgentConfigurationEnvironmentsRoute,
@@ -63,7 +65,8 @@ import {
   createCustomLinkRoute,
   updateCustomLinkRoute,
   deleteCustomLinkRoute,
-  listCustomLinksRoute
+  listCustomLinksRoute,
+  customLinkTransactionRoute
 } from './settings/custom_link';
 
 const createApmApi = () => {
@@ -71,6 +74,7 @@ const createApmApi = () => {
     // index pattern
     .add(staticIndexPatternRoute)
     .add(dynamicIndexPatternRoute)
+    .add(apmIndexPatternTitleRoute)
 
     // Errors
     .add(errorDistributionRoute)
@@ -85,6 +89,7 @@ const createApmApi = () => {
     .add(serviceAnnotationsRoute)
 
     // Agent configuration
+    .add(getSingleAgentConfigurationRoute)
     .add(agentConfigurationAgentNameRoute)
     .add(agentConfigurationRoute)
     .add(agentConfigurationSearchRoute)
@@ -138,7 +143,8 @@ const createApmApi = () => {
     .add(createCustomLinkRoute)
     .add(updateCustomLinkRoute)
     .add(deleteCustomLinkRoute)
-    .add(listCustomLinksRoute);
+    .add(listCustomLinksRoute)
+    .add(customLinkTransactionRoute);
 
   return api;
 };

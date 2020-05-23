@@ -7,8 +7,7 @@
 import { schema, Type } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { decode } from 'rison-node';
-import { fromKueryExpression } from '../../../../../src/plugins/data/common';
-import { EndpointAppConstants } from '../types';
+import { AlertConstants } from '../alert_constants';
 
 /**
  * Used to validate GET requests against the index of the alerting APIs.
@@ -19,6 +18,7 @@ export const alertingIndexGetQuerySchema = schema.object(
       schema.number({
         min: 1,
         max: 100,
+        defaultValue: AlertConstants.ALERT_LIST_DEFAULT_PAGE_SIZE,
       })
     ),
     page_index: schema.maybe(
@@ -38,16 +38,17 @@ export const alertingIndexGetQuerySchema = schema.object(
         maxSize: 2,
       }) as Type<[string, string]> // Cast this to a string tuple. `@kbn/config-schema` doesn't do this automatically
     ),
+    empty_string_is_undefined: schema.maybe(schema.boolean()),
     sort: schema.maybe(schema.string()),
     order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
     query: schema.maybe(
       schema.string({
         validate(value) {
           try {
-            fromKueryExpression(value);
+            decode(value);
           } catch (err) {
-            return i18n.translate('xpack.endpoint.alerts.errors.bad_kql', {
-              defaultMessage: 'must be valid KQL',
+            return i18n.translate('xpack.endpoint.alerts.errors.bad_rison', {
+              defaultMessage: 'must be a valid rison-encoded string',
             });
           }
         },
@@ -103,18 +104,6 @@ export const alertingIndexGetQuerySchema = schema.object(
         return i18n.translate('xpack.endpoint.alerts.errors.before_cannot_be_used_with_after', {
           defaultMessage: '[before] cannot be used with [after]',
         });
-      }
-      if (
-        value.before !== undefined &&
-        value.sort !== undefined &&
-        value.sort !== EndpointAppConstants.ALERT_LIST_DEFAULT_SORT
-      ) {
-        return i18n.translate(
-          'xpack.endpoint.alerts.errors.before_cannot_be_used_with_custom_sort',
-          {
-            defaultMessage: '[before] cannot be used with custom sort',
-          }
-        );
       }
     },
   }

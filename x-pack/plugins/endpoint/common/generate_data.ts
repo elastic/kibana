@@ -6,7 +6,18 @@
 
 import uuid from 'uuid';
 import seedrandom from 'seedrandom';
-import { AlertEvent, EndpointEvent, EndpointMetadata, OSFields } from './types';
+import {
+  AlertEvent,
+  EndpointEvent,
+  Host,
+  HostMetadata,
+  HostOS,
+  HostPolicyResponse,
+  HostPolicyResponseActions,
+  HostPolicyResponseActionStatus,
+  PolicyData,
+} from './types';
+import { factory as policyFactory } from './models/policy_config';
 
 export type Event = AlertEvent | EndpointEvent;
 
@@ -16,9 +27,10 @@ interface EventOptions {
   parentEntityID?: string;
   eventType?: string;
   eventCategory?: string;
+  processName?: string;
 }
 
-const Windows: OSFields[] = [
+const Windows: HostOS[] = [
   {
     name: 'windows 10.0',
     full: 'Windows 10',
@@ -45,11 +57,11 @@ const Windows: OSFields[] = [
   },
 ];
 
-const Linux: OSFields[] = [];
+const Linux: HostOS[] = [];
 
-const Mac: OSFields[] = [];
+const Mac: HostOS[] = [];
 
-const OS: OSFields[] = [...Windows, ...Mac, ...Linux];
+const OS: HostOS[] = [...Windows, ...Mac, ...Linux];
 
 const POLICIES: Array<{ name: string; id: string }> = [
   {
@@ -64,72 +76,126 @@ const POLICIES: Array<{ name: string; id: string }> = [
 
 const FILE_OPERATIONS: string[] = ['creation', 'open', 'rename', 'execution', 'deletion'];
 
+interface EventInfo {
+  category: string;
+  /**
+   * This denotes the `event.type` field for when an event is created, this can be `start` or `creation`
+   */
+  creationType: string;
+}
+
 // These are from the v1 schemas and aren't all valid ECS event categories, still in flux
-const OTHER_EVENT_CATEGORIES: string[] = ['driver', 'file', 'library', 'network', 'registry'];
+const OTHER_EVENT_CATEGORIES: EventInfo[] = [
+  { category: 'driver', creationType: 'start' },
+  { category: 'file', creationType: 'creation' },
+  { category: 'library', creationType: 'start' },
+  { category: 'network', creationType: 'start' },
+  { category: 'registry', creationType: 'creation' },
+];
+
+interface HostInfo {
+  elastic: {
+    agent: {
+      id: string;
+    };
+  };
+  agent: {
+    version: string;
+    id: string;
+  };
+  host: Host;
+  endpoint: {
+    policy: {
+      id: string;
+    };
+  };
+}
+
+interface NodeState {
+  event: Event;
+  childrenCreated: number;
+  maxChildren: number;
+}
 
 export class EndpointDocGenerator {
-  agentId: string;
-  hostId: string;
-  hostname: string;
-  macAddress: string[];
-  ip: string[];
-  agentVersion: string;
-  os: OSFields;
-  policy: { name: string; id: string };
+  commonInfo: HostInfo;
   random: seedrandom.prng;
 
-  constructor(seed = Math.random().toString()) {
-    this.random = seedrandom(seed);
-    this.hostId = this.seededUUIDv4();
-    this.agentId = this.seededUUIDv4();
-    this.hostname = this.randomHostname();
-    this.ip = this.randomArray(3, () => this.randomIP());
-    this.macAddress = this.randomArray(3, () => this.randomMac());
-    this.agentVersion = this.randomVersion();
-    this.os = this.randomChoice(OS);
-    this.policy = this.randomChoice(POLICIES);
+  constructor(seed: string | seedrandom.prng = Math.random().toString()) {
+    if (typeof seed === 'string') {
+      this.random = seedrandom(seed);
+    } else {
+      this.random = seed;
+    }
+    this.commonInfo = this.createHostData();
   }
 
-  public randomizeIPs() {
-    this.ip = this.randomArray(3, () => this.randomIP());
+  /**
+   * Creates new random IP addresses for the host to simulate new DHCP assignment
+   */
+  public updateHostData() {
+    this.commonInfo.host.ip = this.randomArray(3, () => this.randomIP());
   }
 
-  public generateEndpointMetadata(ts = new Date().getTime()): EndpointMetadata {
+  /**
+   * Creates new random policy id for the host to simulate new policy application
+   */
+  public updatePolicyId() {
+    this.commonInfo.endpoint.policy.id = this.randomChoice(POLICIES).id;
+  }
+
+  private createHostData(): HostInfo {
+    return {
+      agent: {
+        version: this.randomVersion(),
+        id: this.seededUUIDv4(),
+      },
+      elastic: {
+        agent: {
+          id: this.seededUUIDv4(),
+        },
+      },
+      host: {
+        id: this.seededUUIDv4(),
+        hostname: this.randomHostname(),
+        ip: this.randomArray(3, () => this.randomIP()),
+        mac: this.randomArray(3, () => this.randomMac()),
+        os: this.randomChoice(OS),
+      },
+      endpoint: {
+        policy: this.randomChoice(POLICIES),
+      },
+    };
+  }
+
+  /**
+   * Creates a host metadata document
+   * @param ts - Timestamp to put in the event
+   */
+  public generateHostMetadata(ts = new Date().getTime()): HostMetadata {
     return {
       '@timestamp': ts,
       event: {
         created: ts,
       },
-      endpoint: {
-        policy: {
-          id: this.policy.id,
-        },
-      },
-      agent: {
-        version: this.agentVersion,
-        id: this.agentId,
-      },
-      host: {
-        id: this.hostId,
-        hostname: this.hostname,
-        ip: this.ip,
-        mac: this.macAddress,
-        os: this.os,
-      },
+      ...this.commonInfo,
     };
   }
 
+  /**
+   * Creates an alert from the simulated host represented by this EndpointDocGenerator
+   * @param ts - Timestamp to put in the event
+   * @param entityID - entityID of the originating process
+   * @param parentEntityID - optional entityID of the parent process, if it exists
+   */
   public generateAlert(
     ts = new Date().getTime(),
     entityID = this.randomString(10),
     parentEntityID?: string
   ): AlertEvent {
     return {
+      ...this.commonInfo,
       '@timestamp': ts,
-      agent: {
-        id: this.agentId,
-        version: this.agentVersion,
-      },
       event: {
         action: this.randomChoice(FILE_OPERATIONS),
         kind: 'alert',
@@ -138,11 +204,6 @@ export class EndpointDocGenerator {
         dataset: 'endpoint',
         module: 'endpoint',
         type: 'creation',
-      },
-      endpoint: {
-        policy: {
-          id: this.policy.id,
-        },
       },
       file: {
         owner: 'SYSTEM',
@@ -161,20 +222,13 @@ export class EndpointDocGenerator {
           trusted: false,
           subject_name: 'bad signer',
         },
-        malware_classifier: {
+        malware_classification: {
           identifier: 'endpointpe',
           score: 1,
           threshold: 0.66,
           version: '3.0.33',
         },
         temp_file_path: 'C:/temp/fake_malware.exe',
-      },
-      host: {
-        id: this.hostId,
-        hostname: this.hostname,
-        ip: this.ip,
-        mac: this.macAddress,
-        os: this.os,
       },
       process: {
         pid: 2,
@@ -226,7 +280,7 @@ export class EndpointDocGenerator {
             sha1: 'ca85243c0af6a6471bdaa560685c51eefd6dbc0d',
             sha256: '8ad40c90a611d36eb8f9eb24fa04f7dbca713db383ff55a03aa0f382e92061a2',
           },
-          malware_classifier: {
+          malware_classification: {
             identifier: 'Whitelisted',
             score: 0,
             threshold: 0,
@@ -240,48 +294,57 @@ export class EndpointDocGenerator {
     };
   }
 
+  /**
+   * Creates an event, customized by the options parameter
+   * @param options - Allows event field values to be specified
+   */
   public generateEvent(options: EventOptions = {}): EndpointEvent {
     return {
       '@timestamp': options.timestamp ? options.timestamp : new Date().getTime(),
-      agent: {
-        id: this.agentId,
-        version: this.agentVersion,
-        type: 'endpoint',
-      },
+      agent: { ...this.commonInfo.agent, type: 'endpoint' },
       ecs: {
         version: '1.4.0',
       },
       event: {
         category: options.eventCategory ? options.eventCategory : 'process',
         kind: 'event',
-        type: options.eventType ? options.eventType : 'creation',
+        type: options.eventType ? options.eventType : 'start',
         id: this.seededUUIDv4(),
       },
-      host: {
-        id: this.hostId,
-        hostname: this.hostname,
-        ip: this.ip,
-        mac: this.macAddress,
-        os: this.os,
-      },
+      host: this.commonInfo.host,
       process: {
         entity_id: options.entityID ? options.entityID : this.randomString(10),
         parent: options.parentEntityID ? { entity_id: options.parentEntityID } : undefined,
+        name: options.processName ? options.processName : randomProcessName(),
       },
     };
   }
 
-  public generateFullResolverTree(
+  /**
+   * Generator function that creates the full set of events needed to render resolver.
+   * The number of nodes grows exponentially with the number of generations and children per node.
+   * Each node is logically a process, and will have 1 or more process events associated with it.
+   * @param alertAncestors - number of ancestor generations to create relative to the alert
+   * @param childGenerations - number of child generations to create relative to the alert
+   * @param maxChildrenPerNode - maximum number of children for any given node in the tree
+   * @param relatedEventsPerNode - number of related events (file, registry, etc) to create for each process event in the tree
+   * @param percentNodesWithRelated - percent of nodes which should have related events
+   * @param percentChildrenTerminated - percent of nodes which will have process termination events
+   */
+  public *fullResolverTreeGenerator(
     alertAncestors?: number,
     childGenerations?: number,
     maxChildrenPerNode?: number,
     relatedEventsPerNode?: number,
     percentNodesWithRelated?: number,
     percentChildrenTerminated?: number
-  ): Event[] {
-    const ancestry = this.generateAlertEventAncestry(alertAncestors);
+  ) {
+    const ancestry = this.createAlertEventAncestry(alertAncestors);
+    for (let i = 0; i < ancestry.length; i++) {
+      yield ancestry[i];
+    }
     // ancestry will always have at least 2 elements, and the second to last element will be the process associated with the alert
-    const descendants = this.generateDescendantsTree(
+    yield* this.descendantsTreeGenerator(
       ancestry[ancestry.length - 2],
       childGenerations,
       maxChildrenPerNode,
@@ -289,10 +352,13 @@ export class EndpointDocGenerator {
       percentNodesWithRelated,
       percentChildrenTerminated
     );
-    return ancestry.concat(descendants);
   }
 
-  public generateAlertEventAncestry(alertAncestors = 3): Event[] {
+  /**
+   * Creates an alert event and associated process ancestry. The alert event will always be the last event in the return array.
+   * @param alertAncestors - number of ancestor generations to create
+   */
+  public createAlertEventAncestry(alertAncestors = 3): Event[] {
     const events = [];
     const startDate = new Date().getTime();
     const root = this.generateEvent({ timestamp: startDate + 1000 });
@@ -315,74 +381,271 @@ export class EndpointDocGenerator {
     return events;
   }
 
-  public generateDescendantsTree(
+  /**
+   * Creates the child generations of a process.  The number of returned events grows exponentially with generations and maxChildrenPerNode.
+   * @param root - The process event to use as the root node of the tree
+   * @param generations - number of child generations to create. The root node is not counted as a generation.
+   * @param maxChildrenPerNode - maximum number of children for any given node in the tree
+   * @param relatedEventsPerNode - number of related events (file, registry, etc) to create for each process event in the tree
+   * @param percentNodesWithRelated - percent of nodes which should have related events
+   * @param percentChildrenTerminated - percent of nodes which will have process termination events
+   */
+  public *descendantsTreeGenerator(
     root: Event,
     generations = 2,
     maxChildrenPerNode = 2,
     relatedEventsPerNode = 3,
     percentNodesWithRelated = 100,
     percentChildrenTerminated = 100
-  ): Event[] {
-    let events: Event[] = [root];
-    let parents = [root];
+  ) {
+    const rootState: NodeState = {
+      event: root,
+      childrenCreated: 0,
+      maxChildren: this.randomN(maxChildrenPerNode + 1),
+    };
+    const lineage: NodeState[] = [rootState];
     let timestamp = root['@timestamp'];
-    for (let i = 0; i < generations; i++) {
-      const newParents: EndpointEvent[] = [];
-      parents.forEach(element => {
-        // const numChildren = randomN(maxChildrenPerNode);
-        const numChildren = maxChildrenPerNode;
-        for (let j = 0; j < numChildren; j++) {
-          timestamp = timestamp + 1000;
-          const child = this.generateEvent({
-            timestamp,
-            parentEntityID: element.process.entity_id,
-          });
-          newParents.push(child);
-        }
+    while (lineage.length > 0) {
+      const currentState = lineage[lineage.length - 1];
+      // If we get to a state node and it has made all the children, move back up a level
+      if (
+        currentState.childrenCreated === currentState.maxChildren ||
+        lineage.length === generations + 1
+      ) {
+        lineage.pop();
+        continue;
+      }
+      // Otherwise, add a child and any nodes associated with it
+      currentState.childrenCreated++;
+      timestamp = timestamp + 1000;
+      const child = this.generateEvent({
+        timestamp,
+        parentEntityID: currentState.event.process.entity_id,
       });
-      events = events.concat(newParents);
-      parents = newParents;
-    }
-    const terminationEvents: EndpointEvent[] = [];
-    let relatedEvents: EndpointEvent[] = [];
-    events.forEach(element => {
+      lineage.push({
+        event: child,
+        childrenCreated: 0,
+        maxChildren: this.randomN(maxChildrenPerNode + 1),
+      });
+      yield child;
+      let processDuration: number = 6 * 3600;
       if (this.randomN(100) < percentChildrenTerminated) {
-        timestamp = timestamp + 1000;
-        terminationEvents.push(
-          this.generateEvent({
-            timestamp,
-            entityID: element.process.entity_id,
-            parentEntityID: element.process.parent?.entity_id,
-            eventCategory: 'process',
-            eventType: 'end',
-          })
-        );
+        processDuration = this.randomN(1000000); // This lets termination events be up to 1 million seconds after the creation event (~11 days)
+        yield this.generateEvent({
+          timestamp: timestamp + processDuration * 1000,
+          entityID: child.process.entity_id,
+          parentEntityID: child.process.parent?.entity_id,
+          eventCategory: 'process',
+          eventType: 'end',
+        });
       }
       if (this.randomN(100) < percentNodesWithRelated) {
-        relatedEvents = relatedEvents.concat(
-          this.generateRelatedEvents(element, relatedEventsPerNode)
-        );
+        yield* this.relatedEventsGenerator(child, relatedEventsPerNode, processDuration);
       }
-    });
-    events = events.concat(terminationEvents);
-    events = events.concat(relatedEvents);
-    return events;
+    }
   }
 
-  public generateRelatedEvents(node: Event, numRelatedEvents = 10): EndpointEvent[] {
-    const ts = node['@timestamp'] + 1000;
-    const relatedEvents: EndpointEvent[] = [];
+  /**
+   * Creates related events for a process event
+   * @param node - process event to relate events to by entityID
+   * @param numRelatedEvents - number of related events to generate
+   * @param processDuration - maximum number of seconds after process event that related event timestamp can be
+   */
+  public *relatedEventsGenerator(
+    node: Event,
+    numRelatedEvents = 10,
+    processDuration: number = 6 * 3600
+  ) {
     for (let i = 0; i < numRelatedEvents; i++) {
-      relatedEvents.push(
-        this.generateEvent({
-          timestamp: ts,
-          entityID: node.process.entity_id,
-          parentEntityID: node.process.parent?.entity_id,
-          eventCategory: this.randomChoice(OTHER_EVENT_CATEGORIES),
-        })
-      );
+      const eventInfo = this.randomChoice(OTHER_EVENT_CATEGORIES);
+
+      const ts = node['@timestamp'] + this.randomN(processDuration) * 1000;
+      yield this.generateEvent({
+        timestamp: ts,
+        entityID: node.process.entity_id,
+        parentEntityID: node.process.parent?.entity_id,
+        eventCategory: eventInfo.category,
+        eventType: eventInfo.creationType,
+      });
     }
-    return relatedEvents;
+  }
+
+  /**
+   * Generates an Ingest `datasource` that includes the Endpoint Policy data
+   */
+  public generatePolicyDatasource(): PolicyData {
+    return {
+      id: this.seededUUIDv4(),
+      name: 'Endpoint Policy',
+      description: 'Policy to protect the worlds data',
+      config_id: this.seededUUIDv4(),
+      enabled: true,
+      output_id: '',
+      inputs: [
+        {
+          type: 'endpoint',
+          enabled: true,
+          streams: [],
+          config: {
+            policy: {
+              value: policyFactory(),
+            },
+          },
+        },
+      ],
+      namespace: 'default',
+      package: {
+        name: 'endpoint',
+        title: 'Elastic Endpoint',
+        version: '1.0.0',
+      },
+      revision: 1,
+    };
+  }
+
+  /**
+   * Generates a Host Policy response message
+   */
+  public generatePolicyResponse(ts = new Date().getTime()): HostPolicyResponse {
+    const policyVersion = this.seededUUIDv4();
+    return {
+      '@timestamp': ts,
+      agent: {
+        id: this.commonInfo.agent.id,
+        version: '1.0.0-local.20200416.0',
+      },
+      elastic: {
+        agent: {
+          id: this.commonInfo.elastic.agent.id,
+        },
+      },
+      ecs: {
+        version: '1.4.0',
+      },
+      host: {
+        id: this.commonInfo.host.id,
+      },
+      endpoint: {
+        policy: {
+          applied: {
+            actions: {
+              configure_elasticsearch_connection: {
+                message: 'elasticsearch comms configured successfully',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              configure_kernel: {
+                message: 'Failed to configure kernel',
+                status: HostPolicyResponseActionStatus.failure,
+              },
+              configure_logging: {
+                message: 'Successfully configured logging',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              configure_malware: {
+                message: 'Unexpected error configuring malware',
+                status: HostPolicyResponseActionStatus.failure,
+              },
+              connect_kernel: {
+                message: 'Successfully initialized minifilter',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              detect_file_open_events: {
+                message: 'Successfully stopped file open event reporting',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              detect_file_write_events: {
+                message: 'Failed to stop file write event reporting',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              detect_image_load_events: {
+                message: 'Successfuly started image load event reporting',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              detect_process_events: {
+                message: 'Successfully started process event reporting',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              download_global_artifacts: {
+                message: 'Failed to download EXE model',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              load_config: {
+                message: 'successfully parsed configuration',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              load_malware_model: {
+                message: 'Error deserializing EXE model; no valid malware model installed',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              read_elasticsearch_config: {
+                message: 'Successfully read Elasticsearch configuration',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              read_events_config: {
+                message: 'Successfully read events configuration',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              read_kernel_config: {
+                message: 'Succesfully read kernel configuration',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              read_logging_config: {
+                message: 'field (logging.debugview) not found in config',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              read_malware_config: {
+                message: 'Successfully read malware detect configuration',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              workflow: {
+                message: 'Failed to apply a portion of the configuration (kernel)',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              download_model: {
+                message: 'Failed to apply a portion of the configuration (kernel)',
+                status: HostPolicyResponseActionStatus.success,
+              },
+              ingest_events_config: {
+                message: 'Failed to apply a portion of the configuration (kernel)',
+                status: HostPolicyResponseActionStatus.success,
+              },
+            },
+            id: this.commonInfo.endpoint.policy.id,
+            policy: {
+              id: this.commonInfo.endpoint.policy.id,
+              version: policyVersion,
+            },
+            response: {
+              configurations: {
+                events: {
+                  concerned_actions: this.randomHostPolicyResponseActions(),
+                  status: this.randomHostPolicyResponseActionStatus(),
+                },
+                logging: {
+                  concerned_actions: this.randomHostPolicyResponseActions(),
+                  status: this.randomHostPolicyResponseActionStatus(),
+                },
+                malware: {
+                  concerned_actions: this.randomHostPolicyResponseActions(),
+                  status: this.randomHostPolicyResponseActionStatus(),
+                },
+                streaming: {
+                  concerned_actions: this.randomHostPolicyResponseActions(),
+                  status: this.randomHostPolicyResponseActionStatus(),
+                },
+              },
+            },
+            status: this.randomHostPolicyResponseActionStatus(),
+            version: policyVersion,
+          },
+        },
+      },
+      event: {
+        created: ts,
+        id: this.seededUUIDv4(),
+        kind: 'policy_response',
+      },
+    };
   }
 
   private randomN(n: number): number {
@@ -428,4 +691,45 @@ export class EndpointDocGenerator {
   private seededUUIDv4(): string {
     return uuid.v4({ random: [...this.randomNGenerator(255, 16)] });
   }
+
+  private randomHostPolicyResponseActions(): Array<keyof HostPolicyResponseActions> {
+    return this.randomArray(this.randomN(8), () =>
+      this.randomChoice([
+        'load_config',
+        'workflow',
+        'download_global_artifacts',
+        'configure_malware',
+        'read_malware_config',
+        'load_malware_model',
+        'read_kernel_config',
+        'configure_kernel',
+        'detect_process_events',
+        'detect_file_write_events',
+        'detect_file_open_events',
+        'detect_image_load_events',
+        'connect_kernel',
+      ])
+    );
+  }
+
+  private randomHostPolicyResponseActionStatus(): HostPolicyResponseActionStatus {
+    return this.randomChoice([
+      HostPolicyResponseActionStatus.failure,
+      HostPolicyResponseActionStatus.success,
+      HostPolicyResponseActionStatus.warning,
+    ]);
+  }
+}
+
+const fakeProcessNames = [
+  'lsass.exe',
+  'notepad.exe',
+  'mimikatz.exe',
+  'powershell.exe',
+  'iexlorer.exe',
+  'explorer.exe',
+];
+/** Return a random fake process name */
+function randomProcessName(): string {
+  return fakeProcessNames[Math.floor(Math.random() * fakeProcessNames.length)];
 }

@@ -20,7 +20,7 @@
 jest.mock('history');
 
 import { setRootControllerMock, historyMock } from './new_platform.test.mocks';
-import { legacyAppRegister, __reset__, __setup__ } from './new_platform';
+import { legacyAppRegister, __reset__, __setup__, __start__ } from './new_platform';
 import { coreMock } from '../../../../core/public/mocks';
 
 describe('ui/new_platform', () => {

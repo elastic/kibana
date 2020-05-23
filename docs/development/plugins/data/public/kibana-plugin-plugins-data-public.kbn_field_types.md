@@ -23,6 +23,7 @@ export declare enum KBN_FIELD_TYPES
 |  DATE | <code>&quot;date&quot;</code> |  |
 |  GEO\_POINT | <code>&quot;geo_point&quot;</code> |  |
 |  GEO\_SHAPE | <code>&quot;geo_shape&quot;</code> |  |
+|  HISTOGRAM | <code>&quot;histogram&quot;</code> |  |
 |  IP | <code>&quot;ip&quot;</code> |  |
 |  MURMUR3 | <code>&quot;murmur3&quot;</code> |  |
 |  NESTED | <code>&quot;nested&quot;</code> |  |

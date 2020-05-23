@@ -17,6 +17,7 @@ import {
   EuiTabs,
   EuiTitle,
   EuiBetaBadge,
+  EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -28,6 +29,8 @@ import { hasShowActionsCapability, hasShowAlertsCapability } from './lib/capabil
 
 import { ActionsConnectorsList } from './sections/actions_connectors_list/components/actions_connectors_list';
 import { AlertsList } from './sections/alerts_list/components/alerts_list';
+import { PLUGIN } from './constants/plugin';
+import { HealthCheck } from './components/health_check';
 
 interface MatchParams {
   section: Section;
@@ -39,7 +42,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   },
   history,
 }) => {
-  const { chrome, capabilities, setBreadcrumbs } = useAppDependencies();
+  const { chrome, capabilities, setBreadcrumbs, docLinks, http } = useAppDependencies();
 
   const canShowActions = hasShowActionsCapability(capabilities);
   const canShowAlerts = hasShowAlertsCapability(capabilities);
@@ -100,12 +103,24 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
                     'xpack.triggersActionsUI.home.betaBadgeTooltipContent',
                     {
                       defaultMessage:
-                        'This module is not GA. Please help us by reporting any bugs.',
+                        '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                      values: {
+                        pluginName: PLUGIN.getI18nName(i18n),
+                      },
                     }
                   )}
                 />
               </h1>
             </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.home.sectionDescription"
+                  defaultMessage="Detect conditions using alerts, and take actions using connectors."
+                />
+              </p>
+            </EuiText>
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
 
@@ -126,9 +141,27 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 
         <Switch>
           {canShowActions && (
-            <Route exact path={routeToConnectors} component={ActionsConnectorsList} />
+            <Route
+              exact
+              path={routeToConnectors}
+              component={() => (
+                <HealthCheck docLinks={docLinks} http={http}>
+                  <ActionsConnectorsList />
+                </HealthCheck>
+              )}
+            />
           )}
-          {canShowAlerts && <Route exact path={routeToAlerts} component={AlertsList} />}
+          {canShowAlerts && (
+            <Route
+              exact
+              path={routeToAlerts}
+              component={() => (
+                <HealthCheck docLinks={docLinks} http={http}>
+                  <AlertsList />
+                </HealthCheck>
+              )}
+            />
+          )}
         </Switch>
       </EuiPageContent>
     </EuiPageBody>

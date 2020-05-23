@@ -18,15 +18,21 @@
  */
 
 import { first } from 'rxjs/operators';
-import { CoreStart, ISavedObjectsRepository } from 'kibana/server';
+import {
+  PluginInitializerContext,
+  Logger,
+  CoreSetup,
+  CoreStart,
+  ISavedObjectsRepository,
+  Plugin,
+} from 'kibana/server';
 import { ConfigType } from './config';
-import { PluginInitializerContext, Logger, CoreSetup } from '../../../../src/core/server';
 import { CollectorSet } from './collector';
 import { setupRoutes } from './routes';
 
 export type UsageCollectionSetup = CollectorSet;
-export class UsageCollectionPlugin {
-  logger: Logger;
+export class UsageCollectionPlugin implements Plugin<CollectorSet> {
+  private readonly logger: Logger;
   private savedObjects?: ISavedObjectsRepository;
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
@@ -39,7 +45,7 @@ export class UsageCollectionPlugin {
       .toPromise();
 
     const collectorSet = new CollectorSet({
-      logger: this.logger,
+      logger: this.logger.get('collector-set'),
       maximumWaitTimeForAllCollectorsInS: config.maximumWaitTimeForAllCollectorsInS,
     });
 

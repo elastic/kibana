@@ -32,19 +32,19 @@ import {
   ContactCardEmbeddableFactory,
 } from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { HelloWorldContainer } from '../../../../test_samples/embeddables/hello_world_container';
-import { GetEmbeddableFactory } from '../../../../types';
-import { EmbeddableFactory } from '../../../../embeddables';
+import { embeddablePluginMock } from '../../../../../mocks';
 
 let container: Container;
 let embeddable: ContactCardEmbeddable;
 
 function createHelloWorldContainer(input = { id: '123', panels: {} }) {
-  const embeddableFactories = new Map<string, EmbeddableFactory>();
-  const getEmbeddableFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
-  embeddableFactories.set(
+  const { setup, doStart } = embeddablePluginMock.createInstance();
+  setup.registerEmbeddableFactory(
     CONTACT_CARD_EMBEDDABLE,
-    new ContactCardEmbeddableFactory({}, (() => {}) as any, {} as any)
+    new ContactCardEmbeddableFactory((() => {}) as any, {} as any)
   );
+  const getEmbeddableFactory = doStart().getEmbeddableFactory;
+
   return new HelloWorldContainer(input, { getEmbeddableFactory } as any);
 }
 

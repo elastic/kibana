@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { App, CoreSetup, Plugin } from 'kibana/public';
+import { CoreSetup, Plugin } from 'kibana/public';
 import { sortBy } from 'lodash';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
+import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
 
 import './index.scss';
 
@@ -34,7 +35,7 @@ export interface DevToolsSetup {
    * to switch between the tools.
    * @param devTool The dev tools descriptor
    */
-  register: (devTool: DevTool) => void;
+  register: (devTool: CreateDevToolArgs) => DevToolApp;
 }
 
 export interface DevToolsStart {
@@ -46,53 +47,13 @@ export interface DevToolsStart {
    * becomes an implementation detail.
    * @deprecated
    */
-  getSortedDevTools: () => readonly DevTool[];
-}
-
-/**
- * Descriptor for a dev tool. A dev tool works similar to an application
- * registered in the core application service.
- */
-export interface DevTool {
-  /**
-   * The id of the dev tools. This will become part of the URL path
-   * (`dev_tools/${devTool.id}`. It has to be unique among registered
-   * dev tools.
-   */
-  id: string;
-  /**
-   * The human readable name of the dev tool. Should be internationalized.
-   * This will be used as a label in the tab above the actual tool.
-   */
-  title: string;
-  mount: App['mount'];
-  /**
-   * Flag indicating to disable the tab of this dev tool. Navigating to a
-   * disabled dev tool will be treated as the navigation to an unknown route
-   * (redirect to the console).
-   */
-  disabled?: boolean;
-  /**
-   * Optional tooltip content of the tab.
-   */
-  tooltipContent?: string;
-  /**
-   * Flag indicating whether the dev tool will do routing within the `dev_tools/${devTool.id}/`
-   * prefix. If it is set to true, the dev tool is responsible to redirect
-   * the user when navigating to unknown URLs within the prefix. If set
-   * to false only the root URL of the dev tool will be recognized as valid.
-   */
-  enableRouting: boolean;
-  /**
-   * Number used to order the tabs.
-   */
-  order: number;
+  getSortedDevTools: () => readonly DevToolApp[];
 }
 
 export class DevToolsPlugin implements Plugin<DevToolsSetup, DevToolsStart> {
-  private readonly devTools = new Map<string, DevTool>();
+  private readonly devTools = new Map<string, DevToolApp>();
 
-  private getSortedDevTools(): readonly DevTool[] {
+  private getSortedDevTools(): readonly DevToolApp[] {
     return sortBy([...this.devTools.values()], 'order');
   }
 
@@ -115,14 +76,16 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, DevToolsStart> {
     });
 
     return {
-      register: (devTool: DevTool) => {
-        if (this.devTools.has(devTool.id)) {
+      register: (devToolArgs: CreateDevToolArgs) => {
+        if (this.devTools.has(devToolArgs.id)) {
           throw new Error(
-            `Dev tool with id [${devTool.id}] has already been registered. Use a unique id.`
+            `Dev tool with id [${devToolArgs.id}] has already been registered. Use a unique id.`
           );
         }
 
+        const devTool = createDevToolApp(devToolArgs);
         this.devTools.set(devTool.id, devTool);
+        return devTool;
       },
     };
   }
@@ -132,4 +95,6 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, DevToolsStart> {
       getSortedDevTools: this.getSortedDevTools.bind(this),
     };
   }
+
+  public stop() {}
 }

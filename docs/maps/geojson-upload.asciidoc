@@ -14,7 +14,7 @@ GeoJSON is the most commonly used and flexible option.
 [float]
 
 === Upload a GeoJSON file
-Follow the instructions below to upload a GeoJSON data file, or try the
+Follow these instructions to upload a GeoJSON data file, or try the
 <<indexing-geojson-data-tutorial, end-to-end integrated example>>.
 
 . Open *Elastic Maps*, and then click *Add layer*.
@@ -37,7 +37,6 @@ the Elasticsearch responses are shown on the *Layer add panel* and the indexed d
 appears on the map. The geospatial data on the map
 should be identical to the locally-previewed data, but now it's indexed data from Elasticsearch.
 
-. To continue adding data to the map, click *Add layer* in the lower
-right-hand corner.
+. To continue adding data to the map, click *Add layer*.
 . In *Layer settings*, adjust any settings or <<maps-vector-style-properties, properties>> as needed.
 . Click *Save & close*.

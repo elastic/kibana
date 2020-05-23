@@ -1,0 +1,38 @@
+{
+  "description": "Adversaries may attempt to get information about running processes on a system.",
+  "false_positives": [
+    "Administrators may use the tasklist command to display a list of currently running processes. By itself, it does not indicate malicious activity. After obtaining a foothold, it's possible adversaries may use discovery commands like tasklist to get information about running processes."
+  ],
+  "index": [
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "name": "Process Discovery via Tasklist",
+  "query": "event.code:1 and process.name:tasklist.exe",
+  "risk_score": 21,
+  "rule_id": "cc16f774-59f9-462d-8b98-d27ccd4519ec",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0007",
+        "name": "Discovery",
+        "reference": "https://attack.mitre.org/tactics/TA0007/"
+      },
+      "technique": [
+        {
+          "id": "T1057",
+          "name": "Process Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1057/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 2
+}

@@ -9,7 +9,7 @@ import { Setup } from '../../helpers/setup_request';
 import {
   AgentConfiguration,
   AgentConfigurationIntake
-} from './configuration_types';
+} from '../../../../common/agent_configuration/configuration_types';
 import { APMIndexDocumentParams } from '../../helpers/es_client';
 
 export async function createOrUpdateConfiguration({

@@ -8,7 +8,7 @@
 > 
 > 
 
-Register a context provider for application mounting. Will only be available to applications that depend on the plugin that registered this context. Deprecated, use [CoreSetup.getStartServices()](./kibana-plugin-core-public.coresetup.getstartservices.md)<!-- -->.
+Register a context provider for application mounting. Will only be available to applications that depend on the plugin that registered this context. Deprecated, use [CoreSetup.getStartServices](./kibana-plugin-core-public.coresetup.getstartservices.md)<!-- -->.
 
 <b>Signature:</b>
 

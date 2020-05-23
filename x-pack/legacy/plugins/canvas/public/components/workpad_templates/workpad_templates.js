@@ -113,11 +113,13 @@ export class WorkpadTemplates extends React.PureComponent {
           className="canvasWorkpad__dropzoneTable canvasWorkpad__dropzoneTable--tags"
         />
         <EuiSpacer />
-        <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiPagination activePage={pageNumber} onPageClick={setPage} pageCount={totalPages} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {rows.length > 0 && (
+          <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiPagination activePage={pageNumber} onPageClick={setPage} pageCount={totalPages} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </Fragment>
     );
   };

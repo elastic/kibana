@@ -9,7 +9,6 @@ import { CanvasStartDeps, CanvasSetupDeps } from './plugin'; // eslint-disable-l
 
 // @ts-ignore Untyped Kibana Lib
 import chrome, { loadingCount } from 'ui/chrome'; // eslint-disable-line import/order
-import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url'; // eslint-disable-line import/order
 // @ts-ignore Untyped Kibana Lib
 import { formatMsg } from '../../../../../src/plugins/kibana_legacy/public'; // eslint-disable-line import/order
 
@@ -21,20 +20,17 @@ const shimCoreStart = {
 };
 
 const shimSetupPlugins: CanvasSetupDeps = {
+  data: npSetup.plugins.data,
   expressions: npSetup.plugins.expressions,
   home: npSetup.plugins.home,
+  usageCollection: npSetup.plugins.usageCollection,
 };
 const shimStartPlugins: CanvasStartDeps = {
   ...npStart.plugins,
+  embeddable: npStart.plugins.embeddable,
   expressions: npStart.plugins.expressions,
-  __LEGACY: {
-    // ToDo: Copy directly into canvas
-    absoluteToParsedUrl,
-    // ToDo: Copy directly into canvas
-    formatMsg,
-    // ToDo: Won't be a part of New Platform. Will need to handle internally
-    trackSubUrlForApp: chrome.trackSubUrlForApp,
-  },
+  inspector: npStart.plugins.inspector,
+  uiActions: npStart.plugins.uiActions,
 };
 
 // These methods are intended to be a replacement for import from 'ui/whatever'

@@ -7,10 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import { APICaller } from 'kibana/server';
-import {
-  JOB_STATE,
-  DATAFEED_STATE,
-} from '../../../../../legacy/plugins/ml/common/constants/states';
+import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import {
   MlSummaryJob,
   AuditMessage,
@@ -18,7 +15,8 @@ import {
   JobStats,
   DatafeedWithStats,
   CombinedJobWithStats,
-} from '../../../../../legacy/plugins/ml/common/types/anomaly_detection_jobs';
+} from '../../../common/types/anomaly_detection_jobs';
+import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import { datafeedsProvider, MlDatafeedsResponse, MlDatafeedsStatsResponse } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
 import { resultsServiceProvider } from '../results_service';
@@ -27,7 +25,7 @@ import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
 import {
   getLatestDataOrBucketTimestamp,
   isTimeSeriesViewJob,
-} from '../../../../../legacy/plugins/ml/common/util/job_utils';
+} from '../../../common/util/job_utils';
 import { groupsProvider } from './groups';
 
 export interface MlJobsResponse {
@@ -230,6 +228,8 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
     const groups: { [jobId: string]: string[] } = {};
     const datafeeds: { [id: string]: DatafeedWithStats } = {};
     const calendarsByJobId: { [jobId: string]: string[] } = {};
+    const globalCalendars: string[] = [];
+
     const requests: [
       Promise<MlJobsResponse>,
       Promise<MlJobsStatsResponse>,
@@ -301,7 +301,9 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
     if (calendarResults) {
       calendarResults.forEach(cal => {
         cal.job_ids.forEach(id => {
-          if (groups[id]) {
+          if (id === GLOBAL_CALENDAR) {
+            globalCalendars.push(cal.calendar_id);
+          } else if (groups[id]) {
             groups[id].forEach(jId => {
               if (calendarsByJobId[jId] !== undefined) {
                 calendarsByJobId[jId].push(cal.calendar_id);
@@ -328,8 +330,12 @@ export function jobsProvider(callAsCurrentUser: APICaller) {
       jobResults.jobs.forEach(job => {
         const tempJob = job as CombinedJobWithStats;
 
-        if (calendarsByJobId[tempJob.job_id].length) {
-          tempJob.calendars = calendarsByJobId[tempJob.job_id];
+        const calendars: string[] = [
+          ...(calendarsByJobId[tempJob.job_id] || []),
+          ...(globalCalendars || []),
+        ];
+        if (calendars.length) {
+          tempJob.calendars = calendars;
         }
 
         if (jobStatsResults && jobStatsResults.jobs) {

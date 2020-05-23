@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import './edit_user_page.scss';
+
 import { get } from 'lodash';
 import React, { Component, Fragment, ChangeEvent } from 'react';
 import {

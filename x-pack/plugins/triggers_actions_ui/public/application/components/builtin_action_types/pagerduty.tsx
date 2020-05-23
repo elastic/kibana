@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import moment from 'moment';
 import {
   ActionTypeModel,
   ActionConnectorFieldsProps,
@@ -21,11 +22,14 @@ import {
   ActionParamsProps,
 } from '../../../types';
 import { PagerDutyActionParams, PagerDutyActionConnector } from './types';
+import pagerDutySvg from './pagerduty.svg';
+import { AddMessageVariables } from '../add_message_variables';
+import { hasMustacheTokens } from '../../lib/has_mustache_tokens';
 
 export function getActionType(): ActionTypeModel {
   return {
     id: '.pagerduty',
-    iconClass: 'apps',
+    iconClass: pagerDutySvg,
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.selectMessageText',
       {
@@ -60,6 +64,7 @@ export function getActionType(): ActionTypeModel {
       const validationResult = { errors: {} };
       const errors = {
         summary: new Array<string>(),
+        timestamp: new Array<string>(),
       };
       validationResult.errors = errors;
       if (!actionParams.summary?.length) {
@@ -71,6 +76,24 @@ export function getActionType(): ActionTypeModel {
             }
           )
         );
+      }
+      if (actionParams.timestamp && !hasMustacheTokens(actionParams.timestamp)) {
+        if (isNaN(Date.parse(actionParams.timestamp))) {
+          const { nowShortFormat, nowLongFormat } = getValidTimestampExamples();
+          errors.timestamp.push(
+            i18n.translate(
+              'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.error.invalidTimestamp',
+              {
+                defaultMessage:
+                  'Timestamp must be a valid date, such as {nowShortFormat} or {nowLongFormat}.',
+                values: {
+                  nowShortFormat,
+                  nowLongFormat,
+                },
+              }
+            )
+          );
+        }
       }
       return validationResult;
     },
@@ -92,7 +115,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.apiUrlTextFieldLabel',
           {
-            defaultMessage: 'API URL',
+            defaultMessage: 'API URL (optional)',
           }
         )}
       >
@@ -116,12 +139,12 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
         fullWidth
         helpText={
           <EuiLink
-            href="https://www.elastic.co/guide/en/elasticsearch/reference/current/actions-pagerduty.html#configuring-pagerduty"
+            href="https://www.elastic.co/guide/en/kibana/current/pagerduty-action-type.html"
             target="_blank"
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyNameHelpLabel"
-              defaultMessage="Learn how to configure PagerDuty Accounts"
+              defaultMessage="Configure a PagerDuty account."
             />
           </EuiLink>
         }
@@ -130,7 +153,7 @@ const PagerDutyActionConnectorFields: React.FunctionComponent<ActionConnectorFie
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyTextFieldLabel',
           {
-            defaultMessage: 'Routing key',
+            defaultMessage: 'Integration key',
           }
         )}
       >
@@ -158,6 +181,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
   actionParams,
   editAction,
   index,
+  messageVariables,
   errors,
 }) => {
   const {
@@ -171,16 +195,81 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
     group,
   } = actionParams;
   const severityOptions = [
-    { value: 'critical', text: 'Critical' },
-    { value: 'info', text: 'Info' },
-    { value: 'warning', text: 'Warning' },
-    { value: 'error', text: 'Error' },
+    {
+      value: 'critical',
+      text: i18n.translate(
+        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectCriticalOptionLabel',
+        {
+          defaultMessage: 'Critical',
+        }
+      ),
+    },
+    {
+      value: 'error',
+      text: i18n.translate(
+        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectErrorOptionLabel',
+        {
+          defaultMessage: 'Error',
+        }
+      ),
+    },
+    {
+      value: 'warning',
+      text: i18n.translate(
+        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectWarningOptionLabel',
+        {
+          defaultMessage: 'Warning',
+        }
+      ),
+    },
+    {
+      value: 'info',
+      text: i18n.translate(
+        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectInfoOptionLabel',
+        {
+          defaultMessage: 'Info',
+        }
+      ),
+    },
   ];
   const eventActionOptions = [
-    { value: 'trigger', text: 'Trigger' },
-    { value: 'resolve', text: 'Resolve' },
-    { value: 'acknowledge', text: 'Acknowledge' },
+    {
+      value: 'trigger',
+      text: i18n.translate(
+        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.eventSelectTriggerOptionLabel',
+        {
+          defaultMessage: 'Trigger',
+        }
+      ),
+    },
+    {
+      value: 'resolve',
+      text: i18n.translate(
+        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.eventSelectResolveOptionLabel',
+        {
+          defaultMessage: 'Resolve',
+        }
+      ),
+    },
+    {
+      value: 'acknowledge',
+      text: i18n.translate(
+        'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.eventSelectAcknowledgeOptionLabel',
+        {
+          defaultMessage: 'Acknowledge',
+        }
+      ),
+    },
   ];
+
+  const onSelectMessageVariable = (paramsProperty: string, variable: string) => {
+    editAction(
+      paramsProperty,
+      ((actionParams as any)[paramsProperty] ?? '').concat(` {{${variable}}}`),
+      index
+    );
+  };
+
   return (
     <Fragment>
       <EuiFlexGroup>
@@ -190,7 +279,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.severitySelectFieldLabel',
               {
-                defaultMessage: 'Severity (optional)',
+                defaultMessage: 'Severity',
               }
             )}
           >
@@ -211,7 +300,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.eventActionSelectFieldLabel',
               {
-                defaultMessage: 'Event action (optional)',
+                defaultMessage: 'Event action',
               }
             )}
           >
@@ -237,6 +326,15 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
                 defaultMessage: 'DedupKey (optional)',
               }
             )}
+            labelAppend={
+              <AddMessageVariables
+                messageVariables={messageVariables}
+                onSelectEventHandler={(variable: string) =>
+                  onSelectMessageVariable('dedupKey', variable)
+                }
+                paramsProperty="dedupKey"
+              />
+            }
           >
             <EuiFieldText
               fullWidth
@@ -247,7 +345,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
                 editAction('dedupKey', e.target.value, index);
               }}
               onBlur={() => {
-                if (!index) {
+                if (!dedupKey) {
                   editAction('dedupKey', '', index);
                 }
               }}
@@ -257,23 +355,37 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
+            error={errors.timestamp}
+            isInvalid={errors.timestamp.length > 0 && timestamp !== undefined}
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.timestampTextFieldLabel',
               {
                 defaultMessage: 'Timestamp (optional)',
               }
             )}
+            labelAppend={
+              <AddMessageVariables
+                messageVariables={messageVariables}
+                onSelectEventHandler={(variable: string) =>
+                  onSelectMessageVariable('timestamp', variable)
+                }
+                paramsProperty="timestamp"
+              />
+            }
           >
             <EuiFieldText
               fullWidth
               name="timestamp"
               data-test-subj="timestampInput"
               value={timestamp || ''}
+              isInvalid={errors.timestamp.length > 0 && timestamp !== undefined}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 editAction('timestamp', e.target.value, index);
               }}
               onBlur={() => {
-                if (!index) {
+                if (timestamp?.trim()) {
+                  editAction('timestamp', timestamp.trim(), index);
+                } else {
                   editAction('timestamp', '', index);
                 }
               }}
@@ -289,6 +401,15 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Component (optional)',
           }
         )}
+        labelAppend={
+          <AddMessageVariables
+            messageVariables={messageVariables}
+            onSelectEventHandler={(variable: string) =>
+              onSelectMessageVariable('component', variable)
+            }
+            paramsProperty="component"
+          />
+        }
       >
         <EuiFieldText
           fullWidth
@@ -299,7 +420,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             editAction('component', e.target.value, index);
           }}
           onBlur={() => {
-            if (!index) {
+            if (!component) {
               editAction('component', '', index);
             }
           }}
@@ -313,6 +434,13 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Group (optional)',
           }
         )}
+        labelAppend={
+          <AddMessageVariables
+            messageVariables={messageVariables}
+            onSelectEventHandler={(variable: string) => onSelectMessageVariable('group', variable)}
+            paramsProperty="group"
+          />
+        }
       >
         <EuiFieldText
           fullWidth
@@ -323,7 +451,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             editAction('group', e.target.value, index);
           }}
           onBlur={() => {
-            if (!index) {
+            if (!group) {
               editAction('group', '', index);
             }
           }}
@@ -337,6 +465,13 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Source (optional)',
           }
         )}
+        labelAppend={
+          <AddMessageVariables
+            messageVariables={messageVariables}
+            onSelectEventHandler={(variable: string) => onSelectMessageVariable('source', variable)}
+            paramsProperty="source"
+          />
+        }
       >
         <EuiFieldText
           fullWidth
@@ -347,7 +482,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             editAction('source', e.target.value, index);
           }}
           onBlur={() => {
-            if (!index) {
+            if (!source) {
               editAction('source', '', index);
             }
           }}
@@ -364,6 +499,15 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
             defaultMessage: 'Summary',
           }
         )}
+        labelAppend={
+          <AddMessageVariables
+            messageVariables={messageVariables}
+            onSelectEventHandler={(variable: string) =>
+              onSelectMessageVariable('summary', variable)
+            }
+            paramsProperty="summary"
+          />
+        }
       >
         <EuiFieldText
           fullWidth
@@ -387,9 +531,16 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.classFieldLabel',
           {
-            defaultMessage: 'Class',
+            defaultMessage: 'Class (optional)',
           }
         )}
+        labelAppend={
+          <AddMessageVariables
+            messageVariables={messageVariables}
+            onSelectEventHandler={(variable: string) => onSelectMessageVariable('class', variable)}
+            paramsProperty="class"
+          />
+        }
       >
         <EuiFieldText
           fullWidth
@@ -409,3 +560,11 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
     </Fragment>
   );
 };
+
+function getValidTimestampExamples() {
+  const now = moment();
+  return {
+    nowShortFormat: now.format('YYYY-MM-DD'),
+    nowLongFormat: now.format('YYYY-MM-DD h:mm:ss'),
+  };
+}

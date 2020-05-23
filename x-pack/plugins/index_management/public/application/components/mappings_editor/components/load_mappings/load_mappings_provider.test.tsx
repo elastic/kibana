@@ -38,17 +38,16 @@ const setup = (props: any) =>
     defaultProps: props,
   })();
 
-const openModalWithJsonContent = ({ find, component }: TestBed) => async (json: any) => {
-  find('load-json-button').simulate('click');
-  component.update();
-
+const openModalWithJsonContent = ({ find, waitFor }: TestBed) => async (json: any) => {
   // Set the mappings to load
-  // @ts-ignore
   await act(async () => {
+    find('load-json-button').simulate('click');
+    await waitFor('mockCodeEditor');
+
     find('mockCodeEditor').simulate('change', {
       jsonString: JSON.stringify(json),
     });
-    await nextTick(300); // There is a debounce in the JsonEditor that we need to wait for
+    await nextTick(500); // There is a debounce in the JsonEditor that we need to wait for
   });
 };
 

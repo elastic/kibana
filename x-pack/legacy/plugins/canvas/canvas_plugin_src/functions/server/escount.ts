@@ -4,9 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunctionDefinition, Filter } from 'src/plugins/expressions/common';
+import {
+  ExpressionFunctionDefinition,
+  ExpressionValueFilter,
+} from 'src/plugins/expressions/common';
+/* eslint-disable */
 // @ts-ignore untyped local
-import { buildESRequest } from '../../../server/lib/build_es_request';
+import { buildESRequest } from '../../../../../../plugins/canvas/server/lib/build_es_request';
+/* eslint-enable */
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -14,7 +19,12 @@ interface Arguments {
   query: string;
 }
 
-export function escount(): ExpressionFunctionDefinition<'escount', Filter, Arguments, any> {
+export function escount(): ExpressionFunctionDefinition<
+  'escount',
+  ExpressionValueFilter,
+  Arguments,
+  any
+> {
   const { help, args: argHelp } = getFunctionHelp().escount;
 
   return {
@@ -40,7 +50,8 @@ export function escount(): ExpressionFunctionDefinition<'escount', Filter, Argum
     fn: (input, args, handlers) => {
       input.and = input.and.concat([
         {
-          type: 'luceneQueryString',
+          type: 'filter',
+          filterType: 'luceneQueryString',
           query: args.query,
           and: [],
         },

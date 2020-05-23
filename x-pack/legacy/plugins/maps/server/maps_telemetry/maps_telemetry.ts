@@ -12,13 +12,13 @@ import {
 } from 'src/core/server';
 import { IFieldType, IIndexPattern } from 'src/plugins/data/public';
 import {
-  EMS_FILE,
+  SOURCE_TYPES,
   ES_GEO_FIELD_TYPE,
   MAP_SAVED_OBJECT_TYPE,
   TELEMETRY_TYPE,
-  // @ts-ignore
-} from '../../common/constants';
-import { LayerDescriptor } from '../../common/descriptor_types';
+} from '../../../../../plugins/maps/common/constants';
+import { LayerDescriptor } from '../../../../../plugins/maps/common/descriptor_types';
+import { MapSavedObject } from '../../../../../plugins/maps/common/map_saved_object_type';
 
 interface IStats {
   [key: string]: {
@@ -30,33 +30,6 @@ interface IStats {
 
 interface ILayerTypeCount {
   [key: string]: number;
-}
-
-interface IMapSavedObject {
-  [key: string]: any;
-  fields: IFieldType[];
-  title: string;
-  id?: string;
-  type?: string;
-  timeFieldName?: string;
-  fieldFormatMap?: Record<
-    string,
-    {
-      id: string;
-      params: unknown;
-    }
-  >;
-  attributes?: {
-    title?: string;
-    description?: string;
-    mapStateJSON?: string;
-    layerListJSON?: string;
-    uiStateJSON?: string;
-    bounds?: {
-      type?: string;
-      coordinates?: [];
-    };
-  };
 }
 
 function getUniqueLayerCounts(layerCountsList: ILayerTypeCount[], mapsCount: number) {
@@ -102,7 +75,7 @@ export function buildMapsTelemetry({
   indexPatternSavedObjects,
   settings,
 }: {
-  mapSavedObjects: IMapSavedObject[];
+  mapSavedObjects: MapSavedObject[];
   indexPatternSavedObjects: IIndexPattern[];
   settings: SavedObjectAttribute;
 }): SavedObjectAttributes {
@@ -114,6 +87,8 @@ export function buildMapsTelemetry({
   const mapsCount = layerLists.length;
 
   const dataSourcesCount = layerLists.map(lList => {
+    // todo: not every source-descriptor has an id
+    // @ts-ignore
     const sourceIdList = lList.map((layer: LayerDescriptor) => layer.sourceDescriptor.id);
     return _.uniq(sourceIdList).length;
   });
@@ -125,7 +100,7 @@ export function buildMapsTelemetry({
   const emsLayersCount = layerLists.map(lList =>
     _(lList)
       .countBy((layer: LayerDescriptor) => {
-        const isEmsFile = _.get(layer, 'sourceDescriptor.type') === EMS_FILE;
+        const isEmsFile = _.get(layer, 'sourceDescriptor.type') === SOURCE_TYPES.EMS_FILE;
         return isEmsFile && _.get(layer, 'sourceDescriptor.id');
       })
       .pick((val, key) => key !== 'false')
@@ -183,7 +158,7 @@ export async function getMapsTelemetry(
   savedObjectsClient: SavedObjectsClientContract,
   config: Function
 ) {
-  const mapSavedObjects: IMapSavedObject[] = await getMapSavedObjects(savedObjectsClient);
+  const mapSavedObjects: MapSavedObject[] = await getMapSavedObjects(savedObjectsClient);
   const indexPatternSavedObjects: IIndexPattern[] = await getIndexPatternSavedObjects(
     savedObjectsClient
   );

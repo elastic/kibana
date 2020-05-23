@@ -5,12 +5,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, AppMountParameters, HttpSetup } from 'src/core/public';
+import {
+  StartServicesAccessor,
+  ApplicationSetup,
+  AppMountParameters,
+  HttpSetup,
+} from 'src/core/public';
 
 interface CreateDeps {
-  application: CoreSetup['application'];
+  application: ApplicationSetup;
   http: HttpSetup;
-  getStartServices: CoreSetup['getStartServices'];
+  getStartServices: StartServicesAccessor;
 }
 
 export const loggedOutApp = Object.freeze({

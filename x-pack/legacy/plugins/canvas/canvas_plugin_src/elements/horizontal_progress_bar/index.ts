@@ -6,16 +6,14 @@
 
 import { openSans } from '../../../common/lib/fonts';
 import { ElementFactory } from '../../../types';
-import header from './header.png';
 
 export const horizontalProgressBar: ElementFactory = () => ({
   name: 'horizontalProgressBar',
-  displayName: 'Horizontal progress bar',
-  tags: ['chart', 'proportion'],
+  displayName: 'Horizontal bar',
+  type: 'progress',
   help: 'Displays progress as a portion of a horizontal bar',
   width: 400,
   height: 30,
-  image: header,
   expression: `filters
 | demodata
 | math "mean(percent_uptime)"

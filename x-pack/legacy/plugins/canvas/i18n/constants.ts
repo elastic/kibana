@@ -25,6 +25,7 @@ export const JS = 'JavaScript';
 export const JSON = 'JSON';
 export const KIBANA = 'Kibana';
 export const LUCENE = 'Lucene';
+export const LUCENE_QUERY_URL = 'https://www.elastic.co/guide/en/kibana/current/lucene-query.html';
 export const MARKDOWN = 'Markdown';
 export const MOMENTJS = 'MomentJS';
 export const MOMENTJS_TIMEZONE_URL = 'https://momentjs.com/timezone/';
@@ -37,6 +38,7 @@ export const SQL_URL =
   'https://www.elastic.co/guide/en/elasticsearch/reference/current/sql-spec.html';
 export const SVG = 'SVG';
 export const TIMELION = 'Timelion';
+export const TIMELION_QUERY_URL = 'https://www.elastic.co/blog/timelion-tutorial-from-zero-to-hero';
 export const TINYMATH = '`TinyMath`';
 export const TINYMATH_URL =
   'https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html';

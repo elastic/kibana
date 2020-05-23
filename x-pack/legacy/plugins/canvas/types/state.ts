@@ -6,7 +6,7 @@
 
 import {
   Datatable,
-  Filter,
+  ExpressionValueFilter,
   ExpressionImage,
   ExpressionFunction,
   KibanaContext,
@@ -46,7 +46,7 @@ interface ElementStatsType {
 
 type ExpressionType =
   | Datatable
-  | Filter
+  | ExpressionValueFilter
   | ExpressionImage
   | KibanaContext
   | KibanaDatatable

@@ -66,6 +66,7 @@ export function getActionType({
 }): ActionType {
   return {
     id: '.webhook',
+    minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.actions.builtin.webhookTitle', {
       defaultMessage: 'Webhook',
     }),
@@ -159,7 +160,7 @@ export async function executor(
 }
 
 // Action Executor Result w/ internationalisation
-function successResult(actionId: string, data: any): ActionTypeExecutorResult {
+function successResult(actionId: string, data: unknown): ActionTypeExecutorResult {
   return { status: 'ok', data, actionId };
 }
 

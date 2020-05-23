@@ -6,20 +6,21 @@
 
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
+import { CASE_TAGS_URL } from '../../../../../common/constants';
 
 export function initGetTagsApi({ caseService, router }: RouteDeps) {
   router.get(
     {
-      path: '/api/cases/tags',
+      path: CASE_TAGS_URL,
       validate: {},
     },
     async (context, request, response) => {
-      let theCase;
       try {
-        theCase = await caseService.getTags({
-          client: context.core.savedObjects.client,
+        const client = context.core.savedObjects.client;
+        const tags = await caseService.getTags({
+          client,
         });
-        return response.ok({ body: theCase });
+        return response.ok({ body: tags });
       } catch (error) {
         return response.customError(wrapError(error));
       }

@@ -8,7 +8,7 @@
 > 
 > 
 
-The context object received when applications are mounted to the DOM. Deprecated, use [CoreSetup.getStartServices()](./kibana-plugin-core-public.coresetup.getstartservices.md)<!-- -->.
+The context object received when applications are mounted to the DOM. Deprecated, use [CoreSetup.getStartServices](./kibana-plugin-core-public.coresetup.getstartservices.md)<!-- -->.
 
 <b>Signature:</b>
 

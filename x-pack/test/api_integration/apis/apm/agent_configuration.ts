@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { AgentConfigurationIntake } from '../../../../plugins/apm/server/lib/settings/agent_configuration/configuration_types';
+import { AgentConfigurationIntake } from '../../../../plugins/apm/common/agent_configuration/configuration_types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function agentConfigurationTests({ getService }: FtrProviderContext) {
@@ -70,7 +70,7 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     describe('when creating one configuration', () => {
       const newConfig = {
         service: {},
-        settings: { transaction_sample_rate: 0.55 },
+        settings: { transaction_sample_rate: '0.55' },
       };
 
       const searchParams = {
@@ -83,25 +83,25 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       });
 
       it('can find the created config', async () => {
-        const { statusCode, body } = await searchConfigurations(searchParams);
-        expect(statusCode).to.equal(200);
+        const { status, body } = await searchConfigurations(searchParams);
+        expect(status).to.equal(200);
         expect(body._source.service).to.eql({});
-        expect(body._source.settings).to.eql({ transaction_sample_rate: 0.55 });
+        expect(body._source.settings).to.eql({ transaction_sample_rate: '0.55' });
       });
 
       it('can update the created config', async () => {
-        await updateConfiguration({ service: {}, settings: { transaction_sample_rate: 0.85 } });
+        await updateConfiguration({ service: {}, settings: { transaction_sample_rate: '0.85' } });
 
-        const { statusCode, body } = await searchConfigurations(searchParams);
-        expect(statusCode).to.equal(200);
+        const { status, body } = await searchConfigurations(searchParams);
+        expect(status).to.equal(200);
         expect(body._source.service).to.eql({});
-        expect(body._source.settings).to.eql({ transaction_sample_rate: 0.85 });
+        expect(body._source.settings).to.eql({ transaction_sample_rate: '0.85' });
       });
 
       it('can delete the created config', async () => {
         await deleteConfiguration(newConfig);
-        const { statusCode } = await searchConfigurations(searchParams);
-        expect(statusCode).to.equal(404);
+        const { status } = await searchConfigurations(searchParams);
+        expect(status).to.equal(404);
       });
     });
 
@@ -109,23 +109,23 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       const configs = [
         {
           service: {},
-          settings: { transaction_sample_rate: 0.1 },
+          settings: { transaction_sample_rate: '0.1' },
         },
         {
           service: { name: 'my_service' },
-          settings: { transaction_sample_rate: 0.2 },
+          settings: { transaction_sample_rate: '0.2' },
         },
         {
           service: { name: 'my_service', environment: 'development' },
-          settings: { transaction_sample_rate: 0.3 },
+          settings: { transaction_sample_rate: '0.3' },
         },
         {
           service: { environment: 'production' },
-          settings: { transaction_sample_rate: 0.4 },
+          settings: { transaction_sample_rate: '0.4' },
         },
         {
           service: { environment: 'development' },
-          settings: { transaction_sample_rate: 0.5 },
+          settings: { transaction_sample_rate: '0.5' },
         },
       ];
 
@@ -140,38 +140,38 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
       const agentsRequests = [
         {
           service: { name: 'non_existing_service', environment: 'non_existing_env' },
-          expectedSettings: { transaction_sample_rate: 0.1 },
+          expectedSettings: { transaction_sample_rate: '0.1' },
         },
         {
           service: { name: 'my_service', environment: 'non_existing_env' },
-          expectedSettings: { transaction_sample_rate: 0.2 },
+          expectedSettings: { transaction_sample_rate: '0.2' },
         },
         {
           service: { name: 'my_service', environment: 'production' },
-          expectedSettings: { transaction_sample_rate: 0.2 },
+          expectedSettings: { transaction_sample_rate: '0.2' },
         },
         {
           service: { name: 'my_service', environment: 'development' },
-          expectedSettings: { transaction_sample_rate: 0.3 },
+          expectedSettings: { transaction_sample_rate: '0.3' },
         },
         {
           service: { name: 'non_existing_service', environment: 'production' },
-          expectedSettings: { transaction_sample_rate: 0.4 },
+          expectedSettings: { transaction_sample_rate: '0.4' },
         },
         {
           service: { name: 'non_existing_service', environment: 'development' },
-          expectedSettings: { transaction_sample_rate: 0.5 },
+          expectedSettings: { transaction_sample_rate: '0.5' },
         },
       ];
 
       for (const agentRequest of agentsRequests) {
         it(`${agentRequest.service.name} / ${agentRequest.service.environment}`, async () => {
-          const { statusCode, body } = await searchConfigurations({
+          const { status, body } = await searchConfigurations({
             service: agentRequest.service,
             etag: 'abc',
           });
 
-          expect(statusCode).to.equal(200);
+          expect(status).to.equal(200);
           expect(body._source.settings).to.eql(agentRequest.expectedSettings);
         });
       }
@@ -180,39 +180,81 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
     describe('when an agent retrieves a configuration', () => {
       const config = {
         service: { name: 'myservice', environment: 'development' },
-        settings: { transaction_sample_rate: 0.9 },
+        settings: { transaction_sample_rate: '0.9' },
       };
+      const configProduction = {
+        service: { name: 'myservice', environment: 'production' },
+        settings: { transaction_sample_rate: '0.9' },
+      };
+      let etag: string;
 
       before(async () => {
         log.debug('creating agent configuration');
         await createConfiguration(config);
+        await createConfiguration(configProduction);
       });
 
       after(async () => {
         await deleteConfiguration(config);
+        await deleteConfiguration(configProduction);
       });
 
-      it(`should have 'applied_by_agent=false' on first request`, async () => {
-        const { body } = await searchConfigurations({
+      it(`should have 'applied_by_agent=false' before supplying etag`, async () => {
+        const res1 = await searchConfigurations({
           service: { name: 'myservice', environment: 'development' },
-          etag: '7312bdcc34999629a3d39df24ed9b2a7553c0c39',
         });
 
-        expect(body._source.applied_by_agent).to.be(false);
+        etag = res1.body._source.etag;
+
+        const res2 = await searchConfigurations({
+          service: { name: 'myservice', environment: 'development' },
+          etag,
+        });
+
+        expect(res1.body._source.applied_by_agent).to.be(false);
+        expect(res2.body._source.applied_by_agent).to.be(false);
       });
 
-      it(`should have 'applied_by_agent=true' on second request`, async () => {
-        async function getAppliedByAgent() {
+      it(`should have 'applied_by_agent=true' after supplying etag`, async () => {
+        await searchConfigurations({
+          service: { name: 'myservice', environment: 'development' },
+          etag,
+        });
+
+        async function hasBeenAppliedByAgent() {
           const { body } = await searchConfigurations({
             service: { name: 'myservice', environment: 'development' },
-            etag: '7312bdcc34999629a3d39df24ed9b2a7553c0c39',
           });
 
           return body._source.applied_by_agent;
         }
 
         // wait until `applied_by_agent` has been updated in elasticsearch
-        expect(await waitFor(getAppliedByAgent)).to.be(true);
+        expect(await waitFor(hasBeenAppliedByAgent)).to.be(true);
+      });
+      it(`should have 'applied_by_agent=false' before marking as applied`, async () => {
+        const res1 = await searchConfigurations({
+          service: { name: 'myservice', environment: 'production' },
+        });
+
+        expect(res1.body._source.applied_by_agent).to.be(false);
+      });
+      it(`should have 'applied_by_agent=true' when 'mark_as_applied_by_agent' attribute is true`, async () => {
+        await searchConfigurations({
+          service: { name: 'myservice', environment: 'production' },
+          mark_as_applied_by_agent: true,
+        });
+
+        async function hasBeenAppliedByAgent() {
+          const { body } = await searchConfigurations({
+            service: { name: 'myservice', environment: 'production' },
+          });
+
+          return body._source.applied_by_agent;
+        }
+
+        // wait until `applied_by_agent` has been updated in elasticsearch
+        expect(await waitFor(hasBeenAppliedByAgent)).to.be(true);
       });
     });
   });

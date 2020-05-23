@@ -21,7 +21,6 @@ import { AnomaliesChart } from './chart';
 
 export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   partitionId: string;
-  topAnomalyScore: number;
   results: LogEntryRateResults;
   setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;

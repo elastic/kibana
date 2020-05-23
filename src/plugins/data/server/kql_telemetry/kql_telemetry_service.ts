@@ -22,14 +22,16 @@ import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
 import { registerKqlTelemetryRoute } from './route';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { makeKQLUsageCollector } from './usage_collector';
+import { kqlTelemetry } from '../saved_objects';
 
 export class KqlTelemetryService implements Plugin<void> {
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(
-    { http, getStartServices }: CoreSetup,
+    { http, getStartServices, savedObjects }: CoreSetup,
     { usageCollection }: { usageCollection?: UsageCollectionSetup }
   ) {
+    savedObjects.registerType(kqlTelemetry);
     registerKqlTelemetryRoute(
       http.createRouter(),
       getStartServices,

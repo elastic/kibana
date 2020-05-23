@@ -17,6 +17,7 @@
  * under the License.
  */
 import { Server } from 'hapi';
+import HapiStaticFiles from 'inert';
 import url from 'url';
 
 import { Logger, LoggerFactory } from '../logging';
@@ -44,6 +45,7 @@ export interface HttpServerSetup {
    * @param router {@link IRouter} - a router with registered route handlers.
    */
   registerRouter: (router: IRouter) => void;
+  registerStaticDir: (path: string, dirPath: string) => void;
   basePath: HttpServiceSetup['basePath'];
   csp: HttpServiceSetup['csp'];
   createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
@@ -72,6 +74,7 @@ export class HttpServer {
   private registeredRouters = new Set<IRouter>();
   private authRegistered = false;
   private cookieSessionStorageCreated = false;
+  private stopped = false;
 
   private readonly log: Logger;
   private readonly authState: AuthStateStorage;
@@ -97,10 +100,11 @@ export class HttpServer {
     this.registeredRouters.add(router);
   }
 
-  public setup(config: HttpConfig): HttpServerSetup {
+  public async setup(config: HttpConfig): Promise<HttpServerSetup> {
     const serverOptions = getServerOptions(config);
     const listenerOptions = getListenerOptions(config);
     this.server = createServer(serverOptions, listenerOptions);
+    await this.server.register([HapiStaticFiles]);
     this.config = config;
 
     const basePathService = new BasePath(config.basePath);
@@ -109,6 +113,7 @@ export class HttpServer {
 
     return {
       registerRouter: this.registerRouter.bind(this),
+      registerStaticDir: this.registerStaticDir.bind(this),
       registerOnPreAuth: this.registerOnPreAuth.bind(this),
       registerOnPostAuth: this.registerOnPostAuth.bind(this),
       registerOnPreResponse: this.registerOnPreResponse.bind(this),
@@ -139,6 +144,10 @@ export class HttpServer {
   public async start() {
     if (this.server === undefined) {
       throw new Error('Http server is not setup up yet');
+    }
+    if (this.stopped) {
+      this.log.warn(`start called after stop`);
+      return;
     }
     this.log.debug('starting http server');
 
@@ -185,13 +194,13 @@ export class HttpServer {
   }
 
   public async stop() {
+    this.stopped = true;
     if (this.server === undefined) {
       return;
     }
 
     this.log.debug('stopping http server');
     await this.server.stop();
-    this.server = undefined;
   }
 
   private getAuthOption(
@@ -230,6 +239,9 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
+    if (this.stopped) {
+      this.log.warn(`setupConditionalCompression called after stop`);
+    }
 
     const { enabled, referrerWhitelist: list } = config.compression;
     if (!enabled) {
@@ -257,6 +269,9 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
+    if (this.stopped) {
+      this.log.warn(`registerOnPostAuth called after stop`);
+    }
 
     this.server.ext('onPostAuth', adoptToHapiOnPostAuthFormat(fn, this.log));
   }
@@ -265,6 +280,9 @@ export class HttpServer {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
+    if (this.stopped) {
+      this.log.warn(`registerOnPreAuth called after stop`);
+    }
 
     this.server.ext('onRequest', adoptToHapiOnPreAuthFormat(fn, this.log));
   }
@@ -272,6 +290,9 @@ export class HttpServer {
   private registerOnPreResponse(fn: OnPreResponseHandler) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
+    }
+    if (this.stopped) {
+      this.log.warn(`registerOnPreResponse called after stop`);
     }
 
     this.server.ext('onPreResponse', adoptToHapiOnPreResponseFormat(fn, this.log));
@@ -283,6 +304,9 @@ export class HttpServer {
   ) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
+    }
+    if (this.stopped) {
+      this.log.warn(`createCookieSessionStorageFactory called after stop`);
     }
     if (this.cookieSessionStorageCreated) {
       throw new Error('A cookieSessionStorageFactory was already created');
@@ -300,6 +324,9 @@ export class HttpServer {
   private registerAuth<T>(fn: AuthenticationHandler) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
+    }
+    if (this.stopped) {
+      this.log.warn(`registerAuth called after stop`);
     }
     if (this.authRegistered) {
       throw new Error('Auth interceptor was already registered');
@@ -337,6 +364,28 @@ export class HttpServer {
     this.registerOnPreResponse((request, preResponseInfo, t) => {
       const authResponseHeaders = this.authResponseHeaders.get(request);
       return t.next({ headers: authResponseHeaders });
+    });
+  }
+
+  private registerStaticDir(path: string, dirPath: string) {
+    if (this.server === undefined) {
+      throw new Error('Http server is not setup up yet');
+    }
+    if (this.stopped) {
+      this.log.warn(`registerStaticDir called after stop`);
+    }
+
+    this.server.route({
+      path,
+      method: 'GET',
+      handler: {
+        directory: {
+          path: dirPath,
+          listing: false,
+          lookupCompressed: true,
+        },
+      },
+      options: { auth: false },
     });
   }
 }

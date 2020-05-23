@@ -4,24 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import { indexBy } from 'lodash';
+import { useHistory } from 'react-router-dom';
 import {
   EuiPageBody,
   EuiPageContent,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
   EuiTitle,
+  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
   EuiPage,
   EuiPageContentBody,
-  EuiButtonEmpty,
   EuiSwitch,
   EuiCallOut,
   EuiSpacer,
   EuiBetaBadge,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -33,6 +35,11 @@ import {
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
 import { AlertInstancesRouteWithApi } from './alert_instances_route';
+import { ViewInApp } from './view_in_app';
+import { PLUGIN } from '../../../constants/plugin';
+import { AlertEdit } from '../../alert_form';
+import { AlertsContextProvider } from '../../../context/alerts_context';
+import { routeToAlertDetails } from '../../../constants';
 
 type AlertDetailsProps = {
   alert: Alert;
@@ -51,15 +58,32 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
   muteAlert,
   requestRefresh,
 }) => {
-  const { capabilities } = useAppDependencies();
+  const history = useHistory();
+  const {
+    http,
+    toastNotifications,
+    capabilities,
+    alertTypeRegistry,
+    actionTypeRegistry,
+    uiSettings,
+    docLinks,
+    charts,
+    dataPlugin,
+  } = useAppDependencies();
 
   const canSave = hasSaveAlertsCapability(capabilities);
 
   const actionTypesByTypeId = indexBy(actionTypes, 'id');
-  const [firstAction, ...otherActions] = alert.actions;
 
+  const alertActions = alert.actions;
+  const uniqueActions = Array.from(new Set(alertActions.map((item: any) => item.actionTypeId)));
   const [isEnabled, setIsEnabled] = useState<boolean>(alert.enabled);
   const [isMuted, setIsMuted] = useState<boolean>(alert.muteAll);
+  const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
+
+  const setAlert = async () => {
+    history.push(routeToAlertDetails.replace(`:alertId`, alert.id));
+  };
 
   return (
     <EuiPage>
@@ -77,7 +101,10 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                       'xpack.triggersActionsUI.sections.alertDetails.betaBadgeTooltipContent',
                       {
                         defaultMessage:
-                          'This module is not GA. Please help us by reporting any bugs.',
+                          '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                        values: {
+                          pluginName: PLUGIN.getI18nName(i18n),
+                        },
                       }
                     )}
                   />
@@ -86,29 +113,44 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
             </EuiPageContentHeaderSection>
             <EuiPageContentHeaderSection>
               <EuiFlexGroup responsive={false} gutterSize="xs">
+                {canSave ? (
+                  <EuiFlexItem grow={false}>
+                    <Fragment>
+                      {' '}
+                      <EuiButtonEmpty
+                        data-test-subj="openEditAlertFlyoutButton"
+                        iconType="pencil"
+                        onClick={() => setEditFlyoutVisibility(true)}
+                      >
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
+                          defaultMessage="Edit"
+                        />
+                      </EuiButtonEmpty>
+                      <AlertsContextProvider
+                        value={{
+                          http,
+                          actionTypeRegistry,
+                          alertTypeRegistry,
+                          toastNotifications,
+                          uiSettings,
+                          docLinks,
+                          charts,
+                          dataFieldsFormats: dataPlugin.fieldFormats,
+                          reloadAlerts: setAlert,
+                        }}
+                      >
+                        <AlertEdit
+                          initialAlert={alert}
+                          editFlyoutVisible={editFlyoutVisible}
+                          setEditFlyoutVisibility={setEditFlyoutVisibility}
+                        />
+                      </AlertsContextProvider>
+                    </Fragment>
+                  </EuiFlexItem>
+                ) : null}
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty disabled={true} iconType="pencil">
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.editAlertButtonLabel"
-                      defaultMessage="Edit"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty disabled={true} iconType="popout">
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.viewAlertInAppButtonLabel"
-                      defaultMessage="View in app"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty disabled={true} iconType="menuLeft">
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertDetails.activityLogButtonLabel"
-                      defaultMessage="Activity Log"
-                    />
-                  </EuiButtonEmpty>
+                  <ViewInApp alert={alert} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPageContentHeaderSection>
@@ -116,33 +158,50 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
           <EuiPageContentBody>
             <EuiFlexGroup wrap responsive={false} gutterSize="m">
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge data-test-subj="alertTypeLabel">{alertType.name}</EuiBadge>
-                  </EuiFlexItem>
-                  {firstAction && (
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="hollow" data-test-subj="actionTypeLabel">
-                        {actionTypesByTypeId[firstAction.actionTypeId].name ??
-                          firstAction.actionTypeId}
-                      </EuiBadge>
-                    </EuiFlexItem>
-                  )}
-                  {otherActions.length ? (
-                    <EuiFlexItem grow={false} data-test-subj="actionCountLabel">
-                      <EuiBadge color="hollow">+{otherActions.length}</EuiBadge>
-                    </EuiFlexItem>
-                  ) : null}
-                </EuiFlexGroup>
+                <EuiText size="s">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.alertTypeTitle"
+                      defaultMessage="Type"
+                    />
+                  </p>
+                </EuiText>
+                <EuiSpacer size="xs" />
+                <EuiBadge data-test-subj="alertTypeLabel">{alertType.name}</EuiBadge>
               </EuiFlexItem>
-              <EuiFlexItem grow={true}>
-                <EuiFlexGroup wrap responsive={false} gutterSize="m">
+              <EuiFlexItem grow={1}>
+                {uniqueActions && uniqueActions.length ? (
+                  <Fragment>
+                    <EuiText size="s">
+                      <p>
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.actionsTex"
+                          defaultMessage="Actions"
+                        />
+                      </p>
+                    </EuiText>
+                    <EuiSpacer size="xs" />
+                    <EuiFlexGroup wrap gutterSize="s">
+                      {uniqueActions.map((action, index) => (
+                        <EuiFlexItem key={index} grow={false}>
+                          <EuiBadge color="hollow" data-test-subj="actionTypeLabel">
+                            {actionTypesByTypeId[action].name ?? action}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
+                  </Fragment>
+                ) : null}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSpacer />
+                <EuiFlexGroup justifyContent="flexEnd" wrap responsive={false} gutterSize="m">
                   <EuiFlexItem grow={false}>
                     <EuiSwitch
-                      name="enable"
+                      name="disable"
                       disabled={!canSave}
-                      checked={isEnabled}
-                      data-test-subj="enableSwitch"
+                      checked={!isEnabled}
+                      data-test-subj="disableSwitch"
                       onChange={async () => {
                         if (isEnabled) {
                           setIsEnabled(false);
@@ -155,8 +214,8 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                       }}
                       label={
                         <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.enableTitle"
-                          defaultMessage="Enable"
+                          id="xpack.triggersActionsUI.sections.alertDetails.collapsedItemActons.disableTitle"
+                          defaultMessage="Disable"
                         />
                       }
                     />
@@ -189,19 +248,21 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiFlexGroup>
-              <EuiSpacer size="m" />
               <EuiFlexItem>
                 {alert.enabled ? (
                   <AlertInstancesRouteWithApi requestRefresh={requestRefresh} alert={alert} />
                 ) : (
-                  <EuiCallOut title="Disabled Alert" color="warning" iconType="help">
-                    <p>
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.disabledAlert"
-                        defaultMessage="Disabled Alerts do not have an active state, hence Alert Instances cannot be displayed."
-                      />
-                    </p>
-                  </EuiCallOut>
+                  <Fragment>
+                    <EuiSpacer />
+                    <EuiCallOut title="Disabled Alert" color="warning" iconType="help">
+                      <p>
+                        <FormattedMessage
+                          id="xpack.triggersActionsUI.sections.alertDetails.alertInstances.disabledAlert"
+                          defaultMessage="This alert is disabled and cannot be displayed. Toggle Disable ↑ to activate it."
+                        />
+                      </p>
+                    </EuiCallOut>
+                  </Fragment>
                 )}
               </EuiFlexItem>
             </EuiFlexGroup>

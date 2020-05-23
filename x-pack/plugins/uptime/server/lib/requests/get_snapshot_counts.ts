@@ -5,11 +5,8 @@
  */
 
 import { UMElasticsearchQueryFn } from '../adapters';
-import { Snapshot } from '../../../../../legacy/plugins/uptime/common/runtime_types';
-import {
-  CONTEXT_DEFAULTS,
-  INDEX_NAMES,
-} from '../../../../../legacy/plugins/uptime/common/constants';
+import { CONTEXT_DEFAULTS } from '../../../common/constants';
+import { Snapshot } from '../../../common/runtime_types';
 import { QueryContext } from './search';
 
 export interface GetSnapshotCountParams {
@@ -21,6 +18,7 @@ export interface GetSnapshotCountParams {
 
 export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Snapshot> = async ({
   callES,
+  dynamicSettings: { heartbeatIndices },
   dateRangeStart,
   dateRangeEnd,
   filters,
@@ -32,6 +30,7 @@ export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Sn
 
   const context = new QueryContext(
     callES,
+    heartbeatIndices,
     dateRangeStart,
     dateRangeEnd,
     CONTEXT_DEFAULTS.CURSOR_PAGINATION,
@@ -52,7 +51,7 @@ export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Sn
 
 const statusCount = async (context: QueryContext): Promise<Snapshot> => {
   const res = await context.search({
-    index: INDEX_NAMES.HEARTBEAT,
+    index: context.heartbeatIndices,
     body: statusCountBody(await context.dateAndCustomFilters()),
   });
 
@@ -89,7 +88,7 @@ const statusCountBody = (filters: any): any => {
           String id = doc["monitor.id"][0];
           String idLenDelim = Integer.toHexString(id.length()) + ":" + id;
           String idLoc = loc == null ? idLenDelim : idLenDelim + loc;
-          
+
           String status = doc["summary.down"][0] > 0 ? "d" : "u";
           String timeAndStatus = doc["@timestamp"][0].toInstant().toEpochMilli().toString() + status;
           state.locStatus[idLoc] = timeAndStatus;
@@ -111,7 +110,7 @@ const statusCountBody = (filters: any): any => {
               locStatus.merge(entry.getKey(), entry.getValue(), (a,b) -> a.compareTo(b) > 0 ? a : b)
             }
           }
-          
+
           HashMap locTotals = new HashMap();
           int total = 0;
           int down = 0;
@@ -130,7 +129,7 @@ const statusCountBody = (filters: any): any => {
             String id = idLoc.substring(colonIndex + 1, idEnd);
             String loc = idLoc.substring(idEnd, idLoc.length());
             String status = timeStatus.substring(timeStatus.length() - 1);
-            
+
             // Here we increment counters for the up/down key per location
             // We also create a new hashmap in locTotals if we've never seen this location
             // before.
@@ -141,7 +140,7 @@ const statusCountBody = (filters: any): any => {
                 res.put('up', 0);
                 res.put('down', 0);
               }
-              
+
               if (status == 'u') {
                 res.up++;
               } else {
@@ -150,8 +149,8 @@ const statusCountBody = (filters: any): any => {
 
               return res;
             });
-            
-            
+
+
             // We've encountered a new ID
             if (curId != id) {
               total++;
@@ -171,7 +170,7 @@ const statusCountBody = (filters: any): any => {
               }
             }
           }
-          
+
           Map result = new HashMap();
           result.total = total;
           result.location_totals = locTotals;

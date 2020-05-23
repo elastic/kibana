@@ -24,6 +24,7 @@ import { MaybePromise } from '@kbn/utility-types';
 export interface HttpSetup {
   /**
    * APIs for manipulating the basePath on URL segments.
+   * See {@link IBasePath}
    */
   basePath: IBasePath;
 

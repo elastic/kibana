@@ -59,10 +59,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('navigates to an alert details page', async () => {
         const action = await alerting.actions.createAction({
-          name: `server-log-${Date.now()}`,
-          actionTypeId: '.server-log',
+          name: `Slack-${Date.now()}`,
+          actionTypeId: '.slack',
           config: {},
-          secrets: {},
+          secrets: {
+            webhookUrl: 'https://test',
+          },
         });
 
         const alert = await alerting.alerts.createAlwaysFiringWithAction(

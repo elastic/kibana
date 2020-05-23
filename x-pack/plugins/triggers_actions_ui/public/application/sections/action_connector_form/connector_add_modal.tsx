@@ -24,6 +24,7 @@ import { connectorReducer } from './connector_reducer';
 import { createActionConnector } from '../../lib/action_connector_api';
 import { TypeRegistry } from '../../type_registry';
 import './connector_add_modal.scss';
+import { PLUGIN } from '../../constants/plugin';
 
 interface ConnectorAddModalProps {
   actionType: ActionType;
@@ -133,7 +134,10 @@ export const ConnectorAddModal = ({
                         'xpack.triggersActionsUI.sections.addModalConnectorForm.betaBadgeTooltipContent',
                         {
                           defaultMessage:
-                            'This module is not GA. Please help us by reporting any bugs.',
+                            '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
+                          values: {
+                            pluginName: PLUGIN.getI18nName(i18n),
+                          },
                         }
                       )}
                     />
@@ -152,6 +156,7 @@ export const ConnectorAddModal = ({
             serverError={serverError}
             errors={errors}
             actionTypeRegistry={actionTypeRegistry}
+            http={http}
           />
         </EuiModalBody>
 

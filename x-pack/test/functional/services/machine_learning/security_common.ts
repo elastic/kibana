@@ -12,6 +12,7 @@ export type MlSecurityCommon = ProvidedType<typeof MachineLearningSecurityCommon
 export enum USER {
   ML_POWERUSER = 'ml_poweruser',
   ML_VIEWER = 'ml_viewer',
+  ML_UNAUTHORIZED = 'ml_unauthorized',
 }
 
 export function MachineLearningSecurityCommonProvider({ getService }: FtrProviderContext) {
@@ -42,7 +43,7 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
     {
       name: 'ml_ui_extras',
       elasticsearch: {
-        cluster: ['manage', 'manage_ingest_pipelines', 'monitor'],
+        cluster: ['manage_ingest_pipelines', 'monitor'],
       },
       kibana: [],
     },
@@ -60,6 +61,12 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
       full_name: 'ML Viewer',
       password: 'mlv001',
       roles: ['kibana_admin', 'machine_learning_user', 'ml_source', 'ml_dest_readonly'],
+    },
+    {
+      name: 'ml_unauthorized',
+      full_name: 'ML Unauthorized',
+      password: 'mlu001',
+      roles: ['kibana_admin', 'ml_source'],
     },
   ];
 

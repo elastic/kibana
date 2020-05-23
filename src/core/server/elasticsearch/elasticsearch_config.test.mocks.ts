@@ -22,7 +22,7 @@ jest.mock('fs', () => ({ readFileSync: mockReadFileSync }));
 
 export const mockReadPkcs12Keystore = jest.fn();
 export const mockReadPkcs12Truststore = jest.fn();
-jest.mock('../../utils', () => ({
+jest.mock('../utils', () => ({
   readPkcs12Keystore: mockReadPkcs12Keystore,
   readPkcs12Truststore: mockReadPkcs12Truststore,
 }));

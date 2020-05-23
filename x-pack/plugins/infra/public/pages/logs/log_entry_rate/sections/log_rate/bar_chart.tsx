@@ -11,6 +11,7 @@ import {
   niceTimeFormatter,
   Settings,
   TooltipValue,
+  BrushEndListener,
   LIGHT_THEME,
   DARK_THEME,
 } from '@elastic/charts';
@@ -43,8 +44,12 @@ export const LogEntryRateBarChart: React.FunctionComponent<{
     [dateFormat]
   );
 
-  const handleBrushEnd = useCallback(
-    (startTime: number, endTime: number) => {
+  const handleBrushEnd = useCallback<BrushEndListener>(
+    ({ x }) => {
+      if (!x) {
+        return;
+      }
+      const [startTime, endTime] = x;
       setTimeRange({
         endTime,
         startTime,
@@ -85,6 +90,7 @@ export const LogEntryRateBarChart: React.FunctionComponent<{
           tooltip={tooltipProps}
           theme={isDarkMode ? DARK_THEME : LIGHT_THEME}
           showLegend
+          showLegendExtra
           legendPosition="right"
           xDomain={{ min: timeRange.startTime, max: timeRange.endTime }}
         />

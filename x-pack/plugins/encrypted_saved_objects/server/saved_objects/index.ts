@@ -4,14 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, SavedObject, SavedObjectsBaseOptions } from 'src/core/server';
+import {
+  StartServicesAccessor,
+  SavedObject,
+  SavedObjectsBaseOptions,
+  SavedObjectsServiceSetup,
+} from 'src/core/server';
 import { EncryptedSavedObjectsService } from '../crypto';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 
 interface SetupSavedObjectsParams {
   service: PublicMethodsOf<EncryptedSavedObjectsService>;
-  savedObjects: CoreSetup['savedObjects'];
-  getStartServices: CoreSetup['getStartServices'];
+  savedObjects: SavedObjectsServiceSetup;
+  getStartServices: StartServicesAccessor;
 }
 
 export interface SavedObjectsSetup {
@@ -35,7 +40,8 @@ export function setupSavedObjects({
   savedObjects.addClientWrapper(
     Number.MAX_SAFE_INTEGER,
     'encryptedSavedObjects',
-    ({ client: baseClient }) => new EncryptedSavedObjectsClientWrapper({ baseClient, service })
+    ({ client: baseClient, typeRegistry: baseTypeRegistry }) =>
+      new EncryptedSavedObjectsClientWrapper({ baseClient, baseTypeRegistry, service })
   );
 
   const internalRepositoryPromise = getStartServices().then(([core]) =>

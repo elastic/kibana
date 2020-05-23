@@ -11,13 +11,16 @@ import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public'
 
 import { TransformEndpointRequest, TransformEndpointResult } from '../../../common';
 
-import { useToastNotifications } from '../app_dependencies';
+import { getErrorMessage } from '../../shared_imports';
+
+import { useAppDependencies, useToastNotifications } from '../app_dependencies';
 import { TransformListRow, refreshTransformList$, REFRESH_TRANSFORM_LIST_STATE } from '../common';
 import { ToastNotificationText } from '../components';
 
 import { useApi } from './use_api';
 
 export const useDeleteTransforms = () => {
+  const { overlays } = useAppDependencies();
   const toastNotifications = useToastNotifications();
   const api = useApi();
 
@@ -56,9 +59,7 @@ export const useDeleteTransforms = () => {
         title: i18n.translate('xpack.transform.transformList.deleteTransformGenericErrorMessage', {
           defaultMessage: 'An error occurred calling the API endpoint to delete transforms.',
         }),
-        text: toMountPoint(
-          <ToastNotificationText text={e?.message ?? JSON.stringify(e, null, 2)} />
-        ),
+        text: toMountPoint(<ToastNotificationText overlays={overlays} text={getErrorMessage(e)} />),
       });
     }
   };

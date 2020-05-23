@@ -15,15 +15,16 @@ import {
   mockCaseComments,
 } from '../../__fixtures__';
 import { initDeleteCommentApi } from './delete_comment';
+import { CASE_COMMENT_DETAILS_URL } from '../../../../../common/constants';
 
 describe('DELETE comment', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeAll(async () => {
     routeHandler = await createRoute(initDeleteCommentApi, 'delete');
   });
-  it(`deletes the comment. responds with 200`, async () => {
+  it(`deletes the comment. responds with 204`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}/comments/{comment_id}',
+      path: CASE_COMMENT_DETAILS_URL,
       method: 'delete',
       params: {
         case_id: 'mock-id-1',
@@ -39,11 +40,11 @@ describe('DELETE comment', () => {
     );
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
-    expect(response.status).toEqual(200);
+    expect(response.status).toEqual(204);
   });
   it(`returns an error when thrown from deleteComment service`, async () => {
     const request = httpServerMock.createKibanaRequest({
-      path: '/api/cases/{case_id}/comments/{comment_id}',
+      path: CASE_COMMENT_DETAILS_URL,
       method: 'delete',
       params: {
         case_id: 'mock-id-1',

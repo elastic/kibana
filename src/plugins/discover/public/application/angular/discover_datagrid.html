@@ -1,0 +1,167 @@
+<discover-app class="dscApp">
+  <h1 class="euiScreenReaderOnly">{{screenTitle}}</h1>
+
+  <!-- Local nav. -->
+  <kbn-top-nav
+    app-name="'discover'"
+    config="topNavMenu"
+    index-patterns="[indexPattern]"
+    on-query-submit="updateQuery"
+    on-saved-query-id-change="updateSavedQueryId"
+    query="state.query"
+    saved-query-id="state.savedQuery"
+    screen-title="screenTitle"
+    show-date-picker="indexPattern.isTimeBased()"
+    show-save-query="showSaveQuery"
+    show-search-bar="true"
+    class="dscApp__header"
+    use-default-behaviors="true"
+  >
+  </kbn-top-nav>
+
+  <main class="dscApp__frame">
+
+    <discover-sidebar
+      columns="state.columns"
+      field-counts="fieldCounts"
+      hits="rows"
+      index-pattern-list="opts.indexPatternList"
+      on-add-field="addColumn"
+      on-add-filter="filterQuery"
+      on-remove-field="removeColumn"
+      selected-index-pattern="searchSource.getField('index')"
+      set-index-pattern="setIndexPattern"
+      state="state"
+      class="dscApp__sidebar"
+    >
+    </discover-sidebar>
+
+    <div class="dscApp__content">
+      <discover-no-results
+        ng-show="resultState === 'none'"
+        shard-failures="failures"
+        time-field-name="opts.timefield"
+        query-language="state.query.language"
+        get-doc-link="getDocLink"
+      ></discover-no-results>
+
+      <discover-uninitialized
+        ng-show="resultState === 'uninitialized'"
+        on-refresh="fetch"
+      ></discover-uninitialized>
+
+      <!-- loading -->
+      <div ng-show="resultState === 'loading'">
+        <discover-fetch-error ng-show="fetchError" fetch-error="fetchError"></discover-fetch-error>
+
+        <div ng-hide="fetchError" class="dscOverlay">
+          <h2
+            i18n-id="kbn.discover.searchingTitle"
+            i18n-default-message="Searching"
+            class="euiTitle euiTitle--small"
+          ></h2>
+          <div class="euiSpacer euiSpacer--m"></div>
+          <div
+            class="euiLoadingSpinner euiLoadingSpinner--large"
+            data-test-subj="loadingSpinner"
+          ></div>
+        </div>
+      </div>
+
+      <div class="dscWrapper__content" ng-show="resultState === 'ready'">
+        <!-- result -->
+        <div class="dscResults">
+
+          <div class="dscResultCount">
+            <div class="dscResuntCount__title">
+              <h2 class="euiTitle euiTitle--xsmall " data-test-subj="discoverQueryHits">
+                {{(hits || 0) | number:0}}
+                <span
+                  class="dscResultHits"
+                  i18n-id="kbn.discover.resultsPluralTitle"
+                  i18n-default-message="{results, plural, one {result} other {results}}"
+                  i18n-values="{ results }"
+                ></span>
+              </h2>
+            </div>
+            <div class="dscResultCount__actions">
+              <div class="euiText euiText--small">
+                <button
+                  ng-if="opts.savedSearch.id"
+                  class="euiLink euiLink--primary eui-textNoWrap"
+                  type="button"
+                  id="reload_saved_search"
+                  ng-click="resetQuery()"
+                >
+                  {{::'kbn.discover.reloadSavedSearchButton' | i18n: {defaultMessage: 'Reset results'} }}
+                </button>
+              </div>
+              <select
+                id="dscResultsIntervalSelector"
+                class="euiSelect euiSelect--compressed"
+                ng-model="state.interval"
+                ng-options="interval.val as interval.display for interval in intervalOptions | filter: intervalEnabled"
+                ng-blur="toggleInterval()"
+                data-test-subj="discoverIntervalSelect"
+              >
+              </select>
+              <span ng-if="bucketInterval.scaled">
+                <icon-tip content="getBucketIntervalToolTipText()" position="'top'"></icon-tip>
+                <span
+                  i18n-id="kbn.discover.scaledToDescription"
+                  i18n-default-message="Scaled to {bucketIntervalDescription}"
+                  i18n-values="{
+                      bucketIntervalDescription: bucketInterval.description
+                    }"
+                ></span>
+              </span>
+            </div>
+          </div>
+
+          <section
+            aria-label="{{::'kbn.discover.histogramOfFoundDocumentsAriaLabel' | i18n: {defaultMessage: 'Histogram of found documents'} }}"
+            class="dscTimechart"
+            ng-if="opts.timefield"
+          >
+            <discover-histogram
+              class="dscHistogram"
+              ng-show="vis && rows.length !== 0"
+              chart-data="histogramData"
+              timefilter-update-handler="timefilterUpdateHandler"
+              watch-depth="reference"
+              data-test-subj="discoverChart"
+            ></discover-histogram>
+          </section>
+
+          <section class="dscTable" fixed-scroll aria-labelledby="documentsAriaLabel">
+            <h2
+              class="euiScreenReaderOnly"
+              id="documentsAriaLabel"
+              i18n-id="kbn.discover.documentsAriaLabel"
+              i18n-default-message="Documents"
+            ></h2>
+            <discover-grid
+              ng-if="rows && !useNewGrid"
+              aria-labelled-by="'documentsAriaLabel'"
+              columns="state.columns"
+              index-pattern="indexPattern"
+              rows="rows"
+              sort="state.sort"
+              sample-size="opts.sampleSize"
+              search-description="opts.savedSearch.description"
+              search-title="opts.savedSearch.lastSavedTitle"
+              use-short-dots="useShortDots"
+              show-time-col="showTimeCol"
+              get-context-app-href="getContextAppHref"
+              on-add-column="addColumn"
+              on-filter="filterQuery"
+              on-remove-column="removeColumn"
+              on-sort="setSortOrder"
+              class="dscDiscoverGrid"
+            ></discover-grid>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+</discover-app>

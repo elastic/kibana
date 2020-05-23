@@ -13,7 +13,7 @@ import {
 } from '../../../context';
 import { createTimeInterval } from '../../../../public/lib/time_interval';
 // @ts-ignore Untyped local
-import { CustomInterval } from '../../../../public/components/workpad_header/control_settings/custom_interval';
+import { CustomInterval } from '../../../../public/components/workpad_header/view_menu/custom_interval';
 
 export type onSetAutoplayFn = (autoplay: boolean) => void;
 export type onSetIntervalFn = (interval: string) => void;

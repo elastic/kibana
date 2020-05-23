@@ -11,7 +11,7 @@ export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments';
 export const caseCommentSavedObjectType: SavedObjectsType = {
   name: CASE_COMMENT_SAVED_OBJECT,
   hidden: false,
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   mappings: {
     properties: {
       comment: {
@@ -28,6 +28,25 @@ export const caseCommentSavedObjectType: SavedObjectsType = {
           username: {
             type: 'keyword',
           },
+          email: {
+            type: 'keyword',
+          },
+        },
+      },
+      pushed_at: {
+        type: 'date',
+      },
+      pushed_by: {
+        properties: {
+          username: {
+            type: 'keyword',
+          },
+          full_name: {
+            type: 'keyword',
+          },
+          email: {
+            type: 'keyword',
+          },
         },
       },
       updated_at: {
@@ -39,6 +58,9 @@ export const caseCommentSavedObjectType: SavedObjectsType = {
             type: 'keyword',
           },
           full_name: {
+            type: 'keyword',
+          },
+          email: {
             type: 'keyword',
           },
         },

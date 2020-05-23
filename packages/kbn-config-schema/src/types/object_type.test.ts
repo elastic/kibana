@@ -18,6 +18,7 @@
  */
 
 import { schema } from '..';
+import { TypeOf } from './object_type';
 
 test('returns value by default', () => {
   const type = schema.object({
@@ -276,10 +277,10 @@ test('individual keys can validated', () => {
   );
 });
 
-test('allow unknown keys when allowUnknowns = true', () => {
+test('allow unknown keys when unknowns = `allow`', () => {
   const type = schema.object(
     { foo: schema.string({ defaultValue: 'test' }) },
-    { allowUnknowns: true }
+    { unknowns: 'allow' }
   );
 
   expect(
@@ -292,10 +293,10 @@ test('allow unknown keys when allowUnknowns = true', () => {
   });
 });
 
-test('allowUnknowns = true affects only own keys', () => {
+test('unknowns = `allow` affects only own keys', () => {
   const type = schema.object(
     { foo: schema.object({ bar: schema.string() }) },
-    { allowUnknowns: true }
+    { unknowns: 'allow' }
   );
 
   expect(() =>
@@ -308,14 +309,68 @@ test('allowUnknowns = true affects only own keys', () => {
   ).toThrowErrorMatchingInlineSnapshot(`"[foo.baz]: definition for this key is missing"`);
 });
 
-test('does not allow unknown keys when allowUnknowns = false', () => {
+test('does not allow unknown keys when unknowns = `forbid`', () => {
   const type = schema.object(
     { foo: schema.string({ defaultValue: 'test' }) },
-    { allowUnknowns: false }
+    { unknowns: 'forbid' }
   );
   expect(() =>
     type.validate({
       bar: 'baz',
     })
   ).toThrowErrorMatchingInlineSnapshot(`"[bar]: definition for this key is missing"`);
+});
+
+test('allow and remove unknown keys when unknowns = `ignore`', () => {
+  const type = schema.object(
+    { foo: schema.string({ defaultValue: 'test' }) },
+    { unknowns: 'ignore' }
+  );
+
+  expect(
+    type.validate({
+      bar: 'baz',
+    })
+  ).toEqual({
+    foo: 'test',
+  });
+});
+
+test('unknowns = `ignore` affects only own keys', () => {
+  const type = schema.object(
+    { foo: schema.object({ bar: schema.string() }) },
+    { unknowns: 'ignore' }
+  );
+
+  expect(() =>
+    type.validate({
+      foo: {
+        bar: 'bar',
+        baz: 'baz',
+      },
+    })
+  ).toThrowErrorMatchingInlineSnapshot(`"[foo.baz]: definition for this key is missing"`);
+});
+
+test('handles optional properties', () => {
+  const type = schema.object({
+    required: schema.string(),
+    optional: schema.maybe(schema.string()),
+  });
+
+  type SchemaType = TypeOf<typeof type>;
+
+  let foo: SchemaType = {
+    required: 'foo',
+  };
+  foo = {
+    required: 'hello',
+    optional: undefined,
+  };
+  foo = {
+    required: 'hello',
+    optional: 'bar',
+  };
+
+  expect(foo).toBeDefined();
 });

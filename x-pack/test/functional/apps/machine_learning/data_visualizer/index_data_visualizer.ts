@@ -5,8 +5,8 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { ML_JOB_FIELD_TYPES } from '../../../../../legacy/plugins/ml/common/constants/field_types';
-import { FieldVisConfig } from '../../../../../legacy/plugins/ml/public/application/datavisualizer/index_based/common';
+import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
+import { FieldVisConfig } from '../../../../../plugins/ml/public/application/datavisualizer/index_based/common';
 
 interface TestData {
   suiteTitle: string;
@@ -45,7 +45,7 @@ export default function({ getService }: FtrProviderContext) {
 
   const farequoteIndexPatternTestData: TestData = {
     suiteTitle: 'index pattern',
-    sourceIndexOrSavedSearch: 'farequote',
+    sourceIndexOrSavedSearch: 'ft_farequote',
     advancedJobWizardDatafeedQuery: `{
   "bool": {
     "must": [
@@ -128,7 +128,7 @@ export default function({ getService }: FtrProviderContext) {
 
   const farequoteKQLSearchTestData: TestData = {
     suiteTitle: 'KQL saved search',
-    sourceIndexOrSavedSearch: 'farequote_kuery',
+    sourceIndexOrSavedSearch: 'ft_farequote_kuery',
     advancedJobWizardDatafeedQuery: `{
   "bool": {
     "must": [
@@ -211,7 +211,7 @@ export default function({ getService }: FtrProviderContext) {
 
   const farequoteLuceneSearchTestData: TestData = {
     suiteTitle: 'lucene saved search',
-    sourceIndexOrSavedSearch: 'farequote_lucene',
+    sourceIndexOrSavedSearch: 'ft_farequote_lucene',
     advancedJobWizardDatafeedQuery: `{
   "bool": {
     "must": [
@@ -376,14 +376,15 @@ export default function({ getService }: FtrProviderContext) {
   }
 
   describe('index based', function() {
-    this.tags(['smoke', 'mlqa']);
+    this.tags(['mlqa']);
     before(async () => {
-      await esArchiver.load('ml/farequote');
-      await ml.securityUI.loginAsMlPowerUser();
-    });
+      await esArchiver.loadIfNeeded('ml/farequote');
+      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded();
+      await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();
+      await ml.testResources.setKibanaTimeZoneToUTC();
 
-    after(async () => {
-      await esArchiver.unload('ml/farequote');
+      await ml.securityUI.loginAsMlPowerUser();
     });
 
     // TODO - add tests for

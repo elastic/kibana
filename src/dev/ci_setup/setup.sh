@@ -17,6 +17,14 @@ echo " -- installing node.js dependencies"
 yarn kbn bootstrap --prefer-offline
 
 ###
+### Download es snapshots
+###
+echo " -- downloading es snapshot"
+node scripts/es snapshot --download-only;
+node scripts/es snapshot --license=oss --download-only;
+
+
+###
 ### verify no git modifications
 ###
 GIT_CHANGES="$(git ls-files --modified)"

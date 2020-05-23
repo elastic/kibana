@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { Type } from '@kbn/config-schema';
 import pkg from '../../../../package.json';
 
 export const createTestEntryTemplate = defaultUiSettings => bundle => `
@@ -87,7 +87,14 @@ const coreSystem = new CoreSystem({
       buildNum: 1234,
       devMode: true,
       uiSettings: {
-        defaults: ${JSON.stringify(defaultUiSettings, null, 2)
+        defaults: ${JSON.stringify(
+          defaultUiSettings,
+          (key, value) => {
+            if (value instanceof Type) return null;
+            return value;
+          },
+          2
+        )
           .split('\n')
           .join('\n    ')},
         user: {}
@@ -128,7 +135,16 @@ const coreSystem = new CoreSystem({
     },
   },
   rootDomElement,
-  useLegacyTestHarness: true,
+  requireLegacyBootstrapModule: () => {
+    // wrapped in NODE_ENV check so the 'ui/test_harness' module	
+    // is not included in the distributable
+    if (process.env.IS_KIBANA_DISTRIBUTABLE !== 'true') {	
+      return require('ui/test_harness');	
+    }	
+
+    throw new Error('tests bundle is not available in the distributable');
+  },
+  requireNewPlatformShimModule: () => require('ui/new_platform'),
   requireLegacyFiles: () => {
     ${bundle.getRequires().join('\n  ')}
   }

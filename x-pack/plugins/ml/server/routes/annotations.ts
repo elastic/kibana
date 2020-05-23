@@ -5,10 +5,8 @@
  */
 
 import Boom from 'boom';
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { schema } from '@kbn/config-schema';
 import { SecurityPluginSetup } from '../../../security/server';
 import { isAnnotationsFeatureAvailable } from '../lib/check_annotations';
 import { annotationServiceProvider } from '../models/annotation_service';
@@ -20,7 +18,7 @@ import {
   indexAnnotationSchema,
 } from './schemas/annotations_schema';
 
-import { ANNOTATION_USER_UNKNOWN } from '../../../../legacy/plugins/ml/common/constants/annotations';
+import { ANNOTATION_USER_UNKNOWN } from '../../common/constants/annotations';
 
 function getAnnotationsFeatureUnavailableErrorMessage() {
   return Boom.badRequest(
@@ -45,10 +43,7 @@ export function annotationRoutes(
    * @apiName GetAnnotations
    * @apiDescription Gets annotations.
    *
-   * @apiParam {String[]} jobIds List of job IDs
-   * @apiParam {String} earliestMs
-   * @apiParam {Number} latestMs
-   * @apiParam {Number} maxAnnotations Max limit of annotations returned
+   * @apiSchema (body) getAnnotationsSchema
    *
    * @apiSuccess {Boolean} success
    * @apiSuccess {Object} annotations
@@ -57,7 +52,10 @@ export function annotationRoutes(
     {
       path: '/api/ml/annotations',
       validate: {
-        body: schema.object(getAnnotationsSchema),
+        body: getAnnotationsSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetAnnotations'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -83,14 +81,16 @@ export function annotationRoutes(
    * @apiName IndexAnnotations
    * @apiDescription Index the annotation.
    *
-   * @apiParam {Object} annotation
-   * @apiParam {String} username
+   * @apiSchema (body) indexAnnotationSchema
    */
   router.put(
     {
       path: '/api/ml/annotations/index',
       validate: {
-        body: schema.object(indexAnnotationSchema),
+        body: indexAnnotationSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateAnnotation'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
@@ -124,17 +124,20 @@ export function annotationRoutes(
   /**
    * @apiGroup Annotations
    *
-   * @api {delete} /api/ml/annotations/index Deletes annotation
+   * @api {delete} /api/ml/annotations/delete/:annotationId Deletes annotation
    * @apiName DeleteAnnotation
    * @apiDescription Deletes specified annotation
    *
-   * @apiParam {String} annotationId
+   * @apiSchema (params) deleteAnnotationSchema
    */
   router.delete(
     {
       path: '/api/ml/annotations/delete/{annotationId}',
       validate: {
-        params: schema.object(deleteAnnotationSchema),
+        params: deleteAnnotationSchema,
+      },
+      options: {
+        tags: ['access:ml:canDeleteAnnotation'],
       },
     },
     mlLicense.fullLicenseAPIGuard(async (context, request, response) => {

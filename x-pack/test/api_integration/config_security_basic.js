@@ -13,8 +13,9 @@ export default async function({ readConfigFile }) {
     config.esTestCluster.serverArgs = [
       'xpack.license.self_generated.type=basic',
       'xpack.security.enabled=true',
+      'xpack.security.authc.api_key.enabled=true',
     ];
-    config.testFiles = [require.resolve('./apis/security')];
+    config.testFiles = [require.resolve('./apis/security/security_basic')];
     return config;
   });
 }

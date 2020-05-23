@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
-import { SavedObjectsManagementRecord } from '../../../../../../src/legacy/core_plugins/management/public';
+import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
 import { SummarizedCopyToSpaceResult } from '../index';
 import { SpaceAvatar } from '../../space_avatar';
 import { Space } from '../../../common/model/space';

@@ -4,76 +4,48 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { Chrome } from 'ui/chrome';
-import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Plugin } from '../../../../../src/core/public';
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  AppMountParameters,
+  DEFAULT_APP_CATEGORIES,
+} from '../../../../../src/core/public';
 import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
-// @ts-ignore: Untyped Local
-import { CapabilitiesStrings } from '../i18n';
-const { ReadOnlyBadge: strings } = CapabilitiesStrings;
-
-import { createStore } from './store';
-
-// @ts-ignore: untyped local component
-import { HelpMenu } from './components/help_menu/help_menu';
-// @ts-ignore: untyped local
-import { loadExpressionTypes } from './lib/load_expression_types';
-// @ts-ignore: untyped local
-import { loadTransitions } from './lib/load_transitions';
 import { initLoadingIndicator } from './lib/loading_indicator';
-import { getDocumentationLinks } from './lib/documentation_links';
-
-// @ts-ignore: untyped local
-import { initClipboard } from './lib/clipboard';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { ExpressionsSetup, ExpressionsStart } from '../../../../../src/plugins/expressions/public';
-// @ts-ignore untyped local
-import { datasourceSpecs } from './expression_types/datasources';
+import { DataPublicPluginSetup } from '../../../../../src/plugins/data/public';
+import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
+import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
+import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/public';
+import { Start as InspectorStart } from '../../../../../src/plugins/inspector/public';
 // @ts-ignore untyped local
 import { argTypeSpecs } from './expression_types/arg_types';
 import { transitions } from './transitions';
-import { registerLanguage } from './lib/monaco_language_def';
-
-import { initInterpreter } from './lib/run_interpreter';
 import { legacyRegistries } from './legacy_plugin_support';
-import { getPluginApi, CanvasApi, SetupRegistries } from './plugin_api';
-import {
-  initRegistries,
-  addElements,
-  addTransformUIs,
-  addDatasourceUIs,
-  addModelUIs,
-  addViewUIs,
-  addArgumentUIs,
-  addTagUIs,
-  addTemplates,
-  addTransitions,
-} from './registries';
-
+import { getPluginApi, CanvasApi } from './plugin_api';
 import { initFunctions } from './functions';
-
 import { CanvasSrcPlugin } from '../canvas_plugin_src/plugin';
+export { CoreStart, CoreSetup };
 
-export { CoreStart };
 /**
  * These are the private interfaces for the services your plugin depends on.
  * @internal
  */
 // This interface will be built out as we require other plugins for setup
 export interface CanvasSetupDeps {
+  data: DataPublicPluginSetup;
   expressions: ExpressionsSetup;
   home: HomePublicPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface CanvasStartDeps {
+  embeddable: EmbeddableStart;
   expressions: ExpressionsStart;
-  __LEGACY: {
-    absoluteToParsedUrl: (url: string, basePath: string) => any;
-    formatMsg: any;
-    trackSubUrlForApp: Chrome['trackSubUrlForApp'];
-  };
+  inspector: InspectorStart;
+  uiActions: UiActionsStart;
 }
 
 /**
@@ -84,49 +56,58 @@ export interface CanvasStartDeps {
 // These interfaces are empty for now but will be populate as we need to export
 // things for other plugins to use at startup or runtime
 export type CanvasSetup = CanvasApi;
-export interface CanvasStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
+export type CanvasStart = void;
 
 /** @internal */
 export class CanvasPlugin
   implements Plugin<CanvasSetup, CanvasStart, CanvasSetupDeps, CanvasStartDeps> {
-  private expressionSetup: CanvasSetupDeps['expressions'] | undefined;
-  private registries: SetupRegistries | undefined;
+  // TODO: Do we want to completely move canvas_plugin_src into it's own plugin?
+  private srcPlugin = new CanvasSrcPlugin();
 
   public setup(core: CoreSetup<CanvasStartDeps>, plugins: CanvasSetupDeps) {
     const { api: canvasApi, registries } = getPluginApi(plugins.expressions);
-    this.registries = registries;
+
+    this.srcPlugin.setup(core, { canvas: canvasApi });
 
     core.application.register({
+      category: DEFAULT_APP_CATEGORIES.analyze,
       id: 'canvas',
-      title: 'Canvas App',
-      async mount(context, params) {
+      title: 'Canvas',
+      euiIconType: 'canvasApp',
+      order: 0, // need to figure out if this is the proper order for us
+      mount: async (params: AppMountParameters) => {
         // Load application bundle
-        const { renderApp } = await import('./application');
-
-        // Setup our store
-        const canvasStore = await createStore(core, plugins);
+        const { renderApp, initializeCanvas, teardownCanvas } = await import('./application');
 
         // Get start services
         const [coreStart, depsStart] = await core.getStartServices();
 
-        return renderApp(coreStart, depsStart, params, canvasStore);
+        const canvasStore = await initializeCanvas(core, coreStart, plugins, depsStart, registries);
+
+        const unmount = renderApp(coreStart, depsStart, params, canvasStore);
+
+        return () => {
+          unmount();
+          teardownCanvas(coreStart, depsStart);
+        };
       },
     });
 
     plugins.home.featureCatalogue.register(featureCatalogueEntry);
-    this.expressionSetup = plugins.expressions;
 
     // Register Legacy plugin stuff
     canvasApi.addFunctions(legacyRegistries.browserFunctions.getOriginalFns());
     canvasApi.addElements(legacyRegistries.elements.getOriginalFns());
-
-    // TODO: Do we want to completely move canvas_plugin_src into it's own plugin?
-    const srcPlugin = new CanvasSrcPlugin();
-    srcPlugin.setup(core, { canvas: canvasApi });
+    canvasApi.addTypes(legacyRegistries.types.getOriginalFns());
 
     // Register core canvas stuff
-    canvasApi.addFunctions(initFunctions({ typesRegistry: plugins.expressions.__LEGACY.types }));
-    canvasApi.addDatasourceUIs(datasourceSpecs);
+    canvasApi.addFunctions(
+      initFunctions({
+        timefilter: plugins.data.query.timefilter.timefilter,
+        prependBasePath: core.http.basePath.prepend,
+        typesRegistry: plugins.expressions.__LEGACY.types,
+      })
+    );
     canvasApi.addArgumentUIs(argTypeSpecs);
     canvasApi.addTransitions(transitions);
 
@@ -136,55 +117,7 @@ export class CanvasPlugin
   }
 
   public start(core: CoreStart, plugins: CanvasStartDeps) {
+    this.srcPlugin.start(core, plugins);
     initLoadingIndicator(core.http.addLoadingCountSource);
-    initRegistries();
-
-    if (this.expressionSetup) {
-      const expressionSetup = this.expressionSetup;
-      initInterpreter(plugins.expressions, expressionSetup).then(() => {
-        registerLanguage(Object.values(plugins.expressions.getFunctions()));
-      });
-    }
-
-    if (this.registries) {
-      addElements(this.registries.elements);
-      addTransformUIs(this.registries.transformUIs);
-      addDatasourceUIs(this.registries.datasourceUIs);
-      addModelUIs(this.registries.modelUIs);
-      addViewUIs(this.registries.viewUIs);
-      addArgumentUIs(this.registries.argumentUIs);
-      addTemplates(this.registries.templates);
-      addTagUIs(this.registries.tagUIs);
-      addTransitions(this.registries.transitions);
-    } else {
-      throw new Error('Unable to initialize Canvas registries');
-    }
-
-    core.chrome.setBadge(
-      core.application.capabilities.canvas && core.application.capabilities.canvas.save
-        ? undefined
-        : {
-            text: strings.getText(),
-            tooltip: strings.getTooltip(),
-            iconType: 'glasses',
-          }
-    );
-
-    core.chrome.setHelpExtension({
-      appName: i18n.translate('xpack.canvas.helpMenu.appName', {
-        defaultMessage: 'Canvas',
-      }),
-      links: [
-        {
-          linkType: 'documentation',
-          href: getDocumentationLinks().canvas,
-        },
-      ],
-      content: domNode => () => {
-        ReactDOM.render(<HelpMenu />, domNode);
-      },
-    });
-
-    return {};
   }
 }

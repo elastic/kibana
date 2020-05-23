@@ -7,15 +7,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const security = getService('security');
   const appsMenu = getService('appsMenu');
   const PageObjects = getPageObjects(['common', 'security']);
 
-  describe('security', () => {
+  describe('security', function() {
     before(async () => {
-      await esArchiver.load('empty_kibana');
-
       await security.role.create('global_all_role', {
         elasticsearch: {
           indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
@@ -33,7 +30,6 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('empty_kibana');
       await security.role.delete('global_all_role');
 
       // logout, so the other tests don't accidentally run as the custom users we're testing below

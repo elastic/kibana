@@ -104,7 +104,7 @@ export const registerTestBed = <T extends string = string>(
        * ----------------------------------------------------------------
        */
 
-      const find: TestBed<T>['find'] = (testSubject: T) => {
+      const find: TestBed<T>['find'] = (testSubject: T, sourceReactWrapper = component) => {
         const testSubjectToArray = testSubject.split('.');
 
         return testSubjectToArray.reduce((reactWrapper, subject, i) => {
@@ -117,7 +117,7 @@ export const registerTestBed = <T extends string = string>(
             );
           }
           return target;
-        }, component);
+        }, sourceReactWrapper);
       };
 
       const exists: TestBed<T>['exists'] = (testSubject, count = 1) =>
@@ -136,6 +136,44 @@ export const registerTestBed = <T extends string = string>(
         return component.setProps({
           children: getJSXComponentWithProps(Component, { ...defaultProps, ...updatedProps }),
         });
+      };
+
+      const waitFor: TestBed<T>['waitFor'] = async (testSubject: T, count = 1) => {
+        const triggeredAt = Date.now();
+
+        /**
+         * The way jest run tests in parallel + the not deterministic DOM update from React "hooks"
+         * add flakiness to the tests. This is especially true for component integration tests that
+         * make many update to the DOM.
+         *
+         * For this reason, when we _know_ that an element should be there after we updated some state,
+         * we will give it 30 seconds to appear in the DOM, checking every 100 ms for its presence.
+         */
+        const MAX_WAIT_TIME = 30000;
+        const WAIT_INTERVAL = 100;
+
+        const process = async (): Promise<void> => {
+          const elemFound = exists(testSubject, count);
+
+          if (elemFound) {
+            // Great! nothing else to do here.
+            return;
+          }
+
+          const timeElapsed = Date.now() - triggeredAt;
+          if (timeElapsed > MAX_WAIT_TIME) {
+            throw new Error(
+              `I waited patiently for the "${testSubject}" test subject to appear with no luck. It is nowhere to be found!`
+            );
+          }
+
+          return new Promise(resolve => setTimeout(resolve, WAIT_INTERVAL)).then(() => {
+            component.update();
+            return process();
+          });
+        };
+
+        return process();
       };
 
       /**
@@ -254,6 +292,7 @@ export const registerTestBed = <T extends string = string>(
         exists,
         find,
         setProps,
+        waitFor,
         table: {
           getMetaData,
         },

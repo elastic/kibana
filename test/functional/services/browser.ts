@@ -21,6 +21,7 @@ import { cloneDeep } from 'lodash';
 import { Key, Origin } from 'selenium-webdriver';
 // @ts-ignore internal modules are not typed
 import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
+import { ProvidedType } from '@kbn/test/types/ftr';
 
 import Jimp from 'jimp';
 import { modifyUrl } from '../../../src/core/utils';
@@ -28,6 +29,7 @@ import { WebElementWrapper } from './lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { Browsers } from './remote/browsers';
 
+export type Browser = ProvidedType<typeof BrowserProvider>;
 export async function BrowserProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const { driver, browserType } = await getService('__webdriver__').init();
@@ -45,7 +47,9 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      */
     public readonly browserType: string = browserType;
 
-    public readonly isChrome: boolean = browserType === Browsers.Chrome;
+    public readonly isChromium: boolean = [Browsers.Chrome, Browsers.ChromiumEdge].includes(
+      browserType
+    );
 
     public readonly isFirefox: boolean = browserType === Browsers.Firefox;
 

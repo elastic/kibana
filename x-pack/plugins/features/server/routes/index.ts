@@ -31,13 +31,19 @@ export function defineRoutes({ router, featureRegistry, getLegacyAPI }: RouteDef
       const allFeatures = featureRegistry.getAll();
 
       return response.ok({
-        body: allFeatures.filter(
-          feature =>
-            request.query.ignoreValidLicenses ||
-            !feature.validLicenses ||
-            !feature.validLicenses.length ||
-            getLegacyAPI().xpackInfo.license.isOneOf(feature.validLicenses)
-        ),
+        body: allFeatures
+          .filter(
+            feature =>
+              request.query.ignoreValidLicenses ||
+              !feature.validLicenses ||
+              !feature.validLicenses.length ||
+              getLegacyAPI().xpackInfo.license.isOneOf(feature.validLicenses)
+          )
+          .sort(
+            (f1, f2) =>
+              (f1.order ?? Number.MAX_SAFE_INTEGER) - (f2.order ?? Number.MAX_SAFE_INTEGER)
+          )
+          .map(feature => feature.toRaw()),
       });
     }
   );

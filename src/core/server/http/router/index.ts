@@ -18,7 +18,7 @@
  */
 
 export { Headers, filterHeaders, ResponseHeaders, KnownHeaders } from './headers';
-export { Router, RequestHandler, IRouter, RouteRegistrar } from './router';
+export { Router, RequestHandler, RequestHandlerWrapper, IRouter, RouteRegistrar } from './router';
 export {
   KibanaRequest,
   KibanaRequestEvents,

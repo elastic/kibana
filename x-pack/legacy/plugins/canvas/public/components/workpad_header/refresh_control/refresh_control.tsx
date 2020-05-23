@@ -32,6 +32,7 @@ export const RefreshControl = ({ doRefresh, inFlight }: Props) => (
       iconType="refresh"
       aria-label={strings.getRefreshAriaLabel()}
       onClick={doRefresh}
+      data-test-subj="canvas-refresh-control"
     />
   </EuiToolTip>
 );

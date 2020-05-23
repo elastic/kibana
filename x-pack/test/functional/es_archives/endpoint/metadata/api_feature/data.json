@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "3KVN2G8BYQH1gtPUuYk7",
-    "index": "endpoint-agent",
+    "index": "metrics-endpoint-default-1",
     "source": {
       "@timestamp": 1579881969541,
       "agent": {
@@ -10,13 +10,18 @@
         "version": "6.6.1",
         "name" : "Elastic Endpoint"
       },
+      "elastic": {
+        "agent": {
+          "id": "11488bae-880b-4e7b-8d28-aac2aa9de816"
+        }
+      },
       "endpoint": {
         "policy": {
           "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
         }
       },
       "event": {
-        "created": "2020-01-24T16:06:09.541Z"
+        "created": 1579881969541
       },
       "host": {
         "architecture": "x86",
@@ -46,7 +51,7 @@
   "type": "doc",
   "value": {
     "id": "3aVN2G8BYQH1gtPUuYk7",
-    "index": "endpoint-agent",
+    "index": "metrics-endpoint-default-1",
     "source": {
       "@timestamp": 1579881969541,
       "agent": {
@@ -54,13 +59,18 @@
         "version": "6.0.0",
         "name" : "Elastic Endpoint"
       },
+      "elastic": {
+        "agent": {
+          "id": "92ac1ce0-e1f7-409e-8af6-f17e97b1fc71"
+        }
+      },
       "endpoint": {
         "policy": {
           "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
         }
       },
       "event": {
-        "created": "2020-01-24T16:06:09.541Z"
+        "created": 1579881969541
       },
       "host": {
         "architecture": "x86_64",
@@ -89,7 +99,7 @@
   "type": "doc",
   "value": {
     "id": "3qVN2G8BYQH1gtPUuYk7",
-    "index": "endpoint-agent",
+    "index": "metrics-endpoint-default-1",
     "source": {
       "@timestamp": 1579881969541,
       "agent": {
@@ -97,13 +107,18 @@
         "version": "6.8.0",
         "name" : "Elastic Endpoint"
       },
+      "elastic": {
+        "agent": {
+          "id": "023fa40c-411d-4188-a941-4147bfadd095"
+        }
+      },
       "endpoint": {
         "policy": {
           "id": "00000000-0000-0000-0000-000000000000"
         }
       },
       "event": {
-        "created": "2020-01-24T16:06:09.541Z"
+        "created": 1579881969541
       },
       "host": {
         "hostname": "rezzani-7.example.com",
@@ -130,7 +145,7 @@
   "type": "doc",
   "value": {
     "id": "36VN2G8BYQH1gtPUuYk7",
-    "index": "endpoint-agent",
+    "index": "metrics-endpoint-default-1",
     "source": {
       "@timestamp": 1579878369541,
       "agent": {
@@ -138,13 +153,18 @@
         "version": "6.6.1",
         "name" : "Elastic Endpoint"
       },
+      "elastic": {
+        "agent": {
+          "id": "11488bae-880b-4e7b-8d28-aac2aa9de816"
+        }
+      },
       "endpoint": {
         "policy": {
           "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
         }
       },
       "event": {
-        "created": "2020-01-24T15:06:09.541Z"
+        "created": 1579878369541
       },
       "host": {
         "architecture": "x86",
@@ -174,7 +194,7 @@
   "type": "doc",
   "value": {
     "id": "4KVN2G8BYQH1gtPUuYk7",
-    "index": "endpoint-agent",
+    "index": "metrics-endpoint-default-1",
     "source": {
       "@timestamp": 1579878369541,
       "agent": {
@@ -182,13 +202,18 @@
         "version": "6.0.0",
         "name" : "Elastic Endpoint"
       },
+      "elastic": {
+        "agent": {
+          "id": "92ac1ce0-e1f7-409e-8af6-f17e97b1fc71"
+        }
+      },
       "endpoint": {
         "policy": {
           "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
         }
       },
       "event": {
-        "created": "2020-01-24T15:06:09.541Z"
+        "created": 1579878369541
       },
       "host": {
         "hostname": "thurlow-9.example.com",
@@ -216,7 +241,7 @@
   "type": "doc",
   "value": {
     "id": "4aVN2G8BYQH1gtPUuYk7",
-    "index": "endpoint-agent",
+    "index": "metrics-endpoint-default-1",
     "source": {
       "@timestamp": 1579878369541,
       "agent": {
@@ -224,13 +249,18 @@
         "version": "6.8.0",
         "name" : "Elastic Endpoint"
       },
+      "elastic": {
+        "agent": {
+          "id": "023fa40c-411d-4188-a941-4147bfadd095"
+        }
+      },
       "endpoint": {
         "policy": {
           "id": "00000000-0000-0000-0000-000000000000"
         }
       },
       "event": {
-        "created": "2020-01-24T15:06:09.541Z"
+        "created": 1579878369541
       },
       "host": {
         "architecture": "x86",
@@ -258,7 +288,7 @@
   "type": "doc",
   "value": {
     "id": "4qVN2G8BYQH1gtPUuYk7",
-    "index": "endpoint-agent",
+    "index": "metrics-endpoint-default-1",
     "source": {
       "@timestamp": 1579874769541,
       "agent": {
@@ -266,13 +296,18 @@
         "version": "6.6.1",
         "name" : "Elastic Endpoint"
       },
+      "elastic": {
+        "agent": {
+          "id": "11488bae-880b-4e7b-8d28-aac2aa9de816"
+        }
+      },
       "endpoint": {
         "policy": {
           "id": "00000000-0000-0000-0000-000000000000"
         }
       },
       "event": {
-        "created": "2020-01-24T14:06:09.541Z"
+        "created": 1579874769541
       },
       "host": {
         "hostname": "cadmann-4.example.com",
@@ -301,7 +336,7 @@
   "type": "doc",
   "value": {
     "id": "46VN2G8BYQH1gtPUuYk7",
-    "index": "endpoint-agent",
+    "index": "metrics-endpoint-default-1",
     "source": {
       "@timestamp": 1579874769541,
       "agent": {
@@ -309,13 +344,18 @@
         "version": "6.0.0",
         "name" : "Elastic Endpoint"
       },
+      "elastic": {
+        "agent": {
+          "id": "92ac1ce0-e1f7-409e-8af6-f17e97b1fc71"
+        }
+      },
       "endpoint": {
         "policy": {
           "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A"
         }
       },
       "event": {
-        "created": "2020-01-24T14:06:09.541Z"
+        "created": 1579874769541
       },
       "host": {
         "hostname": "thurlow-9.example.com",
@@ -343,7 +383,7 @@
   "type": "doc",
   "value": {
     "id": "5KVN2G8BYQH1gtPUuYk7",
-    "index": "endpoint-agent",
+    "index": "metrics-endpoint-default-1",
     "source": {
       "@timestamp": 1579874769541,
       "agent": {
@@ -351,13 +391,18 @@
         "version": "6.8.0",
         "name" : "Elastic Endpoint"
       },
+      "elastic": {
+        "agent": {
+          "id": "023fa40c-411d-4188-a941-4147bfadd095"
+        }
+      },
       "endpoint": {
         "policy": {
           "id": "00000000-0000-0000-0000-000000000000"
         }
       },
       "event": {
-        "created": "2020-01-24T14:06:09.541Z"
+        "created": 1579874769541
       },
       "host": {
         "architecture": "x86",

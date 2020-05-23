@@ -30,7 +30,27 @@ export enum ReindexStatus {
 export const REINDEX_OP_TYPE = 'upgrade-assistant-reindex-operation';
 
 export interface QueueSettings extends SavedObjectAttributes {
+  /**
+   * A Unix timestamp of when the reindex operation was enqueued.
+   *
+   * @remark
+   * This is used by the reindexing scheduler to determine execution
+   * order.
+   */
   queuedAt: number;
+
+  /**
+   * A Unix timestamp of when the reindex operation was started.
+   *
+   * @remark
+   * Updating this field is useful for _also_ updating the saved object "updated_at" field
+   * which is used to determine stale or abandoned reindex operations.
+   *
+   * For now this is used by the reindex worker scheduler to determine whether we have
+   * A queue item at the start of the queue.
+   *
+   */
+  startedAt?: number;
 }
 
 export interface ReindexOptions extends SavedObjectAttributes {

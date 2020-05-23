@@ -83,7 +83,11 @@ export function transactionGroupsFetcher(
             sample: { top_hits: { size: 1, sort } },
             avg: { avg: { field: TRANSACTION_DURATION } },
             p95: {
-              percentiles: { field: TRANSACTION_DURATION, percents: [95] }
+              percentiles: {
+                field: TRANSACTION_DURATION,
+                percents: [95],
+                hdr: { number_of_significant_value_digits: 2 }
+              }
             },
             sum: { sum: { field: TRANSACTION_DURATION } }
           }

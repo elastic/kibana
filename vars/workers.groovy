@@ -1,23 +1,38 @@
 // "Workers" in this file will spin up an instance, do some setup etc depending on the configuration, and then execute some work that you define
 // e.g. workers.base(name: 'my-worker') { sh "echo 'ready to execute some kibana scripts'" }
 
+def label(size) {
+  switch(size) {
+    case 's':
+      return 'linux && immutable'
+    case 'l':
+      return 'tests-l'
+    case 'xl':
+      return 'tests-xl'
+    case 'xxl':
+      return 'tests-xxl'
+  }
+
+  error "unknown size '${size}'"
+}
+
 /*
   The base worker that all of the others use. Will clone the scm (assumed to be kibana), and run kibana bootstrap processes by default.
 
   Parameters:
-    label - gobld/agent label to use, e.g. 'linux && immutable'
+    size - size of worker label to use, e.g. 's' or 'xl'
     ramDisk - Should the workspace be mounted in memory? Default: true
     bootstrapped - If true, download kibana dependencies, run kbn bootstrap, etc. Default: true
     name - Name of the worker for display purposes, filenames, etc.
     scm - Jenkins scm configuration for checking out code. Use `null` to disable checkout. Default: inherited from job
 */
 def base(Map params, Closure closure) {
-  def config = [label: '', ramDisk: true, bootstrapped: true, name: 'unnamed-worker', scm: scm] + params
-  if (!config.label) {
-    error "You must specify an agent label, such as 'tests-xl' or 'linux && immutable', when using workers.base()"
+  def config = [size: '', ramDisk: true, bootstrapped: true, name: 'unnamed-worker', scm: scm] + params
+  if (!config.size) {
+    error "You must specify an agent size, such as 'xl' or 's', when using workers.base()"
   }
 
-  node(config.label) {
+  node(label(config.size)) {
     agentInfo.print()
 
     if (config.ramDisk) {
@@ -42,6 +57,26 @@ def base(Map params, Closure closure) {
       // Try to clone from Github up to 8 times, waiting 15 secs between attempts
       retryWithDelay(8, 15) {
         scmVars = checkout scm
+
+        def mergeBase
+        if (env.ghprbTargetBranch) {
+          sh(
+            script: "cd kibana && git fetch origin ${env.ghprbTargetBranch}",
+            label: "update reference to target branch 'origin/${env.ghprbTargetBranch}'"
+          )
+          mergeBase = sh(
+            script: "cd kibana && git merge-base HEAD FETCH_HEAD",
+            label: "determining merge point with target branch 'origin/${env.ghprbTargetBranch}'",
+            returnStdout: true
+          ).trim()
+        }
+
+        ciStats.reportGitInfo(
+          env.ghprbSourceBranch ?: scmVars.GIT_LOCAL_BRANCH ?: scmVars.GIT_BRANCH,
+          scmVars.GIT_COMMIT,
+          env.ghprbTargetBranch,
+          mergeBase
+        )
       }
     }
 
@@ -88,7 +123,7 @@ def ci(Map params, Closure closure) {
 // Worker for running the current intake jobs. Just runs a single script after bootstrap.
 def intake(jobName, String script) {
   return {
-    ci(name: jobName, label: 'linux && immutable', ramDisk: false) {
+    ci(name: jobName, size: 's', ramDisk: false) {
       withEnv(["JOB=${jobName}"]) {
         runbld(script, "Execute ${jobName}")
       }
@@ -99,7 +134,7 @@ def intake(jobName, String script) {
 // Worker for running functional tests. Runs a setup process (e.g. the kibana build) then executes a map of closures in parallel (e.g. one for each ciGroup)
 def functional(name, Closure setup, Map processes) {
   return {
-    parallelProcesses(name: name, setup: setup, processes: processes, delayBetweenProcesses: 20, label: 'tests-xl')
+    parallelProcesses(name: name, setup: setup, processes: processes, delayBetweenProcesses: 20, size: 'xl')
   }
 }
 
@@ -111,12 +146,12 @@ def functional(name, Closure setup, Map processes) {
     setup: Closure to execute after the agent is bootstrapped, before starting the parallel work
     processes: Map of closures that will execute in parallel after setup. Each closure is passed a unique number.
     delayBetweenProcesses: Number of seconds to wait between starting the parallel processes. Useful to spread the load of heavy init processes, e.g. Elasticsearch starting up. Default: 0
-    label: gobld/agent label to use, e.g. 'linux && immutable'. Default: 'tests-xl', a 32 CPU machine used for running many functional test suites in parallel
+    size: size of worker label to use, e.g. 's' or 'xl'
 */
 def parallelProcesses(Map params) {
-  def config = [name: 'parallel-worker', setup: {}, processes: [:], delayBetweenProcesses: 0, label: 'tests-xl'] + params
+  def config = [name: 'parallel-worker', setup: {}, processes: [:], delayBetweenProcesses: 0, size: 'xl'] + params
 
-  ci(label: config.label, name: config.name) {
+  ci(size: config.size, name: config.name) {
     config.setup()
 
     def nextProcessNumber = 1

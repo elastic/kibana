@@ -16,7 +16,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const spaces = getService('spaces');
 
   describe('Security', function() {
-    this.tags('smoke');
+    this.tags('includeFirefox');
     describe('Login Page', () => {
       before(async () => {
         await esArchiver.load('empty_kibana');

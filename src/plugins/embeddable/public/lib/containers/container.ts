@@ -29,7 +29,8 @@ import {
 } from '../embeddables';
 import { IContainer, ContainerInput, ContainerOutput, PanelState } from './i_container';
 import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
-import { GetEmbeddableFactory } from '../types';
+import { EmbeddableStart } from '../../plugin';
+import { isSavedObjectEmbeddableInput } from '../embeddables/saved_object_embeddable';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -49,7 +50,7 @@ export abstract class Container<
   constructor(
     input: TContainerInput,
     output: TContainerOutput,
-    protected readonly getFactory: GetEmbeddableFactory,
+    protected readonly getFactory: EmbeddableStart['getEmbeddableFactory'],
     parent?: Container
   ) {
     super(input, output, parent);
@@ -94,17 +95,6 @@ export abstract class Container<
     }
 
     const panelState = this.createNewPanelState<EEI, E>(factory, explicitInput);
-
-    return this.createAndSaveEmbeddable(type, panelState);
-  }
-
-  public async addSavedObjectEmbeddable<
-    TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
-    TEmbeddable extends IEmbeddable<TEmbeddableInput> = IEmbeddable<TEmbeddableInput>
-  >(type: string, savedObjectId: string): Promise<TEmbeddable | ErrorEmbeddable> {
-    const factory = this.getFactory(type) as EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>;
-    const panelState = this.createNewPanelState(factory);
-    panelState.savedObjectId = savedObjectId;
 
     return this.createAndSaveEmbeddable(type, panelState);
   }
@@ -240,7 +230,6 @@ export abstract class Container<
         ...this.input.panels,
         [panelState.explicitInput.id]: panelState,
       },
-      isEmptyState: false,
     } as Partial<TContainerInput>);
 
     return await this.untilEmbeddableLoaded<TEmbeddable>(panelState.explicitInput.id);
@@ -305,8 +294,10 @@ export abstract class Container<
         throw new EmbeddableFactoryNotFoundError(panel.type);
       }
 
-      embeddable = panel.savedObjectId
-        ? await factory.createFromSavedObject(panel.savedObjectId, inputForChild, this)
+      // TODO: lets get rid of this distinction with factories, I don't think it will be needed
+      // anymore after this change.
+      embeddable = isSavedObjectEmbeddableInput(inputForChild)
+        ? await factory.createFromSavedObject(inputForChild.savedObjectId, inputForChild, this)
         : await factory.create(inputForChild, this);
     } catch (e) {
       embeddable = new ErrorEmbeddable(e, { id: panel.explicitInput.id }, this);
@@ -322,23 +313,6 @@ export abstract class Container<
       if (!this.input.panels[panel.explicitInput.id]) {
         embeddable.destroy();
         return;
-      }
-
-      if (embeddable.getOutput().savedObjectId) {
-        this.updateInput({
-          panels: {
-            ...this.input.panels,
-            [panel.explicitInput.id]: {
-              ...this.input.panels[panel.explicitInput.id],
-              ...(embeddable.getOutput().savedObjectId
-                ? { savedObjectId: embeddable.getOutput().savedObjectId }
-                : undefined),
-              explicitInput: {
-                ...this.input.panels[panel.explicitInput.id].explicitInput,
-              },
-            },
-          },
-        } as Partial<TContainerInput>);
       }
 
       this.children[embeddable.id] = embeddable;

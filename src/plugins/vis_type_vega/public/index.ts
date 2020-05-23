@@ -19,20 +19,8 @@
 
 import { PluginInitializerContext } from 'kibana/public';
 import { ConfigSchema } from '../config';
+import { VegaPlugin as Plugin } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext<ConfigSchema>) => ({
-  setup() {
-    return {
-      /**
-       * The configuration is temporarily exposed to allow the legacy vega plugin to consume
-       * the setting. Once the vega plugin is migrated completely, this will become an implementation
-       * detail.
-       * @deprecated
-       */
-      config: initializerContext.config.get(),
-    };
-  },
-  start() {},
-});
-
-export type VisTypeVegaSetup = ReturnType<ReturnType<typeof plugin>['setup']>;
+export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
+  return new Plugin(initializerContext);
+}

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IAggConfig } from '../../../../../legacy/ui/public/agg_types';
+import { IAggConfig } from 'src/plugins/data/public';
 import { SerializedFieldFormat } from '../../../../expressions/common/types';
 
 export const serializeFieldFormat = (agg: IAggConfig): SerializedFieldFormat => {

@@ -16,7 +16,7 @@ export class ExportApp extends React.PureComponent {
       id: PropTypes.string.isRequired,
       pages: PropTypes.array.isRequired,
     }).isRequired,
-    selectedPageId: PropTypes.string.isRequired,
+    selectedPageIndex: PropTypes.number.isRequired,
     initializeWorkpad: PropTypes.func.isRequired,
   };
 
@@ -25,12 +25,13 @@ export class ExportApp extends React.PureComponent {
   }
 
   render() {
-    const { workpad, selectedPageId } = this.props;
+    const { workpad, selectedPageIndex } = this.props;
     const { pages, height, width } = workpad;
-    const activePage = pages.find(page => page.id === selectedPageId);
+    const activePage = pages[selectedPageIndex];
+    const pageElementCount = activePage.elements.length;
 
     return (
-      <div className="canvasExport">
+      <div className="canvasExport" data-shared-page={selectedPageIndex + 1}>
         <div className="canvasExport__stage">
           <div className="canvasLayout__stageHeader">
             <Link name="loadWorkpad" params={{ id: this.props.workpad.id }}>
@@ -39,7 +40,7 @@ export class ExportApp extends React.PureComponent {
           </div>
           {Style.it(
             workpad.css,
-            <div className="canvasExport__stageContent">
+            <div className="canvasExport__stageContent" data-shared-items-count={pageElementCount}>
               <WorkpadPage
                 isSelected
                 key={activePage.id}

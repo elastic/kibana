@@ -5,14 +5,13 @@
  */
 
 import { ElementFactory } from '../../../types';
-import header from './header.png';
 
 export const dropdownFilter: ElementFactory = () => ({
-  name: 'dropdown_filter',
-  displayName: 'Dropdown filter',
-  tags: ['filter'],
+  name: 'dropdownFilter',
+  displayName: 'Dropdown select',
+  type: 'filter',
   help: 'A dropdown from which you can select values for an "exactly" filter',
-  image: header,
+  icon: 'filter',
   height: 50,
   expression: `demodata
 | dropdownControl valueColumn=project filterColumn=project | render`,

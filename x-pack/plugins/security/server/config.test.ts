@@ -6,9 +6,8 @@
 
 jest.mock('crypto', () => ({ randomBytes: jest.fn() }));
 
-import { first } from 'rxjs/operators';
-import { loggingServiceMock, coreMock } from '../../../../src/core/server/mocks';
-import { createConfig$, ConfigSchema } from './config';
+import { loggingServiceMock } from '../../../../src/core/server/mocks';
+import { createConfig, ConfigSchema } from './config';
 
 describe('config schema', () => {
   it('generates proper defaults', () => {
@@ -25,9 +24,25 @@ describe('config schema', () => {
               "apikey",
             ],
           },
-          "providers": Array [
-            "basic",
-          ],
+          "providers": Object {
+            "basic": Object {
+              "basic": Object {
+                "accessAgreement": undefined,
+                "description": undefined,
+                "enabled": true,
+                "hint": undefined,
+                "icon": undefined,
+                "order": 0,
+                "showInSelector": true,
+              },
+            },
+            "kerberos": undefined,
+            "oidc": undefined,
+            "pki": undefined,
+            "saml": undefined,
+            "token": undefined,
+          },
+          "selector": Object {},
         },
         "cookieName": "sid",
         "enabled": true,
@@ -54,9 +69,25 @@ describe('config schema', () => {
               "apikey",
             ],
           },
-          "providers": Array [
-            "basic",
-          ],
+          "providers": Object {
+            "basic": Object {
+              "basic": Object {
+                "accessAgreement": undefined,
+                "description": undefined,
+                "enabled": true,
+                "hint": undefined,
+                "icon": undefined,
+                "order": 0,
+                "showInSelector": true,
+              },
+            },
+            "kerberos": undefined,
+            "oidc": undefined,
+            "pki": undefined,
+            "saml": undefined,
+            "token": undefined,
+          },
+          "selector": Object {},
         },
         "cookieName": "sid",
         "enabled": true,
@@ -83,9 +114,25 @@ describe('config schema', () => {
               "apikey",
             ],
           },
-          "providers": Array [
-            "basic",
-          ],
+          "providers": Object {
+            "basic": Object {
+              "basic": Object {
+                "accessAgreement": undefined,
+                "description": undefined,
+                "enabled": true,
+                "hint": undefined,
+                "icon": undefined,
+                "order": 0,
+                "showInSelector": true,
+              },
+            },
+            "kerberos": undefined,
+            "oidc": undefined,
+            "pki": undefined,
+            "saml": undefined,
+            "token": undefined,
+          },
+          "selector": Object {},
         },
         "cookieName": "sid",
         "enabled": true,
@@ -148,6 +195,7 @@ describe('config schema', () => {
           "providers": Array [
             "oidc",
           ],
+          "selector": Object {},
         }
       `);
     });
@@ -181,6 +229,7 @@ describe('config schema', () => {
             "oidc",
             "basic",
           ],
+          "selector": Object {},
         }
       `);
     });
@@ -228,6 +277,7 @@ describe('config schema', () => {
             },
             "realm": "realm-1",
           },
+          "selector": Object {},
         }
       `);
     });
@@ -305,27 +355,456 @@ describe('config schema', () => {
             `);
     });
   });
+
+  describe('authc.providers (extended format)', () => {
+    describe('`basic` provider', () => {
+      it('requires `order`', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: { providers: { basic: { basic1: { enabled: true } } } },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`
+"[authc.providers]: types that failed validation:
+- [authc.providers.0]: expected value of type [array] but got [Object]
+- [authc.providers.1.basic.basic1.order]: expected value of type [number] but got [undefined]"
+`);
+      });
+
+      it('cannot be hidden from selector', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: {
+              providers: { basic: { basic1: { order: 0, showInSelector: false } } },
+            },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`
+"[authc.providers]: types that failed validation:
+- [authc.providers.0]: expected value of type [array] but got [Object]
+- [authc.providers.1.basic.basic1.showInSelector]: \`basic\` provider only supports \`true\` in \`showInSelector\`."
+`);
+      });
+
+      it('can have only provider of this type', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: { providers: { basic: { basic1: { order: 0 }, basic2: { order: 1 } } } },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`
+"[authc.providers]: types that failed validation:
+- [authc.providers.0]: expected value of type [array] but got [Object]
+- [authc.providers.1.basic]: Only one \\"basic\\" provider can be configured."
+`);
+      });
+
+      it('can be successfully validated', () => {
+        expect(
+          ConfigSchema.validate({
+            authc: { providers: { basic: { basic1: { order: 0 } } } },
+          }).authc.providers
+        ).toMatchInlineSnapshot(`
+          Object {
+            "basic": Object {
+              "basic1": Object {
+                "description": "Log in with Elasticsearch",
+                "enabled": true,
+                "icon": "logoElastic",
+                "order": 0,
+                "showInSelector": true,
+              },
+            },
+          }
+        `);
+      });
+    });
+
+    describe('`token` provider', () => {
+      it('requires `order`', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: { providers: { token: { token1: { enabled: true } } } },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`
+"[authc.providers]: types that failed validation:
+- [authc.providers.0]: expected value of type [array] but got [Object]
+- [authc.providers.1.token.token1.order]: expected value of type [number] but got [undefined]"
+`);
+      });
+
+      it('cannot be hidden from selector', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: {
+              providers: { token: { token1: { order: 0, showInSelector: false } } },
+            },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`
+"[authc.providers]: types that failed validation:
+- [authc.providers.0]: expected value of type [array] but got [Object]
+- [authc.providers.1.token.token1.showInSelector]: \`token\` provider only supports \`true\` in \`showInSelector\`."
+`);
+      });
+
+      it('can have only provider of this type', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: { providers: { token: { token1: { order: 0 }, token2: { order: 1 } } } },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`
+"[authc.providers]: types that failed validation:
+- [authc.providers.0]: expected value of type [array] but got [Object]
+- [authc.providers.1.token]: Only one \\"token\\" provider can be configured."
+`);
+      });
+
+      it('can be successfully validated', () => {
+        expect(
+          ConfigSchema.validate({
+            authc: { providers: { token: { token1: { order: 0 } } } },
+          }).authc.providers
+        ).toMatchInlineSnapshot(`
+          Object {
+            "token": Object {
+              "token1": Object {
+                "description": "Log in with Elasticsearch",
+                "enabled": true,
+                "icon": "logoElastic",
+                "order": 0,
+                "showInSelector": true,
+              },
+            },
+          }
+        `);
+      });
+    });
+
+    describe('`pki` provider', () => {
+      it('requires `order`', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: { providers: { pki: { pki1: { enabled: true } } } },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`
+"[authc.providers]: types that failed validation:
+- [authc.providers.0]: expected value of type [array] but got [Object]
+- [authc.providers.1.pki.pki1.order]: expected value of type [number] but got [undefined]"
+`);
+      });
+
+      it('can have only provider of this type', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: { providers: { pki: { pki1: { order: 0 }, pki2: { order: 1 } } } },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`
+"[authc.providers]: types that failed validation:
+- [authc.providers.0]: expected value of type [array] but got [Object]
+- [authc.providers.1.pki]: Only one \\"pki\\" provider can be configured."
+`);
+      });
+
+      it('can be successfully validated', () => {
+        expect(
+          ConfigSchema.validate({
+            authc: { providers: { pki: { pki1: { order: 0 } } } },
+          }).authc.providers
+        ).toMatchInlineSnapshot(`
+          Object {
+            "pki": Object {
+              "pki1": Object {
+                "enabled": true,
+                "order": 0,
+                "showInSelector": true,
+              },
+            },
+          }
+        `);
+      });
+    });
+
+    describe('`kerberos` provider', () => {
+      it('requires `order`', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: { providers: { kerberos: { kerberos1: { enabled: true } } } },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`
+"[authc.providers]: types that failed validation:
+- [authc.providers.0]: expected value of type [array] but got [Object]
+- [authc.providers.1.kerberos.kerberos1.order]: expected value of type [number] but got [undefined]"
+`);
+      });
+
+      it('can have only provider of this type', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: {
+              providers: { kerberos: { kerberos1: { order: 0 }, kerberos2: { order: 1 } } },
+            },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`
+"[authc.providers]: types that failed validation:
+- [authc.providers.0]: expected value of type [array] but got [Object]
+- [authc.providers.1.kerberos]: Only one \\"kerberos\\" provider can be configured."
+`);
+      });
+
+      it('can be successfully validated', () => {
+        expect(
+          ConfigSchema.validate({
+            authc: { providers: { kerberos: { kerberos1: { order: 0 } } } },
+          }).authc.providers
+        ).toMatchInlineSnapshot(`
+          Object {
+            "kerberos": Object {
+              "kerberos1": Object {
+                "enabled": true,
+                "order": 0,
+                "showInSelector": true,
+              },
+            },
+          }
+        `);
+      });
+    });
+
+    describe('`oidc` provider', () => {
+      it('requires `order`', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: { providers: { oidc: { oidc1: { enabled: true } } } },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`
+"[authc.providers]: types that failed validation:
+- [authc.providers.0]: expected value of type [array] but got [Object]
+- [authc.providers.1.oidc.oidc1.order]: expected value of type [number] but got [undefined]"
+`);
+      });
+
+      it('requires `realm`', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: { providers: { oidc: { oidc1: { order: 0 } } } },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`
+"[authc.providers]: types that failed validation:
+- [authc.providers.0]: expected value of type [array] but got [Object]
+- [authc.providers.1.oidc.oidc1.realm]: expected value of type [string] but got [undefined]"
+`);
+      });
+
+      it('can be successfully validated', () => {
+        expect(
+          ConfigSchema.validate({
+            authc: {
+              providers: {
+                oidc: { oidc1: { order: 0, realm: 'oidc1' }, oidc2: { order: 1, realm: 'oidc2' } },
+              },
+            },
+          }).authc.providers
+        ).toMatchInlineSnapshot(`
+          Object {
+            "oidc": Object {
+              "oidc1": Object {
+                "enabled": true,
+                "order": 0,
+                "realm": "oidc1",
+                "showInSelector": true,
+              },
+              "oidc2": Object {
+                "enabled": true,
+                "order": 1,
+                "realm": "oidc2",
+                "showInSelector": true,
+              },
+            },
+          }
+        `);
+      });
+    });
+
+    describe('`saml` provider', () => {
+      it('requires `order`', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: { providers: { saml: { saml1: { enabled: true } } } },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`
+"[authc.providers]: types that failed validation:
+- [authc.providers.0]: expected value of type [array] but got [Object]
+- [authc.providers.1.saml.saml1.order]: expected value of type [number] but got [undefined]"
+`);
+      });
+
+      it('requires `realm`', () => {
+        expect(() =>
+          ConfigSchema.validate({
+            authc: { providers: { saml: { saml1: { order: 0 } } } },
+          })
+        ).toThrowErrorMatchingInlineSnapshot(`
+"[authc.providers]: types that failed validation:
+- [authc.providers.0]: expected value of type [array] but got [Object]
+- [authc.providers.1.saml.saml1.realm]: expected value of type [string] but got [undefined]"
+`);
+      });
+
+      it('can be successfully validated', () => {
+        expect(
+          ConfigSchema.validate({
+            authc: {
+              providers: {
+                saml: {
+                  saml1: { order: 0, realm: 'saml1' },
+                  saml2: { order: 1, realm: 'saml2', maxRedirectURLSize: '1kb' },
+                },
+              },
+            },
+          }).authc.providers
+        ).toMatchInlineSnapshot(`
+          Object {
+            "saml": Object {
+              "saml1": Object {
+                "enabled": true,
+                "maxRedirectURLSize": ByteSizeValue {
+                  "valueInBytes": 2048,
+                },
+                "order": 0,
+                "realm": "saml1",
+                "showInSelector": true,
+              },
+              "saml2": Object {
+                "enabled": true,
+                "maxRedirectURLSize": ByteSizeValue {
+                  "valueInBytes": 1024,
+                },
+                "order": 1,
+                "realm": "saml2",
+                "showInSelector": true,
+              },
+            },
+          }
+        `);
+      });
+    });
+
+    it('`name` should be unique across all provider types', () => {
+      expect(() =>
+        ConfigSchema.validate({
+          authc: {
+            providers: {
+              basic: { provider1: { order: 0 } },
+              saml: {
+                provider2: { order: 1, realm: 'saml1' },
+                provider1: { order: 2, realm: 'saml2' },
+              },
+            },
+          },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`
+"[authc.providers]: types that failed validation:
+- [authc.providers.0]: expected value of type [array] but got [Object]
+- [authc.providers.1]: Found multiple providers configured with the same name \\"provider1\\": [xpack.security.authc.providers.basic.provider1, xpack.security.authc.providers.saml.provider1]"
+`);
+    });
+
+    it('`order` should be unique across all provider types', () => {
+      expect(() =>
+        ConfigSchema.validate({
+          authc: {
+            providers: {
+              basic: { provider1: { order: 0 } },
+              saml: {
+                provider2: { order: 0, realm: 'saml1' },
+                provider3: { order: 2, realm: 'saml2' },
+              },
+            },
+          },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`
+"[authc.providers]: types that failed validation:
+- [authc.providers.0]: expected value of type [array] but got [Object]
+- [authc.providers.1]: Found multiple providers configured with the same order \\"0\\": [xpack.security.authc.providers.basic.provider1, xpack.security.authc.providers.saml.provider2]"
+`);
+    });
+
+    it('can be successfully validated with multiple providers ignoring uniqueness violations in disabled ones', () => {
+      expect(
+        ConfigSchema.validate({
+          authc: {
+            providers: {
+              basic: { basic1: { order: 0 }, basic2: { enabled: false, order: 1 } },
+              saml: {
+                saml1: { order: 1, realm: 'saml1' },
+                saml2: { order: 2, realm: 'saml2' },
+                basic1: { order: 3, realm: 'saml3', enabled: false },
+              },
+            },
+          },
+        }).authc.providers
+      ).toMatchInlineSnapshot(`
+        Object {
+          "basic": Object {
+            "basic1": Object {
+              "description": "Log in with Elasticsearch",
+              "enabled": true,
+              "icon": "logoElastic",
+              "order": 0,
+              "showInSelector": true,
+            },
+            "basic2": Object {
+              "description": "Log in with Elasticsearch",
+              "enabled": false,
+              "icon": "logoElastic",
+              "order": 1,
+              "showInSelector": true,
+            },
+          },
+          "saml": Object {
+            "basic1": Object {
+              "enabled": false,
+              "maxRedirectURLSize": ByteSizeValue {
+                "valueInBytes": 2048,
+              },
+              "order": 3,
+              "realm": "saml3",
+              "showInSelector": true,
+            },
+            "saml1": Object {
+              "enabled": true,
+              "maxRedirectURLSize": ByteSizeValue {
+                "valueInBytes": 2048,
+              },
+              "order": 1,
+              "realm": "saml1",
+              "showInSelector": true,
+            },
+            "saml2": Object {
+              "enabled": true,
+              "maxRedirectURLSize": ByteSizeValue {
+                "valueInBytes": 2048,
+              },
+              "order": 2,
+              "realm": "saml2",
+              "showInSelector": true,
+            },
+          },
+        }
+      `);
+    });
+  });
 });
 
-describe('createConfig$()', () => {
-  const mockAndCreateConfig = async (isTLSEnabled: boolean, value = {}, context?: any) => {
-    const contextMock = coreMock.createPluginInitializerContext(
-      // we must use validate to avoid errors in `createConfig$`
-      ConfigSchema.validate(value, context)
-    );
-    return await createConfig$(contextMock, isTLSEnabled)
-      .pipe(first())
-      .toPromise()
-      .then(config => ({ contextMock, config }));
-  };
+describe('createConfig()', () => {
   it('should log a warning and set xpack.security.encryptionKey if not set', async () => {
     const mockRandomBytes = jest.requireMock('crypto').randomBytes;
     mockRandomBytes.mockReturnValue('ab'.repeat(16));
 
-    const { contextMock, config } = await mockAndCreateConfig(true, {}, { dist: true });
+    const logger = loggingServiceMock.create().get();
+    const config = createConfig(ConfigSchema.validate({}, { dist: true }), logger, {
+      isTLSEnabled: true,
+    });
     expect(config.encryptionKey).toEqual('ab'.repeat(16));
 
-    expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
+    expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
                         Array [
                           Array [
                             "Generating a random key for xpack.security.encryptionKey. To prevent sessions from being invalidated on restart, please set xpack.security.encryptionKey in kibana.yml",
@@ -335,10 +814,11 @@ describe('createConfig$()', () => {
   });
 
   it('should log a warning if SSL is not configured', async () => {
-    const { contextMock, config } = await mockAndCreateConfig(false, {});
+    const logger = loggingServiceMock.create().get();
+    const config = createConfig(ConfigSchema.validate({}), logger, { isTLSEnabled: false });
     expect(config.secureCookies).toEqual(false);
 
-    expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
+    expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
                         Array [
                           Array [
                             "Session cookies will be transmitted over insecure connections. This is not recommended.",
@@ -348,10 +828,13 @@ describe('createConfig$()', () => {
   });
 
   it('should log a warning if SSL is not configured yet secure cookies are being used', async () => {
-    const { contextMock, config } = await mockAndCreateConfig(false, { secureCookies: true });
+    const logger = loggingServiceMock.create().get();
+    const config = createConfig(ConfigSchema.validate({ secureCookies: true }), logger, {
+      isTLSEnabled: false,
+    });
     expect(config.secureCookies).toEqual(true);
 
-    expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
+    expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
                         Array [
                           Array [
                             "Using secure cookies, but SSL is not enabled inside Kibana. SSL must be configured outside of Kibana to function properly.",
@@ -361,9 +844,182 @@ describe('createConfig$()', () => {
   });
 
   it('should set xpack.security.secureCookies if SSL is configured', async () => {
-    const { contextMock, config } = await mockAndCreateConfig(true, {});
+    const logger = loggingServiceMock.create().get();
+    const config = createConfig(ConfigSchema.validate({}), logger, { isTLSEnabled: true });
     expect(config.secureCookies).toEqual(true);
 
-    expect(loggingServiceMock.collect(contextMock.logger).warn).toEqual([]);
+    expect(loggingServiceMock.collect(logger).warn).toEqual([]);
+  });
+
+  it('transforms legacy `authc.providers` into new format', () => {
+    const logger = loggingServiceMock.create().get();
+
+    expect(
+      createConfig(
+        ConfigSchema.validate({
+          authc: {
+            providers: ['saml', 'basic'],
+            saml: { realm: 'saml-realm' },
+          },
+        }),
+        logger,
+        { isTLSEnabled: true }
+      ).authc
+    ).toMatchInlineSnapshot(`
+      Object {
+        "http": Object {
+          "autoSchemesEnabled": true,
+          "enabled": true,
+          "schemes": Array [
+            "apikey",
+          ],
+        },
+        "providers": Object {
+          "basic": Object {
+            "basic": Object {
+              "enabled": true,
+              "order": 1,
+              "showInSelector": true,
+            },
+          },
+          "saml": Object {
+            "saml": Object {
+              "enabled": true,
+              "maxRedirectURLSize": ByteSizeValue {
+                "valueInBytes": 2048,
+              },
+              "order": 0,
+              "realm": "saml-realm",
+              "showInSelector": true,
+            },
+          },
+        },
+        "selector": Object {
+          "enabled": false,
+        },
+        "sortedProviders": Array [
+          Object {
+            "name": "saml",
+            "order": 0,
+            "type": "saml",
+          },
+          Object {
+            "name": "basic",
+            "order": 1,
+            "type": "basic",
+          },
+        ],
+      }
+    `);
+  });
+
+  it('does not automatically set `authc.selector.enabled` to `true` if legacy `authc.providers` format is used', () => {
+    expect(
+      createConfig(
+        ConfigSchema.validate({
+          authc: { providers: ['saml', 'basic'], saml: { realm: 'saml-realm' } },
+        }),
+        loggingServiceMock.create().get(),
+        { isTLSEnabled: true }
+      ).authc.selector.enabled
+    ).toBe(false);
+
+    // But keep it as `true` if it's explicitly set.
+    expect(
+      createConfig(
+        ConfigSchema.validate({
+          authc: {
+            selector: { enabled: true },
+            providers: ['saml', 'basic'],
+            saml: { realm: 'saml-realm' },
+          },
+        }),
+        loggingServiceMock.create().get(),
+        { isTLSEnabled: true }
+      ).authc.selector.enabled
+    ).toBe(true);
+  });
+
+  it('does not automatically set `authc.selector.enabled` to `true` if less than 2 providers must be shown there', () => {
+    expect(
+      createConfig(
+        ConfigSchema.validate({
+          authc: {
+            providers: {
+              basic: { basic1: { order: 0 } },
+              saml: {
+                saml1: { order: 1, realm: 'saml1', showInSelector: false },
+                saml2: { enabled: false, order: 2, realm: 'saml2' },
+              },
+            },
+          },
+        }),
+        loggingServiceMock.create().get(),
+        { isTLSEnabled: true }
+      ).authc.selector.enabled
+    ).toBe(false);
+  });
+
+  it('automatically set `authc.selector.enabled` to `true` if more than 1 provider must be shown there', () => {
+    expect(
+      createConfig(
+        ConfigSchema.validate({
+          authc: {
+            providers: {
+              basic: { basic1: { order: 0 } },
+              saml: { saml1: { order: 1, realm: 'saml1' }, saml2: { order: 2, realm: 'saml2' } },
+            },
+          },
+        }),
+        loggingServiceMock.create().get(),
+        { isTLSEnabled: true }
+      ).authc.selector.enabled
+    ).toBe(true);
+  });
+
+  it('correctly sorts providers based on the `order`', () => {
+    expect(
+      createConfig(
+        ConfigSchema.validate({
+          authc: {
+            providers: {
+              basic: { basic1: { order: 3 } },
+              saml: { saml1: { order: 2, realm: 'saml1' }, saml2: { order: 1, realm: 'saml2' } },
+              oidc: { oidc1: { order: 0, realm: 'oidc1' }, oidc2: { order: 4, realm: 'oidc2' } },
+            },
+          },
+        }),
+        loggingServiceMock.create().get(),
+        { isTLSEnabled: true }
+      ).authc.sortedProviders
+    ).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "name": "oidc1",
+          "order": 0,
+          "type": "oidc",
+        },
+        Object {
+          "name": "saml2",
+          "order": 1,
+          "type": "saml",
+        },
+        Object {
+          "name": "saml1",
+          "order": 2,
+          "type": "saml",
+        },
+        Object {
+          "name": "basic1",
+          "order": 3,
+          "type": "basic",
+        },
+        Object {
+          "name": "oidc2",
+          "order": 4,
+          "type": "oidc",
+        },
+      ]
+    `);
   });
 });

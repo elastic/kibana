@@ -44,7 +44,7 @@ describe('timefilter', () => {
         from: fromDate,
         to: toDate,
       }).and[0]
-    ).toHaveProperty('type', 'time');
+    ).toHaveProperty('filterType', 'time');
   });
 
   describe('args', () => {

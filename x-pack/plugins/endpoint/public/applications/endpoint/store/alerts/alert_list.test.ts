@@ -11,20 +11,40 @@ import { AlertListState } from '../../types';
 import { alertMiddlewareFactory } from './middleware';
 import { AppAction } from '../action';
 import { coreMock } from 'src/core/public/mocks';
-import { AlertResultList } from '../../../../../common/types';
+import { DepsStartMock, depsStartMock } from '../../mocks';
+import { AlertResultList, Immutable } from '../../../../../common/types';
 import { isOnAlertPage } from './selectors';
 import { createBrowserHistory } from 'history';
 import { mockAlertResultList } from './mock_alert_result_list';
 
 describe('alert list tests', () => {
-  let store: Store<AlertListState, AppAction>;
+  let store: Store<Immutable<AlertListState>, Immutable<AppAction>>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
+  let depsStart: DepsStartMock;
   let history: History<never>;
+  /**
+   * A function that waits until a selector returns true.
+   */
+  let selectorIsTrue: (selector: (state: Immutable<AlertListState>) => boolean) => Promise<void>;
   beforeEach(() => {
     coreStart = coreMock.createStart();
+    depsStart = depsStartMock();
     history = createBrowserHistory();
-    const middleware = alertMiddlewareFactory(coreStart);
+    const middleware = alertMiddlewareFactory(coreStart, depsStart);
     store = createStore(alertListReducer, applyMiddleware(middleware));
+
+    selectorIsTrue = async selector => {
+      // If the selector returns true, we're done
+      while (selector(store.getState()) !== true) {
+        // otherwise, wait til the next state change occurs
+        await new Promise(resolve => {
+          const unsubscribe = store.subscribe(() => {
+            unsubscribe();
+            resolve();
+          });
+        });
+      }
+    };
   });
   describe('when the user navigates to the alert list page', () => {
     beforeEach(() => {
@@ -32,6 +52,7 @@ describe('alert list tests', () => {
         const response: AlertResultList = mockAlertResultList();
         return response;
       });
+      depsStart.data.indexPatterns.getFieldsForWildcard.mockReturnValue(Promise.resolve([]));
 
       // Simulates user navigating to the /alerts page
       store.dispatch({
@@ -48,9 +69,8 @@ describe('alert list tests', () => {
       expect(actual).toBe(true);
     });
 
-    it('should return alertListData', () => {
-      const actualResponseLength = store.getState().alerts.length;
-      expect(actualResponseLength).toEqual(1);
+    it('should return alertListData', async () => {
+      await selectorIsTrue(state => state.alerts.length === 1);
     });
   });
 });

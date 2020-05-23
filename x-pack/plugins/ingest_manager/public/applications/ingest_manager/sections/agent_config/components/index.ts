@@ -6,3 +6,5 @@
 
 export { AgentConfigForm, agentConfigFormValidation } from './config_form';
 export { AgentConfigDeleteProvider } from './config_delete_provider';
+export { LinkedAgentCount } from './linked_agent_count';
+export { ConfirmDeployConfigModal } from './confirm_deploy_modal';

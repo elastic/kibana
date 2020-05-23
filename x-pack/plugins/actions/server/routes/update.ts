@@ -12,8 +12,8 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { LicenseState } from '../lib/license_state';
-import { verifyApiAccess } from '../lib/license_api_access';
+import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../lib';
+import { BASE_ACTION_API_PATH } from '../../common';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -25,10 +25,10 @@ const bodySchema = schema.object({
   secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
 });
 
-export const updateActionRoute = (router: IRouter, licenseState: LicenseState) => {
+export const updateActionRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.put(
     {
-      path: `/api/action/{id}`,
+      path: `${BASE_ACTION_API_PATH}/{id}`,
       validate: {
         body: bodySchema,
         params: paramSchema,
@@ -39,9 +39,9 @@ export const updateActionRoute = (router: IRouter, licenseState: LicenseState) =
     },
     router.handleLegacyErrors(async function(
       context: RequestHandlerContext,
-      req: KibanaRequest<TypeOf<typeof paramSchema>, any, TypeOf<typeof bodySchema>, any>,
+      req: KibanaRequest<TypeOf<typeof paramSchema>, unknown, TypeOf<typeof bodySchema>>,
       res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
+    ): Promise<IKibanaResponse> {
       verifyApiAccess(licenseState);
       if (!context.actions) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
@@ -49,12 +49,20 @@ export const updateActionRoute = (router: IRouter, licenseState: LicenseState) =
       const actionsClient = context.actions.getActionsClient();
       const { id } = req.params;
       const { name, config, secrets } = req.body;
-      return res.ok({
-        body: await actionsClient.update({
-          id,
-          action: { name, config, secrets },
-        }),
-      });
+
+      try {
+        return res.ok({
+          body: await actionsClient.update({
+            id,
+            action: { name, config, secrets },
+          }),
+        });
+      } catch (e) {
+        if (isErrorThatHandlesItsOwnResponse(e)) {
+          return e.sendResponse(res);
+        }
+        throw e;
+      }
     })
   );
 };

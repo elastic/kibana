@@ -166,7 +166,7 @@ export class UrlPanelContent extends Component<Props, State> {
     // Get the application route, after the hash, and remove the #.
     const parsedAppUrl = parseUrl(parsedUrl.hash.slice(1), true);
 
-    return formatUrl({
+    let formattedUrl = formatUrl({
       protocol: parsedUrl.protocol,
       auth: parsedUrl.auth,
       host: parsedUrl.host,
@@ -180,6 +180,11 @@ export class UrlPanelContent extends Component<Props, State> {
         },
       }),
     });
+    if (this.props.isEmbedded) {
+      formattedUrl = this.makeUrlEmbeddable(url);
+    }
+
+    return formattedUrl;
   };
 
   private getSnapshotUrl = () => {

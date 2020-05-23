@@ -13,7 +13,7 @@ import {
 } from 'kibana/server';
 
 import { Service } from '../../../types';
-import { TimeSeriesQuery, TimeSeriesQuerySchema, TimeSeriesResult } from '../lib/time_series_types';
+import { TimeSeriesQuery, TimeSeriesQuerySchema } from '../lib/time_series_types';
 export { TimeSeriesQuery, TimeSeriesResult } from '../lib/time_series_types';
 
 export function createTimeSeriesQueryRoute(service: Service, router: IRouter, baseRoute: string) {
@@ -30,24 +30,18 @@ export function createTimeSeriesQueryRoute(service: Service, router: IRouter, ba
   );
   async function handler(
     ctx: RequestHandlerContext,
-    req: KibanaRequest<any, any, TimeSeriesQuery, any>,
+    req: KibanaRequest<unknown, unknown, TimeSeriesQuery>,
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
-    service.logger.debug(`route query_data request: ${JSON.stringify(req.body)}`);
+    service.logger.debug(`route ${path} request: ${JSON.stringify(req.body)}`);
 
-    let result: TimeSeriesResult;
-    try {
-      result = await service.indexThreshold.timeSeriesQuery({
-        logger: service.logger,
-        callCluster: ctx.core.elasticsearch.dataClient.callAsCurrentUser,
-        query: req.body,
-      });
-    } catch (err) {
-      service.logger.debug(`route query_data error: ${err.message}`);
-      return res.internalError({ body: 'error running time series query' });
-    }
+    const result = await service.indexThreshold.timeSeriesQuery({
+      logger: service.logger,
+      callCluster: ctx.core.elasticsearch.dataClient.callAsCurrentUser,
+      query: req.body,
+    });
 
-    service.logger.debug(`route query_data response: ${JSON.stringify(result)}`);
+    service.logger.debug(`route ${path} response: ${JSON.stringify(result)}`);
     return res.ok({ body: result });
   }
 }

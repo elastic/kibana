@@ -17,6 +17,8 @@ export default function spacesOnlyTestSuite({ loadTestFile }: TestInvoker) {
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./get_all'));
     loadTestFile(require.resolve('./get'));
+    loadTestFile(require.resolve('./share_add'));
+    loadTestFile(require.resolve('./share_remove'));
     loadTestFile(require.resolve('./update'));
   });
 }

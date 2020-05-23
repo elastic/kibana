@@ -103,6 +103,15 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       await radioBtn.click();
     }
 
+    public async clickAddDateRange() {
+      await testSubjects.click(`visEditorAddDateRange`);
+    }
+
+    public async setDateRangeByIndex(index: string, from: string, to: string) {
+      await testSubjects.setValue(`visEditorDateRange${index}__from`, from);
+      await testSubjects.setValue(`visEditorDateRange${index}__to`, to);
+    }
+
     /**
      * Adds new bucket
      * @param bucketName bucket name, like 'X-axis', 'Split rows', 'Split series'
@@ -110,7 +119,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
      */
     public async clickBucket(bucketName: string, type = 'buckets') {
       await testSubjects.click(`visEditorAdd_${type}`);
-      await find.clickByCssSelector(`[data-test-subj="visEditorAdd_${type}_${bucketName}"`);
+      await testSubjects.click(`visEditorAdd_${type}_${bucketName}`);
     }
 
     public async clickEnableCustomRanges() {

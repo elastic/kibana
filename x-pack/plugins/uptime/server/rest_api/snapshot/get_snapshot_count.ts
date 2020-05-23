@@ -7,10 +7,11 @@
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
+import { API_URLS } from '../../../common/constants';
 
 export const createGetSnapshotCount: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: '/api/uptime/snapshot/count',
+  path: API_URLS.SNAPSHOT_COUNT,
   validate: {
     query: schema.object({
       dateRangeStart: schema.string(),
@@ -19,13 +20,11 @@ export const createGetSnapshotCount: UMRestApiRouteFactory = (libs: UMServerLibs
       statusFilter: schema.maybe(schema.string()),
     }),
   },
-  options: {
-    tags: ['access:uptime'],
-  },
-  handler: async ({ callES }, _context, request, response): Promise<any> => {
+  handler: async ({ callES, dynamicSettings }, _context, request, response): Promise<any> => {
     const { dateRangeStart, dateRangeEnd, filters, statusFilter } = request.query;
     const result = await libs.requests.getSnapshotCount({
       callES,
+      dynamicSettings,
       dateRangeStart,
       dateRangeEnd,
       filters,

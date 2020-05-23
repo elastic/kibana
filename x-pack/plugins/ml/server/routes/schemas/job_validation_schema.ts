@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { anomalyDetectionJobSchema } from './anomaly_detectors_schema';
+import { analysisConfigSchema, anomalyDetectionJobSchema } from './anomaly_detectors_schema';
 import { datafeedConfigSchema } from './datafeeds_schema';
 
 export const estimateBucketSpanSchema = schema.object({
@@ -20,11 +20,9 @@ export const estimateBucketSpanSchema = schema.object({
 });
 
 export const modelMemoryLimitSchema = schema.object({
+  analysisConfig: analysisConfigSchema,
   indexPattern: schema.string(),
-  splitFieldName: schema.string(),
   query: schema.any(),
-  fieldNames: schema.arrayOf(schema.string()),
-  influencerNames: schema.arrayOf(schema.maybe(schema.string())),
   timeFieldName: schema.string(),
   earliestMs: schema.number(),
   latestMs: schema.number(),
@@ -39,7 +37,7 @@ export const validateJobSchema = schema.object({
   job: schema.object(anomalyDetectionJobSchema),
 });
 
-export const validateCardinalitySchema = {
+export const validateCardinalitySchema = schema.object({
   ...anomalyDetectionJobSchema,
   datafeed_config: datafeedConfigSchema,
-};
+});

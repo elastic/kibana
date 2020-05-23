@@ -28,9 +28,9 @@ interface Props {
 }
 
 export const FormDataProvider = React.memo(({ children, pathsToWatch }: Props) => {
-  const [formData, setFormData] = useState<FormData>({});
-  const previousRawData = useRef<FormData>({});
   const form = useFormContext();
+  const previousRawData = useRef<FormData>(form.__formData$.current.value);
+  const [formData, setFormData] = useState<FormData>(previousRawData.current);
 
   useEffect(() => {
     const subscription = form.subscribe(({ data: { raw } }) => {
@@ -41,6 +41,7 @@ export const FormDataProvider = React.memo(({ children, pathsToWatch }: Props) =
         const valuesToWatchArray = Array.isArray(pathsToWatch)
           ? (pathsToWatch as string[])
           : ([pathsToWatch] as string[]);
+
         if (valuesToWatchArray.some(value => previousRawData.current[value] !== raw[value])) {
           previousRawData.current = raw;
           setFormData(raw);

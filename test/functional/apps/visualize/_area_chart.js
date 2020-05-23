@@ -21,9 +21,12 @@ import expect from '@kbn/expect';
 
 export default function({ getService, getPageObjects }) {
   const log = getService('log');
+  const find = getService('find');
   const inspector = getService('inspector');
   const browser = getService('browser');
   const retry = getService('retry');
+  const security = getService('security');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
     'common',
     'visualize',
@@ -58,7 +61,14 @@ export default function({ getService, getPageObjects }) {
       return PageObjects.visEditor.clickGo();
     };
 
-    before(initAreaChart);
+    before(async function() {
+      await security.testUser.setRoles([
+        'kibana_admin',
+        'long_window_logstash',
+        'test_logstash_reader',
+      ]);
+      await initAreaChart();
+    });
 
     it('should save and load with special characters', async function() {
       const vizNamewithSpecialChars = vizName1 + '/?&=%';
@@ -232,7 +242,9 @@ export default function({ getService, getPageObjects }) {
         await inspector.close();
       });
 
-      it('does not scale top hit agg', async () => {
+      // Preventing ES Promotion for master (8.0)
+      // https://github.com/elastic/kibana/issues/64734
+      it.skip('does not scale top hit agg', async () => {
         const expectedTableData = [
           ['2015-09-20 00:00', '6', '9.035KB'],
           ['2015-09-20 01:00', '9', '5.854KB'],
@@ -284,6 +296,7 @@ export default function({ getService, getPageObjects }) {
           .pop()
           .replace('embed=true', '');
         await PageObjects.common.navigateToUrl('visualize', embedUrl);
+        await security.testUser.restoreDefaults();
       });
     });
 
@@ -454,6 +467,164 @@ export default function({ getService, getPageObjects }) {
         const paths = await PageObjects.visChart.getAreaChartPaths('Count');
         log.debug('actual chart data =     ' + paths);
         expect(paths.length).to.eql(numberOfSegments);
+      });
+    });
+
+    describe('date histogram when no date field', () => {
+      before(async () => {
+        await PageObjects.visualize.loadSavedVisualization('AreaChart [no date field]');
+        await PageObjects.visChart.waitForVisualization();
+
+        log.debug('Click X-axis');
+        await PageObjects.visEditor.clickBucket('X-axis');
+        log.debug('Click Date Histogram');
+        await PageObjects.visEditor.selectAggregation('Date Histogram');
+      });
+
+      it('should show error message for field', async () => {
+        const fieldErrorMessage = await find.byCssSelector(
+          '[data-test-subj="visDefaultEditorField"] + .euiFormErrorText'
+        );
+        const errorMessage = await fieldErrorMessage.getVisibleText();
+        expect(errorMessage).to.be(
+          'The index pattern test_index* does not contain any of the following compatible field types: date'
+        );
+      });
+    });
+
+    describe('date histogram when no time filter', () => {
+      before(async () => {
+        await PageObjects.visualize.loadSavedVisualization('AreaChart [no time filter]');
+        await PageObjects.visChart.waitForVisualization();
+
+        log.debug('Click X-axis');
+        await PageObjects.visEditor.clickBucket('X-axis');
+        log.debug('Click Date Histogram');
+        await PageObjects.visEditor.selectAggregation('Date Histogram');
+      });
+
+      it('should not show error message on init when the field is not selected', async () => {
+        const fieldValues = await PageObjects.visEditor.getField();
+        expect(fieldValues[0]).to.be(undefined);
+        const isFieldErrorMessageExists = await find.existsByCssSelector(
+          '[data-test-subj="visDefaultEditorField"] + .euiFormErrorText'
+        );
+        expect(isFieldErrorMessageExists).to.be(false);
+      });
+
+      describe('interval errors', () => {
+        before(async () => {
+          // to trigger displaying of error messages
+          await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
+          // this will avoid issues with the play tooltip covering the interval field
+          await testSubjects.scrollIntoView('advancedParams-2');
+        });
+
+        it('should not fail during changing interval when the field is not selected', async () => {
+          await PageObjects.visEditor.setInterval('m');
+          const intervalValues = await PageObjects.visEditor.getInterval();
+          expect(intervalValues[0]).to.be('Millisecond');
+        });
+
+        it('should not fail during changing custom interval when the field is not selected', async () => {
+          await PageObjects.visEditor.setInterval('4d', { type: 'custom' });
+          const isInvalidIntervalExists = await find.existsByCssSelector(
+            '.euiComboBox-isInvalid[data-test-subj="visEditorInterval"]'
+          );
+          expect(isInvalidIntervalExists).to.be(false);
+        });
+
+        it('should show error when interval invalid', async () => {
+          await PageObjects.visEditor.setInterval('xx', { type: 'custom' });
+          const isIntervalErrorMessageExists = await find.existsByCssSelector(
+            '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
+          );
+          expect(isIntervalErrorMessageExists).to.be(true);
+        });
+
+        it('should show error when calendar interval invalid', async () => {
+          await PageObjects.visEditor.setInterval('14d', { type: 'custom' });
+          const intervalErrorMessage = await find.byCssSelector(
+            '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
+          );
+          let errorMessage = await intervalErrorMessage.getVisibleText();
+          expect(errorMessage).to.be('Invalid calendar interval: 2w, value must be 1');
+
+          await PageObjects.visEditor.setInterval('3w', { type: 'custom' });
+          errorMessage = await intervalErrorMessage.getVisibleText();
+          expect(errorMessage).to.be('Invalid calendar interval: 3w, value must be 1');
+        });
+      });
+    });
+
+    describe('date histogram interval', () => {
+      before(async () => {
+        await PageObjects.visualize.loadSavedVisualization('Visualization AreaChart');
+        await PageObjects.visChart.waitForVisualization();
+      });
+
+      beforeEach(async () => {
+        const fromTime = 'Sep 20, 2015 @ 00:00:00.000';
+        const toTime = 'Sep 20, 2015 @ 23:30:00.000';
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      });
+
+      it('should update collapsed accordion label when time range is changed', async () => {
+        const accordionLabel = await find.byCssSelector(
+          '[data-test-subj="visEditorAggAccordion2"] .visEditorSidebar__aggGroupAccordionButtonContent'
+        );
+        let accordionLabelText = await accordionLabel.getVisibleText();
+        expect(accordionLabelText).to.include.string('per 30 minutes');
+        const fromTime = 'Sep 20, 2015 @ 08:30:00.000';
+        const toTime = 'Sep 20, 2015 @ 23:30:00.000';
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        accordionLabelText = await accordionLabel.getVisibleText();
+        expect(accordionLabelText).to.include.string('per 10 minutes');
+      });
+
+      describe('expanded accordion', () => {
+        before(async () => await PageObjects.visEditor.toggleAccordion('visEditorAggAccordion2'));
+
+        it('should update label inside the opened accordion when scaled to milliseconds', async () => {
+          const isHelperScaledLabelExists = await find.existsByCssSelector(
+            '[data-test-subj="currentlyScaledText"]'
+          );
+          expect(isHelperScaledLabelExists).to.be(false);
+          await PageObjects.visEditor.setInterval('Millisecond');
+          const helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
+          expect(helperScaledLabelText).to.include.string('to 10 minutes');
+        });
+
+        it('should display updated scaled label text after time range is changed', async () => {
+          await PageObjects.visEditor.setInterval('Millisecond');
+          const isHelperScaledLabelExists = await find.existsByCssSelector(
+            '[data-test-subj="currentlyScaledText"]'
+          );
+          expect(isHelperScaledLabelExists).to.be(true);
+          let helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
+          expect(helperScaledLabelText).to.include.string('to 10 minutes');
+          const fromTime = 'Sep 20, 2015 @ 22:30:00.000';
+          const toTime = 'Sep 20, 2015 @ 23:30:00.000';
+          await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+          helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
+          expect(helperScaledLabelText).to.include.string('to 30 seconds');
+        });
+
+        it('should update scaled label text after custom interval is set and time range is changed', async () => {
+          await PageObjects.visEditor.setInterval('10s', { type: 'custom' });
+          await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
+          const isHelperScaledLabelExists = await find.existsByCssSelector(
+            '[data-test-subj="currentlyScaledText"]'
+          );
+          expect(isHelperScaledLabelExists).to.be(true);
+          let helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
+          expect(helperScaledLabelText).to.include.string('to 10 minutes');
+          const fromTime = 'Sep 20, 2015 @ 21:30:00.000';
+          const toTime = 'Sep 20, 2015 @ 23:30:00.000';
+          await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+          helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
+          expect(helperScaledLabelText).to.include.string('to minute');
+        });
       });
     });
   });

@@ -5,17 +5,22 @@
  */
 
 import { Plugin, CoreSetup, AppMountParameters, CoreStart } from 'kibana/public';
-import { IEmbeddableSetup } from 'src/plugins/embeddable/public';
+import { EmbeddableSetup } from 'src/plugins/embeddable/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
+import { IngestManagerStart } from '../../ingest_manager/public';
 import { ResolverEmbeddableFactory } from './embeddables/resolver';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;
 export interface EndpointPluginSetupDependencies {
-  embeddable: IEmbeddableSetup;
+  embeddable: EmbeddableSetup;
+  data: DataPublicPluginStart;
 }
-
-export interface EndpointPluginStartDependencies {} // eslint-disable-line @typescript-eslint/no-empty-interface
+export interface EndpointPluginStartDependencies {
+  data: DataPublicPluginStart;
+  ingestManager: IngestManagerStart;
+}
 
 /**
  * Functionality that the endpoint plugin uses from core.
@@ -24,6 +29,7 @@ export interface EndpointPluginServices extends Partial<CoreStart> {
   http: CoreStart['http'];
   overlays: CoreStart['overlays'] | undefined;
   notifications: CoreStart['notifications'] | undefined;
+  data: DataPublicPluginStart;
 }
 
 export class EndpointPlugin
@@ -34,16 +40,20 @@ export class EndpointPlugin
       EndpointPluginSetupDependencies,
       EndpointPluginStartDependencies
     > {
-  public setup(core: CoreSetup, plugins: EndpointPluginSetupDependencies) {
+  public setup(
+    core: CoreSetup<EndpointPluginStartDependencies>,
+    plugins: EndpointPluginSetupDependencies
+  ) {
     core.application.register({
       id: 'endpoint',
       title: i18n.translate('xpack.endpoint.pluginTitle', {
         defaultMessage: 'Endpoint',
       }),
+      euiIconType: 'securityApp',
       async mount(params: AppMountParameters) {
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./applications/endpoint');
-        return renderApp(coreStart, params);
+        return renderApp(coreStart, depsStart, params);
       },
     });
 

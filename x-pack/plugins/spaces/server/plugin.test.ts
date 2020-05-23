@@ -68,5 +68,30 @@ describe('Spaces Plugin', () => {
 
       expect(usageCollection.getCollectorByType('spaces')).toBeDefined();
     });
+
+    it('registers the "space" saved object type and client wrapper', async () => {
+      const initializerContext = coreMock.createPluginInitializerContext({});
+      const core = coreMock.createSetup() as CoreSetup<PluginsSetup>;
+      const features = featuresPluginMock.createSetup();
+      const licensing = licensingMock.createSetup();
+
+      const plugin = new Plugin(initializerContext);
+
+      await plugin.setup(core, { features, licensing });
+
+      expect(core.savedObjects.registerType).toHaveBeenCalledWith({
+        name: 'space',
+        namespaceType: 'agnostic',
+        hidden: true,
+        mappings: expect.any(Object),
+        migrations: expect.any(Object),
+      });
+
+      expect(core.savedObjects.addClientWrapper).toHaveBeenCalledWith(
+        Number.MIN_SAFE_INTEGER,
+        'spaces',
+        expect.any(Function)
+      );
+    });
   });
 });

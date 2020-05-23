@@ -31,17 +31,20 @@ export default function indexTest({ getService }: FtrProviderContext) {
         .send({
           name: 'An index action',
           actionTypeId: '.index',
-          config: {},
+          config: { index: ES_TEST_INDEX_NAME },
           secrets: {},
         })
         .expect(200);
 
       expect(createdAction).to.eql({
         id: createdAction.id,
+        isPreconfigured: false,
         name: 'An index action',
         actionTypeId: '.index',
         config: {
-          index: null,
+          index: ES_TEST_INDEX_NAME,
+          refresh: false,
+          executionTimeField: null,
         },
       });
       createdActionID = createdAction.id;
@@ -53,12 +56,13 @@ export default function indexTest({ getService }: FtrProviderContext) {
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
+        isPreconfigured: false,
         name: 'An index action',
         actionTypeId: '.index',
-        config: { index: null },
+        config: { index: ES_TEST_INDEX_NAME, refresh: false, executionTimeField: null },
       });
 
-      // create action with index config
+      // create action with all config props
       const { body: createdActionWithIndex } = await supertest
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
@@ -67,16 +71,21 @@ export default function indexTest({ getService }: FtrProviderContext) {
           actionTypeId: '.index',
           config: {
             index: ES_TEST_INDEX_NAME,
+            refresh: true,
+            executionTimeField: 'test',
           },
         })
         .expect(200);
 
       expect(createdActionWithIndex).to.eql({
         id: createdActionWithIndex.id,
+        isPreconfigured: false,
         name: 'An index action with index config',
         actionTypeId: '.index',
         config: {
           index: ES_TEST_INDEX_NAME,
+          refresh: true,
+          executionTimeField: 'test',
         },
       });
       createdActionIDWithIndex = createdActionWithIndex.id;
@@ -88,23 +97,37 @@ export default function indexTest({ getService }: FtrProviderContext) {
 
       expect(fetchedActionWithIndex).to.eql({
         id: fetchedActionWithIndex.id,
+        isPreconfigured: false,
         name: 'An index action with index config',
         actionTypeId: '.index',
         config: {
           index: ES_TEST_INDEX_NAME,
+          refresh: true,
+          executionTimeField: 'test',
         },
       });
     });
 
     it('should execute successly when expected for a single body', async () => {
+      const { body: createdAction } = await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'An index action',
+          actionTypeId: '.index',
+          config: {
+            index: ES_TEST_INDEX_NAME,
+            refresh: true,
+          },
+          secrets: {},
+        })
+        .expect(200);
       const { body: result } = await supertest
-        .post(`/api/action/${createdActionID}/_execute`)
+        .post(`/api/action/${createdAction.id}/_execute`)
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            index: ES_TEST_INDEX_NAME,
             documents: [{ testing: [1, 2, 3] }],
-            refresh: true,
           },
         })
         .expect(200);

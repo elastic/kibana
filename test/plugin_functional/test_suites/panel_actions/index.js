@@ -32,10 +32,9 @@ export default function({ getService, getPageObjects, loadTestFile }) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['dashboard']);
+  const PageObjects = getPageObjects(['common', 'dashboard']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/41050
-  describe.skip('pluggable panel actions', function() {
+  describe('pluggable panel actions', function() {
     before(async () => {
       await browser.setWindowSize(1300, 900);
       await esArchiver.load(KIBANA_ARCHIVE_PATH);

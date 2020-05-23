@@ -18,24 +18,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Container, EmbeddableFactory } from '../..';
+import { Container, EmbeddableFactoryDefinition } from '../..';
 import {
   FilterableContainer,
   FilterableContainerInput,
   FILTERABLE_CONTAINER,
 } from './filterable_container';
-import { GetEmbeddableFactory } from '../../types';
-import { EmbeddableFactoryOptions } from '../../embeddables/embeddable_factory';
+import { EmbeddableStart } from '../../../plugin';
 
-export class FilterableContainerFactory extends EmbeddableFactory<FilterableContainerInput> {
+export class FilterableContainerFactory
+  implements EmbeddableFactoryDefinition<FilterableContainerInput> {
   public readonly type = FILTERABLE_CONTAINER;
 
   constructor(
-    private readonly getFactory: GetEmbeddableFactory,
-    options: EmbeddableFactoryOptions<any> = {}
-  ) {
-    super(options);
-  }
+    private readonly getFactory: () => Promise<EmbeddableStart['getEmbeddableFactory']>
+  ) {}
 
   public getDisplayName() {
     return i18n.translate('embeddableApi.samples.filterableContainer.displayName', {
@@ -43,11 +40,12 @@ export class FilterableContainerFactory extends EmbeddableFactory<FilterableCont
     });
   }
 
-  public isEditable() {
+  public async isEditable() {
     return true;
   }
 
-  public async create(initialInput: FilterableContainerInput, parent?: Container) {
-    return new FilterableContainer(initialInput, this.getFactory, parent);
-  }
+  public create = async (initialInput: FilterableContainerInput, parent?: Container) => {
+    const getEmbeddableFactory = await this.getFactory();
+    return new FilterableContainer(initialInput, getEmbeddableFactory, parent);
+  };
 }

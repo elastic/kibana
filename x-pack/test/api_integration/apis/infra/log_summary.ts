@@ -38,9 +38,10 @@ export default function({ getService }: FtrProviderContext) {
     after(() => esArchiver.unload('infra/metrics_and_logs'));
 
     it('should return empty and non-empty consecutive buckets', async () => {
-      const startDate = EARLIEST_TIME_WITH_DATA;
-      const endDate = LATEST_TIME_WITH_DATA + (LATEST_TIME_WITH_DATA - EARLIEST_TIME_WITH_DATA);
-      const bucketSize = Math.ceil((endDate - startDate) / 10);
+      const startTimestamp = EARLIEST_TIME_WITH_DATA;
+      const endTimestamp =
+        LATEST_TIME_WITH_DATA + (LATEST_TIME_WITH_DATA - EARLIEST_TIME_WITH_DATA);
+      const bucketSize = Math.ceil((endTimestamp - startTimestamp) / 10);
 
       const { body } = await supertest
         .post(LOG_ENTRIES_SUMMARY_PATH)
@@ -48,8 +49,8 @@ export default function({ getService }: FtrProviderContext) {
         .send(
           logEntriesSummaryRequestRT.encode({
             sourceId: 'default',
-            startDate,
-            endDate,
+            startTimestamp,
+            endTimestamp,
             bucketSize,
             query: null,
           })

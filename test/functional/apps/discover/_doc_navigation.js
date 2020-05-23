@@ -32,8 +32,8 @@ export default function({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('doc link in discover', function contextSize() {
-    this.tags('smoke');
+  // FLAKY: https://github.com/elastic/kibana/issues/62281
+  describe.skip('doc link in discover', function contextSize() {
     before(async function() {
       await esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.replace({ 'doc_table:legacyTable': true });

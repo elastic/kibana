@@ -54,6 +54,22 @@ const jobStateRT = rt.keyof({
   opening: null,
 });
 
+const jobCategorizationStatusRT = rt.keyof({
+  ok: null,
+  warn: null,
+});
+
+const jobModelSizeStatsRT = rt.type({
+  categorization_status: jobCategorizationStatusRT,
+  categorized_doc_count: rt.number,
+  dead_category_count: rt.number,
+  frequent_category_count: rt.number,
+  rare_category_count: rt.number,
+  total_category_count: rt.number,
+});
+
+export type JobModelSizeStats = rt.TypeOf<typeof jobModelSizeStatsRT>;
+
 export const jobSummaryRT = rt.intersection([
   rt.type({
     id: rt.string,
@@ -65,6 +81,7 @@ export const jobSummaryRT = rt.intersection([
     fullJob: rt.partial({
       custom_settings: jobCustomSettingsRT,
       finished_time: rt.number,
+      model_size_stats: jobModelSizeStatsRT,
     }),
   }),
 ]);

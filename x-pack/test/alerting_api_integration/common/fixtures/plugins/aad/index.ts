@@ -21,7 +21,7 @@ interface CheckAADRequest extends Hapi.Request {
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
   return new kibana.Plugin({
-    require: ['actions', 'alerting', 'encryptedSavedObjects'],
+    require: ['encryptedSavedObjects'],
     name: 'aad-fixtures',
     init(server: Legacy.Server) {
       const newPlatform = ((server as unknown) as KbnServer).newPlatform;
@@ -42,7 +42,7 @@ export default function(kibana: any) {
               .required(),
           },
         },
-        async handler(request: CheckAADRequest) {
+        handler: (async (request: CheckAADRequest) => {
           let namespace: string | undefined;
           const spacesPlugin = server.plugins.spaces;
           if (spacesPlugin && request.payload.spaceId) {
@@ -52,7 +52,7 @@ export default function(kibana: any) {
             namespace,
           });
           return { success: true };
-        },
+        }) as Hapi.Lifecycle.Method,
       });
     },
   });

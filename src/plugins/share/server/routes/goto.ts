@@ -34,7 +34,7 @@ export const createGotoRoute = ({
   shortUrlLookup: ShortUrlLookupService;
   http: CoreSetup['http'];
 }) => {
-  router.get(
+  http.resources.register(
     {
       path: getGotoPath('{urlId}'),
       validate: {
@@ -63,14 +63,8 @@ export const createGotoRoute = ({
           },
         });
       }
-      const body = await context.core.rendering.render();
 
-      return response.ok({
-        headers: {
-          'content-security-policy': http.csp.header,
-        },
-        body,
-      });
+      return response.renderCoreApp();
     })
   );
 };

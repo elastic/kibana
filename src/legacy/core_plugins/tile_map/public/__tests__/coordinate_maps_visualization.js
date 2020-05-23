@@ -19,26 +19,41 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { ImageComparator } from 'test_utils/image_comparator';
 import dummyESResponse from './dummy_es_response.json';
 import initial from './initial.png';
 import blues from './blues.png';
 import shadedGeohashGrid from './shadedGeohashGrid.png';
 import heatmapRaw from './heatmap_raw.png';
-import EMS_CATALOGUE from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_manifest.json';
-import EMS_FILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_files.json';
-import EMS_TILES from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_tiles.json';
-import EMS_STYLE_ROAD_MAP_BRIGHT from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_bright';
-import EMS_STYLE_ROAD_MAP_DESATURATED from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_desaturated';
-import EMS_STYLE_DARK_MAP from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_style_dark';
-import {
-  setup as visualizationsSetup,
-  start as visualizationsStart,
-} from '../../../visualizations/public/np_ready/public/legacy';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import EMS_CATALOGUE from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_manifest.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import EMS_FILES from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_files.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import EMS_TILES from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_tiles.json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import EMS_STYLE_ROAD_MAP_BRIGHT from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_style_bright';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import EMS_STYLE_ROAD_MAP_DESATURATED from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_style_desaturated';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import EMS_STYLE_DARK_MAP from '../../../../../plugins/maps_legacy/public/__tests__/map/ems_mocks/sample_style_dark';
 
 import { createTileMapVisualization } from '../tile_map_visualization';
 import { createTileMapTypeDefinition } from '../tile_map_type';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ExprVis } from '../../../../../plugins/visualizations/public/expressions/vis';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { BaseVisType } from '../../../../../plugins/visualizations/public/vis_types/base_vis_type';
+import {
+  getPrecision,
+  getZoomPrecision,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../../plugins/maps_legacy/public/map/precision';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ServiceSettings } from '../../../../../plugins/maps_legacy/public/map/service_settings';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { setInjectedVarFunc } from '../../../../../plugins/maps_legacy/public/kibana_services';
+import { getBaseMapsVis } from '../../../../../plugins/maps_legacy/public';
 
 function mockRawData() {
   const stack = [dummyESResponse];
@@ -62,14 +77,13 @@ mockRawData();
 
 const THRESHOLD = 0.45;
 const PIXEL_DIFF = 64;
-let visRegComplete = false;
 
 describe('CoordinateMapsVisualizationTest', function() {
   let domNode;
   let CoordinateMapsVisualization;
-  let indexPattern;
   let vis;
   let dependencies;
+  let visType;
 
   let imageComparator;
 
@@ -77,22 +91,55 @@ describe('CoordinateMapsVisualizationTest', function() {
   beforeEach(ngMock.module('kibana'));
   beforeEach(
     ngMock.inject((Private, $injector) => {
-      const serviceSettings = $injector.get('serviceSettings');
+      setInjectedVarFunc(injectedVar => {
+        switch (injectedVar) {
+          case 'mapConfig':
+            return {
+              emsFileApiUrl: '',
+              emsTileApiUrl: '',
+              emsLandingPageUrl: '',
+            };
+          case 'tilemapsConfig':
+            return {
+              deprecated: {
+                config: {
+                  options: {
+                    attribution: '123',
+                  },
+                },
+              },
+            };
+          case 'version':
+            return '123';
+          default:
+            return 'not found';
+        }
+      });
+
+      const coreSetupMock = {
+        notifications: {
+          toasts: {},
+        },
+        uiSettings: {},
+        injectedMetadata: {
+          getInjectedVar: () => {},
+        },
+      };
+      const serviceSettings = new ServiceSettings();
+      const BaseMapsVisualization = getBaseMapsVis(coreSetupMock, serviceSettings);
       const uiSettings = $injector.get('config');
 
       dependencies = {
-        serviceSettings,
+        getZoomPrecision,
+        getPrecision,
+        BaseMapsVisualization,
         uiSettings,
-        $injector,
+        serviceSettings,
       };
 
-      if (!visRegComplete) {
-        visRegComplete = true;
-        visualizationsSetup.createBaseVisualization(createTileMapTypeDefinition(dependencies));
-      }
+      visType = new BaseVisType(createTileMapTypeDefinition(dependencies));
 
       CoordinateMapsVisualization = createTileMapVisualization(dependencies);
-      indexPattern = Private(LogstashIndexPatternStubProvider);
 
       getManifestStub = serviceSettings.__debugStubManifestCalls(async url => {
         //simulate network calls
@@ -124,8 +171,8 @@ describe('CoordinateMapsVisualizationTest', function() {
       setupDOM('512px', '512px');
 
       imageComparator = new ImageComparator();
-      vis = visualizationsStart.createVis(indexPattern, {
-        type: 'tile_map',
+      vis = new ExprVis({
+        type: visType,
       });
       vis.params = {
         mapType: 'Scaled Circle Markers',

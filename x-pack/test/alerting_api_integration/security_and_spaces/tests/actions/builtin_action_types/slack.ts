@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
-} from '../../../../common/fixtures/plugins/actions';
+} from '../../../../common/fixtures/plugins/actions_simulators';
 
 // eslint-disable-next-line import/no-default-export
 export default function slackTest({ getService }: FtrProviderContext) {
@@ -47,6 +47,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
       expect(createdAction).to.eql({
         id: createdAction.id,
+        isPreconfigured: false,
         name: 'A slack action',
         actionTypeId: '.slack',
         config: {},
@@ -60,6 +61,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
+        isPreconfigured: false,
         name: 'A slack action',
         actionTypeId: '.slack',
         config: {},
@@ -157,6 +159,20 @@ export default function slackTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
       expect(result.status).to.eql('ok');
+    });
+
+    it('should handle an empty message error', async () => {
+      const { body: result } = await supertest
+        .post(`/api/action/${simulatedActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            message: '',
+          },
+        })
+        .expect(200);
+      expect(result.status).to.eql('error');
+      expect(result.message).to.match(/error validating action params: \[message\]: /);
     });
 
     it('should handle a 40x slack error', async () => {

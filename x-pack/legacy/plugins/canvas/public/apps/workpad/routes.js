@@ -6,7 +6,7 @@
 
 import { ErrorStrings } from '../../../i18n';
 import * as workpadService from '../../lib/workpad_service';
-import { notify } from '../../lib/notify';
+import { notifyService } from '../../services';
 import { getBaseBreadcrumb, getWorkpadBreadcrumb, setBreadcrumb } from '../../lib/breadcrumbs';
 import { getDefaultWorkpad } from '../../state/defaults';
 import { setWorkpad } from '../../state/actions/workpad';
@@ -33,7 +33,9 @@ export const routes = [
             dispatch(resetAssets());
             router.redirectTo('loadWorkpad', { id: newWorkpad.id, page: 1 });
           } catch (err) {
-            notify.error(err, { title: strings.getCreateFailureErrorMessage() });
+            notifyService
+              .getService()
+              .error(err, { title: strings.getCreateFailureErrorMessage() });
             router.redirectTo('home');
           }
         },
@@ -59,7 +61,9 @@ export const routes = [
               // reset transient properties when changing workpads
               dispatch(setZoomScale(1));
             } catch (err) {
-              notify.error(err, { title: strings.getLoadFailureErrorMessage() });
+              notifyService
+                .getService()
+                .error(err, { title: strings.getLoadFailureErrorMessage() });
               return router.redirectTo('home');
             }
           }

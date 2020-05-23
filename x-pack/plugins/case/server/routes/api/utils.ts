@@ -12,58 +12,72 @@ import {
   SavedObject,
   SavedObjectsFindResponse,
 } from 'kibana/server';
+
 import {
-  CaseRequest,
+  CasePostRequest,
   CaseResponse,
-  CasesResponse,
+  CasesFindResponse,
   CaseAttributes,
   CommentResponse,
   CommentsResponse,
   CommentAttributes,
 } from '../../../common/api';
 
-import { SortFieldCase } from './types';
+import { SortFieldCase, TotalCommentByCase } from './types';
 
 export const transformNewCase = ({
+  connectorId,
   createdDate,
-  newCase,
+  email,
   full_name,
+  newCase,
   username,
 }: {
+  connectorId: string;
   createdDate: string;
-  newCase: CaseRequest;
+  email?: string | null;
   full_name?: string | null;
-  username: string | null;
+  newCase: CasePostRequest;
+  username?: string | null;
 }): CaseAttributes => ({
-  comment_ids: [],
+  ...newCase,
+  closed_at: null,
+  closed_by: null,
+  connector_id: connectorId,
   created_at: createdDate,
-  created_by: { full_name, username },
+  created_by: { email, full_name, username },
+  external_service: null,
+  status: 'open',
   updated_at: null,
   updated_by: null,
-  ...newCase,
 });
 
 interface NewCommentArgs {
   comment: string;
   createdDate: string;
+  email?: string | null;
   full_name?: string | null;
-  username: string | null;
+  username?: string | null;
 }
 export const transformNewComment = ({
   comment,
   createdDate,
+  email,
   full_name,
   username,
 }: NewCommentArgs): CommentAttributes => ({
   comment,
   created_at: createdDate,
-  created_by: { full_name, username },
+  created_by: { email, full_name, username },
+  pushed_at: null,
+  pushed_by: null,
   updated_at: null,
   updated_by: null,
 });
 
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {
-  const boom = isBoom(error) ? error : boomify(error);
+  const options = { statusCode: error.statusCode ?? 500 };
+  const boom = isBoom(error) ? error : boomify(error, options);
   return {
     body: boom,
     headers: boom.output.headers,
@@ -71,27 +85,54 @@ export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> 
   };
 }
 
-export const transformCases = (cases: SavedObjectsFindResponse<CaseAttributes>): CasesResponse => ({
+export const transformCases = (
+  cases: SavedObjectsFindResponse<CaseAttributes>,
+  countOpenCases: number,
+  countClosedCases: number,
+  totalCommentByCase: TotalCommentByCase[],
+  caseConfigureConnectorId: string = 'none'
+): CasesFindResponse => ({
   page: cases.page,
   per_page: cases.per_page,
   total: cases.total,
-  cases: flattenCaseSavedObjects(cases.saved_objects),
+  cases: flattenCaseSavedObjects(cases.saved_objects, totalCommentByCase, caseConfigureConnectorId),
+  count_open_cases: countOpenCases,
+  count_closed_cases: countClosedCases,
 });
 
 export const flattenCaseSavedObjects = (
-  savedObjects: SavedObjectsFindResponse<CaseAttributes>['saved_objects']
+  savedObjects: SavedObjectsFindResponse<CaseAttributes>['saved_objects'],
+  totalCommentByCase: TotalCommentByCase[],
+  caseConfigureConnectorId: string = 'none'
 ): CaseResponse[] =>
   savedObjects.reduce((acc: CaseResponse[], savedObject: SavedObject<CaseAttributes>) => {
-    return [...acc, flattenCaseSavedObject(savedObject, [])];
+    return [
+      ...acc,
+      flattenCaseSavedObject({
+        savedObject,
+        totalComment:
+          totalCommentByCase.find(tc => tc.caseId === savedObject.id)?.totalComments ?? 0,
+        caseConfigureConnectorId,
+      }),
+    ];
   }, []);
 
-export const flattenCaseSavedObject = (
-  savedObject: SavedObject<CaseAttributes>,
-  comments: Array<SavedObject<CommentAttributes>> = []
-): CaseResponse => ({
+export const flattenCaseSavedObject = ({
+  savedObject,
+  comments = [],
+  totalComment = 0,
+  caseConfigureConnectorId = 'none',
+}: {
+  savedObject: SavedObject<CaseAttributes>;
+  comments?: Array<SavedObject<CommentAttributes>>;
+  totalComment?: number;
+  caseConfigureConnectorId?: string;
+}): CaseResponse => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   comments: flattenCommentSavedObjects(comments),
+  totalComment,
+  connector_id: savedObject.attributes.connector_id ?? caseConfigureConnectorId,
   ...savedObject.attributes,
 });
 
@@ -121,17 +162,17 @@ export const flattenCommentSavedObject = (
 
 export const sortToSnake = (sortField: string): SortFieldCase => {
   switch (sortField) {
-    case 'state':
-      return SortFieldCase.state;
+    case 'status':
+      return SortFieldCase.status;
     case 'createdAt':
     case 'created_at':
       return SortFieldCase.createdAt;
-    case 'updatedAt':
-    case 'updated_at':
-      return SortFieldCase.updatedAt;
+    case 'closedAt':
+    case 'closed_at':
+      return SortFieldCase.closedAt;
     default:
       return SortFieldCase.createdAt;
   }
 };
 
-export const escapeHatch = schema.object({}, { allowUnknowns: true });
+export const escapeHatch = schema.object({}, { unknowns: 'allow' });

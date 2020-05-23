@@ -3,67 +3,81 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { PromiseReturnType } from '../../../typings/common';
+import { chunk } from 'lodash';
 import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters
-} from '../helpers/setup_request';
-import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
-import { getTraceSampleIds } from './get_trace_sample_ids';
+  AGENT_NAME,
+  SERVICE_ENVIRONMENT,
+  SERVICE_FRAMEWORK_NAME,
+  SERVICE_NAME
+} from '../../../common/elasticsearch_fieldnames';
 import { getServicesProjection } from '../../../common/projections/services';
 import { mergeProjection } from '../../../common/projections/util/merge_projection';
-import {
-  SERVICE_AGENT_NAME,
-  SERVICE_NAME,
-  SERVICE_FRAMEWORK_NAME
-} from '../../../common/elasticsearch_fieldnames';
+import { PromiseReturnType } from '../../../typings/common';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { dedupeConnections } from './dedupe_connections';
+import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
+import { getTraceSampleIds } from './get_trace_sample_ids';
+import { addAnomaliesToServicesData } from './ml_helpers';
+import { getMlIndex } from '../../../common/ml_job_constants';
 
 export interface IEnvOptions {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   serviceName?: string;
   environment?: string;
-  after?: string;
 }
 
 async function getConnectionData({
   setup,
   serviceName,
-  environment,
-  after
+  environment
 }: IEnvOptions) {
-  const { traceIds, after: nextAfter } = await getTraceSampleIds({
+  const { traceIds } = await getTraceSampleIds({
     setup,
     serviceName,
-    environment,
-    after
+    environment
   });
 
-  const serviceMapData = traceIds.length
-    ? await getServiceMapFromTraceIds({
+  const chunks = chunk(
+    traceIds,
+    setup.config['xpack.apm.serviceMapMaxTracesPerRequest']
+  );
+
+  const init = {
+    connections: [],
+    discoveredServices: []
+  };
+
+  if (!traceIds.length) {
+    return init;
+  }
+
+  const chunkedResponses = await Promise.all(
+    chunks.map(traceIdsChunk =>
+      getServiceMapFromTraceIds({
         setup,
         serviceName,
         environment,
-        traceIds
+        traceIds: traceIdsChunk
       })
-    : { connections: [], discoveredServices: [] };
+    )
+  );
 
-  return {
-    after: nextAfter,
-    ...serviceMapData
-  };
+  return chunkedResponses.reduce((prev, current) => {
+    return {
+      connections: prev.connections.concat(current.connections),
+      discoveredServices: prev.discoveredServices.concat(
+        current.discoveredServices
+      )
+    };
+  });
 }
 
 async function getServicesData(options: IEnvOptions) {
-  // only return services on the first request for the global service map
-  if (options.after) {
-    return [];
-  }
-
   const { setup } = options;
 
-  const projection = getServicesProjection({ setup });
+  const projection = getServicesProjection({
+    setup: { ...setup, uiFiltersES: [] }
+  });
 
   const { filter } = projection.body.query.bool;
 
@@ -91,7 +105,7 @@ async function getServicesData(options: IEnvOptions) {
           aggs: {
             agent_name: {
               terms: {
-                field: SERVICE_AGENT_NAME
+                field: AGENT_NAME
               }
             },
             service_framework_name: {
@@ -112,11 +126,11 @@ async function getServicesData(options: IEnvOptions) {
   return (
     response.aggregations?.services.buckets.map(bucket => {
       return {
-        'service.name': bucket.key as string,
-        'agent.name':
+        [SERVICE_NAME]: bucket.key as string,
+        [AGENT_NAME]:
           (bucket.agent_name.buckets[0]?.key as string | undefined) || '',
-        'service.environment': options.environment || null,
-        'service.framework.name':
+        [SERVICE_ENVIRONMENT]: options.environment || null,
+        [SERVICE_FRAMEWORK_NAME]:
           (bucket.service_framework_name.buckets[0]?.key as
             | string
             | undefined) || null
@@ -125,15 +139,58 @@ async function getServicesData(options: IEnvOptions) {
   );
 }
 
+function getAnomaliesData(options: IEnvOptions) {
+  const { client } = options.setup;
+
+  const params = {
+    index: getMlIndex('*'),
+    body: {
+      size: 0,
+      query: {
+        exists: {
+          field: 'bucket_span'
+        }
+      },
+      aggs: {
+        jobs: {
+          terms: {
+            field: 'job_id',
+            size: 10
+          },
+          aggs: {
+            max_score: {
+              max: {
+                field: 'anomaly_score'
+              }
+            }
+          }
+        }
+      }
+    }
+  };
+
+  return client.search(params);
+}
+
+export type AnomaliesResponse = PromiseReturnType<typeof getAnomaliesData>;
+export type ConnectionsResponse = PromiseReturnType<typeof getConnectionData>;
+export type ServicesResponse = PromiseReturnType<typeof getServicesData>;
 export type ServiceMapAPIResponse = PromiseReturnType<typeof getServiceMap>;
+
 export async function getServiceMap(options: IEnvOptions) {
-  const [connectionData, servicesData] = await Promise.all([
+  const [connectionData, servicesData, anomaliesData] = await Promise.all([
     getConnectionData(options),
-    getServicesData(options)
+    getServicesData(options),
+    getAnomaliesData(options)
   ]);
 
-  return {
+  const servicesDataWithAnomalies = addAnomaliesToServicesData(
+    servicesData,
+    anomaliesData
+  );
+
+  return dedupeConnections({
     ...connectionData,
-    services: servicesData
-  };
+    services: servicesDataWithAnomalies
+  });
 }

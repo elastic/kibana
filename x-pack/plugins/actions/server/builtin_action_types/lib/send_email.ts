@@ -14,47 +14,49 @@ import { Logger } from '../../../../../../src/core/server';
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
 
-interface SendEmailOptions {
+export interface SendEmailOptions {
   transport: Transport;
   routing: Routing;
   content: Content;
 }
 
 // config validation ensures either service is set or host/port are set
-interface Transport {
-  user: string;
-  password: string;
+export interface Transport {
+  user?: string;
+  password?: string;
   service?: string; // see: https://nodemailer.com/smtp/well-known/
   host?: string;
   port?: number;
   secure?: boolean; // see: https://nodemailer.com/smtp/#tls-options
 }
 
-interface Routing {
+export interface Routing {
   from: string;
   to: string[];
   cc: string[];
   bcc: string[];
 }
 
-interface Content {
+export interface Content {
   subject: string;
   message: string;
 }
 
 // send an email
-export async function sendEmail(logger: Logger, options: SendEmailOptions): Promise<any> {
+export async function sendEmail(logger: Logger, options: SendEmailOptions): Promise<unknown> {
   const { transport, routing, content } = options;
   const { service, host, port, secure, user, password } = transport;
   const { from, to, cc, bcc } = routing;
   const { subject, message } = content;
 
-  const transportConfig: Record<string, any> = {
-    auth: {
+  const transportConfig: Record<string, unknown> = {};
+
+  if (user != null && password != null) {
+    transportConfig.auth = {
       user,
       pass: password,
-    },
-  };
+    };
+  }
 
   if (service === JSON_TRANSPORT_SERVICE) {
     transportConfig.jsonTransport = true;
@@ -65,6 +67,11 @@ export async function sendEmail(logger: Logger, options: SendEmailOptions): Prom
     transportConfig.host = host;
     transportConfig.port = port;
     transportConfig.secure = !!secure;
+    if (!transportConfig.secure) {
+      transportConfig.tls = {
+        rejectUnauthorized: false,
+      };
+    }
   }
 
   const nodemailerTransport = nodemailer.createTransport(transportConfig);

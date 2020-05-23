@@ -110,7 +110,19 @@ export function routerProvider(routes) {
 
       return unlisten; // return function to remove change handler
     },
+    stop: () => {
+      for (const listener of componentListeners) {
+        listener();
+      }
+    },
   };
 
   return router;
 }
+
+export const stopRouter = () => {
+  if (router) {
+    router.stop();
+    router = undefined;
+  }
+};

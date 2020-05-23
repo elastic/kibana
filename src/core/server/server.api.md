@@ -622,20 +622,25 @@ export interface ContextSetup {
 export type CoreId = symbol;
 
 // @public
-export interface CoreSetup<TPluginsStart extends object = object> {
+export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
     // (undocumented)
     capabilities: CapabilitiesSetup;
     // (undocumented)
     context: ContextSetup;
     // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
-    getStartServices(): Promise<[CoreStart, TPluginsStart]>;
     // (undocumented)
-    http: HttpServiceSetup;
+    getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
+    // (undocumented)
+    http: HttpServiceSetup & {
+        resources: HttpResources;
+    };
     // (undocumented)
     metrics: MetricsServiceSetup;
     // (undocumented)
     savedObjects: SavedObjectsServiceSetup;
+    // (undocumented)
+    status: StatusServiceSetup;
     // (undocumented)
     uiSettings: UiSettingsServiceSetup;
     // (undocumented)
@@ -647,9 +652,19 @@ export interface CoreStart {
     // (undocumented)
     capabilities: CapabilitiesStart;
     // (undocumented)
+    elasticsearch: ElasticsearchServiceStart;
+    // (undocumented)
     savedObjects: SavedObjectsServiceStart;
     // (undocumented)
     uiSettings: UiSettingsServiceStart;
+}
+
+// @public
+export interface CoreStatus {
+    // (undocumented)
+    elasticsearch: ServiceStatus;
+    // (undocumented)
+    savedObjects: ServiceStatus;
 }
 
 // @public
@@ -774,9 +789,29 @@ export class ElasticsearchErrorHelpers {
 
 // @public (undocumented)
 export interface ElasticsearchServiceSetup {
+    // @deprecated (undocumented)
     readonly adminClient: IClusterClient;
+    // @deprecated (undocumented)
     readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
+    // @deprecated (undocumented)
     readonly dataClient: IClusterClient;
+}
+
+// @public (undocumented)
+export interface ElasticsearchServiceStart {
+    // (undocumented)
+    legacy: {
+        readonly createClient: (type: string, clientConfig?: Partial<ElasticsearchClientConfig>) => ICustomClusterClient;
+        readonly client: IClusterClient;
+    };
+}
+
+// @public (undocumented)
+export interface ElasticsearchStatusMeta {
+    // (undocumented)
+    incompatibleNodes: NodesVersionCompatibility['incompatibleNodes'];
+    // (undocumented)
+    warningNodes: NodesVersionCompatibility['warningNodes'];
 }
 
 // @public (undocumented)
@@ -827,6 +862,30 @@ export type Headers = {
 } & {
     [header: string]: string | string[] | undefined;
 };
+
+// @public
+export interface HttpResources {
+    register: <P, Q, B>(route: RouteConfig<P, Q, B, 'get'>, handler: HttpResourcesRequestHandler<P, Q, B>) => void;
+}
+
+// @public
+export interface HttpResourcesRenderOptions {
+    headers?: ResponseHeaders;
+}
+
+// @public
+export type HttpResourcesRequestHandler<P = unknown, Q = unknown, B = unknown> = RequestHandler<P, Q, B, 'get', KibanaResponseFactory & HttpResourcesServiceToolkit>;
+
+// @public
+export type HttpResourcesResponseOptions = HttpResponseOptions;
+
+// @public
+export interface HttpResourcesServiceToolkit {
+    renderAnonymousCoreApp: (options?: HttpResourcesRenderOptions) => Promise<IKibanaResponse>;
+    renderCoreApp: (options?: HttpResourcesRenderOptions) => Promise<IKibanaResponse>;
+    renderHtml: (options: HttpResourcesResponseOptions) => IKibanaResponse;
+    renderJs: (options: HttpResourcesResponseOptions) => IKibanaResponse;
+}
 
 // @public
 export interface HttpResponseOptions {
@@ -882,8 +941,10 @@ export interface IContextContainer<THandler extends HandlerFunction<any>> {
     registerContext<TContextName extends keyof HandlerContextType<THandler>>(pluginOpaqueId: PluginOpaqueId, contextName: TContextName, provider: IContextProvider<THandler, TContextName>): this;
 }
 
+// Warning: (ae-forgotten-export) The symbol "PartialExceptFor" needs to be exported by the entry point index.d.ts
+//
 // @public
-export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: Partial<HandlerContextType<THandler>>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
+export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: PartialExceptFor<HandlerContextType<THandler>, 'core'>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
 
 // @public
 export interface ICspConfig {
@@ -954,7 +1015,7 @@ export interface IRouter {
     //
     // @internal
     getRoutes: () => RouterRoute[];
-    handleLegacyErrors: <P, Q, B>(handler: RequestHandler<P, Q, B>) => RequestHandler<P, Q, B>;
+    handleLegacyErrors: RequestHandlerWrapper;
     patch: RouteRegistrar<'patch'>;
     post: RouteRegistrar<'post'>;
     put: RouteRegistrar<'put'>;
@@ -968,21 +1029,16 @@ export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolea
 export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
 
 // @public
-export type ISavedObjectTypeRegistry = Pick<SavedObjectTypeRegistry, 'getType' | 'getAllTypes' | 'getIndex' | 'isNamespaceAgnostic' | 'isHidden' | 'getImportableAndExportableTypes' | 'isImportableAndExportable'>;
+export type ISavedObjectTypeRegistry = Omit<SavedObjectTypeRegistry, 'registerType'>;
 
 // @public
 export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser' | 'callAsInternalUser'>;
-
-// @public (undocumented)
-export interface IScopedRenderingClient {
-    render(options?: Pick<IRenderOptions, 'includeUserSettings'>): Promise<string>;
-}
 
 // @public
 export interface IUiSettingsClient {
     get: <T = any>(key: string) => Promise<T>;
     getAll: <T = any>() => Promise<Record<string, T>>;
-    getRegistered: () => Readonly<Record<string, UiSettingsParams>>;
+    getRegistered: () => Readonly<Record<string, PublicUiSettingsParams>>;
     getUserProvided: <T = any>() => Promise<Record<string, UserProvidedValues<T>>>;
     isOverridden: (key: string) => boolean;
     remove: (key: string) => Promise<void>;
@@ -1115,6 +1171,10 @@ export interface LegacyServiceSetupDeps {
     core: LegacyCoreSetup;
     // (undocumented)
     plugins: Record<string, unknown>;
+    // Warning: (ae-forgotten-export) The symbol "UiPlugins" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    uiPlugins: UiPlugins;
 }
 
 // @public @deprecated (undocumented)
@@ -1231,6 +1291,24 @@ export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critica
 
 // @public
 export type MutatingOperationRefreshSetting = boolean | 'wait_for';
+
+// Warning: (ae-missing-release-tag) "NodesVersionCompatibility" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface NodesVersionCompatibility {
+    // Warning: (ae-forgotten-export) The symbol "NodeInfo" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    incompatibleNodes: NodeInfo[];
+    // (undocumented)
+    isCompatible: boolean;
+    // (undocumented)
+    kibanaVersion: string;
+    // (undocumented)
+    message?: string;
+    // (undocumented)
+    warningNodes: NodeInfo[];
+}
 
 // Warning: (ae-forgotten-export) The symbol "OnPostAuthResult" needs to be exported by the entry point index.d.ts
 //
@@ -1409,23 +1487,19 @@ export type PluginName = string;
 // @public (undocumented)
 export type PluginOpaqueId = symbol;
 
-// @public (undocumented)
+// @internal (undocumented)
 export interface PluginsServiceSetup {
-    // (undocumented)
     contracts: Map<PluginName, unknown>;
-    // (undocumented)
-    uiPlugins: {
-        internal: Map<PluginName, InternalPluginInfo>;
-        public: Map<PluginName, DiscoveredPlugin>;
-        browserConfigs: Map<PluginName, Observable<unknown>>;
-    };
+    initialized: boolean;
 }
 
-// @public (undocumented)
+// @internal (undocumented)
 export interface PluginsServiceStart {
-    // (undocumented)
     contracts: Map<PluginName, unknown>;
 }
+
+// @public
+export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 
 // Warning: (ae-forgotten-export) The symbol "RecursiveReadonlyArray" needs to be exported by the entry point index.d.ts
 //
@@ -1441,19 +1515,13 @@ export type RedirectResponseOptions = HttpResponseOptions & {
     };
 };
 
-// @internal (undocumented)
-export interface RenderingServiceSetup {
-    render<R extends KibanaRequest | LegacyRequest>(request: R, uiSettings: IUiSettingsClient, options?: IRenderOptions): Promise<string>;
-}
-
 // @public
-export type RequestHandler<P = unknown, Q = unknown, B = unknown, Method extends RouteMethod = any> = (context: RequestHandlerContext, request: KibanaRequest<P, Q, B, Method>, response: KibanaResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+export type RequestHandler<P = unknown, Q = unknown, B = unknown, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory> = (context: RequestHandlerContext, request: KibanaRequest<P, Q, B, Method>, response: ResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
 // @public
 export interface RequestHandlerContext {
     // (undocumented)
     core: {
-        rendering: IScopedRenderingClient;
         savedObjects: {
             client: SavedObjectsClientContract;
             typeRegistry: ISavedObjectTypeRegistry;
@@ -1475,6 +1543,9 @@ export type RequestHandlerContextContainer = IContextContainer<RequestHandler<an
 export type RequestHandlerContextProvider<TContextName extends keyof RequestHandlerContext> = IContextProvider<RequestHandler<any, any, any>, TContextName>;
 
 // @public
+export type RequestHandlerWrapper = <P, Q, B, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory>(handler: RequestHandler<P, Q, B, Method, ResponseFactory>) => RequestHandler<P, Q, B, Method, ResponseFactory>;
+
+// @public
 export function resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, supportedTypes, namespace, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
 
 // @public
@@ -1487,11 +1558,7 @@ export type ResponseError = string | Error | {
 export type ResponseErrorAttributes = Record<string, any>;
 
 // @public
-export type ResponseHeaders = {
-    [header in KnownHeaders]?: string | string[];
-} & {
-    [header: string]: string | string[];
-};
+export type ResponseHeaders = Record<KnownHeaders, string | string[]> | Record<string, string | string[]>;
 
 // @public
 export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
@@ -1576,6 +1643,8 @@ export interface RouteValidatorOptions {
 // @public
 export type SafeRouteMethod = 'get' | 'options';
 
+// Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
 // @public (undocumented)
 export interface SavedObject<T = unknown> {
     attributes: T;
@@ -1586,6 +1655,7 @@ export interface SavedObject<T = unknown> {
     };
     id: string;
     migrationVersion?: SavedObjectsMigrationVersion;
+    namespaces?: string[];
     references: SavedObjectReference[];
     type: string;
     updated_at?: string;
@@ -1609,10 +1679,8 @@ export interface SavedObjectMigrationContext {
     log: SavedObjectsMigrationLogger;
 }
 
-// Warning: (ae-forgotten-export) The symbol "SavedObjectUnsanitizedDoc" needs to be exported by the entry point index.d.ts
-//
 // @public
-export type SavedObjectMigrationFn = (doc: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc;
+export type SavedObjectMigrationFn<InputAttributes = unknown, MigratedAttributes = unknown> = (doc: SavedObjectUnsanitizedDoc<InputAttributes>, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc<MigratedAttributes>;
 
 // @public
 export interface SavedObjectMigrationMap {
@@ -1630,11 +1698,17 @@ export interface SavedObjectReference {
     type: string;
 }
 
+// @public (undocumented)
+export interface SavedObjectsAddToNamespacesOptions extends SavedObjectsBaseOptions {
+    refresh?: MutatingOperationRefreshSetting;
+    version?: string;
+}
+
 // Warning: (ae-forgotten-export) The symbol "SavedObjectDoc" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "Referencable" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
-export type SavedObjectSanitizedDoc = SavedObjectDoc & Referencable;
+// @public
+export type SavedObjectSanitizedDoc<T = unknown> = SavedObjectDoc<T> & Referencable;
 
 // @public (undocumented)
 export interface SavedObjectsBaseOptions {
@@ -1697,11 +1771,13 @@ export interface SavedObjectsBulkUpdateResponse<T = unknown> {
 export class SavedObjectsClient {
     // @internal
     constructor(repository: ISavedObjectsRepository);
+    addToNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsAddToNamespacesOptions): Promise<{}>;
     bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
     create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
+    deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<{}>;
     // (undocumented)
     static errors: typeof SavedObjectsErrorHelpers;
     // (undocumented)
@@ -1764,6 +1840,8 @@ export interface SavedObjectsCoreFieldMapping {
     // (undocumented)
     index?: boolean;
     // (undocumented)
+    null_value?: number | boolean | string;
+    // (undocumented)
     type: string;
 }
 
@@ -1783,6 +1861,11 @@ export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOp
 }
 
 // @public (undocumented)
+export interface SavedObjectsDeleteFromNamespacesOptions extends SavedObjectsBaseOptions {
+    refresh?: MutatingOperationRefreshSetting;
+}
+
+// @public (undocumented)
 export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions {
     refresh?: MutatingOperationRefreshSetting;
 }
@@ -1792,7 +1875,7 @@ export class SavedObjectsErrorHelpers {
     // (undocumented)
     static createBadRequestError(reason?: string): DecoratedError;
     // (undocumented)
-    static createEsAutoCreateIndexError(): DecoratedError;
+    static createConflictError(type: string, id: string): DecoratedError;
     // (undocumented)
     static createGenericNotFoundError(type?: string | null, id?: string | null): DecoratedError;
     // (undocumented)
@@ -1803,6 +1886,8 @@ export class SavedObjectsErrorHelpers {
     static decorateBadRequestError(error: Error, reason?: string): DecoratedError;
     // (undocumented)
     static decorateConflictError(error: Error, reason?: string): DecoratedError;
+    // (undocumented)
+    static decorateEsCannotExecuteScriptError(error: Error, reason?: string): DecoratedError;
     // (undocumented)
     static decorateEsUnavailableError(error: Error, reason?: string): DecoratedError;
     // (undocumented)
@@ -1818,7 +1903,7 @@ export class SavedObjectsErrorHelpers {
     // (undocumented)
     static isConflictError(error: Error | DecoratedError): boolean;
     // (undocumented)
-    static isEsAutoCreateIndexError(error: Error | DecoratedError): boolean;
+    static isEsCannotExecuteScriptError(error: Error | DecoratedError): boolean;
     // (undocumented)
     static isEsUnavailableError(error: Error | DecoratedError): boolean;
     // (undocumented)
@@ -2048,6 +2133,9 @@ export interface SavedObjectsMigrationVersion {
 }
 
 // @public
+export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'agnostic';
+
+// @public
 export interface SavedObjectsRawDoc {
     // (undocumented)
     _id: string;
@@ -2065,6 +2153,7 @@ export interface SavedObjectsRawDoc {
 
 // @public (undocumented)
 export class SavedObjectsRepository {
+    addToNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsAddToNamespacesOptions): Promise<{}>;
     bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
@@ -2075,6 +2164,7 @@ export class SavedObjectsRepository {
     static createRepository(migrator: KibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, callCluster: APICaller, extraTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
+    deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<{}>;
     // (undocumented)
     find<T = unknown>({ search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
@@ -2116,7 +2206,11 @@ export class SavedObjectsSchema {
     // (undocumented)
     isHiddenType(type: string): boolean;
     // (undocumented)
+    isMultiNamespace(type: string): boolean;
+    // (undocumented)
     isNamespaceAgnostic(type: string): boolean;
+    // (undocumented)
+    isSingleNamespace(type: string): boolean;
 }
 
 // @public
@@ -2146,6 +2240,16 @@ export interface SavedObjectsServiceStart {
     getTypeRegistry: () => ISavedObjectTypeRegistry;
 }
 
+// @public
+export interface SavedObjectStatusMeta {
+    // (undocumented)
+    migratedIndices: {
+        [status: string]: number;
+        skipped: number;
+        migrated: number;
+    };
+}
+
 // @public (undocumented)
 export interface SavedObjectsType {
     convertToAliasScript?: string;
@@ -2155,7 +2259,7 @@ export interface SavedObjectsType {
     mappings: SavedObjectsTypeMappingDefinition;
     migrations?: SavedObjectMigrationMap;
     name: string;
-    namespaceAgnostic: boolean;
+    namespaceType: SavedObjectsNamespaceType;
 }
 
 // @public
@@ -2200,9 +2304,14 @@ export class SavedObjectTypeRegistry {
     getType(type: string): SavedObjectsType | undefined;
     isHidden(type: string): boolean;
     isImportableAndExportable(type: string): boolean;
+    isMultiNamespace(type: string): boolean;
     isNamespaceAgnostic(type: string): boolean;
+    isSingleNamespace(type: string): boolean;
     registerType(type: SavedObjectsType): void;
     }
+
+// @public
+export type SavedObjectUnsanitizedDoc<T = unknown> = SavedObjectDoc<T> & Partial<Referencable>;
 
 // @public
 export type ScopeableRequest = KibanaRequest | LegacyRequest | FakeRequest;
@@ -2213,6 +2322,38 @@ export class ScopedClusterClient implements IScopedClusterClient {
     callAsCurrentUser(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<any>;
     callAsInternalUser(endpoint: string, clientParams?: Record<string, any>, options?: CallAPIOptions): Promise<any>;
     }
+
+// @public
+export interface ServiceStatus<Meta extends Record<string, any> | unknown = unknown> {
+    detail?: string;
+    documentationUrl?: string;
+    level: ServiceStatusLevel;
+    meta?: Meta;
+    summary: string;
+}
+
+// @public
+export type ServiceStatusLevel = typeof ServiceStatusLevels[keyof typeof ServiceStatusLevels];
+
+// @public
+export const ServiceStatusLevels: Readonly<{
+    available: Readonly<{
+        toString: () => "available";
+        valueOf: () => 0;
+    }>;
+    degraded: Readonly<{
+        toString: () => "degraded";
+        valueOf: () => 1;
+    }>;
+    unavailable: Readonly<{
+        toString: () => "unavailable";
+        valueOf: () => 2;
+    }>;
+    critical: Readonly<{
+        toString: () => "critical";
+        valueOf: () => 3;
+    }>;
+}>;
 
 // @public
 export interface SessionCookieValidationResult {
@@ -2249,6 +2390,14 @@ export type SharedGlobalConfig = RecursiveReadonly_2<{
 }>;
 
 // @public
+export type StartServicesAccessor<TPluginsStart extends object = object, TStart = unknown> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
+
+// @public
+export interface StatusServiceSetup {
+    core$: Observable<CoreStatus>;
+}
+
+// @public
 export type StringValidation = StringValidationRegex | StringValidationRegexString;
 
 // @public
@@ -2268,7 +2417,7 @@ export interface StringValidationRegexString {
 }
 
 // @public
-export interface UiSettingsParams {
+export interface UiSettingsParams<T = unknown> {
     category?: string[];
     deprecation?: DeprecationSettings;
     description?: string;
@@ -2277,10 +2426,12 @@ export interface UiSettingsParams {
     options?: string[];
     readonly?: boolean;
     requiresPageReload?: boolean;
+    // (undocumented)
+    schema: Type<T>;
     type?: UiSettingsType;
     // (undocumented)
     validation?: ImageValidation | StringValidation;
-    value?: SavedObjectAttribute;
+    value?: T;
 }
 
 // @public (undocumented)
@@ -2316,14 +2467,13 @@ export const validBodyOutput: readonly ["data", "stream"];
 // Warnings were encountered during analysis:
 //
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/legacy/types.ts:162:3 - (ae-forgotten-export) The symbol "VarsProvider" needs to be exported by the entry point index.d.ts
-// src/core/server/legacy/types.ts:163:3 - (ae-forgotten-export) The symbol "VarsReplacer" needs to be exported by the entry point index.d.ts
-// src/core/server/legacy/types.ts:164:3 - (ae-forgotten-export) The symbol "LegacyNavLinkSpec" needs to be exported by the entry point index.d.ts
-// src/core/server/legacy/types.ts:165:3 - (ae-forgotten-export) The symbol "LegacyAppSpec" needs to be exported by the entry point index.d.ts
-// src/core/server/legacy/types.ts:166:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/plugins_service.ts:44:5 - (ae-forgotten-export) The symbol "InternalPluginInfo" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:226:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:226:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:228:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/legacy/types.ts:163:3 - (ae-forgotten-export) The symbol "VarsProvider" needs to be exported by the entry point index.d.ts
+// src/core/server/legacy/types.ts:164:3 - (ae-forgotten-export) The symbol "VarsReplacer" needs to be exported by the entry point index.d.ts
+// src/core/server/legacy/types.ts:165:3 - (ae-forgotten-export) The symbol "LegacyNavLinkSpec" needs to be exported by the entry point index.d.ts
+// src/core/server/legacy/types.ts:166:3 - (ae-forgotten-export) The symbol "LegacyAppSpec" needs to be exported by the entry point index.d.ts
+// src/core/server/legacy/types.ts:167:16 - (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:230:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:230:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:232:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
 
 ```

@@ -12,6 +12,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
+  const comboBox = getService('comboBox');
   const PageObjects = getPageObjects([
     'header',
     'common',
@@ -103,24 +104,30 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Changes the specified dimension to the specified operation and (optinally) field.
      *
-     * @param opts.from - the text of the dimension being changed
-     * @param opts.to - the desired operation for the dimension
+     * @param opts.dimension - the selector of the dimension being changed
+     * @param opts.operation - the desired operation ID for the dimension
      * @param opts.field - the desired field for the dimension
      */
-    async configureDimension(opts: { dimension: string; operation?: string; field?: string }) {
+    async configureDimension(opts: { dimension: string; operation: string; field: string }) {
       await find.clickByCssSelector(opts.dimension);
 
-      if (opts.operation) {
-        await find.clickByCssSelector(
-          `[data-test-subj="lns-indexPatternDimensionIncompatible-${opts.operation}"],
-           [data-test-subj="lns-indexPatternDimension-${opts.operation}"]`
-        );
-      }
+      await find.clickByCssSelector(
+        `[data-test-subj="lns-indexPatternDimensionIncompatible-${opts.operation}"],
+          [data-test-subj="lns-indexPatternDimension-${opts.operation}"]`
+      );
 
-      if (opts.field) {
-        await testSubjects.click('indexPattern-dimension-field');
-        await testSubjects.click(`lns-fieldOption-${opts.field}`);
-      }
+      const target = await testSubjects.find('indexPattern-dimension-field');
+      await comboBox.openOptionsList(target);
+      await comboBox.setElement(target, opts.field);
+    },
+
+    /**
+     * Removes the dimension matching a specific test subject
+     */
+    async removeDimension(dimensionTestSubj: string) {
+      await find.clickByCssSelector(
+        `[data-test-subj="${dimensionTestSubj}"] [data-test-subj="indexPattern-dimensionPopover-remove"]`
+      );
     },
 
     /**

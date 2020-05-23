@@ -14,7 +14,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const config = getService('config');
 
-  describe('spaces feature controls', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/57413
+  describe.skip('spaces feature controls', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
     });

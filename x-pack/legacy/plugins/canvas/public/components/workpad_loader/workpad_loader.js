@@ -20,20 +20,16 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { sortByOrder } from 'lodash';
-import moment from 'moment';
 import { ConfirmModal } from '../confirm_modal';
 import { Link } from '../link';
 import { Paginate } from '../paginate';
 import { ComponentStrings } from '../../../i18n';
-import { AdvancedSettings } from '../../lib/kibana_advanced_settings';
 import { WorkpadDropzone } from './workpad_dropzone';
 import { WorkpadCreate } from './workpad_create';
 import { WorkpadSearch } from './workpad_search';
 import { uploadWorkpad } from './upload_workpad';
 
 const { WorkpadLoader: strings } = ComponentStrings;
-
-const formatDate = date => date && moment(date).format(AdvancedSettings.get('dateFormat'));
 
 const getDisplayName = (name, workpad, loadedWorkpad) => {
   const workpadName = name.length ? name : <em>{workpad.id}</em>;
@@ -51,6 +47,7 @@ export class WorkpadLoader extends React.PureComponent {
     removeWorkpads: PropTypes.func.isRequired,
     onClose: PropTypes.func.isRequired,
     workpads: PropTypes.object,
+    formatDate: PropTypes.func.isRequired,
   };
 
   state = {
@@ -205,7 +202,7 @@ export class WorkpadLoader extends React.PureComponent {
         sortable: true,
         dataType: 'date',
         width: '20%',
-        render: date => formatDate(date),
+        render: date => this.props.formatDate(date),
       },
       {
         field: '@timestamp',
@@ -213,7 +210,7 @@ export class WorkpadLoader extends React.PureComponent {
         sortable: true,
         dataType: 'date',
         width: '20%',
-        render: date => formatDate(date),
+        render: date => this.props.formatDate(date),
       },
       { name: '', actions, width: '5%' },
     ];
@@ -252,7 +249,11 @@ export class WorkpadLoader extends React.PureComponent {
 
     return (
       <Fragment>
-        <WorkpadDropzone onUpload={this.onUpload} disabled={createPending || !canUserWrite}>
+        <WorkpadDropzone
+          onUpload={this.onUpload}
+          disabled={createPending || !canUserWrite}
+          notify={this.props.notify}
+        >
           <EuiBasicTable
             items={rows}
             itemId="id"
@@ -266,11 +267,17 @@ export class WorkpadLoader extends React.PureComponent {
             data-test-subj="canvasWorkpadLoaderTable"
           />
           <EuiSpacer />
-          <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiPagination activePage={pageNumber} onPageClick={setPage} pageCount={totalPages} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {rows.length > 0 && (
+            <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiPagination
+                  activePage={pageNumber}
+                  onPageClick={setPage}
+                  pageCount={totalPages}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
         </WorkpadDropzone>
       </Fragment>
     );
@@ -324,7 +331,7 @@ export class WorkpadLoader extends React.PureComponent {
         compressed
         className="canvasWorkpad__upload--compressed"
         initialPromptText={strings.getFilePickerPlaceholder()}
-        onChange={([file]) => uploadWorkpad(file, this.onUpload)}
+        onChange={([file]) => uploadWorkpad(file, this.onUpload, this.props.notify)}
         accept="application/json"
         disabled={createPending || !canUserWrite}
       />

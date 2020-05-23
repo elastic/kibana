@@ -11,13 +11,16 @@ import { AlertListState, AlertingIndexUIQueryParams } from '../../types';
 import { alertMiddlewareFactory } from './middleware';
 import { AppAction } from '../action';
 import { coreMock } from 'src/core/public/mocks';
+import { DepsStartMock, depsStartMock } from '../../mocks';
 import { createBrowserHistory } from 'history';
 import { uiQueryParams } from './selectors';
 import { urlFromQueryParams } from '../../view/alerts/url_from_query_params';
+import { Immutable } from '../../../../../common/types';
 
 describe('alert list pagination', () => {
-  let store: Store<AlertListState, AppAction>;
+  let store: Store<Immutable<AlertListState>, Immutable<AppAction>>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
+  let depsStart: DepsStartMock;
   let history: History<never>;
   let queryParams: () => AlertingIndexUIQueryParams;
   /**
@@ -26,9 +29,10 @@ describe('alert list pagination', () => {
   let historyPush: (params: AlertingIndexUIQueryParams) => void;
   beforeEach(() => {
     coreStart = coreMock.createStart();
+    depsStart = depsStartMock();
     history = createBrowserHistory();
 
-    const middleware = alertMiddlewareFactory(coreStart);
+    const middleware = alertMiddlewareFactory(coreStart, depsStart);
     store = createStore(alertListReducer, applyMiddleware(middleware));
 
     history.listen(location => {

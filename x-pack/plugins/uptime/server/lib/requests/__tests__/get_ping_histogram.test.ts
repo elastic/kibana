@@ -5,6 +5,7 @@
  */
 
 import { getPingHistogram } from '../get_ping_histogram';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
 describe('getPingHistogram', () => {
   const standardMockResponse: any = {
@@ -58,6 +59,7 @@ describe('getPingHistogram', () => {
 
     const result = await getPingHistogram({
       callES: mockEsClient,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       from: 'now-15m',
       to: 'now',
       filters: null,
@@ -76,6 +78,7 @@ describe('getPingHistogram', () => {
 
     const result = await getPingHistogram({
       callES: mockEsClient,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       from: 'now-15m',
       to: 'now',
       filters: null,
@@ -137,6 +140,7 @@ describe('getPingHistogram', () => {
 
     const result = await getPingHistogram({
       callES: mockEsClient,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       from: '1234',
       to: '5678',
       filters: JSON.stringify(searchFilter),
@@ -192,6 +196,7 @@ describe('getPingHistogram', () => {
     const filters = `{"bool":{"must":[{"simple_query_string":{"query":"http"}}]}}`;
     const result = await getPingHistogram({
       callES: mockEsClient,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       from: 'now-15m',
       to: 'now',
       filters,
@@ -208,6 +213,7 @@ describe('getPingHistogram', () => {
     mockEsClient.mockReturnValue(standardMockResponse);
     const result = await getPingHistogram({
       callES: mockEsClient,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       from: '1234',
       to: '5678',
       filters: '',
@@ -228,6 +234,7 @@ describe('getPingHistogram', () => {
 
     const result = await getPingHistogram({
       callES: mockEsClient,
+      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       from: '1234',
       to: '5678',
       filters: '',

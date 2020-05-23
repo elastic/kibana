@@ -8,18 +8,14 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { HashRouter as Router, Route, Switch, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from 'src/core/public';
+import { StartServicesAccessor } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import { AuthenticationServiceSetup } from '../../authentication';
 import { PluginStartDependencies } from '../../plugin';
-import { RolesAPIClient } from '../roles';
-import { UserAPIClient } from './user_api_client';
-import { UsersGridPage } from './users_grid';
-import { EditUserPage } from './edit_user';
 
 interface CreateParams {
   authc: AuthenticationServiceSetup;
-  getStartServices: CoreSetup<PluginStartDependencies>['getStartServices'];
+  getStartServices: StartServicesAccessor<PluginStartDependencies>;
 }
 
 export const usersManagementApp = Object.freeze({
@@ -30,13 +26,26 @@ export const usersManagementApp = Object.freeze({
       order: 10,
       title: i18n.translate('xpack.security.management.usersTitle', { defaultMessage: 'Users' }),
       async mount({ basePath, element, setBreadcrumbs }) {
-        const [{ http, notifications, i18n: i18nStart }] = await getStartServices();
         const usersBreadcrumbs = [
           {
             text: i18n.translate('xpack.security.users.breadcrumb', { defaultMessage: 'Users' }),
             href: `#${basePath}`,
           },
         ];
+
+        const [
+          [{ http, notifications, i18n: i18nStart }],
+          { UsersGridPage },
+          { EditUserPage },
+          { UserAPIClient },
+          { RolesAPIClient },
+        ] = await Promise.all([
+          getStartServices(),
+          import('./users_grid'),
+          import('./edit_user'),
+          import('./user_api_client'),
+          import('../roles'),
+        ]);
 
         const userAPIClient = new UserAPIClient(http);
         const rolesAPIClient = new RolesAPIClient(http);

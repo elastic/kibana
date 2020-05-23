@@ -1,0 +1,27 @@
+[role="xpack"]
+[[machine-learning-integration]]
+=== Machine Learning integration
+
+++++
+<titleabbrev>Integrate with machine learning</titleabbrev>
+++++
+
+The Machine Learning integration will initiate a new job predefined to calculate anomaly scores on transaction response times.
+The response time graph will show the expected bounds and add an annotation when the anomaly score is 75 or above.
+Jobs can be created per transaction type, and based on the average response time.
+Manage jobs in the *Machine Learning jobs management*.
+
+[role="screenshot"]
+image::apm/images/apm-ml-integration.png[Example view of anomaly scores on response times in APM app in Kibana]
+
+[float]
+[[create-ml-integration]]
+=== Create a new machine learning job
+
+To enable machine learning anomaly detection, first choose a service to monitor.
+Then, select **Integrations** > **Enable ML anomaly detection** and click **Create job**.
+That's it! After a few minutes, the job will begin calculating results;
+it might take additional time for results to appear on your graph.
+
+APM specific anomaly detection wizards are also available for certain Agents.
+See the machine learning {ml-docs}/ootb-ml-jobs-apm.html[APM anomaly detection configurations] for more information.

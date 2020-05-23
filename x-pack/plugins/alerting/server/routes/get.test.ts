@@ -5,7 +5,7 @@
  */
 
 import { getAlertRoute } from './get';
-import { mockRouter, RouterMock } from '../../../../../src/core/server/http/router/router.mock';
+import { httpServiceMock } from 'src/core/server/mocks';
 import { mockLicenseState } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
@@ -55,7 +55,7 @@ describe('getAlertRoute', () => {
 
   it('gets an alert with proper parameters', async () => {
     const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     getAlertRoute(router, licenseState);
     const [config, handler] = router.get.mock.calls[0];
@@ -90,7 +90,7 @@ describe('getAlertRoute', () => {
 
   it('ensures the license allows getting alerts', async () => {
     const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     getAlertRoute(router, licenseState);
 
@@ -99,7 +99,7 @@ describe('getAlertRoute', () => {
     alertsClient.get.mockResolvedValueOnce(mockedAlert);
 
     const [context, req, res] = mockHandlerArguments(
-      alertsClient,
+      { alertsClient },
       {
         params: { id: '1' },
       },
@@ -113,7 +113,7 @@ describe('getAlertRoute', () => {
 
   it('ensures the license check prevents getting alerts', async () => {
     const licenseState = mockLicenseState();
-    const router: RouterMock = mockRouter.create();
+    const router = httpServiceMock.createRouter();
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('OMG');
@@ -126,7 +126,7 @@ describe('getAlertRoute', () => {
     alertsClient.get.mockResolvedValueOnce(mockedAlert);
 
     const [context, req, res] = mockHandlerArguments(
-      alertsClient,
+      { alertsClient },
       {
         params: { id: '1' },
       },

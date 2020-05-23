@@ -13,6 +13,7 @@ import {
   ArtifactsSchema,
   TutorialsCategory
 } from '../../../../../src/plugins/home/server';
+import { APM_STATIC_INDEX_PATTERN_ID } from '../../common/index_pattern_constants';
 
 const apmIntro = i18n.translate('xpack.apm.tutorial.introduction', {
   defaultMessage:
@@ -39,6 +40,7 @@ export const tutorialProvider = ({
   const savedObjects = [
     {
       ...apmIndexPattern,
+      id: APM_STATIC_INDEX_PATTERN_ID,
       attributes: {
         ...apmIndexPattern.attributes,
         title: indexPatternTitle
@@ -98,7 +100,7 @@ It allows you to monitor the performance of thousands of applications in real ti
     artifacts,
     onPrem: onPremInstructions(indices),
     elasticCloud: createElasticCloudInstructions(cloud),
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/apm/apm.png',
+    previewImagePath: '/plugins/apm/assets/apm.png',
     savedObjects,
     savedObjectsInstallMsg: i18n.translate(
       'xpack.apm.tutorial.specProvider.savedObjectsInstallMsg',

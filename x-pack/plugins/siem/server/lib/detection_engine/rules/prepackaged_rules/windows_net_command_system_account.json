@@ -1,0 +1,35 @@
+{
+  "description": "Identifies the SYSTEM account using the Net utility. The Net utility is a component of the Windows operating system. It is used in command line operations for control of users, groups, services, and network connections.",
+  "index": [
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "name": "Net command via SYSTEM account",
+  "query": "(process.name:net.exe or process.name:net1.exe and not process.parent.name:net.exe) and user.name:SYSTEM and event.action:\"Process Create (rule: ProcessCreate)\"",
+  "risk_score": 21,
+  "rule_id": "2856446a-34e6-435b-9fb5-f8f040bfa7ed",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0007",
+        "name": "Discovery",
+        "reference": "https://attack.mitre.org/tactics/TA0007/"
+      },
+      "technique": [
+        {
+          "id": "T1087",
+          "name": "Account Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1087/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

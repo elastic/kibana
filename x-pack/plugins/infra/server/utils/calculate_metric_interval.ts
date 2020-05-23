@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
+// import { RequestHandlerContext } from 'src/core/server';
 import { findInventoryModel } from '../../common/inventory_models';
-import { KibanaFramework } from '../lib/adapters/framework/kibana_framework_adapter';
+// import { KibanaFramework } from '../lib/adapters/framework/kibana_framework_adapter';
 import { InventoryItemType } from '../../common/inventory_models/types';
+import { ESSearchClient } from '../lib/snapshot';
 
 interface Options {
   indexPattern: string;
@@ -23,8 +24,7 @@ interface Options {
  * This is useful for visualizing metric modules like s3 that only send metrics once per day.
  */
 export const calculateMetricInterval = async (
-  framework: KibanaFramework,
-  requestContext: RequestHandlerContext,
+  client: ESSearchClient,
   options: Options,
   modules?: string[],
   nodeType?: InventoryItemType // TODO: check that this type still makes sense
@@ -73,11 +73,7 @@ export const calculateMetricInterval = async (
     },
   };
 
-  const resp = await framework.callWithRequest<{}, PeriodAggregationData>(
-    requestContext,
-    'search',
-    query
-  );
+  const resp = await client<{}, PeriodAggregationData>(query);
 
   // if ES doesn't return an aggregations key, something went seriously wrong.
   if (!resp.aggregations) {

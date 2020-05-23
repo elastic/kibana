@@ -24,7 +24,7 @@ import { UiActionsService } from 'src/plugins/ui_actions/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { Container, ViewMode, ContainerInput } from '../..';
 import { HelloWorldContainerComponent } from './hello_world_container_component';
-import { GetEmbeddableFactory, GetEmbeddableFactories } from '../../types';
+import { EmbeddableStart } from '../../../plugin';
 
 export const HELLO_WORLD_CONTAINER = 'HELLO_WORLD_CONTAINER';
 
@@ -46,9 +46,10 @@ interface HelloWorldContainerInput extends ContainerInput {
 
 interface HelloWorldContainerOptions {
   getActions: UiActionsService['getTriggerCompatibleActions'];
-  getEmbeddableFactory: GetEmbeddableFactory;
-  getAllEmbeddableFactories: GetEmbeddableFactories;
+  getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'];
+  getAllEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
   overlays: CoreStart['overlays'];
+  application: CoreStart['application'];
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
@@ -81,6 +82,7 @@ export class HelloWorldContainer extends Container<InheritedInput, HelloWorldCon
           getAllEmbeddableFactories={this.options.getAllEmbeddableFactories}
           getEmbeddableFactory={this.options.getEmbeddableFactory}
           overlays={this.options.overlays}
+          application={this.options.application}
           notifications={this.options.notifications}
           inspector={this.options.inspector}
           SavedObjectFinder={this.options.SavedObjectFinder}

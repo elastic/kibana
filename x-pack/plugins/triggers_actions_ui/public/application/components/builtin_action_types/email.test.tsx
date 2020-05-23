@@ -39,6 +39,7 @@ describe('connector validation', () => {
       id: 'test',
       actionTypeId: '.email',
       name: 'email',
+      isPreconfigured: false,
       config: {
         from: 'test@test.com',
         port: 2323,
@@ -58,6 +59,34 @@ describe('connector validation', () => {
     });
   });
 
+  test('connector validation succeeds when connector config is valid with empty user/password', () => {
+    const actionConnector = {
+      secrets: {
+        user: null,
+        password: null,
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      isPreconfigured: false,
+      name: 'email',
+      config: {
+        from: 'test@test.com',
+        port: 2323,
+        host: 'localhost',
+        test: 'test',
+      },
+    } as EmailActionConnector;
+
+    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+      errors: {
+        from: [],
+        port: [],
+        host: [],
+        user: [],
+        password: [],
+      },
+    });
+  });
   test('connector validation fails when connector config is not valid', () => {
     const actionConnector = {
       secrets: {
@@ -78,6 +107,62 @@ describe('connector validation', () => {
         port: ['Port is required.'],
         host: ['Host is required.'],
         user: [],
+        password: [],
+      },
+    });
+  });
+  test('connector validation fails when user specified but not password', () => {
+    const actionConnector = {
+      secrets: {
+        user: 'user',
+        password: null,
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      isPreconfigured: false,
+      name: 'email',
+      config: {
+        from: 'test@test.com',
+        port: 2323,
+        host: 'localhost',
+        test: 'test',
+      },
+    } as EmailActionConnector;
+
+    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+      errors: {
+        from: [],
+        port: [],
+        host: [],
+        user: [],
+        password: ['Password is required when username is used.'],
+      },
+    });
+  });
+  test('connector validation fails when password specified but not user', () => {
+    const actionConnector = {
+      secrets: {
+        user: null,
+        password: 'password',
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      isPreconfigured: false,
+      name: 'email',
+      config: {
+        from: 'test@test.com',
+        port: 2323,
+        host: 'localhost',
+        test: 'test',
+      },
+    } as EmailActionConnector;
+
+    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+      errors: {
+        from: [],
+        port: [],
+        host: [],
+        user: ['Username is required when password is used.'],
         password: [],
       },
     });

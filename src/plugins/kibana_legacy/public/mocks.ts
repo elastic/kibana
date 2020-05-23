@@ -25,6 +25,7 @@ export type Start = jest.Mocked<ReturnType<KibanaLegacyPlugin['start']>>;
 
 const createSetupContract = (): Setup => ({
   forwardApp: jest.fn(),
+  registerLegacyAppAlias: jest.fn(),
   registerLegacyApp: jest.fn(),
   config: {
     defaultAppId: 'home',
@@ -37,6 +38,7 @@ const createSetupContract = (): Setup => ({
 
 const createStartContract = (): Start => ({
   getApps: jest.fn(),
+  getLegacyAppAliases: jest.fn(),
   getForwards: jest.fn(),
   config: {
     defaultAppId: 'home',

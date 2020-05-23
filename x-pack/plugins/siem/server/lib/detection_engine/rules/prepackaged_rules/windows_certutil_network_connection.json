@@ -1,0 +1,35 @@
+{
+  "description": "Identifies certutil.exe making a network connection. Adversaries could abuse certutil.exe to download a certificate, or malware, from a remote URL.",
+  "index": [
+    "winlogbeat-*"
+  ],
+  "language": "kuery",
+  "name": "Network Connection via Certutil",
+  "query": "process.name:certutil.exe and event.action:\"Network connection detected (rule: NetworkConnect)\" and not destination.ip:(10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)",
+  "risk_score": 21,
+  "rule_id": "3838e0e3-1850-4850-a411-2e8c5ba40ba8",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Windows"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1105",
+          "name": "Remote File Copy",
+          "reference": "https://attack.mitre.org/techniques/T1105/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

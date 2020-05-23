@@ -19,14 +19,14 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       return await testSubjects.getVisibleText('appTitle');
     },
     async clickCreateFirstConnectorButton() {
-      const createBtn = await find.byCssSelector('[data-test-subj="createFirstActionButton"]');
+      const createBtn = await testSubjects.find('createFirstActionButton');
       const createBtnIsVisible = await createBtn.isDisplayed();
       if (createBtnIsVisible) {
         await createBtn.click();
       }
     },
     async clickCreateConnectorButton() {
-      const createBtn = await find.byCssSelector('[data-test-subj="createActionButton"]');
+      const createBtn = await testSubjects.find('createActionButton');
       const createBtnIsVisible = await createBtn.isDisplayed();
       if (createBtnIsVisible) {
         await createBtn.click();
@@ -69,10 +69,6 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
               .findTestSubject('connectorsTableCell-actionType')
               .find('.euiTableCellContent')
               .text(),
-            referencedByCount: $(row)
-              .findTestSubject('connectorsTableCell-referencedByCount')
-              .find('.euiTableCellContent')
-              .text(),
           };
         });
     },
@@ -101,6 +97,23 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
               .text(),
           };
         });
+    },
+    async isAlertsListDisplayed() {
+      const table = await find.byCssSelector('[data-test-subj="alertsList"] table');
+      return table.isDisplayed();
+    },
+    async isAnEmptyAlertsListDisplayed() {
+      await retry.try(async () => {
+        const table = await find.byCssSelector('[data-test-subj="alertsList"] table');
+        const $ = await table.parseDomContent();
+        const rows = $.findTestSubjects('alert-row').toArray();
+        expect(rows.length).to.eql(0);
+        const emptyRow = await find.byCssSelector(
+          '[data-test-subj="alertsList"] table .euiTableRow'
+        );
+        expect(await emptyRow.getVisibleText()).to.eql('No items found');
+      });
+      return true;
     },
     async clickOnAlertInAlertsList(name: string) {
       await this.searchAlerts(name);

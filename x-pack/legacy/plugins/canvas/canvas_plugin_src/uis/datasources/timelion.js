@@ -13,12 +13,13 @@ import {
   EuiSpacer,
   EuiCode,
   EuiTextArea,
+  EuiText,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
-import { DataSourceStrings, TIMELION, CANVAS } from '../../../i18n';
-import { TooltipIcon } from '../../../public/components/tooltip_icon';
+import { DataSourceStrings, TIMELION_QUERY_URL, TIMELION, CANVAS } from '../../../i18n';
 
 const { Timelion: strings } = DataSourceStrings;
 
@@ -86,8 +87,14 @@ const TimelionDatasource = ({ args, updateArgs, defaultIndex }) => {
 
       <EuiFormRow
         label={strings.getQueryLabel()}
-        helpText={strings.getQueryHelp()}
-        labelAppend={<TooltipIcon content={strings.getAbout()} />}
+        labelAppend={
+          <EuiText size="xs">
+            <EuiLink href={TIMELION_QUERY_URL} target="_blank">
+              {strings.queryLabel()}
+            </EuiLink>
+          </EuiText>
+        }
+        display="rowCompressed"
       >
         <EuiTextArea
           className="canvasTextArea__code"
@@ -96,6 +103,7 @@ const TimelionDatasource = ({ args, updateArgs, defaultIndex }) => {
           rows={15}
         />
       </EuiFormRow>
+
       {
         // TODO: Time timelion interval picker should be a drop down
       }
@@ -124,6 +132,6 @@ export const timelion = () => ({
   name: 'timelion',
   displayName: TIMELION,
   help: strings.getHelp(),
-  image: 'timelionApp',
+  image: 'visTimelion',
   template: templateFromReactComponent(TimelionDatasource),
 });

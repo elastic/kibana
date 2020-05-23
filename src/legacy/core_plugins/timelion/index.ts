@@ -29,7 +29,7 @@ const experimentalLabel = i18n.translate('timelion.uiSettings.experimentalLabel'
 
 const timelionPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
-    require: ['kibana', 'elasticsearch', 'data'],
+    require: ['kibana', 'elasticsearch'],
     config(Joi: any) {
       return Joi.object({
         enabled: Joi.boolean().default(true),

@@ -12,7 +12,6 @@ export default function({ getService, getPageObjects }) {
   const log = getService('log');
 
   describe('users', function() {
-    this.tags('smoke');
     before(async () => {
       log.debug('users');
       await PageObjects.settings.navigateTo();

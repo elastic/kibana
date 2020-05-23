@@ -5,15 +5,13 @@
  */
 
 import { AxiosPromise } from 'axios';
-// @ts-ignore unconverted local file
 import { API_ROUTE_CUSTOM_ELEMENT } from '../../common/lib/constants';
-// @ts-ignore unconverted local file
 import { fetch } from '../../common/lib/fetch';
 import { CustomElement } from '../../types';
-import { getCoreStart } from '../legacy';
+import { platformService } from '../services';
 
 const getApiPath = function() {
-  const basePath = getCoreStart().http.basePath.get();
+  const basePath = platformService.getService().coreStart.http.basePath.get();
   return `${basePath}${API_ROUTE_CUSTOM_ELEMENT}`;
 };
 
@@ -25,7 +23,7 @@ export const get = (customElementId: string): Promise<CustomElement> =>
     .get(`${getApiPath()}/${customElementId}`)
     .then(({ data: element }: { data: CustomElement }) => element);
 
-export const update = (id: string, element: CustomElement): AxiosPromise =>
+export const update = (id: string, element: Partial<CustomElement>): AxiosPromise =>
   fetch.put(`${getApiPath()}/${id}`, element);
 
 export const remove = (id: string): AxiosPromise => fetch.delete(`${getApiPath()}/${id}`);

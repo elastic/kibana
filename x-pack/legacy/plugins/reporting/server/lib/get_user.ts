@@ -6,10 +6,10 @@
 
 import { Legacy } from 'kibana';
 import { KibanaRequest } from '../../../../../../src/core/server';
-import { ServerFacade } from '../../types';
+import { Logger } from '../../types';
 import { ReportingSetupDeps } from '../types';
 
-export function getUserFactory(server: ServerFacade, security: ReportingSetupDeps['security']) {
+export function getUserFactory(security: ReportingSetupDeps['security'], logger: Logger) {
   /*
    * Legacy.Request because this is called from routing middleware
    */

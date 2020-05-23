@@ -3,18 +3,28 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { useObservable } from 'react-use';
 import { HashRouter as Router, Redirect, Switch, Route, RouteProps } from 'react-router-dom';
-import { CoreStart, AppMountParameters } from 'kibana/public';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiErrorBoundary } from '@elastic/eui';
+import { CoreStart, AppMountParameters } from 'src/core/public';
 import { EuiThemeProvider } from '../../../../../legacy/common/eui_styled_components';
-import { IngestManagerSetupDeps, IngestManagerConfigType } from '../../plugin';
-import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH } from './constants';
-import { DefaultLayout } from './layouts';
-import { IngestManagerOverview, EPMApp, AgentConfigApp, FleetApp } from './sections';
+import {
+  IngestManagerSetupDeps,
+  IngestManagerConfigType,
+  IngestManagerStartDeps,
+} from '../../plugin';
+import { EPM_PATH, FLEET_PATH, AGENT_CONFIG_PATH, DATA_STREAM_PATH } from './constants';
+import { DefaultLayout, WithoutHeaderLayout } from './layouts';
+import { Loading, Error } from './components';
+import { IngestManagerOverview, EPMApp, AgentConfigApp, FleetApp, DataStreamApp } from './sections';
 import { CoreContext, DepsContext, ConfigContext, setHttpClient, useConfig } from './hooks';
+import { PackageInstallProvider } from './sections/epm/hooks';
+import { sendSetup } from './hooks/use_request/setup';
+import { FleetStatusProvider } from './hooks/use_fleet_status';
+import './index.scss';
 
 export interface ProtectedRouteProps extends RouteProps {
   isAllowed?: boolean;
@@ -32,6 +42,50 @@ export const ProtectedRoute: React.FunctionComponent<ProtectedRouteProps> = ({
 const IngestManagerRoutes = ({ ...rest }) => {
   const { epm, fleet } = useConfig();
 
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [initializationError, setInitializationError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      setIsInitialized(false);
+      setInitializationError(null);
+      try {
+        const res = await sendSetup();
+        if (res.error) {
+          setInitializationError(res.error);
+        }
+      } catch (err) {
+        setInitializationError(err);
+      }
+      setIsInitialized(true);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (!isInitialized || initializationError) {
+    return (
+      <EuiErrorBoundary>
+        <DefaultLayout>
+          <WithoutHeaderLayout>
+            {initializationError ? (
+              <Error
+                title={
+                  <FormattedMessage
+                    id="xpack.ingestManager.initializationErrorMessageTitle"
+                    defaultMessage="Unable to initialize Ingest Manager"
+                  />
+                }
+                error={initializationError}
+              />
+            ) : (
+              <Loading />
+            )}
+          </WithoutHeaderLayout>
+        </DefaultLayout>
+      </EuiErrorBoundary>
+    );
+  }
+
   return (
     <EuiErrorBoundary>
       <Router {...rest}>
@@ -44,6 +98,11 @@ const IngestManagerRoutes = ({ ...rest }) => {
           <Route path={AGENT_CONFIG_PATH}>
             <DefaultLayout section="agent_config">
               <AgentConfigApp />
+            </DefaultLayout>
+          </Route>
+          <Route path={DATA_STREAM_PATH}>
+            <DefaultLayout section="data_stream">
+              <DataStreamApp />
             </DefaultLayout>
           </Route>
           <ProtectedRoute path={FLEET_PATH} isAllowed={fleet.enabled}>
@@ -66,22 +125,28 @@ const IngestManagerRoutes = ({ ...rest }) => {
 const IngestManagerApp = ({
   basepath,
   coreStart,
-  deps,
+  setupDeps,
+  startDeps,
   config,
 }: {
   basepath: string;
   coreStart: CoreStart;
-  deps: IngestManagerSetupDeps;
+  setupDeps: IngestManagerSetupDeps;
+  startDeps: IngestManagerStartDeps;
   config: IngestManagerConfigType;
 }) => {
   const isDarkMode = useObservable<boolean>(coreStart.uiSettings.get$('theme:darkMode'));
   return (
     <coreStart.i18n.Context>
       <CoreContext.Provider value={coreStart}>
-        <DepsContext.Provider value={deps}>
+        <DepsContext.Provider value={{ setup: setupDeps, start: startDeps }}>
           <ConfigContext.Provider value={config}>
             <EuiThemeProvider darkMode={isDarkMode}>
-              <IngestManagerRoutes basepath={basepath} />
+              <PackageInstallProvider notifications={coreStart.notifications}>
+                <FleetStatusProvider>
+                  <IngestManagerRoutes basepath={basepath} />
+                </FleetStatusProvider>
+              </PackageInstallProvider>
             </EuiThemeProvider>
           </ConfigContext.Provider>
         </DepsContext.Provider>
@@ -93,12 +158,19 @@ const IngestManagerApp = ({
 export function renderApp(
   coreStart: CoreStart,
   { element, appBasePath }: AppMountParameters,
-  deps: IngestManagerSetupDeps,
+  setupDeps: IngestManagerSetupDeps,
+  startDeps: IngestManagerStartDeps,
   config: IngestManagerConfigType
 ) {
   setHttpClient(coreStart.http);
   ReactDOM.render(
-    <IngestManagerApp basepath={appBasePath} coreStart={coreStart} deps={deps} config={config} />,
+    <IngestManagerApp
+      basepath={appBasePath}
+      coreStart={coreStart}
+      setupDeps={setupDeps}
+      startDeps={startDeps}
+      config={config}
+    />,
     element
   );
 

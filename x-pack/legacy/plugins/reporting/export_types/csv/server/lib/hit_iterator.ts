@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams, SearchResponse } from 'elasticsearch';
 import { i18n } from '@kbn/i18n';
-import { CancellationToken, ScrollConfig, Logger } from '../../../../types';
+import { SearchParams, SearchResponse } from 'elasticsearch';
+import { ScrollConfig } from '../../../../server/types';
+import { CancellationToken, Logger } from '../../../../types';
 
 async function parseResponse(request: SearchResponse<any>) {
   const response = await request;

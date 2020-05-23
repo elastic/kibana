@@ -11,7 +11,7 @@ import { Provider } from 'react-redux';
 import * as selectors from '../store/selectors';
 import { storeFactory } from '../store';
 import { Matrix3, ResolverAction, ResolverStore, SideEffectSimulator } from '../types';
-import { LegacyEndpointEvent } from '../../../../common/types';
+import { ResolverEvent } from '../../../../common/types';
 import { SideEffectContext } from './side_effect_context';
 import { applyMatrix3 } from '../lib/vector2';
 import { sideEffectSimulator } from './side_effect_simulator';
@@ -133,9 +133,9 @@ describe('useCamera on an unpainted element', () => {
       expect(simulator.mock.requestAnimationFrame).not.toHaveBeenCalled();
     });
     describe('when the camera begins animation', () => {
-      let process: LegacyEndpointEvent;
+      let process: ResolverEvent;
       beforeEach(() => {
-        const events: LegacyEndpointEvent[] = [];
+        const events: ResolverEvent[] = [];
         const numberOfEvents: number = Math.floor(Math.random() * 10 + 1);
 
         for (let index = 0; index < numberOfEvents; index++) {
@@ -153,18 +153,12 @@ describe('useCamera on an unpainted element', () => {
         }
         const serverResponseAction: ResolverAction = {
           type: 'serverReturnedResolverData',
-          payload: {
-            data: {
-              result: {
-                search_results: events,
-              },
-            },
-          },
+          payload: events,
         };
         act(() => {
           store.dispatch(serverResponseAction);
         });
-        const processes: LegacyEndpointEvent[] = [
+        const processes: ResolverEvent[] = [
           ...selectors
             .processNodePositionsAndEdgeLineSegments(store.getState())
             .processNodePositions.keys(),

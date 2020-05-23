@@ -4,21 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Reducer } from 'redux';
-import { PolicyListState } from '../../types';
+import { PolicyListState, ImmutableReducer } from '../../types';
 import { AppAction } from '../action';
+import { isOnPolicyListPage } from './selectors';
+import { Immutable } from '../../../../../common/types';
 
 const initialPolicyListState = (): PolicyListState => {
   return {
     policyItems: [],
     isLoading: false,
+    apiError: undefined,
     pageIndex: 0,
     pageSize: 10,
     total: 0,
+    location: undefined,
   };
 };
 
-export const policyListReducer: Reducer<PolicyListState, AppAction> = (
+export const policyListReducer: ImmutableReducer<PolicyListState, AppAction> = (
   state = initialPolicyListState(),
   action
 ) => {
@@ -30,17 +33,34 @@ export const policyListReducer: Reducer<PolicyListState, AppAction> = (
     };
   }
 
-  if (
-    action.type === 'userPaginatedPolicyListTable' ||
-    (action.type === 'userNavigatedToPage' && action.payload === 'policyListPage')
-  ) {
+  if (action.type === 'serverFailedToReturnPolicyListData') {
     return {
       ...state,
-      isLoading: true,
+      apiError: action.payload,
+      isLoading: false,
     };
   }
 
-  if (action.type === 'userNavigatedFromPage' && action.payload === 'policyListPage') {
+  if (action.type === 'userChangedUrl') {
+    const newState: Immutable<PolicyListState> = {
+      ...state,
+      location: action.payload,
+    };
+    const isCurrentlyOnListPage = isOnPolicyListPage(newState);
+    const wasPreviouslyOnListPage = isOnPolicyListPage(state);
+
+    // If on the current page, then return new state with location information
+    // Also adjust some state if user is just entering the policy list view
+    if (isCurrentlyOnListPage) {
+      if (!wasPreviouslyOnListPage) {
+        return {
+          ...newState,
+          apiError: undefined,
+          isLoading: true,
+        };
+      }
+      return newState;
+    }
     return initialPolicyListState();
   }
 

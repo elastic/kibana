@@ -23,6 +23,7 @@ export default function({ getService, loadTestFile }) {
 
   async function loadCurrentData() {
     await browser.setWindowSize(1300, 900);
+    await esArchiver.unload('logstash_functional');
     await esArchiver.loadIfNeeded('dashboard/current/data');
   }
 
@@ -54,6 +55,7 @@ export default function({ getService, loadTestFile }) {
       loadTestFile(require.resolve('./dashboard_options'));
       loadTestFile(require.resolve('./data_shared_attributes'));
       loadTestFile(require.resolve('./embed_mode'));
+      loadTestFile(require.resolve('./dashboard_back_button'));
 
       // Note: This one must be last because it unloads some data for one of its tests!
       // No, this isn't ideal, but loading/unloading takes so much time and these are all bunched
@@ -72,6 +74,7 @@ export default function({ getService, loadTestFile }) {
       loadTestFile(require.resolve('./panel_expand_toggle'));
       loadTestFile(require.resolve('./dashboard_grid'));
       loadTestFile(require.resolve('./view_edit'));
+      loadTestFile(require.resolve('./dashboard_saved_query'));
       // Order of test suites *shouldn't* be important but there's a bug for the view_edit test above
       // https://github.com/elastic/kibana/issues/46752
       // The dashboard_snapshot test below requires the timestamped URL which breaks the view_edit test.

@@ -21,6 +21,18 @@ export const configSchema = schema.object({
       defaultValue: [WhitelistedHosts.Any],
     }
   ),
+  preconfigured: schema.arrayOf(
+    schema.object({
+      id: schema.string({ minLength: 1 }),
+      name: schema.string(),
+      actionTypeId: schema.string({ minLength: 1 }),
+      config: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+      secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+    }),
+    {
+      defaultValue: [],
+    }
+  ),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;

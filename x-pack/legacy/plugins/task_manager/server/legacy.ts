@@ -49,10 +49,10 @@ export function createLegacyApi(legacyTaskManager: Promise<TaskManager>): Legacy
     fetch: (opts: SearchOpts) => legacyTaskManager.then((tm: TaskManager) => tm.fetch(opts)),
     get: (id: string) => legacyTaskManager.then((tm: TaskManager) => tm.get(id)),
     remove: (id: string) => legacyTaskManager.then((tm: TaskManager) => tm.remove(id)),
-    schedule: (taskInstance: TaskInstanceWithDeprecatedFields, options?: any) =>
+    schedule: (taskInstance: TaskInstanceWithDeprecatedFields, options?: object) =>
       legacyTaskManager.then((tm: TaskManager) => tm.schedule(taskInstance, options)),
     runNow: (taskId: string) => legacyTaskManager.then((tm: TaskManager) => tm.runNow(taskId)),
-    ensureScheduled: (taskInstance: TaskInstanceWithId, options?: any) =>
+    ensureScheduled: (taskInstance: TaskInstanceWithId, options?: object) =>
       legacyTaskManager.then((tm: TaskManager) => tm.ensureScheduled(taskInstance, options)),
   };
 }

@@ -6,8 +6,8 @@
 
 import expect from '@kbn/expect';
 
-import { timelineQuery } from '../../../../legacy/plugins/siem/public/containers/timeline/index.gql_query';
-import { Direction, GetTimelineQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
+import { timelineQuery } from '../../../../plugins/siem/public/containers/timeline/index.gql_query';
+import { Direction, GetTimelineQuery } from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const LTE = new Date('3000-01-01T00:00:00.000Z').valueOf();

@@ -90,13 +90,31 @@ In *Edit* mode, you can move, resize, customize, and delete panels to suit your 
 * To move a panel, click and hold the panel header and drag to the new location.
 
 [[resizing-containers]]
-* To resize a panel, click the resize control on the lower right and drag
+* To resize a panel, click the resize control and drag
 to the new dimensions.
 
-* To toggle the use of margins and panel titles, use the *Options* menu in the upper left.
+* To toggle the use of margins and panel titles, use the *Options* menu.
 
 * To delete a panel, open the panel menu and select *Delete from dashboard.* Deleting a panel from a
 dashboard does *not* delete the saved visualization or search.
+
+[float]
+[[cloning-a-panel]]
+=== Clone dashboard elements
+
+In *Edit* mode, you can clone any panel on a dashboard.
+
+To clone an existing panel, open the panel menu of the element you wish to clone, then select *Clone panel*.
+
+* Cloned panels appear beside the original, and will move other panels down to make room if necessary.
+
+* Clones support all of the original panel's functionality, including renaming, editing, and cloning.
+
+* All cloned visualizations will appear in the visualization list.
+
+[role="screenshot"]
+image:images/clone_panel.gif[clone panel]
+
 
 [float]
 [[viewing-detailed-information]]

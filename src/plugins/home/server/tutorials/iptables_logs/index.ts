@@ -52,7 +52,7 @@ number and the action performed on the traffic (allow/deny).. \
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-iptables.html',
       },
     }),
-    // euiIconType: 'logoUbiquiti',
+    euiIconType: '/plugins/home/assets/logos/ubiquiti.svg',
     artifacts: {
       dashboards: [],
       application: {
@@ -66,7 +66,7 @@ number and the action performed on the traffic (allow/deny).. \
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/iptables_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/iptables_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

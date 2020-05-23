@@ -20,6 +20,7 @@
 import { ResponseObject, Server } from 'hapi';
 import { UnwrapPromise } from '@kbn/utility-types';
 
+import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
 import {
   ConfigService,
   CoreSetup,
@@ -38,16 +39,13 @@ import {
   LegacyServiceDiscoverPlugins,
 } from '../../core/server';
 
-// Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectsManagement } from '../../core/server/saved_objects/management';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { LegacyConfig, ILegacyService, ILegacyInternals } from '../../core/server/legacy';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { UiPlugins } from '../../core/server/plugins';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 import { UsageCollectionSetup } from '../../plugins/usage_collection/server';
-import { IndexPatternsServiceFactory } from './index_patterns';
-import { Capabilities } from '../../core/server';
 import { UiSettingsServiceFactoryOptions } from '../../legacy/ui/ui_settings/ui_settings_service_factory';
 import { HomeServerPluginSetup } from '../../plugins/home/server';
 
@@ -70,14 +68,12 @@ declare module 'hapi' {
 
   interface Server {
     config: () => KibanaConfig;
-    indexPatternsServiceFactory: IndexPatternsServiceFactory;
     savedObjects: SavedObjectsLegacyService;
     injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
     getHiddenUiAppById(appId: string): UiApp;
     addScopedTutorialContextFactory: (
       scopedTutorialContextFactory: (...args: any[]) => any
     ) => void;
-    getSavedObjectsManagement(): SavedObjectsManagement;
     getInjectedUiAppVars: (pluginName: string) => { [key: string]: any };
     getUiNavLinks(): Array<{ _id: string }>;
     addMemoizedFactoryToRequest: (
@@ -92,7 +88,6 @@ declare module 'hapi' {
   interface Request {
     getSavedObjectsClient(options?: SavedObjectsClientProviderOptions): SavedObjectsClientContract;
     getBasePath(): string;
-    getDefaultRoute(): Promise<string>;
     getUiSettingsService(): IUiSettingsClient;
   }
 
@@ -105,6 +100,7 @@ type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promi
 
 export interface PluginsSetup {
   usageCollection: UsageCollectionSetup;
+  telemetryCollectionManager: TelemetryCollectionManagerPluginSetup;
   home: HomeServerPluginSetup;
   [key: string]: object;
 }
@@ -116,7 +112,7 @@ export interface KibanaCore {
     kibanaMigrator: LegacyServiceStartDeps['core']['savedObjects']['migrator'];
     legacy: ILegacyInternals;
     rendering: LegacyServiceSetupDeps['core']['rendering'];
-    uiPlugins: LegacyServiceSetupDeps['core']['plugins']['uiPlugins'];
+    uiPlugins: UiPlugins;
     uiSettings: LegacyServiceSetupDeps['core']['uiSettings'];
     savedObjectsClientProvider: LegacyServiceStartDeps['core']['savedObjects']['clientProvider'];
   };
@@ -157,6 +153,7 @@ export default class KbnServer {
   public server: Server;
   public inject: Server['inject'];
   public pluginSpecs: any[];
+  public uiBundles: any;
 
   constructor(
     settings: Record<string, any>,
@@ -178,5 +175,4 @@ export default class KbnServer {
 export { Server, Request, ResponseToolkit } from 'hapi';
 
 // Re-export commonly accessed api types.
-export { IndexPatternsFetcher as IndexPatternsService } from './index_patterns';
 export { SavedObjectsLegacyService, SavedObjectsClient } from 'src/core/server';

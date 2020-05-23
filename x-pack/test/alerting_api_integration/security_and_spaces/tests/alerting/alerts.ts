@@ -97,9 +97,11 @@ export default function alertTests({ getService }: FtrProviderContext) {
               // Wait for the action to index a document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('action:test.index-record', reference);
 
+              await taskManagerUtils.waitForAllTasksIdle(testStart);
+
               const alertId = response.body.id;
               await alertUtils.disable(alertId);
-              await taskManagerUtils.waitForIdle(testStart);
+              await taskManagerUtils.waitForEmpty(testStart);
 
               // Ensure only 1 alert executed with proper params
               const alertSearchResult = await esTestIndexTool.search(
@@ -163,17 +165,117 @@ instanceStateValue: true
           }
         });
 
+        it('should schedule task, run alert and schedule preconfigured actions when appropriate', async () => {
+          const testStart = new Date();
+          const reference = alertUtils.generateReference();
+          const response = await alertUtils.createAlwaysFiringAction({
+            reference,
+            indexRecordActionId: 'preconfigured.test.index-record',
+          });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(404);
+              expect(response.body).to.eql({
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Not Found',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(200);
+
+              // Wait for the action to index a document before disabling the alert and waiting for tasks to finish
+              await esTestIndexTool.waitForDocs('action:test.index-record', reference);
+
+              await taskManagerUtils.waitForAllTasksIdle(testStart);
+
+              const alertId = response.body.id;
+              await alertUtils.disable(alertId);
+              await taskManagerUtils.waitForEmpty(testStart);
+
+              // Ensure only 1 alert executed with proper params
+              const alertSearchResult = await esTestIndexTool.search(
+                'alert:test.always-firing',
+                reference
+              );
+              expect(alertSearchResult.hits.total.value).to.eql(1);
+              expect(alertSearchResult.hits.hits[0]._source).to.eql({
+                source: 'alert:test.always-firing',
+                reference,
+                state: {},
+                params: {
+                  index: ES_TEST_INDEX_NAME,
+                  reference,
+                },
+                alertInfo: {
+                  alertId,
+                  spaceId: space.id,
+                  namespace: space.id,
+                  name: 'abc',
+                  tags: ['tag-A', 'tag-B'],
+                  createdBy: user.fullName,
+                  updatedBy: user.fullName,
+                },
+              });
+
+              // Ensure only 1 action executed with proper params
+              const actionSearchResult = await esTestIndexTool.search(
+                'action:test.index-record',
+                reference
+              );
+              expect(actionSearchResult.hits.total.value).to.eql(1);
+              expect(actionSearchResult.hits.hits[0]._source).to.eql({
+                config: {
+                  unencrypted: 'ignored-but-required',
+                },
+                secrets: {
+                  encrypted: 'this-is-also-ignored-and-also-required',
+                },
+                params: {
+                  index: ES_TEST_INDEX_NAME,
+                  reference,
+                  message: `
+alertId: ${alertId},
+alertName: abc,
+spaceId: ${space.id},
+tags: tag-A,tag-B,
+alertInstanceId: 1,
+instanceContextValue: true,
+instanceStateValue: true
+`.trim(),
+                },
+                reference,
+                source: 'action:test.index-record',
+              });
+
+              await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
         it('should pass updated alert params to executor', async () => {
+          const testStart = new Date();
           // create an alert
           const reference = alertUtils.generateReference();
-          const overwrites = {
-            throttle: '1s',
-            schedule: { interval: '1s' },
-          };
-          const response = await alertUtils.createAlwaysFiringAction({ reference, overwrites });
+          const response = await alertUtils.createAlwaysFiringAction({
+            reference,
+            overwrites: { throttle: null },
+          });
 
           // only need to test creation success paths
           if (response.statusCode !== 200) return;
+
+          // Wait for the action to index a document before disabling the alert and waiting for tasks to finish
+          await esTestIndexTool.waitForDocs('action:test.index-record', reference);
+
+          // Avoid invalidating an API key while the alert is executing
+          await taskManagerUtils.waitForAllTasksIdle(testStart);
 
           // update the alert with super user
           const alertId = response.body.id;
@@ -186,8 +288,8 @@ instanceStateValue: true
             overwrites: {
               name: 'def',
               tags: ['fee', 'fi', 'fo'],
-              throttle: '1s',
-              schedule: { interval: '1s' },
+              // This will cause the task to re-run on update
+              schedule: { interval: '59s' },
             },
           });
 
@@ -195,6 +297,9 @@ instanceStateValue: true
 
           // make sure alert info passed to executor is correct
           await esTestIndexTool.waitForDocs('alert:test.always-firing', reference2);
+
+          await taskManagerUtils.waitForAllTasksIdle(testStart);
+
           await alertUtils.disable(alertId);
           const alertSearchResult = await esTestIndexTool.search(
             'alert:test.always-firing',
@@ -357,16 +462,21 @@ instanceStateValue: true
               // Wait for test.authorization to index a document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('alert:test.authorization', reference);
               await alertUtils.disable(response.body.id);
-              await taskManagerUtils.waitForIdle(testStart);
+              await taskManagerUtils.waitForEmpty(testStart);
 
               // Ensure only 1 document exists with proper params
               searchResult = await esTestIndexTool.search('alert:test.authorization', reference);
               expect(searchResult.hits.total.value).to.eql(1);
               expect(searchResult.hits.hits[0]._source.state).to.eql({
                 callClusterSuccess: false,
+                callScopedClusterSuccess: false,
                 savedObjectsClientSuccess: false,
                 callClusterError: {
                   ...searchResult.hits.hits[0]._source.state.callClusterError,
+                  statusCode: 403,
+                },
+                callScopedClusterError: {
+                  ...searchResult.hits.hits[0]._source.state.callScopedClusterError,
                   statusCode: 403,
                 },
                 savedObjectsClientError: {
@@ -385,13 +495,14 @@ instanceStateValue: true
               // Wait for test.authorization to index a document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('alert:test.authorization', reference);
               await alertUtils.disable(response.body.id);
-              await taskManagerUtils.waitForIdle(testStart);
+              await taskManagerUtils.waitForEmpty(testStart);
 
               // Ensure only 1 document exists with proper params
               searchResult = await esTestIndexTool.search('alert:test.authorization', reference);
               expect(searchResult.hits.total.value).to.eql(1);
               expect(searchResult.hits.hits[0]._source.state).to.eql({
                 callClusterSuccess: true,
+                callScopedClusterSuccess: true,
                 savedObjectsClientSuccess: false,
                 savedObjectsClientError: {
                   ...searchResult.hits.hits[0]._source.state.savedObjectsClientError,
@@ -465,16 +576,21 @@ instanceStateValue: true
               // Ensure test.authorization indexed 1 document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('action:test.authorization', reference);
               await alertUtils.disable(response.body.id);
-              await taskManagerUtils.waitForIdle(testStart);
+              await taskManagerUtils.waitForEmpty(testStart);
 
               // Ensure only 1 document with proper params exists
               searchResult = await esTestIndexTool.search('action:test.authorization', reference);
               expect(searchResult.hits.total.value).to.eql(1);
               expect(searchResult.hits.hits[0]._source.state).to.eql({
                 callClusterSuccess: false,
+                callScopedClusterSuccess: false,
                 savedObjectsClientSuccess: false,
                 callClusterError: {
                   ...searchResult.hits.hits[0]._source.state.callClusterError,
+                  statusCode: 403,
+                },
+                callScopedClusterError: {
+                  ...searchResult.hits.hits[0]._source.state.callScopedClusterError,
                   statusCode: 403,
                 },
                 savedObjectsClientError: {
@@ -493,13 +609,14 @@ instanceStateValue: true
               // Ensure test.authorization indexed 1 document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('action:test.authorization', reference);
               await alertUtils.disable(response.body.id);
-              await taskManagerUtils.waitForIdle(testStart);
+              await taskManagerUtils.waitForEmpty(testStart);
 
               // Ensure only 1 document with proper params exists
               searchResult = await esTestIndexTool.search('action:test.authorization', reference);
               expect(searchResult.hits.total.value).to.eql(1);
               expect(searchResult.hits.hits[0]._source.state).to.eql({
                 callClusterSuccess: true,
+                callScopedClusterSuccess: true,
                 savedObjectsClientSuccess: false,
                 savedObjectsClientError: {
                   ...searchResult.hits.hits[0]._source.state.savedObjectsClientError,
@@ -542,7 +659,7 @@ instanceStateValue: true
               // Wait until alerts scheduled actions 3 times before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 3);
               await alertUtils.disable(response.body.id);
-              await taskManagerUtils.waitForIdle(testStart);
+              await taskManagerUtils.waitForEmpty(testStart);
 
               // Ensure actions only executed once
               const searchResult = await esTestIndexTool.search(
@@ -608,7 +725,7 @@ instanceStateValue: true
               // Wait for actions to execute twice before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('action:test.index-record', reference, 2);
               await alertUtils.disable(response.body.id);
-              await taskManagerUtils.waitForIdle(testStart);
+              await taskManagerUtils.waitForEmpty(testStart);
 
               // Ensure only 2 actions with proper params exists
               const searchResult = await esTestIndexTool.search(
@@ -658,7 +775,7 @@ instanceStateValue: true
               // Actions should execute twice before widning things down
               await esTestIndexTool.waitForDocs('action:test.index-record', reference, 2);
               await alertUtils.disable(response.body.id);
-              await taskManagerUtils.waitForIdle(testStart);
+              await taskManagerUtils.waitForEmpty(testStart);
 
               // Ensure only 2 actions are executed
               const searchResult = await esTestIndexTool.search(
@@ -703,7 +820,7 @@ instanceStateValue: true
               // execution once before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 2);
               await alertUtils.disable(response.body.id);
-              await taskManagerUtils.waitForIdle(testStart);
+              await taskManagerUtils.waitForEmpty(testStart);
 
               // Should not have executed any action
               const executedActionsResult = await esTestIndexTool.search(
@@ -748,7 +865,7 @@ instanceStateValue: true
               // once before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 2);
               await alertUtils.disable(response.body.id);
-              await taskManagerUtils.waitForIdle(testStart);
+              await taskManagerUtils.waitForEmpty(testStart);
 
               // Should not have executed any action
               const executedActionsResult = await esTestIndexTool.search(
@@ -794,7 +911,7 @@ instanceStateValue: true
               // Ensure actions are executed once before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('action:test.index-record', reference, 1);
               await alertUtils.disable(response.body.id);
-              await taskManagerUtils.waitForIdle(testStart);
+              await taskManagerUtils.waitForEmpty(testStart);
 
               // Should have one document indexed by the action
               const searchResult = await esTestIndexTool.search(

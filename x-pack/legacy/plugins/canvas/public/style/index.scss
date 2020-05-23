@@ -51,8 +51,9 @@
 @import '../components/toolbar/tray/tray';
 @import '../components/tooltip_annotation/tooltip_annotation';
 @import '../components/workpad/workpad';
-@import '../components/workpad_header/control_settings/control_settings';
-@import '../components/workpad_header/workpad_export/workpad_export';
+@import '../components/workpad_header/element_menu/element_menu';
+@import '../components/workpad_header/share_menu/share_menu';
+@import '../components/workpad_header/view_menu/view_menu';
 @import '../components/workpad_loader/workpad_loader';
 @import '../components/workpad_loader/workpad_dropzone/workpad_dropzone';
 @import '../components/workpad_page/workpad_page';
@@ -61,10 +62,8 @@
 
 @import '../../canvas_plugin_src/renderers/advanced_filter/component/advanced_filter.scss';
 @import '../../canvas_plugin_src/renderers/dropdown_filter/component/dropdown_filter.scss';
+@import '../../canvas_plugin_src/renderers/embeddable/embeddable.scss';
 @import '../../canvas_plugin_src/renderers/plot/plot.scss';
 @import '../../canvas_plugin_src/renderers/reveal_image/reveal_image.scss';
-@import '../../canvas_plugin_src/renderers/time_filter/components/datetime_calendar/datetime_calendar.scss';
-@import '../../canvas_plugin_src/renderers/time_filter/components/datetime_range_absolute/datetime_range_absolute.scss';
-@import '../../canvas_plugin_src/renderers/time_filter/components/time_picker/time_picker.scss';
-@import '../../canvas_plugin_src/renderers/time_filter/components/time_picker_popover/time_picker_popover.scss';
+@import '../../canvas_plugin_src/renderers/time_filter/time_filter.scss';
 @import '../../canvas_plugin_src/uis/arguments/image_upload/image_upload.scss';

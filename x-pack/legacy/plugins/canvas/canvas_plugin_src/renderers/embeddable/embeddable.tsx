@@ -6,103 +6,113 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nContext } from 'ui/i18n';
-import { npStart } from 'ui/new_platform';
+import { CoreStart } from '../../../../../../../src/core/public';
+import { StartDeps } from '../../plugin';
 import {
   IEmbeddable,
   EmbeddableFactory,
   EmbeddablePanel,
   EmbeddableFactoryNotFoundError,
 } from '../../../../../../../src/plugins/embeddable/public';
-import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { RendererStrings } from '../../../i18n';
 import { getSavedObjectFinder } from '../../../../../../../src/plugins/saved_objects/public';
-
-const { embeddable: strings } = RendererStrings;
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
 import { EmbeddableInput } from '../../expression_types';
 import { RendererHandlers } from '../../../types';
+import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
+
+const { embeddable: strings } = RendererStrings;
 
 const embeddablesRegistry: {
   [key: string]: IEmbeddable;
 } = {};
 
-const renderEmbeddable = (embeddableObject: IEmbeddable, domNode: HTMLElement) => {
-  return (
-    <div
-      className="embeddable"
-      style={{ width: domNode.offsetWidth, height: domNode.offsetHeight, cursor: 'auto' }}
-    >
-      <I18nContext>
-        <EmbeddablePanel
-          embeddable={embeddableObject}
-          getActions={npStart.plugins.uiActions.getTriggerCompatibleActions}
-          getEmbeddableFactory={start.getEmbeddableFactory}
-          getAllEmbeddableFactories={start.getEmbeddableFactories}
-          notifications={npStart.core.notifications}
-          overlays={npStart.core.overlays}
-          inspector={npStart.plugins.inspector}
-          SavedObjectFinder={getSavedObjectFinder(
-            npStart.core.savedObjects,
-            npStart.core.uiSettings
-          )}
-        />
-      </I18nContext>
-    </div>
-  );
+const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
+  const I18nContext = core.i18n.Context;
+
+  return (embeddableObject: IEmbeddable, domNode: HTMLElement) => {
+    return (
+      <div
+        className={CANVAS_EMBEDDABLE_CLASSNAME}
+        style={{ width: domNode.offsetWidth, height: domNode.offsetHeight, cursor: 'auto' }}
+      >
+        <I18nContext>
+          <EmbeddablePanel
+            embeddable={embeddableObject}
+            getActions={plugins.uiActions.getTriggerCompatibleActions}
+            getEmbeddableFactory={plugins.embeddable.getEmbeddableFactory}
+            getAllEmbeddableFactories={plugins.embeddable.getEmbeddableFactories}
+            notifications={core.notifications}
+            overlays={core.overlays}
+            application={core.application}
+            inspector={plugins.inspector}
+            SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
+          />
+        </I18nContext>
+      </div>
+    );
+  };
 };
 
-const embeddable = () => ({
-  name: 'embeddable',
-  displayName: strings.getDisplayName(),
-  help: strings.getHelpDescription(),
-  reuseDomNode: true,
-  render: async (
-    domNode: HTMLElement,
-    { input, embeddableType }: EmbeddableExpression<EmbeddableInput>,
-    handlers: RendererHandlers
-  ) => {
-    const uniqueId = handlers.getElementId();
+export const embeddableRendererFactory = (core: CoreStart, plugins: StartDeps) => {
+  const renderEmbeddable = renderEmbeddableFactory(core, plugins);
+  return () => ({
+    name: 'embeddable',
+    displayName: strings.getDisplayName(),
+    help: strings.getHelpDescription(),
+    reuseDomNode: true,
+    render: async (
+      domNode: HTMLElement,
+      { input, embeddableType }: EmbeddableExpression<EmbeddableInput>,
+      handlers: RendererHandlers
+    ) => {
+      const uniqueId = handlers.getElementId();
 
-    if (!embeddablesRegistry[uniqueId]) {
-      const factory = Array.from(start.getEmbeddableFactories()).find(
-        embeddableFactory => embeddableFactory.type === embeddableType
-      ) as EmbeddableFactory<EmbeddableInput>;
+      if (!embeddablesRegistry[uniqueId]) {
+        const factory = Array.from(plugins.embeddable.getEmbeddableFactories()).find(
+          embeddableFactory => embeddableFactory.type === embeddableType
+        ) as EmbeddableFactory<EmbeddableInput>;
 
-      if (!factory) {
-        handlers.done();
-        throw new EmbeddableFactoryNotFoundError(embeddableType);
-      }
+        if (!factory) {
+          handlers.done();
+          throw new EmbeddableFactoryNotFoundError(embeddableType);
+        }
 
-      const embeddableObject = await factory.createFromSavedObject(input.id, input);
+        const embeddableObject = await factory.createFromSavedObject(input.id, input);
 
-      embeddablesRegistry[uniqueId] = embeddableObject;
-      ReactDOM.unmountComponentAtNode(domNode);
+        embeddablesRegistry[uniqueId] = embeddableObject;
+        ReactDOM.unmountComponentAtNode(domNode);
 
-      const subscription = embeddableObject.getInput$().subscribe(function(updatedInput) {
-        handlers.onEmbeddableInputChange(embeddableInputToExpression(updatedInput, embeddableType));
-      });
-      ReactDOM.render(renderEmbeddable(embeddableObject, domNode), domNode, () => handlers.done());
+        const subscription = embeddableObject.getInput$().subscribe(function(updatedInput) {
+          const updatedExpression = embeddableInputToExpression(updatedInput, embeddableType);
 
-      handlers.onResize(() => {
+          if (updatedExpression) {
+            handlers.onEmbeddableInputChange(updatedExpression);
+          }
+        });
+
         ReactDOM.render(renderEmbeddable(embeddableObject, domNode), domNode, () =>
           handlers.done()
         );
-      });
 
-      handlers.onDestroy(() => {
-        subscription.unsubscribe();
-        handlers.onEmbeddableDestroyed();
+        handlers.onResize(() => {
+          ReactDOM.render(renderEmbeddable(embeddableObject, domNode), domNode, () =>
+            handlers.done()
+          );
+        });
 
-        delete embeddablesRegistry[uniqueId];
+        handlers.onDestroy(() => {
+          subscription.unsubscribe();
+          handlers.onEmbeddableDestroyed();
 
-        return ReactDOM.unmountComponentAtNode(domNode);
-      });
-    } else {
-      embeddablesRegistry[uniqueId].updateInput(input);
-    }
-  },
-});
+          delete embeddablesRegistry[uniqueId];
 
-export { embeddable };
+          return ReactDOM.unmountComponentAtNode(domNode);
+        });
+      } else {
+        embeddablesRegistry[uniqueId].updateInput(input);
+      }
+    },
+  });
+};

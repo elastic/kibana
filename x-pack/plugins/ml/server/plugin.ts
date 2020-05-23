@@ -7,16 +7,21 @@
 import { i18n } from '@kbn/i18n';
 import {
   CoreSetup,
+  CoreStart,
   Plugin,
   IScopedClusterClient,
+  KibanaRequest,
   Logger,
   PluginInitializerContext,
+  ICustomClusterClient,
+  CapabilitiesStart,
 } from 'kibana/server';
 import { PluginsSetup, RouteInitialization } from './types';
-import { PLUGIN_ID } from '../../../legacy/plugins/ml/common/constants/app';
+import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
+import { MlCapabilities } from '../common/types/capabilities';
 
 import { elasticsearchJsPlugin } from './client/elasticsearch_ml';
-import { makeMlUsageCollector } from './lib/ml_telemetry';
+import { initMlTelemetry } from './lib/telemetry';
 import { initMlServerLog } from './client/log';
 import { initSampleDataSets } from './lib/sample_data_sets';
 
@@ -37,9 +42,12 @@ import { jobValidationRoutes } from './routes/job_validation';
 import { notificationRoutes } from './routes/notification_settings';
 import { resultsServiceRoutes } from './routes/results_service';
 import { systemRoutes } from './routes/system';
-import { MlLicense } from '../../../legacy/plugins/ml/common/license';
+import { MlLicense } from '../common/license';
 import { MlServerLicense } from './lib/license';
 import { createSharedServices, SharedServices } from './shared_services';
+import { getPluginPrivileges } from '../common/types/capabilities';
+import { setupCapabilitiesSwitcher } from './lib/capabilities';
+import { registerKibanaSettings } from './lib/register_settings';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
@@ -49,13 +57,16 @@ declare module 'kibana/server' {
   }
 }
 
-export type MlSetupContract = SharedServices;
-export type MlStartContract = void;
+export interface MlPluginSetup extends SharedServices {
+  mlClient: ICustomClusterClient;
+}
+export type MlPluginStart = void;
 
-export class MlServerPlugin implements Plugin<MlSetupContract, MlStartContract, PluginsSetup> {
+export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, PluginsSetup> {
   private log: Logger;
   private version: string;
   private mlLicense: MlServerLicense;
+  private capabilities: CapabilitiesStart | null = null;
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
@@ -63,35 +74,63 @@ export class MlServerPlugin implements Plugin<MlSetupContract, MlStartContract, 
     this.mlLicense = new MlServerLicense();
   }
 
-  public setup(coreSetup: CoreSetup, plugins: PluginsSetup): MlSetupContract {
+  public setup(coreSetup: CoreSetup, plugins: PluginsSetup): MlPluginSetup {
+    const { user, admin } = getPluginPrivileges();
+
     plugins.features.registerFeature({
       id: PLUGIN_ID,
       name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
         defaultMessage: 'Machine Learning',
       }),
-      icon: 'machineLearningApp',
+      icon: PLUGIN_ICON,
+      order: 500,
       navLinkId: PLUGIN_ID,
       app: [PLUGIN_ID, 'kibana'],
       catalogue: [PLUGIN_ID],
-      privileges: {},
+      privileges: null,
       reserved: {
-        privilege: {
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: [],
-        },
         description: i18n.translate('xpack.ml.feature.reserved.description', {
           defaultMessage:
             'To grant users access, you should also assign either the machine_learning_user or machine_learning_admin role.',
         }),
+        privileges: [
+          {
+            id: 'ml_user',
+            privilege: {
+              api: user.api,
+              app: [PLUGIN_ID, 'kibana'],
+              catalogue: [PLUGIN_ID],
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: user.ui,
+            },
+          },
+          {
+            id: 'ml_admin',
+            privilege: {
+              api: admin.api,
+              app: [PLUGIN_ID, 'kibana'],
+              catalogue: [PLUGIN_ID],
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: admin.ui,
+            },
+          },
+        ],
       },
     });
+    registerKibanaSettings(coreSetup);
 
     this.mlLicense.setup(plugins.licensing.license$, [
       (mlLicense: MlLicense) => initSampleDataSets(mlLicense, plugins),
     ]);
+
+    // initialize capabilities switcher to add license filter to ml capabilities
+    setupCapabilitiesSwitcher(coreSetup, plugins.licensing.license$, this.log);
 
     // Can access via router's handler function 'context' parameter - context.ml.mlClient
     const mlClient = coreSetup.elasticsearch.createClient(PLUGIN_ID, {
@@ -107,6 +146,14 @@ export class MlServerPlugin implements Plugin<MlSetupContract, MlStartContract, 
     const routeInit: RouteInitialization = {
       router: coreSetup.http.createRouter(),
       mlLicense: this.mlLicense,
+    };
+
+    const resolveMlCapabilities = async (request: KibanaRequest) => {
+      if (this.capabilities === null) {
+        return null;
+      }
+      const capabilities = await this.capabilities.resolveCapabilities(request);
+      return capabilities.ml as MlCapabilities;
     };
 
     annotationRoutes(routeInit, plugins.security);
@@ -128,16 +175,20 @@ export class MlServerPlugin implements Plugin<MlSetupContract, MlStartContract, 
     systemRoutes(routeInit, {
       spaces: plugins.spaces,
       cloud: plugins.cloud,
+      resolveMlCapabilities,
     });
     initMlServerLog({ log: this.log });
-    coreSetup.getStartServices().then(([core]) => {
-      makeMlUsageCollector(plugins.usageCollection, core.savedObjects);
-    });
+    initMlTelemetry(coreSetup, plugins.usageCollection);
 
-    return createSharedServices(this.mlLicense, plugins.spaces, plugins.cloud);
+    return {
+      ...createSharedServices(this.mlLicense, plugins.spaces, plugins.cloud, resolveMlCapabilities),
+      mlClient,
+    };
   }
 
-  public start(): MlStartContract {}
+  public start(coreStart: CoreStart): MlPluginStart {
+    this.capabilities = coreStart.capabilities;
+  }
 
   public stop() {
     this.mlLicense.unsubscribe();

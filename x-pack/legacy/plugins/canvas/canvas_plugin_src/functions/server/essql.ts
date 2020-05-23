@@ -5,9 +5,11 @@
  */
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+/* eslint-disable */
 // @ts-ignore untyped local
-import { queryEsSQL } from '../../../server/lib/query_es_sql';
-import { Filter } from '../../../types';
+import { queryEsSQL } from '../../../../../../plugins/canvas/server/lib/query_es_sql';
+/* eslint-enable */
+import { ExpressionValueFilter } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
@@ -16,7 +18,12 @@ interface Arguments {
   timezone: string;
 }
 
-export function essql(): ExpressionFunctionDefinition<'essql', Filter, Arguments, any> {
+export function essql(): ExpressionFunctionDefinition<
+  'essql',
+  ExpressionValueFilter,
+  Arguments,
+  any
+> {
   const { help, args: argHelp } = getFunctionHelp().essql;
 
   return {

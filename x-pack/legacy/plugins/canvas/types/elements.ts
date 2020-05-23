@@ -9,10 +9,10 @@ import { CanvasElement } from '.';
 
 export interface ElementSpec {
   name: string;
-  image: string;
+  icon?: string;
   expression: string;
   displayName?: string;
-  tags?: string[];
+  type?: string;
   help?: string;
   filter?: string;
   width?: number;
@@ -42,10 +42,6 @@ export interface CustomElement {
    * base 64 data URL string of the preview image
    */
   image?: string;
-  /**
-   * tags associated with the element
-   */
-  tags?: string[];
   /**
    * the element object stringified
    */
@@ -79,4 +75,8 @@ export interface ElementPosition {
   parent: string | null;
 }
 
-export type PositionedElement = CanvasElement & { ast: ExpressionAstExpression };
+export type PositionedElement = CanvasElement & {
+  ast: ExpressionAstExpression;
+} & {
+  position: ElementPosition;
+};

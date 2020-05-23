@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../legacy/plugins/siem/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/siem/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -48,7 +48,6 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .delete(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`)
           .set('kbn-xsrf', 'true')
-          .query()
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
@@ -67,7 +66,6 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .delete(`${DETECTION_ENGINE_RULES_URL}?rule_id=${bodyWithCreatedRule.rule_id}`)
           .set('kbn-xsrf', 'true')
-          .query()
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
@@ -86,7 +84,6 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .delete(`${DETECTION_ENGINE_RULES_URL}?id=${bodyWithCreatedRule.id}`)
           .set('kbn-xsrf', 'true')
-          .query()
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
@@ -97,7 +94,6 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .delete(`${DETECTION_ENGINE_RULES_URL}?id=fake_id`)
           .set('kbn-xsrf', 'true')
-          .query()
           .expect(404);
 
         expect(body).to.eql({
@@ -110,7 +106,6 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await supertest
           .delete(`${DETECTION_ENGINE_RULES_URL}?rule_id=fake_id`)
           .set('kbn-xsrf', 'true')
-          .query()
           .expect(404);
 
         expect(body).to.eql({

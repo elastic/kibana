@@ -5,6 +5,7 @@
  */
 
 import {
+  EMS_APP_NAME,
   EMS_CATALOGUE_PATH,
   EMS_FILES_API_PATH,
   EMS_FILES_CATALOGUE_PATH,
@@ -20,7 +21,7 @@ import {
   GIS_API_PATH,
   EMS_SPRITES_PATH,
   INDEX_SETTINGS_API_PATH,
-} from '../common/constants';
+} from '../../../../plugins/maps/common/constants';
 import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
 import { i18n } from '@kbn/i18n';
@@ -38,10 +39,12 @@ export function initRoutes(server, licenseUid) {
   if (mapConfig.includeElasticMapsService) {
     emsClient = new EMSClient({
       language: i18n.getLocale(),
-      kbnVersion: serverConfig.get('pkg.version'),
+      appVersion: serverConfig.get('pkg.version'),
+      appName: EMS_APP_NAME,
       fileApiUrl: mapConfig.emsFileApiUrl,
       tileApiUrl: mapConfig.emsTileApiUrl,
       landingPageUrl: mapConfig.emsLandingPageUrl,
+      fetchFunction: fetch,
     });
     emsClient.addQueryParams({ license: licenseUid });
   } else {
@@ -404,26 +407,6 @@ export function initRoutes(server, licenseUid) {
         url: proxyPathUrl,
         contentType: request.params.extension === 'png' ? 'image/png' : '',
       });
-    },
-  });
-
-  server.route({
-    method: 'GET',
-    path: `${ROOT}/indexCount`,
-    handler: async (request, h) => {
-      const { server, query } = request;
-
-      if (!query.index) {
-        return h.response().code(400);
-      }
-
-      const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-      try {
-        const { count } = await callWithRequest(request, 'count', { index: query.index });
-        return { count };
-      } catch (error) {
-        return h.response().code(400);
-      }
     },
   });
 

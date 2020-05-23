@@ -17,7 +17,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useContext, useMemo } from 'react';
-import { Prompt } from 'react-router-dom';
 
 import { Source } from '../../containers/source';
 import { FieldsConfigurationPanel } from './fields_configuration_panel';
@@ -26,6 +25,7 @@ import { NameConfigurationPanel } from './name_configuration_panel';
 import { LogColumnsConfigurationPanel } from './log_columns_configuration_panel';
 import { useSourceConfigurationFormState } from './source_configuration_form_state';
 import { SourceLoadingPage } from '../source_loading_page';
+import { Prompt } from '../../utils/navigation_warning_prompt';
 
 interface SourceConfigurationSettingsProps {
   shouldAllowEdit: boolean;
@@ -41,6 +41,7 @@ export const SourceConfigurationSettings = ({
     source,
     sourceExists,
     isLoading,
+    isUninitialized,
     updateSourceConfiguration,
   } = useContext(Source.Context);
 
@@ -83,10 +84,10 @@ export const SourceConfigurationSettings = ({
     source,
   ]);
 
-  if (!source) {
+  if ((isLoading || isUninitialized) && !source) {
     return <SourceLoadingPage />;
   }
-  if (!source.configuration) {
+  if (!source?.configuration) {
     return null;
   }
 
@@ -99,10 +100,13 @@ export const SourceConfigurationSettings = ({
           data-test-subj="sourceConfigurationContent"
         >
           <Prompt
-            when={isFormDirty}
-            message={i18n.translate('xpack.infra.sourceConfiguration.unsavedFormPrompt', {
-              defaultMessage: 'Are you sure you want to leave? Changes will be lost',
-            })}
+            prompt={
+              isFormDirty
+                ? i18n.translate('xpack.infra.sourceConfiguration.unsavedFormPrompt', {
+                    defaultMessage: 'Are you sure you want to leave? Changes will be lost',
+                  })
+                : undefined
+            }
           />
           <EuiPanel paddingSize="l">
             <NameConfigurationPanel

@@ -57,6 +57,7 @@ export function createKbnUrlTracker({
   navLinkUpdater$,
   toastNotifications,
   history,
+  getHistory,
   storage,
   shouldTrackUrlUpdate = pathname => {
     const currentAppName = defaultSubUrl.slice(2); // cut hash and slash symbols
@@ -103,6 +104,12 @@ export function createKbnUrlTracker({
    * History object to use to track url changes. If this isn't provided, a local history instance will be created.
    */
   history?: History;
+
+  /**
+   * Lazily retrieve history instance
+   */
+  getHistory?: () => History;
+
   /**
    * Storage object to use to persist currently active url. If this isn't provided, the browser wide session storage instance will be used.
    */
@@ -115,7 +122,6 @@ export function createKbnUrlTracker({
    */
   shouldTrackUrlUpdate?: (pathname: string) => boolean;
 }): KbnUrlTracker {
-  const historyInstance = history || createHashHistory();
   const storageInstance = storage || sessionStorage;
 
   // local state storing current listeners and active url
@@ -159,6 +165,7 @@ export function createKbnUrlTracker({
 
   function onMountApp() {
     unsubscribe();
+    const historyInstance = history || (getHistory && getHistory()) || createHashHistory();
     // track current hash when within app
     unsubscribeURLHistory = historyInstance.listen(location => {
       if (shouldTrackUrlUpdate(location.pathname)) {

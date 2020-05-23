@@ -7,8 +7,6 @@
 import { pageHelpers, nextTick, setupEnvironment } from './helpers';
 import { NON_ALPHA_NUMERIC_CHARS, ACCENTED_CHARS } from './helpers/constants';
 
-jest.mock('ui/new_platform');
-
 const { setup } = pageHelpers.remoteClustersAdd;
 
 describe('Create Remote cluster', () => {
@@ -51,6 +49,17 @@ describe('Create Remote cluster', () => {
       form.toggleEuiSwitch('remoteClusterFormSkipUnavailableFormToggle');
 
       expect(find('remoteClusterFormSkipUnavailableFormToggle').props()['aria-checked']).toBe(true);
+    });
+
+    test('should have a toggle to enable "proxy" mode for a remote cluster', () => {
+      expect(exists('remoteClusterFormConnectionModeToggle')).toBe(true);
+
+      // By default it should be set to "false"
+      expect(find('remoteClusterFormConnectionModeToggle').props()['aria-checked']).toBe(false);
+
+      form.toggleEuiSwitch('remoteClusterFormConnectionModeToggle');
+
+      expect(find('remoteClusterFormConnectionModeToggle').props()['aria-checked']).toBe(true);
     });
 
     test('should display errors and disable the save button when clicking "save" without filling the form', () => {
@@ -141,6 +150,45 @@ describe('Create Remote cluster', () => {
         expect(form.getErrorsMessages()).toContain('A port is required.');
 
         form.setComboBoxValue('remoteClusterFormSeedsInput', '192.168.1.1:abc');
+        expect(form.getErrorsMessages()).toContain('A port is required.');
+      });
+    });
+
+    describe('proxy address', () => {
+      let actions;
+      let form;
+
+      beforeEach(async () => {
+        ({ form, actions } = setup());
+
+        // Enable "proxy" mode
+        form.toggleEuiSwitch('remoteClusterFormConnectionModeToggle');
+      });
+
+      test('should only allow alpha-numeric characters and "-" (dash) in the proxy address "host" part', () => {
+        actions.clickSaveForm(); // display form errors
+
+        const notInArray = array => value => array.indexOf(value) < 0;
+
+        const expectInvalidChar = char => {
+          form.setInputValue('remoteClusterFormProxyAddressInput', `192.16${char}:3000`);
+          expect(form.getErrorsMessages()).toContain(
+            'Address must use host:port format. Example: 127.0.0.1:9400, localhost:9400. Hosts can only consist of letters, numbers, and dashes.'
+          );
+        };
+
+        [...NON_ALPHA_NUMERIC_CHARS, ...ACCENTED_CHARS]
+          .filter(notInArray(['-', '_', ':']))
+          .forEach(expectInvalidChar);
+      });
+
+      test('should require a numeric "port" to be set', () => {
+        actions.clickSaveForm();
+
+        form.setInputValue('remoteClusterFormProxyAddressInput', '192.168.1.1');
+        expect(form.getErrorsMessages()).toContain('A port is required.');
+
+        form.setInputValue('remoteClusterFormProxyAddressInput', '192.168.1.1:abc');
         expect(form.getErrorsMessages()).toContain('A port is required.');
       });
     });

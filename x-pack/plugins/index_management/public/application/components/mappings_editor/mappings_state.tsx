@@ -111,13 +111,14 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
         let nextState = state;
 
         if (
+          state.fieldForm &&
           state.documentFields.status === 'creatingField' &&
           isValid &&
           !bypassFieldFormValidation
         ) {
           // If the form field is valid and we are creating a new field that has some data
           // we automatically add the field to our state.
-          const fieldFormData = state.fieldForm!.data.format() as Field;
+          const fieldFormData = state.fieldForm.data.format() as Field;
           if (Object.keys(fieldFormData).length !== 0) {
             nextState = addFieldToState(fieldFormData, state);
             dispatch({ type: 'field.add', value: fieldFormData });

@@ -44,11 +44,12 @@ esFilters: {
     getPhraseFilterField: (filter: import("../common").PhraseFilter) => string;
     getPhraseFilterValue: (filter: import("../common").PhraseFilter) => string | number | boolean;
     getDisplayValueFromFilter: typeof getDisplayValueFromFilter;
-    compareFilters: (first: import("../common").Filter | import("../common").Filter[], second: import("../common").Filter | import("../common").Filter[], comparatorOptions?: import("./query/filter_manager/lib/compare_filters").FilterCompareOptions) => boolean;
-    COMPARE_ALL_OPTIONS: import("./query/filter_manager/lib/compare_filters").FilterCompareOptions;
+    compareFilters: (first: import("../common").Filter | import("../common").Filter[], second: import("../common").Filter | import("../common").Filter[], comparatorOptions?: import("../common").FilterCompareOptions) => boolean;
+    COMPARE_ALL_OPTIONS: import("../common").FilterCompareOptions;
     generateFilters: typeof generateFilters;
     onlyDisabledFiltersChanged: (newFilters?: import("../common").Filter[] | undefined, oldFilters?: import("../common").Filter[] | undefined) => boolean;
     changeTimeFilter: typeof changeTimeFilter;
+    convertRangeFilterToTimeRangeString: typeof convertRangeFilterToTimeRangeString;
     mapAndFlattenFilters: (filters: import("../common").Filter[]) => import("../common").Filter[];
     extractTimeFilter: typeof extractTimeFilter;
 }

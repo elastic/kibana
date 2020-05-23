@@ -26,6 +26,7 @@ describe('Security Plugin', () => {
           lifespan: null,
         },
         authc: {
+          selector: { enabled: false },
           providers: ['saml', 'token'],
           saml: { realm: 'saml1', maxRedirectURLSize: new ByteSizeValue(2048) },
           http: { enabled: true, autoSchemesEnabled: true, schemes: ['apikey'] },
@@ -49,40 +50,20 @@ describe('Security Plugin', () => {
       await expect(plugin.setup(mockCoreSetup, mockDependencies)).resolves.toMatchInlineSnapshot(`
               Object {
                 "__legacyCompat": Object {
-                  "config": Object {
-                    "secureCookies": true,
-                  },
-                  "license": Object {
-                    "features$": Observable {
-                      "_isScalar": false,
-                      "operator": MapOperator {
-                        "project": [Function],
-                        "thisArg": undefined,
-                      },
-                      "source": Observable {
-                        "_isScalar": false,
-                        "_subscribe": [Function],
-                      },
-                    },
-                    "getFeatures": [Function],
-                    "isEnabled": [Function],
-                  },
                   "registerLegacyAPI": [Function],
                   "registerPrivilegesWithCluster": [Function],
                 },
                 "authc": Object {
+                  "areAPIKeysEnabled": [Function],
                   "createAPIKey": [Function],
                   "getCurrentUser": [Function],
-                  "getSessionInfo": [Function],
+                  "grantAPIKeyAsInternalUser": [Function],
                   "invalidateAPIKey": [Function],
+                  "invalidateAPIKeyAsInternalUser": [Function],
                   "isAuthenticated": [Function],
-                  "isProviderEnabled": [Function],
-                  "login": [Function],
-                  "logout": [Function],
                 },
                 "authz": Object {
                   "actions": Actions {
-                    "allHack": "allHack:",
                     "api": ApiActions {
                       "prefix": "api:version:",
                     },
@@ -106,6 +87,21 @@ describe('Security Plugin', () => {
                   "mode": Object {
                     "useRbacForRequest": [Function],
                   },
+                },
+                "license": Object {
+                  "features$": Observable {
+                    "_isScalar": false,
+                    "operator": MapOperator {
+                      "project": [Function],
+                      "thisArg": undefined,
+                    },
+                    "source": Observable {
+                      "_isScalar": false,
+                      "_subscribe": [Function],
+                    },
+                  },
+                  "getFeatures": [Function],
+                  "isEnabled": [Function],
                 },
                 "registerSpacesService": [Function],
               }

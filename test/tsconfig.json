@@ -3,7 +3,8 @@
   "compilerOptions": {
     "types": [
       "node",
-      "mocha"
+      "mocha",
+      "flot"
     ],
     "lib": [
       "esnext",
@@ -14,6 +15,7 @@
     "**/*.ts",
     "**/*.tsx",
     "../typings/lodash.topath/*.ts",
+    "../typings/elastic__node_crypto.d.ts",
     "typings/**/*"
   ],
   "exclude": [

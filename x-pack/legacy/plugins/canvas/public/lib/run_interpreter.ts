@@ -6,12 +6,11 @@
 
 import { fromExpression, getType } from '@kbn/interpreter/common';
 import { ExpressionValue, ExpressionAstExpression } from 'src/plugins/expressions/public';
-// @ts-ignore Untyped Local
-import { notify } from './notify';
+import { notifyService } from '../services';
 
 import { CanvasStartDeps, CanvasSetupDeps } from '../plugin';
 
-let expressionsStarting: Promise<CanvasStartDeps['expressions']>;
+let expressionsStarting: Promise<CanvasStartDeps['expressions']> | undefined;
 
 export const initInterpreter = function(
   expressionsStart: CanvasStartDeps['expressions'],
@@ -29,6 +28,10 @@ async function startExpressions(
   await expressionsSetup.__LEGACY.loadLegacyServerFunctionWrappers();
   return expressionsStart;
 }
+
+export const resetInterpreter = function() {
+  expressionsStarting = undefined;
+};
 
 interface Options {
   castToRender?: boolean;
@@ -81,7 +84,7 @@ export async function runInterpreter(
 
     throw new Error(`Ack! I don't know how to render a '${getType(renderable)}'`);
   } catch (err) {
-    notify.error(err);
+    notifyService.getService().error(err);
     throw err;
   }
 }

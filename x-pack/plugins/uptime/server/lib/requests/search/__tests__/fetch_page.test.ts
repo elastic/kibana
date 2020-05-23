@@ -12,7 +12,7 @@ import {
   MonitorGroupsPage,
 } from '../fetch_page';
 import { QueryContext } from '../query_context';
-import { MonitorSummary } from '../../../../../../../legacy/plugins/uptime/common/graphql/types';
+import { MonitorSummary } from '../../../../../common/runtime_types';
 import { nextPagination, prevPagination, simpleQueryContext } from './test_helpers';
 
 const simpleFixture: MonitorGroups[] = [
@@ -53,12 +53,16 @@ const simpleFetcher = (monitorGroups: MonitorGroups[]): MonitorGroupsFetcher => 
 };
 
 const simpleEnricher = (monitorGroups: MonitorGroups[]): MonitorEnricher => {
-  return async (queryContext: QueryContext, checkGroups: string[]): Promise<MonitorSummary[]> => {
+  return async (_queryContext: QueryContext, checkGroups: string[]): Promise<MonitorSummary[]> => {
     return checkGroups.map(cg => {
       const monitorGroup = monitorGroups.find(mg => mg.groups.some(g => g.checkGroup === cg))!;
       return {
         monitor_id: monitorGroup.id,
-        state: { summary: {}, timestamp: new Date(Date.parse('1999-12-31')).toISOString() },
+        state: {
+          summary: {},
+          timestamp: new Date(Date.parse('1999-12-31')).valueOf().toString(),
+          url: {},
+        },
       };
     });
   };
@@ -71,16 +75,37 @@ describe('fetching a page', () => {
       simpleFetcher(simpleFixture),
       simpleEnricher(simpleFixture)
     );
-    expect(res).toEqual({
-      items: [
-        {
-          monitor_id: 'foo',
-          state: { summary: {}, timestamp: '1999-12-31T00:00:00.000Z' },
+    expect(res).toMatchInlineSnapshot(`
+      Object {
+        "items": Array [
+          Object {
+            "monitor_id": "foo",
+            "state": Object {
+              "summary": Object {},
+              "timestamp": "946598400000",
+              "url": Object {},
+            },
+          },
+          Object {
+            "monitor_id": "bar",
+            "state": Object {
+              "summary": Object {},
+              "timestamp": "946598400000",
+              "url": Object {},
+            },
+          },
+        ],
+        "nextPagePagination": Object {
+          "cursorDirection": "AFTER",
+          "cursorKey": "bar",
+          "sortOrder": "ASC",
         },
-        { monitor_id: 'bar', state: { summary: {}, timestamp: '1999-12-31T00:00:00.000Z' } },
-      ],
-      nextPagePagination: { cursorDirection: 'AFTER', sortOrder: 'ASC', cursorKey: 'bar' },
-      prevPagePagination: { cursorDirection: 'BEFORE', sortOrder: 'ASC', cursorKey: 'foo' },
-    });
+        "prevPagePagination": Object {
+          "cursorDirection": "BEFORE",
+          "cursorKey": "foo",
+          "sortOrder": "ASC",
+        },
+      }
+    `);
   });
 });

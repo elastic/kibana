@@ -1,0 +1,10 @@
+{
+  "include": [
+    "./plugins/apm/**/*",
+    "./typings/**/*"
+  ],
+  "exclude": [
+    "**/__fixtures__/**/*",
+    "./plugins/apm/e2e/cypress/**/*"
+  ]
+}

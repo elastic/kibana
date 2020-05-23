@@ -93,7 +93,7 @@ test(`returns exposed services`, () => {
   );
 
   expect(authz.privileges).toBe(mockPrivilegesService);
-  expect(privilegesFactory).toHaveBeenCalledWith(authz.actions, mockFeaturesService);
+  expect(privilegesFactory).toHaveBeenCalledWith(authz.actions, mockFeaturesService, mockLicense);
 
   expect(authz.mode).toBe(mockAuthorizationMode);
   expect(authorizationModeFactory).toHaveBeenCalledWith(mockLicense);

@@ -40,6 +40,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return await el.getVisibleText();
     }
 
+    public async findFieldByName(name: string) {
+      const fieldSearch = await testSubjects.find('fieldFilterSearchInput');
+      await fieldSearch.type(name);
+    }
+
     public async saveSearch(searchName: string) {
       log.debug('saveSearch');
       await this.clickSaveSearchButton();
@@ -112,6 +117,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async clickNewSearchButton() {
       await testSubjects.click('discoverNewButton');
+      await header.waitUntilLoadingHasFinished();
     }
 
     public async clickSaveSearchButton() {
@@ -132,7 +138,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
       await browser
         .getActions()
-        .move({ x: 200, y: 20, origin: el._webElement })
+        .move({ x: 0, y: 20, origin: el._webElement })
         .click()
         .perform();
     }
@@ -141,8 +147,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       const el = await elasticChart.getCanvas();
 
       await browser.dragAndDrop(
-        { location: el, offset: { x: 200, y: 20 } },
-        { location: el, offset: { x: 400, y: 30 } }
+        { location: el, offset: { x: -300, y: 20 } },
+        { location: el, offset: { x: -100, y: 30 } }
       );
     }
 
@@ -154,6 +160,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       const selectedValue = await testSubjects.getAttribute('discoverIntervalSelect', 'value');
       const selectedOption = await find.byCssSelector(`option[value="${selectedValue}"]`);
       return selectedOption.getVisibleText();
+    }
+
+    public async getChartIntervalScaledToDesc() {
+      await header.waitUntilLoadingHasFinished();
+      return await testSubjects.getVisibleText('discoverIntervalSelectScaledToDesc');
     }
 
     public async setChartInterval(interval: string) {
@@ -207,7 +218,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     public async getAllFieldNames() {
       const sidebar = await testSubjects.find('discover-sidebar');
       const $ = await sidebar.parseDomContent();
-      return $('.sidebar-item[attr-field]')
+      return $('.dscSidebar__item[attr-field]')
         .toArray()
         .map(field =>
           $(field)
@@ -238,10 +249,16 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       await testSubjects.click(`fieldToggle-${field}`);
     }
 
-    public async clickFieldListItemVisualize(field: string) {
-      return await retry.try(async () => {
-        await testSubjects.click(`fieldVisualize-${field}`);
-      });
+    public async clickFieldListItemVisualize(fieldName: string) {
+      const field = await testSubjects.find(`field-${fieldName}-showDetails`);
+      const isActive = await field.elementHasClass('dscSidebarItem--active');
+
+      if (!isActive) {
+        // expand the field to show the "Visualize" button
+        await field.click();
+      }
+
+      await testSubjects.click(`fieldVisualize-${fieldName}`);
     }
 
     public async expectFieldListItemVisualize(field: string) {
@@ -249,20 +266,24 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     public async expectMissingFieldListItemVisualize(field: string) {
-      await testSubjects.missingOrFail(`fieldVisualize-${field}`, { allowHidden: true });
+      await testSubjects.missingOrFail(`fieldVisualize-${field}`);
     }
 
     public async clickFieldListPlusFilter(field: string, value: string) {
-      // this method requires the field details to be open from clickFieldListItem()
+      const plusFilterTestSubj = `plus-${field}-${value}`;
+      if (!(await testSubjects.exists(plusFilterTestSubj))) {
+        // field has to be open
+        await this.clickFieldListItem(field);
+      }
       // testSubjects.find doesn't handle spaces in the data-test-subj value
-      await find.clickByCssSelector(`[data-test-subj="plus-${field}-${value}"]`);
+      await testSubjects.click(plusFilterTestSubj);
       await header.waitUntilLoadingHasFinished();
     }
 
     public async clickFieldListMinusFilter(field: string, value: string) {
       // this method requires the field details to be open from clickFieldListItem()
       // testSubjects.find doesn't handle spaces in the data-test-subj value
-      await find.clickByCssSelector('[data-test-subj="minus-' + field + '-' + value + '"]');
+      await testSubjects.click(`minus-${field}-${value}`);
       await header.waitUntilLoadingHasFinished();
     }
 
@@ -299,6 +320,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
         'data-render-complete',
         'true'
       );
+    }
+    public async getNrOfFetches() {
+      const el = await find.byCssSelector('[data-fetch-counter]');
+      const nr = await el.getAttribute('data-fetch-counter');
+      return Number(nr);
     }
   }
 

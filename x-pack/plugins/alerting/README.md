@@ -18,6 +18,7 @@ Table of Contents
 		- [Methods](#methods)
 		- [Executor](#executor)
 		- [Example](#example)
+	- [Alert Navigation](#alert-navigation)
 	- [RESTful API](#restful-api)
 		- [`POST /api/alert`: Create alert](#post-apialert-create-alert)
 		- [`DELETE /api/alert/{id}`: Delete alert](#delete-apialertid-delete-alert)
@@ -86,6 +87,7 @@ The following table describes the properties of the `options` object.
 |id|Unique identifier for the alert type. For convention purposes, ids starting with `.` are reserved for built in alert types. We recommend using a convention like `<plugin_id>.mySpecialAlert` for your alert types to avoid conflicting with another plugin.|string|
 |name|A user-friendly name for the alert type. These will be displayed in dropdowns when choosing alert types.|string|
 |actionGroups|An explicit list of groups the alert type may schedule actions for, each specifying the ActionGroup's unique ID and human readable name. Alert `actions` validation will use this configuartion to ensure groups are valid. We highly encourage using `kbn-i18n` to translate the names of actionGroup  when registering the AlertType. |Array<{id:string, name:string}>|
+|actionVariables|An explicit list of action variables the alert type makes available via context and state in action parameter templates, and a short human readable description. Alert UI  will use this to display prompts for the users for these variables, in action parameter editors. We highly encourage using `kbn-i18n` to translate the descriptions. |{ context: Array<{name:string, description:string}, state: Array<{name:string, description:string}>|
 |validate.params|When developing an alert type, you can choose to accept a series of parameters. You may also have the parameters validated before they are passed to the `executor` function or created as an alert saved object. In order to do this, provide a `@kbn/config-schema` schema that we will use to validate the `params` attribute.|@kbn/config-schema|
 |executor|This is where the code of the alert type lives. This is a function to be called when executing an alert on an interval basis. For full details, see executor section below.|Function|
 
@@ -99,6 +101,7 @@ This is the primary function for an alert type. Whenever the alert needs to exec
 |---|---|
 |services.callCluster(path, opts)|Use this to do Elasticsearch queries on the cluster Kibana connects to. This function is the same as any other `callCluster` in Kibana but in the context of the user who created the alert when security is enabled.|
 |services.savedObjectsClient|This is an instance of the saved objects client. This provides the ability to do CRUD on any saved objects within the same space the alert lives in.<br><br>The scope of the saved objects client is tied to the user who created the alert (only when security isenabled).|
+|services.getScopedCallCluster|This function scopes an instance of CallCluster by returning a `callCluster(path, opts)` function that runs in the context of the user who created the alert when security is enabled. This must only be called with instances of CallCluster provided by core.|
 |services.log(tags, [data], [timestamp])|Use this to create server logs. (This is the same function as server.log)|
 |startedAt|The date and time the alert type started execution.|
 |previousStartedAt|The previous date and time the alert type started a successful execution.|
@@ -112,11 +115,25 @@ This is the primary function for an alert type. Whenever the alert needs to exec
 |createdBy|The userid that created this alert.|
 |updatedBy|The userid that last updated this alert.|
 
+### The `actionVariables` property
+
+This property should contain the **flattened** names of the state and context variables available when an executor calls `alertInstance.scheduleActions(groupName, context)`.  These names are meant to be used in prompters in the alerting user interface, are used as text values for display, and can be inserted into to an action parameter text entry field via UI gesture (eg, clicking a menu item from a menu built with these names).  They should be flattened,  so if a state or context variable is an object with properties, these should be listed with the "parent" property/properties in the name, separated by a `.` (period).
+
+For example, if the `context` has one variable `foo` which is an object that has one property `bar`, and there are no `state` variables, the `actionVariables` value would be in the following shape:
+
+```js
+{
+	context: [
+		{ name: 'foo.bar', description: 'the ultra-exciting bar property' },
+	]
+}
+```
+
 ### Example
 
 This example receives server and threshold as parameters. It will read the CPU usage of the server and schedule actions to be executed (asynchronously by the task manager) if the reading is greater than the threshold.
 
-```
+```typescript
 import { schema } from '@kbn/config-schema';
 ...
 server.newPlatform.setup.plugins.alerting.registerType({
@@ -128,6 +145,15 @@ server.newPlatform.setup.plugins.alerting.registerType({
 			threshold: schema.number({ min: 0, max: 1 }),
 		}),
 	},
+	actionVariables: {
+		context: [
+			{ name: 'server', description: 'the server' },
+			{ name: 'hasCpuUsageIncreased', description: 'boolean indicating if the cpu usage has increased' },
+		],
+		state: [
+			{ name: 'cpuUsage', description: 'CPU usage' },
+		],
+	},
 	async executor({
     alertId,
 		startedAt,
@@ -136,7 +162,8 @@ server.newPlatform.setup.plugins.alerting.registerType({
 		params,
 		state,
 	}: AlertExecutorOptions) {
-		const { server, threshold } = params; // Let's assume params is { server: 'server_1', threshold: 0.8 }
+		// Let's assume params is { server: 'server_1', threshold: 0.8 }
+		const { server, threshold } = params;
 
 		// Call a function to get the server's current CPU usage
 		const currentCpuUsage = await getCpuUsage(server);
@@ -177,7 +204,7 @@ server.newPlatform.setup.plugins.alerting.registerType({
 
 This example only receives threshold as a parameter. It will read the CPU usage of all the servers and schedule individual actions if the reading for a server is greater than the threshold. This is a better implementation than above as only one query is performed for all the servers instead of one query per server.
 
-```
+```typescript
 server.newPlatform.setup.plugins.alerting.registerType({
 	id: 'my-alert-type',
 	name: 'My alert type',
@@ -185,6 +212,15 @@ server.newPlatform.setup.plugins.alerting.registerType({
 		params: schema.object({
 			threshold: schema.number({ min: 0, max: 1 }),
 		}),
+	},
+	actionVariables: {
+		context: [
+			{ name: 'server', description: 'the server' },
+			{ name: 'hasCpuUsageIncreased', description: 'boolean indicating if the cpu usage has increased' },
+		],
+		state: [
+			{ name: 'cpuUsage', description: 'CPU usage' },
+		],
 	},
 	async executor({
     alertId,
@@ -233,6 +269,61 @@ server.newPlatform.setup.plugins.alerting.registerType({
 	},
 });
 ```
+
+## Alert Navigation
+When registering an Alert Type, you'll likely want to provide a way of viewing alerts of that type within your own plugin, or perhaps you want to provide a view for all alerts created from within your solution within your own UI.
+
+In order for the Alerting framework to know that your plugin has its own internal view for displaying an alert, you must resigter a navigation handler within the framework.
+
+A navigation handler is nothing more than a function that receives an Alert and its corresponding AlertType, and is expected to then return the path *within your plugin* which knows how to display this alert.
+
+The signature of such a handler is:
+
+```
+type AlertNavigationHandler = (
+  alert: SanitizedAlert,
+  alertType: AlertType
+) => string;
+```
+
+There are two ways to register this handler.
+By specifying _alerting_ as a dependency of your *public* (client side) plugin, you'll gain access to two apis: _alerting.registerNavigation_ and _alerting.registerDefaultNavigation_.
+
+### registerNavigation
+The _registerNavigation_ api allows you to register a handler for a specific alert type within your solution:
+
+```
+alerting.registerNavigation(
+	'my-application-id',
+	'my-application-id.my-alert-type',
+	(alert: SanitizedAlert, alertType: AlertType) => `/my-unique-alert/${alert.id}`
+);
+```
+
+This tells the Alerting framework that, given an alert of the AlertType whose ID is `my-application-id.my-unique-alert-type`, if that Alert's `consumer` value (which is set when the alert is created by your plugin) is your application (whose id is `my-application-id`), then it will navigate to your application using the path `/my-unique-alert/${the id of the alert}`.
+
+The navigation is handled using the `navigateToApp` api, meaning that the path will be automatically picked up by your `react-router-dom` **Route** component, so all you have top do is configure a Route that handles the path `/my-unique-alert/:id`.
+
+You can look at the `alerting-example` plugin to see an example of using this API, which is enabled using the `--run-examples` flag when you run `yarn start`.
+
+### registerDefaultNavigation
+The _registerDefaultNavigation_ api allows you to register a handler for any alert type within your solution:
+
+```
+alerting.registerDefaultNavigation(
+	'my-application-id',
+	(alert: SanitizedAlert, alertType: AlertType) => `/my-other-alerts/${alert.id}`
+);
+```
+
+This tells the Alerting framework that, given any alert whose `consumer` value is your application, as long as  then it will navigate to your application using the path `/my-other-alerts/${the id of the alert}`.
+
+### balancing both APIs side by side
+As we mentioned, using `registerDefaultNavigation` will tell the Alerting Framework that your application can handle any type of Alert we throw at it, as long as your application created it, using the handler you provide it.
+
+The only case in which this handler will not be used to evaluate the navigation for an alert (assuming your application is the `consumer`) is if you have also used `registerNavigation` api, along side your `registerDefaultNavigation` usage, to handle that alert's specific AlertType.
+
+You can use the `registerNavigation` api to specify as many AlertType specific handlers as you like, but you can only use it once per AlertType as we wouldn't know which handler to use if you specified two for the same AlertType. For the same reason, you can only use `registerDefaultNavigation` once per plugin, as it covers all cases for your specific plugin.
 
 ## RESTful API
 

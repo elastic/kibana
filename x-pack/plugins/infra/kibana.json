@@ -4,14 +4,14 @@
   "kibanaVersion": "kibana",
   "requiredPlugins": [
     "features",
-    "apm",
     "usageCollection",
     "spaces",
     "home",
     "data",
     "dataEnhanced",
-    "metrics",
-    "alerting"
+    "visTypeTimeseries",
+    "alerting",
+    "triggers_actions_ui"
   ],
   "server": true,
   "ui": true,

@@ -10,7 +10,7 @@
 fieldFormats: {
     FieldFormatsRegistry: typeof FieldFormatsRegistry;
     FieldFormat: typeof FieldFormat;
-    serializeFieldFormat: (agg: import("../../../legacy/core_plugins/data/public/search").AggConfig) => import("../../expressions/common").SerializedFieldFormat<object>;
+    serializeFieldFormat: (agg: import("../public/search").AggConfig) => import("../../expressions").SerializedFieldFormat<object>;
     BoolFormat: typeof BoolFormat;
     BytesFormat: typeof BytesFormat;
     ColorFormat: typeof ColorFormat;

@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Subject } from 'rxjs';
-import { first, filter, take } from 'rxjs/operators';
+import { Subject, Observable } from 'rxjs';
+import { first, filter, take, switchMap } from 'rxjs/operators';
 import { CoreService } from '../../types';
 import {
   SavedObjectsClient,
@@ -38,7 +38,7 @@ import {
   SavedObjectConfig,
 } from './saved_objects_config';
 import { KibanaRequest, InternalHttpServiceSetup } from '../http';
-import { SavedObjectsClientContract, SavedObjectsType } from './types';
+import { SavedObjectsClientContract, SavedObjectsType, SavedObjectStatusMeta } from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
   SavedObjectsClientFactoryProvider,
@@ -50,6 +50,8 @@ import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objec
 import { PropertyValidators } from './validation';
 import { SavedObjectsSerializer } from './serialization';
 import { registerRoutes } from './routes';
+import { ServiceStatus } from '../status';
+import { calculateStatus$ } from './status';
 
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
@@ -122,7 +124,7 @@ export interface SavedObjectsServiceSetup {
    * export const myType: SavedObjectsType = {
    *   name: 'MyType',
    *   hidden: false,
-   *   namespaceAgnostic: true,
+   *   namespaceType: 'multiple',
    *   mappings: {
    *     properties: {
    *       textField: {
@@ -164,7 +166,9 @@ export interface SavedObjectsServiceSetup {
 /**
  * @internal
  */
-export type InternalSavedObjectsServiceSetup = SavedObjectsServiceSetup;
+export interface InternalSavedObjectsServiceSetup extends SavedObjectsServiceSetup {
+  status$: Observable<ServiceStatus<SavedObjectStatusMeta>>;
+}
 
 /**
  * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
@@ -269,7 +273,9 @@ interface WrappedClientFactoryWrapper {
 
 /** @internal */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SavedObjectsStartDeps {}
+export interface SavedObjectsStartDeps {
+  pluginsInitialized?: boolean;
+}
 
 export class SavedObjectsService
   implements CoreService<InternalSavedObjectsServiceSetup, InternalSavedObjectsServiceStart> {
@@ -319,6 +325,10 @@ export class SavedObjectsService
     });
 
     return {
+      status$: calculateStatus$(
+        this.migrator$.pipe(switchMap(migrator => migrator.getStatus$())),
+        setupDeps.elasticsearch.status$
+      ),
       setClientFactoryProvider: provider => {
         if (this.started) {
           throw new Error('cannot call `setClientFactoryProvider` after service startup.');
@@ -349,7 +359,7 @@ export class SavedObjectsService
   }
 
   public async start(
-    core: SavedObjectsStartDeps,
+    { pluginsInitialized = true }: SavedObjectsStartDeps,
     migrationsRetryDelay?: number
   ): Promise<InternalSavedObjectsServiceStart> {
     if (!this.setupDeps || !this.config) {
@@ -376,9 +386,11 @@ export class SavedObjectsService
      * However, our build system optimize step and some tests depend on the
      * HTTP server running without an Elasticsearch server being available.
      * So, when the `migrations.skip` is true, we skip migrations altogether.
+     *
+     * We also cannot safely run migrations if plugins are not initialized since
+     * not plugin migrations won't be registered.
      */
-    const cliArgs = this.coreContext.env.cliArgs;
-    const skipMigrations = cliArgs.optimize || this.config.migration.skip;
+    const skipMigrations = this.config.migration.skip || !pluginsInitialized;
 
     if (skipMigrations) {
       this.logger.warn(

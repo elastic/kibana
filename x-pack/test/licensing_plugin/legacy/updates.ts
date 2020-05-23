@@ -27,7 +27,7 @@ export default function(ftrContext: FtrProviderContext) {
 
       const {
         body: legacyInitialLicense,
-        headers: legacyInitialLicenseHeaders,
+        header: legacyInitialLicenseHeaders,
       } = await supertest.get('/api/xpack/v1/info').expect(200);
 
       expect(legacyInitialLicense.license?.type).to.be('basic');
@@ -37,7 +37,7 @@ export default function(ftrContext: FtrProviderContext) {
       await scenario.startTrial();
       await scenario.waitForPluginToDetectLicenseUpdate();
 
-      const { body: legacyTrialLicense, headers: legacyTrialLicenseHeaders } = await supertest
+      const { body: legacyTrialLicense, header: legacyTrialLicenseHeaders } = await supertest
         .get('/api/xpack/v1/info')
         .expect(200);
 
@@ -50,14 +50,9 @@ export default function(ftrContext: FtrProviderContext) {
       await scenario.startBasic();
       await scenario.waitForPluginToDetectLicenseUpdate();
 
-      const { body: legacyBasicLicense, headers: legacyBasicLicenseHeaders } = await supertest
-        .get('/api/xpack/v1/info')
-        .expect(200);
+      const { body: legacyBasicLicense } = await supertest.get('/api/xpack/v1/info').expect(200);
       expect(legacyBasicLicense.license?.type).to.be('basic');
       expect(legacyBasicLicense.features).to.have.property('security');
-      expect(legacyBasicLicenseHeaders['kbn-xpack-sig']).to.not.be(
-        legacyInitialLicenseHeaders['kbn-xpack-sig']
-      );
 
       // banner shown only when license expired not just deleted
       await testSubjects.missingOrFail('licenseExpiredBanner');

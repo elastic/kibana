@@ -23,6 +23,7 @@ export default function({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
   const kibanaServer = getService('kibanaServer');
+  const security = getService('security');
   const fromTime = 'Sep 22, 2019 @ 20:31:44.000';
   const toTime = 'Sep 23, 2019 @ 03:31:44.000';
 
@@ -33,12 +34,14 @@ export default function({ getService, getPageObjects }) {
         defaultIndex: 'date-nanos',
         'doc_table:legacyTable': true,
       });
+      await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos']);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
-    after(function unloadMakelogs() {
-      return esArchiver.unload('date_nanos');
+    after(async function unloadMakelogs() {
+      await security.testUser.restoreDefaults();
+      await esArchiver.unload('date_nanos');
     });
 
     it('should show a timestamp with nanoseconds in the first result row', async function() {

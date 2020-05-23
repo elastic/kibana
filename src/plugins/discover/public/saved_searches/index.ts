@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export * from './saved_searches';
+export { createSavedSearchesLoader } from './saved_searches';
+export { SavedSearch, SavedSearchLoader } from './types';

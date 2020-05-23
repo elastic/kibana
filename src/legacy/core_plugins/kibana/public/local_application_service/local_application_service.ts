@@ -98,14 +98,29 @@ export class LocalApplicationService {
       }
     });
 
-    npStart.plugins.kibanaLegacy.getForwards().forEach(({ legacyAppId, newAppId, keepPrefix }) => {
-      angularRouteManager.when(matchAllWithPrefix(legacyAppId), {
-        resolveRedirectTo: ($location: ILocationService) => {
-          const url = $location.url();
-          return `/${newAppId}${keepPrefix ? url : url.replace(legacyAppId, '')}`;
+    npStart.plugins.kibanaLegacy.getForwards().forEach(forwardDefinition => {
+      angularRouteManager.when(matchAllWithPrefix(forwardDefinition.legacyAppId), {
+        outerAngularWrapperRoute: true,
+        reloadOnSearch: false,
+        reloadOnUrl: false,
+        template: '<span></span>',
+        controller($location: ILocationService) {
+          const newPath = forwardDefinition.rewritePath($location.url());
+          npStart.core.application.navigateToApp(forwardDefinition.newAppId, { path: newPath });
         },
       });
     });
+
+    npStart.plugins.kibanaLegacy
+      .getLegacyAppAliases()
+      .forEach(({ legacyAppId, newAppId, keepPrefix }) => {
+        angularRouteManager.when(matchAllWithPrefix(legacyAppId), {
+          resolveRedirectTo: ($location: ILocationService) => {
+            const url = $location.url();
+            return `/${newAppId}${keepPrefix ? url : url.replace(legacyAppId, '')}`;
+          },
+        });
+      });
   }
 }
 

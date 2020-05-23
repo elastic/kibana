@@ -23,10 +23,13 @@ export default function({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const es = getService('legacyEs');
   const retry = getService('retry');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'timePicker']);
 
-  describe('Index patterns on aliases', function() {
+  // FLAKY: https://github.com/elastic/kibana/issues/59717
+  describe.skip('Index patterns on aliases', function() {
     before(async function() {
+      await security.testUser.setRoles(['kibana_admin', 'test_alias_reader']);
       await esArchiver.loadIfNeeded('alias');
       await esArchiver.load('empty_kibana');
       await es.indices.updateAliases({
@@ -48,8 +51,7 @@ export default function({ getService, getPageObjects }) {
 
     it('should be able to create index pattern without time field', async function() {
       await PageObjects.settings.createIndexPattern('alias1', null);
-      const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
-      const patternName = await indexPageHeading.getVisibleText();
+      const patternName = await PageObjects.settings.getIndexPageHeading();
       expect(patternName).to.be('alias1*');
     });
 
@@ -63,8 +65,7 @@ export default function({ getService, getPageObjects }) {
 
     it('should be able to create index pattern with timefield', async function() {
       await PageObjects.settings.createIndexPattern('alias2', 'date');
-      const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
-      const patternName = await indexPageHeading.getVisibleText();
+      const patternName = await PageObjects.settings.getIndexPageHeading();
       expect(patternName).to.be('alias2*');
     });
 
@@ -83,6 +84,7 @@ export default function({ getService, getPageObjects }) {
     });
 
     after(async () => {
+      await security.testUser.restoreDefaults();
       await esArchiver.unload('alias');
     });
   });

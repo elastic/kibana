@@ -143,7 +143,14 @@ Highlighting slows requests when
 working on big documents.
 `doc_table:legacyTable`:: Control the way the Discover's table looks and works. Set this property to `true` to revert to the legacy implementation.
 
+[float]
+[[kibana-ml-settings]]
+==== Machine learning
 
+[horizontal]
+`ml:fileDataVisualizerMaxFileSize`:: Sets the file size limit when importing
+data in the {data-viz}. The default value is `100MB`. The highest supported
+value for this setting is `1GB`.
 
 
 [float]
@@ -218,6 +225,8 @@ might increase the search time. This setting is off by default. Users must opt-i
 [horizontal]
 `siem:defaultAnomalyScore`:: The threshold above which Machine Learning job anomalies are displayed in the SIEM app.
 `siem:defaultIndex`:: A comma-delimited list of Elasticsearch indices from which the SIEM app collects events.
+`siem:ipReputationLinks`:: A JSON array containing links for verifying the reputation of an IP address. The links are displayed on
+{siem-guide}/siem-ui-overview.html#network-ui[IP detail] pages.
 `siem:enableNewsFeed`:: Enables the security news feed on the SIEM *Overview*
 page.
 `siem:newsFeedUrl`:: The URL from which the security news feed content is

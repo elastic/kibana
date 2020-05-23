@@ -89,6 +89,7 @@ export class FeatureDirectory extends React.Component {
   renderTabs = () => {
     return this.tabs.map((tab, index) => (
       <EuiTab
+        data-test-subj={`tab-${tab.id}`}
         onClick={() => this.onSelectedTabChanged(tab.id)}
         isSelected={tab.id === this.state.selectedTabId}
         key={index}

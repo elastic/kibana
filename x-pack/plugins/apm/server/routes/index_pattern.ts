@@ -8,6 +8,7 @@ import { createStaticIndexPattern } from '../lib/index_pattern/create_static_ind
 import { createRoute } from './create_route';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getInternalSavedObjectsClient } from '../lib/helpers/get_internal_saved_objects_client';
+import { getApmIndexPatternTitle } from '../lib/index_pattern/get_apm_index_pattern_title';
 
 export const staticIndexPatternRoute = createRoute(core => ({
   method: 'POST',
@@ -36,5 +37,12 @@ export const dynamicIndexPatternRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const { dynamicIndexPattern } = await setupRequest(context, request);
     return { dynamicIndexPattern };
+  }
+}));
+
+export const apmIndexPatternTitleRoute = createRoute(() => ({
+  path: '/api/apm/index_pattern/title',
+  handler: async ({ context }) => {
+    return getApmIndexPatternTitle(context);
   }
 }));

@@ -11,7 +11,12 @@ import { safeElementFromExpression, fromExpression } from '@kbn/interpreter/comm
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';
 import { State, CanvasWorkpad, CanvasPage, CanvasElement, ResolvedArgType } from '../../../types';
-import { ExpressionContext, CanvasGroup, PositionedElement } from '../../../types';
+import {
+  ExpressionContext,
+  CanvasGroup,
+  PositionedElement,
+  CanvasWorkpadBoundingBox,
+} from '../../../types';
 import {
   ExpressionAstArgument,
   ExpressionAstFunction,
@@ -91,7 +96,7 @@ export function getWorkpadWidth(state: State): number {
   return get(state, append(workpadRoot, 'width'));
 }
 
-export function getWorkpadBoundingBox(state: State) {
+export function getWorkpadBoundingBox(state: State): CanvasWorkpadBoundingBox {
   return getPages(state).reduce(
     (boundingBox, page) => {
       page.elements.forEach(({ position }) => {
@@ -358,7 +363,11 @@ export function getNodesForPage(page: CanvasPage, withAst: boolean): CanvasEleme
 }
 
 // todo unify or DRY up with `getElements`
-export function getNodes(state: State, pageId: string, withAst = true): CanvasElement[] {
+export function getNodes(
+  state: State,
+  pageId: string,
+  withAst = true
+): CanvasElement[] | PositionedElement[] {
   const id = pageId || getSelectedPage(state);
   if (!id) {
     return [];

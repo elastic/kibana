@@ -33,11 +33,21 @@ export interface MappingsConfiguration {
 }
 
 export interface MappingsTemplates {
-  dynamic_templates: Template[];
+  dynamic_templates: DynamicTemplate[];
 }
 
-interface Template {
-  [key: string]: any;
+interface DynamicTemplate {
+  [key: string]: {
+    mapping: {
+      [key: string]: any;
+    };
+    match_mapping_type?: string;
+    match?: string;
+    unmatch?: string;
+    match_pattern?: string;
+    path_match?: string;
+    path_unmatch?: string;
+  };
 }
 
 export interface MappingsFields {

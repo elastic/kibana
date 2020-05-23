@@ -4,12 +4,12 @@
 
 ## ErrorToastOptions interface
 
-Options available for [IToasts](./kibana-plugin-core-public.itoasts.md) APIs.
+Options available for [IToasts](./kibana-plugin-core-public.itoasts.md) error APIs.
 
 <b>Signature:</b>
 
 ```typescript
-export interface ErrorToastOptions 
+export interface ErrorToastOptions extends ToastOptions 
 ```
 
 ## Properties

@@ -121,7 +121,7 @@ export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
       // Avoid reseting the form on component mount.
       didMountRef.current = true;
     }
-  }, [defaultValue, form]);
+  }, [defaultValue]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     return () => {
@@ -131,7 +131,12 @@ export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
   }, [dispatch]);
 
   return (
-    <Form form={form} isInvalid={form.isSubmitted && !form.isValid} error={form.getErrors()}>
+    <Form
+      form={form}
+      isInvalid={form.isSubmitted && !form.isValid}
+      error={form.getErrors()}
+      data-test-subj="advancedConfiguration"
+    >
       <DynamicMappingSection />
       <EuiSpacer size="xl" />
       <MetaFieldSection />

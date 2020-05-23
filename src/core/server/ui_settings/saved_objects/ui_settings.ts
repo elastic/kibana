@@ -22,7 +22,7 @@ import { SavedObjectsType } from '../../saved_objects';
 export const uiSettingsType: SavedObjectsType = {
   name: 'config',
   hidden: false,
-  namespaceAgnostic: false,
+  namespaceType: 'single',
   mappings: {
     // we don't want to allow `true` in the public `SavedObjectsTypeMappingDefinition` type, however
     // this is needed for the config that is kinda a special type. To avoid adding additional internal types

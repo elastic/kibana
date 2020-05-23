@@ -6,20 +6,19 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  VALID_TOKEN_COUNT,
+  MEDIAN_LINE_LENGTH_LIMIT,
+  NULL_COUNT_PERCENT_LIMIT,
   CATEGORY_EXAMPLES_VALIDATION_STATUS,
   CATEGORY_EXAMPLES_ERROR_LIMIT,
   CATEGORY_EXAMPLES_WARNING_LIMIT,
-} from '../../../../../../../legacy/plugins/ml/common/constants/new_job';
+} from '../../../../../common/constants/categorization_job';
 import {
   FieldExampleCheck,
   CategoryFieldExample,
   VALIDATION_RESULT,
-} from '../../../../../../../legacy/plugins/ml/common/types/categories';
-import { getMedianStringLength } from '../../../../../../../legacy/plugins/ml/common/util/string_utils';
-
-const VALID_TOKEN_COUNT = 3;
-const MEDIAN_LINE_LENGTH_LIMIT = 400;
-const NULL_COUNT_PERCENT_LIMIT = 0.75;
+} from '../../../../../common/types/categories';
+import { getMedianStringLength } from '../../../../../common/util/string_utils';
 
 export class ValidationResults {
   private _results: FieldExampleCheck[] = [];
@@ -187,7 +186,6 @@ export class ValidationResults {
         valid: CATEGORY_EXAMPLES_VALIDATION_STATUS.PARTIALLY_VALID,
         message,
       });
-      return;
     }
   }
 

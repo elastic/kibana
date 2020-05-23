@@ -23,10 +23,10 @@ import sinon from 'sinon';
 // than just the type. Doing this as a temporary measure; it will be left behind when migrating to NP.
 
 import {
-  IndexPatternFieldList,
   IndexPattern,
   indexPatterns,
   KBN_FIELD_TYPES,
+  getIndexPatternFieldListCreator,
 } from '../../plugins/data/public';
 
 import { setFieldFormats } from '../../plugins/data/public/services';
@@ -42,6 +42,16 @@ import { getFieldFormatsRegistry } from './stub_field_formats';
 
 export default function StubIndexPattern(pattern, getConfig, timeField, fields, core) {
   const registeredFieldFormats = getFieldFormatsRegistry(core);
+  const createFieldList = getIndexPatternFieldListCreator({
+    fieldFormats: {
+      getDefaultInstance: () => ({
+        convert: val => String(val),
+      }),
+    },
+    toastNotifications: {
+      addDanger: () => {},
+    },
+  });
 
   this.id = pattern;
   this.title = pattern;
@@ -67,7 +77,7 @@ export default function StubIndexPattern(pattern, getConfig, timeField, fields, 
   this.formatField = this.formatHit.formatField;
 
   this._reindexFields = function() {
-    this.fields = new IndexPatternFieldList(this, this.fields || fields);
+    this.fields = createFieldList(this, this.fields || fields, false);
   };
 
   this.stubSetFieldFormat = function(fieldName, id, params) {

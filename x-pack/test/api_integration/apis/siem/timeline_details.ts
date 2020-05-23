@@ -7,11 +7,8 @@
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 
-import { timelineDetailsQuery } from '../../../../legacy/plugins/siem/public/containers/timeline/details/index.gql_query';
-import {
-  DetailItem,
-  GetTimelineDetailsQuery,
-} from '../../../../legacy/plugins/siem/public/graphql/types';
+import { timelineDetailsQuery } from '../../../../plugins/siem/public/containers/timeline/details/index.gql_query';
+import { DetailItem, GetTimelineDetailsQuery } from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 type DetailsData = Array<

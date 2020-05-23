@@ -4,35 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { of } from 'rxjs';
-import { LicenseState } from './license_state';
-import { LICENSE_CHECK_STATE, ILicense } from '../../../licensing/server';
+import { ILicenseState } from './license_state';
 
-export const mockLicenseState = () => {
-  const license: ILicense = {
-    uid: '123',
-    status: 'active',
-    isActive: true,
-    signature: 'sig',
-    isAvailable: true,
-    toJSON: () => ({
-      signature: 'sig',
+export const createLicenseStateMock = () => {
+  const licenseState: jest.Mocked<ILicenseState> = {
+    clean: jest.fn(),
+    getLicenseInformation: jest.fn(),
+    ensureLicenseForActionType: jest.fn(),
+    isLicenseValidForActionType: jest.fn(),
+    checkLicense: jest.fn().mockResolvedValue({
+      state: 'valid',
     }),
-    getUnavailableReason: () => undefined,
-    hasAtLeast() {
-      return true;
-    },
-    check() {
-      return {
-        state: LICENSE_CHECK_STATE.Valid,
-      };
-    },
-    getFeature() {
-      return {
-        isAvailable: true,
-        isEnabled: true,
-      };
-    },
   };
-  return new LicenseState(of(license));
+  return licenseState;
+};
+
+export const licenseStateMock = {
+  create: createLicenseStateMock,
 };

@@ -7,7 +7,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlApi } from './api';
 
-import { DATA_FRAME_TASK_STATE } from '../../../../legacy/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/data_frame_task_state';
 
 export function MachineLearningDataFrameAnalyticsProvider(
   { getService }: FtrProviderContext,
@@ -41,7 +41,7 @@ export function MachineLearningDataFrameAnalyticsProvider(
     },
 
     async assertRegressionTablePanelExists() {
-      await testSubjects.existOrFail('mlDFAnalyticsRegressionExplorationTablePanel');
+      await testSubjects.existOrFail('mlDFAnalyticsExplorationTablePanel');
     },
 
     async assertClassificationEvaluatePanelElementsExists() {
@@ -50,7 +50,7 @@ export function MachineLearningDataFrameAnalyticsProvider(
     },
 
     async assertClassificationTablePanelExists() {
-      await testSubjects.existOrFail('mlDFAnalyticsClassificationExplorationTablePanel');
+      await testSubjects.existOrFail('mlDFAnalyticsExplorationTablePanel');
     },
 
     async assertOutlierTablePanelExists() {

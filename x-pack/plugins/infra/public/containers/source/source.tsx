@@ -21,7 +21,7 @@ import { updateSourceMutation } from './update_source.gql_query';
 
 type Source = SourceQuery.Query['source'];
 
-const pickIndexPattern = (source: Source | undefined, type: 'logs' | 'metrics' | 'both') => {
+export const pickIndexPattern = (source: Source | undefined, type: 'logs' | 'metrics' | 'both') => {
   if (!source) {
     return 'unknown-index';
   }
@@ -142,6 +142,10 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
     ]
   );
 
+  const isUninitialized = useMemo(() => loadSourceRequest.state === 'uninitialized', [
+    loadSourceRequest.state,
+  ]);
+
   const sourceExists = useMemo(() => (source ? !!source.version : undefined), [source]);
 
   const logIndicesExist = useMemo(() => source && source.status && source.status.logIndicesExist, [
@@ -162,6 +166,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
     logIndicesExist,
     isLoading,
     isLoadingSource: loadSourceRequest.state === 'pending',
+    isUninitialized,
     hasFailedLoadingSource: loadSourceRequest.state === 'rejected',
     loadSource,
     loadSourceFailureMessage:

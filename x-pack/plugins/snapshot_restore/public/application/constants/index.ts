@@ -14,10 +14,10 @@ export type Section = 'repositories' | 'snapshots' | 'restore_status' | 'policie
 export const MINIMUM_TIMEOUT_MS = 300;
 
 export enum REPOSITORY_DOC_PATHS {
-  default = 'modules-snapshots.html',
-  fs = 'modules-snapshots.html#_shared_file_system_repository',
-  url = 'modules-snapshots.html#_read_only_url_repository',
-  source = 'modules-snapshots.html#_source_only_repository',
+  default = 'snapshot-restore.html',
+  fs = 'snapshots-register-repository.html#snapshots-filesystem-repository',
+  url = 'snapshots-register-repository.html#snapshots-read-only-repository',
+  source = 'snapshots-register-repository.html#snapshots-source-only-repository',
   s3 = 'repository-s3.html',
   hdfs = 'repository-hdfs.html',
   azure = 'repository-azure.html',

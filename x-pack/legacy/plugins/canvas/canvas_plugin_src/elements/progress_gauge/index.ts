@@ -6,16 +6,15 @@
 
 import { openSans } from '../../../common/lib/fonts';
 import { ElementFactory } from '../../../types';
-import header from './header.png';
 
 export const progressGauge: ElementFactory = () => ({
   name: 'progressGauge',
-  displayName: 'Progress gauge',
-  tags: ['chart', 'proportion'],
+  displayName: 'Gauge',
+  type: 'progress',
   help: 'Displays progress as a portion of a gauge',
   width: 200,
   height: 200,
-  image: header,
+  icon: 'visGoal',
   expression: `filters
 | demodata
 | math "mean(percent_uptime)"

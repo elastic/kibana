@@ -18,10 +18,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ApplicationStart } from 'kibana/public';
 import { Action } from 'src/plugins/ui_actions/public';
-import { GetEmbeddableFactory, ViewMode } from '../types';
+import { ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';
 import { IEmbeddable } from '../embeddables';
+import { EmbeddableStart } from '../../plugin';
 
 export const ACTION_EDIT_PANEL = 'editPanel';
 
@@ -32,9 +34,12 @@ interface ActionContext {
 export class EditPanelAction implements Action<ActionContext> {
   public readonly type = ACTION_EDIT_PANEL;
   public readonly id = ACTION_EDIT_PANEL;
-  public order = 15;
+  public order = 50;
 
-  constructor(private readonly getEmbeddableFactory: GetEmbeddableFactory) {}
+  constructor(
+    private readonly getEmbeddableFactory: EmbeddableStart['getEmbeddableFactory'],
+    private readonly application: ApplicationStart
+  ) {}
 
   public getDisplayName({ embeddable }: ActionContext) {
     const factory = this.getEmbeddableFactory(embeddable.type);
@@ -55,17 +60,39 @@ export class EditPanelAction implements Action<ActionContext> {
 
   public async isCompatible({ embeddable }: ActionContext) {
     const canEditEmbeddable = Boolean(
-      embeddable && embeddable.getOutput().editable && embeddable.getOutput().editUrl
+      embeddable &&
+        embeddable.getOutput().editable &&
+        (embeddable.getOutput().editUrl ||
+          (embeddable.getOutput().editApp && embeddable.getOutput().editPath))
     );
     const inDashboardEditMode = embeddable.getInput().viewMode === ViewMode.EDIT;
     return Boolean(canEditEmbeddable && inDashboardEditMode);
   }
 
-  public async execute() {
-    return;
+  public async execute(context: ActionContext) {
+    const appTarget = this.getAppTarget(context);
+
+    if (appTarget) {
+      await this.application.navigateToApp(appTarget.app, { path: appTarget.path });
+      return;
+    }
+
+    const href = await this.getHref(context);
+    if (href) {
+      window.location.href = href;
+      return;
+    }
   }
 
-  public getHref({ embeddable }: ActionContext): string {
+  public getAppTarget({ embeddable }: ActionContext): { app: string; path: string } | undefined {
+    const app = embeddable ? embeddable.getOutput().editApp : undefined;
+    const path = embeddable ? embeddable.getOutput().editPath : undefined;
+    if (app && path) {
+      return { app, path };
+    }
+  }
+
+  public async getHref({ embeddable }: ActionContext): Promise<string> {
     const editUrl = embeddable ? embeddable.getOutput().editUrl : undefined;
     return editUrl ? editUrl : '';
   }

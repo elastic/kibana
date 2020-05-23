@@ -45,16 +45,19 @@ const runParametersDeserializers = (field: Field): Field =>
   );
 
 export const fieldSerializer: SerializerFunc<Field> = (field: Field) => {
+  const { otherTypeJson, ...rest } = field;
+  const updatedField: Field = Boolean(otherTypeJson) ? { ...otherTypeJson, ...rest } : { ...rest };
+
   // If a subType is present, use it as type for ES
-  if ({}.hasOwnProperty.call(field, 'subType')) {
-    field.type = field.subType as DataType;
-    delete field.subType;
+  if ({}.hasOwnProperty.call(updatedField, 'subType')) {
+    updatedField.type = updatedField.subType as DataType;
+    delete updatedField.subType;
   }
 
   // Delete temp fields
-  delete (field as any).useSameAnalyzerForSearch;
+  delete (updatedField as any).useSameAnalyzerForSearch;
 
-  return sanitizeField(runParametersSerializers(field));
+  return sanitizeField(runParametersSerializers(updatedField));
 };
 
 export const fieldDeserializer: SerializerFunc<Field> = (field: Field): Field => {
@@ -70,8 +73,18 @@ export const fieldDeserializer: SerializerFunc<Field> = (field: Field): Field =>
     field.type = type;
   }
 
-  (field as any).useSameAnalyzerForSearch =
-    {}.hasOwnProperty.call(field, 'search_analyzer') === false;
+  if (field.type === 'other') {
+    const { type, subType, name, ...otherTypeJson } = field;
+    /**
+     * For "other" type (type we don't support through a form)
+     * we grab all the parameters and put them in the "otherTypeJson" object
+     * that we will render in a JSON editor.
+     */
+    field.otherTypeJson = otherTypeJson;
+  } else {
+    (field as any).useSameAnalyzerForSearch =
+      {}.hasOwnProperty.call(field, 'search_analyzer') === false;
+  }
 
   return runParametersDeserializers(field);
 };

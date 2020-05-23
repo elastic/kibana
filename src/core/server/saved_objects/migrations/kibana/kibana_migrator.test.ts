@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { take } from 'rxjs/operators';
 
 import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
 import { loggingServiceMock } from '../../../logging/logging_service.mock';
@@ -27,8 +28,8 @@ const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
   types.forEach(type =>
     registry.registerType({
       name: 'unknown',
-      namespaceAgnostic: false,
       hidden: false,
+      namespaceType: 'single',
       mappings: { properties: {} },
       migrations: {},
       ...type,
@@ -79,6 +80,33 @@ describe('KibanaMigrator', () => {
         .filter(callClusterPath => callClusterPath === 'cat.templates');
       expect(callClusterCommands.length).toBe(1);
     });
+
+    it('emits results on getMigratorResult$()', async () => {
+      const options = mockOptions();
+      const clusterStub = jest.fn<any, any>(() => ({ status: 404 }));
+
+      options.callCluster = clusterStub;
+      const migrator = new KibanaMigrator(options);
+      const migratorStatus = migrator
+        .getStatus$()
+        .pipe(take(3))
+        .toPromise();
+      await migrator.runMigrations();
+      const { status, result } = await migratorStatus;
+      expect(status).toEqual('completed');
+      expect(result![0]).toMatchObject({
+        destIndex: '.my-index_1',
+        elapsedMs: expect.any(Number),
+        sourceIndex: '.my-index',
+        status: 'migrated',
+      });
+      expect(result![1]).toMatchObject({
+        destIndex: 'other-index_1',
+        elapsedMs: expect.any(Number),
+        sourceIndex: 'other-index',
+        status: 'migrated',
+      });
+    });
   });
 });
 
@@ -92,7 +120,7 @@ function mockOptions(): KibanaMigratorOptions {
       {
         name: 'testtype',
         hidden: false,
-        namespaceAgnostic: false,
+        namespaceType: 'single',
         mappings: {
           properties: {
             name: { type: 'keyword' },
@@ -103,7 +131,7 @@ function mockOptions(): KibanaMigratorOptions {
       {
         name: 'testtype2',
         hidden: false,
-        namespaceAgnostic: false,
+        namespaceType: 'single',
         indexPattern: 'other-index',
         mappings: {
           properties: {

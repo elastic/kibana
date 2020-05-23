@@ -5,28 +5,27 @@
  */
 
 import expect from '@kbn/expect';
-import { tlsQuery } from '../../../../legacy/plugins/siem/public/containers/tls/index.gql_query';
+import { tlsQuery } from '../../../../plugins/siem/public/containers/tls/index.gql_query';
 import {
   Direction,
   TlsFields,
   FlowTarget,
   GetTlsQuery,
-} from '../../../../legacy/plugins/siem/public/graphql/types';
+} from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
 const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
-const SOURCE_IP = '157.230.208.30';
-const DESTINATION_IP = '91.189.92.20';
+const SOURCE_IP = '10.128.0.35';
+const DESTINATION_IP = '74.125.129.95';
 
 const expectedResult = {
   __typename: 'TlsNode',
-  _id: '61749734b3246f1584029deb4f5276c64da00ada',
-  alternativeNames: ['api.snapcraft.io'],
-  commonNames: ['api.snapcraft.io'],
-  issuerNames: ['DigiCert SHA2 Secure Server CA'],
-  ja3: ['839868ad711dc55bde0d37a87f14740d'],
-  notAfter: ['2019-05-22T12:00:00.000Z'],
+  _id: '16989191B1A93ECECD5FE9E63EBD4B5C3B606D26',
+  subjects: ['CN=edgecert.googleapis.com,O=Google LLC,L=Mountain View,ST=California,C=US'],
+  issuers: ['CN=GTS CA 1O1,O=Google Trust Services,C=US'],
+  ja3: [],
+  notAfter: ['2020-05-06T11:52:15.000Z'],
 };
 
 const expectedOverviewDestinationResult = {
@@ -36,27 +35,29 @@ const expectedOverviewDestinationResult = {
       __typename: 'TlsEdges',
       cursor: {
         __typename: 'CursorType',
-        value: '61749734b3246f1584029deb4f5276c64da00ada',
+        value: 'EB4E81DD7C55BA9715652ECF5647FB8877E55A8F',
       },
       node: {
         __typename: 'TlsNode',
-        _id: '61749734b3246f1584029deb4f5276c64da00ada',
-        alternativeNames: ['api.snapcraft.io'],
-        commonNames: ['api.snapcraft.io'],
-        issuerNames: ['DigiCert SHA2 Secure Server CA'],
-        ja3: ['839868ad711dc55bde0d37a87f14740d'],
-        notAfter: ['2019-05-22T12:00:00.000Z'],
+        _id: 'EB4E81DD7C55BA9715652ECF5647FB8877E55A8F',
+        subjects: [
+          'CN=*.cdn.mozilla.net,OU=Cloud Services,O=Mozilla Corporation,L=Mountain View,ST=California,C=US',
+        ],
+        issuers: ['CN=DigiCert SHA2 Secure Server CA,O=DigiCert Inc,C=US'],
+        ja3: [],
+        notAfter: ['2020-12-09T12:00:00.000Z'],
       },
     },
   ],
   pageInfo: {
     __typename: 'PageInfoPaginated',
     activePage: 0,
-    fakeTotalCount: 1,
+    fakeTotalCount: 3,
     showMorePagesIndicator: false,
   },
-  totalCount: 1,
+  totalCount: 3,
 };
+
 const expectedOverviewSourceResult = {
   __typename: 'TlsData',
   edges: [
@@ -64,26 +65,27 @@ const expectedOverviewSourceResult = {
       __typename: 'TlsEdges',
       cursor: {
         __typename: 'CursorType',
-        value: '61749734b3246f1584029deb4f5276c64da00ada',
+        value: 'EB4E81DD7C55BA9715652ECF5647FB8877E55A8F',
       },
       node: {
         __typename: 'TlsNode',
-        _id: '61749734b3246f1584029deb4f5276c64da00ada',
-        alternativeNames: ['api.snapcraft.io'],
-        commonNames: ['api.snapcraft.io'],
-        issuerNames: ['DigiCert SHA2 Secure Server CA'],
-        ja3: ['839868ad711dc55bde0d37a87f14740d'],
-        notAfter: ['2019-05-22T12:00:00.000Z'],
+        _id: 'EB4E81DD7C55BA9715652ECF5647FB8877E55A8F',
+        subjects: [
+          'CN=*.cdn.mozilla.net,OU=Cloud Services,O=Mozilla Corporation,L=Mountain View,ST=California,C=US',
+        ],
+        issuers: ['CN=DigiCert SHA2 Secure Server CA,O=DigiCert Inc,C=US'],
+        ja3: [],
+        notAfter: ['2020-12-09T12:00:00.000Z'],
       },
     },
   ],
   pageInfo: {
     __typename: 'PageInfoPaginated',
     activePage: 0,
-    fakeTotalCount: 1,
+    fakeTotalCount: 3,
     showMorePagesIndicator: false,
   },
-  totalCount: 1,
+  totalCount: 3,
 };
 
 export default function({ getService }: FtrProviderContext) {
@@ -91,8 +93,8 @@ export default function({ getService }: FtrProviderContext) {
   const client = getService('siemGraphQLClient');
   describe('Tls Test with Packetbeat', () => {
     describe('Tls Test', () => {
-      before(() => esArchiver.load('packetbeat/default'));
-      after(() => esArchiver.unload('packetbeat/default'));
+      before(() => esArchiver.load('packetbeat/tls'));
+      after(() => esArchiver.unload('packetbeat/tls'));
 
       it('Ensure data is returned for FlowTarget.Source', () => {
         return client
@@ -160,8 +162,8 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     describe('Tls Overview Test', () => {
-      before(() => esArchiver.load('packetbeat/default'));
-      after(() => esArchiver.unload('packetbeat/default'));
+      before(() => esArchiver.load('packetbeat/tls'));
+      after(() => esArchiver.unload('packetbeat/tls'));
 
       it('Ensure data is returned for FlowTarget.Source', () => {
         return client
@@ -189,7 +191,8 @@ export default function({ getService }: FtrProviderContext) {
           })
           .then(resp => {
             const tls = resp.data.source.Tls;
-            expect(tls).to.eql(expectedOverviewSourceResult);
+            expect(tls.pageInfo).to.eql(expectedOverviewSourceResult.pageInfo);
+            expect(tls.edges[0]).to.eql(expectedOverviewSourceResult.edges[0]);
           });
       });
 
@@ -219,7 +222,8 @@ export default function({ getService }: FtrProviderContext) {
           })
           .then(resp => {
             const tls = resp.data.source.Tls;
-            expect(tls).to.eql(expectedOverviewDestinationResult);
+            expect(tls.pageInfo).to.eql(expectedOverviewDestinationResult.pageInfo);
+            expect(tls.edges[0]).to.eql(expectedOverviewDestinationResult.edges[0]);
           });
       });
     });

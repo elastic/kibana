@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import nodeCrypto from '@elastic/node-crypto';
+import nodeCrypto, { Crypto } from '@elastic/node-crypto';
 import stringify from 'json-stable-stringify';
 import typeDetect from 'type-detect';
 import { Logger } from 'src/core/server';
@@ -49,10 +48,7 @@ export function descriptorToArray(descriptor: SavedObjectDescriptor) {
  * attributes.
  */
 export class EncryptedSavedObjectsService {
-  private readonly crypto: Readonly<{
-    encrypt<T>(valueToEncrypt: T, aad?: string): Promise<string>;
-    decrypt<T>(valueToDecrypt: string, aad?: string): Promise<T>;
-  }>;
+  private readonly crypto: Readonly<Crypto>;
 
   /**
    * Map of all registered saved object types where the `key` is saved object type and the `value`
@@ -229,10 +225,10 @@ export class EncryptedSavedObjectsService {
       }
 
       try {
-        decryptedAttributes[attributeName] = await this.crypto.decrypt(
+        decryptedAttributes[attributeName] = (await this.crypto.decrypt(
           attributeValue,
           encryptionAAD
-        );
+        )) as string;
       } catch (err) {
         this.logger.error(`Failed to decrypt "${attributeName}" attribute: ${err.message || err}`);
         this.audit.decryptAttributeFailure(attributeName, descriptor);

@@ -4,7 +4,7 @@
 
 ## HttpSetup.basePath property
 
-APIs for manipulating the basePath on URL segments.
+APIs for manipulating the basePath on URL segments. See [IBasePath](./kibana-plugin-core-public.ibasepath.md)
 
 <b>Signature:</b>
 

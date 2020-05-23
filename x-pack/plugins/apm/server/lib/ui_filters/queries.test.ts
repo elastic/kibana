@@ -8,7 +8,7 @@ import { getEnvironments } from './get_environments';
 import {
   SearchParamsMock,
   inspectSearchParams
-} from '../../../../../legacy/plugins/apm/public/utils/testHelpers';
+} from '../../../public/utils/testHelpers';
 
 describe('ui filter queries', () => {
   let mock: SearchParamsMock;

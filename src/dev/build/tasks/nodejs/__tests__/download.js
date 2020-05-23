@@ -18,27 +18,39 @@
  */
 
 import { createServer } from 'http';
-import { resolve } from 'path';
-import { readFileSync } from 'fs';
+import { join } from 'path';
+import { tmpdir } from 'os';
+import { mkdirp, readFileSync } from 'fs-extra';
 
 import del from 'del';
 import sinon from 'sinon';
+import { CI_PARALLEL_PROCESS_PREFIX } from '@kbn/test';
 import expect from '@kbn/expect';
 import Wreck from '@hapi/wreck';
 
 import { ToolingLog } from '@kbn/dev-utils';
 import { download } from '../download';
 
-const TMP_DESTINATION = resolve(__dirname, '__tmp__');
-beforeEach(async () => {
-  await del(TMP_DESTINATION);
-});
-after(async () => {
-  await del(TMP_DESTINATION);
-});
+const getTempFolder = async () => {
+  const dir = join(tmpdir(), CI_PARALLEL_PROCESS_PREFIX, 'download-js-test-tmp-dir');
+  console.log(dir);
+  await mkdirp(dir);
+  return dir;
+};
 
 describe('src/dev/build/tasks/nodejs/download', () => {
   const sandbox = sinon.createSandbox();
+  let TMP_DESTINATION;
+  let TMP_DIR;
+
+  beforeEach(async () => {
+    TMP_DIR = await getTempFolder();
+    TMP_DESTINATION = join(TMP_DIR, '__tmp_download_js_test_file__');
+  });
+
+  afterEach(async () => {
+    await del(TMP_DIR, { force: true });
+  });
   afterEach(() => sandbox.reset());
 
   const onLogLine = sandbox.stub();

@@ -42,10 +42,10 @@ filters
 | metric "Average uptime"
   metricFont={
     font size=48 family="'Open Sans', Helvetica, Arial, sans-serif"
-    color={
-      if {all {gte 0} {lt 0.8}} then="red" else="green"
-    }
-    align="center" lHeight=48
+      color={
+        if {all {gte 0} {lt 0.8}} then="red" else="green"
+      }
+      align="center" lHeight=48
   }
 | render
 ----
@@ -324,12 +324,14 @@ case if={lte 50} then="green"
 ----
 math "random()"
 | progress shape="gauge" label={formatnumber "0%"}
-  font={font size=24 family="'Open Sans', Helvetica, Arial, sans-serif" align="center"
-    color={
-      switch {case if={lte 0.5} then="green"}
-        {case if={all {gt 0.5} {lte 0.75}} then="orange"}
-        default="red"
-    }}
+  font={
+    font size=24 family="'Open Sans', Helvetica, Arial, sans-serif" align="center"
+      color={
+        switch {case if={lte 0.5} then="green"}
+          {case if={all {gt 0.5} {lte 0.75}} then="orange"}
+          default="red"
+      }
+  }
   valueColor={
     switch {case if={lte 0.5} then="green"}
       {case if={all {gt 0.5} {lte 0.75}} then="orange"}
@@ -693,7 +695,25 @@ Alias: `value`
 [[demodata_fn]]
 === `demodata`
 
-A mock data set that includes project CI times with usernames, countries, and run phases.
+A sample data set that includes project CI times with usernames, countries, and run phases.
+
+*Expression syntax*
+[source,js]
+----
+demodata
+demodata "ci"
+demodata type="shirts"
+----
+
+*Code example*
+[source,text]
+----
+filters
+| demodata
+| table
+| render
+----
+`demodata` is a mock data set that you can use to start playing around in Canvas.
 
 *Accepts:* `filter`
 
@@ -837,6 +857,28 @@ Alias: `value`
 
 Query Elasticsearch for the number of hits matching the specified query.
 
+*Expression syntax*
+[source,js]
+----
+escount index="logstash-*"
+escount "currency:"EUR"" index="kibana_sample_data_ecommerce"
+escount query="response:404" index="kibana_sample_data_logs"
+----
+
+*Code example*
+[source,text]
+----
+filters
+| escount "Cancelled:true" index="kibana_sample_data_flights"
+| math "value"
+| progress shape="semicircle"
+  label={formatnumber 0,0}
+  font={font size=24 family="'Open Sans', Helvetica, Arial, sans-serif" color="#000000" align=center}
+  max={filters | escount index="kibana_sample_data_flights"}
+| render
+----
+The first `escount` expression retrieves the number of flights that were cancelled. The second `escount` expression retrieves the total number of flights.
+
 *Accepts:* `filter`
 
 [cols="3*^<"]
@@ -866,6 +908,34 @@ Default: `_all`
 === `esdocs`
 
 Query Elasticsearch for raw documents. Specify the fields you want to retrieve, especially if you are asking for a lot of rows.
+
+*Expression syntax*
+[source,js]
+----
+esdocs index="logstash-*"
+esdocs "currency:"EUR"" index="kibana_sample_data_ecommerce"
+esdocs query="response:404" index="kibana_sample_data_logs"
+esdocs index="kibana_sample_data_flights" count=100
+esdocs index="kibana_sample_data_flights" sort="AvgTicketPrice, asc"
+----
+
+*Code example*
+[source,text]
+----
+filters
+| esdocs index="kibana_sample_data_ecommerce"
+  fields="customer_gender, taxful_total_price, order_date"
+  sort="order_date, asc"
+  count=10000
+| mapColumn "order_date"
+  fn={getCell "order_date" | date {context} | rounddate "YYYY-MM-DD"}
+| alterColumn "order_date" type="date"
+| pointseries x="order_date" y="sum(taxful_total_price)" color="customer_gender"
+| plot defaultStyle={seriesStyle lines=3}
+  palette={palette "#7ECAE3" "#003A4D" gradient=true}
+| render
+----
+This retrieves the first 10000 documents data from the `kibana_sample_data_ecommerce` index sorted by `order_date` in ascending order, and only requests the `customer_gender`, `taxful_total_price`, and `order_date` fields.
 
 *Accepts:* `filter`
 
@@ -914,6 +984,23 @@ Default: `_all`
 === `essql`
 
 Queries Elasticsearch using Elasticsearch SQL.
+
+*Expression syntax*
+[source,js]
+----
+essql query="SELECT * FROM "logstash*""
+essql "SELECT * FROM "apm*"" count=10000
+----
+
+*Code example*
+[source,text]
+----
+filters
+| essql query="SELECT Carrier, FlightDelayMin, AvgTicketPrice FROM   "kibana_sample_data_flights""
+| table
+| render
+----
+This retrieves the `Carrier`, `FlightDelayMin`, and `AvgTicketPrice` fields from the "kibana_sample_data_flights" index.
 
 *Accepts:* `filter`
 
@@ -1107,7 +1194,7 @@ Default: `false`
 [[font_fn]]
 === `font`
 
-Creates a font style.
+Create a font style.
 
 *Expression syntax*
 [source,js]
@@ -1244,7 +1331,7 @@ Alias: `format`
 [[formatnumber_fn]]
 === `formatnumber`
 
-Formats a number into a formatted number string using the <<numeral, numeral pattern syntax>>.
+Formats a number into a formatted number string using the Numeral pattern.
 
 *Expression syntax*
 [source,js]
@@ -1276,7 +1363,7 @@ The `formatnumber` subexpression receives the same `context` as the `progress` f
 
 Alias: `format`
 |`string`
-|A <<numeral, numeral pattern>> string. For example, `"0.0a"` or `"0%"`.
+|A Numeral pattern format string. For example, `"0.0a"` or `"0%"`.
 |===
 
 *Returns:* `string`
@@ -1560,6 +1647,34 @@ Alias: `value`
 == M
 
 [float]
+[[mapCenter_fn]]
+=== `mapCenter`
+
+Returns an object with the center coordinates and zoom level of the map.
+
+*Accepts:* `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`lat` ***
+|`number`
+|Latitude for the center of the map
+
+|`lon` ***
+|`number`
+|Longitude for the center of the map
+
+|`zoom` ***
+|`number`
+|Zoom level of the map
+|===
+
+*Returns:* `mapCenter`
+
+
+[float]
 [[mapColumn_fn]]
 === `mapColumn`
 
@@ -1612,6 +1727,12 @@ Default: `""`
 |The CSS font properties for the content. For example, "font-family" or "font-weight".
 
 Default: `${font}`
+
+|`openLinksInNewTab`
+|`boolean`
+|A true or false value for opening links in a new tab. The default value is `false`. Setting to `true` opens all links in a new tab.
+
+Default: `false`
 |===
 
 *Returns:* `render`
@@ -1675,7 +1796,7 @@ Default: `${font size=48 family="'Open Sans', Helvetica, Arial, sans-serif" colo
 
 Alias: `format`
 |`string`
-|A <<numeral, numeral pattern>> string. For example, `"0.0a"` or `"0%"`.
+|A Numeral pattern format string. For example, `"0.0a"` or `"0%"`.
 |===
 
 *Returns:* `render`
@@ -2185,6 +2306,102 @@ Returns the number of rows. Pairs with <<ply_fn>> to get the count of unique col
 == S
 
 [float]
+[[savedLens_fn]]
+=== `savedLens`
+
+Returns an embeddable for a saved Lens visualization object.
+
+*Accepts:* `any`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`id`
+|`string`
+|The ID of the saved Lens visualization object
+
+|`timerange`
+|`timerange`
+|The timerange of data that should be included
+
+|`title`
+|`string`
+|The title for the Lens visualization object
+|===
+
+*Returns:* `embeddable`
+
+
+[float]
+[[savedMap_fn]]
+=== `savedMap`
+
+Returns an embeddable for a saved map object.
+
+*Accepts:* `any`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`center`
+|`mapCenter`
+|The center and zoom level the map should have
+
+|`hideLayer` †
+|`string`
+|The IDs of map layers that should be hidden
+
+|`id`
+|`string`
+|The ID of the saved map object
+
+|`timerange`
+|`timerange`
+|The timerange of data that should be included
+
+|`title`
+|`string`
+|The title for the map
+|===
+
+*Returns:* `embeddable`
+
+
+[float]
+[[savedVisualization_fn]]
+=== `savedVisualization`
+
+Returns an embeddable for a saved visualization object.
+
+*Accepts:* `any`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`colors` †
+|`seriesStyle`
+|Defines the color to use for a specific series
+
+|`hideLegend`
+|`boolean`
+|Specifies the option to hide the legend
+
+|`id`
+|`string`
+|The ID of the saved visualization object
+
+|`timerange`
+|`timerange`
+|The timerange of data that should be included
+|===
+
+*Returns:* `embeddable`
+
+
+[float]
 [[seriesStyle_fn]]
 === `seriesStyle`
 
@@ -2577,6 +2794,30 @@ Default: `"now"`
 |===
 
 *Returns:* `datatable`
+
+
+[float]
+[[timerange_fn]]
+=== `timerange`
+
+An object that represents a span of time.
+
+*Accepts:* `null`
+
+[cols="3*^<"]
+|===
+|Argument |Type |Description
+
+|`from` ***
+|`string`
+|The start of the time range
+
+|`to` ***
+|`string`
+|The end of the time range
+|===
+
+*Returns:* `timerange`
 
 
 [float]

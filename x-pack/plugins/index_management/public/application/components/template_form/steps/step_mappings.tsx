@@ -15,7 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { documentationService } from '../../../services/documentation';
-import { StepProps } from '../types';
+import { StepProps, DataGetterFunc } from '../types';
 import { MappingsEditor, OnUpdateHandler, LoadMappingsFromJsonButton } from '../../mappings_editor';
 
 export const StepMappings: React.FunctionComponent<StepProps> = ({
@@ -23,16 +23,23 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
   setDataGetter,
   onStepValidityChange,
 }) => {
-  const [mappings, setMappings] = useState(template.mappings);
+  const [mappings, setMappings] = useState(template?.template.mappings);
 
   const onMappingsEditorUpdate = useCallback<OnUpdateHandler>(
     ({ isValid, getData, validate }) => {
       onStepValidityChange(isValid);
-      setDataGetter(async () => {
+
+      const dataGetterFunc: DataGetterFunc = async () => {
         const isMappingsValid = isValid === undefined ? await validate() : isValid;
         const data = getData(isMappingsValid);
-        return Promise.resolve({ isValid: isMappingsValid, data: { mappings: data } });
-      });
+        return {
+          isValid: isMappingsValid,
+          data: { mappings: data },
+          path: 'template',
+        };
+      };
+
+      setDataGetter(dataGetterFunc);
     },
     [setDataGetter, onStepValidityChange]
   );
@@ -96,7 +103,7 @@ export const StepMappings: React.FunctionComponent<StepProps> = ({
       <MappingsEditor
         defaultValue={mappings}
         onUpdate={onMappingsEditorUpdate}
-        indexSettings={template.settings}
+        indexSettings={template?.template.settings}
       />
 
       <EuiSpacer size="m" />

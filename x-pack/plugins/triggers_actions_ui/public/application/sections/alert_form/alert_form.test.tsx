@@ -53,6 +53,7 @@ describe('alert_form', () => {
         uiSettings: mockes.uiSettings,
         actionTypeRegistry: actionTypeRegistry as any,
         alertTypeRegistry: alertTypeRegistry as any,
+        docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
       };
       alertTypeRegistry.list.mockReturnValue([alertType]);
       alertTypeRegistry.has.mockReturnValue(true);
@@ -80,13 +81,14 @@ describe('alert_form', () => {
               return new Promise<void>(() => {});
             },
             http: deps!.http,
+            docLinks: deps.docLinks,
             actionTypeRegistry: deps!.actionTypeRegistry,
             alertTypeRegistry: deps!.alertTypeRegistry,
             toastNotifications: deps!.toastNotifications,
             uiSettings: deps!.uiSettings,
           }}
         >
-          <AlertForm alert={initialAlert} dispatch={() => {}} errors={{ name: [] }} />
+          <AlertForm alert={initialAlert} dispatch={() => {}} errors={{ name: [], interval: [] }} />
         </AlertsContextProvider>
       );
 
@@ -159,13 +161,14 @@ describe('alert_form', () => {
               return new Promise<void>(() => {});
             },
             http: deps!.http,
+            docLinks: deps.docLinks,
             actionTypeRegistry: deps!.actionTypeRegistry,
             alertTypeRegistry: deps!.alertTypeRegistry,
             toastNotifications: deps!.toastNotifications,
             uiSettings: deps!.uiSettings,
           }}
         >
-          <AlertForm alert={initialAlert} dispatch={() => {}} errors={{ name: [] }} />
+          <AlertForm alert={initialAlert} dispatch={() => {}} errors={{ name: [], interval: [] }} />
         </AlertsContextProvider>
       );
 
@@ -186,6 +189,26 @@ describe('alert_form', () => {
       await setup();
       const alertTypeSelectOptions = wrapper.find('[data-test-subj="selectedAlertTypeTitle"]');
       expect(alertTypeSelectOptions.exists()).toBeTruthy();
+    });
+
+    it('should update throttle value', async () => {
+      const newThrottle = 17;
+      await setup();
+      const throttleField = wrapper.find('[data-test-subj="throttleInput"]');
+      expect(throttleField.exists()).toBeTruthy();
+      throttleField.at(1).simulate('change', { target: { value: newThrottle.toString() } });
+      const throttleFieldAfterUpdate = wrapper.find('[data-test-subj="throttleInput"]');
+      expect(throttleFieldAfterUpdate.at(1).prop('value')).toEqual(newThrottle);
+    });
+
+    it('should unset throttle value', async () => {
+      const newThrottle = '';
+      await setup();
+      const throttleField = wrapper.find('[data-test-subj="throttleInput"]');
+      expect(throttleField.exists()).toBeTruthy();
+      throttleField.at(1).simulate('change', { target: { value: newThrottle } });
+      const throttleFieldAfterUpdate = wrapper.find('[data-test-subj="throttleInput"]');
+      expect(throttleFieldAfterUpdate.at(1).prop('value')).toEqual(newThrottle);
     });
   });
 });

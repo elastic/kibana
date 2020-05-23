@@ -17,20 +17,11 @@
  * under the License.
  */
 import { UiActionsSetup } from '../../ui_actions/public';
-import { Filter } from '../../data/public';
 import {
-  applyFilterTrigger,
   contextMenuTrigger,
   createFilterAction,
   panelBadgeTrigger,
-  selectRangeTrigger,
-  valueClickTrigger,
-  EmbeddableVisTriggerContext,
-  IEmbeddable,
   EmbeddableContext,
-  APPLY_FILTER_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-  SELECT_RANGE_TRIGGER,
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
   ACTION_ADD_PANEL,
@@ -40,18 +31,15 @@ import {
   ACTION_EDIT_PANEL,
   FilterActionContext,
   ACTION_APPLY_FILTER,
+  panelNotificationTrigger,
+  PANEL_NOTIFICATION_TRIGGER,
 } from './lib';
 
 declare module '../../ui_actions/public' {
   export interface TriggerContextMapping {
-    [SELECT_RANGE_TRIGGER]: EmbeddableVisTriggerContext;
-    [VALUE_CLICK_TRIGGER]: EmbeddableVisTriggerContext;
-    [APPLY_FILTER_TRIGGER]: {
-      embeddable: IEmbeddable;
-      filters: Filter[];
-    };
     [CONTEXT_MENU_TRIGGER]: EmbeddableContext;
     [PANEL_BADGE_TRIGGER]: EmbeddableContext;
+    [PANEL_NOTIFICATION_TRIGGER]: EmbeddableContext;
   }
 
   export interface ActionContextMapping {
@@ -70,10 +58,8 @@ declare module '../../ui_actions/public' {
  */
 export const bootstrap = (uiActions: UiActionsSetup) => {
   uiActions.registerTrigger(contextMenuTrigger);
-  uiActions.registerTrigger(applyFilterTrigger);
   uiActions.registerTrigger(panelBadgeTrigger);
-  uiActions.registerTrigger(selectRangeTrigger);
-  uiActions.registerTrigger(valueClickTrigger);
+  uiActions.registerTrigger(panelNotificationTrigger);
 
   const actionApplyFilter = createFilterAction();
 

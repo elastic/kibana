@@ -9,18 +9,9 @@
 //   kbnChart__legend-isLoading
 
 @import './accessibility/index';
-@import './chrome/index';
 @import './directives/index';
-@import './error_auto_create_index/index';
 @import './error_url_overflow/index';
 @import './exit_full_screen/index';
 @import './field_editor/index';
-@import './share/index';
 @import './style_compile/index';
 @import '../../../plugins/management/public/components/index';
-
-// The following are prefixed with "vis"
-
-// Can't import vis folder here because of cascading issues, it's imported in core_plugins/kibana
-// @import './vis/index';
-@import './visualize/index';

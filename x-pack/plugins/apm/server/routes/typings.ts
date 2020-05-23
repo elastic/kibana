@@ -14,7 +14,9 @@ import {
 import { PickByValue, Optional } from 'utility-types';
 import { Observable } from 'rxjs';
 import { Server } from 'hapi';
-import { FetchOptions } from '../../../../legacy/plugins/apm/public/services/rest/callApi';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { FetchOptions } from '../../public/services/rest/callApi';
+import { SecurityPluginSetup } from '../../../security/public';
 import { APMConfig } from '..';
 
 export interface Params {
@@ -61,8 +63,8 @@ export type APMRequestHandlerContext<
   params: { query: { _debug: boolean } } & TDecodedParams;
   config: APMConfig;
   logger: Logger;
-  __LEGACY: {
-    server: APMLegacyServer;
+  plugins: {
+    security?: SecurityPluginSetup;
   };
 };
 
@@ -107,7 +109,9 @@ export interface ServerAPI<TRouteState extends RouteState> {
     context: {
       config$: Observable<APMConfig>;
       logger: Logger;
-      __LEGACY: { server: Server };
+      plugins: {
+        security?: SecurityPluginSetup;
+      };
     }
   ) => void;
 }

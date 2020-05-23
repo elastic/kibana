@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { overviewNetworkQuery } from '../../../../legacy/plugins/siem/public/containers/overview/overview_network/index.gql_query';
-import { GetOverviewNetworkQuery } from '../../../../legacy/plugins/siem/public/graphql/types';
+import { overviewNetworkQuery } from '../../../../plugins/siem/public/containers/overview/overview_network/index.gql_query';
+import { GetOverviewNetworkQuery } from '../../../../plugins/siem/public/graphql/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService }: FtrProviderContext) {

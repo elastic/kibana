@@ -135,6 +135,27 @@ export default function({ getService, getPageObjects }) {
 
         await dashboardExpect.selectedLegendColorCount('#000000', 5);
       });
+
+      it('back button works for old dashboards after state migrations', async () => {
+        await PageObjects.dashboard.preserveCrossAppState();
+        const oldId = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboardExpect.selectedLegendColorCount('#000000', 5);
+
+        const url = `${kibanaBaseUrl}#/dashboard?${urlQuery}`;
+        log.debug(`Navigating to ${url}`);
+        await browser.get(url);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
+        await browser.goBack();
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const newId = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+        expect(newId).to.be.equal(oldId);
+        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboardExpect.selectedLegendColorCount('#000000', 5);
+      });
     });
   });
 }

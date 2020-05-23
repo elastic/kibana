@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { APP_ID, APP_ICON, createMapPath, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import {
+  APP_ID,
+  APP_ICON,
+  createMapPath,
+  MAP_SAVED_OBJECT_TYPE,
+} from '../../../../plugins/maps/common/constants';
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects.js';
 import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
-import { LICENSE_CHECK_STATE } from '../../../../plugins/licensing/server';
 import { initRoutes } from './routes';
 import { emsBoundariesSpecProvider } from './tutorials/ems';
 
@@ -23,12 +27,15 @@ export class MapPlugin {
       name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
         defaultMessage: 'Maps',
       }),
+      order: 600,
       icon: APP_ICON,
       navLinkId: APP_ID,
       app: [APP_ID, 'kibana'],
       catalogue: [APP_ID],
       privileges: {
         all: {
+          app: [APP_ID, 'kibana'],
+          catalogue: [APP_ID],
           savedObject: {
             all: [MAP_SAVED_OBJECT_TYPE, 'query'],
             read: ['index-pattern'],
@@ -36,6 +43,8 @@ export class MapPlugin {
           ui: ['save', 'show', 'saveQuery'],
         },
         read: {
+          app: [APP_ID, 'kibana'],
+          catalogue: [APP_ID],
           savedObject: {
             all: [],
             read: [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'query'],
@@ -47,7 +56,7 @@ export class MapPlugin {
 
     licensing.license$.subscribe(license => {
       const { state } = license.check('maps', 'basic');
-      if (state === LICENSE_CHECK_STATE.Valid && !routesInitialized) {
+      if (state === 'valid' && !routesInitialized) {
         routesInitialized = true;
         initRoutes(__LEGACY, license.uid);
       }

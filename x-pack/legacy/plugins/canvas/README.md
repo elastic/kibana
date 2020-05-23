@@ -48,7 +48,7 @@ Open your plugin's `index.js` file, and modify it to look something like this (b
 export default function (kibana) {
   return new kibana.Plugin({
     // Tell Kibana that this plugin needs canvas and the Kibana interpreter
-    require: ['interpreter', 'canvas'],
+    require: ['canvas'],
 
     // The name of your plugin. Make this whatever you want.
     name: 'canvas_example',
@@ -132,7 +132,7 @@ In your plugin's root `index.js` file, modify the `kibana.Plugin` definition to 
 export default function (kibana) {
   return new kibana.Plugin({
     // Tell Kibana that this plugin needs canvas and the Kibana interpreter
-    require: ['interpreter', 'canvas'],
+    require: ['canvas'],
 
     // The name of your plugin. Make this whatever you want.
     name: 'canvas_example',

@@ -6,13 +6,12 @@ source src/dev/ci_setup/setup_env.sh
 echo " -> building kibana platform plugins"
 node scripts/build_kibana_platform_plugins \
   --scan-dir "$XPACK_DIR/test/plugin_functional/plugins" \
+  --scan-dir "$XPACK_DIR/test/functional_with_es_ssl/fixtures/plugins" \
+  --scan-dir "$XPACK_DIR/test/plugin_api_integration/plugins" \
   --verbose;
 
 # doesn't persist, also set in kibanaPipeline.groovy
 export KBN_NP_PLUGINS_BUILT=true
-
-echo " -> downloading es snapshot"
-node scripts/es snapshot --download-only;
 
 echo " -> Ensuring all functional tests are in a ciGroup"
 cd "$XPACK_DIR"

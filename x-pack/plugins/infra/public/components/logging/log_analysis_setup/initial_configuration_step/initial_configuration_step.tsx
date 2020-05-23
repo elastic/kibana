@@ -13,7 +13,7 @@ import React, { useMemo } from 'react';
 import { SetupStatus } from '../../../../../common/log_analysis';
 import { AnalysisSetupIndicesForm } from './analysis_setup_indices_form';
 import { AnalysisSetupTimerangeForm } from './analysis_setup_timerange_form';
-import { ValidatedIndex, ValidationIndicesUIError } from './validation';
+import { AvailableIndex, ValidationIndicesUIError } from './validation';
 
 interface InitialConfigurationStepProps {
   setStartTime: (startTime: number | undefined) => void;
@@ -21,9 +21,9 @@ interface InitialConfigurationStepProps {
   startTime: number | undefined;
   endTime: number | undefined;
   isValidating: boolean;
-  validatedIndices: ValidatedIndex[];
+  validatedIndices: AvailableIndex[];
   setupStatus: SetupStatus;
-  setValidatedIndices: (selectedIndices: ValidatedIndex[]) => void;
+  setValidatedIndices: (selectedIndices: AvailableIndex[]) => void;
   validationErrors?: ValidationIndicesUIError[];
 }
 
@@ -45,7 +45,7 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
   setValidatedIndices,
   validationErrors = [],
 }: InitialConfigurationStepProps) => {
-  const disabled = useMemo(() => !editableFormStatus.includes(setupStatus), [setupStatus]);
+  const disabled = useMemo(() => !editableFormStatus.includes(setupStatus.type), [setupStatus]);
 
   return (
     <>
@@ -72,12 +72,7 @@ export const InitialConfigurationStep: React.FunctionComponent<InitialConfigurat
   );
 };
 
-const editableFormStatus = [
-  'required',
-  'requiredForReconfiguration',
-  'requiredForUpdate',
-  'failed',
-];
+const editableFormStatus = ['required', 'failed'];
 
 const errorCalloutTitle = i18n.translate(
   'xpack.infra.analysisSetup.steps.initialConfigurationStep.errorCalloutTitle',

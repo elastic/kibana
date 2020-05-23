@@ -308,6 +308,7 @@ export const ArgumentStrings = {
 };
 
 export const DataSourceStrings = {
+  // Demo data source
   DemoData: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.uis.dataSources.demoDataTitle', {
@@ -319,7 +320,7 @@ export const DataSourceStrings = {
       }),
     getHelp: () =>
       i18n.translate('xpack.canvas.uis.dataSources.demoDataLabel', {
-        defaultMessage: 'Mock data set with usernames, prices, projects, countries, and phases',
+        defaultMessage: 'Sample data set used to populate default elements',
       }),
     getDescription: () =>
       i18n.translate('xpack.canvas.uis.dataSources.demoDataDescription', {
@@ -330,6 +331,88 @@ export const DataSourceStrings = {
         },
       }),
   },
+  // Elasticsearch documents datasource
+  ESDocs: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.esdocsTitle', {
+        defaultMessage: '{elasticsearch} documents',
+        values: {
+          elasticsearch: ELASTICSEARCH,
+        },
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.esdocsLabel', {
+        defaultMessage: 'Pull data directly from {elasticsearch} without the use of aggregations',
+        values: {
+          elasticsearch: ELASTICSEARCH,
+        },
+      }),
+    getWarningTitle: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.esdocs.warningTitle', {
+        defaultMessage: 'Query with caution',
+      }),
+    getWarning: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.esdocs.warningDescription', {
+        defaultMessage: `
+        Using this data source with larger data sets can result in slower performance. Use this source only when you need exact values.`,
+      }),
+    getIndexTitle: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.esdocs.indexTitle', {
+        defaultMessage: 'Index',
+      }),
+    getIndexLabel: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.esdocs.indexLabel', {
+        defaultMessage: 'Enter an index name or select an index pattern',
+      }),
+    getQueryTitle: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.esdocs.queryTitle', {
+        defaultMessage: 'Query',
+      }),
+    getQueryLabel: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.esdocs.queryLabel', {
+        defaultMessage: '{lucene} query string syntax',
+        values: {
+          lucene: LUCENE,
+        },
+      }),
+    getSortFieldTitle: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.esdocs.sortFieldTitle', {
+        defaultMessage: 'Sort field',
+      }),
+    getSortFieldLabel: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.esdocs.sortFieldLabel', {
+        defaultMessage: 'Document sort field',
+      }),
+    getSortOrderTitle: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.esdocs.sortOrderTitle', {
+        defaultMessage: 'Sort order',
+      }),
+    getSortOrderLabel: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.esdocs.sortOrderLabel', {
+        defaultMessage: 'Document sort order',
+      }),
+    getFieldsTitle: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.esdocs.fieldsTitle', {
+        defaultMessage: 'Fields',
+      }),
+    getFieldsLabel: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.esdocs.fieldsLabel', {
+        defaultMessage: 'Scripted fields are unavailable',
+      }),
+    getFieldsWarningLabel: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.esdocs.fieldsWarningLabel', {
+        defaultMessage: 'This datasource performs best with 10 or fewer fields',
+      }),
+    getAscendingOption: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.esdocs.ascendingDropDown', {
+        defaultMessage: 'Ascending',
+      }),
+    getDescendingOption: () =>
+      i18n.translate('xpack.canvas.uis.dataSources.esdocs.descendingDropDown', {
+        defaultMessage: 'Descending',
+      }),
+  },
+  // Elasticsearch SQL data source
   Essql: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.uis.dataSources.essqlTitle', {
@@ -341,7 +424,7 @@ export const DataSourceStrings = {
       }),
     getHelp: () =>
       i18n.translate('xpack.canvas.uis.dataSources.essqlLabel', {
-        defaultMessage: 'Use {elasticsearch} {sql} to get a data table',
+        defaultMessage: 'Write an {elasticsearch} {sql} query to retrieve data',
         values: {
           elasticsearch: ELASTICSEARCH,
           sql: SQL,
@@ -353,18 +436,18 @@ export const DataSourceStrings = {
       }),
     getLabelAppend: () =>
       i18n.translate('xpack.canvas.uis.dataSources.essql.queryTitleAppend', {
-        defaultMessage: 'Learn {elasticsearchShort} {sql} syntax',
+        defaultMessage: 'Learn {elasticsearchShort} {sql} query syntax',
         values: {
           elasticsearchShort: ELASTICSEARCH_SHORT,
           sql: SQL,
         },
       }),
   },
+  // Timelion datasource
   Timelion: {
     getAbout: () =>
       i18n.translate('xpack.canvas.uis.dataSources.timelion.aboutDetail', {
-        defaultMessage:
-          'Use {timelion} queries to pull back timeseries data that can be used with {canvas} elements.',
+        defaultMessage: 'Use {timelion} syntax in {canvas} to retrieve timeseries data',
         values: {
           timelion: TIMELION,
           canvas: CANVAS,
@@ -372,7 +455,7 @@ export const DataSourceStrings = {
       }),
     getHelp: () =>
       i18n.translate('xpack.canvas.uis.dataSources.timelionLabel', {
-        defaultMessage: 'Use {timelion} syntax to retrieve a timeseries',
+        defaultMessage: 'Use {timelion} syntax to retrieve timeseries data',
         values: {
           timelion: TIMELION,
         },
@@ -392,11 +475,11 @@ export const DataSourceStrings = {
       i18n.translate('xpack.canvas.uis.dataSources.timelion.intervalTitle', {
         defaultMessage: 'Interval',
       }),
-    getQueryHelp: () =>
+    queryLabel: () =>
       i18n.translate('xpack.canvas.uis.dataSources.timelion.queryLabel', {
-        defaultMessage: '{lucene} Query String syntax',
+        defaultMessage: '{timelion} Query String syntax',
         values: {
-          lucene: LUCENE,
+          timelion: TIMELION,
         },
       }),
     getQueryLabel: () =>

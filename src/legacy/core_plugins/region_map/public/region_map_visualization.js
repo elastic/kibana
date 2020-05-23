@@ -21,26 +21,25 @@ import { i18n } from '@kbn/i18n';
 import ChoroplethLayer from './choropleth_layer';
 import { getFormat } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { toastNotifications } from 'ui/notify';
-
-import { TileMapTooltipFormatter } from './tooltip_formatter';
 import { truncatedColorMaps } from '../../../../plugins/charts/public';
+import { tooltipFormatter } from './tooltip_formatter';
+import { mapTooltipProvider } from '../../../../plugins/maps_legacy/public';
 
-// TODO: reference to TILE_MAP plugin should be removed
-import { BaseMapsVisualizationProvider } from '../../tile_map/public/base_maps_visualization';
-
-export function createRegionMapVisualization({ serviceSettings, $injector, uiSettings }) {
-  const BaseMapsVisualization = new BaseMapsVisualizationProvider(serviceSettings);
-  const tooltipFormatter = new TileMapTooltipFormatter($injector);
-
+export function createRegionMapVisualization({
+  serviceSettings,
+  uiSettings,
+  BaseMapsVisualization,
+}) {
   return class RegionMapsVisualization extends BaseMapsVisualization {
     constructor(container, vis) {
       super(container, vis);
       this._vis = this.vis;
       this._choroplethLayer = null;
+      this._tooltipFormatter = mapTooltipProvider(container, tooltipFormatter);
     }
 
-    async render(esResponse, visParams, status) {
-      await super.render(esResponse, visParams, status);
+    async render(esResponse, visParams) {
+      await super.render(esResponse, visParams);
       if (this._choroplethLayer) {
         await this._choroplethLayer.whenDataLoaded();
       }
@@ -81,7 +80,7 @@ export function createRegionMapVisualization({ serviceSettings, $injector, uiSet
       this._choroplethLayer.setMetrics(results, metricFieldFormatter, valueColumn.name);
       if (termColumn && valueColumn) {
         this._choroplethLayer.setTooltipFormatter(
-          tooltipFormatter,
+          this._tooltipFormatter,
           metricFieldFormatter,
           termColumn.name,
           valueColumn.name
@@ -115,7 +114,7 @@ export function createRegionMapVisualization({ serviceSettings, $injector, uiSet
       this._choroplethLayer.setColorRamp(truncatedColorMaps[visParams.colorSchema].value);
       this._choroplethLayer.setLineWeight(visParams.outlineWeight);
       this._choroplethLayer.setTooltipFormatter(
-        tooltipFormatter,
+        this._tooltipFormatter,
         metricFieldFormatter,
         this._metricLabel
       );
@@ -164,7 +163,8 @@ export function createRegionMapVisualization({ serviceSettings, $injector, uiSet
       }
 
       this._choroplethLayer.on('select', event => {
-        const rowIndex = this._chartData.rows.findIndex(row => row[0] === event);
+        const { rows, columns } = this._chartData;
+        const rowIndex = rows.findIndex(row => row[columns[0].id] === event);
         this._vis.API.events.filter({
           table: this._chartData,
           column: 0,

@@ -17,11 +17,13 @@
  * under the License.
  */
 
-import { CoreStart } from 'kibana/public';
-import { TimeRange } from '../../common';
+import { CoreStart, SavedObjectReference } from 'kibana/public';
+import { SearchAggsSetup, SearchAggsStart } from './aggs';
 import { ISearch, ISearchGeneric } from './i_search';
 import { TStrategyTypes } from './strategy_types';
-import { LegacyApiCaller } from './es_client';
+import { LegacyApiCaller } from './legacy/es_client';
+import { SearchInterceptor } from './search_interceptor';
+import { ISearchSource, SearchSourceFields } from './search_source';
 
 export interface ISearchContext {
   core: CoreStart;
@@ -35,15 +37,6 @@ export interface ISearchContext {
 export interface ISearchStrategy<T extends TStrategyTypes> {
   search: ISearch<T>;
 }
-
-/**
- * Search strategy provider creates an instance of a search strategy with the request
- * handler context bound to it. This way every search strategy can use
- * whatever information they require from the request context.
- */
-export type TSearchStrategyProviderEnhanced<T extends TStrategyTypes> = (
-  search: ISearchGeneric
-) => Promise<ISearchStrategy<T>>;
 
 export type TSearchStrategiesMap = {
   [K in TStrategyTypes]?: TSearchStrategyProvider<any>;
@@ -67,12 +60,8 @@ export type TRegisterSearchStrategyProvider = <T extends TStrategyTypes>(
   searchStrategyProvider: TSearchStrategyProvider<T>
 ) => void;
 
-interface SearchAggsSetup {
-  calculateAutoTimeExpression: (range: TimeRange) => string | undefined;
-}
-
-interface SearchAggsStart {
-  calculateAutoTimeExpression: (range: TimeRange) => string | undefined;
+export interface ISearchStartLegacy {
+  esClient: LegacyApiCaller;
 }
 
 /**
@@ -90,8 +79,14 @@ export interface ISearchSetup {
 
 export interface ISearchStart {
   aggs: SearchAggsStart;
+  setInterceptor: (searchInterceptor: SearchInterceptor) => void;
   search: ISearchGeneric;
-  __LEGACY: {
-    esClient: LegacyApiCaller;
+  searchSource: {
+    create: (fields?: SearchSourceFields) => ISearchSource;
+    fromJSON: (
+      searchSourceJson: string,
+      references: SavedObjectReference[]
+    ) => Promise<ISearchSource>;
   };
+  __LEGACY: ISearchStartLegacy;
 }

@@ -34,25 +34,15 @@ export const CategoryExampleMessage: React.FunctionComponent<{
   return (
     <LogEntryRowWrapper scale={exampleMessageScale}>
       <LogEntryColumn {...columnWidths[timestampColumnId]}>
-        <LogEntryTimestampColumn
-          format={exampleTimestampFormat}
-          isHighlighted={false}
-          isHovered={false}
-          time={timestamp}
-        />
+        <LogEntryTimestampColumn format={exampleTimestampFormat} time={timestamp} />
       </LogEntryColumn>
       <LogEntryColumn {...columnWidths[messageColumnId]}>
         <LogEntryMessageColumn
           columnValue={{
-            __typename: 'InfraLogEntryMessageColumn' as const,
             columnId: messageColumnId,
-            message: [
-              { __typename: 'InfraLogMessageFieldSegment', field: 'message', value: message },
-            ],
+            message: [{ field: 'message', value: message, highlights: [] }],
           }}
           highlights={noHighlights}
-          isHovered={false}
-          isHighlighted={false}
           isActiveHighlight={false}
           wrapMode="none"
         />
@@ -60,14 +50,12 @@ export const CategoryExampleMessage: React.FunctionComponent<{
       <LogEntryColumn {...columnWidths[datasetColumnId]}>
         <LogEntryFieldColumn
           columnValue={{
-            __typename: 'InfraLogEntryFieldColumn' as const,
             columnId: datasetColumnId,
             field: 'event.dataset',
             value: encodedDatasetFieldValue,
+            highlights: [],
           }}
           highlights={noHighlights}
-          isHovered={false}
-          isHighlighted={false}
           isActiveHighlight={false}
           wrapMode="none"
         />
@@ -103,19 +91,16 @@ const columnWidths = {
 
 export const exampleMessageColumnConfigurations: LogColumnConfiguration[] = [
   {
-    __typename: 'InfraSourceTimestampLogColumn',
     timestampColumn: {
       id: timestampColumnId,
     },
   },
   {
-    __typename: 'InfraSourceMessageLogColumn',
     messageColumn: {
       id: messageColumnId,
     },
   },
   {
-    __typename: 'InfraSourceFieldLogColumn',
     fieldColumn: {
       field: 'event.dataset',
       id: datasetColumnId,

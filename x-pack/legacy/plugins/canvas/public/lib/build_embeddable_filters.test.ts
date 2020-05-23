@@ -5,19 +5,21 @@
  */
 
 import { buildEmbeddableFilters } from './build_embeddable_filters';
-import { Filter } from '../../types';
+import { ExpressionValueFilter } from '../../types';
 
-const columnFilter: Filter = {
+const columnFilter: ExpressionValueFilter = {
+  type: 'filter',
   and: [],
   value: 'filter-value',
   column: 'filter-column',
-  type: 'exactly',
+  filterType: 'exactly',
 };
 
-const timeFilter: Filter = {
+const timeFilter: ExpressionValueFilter = {
+  type: 'filter',
   and: [],
   column: 'time-column',
-  type: 'time',
+  filterType: 'time',
   from: '2019-06-04T04:00:00.000Z',
   to: '2019-06-05T04:00:00.000Z',
 };

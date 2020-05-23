@@ -7,4 +7,4 @@
 export * from './defaults';
 export * from './saved_object_mappings';
 export * from './sources';
-export * from './types';
+export * from '../../../common/http_api/source_api';

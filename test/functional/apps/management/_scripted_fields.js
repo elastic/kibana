@@ -53,7 +53,7 @@ export default function({ getService, getPageObjects }) {
   ]);
 
   describe('scripted fields', function() {
-    this.tags(['skipFirefox', 'skipCoverage']);
+    this.tags(['skipFirefox']);
 
     before(async function() {
       await browser.setWindowSize(1200, 800);
@@ -388,7 +388,7 @@ export default function({ getService, getPageObjects }) {
         await log.debug('filter by "Sep 17, 2015 @ 23:00" in the expanded scripted field list');
         await PageObjects.discover.clickFieldListPlusFilter(
           scriptedPainlessFieldName2,
-          '2015-09-17 23:00'
+          '1442531297065'
         );
         await PageObjects.header.waitUntilLoadingHasFinished();
 

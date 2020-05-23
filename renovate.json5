@@ -266,6 +266,14 @@
         ],
       },
       {
+        groupSlug: 'estree',
+        groupName: 'estree related packages',
+        packageNames: [
+          'estree',
+          '@types/estree',
+        ],
+      },
+      {
         groupSlug: 'fancy-log',
         groupName: 'fancy-log related packages',
         packageNames: [
@@ -295,6 +303,14 @@
         packageNames: [
           'flot',
           '@types/flot',
+        ],
+      },
+      {
+        groupSlug: 'geojson',
+        groupName: 'geojson related packages',
+        packageNames: [
+          'geojson',
+          '@types/geojson',
         ],
       },
       {
@@ -382,6 +398,8 @@
           '@types/good-squeeze',
           'inert',
           '@types/inert',
+          'accept',
+          '@types/accept',
         ],
       },
       {
@@ -429,6 +447,14 @@
         packageNames: [
           'jquery',
           '@types/jquery',
+        ],
+      },
+      {
+        groupSlug: 'js-search',
+        groupName: 'js-search related packages',
+        packageNames: [
+          'js-search',
+          '@types/js-search',
         ],
       },
       {
@@ -823,6 +849,14 @@
         ],
       },
       {
+        groupSlug: 'set-value',
+        groupName: 'set-value related packages',
+        packageNames: [
+          'set-value',
+          '@types/set-value',
+        ],
+      },
+      {
         groupSlug: 'sinon',
         groupName: 'sinon related packages',
         packageNames: [
@@ -875,6 +909,14 @@
         packageNames: [
           'supertest-as-promised',
           '@types/supertest-as-promised',
+        ],
+      },
+      {
+        groupSlug: 'tar',
+        groupName: 'tar related packages',
+        packageNames: [
+          'tar',
+          '@types/tar',
         ],
       },
       {
