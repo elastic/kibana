@@ -24,7 +24,16 @@ import {
   DEFAULT_INTERVAL_VALUE,
 } from '../../../common/constants';
 import { networkModel } from '../../network/store';
-import { TimelineType } from '../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../common/types/timeline';
+import { initialPolicyListState } from '../../endpoint_policy/store/policy_list/reducer';
+import { initialAlertListState } from '../../endpoint_alerts/store/reducer';
+import { initialPolicyDetailsState } from '../../endpoint_policy/store/policy_details/reducer';
+import { initialHostListState } from '../../endpoint_hosts/store/reducer';
+
+const policyList = initialPolicyListState();
+const alertList = initialAlertListState();
+const policyDetails = initialPolicyDetailsState();
+const hostList = initialHostListState();
 
 export const mockGlobalState: State = {
   app: {
@@ -222,7 +231,12 @@ export const mockGlobalState: State = {
         width: DEFAULT_TIMELINE_WIDTH,
         isSaving: false,
         version: null,
+        status: TimelineStatus.active,
       },
     },
   },
+  alertList,
+  hostList,
+  policyList,
+  policyDetails,
 };

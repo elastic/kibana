@@ -13,7 +13,7 @@ import {
 } from '../../../store/reducers/license_management';
 import { i18n } from '@kbn/i18n';
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   const { isActive, type } = getLicense(state);
   return {
     status: isActive

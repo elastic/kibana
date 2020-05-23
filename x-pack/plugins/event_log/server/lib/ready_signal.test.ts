@@ -13,7 +13,7 @@ describe('ReadySignal', () => {
     readySignal = createReadySignal<number>();
   });
 
-  test('works as expected', async done => {
+  test('works as expected', async (done) => {
     let value = 41;
 
     timeoutSet(100, async () => {

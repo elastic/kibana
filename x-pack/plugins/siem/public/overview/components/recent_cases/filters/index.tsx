@@ -35,7 +35,7 @@ export const Filters = React.memo<{
     () =>
       showMyRecentlyReported
         ? toggleButtonIcons
-        : toggleButtonIcons.filter(x => x.id !== MY_RECENTLY_REPORTED_ID),
+        : toggleButtonIcons.filter((x) => x.id !== MY_RECENTLY_REPORTED_ID),
     [showMyRecentlyReported]
   );
   const onChange = useCallback(

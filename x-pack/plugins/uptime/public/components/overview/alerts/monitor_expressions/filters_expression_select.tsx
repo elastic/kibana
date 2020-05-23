@@ -24,7 +24,9 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
   newFilters,
   onRemoveFilter,
 }) => {
-  const { tags, ports, schemes, locations } = useSelector(overviewFiltersSelector);
+  const {
+    filters: { tags, ports, schemes, locations },
+  } = useSelector(overviewFiltersSelector);
 
   const [updatedFieldValues, setUpdatedFieldValues] = useState<{
     fieldName: string;
@@ -116,7 +118,7 @@ export const FiltersExpressionsSelect: React.FC<Props> = ({
   });
 
   const filtersToDisplay = monitorFilters.filter(
-    curr => curr.selectedItems.length > 0 || newFilters?.includes(curr.fieldName)
+    (curr) => curr.selectedItems.length > 0 || newFilters?.includes(curr.fieldName)
   );
 
   return (

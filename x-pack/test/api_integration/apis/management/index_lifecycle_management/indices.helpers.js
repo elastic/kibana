@@ -9,33 +9,24 @@ import { getRandomString } from './lib';
 
 export const registerHelpers = ({ supertest }) => {
   const addPolicyToIndex = (policyName, indexName, rolloverAlias = getRandomString()) =>
-    supertest
-      .post(`${API_BASE_PATH}/index/add`)
-      .set('kbn-xsrf', 'xxx')
-      .send({
-        indexName,
-        policyName,
-        alias: rolloverAlias,
-      });
+    supertest.post(`${API_BASE_PATH}/index/add`).set('kbn-xsrf', 'xxx').send({
+      indexName,
+      policyName,
+      alias: rolloverAlias,
+    });
 
-  const removePolicyFromIndex = indexName => {
+  const removePolicyFromIndex = (indexName) => {
     const indexNames = Array.isArray(indexName) ? indexName : [indexName];
-    return supertest
-      .post(`${API_BASE_PATH}/index/remove`)
-      .set('kbn-xsrf', 'xxx')
-      .send({
-        indexNames,
-      });
+    return supertest.post(`${API_BASE_PATH}/index/remove`).set('kbn-xsrf', 'xxx').send({
+      indexNames,
+    });
   };
 
-  const retryPolicyOnIndex = indexName => {
+  const retryPolicyOnIndex = (indexName) => {
     const indexNames = Array.isArray(indexName) ? indexName : [indexName];
-    return supertest
-      .post(`${API_BASE_PATH}/index/retry`)
-      .set('kbn-xsrf', 'xxx')
-      .send({
-        indexNames,
-      });
+    return supertest.post(`${API_BASE_PATH}/index/retry`).set('kbn-xsrf', 'xxx').send({
+      indexNames,
+    });
   };
 
   return {

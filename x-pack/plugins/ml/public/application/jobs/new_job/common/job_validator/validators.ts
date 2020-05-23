@@ -41,10 +41,10 @@ export function cardinalityValidator(
 ): Observable<CardinalityValidatorResult> {
   return jobCreator$.pipe(
     // Perform a cardinality check only with enabled model plot.
-    filter(jobCreator => {
+    filter((jobCreator) => {
       return jobCreator?.modelPlot;
     }),
-    map(jobCreator => {
+    map((jobCreator) => {
       return {
         jobCreator,
         analysisConfigString: JSON.stringify(jobCreator.jobConfig.analysis_config),
@@ -60,7 +60,7 @@ export function cardinalityValidator(
         datafeed_config: jobCreator.datafeedConfig,
       } as CombinedJob);
     }),
-    map(validationResults => {
+    map((validationResults) => {
       for (const validationResult of validationResults) {
         if (isCardinalityModelPlotHigh(validationResult)) {
           return {
