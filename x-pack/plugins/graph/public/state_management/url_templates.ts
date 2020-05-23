@@ -35,7 +35,7 @@ function generateDefaultTemplate(
   datasource: IndexpatternDatasource,
   addBasePath: (url: string) => string
 ): UrlTemplate {
-  const appPath = modifyUrl('/', parsed => {
+  const appPath = modifyUrl('/', (parsed) => {
     parsed.query._a = rison.encode({
       columns: ['_source'],
       index: datasource.id,
@@ -78,7 +78,7 @@ export const urlTemplatesReducer = (addBasePath: (url: string) => string) =>
       if (datasource.type === 'none') {
         return initialTemplates;
       }
-      const customTemplates = templates.filter(template => !template.isDefault);
+      const customTemplates = templates.filter((template) => !template.isDefault);
       return [...customTemplates, generateDefaultTemplate(datasource, addBasePath)];
     })
     .case(loadTemplates, (_currentTemplates, newTemplates) => newTemplates)
@@ -90,7 +90,7 @@ export const urlTemplatesReducer = (addBasePath: (url: string) => string) =>
         : templates.map((template, index) => (index === indexToUpdate ? newTemplate : template));
     })
     .case(removeTemplate, (templates, templateToDelete) =>
-      templates.filter(template => template !== templateToDelete)
+      templates.filter((template) => template !== templateToDelete)
     )
     .build();
 
@@ -108,7 +108,7 @@ export const syncTemplatesSaga = ({ setUrlTemplates, notifyAngular }: GraphStore
     notifyAngular();
   }
 
-  return function*() {
+  return function* () {
     yield takeEvery(
       matchesOne(loadTemplates, saveTemplate, removeTemplate, requestDatasource, setDatasource),
       syncTemplates

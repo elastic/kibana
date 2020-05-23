@@ -95,7 +95,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
   }
 
   getFieldNames() {
-    return this.getMetricFields().map(esAggMetricField => esAggMetricField.getName());
+    return this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName());
   }
 
   isGeoGridPrecisionAware() {
@@ -270,7 +270,7 @@ export class ESGeoGridSource extends AbstractESAggSource {
     const searchSource = await this.makeSearchSource(searchFilters, 0);
 
     let bucketsPerGrid = 1;
-    this.getMetricFields().forEach(metricField => {
+    this.getMetricFields().forEach((metricField) => {
       bucketsPerGrid += metricField.getBucketCount();
     });
 

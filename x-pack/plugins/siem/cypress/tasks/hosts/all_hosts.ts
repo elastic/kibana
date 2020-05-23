@@ -12,16 +12,16 @@ import { drag, dragWithoutDrop, drop } from '../../tasks/common';
 export const dragAndDropFirstHostToTimeline = () => {
   cy.get(HOSTS_NAMES_DRAGGABLE)
     .first()
-    .then(firstHost => drag(firstHost));
-  cy.get(TIMELINE_DATA_PROVIDERS).then(dataProvidersDropArea => drop(dataProvidersDropArea));
+    .then((firstHost) => drag(firstHost));
+  cy.get(TIMELINE_DATA_PROVIDERS).then((dataProvidersDropArea) => drop(dataProvidersDropArea));
 };
 
 export const dragFirstHostToEmptyTimelineDataProviders = () => {
   cy.get(HOSTS_NAMES_DRAGGABLE)
     .first()
-    .then(host => drag(host));
+    .then((host) => drag(host));
 
-  cy.get(TIMELINE_DATA_PROVIDERS_EMPTY).then(dataProvidersDropArea =>
+  cy.get(TIMELINE_DATA_PROVIDERS_EMPTY).then((dataProvidersDropArea) =>
     dragWithoutDrop(dataProvidersDropArea)
   );
 };
@@ -29,12 +29,10 @@ export const dragFirstHostToEmptyTimelineDataProviders = () => {
 export const dragFirstHostToTimeline = () => {
   cy.get(HOSTS_NAMES_DRAGGABLE)
     .first()
-    .then(host => drag(host));
+    .then((host) => drag(host));
 };
 export const openFirstHostDetails = () => {
-  cy.get(HOSTS_NAMES)
-    .first()
-    .click({ force: true });
+  cy.get(HOSTS_NAMES).first().click({ force: true });
 };
 
 export const waitForAllHostsToBeLoaded = () => {

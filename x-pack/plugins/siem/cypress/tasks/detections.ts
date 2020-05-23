@@ -19,9 +19,7 @@ import {
 import { REFRESH_BUTTON } from '../screens/siem_header';
 
 export const closeFirstSignal = () => {
-  cy.get(OPEN_CLOSE_SIGNAL_BTN)
-    .first()
-    .click({ force: true });
+  cy.get(OPEN_CLOSE_SIGNAL_BTN).first().click({ force: true });
 };
 
 export const closeSignals = () => {
@@ -29,9 +27,7 @@ export const closeSignals = () => {
 };
 
 export const expandFirstSignal = () => {
-  cy.get(EXPAND_SIGNAL_BTN)
-    .first()
-    .click({ force: true });
+  cy.get(EXPAND_SIGNAL_BTN).first().click({ force: true });
 };
 
 export const goToClosedSignals = () => {
@@ -39,9 +35,7 @@ export const goToClosedSignals = () => {
 };
 
 export const goToManageSignalDetectionRules = () => {
-  cy.get(MANAGE_SIGNAL_DETECTION_RULES_BTN)
-    .should('exist')
-    .click({ force: true });
+  cy.get(MANAGE_SIGNAL_DETECTION_RULES_BTN).should('exist').click({ force: true });
 };
 
 export const goToOpenedSignals = () => {
@@ -49,9 +43,7 @@ export const goToOpenedSignals = () => {
 };
 
 export const openFirstSignal = () => {
-  cy.get(OPEN_CLOSE_SIGNAL_BTN)
-    .first()
-    .click({ force: true });
+  cy.get(OPEN_CLOSE_SIGNAL_BTN).first().click({ force: true });
 };
 
 export const openSignals = () => {
@@ -60,27 +52,21 @@ export const openSignals = () => {
 
 export const selectNumberOfSignals = (numberOfSignals: number) => {
   for (let i = 0; i < numberOfSignals; i++) {
-    cy.get(SIGNAL_CHECKBOX)
-      .eq(i)
-      .click({ force: true });
+    cy.get(SIGNAL_CHECKBOX).eq(i).click({ force: true });
   }
 };
 
 export const investigateFirstSignalInTimeline = () => {
-  cy.get(SEND_SIGNAL_TO_TIMELINE_BTN)
-    .first()
-    .click({ force: true });
+  cy.get(SEND_SIGNAL_TO_TIMELINE_BTN).first().click({ force: true });
 };
 
 export const waitForSignals = () => {
-  cy.get(REFRESH_BUTTON)
-    .invoke('text')
-    .should('not.equal', 'Updating');
+  cy.get(REFRESH_BUTTON).invoke('text').should('not.equal', 'Updating');
 };
 
 export const waitForSignalsIndexToBeCreated = () => {
   cy.request({ url: '/api/detection_engine/index', retryOnStatusCodeFailure: true }).then(
-    response => {
+    (response) => {
       if (response.status !== 200) {
         cy.wait(7500);
       }

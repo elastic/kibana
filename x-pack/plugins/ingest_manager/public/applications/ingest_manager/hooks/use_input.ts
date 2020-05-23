@@ -34,7 +34,7 @@ export function useComboInput(defaultValue = []) {
         setValue([...value, newVal]);
       },
       onChange: (newVals: any[]) => {
-        setValue(newVals.map(val => val.label));
+        setValue(newVals.map((val) => val.label));
       },
     },
     value,

@@ -192,9 +192,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
           id="xpack.security.management.roleMappings.roleMappingTableLoadingMessage"
           defaultMessage="Loading role mappings…"
         />
-      ) : (
-        undefined
-      );
+      ) : undefined;
 
     const sorting = {
       sort: {
@@ -222,7 +220,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
           roleMappingsAPI={this.props.roleMappingsAPI}
           notifications={this.props.notifications}
         >
-          {deleteRoleMappingsPrompt => {
+          {(deleteRoleMappingsPrompt) => {
             return (
               <EuiButton
                 onClick={() => deleteRoleMappingsPrompt(selectedItems, this.onRoleMappingsDeleted)}
@@ -240,9 +238,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
             );
           }}
         </DeleteProvider>
-      ) : (
-        undefined
-      ),
+      ) : undefined,
       toolsRight: (
         <EuiButton
           color="secondary"
@@ -325,7 +321,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
           }
           const roleLinks = assignedRoleNames.map((rolename, index) => {
             const role: Role | string =
-              this.state.roles?.find(r => r.name === rolename) ?? rolename;
+              this.state.roles?.find((r) => r.name === rolename) ?? rolename;
 
             return <RoleTableDisplay role={role} key={rolename} />;
           });
@@ -386,7 +382,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
                       roleMappingsAPI={this.props.roleMappingsAPI}
                       notifications={this.props.notifications}
                     >
-                      {deleteRoleMappingPrompt => {
+                      {(deleteRoleMappingPrompt) => {
                         return (
                           <EuiToolTip
                             content={i18n.translate(

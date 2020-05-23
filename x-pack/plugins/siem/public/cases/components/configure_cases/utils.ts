@@ -15,7 +15,7 @@ export const setActionTypeToMapping = (
   newActionType: ActionType,
   mapping: CasesConfigurationMapping[]
 ): CasesConfigurationMapping[] => {
-  const findItemIndex = mapping.findIndex(item => item.source === caseField);
+  const findItemIndex = mapping.findIndex((item) => item.source === caseField);
 
   if (findItemIndex >= 0) {
     return [
@@ -33,7 +33,7 @@ export const setThirdPartyToMapping = (
   newThirdPartyField: ThirdPartyField,
   mapping: CasesConfigurationMapping[]
 ): CasesConfigurationMapping[] =>
-  mapping.map(item => {
+  mapping.map((item) => {
     if (item.source !== caseField && item.target === newThirdPartyField) {
       return { ...item, target: 'not_mapped' };
     } else if (item.source === caseField) {

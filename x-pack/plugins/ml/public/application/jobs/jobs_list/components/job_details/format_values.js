@@ -84,9 +84,9 @@ export function formatValues([key, value]) {
 export function filterObjects(obj, allowArrays, allowObjects) {
   return Object.keys(obj)
     .filter(
-      k => allowObjects || typeof obj[k] !== 'object' || (allowArrays && Array.isArray(obj[k]))
+      (k) => allowObjects || typeof obj[k] !== 'object' || (allowArrays && Array.isArray(obj[k]))
     )
-    .map(k => {
+    .map((k) => {
       let item = obj[k];
       if (Array.isArray(item)) {
         item = item.join(', ');

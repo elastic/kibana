@@ -25,7 +25,7 @@ describe('snapshot API', () => {
   });
 
   it('calls url with expected params and returns response body on 200', async () => {
-    fetchMock.mockReturnValue(new Promise(r => r(mockResponse)));
+    fetchMock.mockReturnValue(new Promise((r) => r(mockResponse)));
     const resp = await fetchSnapshotCount({
       dateRangeStart: 'now-15m',
       dateRangeEnd: 'now',
@@ -43,7 +43,7 @@ describe('snapshot API', () => {
 
   it(`throws when server response doesn't correspond to expected type`, async () => {
     mockResponse = { foo: 'bar' };
-    fetchMock.mockReturnValue(new Promise(r => r(mockResponse)));
+    fetchMock.mockReturnValue(new Promise((r) => r(mockResponse)));
     const result = await fetchSnapshotCount({
       dateRangeStart: 'now-15m',
       dateRangeEnd: 'now',
