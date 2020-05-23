@@ -50,7 +50,7 @@ const verboseArgs = [
   '--path',
 ];
 
-describe('Ingesting coverage', () => {
+describe.skip('Ingesting coverage', () => {
   const bothIndexesPath = 'jest-combined/coverage-summary-manual-mix.json';
 
   describe(`to the coverage index`, () => {
